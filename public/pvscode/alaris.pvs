@@ -1,0 +1,98 @@
+alaris: THEORY
+ BEGIN
+
+  max: nonneg_real = 1200
+  min: nonneg_real = 0.01
+  alaris_real: TYPE = {x: nonneg_real | x <= max}
+
+  timer_duration: posnat = 5
+  alaris_timer: TYPE = upto(timer_duration)
+  decrement(t: alaris_timer): alaris_timer = IF t > 0 THEN t - 1 ELSE t ENDIF
+
+  small_step: alaris_real = 1
+  big_step: alaris_real = 10
+  alaris_step: TYPE = {x: alaris_real | x = small_step OR x = big_step}
+
+  state: TYPE = [# display: alaris_real, timer: alaris_timer, step: alaris_step #]
+
+  delta(x: alaris_real): {x: alaris_real | x > 0} = IF x < 100 THEN 0.1 ELSE 1 ENDIF
+  DELTA(x: alaris_real): {x: alaris_real | x > 0} = IF x < 100 THEN 1 ELSE 10 ENDIF
+
+
+  %-- utility function
+  trim(x: real): alaris_real = IF x > max THEN max ELSIF x < 0 THEN 0 ELSE x ENDIF
+  ceil(x: real): real = ceiling(x)
+
+  %-- alaris' chevron (UP,up,dn,DN)
+  alaris_up(delta: alaris_step, val: alaris_real): alaris_real = 
+     IF    val < 100                 THEN trim( floor((val*10) + delta) / 10 )
+     ELSIF val >= 100 AND val < 1000 THEN trim( floor((val) + delta) )
+     ELSE                                 trim( (floor(val/10) + delta) * 10 ) ENDIF
+
+  alaris_dn(delta: alaris_step, val: alaris_real): alaris_real = 
+     IF    val < 100                 THEN trim( (ceil(val*10) - delta) / 10 )
+     ELSIF val >= 100 AND val < 1000 THEN trim( ceil(val - delta) )
+     ELSE                                 trim( (ceil(val/10) - delta) * 10 ) ENDIF
+
+  alaris_UP(delta: alaris_step, val: alaris_real): alaris_real = 
+     IF    val < 100                 THEN trim( floor(val) + delta )
+     ELSIF val >= 100 AND val < 1000 THEN trim( (floor(val/10) + delta) * 10 )
+     ELSE                            trim( (floor(val/100) + delta) * 100 ) ENDIF
+
+  alaris_DN(delta: alaris_step, val: alaris_real): alaris_real = 
+     IF    val < 100                 THEN trim( ceil(val) - delta)
+     ELSIF val >= 100 AND val < 1000 THEN trim( (ceil(val/10) - delta) * 10 )
+     ELSE                                 trim( (ceil(val/100) - delta) * 100 ) ENDIF
+
+
+%  hold_up(st: state): state =
+%    LET new_delta   = compute_delta(display(st)),
+%        new_display = display(st) + new_delta
+%     IN st WITH [display := new_display,
+%                 multiplier := new_delta]
+    
+
+%  hold_UP_old(st: state): state = 
+%    IF timer(st) > 0 OR mod(display(st), 10 * next_delta(display(st))) /= 0 
+%    THEN st WITH [display := display(st) + 10 * current_delta(display(st)),
+%                  timer   := IF timer(st) > 0 THEN timer(st) - 1 ELSE timer(st) ENDIF]
+%    ELSE LET new_delta = 10 * next_delta(display(st))
+%          IN st WITH [display := display(st) + new_delta,
+%                      timer   := HOLD_TIMER_DURATION,
+%                      delta   := new_delta] ENDIF
+
+  hold_UP(st: state): state =
+      LET t: alaris_timer = decrement(timer(st)),
+          s: alaris_step  =
+            IF t = 0 AND step(st) = small_step 
+                 AND IF display(st) < 100 THEN fractional(display(st) / 10 ) = 0 ELSE fractional(display(st) / 100 ) = 0 ENDIF
+              THEN big_step
+            ELSE step(st) ENDIF,
+          d: alaris_real = alaris_UP(s, display(st)),
+          dbg = println("display(" + d  + ")")
+        IN st WITH [display := d, timer := t, step := s]
+
+  hold_up(st: state): state =
+      LET t: alaris_timer = decrement(timer(st)),
+          s: alaris_step  =
+            IF t = 0 AND step(st) = small_step 
+                 AND IF display(st) < 100 THEN fractional(display(st) / 10 ) = 0 ELSE fractional(display(st) / 100 ) = 0 ENDIF
+              THEN big_step
+            ELSE step(st) ENDIF,
+          d: alaris_real = alaris_up(s, display(st)),
+          dbg = println("display(" + d  + ")")
+        IN st WITH [display := d, timer := t, step := s]
+
+  init(x: alaris_real): state = (# display := x, timer := timer_duration, step := small_step #)
+
+  hold_UP_n(n: nat)(st: state): RECURSIVE state =
+    IF n > 0 THEN hold_UP_n(n - 1)(hold_UP(st)) ELSE st ENDIF
+   MEASURE n
+
+  hold_up_n(n: nat)(st: state): RECURSIVE state =
+    IF n > 0 THEN hold_up_n(n - 1)(hold_up(st)) ELSE st ENDIF
+   MEASURE n
+
+  test: state = hold_up_n(8)(init(10))
+
+ END alaris
