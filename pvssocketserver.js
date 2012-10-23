@@ -13,7 +13,7 @@ var pvsio = require("./pvsprocess"),
 	args = require("optimist")
 			.usage("Start a PVSIO process")
 			.alias({"host":"h", "workspace":"w", "port":"p"})
-			.default({"host":"0.0.0.0", "port":"8080"})
+			.default({"host":"0.0.0.0", "port":"8080", "workspace":"public"})
 			.demand(["host","workspace", "port"])
 			.describe({"host":"The IP address to bind the server to - defaults to 0.0.0.0 to listen on all addresses",
 						"port":"The port to listen at - defaults to 8080",
