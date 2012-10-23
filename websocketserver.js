@@ -41,7 +41,7 @@ module.exports = function(name){
 					//call the function with token and socket as parameter
 					f(token, s, socketid);
 				}else{
-					util.log("f is something unexpected -- " + typeof f);
+					util.log("f is something unexpected -- I expected a function but got type " + typeof f);
 				}
 			});
 			

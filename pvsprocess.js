@@ -13,7 +13,21 @@ var spawn = childprocess.spawn;
 
 module.exports = (function(){
 	var o = {}, output = [], exitString = "<PVSio>", wordsIgnored = ["","==>",exitString];
-	var sourceCode, filename, processReady = false, pvsio;
+	var sourceCode, filename, processReady = false, pvsio, workspaceDir = process.cwd() + "/public/";
+	
+	/**
+	 * get or set the workspace dir. this is the base directory of the pvs source code
+	 * @param dir
+	 * @returns
+	 */
+	o.workspaceDir = function(dir){
+		if(dir){
+			dir = dir.substr(-1) !== "/" ? dir + "/": dir;
+			workspaceDir = dir; 
+			return o;
+		}
+		return workspaceDir;		
+	};
 	
 	/**
 	 * starts the pvs process with the given sourcefile 
@@ -21,7 +35,7 @@ module.exports = (function(){
 	 * @param callback function to call when any data is received  in the stdout
 	 */
 	o.start = function(file, callback){
-		filename = process.cwd() + "/public/" + file;
+		filename = o.workspaceDir()+ file;
 		pvsio = spawn("pvsio", [filename]);
 		pvsio.stdout.setEncoding('utf8');
 		pvsio.stderr.setEncoding('utf8');
@@ -81,7 +95,9 @@ module.exports = (function(){
 		if(sourceCode){
 			callback({type:"sourcecode", data:sourceCode});
 		}else{
-			fs.readFile(filename + ".pvs", 'utf8', function(err, data){
+			//append a .pvs extension if there isnt one already
+			var fname = filename.split(".")[1] === "pvs" ? filename : filename + ".pvs";
+			fs.readFile(fname, 'utf8', function(err, data){
 				if(err){
 					var msg = util.format("Error reading file %s", filename);
 					util.log(msg);
@@ -95,7 +111,9 @@ module.exports = (function(){
 		}
 		return o;
 	};
-	
+	/**
+	 * closes the pvsio process
+	 */
 	o.close = function(){
 		pvsio.kill();
 		return o;

@@ -1,0 +1,701 @@
+<HTML>
+<HEAD>
+<TITLE>BBraun_interface</TITLE>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+
+<!-- JS addition for GIP & PVSio -->
+<script type="text/javascript" src="scripts/require.js" data-main='scripts/pvsiowebsocketclient_dist.js'></script>
+<script type="text/javascript" src="scripts/gip.js"></script>
+<script type="text/javascript" src="scripts/require.js" data-main='scripts/pvsiowebsocketclient_dist.js'></script>
+<script type="text/javascript" src="scripts/pvsio_utils.js"></script>
+
+<!-- ImageReady Preload Script (BBraun_interface.psd) -->
+<SCRIPT TYPE="text/javascript">
+
+userAgent = window.navigator.userAgent;
+browserVers = parseInt(userAgent.charAt(userAgent.indexOf("/")+1),10);
+function newImage(arg) {
+	if (document.images) {
+		rslt = new Image();
+		rslt.src = arg;
+		return rslt;
+	}
+}
+
+function findElement(n,ly) {
+	if (browserVers < 4)		return document[n];
+	var curDoc = ly ? ly.document : document;
+	var elem = curDoc[n];
+	if (!elem) {
+		for (var i=0;i<curDoc.layers.length;i++) {
+			elem = findElement(n,curDoc.layers[i]);
+			if (elem) return elem;
+		}
+	}
+	return elem;
+}
+
+function changeImages() {
+	if (document.images && (preloadFlag == true)) {
+		var img;
+		for (var i=0; i<changeImages.arguments.length; i+=2) {
+			img = null;
+			if (document.layers) {
+				img = findElement(changeImages.arguments[i],0);
+			}
+			else {
+				img = document.images[changeImages.arguments[i]];
+			}
+			if (img) {
+				img.src = changeImages.arguments[i+1];
+			}
+		}
+	}
+}
+
+var preloadFlag = false;
+function preloadImages() {
+	if (document.images) {
+		BBraun_interface_13_BBraun_interface_15_over = newImage("images/BBraun_interface_13-BBraun_.png");
+		BBraun_interface_14_BBraun_interface_24_down = newImage("images/BBraun_interface_14-BBraun_.png");
+		BBraun_interface_14_BBraun_interface_24_over = newImage("images/BBraun_interface_14-BBra-17.png");
+		BBraun_interface_15_over = newImage("images/BBraun_interface_15-over.png");
+		BBraun_interface_15_down = newImage("images/BBraun_interface_15-down.png");
+		BBraun_interface_16_BBraun_interface_15_over = newImage("images/BBraun_interface_16-BBraun_.png");
+		BBraun_interface_16_BBraun_interface_25_over = newImage("images/BBraun_interface_16-BBra-23.png");
+		BBraun_interface_16_BBraun_interface_25_down = newImage("images/BBraun_interface_16-BBra-24.png");
+		BBraun_interface_24_down = newImage("images/BBraun_interface_24-down.png");
+		BBraun_interface_24_over = newImage("images/BBraun_interface_24-over.png");
+		BBraun_interface_25_over = newImage("images/BBraun_interface_25-over.png");
+		BBraun_interface_25_down = newImage("images/BBraun_interface_25-down.png");
+		BBraun_interface_26_BBraun_interface_25_over = newImage("images/BBraun_interface_26-BBraun_.png");
+		BBraun_interface_26_BBraun_interface_25_down = newImage("images/BBraun_interface_26-BBra-40.png");
+		BBraun_interface_27_BBraun_interface_15_over = newImage("images/BBraun_interface_27-BBraun_.png");
+		BBraun_interface_27_BBraun_interface_15_down = newImage("images/BBraun_interface_27-BBra-43.png");
+		BBraun_interface_27_BBraun_interface_24_down = newImage("images/BBraun_interface_27-BBra-44.png");
+		BBraun_interface_31_over = newImage("images/BBraun_interface_31-over.png");
+		BBraun_interface_31_down = newImage("images/BBraun_interface_31-down.png");
+		BBraun_interface_35_BBraun_interface_24_down = newImage("images/BBraun_interface_35-BBraun_.png");
+		BBraun_interface_35_BBraun_interface_24_over = newImage("images/BBraun_interface_35-BBra-56.png");
+		BBraun_interface_36_BBraun_interface_25_over = newImage("images/BBraun_interface_36-BBraun_.png");
+		BBraun_interface_36_BBraun_interface_25_down = newImage("images/BBraun_interface_36-BBra-59.png");
+		BBraun_interface_38_BBraun_interface_31_over = newImage("images/BBraun_interface_38-BBraun_.png");
+		preloadFlag = true;
+	}
+}
+
+</SCRIPT>
+<!-- End Preload Script -->
+<!-- ImageReady Styles (BBraun_interface.psd) -->
+<STYLE TYPE="text/css">
+<!--
+
+#BBraun-interface-01 {
+	position:absolute;
+	left:0px;
+	top:0px;
+	width:917px;
+	height:25px;
+}
+
+#BBraun-interface-02 {
+	position:absolute;
+	left:0px;
+	top:25px;
+	width:768px;
+	height:33px;
+}
+
+#BBraun-interface-03 {
+	position:absolute;
+	left:768px;
+	top:25px;
+	width:149px;
+	height:214px;
+}
+
+#BBraun-interface-04 {
+	position:absolute;
+	left:0px;
+	top:58px;
+	width:152px;
+	height:19px;
+}
+
+#BBraun-interface-05 {
+	position:absolute;
+	left:152px;
+	top:58px;
+	width:29px;
+	height:19px;
+}
+
+#BBraun-interface-06 {
+	position:absolute;
+	left:181px;
+	top:58px;
+	width:14px;
+	height:19px;
+}
+
+#BBraun-interface-07 {
+	position:absolute;
+	left:195px;
+	top:58px;
+	width:30px;
+	height:19px;
+}
+
+#BBraun-interface-08 {
+	position:absolute;
+	left:225px;
+	top:58px;
+	width:13px;
+	height:19px;
+}
+
+#BBraun-interface-09 {
+	position:absolute;
+	left:238px;
+	top:58px;
+	width:30px;
+	height:19px;
+}
+
+#BBraun-interface-10 {
+	position:absolute;
+	left:268px;
+	top:58px;
+	width:500px;
+	height:19px;
+}
+
+#BBraun-interface-11 {
+	position:absolute;
+	left:0px;
+	top:77px;
+	width:48px;
+	height:162px;
+}
+
+#BBraun-interface-12 {
+	position:absolute;
+	left:48px;
+	top:77px;
+	width:323px;
+	height:93px;
+	z-index: 0;
+}
+
+#BBraun-rate {
+	position:absolute;
+	float: right;
+	text-align: right;	
+	left:144px;
+	top:96px;
+	font: bold 50px Arial;
+	z-index: 1;
+}
+
+#BBraun-interface-13 {
+	position:absolute;
+	left:371px;
+	top:77px;
+	width:397px;
+	height:12px;
+}
+
+#BBraun-interface-14 {
+	position:absolute;
+	left:371px;
+	top:89px;
+	width:86px;
+	height:35px;
+}
+
+#BBraun-interface-15 {
+	position:absolute;
+	left:457px;
+	top:89px;
+	width:49px;
+	height:43px;
+}
+
+#BBraun-interface-16 {
+	position:absolute;
+	left:506px;
+	top:89px;
+	width:56px;
+	height:35px;
+}
+
+#BBraun-interface-17 {
+	position:absolute;
+	left:562px;
+	top:89px;
+	width:47px;
+	height:48px;
+}
+
+#BBraun-interface-18 {
+	position:absolute;
+	left:609px;
+	top:89px;
+	width:8px;
+	height:150px;
+}
+
+#BBraun-interface-19 {
+	position:absolute;
+	left:617px;
+	top:89px;
+	width:48px;
+	height:48px;
+}
+
+#BBraun-interface-20 {
+	position:absolute;
+	left:665px;
+	top:89px;
+	width:10px;
+	height:150px;
+}
+
+#BBraun-interface-21 {
+	position:absolute;
+	left:675px;
+	top:89px;
+	width:47px;
+	height:48px;
+}
+
+#BBraun-interface-22 {
+	position:absolute;
+	left:722px;
+	top:89px;
+	width:46px;
+	height:150px;
+}
+
+#BBraun-interface-23 {
+	position:absolute;
+	left:371px;
+	top:124px;
+	width:40px;
+	height:115px;
+}
+
+#BBraun-interface-24 {
+	position:absolute;
+	left:411px;
+	top:124px;
+	width:46px;
+	height:42px;
+}
+
+#BBraun-interface-25 {
+	position:absolute;
+	left:506px;
+	top:124px;
+	width:45px;
+	height:42px;
+}
+
+#BBraun-interface-26 {
+	position:absolute;
+	left:551px;
+	top:124px;
+	width:11px;
+	height:115px;
+}
+
+#BBraun-interface-27 {
+	position:absolute;
+	left:457px;
+	top:132px;
+	width:49px;
+	height:19px;
+}
+
+#BBraun-interface-28 {
+	position:absolute;
+	left:562px;
+	top:137px;
+	width:47px;
+	height:14px;
+}
+
+#BBraun-interface-29 {
+	position:absolute;
+	left:617px;
+	top:137px;
+	width:48px;
+	height:14px;
+}
+
+#BBraun-interface-30 {
+	position:absolute;
+	left:675px;
+	top:137px;
+	width:47px;
+	height:14px;
+}
+
+#BBraun-interface-31 {
+	position:absolute;
+	left:457px;
+	top:151px;
+	width:49px;
+	height:47px;
+}
+
+#BBraun-interface-32 {
+	position:absolute;
+	left:562px;
+	top:151px;
+	width:47px;
+	height:47px;
+}
+
+#BBraun-interface-33 {
+	position:absolute;
+	left:617px;
+	top:151px;
+	width:48px;
+	height:47px;
+}
+
+#BBraun-interface-34 {
+	position:absolute;
+	left:675px;
+	top:151px;
+	width:47px;
+	height:47px;
+}
+
+#BBraun-interface-35 {
+	position:absolute;
+	left:411px;
+	top:166px;
+	width:46px;
+	height:73px;
+}
+
+#BBraun-interface-36 {
+	position:absolute;
+	left:506px;
+	top:166px;
+	width:45px;
+	height:73px;
+}
+
+#BBraun-interface-37 {
+	position:absolute;
+	left:48px;
+	top:170px;
+	width:323px;
+	height:69px;
+}
+
+#BBraun-interface-38 {
+	position:absolute;
+	left:457px;
+	top:198px;
+	width:49px;
+	height:41px;
+}
+
+#BBraun-interface-39 {
+	position:absolute;
+	left:562px;
+	top:198px;
+	width:47px;
+	height:41px;
+}
+
+#BBraun-interface-40 {
+	position:absolute;
+	left:617px;
+	top:198px;
+	width:48px;
+	height:41px;
+}
+
+#BBraun-interface-41 {
+	position:absolute;
+	left:675px;
+	top:198px;
+	width:47px;
+	height:41px;
+}
+
+
+#console {
+	position:absolute;
+	left:20px;
+	top:200px;
+	width:200px;
+	height:24px;
+	color: black;
+	background: white;
+	padding: 0px;
+	font: 10px Arial;
+}
+
+#pvsio_commands_log_h2 {
+	position:absolute;
+	left:6px;
+	top:290px;
+}
+
+#pvsio_commands_log {
+	position:absolute;
+	left:6px;
+	top:340px;
+	width:600px;
+	height:200px;
+	overflow: scroll;
+	color: lime;
+	background: black;
+	padding: 10px;
+}
+
+
+#pvsio_response_log_h2 {
+	position:absolute;
+	left:636px;
+	top:290px;
+}
+
+#pvsio_response_log {
+	position:absolute;
+	left:636px;
+	top:340px;
+	width:550px;
+	height:200px;
+	overflow: scroll;
+	color: lime;
+	background: black;
+	padding: 10px;
+}
+
+#specification_log_h2 {
+	position:absolute;
+	left:6px;
+	top:600px;
+}
+
+#specification_log {
+	position:absolute;
+	left:6px;
+	top:660px;
+	width:1180px;
+	height:640px;
+	overflow: scroll;
+	color: lime;
+	background: black;
+	padding: 10px;
+}
+
+
+-->
+</STYLE>
+<!-- End ImageReady Styles -->
+</HEAD>
+<BODY ONLOAD="preloadImages();" STYLE="background-color:#FFFFFF; margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px;">
+<!-- ImageReady Slices (BBraun_interface.psd) -->
+<DIV ID="BBraun-interface-01">
+	<IMG SRC="images/BBraun_interface_01.png" WIDTH=917 HEIGHT=25 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-02">
+	<IMG SRC="images/BBraun_interface_02.png" WIDTH=768 HEIGHT=33 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-03">
+	<IMG SRC="images/BBraun_interface_03.png" WIDTH=149 HEIGHT=214 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-04">
+	<IMG SRC="images/BBraun_interface_04.png" WIDTH=152 HEIGHT=19 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-05">
+	<IMG SRC="images/BBraun_interface_05.png" WIDTH=29 HEIGHT=19 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-06">
+	<IMG SRC="images/BBraun_interface_06.png" WIDTH=14 HEIGHT=19 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-07">
+	<IMG SRC="images/BBraun_interface_07.png" WIDTH=30 HEIGHT=19 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-08">
+	<IMG SRC="images/BBraun_interface_08.png" WIDTH=13 HEIGHT=19 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-09">
+	<IMG SRC="images/BBraun_interface_09.png" WIDTH=30 HEIGHT=19 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-10">
+	<IMG SRC="images/BBraun_interface_10.png" WIDTH=500 HEIGHT=19 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-11">
+	<IMG SRC="images/BBraun_interface_11.png" WIDTH=48 HEIGHT=162 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-12">
+	<IMG SRC="images/BBraun_interface_12.png" WIDTH=323 HEIGHT=93 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-13">
+	<IMG NAME="BBraun_interface_13" SRC="images/BBraun_interface_13.png" WIDTH=397 HEIGHT=12 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-14">
+	<IMG NAME="BBraun_interface_14" SRC="images/BBraun_interface_14.png" WIDTH=86 HEIGHT=35 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-15">
+	<A HREF="#"
+		ONMOUSEOVER="changeImages('BBraun_interface_13', 'images/BBraun_interface_13-BBraun_.png', 'BBraun_interface_15', 'images/BBraun_interface_15-over.png', 'BBraun_interface_16', 'images/BBraun_interface_16-BBraun_.png', 'BBraun_interface_27', 'images/BBraun_interface_27-BBraun_.png'); return true;"
+		ONMOUSEOUT="changeImages('BBraun_interface_13', 'images/BBraun_interface_13.png', 'BBraun_interface_15', 'images/BBraun_interface_15.png', 'BBraun_interface_16', 'images/BBraun_interface_16.png', 'BBraun_interface_27', 'images/BBraun_interface_27.png'); return true;"
+		ONMOUSEDOWN="changeImages('BBraun_interface_13', 'images/BBraun_interface_13.png', 'BBraun_interface_15', 'images/BBraun_interface_15-down.png', 'BBraun_interface_16', 'images/BBraun_interface_16.png', 'BBraun_interface_27', 'images/BBraun_interface_27-BBra-43.png'); return true;"
+		ONMOUSEUP="changeImages('BBraun_interface_13', 'images/BBraun_interface_13-BBraun_.png', 'BBraun_interface_15', 'images/BBraun_interface_15-over.png', 'BBraun_interface_16', 'images/BBraun_interface_16-BBraun_.png', 'BBraun_interface_27', 'images/BBraun_interface_27-BBraun_.png'); return true;">
+		<IMG id="btnUp" NAME="BBraun_interface_15" SRC="images/BBraun_interface_15.png" WIDTH=49 HEIGHT=43 BORDER=0 ALT=""></A>
+</DIV>
+<DIV ID="BBraun-interface-16">
+	<IMG NAME="BBraun_interface_16" SRC="images/BBraun_interface_16.png" WIDTH=56 HEIGHT=35 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-17">
+	<IMG SRC="images/BBraun_interface_17.png" WIDTH=47 HEIGHT=48 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-18">
+	<IMG SRC="images/BBraun_interface_18.png" WIDTH=8 HEIGHT=150 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-19">
+	<IMG SRC="images/BBraun_interface_19.png" WIDTH=48 HEIGHT=48 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-20">
+	<IMG SRC="images/BBraun_interface_20.png" WIDTH=10 HEIGHT=150 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-21">
+	<A HREF="#"
+		ONMOUSEOVER="changeImages('BBraun_interface_20', 'images/BBraun_interface_20-BBraun_.png', 'BBraun_interface_21', 'images/BBraun_interface_21-over.png', 'BBraun_interface_22', 'images/BBraun_interface_22-BBraun_.png', 'BBraun_interface_30', 'images/BBraun_interface_30-BBraun_.png'); return true;"
+		ONMOUSEOUT="changeImages('BBraun_interface_20', 'images/BBraun_interface_20.png', 'BBraun_interface_21', 'images/BBraun_interface_21.png', 'BBraun_interface_22', 'images/BBraun_interface_22.png', 'BBraun_interface_30', 'images/BBraun_interface_30.png'); return true;"
+		ONMOUSEDOWN="changeImages('BBraun_interface_20', 'images/BBraun_interface_20.png', 'BBraun_interface_21', 'images/BBraun_interface_21-down.png', 'BBraun_interface_22', 'images/BBraun_interface_22.png', 'BBraun_interface_30', 'images/BBraun_interface_30.png'); return true;"
+		ONMOUSEUP="changeImages('BBraun_interface_20', 'images/BBraun_interface_20-BBraun_.png', 'BBraun_interface_21', 'images/BBraun_interface_21-over.png', 'BBraun_interface_22', 'images/BBraun_interface_22-BBraun_.png', 'BBraun_interface_30', 'images/BBraun_interface_30-BBraun_.png'); return true;">
+		<IMG id="btnOn" NAME="BBraun_interface_21" SRC="images/BBraun_interface_21.png" WIDTH=47 HEIGHT=48 BORDER=0 ALT=""></A>
+</DIV>
+<DIV ID="BBraun-interface-22">
+	<IMG SRC="images/BBraun_interface_22.png" WIDTH=46 HEIGHT=150 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-23">
+	<IMG SRC="images/BBraun_interface_23.png" WIDTH=40 HEIGHT=115 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-24">
+	<A HREF="#"
+		ONMOUSEOVER="changeImages('BBraun_interface_14', 'images/BBraun_interface_14-BBra-17.png', 'BBraun_interface_24', 'images/BBraun_interface_24-over.png', 'BBraun_interface_35', 'images/BBraun_interface_35-BBra-56.png'); return true;"
+		ONMOUSEOUT="changeImages('BBraun_interface_14', 'images/BBraun_interface_14.png', 'BBraun_interface_24', 'images/BBraun_interface_24.png', 'BBraun_interface_27', 'images/BBraun_interface_27.png', 'BBraun_interface_35', 'images/BBraun_interface_35.png'); return true;"
+		ONMOUSEDOWN="changeImages('BBraun_interface_14', 'images/BBraun_interface_14-BBraun_.png', 'BBraun_interface_24', 'images/BBraun_interface_24-down.png', 'BBraun_interface_27', 'images/BBraun_interface_27-BBra-44.png', 'BBraun_interface_35', 'images/BBraun_interface_35-BBraun_.png'); return true;"
+		ONMOUSEUP="changeImages('BBraun_interface_14', 'images/BBraun_interface_14-BBra-17.png', 'BBraun_interface_24', 'images/BBraun_interface_24-over.png', 'BBraun_interface_27', 'images/BBraun_interface_27.png', 'BBraun_interface_35', 'images/BBraun_interface_35-BBra-56.png'); return true;">
+		<IMG id="btnLeft" NAME="BBraun_interface_24" SRC="images/BBraun_interface_24.png" WIDTH=46 HEIGHT=42 BORDER=0 ALT=""></A>
+</DIV>
+<DIV ID="BBraun-interface-25">
+	<A HREF="#"
+		ONMOUSEOVER="changeImages('BBraun_interface_16', 'images/BBraun_interface_16-BBra-23.png', 'BBraun_interface_25', 'images/BBraun_interface_25-over.png', 'BBraun_interface_26', 'images/BBraun_interface_26-BBraun_.png', 'BBraun_interface_36', 'images/BBraun_interface_36-BBraun_.png'); return true;"
+		ONMOUSEOUT="changeImages('BBraun_interface_16', 'images/BBraun_interface_16.png', 'BBraun_interface_25', 'images/BBraun_interface_25.png', 'BBraun_interface_26', 'images/BBraun_interface_26.png', 'BBraun_interface_36', 'images/BBraun_interface_36.png'); return true;"
+		ONMOUSEDOWN="changeImages('BBraun_interface_16', 'images/BBraun_interface_16-BBra-24.png', 'BBraun_interface_25', 'images/BBraun_interface_25-down.png', 'BBraun_interface_26', 'images/BBraun_interface_26-BBra-40.png', 'BBraun_interface_36', 'images/BBraun_interface_36-BBra-59.png'); return true;"
+		ONMOUSEUP="changeImages('BBraun_interface_16', 'images/BBraun_interface_16-BBra-23.png', 'BBraun_interface_25', 'images/BBraun_interface_25-over.png', 'BBraun_interface_26', 'images/BBraun_interface_26-BBraun_.png', 'BBraun_interface_36', 'images/BBraun_interface_36-BBraun_.png'); return true;">
+		<IMG id="btnRight" NAME="BBraun_interface_25" SRC="images/BBraun_interface_25.png" WIDTH=45 HEIGHT=42 BORDER=0 ALT=""></A>
+</DIV>
+<DIV ID="BBraun-interface-26">
+	<IMG NAME="BBraun_interface_26" SRC="images/BBraun_interface_26.png" WIDTH=11 HEIGHT=115 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-27">
+	<IMG NAME="BBraun_interface_27" SRC="images/BBraun_interface_27.png" WIDTH=49 HEIGHT=19 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-28">
+	<IMG SRC="images/BBraun_interface_28.png" WIDTH=47 HEIGHT=14 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-29">
+	<IMG SRC="images/BBraun_interface_29.png" WIDTH=48 HEIGHT=14 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-30">
+	<IMG SRC="images/BBraun_interface_30.png" WIDTH=47 HEIGHT=14 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-31">
+	<A HREF="#"
+		ONMOUSEOVER="changeImages('BBraun_interface_31', 'images/BBraun_interface_31-over.png', 'BBraun_interface_38', 'images/BBraun_interface_38-BBraun_.png'); return true;"
+		ONMOUSEOUT="changeImages('BBraun_interface_31', 'images/BBraun_interface_31.png', 'BBraun_interface_38', 'images/BBraun_interface_38.png'); return true;"
+		ONMOUSEDOWN="changeImages('BBraun_interface_31', 'images/BBraun_interface_31-down.png', 'BBraun_interface_38', 'images/BBraun_interface_38.png'); return true;"
+		ONMOUSEUP="changeImages('BBraun_interface_31', 'images/BBraun_interface_31-over.png', 'BBraun_interface_38', 'images/BBraun_interface_38-BBraun_.png'); return true;">
+		<IMG id="btnDown" NAME="BBraun_interface_31" SRC="images/BBraun_interface_31.png" WIDTH=49 HEIGHT=47 BORDER=0 ALT=""></A>
+</DIV>
+<DIV ID="BBraun-interface-32">
+	<A HREF="#"
+		ONMOUSEOVER="changeImages('BBraun_interface_26', 'images/BBraun_interface_26-BBra-42.png', 'BBraun_interface_32', 'images/BBraun_interface_32-over.png', 'BBraun_interface_39', 'images/BBraun_interface_39-BBraun_.png'); return true;"
+		ONMOUSEOUT="changeImages('BBraun_interface_26', 'images/BBraun_interface_26.png', 'BBraun_interface_32', 'images/BBraun_interface_32.png', 'BBraun_interface_39', 'images/BBraun_interface_39.png'); return true;"
+		ONMOUSEDOWN="changeImages('BBraun_interface_26', 'images/BBraun_interface_26.png', 'BBraun_interface_32', 'images/BBraun_interface_32-down.png', 'BBraun_interface_39', 'images/BBraun_interface_39.png'); return true;"
+		ONMOUSEUP="changeImages('BBraun_interface_26', 'images/BBraun_interface_26-BBra-42.png', 'BBraun_interface_32', 'images/BBraun_interface_32-over.png', 'BBraun_interface_39', 'images/BBraun_interface_39-BBraun_.png'); return true;">
+		<IMG id="btnOk" NAME="BBraun_interface_32" SRC="images/BBraun_interface_32.png" WIDTH=47 HEIGHT=47 BORDER=0 ALT=""></A>
+</DIV>
+<DIV ID="BBraun-interface-33">
+	<IMG SRC="images/BBraun_interface_33.png" WIDTH=48 HEIGHT=47 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-34">
+	<A HREF="#"
+		ONMOUSEOVER="changeImages('BBraun_interface_22', 'images/BBraun_interface_22-BBraun_.png', 'BBraun_interface_34', 'images/BBraun_interface_34-over.png', 'BBraun_interface_41', 'images/BBraun_interface_41-BBraun_.png'); return true;"
+		ONMOUSEOUT="changeImages('BBraun_interface_22', 'images/BBraun_interface_22.png', 'BBraun_interface_34', 'images/BBraun_interface_34.png', 'BBraun_interface_41', 'images/BBraun_interface_41.png'); return true;"
+		ONMOUSEDOWN="changeImages('BBraun_interface_22', 'images/BBraun_interface_22.png', 'BBraun_interface_34', 'images/BBraun_interface_34-down.png', 'BBraun_interface_41', 'images/BBraun_interface_41.png'); return true;"
+		ONMOUSEUP="changeImages('BBraun_interface_22', 'images/BBraun_interface_22-BBraun_.png', 'BBraun_interface_34', 'images/BBraun_interface_34-over.png', 'BBraun_interface_41', 'images/BBraun_interface_41-BBraun_.png'); return true;">
+		<IMG id="btnStart" NAME="BBraun_interface_34" SRC="images/BBraun_interface_34.png" WIDTH=47 HEIGHT=47 BORDER=0 ALT=""></A>
+</DIV>
+<DIV ID="BBraun-interface-35">
+	<IMG NAME="BBraun_interface_35" SRC="images/BBraun_interface_35.png" WIDTH=46 HEIGHT=73 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-36">
+	<IMG NAME="BBraun_interface_36" SRC="images/BBraun_interface_36.png" WIDTH=45 HEIGHT=73 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-37">
+	<IMG SRC="images/BBraun_interface_37.png" WIDTH=323 HEIGHT=69 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-38">
+	<IMG NAME="BBraun_interface_38" SRC="images/BBraun_interface_38.png" WIDTH=49 HEIGHT=41 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-39">
+	<IMG SRC="images/BBraun_interface_39.png" WIDTH=47 HEIGHT=41 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-40">
+	<IMG SRC="images/BBraun_interface_40.png" WIDTH=48 HEIGHT=41 ALT="">
+</DIV>
+<DIV ID="BBraun-interface-41">
+	<IMG SRC="images/BBraun_interface_41.png" WIDTH=47 HEIGHT=41 ALT="">
+</DIV>
+<DIV ID="BBraun-rate"> </DIV>
+<!-- End ImageReady Slices -->
+
+<div id='pvsio_commands_log_h2'>
+<h2>GUI frontend commands</h2>
+</div>
+<div id='pvsio_commands_log'>
+</div>
+
+<div id='pvsio_response_log_h2'>
+<h2>PVSio backend replies</h2>
+</div>
+<div id='pvsio_response_log'>
+</div>
+
+<div id='console'>
+</div>
+
+<div id='specification_log_h2'>
+<h2>Formal specification animated by PVSio
+  <label>
+  <input type="button" value="Show" onClick="ws.getSourceCode();">
+  </label>
+</h2>
+</div>
+<div id='specification_log'>
+</div>
+
+<div id="GIP_h2"><h2>GIPconsole</h2></div>
+<div id="GIPconsole"></div>
+
+
+<script type="text/javascript" src="scripts/UI_mappings.js"></script> 
+
+ 
+</BODY>
+</HTML>
