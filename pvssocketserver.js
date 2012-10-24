@@ -1,7 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * 
+ * This file creates a connection to a pvsio process run locally or at specified host.
+ * It also creates an express webserver to serve demo applications e.g. the infusion 
+ * pump pvsio demo.
+ * The websocket connection started by this process listens for 3 commands:
+ * sendCommand: used to send a pvsio command to the processs
+ * startProcess: used to start the pvsio process
+ * getSourceCode: used to get the source code of the pvs code being executed
  * @author patrick
  * @date 28 Jul 2012 21:52:31
  *
@@ -13,7 +19,7 @@ var pvsio = require("./pvsprocess"),
 	args = require("optimist")
 			.usage("Start a PVSIO process")
 			.alias({"host":"h", "workspace":"w", "port":"p"})
-			.default({"host":"0.0.0.0", "port":"8080", "workspace":"public"})
+			.default({"host":"0.0.0.0", "port":"8080", "workspace":__dirname + "/public"})
 			.demand(["host","workspace", "port"])
 			.describe({"host":"The IP address to bind the server to - defaults to 0.0.0.0 to listen on all addresses",
 						"port":"The port to listen at - defaults to 8080",
@@ -69,6 +75,6 @@ var pvsioProcessMap = {};//each client should get his own process
 	//set the port
 	server.port  = port;
 	server.start({host:host});	
-	//create the express static server
+	//create the express static server and use public dir as the default serving directory
 	webserver.use(express.static(__dirname + "/public"));
 	webserver.listen(8081);
