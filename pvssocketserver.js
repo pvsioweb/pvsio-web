@@ -47,6 +47,11 @@ var pvsioProcessMap = {};//each client should get his own process
 			.start(token.fileName, function(tok){
 				//called when any data is recieved from pvs process
 				socket.send(JSON.stringify(tok));
+				//if the type of the token is 'processExited' then shutdown the server
+				if(tok.type === 'processExited') {
+					socket.close();
+					process.exit(tok.code);
+				}
 			});
 			//add to map
 			pvsioProcessMap[socketid] = p;

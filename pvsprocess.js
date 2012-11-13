@@ -35,8 +35,14 @@ module.exports = (function(){
 	 * @param callback function to call when any data is received  in the stdout
 	 */
 	o.start = function(file, callback){
-		filename = o.workspaceDir()+ file;
+		filename = o.workspaceDir() + file;
 		pvsio = spawn("pvsio", [filename]);
+		//display error if pvsio fails to start for some reason
+		pvsio.on('exit', function(code){
+			var msg = "pvsio process exited with code " + code;
+			util.log(msg);
+			callback({type:"processExited", data:msg, code:code});
+		});
 		pvsio.stdout.setEncoding('utf8');
 		pvsio.stderr.setEncoding('utf8');
 		pvsio.stdout.on("data", function(data){
