@@ -44,7 +44,6 @@ module.exports = (function(){
 			callback({type:"processExited", data:msg, code:code});
 		});
 		pvsio.stdout.setEncoding('utf8');
-		pvsio.stderr.setEncoding('utf8');
 		pvsio.stdout.on("data", function(data){
 			var lines = data.split("\n").map(function(d){
 				return d.trim();
@@ -66,6 +65,11 @@ module.exports = (function(){
 				processReady = true;
 				output = [];
 			}
+		});
+		//listen for stderror stream
+		pvsio.stderr.setEncoding('utf8');
+		pvsio.stderr.on("data", function(data){
+			util.log(data);
 		});
 		
 		util.log("pvsio process started with file " + filename);

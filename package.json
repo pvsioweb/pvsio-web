@@ -2,7 +2,7 @@
 	"name":"pvsio-web",
 	"author":"Patrick Oladimeji <patrick@dustygem.co.uk>",
 	"description":"A javascript library to connect to and communicate with a pvsio process using websockets",
-	"version":"0.0.2",
+	"version":"0.0.3",
 	"preferGlobal":"true",
 	"main":"./pvssocketserver.js",
 	"bin":"./pvssocketserver.js",
