@@ -1,0 +1,48 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Interactive Prototype Builder</title>
+<script type="text/javascript" src="require.js" data-main="index.js"></script>
+<link href="css/style.css" type="text/css" rel="stylesheet">
+
+</head>
+<body>
+	<div id="imageDiv">
+		<img src="image/image.png" usemap="#prototypeMap" />
+		<div id="prototypeImage"></div>
+	</div>
+	<div id="controlsContainer">
+		<button id="btnToggleOverlay">Toggle Overlay</button>
+	</div>
+
+	<div id='pvsio_commands_log_h2'>
+		<h2>GUI frontend commands</h2>
+	</div>
+	<div id='pvsio_commands_log'></div>
+
+	<div id='pvsio_response_log_h2'>
+		<h2>PVSio backend replies</h2>
+	</div>
+	<div id='pvsio_response_log'></div>
+
+	<div id='console'></div>
+
+	<div id='specification_log_h2'>
+		<h2>
+			Formal specification animated by PVSio <label> <input
+				type="button" value="Show" onClick="ws.getSourceCode();">
+			</label>
+		</h2>
+	</div>
+	<div id='specification_log'></div>
+
+	<div id="GIP_h2">
+		<h2>GPCA-UI console</h2>
+	</div>
+
+	<div id="GIPconsole"></div>
+	<map name="prototypeMap" id="prototypeMap">
+
+	</map>
+</body>
+</html>

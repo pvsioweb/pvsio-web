@@ -12,7 +12,7 @@ var childprocess = require("child_process"),
 var spawn = childprocess.spawn;
 
 module.exports = (function(){
-	var o = {}, output = [], exitString = "<PVSio>", wordsIgnored = ["","==>",exitString];
+	var o = {}, output = [], readyString = "<PVSio>", wordsIgnored = ["","==>",readyString];
 	var sourceCode, filename, processReady = false, pvsio, workspaceDir = process.cwd() + "/public/";
 	
 	/**
@@ -55,12 +55,12 @@ module.exports = (function(){
 				return wordsIgnored.indexOf(d) < 0;
 			}));
 			
-			if(processReady && lastLine.indexOf(exitString) > -1){
+			if(processReady && lastLine.indexOf(readyString) > -1){
 				callback({type:"pvsoutput", data:output});
 				//clear the output
 				output  = [];
 			}
-			else if(lastLine.indexOf(exitString) > -1){
+			else if(lastLine.indexOf(readyString) > -1){//last line of the output is the ready string
 				callback({type:"processReady", data:output});
 				processReady = true;
 				output = [];
@@ -79,11 +79,11 @@ module.exports = (function(){
 	
 
 	/**
-	 * sends a command to the pvsio process
+	 * sends a command to the pvsio process. This method returns immediately. The result of the command
+	 * will be by the 'on data' event of the process standard output stream
 	 * @param command the command to send to pvsio
-	 * @param callback function to call after command has been processed
 	 */
-	o.sendCommand = function (command, callback){
+	o.sendCommand = function (command){
 		//try to write to the stdin and wait for the buffer to be empty incase it is full
 		//should be unlikely for the pvs process
 		if(!pvsio.stdin.write(command)){
