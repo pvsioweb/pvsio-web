@@ -8,28 +8,28 @@
 </head>
 <body>
 	<div id="imageDiv">
-		<img src="image/image.png" usemap="#prototypeMap" />
+		<img src="image/alaris-syringe-driver.jpg" usemap="#prototypeMap" />
 		<div id="prototypeImage"></div>
 	</div>
 	<div id="controlsContainer">
 		<button id="btnBuilderView">Builder View</button>
 		<button id="btnSimulatorView">Simulator View</button>
 	</div>
-
-	<div id='pvsio_commands_log_Container'>
-		<h2>GUI frontend commands</h2>
-		
-		<div id='pvsio_commands_log'></div>
+	
+	<div id='logsDiv'>
+		<div id='pvsio_commands_log_Container' class='pvsio-log-container'>
+			<h2>GUI frontend commands</h2>
+			
+			<div id='pvsio_commands_log'></div>
+		</div>
+	
+		<div id='pvsio_response_log_Container' class='pvsio-log-container'>
+			<h2>PVSio backend replies</h2>
+			<div id='pvsio_response_log'></div>
+		</div>
 	</div>
-
-	<div id='pvsio_response_log_Container'>
-		<h2>PVSio backend replies</h2>
-		<div id='pvsio_response_log'></div>
-	</div>
-
-	<div id='console'></div>
-
-	<div id='specification_log_Container'>
+	<!-- container for specification source code -->
+	<div id='specification_log_Container' class="clear-both">
 		<h2>
 			Formal specification source file</h2> <label> <input
 				type="button" id="btnGetSpecification" value="Show">
@@ -37,10 +37,12 @@
 		
 		<button id="btnSave">Save Specification</button>
 		<label for="filename">File name:</label>
-		<input type="text" id="txtFileName" name='filename' value="pvscode/gpcaui"/>
+		<input type="text" id="txtFileName" name='filename' value="alarisGP_oldFW"/>
 		<div id="editor">
 		</div>
 	</div>
+	
+	<div id='console'></div>
 	<map name="prototypeMap" id="prototypeMap">
 
 	</map>

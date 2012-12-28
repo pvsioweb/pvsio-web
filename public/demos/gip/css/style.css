@@ -1,3 +1,6 @@
+body{
+	width: 1130px;
+}
 area{
 	cursor: pointer;	
 }
@@ -9,6 +12,7 @@ area{
 }
 #controlsContainer{
 	position: relative;
+	height: 50px;
 }
 #controlsContainer button.selected{
 	top: -1px;
@@ -27,55 +31,21 @@ area{
 
 #editor{
 	z-index: 30;
-	width:1320px;
+	width: 1130px;
 	height: 800px;
 	border: 1px solid black;
-}
-#GIP-rate {
-	position:absolute;
-	float: right;
-	text-align: center;
-	left:382px;
-	top:95px;
-	font: bold 50px Arial;
-	z-index: 1;
-	width: 366px;
-	height: 69px;
-}
-
-#GIP-cmd {
-	position:absolute;
-	float: right;
-	text-align: right;
-	left:708px;
-	top:201px;
-	font: bold 12px Arial;
-	z-index: 2;
-	width: 68px;
-	color: #FFFFFF;
-	height: 21px;
 }
 
 #console {
 	position: absolute;
-	left: 1070px;
-	top: 10px;
-	width: 230px;
-	height: 204px;
+	top:8px;
 	color: white;
 	background: #333;
 	padding: 10px;
 	font: 10px Arial;
 }
 
-#pvsio_commands_log_Container {
-	position:absolute;
-	left:6px;
-	top:300px;
-}
-
 #pvsio_commands_log {
-	width:581px;
 	height:200px;
 	overflow: scroll;
 	color: lime;
@@ -87,14 +57,16 @@ area{
 	left: 100px;
 }
 
-#pvsio_response_log_Container {
-	position:absolute;
-	left:641px;
-	top:300px;
+.clear-both{
+	clear:both;
+}
+
+.pvsio-log-container{
+	float:left;
+	width: 50%;	
 }
 
 #pvsio_response_log {
-	width:660px;
 	height:200px;
 	overflow: scroll;
 	color: lime;
@@ -102,39 +74,11 @@ area{
 	padding: 10px;
 }
 
-#specification_log_Container {
-	position:absolute;
-	left:6px;
-	top:600px;
-}
-
-#specification_log {
-	width:1280px;
-	height:638px;
-	overflow: scroll;
-	color: lime;
-	background: black;
-	padding: 10px;
-}
-
-#GIPconsole {
-	position:absolute;
-	left:10px;
-	top:325px;
-	width:1280;
-	height:159px;
-	overflow: scroll;
-	color: lime;
-	background: black;
-	padding: 10px;
-}
 #prototypeImage {
 	padding: 0;
 	margin: 0;
-	background-image: url("../image/image.png");
-	width: 1045px;
+	background-image: url("../image/alaris-syringe-driver.jpg");
 	cursor: crosshair;
-	height: 225px;
 }
 
 img {

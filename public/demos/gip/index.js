@@ -308,6 +308,150 @@ define('formal/pvs/prototypebuilder/displayMappings',[], function(){
 	
 	return mappings;
 });
+/**
+ * @author hogfather
+ * @date Feb 29, 2012
+ * @project JSNumberEntry
+ */
+define('util/timerConstants',{
+	Interval:'Interval',
+	TimerTicked:"TimerTicked",
+	TimerFinished:"TimerFinished",
+	Timeout:"Timeout"
+});
+/**
+ * @author hogfather
+ * @date Feb 29, 2012
+ * @project JSNumberEntry
+ */
+/**
+ * Creates a timer object that can be easily used to manage timing functions
+ * 
+ * @param interval
+ * @param repeatCount
+ * @param mode
+ *            can be either interval or timeout
+ * @returns {Timer}
+ */
+define('util/Timer',['util/timerConstants','util/eventDispatcher'], function( timerConstants, eventDispatcher){
+	//return a function for creating timers
+	return function(interval, repeatCount, mode) {	
+		var initialInterval = interval;
+		var _interval = interval;
+		var _repeatCount = repeatCount || Number.POSITIVE_INFINITY;
+		var _mode = mode ? mode : timerConstants.Interval;
+		var _currentCount = 0;
+		var timerid = -1;
+		var running = false;
+		
+		function timerTick() {
+			if (!running)
+				return;
+	
+			if (_currentCount < _repeatCount) {
+				_currentCount++;
+				var event = {
+					type : timerConstants.TimerTicked,
+					currentCount : _currentCount
+				};
+				res.fire(event);
+				if (_currentCount < _repeatCount) {
+					// recall the setTimeout method if the timer is in timeout mode
+					if (_mode == timerConstants.Timeout)
+						timerid = setTimeout(arguments.callee, _interval);
+				} else {
+					clearInterval(timerid);
+					event = {
+						type : timerConstants.TimerFinished,
+						currentCount : _currentCount
+					};
+					res.fire(event);
+				}
+			} else {
+				clearInterval(timerid);
+				var event = {
+					type : timerConstants.TimerFinished,
+					currentCount : _currentCount
+				};
+				res.fire(event);
+			}
+		}
+	
+		
+		function start(){
+			if (!running) {
+				switch (_mode) {
+				case timerConstants.Interval:
+					timerid = setInterval(timerTick, _interval);
+					break;
+				case timerConstants.Timeout:
+					timerid = setTimeout(timerTick, _interval);
+					break;
+				}
+				running = true;
+			}
+		}
+		
+		function changeInterval(val){
+			if (_mode == timerConstants.Timeout) {
+				_interval = _val;
+				logger.log('interval changed to ' + _interval);
+			}
+		}
+		
+		function stop(){
+			if (running) {
+				running = false;
+				clearInterval(timerid);
+			}
+		}
+		
+		
+		var res = {
+			getCurrentCount : function() {
+				return _currentCount;
+			},
+	
+			getInterval : function() {
+				return _interval;
+			},
+	
+			start : function() {
+				start();
+				return this;
+			},
+			/**
+			 * This only has an effect in the timeout mode because the interval mode
+			 * implies that events will be fired regularly
+			 */
+			changeInterval: function(_val) {
+				changeInterval(_val);
+				return this;
+			},
+	
+			stop : function() {
+				stop();
+				return this;
+			},
+			reset : function() {
+				stop();
+				_currentCount = 0;
+				_interval = initialInterval;
+				return this;
+			},
+	
+			restart : function() {
+				stop();
+				start();
+				return this;
+			}
+			
+		};
+		eventDispatcher(res);
+		return res;
+	};
+});
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Distributed under the BSD license:
  *
@@ -22155,7 +22299,21 @@ define('formal/pvs/prototypebuilder/displayManager',['./displayMappings', 'd3/d3
  * @date Dec 5, 2012 : 10:29:16 PM
  */
 
-define('formal/pvs/prototypebuilder/editOverlay',['./displayMappings','./widgetMaps', 'd3/d3'], function(displayMappings, widgetMaps){
+define('formal/pvs/prototypebuilder/editOverlay',['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'], 
+	function(displayMappings, widgetMaps, Timer){
+	//define timer for sensing hold down actions on buttons
+	var btnTimer = Timer(1200, 1), numTicks = 0, timerTickFunction = null;
+	//add event listener for timer's tick 
+	btnTimer.addListener('TimerTicked', function(){
+		if(timerTickFunction){
+			timerTickFunction();
+		}
+	});
+	function mouseup(e){
+		numTicks = btnTimer.getCurrentCount();
+		btnTimer.reset();
+	}
+	
 	/**
 	 * requests the details fo the mark that was drawn. Details are:
 	 * a unique name to give the mark, and
@@ -22256,8 +22414,22 @@ define('formal/pvs/prototypebuilder/editOverlay',['./displayMappings','./widgetM
 							.attr("coords", coords)
 							.attr("href", type === "Button" ? "#" : null)//only make buttons clickable
 						.on('click', function(){
-							console.log(funcText);
-							ws.sendGuiAction(funcText + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");");
+							if(numTicks === 0){
+								console.log(funcText);
+								ws.sendGuiAction("click_" + funcText + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");");
+							}
+						}).on("mousedown", function(){
+							timerTickFunction = function(){
+								console.log("button pressed");
+								ws.sendGuiAction("press_" + funcText + "(" + ws.lastState().toString().replace(/,,/g,',') + ");");
+							};
+							btnTimer.start();
+						}).on("mouseup", function(){
+							if(numTicks > 0){
+								console.log("button released");
+								ws.sendGuiAction("release_" + funcText + "(" + ws.lastState().toString().replace(/,,/g,',') + ");");
+							}
+							mouseup(d3.event);
 						});
 				}else{
 					//the mark created should stay in place and be classed as a display element
@@ -22415,7 +22587,7 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 	var ws = pvsws()
 		.addListener('ConnectionOpened', function(e){
 			log("connection to pvsio server established");
-			this.startPVSProcess(d3.select("#txtFileName").property("value"));
+			this.startPVSProcess('pvscode/' + d3.select("#txtFileName").property("value"));
 			gip.connect();
 		}).addListener("ConnectionClosed", function(e){
 			log("connection to pvsio server closed");
@@ -22458,6 +22630,7 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 		}).addListener("ProcessExited", function(e){
 			console.log("Server process exited -- server message was ...");
 			console.log(e);
+			log(JSON.stringify(e));
 		}).logon();
 	
 	/**
@@ -22469,7 +22642,7 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 	}
 	
 	d3.select("#btnSave").on('click', function(){
-		ws.saveSourceCode({fileName:d3.select("#txtFileName").property('value'), fileContent:editor.getValue()});
+		ws.saveSourceCode({fileName:'pvscode/' + d3.select("#txtFileName").property('value'), fileContent:editor.getValue()});
 	});
 	/**
 	 * add event listener for getting sourcecode
@@ -22508,6 +22681,7 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 	
 	
 	//create mouse actions for draging areas on top of the image
+	var img = d3.select("#imageDiv img");
 	var image = d3.select("#prototypeImage");
 	var rect, drawing = false, moved = false;
 	image.on('mousedown', function(){
@@ -22548,6 +22722,11 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 		}
 	});
 	
+	image.style("height", img.property("height") + "px")
+		.style("width", img.property("width") + "px");
+	d3.select("#imageDiv").style("width",  img.property("width"));
+	d3.select("#console").style("left", img.property('width') + 20)
+		.style("height", img.property('height'));
 	/***
 	 * ##### dealing with logging input and output of pvs
 	 */
