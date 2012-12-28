@@ -36,23 +36,19 @@ var pvsioProcessMap = {};//each client should get his own process
 	var server = wsbase("PVSIO")
 	.bind("sendCommand", function(token, socket, socketid){
 		p = pvsioProcessMap[socketid];
-		p.sendCommand(token.command);
+		p.sendCommand(token.data.command);
 	}).bind("startProcess", function(token, socket, socketid){
-		util.log("Calling start process for client...");
+		util.log("Calling start process for client... " + socketid);
 		p = pvsioProcessMap[socketid];
 		if(!p){
 			p = pvsio();
-			//start the pvs process
+			//set the workspace dir and start the pvs process with a callback for processing any responses from
+			//the process
 			p.workspaceDir(workspace)
-			.start(token.fileName, function(tok){
+			.start(token.data.fileName, function(tok){
 				//called when any data is recieved from pvs process
 				//if the type of the token is 'processExited' then close the socket if it is still open
-				if(tok.type === 'processExited') {
-					if(socket.readyState === 1)
-						socket.close();
-				}else{//send the message normally
-					socket.send(JSON.stringify(tok));
-				}
+				processCallback(tok, socket);
 			});
 			//add to map
 			pvsioProcessMap[socketid] = p;
@@ -62,11 +58,17 @@ var pvsioProcessMap = {};//each client should get his own process
 		//hsndle close event of socket to release resources
 		socket.on("close", onsocketClose(socketid));
 		
+		/**
+		 * handler for socket closed event
+		 * @param sid
+		 * @returns
+		 */
 		function onsocketClose(sid){
 			return function(e){
 				util.log("closing websocket client " + sid);
 				p = pvsioProcessMap[sid];
-				p.close();
+				if(p)
+					p.close();
 				delete pvsioProcessMap[sid];
 			};
 		}
@@ -76,7 +78,31 @@ var pvsioProcessMap = {};//each client should get his own process
 		p.getSourceCode(function(res){
 			socket.send(JSON.stringify(res));
 		});
+	}).bind("saveSourceCode", function(token, socket, socketid){
+		p = pvsioProcessMap[socketid];
+		p.saveSourceCode(token.data, function(token){
+			//sourcecode has been saved so restart the server
+			if(token.type === "sourceCodeSaved") {
+				util.log("Source code has been saved. Closing process ... " + socketid);
+				p.close();
+				delete pvsioProcessMap[socketid];
+				socket.send(JSON.stringify(token));
+			}else{
+				socket.send(JSON.stringify(token));
+			}
+		});
 	});
+	
+	function processCallback(tok, socket){
+		//called when any data is recieved from pvs process
+		//if the type of the token is 'processExited' then send message to client if the socket is still open
+		if(tok.type === 'processExited') {
+			if(socket.readyState === 1)
+				socket.send(JSON.stringify(tok));
+		}else{//send the message normally
+			socket.send(JSON.stringify(tok));
+		}
+	}
 	
 	//set the port
 	server.port  = port;

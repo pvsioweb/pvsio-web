@@ -12,35 +12,35 @@
 		<div id="prototypeImage"></div>
 	</div>
 	<div id="controlsContainer">
-		<button id="btnToggleOverlay">Toggle Overlay</button>
+		<button id="btnBuilderView">Builder View</button>
+		<button id="btnSimulatorView">Simulator View</button>
 	</div>
 
-	<div id='pvsio_commands_log_h2'>
+	<div id='pvsio_commands_log_Container'>
 		<h2>GUI frontend commands</h2>
+		
+		<div id='pvsio_commands_log'></div>
 	</div>
-	<div id='pvsio_commands_log'></div>
 
-	<div id='pvsio_response_log_h2'>
+	<div id='pvsio_response_log_Container'>
 		<h2>PVSio backend replies</h2>
+		<div id='pvsio_response_log'></div>
 	</div>
-	<div id='pvsio_response_log'></div>
 
 	<div id='console'></div>
 
-	<div id='specification_log_h2'>
+	<div id='specification_log_Container'>
 		<h2>
-			Formal specification animated by PVSio <label> <input
-				type="button" value="Show" onClick="ws.getSourceCode();">
+			Formal specification source file</h2> <label> <input
+				type="button" id="btnGetSpecification" value="Show">
 			</label>
-		</h2>
+		
+		<button id="btnSave">Save Specification</button>
+		<label for="filename">File name:</label>
+		<input type="text" id="txtFileName" name='filename' value="pvscode/gpcaui"/>
+		<div id="editor">
+		</div>
 	</div>
-	<div id='specification_log'></div>
-
-	<div id="GIP_h2">
-		<h2>GPCA-UI console</h2>
-	</div>
-
-	<div id="GIPconsole"></div>
 	<map name="prototypeMap" id="prototypeMap">
 
 	</map>

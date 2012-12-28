@@ -1,4 +1,36 @@
+area{
+	cursor: pointer;	
+}
 
+#imageDiv{
+	border-bottom: 1px solid black;
+	width: 1045px;
+	padding-bottom: 20px;
+}
+#controlsContainer{
+	position: relative;
+}
+#controlsContainer button.selected{
+	top: -1px;
+	height: 40px;
+	border-top: none;
+	background: white;
+}
+
+#controlsContainer button{
+	height: 35px;
+	border: 2px solid black;
+	top: 1px;
+	position:absolute;
+	background: #ddd;
+}
+
+#editor{
+	z-index: 30;
+	width:1320px;
+	height: 800px;
+	border: 1px solid black;
+}
 #GIP-rate {
 	position:absolute;
 	float: right;
@@ -25,28 +57,24 @@
 }
 
 #console {
-	position:absolute;
-	left:238px;
-	top:200px;
-	width:278px;
-	height:24px;
+	position: absolute;
+	left: 1070px;
+	top: 10px;
+	width: 230px;
+	height: 204px;
 	color: white;
-	background: white;
-	padding: 0px;
+	background: #333;
+	padding: 10px;
 	font: 10px Arial;
-	background-color: #333333;
 }
 
-#pvsio_commands_log_h2 {
+#pvsio_commands_log_Container {
 	position:absolute;
 	left:6px;
-	top:540px;
+	top:300px;
 }
 
 #pvsio_commands_log {
-	position:absolute;
-	left:10px;
-	top:589px;
 	width:581px;
 	height:200px;
 	overflow: scroll;
@@ -55,17 +83,17 @@
 	padding: 10px;
 }
 
+#btnSimulatorView{
+	left: 100px;
+}
 
-#pvsio_response_log_h2 {
+#pvsio_response_log_Container {
 	position:absolute;
 	left:641px;
-	top:541px;
+	top:300px;
 }
 
 #pvsio_response_log {
-	position:absolute;
-	left:635px;
-	top:589px;
 	width:660px;
 	height:200px;
 	overflow: scroll;
@@ -74,29 +102,19 @@
 	padding: 10px;
 }
 
-#specification_log_h2 {
+#specification_log_Container {
 	position:absolute;
 	left:6px;
-	top:845px;
+	top:600px;
 }
 
 #specification_log {
-	position:absolute;
-	left:10px;
-	top:905px;
 	width:1280px;
 	height:638px;
 	overflow: scroll;
 	color: lime;
 	background: black;
 	padding: 10px;
-}
-
-#GIP_h2 {
-	position:absolute;
-	left:10px;
-	top:276px;
-	width: 248px;
 }
 
 #GIPconsole {
@@ -141,7 +159,6 @@ img {
 
 .detailsForm {
 	width: 230px;
-	height: 120px;
 	position: absolute;
 	z-index: 200;
 	box-shadow: 0px 0px 30px 10px #444;

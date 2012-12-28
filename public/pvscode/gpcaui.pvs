@@ -194,7 +194,7 @@ gpcaui: THEORY
                         ENDIF,
                       new_val /= 0 AND new_val < min_val ->
                         IF valid?(mem) THEN st WITH [ display := min_val, cursor := i, memory := NA ]
-                        ELSE st WITH [ display := min_val, cursor := i, memory := new_mem ]
+                        ELSE st WITH [display := min_val, cursor := i, memory := new_mem ]
                         ENDIF
                  ENDCOND
           ENDCOND
