@@ -66,6 +66,10 @@ area{
 	width: 50%;	
 }
 
+.displayvalue{
+	color: white;	
+}
+
 #pvsio_response_log {
 	height:200px;
 	overflow: scroll;
@@ -99,6 +103,7 @@ img {
 
 .display{
 	z-index: 3;
+	text-align: center;
 }
 
 .detailsForm {
