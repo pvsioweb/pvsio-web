@@ -6,46 +6,52 @@
 
 </head>
 <body>
-	<div id="imageDiv">
-		<img src="image/alaris-syringe-driver.jpg" usemap="#prototypeMap" />
-		<div id="prototypeImage"></div>
-	</div>
-	<div id="controlsContainer">
-		<button id="btnBuilderView">Builder View</button>
-		<button id="btnSimulatorView">Simulator View</button>
-	</div>
-	
-	<div id='logsDiv'>
-		<div id='pvsio_commands_log_Container' class='pvsio-log-container'>
-			<h2>GUI frontend commands</h2>
-			
-			<div id='pvsio_commands_log'></div>
-		</div>
-	
-		<div id='pvsio_response_log_Container' class='pvsio-log-container'>
-			<h2>PVSio backend replies</h2>
-			<div id='pvsio_response_log'></div>
-		</div>
-	</div>
-	<!-- container for specification source code -->
-	<div id='specification_log_Container' class="clear-both">
-		<h2>
-			Formal specification source file</h2> <label> <input
-				type="button" id="btnGetSpecification" value="Show">
-			</label>
+	<div id="content" class="center">
+		<div id="header">
 		
-		<button id="btnSave">Save Specification</button>
-		<label for="filename">File name:</label>
-		<input type="text" id="txtFileName" name='filename' value="alarisGS"/>
-		<div id="editor">
 		</div>
-	</div>
+		<div id="imageDiv">
+			<img src="image/alaris-syringe-driver.jpg" usemap="#prototypeMap" />
+			<div id="prototypeImage"></div>
+			<div id='console'></div>
+		</div>
+		<div id="controlsContainer">
+			<button id="btnBuilderView">Builder View</button>
+			<button id="btnSimulatorView">Simulator View</button>
+		</div>
+		
+		<div id='logsDiv'>
+			<div id='pvsio_commands_log_Container' class='pvsio-log-container'>
+				<h2>GUI frontend commands</h2>
+				
+				<div id='pvsio_commands_log'></div>
+			</div>
+		
+			<div id='pvsio_response_log_Container' class='pvsio-log-container'>
+				<h2>PVSio backend replies</h2>
+				<div id='pvsio_response_log'></div>
+			</div>
+		</div>
+		<!-- container for specification source code -->
+		<div id='specification_log_Container' class="clear-both">
+			<h2>
+				Formal specification source file</h2> <label> <input
+					type="button" id="btnGetSpecification" value="Show">
+				</label>
+			
+			<button id="btnSave">Save Specification</button>
+			<label for="filename">File name:</label>
+			<input type="text" id="txtFileName" name='filename' value="alarisGS"/>
+			<div id="editor">
+			</div>
+		</div>
+		
+		<map name="prototypeMap" id="prototypeMap">
 	
-	<div id='console'></div>
-	<map name="prototypeMap" id="prototypeMap">
-
-	</map>
-	<script type="text/javascript" src="require.js" data-main="index.js"></script>
+		</map>
+		<script type="text/javascript" src="require.js" data-main="index.js"></script>
+	
+	</div>
 	
 </body>
 </html>

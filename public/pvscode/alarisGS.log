@@ -4,7 +4,7 @@ Context changed to ~/Documents/workspace/pvsio-web/public/pvscode/
 Prelude library PVSio not found
 Typechecking
 Parsing alarisGS
-alarisGS parsed in 0.13 seconds
+alarisGS parsed in 0.14 seconds
 Typechecking alarisGS
 alarisGS typechecked in 0.32s: 10 TCCs, 0 proved, 1 subsumed, 9 unproved
-alaris_test typechecked in 0.35s: 16 TCCs, 0 proved, 0 subsumed, 16 unproved; 17 msgs
+alaris_test typechecked in 0.34s: 16 TCCs, 0 proved, 0 subsumed, 16 unproved; 17 msgs

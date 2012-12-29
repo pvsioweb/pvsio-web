@@ -29,13 +29,15 @@ define(['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'],
 	 * @param ws the ws to use for calling functions
 	 */
 	return function(callback, mark, ws){
-		var type = "Button", name, funcText, funcRowLabel = "Function:", displayLabel, displayLabelRow, displayWidgetLabel, presetRegexRow;
+		var eventRow, events = {}, type = "Button", name, funcText, funcRowLabel = "Function:", 
+			displayLabel, displayLabelRow, displayWidgetLabel, presetRegexRow;
 		//this form is used to both edit and create new details for an overlay so get the details if this is an edit
 		if(mark && mark.attr("id")){
 			var id = mark.attr("id");
 			type = widgetMaps[id].type;
 			name  = widgetMaps[id].name;
 			funcText = widgetMaps[id].functionText;
+			events = widgetMaps[id].events || {};
 			if(type !== "Button")
 				displayLabel = displayMappings[id].label;
 		}
@@ -85,7 +87,7 @@ define(['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'],
 				if(type === "Display")
 					displayLabel = displayWidgetLabel.property("value");
 				//fetch the values input in the form and pass to the callback function
-				callback(type, name, funcText, displayLabel);
+				callback(type, name, funcText, displayLabel, events);
 				if(funcRowLabel === "Function:"){
 					//need to create the area for this
 					var top = parseFloat(mark.style('top')), 
@@ -103,20 +105,23 @@ define(['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'],
 							var f = widgetMaps[name].functionText;
 							if(numTicks === 0){
 								console.log(f);
-								ws.sendGuiAction("click_" + f + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");");
+								if(events['click'])
+									ws.sendGuiAction("click_" + f + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");");
 							}
 						}).on("mousedown", function(){
 							var f = widgetMaps[name].functionText;
 							timerTickFunction = function(){
 								console.log("button pressed");
-								ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g,',') + ");");
+								if(events['press/release'])
+									ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g,',') + ");");
 							};
 							btnTimer.start();
 						}).on("mouseup", function(){
 							var f = widgetMaps[name].functionText;
 							if(numTicks > 0){
-								console.log("button released");
-								ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g,',') + ");");
+								console.log("button released");	
+								if(events['press/release'])
+									ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g,',') + ");");
 							}
 							mouseup(d3.event);
 						});
@@ -146,6 +151,9 @@ define(['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'],
 			//update the label to show regex if display is selected
 			funcRowLabel = d3.select(this).property("value") === "Button" ? "Function:" : "Regex:";
 			d3.select("#lblFunction").html(funcRowLabel);
+			
+			if(eventRow)
+				eventRow.remove();
 			//show widget label field if widget type is display
 			if(funcRowLabel === "Regex:") {
 				//create preset regexes
@@ -178,11 +186,33 @@ define(['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'],
 				displayWidgetLabel = displayLabelRow.append("td").append("input").attr("type", "text").attr("id", "displayLabel");
 				if(displayLabel)
 					displayWidgetLabel.property("value", displayLabel);
-			}else{
+			}else{//widget type is button so add the checkboxes for the events you wish to listen for
 				if(displayLabelRow)
 					displayLabelRow.remove();
 				if(presetRegexRow)
 					presetRegexRow.remove();
+				//add check boxes
+				eventRow = table.insert("tr", "tr.buttons").attr("id", "eventRow");
+				eventRow.append("td").append("label").html("Registered Events:");
+				var eventsTd = eventRow.append("td");
+				eventsTd.append("input").attr("type", "checkbox").attr("value", "click")
+					.on("change", checkChanged).attr("checked", function(){
+						return events && events['click'] ? true : null;
+					});
+				eventsTd.append("span").html("click");
+				eventsTd.append("input").attr("type", "checkbox").attr("value","press/release")
+					.on("change", checkChanged).attr("checked", function(){
+						return events && events['press/release'] ? true : null;
+					});
+				eventsTd.append("span").html("Press/Release");
+			}//end else
+			
+			function checkChanged(){
+				if(this.checked){
+					events[this.value] = true;
+				}else{
+					delete events[this.value];
+				}
 			}
 		}
 	};

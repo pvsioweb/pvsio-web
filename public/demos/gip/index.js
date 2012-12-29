@@ -84,7 +84,7 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 	d3.select("body").on("keydown", function(){
 		if(d3.event.which === 46){
 			d3.event.preventDefault();
-			d3.selectAll(".selected")
+			d3.selectAll(".mark.selected")
 				.each(function(d){
 					d3.select("area." + d3.select(this).attr("id")).remove();
 					d3.select(this).remove();
@@ -184,8 +184,8 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 	/**
 	 * function called when the details of an overlay has been edited in a form
 	 */
-	function handleFormDetails(type, name, functionDetails, displayLabel){
-		widgetMaps[name] = {name:name, type:type, functionText: functionDetails};
+	function handleFormDetails(type, name, functionDetails, displayLabel, events){
+		widgetMaps[name] = {name:name, type:type, functionText: functionDetails, events:events};
 		if(type === "Display")
 			widgetMaps[name].displayLabel = displayLabel;
 		console.log("Type:%1$s, Name:%2$s, Function: %3$s", type, name, functionDetails);
