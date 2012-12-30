@@ -25,7 +25,7 @@ var pvsio = require("./pvsprocess"),
 						"port":"The port to listen at - defaults to 8080",
 						"workspace":"The base directory of all your pvs source code."})
 			.argv;
-
+var fs = require("fs");
 var express = require('express');
 var webserver = express();
 
@@ -116,5 +116,19 @@ var pvsioProcessMap = {};//each client should get his own process
 		util.log(JSON.stringify(req.files));
 		var filename = req.files.file.path.split("/").slice(-1).join("");
 		res.send({filename:filename});
+	});
+	
+	webserver.all("/saveWidgetDefinition", function(req, res){
+		var filename = req.body.filename, filecontent = req.body.filecontent;
+		util.log(filename);
+		util.log(filecontent);
+		fs.writeFile( __dirname + "/public/widgetDefinitions/" + filename, filecontent, function(err){
+			if(err){
+				console.log(err);
+				res.send("error");
+			}else{
+				res.send(filename);
+			}
+		});
 	});
 	webserver.listen(8081);

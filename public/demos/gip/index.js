@@ -13,8 +13,9 @@ require.config({baseUrl:'app',
 require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayManager',
          'formal/pvs/prototypebuilder/createOverlay',
          'formal/pvs/prototypebuilder/editOverlay','formal/pvs/prototypebuilder/gip', 
-         'ace/ace','formal/pvs/prototypebuilder/widgetMaps','d3/d3'], 
-	function(pvsws, displayManager, createOverlay, editOverlay, gip, ace, widgetMaps){
+         'ace/ace','formal/pvs/prototypebuilder/widgetMaps', 'util/shuffle','d3/d3'], 
+	function(pvsws, displayManager, createOverlay, editOverlay, gip, ace, widgetMaps, shuffle){
+	var alphabet = 'a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z'.split(",");
 	var editor = ace.edit("editor");
 	editor.getSession().setMode('ace/mode/text');
 	
@@ -107,6 +108,9 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 		d3.select(this).classed('selected', true);
 	});
 	
+	d3.select("#saveWidgetDefinitions").on("click", function(){
+		saveWidgetDefinition();
+	});
 	
 	//create mouse actions for draging areas on top of the image
 	var img = d3.select("#imageDiv img");
@@ -234,4 +238,53 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 				});
 		}
 	}
+	
+	function saveWidgetDefinition(){
+		var safe = {};
+		safe.widgetMaps = widgetMaps;
+		var regionDefs = [];
+		d3.selectAll("#prototypeMap area").each(function(){
+			var region = {}, a = d3.select(this);
+			region.class = a.attr("class");
+			region.shape = a.attr("shape");
+			region.coords = a.attr("coords");
+			region.href = a.attr("href");
+			regionDefs.push(region);
+		});
+		
+		safe.regionDefs = regionDefs;
+		//save to the user's drive
+		var safeStr = JSON.stringify(safe, null, " ");
+		console.log(safeStr);
+		var fd = new FormData();
+		fd.append("filename", randomFileName() + ".json");
+		fd.append("filecontent", safeStr);
+		
+		d3.xhr("/saveWidgetDefinition").post(fd).on("load", function(res){
+			//write the download link to the client
+			var diag = d3.select("body").append("div").attr("class", "dialog overlay").
+				append("div").attr("class", "downloader center shadow");
+			
+			diag.append("textarea").text(safeStr);
+			diag.append("br");
+			diag.append("hr");
+			diag.append("a").attr("href", "/widgetDefinitions/" + res.responseText)
+				.attr("download", "widget-definition.json")
+					.attr("class", "btn left").html("Save to Disk").on("click", function(){
+						d3.select("div.dialog.overlay").transition().delay(1000).remove();
+					});
+			diag.append("button").attr("class", "btn btn-danger right").html("Close Window").on("click", function(){
+				d3.select("div.dialog.overlay").remove();
+			})
+		});
+	}
+	
+	function openWidgetDefinition(){
+		
+	}
+	
+	function randomFileName(){
+		return shuffle(alphabet).slice(-5).join("") + new Date().getTime();
+	}
+	
 });
