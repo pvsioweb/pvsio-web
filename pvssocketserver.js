@@ -109,4 +109,12 @@ var pvsioProcessMap = {};//each client should get his own process
 	server.start({host:host});	
 	//create the express static server and use public dir as the default serving directory
 	webserver.use(express.static(__dirname + "/public"));
+	webserver.use(express.bodyParser({ keepExtensions: true, uploadDir: __dirname + "/public/images"}));
+
+	//add image upload path
+	webserver.all("/changeimage", function(req, res){
+		util.log(JSON.stringify(req.files));
+		var filename = req.files.file.path.split("/").slice(-1).join("");
+		res.send({filename:filename});
+	});
 	webserver.listen(8081);

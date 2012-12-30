@@ -44,10 +44,11 @@ define(['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'],
 		var x = d3.event.pageX, y = d3.event.pageY;
 		var form = d3.select("body").append("div").attr("class", "detailsForm").style("top", y + "px").style("left", x + "px");
 		//want to select ui component type, provide a name for it and provide a function to call when it is clicked
-		var table = form.append("table");
-		var typerow = table.append("tr");
-		typerow.append("td").append("label").html("Widget Type:");
-		var widgetType = typerow.append("td").append("select")
+		var table = form.append("form").attr("class", ".form-horizontal");
+		table.append("legend").html("Edit User Interface Widget");
+		var typerow = table.append("div").attr("class", "control-group");
+		typerow.append("label").attr("class", "control-label").html("Widget Type:");
+		var widgetType = typerow.append("div").attr("class","controls").append("select")
 			.on("change", function(){
 				//update the label to show regex if display is selected
 				widgetTypeChanged.call(this);
@@ -59,23 +60,23 @@ define(['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'],
 		funcRowLabel = widgetType.property("value") === "Button" ? "Function:" : "Regex:";
 
 		//define the function/Regex row
-		var funcrow = table.append("tr").attr("id", "funcRow");
-		funcrow.append("td").append("label").html(funcRowLabel).attr("id", "lblFunction");
-		var functionDetails = funcrow.append("td").append("input").attr("type", "text");
+		var funcrow = table.append("div").attr("id", "funcRow").attr("class", "control-group");
+		funcrow.append("label").html(funcRowLabel).attr("id", "lblFunction").attr("class", "control-label");
+		var functionDetails = funcrow.append("div").attr("class", "controls").append("input").attr("type", "text");
 		if(funcText)
 			functionDetails.property("value", funcText);
 		
 		widgetTypeChanged.call(widgetType.node());	
 		//define the ok/cancel row
-		var okcancelrow = table.append("tr").attr("class", "buttons");
-		okcancelrow.append("td").append("input")
-			.attr("type", "button").attr("value", "Delete").on("click", function(){
+		var okcancelrow = table.append("div").attr("class", "buttons control-group").append("div").attr("class", "controls");
+		okcancelrow.append("button")
+			.attr("class", "btn btn-danger left").html("Delete").on("click", function(){
 				//hide and delete the form and the mark
 				form.remove();
 				mark.remove();
 			});
-		okcancelrow.append("td").append("input")
-			.attr("type", "button").attr("value", "OK").on("click", function(){
+		okcancelrow.append("button")
+			.attr("class", "btn btn-success right").html("OK").on("click", function(){
 				
 				type = widgetType.property("value");
 				funcText = functionDetails.property("value");
@@ -90,8 +91,8 @@ define(['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'],
 				callback(type, name, funcText, displayLabel, events);
 				if(funcRowLabel === "Function:"){
 					//need to create the area for this
-					var top = parseFloat(mark.style('top')), 
-						left = parseFloat(mark.style('left')),
+					var top = parseFloat(mark.style('top')) - d3.select("#imageDiv img").node().y, 
+						left = parseFloat(mark.style('left')) - d3.select("#imageDiv img").node().x,
 						h = parseFloat(mark.style('height')),
 						w = parseFloat(mark.style('width'));
 					var coords = left + "," + top +	"," + (left + w) + "," + (top + h);
@@ -157,9 +158,9 @@ define(['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'],
 			//show widget label field if widget type is display
 			if(funcRowLabel === "Regex:") {
 				//create preset regexes
-				presetRegexRow = table.insert("tr", "#funcRow").attr("id", "presetRegexRow");
-				presetRegexRow.append("td").append("Label").html("Predefined Regexes:");
-				var regexOptions = presetRegexRow.append('td')
+				presetRegexRow = table.insert("div", "#funcRow").attr("id", "presetRegexRow").attr("class", "control-group");
+				presetRegexRow.append("Label").html("Predefined Regexes:").attr("class", "control-label");
+				var regexOptions = presetRegexRow.append('div').attr("class", "controls")
 					.append("select")
 					.on("change", function(){
 						var d = regexData[this.selectedIndex];
@@ -181,9 +182,10 @@ define(['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'],
 						return d.label || d.regex.toString();
 					});
 				
-				displayLabelRow = table.insert("tr", "tr.buttons").attr("id", "displayLabelRow");
-				displayLabelRow.append("td").append("Label").html("Widget Label:");
-				displayWidgetLabel = displayLabelRow.append("td").append("input").attr("type", "text").attr("id", "displayLabel");
+				displayLabelRow = table.insert("div", "div.buttons").attr("id", "displayLabelRow").attr("class", "control-group");
+				displayLabelRow.append("Label").html("Widget Label:").attr("class", "control-label");
+				displayWidgetLabel = displayLabelRow.append("div").attr("class", "controls")
+					.append("input").attr("type", "text").attr("id", "displayLabel");
 				if(displayLabel)
 					displayWidgetLabel.property("value", displayLabel);
 			}else{//widget type is button so add the checkboxes for the events you wish to listen for
@@ -192,19 +194,19 @@ define(['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'],
 				if(presetRegexRow)
 					presetRegexRow.remove();
 				//add check boxes
-				eventRow = table.insert("tr", "tr.buttons").attr("id", "eventRow");
-				eventRow.append("td").append("label").html("Registered Events:");
-				var eventsTd = eventRow.append("td");
-				eventsTd.append("input").attr("type", "checkbox").attr("value", "click")
+				eventRow = table.insert("div", "div.buttons").attr("id", "eventRow").attr("class", "control-group");
+				eventRow.append("label").html("Registered Events:").attr("class", "control-label");
+				var eventsTd = eventRow.append("div").attr("class", "controls");
+				eventsTd.append("label").attr("class", "checkbox").html(" click")
+					.append("input").attr("type", "checkbox").attr("value", "click").attr("class", "checkbox")
 					.on("change", checkChanged).attr("checked", function(){
 						return events && events['click'] ? true : null;
 					});
-				eventsTd.append("span").html("click");
-				eventsTd.append("input").attr("type", "checkbox").attr("value","press/release")
+				eventsTd.append("label").attr("class", "checkbox").html(" Press/Release")
+					.append("input").attr("type", "checkbox").attr("class", "checkbox").attr("value","press/release")
 					.on("change", checkChanged).attr("checked", function(){
 						return events && events['press/release'] ? true : null;
 					});
-				eventsTd.append("span").html("Press/Release");
 			}//end else
 			
 			function checkChanged(){

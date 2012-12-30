@@ -116,7 +116,7 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 		d3.event.stopPropagation();
 		d3.event.preventDefault();
 		drawing = true;
-		rect = createOverlay(image, handleFormDetails, ws);
+		rect = createOverlay(d3.select('body'), handleFormDetails, ws);
 	}).on("mouseup", function(){
 		//add the area for the drawn rectangle into the map element
 		if(moved)
@@ -127,6 +127,7 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 		drawing = moved = false;
 	}).on('mousemove', function(){
 		if(drawing){
+			var pad = 10;
 			moved = true;
 			d3.event.preventDefault();
 			var starty = parseFloat(rect.attr("starty")),
@@ -146,15 +147,21 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 				rect.style("left", startx + "px");
 			}
 			//update width and height of marker
-			rect.style("height", h + "px").style("width", w + "px");
+			rect.style("height", (h - pad) + "px").style("width", (w - pad) + "px");
 		}
 	});
 	
-	image.style("height", img.property("height") + "px")
-		.style("width", img.property("width") + "px");
-	d3.select("#imageDiv").style("width",  img.property("width"));
-	d3.select("#console").style("left", img.property('width') + 20)
-		.style("height", img.property('height'));
+	resizeImageDiv();
+	
+	function resizeImageDiv(){
+		var img = d3.select('#imageDiv img');
+		image.style("height", img.property("height") + "px")
+			.style("width", img.property("width") + "px");
+		d3.select("#imageDiv").style("width",  img.property("width"));
+		d3.select("#console").style("left", img.property('width') + 20)
+			.style("height", img.property('height') - 17).style("width", 1130 - img.property("width") - 55);
+	}
+		
 	/***
 	 * ##### dealing with logging input and output of pvs
 	 */
@@ -189,5 +196,42 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 		if(type === "Display")
 			widgetMaps[name].displayLabel = displayLabel;
 		console.log("Type:%1$s, Name:%2$s, Function: %3$s", type, name, functionDetails);
+	}
+	
+	preparePageForImageUpload();
+	
+	function preparePageForImageUpload(){
+		var c = d3.select("#imageDiv");
+		c.on('dragover', function(){
+			c.style("border", "3px dashed black")
+		}).on('dragend', function(){
+			c.style("border", null);
+		}).on("drop", function(){
+			c.style("border", null);
+			var files = d3.event.dataTransfer.files;
+			console.log(files);
+			readFiles(files);
+			d3.event.preventDefault();
+		});
+		
+		
+		function readFiles(files){
+			var fd = new FormData();
+			for(var i=0; i< files.length; i++){
+				fd.append("file", files[i]);
+			}
+			var xhr = d3.xhr("/changeimage", 'application/json');
+			xhr.post(fd)
+				.on('progress', function(e){
+					console.log(e);
+				}).on('load', function( res){
+					console.log(res);
+					var imagepath = "../../images/" + JSON.parse(res.responseText).filename;
+					d3.select("#imageDiv img").attr("src", imagepath );
+					d3.select("#prototypeImage")
+						.style("background-image", "url(" + imagepath + ")");
+					setTimeout(resizeImageDiv, 200)
+				});
+		}
 	}
 });

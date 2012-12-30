@@ -3,12 +3,13 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Interactive Prototype Builder</title>
 <link href="css/style.css" type="text/css" rel="stylesheet">
-
+<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
 </head>
 <body>
 	<div id="content" class="center">
 		<div id="header">
-		
+			<button>Save Widget Definition</button>
+			<button>Open Widget Definition</button>
 		</div>
 		<div id="imageDiv">
 			<img src="image/alaris-syringe-driver.jpg" usemap="#prototypeMap" />
@@ -34,14 +35,13 @@
 		</div>
 		<!-- container for specification source code -->
 		<div id='specification_log_Container' class="clear-both">
-			<h2>
-				Formal specification source file</h2> <label> <input
-					type="button" id="btnGetSpecification" value="Show">
-				</label>
+			<div>
+				<h2>Formal specification source file</h2>
+				<button id="btnSave" class="btn">Save Specification</button>
+				<span>File name:</span>
+				<input type="text" id="txtFileName" name='filename' value="alarisGS"/>
+			</div>
 			
-			<button id="btnSave">Save Specification</button>
-			<label for="filename">File name:</label>
-			<input type="text" id="txtFileName" name='filename' value="alarisGS"/>
 			<div id="editor">
 			</div>
 		</div>

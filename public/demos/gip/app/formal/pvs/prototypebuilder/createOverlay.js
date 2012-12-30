@@ -8,7 +8,7 @@
 define(['./editOverlay', 'd3/d3'], function(editOverlay){
 	
 	return function(parent, formHandler, ws){
-		var mx = d3.event.pageX, my = d3.event.pageY;
+		var mx = d3.event.pageX , my = d3.event.pageY;
 		var moving = false, startMouseX, startMouseY, startTop, startLeft;
 		//if there are any active selections, remove them from the selection class
 		if(!d3.selectAll(".mark.selected").empty())
