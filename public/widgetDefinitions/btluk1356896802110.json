@@ -1,0 +1,36 @@
+{
+ "widgetMaps": {
+  "Button1356893877903": {
+   "name": "Button1356893877903",
+   "type": "Button",
+   "functionText": "UP",
+   "events": {
+    "click": true,
+    "press/release": true
+   }
+  },
+  "Button1356893893371": {
+   "name": "Button1356893893371",
+   "type": "Button",
+   "functionText": "DN",
+   "events": {
+    "click": true,
+    "press/release": true
+   }
+  }
+ },
+ "regionDefs": [
+  {
+   "class": "Button1356893877903",
+   "shape": "rect",
+   "coords": "184,162,233,204",
+   "href": "#"
+  },
+  {
+   "class": "Button1356893893371",
+   "shape": "rect",
+   "coords": "350,172,389,209",
+   "href": "#"
+  }
+ ]
+}
