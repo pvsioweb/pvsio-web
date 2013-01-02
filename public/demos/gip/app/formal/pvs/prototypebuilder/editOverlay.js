@@ -42,7 +42,9 @@ define(['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'],
 				displayLabel = displayMappings[id].label;
 		}
 		var x = d3.event.pageX, y = d3.event.pageY;
-		var form = d3.select("body").append("div").attr("class", "detailsForm shadow").style("top", y + "px").style("left", x + "px");
+		var form = d3.select("body").append("div")
+			.attr("class", "detailsForm shadow")
+			.style("top", y + "px").style("left", x + "px");
 		//want to select ui component type, provide a name for it and provide a function to call when it is clicked
 		var table = form.append("form").attr("class", ".form-horizontal");
 		table.append("legend").html("Edit User Interface Widget");

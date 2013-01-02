@@ -112,6 +112,7 @@ area{
 
 .displayvalue{
 	color: white;	
+	line-height: 1;
 }
 
 #pvsio_response_log {

@@ -7,10 +7,11 @@
 
 define([], function(){
 	var mappings = {};
-	mappings.disp_field = {regex: new RegExp("display := [0-9\/.]+"), label:"Display:"};
-	mappings.unit_field = {regex: new RegExp("unit := [0-9A-Za-z]+")};
-	mappings.vtbi_field = {regex: new RegExp("vtbi := [0-9\/.]+"), label:"VTBI:"};
-	mappings.infusing_field = {regex:new RegExp("is_infusing := [0-9\/.]+")};
+	mappings.preset ={};
+	mappings.active = {};
+	
+	mappings.preset.string = {value:"\\w+", label:"String"};
+	mappings.preset.numeric = {value:"[0-9\/.]+", label:"Numeric"};
 	
 	return mappings;
 });

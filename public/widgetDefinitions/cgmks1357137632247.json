@@ -1,0 +1,14 @@
+{
+ "widgetMaps": {
+  "Button1357137447841": {},
+  "Button1357137599098": {}
+ },
+ "regionDefs": [
+  {
+   "class": "Button1357137599098",
+   "shape": "rect",
+   "coords": "91,189,152,234",
+   "href": "#"
+  }
+ ]
+}

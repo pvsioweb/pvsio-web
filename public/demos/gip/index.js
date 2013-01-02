@@ -6,21 +6,25 @@
 require.config({baseUrl:'app',
 	paths:{
 		"ace":"../lib/ace",
-		"d3":"../lib/d3"
+		"d3":"../lib/d3",
+		"pvsioweb":"formal/pvs/prototypebuilder"
 	}
 });
 
-require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayManager',
-         'formal/pvs/prototypebuilder/createOverlay',
-         'formal/pvs/prototypebuilder/editOverlay','formal/pvs/prototypebuilder/gip', 
-         'ace/ace','formal/pvs/prototypebuilder/widgetMaps', 'util/shuffle','d3/d3'], 
-	function(pvsws, displayManager, createOverlay, editOverlay, gip, ace, widgetMaps, shuffle){
+require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
+         'pvsioweb/createOverlay',
+         'pvsioweb/editOverlay','pvsioweb/gip', 
+         'ace/ace','pvsioweb/widgetMaps', 'util/shuffle', 
+         'pvsioweb/widgetEditor','pvsioweb/widgetEvents',
+         'pvsioweb/buttonWidget','pvsioweb/displayWidget',
+         'pvsioweb/displayMappings','d3/d3'], 
+	function(pvsws, displayManager, overlayCreator, editOverlay, gip,
+			ace, widgetMaps, shuffle, widgetEditor, widgetEvents, 
+			buttonWidget, displayWidget, displayMappings){
 	var alphabet = 'a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z'.split(",");
 	var editor = ace.edit("editor");
 	editor.getSession().setMode('ace/mode/text');
 	
-	var isOnRegex = new RegExp("is_on := [0-9\/.]+"), isOn, gipTick, tickPeriod = 1000;
-	var ctrlCmdRegex = new RegExp("ctrl_cmd := [0-9A-Za-z]+"), ctrlCmd;
 	/**
 	 * utitlity function to pretty print pvsio output
 	 */
@@ -87,10 +91,15 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 			d3.event.preventDefault();
 			d3.selectAll(".mark.selected")
 				.each(function(d){
-					d3.select("area." + d3.select(this).attr("id")).remove();
-					d3.select(this).remove();
+					widgetMaps[d3.select(this).attr("id")].remove();
 				});
 		}
+	});
+	d3.select(window).on('resize', function(){
+		//adjust the mark position
+		d3.selectAll("div.mark").each(function(){
+			
+		});
 	});
 	
 	/**
@@ -120,32 +129,39 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 		d3.event.stopPropagation();
 		d3.event.preventDefault();
 		drawing = true;
-		rect = createOverlay(d3.select('body'), handleFormDetails, ws);
+		rect = overlayCreator.createDiv(image);
 	}).on("mouseup", function(){
 		//add the area for the drawn rectangle into the map element
-		if(moved)
-			editOverlay(handleFormDetails, rect, ws);
+		if(moved){
+			handleWidgetEdit(rect);
+			//add double click event listener to mark
+			rect.on('dblclick', function(){
+				handleWidgetEdit(d3.select(this));
+			});
+			//set the font-size of the mark to be 80% of the height
+			rect.style('font-size', (0.8 * parseFloat(rect.style('height'))) + "px");
+		}
 		else
 			rect.remove();
 		//rect finished drawing
 		drawing = moved = false;
 	}).on('mousemove', function(){
 		if(drawing){
-			var pad = 10;
+			var pad = 10, x = d3.event.pageX - img.node().x, y = d3.event.pageY - img.node().y;
 			moved = true;
 			d3.event.preventDefault();
 			var starty = parseFloat(rect.attr("starty")),
 				startx = parseFloat(rect.attr("startx")),
-				h = Math.abs(starty - d3.event.pageY),
-				w = Math.abs(startx - d3.event.pageX);
+				h = Math.abs(starty - y),
+				w = Math.abs(startx - x);
 			//if the current y is less than the start y, then top style should be height - current top style
-			if(d3.event.pageY < starty ){
+			if(y < starty ){
 				rect.style('top', (starty - h) + "px");
 			}else {
 				rect.style('top', starty + "px");
 			}
 			//if the current x is less than the startx then left style should be width - current left style
-			if(d3.event.pageX < startx){
+			if(x < startx){
 				rect.style("left", (startx - w) + "px");
 			}else{
 				rect.style("left", startx + "px");
@@ -155,6 +171,30 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 		}
 	});
 	
+	function handleWidgetEdit(mark){
+		widgetEditor.create(mark)
+			.addListener(widgetEvents.WidgetSaved,  function(e){
+				e.mark.attr("id", e.widget.id());
+				e.formContainer.remove();
+				console.log(e);
+				overlayCreator.createInteractiveImageArea(e.mark, widgetMaps[e.widget.id()], ws);
+		
+				//update the regex for this mark if its a display widget and give it a display class
+				if(e.widget.type() === "Display") {
+					e.mark.classed("display",  true);
+					displayMappings.active[e.widget.id()] = {regex:e.widget.regex(), uiElement:e.widget.id()};
+				}
+			}).addListener(widgetEvents.WidgetDeleted, function(e){
+				if(e.widget.type() === "Display"){
+					delete displayMappings.active[e.widget.id()];
+				}
+				e.mark.attr("id", e.widget.id());
+				e.formContainer.remove();
+				console.log(e);
+				e.widget.remove();
+				
+			});
+	}
 	resizeImageDiv();
 	
 	function resizeImageDiv(){
@@ -210,12 +250,14 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 			c.style("border", "3px dashed black")
 		}).on('dragend', function(){
 			c.style("border", null);
+			d3.event.preventDefault();
 		}).on("drop", function(){
 			c.style("border", null);
 			var files = d3.event.dataTransfer.files;
 			console.log(files);
 			readFiles(files);
 			d3.event.preventDefault();
+			d3.event.stopPropagation();
 		});
 		
 		
@@ -241,7 +283,7 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 	
 	function saveWidgetDefinition(){
 		var safe = {};
-		safe.widgetMaps = widgetMaps;
+		safe.widgetMaps = widgetsToJSON(widgetMaps);
 		var regionDefs = [];
 		d3.selectAll("#prototypeMap area").each(function(){
 			var region = {}, a = d3.select(this);
@@ -277,10 +319,24 @@ require(['websockets/pvs/pvsiowebsocket','formal/pvs/prototypebuilder/displayMan
 				d3.select("div.dialog.overlay").remove();
 			})
 		});
+		
+		function widgetsToJSON(map){
+			var res = {}, k;
+			for(k in map){
+				res[k] = map[k].toJSON();
+			}
+			return res;
+		}
+		
+		
 	}
 	
 	function openWidgetDefinition(){
 		
+		
+		function widgetFromJSON(json){
+			
+		}
 	}
 	
 	function randomFileName(){

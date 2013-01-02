@@ -1,0 +1,20 @@
+{
+ "widgetMaps": {
+  "Button1357139896588": {
+   "functionText": "up",
+   "events": [
+    "click",
+    "press/release"
+   ],
+   "type": "Button"
+  }
+ },
+ "regionDefs": [
+  {
+   "class": "Button1357139896588",
+   "shape": "rect",
+   "coords": "114,58,162,124",
+   "href": "#"
+  }
+ ]
+}

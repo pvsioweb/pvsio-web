@@ -8,23 +8,20 @@ define(['./displayMappings', 'd3/d3'], function(mappings){
 	var splitter = ":= ";
 	var o = {};
 	o.updateDisplay = function(stateString){
+		var map = mappings.active;
 		if(stateString){
-			var key, dispVal,regex, regexMatch, uiElement;
-			for(key in mappings){
+			var key, regex, regexMatch, uiElement;
+			for(key in map){
 				//get the value of the display field in the output
-				regex = mappings[key].regex;
+				regex = new RegExp(map[key].regex);
 				regexMatch = regex.exec(stateString);
-				if(regexMatch){
-					regexMatch = regexMatch.toString();
-					dispVal = (regexMatch.substring(regexMatch.indexOf(splitter) + 3));
+				if(regexMatch && regexMatch.length > 1){
+					regexMatch = eval(regexMatch[1].toString());
 					//update the display ui element with the value
-					uiElement = mappings[key].uiElement;
+					uiElement = map[key].uiElement;
 					if(uiElement){
 						d3.select("#" + uiElement).html("")
-							.append("span").attr("class", "displaylabel")
-							.html(mappings[key].label);
-						d3.select("#" + uiElement)
-							.append("span").attr("class","displayvalue").html(dispVal);
+							.append("span").attr("class","displayvalue").html(regexMatch);
 					}
 				}
 					
