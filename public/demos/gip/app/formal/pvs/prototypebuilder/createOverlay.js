@@ -90,18 +90,7 @@ function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 						d3.select("area." + mark.attr("id")).attr("coords", coords);
 					}
 				}
-			})/*.on("dblclick", function(){
-				widgetEditor.create(d3.select(this))
-					.addListener(widgetEvents.WidgetSaved,  function(e){
-						e.mark.attr("id", e.widget.id());
-						e.formContainer.remove();
-						console.log(e);
-					}).addListener(widgetEvents.WidgetDeleted, function(e){
-						e.formContainer.remove();
-						e.widget.remove();
-						console.log(e);
-					});
-			})*/;
+			});
 	}
 	
 	function getCoords(mark){

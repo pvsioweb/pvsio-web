@@ -245,39 +245,56 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 	preparePageForImageUpload();
 	
 	function preparePageForImageUpload(){
-		var c = d3.select("#imageDiv");
-		c.on('dragover', function(){
-			c.style("border", "3px dashed black")
-		}).on('dragend', function(){
-			c.style("border", null);
-			d3.event.preventDefault();
-		}).on("drop", function(){
-			c.style("border", null);
-			var files = d3.event.dataTransfer.files;
-			console.log(files);
-			readFiles(files);
-			d3.event.preventDefault();
-			d3.event.stopPropagation();
+		//add listener for  upload button
+		d3.select("#btnUpload").on("click", function(){
+			d3.select("#btnSelectPicture").node().click();
+		});
+		d3.select("#btnSelectPicture").on("change", function(){
+			console.log(d3.event.currentTarget.files);
+			uploadFiles(d3.event.currentTarget.files);
 		});
 		
+		var c = document.getElementById("imageDiv");
+		c.ondragover = function(){
+			d3.select(c).style("border", "3px dashed black");
+			return false;
+		};
+		c.ondragend = function(e){
+			d3.select(c).style("border", null);
+			e.preventDefault();
+			e.stopPropagation();
+			return false;
+		};
+		c.ondrop =  function(e){
+			d3.select(c).style("border", null);
+			var files = e.dataTransfer.files;
+			console.log(files);
+			uploadFiles(files);
+			e.preventDefault();
+			e.stopPropagation();
+			return false;
+		};
 		
-		function readFiles(files){
-			var fd = new FormData();
-			for(var i=0; i< files.length; i++){
-				fd.append("file", files[i]);
+		
+		function uploadFiles(files){
+			if(files.length > 0){
+				var fd = new FormData();
+				for(var i=0; i< files.length; i++){
+					fd.append("file", files[i]);
+				}
+				var xhr = d3.xhr("/changeimage", 'application/json');
+				xhr.post(fd)
+					.on('progress', function(e){
+						console.log(e);
+					}).on('load', function( res){
+						console.log(res);
+						var imagepath = "../../images/" + JSON.parse(res.responseText).filename;
+						d3.select("#imageDiv img").attr("src", imagepath );
+						d3.select("#prototypeImage")
+							.style("background-image", "url(" + imagepath + ")");
+						setTimeout(resizeImageDiv, 200)
+					});
 			}
-			var xhr = d3.xhr("/changeimage", 'application/json');
-			xhr.post(fd)
-				.on('progress', function(e){
-					console.log(e);
-				}).on('load', function( res){
-					console.log(res);
-					var imagepath = "../../images/" + JSON.parse(res.responseText).filename;
-					d3.select("#imageDiv img").attr("src", imagepath );
-					d3.select("#prototypeImage")
-						.style("background-image", "url(" + imagepath + ")");
-					setTimeout(resizeImageDiv, 200)
-				});
 		}
 	}
 	

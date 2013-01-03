@@ -3,6 +3,14 @@
 	position: relative;
 }
 
+label[for=selectPicture]{
+	display: inline;
+}
+
+.hide{
+	display:none;
+}
+
 div.downloader{
 	width: 280px;
 	background: white;
