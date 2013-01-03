@@ -153,7 +153,7 @@ define('util/property',['util/eventDispatcher', 'util/events'], function(eventDi
  *
  */
 
-define("websockets/pvs/pvsiowebsocket", ['util/eventDispatcher', 'formal/pvs/numberentry/events', 'websockets/events', 'util/property'], 
+define('websockets/pvs/pvsiowebsocket',['util/eventDispatcher', 'formal/pvs/numberentry/events', 'websockets/events', 'util/property'], 
 		function(eventDispatcher, pvsEvents, wsEvents, property){
 	
 	/**
