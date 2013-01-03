@@ -24,6 +24,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 	var alphabet = 'a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z'.split(",");
 	var editor = ace.edit("editor");
 	editor.getSession().setMode('ace/mode/text');
+	editor.gotoLine(1);
 	
 	/**
 	 * utitlity function to pretty print pvsio output

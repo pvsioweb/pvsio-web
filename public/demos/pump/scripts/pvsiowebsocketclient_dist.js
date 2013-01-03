@@ -153,7 +153,7 @@ define('util/property',['util/eventDispatcher', 'util/events'], function(eventDi
  *
  */
 
-define('websockets/pvs/pvsiowebsocket',['util/eventDispatcher', 'formal/pvs/numberentry/events', 'websockets/events', 'util/property'], 
+define(['util/eventDispatcher', 'formal/pvs/numberentry/events', 'websockets/events', 'util/property'], 
 		function(eventDispatcher, pvsEvents, wsEvents, property){
 	
 	/**
@@ -195,6 +195,8 @@ define('websockets/pvs/pvsiowebsocket',['util/eventDispatcher', 'formal/pvs/numb
 					o.fire({type:wsEvents.ConnectionClosed, event:event});
 				};
 				//add on message received event
+				///TODO fix this block so that the type in the server token matches the event type emitted by
+				///the event listener.
 				ws.onmessage = function(event){
 					var token = JSON.parse(event.data);
 					switch(token.type){
@@ -204,12 +206,18 @@ define('websockets/pvs/pvsiowebsocket',['util/eventDispatcher', 'formal/pvs/numb
 					case "pvsoutput":
 						o.lastState(token.data);
 						o.value(parseState(token.data).display);
+						o.fire({type:pvsEvents.OutputUpdated, data:token.data});
 						//fire state changed as well
 						o.fire({type:pvsEvents.StateChanged, display:o.value()});
-						o.fire({type:pvsEvents.OutputUpdated, data:token.data});
 						break;
 					case "sourcecode":
 						o.fire({type:pvsEvents.SourceCodeReceived, data:token.data});
+						break;
+					case "processExited":
+						o.fire({type:pvsEvents.ProcessExited, data:token.data, code:token.code});
+						break;
+					case "sourceCodeSaved":
+						o.fire({type:pvsEvents.SourceCodeSaved, data:token.data});
 						break;
 					}
 				};
@@ -233,8 +241,8 @@ define('websockets/pvs/pvsiowebsocket',['util/eventDispatcher', 'formal/pvs/numb
 		 * all the pvs source code that the client can access
 		 */
 		o.startPVSProcess = function(sourceFile){
-			sourceFile = sourceFile || "pvscode/bbraun_space";
-			var token = {type:"startProcess", fileName:sourceFile};
+			sourceFile = sourceFile || "pvscode/alarisGP_oldFW";
+			var token = {type:"startProcess", data:{fileName:sourceFile}};
 			ws.send(JSON.stringify(token));
 			return o;
 		};
@@ -243,7 +251,7 @@ define('websockets/pvs/pvsiowebsocket',['util/eventDispatcher', 'formal/pvs/numb
 		 * @action the command to send
 		 */
 		o.sendGuiAction = function(action){
-			var token = {type:"sendCommand", command:action};
+			var token = {type:"sendCommand", data:{command:action}};
 			ws.send(JSON.stringify(token));
 			o.fire({type:pvsEvents.InputUpdated, data:action});
 			return o;
@@ -254,6 +262,17 @@ define('websockets/pvs/pvsiowebsocket',['util/eventDispatcher', 'formal/pvs/numb
 		 */
 		o.getSourceCode = function(){
 			var token = {type:"getSourceCode"};
+			ws.send(JSON.stringify(token));
+			return o;
+		};
+		
+		/**
+		 * saves the source code back to the server
+		 * @param data details containing fileName:String and fileContent:String of
+		 * what to save
+		 */
+		o.saveSourceCode = function(data){
+			var token = {type:"saveSourceCode", data:data};
 			ws.send(JSON.stringify(token));
 			return o;
 		};
