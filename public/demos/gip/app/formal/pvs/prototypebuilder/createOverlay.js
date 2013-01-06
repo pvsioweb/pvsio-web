@@ -9,7 +9,7 @@ define(['./widgetEditor', './widgetEvents',"./widgetType", "./widgetMaps", "util
 function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 
 	//define timer for sensing hold down actions on buttons
-	var btnTimer = Timer(250), numTicks = 0, timerTickFunction = null;
+	var btnTimer = Timer(250), timerTickFunction = null;
 	//add event listener for timer's tick 
 	btnTimer.addListener('TimerTicked', function(){
 		if(timerTickFunction){
@@ -17,13 +17,12 @@ function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 		}
 	});
 	function mouseup(e){
-		numTicks = btnTimer.getCurrentCount();
 		btnTimer.reset();
 	}
 	
 	return {
-		createDiv:function(parent){
-			return createDiv(parent);
+		createDiv:function(parent, mx, my){
+			return createDiv(parent, mx, my);
 		},
 		createInteractiveImageArea:function(mark, widget, ws){
 			return createInteractiveImageArea(mark, widget, ws);
@@ -43,8 +42,9 @@ function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 		return d3.event.pageY - offsetEl.node().y;
 	}
 	
-	function createDiv(parent){
-		var mx = xpos() , my = ypos();
+	function createDiv(parent, mx, my){
+		mx = mx || xpos();
+		my = my || ypos();
 		var moving = false, startMouseX, startMouseY, startTop, startLeft;
 		//if there are any active selections, remove them from the selection class
 		if(!d3.selectAll(".mark.selected").empty())
@@ -102,8 +102,6 @@ function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 	}
 	
 	function createInteractiveImageArea(mark, widget, ws){
-		if(widget.type() === widgetType.Button)
-
 		var coords = getCoords(mark);
 		var events, f;
 		d3.select("#prototypeMap")
@@ -112,19 +110,14 @@ function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 				.attr("shape", "rect")
 				.attr("coords", coords)
 				.attr("href", widget.type() === widgetType.Button ? "#" : null)//only make buttons clickable
-			.on('click', function(){
-				//using the map version of this so 
+			.on("mousedown", function(){
+				
 				f = widgetMaps[widget.id()]['functionText']();
 				events = widgetMaps[widget.id()]['events']();
-				if(numTicks === 0){
-					console.log(f);
-					if( events && events.indexOf('click') > -1)
-						ws.sendGuiAction("click_" + f + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");");
-				}
-			}).on("mousedown", function(){
-				f = widgetMaps[widget.id()]['functionText']();
-				events = widgetMaps[widget.id()]['events']();
-
+				//perform the click event if there is one
+				if( events && events.indexOf('click') > -1)
+					ws.sendGuiAction("click_" + f + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");");
+				
 				timerTickFunction = function(){
 					console.log("button pressed");
 					if(events && events.indexOf('press/release') > -1)
@@ -132,8 +125,16 @@ function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 				};
 				btnTimer.start();
 			}).on("mouseup", function(){
-				var f = widgetMaps[widget.id()]['functionText']();
-				if(numTicks > 0){
+				if(btnTimer.getCurrentCount() > 0){
+					var f = widgetMaps[widget.id()]['functionText']();
+					console.log("button released");	
+					if( events && events.indexOf('press/release') > -1)
+						ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g,',') + ");");
+				}
+				mouseup(d3.event);
+			}).on("mouseout", function(){
+				if(btnTimer.getCurrentCount() > 0){
+					var f = widgetMaps[widget.id()]['functionText']();
 					console.log("button released");	
 					if( events && events.indexOf('press/release') > -1)
 						ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g,',') + ");");

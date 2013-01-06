@@ -53,7 +53,7 @@ define(['util/eventDispatcher', 'formal/pvs/prototypebuilder/events', 'websocket
 					var token = JSON.parse(event.data);
 					switch(token.type){
 					case "processReady":
-						o.fire({type:pvsEvents.ServerReady, data: token.data});
+						o.fire({type:pvsEvents.ServerReady, data: token.data, socketId: token.socketId});
 						break;
 					case "pvsoutput":
 						o.lastState(token.data);
@@ -92,9 +92,9 @@ define(['util/eventDispatcher', 'formal/pvs/prototypebuilder/events', 'websocket
 		 * relative to the workspace directory. The workspace directory is a folder on the server that contains 
 		 * all the pvs source code that the client can access
 		 */
-		o.startPVSProcess = function(sourceFile){
+		o.startPVSProcess = function(sourceFile, workspace){
 			sourceFile = sourceFile || "pvscode/alarisGP_oldFW";
-			var token = {type:"startProcess", data:{fileName:sourceFile}};
+			var token = {type:"startProcess", data:{fileName:sourceFile, workspace:workspace}};
 			ws.send(JSON.stringify(token));
 			return o;
 		};

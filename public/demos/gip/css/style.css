@@ -23,6 +23,12 @@ div.downloader{
 	width: 280px;
 	height: 250px;
 }
+
+.dialog{
+	background: white;
+	padding: 20px;
+	width: 500px;
+}
 .overlay{
 	position: absolute;
 	top:0px;

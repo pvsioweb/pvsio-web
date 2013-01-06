@@ -37,6 +37,7 @@ module.exports = (function(){
 	 */
 	o.start = function(file, callback){
 		filename = o.workspaceDir() + file;
+		util.log(filename);
 		pvsio = spawn("pvsio", [filename], {uid:process.getuid(), gid:process.getgid()});
 		//add exit handler for process
 		pvsio.on('exit', function(code){

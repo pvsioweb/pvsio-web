@@ -24,6 +24,7 @@ define(['./baseWidget', './widgetType', 'util/property','./displayMappings'],
 		o.toJSON = function(){
 			return {
 				predefinedRegex:o.predefinedRegex(),
+				regex:o.regex(),
 				prefix:o.prefix(),
 				type:o.type()
 			};

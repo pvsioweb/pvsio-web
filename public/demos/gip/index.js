@@ -17,10 +17,13 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
          'ace/ace','pvsioweb/widgetMaps', 'util/shuffle', 
          'pvsioweb/widgetEditor','pvsioweb/widgetEvents',
          'pvsioweb/buttonWidget','pvsioweb/displayWidget',
-         'pvsioweb/displayMappings','d3/d3'], 
+         'pvsioweb/displayMappings',"pvsioweb/forms/newProject",
+         "pvsioweb/forms/events","pvsioweb/forms/openProject",'d3/d3'], 
 	function(pvsws, displayManager, overlayCreator, editOverlay, gip,
 			ace, widgetMaps, shuffle, widgetEditor, widgetEvents, 
-			buttonWidget, displayWidget, displayMappings){
+			buttonWidget, displayWidget, displayMappings,newProject, 
+			formEvents, openProjectForm){
+	var currentProject = {}, sourceCodeChanged = false;
 	var alphabet = 'a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z'.split(",");
 	var editor = ace.edit("editor");
 	editor.getSession().setMode('ace/mode/text');
@@ -39,8 +42,6 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 	var ws = pvsws()
 		.addListener('ConnectionOpened', function(e){
 			log("connection to pvsio server established");
-			this.startPVSProcess('pvscode/' + d3.select("#txtFileName").property("value"));
-			//gip.connect();
 		}).addListener("ConnectionClosed", function(e){
 			log("connection to pvsio server closed");
 		}).addListener("ServerReady", function(e){
@@ -55,9 +56,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		}).addListener("InputUpdated", function(e){
 			pvsio_commands_log(JSON.stringify(e.data));
 		}).addListener("SourceCodeReceived", function(e){
-			editor.setValue(e.data);
-			editor.clearSelection();
-			editor.gotoLine(1);
+			updateSourceCode(e.data);
 		}).addListener("SourceCodeSaved", function(e){
 			//need to restart the process with the correct filename
 			this.startPVSProcess(e.data.fileName);
@@ -74,10 +73,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		console.log(msg);
 		d3.select("#console").insert('p','p').html(msg);
 	}
-	
-	d3.select("#btnSave").on('click', function(){
-		ws.saveSourceCode({fileName:'pvscode/' + d3.select("#txtFileName").property('value'), fileContent:editor.getValue()});
-	});
+
 	/**
 	 * add event listener for getting sourcecode
 	 */
@@ -96,13 +92,13 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 				});
 		}
 	});
-	d3.select(window).on('resize', function(){
-		//adjust the mark position
-		d3.selectAll("div.mark").each(function(){
-			
-		});
-	});
 	
+	function saveSourceCode(){
+		if(sourceCodeChanged){
+			ws.saveSourceCode({filename:currentProject.spec, fileContent:editor.getValue()});
+			sourceCodeChanged = false;
+		}
+	}
 	/**
 	 * Add event listener for toggling the prototyping layer and the interaction layer
 	 */
@@ -118,8 +114,24 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		d3.select(this).classed('selected', true);
 	});
 	
-	d3.select("#saveWidgetDefinitions").on("click", function(){
+	d3.select("#saveProject").on("click", function(){
 		saveWidgetDefinition();
+		saveSourceCode();
+	});
+	
+	d3.select("#openProject").on("click", function(){
+		openProject();
+	});
+	
+	d3.select("#newProject").on("click", function(){
+		newProject.create().addListener(formEvents.FormCancelled, function(e){
+			console.log(e);
+			e.form.remove();
+		}).addListener(formEvents.FormSubmitted, function(e){
+			console.log(e);
+			e.form.remove();
+			saveProject(e.formData);
+		})
 	});
 	
 	//create mouse actions for draging areas on top of the image
@@ -135,12 +147,11 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		//add the area for the drawn rectangle into the map element
 		if(moved){
 			handleWidgetEdit(rect);
-			//add double click event listener to mark
+			//add double click event listener to mark and 
+			//set the font-size of the mark to be 80% of the height
 			rect.on('dblclick', function(){
 				handleWidgetEdit(d3.select(this));
-			});
-			//set the font-size of the mark to be 80% of the height
-			rect.style('font-size', (0.8 * parseFloat(rect.style('height'))) + "px");
+			}).style('font-size', (0.8 * parseFloat(rect.style('height'))) + "px");
 		}
 		else
 			rect.remove();
@@ -233,15 +244,6 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		var c = document.getElementById('specification_log');
 		c.innerHTML = msg + "<br>" + c.innerHTML;
 	}
-	/**
-	 * function called when the details of an overlay has been edited in a form
-	 */
-	function handleFormDetails(type, name, functionDetails, displayLabel, events){
-		widgetMaps[name] = {name:name, type:type, functionText: functionDetails, events:events};
-		if(type === "Display")
-			widgetMaps[name].displayLabel = displayLabel;
-		console.log("Type:%1$s, Name:%2$s, Function: %3$s", type, name, functionDetails);
-	}
 	
 	preparePageForImageUpload();
 	
@@ -289,13 +291,69 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 						console.log(e);
 					}).on('load', function( res){
 						console.log(res);
-						var imagepath = "../../images/" + JSON.parse(res.responseText).filename;
-						d3.select("#imageDiv img").attr("src", imagepath );
-						d3.select("#prototypeImage")
-							.style("background-image", "url(" + imagepath + ")");
-						setTimeout(resizeImageDiv, 200)
+						var imagepath = "../../uploads/" + JSON.parse(res.responseText).filename;
+						updateImage(imagepath);
 					});
 			}
+		}
+	}
+	
+	function updateImage(imagepath){
+		d3.select("#imageDiv img").attr("src", imagepath );
+		d3.select("#prototypeImage")
+			.style("background-image", "url(" + imagepath + ")");
+		setTimeout(resizeImageDiv, 200)
+	}
+	
+	function updateSourceCode(src){
+		sourceCodeChanged = false;
+		editor.setValue(src);
+		editor.clearSelection();
+		editor.gotoLine(1);
+		editor.on("change", function(e){
+			sourceCodeChanged = true;
+		});
+		editor.gotoLine(1);
+	}
+	
+	function saveProject(fd){
+		fd = fd || new FormData();
+		fd.widgetMaps = widgetsToJSON(widgetMaps);
+		var regionDefs = [];
+		d3.selectAll("#prototypeMap area").each(function(){
+			var region = {}, a = d3.select(this);
+			region.class = a.attr("class");
+			region.shape = a.attr("shape");
+			region.coords = a.attr("coords");
+			region.href = a.attr("href");
+			regionDefs.push(region);
+		});
+		
+		fd.regionDefs = regionDefs;
+		//save to the user's drive
+		var safeStr = JSON.stringify(fd, null, " ");
+		console.log(safeStr);
+		fd.append("filename", randomFileName() + ".json");
+		fd.append("filecontent", safeStr);
+		
+		d3.xhr("/saveProject").post(fd).on("load", function(res){
+			//update the picture adn the pvs source file and trigger a restart of the pvsioprocess
+			res = JSON.parse(res.responseText);
+			console.log(res);
+			if(!res.error) {
+				ws.startPVSProcess(res.sourceFile.split(".pvs")[0], res.projectPath);
+				var imagePath = "../../projects/" + res.projectName + res.imagePath;
+				updateImage(imagePath);
+			}
+
+		});
+		
+		function widgetsToJSON(map){
+			var res = {}, k;
+			for(k in map){
+				res[k] = map[k].toJSON();
+			}
+			return res;
 		}
 	}
 	
@@ -317,25 +375,12 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		var safeStr = JSON.stringify(safe, null, " ");
 		console.log(safeStr);
 		var fd = new FormData();
-		fd.append("filename", randomFileName() + ".json");
+		fd.append("filename", currentProject.projectPath  + "/widgetDefinition.json");
 		fd.append("filecontent", safeStr);
 		
 		d3.xhr("/saveWidgetDefinition").post(fd).on("load", function(res){
-			//write the download link to the client
-			var diag = d3.select("body").append("div").attr("class", "dialog overlay").
-				append("div").attr("class", "downloader center shadow");
-			
-			diag.append("textarea").text(safeStr);
-			diag.append("br");
-			diag.append("hr");
-			diag.append("a").attr("href", "/widgetDefinitions/" + res.responseText)
-				.attr("download", "widget-definition.json")
-					.attr("class", "btn left").html("Save to Disk").on("click", function(){
-						d3.select("div.dialog.overlay").transition().delay(1000).remove();
-					});
-			diag.append("button").attr("class", "btn btn-danger right").html("Close Window").on("click", function(){
-				d3.select("div.dialog.overlay").remove();
-			})
+			res = JSON.parse(res.responseText);
+			console.log(res);
 		});
 		
 		function widgetsToJSON(map){
@@ -349,12 +394,70 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		
 	}
 	
-	function openWidgetDefinition(){
+	function openProject(){
 		
-		
-		function widgetFromJSON(json){
+		d3.xhr("/openProject").post(function(err, res){
+			if(err)
+				console.log(err);
+			else{
+				var selectedData;
+				res = JSON.parse(res.responseText);
+				console.log(res);
+				res.unshift({name:"--None--"});
+				openProjectForm.create(res, function(d){
+					return d.name;
+				}).addListener(formEvents.FormSubmitted, function(e){
+					var project = "../../projects/" + currentProject.name + "/";
+					console.log(e);
+					console.log(currentProject);
+					//only update the image and pvsfile if a real project was selected
+					if(currentProject.name !== "--None--"){
+						updateImage(project + currentProject.image);
+						ws.startPVSProcess(currentProject.spec.split(".")[0], currentProject.projectPath);
+						loadWidgetDefinitions(currentProject.widgetDefinition);
+					}
+					
+					e.form.remove();
+				}).addListener(formEvents.FormCancelled, function(e){
+					e.form.remove();
+				}).addListener(formEvents.FormDataChanged, function(e){
+					console.log(e);
+					currentProject = e.data;
+				});
+			}
+		});
+	}
+	
+	function loadWidgetDefinitions(defs){
+		console.log(defs);
+		var key, w, widget;
+		for(key in defs.widgetMaps){
+			w = defs.widgetMaps[key];
+			widget = w.type === "Button" ? buttonWidget() : displayWidget();
+			widget.id(key);
+			for(property in w)
+				widget[property](w[property]);
 			
+			widgetMaps[key] = widget;
 		}
+		//create div
+		defs.regionDefs.forEach(function(d){
+			widget = widgetMaps[d.class];
+			var coords = d.coords.split(",");
+			var mark  = overlayCreator.createDiv(image, coords[0], coords[1])
+				.style("height", coords[3] - coords[1]).style("width", coords[2] - coords[0]);
+			overlayCreator.createInteractiveImageArea(mark, widget, ws);
+			//set the font-size of the mark to be 80% of the height and the id of the mark
+			mark.on("dblclick", function(){
+				handleWidgetEdit(d3.select(this));
+			}).style('font-size', (0.8 * parseFloat(mark.style('height'))) + "px")
+			.attr("id", widget.id());
+			
+			if(widget.type() === "Display") {
+				mark.classed("display",  true);
+				displayMappings.active[widget.id()] = {regex:widget.regex(), uiElement:widget.id()};
+			}
+		});
 	}
 	
 	function randomFileName(){
