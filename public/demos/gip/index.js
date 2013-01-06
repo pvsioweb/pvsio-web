@@ -178,7 +178,9 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		drawing = moved = false;
 	}).on('mousemove', function(){
 		if(drawing){
-			var pad = 10, x = d3.event.pageX - img.node().x, y = d3.event.pageY - img.node().y;
+			var bound = this.getBoundingClientRect();
+			var pad = 10, x = d3.event.clientX - bound.left - this.clientLeft + this.scrollLeft,
+			y = d3.event.clientY - bound.top - this.clientTop - this.scrollTop;
 			moved = true;
 			d3.event.preventDefault();
 			var starty = parseFloat(rect.attr("starty")),

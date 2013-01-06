@@ -68,7 +68,7 @@ define(['util/eventDispatcher', "./events", "util/property","d3/d3"],
 				f.fire(event);
 			});
 			
-			buttons.append("button").html("Submit").attr("class", "btn btn-success right").on("click", function(){
+			buttons.append("button").html("OK").attr("class", "btn btn-success right").on("click", function(){
 				event = {type:events.FormSubmitted, formId:form.id, formData:getFormData(form.id), form:d3.select("#" + form.id)};
 				f.fire(event);
 			});

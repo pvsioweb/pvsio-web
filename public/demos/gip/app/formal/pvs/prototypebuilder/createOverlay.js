@@ -33,34 +33,40 @@ function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 	};
 	
 	function xpos(){
-		var offsetEl = d3.select("#imageDiv img");
-		return d3.event.pageX - offsetEl.node().x;
+		var bound = this.getBoundingClientRect();
+		return d3.event.clientX - bound.left - this.clientLeft + this.scrollLeft;
 	}
 	
 	function ypos(){
-		var offsetEl = d3.select("#imageDiv img");
-		return d3.event.pageY - offsetEl.node().y;
+		var bound = this.getBoundingClientRect();
+		return d3.event.clientY - bound.top - this.clientTop - this.scrollTop;
 	}
 	
 	function createDiv(parent, mx, my){
-		mx = mx || xpos();
-		my = my || ypos();
 		var moving = false, startMouseX, startMouseY, startTop, startLeft;
 		//if there are any active selections, remove them from the selection class
 		if(!d3.selectAll(".mark.selected").empty())
 			d3.selectAll(".mark.selected").classed("selected", false);
 		//create and return the new mark. marks are essentially divs
 		return parent.append("div")
-			.style("left", mx + "px")
-			.style("top", my + "px")
-			.attr("startx", mx)
-			.attr("starty",  my)
+			.style("left", function(){
+				return mx !== undefined ? mx : xpos.call(this);
+			})
+			.style("top", function(){
+				return my !== undefined ? my : ypos.call(this);
+			})
+			.attr("startx", function(){
+				return mx !== undefined ? mx : xpos.call(this);
+			})
+			.attr("starty",  function(){
+				return my !== undefined ? my : ypos.call(this);
+			})
 			.attr("class", "mark selected")
 			.on("mousedown", function(){
 				d3.event.preventDefault();
 				d3.event.stopPropagation();
-				startMouseX = d3.event.pageX;
-				startMouseY = d3.event.pageY;
+				startMouseX = d3.event.clientX;
+				startMouseY = d3.event.clientY;
 				startTop = parseFloat(d3.select(this).style("top"));
 				startLeft = parseFloat(d3.select(this).style("left"));
 				//mark this element as selected
@@ -80,9 +86,9 @@ function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 					d3.event.preventDefault();
 					d3.event.stopPropagation();
 					mark.style("top", function(){
-						return (startTop + d3.event.pageY - startMouseY) + 'px';
+						return (startTop + d3.event.clientY - startMouseY) + 'px';
 					}).style("left", function(){
-						return (startLeft + d3.event.pageX - startMouseX) + 'px';
+						return (startLeft + d3.event.clientX - startMouseX) + 'px';
 					});
 					var coords = getCoords(mark);
 					//update coords for the area

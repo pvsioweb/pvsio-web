@@ -41,7 +41,7 @@ define(['./displayMappings','./widgetMaps','util/Timer', 'd3/d3'],
 			if(type !== "Button")
 				displayLabel = displayMappings[id].label;
 		}
-		var x = d3.event.pageX, y = d3.event.pageY;
+		var x = d3.event.clientX, y = d3.event.clientY;
 		var form = d3.select("body").append("div")
 			.attr("class", "detailsForm shadow")
 			.style("top", y + "px").style("left", x + "px");
