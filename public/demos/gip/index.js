@@ -136,10 +136,12 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 	});
 	
 	d3.select("#btnTypeCheck").on("click", function(){
+		var btn = d3.select(this).html("Typechecking ...").attr("disabled", true);
 		if(currentProject && currentProject.projectPath){
 			var fd = new FormData(), file = currentProject.specFullPath;
 			fd.append("file", file);
 			d3.xhr("/typecheck").post(fd, function(err, res){
+				btn.html("Typecheck").attr("disabled", null);
 				if(err){
 					console.log(err);
 				}else{
@@ -337,6 +339,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 			res = JSON.parse(res.responseText);
 			console.log(res);
 			if(!res.error) {
+				currentProject = res;
 				d3.select("div#body").style("display", null);
 				ws.startPVSProcess(res.spec.split(".pvs")[0], res.projectPath);
 				var imagePath = "../../projects/" + res.name + "/" + res.image;

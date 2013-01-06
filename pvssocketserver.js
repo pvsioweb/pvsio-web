@@ -211,18 +211,21 @@ var pvsioProcessMap = {};//each client should get his own process
 			var stat = fs.statSync(projectDir + d);
 			if(stat.isDirectory()){
 				fs.readdirSync(projectDir + d).forEach(function(f){
-					var ext = f.split(".")[1].toLowerCase();
-					if(imageExts.indexOf(ext) > -1){
-						p.image = f;
-						p.imageFullPath = projectDir + d + "/" + f;
-					}else if(specExts.indexOf(ext) > -1){
-						p.spec = f;
-						p.specFullPath = projectDir + d + "/" + f;
-					}
-					else if(f === "widgetDefinition.json") {
-						p.widgetDefinition = JSON.parse(fs.readFileSync(projectDir + d + "/" + f, "utf8"));
-					}else{
-						p.other.push(f);
+					stat = fs.statSync(projectDir + d + "/" + f);
+					if(stat.isFile()){
+						var ext = f.indexOf(".") > -1 ? f.split(".")[1].toLowerCase() : "";
+						if(imageExts.indexOf(ext) > -1){
+							p.image = f;
+							p.imageFullPath = projectDir + d + "/" + f;
+						}else if(specExts.indexOf(ext) > -1){
+							p.spec = f;
+							p.specFullPath = projectDir + d + "/" + f;
+						}
+						else if(f === "widgetDefinition.json") {
+							p.widgetDefinition = JSON.parse(fs.readFileSync(projectDir + d + "/" + f, "utf8"));
+						}else{
+							p.other.push(f);
+						}
 					}
 				});
 				return p;
