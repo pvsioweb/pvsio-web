@@ -28,6 +28,7 @@ var pvsio = require("./pvsprocess"),
 var fs = require("fs");
 var express = require('express');
 var webserver = express();
+var procWrapper = require("./processwrapper");
 var uploadDir = "/public/uploads";
 var host = args.host, port = args.port, workspace = args.workspace;
 var pvsioProcessMap = {};//each client should get his own process
@@ -132,6 +133,15 @@ var pvsioProcessMap = {};//each client should get his own process
 		});
 	});
 	
+	webserver.all("/typecheck", function(req, res){
+		var file = req.body.file;
+		procWrapper().exec({command:"proveit "  + file, 
+			callBack:function(err, stdout, stderr){
+				res.send({err:err, stdout:stdout, stderr:stderr});
+			}
+		});
+	});
+	
 	webserver.all("/saveProject", function(req, res){
 		var pvsFileName = req.files.pvsSpec.name, pvsSpecFullPath = req.files.pvsSpec.path;
 		var projectName = req.body.projectName;
@@ -159,17 +169,19 @@ var pvsioProcessMap = {};//each client should get his own process
 										res.send({error:"There was a problem reading content of file " + pvsSpecFullPath,
 											path:pvsSpecFullPath, err:err});
 									}else{
-										fs.writeFile(projectPath + "/spec.pvs", data, function(err){
+										fs.writeFile(projectPath + "/" + pvsFileName, data, function(err){
 											if(err){
 												util.log(err);
 												res.send({error:"Problem saving pvs spec", err:err});
 											}else{
 												var obj = {};
-												obj.imagePath = "/image." + prototypeImage.split(".")[1];
-												obj.projectName = projectName; 
+												obj.image = "image." + prototypeImage.split(".")[1];
 												obj.projectPath = projectPath;
+												obj.imageFullPath = obj.projectPath + "/" + obj.image;
+												obj.name = projectName; 
 												obj.sourceCode = data;
-												obj.sourceFile = "spec.pvs";
+												obj.spec = pvsFileName;
+												obj.specFullPath = obj.projectPath + "/" + obj.spec;
 												util.log("Source code has been saved.");
 												res.send(obj);
 											}
@@ -202,8 +214,10 @@ var pvsioProcessMap = {};//each client should get his own process
 					var ext = f.split(".")[1].toLowerCase();
 					if(imageExts.indexOf(ext) > -1){
 						p.image = f;
+						p.imageFullPath = projectDir + d + "/" + f;
 					}else if(specExts.indexOf(ext) > -1){
 						p.spec = f;
+						p.specFullPath = projectDir + d + "/" + f;
 					}
 					else if(f === "widgetDefinition.json") {
 						p.widgetDefinition = JSON.parse(fs.readFileSync(projectDir + d + "/" + f, "utf8"));

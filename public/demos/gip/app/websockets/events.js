@@ -6,7 +6,7 @@
  */
 define({
 	ConnectionOpened:"ConnectionOpened",
-	ConnnectionClosed:"ConnectionClosed",
+	ConnectionClosed:"ConnectionClosed",
 	ConnectionTimedOut:"ConnectionTimedOut",
 	UserAuthenticated:"UserAuthenticated",
 	NoConnection:"NoConnection"

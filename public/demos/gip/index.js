@@ -21,14 +21,15 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
          "pvsioweb/forms/events","pvsioweb/forms/openProject",'d3/d3'], 
 	function(pvsws, displayManager, overlayCreator, editOverlay, gip,
 			ace, widgetMaps, shuffle, widgetEditor, widgetEvents, 
-			buttonWidget, displayWidget, displayMappings,newProject, 
+			buttonWidget, displayWidget, displayMappings,newProjectForm, 
 			formEvents, openProjectForm){
 	var currentProject = {}, sourceCodeChanged = false;
-	var alphabet = 'a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z'.split(",");
 	var editor = ace.edit("editor");
 	editor.getSession().setMode('ace/mode/text');
 	editor.gotoLine(1);
 	
+	//hide the main body
+	d3.select("div#body").style("display", "none");
 	/**
 	 * utitlity function to pretty print pvsio output
 	 */
@@ -124,14 +125,30 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 	});
 	
 	d3.select("#newProject").on("click", function(){
-		newProject.create().addListener(formEvents.FormCancelled, function(e){
+		newProjectForm.create().addListener(formEvents.FormCancelled, function(e){
 			console.log(e);
 			e.form.remove();
 		}).addListener(formEvents.FormSubmitted, function(e){
 			console.log(e);
 			e.form.remove();
-			saveProject(e.formData);
+			newProject(e.formData);
 		})
+	});
+	
+	d3.select("#btnTypeCheck").on("click", function(){
+		if(currentProject && currentProject.projectPath){
+			var fd = new FormData(), file = currentProject.specFullPath;
+			fd.append("file", file);
+			d3.xhr("/typecheck").post(fd, function(err, res){
+				if(err){
+					console.log(err);
+				}else{
+					res = JSON.parse(res.responseText);
+					console.log(res);
+					alert(res.stdout);
+				}
+			});
+		}
 	});
 	
 	//create mouse actions for draging areas on top of the image
@@ -167,17 +184,15 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 				h = Math.abs(starty - y),
 				w = Math.abs(startx - x);
 			//if the current y is less than the start y, then top style should be height - current top style
-			if(y < starty ){
+			if(y < starty )
 				rect.style('top', (starty - h) + "px");
-			}else {
+			else 
 				rect.style('top', starty + "px");
-			}
 			//if the current x is less than the startx then left style should be width - current left style
-			if(x < startx){
+			if(x < startx)
 				rect.style("left", (startx - w) + "px");
-			}else{
+			else
 				rect.style("left", startx + "px");
-			}
 			//update width and height of marker
 			rect.style("height", (h - pad) + "px").style("width", (w - pad) + "px");
 		}
@@ -253,7 +268,6 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 			d3.select("#btnSelectPicture").node().click();
 		});
 		d3.select("#btnSelectPicture").on("change", function(){
-			console.log(d3.event.currentTarget.files);
 			uploadFiles(d3.event.currentTarget.files);
 		});
 		
@@ -316,64 +330,27 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		editor.gotoLine(1);
 	}
 	
-	function saveProject(fd){
+	function newProject(fd){
 		fd = fd || new FormData();
-		fd.widgetMaps = widgetsToJSON(widgetMaps);
-		var regionDefs = [];
-		d3.selectAll("#prototypeMap area").each(function(){
-			var region = {}, a = d3.select(this);
-			region.class = a.attr("class");
-			region.shape = a.attr("shape");
-			region.coords = a.attr("coords");
-			region.href = a.attr("href");
-			regionDefs.push(region);
-		});
-		
-		fd.regionDefs = regionDefs;
-		//save to the user's drive
-		var safeStr = JSON.stringify(fd, null, " ");
-		console.log(safeStr);
-		fd.append("filename", randomFileName() + ".json");
-		fd.append("filecontent", safeStr);
-		
 		d3.xhr("/saveProject").post(fd).on("load", function(res){
 			//update the picture adn the pvs source file and trigger a restart of the pvsioprocess
 			res = JSON.parse(res.responseText);
 			console.log(res);
 			if(!res.error) {
-				ws.startPVSProcess(res.sourceFile.split(".pvs")[0], res.projectPath);
-				var imagePath = "../../projects/" + res.projectName + res.imagePath;
+				d3.select("div#body").style("display", null);
+				ws.startPVSProcess(res.spec.split(".pvs")[0], res.projectPath);
+				var imagePath = "../../projects/" + res.name + "/" + res.image;
 				updateImage(imagePath);
 			}
-
 		});
-		
-		function widgetsToJSON(map){
-			var res = {}, k;
-			for(k in map){
-				res[k] = map[k].toJSON();
-			}
-			return res;
-		}
 	}
 	
 	function saveWidgetDefinition(){
 		var safe = {};
 		safe.widgetMaps = widgetsToJSON(widgetMaps);
-		var regionDefs = [];
-		d3.selectAll("#prototypeMap area").each(function(){
-			var region = {}, a = d3.select(this);
-			region.class = a.attr("class");
-			region.shape = a.attr("shape");
-			region.coords = a.attr("coords");
-			region.href = a.attr("href");
-			regionDefs.push(region);
-		});
-		
-		safe.regionDefs = regionDefs;
+		safe.regionDefs = getRegionDefs();
 		//save to the user's drive
 		var safeStr = JSON.stringify(safe, null, " ");
-		console.log(safeStr);
 		var fd = new FormData();
 		fd.append("filename", currentProject.projectPath  + "/widgetDefinition.json");
 		fd.append("filecontent", safeStr);
@@ -390,12 +367,22 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 			}
 			return res;
 		}
-		
-		
+	}
+	
+	function getRegionDefs(){
+		var regionDefs = [];
+		d3.selectAll("#prototypeMap area").each(function(){
+			var region = {}, a = d3.select(this);
+			region.class = a.attr("class");
+			region.shape = a.attr("shape");
+			region.coords = a.attr("coords");
+			region.href = a.attr("href");
+			regionDefs.push(region);
+		});
+		return regionDefs;
 	}
 	
 	function openProject(){
-		
 		d3.xhr("/openProject").post(function(err, res){
 			if(err)
 				console.log(err);
@@ -412,6 +399,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 					console.log(currentProject);
 					//only update the image and pvsfile if a real project was selected
 					if(currentProject.name !== "--None--"){
+						d3.select("div#body").style("display", null);
 						updateImage(project + currentProject.image);
 						ws.startPVSProcess(currentProject.spec.split(".")[0], currentProject.projectPath);
 						loadWidgetDefinitions(currentProject.widgetDefinition);
@@ -459,9 +447,4 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 			}
 		});
 	}
-	
-	function randomFileName(){
-		return shuffle(alphabet).slice(-5).join("") + new Date().getTime();
-	}
-	
 });

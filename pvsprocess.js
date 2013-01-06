@@ -8,9 +8,9 @@
 var childprocess = require("child_process"),
 	util = require("util"),
 	fs = require("fs");
-
+var procWrapper = require("./processwrapper");
 var spawn = childprocess.spawn;
-
+var pvs = procWrapper();
 module.exports = (function(){
 	var o = {}, output = [], readyString = "<PVSio>", wordsIgnored = ["","==>",readyString],
 	restarting = false;
@@ -37,17 +37,13 @@ module.exports = (function(){
 	 */
 	o.start = function(file, callback){
 		filename = o.workspaceDir() + file;
-		util.log(filename);
-		pvsio = spawn("pvsio", [filename], {uid:process.getuid(), gid:process.getgid()});
-		//add exit handler for process
-		pvsio.on('exit', function(code){
-			processReady = false;
-			var msg = "pvsio process exited with code " + code;
-			util.log(msg);
-			callback({type:"processExited", data:msg, code:code});
-		});
-		pvsio.stdout.setEncoding('utf8');
-		pvsio.stdout.on("data", function(data){
+		pvs.start({processName:"pvsio", args:[filename],
+			onDataReceived:onDataReceived,
+			onProcessExited:onProcessExited});
+		
+		util.log("pvsio process started with file " + filename);
+
+		function onDataReceived(data){
 			var lines = data.split("\n").map(function(d){
 				return d.trim();
 			});
@@ -69,19 +65,16 @@ module.exports = (function(){
 				output = [];
 			}else{
 				//maybe process has stalled
-				util.log("lastline is " + lastLine);
 				callback({type:"processStalled",data:output});
 			}
-			
-		});
-		//listen for stderror stream
-		pvsio.stderr.setEncoding('utf8');
-		pvsio.stderr.on("data", function(data){
-			util.log(data);
-		});
+		}
 		
-		util.log("pvsio process started with file " + filename);
-
+		function onProcessExited(code){
+			processReady = false;
+			var msg = "pvsio process exited with code " + code;
+			util.log(msg);
+			callback({type:"processExited", data:msg, code:code});
+		}
 		return o;
 	};
 	
@@ -93,17 +86,7 @@ module.exports = (function(){
 	 */
 	o.sendCommand = function (command){
 		util.log("sending command " + command + " to process");
-		//try to write to the stdin and wait for the buffer to be empty incase it is full
-		//should be unlikely for the pvs process
-		if(!pvsio.stdin.write(command)){
-			util.log("pvsio buffer is full -- waiting for drain event to continue.");
-			pvsio.stdin.on("drain", function(){
-				util.log(util.format("stdin for pvsio is now empty. Sending command %s", command));
-				pvsio.stdin.write(command);
-			});
-		}
-		
-		util.log("command sent successfully -- " + command);
+		pvs.sendCommand(command);
 		return o;
 	};
 	
@@ -168,11 +151,7 @@ module.exports = (function(){
 	 */
 	o.close = function(signal){
 		signal = signal || 'SIGTERM';
-		pvsio.kill(signal);
-		pvsio.stdout.destroy();
-		pvsio.stdin.destroy();
-		pvsio.stderr.destroy();
-		pvsio = undefined;
+		pvs.kill(signal);
 		return o;
 	};
 	
