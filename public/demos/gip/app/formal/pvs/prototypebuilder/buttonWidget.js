@@ -37,7 +37,7 @@ define(['./baseWidget', 'util/property','./widgetType'], function(baseWidget, pr
 		o.getRenderData = function(){
 			var res = [];
 			res.push({label:"Widget Type", element:"select", value:o.type(), data:widgetTypes, name:"type"});
-			res.push({label:"Function",element:"input", inputType:"text", value:o.functionText(), name:"functionText"});
+			res.push({label:"Function",element:"input", inputType:"text", value:o.functionText(), name:"functionText",other:['required']});
 			res.push({label:"Bind", element:'input', inputType:"checkbox", data:defaultEvents, value:o.events(), name:"events"});
 			res.push({label:"",element:"textarea", inputType:"text", value:o.boundFunction(), name:"boundFunction", other:['readonly']});
 

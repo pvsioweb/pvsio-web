@@ -64,7 +64,6 @@ area{
 	position: relative;
 	border: 1px solid black;
 	width: 1045px;
-	height: 200px§
 }
 #controlsContainer{
 	position: relative;
@@ -169,6 +168,11 @@ img {
 input[type=text]{
 	width: 250px;
 }
+
+intput:invalid, select:invalid{
+	border: 1px solid red;
+}
+
 
 .detailsForm {
 	position: absolute;

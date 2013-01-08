@@ -17,8 +17,8 @@ define(['util/eventDispatcher', "./events", "util/property","d3/d3"],
 			if(!o.empty())
 				o.html("");
 			
-			o = d3.select("body").append("div").attr("class", "overlay").attr("id", form.id).append("div")
-				.attr("class", "center dialog shadow form-horizontal");
+			o = d3.select("body").append("div").attr("class", "overlay").attr("id", form.id).append("form")
+				.attr("class", "center dialog shadow form-horizontal").attr("onsubmit", "return false");
 			if(form.legend)
 				o.append("legend").html(form.legend.value).classed(form.legend.classes, true);
 			//add input elements
@@ -63,14 +63,18 @@ define(['util/eventDispatcher', "./events", "util/property","d3/d3"],
 			//add submit and cancle button
 			var buttons = o.append("div").attr("class", "control-group")
 				.append("div").attr("class", "controls");
-			buttons.append("button").html("Cancel").attr("class", "btn btn-danger left").on("click", function(){
+			buttons.append("button").attr("type","button").html("Cancel").attr("class", "btn btn-danger left").on("click", function(){
 				event = {type:events.FormCancelled, formId:form.id, form:d3.select("#" + form.id)};
 				f.fire(event);
 			});
 			
-			buttons.append("button").html("OK").attr("class", "btn btn-success right").on("click", function(){
-				event = {type:events.FormSubmitted, formId:form.id, formData:getFormData(form.id), form:d3.select("#" + form.id)};
-				f.fire(event);
+			buttons.append("button").attr("type","submit").html("OK").attr("class", "btn btn-success right").on("click", function(){
+				//check all the elements are valid before emmitting event
+				if(validate(o)){
+					d3.select(this).attr("type", "button");
+					event = {type:events.FormSubmitted, formId:form.id, formData:getFormData(form.id), form:d3.select("#" + form.id)};
+					f.fire(event);
+				}			
 			});
 			
 			return f;
@@ -85,6 +89,14 @@ define(['util/eventDispatcher', "./events", "util/property","d3/d3"],
 				}else{
 					res.append(el.attr("id"), (el.property("value") || el.text()));
 				}
+			});
+			return res;
+		}
+		
+		function validate(o){
+			var res = true;
+			o.selectAll("select,input,textarea").each(function(d){
+				res = res && this.checkValidity();
 			});
 			return res;
 		}

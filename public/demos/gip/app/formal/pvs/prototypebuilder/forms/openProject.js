@@ -13,7 +13,7 @@ define(["./formBuilder"], function(formBuilder){
 			var model = {
 					legend:{value:"Open Project", classes:"header"},
 					data:[{label:"Select Project", name:"projectName", element:"select", 
-						options:options, labelFunction:labelFunc}]
+						options:options, labelFunction:labelFunc, other:['required']}]
 					};
 			return formBuilder.create(model);
 		}

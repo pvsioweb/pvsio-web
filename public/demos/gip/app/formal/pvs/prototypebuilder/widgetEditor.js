@@ -74,40 +74,45 @@ define(['./displayMappings','util/Timer','util/eventDispatcher', "./widgetEvents
 					controls = form.append("div").attr("class", "buttons control-group")
 						.append("div").attr("class", "controls");
 					//delete handler for widget
-					controls.append("button").html("Delete Widget").attr("class", "btn btn-danger left")
+					controls.append("button").attr("type", "button").html("Delete Widget").attr("class", "btn btn-danger left")
 						.on("click", function(){
 							var event = {type:widgetEvents.WidgetDeleted, mark:mark, widget:widget,
 									formContainer:d3.select("div.detailsForm")};
 							o.fire(event);
 						});
 					//close window handler
-					controls.append("button").html("Close Window").attr("class", "btn")
+					controls.append("button").attr("type", "button").html("Close Window").attr("class", "btn")
 						.style("margin", "0 10px 0 10px")
 						.on("click", function(){
 							d3.select("div.detailsForm").remove();
 						});
 					//save handler for widget
-					controls.append("button").attr("class", "btn btn-success right").html("Save Widget")
+					controls.append("button").attr("type","submit").attr("class", "btn btn-success right").html("Save Widget")
 						.on("click", function(){
-							var res = data.map(function(d){
-								var el = d3.select("#" + d.name), value = el.empty() ? null : el.property("value")|| el.text();
-								value = value ? value.trim() : value;
-								///for checkboxes add list of items selected
-								if(d.data && d.inputType === 'checkbox'){
-									value = [];
-									d3.selectAll("input[type=checkbox][name=events]").each(function(d,i){
-										if(this.checked){
-											value.push(this.value);
-										}
-									});
-								}
-								return {key:d.name, value:value};
-							});
-							widget = dataToWidget(res, widget);
-							widgetMaps[widget.id()] = widget;
-							var event = {type:widgetEvents.WidgetSaved, mark:mark, 
-									formContainer:d3.select("div.detailsForm"), formData:res, widget:widget};
-							o.fire(event);
+							if(validate(form)){
+								d3.select(this).attr("type", "button");
+								
+								var res = data.map(function(d){
+									var el = d3.select("#" + d.name), value = el.empty() ? null : el.property("value")|| el.text();
+									value = value ? value.trim() : value;
+									///for checkboxes add list of items selected
+									if(d.data && d.inputType === 'checkbox'){
+										value = [];
+										d3.selectAll("input[type=checkbox][name=events]").each(function(d,i){
+											if(this.checked){
+												value.push(this.value);
+											}
+										});
+									}
+									return {key:d.name, value:value};
+								});
+								widget = dataToWidget(res, widget);
+								widgetMaps[widget.id()] = widget;
+								var event = {type:widgetEvents.WidgetSaved, mark:mark, 
+										formContainer:d3.select("div.detailsForm"), formData:res, widget:widget};
+								o.fire(event);
+							}
+							
 						});
 					
 					//if the type of widget changes update the widget and recreate the form
@@ -139,6 +144,14 @@ define(['./displayMappings','util/Timer','util/eventDispatcher', "./widgetEvents
 					}
 				}
 				return o;
+			}
+			
+			function validate(o){
+				var res = true;
+				o.selectAll("select,input,textarea").each(function(d){
+					res = res && this.checkValidity();
+				});
+				return res;
 			}
 			
 			function updateRegex(){
@@ -188,7 +201,7 @@ define(['./displayMappings','util/Timer','util/eventDispatcher', "./widgetEvents
 				d3.select("div.detailsForm.shadow").remove();
 				var form = d3.select("body").append("div").attr("class", "detailsForm shadow")
 					.style("top", y).style("left", x)
-						.append("div").attr("class", "form-horizontal");
+						.append("form").attr("class", "form-horizontal");
 				form.append("legend").html("Edit User Interface Widget");
 				return form;
 			}
