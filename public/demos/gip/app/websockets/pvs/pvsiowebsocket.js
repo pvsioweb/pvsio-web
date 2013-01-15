@@ -24,7 +24,7 @@ define(['util/eventDispatcher', 'formal/pvs/prototypebuilder/events', 'websocket
 	}
 	
 	return function() {
-		var o = eventDispatcher({}), ws, url = "ws://localhost:8080";
+		var o = eventDispatcher({}), ws, url = "ws://localhost:8081";
 		o.serverUrl = property.call(o, url);
 		
 		o.lastState = property.call(o, "init(0)");
@@ -71,6 +71,12 @@ define(['util/eventDispatcher', 'formal/pvs/prototypebuilder/events', 'websocket
 					case "sourceCodeSaved":
 						o.fire({type:pvsEvents.SourceCodeSaved, data:token.data});
 						break;
+					case "projectCreated":
+						o.fire({type:pvsEvents.ProjectCreated, data:token.data});
+						break;
+					case "tempFileSaved":
+						o.fire({type:pvsEvents.TempFileSaved, data:token.data});
+						break;
 					}
 				};
 			}
@@ -92,9 +98,9 @@ define(['util/eventDispatcher', 'formal/pvs/prototypebuilder/events', 'websocket
 		 * relative to the workspace directory. The workspace directory is a folder on the server that contains 
 		 * all the pvs source code that the client can access
 		 */
-		o.startPVSProcess = function(sourceFile, workspace){
+		o.startPVSProcess = function(sourceFile, projectName){
 			sourceFile = sourceFile || "pvscode/alarisGP_oldFW";
-			var token = {type:"startProcess", data:{fileName:sourceFile, workspace:workspace}};
+			var token = {type:"startProcess", data:{fileName:sourceFile, projectName:projectName}};
 			ws.send(JSON.stringify(token));
 			return o;
 		};
@@ -128,7 +134,18 @@ define(['util/eventDispatcher', 'formal/pvs/prototypebuilder/events', 'websocket
 			ws.send(JSON.stringify(token));
 			return o;
 		};
-		
+//		
+//		o.createProject = function(data){
+//			var token = {type:"createProject", data:data};
+//			ws.send(JSON.stringify(token));
+//			return o;
+//		};
+//		
+//		o.saveTempFile = function(data){
+//			var token = {type:"saveTempFile", data:data};
+//			ws.send(JSON.stringify(token));
+//			return o;
+//		}
 		/**
 		 * Special function used to maintain state on the client side.
 		 * Particularly useful in the hold_down mode of the alaris

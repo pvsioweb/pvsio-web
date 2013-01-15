@@ -32,9 +32,9 @@ define(['./baseWidget', './widgetType', 'util/property','./displayMappings'],
 		
 		o.getRenderData = function(){
 			var res = [];
-			res.push({label:"Widget Type", element:"select", value:o.type(), data:widgetTypes, name:'type'});
-			res.push({label:"Capture", element:"select", value:o.predefinedRegex(), data:predefinedRegexes(), name:"predefinedRegex", other:['required']});
-			res.push({label:"Prefix", element: "input", inputType:"text", value:o.prefix(), name:"prefix", other:['required']});
+			res.push({label:"Area Type", element:"select", value:o.type(), data:widgetTypes, name:'type'});
+			res.push({label:"Value Type", element:"select", value:o.predefinedRegex(), data:predefinedRegexes(), name:"predefinedRegex", other:['required']});
+			res.push({label:"Area Identifier", element: "input", inputType:"text", value:o.prefix(), name:"prefix", other:['required']});
 			res.push({label:"Regex", element:"input", inputType:"text", value:o.regex(), name:'regex', other:['required']});
 			//res.push({label:"Label", element:"input", inputType:"text", value:o.label(), name:"label"});
 			return res;

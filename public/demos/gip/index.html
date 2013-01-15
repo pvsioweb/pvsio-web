@@ -1,9 +1,11 @@
+<!DOCTYPE HTML>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>PVSio-Web Interactive Prototype Builder</title>
+<link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 <link href="css/style.css" type="text/css" rel="stylesheet">
-<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
 </head>
 <body>
 	<div id="content" class="center">
@@ -11,11 +13,17 @@
 			<a class="btn" id="newProject"><i class="icon-file"></i> New Project</a>
 			<a class="btn" id="openProject"><i class="icon-folder-open"></i> Open Project</a>
 			<a class="btn" id="saveProject"><i class="icon-hdd"></i> Save Project</a>
-			<a class="btn" id="btnUpload"><i class="icon-picture"></i> Change Picture</a>
+			<a class="btn" id="btnLoadPicture"><i class="icon-picture"></i> Change Picture</a>
 			<input type="file" class="hide" id="btnSelectPicture" name="selectPicture">
+			<span>    Project  </span><input type="text" placeholder="Untitled Project" id="txtProjectName" value="" class="input-Med" readonly="readonly">
 		</div>
 		<div id="body">
 			<div id="imageDiv">
+				<div id="imageDragAndDrop" class="dndcontainer">
+					<span class="center">Drag  user interface picture here or if you prefer, use the button below</span>
+					<br/>
+					<a class="btn btn-primary center" id='btnLoadPicture'><i class="icon-picture icon-white"></i> Load Picture</a>
+				</div>
 				<img src="image/start.png" usemap="#prototypeMap" />
 				<div id="prototypeImage"></div>
 				<div id='console'></div>
@@ -41,10 +49,22 @@
 			<div id='specification_log_Container' class="clear-both">
 				<div>
 					<h2>Formal specification source file</h2> <button class="btn btn-primary" id="btnTypeCheck">Typecheck</button>
+					<input type="text" value="" placeholder="Untitled file" id="txtSpecFileName"/>
+				</div>
+				<div>
+					<div id="specDragAndDrop" class="dndcontainer">
+						<span class="center">Drag PVS file here or if you prefer, use the button below</span>
+						<br/>
+						<a class="btn btn-primary center" id='btnLoadSpec'><i class="icon-file-white"></i>Load Spec</a>
+						<input type="file" class="hide" id="btnSelectSpec" name="selectSpec">
+					</div>
+					
+					<div id="editor">
+					
+	
+					</div>
 				</div>
 				
-				<div id="editor">
-				</div>
 			</div>
 			
 			

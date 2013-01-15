@@ -13,16 +13,38 @@ define(['./displayMappings','util/Timer','util/eventDispatcher', "./widgetEvents
 					return create(mark);
 				}
 			};
-			
+			var preventDefault = function(){d3.event.stopPropagation();}
 			function create(mark){
-				var widget = widgetMaps[mark.attr("id")]  || buttonWidget();
+				var widget = widgetMaps.get(mark.attr("id"))  || buttonWidget();
 				var o = eventDispatcher({}), controls, el;
 				var x = d3.event.pageX, y = d3.event.pageY;
 				
 				renderElements(widget);
 				
 				function renderElements(widget){
-					var form = createForm(x, y);
+					var formMoving = false, sx, sy, sTop, sLeft;
+					var form = createForm(x, y).on("mousedown", preventDefault)
+						.on("mouseup", preventDefault)
+						.on("mousemove", preventDefault);
+					d3.select("div.detailsForm").on('mousedown', function(){
+						if(d3.event.target === this){
+							d3.event.preventDefault();
+							formMoving = true;
+							sx = d3.event.clientX, sy = d3.event.clientY;
+							sTop = parseFloat(d3.select(this).style("top"));
+							sLeft = parseFloat(d3.select(this).style("left"));
+						}
+					}).on('mouseup', function(){
+						formMoving = false;
+					}).on("mouseout", function(){
+						formMoving = false;
+					}).on("mousemove", function(){
+						if(formMoving && d3.event.target === this){
+							d3.event.preventDefault();
+							var dx = sx - d3.event.clientX, dy = sy - d3.event.clientY;
+							d3.select(this).style("top", (sTop - dy) + "px").style("left", (sLeft - dx) + "px");
+						}
+					});
 					var data = widget.getRenderData();
 					var controlgroups  = form.selectAll("div.control-group").data(data).enter()
 						.append("div").attr("class", "control-group");
@@ -44,6 +66,9 @@ define(['./displayMappings','util/Timer','util/eventDispatcher', "./widgetEvents
 								el.attr(d, true);
 							});
 						}
+						if(d.pattern){
+							el.attr('pattern', d.pattern);
+						}
 						if(d.data){
 							if(d.element === "select") {
 								el.selectAll("option").data(d.data).enter()
@@ -53,7 +78,7 @@ define(['./displayMappings','util/Timer','util/eventDispatcher', "./widgetEvents
 										}).attr("value", function(d){
 											return d.value;
 										}).attr("selected", function(o){
-											return d.value === o.value ? true : null;
+											return d.value === o.value ? "selected" : null;
 										});
 							}else if(d.inputType === "checkbox"){
 								el.remove();
@@ -74,20 +99,20 @@ define(['./displayMappings','util/Timer','util/eventDispatcher', "./widgetEvents
 					controls = form.append("div").attr("class", "buttons control-group")
 						.append("div").attr("class", "controls");
 					//delete handler for widget
-					controls.append("button").attr("type", "button").html("Delete Widget").attr("class", "btn btn-danger left")
+					controls.append("button").attr("type", "button").html("Delete").attr("class", "btn btn-danger left")
 						.on("click", function(){
 							var event = {type:widgetEvents.WidgetDeleted, mark:mark, widget:widget,
 									formContainer:d3.select("div.detailsForm")};
 							o.fire(event);
 						});
 					//close window handler
-					controls.append("button").attr("type", "button").html("Close Window").attr("class", "btn")
+					controls.append("button").attr("type", "button").html("Cancel").attr("class", "btn")
 						.style("margin", "0 10px 0 10px")
 						.on("click", function(){
 							d3.select("div.detailsForm").remove();
 						});
 					//save handler for widget
-					controls.append("button").attr("type","submit").attr("class", "btn btn-success right").html("Save Widget")
+					controls.append("button").attr("type","submit").attr("class", "btn btn-success right").html("Save")
 						.on("click", function(){
 							if(validate(form)){
 								d3.select(this).attr("type", "button");
@@ -107,7 +132,7 @@ define(['./displayMappings','util/Timer','util/eventDispatcher', "./widgetEvents
 									return {key:d.name, value:value};
 								});
 								widget = dataToWidget(res, widget);
-								widgetMaps[widget.id()] = widget;
+								widgetMaps.add(widget);
 								var event = {type:widgetEvents.WidgetSaved, mark:mark, 
 										formContainer:d3.select("div.detailsForm"), formData:res, widget:widget};
 								o.fire(event);
@@ -118,7 +143,7 @@ define(['./displayMappings','util/Timer','util/eventDispatcher', "./widgetEvents
 					//if the type of widget changes update the widget and recreate the form
 					d3.select("select#type").on("change", function(d){
 						widget = changeWidget(widget, this.value);
-						widgetMaps[widget.id()] = widget;
+						widgetMaps.add(widget);
 						renderElements(widget);
 					});
 					//bind listener to function text to automatically update the boundfunction text
@@ -200,9 +225,9 @@ define(['./displayMappings','util/Timer','util/eventDispatcher', "./widgetEvents
 			function createForm(x, y){
 				d3.select("div.detailsForm.shadow").remove();
 				var form = d3.select("body").append("div").attr("class", "detailsForm shadow")
-					.style("top", y).style("left", x)
-						.append("form").attr("class", "form-horizontal");
-				form.append("legend").html("Edit User Interface Widget");
+					.style("top", y + "px").style("left", x + "px")
+						.append("form").attr("class", "");
+				form.append("legend").html("Edit User Interface Area");
 				return form;
 			}
 		});

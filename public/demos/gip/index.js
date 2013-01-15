@@ -17,18 +17,41 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
          'pvsioweb/widgetEditor','pvsioweb/widgetEvents',
          'pvsioweb/buttonWidget','pvsioweb/displayWidget',
          'pvsioweb/displayMappings',"pvsioweb/forms/newProject",
-         "pvsioweb/forms/events","pvsioweb/forms/openProject",'d3/d3'], 
+         "pvsioweb/forms/events","pvsioweb/forms/openProject",
+         "pvsioweb/forms/saveProjectAs", 'd3/d3'], 
 	function(pvsws, displayManager, overlayCreator ,
 			ace, widgetMaps, shuffle, widgetEditor, widgetEvents, 
 			buttonWidget, displayWidget, displayMappings,newProjectForm, 
-			formEvents, openProjectForm){
+			formEvents, openProjectForm, saveProjectAs){
+	
 	var currentProject = {}, sourceCodeChanged = false;
+	var tempImageName, tempSpecName, specFileName, specNameRegex = /(\w+)\s*:\s*THEORY\s+BEGIN/i;
 	var editor = ace.edit("editor");
 	editor.getSession().setMode('ace/mode/text');
 	editor.gotoLine(1);
-	
-	//hide the main body
-	d3.select("div#body").style("display", "none");
+	editor.on("change", function(e){
+		sourceCodeChanged = true;
+		var toplines = editor.getSession().getLines(0, Math.min(4, editor.getSession().getLength())).join("");
+		var matches = toplines.match(specNameRegex);
+		if(matches && matches.length > 1){
+			specFileName = matches[1];
+			d3.select("#txtSpecFileName").property("value", specFileName);
+		}
+	});
+	editor.setValue("ui_th: THEORY BEGIN \r\n \r\nEND ui_th");
+	d3.select("#header #txtProjectName").property("value", "");
+//	d3.select("#header #txtProjectName").on("mousedown", function(){
+//		var txt = this;
+//		//show window to save current project as ..
+//		saveProjectAs.create()
+//			.addListener(formEvents.FormSubmitted, function(e){
+//				txt.value = e.form.select("#projectName").property("value");
+//				saveProject();
+//				e.form.remove();
+//			}).addListener(formEvents.FormCancelled, function(e){
+//				e.form.remove();
+//			});
+//	});
 	/**
 	 * utitlity function to pretty print pvsio output
 	 */
@@ -59,7 +82,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 			updateSourceCode(e.data);
 		}).addListener("SourceCodeSaved", function(e){
 			//need to restart the process with the correct filename
-			this.startPVSProcess(e.data.fileName);
+			this.startPVSProcess(e.data.fileName, currentProject.name);
 		}).addListener("ProcessExited", function(e){
 			console.log("Server process exited -- server message was ...");
 			console.log(e);
@@ -88,14 +111,14 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 			d3.event.preventDefault();
 			d3.selectAll(".mark.selected")
 				.each(function(d){
-					widgetMaps[d3.select(this).attr("id")].remove();
+					widgetMaps.get(d3.select(this).attr("id")).remove();
 				});
 		}
 	});
 	
-	function saveSourceCode(){
+	function saveSourceCode(project){
 		if(sourceCodeChanged){
-			ws.saveSourceCode({filename:currentProject.spec, fileContent:editor.getValue()});
+			ws.saveSourceCode({fileName:project.spec, fileContent:editor.getValue()});
 			sourceCodeChanged = false;
 		}
 	}
@@ -115,9 +138,66 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 	});
 	
 	d3.select("#saveProject").on("click", function(){
-		saveWidgetDefinition();
-		saveSourceCode();
+		saveProject(currentProject);
 	});
+	
+	function saveProject(project){
+		var imageName, pvsSpecName, fd;
+		if(project.name && project.name.trim().length > 0){
+			//porject has already been created so save the widgets and the sourcecode if it has changed
+			saveWidgetDefinition(project);
+			saveSourceCode(project);
+		}else{
+			//prompt for a project name (this means they have not yet created a project)
+			project.name = prompt("Enter a project name");
+			if(project.name && project.name.trim().length > 0){
+				//save the picture
+				imageName = "image." + tempImageName.split(".").slice(-1);
+				fd = new FormData();
+				fd.append("oldFileName", tempImageName);
+				fd.append("newFileName", imageName);
+				d3.xhr("/saveTempFile").post(fd, function(err, res){
+					if(!err){
+						res = JSON.parse(res.responseText);
+						//save the pvsspec
+						fd = new FormData();
+						pvsSpecName = d3.select("#txtSpecFileName").property("value") + ".pvs";
+						fd.append("newFileName", pvsSpecName);
+						fd.append("fileContent", editor.getValue());
+						d3.xhr("/saveTempFile").post(fd, function(err, res){
+							if(!err){
+								res = JSON.parse(res.responseText);
+								fd = new FormData();
+								fd.append("projectName", project.name);
+								fd.append("prototypeImage", imageName);
+								fd.append("pvsSpecName", pvsSpecName);
+								//create the project
+								d3.xhr("/createProject").post(fd, function(err, res){
+										if(!err){
+											res = JSON.parse(res.responseText);
+											//save the widgets defined if any
+											saveWidgetDefinition(project);
+											///TODO maybe do a callback for changes to current project (res object should be current project)
+											project.image = imageName;
+											project.spec = pvsSpecName;
+											updateProjectName(project.name);
+											//start the pvsio process
+											ws.startPVSProcess(project.spec.split(".pvs")[0], project.name);
+										}
+									});
+								
+							}
+						});
+					}
+				});
+					
+				
+				
+				
+			}
+		}
+		
+	}
 	
 	d3.select("#openProject").on("click", function(){
 		openProject();
@@ -207,7 +287,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 				e.mark.attr("id", e.widget.id());
 				e.formContainer.remove();
 				console.log(e);
-				overlayCreator.createInteractiveImageArea(e.mark, widgetMaps[e.widget.id()], ws);
+				overlayCreator.createInteractiveImageArea(e.mark, widgetMaps.get(e.widget.id()), ws);
 		
 				//update the regex for this mark if its a display widget and give it a display class
 				if(e.widget.type() === "Display") {
@@ -266,17 +346,52 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 	preparePageForImageUpload();
 	
 	function preparePageForImageUpload(){
+		var imageExts = 'png,jpg,jpeg'.split(",");
 		//add listener for  upload button
-		d3.select("#btnUpload").on("click", function(){
+		d3.selectAll("#btnLoadPicture").on("click", function(){
 			d3.select("#btnSelectPicture").node().click();
 		});
 		d3.select("#btnSelectPicture").on("change", function(){
-			uploadFiles(d3.event.currentTarget.files);
+			var files = d3.event.currentTarget.files;
+			if(files && imageExts.indexOf(files[0].name.split(".").slice(-1).join("").toLowerCase()) > -1){
+				uploadFiles(files, 	function( res){
+					res = JSON.parse(res.responseText);
+					tempImageName =  res.fileName;
+					var imagepath = "../../uploads/" + res.fileName;
+					updateImage(imagepath);
+					//hide the draganddrop stuff
+					d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+				});
+			}
+		});
+		
+		d3.select("#btnLoadSpec").on("clik", function(){
+			d3.select("#btnSelectSpec").node().click();
+		});
+		
+		d3.select("#btnSelectSpec").on("change", function(){
+			//check if file is valid pvs file
+			var files = d3.event.currentTarget.files;
+			if(file && files[0].name.split(".").slice(-1).join("").toLowerCase() === "pvs"){
+				uploadFiles(files, function(res){
+					res = JSON.parse(res.responseText);
+					tempSpecName =  res.fileName;
+					//load spec into workspace via json xhr req
+					d3.text("../../uploads/" + res.fileName, function(err, res){
+						console.log(res);
+						//hide drag and drop stuff
+						d3.select("#specDragAndDrop.dndcontainer").style("display", "none");
+					});
+				});
+			}else{
+				console.log("only files with .pvs extension are allowed");
+			}
+			
 		});
 		
 		var c = document.getElementById("imageDiv");
 		c.ondragover = function(){
-			d3.select(c).style("border", "3px dashed black");
+			d3.select(c).style("border", "5px dashed black");
 			return false;
 		};
 		c.ondragend = function(e){
@@ -296,21 +411,17 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		};
 		
 		
-		function uploadFiles(files){
+		function uploadFiles(files, cb){			
 			if(files.length > 0){
 				var fd = new FormData();
 				for(var i=0; i< files.length; i++){
 					fd.append("file", files[i]);
 				}
-				var xhr = d3.xhr("/changeimage", 'application/json');
+				var xhr = d3.xhr("/uploadfile", 'application/json');
 				xhr.post(fd)
 					.on('progress', function(e){
 						console.log(e);
-					}).on('load', function( res){
-						console.log(res);
-						var imagepath = "../../uploads/" + JSON.parse(res.responseText).filename;
-						updateImage(imagepath);
-					});
+					}).on('load', cb);
 			}
 		}
 	}
@@ -327,51 +438,46 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		editor.setValue(src);
 		editor.clearSelection();
 		editor.gotoLine(1);
-		editor.on("change", function(e){
-			sourceCodeChanged = true;
-		});
+		
 		editor.gotoLine(1);
 	}
 	
 	function newProject(fd){
 		fd = fd || new FormData();
-		d3.xhr("/saveProject").post(fd).on("load", function(res){
+		d3.xhr("/newProject").post(fd).on("load", function(res){
 			//update the picture adn the pvs source file and trigger a restart of the pvsioprocess
 			res = JSON.parse(res.responseText);
 			console.log(res);
 			if(!res.error) {
 				currentProject = res;
 				d3.select("div#body").style("display", null);
-				ws.startPVSProcess(res.spec.split(".pvs")[0], res.projectPath);
-				var imagePath = "../../projects/" + res.name + "/" + res.image;
+				ws.startPVSProcess(res.spec.split(".pvs")[0], currentProject.name);
+				var imagePath = "../../projects/" + currentProject.name + "/" + currentProject.image;
 				updateImage(imagePath);
-				document.title = "PVSio-Web -- " + currentProject.name;
+				updateProjectName(currentProject.name);
 			}
 		});
 	}
 	
-	function saveWidgetDefinition(){
+	function updateProjectName(name){
+		document.title = "PVSio-Web -- " + name;
+		d3.select("#header #txtProjectName").property("value", name);
+	}
+	
+	function saveWidgetDefinition(project){
 		var safe = {};
-		safe.widgetMaps = widgetsToJSON(widgetMaps);
+		safe.widgetMaps = widgetMaps.toJSON();
 		safe.regionDefs = getRegionDefs();
 		//save to the user's drive
 		var safeStr = JSON.stringify(safe, null, " ");
 		var fd = new FormData();
-		fd.append("filename", currentProject.projectPath  + "/widgetDefinition.json");
-		fd.append("filecontent", safeStr);
+		fd.append("fileName", project.name  + "/widgetDefinition.json");
+		fd.append("fileContent", safeStr);
 		
 		d3.xhr("/saveWidgetDefinition").post(fd).on("load", function(res){
 			res = JSON.parse(res.responseText);
 			console.log(res);
 		});
-		
-		function widgetsToJSON(map){
-			var res = {}, k;
-			for(k in map){
-				res[k] = map[k].toJSON();
-			}
-			return res;
-		}
 	}
 	
 	function getRegionDefs(){
@@ -406,14 +512,15 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 					if(currentProject.name !== ""){
 						d3.select("div#body").style("display", null);
 						updateImage(project + currentProject.image);
-						ws.startPVSProcess(currentProject.spec.split(".")[0], currentProject.projectPath);
+						ws.startPVSProcess(currentProject.spec.split(".")[0], currentProject.name);
 						loadWidgetDefinitions(currentProject.widgetDefinition);
+						updateProjectName(currentProject.name);
+						d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
 					}
 					
 					e.form.remove();
 				}).addListener(formEvents.FormCancelled, function(e){
 					e.form.remove();
-					currentProject = undefined;
 				}).addListener(formEvents.FormDataChanged, function(e){
 					console.log(e);
 					currentProject = e.data;
@@ -424,6 +531,10 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 	}
 	
 	function loadWidgetDefinitions(defs){
+		//clear old widhget maps and area def
+		widgetMaps.clear();	
+		d3.selectAll("#prototypeImage .mark, #prototypeMap area").remove();
+		
 		if(defs){
 			console.log(defs);
 			var key, w, widget;
@@ -434,14 +545,17 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 				for(property in w)
 					widget[property](w[property]);
 				
-				widgetMaps[key] = widget;
+				widgetMaps.add(widget);
 			}
 			//create div
 			defs.regionDefs.forEach(function(d){
-				widget = widgetMaps[d.class];
-				var coords = d.coords.split(",");
+				widget = widgetMaps.get(d.class);
+				var coords = d.coords.split(",").map(function(d){
+					return parseFloat(d);
+				});
+				var h = coords[3] - coords[1], w = coords[2] - coords[0];
 				var mark  = overlayCreator.createDiv(image, coords[0], coords[1])
-					.style("height", coords[3] - coords[1]).style("width", coords[2] - coords[0]);
+					.style("height", h + "px").style("width", w + "px");
 				overlayCreator.createInteractiveImageArea(mark, widget, ws);
 				//set the font-size of the mark to be 80% of the height and the id of the mark
 				mark.on("dblclick", function(){

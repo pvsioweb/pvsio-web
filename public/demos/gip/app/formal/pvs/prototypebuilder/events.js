@@ -14,5 +14,7 @@ define({
 	SourceCodeReceived:"SourceCodeReceived",
 	ProcessExited:"ProcessExited",
 	SourceCodeSaved:"SourceCodeSaved",
-	SourceCodeNotSaved:"SourceCodeNotSaved"
+	SourceCodeNotSaved:"SourceCodeNotSaved",
+	ProjectCreated:"ProjectCreated",
+	TempFileSaved:"TempFileSaved"
 });

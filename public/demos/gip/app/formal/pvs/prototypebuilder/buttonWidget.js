@@ -12,6 +12,7 @@ define(['./baseWidget', 'util/property','./widgetType'], function(baseWidget, pr
 		var o = baseWidget();
 		o.functionText = property.call(o, f||  "");
 		o.events = property.call(o, events || []);
+		o.recallRate = property.call(o, 250);
 		o.boundFunction = function(){
 			var res = o.events().map(function(d){
 				if(d.indexOf("/") > -1){
@@ -30,15 +31,17 @@ define(['./baseWidget', 'util/property','./widgetType'], function(baseWidget, pr
 			return {
 				functionText:o.functionText(),
 				events:o.events(),
-				type: o.type()
+				type: o.type(),
+				recallRate:o.recallRate()
 			};
 		};
 		
 		o.getRenderData = function(){
 			var res = [];
-			res.push({label:"Widget Type", element:"select", value:o.type(), data:widgetTypes, name:"type"});
-			res.push({label:"Function",element:"input", inputType:"text", value:o.functionText(), name:"functionText",other:['required']});
+			res.push({label:"Area Type", element:"select", value:o.type(), data:widgetTypes, name:"type"});
+			res.push({label:"Area Identifier",element:"input", inputType:"text", value:o.functionText(), name:"functionText",other:['required']});
 			res.push({label:"Bind", element:'input', inputType:"checkbox", data:defaultEvents, value:o.events(), name:"events"});
+			res.push({label:"Recall Rate",element:"input", inputType:"text", pattern:"\\d{2,5}", value:o.recallRate(), name:"recallRate", other:['required']})
 			res.push({label:"",element:"textarea", inputType:"text", value:o.boundFunction(), name:"boundFunction", other:['readonly']});
 
 			return res;

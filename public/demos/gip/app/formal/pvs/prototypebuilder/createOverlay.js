@@ -50,10 +50,12 @@ function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 		//create and return the new mark. marks are essentially divs
 		return parent.append("div")
 			.style("left", function(){
-				return mx !== undefined ? mx : xpos.call(this);
+				var val = mx !== undefined ? mx : xpos.call(this);
+				return val + "px";
 			})
 			.style("top", function(){
-				return my !== undefined ? my : ypos.call(this);
+				var val = my !== undefined ? my : ypos.call(this);
+				return val + "px";
 			})
 			.attr("startx", function(){
 				return mx !== undefined ? mx : xpos.call(this);
@@ -67,7 +69,7 @@ function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 				d3.event.stopPropagation();
 				startMouseX = d3.event.clientX;
 				startMouseY = d3.event.clientY;
-				startTop = parseFloat(d3.select(this).style("top"));
+				startTop = parseFloat(d3.select(this).style('top'));
 				startLeft = parseFloat(d3.select(this).style("left"));
 				//mark this element as selected
 				d3.selectAll(".mark.selected").classed("selected", false);
@@ -118,8 +120,8 @@ function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 				.attr("href", widget.type() === widgetType.Button ? "#" : null)//only make buttons clickable
 			.on("mousedown", function(){
 				
-				f = widgetMaps[widget.id()]['functionText']();
-				events = widgetMaps[widget.id()]['events']();
+				f = widget.functionText();
+				events = widget.events();
 				//perform the click event if there is one
 				if( events && events.indexOf('click') > -1)
 					ws.sendGuiAction("click_" + f + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");");
@@ -129,10 +131,10 @@ function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 					if(events && events.indexOf('press/release') > -1)
 						ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g,',') + ");");
 				};
-				btnTimer.start();
+				btnTimer.interval(widget.recallRate()).start();
 			}).on("mouseup", function(){
 				if(btnTimer.getCurrentCount() > 0){
-					var f = widgetMaps[widget.id()]['functionText']();
+					var f = widget.functionText();
 					console.log("button released");	
 					if( events && events.indexOf('press/release') > -1)
 						ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g,',') + ");");
@@ -140,7 +142,7 @@ function(widgetEditor, widgetEvents, widgetType, widgetMaps, Timer){
 				mouseup(d3.event);
 			}).on("mouseout", function(){
 				if(btnTimer.getCurrentCount() > 0){
-					var f = widgetMaps[widget.id()]['functionText']();
+					var f = widget.functionText(); 
 					console.log("button released");	
 					if( events && events.indexOf('press/release') > -1)
 						ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g,',') + ");");

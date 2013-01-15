@@ -6,7 +6,8 @@
     "click",
     "press/release"
    ],
-   "type": "Button"
+   "type": "Button",
+   "recallRate": 250
   },
   "Display1357381783023": {
    "predefinedRegex": "[0-9/.]+",
@@ -26,7 +27,8 @@
     "click",
     "press/release"
    ],
-   "type": "Button"
+   "type": "Button",
+   "recallRate": 250
   },
   "Button1357494286330": {
    "functionText": "up",
@@ -34,7 +36,8 @@
     "click",
     "press/release"
    ],
-   "type": "Button"
+   "type": "Button",
+   "recallRate": 250
   },
   "Button1357494295183": {
    "functionText": "dn",
@@ -42,7 +45,8 @@
     "click",
     "press/release"
    ],
-   "type": "Button"
+   "type": "Button",
+   "recallRate": 250
   },
   "Button1357494307176": {
    "functionText": "DN",
@@ -50,7 +54,16 @@
     "click",
     "press/release"
    ],
-   "type": "Button"
+   "type": "Button",
+   "recallRate": 250
+  },
+  "Button1357831841166": {
+   "functionText": "UP",
+   "events": [
+    "click"
+   ],
+   "type": "Button",
+   "recallRate": "250"
   }
  },
  "regionDefs": [
@@ -82,6 +95,12 @@
    "class": "Button1357494307176",
    "shape": "rect",
    "coords": "349,168,391,206",
+   "href": "#"
+  },
+  {
+   "class": "Button1357831841166",
+   "shape": "rect",
+   "coords": "424,170,493,211",
    "href": "#"
   }
  ]

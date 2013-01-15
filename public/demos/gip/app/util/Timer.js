@@ -71,12 +71,14 @@ define(['util/timerConstants','util/eventDispatcher'], function( timerConstants,
 			}
 		}
 		
-		function changeInterval(val){
-			if (_mode == timerConstants.Timeout) {
-				_interval = _val;
-				logger.log('interval changed to ' + _interval);
+		function interval(val){
+			if(val !== undefined){
+				_interval = val;
+				return this;
 			}
+			return _interval;
 		}
+
 		
 		function stop(){
 			if (running) {
@@ -90,23 +92,11 @@ define(['util/timerConstants','util/eventDispatcher'], function( timerConstants,
 			getCurrentCount : function() {
 				return _currentCount;
 			},
-	
-			getInterval : function() {
-				return _interval;
-			},
-	
 			start : function() {
 				start();
 				return this;
 			},
-			/**
-			 * This only has an effect in the timeout mode because the interval mode
-			 * implies that events will be fired regularly
-			 */
-			changeInterval: function(_val) {
-				changeInterval(_val);
-				return this;
-			},
+			interval:interval,
 	
 			stop : function() {
 				stop();

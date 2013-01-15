@@ -1,0 +1,9 @@
+
+Context file /Users/patrick/Documents/workspace/pvsio-web/.pvscontext written
+Context changed to ~/Documents/workspace/pvsio-web/public/projects/AlarisGP/
+Prelude library PVSio not found
+Typechecking
+Parsing alarisGP_oldFW
+alarisGP_oldFW parsed in 0.13 seconds
+Typechecking alarisGP_oldFW
+alarisGP_oldFW typechecked in 0.60s: 35 TCCs, 0 proved, 3 subsumed, 32 unproved; 22 msgs

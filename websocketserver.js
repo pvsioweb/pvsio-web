@@ -27,7 +27,7 @@ module.exports = function(name){
 	 */
 	o.start = function(options){
 		options = options || {};
-		options.port = options.port || o.port;		
+		//options.port = options.port || o.port;		
 		server = new WebSocketServer(options);
 		util.log("server instantiated. waiting for connection ...");
 		server.on("connection", function(s){
