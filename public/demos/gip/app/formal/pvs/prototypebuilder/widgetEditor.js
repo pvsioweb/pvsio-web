@@ -7,13 +7,9 @@
 define(['./displayMappings','util/Timer','util/eventDispatcher', "./widgetEvents",
         "./buttonWidget", "./displayWidget", './widgetMaps','d3/d3'], 
       function(displayMappings,  timer, eventDispatcher, widgetEvents, buttonWidget, displayWidget, widgetMaps){
-	
-			return{
-				create:function(mark){
-					return create(mark);
-				}
-			};
-			var preventDefault = function(){d3.event.stopPropagation();}
+			var preventDefault = function(){d3.event.stopPropagation();};
+
+			
 			function create(mark){
 				var widget = widgetMaps.get(mark.attr("id"))  || buttonWidget();
 				var o = eventDispatcher({}), controls, el;
@@ -230,4 +226,10 @@ define(['./displayMappings','util/Timer','util/eventDispatcher', "./widgetEvents
 				form.append("legend").html("Edit User Interface Area");
 				return form;
 			}
+			
+			return{
+				create:function(mark){
+					return create(mark);
+				}
+			};
 		});

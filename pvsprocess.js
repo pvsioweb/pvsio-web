@@ -144,7 +144,7 @@ module.exports = (function(){
 			}else{
 				callback({type:"sourceCodeSaved", data:{fileName:fname.split(".pvs")[0]}});
 			}
-		})
+		});
 	}
 	/**
 	 * closes the pvsio process

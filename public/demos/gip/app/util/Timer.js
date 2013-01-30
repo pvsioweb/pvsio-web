@@ -14,14 +14,15 @@
  */
 define(['util/timerConstants','util/eventDispatcher'], function( timerConstants, eventDispatcher){
 	//return a function for creating timers
-	return function(interval, repeatCount, mode) {	
-		var initialInterval = interval;
-		var _interval = interval;
+	return function(i, repeatCount, mode) {	
+		var initialInterval = i;
+		var _interval = i;
 		var _repeatCount = repeatCount || Number.POSITIVE_INFINITY;
 		var _mode = mode ? mode : timerConstants.Interval;
 		var _currentCount = 0;
 		var timerid = -1;
 		var running = false;
+		var event = {};
 		
 		function timerTick() {
 			if (!running)
@@ -29,7 +30,7 @@ define(['util/timerConstants','util/eventDispatcher'], function( timerConstants,
 	
 			if (_currentCount < _repeatCount) {
 				_currentCount++;
-				var event = {
+				event = {
 					type : timerConstants.TimerTicked,
 					currentCount : _currentCount
 				};
@@ -48,7 +49,7 @@ define(['util/timerConstants','util/eventDispatcher'], function( timerConstants,
 				}
 			} else {
 				clearInterval(timerid);
-				var event = {
+				event = {
 					type : timerConstants.TimerFinished,
 					currentCount : _currentCount
 				};

@@ -5,8 +5,7 @@
  */
 
 define(['./baseWidget', 'util/property','./widgetType'], function(baseWidget, property, widgetType){
-	var defaultEvents = [{value:'click', label:"Click"},
-	                     {value:"press/release", label:"Press/Release"}];
+	var defaultEvents = [{value:'click', label:"Click"},{value:"press/release", label:"Press/Release"}];
 	var widgetTypes = [{value:widgetType.Button, label:widgetType.Button},{value:widgetType.Display, label:widgetType.Display}];
 	return function(f, events){
 		var o = baseWidget();
@@ -41,7 +40,7 @@ define(['./baseWidget', 'util/property','./widgetType'], function(baseWidget, pr
 			res.push({label:"Area Type", element:"select", value:o.type(), data:widgetTypes, name:"type"});
 			res.push({label:"Area Identifier",element:"input", inputType:"text", value:o.functionText(), name:"functionText",other:['required']});
 			res.push({label:"Bind", element:'input', inputType:"checkbox", data:defaultEvents, value:o.events(), name:"events"});
-			res.push({label:"Recall Rate",element:"input", inputType:"text", pattern:"\\d{2,5}", value:o.recallRate(), name:"recallRate", other:['required']})
+			res.push({label:"Recall Rate",element:"input", inputType:"text", pattern:"\\d{2,5}", value:o.recallRate(), name:"recallRate", other:['required']});
 			res.push({label:"",element:"textarea", inputType:"text", value:o.boundFunction(), name:"boundFunction", other:['readonly']});
 
 			return res;

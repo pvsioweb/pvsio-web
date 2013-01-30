@@ -16,8 +16,10 @@ var WebSocketServer = ws.Server;
 
 module.exports = function(name){
 	var messageFunctionMap = {};
-	var o = {}, server, name = name || "", clientid = 0;
+	
+	var o = {}, server, clientid = 0;
 	o.port = 8080;
+	name = name || "";
 	
 	/**
 	 * starts a websocket server

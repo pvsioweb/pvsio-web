@@ -15,5 +15,5 @@ define(["./formBuilder"], function(formBuilder){
 		create:function(){
 			return formBuilder.create(model);
 		}
-	}
+	};
 });

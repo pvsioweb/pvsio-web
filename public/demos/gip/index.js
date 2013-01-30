@@ -211,7 +211,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 			console.log(e);
 			e.form.remove();
 			newProject(e.formData);
-		})
+		});
 	});
 	//handle typecheck event
 	d3.select("#btnTypeCheck").on("click", function(){
@@ -354,7 +354,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		d3.select("#btnSelectPicture").on("change", function(){
 			var files = d3.event.currentTarget.files;
 			if(files && imageExts.indexOf(files[0].name.split(".").slice(-1).join("").toLowerCase()) > -1){
-				uploadFiles(files, 	function( res){
+				uploadFiles(files,	function( res){
 					res = JSON.parse(res.responseText);
 					tempImageName =  res.fileName;
 					var imagepath = "../../uploads/" + res.fileName;
@@ -430,7 +430,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		d3.select("#imageDiv img").attr("src", imagepath);
 		d3.select("#prototypeImage")
 			.style("background-image", "url(" + imagepath + ")");
-		setTimeout(resizeImageDiv, 500)
+		setTimeout(resizeImageDiv, 500);
 	}
 	
 	function updateSourceCode(src){
@@ -537,7 +537,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		
 		if(defs){
 			console.log(defs);
-			var key, w, widget;
+			var key, w, widget, property;
 			for(key in defs.widgetMaps){
 				w = defs.widgetMaps[key];
 				widget = w.type === "Button" ? buttonWidget() : displayWidget();

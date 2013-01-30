@@ -32,10 +32,10 @@ define(['util/eventDispatcher', 'formal/pvs/prototypebuilder/events', 'websocket
 		/**
 		 * creates a connection to the pvsio webserver
 		 * This emits the 'ConnectionOpened' event when the connection has been established
-		 * 				'ConnectionClosed' event when the connection has been closed
-		 * 				'ProcessReady' event when the pvsio process is ready
-		 * 				'OutputUpdated' event when there is some response data from the server
-		 * 				'SourceCodeReceived' event when the source code has been received
+		 *	'ConnectionClosed' event when the connection has been closed
+		 *	'ProcessReady' event when the pvsio process is ready
+		 *	'OutputUpdated' event when there is some response data from the server
+		 *	'SourceCodeReceived' event when the source code has been received
 		 */
 		o.logon = function(){
 			if(!ws){
