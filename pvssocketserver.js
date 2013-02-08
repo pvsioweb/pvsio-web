@@ -130,22 +130,24 @@ var wsServer = wsbase("PVSIO")
 	}).bind("startProcess", function(token, socket, socketid){
 		util.log("Calling start process for client... " + socketid);
 		p = pvsioProcessMap[socketid];
-		if(!p){
-			p = pvsio();
-			//set the workspace dir and start the pvs process with a callback for processing any responses from
-			//the process
-			p.workspaceDir(__dirname + "/public/projects/" + token.data.projectName)
-			.start(token.data.fileName, function(tok){
-				//called when any data is recieved from pvs process
-				//if the type of the token is 'processExited' then close the socket if it is still open
-				tok.socketId = socketid;
-				processCallback(tok, socket);
-			});
-			//add to map
-			pvsioProcessMap[socketid] = p;
-		}else{
-			util.log("using existing pvsio process!");
+		if(p){
+			p.close();
+			delete pvsioProcessMap[socketid];
 		}
+		//create the pvsio process
+		p = pvsio();
+		//set the workspace dir and start the pvs process with a callback for processing any responses from
+		//the process
+		p.workspaceDir(__dirname + "/public/projects/" + token.data.projectName)
+		.start(token.data.fileName, function(tok){
+			//called when any data is recieved from pvs process
+			//if the type of the token is 'processExited' then close the socket if it is still open
+			tok.socketId = socketid;
+			processCallback(tok, socket);
+		});
+		//add to map
+		pvsioProcessMap[socketid] = p;
+		
 		//hsndle close event of socket to release resources
 		socket.on("close", onsocketClose(socketid));
 		

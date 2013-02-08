@@ -512,6 +512,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 					if(currentProject.name !== ""){
 						d3.select("div#body").style("display", null);
 						updateImage(project + currentProject.image);
+						ws.lastState("init(0)");
 						ws.startPVSProcess(currentProject.spec.split(".")[0], currentProject.name);
 						loadWidgetDefinitions(currentProject.widgetDefinition);
 						updateProjectName(currentProject.name);

@@ -1,9 +1,9 @@
 
-Context file /home/paolo/.pvscontext written
-Context changed to /usr/lib/node_modules/pvsio-web/public/projects/AlarisGP/
+Context file /Users/patrick/Documents/workspace/pvsio-web/.pvscontext written
+Context changed to ~/Documents/workspace/pvsio-web/public/projects/AlarisGP/
 Prelude library PVSio not found
 Typechecking
 Parsing alarisGP
-alarisGP parsed in 0.07 seconds
+alarisGP parsed in 0.09 seconds
 Typechecking alarisGP
-alarisGP typechecked in 0.27s: 10 TCCs, 0 proved, 1 subsumed, 9 unproved
+alarisGP typechecked in 0.29s: 10 TCCs, 0 proved, 1 subsumed, 9 unproved
