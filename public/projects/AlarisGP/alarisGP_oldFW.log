@@ -4,6 +4,18 @@ Context changed to ~/Documents/workspace/pvsio-web/public/projects/AlarisGP/
 Prelude library PVSio not found
 Typechecking
 Parsing alarisGP_oldFW
-alarisGP_oldFW parsed in 0.13 seconds
+alarisGP_oldFW parsed in 0.21 seconds
 Typechecking alarisGP_oldFW
-alarisGP_oldFW typechecked in 0.60s: 35 TCCs, 0 proved, 3 subsumed, 32 unproved; 22 msgs
+alarisGP_oldFW typechecked in 0.77s: 35 TCCs, 0 proved, 3 subsumed, 32 unproved; 22 msgs
+; While compiling _state2string:
+Warning: Variable st is never used.
+; While compiling state2string!:
+Warning: Variable st is never used.
+; While compiling (:internal state2string 0):
+Warning: Variable st is never used.
+; While compiling _press_UP_1:
+Warning: Variable dbg is never used.
+; While compiling press_UP_1!:
+Warning: Variable dbg is never used.
+; While compiling (:internal press_UP_1 0):
+Warning: Variable dbg is never used.
