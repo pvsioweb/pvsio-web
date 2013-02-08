@@ -53,7 +53,7 @@ module.exports = function(name){
 			util.log(JSON.stringify(err));
 		});
 		
-		util.log(util.format("%s websocket server started . Listening on host address %s", name, options.host));
+		util.log(util.format("%s websocket server started . Listening on localhost on port %s", name, o.port.toString()));
 		return o;
 	};
 	
