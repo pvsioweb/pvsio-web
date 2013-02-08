@@ -1,0 +1,225 @@
+gpcaUI: THEORY
+ BEGIN
+ 
+  %-- constants
+  max: posreal = 99999;
+  alarmType: TYPE = {silent, beep, muted}
+
+  %-- type definitions
+  %-- data entry
+  device_real: TYPE = {r: nonneg_real | r <= max}
+  Cursor: TYPE = {i: int | i >= -2 AND i <= 4}
+  Memory: DATATYPE
+   BEGIN
+     mem(value: device_real): valid?
+     NA: NA?   
+   END Memory
+
+  % 42->93->4F->86->88->51->8A->8C->8E->48->4D->4A->4E->94
+  ControllerCMD: TYPE = { CINIT, C42, C93, C4F, C86, C88, C51, C8A, C8C, C8E, C48, C4D, C4A, C4E, C94, CREADY }
+
+  gpcaui_state: TYPE = [#
+     is_on       : int, % on flag
+     is_infusing : int, % infusing flag
+     rate        : device_real, % rate
+     vtbi      : device_real, % vtbi
+     ctrl_cmd    : ControllerCMD, % Command to be sent to the GPCA state controller
+     ctrl_ready  : int, % true when the controller has been initialised
+     tick_enabled: int, % true when timed transitions in the UI are active
+     %-- data etry state
+     display     : device_real, % display
+     cursor      : Cursor, % cursor
+     memory      : Memory  % memory
+   #]
+
+  int2boolean(i: int): boolean =
+    IF i = 0 THEN FALSE ELSE TRUE ENDIF
+  CONVERSION int2boolean
+
+  gpcaui_init(x: device_real): gpcaui_state = (#
+  	  is_on       := FALSE,
+	  is_infusing := FALSE,
+	  rate        := 0,
+	  vtbi      := 0,
+	  ctrl_cmd    := CINIT,
+	  ctrl_ready  := FALSE,
+	  tick_enabled:= FALSE,
+	  display     := x,
+	  cursor      := 0,
+	  memory      := NA
+  #)
+  CONVERSION gpcaui_init
+
+  gpcaui_init?(st: gpcaui_state): boolean =
+  	  is_on(st)       = FALSE AND
+	  is_infusing(st) = FALSE AND
+	  rate(st)        = 0 AND
+	  vtbi(st)      = 0 AND
+	  ctrl_cmd(st)    = CINIT AND
+	  ctrl_ready(st)  = FALSE AND
+	  tick_enabled(st)= FALSE AND
+	  display(st)     = 0 AND
+	  cursor(st)      = 0 AND
+	  memory(st)      = NA
+  
+
+  %-- On Off button
+  %      - when the pump is on, you can switch it off, unless it's infusing
+  %      - when the pump is off, you can only switch it on
+  gpcaui_on(st: gpcaui_state): gpcaui_state =
+    IF     is_on(st)  THEN IF NOT is_infusing(st) THEN gpcaui_init(0) WITH [ is_on := FALSE ] ELSE st ENDIF
+    ELSE   gpcaui_init(0) WITH [ is_on := TRUE,
+    	   	   	  tick_enabled := TRUE ] ENDIF
+
+
+  %-- Start-Stop button
+  gpcaui_start(st: gpcaui_state): gpcaui_state =
+    IF    is_on(st) AND display(st) > 0 AND vtbi(st) > 0 AND rate(st) > 0 
+    THEN  IF is_infusing(st) THEN st WITH [ is_infusing := false ] ELSE st WITH [ is_infusing := true ] ENDIF
+    ELSE  st ENDIF
+
+  %-- tick
+  gpcaui_tick(st: gpcaui_state): gpcaui_state =
+    IF     ctrl_ready(st) 
+     THEN  IF is_on(st) AND is_infusing(st)
+           THEN  IF display(st) > 0 AND vtbi(st) > 0 AND rate(st) > 0
+      	         THEN  LET new_vtbi: real = IF vtbi(st) - rate(st) > 0 THEN vtbi(st) - rate(st) ELSE 0 ENDIF %floor(v(st) - r(st) / 100)
+            	        IN st WITH [ vtbi := new_vtbi, 
+			             display := new_vtbi, 
+				     is_infusing := IF new_vtbi = 0 THEN false ELSE is_infusing(st) ENDIF ]
+	   ELSE st WITH [ is_infusing := false ] ENDIF
+	   ELSE  st ENDIF
+     ELSE % init sequence 42->93->4F->86->88->51->8A->8C->8E->48->4D->4A->4E->94
+     	   COND  ctrl_cmd(st) = CINIT -> st WITH [ ctrl_cmd := C42 ],
+           	 ctrl_cmd(st) = C42   -> st WITH [ ctrl_cmd := C93 ],
+	   	 ctrl_cmd(st) = C93   -> st WITH [ ctrl_cmd := C4F ],
+	   	 ctrl_cmd(st) = C4F   -> st WITH [ ctrl_cmd := C86 ],
+	   	 ctrl_cmd(st) = C86   -> st WITH [ ctrl_cmd := C88 ],
+	   	 ctrl_cmd(st) = C88   -> st WITH [ ctrl_cmd := C51 ],
+	   	 ctrl_cmd(st) = C51   -> st WITH [ ctrl_cmd := C8A ],
+	   	 ctrl_cmd(st) = C8A   -> st WITH [ ctrl_cmd := C8C ],
+	   	 ctrl_cmd(st) = C8C   -> st WITH [ ctrl_cmd := C8E ],
+	   	 ctrl_cmd(st) = C8E   -> st WITH [ ctrl_cmd := C48 ],
+	   	 ctrl_cmd(st) = C48   -> st WITH [ ctrl_cmd := C4D ],
+	   	 ctrl_cmd(st) = C4D   -> st WITH [ ctrl_cmd := C4A ],
+	   	 ctrl_cmd(st) = C4A   -> st WITH [ ctrl_cmd := C4E ],
+	   	 ctrl_cmd(st) = C4E   -> st WITH [ ctrl_cmd := C94 ],
+	   	 ctrl_cmd(st) = C94   -> st WITH [ ctrl_cmd := CREADY,
+	   	 	      	                   ctrl_ready := TRUE,
+						   tick_enabled := FALSE ],
+	   	 ctrl_cmd(st) = CREADY-> st WITH [ ctrl_cmd := CREADY ]
+	   ENDCOND ENDIF
+
+
+  
+  %-- interactive data entry sub-system
+  pow10(i: Cursor): device_real = ^(10,i);
+
+  min_value(st: gpcaui_state): device_real = 
+   LET i = cursor(st), val = display(st) 
+    IN IF i >= 3 AND val >= 1          THEN 1
+       ELSIF (i >= 0 AND i < 3) 
+             OR (i < 0 AND val >= 0.1) THEN 0.1 ELSE 0 ENDIF
+
+  min_position(st: gpcaui_state): Cursor = -2
+
+  limit(min_val: device_real): [real -> real] =
+    LAMBDA (val: real): IF val > 0 AND val < min_val THEN min_val ELSE val ENDIF
+
+  set_accuracy(val: device_real): device_real =
+    COND
+     val < 10       -> floor(val * 100) / 100, % two decimal digits
+     val >= 10 
+      AND val < 100 -> floor(val * 10) / 10, % one decimal digit
+     val >= 100     -> floor(val) % no decimal digit
+    ENDCOND
+
+
+  %-- down button
+  dn: [gpcaui_state -> gpcaui_state] =
+      LAMBDA (st: gpcaui_state):
+        LET val = display(st),
+            i = cursor(st),
+            mem = memory(st),
+            min_val = min_value(st),
+            new_val =
+              set_accuracy(COND val - pow10(i) <= 0 -> 0,
+                                val - pow10(i) > 0 -> val - pow10(i)
+                           ENDCOND)
+          IN
+          IF new_val /= val
+            THEN st WITH [display := new_val, memory := mem(val)]
+          ELSE st
+          ENDIF
+
+  %-- up button
+  up: [gpcaui_state -> gpcaui_state] =
+      LAMBDA (st: gpcaui_state):
+        LET val = display(st),
+            i = cursor(st),
+            mem = memory(st),
+            new_val =
+              set_accuracy(COND val + pow10(i) >= max -> max,
+                                val + pow10(i) < max -> val + pow10(i)
+                           ENDCOND)
+          IN
+          IF new_val /= val
+            THEN st WITH [display := new_val, memory := mem(val)]
+          ELSE st
+          ENDIF
+
+  %-- left button
+  lf: [gpcaui_state -> gpcaui_state] =
+   LAMBDA(st: gpcaui_state):
+     LET val = display(st), i = cursor(st), mem = memory(st) IN
+      COND
+        i < 4 -> st WITH [ display := val, cursor := i + 1, memory := NA ],
+        i = 4 -> st WITH [ display := val, cursor := i    , memory := mem ]
+      ENDCOND
+
+  %-- right button
+  rt: [gpcaui_state -> gpcaui_state] =
+    LAMBDA(st: gpcaui_state): 
+      LET val = display(st), i = cursor(st), mem = memory(st), min_pos = min_position(st) IN
+       COND
+         i > min_pos  -> st WITH [ display := val, cursor := i - 1 ],
+         i <= min_pos -> st WITH [ display := val, cursor := i     ]
+       ENDCOND
+
+
+  click_dn(st: gpcaui_state): gpcaui_state =
+    IF is_on(st) AND ctrl_ready(st) THEN dn(st)
+    ELSE st ENDIF
+  press_dn(st: gpcaui_state): gpcaui_state = click_dn(st)
+  release_dn(st: gpcaui_state): gpcaui_state = st
+
+  click_up(st: gpcaui_state): gpcaui_state =
+    IF is_on(st) AND ctrl_ready(st) THEN up(st)
+    ELSE st ENDIF
+  press_up(st: gpcaui_state): gpcaui_state = click_up(st)
+  release_up(st: gpcaui_state): gpcaui_state = st
+
+  click_lf(st: gpcaui_state): gpcaui_state =
+    IF is_on(st) AND ctrl_ready(st) THEN lf(st)
+    ELSE st ENDIF
+  press_lf(st: gpcaui_state): gpcaui_state = click_lf(st)
+  release_lf(st: gpcaui_state): gpcaui_state = st
+
+
+  click_rt(st: gpcaui_state): gpcaui_state =
+    IF is_on(st) AND ctrl_ready(st) THEN rt(st)
+    ELSE st ENDIF
+  press_rt(st: gpcaui_state): gpcaui_state = click_rt(st)
+  release_rt(st: gpcaui_state): gpcaui_state = st
+
+
+  click_ok(st: gpcaui_state): gpcaui_state =
+    IF is_on(st) AND display(st) > 0 AND ctrl_ready(st) 
+    THEN st WITH [ vtbi := display(st), rate := 0.1 ] 
+    ELSE st ENDIF
+ 
+  % this is for the pvsio-web demo
+  init(val: device_real): gpcaui_state = gpcaui_init(val) WITH [ ctrl_ready := 1, is_on := 1 ]
+
+ END gpcaUI
+

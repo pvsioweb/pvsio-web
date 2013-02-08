@@ -1,0 +1,9 @@
+
+Context file /home/paolo/.pvscontext written
+Context changed to /usr/lib/node_modules/pvsio-web/public/projects/AlarisGH_AsenaCC/
+Prelude library PVSio not found
+Typechecking
+Parsing alarisGH_AsenaCC
+alarisGH_AsenaCC parsed in 0.09 seconds
+Typechecking alarisGH_AsenaCC
+alarisGH_AsenaCC typechecked in 0.31s: 9 TCCs, 0 proved, 1 subsumed, 8 unproved
