@@ -34,8 +34,5 @@ To start the server, use
 
 Demo
 ----
-You can interact with the infusion pump demo by navigating to 
-http://localhost:8081/demos/pump/
-
 You can interact with the interactive prototype builder by navigating your browser to
 http://localhost:8081/demos/gip/
