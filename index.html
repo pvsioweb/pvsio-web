@@ -37,6 +37,15 @@
 <p>Before installation, please ensure you download and install pvs and pvsio on your computer and make sure pvsio is available as a command on your path.
 Visit <a href="http://pvs.csl.sri.com/download.shtml">http://pvs.csl.sri.com/download.shtml</a> to download PVS.</p>
 
+<h4>Add PVS to your path</h4>
+<p>You will need to add pvs, pvsio and proveit to your PATH alternatively  you can create symbolic links in /usr/bin for pvs, pvsio, and proveit with the ln command.
+For instance, assuming that pvs is installed in /opt/pvs6.0/pvs, the following commands should be executed in a terminal/shell:
+<ul>
+	<li>	sudo ln -s /opt/pvs6.0/pvs /usr/bin/pvs
+	<li>	sudo ln -s /opt/pvs6.0/pvsio /usr/bin/pvsio
+	<li> 	sudo ln -s /opt/pvs6.0/proveit /usr/bin/proveit
+</ul>
+</p>
 <p>This package also depends on nodejs (<a href="http://nodejs.org/download/">http://nodejs.org/download/</a>). Please download and install nodejs before proceeding to installing pvsio-web.</p>
 
 <h2>Installation</h2>
@@ -69,7 +78,7 @@ or (if your /usr/local/ directory is owned by root)
 http://localhost:8081/demos/pump/</p> -->
 
 <p>You can interact with the interactive prototype builder by navigating your browser to
-http://localhost:8081/demos/gip/</p>
+http://localhost:8081/</p>
         </section>
 
         <aside id="sidebar">
