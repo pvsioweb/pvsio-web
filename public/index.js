@@ -3,7 +3,7 @@
  * @author Patrick Oladimeji
  * @date Dec 3, 2012 : 4:42:55 PM
  */
-require.config({baseUrl:'app',
+require.config({baseUrl:'pvsioweb/app',
 	paths:{
 		"ace":"../lib/ace",
 		"d3":"../lib/d3",

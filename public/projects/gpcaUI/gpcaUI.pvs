@@ -126,6 +126,7 @@ gpcaUI: THEORY
   limit(min_val: device_real): [real -> real] =
     LAMBDA (val: real): IF val > 0 AND val < min_val THEN min_val ELSE val ENDIF
 
+  %-- to be used in a refined specification for setting the decimal accuracy of the display
   set_accuracy(val: device_real): device_real =
     COND
      val < 10       -> floor(val * 100) / 100, % two decimal digits
@@ -143,9 +144,9 @@ gpcaUI: THEORY
             mem = memory(st),
             min_val = min_value(st),
             new_val =
-              set_accuracy(COND val - pow10(i) <= 0 -> 0,
+              COND val - pow10(i) <= 0 -> 0,
                                 val - pow10(i) > 0 -> val - pow10(i)
-                           ENDCOND)
+                           ENDCOND
           IN
           IF new_val /= val
             THEN st WITH [display := new_val, memory := mem(val)]
@@ -159,9 +160,9 @@ gpcaUI: THEORY
             i = cursor(st),
             mem = memory(st),
             new_val =
-              set_accuracy(COND val + pow10(i) >= max -> max,
+              COND val + pow10(i) >= max -> max,
                                 val + pow10(i) < max -> val + pow10(i)
-                           ENDCOND)
+                           ENDCOND
           IN
           IF new_val /= val
             THEN st WITH [display := new_val, memory := mem(val)]
