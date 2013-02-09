@@ -1,0 +1,16 @@
+
+Context file /Users/patrick/Documents/workspace/pvsio-web/.pvscontext written
+Context changed to ~/Documents/workspace/pvsio-web/public/projects/gpcaUI/
+Prelude library PVSio not found
+Typechecking
+Parsing gpcaUI
+gpcaUI parsed in 0.12 seconds
+Typechecking gpcaUI
+Added 3 proofs from theory gpcaUI to orphaned-proofs.prf
+gpcaUI typechecked in 0.48s: 32 TCCs, 0 proved, 5 subsumed, 27 unproved; 43 conversions; 18 msgs
+; While compiling _up:
+Warning: Variable mem is never used.
+; While compiling up!:
+Warning: Variable mem is never used.
+; While compiling (:internal up 0):
+Warning: Variable mem is never used.
