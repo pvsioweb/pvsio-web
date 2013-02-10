@@ -14,6 +14,7 @@ gpcaUI: THEORY
      mem(value: device_real): valid?
      NA: NA?   
    END Memory
+  number_unit: TYPE = { mL } % always mL in this simple version -- the user can enter just volume
 
   % 42->93->4F->86->88->51->8A->8C->8E->48->4D->4A->4E->94
   ControllerCMD: TYPE = { CINIT, C42, C93, C4F, C86, C88, C51, C8A, C8C, C8E, C48, C4D, C4A, C4E, C94, CREADY }
@@ -29,7 +30,8 @@ gpcaUI: THEORY
      %-- data etry state
      display     : device_real, % display
      cursor      : Cursor, % cursor
-     memory      : Memory  % memory
+     memory      : Memory, % memory
+     unit	 : number_unit % display unit
    #]
 
   int2boolean(i: int): boolean =
@@ -46,7 +48,8 @@ gpcaUI: THEORY
 	  tick_enabled:= FALSE,
 	  display     := x,
 	  cursor      := 0,
-	  memory      := NA
+	  memory      := NA,
+	  unit	      := mL
   #)
   CONVERSION gpcaui_init
 
@@ -71,12 +74,19 @@ gpcaUI: THEORY
     ELSE   gpcaui_init(0) WITH [ is_on := TRUE,
     	   	   	  tick_enabled := TRUE ] ENDIF
 
-
   %-- Start-Stop button
   gpcaui_start(st: gpcaui_state): gpcaui_state =
     IF    is_on(st) AND display(st) > 0 AND vtbi(st) > 0 AND rate(st) > 0 
     THEN  IF is_infusing(st) THEN st WITH [ is_infusing := false ] ELSE st WITH [ is_infusing := true ] ENDIF
     ELSE  st ENDIF
+
+  click_start(st: gpcaui_state): gpcaui_state =
+    IF    is_on(st) AND display(st) > 0 AND vtbi(st) > 0 AND rate(st) > 0 
+          AND NOT is_infusing(st) THEN st WITH [ is_infusing := true ] ELSE  st ENDIF
+
+  click_stop(st: gpcaui_state): gpcaui_state =
+    IF    is_on(st) AND display(st) > 0 AND vtbi(st) > 0 AND rate(st) > 0 
+          AND is_infusing(st) THEN st WITH [ is_infusing := false ] ELSE st ENDIF
 
   %-- tick
   gpcaui_tick(st: gpcaui_state): gpcaui_state =
@@ -223,4 +233,3 @@ gpcaUI: THEORY
   init(val: device_real): gpcaui_state = gpcaui_init(val) WITH [ ctrl_ready := 1, is_on := 1 ]
 
  END gpcaUI
-
