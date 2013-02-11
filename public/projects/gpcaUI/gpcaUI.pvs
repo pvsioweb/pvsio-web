@@ -170,8 +170,8 @@ gpcaUI: THEORY
             i = cursor(st),
             mem = memory(st),
             new_val =
-              COND val + pow10(i) >= max -> max,
-                                val + pow10(i) < max -> val + pow10(i)
+              COND val + pow10(i) >= max -> val,
+                   val + pow10(i) < max  -> val + pow10(i)
                            ENDCOND
           IN
           IF new_val /= val

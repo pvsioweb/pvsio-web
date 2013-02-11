@@ -11,13 +11,16 @@ var infusing_tick_period = 1000; //ms
 var ctrl_tick_period = 250; //ms
 
 // variables linked to the UI model state fields; they are used to render the field state.
+var bullet = "&#8226;"
 var vtbi = 0;
 var infusing = 0;
 var ctrl_cmd = "CINIT";
 var isOn = 0;
 var ctrl_ready = 0;
 var pvsio_response;
+var cursor = 0;
 var disp_field = new RegExp("display := [0-9\/.]+");
+var cursor_field = new RegExp("cursor := [0-9\/.-]+");
 var unit_field = new RegExp("unit := [0-9A-Za-z]+");
 var is_on_field = new RegExp("is_on := [0-9\/.]+");
 var vtbi_field = new RegExp("vtbi := [0-9\/.]+");
@@ -35,6 +38,88 @@ function tick() {
 		GIPlog("Sending message " + ctrl_cmd + " to GPCA state controller...");
 		gip.send(ctrl_cmd);
 	}
+}
+
+var render_cursor = function(val) {
+  obj = display_val;
+  obj.innerHTML = "";
+  var disp = val.toString();
+  // display from left to right
+  var decimal_place = disp.indexOf(".");
+  var cursor_rendered = false;
+  for(var i = 0; i < disp.length; i++) {
+	var digit = disp.charAt(i);
+	if(digit == ".") {
+		digit = bullet;
+	}
+	var close_span = false;
+	if(decimal_place > 0 ) {
+		if(cursor < 0) {
+			if(cursor == decimal_place - i) { 
+				obj.innerHTML = obj.innerHTML + "<span class = decimaldigit><span class = \"invertedcolor\">" + digit + "</span></span>"; 
+				cursor_rendered = true;
+			}
+			else {
+				if(i > decimal_place) { obj.innerHTML = obj.innerHTML + "<span class = decimaldigit>" + digit + "</span>"; } 
+				else { obj.innerHTML = obj.innerHTML + digit; }
+			}
+		}
+		else { 
+			if(cursor == decimal_place - i - 1) { 
+				obj.innerHTML = obj.innerHTML + "<span class = \"invertedcolor\">" + digit + "</span>"; 
+				cursor_rendered = true;
+			}
+			else { 
+				if(i > decimal_place) { obj.innerHTML = obj.innerHTML + "<span class = decimaldigit>" + digit + "</span>"; } 
+				else { obj.innerHTML = obj.innerHTML + digit; }
+			}
+		}
+	}
+	else {
+		if(cursor == disp.length - i - 1) { 
+			obj.innerHTML = obj.innerHTML + "<span class = \"invertedcolor\">" + digit + "</span>"; 
+			cursor_rendered = true;
+		}
+		else { obj.innerHTML = obj.innerHTML + digit; }
+	}
+  }
+  if(cursor_rendered == false) {
+	if(cursor < 0) {
+		if(decimal_place < 0) {
+			// the cursor has not been rendered because the decimal part is 0
+			obj.innerHTML = obj.innerHTML + bullet; 
+			var gaps = cursor * -1;
+			for(var i = 0; i < gaps; i++) {
+				if(i == gaps - 1) { obj.innerHTML = obj.innerHTML + "<span class = decimaldigit><span class = \"invertedcolor\">" + "_" + "</span></span>"; }
+				else { obj.innerHTML = obj.innerHTML + "_"; }
+			}
+		}
+		else {
+			// the cursor has not been rendered because the number has just one decimal digit (this rendering is specific to the case with 2 decimals)
+			obj.innerHTML = obj.innerHTML + "<span class = decimaldigit><span class = \"invertedcolor\">" + "_" + "</span></span>";
+		}
+	}
+	else { // the cursor is has been not rendered because it's beyond the max non-zero integer digit
+		if(decimal_place < 0) {
+			var gaps = cursor - disp.length;
+			for(var i = 0; i< gaps; i++) {
+				if(i > decimal_place) {
+					obj.innerHTML = "<span class = decimaldigit>" + "_" + "</span>" + obj.innerHTML;
+				}
+				else {
+					obj.innerHTML = "_" + obj.innerHTML;
+				}
+			}
+		}
+		else {
+			var gaps = cursor - decimal_place;
+			for(var i = 0; i < gaps; i++) {
+				obj.innerHTML = "_" + obj.innerHTML;
+			}
+		}
+		obj.innerHTML = "<span class = \"invertedcolor\">" + "_" + "</span>" + obj.innerHTML;
+	}
+  }
 }
 
 require(['pvsiowebsocketclient_dist'], function(){
@@ -60,13 +145,18 @@ require(['pvsiowebsocketclient_dist'], function(){
 			ctrl_cmd
 			  = ctrl_cmd_field.exec(pvsio_response).toString().substring(
 				  ctrl_cmd_field.exec(pvsio_response).toString().indexOf(":= ") + 3);
+			cursor
+			  = cursor_field.exec(pvsio_response).toString().substring(
+				  cursor_field.exec(pvsio_response).toString().indexOf(":= ") + 3);
 			display_cmd.firstChild.nodeValue = ctrl_cmd;
 			if(isOn == 1 && ctrl_ready == 1) {
 				display_status.firstChild.nodeValue = "";
 				// power on the display
-				display_val.firstChild.nodeValue 
+/*				display_val.firstChild.nodeValue 
 				  = eval(disp_field.exec(pvsio_response).toString().substring(
-					  disp_field.exec(pvsio_response).toString().indexOf(":= ") + 3));
+					  disp_field.exec(pvsio_response).toString().indexOf(":= ") + 3));*/
+				render_cursor(eval(disp_field.exec(pvsio_response).toString().substring(
+					 	   disp_field.exec(pvsio_response).toString().indexOf(":= ") + 3)));
 				display_unit.firstChild.nodeValue
 				  = unit_field.exec(pvsio_response).toString().substring(
 					  unit_field.exec(pvsio_response).toString().indexOf(":= ") + 3);
@@ -102,7 +192,7 @@ require(['pvsiowebsocketclient_dist'], function(){
 				}
 			}
 			else {
-				display_val.firstChild.nodeValue = "powered off";
+				display_val.innerHTML = "powered off";
 				display_unit.firstChild.nodeValue = "";
 				// stop periodic events
 				clearInterval(device_tick);
