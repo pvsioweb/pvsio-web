@@ -45,3 +45,7 @@ Demo
 ----
 You can interact with the interactive prototype builder by navigating your browser to
 http://localhost:8081/
+
+Wiki
+----
+A more comprehensive guide about pvsio-web can be found at https://github.com/thehogfather/pvsio-web/wiki
