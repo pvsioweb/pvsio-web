@@ -28,7 +28,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 	var tempImageName, tempSpecName, specFileName, specNameRegex = /(\w+)\s*:\s*THEORY\s+BEGIN/i;
 	var editor = ace.edit("editor");
 	editor.getSession().setMode('ace/mode/text');
-	editor.gotoLine(1);
+	
 	editor.on("change", function(e){
 		sourceCodeChanged = true;
 		var toplines = editor.getSession().getLines(0, Math.min(4, editor.getSession().getLength())).join("");
@@ -38,7 +38,7 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 			d3.select("#txtSpecFileName").property("value", specFileName);
 		}
 	});
-	editor.setValue("ui_th: THEORY BEGIN \r\n \r\nEND ui_th");
+	updateSourceCode("ui_th: THEORY BEGIN \r\n \r\nEND ui_th");
 	d3.select("#header #txtProjectName").property("value", "");
 //	d3.select("#header #txtProjectName").on("mousedown", function(){
 //		var txt = this;
@@ -438,8 +438,8 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 		editor.setValue(src);
 		editor.clearSelection();
 		editor.gotoLine(1);
-		
-		editor.gotoLine(1);
+		editor.moveCursorTo(0, 0);
+		editor.scrollToLine(0, false, false, function(){});
 	}
 	
 	function newProject(fd){

@@ -110,7 +110,7 @@ define(['./displayMappings','util/Timer','util/eventDispatcher', "./widgetEvents
 					//save handler for widget
 					controls.append("button").attr("type","submit").attr("class", "btn btn-success right").html("Save")
 						.on("click", function(){
-							if(validate(form)){
+							if(validate(form)){	
 								d3.select(this).attr("type", "button");
 								
 								var res = data.map(function(d){
