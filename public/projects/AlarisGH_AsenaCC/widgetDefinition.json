@@ -6,7 +6,8 @@
     "click",
     "press/release"
    ],
-   "type": "Button"
+   "type": "Button",
+   "recallRate": 250
   },
   "Display1357381783023": {
    "predefinedRegex": "[0-9/.]+",
@@ -26,7 +27,8 @@
     "click",
     "press/release"
    ],
-   "type": "Button"
+   "type": "Button",
+   "recallRate": 250
   },
   "Button1357494286330": {
    "functionText": "up",
@@ -34,7 +36,8 @@
     "click",
     "press/release"
    ],
-   "type": "Button"
+   "type": "Button",
+   "recallRate": 250
   },
   "Button1357494295183": {
    "functionText": "dn",
@@ -42,7 +45,8 @@
     "click",
     "press/release"
    ],
-   "type": "Button"
+   "type": "Button",
+   "recallRate": 250
   },
   "Button1357494307176": {
    "functionText": "DN",
@@ -50,7 +54,8 @@
     "click",
     "press/release"
    ],
-   "type": "Button"
+   "type": "Button",
+   "recallRate": 250
   }
  },
  "regionDefs": [

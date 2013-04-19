@@ -3,42 +3,44 @@
  * @author Patrick Oladimeji
  * @date Dec 5, 2012 : 4:16:16 PM
  */
-
-define(['./displayMappings', 'd3/d3'], function(mappings){
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
+/*global define, d3, require, __dirname, process, _*/
+define(['./displayMappings', 'd3/d3'], function (mappings) {
+    "use strict";
 	var splitter = ":= ";
 	var o = {};
-	o.updateDisplay = function(stateString){
+	o.updateDisplay = function (stateString) {
 		var map = mappings.active;
-		if(stateString){
+		if (stateString) {
 			var key, regex, regexMatch, uiElement;
-			for(key in map){
-				//get the value of the display field in the output
-				regex = new RegExp(map[key].regex);
+            _.each(map, function (value, key) {
+                //get the value of the display field in the output
+				regex = new RegExp(value.regex);
 				regexMatch = regex.exec(stateString);
-				if(regexMatch && regexMatch.length > 1){
+				if (regexMatch && regexMatch.length > 1) {
 					regexMatch = eval(regexMatch[1].toString());
 					//update the display ui element with the value
-					uiElement = map[key].uiElement;
-					if(uiElement){
+					uiElement = value.uiElement;
+					if (uiElement) {
 						d3.select("#" + uiElement).html("")
-							.append("span").attr("class","displayvalue").html(regexMatch);
+							.append("span").attr("class", "displayvalue").html(regexMatch);
 					}
 				}
 					
 				uiElement = undefined;
-			}
+            });
 		}//endif
 	};
 	
-	o.clearDisplay = function(){
+	o.clearDisplay = function () {
 		var key, uiElement;
-		for(key in mappings){
-			uiElement = mappings[key].uiElement;
-			if(uiElement){
+        _.each(mappings, function (value, key) {
+            uiElement = value.uiElement;
+			if (uiElement) {
 				d3.select("#" + uiElement).html("");
 			}
 			uiElement = undefined;
-		}
+        });
 	};
 	return o;
 });

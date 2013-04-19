@@ -4,9 +4,12 @@
  * @date Jul 3, 2012
  * @project JSLib
  */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
+/*global define, d3, require, __dirname, process*/
+
 define({
-	PropertyChanged:"PropertyChanged",
-	ValueChanged:"ValueChanged",
-	TimerTicked:"TimerTicked",
-	TimerFinished:"TimerFinished"
+	PropertyChanged: "PropertyChanged",
+	ValueChanged: "ValueChanged",
+	TimerTicked: "TimerTicked",
+	TimerFinished: "TimerFinished"
 });

@@ -1,2 +1,6 @@
 *~
 *.log
+.project
+.pvscontext
+.settings
+.DS_Store

@@ -8,17 +8,22 @@
  * adapted from javascript the good parts
  * @param that
  */
-define(function(){
-	return function(that) {
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
+/*global define, d3, require, __dirname, process*/
+
+define(function () {
+    "use strict";
+    
+	return function (that) {
 		var registry = {};
 
-		var fire = function(event) {
+		var fire = function (event) {
 			// Fire an event on an object. The event can be either  a string
 			// containing the name of the event or an  object containing a type
 			// property containing the  name of the event. Handlers registered by
 			// the 'on' method that match the event name will be invoked.
 			var array, func, handler, i, type = typeof event === 'string' ? event
-					: event.type;
+                : event.type;
 			// If an array of handlers exist for this event, then  loop through it
 			// and execute the handlers in order.
 			if (registry.hasOwnProperty(type)) {
@@ -41,7 +46,7 @@ define(function(){
 		};
 		that.fire = fire;
 		
-		var on = function(type, method, parameters) {
+		var on = function (type, method, parameters) {
 			// Register an event. Make a handler record. Put it  in a handler
 			// array, making one if it doesn't yet exist for this type.
 			var handler = {	method : method, parameters : parameters};
@@ -56,13 +61,13 @@ define(function(){
 		
 		that.addListener = on;
 		
-		var removeListener = function(type, method){
+		var removeListener = function (type, method) {
 			var array, i, handler;
-			if(registry.hasOwnProperty(type)){
+			if (registry.hasOwnProperty(type)) {
 				array = registry[type];
-				for(i = 0; i< array.length; i++){
+				for (i = 0; i < array.length; i++) {
 					handler = array[i];
-					if(method === handler.method){
+					if (method === handler.method) {
 						array.splice(i, 1);
 					}
 				}//end for
@@ -71,7 +76,7 @@ define(function(){
 		};
 		that.removeListener = removeListener;
 		
-		var clearListeners = function(){
+		var clearListeners = function () {
 			registry = {};
 			return this;
 		};
@@ -79,5 +84,4 @@ define(function(){
 		
 		return that;
 	};
-	}
-);
+});
