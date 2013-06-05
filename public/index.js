@@ -3,27 +3,23 @@
  * @author Patrick Oladimeji
  * @date Dec 3, 2012 : 4:42:55 PM
  */
-require.config({baseUrl:'pvsioweb/app',
-	paths:{
-		"ace":"../lib/ace",
-		"d3":"../lib/d3",
-		"pvsioweb":"formal/pvs/prototypebuilder"
-	}
-});
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
+/*global define, d3, require,module, WebSocket*/
+require.config(
+    {
+        baseUrl: 'pvsioweb/app',
+        paths: {
+            "ace": "../lib/ace",
+            "d3": "../lib/d3",
+            "pvsioweb": "formal/pvs/prototypebuilder"
+        }
+    }
+);
 
-require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
-         'pvsioweb/createOverlay',
-         'ace/ace','pvsioweb/widgetMaps', 'util/shuffle', 
-         'pvsioweb/widgetEditor','pvsioweb/widgetEvents',
-         'pvsioweb/buttonWidget','pvsioweb/displayWidget',
-         'pvsioweb/displayMappings',"pvsioweb/forms/newProject",
-         "pvsioweb/forms/events","pvsioweb/forms/openProject",
-         "pvsioweb/forms/saveProjectAs", 'd3/d3'], 
-	function(pvsws, displayManager, overlayCreator ,
-			ace, widgetMaps, shuffle, widgetEditor, widgetEvents, 
-			buttonWidget, displayWidget, displayMappings,newProjectForm, 
-			formEvents, openProjectForm, saveProjectAs){
+require(["main"], function (main) {
+	"use strict";
 	
+<<<<<<< HEAD
 	var currentProject = {}, sourceCodeChanged = false;
 	var tempImageName, tempSpecName, specFileName, specNameRegex = /(\w+)\s*:\s*THEORY\s+BEGIN/i;
 	var editor = ace.edit("editor");
@@ -575,4 +571,6 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 			});
 		}
 	}
+=======
+>>>>>>> dev-mustache
 });

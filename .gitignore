@@ -1,2 +1,9 @@
 *~
 *.log
+.project
+.pvscontext
+.settings
+.DS_Store
+public/projects/*
+public/uploads/*
+public/widgetDefinitions/*
