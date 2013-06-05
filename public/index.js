@@ -62,7 +62,11 @@ require(['websockets/pvs/pvsiowebsocket','pvsioweb/displayManager',
 	 * create pvs websocket connection
 	 * add listeners for pvs process events
 	 */
+    var url = window.location.origin.indexOf("file") === 0 ? "ws://localhost:8081" :
+        ("ws://" + window.location.hostname + ":8081");
+        
 	var ws = pvsws()
+        .serverUrl(url)
 		.addListener('ConnectionOpened', function(e){
 			log("connection to pvsio server established");
 		}).addListener("ConnectionClosed", function(e){
