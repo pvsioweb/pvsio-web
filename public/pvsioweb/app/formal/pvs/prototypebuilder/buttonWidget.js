@@ -44,11 +44,36 @@ define(function (require, exports, module) {
 		
 		o.getRenderData = function () {
 			var res = [];
-			res.push({label: "Area Type", element: "select", value: o.type(), data: widgetTypes, name: "type"});
-			res.push({label: "Area Identifier", element: "input", inputType: "text", value: o.functionText(), name: "functionText", other: ['required']});
-			res.push({label: "Bind", element: 'input', inputType: "checkbox", data: defaultEvents, value: o.events(), name: "events"});
-			res.push({label: "Recall Rate", element: "input", inputType: "text", pattern: "\\d{2,5}", value: o.recallRate(), name: "recallRate", other: ['required']});
-			res.push({label: "", element: "textarea", inputType: "text", value: o.boundFunction(), name: "boundFunction", other: ['readonly']});
+			res.push({label: "Area Type",
+                      element: "select",
+                      value: o.type(),
+                      data: widgetTypes,
+                      name: "type"});
+			res.push({label: "Area Identifier",
+                      element: "input",
+                      inputType: "text",
+                      value: o.functionText(),
+                      name: "functionText",
+                      other: ['required']});
+			res.push({label: "Bind",
+                      element: 'input',
+                      inputType: "checkbox",
+                      data: defaultEvents,
+                      value: o.events(),
+                      name: "events"});
+			res.push({label: "Recall Rate",
+                      element: "input",
+                      inputType: "text",
+                      pattern: "\\d{2,5}",
+                      value: o.recallRate(),
+                      name: "recallRate",
+                      other: ['required']});
+			res.push({label: "",
+                      element: "textarea",
+                      inputType: "text",
+                      value: o.boundFunction(),
+                      name: "boundFunction",
+                      other: ['readonly']});
 
 			return res;
 		};
