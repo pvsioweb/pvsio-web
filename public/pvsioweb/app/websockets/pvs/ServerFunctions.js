@@ -9,9 +9,9 @@ define(function (require, exports, module) {
     "use strict";
     
     module.exports = {
-        GetSourceCode: "getSourceCode",
-        SaveSourceCode: "saveSourceCode",
         SendUICommand: "sendCommand",
-        StartProcess: "startProcess"
+        StartProcess: "startProcess",
+        WriteFile: "writeFile",
+        ReadFile: "readFile"
     };
 });

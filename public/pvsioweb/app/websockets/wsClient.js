@@ -26,6 +26,7 @@ define(function (require, exports, module) {
                     o.fire({type: events.ConnectionClosed, event: event});
                 };
                 //when a message is received, look for the callback for that message id in the callbackRegistry
+                //if no callback exists then broadcast the event using the token type string
                 ws.onmessage = function (event) {
                     var token = JSON.parse(event.data);
                     //if token has an id check if there is a function to be called in the registry
@@ -33,9 +34,10 @@ define(function (require, exports, module) {
                         var f = callbackRegistry[token.id];
                         delete callbackRegistry[token.id];
                         f.call(o, token);
+                    } else if (token.type) {
+                        o.fire(token);
                     }
                 };
-                
             }
             return o;
         };

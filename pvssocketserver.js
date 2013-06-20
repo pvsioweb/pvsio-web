@@ -1,4 +1,4 @@
-//#!/usr/bin/env node
+#!/usr/bin/env node
 
 /**
  * This file creates a connection to a pvsio process run locally or at specified host.
@@ -53,21 +53,19 @@ function run() {
     
     /**
      * save the file described in request parameter into the uploads directory
-     * @param {Request} req
-     * @param {Response} res
+     * @param {object} token
      */
-    function saveTempFile(req, res) {
-        var fileContent = req.body.fileContent;
-        var fileName = req.body.newFileName;
-        var oldFileName = req.body.oldFileName, oldFilePath = __dirname + uploadDir + "/" + oldFileName;
+    function saveTempFile(token, cb) {
+        var fileContent = token.fileContent;
+        var fileName = token.newFileName;
+        var oldFileName = token.oldFileName, oldFilePath = __dirname + uploadDir + "/" + oldFileName;
         var destName = __dirname + uploadDir + "/" + fileName;
         if (fileContent && fileName) {
             fs.writeFileSync(destName, fileContent);
         } else if (oldFileName && fileName) {
             fs.renameSync(oldFilePath, destName);
         }
-        
-        res.send({fileName: fileName});
+        cb({fileName: fileName});
     }
     
     /**
@@ -75,42 +73,35 @@ function run() {
      * @param {Request} req
      * @param {Response} res
      */
-    function createProject(req, res) {
-        var pvsFileName = req.body.pvsSpecName, pvsSpecFullPath = __dirname + uploadDir + "/" + pvsFileName;
-        var projectName = req.body.projectName;
-        var prototypeImage = req.body.prototypeImage;
-        var imageFullPath = __dirname + uploadDir + "/" + prototypeImage;
-        util.log(JSON.stringify(req.body));
+    function createProject(opt) {
+        var uploadSpecPath = __dirname + uploadDir + "/" + opt.uploadedSpecFileName;
+        var projectName = opt.projectName;
+        var prototypeImage = opt.prototypeImage;
+        var uploadImagePath = __dirname + uploadDir + "/" + opt.uploadedImageFileName;
         var projectPath = __dirname + "/public/projects/" + projectName;
-        var response = {type: "projectCreated"};
+        var newImagePath = projectPath + "/" + opt.clientImageFileName,
+            newSpecPath = projectPath + "/" + opt.clientSpecFileName;
+        var obj = {type: "projectCreated"};
         try {
             if (fs.existsSync(projectPath)) {
                 response.err = "Project with the same name exists. Please choose a different name. Old project name was " + projectPath;
             } else {
                 //create a project folder
                 fs.mkdirSync(projectPath);
-                fs.renameSync(imageFullPath, projectPath + "/image." + prototypeImage.split(".")[1]);
-                //copy sourcecode to the project directory
-                var data = fs.readFileSync(pvsSpecFullPath, 'utf8');
-                fs.writeFileSync(projectPath + "/" + pvsFileName, data);
-                var obj = {};
-                obj.image = "image." + prototypeImage.split(".")[1];
+                fs.renameSync(uploadImagePath, newImagePath);
+                fs.renameSync(uploadSpecPath, newSpecPath);
+                obj.image = newImagePath.split("/").slice(-1).reduce(function (a, b) {return a.concat(b);});
                 obj.projectPath = projectPath;
-                obj.imageFullPath = obj.projectPath + "/" + obj.image;
+                obj.imageFullPath = newImagePath;
                 obj.name = projectName;
-                obj.sourceCode = data;
-                obj.spec = pvsFileName;
-                obj.specFullPath = obj.projectPath + "/" + obj.spec;
+                obj.spec = newSpecPath.split("/").slice(-1).reduce(function (a, b) {return a.concat(b);});
+                obj.specFullPath = newSpecPath;
                 util.log("Source code has been saved.");
-                response.data = obj;
             }
         } catch (err) {
-            response.err = err;
+            obj.err = err;
         }
-        var result = JSON.stringify(response);
-        util.log(result);
-        res.send(response);
-        
+        return obj;
     }
     
     /**
@@ -154,60 +145,54 @@ function run() {
     webserver.use(express.static(__dirname + "/public"));
     webserver.use(express.bodyParser({ keepExtensions: true, uploadDir: __dirname + uploadDir}));
     
-    //add image upload path
-    webserver.all("/uploadfile", function (req, res) {
+    /**
+     * used to manage file upload process for pvsio-web
+     */
+    webserver.all("/upload", function (req, res) {
         util.log(JSON.stringify(req.files));
         var fileName = req.files.file.path.split("/").slice(-1).join("");
+        //should return a map of oldname to new name for the uploaded files
         res.send({fileName: fileName});
     });
     
-    webserver.all("/saveWidgetDefinition", function (req, res) {
-        var fileName = __dirname + "/public/projects/" + req.body.fileName,
-            fileContent = req.body.fileContent;
-        fs.writeFile(fileName, fileContent, function (err) {
-            if (err) {
-                console.log(err);
-                res.send({error: "Problem saving widget definition file", err: err});
-            } else {
-                res.send({success: "file saved", fileName: fileName});
-            }
+    function typeCheck(filePath, cb) {
+        procWrapper().exec({
+            command: "proveit " + filePath,
+            callBack: cb
         });
-    });
-    
-    webserver.all("/typecheck", function (req, res) {
-        var file = req.body.file;
-        procWrapper()
-            .exec({
-                command: "proveit "  + file,
-                callBack: function (err, stdout, stderr) {
-                    res.send({err: err, stdout: stdout, stderr: stderr});
-                }
-            });
-    });
-    
-    webserver.all("/newProject", function (req, res) {
-        var pvsSpecName = req.files.pvsSpec.name;
-        var imageFullPath = req.files.prototypeImage.path;
-        var prototypeImage = imageFullPath.split("/").slice(-1).join("");
-        req.body.pvsSpecName = pvsSpecName;
-        req.body.prototypeImage = prototypeImage;
-        createProject(req, res);
-    });
-    
-    webserver.all("/openProject", function (req, res) {
-        var projects = listProjects();
-        res.send(projects);
-    });
-    
-    webserver.all("/createProject", createProject);
-    
-    webserver.all("/saveTempFile", saveTempFile);
-    
+    }
     
     httpServer.listen(port);
     
     //define websocket server    
     var wsServer = wsbase("PVSIO")
+        .bind("saveTempFile", function (token, socket, socketid) {
+            saveTempFile(token, function (res) {
+                res.id = token.id; res.serverSent = new Date().getTime();
+                processCallback(res, socket);
+            });
+        })
+        .bind("listProjects", function (token, socket, socketid) {
+            var projects = listProjects();
+            var res = {id: token.id, serverSent: new Date().getTime(), projects: projects};
+            processCallback(res, socket);
+        })
+        .bind("createProject", function (token, socket, socketid) {
+            p = pvsioProcessMap[socketid] || pvsio();
+            pvsioProcessMap[socketid] = p;
+            
+            util.log(JSON.stringify(token));
+            var res = createProject(token);
+            res.id = token.id;
+            res.serverSent = new Date().getTime();
+            processCallback(res, socket);
+        })
+        .bind("typeCheck", function (token, socket, socketid) {
+            typeCheck(token.filePath, function (err, stdout, stderr) {
+                var res = {id: token.id, err: err, stdout: stdout, stderr: stderr};
+                processCallback(res, socket);
+            });
+        })
         .bind("sendCommand", function (token, socket, socketid) {
             p = pvsioProcessMap[socketid];
             p.sendCommand(token.data.command);
@@ -228,6 +213,10 @@ function run() {
                 //if the type of the token is 'processExited' then close the socket if it is still open
                     tok.socketId = socketid;
                     processCallback(tok, socket);
+                }, function (res) { //this function is called when the pvsio process is ready
+                    res.id = token.id;
+                    res.serverSent = new Date().getTime();
+                    processCallback(res, socket);
                 });
             //add to map
             pvsioProcessMap[socketid] = p;
@@ -250,27 +239,30 @@ function run() {
             }
             //hsndle close event of socket to release resources
             socket.on("close", onsocketClose(socketid));
-        }).bind("getSourceCode", function (token, socket, socketid) {
+        }).bind("readFile", function (token, socket, socketid) {
             p = pvsioProcessMap[socketid];
-            p.getSourceCode(function (res) {
-                socket.send(JSON.stringify(res));
+            p.readFile(token.fileName, function (err, res) {
+                var res = {id: token.id, serverSent: new Date().getTime(), fileContent: res};
+                processCallback(res, socket);
             });
-        }).bind("saveSourceCode", function (token, socket, socketid) {
+        }).bind("writeFile", function (token, socket, socketid) {
             p = pvsioProcessMap[socketid];
-            p.saveSourceCode(token.data, function (token) {
-                //sourcecode has been saved so restart the server
-                if (token.type === "sourceCodeSaved") {
+            p.writeFile(token.data, function (err) {
+                var res = {id: token.id, serverSent: new Date().getTime()};
+                ///continue here !!! files saved need to inform client about need to restart pvsioweb with appropriate files
+                if (!err) {
                     util.log("Source code has been saved. Closing process ... " + socketid);
-                    p.close();
-                    delete pvsioProcessMap[socketid];
-                    socket.send(JSON.stringify(token));
+                    res.type = "fileSaved";
                 } else {
-                    socket.send(JSON.stringify(token));
+                    res.type = "error";
                 }
+                processCallBack(res, socket);
             });
         });
         
-    wsServer.start({server: httpServer});
+    wsServer.start({server: httpServer}, function () {
+        
+    });
 }
 
 run();

@@ -84,5 +84,17 @@ module.exports = function () {
         }
         return o;
     };
+    
+    o.readFile = function (path, callback) {
+        if (path && callback) {
+            fs.readFile(path, "utf8", callback);
+        }
+    };
+    
+    o.writeFile = function (path, data, callback) {
+        if (path && data && callback) {
+            fs.writeFile(path, data, callback);
+        }
+    };
     return o;
 };

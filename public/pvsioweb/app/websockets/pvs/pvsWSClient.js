@@ -1,5 +1,5 @@
 /**
- * wrapper around the websocket client specifically for pvsio websocket functions
+ * wrapper around the generic websocket client specifically for pvsio websocket functions
  * @author Patrick Oladimeji
  * @date 6/4/13 21:58:31 PM
  */
@@ -10,7 +10,8 @@ define(function (require, exports, module) {
     var wsclient            = require("websockets/wsClient"),
         eventDispatcher     = require("util/eventDispatcher"),
         property            = require("util/property"),
-        serverFunctions     = require("websockets/pvs/ServerFunctions");
+        serverFunctions     = require("websockets/pvs/ServerFunctions"),
+        pvsEvents           = require("formal/pvs/prototypebuilder/events");
     
     module.exports = function () {
         var wscBase = wsclient();
@@ -27,6 +28,11 @@ define(function (require, exports, module) {
         o.lastState = property.call(o, "init(0)");
         o.value = property.call(o, "0");
         
+        o.logon = function () {
+            wscBase.logon();
+            return o;
+        };
+        
         o.close = function () {
             wscBase.close();
         };
@@ -38,23 +44,34 @@ define(function (require, exports, module) {
         
         o.sendGuiAction = function (action, cb) {
             wscBase.send({type: serverFunctions.SendUICommand, data: {command: action}}, cb);
+            wscBase.fire({type: pvsEvents.InputUpdated, data: action});
             return o;
         };
         
-        o.getSourceCode = function (cb) {
-            var token = {type: serverFunctions.GetSourceCode};
+        o.getFile = function (fileName, cb) {
+            var token = {type: serverFunctions.ReadFile, fileName: fileName};
             wscBase.send(token, cb);
             return o;
         };
         
-        o.saveSourceCode = function (data, cb) {
-            var token = {type: serverFunctions.SaveSourceCode, data: data};
+        o.writeFile = function (data, cb) {
+            var token = {type: serverFunctions.WriteFile, data: data};
             wscBase.send(token, cb);
             return o;
         };
         
         o.resetLastState = function () {
             o.lastState("init(" + o.value() + ")");
+            return o;
+        };
+        
+        o.send = function (token, cb) {
+            wscBase.send(token, cb);
+            return o;
+        };
+        
+        o.addListener = function (type, callback) {
+            wscBase.addListener(type, callback);
             return o;
         };
         return o;

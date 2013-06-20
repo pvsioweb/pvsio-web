@@ -28,9 +28,10 @@ module.exports = function (name) {
 	 * starts a websocket server
 	 * @param options may contain keys specifying host:String,port:Number,server:http.Server, 
 	 * verifyClient:Function, path:String, noServer:Boolean, disableHixie:Boolean, clientTracking:Boolean
+     * @cb function to call when server has started
 	 * @returns {___anonymous500_501}
 	 */
-	o.start = function (options) {
+	o.start = function (options, cb) {
 		options = options || {};
 		server = new WebSocketServer(options);
 		util.log("server instantiated. waiting for connection ...");
@@ -56,6 +57,7 @@ module.exports = function (name) {
 		});
 		
 		util.log(util.format("%s websocket server started . Listening on localhost on port %s", name, o.port.toString()));
+        cb.call(o);
 		return o;
 	};
 	
