@@ -13,7 +13,7 @@ define(["./formBuilder"], function (formBuilder) {
 			data: [
                 {label: "Project Name", name: "projectName", other: ['required']},
                 {label: "Prototype Image", name: "prototypeImage", inputType: "file", other: ['required']},
-                {label: "PVS Spec", name: "pvsSpec", inputType: "file", other: ['required']}
+                {label: "PVS Spec", name: "pvsSpec", inputType: "file", other: ['required', "multiple"]}
             ]
 		};
 	

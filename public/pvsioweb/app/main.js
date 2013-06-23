@@ -22,7 +22,8 @@ define(function (require, exports, module) {
         newProjectForm          = require("pvsioweb/forms/newProject"),
         formEvents              = require("pvsioweb/forms/events"),
         openProjectForm         = require("pvsioweb/forms/openProject"),
-        saveProjectAs           = require("pvsioweb/forms/saveProjectAs");
+        saveProjectAs           = require("pvsioweb/forms/saveProjectAs"),
+        WebPageFileReader       = require("util/WebPageFileReader");
     
     var currentProject = {}, sourceCodeChanged = false, ws;
 	var tempImageName, tempSpecName, specFileName, specNameRegex = /(\w+)\s*:\s*THEORY\s+BEGIN/i;
@@ -223,7 +224,7 @@ define(function (require, exports, module) {
 		var safe = {widgetMaps: widgetMaps.toJSON(), regionDefs: getRegionDefs()};
 		//save to the user's drive
 		var safeStr = JSON.stringify(safe, null, " ");
-		var data  = {"fileName": project.name + "/widgetDefinition.json", fileContent: safeStr};
+		var data  = {"fileName": project.projectPath + "/widgetDefinition.json", fileContent: safeStr};
 		ws.writeFile(data, function (res) {
             if (res.type === "fileSaved") {
                 console.log(res);
@@ -333,28 +334,38 @@ define(function (require, exports, module) {
 		d3.selectAll("#btnLoadPicture").on("click", function () {
 			d3.select("#btnSelectPicture").node().click();
 		});
-		d3.select("#btnSelectPicture").on("change", function () {
+        
+        function onInterfaceImageUploaded(res) {
+            res = JSON.parse(res.responseText);
+            tempImageName =  res.fileName;
+            var imagepath = "../../uploads/" + res.fileName;
+            updateImage(imagepath);
+            //hide the draganddrop stuff
+            d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+        }
+		
+        d3.select("#btnSelectPicture").on("change", function () {
 			var file = d3.event.currentTarget.files[0];
 			if (file && imageExts.indexOf(file.name.split(".").slice(-1).join("").toLowerCase()) > -1) {
-				uploadFile(file,	function (res) {
-					res = JSON.parse(res.responseText);
-					tempImageName =  res.fileName;
-					var imagepath = "../../uploads/" + res.fileName;
-					updateImage(imagepath);
-					//hide the draganddrop stuff
-					d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
-				});
+				uploadFile(file, onInterfaceImageUploaded);
 			}
 		});
 		
-		d3.select("#btnLoadSpec").on("clik", function () {
+		d3.select("#btnLoadSpec").on("click", function () {
 			d3.select("#btnSelectSpec").node().click();
 		});
 		
 		d3.select("#btnSelectSpec").on("change", function () {
 			//check if file is valid pvs file
 			var file = d3.event.currentTarget.files[0];
+            
 			if (file && file.name.split(".").slice(-1).join("").toLowerCase() === "pvs") {
+                var fr = WebPageFileReader.FileReader()
+                    .onLoad(function (e) {
+                        updateSourceCode(e.target.result);
+                        tempSpecName = file.name;
+                    }).readAsText(file);
+                
 				uploadFile(file, function (res) {
 					res = JSON.parse(res.responseText);
 					tempSpecName =  res.fileName;
@@ -386,7 +397,7 @@ define(function (require, exports, module) {
 			d3.select(c).style("border", null);
 			var file = e.dataTransfer.files[0];
 			console.log(file);
-			uploadFile(file);
+			uploadFile(file, onInterfaceImageUploaded);
 			e.preventDefault();
 			e.stopPropagation();
 			return false;
@@ -421,6 +432,7 @@ define(function (require, exports, module) {
                             currentProject.image;
                         updateImage(imagePath);
                         updateProjectName(currentProject.name);
+                        d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
                     }
                 });
             });
@@ -482,8 +494,9 @@ define(function (require, exports, module) {
 	 * create pvs websocket connection
 	 * add listeners for pvs process events
 	 */
+    var port = 8082;
     var url = window.location.origin.indexOf("file") === 0 ?
-            "ws://localhost:8081" : ("ws://" + window.location.hostname + ":8081");
+            ("ws://localhost:" + port) : ("ws://" + window.location.hostname + ":" +  port);
 	ws = pvsws()
         .serverUrl(url)
 		.addListener('ConnectionOpened', function (e) {
@@ -501,7 +514,6 @@ define(function (require, exports, module) {
 			pvsio_commands_log(JSON.stringify(e.data));
 		}).addListener("processExited", function (e) {
             var msg = "Warning!!!\r\nServer process exited. See console for details.";
-            alert(msg);
 			console.log("Server process exited -- server message was ...");
 			console.log(e);
 			log(JSON.stringify(e));
@@ -530,14 +542,16 @@ define(function (require, exports, module) {
 	 */
 	d3.select("#btnBuilderView").classed("selected", true).on("click", function () {
 		d3.select("img").style("z-index", -2);
-		d3.selectAll("#controlsContainer button").classed("selected", false);
+		d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
 		d3.select(this).classed('selected', true);
+        d3.select("div.display,#controlsContainer button").classed("builder", true);
 	});
 	
 	d3.select("#btnSimulatorView").on("click", function () {
 		d3.select("img").style("z-index", 2);
-		d3.selectAll("#controlsContainer button").classed("selected", false);
+		d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
 		d3.select(this).classed('selected', true);
+        d3.select("div.display,#controlsContainer button").classed("simulator", true);
 	});
 	
 	d3.select("#saveProject").on("click", function () {

@@ -60,7 +60,11 @@ module.exports = function () {
 			}));
 			
 			if (processReady && lastLine.indexOf(readyString) > -1) {
-                var outString = output.join("");
+                var outString = output.join("").replace(/,/g, ", ").replace(/\s+\:\=/g, ":=").replace(/\:\=\s+/g, ":=");
+                //This is a hack to remove garbage collection messages from the output string before we send to the client
+                var croppedString = outString.substring(0, outString.indexOf("(#"));
+                outString = outString.substring(outString.indexOf("(#"));
+                util.log(outString);
 				callback({type: "pvsoutput", data: [outString]});
 				//clear the output
 				output  = [];
@@ -69,10 +73,10 @@ module.exports = function () {
 				processReadyCallback({type: "processReady", data: output});
 				processReady = true;
 				output = [];
-			} else {
+			} /*else {
 				//maybe process has stalled
 				callback({type: "processStalled", data: output});
-			}
+			}*/
 		}
 		
 		function onProcessExited(code) {
@@ -96,7 +100,7 @@ module.exports = function () {
 	 * will be by the 'on data' event of the process standard output stream
 	 * @param {string} command the command to send to pvsio
 	 */
-	o.sendCommand = function (command, callback) {
+	o.sendCommand = function (command) {
 		util.log("sending command " + command + " to process");
 		pvs.sendCommand(command);
 		return o;
@@ -118,8 +122,8 @@ module.exports = function () {
      * @param {fileName:string, fileContent: string} data Object representing the sourcecode to save
      * @param {function ({type: string, data: {fileName: string}})} callback function to invoke when the file has been saved
 	 */
-	o.writeFile = function (data, callback) {
-        pvs.writeFile(data, callback);
+	o.writeFile = function (path, data, callback) {
+        pvs.writeFile(path, data, callback);
 		return o;
 	};
 	

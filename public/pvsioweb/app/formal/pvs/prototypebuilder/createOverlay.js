@@ -94,6 +94,15 @@ define(function (require, exports, module) {
     
 	function createDiv(parent, mx, my) {
 		var moving = false, startMouseX, startMouseY, startTop, startLeft;
+        function mouseUp() {
+            var mark = d3.select(this);
+            startMouseX = startMouseY = undefined;
+            d3.event.preventDefault();
+            if (moving) {
+                d3.event.stopPropagation();
+            }
+            moving  = false;
+        }
 		//if there are any active selections, remove them from the selection class
 		if (!d3.selectAll(".mark.selected").empty()) {
 			d3.selectAll(".mark.selected").classed("selected", false);
@@ -116,25 +125,22 @@ define(function (require, exports, module) {
 			})
 			.attr("class", "mark selected")
 			.on("mousedown", function () {
-				d3.event.preventDefault();
-				d3.event.stopPropagation();
-				startMouseX = d3.event.clientX;
-				startMouseY = d3.event.clientY;
-				startTop = parseFloat(d3.select(this).style('top'));
-				startLeft = parseFloat(d3.select(this).style("left"));
-				//mark this element as selected
-				d3.selectAll(".mark.selected").classed("selected", false);
-				d3.select(this).classed('selected', true);
-				moving = true;
-			}).on("mouseup", function () {
-				var mark = d3.select(this);
-				startMouseX = startMouseY = undefined;
-				d3.event.preventDefault();
-				if (moving) {
-					d3.event.stopPropagation();
+                if (d3.select(this).classed("builder")) {
+                    d3.event.preventDefault();
+                    d3.event.stopPropagation();
+                    startMouseX = d3.event.clientX;
+                    startMouseY = d3.event.clientY;
+                    startTop = parseFloat(d3.select(this).style('top'));
+                    startLeft = parseFloat(d3.select(this).style("left"));
+                    //mark this element as selected
+                    d3.selectAll(".mark.selected").classed("selected", false);
+                    d3.select(this).classed('selected', true);
+                    moving = true;
                 }
-				moving  = false;
-			}).on("mousemove", function () {
+				
+			}).on("mouseup", mouseUp)
+            .on("mouseout", mouseUp)
+            .on("mousemove", function () {
 				if (moving) {
 					var mark = d3.select(this);
 					d3.event.preventDefault();

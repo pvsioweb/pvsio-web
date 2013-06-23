@@ -76,7 +76,7 @@ define(function (require, exports, module) {
     
     function updateRegex() {
         var r = "", predefined = d3.select("#predefinedRegex").property("value"), prefix = d3.select("#prefix").property("value");
-        r = prefix + " := (" + predefined + ")";
+        r = prefix + ":=(" + predefined + ")";
         d3.select("#regex").property("value", r);
     }
     
@@ -135,6 +135,11 @@ define(function (require, exports, module) {
                     el.attr('pattern', d.pattern);
                 }
                 if (d.data) {
+                    //sort the data to fix the chrome bug that causes the select box to show the first item and not the selected one
+                    d.data.sort(function (a, b) {
+                        return a.value === d.value ? -1 : 1;
+                    });
+                    
                     if (d.element === "select") {
                         el.selectAll("option").data(d.data).enter()
                             .append("option")

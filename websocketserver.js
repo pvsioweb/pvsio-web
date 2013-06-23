@@ -21,7 +21,6 @@ module.exports = function (name) {
 	var messageFunctionMap = {};
 	
 	var o = {}, server, clientid = 0;
-	o.port = 8081;
 	name = name || "";
 	
 	/**
@@ -56,7 +55,7 @@ module.exports = function (name) {
 			util.log(JSON.stringify(err));
 		});
 		
-		util.log(util.format("%s websocket server started . Listening on localhost on port %s", name, o.port.toString()));
+		util.log("websocket server started.");
         cb.call(o);
 		return o;
 	};

@@ -185,8 +185,9 @@ intput:invalid, select:invalid{
 }
 
 #specDragAndDrop.dndcontainer{
-	display:none;
+    display:none;
 }
+
 .dndcontainer span{
 	display:block;
 	margin-top: 150px;
@@ -204,6 +205,9 @@ intput:invalid, select:invalid{
 	cursor: move;
 }
 
+div#logsDiv {
+    display: none;
+}
 
 /***bootstrap overrides ***/
 div#content select, div#content input, div#content textarea, div.detailsForm  input,

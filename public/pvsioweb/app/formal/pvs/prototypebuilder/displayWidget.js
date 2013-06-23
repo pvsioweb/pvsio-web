@@ -13,7 +13,7 @@ define(['./baseWidget', './widgetType', 'util/property', './displayMappings'],
     
         function predefinedRegexes() {
             var res = [];
-            _.each(displayMappings, function (value) {
+            _.each(displayMappings.preset, function (value) {
                 res.push(value);
             });
             return res;

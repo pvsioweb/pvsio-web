@@ -28,7 +28,7 @@ function run() {
         procWrapper             = require("./processwrapper"),
         uploadDir               = "/public/uploads",
         host                    = "0.0.0.0",
-        port                    = 8081,
+        port                    = 8082,
         workspace               = __dirname + "/public",
         pvsioProcessMap         = {},//each client should get his own process
         httpServer              = http.createServer(webserver),
@@ -84,17 +84,17 @@ function run() {
         var obj = {type: "projectCreated"};
         try {
             if (fs.existsSync(projectPath)) {
-                response.err = "Project with the same name exists. Please choose a different name. Old project name was " + projectPath;
+                obj.err = "Project with the same name exists. Please choose a different name. Old project name was " + projectPath;
             } else {
                 //create a project folder
                 fs.mkdirSync(projectPath);
                 fs.renameSync(uploadImagePath, newImagePath);
                 fs.renameSync(uploadSpecPath, newSpecPath);
-                obj.image = newImagePath.split("/").slice(-1).reduce(function (a, b) {return a.concat(b);});
+                obj.image = newImagePath.split("/").slice(-1).reduce(function (a, b) {return a.concat(b); });
                 obj.projectPath = projectPath;
                 obj.imageFullPath = newImagePath;
                 obj.name = projectName;
-                obj.spec = newSpecPath.split("/").slice(-1).reduce(function (a, b) {return a.concat(b);});
+                obj.spec = newSpecPath.split("/").slice(-1).reduce(function (a, b) {return a.concat(b); });
                 obj.specFullPath = newSpecPath;
                 util.log("Source code has been saved.");
             }
@@ -168,7 +168,8 @@ function run() {
     var wsServer = wsbase("PVSIO")
         .bind("saveTempFile", function (token, socket, socketid) {
             saveTempFile(token, function (res) {
-                res.id = token.id; res.serverSent = new Date().getTime();
+                res.id = token.id;
+                res.serverSent = new Date().getTime();
                 processCallback(res, socket);
             });
         })
@@ -212,6 +213,7 @@ function run() {
                 //called when any data is recieved from pvs process
                 //if the type of the token is 'processExited' then close the socket if it is still open
                     tok.socketId = socketid;
+                    tok.id = token.id;
                     processCallback(tok, socket);
                 }, function (res) { //this function is called when the pvsio process is ready
                     res.id = token.id;
@@ -241,13 +243,14 @@ function run() {
             socket.on("close", onsocketClose(socketid));
         }).bind("readFile", function (token, socket, socketid) {
             p = pvsioProcessMap[socketid];
-            p.readFile(token.fileName, function (err, res) {
-                var res = {id: token.id, serverSent: new Date().getTime(), fileContent: res};
+            p.readFile(token.fileName, function (err, content) {
+                var res = {id: token.id, serverSent: new Date().getTime(), fileContent: content};
                 processCallback(res, socket);
             });
         }).bind("writeFile", function (token, socket, socketid) {
             p = pvsioProcessMap[socketid];
-            p.writeFile(token.data, function (err) {
+            p.writeFile(token.data.fileName, token.data.fileContent, function (err) {
+                util.log("back from write file ...");
                 var res = {id: token.id, serverSent: new Date().getTime()};
                 ///continue here !!! files saved need to inform client about need to restart pvsioweb with appropriate files
                 if (!err) {
@@ -255,13 +258,15 @@ function run() {
                     res.type = "fileSaved";
                 } else {
                     res.type = "error";
+                    res.err = err;
+                    util.log(err);
                 }
-                processCallBack(res, socket);
+                processCallback(res, socket);
             });
         });
         
     wsServer.start({server: httpServer}, function () {
-        
+        console.log("http server started .." + "now listening on port " + port);
     });
 }
 
