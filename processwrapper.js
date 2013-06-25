@@ -79,7 +79,7 @@ module.exports = function () {
     o.sendCommand = function (command) {
         if (!proc.stdin.write(command)) {
             proc.stdin.on("drain", (function (c) {
-                proc.stdin.write(c);
+                return function () { proc.stdin.write(c); };
             }(command)));
         }
         return o;

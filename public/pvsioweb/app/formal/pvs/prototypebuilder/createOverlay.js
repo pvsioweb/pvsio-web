@@ -125,7 +125,7 @@ define(function (require, exports, module) {
 			})
 			.attr("class", "mark selected")
 			.on("mousedown", function () {
-                if (d3.select(this).classed("builder")) {
+                if (!d3.select(this).classed("simulator")) {
                     d3.event.preventDefault();
                     d3.event.stopPropagation();
                     startMouseX = d3.event.clientX;

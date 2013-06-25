@@ -447,7 +447,7 @@ define(function (require, exports, module) {
     
     function saveSourceCode(project) {
 		if (sourceCodeChanged) {
-			ws.writeFile({fileName: project.spec, fileContent: editor.getValue()},
+			ws.writeFile({fileName: project.path + "/" + project.spec, fileContent: editor.getValue()},
                         handleSourceCodeSaved);
 			sourceCodeChanged = false;
 		}
@@ -504,6 +504,7 @@ define(function (require, exports, module) {
 		}).addListener("ConnectionClosed", function (e) {
 			log("connection to pvsio server closed");
 		}).addListener("pvsoutput", function (e) {
+            console.log(e);
 			var response = prettyPrint(e.data), tmp;
             ws.lastState(e.data);
             ws.value(parseState(e.data).display);
@@ -545,6 +546,7 @@ define(function (require, exports, module) {
 		d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
 		d3.select(this).classed('selected', true);
         d3.select("div.display,#controlsContainer button").classed("builder", true);
+        d3.select("div.display,#controlsContainer button").classed("simulator", false);
 	});
 	
 	d3.select("#btnSimulatorView").on("click", function () {
@@ -552,6 +554,7 @@ define(function (require, exports, module) {
 		d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
 		d3.select(this).classed('selected', true);
         d3.select("div.display,#controlsContainer button").classed("simulator", true);
+        d3.select("div.display,#controlsContainer button").classed("builder", false);
 	});
 	
 	d3.select("#saveProject").on("click", function () {

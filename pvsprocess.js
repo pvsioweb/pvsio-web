@@ -12,10 +12,9 @@ var childprocess = require("child_process"),
 	fs = require("fs");
 var procWrapper = require("./processwrapper");
 var spawn = childprocess.spawn;
-var pvs = procWrapper();
 module.exports = function () {
     "use strict";
-
+    var pvs = procWrapper();
     var o                                   = {},
         output                              = [],
         readyString                         = "<PVSio>",
@@ -73,10 +72,7 @@ module.exports = function () {
 				processReadyCallback({type: "processReady", data: output});
 				processReady = true;
 				output = [];
-			} /*else {
-				//maybe process has stalled
-				callback({type: "processStalled", data: output});
-			}*/
+			}
 		}
 		
 		function onProcessExited(code) {
@@ -90,7 +86,7 @@ module.exports = function () {
 			onDataReceived: onDataReceived,
 			onProcessExited: onProcessExited});
 		
-		util.log("pvsio process started with file " + filename);
+		util.log("pvsio process started with file " + filename + "; process working directory is :" + o.workspaceDir());
 
 		return o;
 	};
@@ -137,6 +133,5 @@ module.exports = function () {
 		pvs.kill(signal);
 		return o;
 	};
-	
 	return o;
 };

@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+//#!/usr/bin/env node
 
 /**
  * This file creates a connection to a pvsio process run locally or at specified host.
@@ -19,6 +19,7 @@ function run() {
     "use strict";
 
     var pvsio                   = require("./pvsprocess"),
+        ws                      = require("ws"),
         wsbase                  = require("./websocketserver"),
         util                    = require("util"),
         http                    = require("http"),
@@ -31,8 +32,8 @@ function run() {
         port                    = 8082,
         workspace               = __dirname + "/public",
         pvsioProcessMap         = {},//each client should get his own process
-        httpServer              = http.createServer(webserver),
-        p;
+        httpServer              = http.createServer(webserver);
+    var p, clientid = 0, WebSocketServer = ws.Server;
     
     /**
      * Utility function that dispatches responses to websocket clients
@@ -162,112 +163,128 @@ function run() {
         });
     }
     
-    httpServer.listen(port);
-    
-    //define websocket server    
-    var wsServer = wsbase("PVSIO")
-        .bind("saveTempFile", function (token, socket, socketid) {
-            saveTempFile(token, function (res) {
-                res.id = token.id;
-                res.serverSent = new Date().getTime();
-                processCallback(res, socket);
-            });
-        })
-        .bind("listProjects", function (token, socket, socketid) {
-            var projects = listProjects();
-            var res = {id: token.id, serverSent: new Date().getTime(), projects: projects};
-            processCallback(res, socket);
-        })
-        .bind("createProject", function (token, socket, socketid) {
-            p = pvsioProcessMap[socketid] || pvsio();
-            pvsioProcessMap[socketid] = p;
-            
-            util.log(JSON.stringify(token));
-            var res = createProject(token);
-            res.id = token.id;
-            res.serverSent = new Date().getTime();
-            processCallback(res, socket);
-        })
-        .bind("typeCheck", function (token, socket, socketid) {
-            typeCheck(token.filePath, function (err, stdout, stderr) {
-                var res = {id: token.id, err: err, stdout: stdout, stderr: stderr};
-                processCallback(res, socket);
-            });
-        })
-        .bind("sendCommand", function (token, socket, socketid) {
-            p = pvsioProcessMap[socketid];
-            p.sendCommand(token.data.command);
-        }).bind("startProcess", function (token, socket, socketid) {
-            util.log("Calling start process for client... " + socketid);
-            p = pvsioProcessMap[socketid];
-            if (p) {
-                p.close();
-                delete pvsioProcessMap[socketid];
-            }
-            //create the pvsio process
-            p = pvsio();
-            //set the workspace dir and start the pvs process with a callback for processing any responses from
-            //the process
-            p.workspaceDir(__dirname + "/public/projects/" + token.data.projectName)
-                .start(token.data.fileName, function (tok) {
-                //called when any data is recieved from pvs process
-                //if the type of the token is 'processExited' then close the socket if it is still open
-                    tok.socketId = socketid;
-                    tok.id = token.id;
-                    processCallback(tok, socket);
-                }, function (res) { //this function is called when the pvsio process is ready
+    /**
+        get function maps for client sockets
+    */
+    function createClientFunctionMaps() {
+        var map = {
+            "saveTempFile": function (token, socket, socketid) {
+                saveTempFile(token, function (res) {
                     res.id = token.id;
                     res.serverSent = new Date().getTime();
                     processCallback(res, socket);
                 });
-            //add to map
-            pvsioProcessMap[socketid] = p;
-            
-            /**
-             * handler for socket closed event
-             * @param {number} sid The socketid for the socket that was closed
-             * @return {function} a function that closes the resources i.e., pvsio process attributed
-             * to the socketid and deletes the process from the list
-             */
-            function onsocketClose(sid) {
-                return function (e) {
-                    util.log("closing websocket client " + sid);
-                    p = pvsioProcessMap[sid];
-                    if (p) {
-                        p.close();
-                    }
-                    delete pvsioProcessMap[sid];
-                };
-            }
-            //hsndle close event of socket to release resources
-            socket.on("close", onsocketClose(socketid));
-        }).bind("readFile", function (token, socket, socketid) {
-            p = pvsioProcessMap[socketid];
-            p.readFile(token.fileName, function (err, content) {
-                var res = {id: token.id, serverSent: new Date().getTime(), fileContent: content};
+            },
+            "listProjects": function (token, socket, socketid) {
+                var projects = listProjects();
+                var res = {id: token.id, serverSent: new Date().getTime(), projects: projects};
                 processCallback(res, socket);
-            });
-        }).bind("writeFile", function (token, socket, socketid) {
-            p = pvsioProcessMap[socketid];
-            p.writeFile(token.data.fileName, token.data.fileContent, function (err) {
-                util.log("back from write file ...");
-                var res = {id: token.id, serverSent: new Date().getTime()};
-                ///continue here !!! files saved need to inform client about need to restart pvsioweb with appropriate files
-                if (!err) {
-                    util.log("Source code has been saved. Closing process ... " + socketid);
-                    res.type = "fileSaved";
-                } else {
-                    res.type = "error";
-                    res.err = err;
-                    util.log(err);
+            },
+            "createProject": function (token, socket, socketid) {
+                p = pvsioProcessMap[socketid] || pvsio();
+                pvsioProcessMap[socketid] = p;
+                
+                util.log(JSON.stringify(token));
+                var res = createProject(token);
+                res.id = token.id;
+                res.serverSent = new Date().getTime();
+                processCallback(res, socket);
+            },
+            "typeCheck": function (token, socket, socketid) {
+                typeCheck(token.filePath, function (err, stdout, stderr) {
+                    var res = {id: token.id, err: err, stdout: stdout, stderr: stderr};
+                    processCallback(res, socket);
+                });
+            },
+            "sendCommand": function (token, socket, socketid) {
+                p = pvsioProcessMap[socketid];
+                p.sendCommand(token.data.command);
+                console.log(p.workspaceDir());
+            },
+            "startProcess": function (token, socket, socketid) {
+                util.log("Calling start process for client... " + socketid);
+                p = pvsioProcessMap[socketid];
+                //close the process if it exists and recreate it
+                if (p) {
+                    p.close();
+                    delete pvsioProcessMap[socketid];
                 }
-                processCallback(res, socket);
-            });
+                //recreate the pvsio process
+                p = pvsio();
+                pvsioProcessMap[socketid] = p;
+                //set the workspace dir and start the pvs process with a callback for processing any responses from
+                //the process
+                p.workspaceDir(__dirname + "/public/projects/" + token.data.projectName)
+                    .start(token.data.fileName, function (token) {
+                        token.socketId = socketid;
+                        processCallback(token, socket);
+                    },
+                        function (res) {
+                            res.id = token.id;
+                            res.serverSent = new Date().getTime();
+                            processCallback(res, socket);
+                        });
+            },
+            "readFile": function (token, socket, socketid) {
+                p = pvsioProcessMap[socketid];
+                p.readFile(token.fileName, function (err, content) {
+                    var res = {id: token.id, serverSent: new Date().getTime(), fileContent: content};
+                    processCallback(res, socket);
+                });
+            },
+            "writeFile": function (token, socket, socketid) {
+                p = pvsioProcessMap[socketid];
+                p.writeFile(token.data.fileName, token.data.fileContent, function (err) {
+                    util.log("back from write file ...");
+                    var res = {id: token.id, serverSent: new Date().getTime()};
+                    ///continue here !!! files saved need to inform client about need to restart pvsioweb with appropriate files
+                    if (!err) {
+                        util.log("Source code has been saved. Closing process ... " + socketid);
+                        res.type = "fileSaved";
+                    } else {
+                        res.type = "error";
+                        res.err = err;
+                        util.log(err);
+                    }
+                    processCallback(res, socket);
+                });
+            }
+        };
+        
+        return map;
+    }
+    
+    var wsServer = new WebSocketServer({server: httpServer});
+    wsServer.on("connection", function (socket) {
+        var socketid =  clientid++;
+        var functionMaps = createClientFunctionMaps();
+        socket.on("message", function (m) {
+            var token = JSON.parse(m);
+            var f = functionMaps[token.type];
+            if (f && typeof f === 'function') {
+                //call the function with token and socket as parameter
+                f(token, socket, socketid);
+            } else {
+                util.log("f is something unexpected -- I expected a function but got type " + typeof f);
+            }
         });
         
-    wsServer.start({server: httpServer}, function () {
-        console.log("http server started .." + "now listening on port " + port);
+        socket.on("close", function (e) {
+            util.log("closing websocket client " + socketid);
+            var _p = pvsioProcessMap[socketid];
+            if (_p) {
+                _p.close();
+            }
+            delete pvsioProcessMap[socketid];
+        });
     });
+    
+    wsServer.on("error", function (err) {
+        util.log(JSON.stringify(err));
+    });
+    
+    httpServer.listen(port);
+    console.log("http server started .." + "now listening on port " + port);
 }
 
 run();
