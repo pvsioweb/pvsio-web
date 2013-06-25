@@ -1,3 +1,0 @@
-eclipse.preferences.version=1
-excluded=//*.min.js\:public/demos/anonymisedUI//*\:public/demos/gip/bootstrap//*\:public/demos/gip/lib//*\:public/demos/prototype//*\:public/demos/pump//*
-included=//*.js
