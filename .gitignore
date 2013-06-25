@@ -4,7 +4,6 @@
 .pvscontext
 .settings
 .DS_Store
-public/projects/*
+*.prf
 public/uploads/*
 public/widgetDefinitions/*
-public/demos/*
