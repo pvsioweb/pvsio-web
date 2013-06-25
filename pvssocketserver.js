@@ -20,7 +20,6 @@ function run() {
 
     var pvsio                   = require("./pvsprocess"),
         ws                      = require("ws"),
-        wsbase                  = require("./websocketserver"),
         util                    = require("util"),
         http                    = require("http"),
         fs                      = require("fs"),
