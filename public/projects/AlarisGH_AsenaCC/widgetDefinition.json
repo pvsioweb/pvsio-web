@@ -17,7 +17,7 @@
   },
   "Display1357494252462": {
    "predefinedRegex": "[0-9/.]+",
-   "regex": "display := ([0-9/.]+)",
+   "regex": "display:=([0-9/.]+)",
    "prefix": "display",
    "type": "Display"
   },
@@ -88,6 +88,12 @@
    "shape": "rect",
    "coords": "349,168,391,206",
    "href": "#"
+  },
+  {
+   "class": "Display1357494252462",
+   "shape": "rect",
+   "coords": "201,87,400,136",
+   "href": null
   }
  ]
 }
