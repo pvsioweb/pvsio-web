@@ -447,7 +447,7 @@ define(function (require, exports, module) {
     
     function saveSourceCode(project) {
 		if (sourceCodeChanged) {
-			ws.writeFile({fileName: project.path + "/" + project.spec, fileContent: editor.getValue()},
+			ws.writeFile({fileName: project.projectPath + "/" + project.spec, fileContent: editor.getValue()},
                         handleSourceCodeSaved);
 			sourceCodeChanged = false;
 		}
