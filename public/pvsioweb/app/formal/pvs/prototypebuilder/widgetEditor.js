@@ -228,7 +228,7 @@ define(function (require, exports, module) {
             d3.select("select#predefinedRegex").on('change', function () {
                 updateRegex();
             });
-            d3.select("#prefix").on("keyup", function () {
+            d3.select("#prefix").on('input', function () {
                 updateRegex();
             });
             
