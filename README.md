@@ -21,31 +21,43 @@ This package also depends on nodejs (http://nodejs.org/download/). Please downlo
 
 Installation
 ------------
+### npm (recommended)
+To install, use 
+	sudo npm install pvsio-web -g 
+
+The installer will copy pvsio-web in /usr/local/lib/node_modules/pvsio-web. By default, the directory is owned by "nobody". You will need to change the ownership and assign it to your user with the following command:
+        sudo chown -R <username> /usr/local/lib/node_modules/pvsio-web
+
 ### git
 clone this repository, cd into the pvsio-web directory and run
 	node pvssocketserver.js
+
+Running pvsio-web
+-----------------
+To run pvsio-web, a backend and a frontend need to be started.
+
+* to start the backend: open a Terminal window, and use the following command (and leave the Terminal window open):
+	/usr/local/lib/node_modules/pvsio-web/start.sh
 	
-### npm install (recommended)
-To install, use 
-	npm install pvsio-web -g
-or (if your /usr/local/ directory is owned by root)
-	sudo npm install pvsio-web -g 
+* to start the frontend: open a browser (Firefox 21 or greater, or Chrome), and type the following address in the address bar:
+       http://localhost:8082/
 
-Uninstallation
---------------
-To uninstall use
-[sudo] npm uninstall pvsio-web -g
 
-Running
--------
-To start the server, use 
-	sudo pvsio-web
-
-Demo
-----
-You can interact with the interactive prototype builder by navigating your browser to
-http://localhost:8081/
+Demos
+-----
+A demo of a realistic medical infusion pump is included in the pvsio-web distribution. To execute the demo:
+* start the pvsio-web backed by typing the following command in a Terminal window, and leave the Terminal window open:
+       /usr/local/lib/node_modules/pvsio-web/start.sh
+* start the pvsio-web frontend by opening a browser at the following address: 
+       http://localhost:8082/demos/GPCA-UI_PVS/NavKeys
+ 
 
 Wiki
 ----
 A more comprehensive guide about pvsio-web can be found at https://github.com/thehogfather/pvsio-web/wiki
+
+
+Uninstallation
+--------------
+To uninstall pvsio-web, use the following command
+       sudo npm uninstall pvsio-web -g
