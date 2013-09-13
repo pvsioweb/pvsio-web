@@ -185,12 +185,16 @@ define(function (require, exports, module) {
 	}
 	
 	 
-    function pvsProcessReady(e) {
-        console.log("pvsio process ready");
-        //call get source code maybe for all the files that exist in the project or just for the main project file?
-        ws.getFile(currentProject.specFullPath, function (res) {
-            updateSourceCode(res.fileContent);
-        });
+    function pvsProcessReady(err, e) {
+        if (!err) {
+            console.log("pvsio process ready");
+            //call get source code maybe for all the files that exist in the project or just for the main project file?
+            ws.getFile(currentProject.specFullPath, function (err, res) {
+                if (!err) {
+                    updateSourceCode(res.fileContent);
+                }
+            });
+        }
     }
     
 	function updateProjectName(name) {
@@ -284,34 +288,36 @@ define(function (require, exports, module) {
 	}
     
 	function openProject() {
-        ws.send({type: "listProjects"}, function (res) {
-            var projects = res.projects;
-            projects.unshift({name: ""});
-            openProjectForm.create(projects, function (d) {
-                return d.name;
-            }).addListener(formEvents.FormSubmitted, function (e) {
-                var project = "../../projects/" + currentProject.name + "/";
-                console.log(e);
-                console.log(currentProject);
-                //only update the image and pvsfile if a real project was selected
-                if (currentProject.name !== "") {
-                    d3.select("div#body").style("display", null);
-                    updateImage(project + currentProject.image);
-                    ws.lastState("init(0)");
-                    ws.startPVSProcess(currentProject.spec.split(".")[0], currentProject.name,
-                                      pvsProcessReady);
-                    loadWidgetDefinitions(currentProject.widgetDefinition);
-                    updateProjectName(currentProject.name);
-                    d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
-                }
-                e.form.remove();
-            }).addListener(formEvents.FormCancelled, function (e) {
-                e.form.remove();
-            }).addListener(formEvents.FormDataChanged, function (e) {
-                console.log(e);
-                currentProject = e.data;
-                document.title = "PVSio-Web -- " + currentProject.name;
-            });
+        ws.send({type: "listProjects"}, function (err, res) {
+            if (!err) {
+                var projects = res.projects;
+                projects.unshift({name: ""});
+                openProjectForm.create(projects, function (d) {
+                    return d.name;
+                }).addListener(formEvents.FormSubmitted, function (e) {
+                    var project = "../../projects/" + currentProject.name + "/";
+                    console.log(e);
+                    console.log(currentProject);
+                    //only update the image and pvsfile if a real project was selected
+                    if (currentProject.name !== "") {
+                        d3.select("div#body").style("display", null);
+                        updateImage(project + currentProject.image);
+                        ws.lastState("init(0)");
+                        ws.startPVSProcess(currentProject.spec.split(".")[0], currentProject.name,
+                                          pvsProcessReady);
+                        loadWidgetDefinitions(currentProject.widgetDefinition);
+                        updateProjectName(currentProject.name);
+                        d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+                    }
+                    e.form.remove();
+                }).addListener(formEvents.FormCancelled, function (e) {
+                    e.form.remove();
+                }).addListener(formEvents.FormDataChanged, function (e) {
+                    console.log(e);
+                    currentProject = e.data;
+                    document.title = "PVSio-Web -- " + currentProject.name;
+                });
+            }
         });
 	}
 	
@@ -421,9 +427,8 @@ define(function (require, exports, module) {
                     projectName: spec.projectName,
                     uploadedImageFileName: uploadedImageFile,
                     clientImageFileName: spec.prototypeImage.name
-                }, function (res) {
-                    console.log(res);
-                    if (!res.error) {
+                }, function (err, res) {
+                    if (!err) {
                         currentProject = res;
                         d3.select("div#body").style("display", null);
                         ws.startPVSProcess(res.spec.split(".pvs")[0], currentProject.name,
@@ -439,10 +444,10 @@ define(function (require, exports, module) {
         });
 	}
     
-    function handleSourceCodeSaved(e) {
+    function handleSourceCodeSaved(err, e) {
         //if we are having multiple files then need to think about when a restart is needed
         //maybe not even need to restart at all -- but leave the option to user to manually restart process...
-        console.log(e);
+        console.log(err || e);
     }
     
     function saveSourceCode(project) {
@@ -466,25 +471,31 @@ define(function (require, exports, module) {
 				//save the picture
 				imageName = "image." + tempImageName.split(".").slice(-1);
                 fd = {"type": "saveTempFile", "oldFileName": tempImageName, "newFileName": imageName};
-                ws.send(fd, function (res) {
-                    pvsSpecName = d3.select("#txtSpecFileName").property("value") + ".pvs";
-                    delete fd.oldFileName;
-                    fd.newFileName = pvsSpecName;
-                    fd.fileContent = editor.getValue();
-                    ws.send(fd, function (res) {
-                        fd = { "type": "createProject",  "projectName": project.name, "pvsSpecName": pvsSpecName};
-                        ws.send(fd, function (res) {
-                            //save the widgets defined if any
-                            saveWidgetDefinition(project);
-                            ///TODO maybe do a callback for changes to current project (res object should be current project)
-                            project.image = imageName;
-                            project.spec = pvsSpecName;
-                            updateProjectName(project.name);
-                            //start the pvsio process
-                            ws.startPVSProcess(project.spec.split(".pvs")[0], project.name,
-                                                          pvsProcessReady);
+                ws.send(fd, function (err, res) {
+                    if (!err) {
+                        pvsSpecName = d3.select("#txtSpecFileName").property("value") + ".pvs";
+                        delete fd.oldFileName;
+                        fd.newFileName = pvsSpecName;
+                        fd.fileContent = editor.getValue();
+                        ws.send(fd, function (err, res) {
+                            if (!err) {
+                                fd = { "type": "createProject",  "projectName": project.name, "pvsSpecName": pvsSpecName};
+                                ws.send(fd, function (err, res) {
+                                    if (!err) {
+                                        //save the widgets defined if any
+                                        saveWidgetDefinition(project);
+                                        ///TODO maybe do a callback for changes to current project (res object should be current project)
+                                        project.image = imageName;
+                                        project.spec = pvsSpecName;
+                                        updateProjectName(project.name);
+                                        //start the pvsio process
+                                        ws.startPVSProcess(project.spec.split(".pvs")[0], project.name,
+                                                                      pvsProcessReady);
+                                    }
+                                });
+                            }
                         });
-                    });
+                    }
                 });
 			}
 		}

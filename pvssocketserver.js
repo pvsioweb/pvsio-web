@@ -121,36 +121,45 @@ function run() {
     function listProjects() {
         var imageExts = ["jpg", "jpeg", "png"],
             specExts = ["pvs"];
-        var projectDir = __dirname + "/public/projects/";
-        var res = fs.readdirSync(projectDir).map(function (d, i) {
-            var p = {name: d, projectPath: projectDir + d, other: []};
-            var stat = fs.statSync(projectDir + d);
-            if (stat.isDirectory()) {
-                fs.readdirSync(projectDir + d).forEach(function (f) {
-                    stat = fs.statSync(projectDir + d + "/" + f);
-                    if (stat.isFile()) {
-                        var ext = f.indexOf(".") > -1 ? f.split(".")[1].toLowerCase() : "";
-                        if (imageExts.indexOf(ext) > -1) {
-                            p.image = f;
-                            p.imageFullPath = projectDir + d + "/" + f;
-                        } else if (specExts.indexOf(ext) > -1) {
-                            p.spec = f;
-                            p.specFullPath = projectDir + d + "/" + f;
-                        } else if (f === "widgetDefinition.json") {
-                            p.widgetDefinition = JSON.parse(fs.readFileSync(projectDir + d + "/" + f, "utf8"));
-                        } else {
-                            p.other.push(f);
+        var projectDir = __dirname + "/public/projects/", res;
+        try {
+            res = fs.readdirSync(projectDir).map(function (d, i) {
+                var p = {name: d, projectPath: projectDir + d, other: []};
+                var stat = fs.statSync(projectDir + d);
+                if (stat.isDirectory()) {
+                    fs.readdirSync(projectDir + d).forEach(function (f) {
+                        stat = fs.statSync(projectDir + d + "/" + f);
+                        if (stat.isFile()) {
+                            var ext = f.indexOf(".") > -1 ? f.split(".")[1].toLowerCase() : "";
+                            if (imageExts.indexOf(ext) > -1) {
+                                p.image = f;
+                                p.imageFullPath = projectDir + d + "/" + f;
+                            } else if (specExts.indexOf(ext) > -1) {
+                                p.spec = f;
+                                p.specFullPath = projectDir + d + "/" + f;
+                            } else if (f === "widgetDefinition.json") {
+                                p.widgetDefinition = JSON.parse(fs.readFileSync(projectDir + d + "/" + f, "utf8"));
+                            } else {
+                                p.other.push(f);
+                            }
                         }
-                    }
-                });
-                return p;
-            } else {
-                return null;
-            }
-        }).filter(function (d) {return d !== null; });
+                    });
+                    return p;
+                } else {
+                    return null;
+                }
+            }).filter(function (d) {return d !== null; });
+        } catch (err) {
+            res = { err: err };   
+        }
         return res;
     }
     
+    //create logger
+    webserver.use("/demos", function (req, res, next) {
+        console.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
+        next();
+    });
     //create the express static server and use public dir as the default serving directory
     webserver.use(express.static(__dirname + "/public"));
     webserver.use(express.bodyParser({ keepExtensions: true, uploadDir: __dirname + uploadDir}));
@@ -186,7 +195,7 @@ function run() {
             },
             "listProjects": function (token, socket, socketid) {
                 var projects = listProjects();
-                var res = {id: token.id, serverSent: new Date().getTime(), projects: projects};
+                var res = projects.err ? projects : {id: token.id, serverSent: new Date().getTime(), projects: projects};
                 processCallback(res, socket);
             },
             "createProject": function (token, socket, socketid) {
@@ -237,7 +246,7 @@ function run() {
             "readFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 p.readFile(token.fileName, function (err, content) {
-                    var res = {id: token.id, serverSent: new Date().getTime(), fileContent: content};
+                    var res = err ? {err: err} : {id: token.id, serverSent: new Date().getTime(), fileContent: content};
                     processCallback(res, socket);
                 });
             },
@@ -251,9 +260,7 @@ function run() {
                         util.log("Source code has been saved. Closing process ... " + socketid);
                         res.type = "fileSaved";
                     } else {
-                        res.type = "error";
                         res.err = err;
-                        util.log(err);
                     }
                     processCallback(res, socket);
                 });

@@ -33,7 +33,7 @@ define(function (require, exports, module) {
                     if (token.id && typeof callbackRegistry[token.id] === "function") {
                         var f = callbackRegistry[token.id];
                         delete callbackRegistry[token.id];
-                        f.call(o, token);
+                        f.call(o, token.err, token);
                     } else if (token.type) {
                         o.fire(token);
                     }

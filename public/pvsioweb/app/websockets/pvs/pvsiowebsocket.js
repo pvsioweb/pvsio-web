@@ -140,18 +140,7 @@ define(function (require, exports, module) {
 			ws.send(JSON.stringify(token));
 			return o;
 		};
-//		
-//		o.createProject = function(data){
-//			var token = {type:"createProject", data:data};
-//			ws.send(JSON.stringify(token));
-//			return o;
-//		};
-//		
-//		o.saveTempFile = function(data){
-//			var token = {type:"saveTempFile", data:data};
-//			ws.send(JSON.stringify(token));
-//			return o;
-//		}
+        
 		/**
 		 * Special function used to maintain state on the client side.
 		 * Particularly useful in the hold_down mode of the alaris
