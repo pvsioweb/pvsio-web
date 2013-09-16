@@ -38,6 +38,7 @@ define(function (require, exports, module) {
         };
         
         o.startPVSProcess = function (sourceFile, projectName, cb) {
+            sourceFile = sourceFile.split(".pvs")[0];
             wscBase.send({type: serverFunctions.StartProcess, data: {fileName: sourceFile, projectName: projectName}},
                     cb);
         };

@@ -1,0 +1,27 @@
+Extra : THEORY
+BEGIN
+
+   IMPORTING Util, 
+             trig_fnd@sincos_def,
+             trig_fnd@atan2
+
+   deg : VAR real    % Track
+   gs  : VAR posreal % Ground speed
+   vs  : VAR real    % Vertical speed
+
+   mysin(x:real) : real = sin(x)
+   mycos(x:real) : real = cos(x)
+   myatan2(x:real,y:{z:real|x=0 => z/=0}) : real = atan2(x,y) 
+
+   to_rad(deg:real) : real = deg*pi/180
+   to_deg(rad:real) : real = rad*180/pi
+
+   mk_velocity(deg,gs,vs) : Velocity =
+     LET trk = to_rad(deg) IN
+      (gs*mysin(trk),gs*mycos(trk),vs)
+
+   % Track in degrees
+   track(v:Velocity) : real = 
+     to_deg(myatan2(v`y,v`x))
+
+END Extra

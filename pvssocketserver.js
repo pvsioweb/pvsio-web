@@ -41,7 +41,8 @@ function run() {
         port                    = 8082,
         workspace               = __dirname + "/public",
         pvsioProcessMap         = {},//each client should get his own process
-        httpServer              = http.createServer(webserver);
+        httpServer              = http.createServer(webserver),
+        baseProjectDir              = __dirname + "/public/projects/";
     var p, clientid = 0, WebSocketServer = ws.Server;
     
     /**
@@ -88,7 +89,7 @@ function run() {
         var projectName = opt.projectName;
         var prototypeImage = opt.prototypeImage;
         var uploadImagePath = __dirname + uploadDir + "/" + opt.uploadedImageFileName;
-        var projectPath = __dirname + "/public/projects/" + projectName;
+        var projectPath = baseProjectDir + projectName;
         var newImagePath = projectPath + "/" + opt.clientImageFileName,
             newSpecPath = projectPath + "/" + opt.clientSpecFileName;
         var obj = {type: "projectCreated"};
@@ -115,36 +116,56 @@ function run() {
     }
     
     /**
-     * Lists all the projects on the server
+    * open a project with the specified name
+    */
+    function openProject(name) {
+        console.log('opening project..' + name);
+        var imageExts = ["jpg", "jpeg", "png"], specExts = ["pvs"],
+            projectPath = baseProjectDir + name,  stat = fs.statSync(projectPath),
+            res =  {name: name, projectPath: projectPath};
+        if (stat.isDirectory()) {
+            fs.readdirSync(projectPath).forEach(function (file) {
+                stat = fs.statSync(projectPath + "/" + file);
+                if (stat.isFile()) {
+                    var ext = file.indexOf(".") > -1 ? file.split(".")[1].toLowerCase() : "";
+                    if (imageExts.indexOf(ext) > -1) {
+                        res.image = file;
+                    } else if (specExts.indexOf(ext) > -1) {
+                        res.spec = res.spec || [];
+                        res.spec.push(file);
+                    } else if (file === "widgetDefinition.json") {
+                        res.widgetDefinition = JSON.parse(fs.readFileSync(projectPath + "/" + file, "utf8"));
+                    } else if (file === ".pvsioweb") {
+                        var config = JSON.parse(fs.readFileSync(projectPath + "/" + file, "utf8"));
+                        res.mainPVSFile = config.mainPVSFile;
+                    } else {
+                        res.other = res.other || [];
+                        res.other.push(file);
+                    }
+                }
+            });
+            //load the first file if there is no .pvsioweb file in the root of the project
+            if (!res.mainPVSFile && res.spec && res.spec.length) {
+                res.spec.sort();
+                res.mainPVSFile = res.spec[res.spec.length - 1];   
+            }
+            return res;
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * Lists all the projects on the server by listing folder names in the projects directory
      * @return {Array<string>} A list of project names
      */
     function listProjects() {
-        var imageExts = ["jpg", "jpeg", "png"],
-            specExts = ["pvs"];
-        var projectDir = __dirname + "/public/projects/", res;
+        var res;
         try {
-            res = fs.readdirSync(projectDir).map(function (d, i) {
-                var p = {name: d, projectPath: projectDir + d, other: []};
-                var stat = fs.statSync(projectDir + d);
+            res = fs.readdirSync(baseProjectDir).map(function (d, i) {
+                var stat = fs.statSync(baseProjectDir + d);
                 if (stat.isDirectory()) {
-                    fs.readdirSync(projectDir + d).forEach(function (f) {
-                        stat = fs.statSync(projectDir + d + "/" + f);
-                        if (stat.isFile()) {
-                            var ext = f.indexOf(".") > -1 ? f.split(".")[1].toLowerCase() : "";
-                            if (imageExts.indexOf(ext) > -1) {
-                                p.image = f;
-                                p.imageFullPath = projectDir + d + "/" + f;
-                            } else if (specExts.indexOf(ext) > -1) {
-                                p.spec = f;
-                                p.specFullPath = projectDir + d + "/" + f;
-                            } else if (f === "widgetDefinition.json") {
-                                p.widgetDefinition = JSON.parse(fs.readFileSync(projectDir + d + "/" + f, "utf8"));
-                            } else {
-                                p.other.push(f);
-                            }
-                        }
-                    });
-                    return p;
+                    return openProject(d);
                 } else {
                     return null;
                 }
@@ -196,6 +217,11 @@ function run() {
             "listProjects": function (token, socket, socketid) {
                 var projects = listProjects();
                 var res = projects.err ? projects : {id: token.id, serverSent: new Date().getTime(), projects: projects};
+                processCallback(res, socket);
+            },
+            "openProject": function (token, socket, socketid) {
+                var project = openProject(token.name);
+                var res = {project: project, id: token.id, serverSent: new Date().getTime()};
                 processCallback(res, socket);
             },
             "createProject": function (token, socket, socketid) {

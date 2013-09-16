@@ -1,0 +1,19 @@
+TCAS_Z[(IMPORTING TCAS_tables) Thr : TCAS_Table] : THEORY
+BEGIN
+
+  IMPORTING TCAS_tcoa
+
+  sl      : VAR SensitivityLevel
+  soz,siz : VAR nnreal % ownship's and intruder's altitude 
+  voz,viz : VAR real   % ownship's and intruder's vertical speed 
+
+  TCAS_Z?(sl,soz,voz,siz,viz) : bool =
+    LET sz = soz-siz,
+        vz = voz-viz IN
+    ...
+
+  TCAS_Z_safe : LEMMA
+    abs(soz-siz) < Thr(sl,ZTHR) IMPLIES
+    TCAS_Z?(sl,soz,voz,siz,viz)
+        
+END TCAS_Z

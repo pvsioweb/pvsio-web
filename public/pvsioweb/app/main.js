@@ -188,12 +188,16 @@ define(function (require, exports, module) {
     function pvsProcessReady(err, e) {
         if (!err) {
             console.log("pvsio process ready");
-            //call get source code maybe for all the files that exist in the project or just for the main project file?
-            ws.getFile(currentProject.specFullPath, function (err, res) {
+            //call get source code for the main pvs file and list all the other files in a side bar
+            var mainPVSFile = currentProject.projectPath + "/" + currentProject.mainPVSFile;
+            ws.getFile(mainPVSFile, function (err, res) {
                 if (!err) {
                     updateSourceCode(res.fileContent);
                 }
             });
+            ///TODO: 
+            //list all other files
+            
         }
     }
     
@@ -303,7 +307,7 @@ define(function (require, exports, module) {
                         d3.select("div#body").style("display", null);
                         updateImage(project + currentProject.image);
                         ws.lastState("init(0)");
-                        ws.startPVSProcess(currentProject.spec.split(".")[0], currentProject.name,
+                        ws.startPVSProcess(currentProject.mainPVSFile, currentProject.name,
                                           pvsProcessReady);
                         loadWidgetDefinitions(currentProject.widgetDefinition);
                         updateProjectName(currentProject.name);

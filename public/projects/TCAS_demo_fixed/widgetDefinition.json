@@ -1,0 +1,50 @@
+{
+ "widgetMaps": {
+  "Display1379199418100": {
+   "predefinedRegex": "[0-9/.]+",
+   "regex": "x:=([0-9/.]+)",
+   "prefix": "x",
+   "type": "Display"
+  },
+  "Button1379199457634": {
+   "functionText": "tick",
+   "events": [
+    "click"
+   ],
+   "type": "Button",
+   "recallRate": "250"
+  },
+  "Display1379200067589": {
+   "predefinedRegex": "[0-9/.]+",
+   "regex": "y:=([0-9/.]+)",
+   "prefix": "y",
+   "type": "Display"
+  }
+ },
+ "regionDefs": [
+  {
+   "class": "Button1379199457634",
+   "shape": "rect",
+   "coords": "531.3333129882812,69.88888549804688,571.3333129882812,116.88541412353516",
+   "href": "#"
+  },
+  {
+   "class": "Display1379200067589",
+   "shape": "rect",
+   "coords": "51.44443893432617,95.88888549804688,380.4375114440918,135.88888549804688",
+   "href": null
+  },
+  {
+   "class": "Display1379199418100",
+   "shape": "rect",
+   "coords": "49.33332824707031,44.88888931274414,380.3229217529297,86.88541793823242",
+   "href": null
+  },
+  {
+   "class": "Display1379199418100",
+   "shape": "rect",
+   "coords": "49.33332824707031,44.88888931274414,380.3229217529297,86.88541793823242",
+   "href": null
+  }
+ ]
+}

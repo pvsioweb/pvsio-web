@@ -1,0 +1,9 @@
+Util : THEORY
+BEGIN
+
+  IMPORTING vectors@vect_3D_2D
+
+  Velocity : TYPE = {v: Vect3 | nz_vect2?(v)}
+  Position : TYPE = {s: Vect3 | s`z >= 0}
+
+END Util

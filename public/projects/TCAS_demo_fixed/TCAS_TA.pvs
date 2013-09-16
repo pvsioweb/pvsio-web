@@ -1,0 +1,20 @@
+TCAS_TA : THEORY
+BEGIN
+
+  IMPORTING TCAS_tables, Util,
+            TCAS_2D[TA_thr],
+            TCAS_Z[TA_thr]
+ 
+%  The following types are defined in Util.pvs  
+%  Velocity : TYPE = {v: Vect3 | nz_vect2?(v)}
+%  Position : TYPE = {s: Vect3 | s`z >= 0}
+
+  so,si : VAR Position % 3D ownship's and intruder's position 
+  vo,vi : VAR Velocity % 3D onwship's and intruder's velocities
+
+  TCAS_TA?(so,vo,si,vi) : bool =
+    LET sl = sensitivity_level(so`z) IN
+      TCAS_2D?(sl,so,vo,si,vi) AND
+      TCAS_Z?(sl,so`z,vo`z,si`z,vi`z)
+
+END TCAS_TA
