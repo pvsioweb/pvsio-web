@@ -1,5 +1,5 @@
 /**
- * manages websocket connection to the pvsio-web server
+ * manages websocket connection to the pvsio-web server-- currently useful
  * @author Patrick Oladimeji
  * @date 6/20/13 10:45:57 AM
  */
@@ -7,9 +7,10 @@
 /*global define, d3, require, $, brackets, window, MouseEvent */
 define(function (require, exports, module) {
     "use strict";
-    var ws      = require("./pvsWSClient")();
     
-    module.exports = function () {
-        return ws;
+    module.exports = {
+        getWebSocket: function () {
+            return require("./pvsWSClient")();
+        }
     };
 });

@@ -48,17 +48,27 @@
 			<!-- container for specification source code -->
 			<div id='specification_log_Container' class="clear-both">
 				<div>
-					<h2>Formal specification source file</h2> <button class="btn btn-primary" id="btnTypeCheck">Typecheck</button>
-					<input type="text" value="" placeholder="Untitled file" id="txtSpecFileName"/>
+					<h2>Formal specification source file</h2> 
+                    <div id="editorToolbar">
+                        <button class="btn " id="btnTypeCheck">Typecheck</button>
+                        <button class="btn" id="btnSetMainFile"><i class="icon-star"></i> Set As Main File</button>
+<!--                        <button class="btn" id="btnSaveFile">Save File</button>
+
+                        <button class="btn" id="btnSaveAll">Save All Files</button>
+-->
+                        <button class="btn btn-danger" id="btnRestartPVSioWeb">Restart Sever Process</button>
+                    </div>
 				</div>
-				<div>
+				<div id="sourcecode-editor-wrapper">
 					<div id="specDragAndDrop" class="dndcontainer">
 						<span class="center">Drag PVS file here or if you prefer, use the button below</span>
 						<br/>
 						<a class="btn btn-primary center" id='btnLoadSpec'><i class="icon-file-white"></i>Load Spec</a>
 						<input type="file" class="hide" id="btnSelectSpec" name="selectSpec">
 					</div>
-					
+					<div id="pvsFiles">
+                    
+                    </div>
 					<div id="editor">
 					
 	
@@ -67,8 +77,8 @@
 				
 			</div>
 			
-			<script type="text/javascript" src="pvsioweb/lib/underscore/underscore.js"></script>
-            <script type="text/javascript" src="pvsioweb/lib/d3/d3.js"></script>
+            <script type="text/javascript" src="pvsioweb/lib/underscore/underscore.js"></script>
+           <!--	 <script type="text/javascript" src="pvsioweb/lib/d3/d3.js"></script>-->
 			<script type="text/javascript" src="require.js" data-main="index.js"></script>
 	
 		</div>

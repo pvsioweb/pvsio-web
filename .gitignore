@@ -7,3 +7,6 @@
 *.prf
 public/uploads/*
 public/widgetDefinitions/*
+public/projects/*/pvsbin/*
+*.summary
+pvs-attachments

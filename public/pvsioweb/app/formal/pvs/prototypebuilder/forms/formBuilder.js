@@ -15,7 +15,7 @@ define(['util/eventDispatcher', "./events", "util/property", "d3/d3"],
 			d3.select("#" + id).selectAll(".formelement").each(function () {
 				var el = d3.select(this);
 				if (el.attr("type") === "file") {
-					res.append(el.attr("id"), el.property("files")[0]);
+					res.append(el.attr("id"), el.property("files"));
 				} else {
 					res.append(el.attr("id"), (el.property("value") || el.text()));
 				}
@@ -28,7 +28,7 @@ define(['util/eventDispatcher', "./events", "util/property", "d3/d3"],
             d3.select("#" + id).selectAll(".formelement").each(function () {
                 var el = d3.select(this), id = el.attr("id");
                 if (el.attr("type") === "file") {
-                    res[id] = el.property("files")[0];
+                    res[id] = el.property("files");
                 } else {
                     res[id] = el.property("value") || el.text();
                 }

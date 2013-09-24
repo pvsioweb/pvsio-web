@@ -4,7 +4,7 @@
  * @date 4/19/13 17:23:31 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
-/*global define, d3, require, $, brackets, _, window, MouseEvent, FormData, document, setTimeout, clearInterval */
+/*global define, d3, require, $, brackets, _, window, MouseEvent, FormData, document, setTimeout, clearInterval, FileReader */
 define(function (require, exports, module) {
     "use strict";
     
@@ -23,22 +23,15 @@ define(function (require, exports, module) {
         formEvents              = require("pvsioweb/forms/events"),
         openProjectForm         = require("pvsioweb/forms/openProject"),
         saveProjectAs           = require("pvsioweb/forms/saveProjectAs"),
-        WebPageFileReader       = require("util/WebPageFileReader");
+        ListView                = require("pvsioweb/ListView"),
+        Project                 = require("formal/pvs/Project").Project,
+        d3                      = require("d3/d3"),
+        queue                   = require("d3/queue");
     
-    var currentProject = {}, sourceCodeChanged = false, ws;
-	var tempImageName, tempSpecName, specFileName, specNameRegex = /(\w+)\s*:\s*THEORY\s+BEGIN/i;
+    var currentProject = new Project(""), ws, pvsFilesListBox, fileContents = {};
+	var tempImageName, tempSpecName;
 	var editor = ace.edit("editor");
 	editor.getSession().setMode('ace/mode/text');
-	
-	editor.on("change", function (e) {
-		sourceCodeChanged = true;
-		var toplines = editor.getSession().getLines(0, Math.min(4, editor.getSession().getLength())).join("");
-		var matches = toplines.match(specNameRegex);
-		if (matches && matches.length > 1) {
-			specFileName = matches[1];
-			d3.select("#txtSpecFileName").property("value", specFileName);
-		}
-	});
     
     function handleWidgetEdit(mark) {
 		widgetEditor.create(mark)
@@ -113,6 +106,7 @@ define(function (require, exports, module) {
             }
 			//update width and height of marker
 			rect.style("height", (h - pad) + "px").style("width", (w - pad) + "px");
+            console.log({x: x, y: y});
 		}
 	});
 	
@@ -164,8 +158,6 @@ define(function (require, exports, module) {
 		});
 		return res;
 	}
-	
-   
     
 	/**
 	 * log the message
@@ -174,30 +166,87 @@ define(function (require, exports, module) {
 		console.log(msg);
 		d3.select("#console").insert('p', 'p').html(msg);
 	}
+
+    function updateSourceCodeToolbarButtons(pvsFile) {
+        //update status of the set main file button based on the selected file
+        if (pvsFile) {
+            if (currentProject.mainPVSFile() && currentProject.mainPVSFile().name() === pvsFile.name()) {
+                d3.select("#btnSetMainFile").attr("disabled", true);
+            } else {
+                d3.select("#btnSetMainFile").attr("disabled", null);
+            }
+            
+            //update status of file save button based on the selected file
+            if (pvsFile.dirty()) {
+                d3.select("#btnSaveFile").attr("disabled", null);
+            } else {
+                d3.select("#btnSaveFile").attr("disabled", true);
+            }
+        }
+    }
     
-    function updateSourceCode(src) {
-		sourceCodeChanged = false;
-		editor.setValue(src);
-		editor.clearSelection();
-		editor.gotoLine(1);
-		editor.moveCursorTo(0, 0);
-		editor.scrollToLine(0, false, false, function () {});
-	}
-	
+    function renderSourceFileList(files) {
+        var listLabelFunction = function (d) {return d.name(); },
+            classFunc = function (d) {
+                var c = "fileListItem";
+                if (d.dirty()) {
+                    c = c.concat(" dirty");
+                }
+                if (currentProject.mainPVSFile() && d.name() === currentProject.mainPVSFile().name()) {
+                    c = c.concat(" main-file");
+                }
+                return c;
+            };
+        pvsFilesListBox = new ListView("#pvsFiles", files, listLabelFunction, classFunc);
+        var pvsFile;
+        
+        function rebindEditorChangeEvent(pvsFile) {
+            //update editor changed listener so that the project filecontent is updated when the editor is changed
+            editor.on("change", function () {
+                //ideally one should use information from ace to set the dirty mark on the document
+                //e.g editor.getSession().getUndoManager().hasUndo();
+                pvsFile.content(editor.getValue()).dirty(true);//update the selected project file content
+                updateSourceCodeToolbarButtons(pvsFile);
+                pvsFilesListBox.updateView();
+            });
+        }
+        
+        pvsFilesListBox.addListener("SelectedIndexChanged", function (event) {
+            //fetch sourcecode for selected file and update editor
+            pvsFile = event.selectedItem;
+            if (pvsFile.content()) {
+                editor.removeAllListeners("change");
+                editor.setValue(pvsFile.content());
+                editor.clearSelection();
+                editor.moveCursorTo(0, 0);
+                rebindEditorChangeEvent(pvsFile);
+            } else {
+                //fetch file contents from server and set the value
+                var f = currentProject.path() + "/" + pvsFile.name();
+                ws.getFile(f, function (err, res) {
+                    if (!err) {
+                        editor.removeAllListeners("change");
+                        pvsFile.content(res.fileContent).dirty(false);
+                        editor.setValue(pvsFile.content());
+                        editor.clearSelection();
+                        editor.moveCursorTo(0, 0);
+                        rebindEditorChangeEvent(pvsFile);
+                    } else {
+                        ///TODO show error loading file
+                        console.log(JSON.stringify(err));
+                    }
+                });
+            }
+            updateSourceCodeToolbarButtons(pvsFile);
+        });
+    }
 	 
     function pvsProcessReady(err, e) {
         if (!err) {
             console.log("pvsio process ready");
-            //call get source code for the main pvs file and list all the other files in a side bar
-            var mainPVSFile = currentProject.projectPath + "/" + currentProject.mainPVSFile;
-            ws.getFile(mainPVSFile, function (err, res) {
-                if (!err) {
-                    updateSourceCode(res.fileContent);
-                }
-            });
-            ///TODO: 
-            //list all other files
             
+        } else {
+            console.log(err);
         }
     }
     
@@ -215,39 +264,11 @@ define(function (require, exports, module) {
 			.style("height", img.property('height') - 17).style("width", 1130 - img.property("width") - 55);
 	}
     
-    function getRegionDefs() {
-		var regionDefs = [];
-		d3.selectAll("#prototypeMap area").each(function () {
-			var region = {}, a = d3.select(this);
-			region.class = a.attr("class");
-			region.shape = a.attr("shape");
-			region.coords = a.attr("coords");
-			region.href = a.attr("href");
-			regionDefs.push(region);
-		});
-		return regionDefs;
-	}
-    
-	function saveWidgetDefinition(project) {
-		var safe = {widgetMaps: widgetMaps.toJSON(), regionDefs: getRegionDefs()};
-		//save to the user's drive
-		var safeStr = JSON.stringify(safe, null, " ");
-		var data  = {"fileName": project.projectPath + "/widgetDefinition.json", fileContent: safeStr};
-		ws.writeFile(data, function (res) {
-            if (res.type === "fileSaved") {
-                console.log(res);
-            } else {
-                //handle error  
-                console.log(res);
-            }
-        });
-	}
-	
-	function updateImage(imagepath) {
-		d3.select("#imageDiv img").attr("src", imagepath);
-		d3.select("#prototypeImage")
-			.style("background-image", "url(" + imagepath + ")");
+	function updateImage(imageData) {
+		d3.select("#imageDiv img").attr("src", imageData);
 		setTimeout(resizeImageDiv, 500);
+        //hide the draganddrop stuff
+        d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
 	}
 	
     function loadWidgetDefinitions(defs) {
@@ -295,47 +316,46 @@ define(function (require, exports, module) {
         ws.send({type: "listProjects"}, function (err, res) {
             if (!err) {
                 var projects = res.projects;
-                projects.unshift({name: ""});
+                projects.unshift("");
                 openProjectForm.create(projects, function (d) {
-                    return d.name;
+                    return d;
                 }).addListener(formEvents.FormSubmitted, function (e) {
-                    var project = "../../projects/" + currentProject.name + "/";
-                    console.log(e);
-                    console.log(currentProject);
-                    //only update the image and pvsfile if a real project was selected
-                    if (currentProject.name !== "") {
-                        d3.select("div#body").style("display", null);
-                        updateImage(project + currentProject.image);
-                        ws.lastState("init(0)");
-                        ws.startPVSProcess(currentProject.mainPVSFile, currentProject.name,
-                                          pvsProcessReady);
-                        loadWidgetDefinitions(currentProject.widgetDefinition);
-                        updateProjectName(currentProject.name);
-                        d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
-                    }
-                    e.form.remove();
+                    //open selected project
+                    Project.open(e.formJSON.projectName, function (project) {
+                        currentProject = project;
+                        console.log(currentProject);
+                        //only update the image and pvsfile if a real project was selected
+                        if (currentProject.name() !== "") {
+                            d3.select("div#body").style("display", null);
+                            editor.removeAllListeners("change");
+                            editor.setValue("");
+                            if (currentProject.image()) {
+                                updateImage(currentProject.image().content());
+                            }
+                            //list all other files
+                            if (currentProject.pvsFiles()) {
+                                renderSourceFileList(currentProject.pvsFiles());
+                            }
+                            loadWidgetDefinitions(currentProject.widgetDefinitions());
+                            updateProjectName(currentProject.name());
+                            d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+                            
+                            //try to start process on server
+                            ws.lastState("init(0)");
+                            ws.startPVSProcess(currentProject.mainPVSFile().name(), currentProject.name(),
+                                              pvsProcessReady);
+                        }
+                        //remove the dialog
+                        e.form.remove();
+                    });
                 }).addListener(formEvents.FormCancelled, function (e) {
                     e.form.remove();
                 }).addListener(formEvents.FormDataChanged, function (e) {
                     console.log(e);
-                    currentProject = e.data;
-                    document.title = "PVSio-Web -- " + currentProject.name;
                 });
             }
         });
 	}
-	
-    function uploadFile(file, cb) {
-        if (file) {
-            var fd = new FormData();
-            fd.append("file", file);
-            var xhr = d3.xhr("/upload");
-            xhr.post(fd)
-                .on('progress', function (e) {
-                    console.log(e);
-                }).on('load', cb);
-        }
-    }
     
 	function preparePageForImageUpload() {
 		var imageExts = ["png", "jpg", "jpeg"];
@@ -345,51 +365,21 @@ define(function (require, exports, module) {
 			d3.select("#btnSelectPicture").node().click();
 		});
         
-        function onInterfaceImageUploaded(res) {
-            res = JSON.parse(res.responseText);
-            tempImageName =  res.fileName;
-            var imagepath = "../../uploads/" + res.fileName;
-            updateImage(imagepath);
-            //hide the draganddrop stuff
-            d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+        function _updateImage(file) {
+            var fr = new FileReader(), ext = file.name.split(".").slice(-1).join("");
+            fr.onload = function (event) {
+                var imageData = event.target.result;
+                updateImage(imageData);
+                currentProject.changeImage("image." + ext, imageData);
+            };
+            fr.readAsDataURL(file);
         }
 		
         d3.select("#btnSelectPicture").on("change", function () {
 			var file = d3.event.currentTarget.files[0];
 			if (file && imageExts.indexOf(file.name.split(".").slice(-1).join("").toLowerCase()) > -1) {
-				uploadFile(file, onInterfaceImageUploaded);
+				_updateImage(file);
 			}
-		});
-		
-		d3.select("#btnLoadSpec").on("click", function () {
-			d3.select("#btnSelectSpec").node().click();
-		});
-		
-		d3.select("#btnSelectSpec").on("change", function () {
-			//check if file is valid pvs file
-			var file = d3.event.currentTarget.files[0];
-            
-			if (file && file.name.split(".").slice(-1).join("").toLowerCase() === "pvs") {
-                var fr = WebPageFileReader.FileReader()
-                    .onLoad(function (e) {
-                        updateSourceCode(e.target.result);
-                        tempSpecName = file.name;
-                    }).readAsText(file);
-                
-				uploadFile(file, function (res) {
-					res = JSON.parse(res.responseText);
-					tempSpecName =  res.fileName;
-					//load spec into workspace via json xhr req
-					d3.text("../../uploads/" + res.fileName, function (err, res) {
-						console.log(res);
-						//hide drag and drop stuff
-						d3.select("#specDragAndDrop.dndcontainer").style("display", "none");
-					});
-				});
-			} else {
-				console.log("only files with .pvs extension are allowed");
-			}
-			
 		});
 		
 		var c = document.getElementById("imageDiv");
@@ -406,105 +396,105 @@ define(function (require, exports, module) {
 		c.ondrop =  function (e) {
 			d3.select(c).style("border", null);
 			var file = e.dataTransfer.files[0];
-			console.log(file);
-			uploadFile(file, onInterfaceImageUploaded);
+			_updateImage(file);
 			e.preventDefault();
 			e.stopPropagation();
 			return false;
 		};
 	}
 	
-    /**
-     * spec has .prototypeImage, .pvsSpec, .projectName
-     */
-	function newProject(spec) {
-        //first upload the files for pictures and pvs source
-        uploadFile(spec.prototypeImage, function (res) {
-            var uploadedImageFile = JSON.parse(res.responseText).fileName;
-            uploadFile(spec.pvsSpec, function (res) {
-                var uploadedSpecFile = JSON.parse(res.responseText).fileName;
-                //call websocket to create new project
-                ws.send({
-                    type: "createProject",
-                    uploadedSpecFileName: uploadedSpecFile,
-                    clientSpecFileName: spec.pvsSpec.name,
-                    projectName: spec.projectName,
-                    uploadedImageFileName: uploadedImageFile,
-                    clientImageFileName: spec.prototypeImage.name
-                }, function (err, res) {
-                    if (!err) {
-                        currentProject = res;
-                        d3.select("div#body").style("display", null);
-                        ws.startPVSProcess(res.spec.split(".pvs")[0], currentProject.name,
-                                          pvsProcessReady);
-                        var imagePath = "../../projects/" + currentProject.name + "/" +
-                            currentProject.image;
-                        updateImage(imagePath);
-                        updateProjectName(currentProject.name);
-                        d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+    function prepareListBoxForFileDrag() {
+       
+        function updateProjectWithFiles(files) {
+            function createFileLoadFunction(file, fileIndex) {
+                return function (event) {
+                    currentProject.addSpecFile(file.name, event.target.result);
+                    if (fileIndex === files.length - 1) {
+                        //render file list view
+                        renderSourceFileList(currentProject.pvsFiles());
                     }
-                });
+                };
+            }
+            
+            var i, f;
+            for (i = 0; i < files.length; i++) {
+                f = files[i];
+                var fr = new FileReader();
+                fr.onload = createFileLoadFunction(f, i);
+                fr.readAsText(f);
+            }
+        }
+        
+        var allowedExtensions = ["pvs"];
+        var lstBox = d3.select("#pvsFiles").node();
+        lstBox.ondragover = function () {
+            d3.select("#pvsFiles").classed("drag-over", true);
+            return false;
+        };
+        lstBox.ondragend = function (event) {
+            d3.select("#pvsFiles").classed("drag-over", false);
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        };
+        
+        lstBox.ondrop = function (event) {
+            d3.select("#pvsFiles").classed("drag-over", false);
+            var files = event.dataTransfer.files;
+            updateProjectWithFiles(files);
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        };
+    }
+    /**
+     * data has .prototypeImage, .pvsSpec, .projectName
+     */
+	function newProject(data) {
+        //update the current project with info from data and saveNew
+        currentProject.name(data.projectName);
+        var q = queue(), i;
+        q.defer(function (cb) {
+            var fr = new FileReader();
+            fr.onload = function (event) {
+                currentProject.changeImage(data.prototypeImage[0].name, event.target.result);
+                cb();
+            };
+            fr.readAsDataURL(data.prototypeImage[0]);
+        });
+        
+        function createFileLoadFunction(file) {
+            return function (cb) {
+                var fr = new FileReader();
+                fr.onload = function (event) {
+                    currentProject.addSpecFile(file.name, event.target.result);
+                    cb();
+                };
+                fr.readAsText(file);
+            };
+        }
+                
+        for (i = 0; i < data.pvsSpec.length; i++) {
+            q.defer(createFileLoadFunction(data.pvsSpec[i]));
+        }
+        
+        q.awaitAll(function (err, res) {
+            currentProject.saveNew(function (err, res) {
+                console.log({err: err, res: res});
+                if (!err) {
+                    if (currentProject.image()) {
+                        updateImage(currentProject.image().content());
+                    }
+                    currentProject.pvsFiles().forEach(function (f) {
+                        f.dirty(false);
+                    });
+                    updateProjectName(currentProject.name());
+                    renderSourceFileList(currentProject.pvsFiles());
+                }
             });
         });
 	}
-    
-    function handleSourceCodeSaved(err, e) {
-        //if we are having multiple files then need to think about when a restart is needed
-        //maybe not even need to restart at all -- but leave the option to user to manually restart process...
-        console.log(err || e);
-    }
-    
-    function saveSourceCode(project) {
-		if (sourceCodeChanged) {
-			ws.writeFile({fileName: project.projectPath + "/" + project.spec, fileContent: editor.getValue()},
-                        handleSourceCodeSaved);
-			sourceCodeChanged = false;
-		}
-	}
-        
-	function saveProject(project) {
-		var imageName, pvsSpecName, fd;
-		if (project.name && project.name.trim().length > 0) {
-			//porject has already been created so save the widgets and the sourcecode if it has changed
-			saveWidgetDefinition(project);
-			saveSourceCode(project);
-		} else {
-			//prompt for a project name (this means they have not yet created a project)
-			project.name = prompt("Enter a project name");
-			if (project.name && project.name.trim().length > 0) {
-				//save the picture
-				imageName = "image." + tempImageName.split(".").slice(-1);
-                fd = {"type": "saveTempFile", "oldFileName": tempImageName, "newFileName": imageName};
-                ws.send(fd, function (err, res) {
-                    if (!err) {
-                        pvsSpecName = d3.select("#txtSpecFileName").property("value") + ".pvs";
-                        delete fd.oldFileName;
-                        fd.newFileName = pvsSpecName;
-                        fd.fileContent = editor.getValue();
-                        ws.send(fd, function (err, res) {
-                            if (!err) {
-                                fd = { "type": "createProject",  "projectName": project.name, "pvsSpecName": pvsSpecName};
-                                ws.send(fd, function (err, res) {
-                                    if (!err) {
-                                        //save the widgets defined if any
-                                        saveWidgetDefinition(project);
-                                        ///TODO maybe do a callback for changes to current project (res object should be current project)
-                                        project.image = imageName;
-                                        project.spec = pvsSpecName;
-                                        updateProjectName(project.name);
-                                        //start the pvsio process
-                                        ws.startPVSProcess(project.spec.split(".pvs")[0], project.name,
-                                                                      pvsProcessReady);
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-			}
-		}
-	}
-	
+
     /**
 	 * create pvs websocket connection
 	 * add listeners for pvs process events
@@ -537,7 +527,7 @@ define(function (require, exports, module) {
     
     
     
-	updateSourceCode("ui_th: THEORY BEGIN \r\n \r\nEND ui_th");
+	//updateSourceCode("ui_th: THEORY BEGIN \r\n \r\nEND ui_th");
 	d3.select("#header #txtProjectName").property("value", "");
 	
 	/**
@@ -573,7 +563,52 @@ define(function (require, exports, module) {
 	});
 	
 	d3.select("#saveProject").on("click", function () {
-		saveProject(currentProject);
+        /**
+            saves a project including image, widget definitions and pvsfiles
+        */
+        function _doSave() {
+            currentProject.save(function (err, res) {
+                console.log({err: err, res: res});
+                //update status of the pvsfiles -- first select the spec files still dirty-- and match those with the 
+                //response from the call to saveProject
+                if (currentProject.pvsFiles()) {
+                    var pvsFiles = currentProject.pvsFiles().filter(function (f) {
+                        return f.dirty();
+                    });
+                    res[1].forEach(function (response, index) {
+                        if (response.type === "fileSaved") {
+                            pvsFiles[index].dirty(false);
+                        }
+                    });
+                    pvsFilesListBox.updateView();
+                    updateSourceCodeToolbarButtons(pvsFilesListBox.selectedItem());
+                }
+            });
+        }
+        //prompt for a name if there is no name
+        ///TODO this section could use a better prompt for requesting project name
+        if (currentProject.name().length === 0) {
+            var name = prompt("Please enter a name for the project");
+            if (name && name.trim().length > 0) {
+                currentProject.name(name);
+                currentProject.saveNew(function (err, res) {
+                    console.log({err: err, res: res});
+                    if (!err) {
+                        currentProject.pvsFiles().each(function (f) {
+                            f.dirty(false);
+                            pvsFilesListBox.updateView();
+                            updateProjectName(currentProject.name());
+                            updateSourceCodeToolbarButtons(pvsFilesListBox.selectedItem());
+                        });
+                    }
+                });
+            } else {
+                console.log("no name was given for project --");
+            }
+        } else {
+            _doSave();
+        }
+		
 	});
 		
 	d3.select("#openProject").on("click", function () {
@@ -593,16 +628,57 @@ define(function (require, exports, module) {
 	//handle typecheck event
     //this function should be edited to only act on the selected file when multiple files are in use
 	d3.select("#btnTypeCheck").on("click", function () {
-		var btn = d3.select(this).html("Typechecking ...").attr("disabled", true);
-		if (currentProject && currentProject.specFullPath) {
-            ws.send({type: "typeCheck", filePath: currentProject.specFullPath}, function (res) {
+        if (pvsFilesListBox && pvsFilesListBox.selectedIndex() > -1) {
+            var pvsFile = pvsFilesListBox.selectedItem();
+            var btn = d3.select(this).html("Typechecking ...").attr("disabled", true);
+            ws.send({type: "typeCheck", filePath: currentProject.path() + "/" + pvsFile.name()}, function (err, res) {
                 btn.html("Typecheck").attr("disabled", null);
-                console.log(res);
-                alert(res.stdout);
+                if (err) {
+                    alert(JSON.stringify(err));
+                } else {
+                    console.log(res);
+                    ///TODO: show nicer alert and visualisation for type checking info
+                    alert(res.stdout);
+                }
             });
-		}
+        }
 	});
     
-	resizeImageDiv();
+    d3.select("#btnSetMainFile").on("click", function () {
+        if (pvsFilesListBox && pvsFilesListBox.selectedItem()) {
+            var pvsFile = pvsFilesListBox.selectedItem();
+            ws.send({type: "setMainFile", projectName: currentProject.name(), fileName: pvsFile.name()}, function (err, res) {
+                //if there was no error update the main file else alert user
+                currentProject.mainPVSFile(pvsFile);
+                pvsFilesListBox.updateView();
+            });
+        }
+    });
+    
+    d3.select("#btnSaveFile").on("click", function () {
+        if (pvsFilesListBox && pvsFilesListBox.selectedItem()) {
+            var pvsFile = pvsFilesListBox.selectedItem();
+            currentProject.saveFile(pvsFile, function (err, res) {
+                if (!err) {
+                    pvsFile.dirty(false);
+                    pvsFilesListBox.updateView();
+                    updateSourceCodeToolbarButtons(pvsFile);
+                } else {
+                    console.log(err);
+                }
+            });
+        }
+    });
+	
+    d3.select("#btnRestartPVSioWeb").on("click", function () {
+        //try to start process on server
+        if (currentProject.mainPVSFile()) {
+            ws.lastState("init(0)");
+            ws.startPVSProcess(currentProject.mainPVSFile().name(), currentProject.name(),
+                          pvsProcessReady);
+        }
+    });
+    resizeImageDiv();
 	preparePageForImageUpload();
+    prepareListBoxForFileDrag();
 });

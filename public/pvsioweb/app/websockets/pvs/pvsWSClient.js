@@ -11,9 +11,10 @@ define(function (require, exports, module) {
         eventDispatcher     = require("util/eventDispatcher"),
         property            = require("util/property"),
         serverFunctions     = require("websockets/pvs/ServerFunctions"),
-        pvsEvents           = require("formal/pvs/prototypebuilder/events");
+        pvsEvents           = require("formal/pvs/prototypebuilder/events"),
+        wsSingleton;
     
-    module.exports = function () {
+    function createWebSocket() {
         var wscBase = wsclient();
         
         var o  = eventDispatcher({});
@@ -76,6 +77,10 @@ define(function (require, exports, module) {
             return o;
         };
         return o;
-    };
+    }
     
+    module.exports = function () {
+        wsSingleton = wsSingleton || createWebSocket();
+        return wsSingleton;
+    };
 });

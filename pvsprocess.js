@@ -112,29 +112,7 @@ module.exports = function () {
 		pvs.sendCommand(command);
 		return o;
 	};
-	
-	/**
-	 * gets the source code pvs io is executing
-     * @param {string} path the path the to file whose content is to be fetched
-	 * @param {function({type:string, data, message:string})} callback callback to execute when sourcecode has been loaded
-	 * @returns {this}
-	 */
-	o.readFile = function (path, callback) {
-        pvs.readFile(path, callback);
-		return o;
-	};
-	
-	/**
-	 * writes  the file passed to the disk
-     * @param {fileName:string, fileContent: string} data Object representing the sourcecode to save
-     * @param {function ({type: string, data: {fileName: string}})} callback function to invoke when the file has been saved
-	 */
-	o.writeFile = function (path, data, callback) {
-        pvs.writeFile(path, data, callback);
-		return o;
-	};
-	
-	
+    
 	/**
 	 * closes the pvsio process
      * @param {string} signal The signal to send to the kill process. Default is 'SIGTERM'

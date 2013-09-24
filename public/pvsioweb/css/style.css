@@ -84,12 +84,100 @@ area{
 	background: #ddd;
 }
 
+/**
+source code ection styling
+*/
+#pvsFiles ul {
+    list-style-type: none;
+    margin: 0;
+}
+.list-icon {
+    display: inline-block;
+    width: 14px;
+    height:14px;
+    margin-right:5px;
+}
+#sourcecode-editor-wrapper{
+    width: 1130px;
+    height: 800px;
+        
+}
+
+#pvsFiles {
+    display:inline-block;
+    width:200px;
+    height: 100%;
+    border: 1px solid #ddd;
+    border-right: 1px solid #444;
+}
+
 #editor{
 	z-index: 30;
-	width: 1130px;
+	width: 930px;
 	height: 800px;
 	border: 1px solid black;
+    display: inline-block;
 }
+
+#pvsFiles .fileListItem {
+    position:relative;
+    padding: 3px 5px 3px 3px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+#pvsFiles.drag-over{
+    border:3px dashed #393;
+}
+#pvsFiles .file-label {
+    width: 150px;
+    display: inline-block;
+    overflow: hidden;
+}
+.fileListItem.dirty .list-icon-dirty{
+    background-image:url(../bootstrap/img/glyphicons-halflings.png);
+    background-position:-456px -96px;
+}
+
+.fileListItem.selected.dirty .list-icon-dirty{
+    background-image:url(../bootstrap/img/glyphicons-halflings-white.png);
+    background-position:-456px -96px;
+}
+
+.fileListItem.main-file .list-icon-main{
+    background-position: -120px 0;
+    background-image:url(../bootstrap/img/glyphicons-halflings.png);
+}
+
+.fileListItem.main-file.selected .list-icon-main{
+    background-position: -120px 0;
+    background-image:url(../bootstrap/img/glyphicons-halflings-white.png);
+}
+.fileListItem.selected {
+    background: #444;
+    color: #ddd;
+    border: 1px solid #222;
+    border-right:1px solid #444;
+}
+
+#pvsFiles .fileListItem.selected .file-label:after {
+    content: "";
+    border-top: 14px solid transparent;
+    border-bottom: 11px solid transparent;
+    border-left: 14px solid #444;
+    display: block;
+    position: absolute;
+    left: 200px;
+    top: 0px;
+    width: 0;
+    height: 0;
+    z-index: 20000;
+}
+#editorToolbar{
+    margin-bottom: 10px;   
+}
+/*** end source code section **/
+
 
 #console {
 	position: absolute;

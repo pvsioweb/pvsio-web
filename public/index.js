@@ -11,6 +11,7 @@ require.config(
         paths: {
             "ace": "../lib/ace",
             "d3": "../lib/d3",
+            "underscore": "../lib/underscore",
             "pvsioweb": "formal/pvs/prototypebuilder"
         }
     }
