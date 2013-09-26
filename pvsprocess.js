@@ -45,6 +45,7 @@ module.exports = function () {
 		if (dir) {
 			dir = dir.substr(-1) !== "/" ? (dir + "/") : dir;
 			workspaceDir = dir;
+            process.chdir(workspaceDir);
 			return o;
 		}
 		return workspaceDir;
@@ -57,7 +58,7 @@ module.exports = function () {
      * @param {function} callback to call when processis ready
 	 */
 	o.start = function (file, callback, processReadyCallback) {
-		filename = o.workspaceDir() + file;
+		filename = file;
         function onDataReceived(data) {
 			var lines = data.split("\n").map(function (d) {
 				return d.trim();
@@ -88,7 +89,7 @@ module.exports = function () {
 		
 		function onProcessExited(code) {
 			processReady = false;
-			var msg = "pvsio process exited with code " + code;
+			var msg = "pvsio process exited with code " + code + ".\n" + output.join("");
 			util.log(msg);
 			callback({type: "processExited", data: msg, code: code});
 		}

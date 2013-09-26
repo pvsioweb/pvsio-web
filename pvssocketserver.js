@@ -1,4 +1,4 @@
-//#!/usr/bin/env node
+#!/usr/bin/env node
 /**
 Copyright (c) 2012
 
@@ -182,7 +182,6 @@ function run() {
                     if (imageExts.indexOf(ext) > -1) {
                         res.image = file;
                         res.imageData = "data:image/" + ext + ";base64," + fs.readFileSync(projectPath + "/" + file, "base64");
-                        console.log(res.imageData);
                     } else if (specExts.indexOf(ext) > -1) {
                         res.pvsFiles = res.pvsFiles || [];
                         res.pvsFiles.push(file);
@@ -288,8 +287,6 @@ function run() {
             "createProject": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid] || pvsio();
                 pvsioProcessMap[socketid] = p;
-                
-                util.log(JSON.stringify(token));
                 var res = createProject(token);
                 res.id = token.id;
                 res.serverSent = new Date().getTime();

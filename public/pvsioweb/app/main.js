@@ -242,11 +242,16 @@ define(function (require, exports, module) {
     }
 	 
     function pvsProcessReady(err, e) {
+        var pvsioStatus = d3.select("#lblPVSioStatus");
+        pvsioStatus.select("i").remove();
         if (!err) {
-            console.log("pvsio process ready");
+            var msg = ("pvsio process ready");
+            log(msg);
+            pvsioStatus.append("i").attr("class", "icon-ok");
             
         } else {
             console.log(err);
+            pvsioStatus.append("i").attr("class", "icon-warning-sign");
         }
     }
     
@@ -506,8 +511,12 @@ define(function (require, exports, module) {
         .serverUrl(url)
 		.addListener('ConnectionOpened', function (e) {
 			log("connection to pvsio server established");
+            d3.select("#btnRestartPVSioWeb").attr("disabled", null);
+            d3.select("#lblWebSocketStatus").select("i").attr("class", "icon-ok");
 		}).addListener("ConnectionClosed", function (e) {
 			log("connection to pvsio server closed");
+            d3.select("#btnRestartPVSioWeb").attr("disabled", true);
+            d3.select("#lblWebSocketStatus").select("i").attr("class", "icon-warning-sign");
 		}).addListener("pvsoutput", function (e) {
             console.log(e);
 			var response = prettyPrint(e.data), tmp;
@@ -523,6 +532,7 @@ define(function (require, exports, module) {
 			console.log("Server process exited -- server message was ...");
 			console.log(e);
 			log(JSON.stringify(e));
+            d3.select("#lblPVSioStatus").select("i").attr("class", "icon-warning-sign");
 		}).logon();
     
     
@@ -567,19 +577,10 @@ define(function (require, exports, module) {
             saves a project including image, widget definitions and pvsfiles
         */
         function _doSave() {
-            currentProject.save(function (err, res) {
-                console.log({err: err, res: res});
-                //update status of the pvsfiles -- first select the spec files still dirty-- and match those with the 
-                //response from the call to saveProject
+            currentProject.save(function (err, project) {
+                currentProject = project;
+                //repaint the list and sourcecode toolbar
                 if (currentProject.pvsFiles()) {
-                    var pvsFiles = currentProject.pvsFiles().filter(function (f) {
-                        return f.dirty();
-                    });
-                    res[1].forEach(function (response, index) {
-                        if (response.type === "fileSaved") {
-                            pvsFiles[index].dirty(false);
-                        }
-                    });
                     pvsFilesListBox.updateView();
                     updateSourceCodeToolbarButtons(pvsFilesListBox.selectedItem());
                 }
@@ -591,15 +592,12 @@ define(function (require, exports, module) {
             var name = prompt("Please enter a name for the project");
             if (name && name.trim().length > 0) {
                 currentProject.name(name);
-                currentProject.saveNew(function (err, res) {
-                    console.log({err: err, res: res});
+                currentProject.saveNew(function (err, project) {
                     if (!err) {
-                        currentProject.pvsFiles().each(function (f) {
-                            f.dirty(false);
-                            pvsFilesListBox.updateView();
-                            updateProjectName(currentProject.name());
-                            updateSourceCodeToolbarButtons(pvsFilesListBox.selectedItem());
-                        });
+                        currentProject = project;
+                        pvsFilesListBox.updateView();
+                        updateProjectName(currentProject.name());
+                        updateSourceCodeToolbarButtons(pvsFilesListBox.selectedItem());
                     }
                 });
             } else {

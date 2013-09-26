@@ -16,17 +16,24 @@ define(function (require, exports, module) {
     
     var propertyChangedEvent = "PropertyChanged";
     
-    function saveSourceCode(files, cb) {
+    function saveSourceCode(files, project, cb) {
         var ws = WSManager.getWebSocket();
 		var q = queue();
         files.forEach(function (f) {
             q.defer(ws.writeFile, {fileName: f.path(), fileContent: f.content()});
         });
-        q.awaitAll(cb);
+        q.awaitAll(function (err, res) {
+            var pvsFiles = project.pvsFiles().filter(function (p) { return p.dirty(); });
+            //update status of files successfully saved
+            res.forEach(function (response, index) {
+                if (response.type === "fileSaved") {
+                    pvsFiles[index].dirty(false);
+                }
+            });
+            cb(err, res);
+        });
 	}
-        
-    
-    
+            
     function getRegionDefs() {
 		var regionDefs = [];
 		d3.selectAll("#prototypeMap area").each(function () {
@@ -125,12 +132,16 @@ define(function (require, exports, module) {
             if (!_.isArray(file)) {
                 file = [file];
             }
-            saveSourceCode(file, cb);
+            var _thisProject = this;
+            saveSourceCode(file, this, function (err, res) {
+                cb(err, _thisProject);
+            });
             return this;
         };
         
         this.save = function (cb) {
             _dirty = false;
+            var _thisProject = this;
             //do save
             var imageName, pvsSpecName, fd;
             if (this.name() && this.name().trim().length > 0) {
@@ -140,18 +151,21 @@ define(function (require, exports, module) {
                 if (this.pvsFiles()) {
                     q.defer(saveSourceCode, this.pvsFiles().filter(function (f) {
                         return f.dirty();
-                    }));
+                    }), this);
                 }
                
                 if (this.image().dirty()) {
                     q.defer(saveImageFile, this);
                 }
-                q.awaitAll(cb);
+                q.awaitAll(function (err, res) {
+                    cb(err, _thisProject);
+                });
             }
             return this;
         };
             
         this.saveNew = function (cb) {
+            var _thisProject = this;
             var wd = {widgetMaps: widgetMaps.toJSON(), regionDefs: getRegionDefs()};
             var wdStr = JSON.stringify(wd, null, " ");
             var ws = WSManager.getWebSocket(), specFiles = this.pvsFiles().map(function (f, i) {
@@ -165,7 +179,14 @@ define(function (require, exports, module) {
                 token.imageFileName = this.image().name();
                 token.imageData =  this.image().content();
             }
-            ws.send(token, cb);
+            ws.send(token, function (err, res) {
+                if (!err) {
+                    _thisProject.pvsFiles().forEach(function (f) {
+                        f.dirty(false);
+                    });
+                }
+                cb(err, _thisProject);
+            });
         };
         eventDispatcher(this);
     }
@@ -201,43 +222,7 @@ define(function (require, exports, module) {
         });
     }
     
-    ///TODO revise this to handle list of pvsfiles
-    
-//    /**
-//    * create a new project based on the data in the parameter
-//    */
-//    function create(data, cb) {
-//        var imageFileReader = new FileReader();
-//        imageFileReader.onload = function (event) {
-//            var projectImage = event.target.result.replace(/^data:image\/(\w+);base64,/, "");
-//            var imageExt = data.prototypeImage[0].name.split(".").slice(-1)[0];
-//            //get the pvsFile(s)
-//            var pvsFileReader = new FileReader();
-//            pvsFileReader.onload = function (event) {
-//                var pvsFileContent = event.target.result;
-//                //send both files as well as the project name to the server to create new project
-//                console.log(pvsFileContent);
-//                console.log(projectImage);
-//                var ws = WSManager.getWebSocket();
-//                ws.send({type: "createProject", specFileName: data.pvsSpec.name, specFileContent: pvsFileContent,
-//                        imageFileName: "image." + imageExt, imageData: projectImage, projectName: data.projectName},
-//                    function (err, res) {
-//                        var p;
-//                        if (!err) {
-//                            //initialise res to a new project and return
-//                            p = initFromJSON(res);
-//                        }
-//                        cb(err, p);
-//                    });
-//            };
-//            pvsFileReader.readAsText(data.pvsSpec);
-//        };
-//        imageFileReader.readAsDataURL(data.prototypeImage[0]);
-//	}
-//    
-    
     Project.open = open;
-//    Project.create = create;
     
     exports.Project = Project;
     
