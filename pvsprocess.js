@@ -55,11 +55,14 @@ module.exports = function () {
 	 * starts the pvs process with the given sourcefile 
 	 * @param {String} filename source file to load with pvsio
 	 * @param {function({type:string, data:array})} callback function to call when any data is received  in the stdout
-     * @param {function} callback to call when processis ready
+	 * @param {function} callback to call when processis ready
 	 */
 	o.start = function (file, callback, processReadyCallback) {
 		filename = file;
         function onDataReceived(data) {
+  			// this shows the original PVSio output
+            		util.log(data);
+
 			var lines = data.split("\n").map(function (d) {
 				return d.trim();
 			});
@@ -71,16 +74,16 @@ module.exports = function () {
 			}));
 			
 			if (processReady && lastLine.indexOf(readyString) > -1) {
-                var outString = output.join("").replace(/,/g, ", ").replace(/\s+\:\=/g, ":=").replace(/\:\=\s+/g, ":=");
-                //This is a hack to remove garbage collection messages from the output string before we send to the client
-                var croppedString = outString.substring(0, outString.indexOf("(#"));
-                outString = outString.substring(outString.indexOf("(#"));
-                util.log(outString);
+                		var outString = output.join("").replace(/,/g, ", ").replace(/\s+\:\=/g, ":=").replace(/\:\=\s+/g, ":=");
+                		//This is a hack to remove garbage collection messages from the output string before we send to the client
+                		var croppedString = outString.substring(0, outString.indexOf("(#"));
+                		outString = outString.substring(outString.indexOf("(#"));
+                		// util.log(outString);
 				callback({type: "pvsoutput", data: [outString]});
 				//clear the output
 				output  = [];
 			} else if (lastLine.indexOf(readyString) > -1) {
-                //last line of the output is the ready string
+                		//last line of the output is the ready string
 				processReadyCallback({type: "processReady", data: output});
 				processReady = true;
 				output = [];
