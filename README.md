@@ -24,13 +24,15 @@ Installation
 To install, use
 
 ### zip
-- Download the zip archive of the project from [https://github.com/thehogfather/pvsio-web/archive/master.zip](https://github.com/thehogfather/pvsio-web/archive/master.zip)
-- Extract the zip file to a location of your preference.
-- To download all the dependencies of the project, change directory into the extracted folder and run
+Download the zip archive of the project from [https://github.com/thehogfather/pvsio-web/archive/master.zip](https://github.com/thehogfather/pvsio-web/archive/master.zip)
+
+Extract the zip file to a location of your preference.
+
+To download all the dependencies of the project, change directory into the extracted folder and run
 
     npm install
 
-- Continue as in the instruction for __'Running pvsio-web'__
+Continue as in the instruction for __'Running pvsio-web'__
 
 ### npm
 
