@@ -1,0 +1,29 @@
+TCAS_unsafe: THEORY
+ BEGIN
+  IMPORTING TCAS_tables, TCAS_2D[TA_thr]
+    
+    sl : SensitivityLevel = 8
+
+    so : Vect2 = (0,0)
+    vo : Nz_vect2 = (0,600*knt)
+
+    si : Vect2 = (-54171/40,78247/40)
+    vi : Nz_vect2 = (-463/3,463/3)
+
+    Tau : real = tau(so-si,vo-vi)
+    TAU : real = TA_thr(sl,TAU)
+    TCPA: real = tcpa(so-si,vo-vi)
+    Converging: bool = converging?(so-si)(vo-vi)
+    Range: real = range(so-si)/nmi
+    DMOD: real = TA_thr(sl,DMOD)/nmi
+
+    alerts: void =
+       LET i = query_int("Time Period? ") IN
+         printf("TAs in [~a,~a]: ", (-i, i)) &
+          (FORALL (t: subrange(-i, i)): 
+             IF TCAS_2D?(sl, so + t * vo, vo, si + t * vi, vi) 
+              THEN print(t + " ") ELSE skip ENDIF)
+
+
+
+ END TCAS_unsafe

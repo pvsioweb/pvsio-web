@@ -1,0 +1,16 @@
+TCAS_tcoa : THEORY
+BEGIN
+
+  sz : VAR real
+  vz : VAR nzreal
+
+  tcoa(sz,vz) : real = 
+    ... % Time to co-altitude
+
+  tcoa_sound : LEMMA T
+    ... % Relative altitude at time to co-altitude is 0
+
+  tcoa_pos : LEMMA
+    ... % Time to co-altitude is positive when sz*vz < 0
+
+END TCAS_tcoa

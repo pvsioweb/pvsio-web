@@ -1,0 +1,11 @@
+Units : THEORY
+BEGIN
+  
+  ft   : MACRO posreal = 0.3048   % 1 foot in meters
+  nmi  : MACRO posreal = 1852     % 1 nautical mile in meters
+  min  : MACRO posreal = 60       % 1 minute in seconds
+  hour : MACRO posreal = 3600     % 1 hour in seconds
+  knt  : MACRO posreal = nmi/hour % 1 knot in m/s
+  fpm  : MACRO posreal = ft/min   % 1 foot per minute in m/s
+
+END Units

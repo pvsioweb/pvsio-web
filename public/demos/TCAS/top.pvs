@@ -1,0 +1,82 @@
+top: THEORY
+ BEGIN
+
+  IMPORTING TCAS_tables, TCAS_2D[TA_thr]
+
+    time: TYPE = real
+
+    state: TYPE = [#    
+       % ownship's position and velocity
+       so : Vect2,
+       vo : Nz_vect2,
+       % intruder's position and velocity
+       si : Vect2,
+       vi : Nz_vect2,
+       % TCAS configuration
+       SL  : SensitivityLevel,
+       Tau : {x: real | x = tau(so-si,vo-vi)}, % time
+       TAU : {x: real | x = TA_thr(SL,TAU)}, % threshold
+       TCPA: {x: real | x = tcpa(so - si, vo - vi)}, % time closest point of approach
+       Converging: {x: bool | converging?(so - si)(vo - vi)},
+       Range: {x: real | x = range(so - si) / nmi},
+       DMOD: {x: real | x = TA_thr(SL, DMOD) / nmi}, % distance modification
+       t: time,
+       TA: bool % traffic alert
+    #]
+
+    init(t0: time): state = 
+      LET so_: Vect2 = (0,0),
+          vo_: Nz_vect2 = (0,600*knt),
+          si_: Vect2 = (-54171/400,78247/400),
+          vi_: Nz_vect2 = (-463/3,463/3),
+	  SL_: SensitivityLevel = 8  IN (#
+       % ownship's position and velocity
+       so := so_,
+       vo := vo_,
+       % intruder's position and velocity
+       si := si_,
+       vi := vi_,
+       % TCAS configuration
+       SL  := SL_,
+       Tau := tau(so_ - si_,vo_ - vi_),
+       TAU := TA_thr(SL_,TAU),
+       TCPA:= tcpa(so_ - si_, vo_ - vi_),
+       Converging:= converging?(so_ - si_)(vo_ - vi_),
+       Range:= range(so_ - si_) / nmi,
+       DMOD := TA_thr(SL_, DMOD) / nmi,
+       t  := t0,
+       TA := TCAS_2D?(SL_, so_ + t0 * vo_, vo_, si_ + t0 * vi_, vi_) 
+    #)
+
+    % tick is used to advance time with a resolution deltaT
+    deltaT: real = 0.5
+    tick(st: state): state =
+      LET so_: Vect2 = so(st) + deltaT * vo(st),
+          si_: Vect2 = si(st) + deltaT * vi(st),
+	  t_ : real  = t(st)  + deltaT
+       IN st WITH [ so := so_,
+       	     	    si := si_,
+       	     	    Tau := tau(so_ - si_,vo(st) - vi(st)),
+       		    TAU := TA_thr(SL(st),TAU),
+       		    TCPA:= tcpa(so_ - si_, vo(st) - vi(st)),
+       		    Converging:= converging?(so_ - si_)(vo(st) - vi(st)),
+		    Range:= range(so_ - si_) / nmi,
+       		    DMOD := TA_thr(SL(st), DMOD) / nmi,
+       		    t  := t_,
+       		    TA := TCAS_2D?(SL(st), so_, vo(st), si_, vi(st)) ]
+    
+    click_tick(st: state): state = tick(st)
+
+    % click_speedUP/click_slowDOWN is used to increase the ownship's speed of deltaV
+    deltaV: real = 0.1
+    click_speedUPx(st: state): state =
+      st WITH [ vo := (vo(st)`x + deltaV, vo(st)`y) ]
+    click_speedUPy(st: state): state =
+      st WITH [ vo := (vo(st)`x, vo(st)`y + deltaV) ]
+    click_slowDOWNx(st: state): state =
+      IF vo(st)`x - deltaV >= 0 THEN st WITH [ vo := (vo(st)`x - deltaV, vo(st)`y) ] ELSE st ENDIF
+    click_slowDOWNy(st: state): state =
+      IF vo(st)`y - deltaV >= 0 THEN st WITH [ vo := (vo(st)`x, vo(st)`y - deltaV) ] ELSE st ENDIF
+
+
+ END top

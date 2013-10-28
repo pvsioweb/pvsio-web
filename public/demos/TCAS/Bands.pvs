@@ -1,0 +1,15 @@
+Bands : THEORY
+BEGIN
+
+  IMPORTING TCAS_TA, TCAS_RA
+
+  Color : TYPE = ...
+
+  so,si : VAR Position
+  vo,vi : VAR Velocity
+  T     : VAR nnreal   % Lookahead time
+
+  band(so,vo,si,vi,T) : Color =
+    ...
+
+END Bands
