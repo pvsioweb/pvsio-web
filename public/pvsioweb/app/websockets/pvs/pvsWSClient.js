@@ -11,7 +11,6 @@ define(function (require, exports, module) {
         eventDispatcher     = require("util/eventDispatcher"),
         property            = require("util/property"),
         serverFunctions     = require("websockets/pvs/ServerFunctions"),
-        pvsEvents           = require("formal/pvs/prototypebuilder/events"),
         wsSingleton;
     
     function createWebSocket() {
@@ -46,7 +45,7 @@ define(function (require, exports, module) {
         
         o.sendGuiAction = function (action, cb) {
             wscBase.send({type: serverFunctions.SendUICommand, data: {command: action}}, cb);
-            wscBase.fire({type: pvsEvents.InputUpdated, data: action});
+            wscBase.fire({type: "InputUpdated", data: action});
             return o;
         };
         

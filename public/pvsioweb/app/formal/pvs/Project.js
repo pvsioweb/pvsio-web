@@ -10,8 +10,7 @@ define(function (require, exports, module) {
     var property            = require("util/property"),
         eventDispatcher     = require("util/eventDispatcher"),
         WSManager           = require("websockets/pvs/WSManager"),
-        widgetMaps              = require("pvsioweb/widgetMaps"),
-       // FileReader          = require("util/WebPageFileReader"),
+        WidgetManager       = require("pvsioweb/WidgetManager")(),
         queue               = require("d3/queue");
     
     var propertyChangedEvent = "PropertyChanged";
@@ -33,22 +32,11 @@ define(function (require, exports, module) {
             cb(err, res);
         });
 	}
-            
-    function getRegionDefs() {
-		var regionDefs = [];
-		d3.selectAll("#prototypeMap area").each(function () {
-			var a = d3.select(this),
-                region = {"class": a.attr("class"), shape: a.attr("shape"),
-                            coords: a.attr("coords"), href: a.attr("href")};
-			regionDefs.push(region);
-		});
-		return regionDefs;
-	}
-    
+
     function saveWidgetDefinition(project, cb) {
 		//save to the user's drive
         var ws = WSManager.getWebSocket();
-        var wd = {widgetMaps: widgetMaps.toJSON(), regionDefs: getRegionDefs()};
+        var wd = WidgetManager.getWidgetDefinitions();
 		var wdStr = JSON.stringify(wd, null, " ");
 		var data  = {"fileName": project.path() + "/widgetDefinition.json", fileContent: wdStr};
 		ws.writeFile(data, function (err, res) {
@@ -166,7 +154,7 @@ define(function (require, exports, module) {
             
         this.saveNew = function (cb) {
             var _thisProject = this;
-            var wd = {widgetMaps: widgetMaps.toJSON(), regionDefs: getRegionDefs()};
+            var wd = WidgetManager.getWidgetDefinitions();
             var wdStr = JSON.stringify(wd, null, " ");
             var ws = WSManager.getWebSocket(), specFiles = this.pvsFiles().map(function (f, i) {
                 return {fileName: f.name(), fileContent: f.content()};

@@ -97,6 +97,7 @@ source code ection styling
 #pvsFiles ul {
     list-style-type: none;
     margin: 0;
+	padding:0;
 }
 .list-icon {
     display: inline-block;
@@ -107,23 +108,27 @@ source code ection styling
 #sourcecode-editor-wrapper{
     width: 1130px;
     height: 800px;
-        
+   	position:relative;
 }
 
 #pvsFiles {
-    display:inline-block;
-    width:200px;
-    height: 100%;
+	position:absolute;
+	top:0px;
+	width:200px;
+    height: 800px;
     border: 1px solid #ddd;
     border-right: 1px solid #444;
 }
 
 #editor{
 	z-index: 30;
-	width: 930px;
+	width: 900px;
 	height: 800px;
 	border: 1px solid black;
     display: inline-block;
+	position:absolute;
+	top: 0px;
+	left: 205px;
 }
 
 #pvsFiles .fileListItem {
@@ -138,7 +143,6 @@ source code ection styling
 }
 #pvsFiles .file-label {
     width: 150px;
-    display: inline-block;
     overflow: hidden;
 }
 .fileListItem.dirty .list-icon-dirty{
@@ -172,9 +176,9 @@ source code ection styling
     border-top: 14px solid transparent;
     border-bottom: 11px solid transparent;
     border-left: 14px solid #444;
-    display: block;
+    display: inline-block;
     position: absolute;
-    left: 200px;
+    left: 197px;
     top: 0px;
     width: 0;
     height: 0;
@@ -241,7 +245,6 @@ source code ection styling
 }
 
 img {
-	position: absolute;
 	z-index: -2;
 }
 
@@ -308,4 +311,11 @@ div#logsDiv {
 div#content select, div#content input, div#content textarea, div.detailsForm  input,
 div.detailsForm select, div.detailsForm textarea{
 	margin-bottom: 0px;
+}
+#body {
+	margin-top: 20px;
+}
+
+.tab-content {
+	margin-top: 20px;
 }

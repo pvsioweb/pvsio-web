@@ -9,110 +9,51 @@ define(function (require, exports, module) {
     "use strict";
 
     var pvsws                   = require("websockets/pvs/pvsWSClient"),
-        displayManager          = require("pvsioweb/displayManager"),
-        overlayCreator          = require("pvsioweb/createOverlay"),
         ace                     = require("ace/ace"),
-        widgetMaps              = require("pvsioweb/widgetMaps"),
-        shuffle                 = require("util/shuffle"),
-        widgetEditor            = require("pvsioweb/widgetEditor"),
-        widgetEvents            = require("pvsioweb/widgetEvents"),
-        buttonWidget            = require("pvsioweb/buttonWidget"),
-        displayWidget           = require("pvsioweb/displayWidget"),
-        displayMappings         = require("pvsioweb/displayMappings"),
+		Button		            = require("pvsioweb/Button"),
+		Display				    = require("pvsioweb/Display"),
         newProjectForm          = require("pvsioweb/forms/newProject"),
-        formEvents              = require("pvsioweb/forms/events"),
         openProjectForm         = require("pvsioweb/forms/openProject"),
-        saveProjectAs           = require("pvsioweb/forms/saveProjectAs"),
         ListView                = require("pvsioweb/ListView"),
         Project                 = require("formal/pvs/Project").Project,
         d3                      = require("d3/d3"),
-        queue                   = require("d3/queue");
+        queue                   = require("d3/queue"),
+        imageMapper             = require("imagemapper"),
+		NewWidgetView			= require("pvsioweb/forms/newWidget"),
+		EditWidgetView			= require("pvsioweb/forms/editWidget"),
+		WidgetManager			= require("pvsioweb/WidgetManager")(),
+		uidGenerator			= require("util/uuidGenerator");
 
     var currentProject = new Project(""), ws, pvsFilesListBox, fileContents = {};
-    var tempImageName, tempSpecName;
+    var tempImageName, tempSpecName, mapCreator;
     var editor = ace.edit("editor");
     editor.getSession().setMode('ace/mode/text');
 
+	function _updateWidgetWithProperties(widget, properties) {
+		_.each(properties, function (val, key) {
+			widget[key](val);
+		});
+		return widget;
+	}
+	
+	function createImageMap(widget) {
+		if (widget.needsImageMap()) { widget.createImageMap(ws); }
+	}
+	
     function handleWidgetEdit(mark) {
-        widgetEditor.create(mark)
-            .addListener(widgetEvents.WidgetSaved,  function (e) {
-                e.mark.attr("id", e.widget.id());
-                e.formContainer.remove();
-                console.log(e);
+		var widget = WidgetManager.getWidget(mark.attr("id"));
+		if (widget) {
+			var wEd = EditWidgetView.create(widget);
+			wEd.on("ok", function (e, view) {
+                view.remove();
+				widget = _updateWidgetWithProperties(widget, e.data);
                 //create an interactive image area only if there isnt one already
-                if (d3.select("#prototypeMap area." + e.widget.id()).empty()) {
-                    overlayCreator.createInteractiveImageArea(e.mark, widgetMaps.get(e.widget.id()), ws);
-                }
-                //update the regex for this mark if its a display widget and give it a display class
-                if (e.widget.type() === "Display") {
-                    e.mark.classed("display",  true);
-                    displayMappings.active[e.widget.id()] = {regex: e.widget.regex(), uiElement: e.widget.id()};
-                }
-            }).addListener(widgetEvents.WidgetDeleted, function (e) {
-                if (e.widget.type() === "Display") {
-                    delete displayMappings.active[e.widget.id()];
-                }
-                e.mark.attr("id", e.widget.id());
-                e.formContainer.remove();
-                console.log(e);
-                e.widget.remove();
-
-            });
+                createImageMap(widget);
+			}).on("cancel", function (e, view) {
+				view.remove();
+			});
+		}
     }
-
-    //create mouse actions for draging areas on top of the image
-    var img = d3.select("#imageDiv img");
-    var image = d3.select("#prototypeImage");
-    var rect, drawing = false, moved = false;
-    image.on('mousedown', function () {
-        d3.event.stopPropagation();
-        d3.event.preventDefault();
-        drawing = true;
-        rect = overlayCreator.createDiv(image);
-    }).on("mouseup", function () {
-        //add the area for the drawn rectangle into the map element
-        if (moved) {
-            handleWidgetEdit(rect);
-            //add double click event listener to mark and
-            //set the font-size of the mark to be 80% of the height
-            rect.on('dblclick', function () {
-                handleWidgetEdit(d3.select(this));
-            }).style('font-size', (0.8 * parseFloat(rect.style('height'))) + "px");
-        } else {
-            rect.remove();
-        }
-        //rect finished drawing
-        drawing = moved = false;
-    }).on('mousemove', function () {
-        if (drawing) {
-            var bound = this.getBoundingClientRect();
-            var pad = 10, x = d3.event.clientX - bound.left - this.clientLeft + this.scrollLeft,
-                y = d3.event.clientY - bound.top - this.clientTop - this.scrollTop;
-            moved = true;
-            d3.event.preventDefault();
-            var starty = parseFloat(rect.attr("starty")),
-                startx = parseFloat(rect.attr("startx")),
-                h = Math.abs(starty - y),
-                w = Math.abs(startx - x);
-            //if the current y is less than the start y, then top style should be height - current top style
-            if (y < starty) {
-                rect.style('top', (starty - h) + "px");
-            } else {
-                rect.style('top', starty + "px");
-            }
-
-            //if the current x is less than the startx then left style should be width - current left style
-            if (x < startx) {
-                rect.style("left", (startx - w) + "px");
-            } else {
-                rect.style("left", startx + "px");
-            }
-            //update width and height of marker
-            rect.style("height", (h - pad) + "px").style("width", (w - pad) + "px");
-            console.log({x: x, y: y});
-        }
-    });
-
 
     /***
      * ##### dealing with logging input and output of pvs
@@ -178,7 +119,6 @@ define(function (require, exports, module) {
             } else {
                 d3.select("#btnSetMainFile").attr("disabled", null);
             }
-
             //update status of file save button based on the selected file
             if (pvsFile.dirty()) {
                 d3.select("#btnSaveFile").attr("disabled", null);
@@ -246,15 +186,15 @@ define(function (require, exports, module) {
 
     function pvsProcessReady(err, e) {
         var pvsioStatus = d3.select("#lblPVSioStatus");
-        pvsioStatus.select("i").remove();
+        pvsioStatus.select("span").remove();
         if (!err) {
             var msg = ("pvsio process ready");
             log(msg);
-            pvsioStatus.append("i").attr("class", "icon-ok");
+            pvsioStatus.append("span").attr("class", "glyphicon glyphicon-ok");
 
         } else {
             console.log(err);
-            pvsioStatus.append("i").attr("class", "icon-warning-sign");
+            pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
         }
     }
 
@@ -263,63 +203,103 @@ define(function (require, exports, module) {
         d3.select("#header #txtProjectName").property("value", name);
     }
 
-    function resizeImageDiv() {
-        var img = d3.select('#imageDiv img');
-        image.style("height", img.property("height") + "px")
-            .style("width", img.property("width") + "px");
-        d3.select("#imageDiv").style("width",  img.property("width"));
-        d3.select("#console").style("left", img.property('width') + 20)
-            .style("height", img.property('height') - 17).style("width", 1130 - img.property("width") - 55);
+    function updateMapCreator(cb) {
+        imageMapper({element: "#imageDiv img", parent: "#imageDiv", onReady: function (mc) {
+            mapCreator = mc.on("create", function (e) {
+                var region = e.region;
+                region.on("dblclick", function () {
+                    handleWidgetEdit(region);
+                });
+                //pop up the widget edit dialog
+				NewWidgetView.create()
+					.on("ok", function (e, view) {
+						view.remove();
+						var id = e.data.type + "_" + uidGenerator();
+						var widget = e.data.type === "button" ? new Button(id) : new Display(id);
+						region.classed(widget.type(), true)
+							.attr("id", id);
+						widget = _updateWidgetWithProperties(widget, e.data);
+						widget.element(region);
+						widget.createImageMap(ws);
+						WidgetManager.addWidget(widget);
+					}).on("cancel", function (e, view) {
+						view.remove();
+						d3.select(region.node().parentNode).remove();
+					});
+            }).on("resize", function (e) {
+				WidgetManager.updateLocation(e.region.attr("id"), e.pos);
+            }).on("move", function (e) {
+				WidgetManager.updateLocation(e.region.attr("id"), e.pos);
+            }).on("remove", function (e) {
+                e.regions.each(function () {
+                    var w = WidgetManager.getWidget(d3.select(this).attr("id"));
+					if (w) {
+						w.remove();
+					} else {
+						d3.select(this.parentNode).remove();
+					}
+                });
+            });
+            if (cb) { cb(); }
+        }});
     }
 
     function updateImage(imageData) {
         d3.select("#imageDiv img").attr("src", imageData);
-        setTimeout(resizeImageDiv, 500);
         //hide the draganddrop stuff
         d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
     }
-
+	
     function loadWidgetDefinitions(defs) {
         //clear old widhget maps and area def
-        widgetMaps.clear();
+        WidgetManager.clearWidgets();
         d3.selectAll("#prototypeImage .mark, #prototypeMap area").remove();
 
         if (defs) {
             console.log(defs);
             var key, w, widget, property;
             _.each(defs.widgetMaps, function (w, key) {
-                widget = w.type === "Button" ? buttonWidget() : displayWidget();
-                widget.id(key);
-                _.each(w, function (value, property) {
-                    widget[property](w[property]);
-                });
-                widgetMaps.add(widget);
+				w.type = w.type.toLowerCase();
+                widget = w.type === "button" ? new Button(key) : new Display(key);
+				widget = _updateWidgetWithProperties(widget, w);
+                WidgetManager.addWidget(widget);
             });
 
             //create div
             defs.regionDefs.forEach(function (d) {
-                widget = widgetMaps.get(d.class);
+                widget = WidgetManager.getWidget(d.class);
                 var coords = d.coords.split(",").map(function (d) {
                     return parseFloat(d);
                 });
-                var h = coords[3] - coords[1], w = coords[2] - coords[0];
-                var mark  = overlayCreator.createDiv(image, coords[0], coords[1])
-                    .style("height", h + "px").style("width", w + "px");
-                overlayCreator.createInteractiveImageArea(mark, widget, ws);
+                var h = coords[3] - coords[1], w = coords[2] - coords[0], x = coords[0], y = coords[1];
+                var mark = mapCreator.restoreRectRegion({x: x, y: y, width: w, height: h});
+				mark.attr("id", widget.id()).classed(widget.type(), true);
+				widget.element(mark);
+				createImageMap(widget);
                 //set the font-size of the mark to be 80% of the height and the id of the mark
                 mark.on("dblclick", function () {
-                    handleWidgetEdit(d3.select(this));
-                }).style('font-size', (0.8 * parseFloat(mark.style('height'))) + "px")
-                    .attr("id", widget.id());
-
-                if (widget.type() === "Display") {
-                    mark.classed("display",  true);
-                    displayMappings.active[widget.id()] = {regex: widget.regex(), uiElement: widget.id()};
-                }
+                    handleWidgetEdit(mark);
+                });
             });
         }
     }
 
+	function switchToBuilderView() {
+		d3.select(".image-map-layer").style("opacity", 1).style("z-index", 190);
+        d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
+        d3.select("#btnBuilderView").classed('selected', true);
+        d3.select("div.display,#controlsContainer button").classed("builder", true);
+        d3.select("div.display,#controlsContainer button").classed("simulator", false);
+	}
+	
+	function switchToSimulatorView() {
+		d3.select(".image-map-layer").style("opacity", 0.1).style("z-index", -2);
+        d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
+        d3.select("#btnSimulatorView").classed('selected', true);
+        d3.select("div.display,#controlsContainer button").classed("simulator", true);
+        d3.select("div.display,#controlsContainer button").classed("builder", false);
+	}
+	
     function openProject() {
         ws.send({type: "listProjects"}, function (err, res) {
             if (!err) {
@@ -327,9 +307,9 @@ define(function (require, exports, module) {
                 projects.unshift("");
                 openProjectForm.create(projects, function (d) {
                     return d;
-                }).addListener(formEvents.FormSubmitted, function (e) {
+                }).on("ok", function (e, view) {
                     //open selected project
-                    Project.open(e.formJSON.projectName, function (project) {
+                    Project.open(e.data.projectName, function (project) {
                         currentProject = project;
                         console.log(currentProject);
                         //only update the image and pvsfile if a real project was selected
@@ -339,12 +319,14 @@ define(function (require, exports, module) {
                             editor.setValue("");
                             if (currentProject.image()) {
                                 updateImage(currentProject.image().content());
+                                updateMapCreator(function () {
+                                    loadWidgetDefinitions(currentProject.widgetDefinitions());
+                                });
                             }
                             //list all other files
                             if (currentProject.pvsFiles()) {
                                 renderSourceFileList(currentProject.pvsFiles());
                             }
-                            loadWidgetDefinitions(currentProject.widgetDefinitions());
                             updateProjectName(currentProject.name());
                             d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
 
@@ -352,14 +334,14 @@ define(function (require, exports, module) {
                             ws.lastState("init(0)");
                             ws.startPVSProcess(currentProject.mainPVSFile().name(), currentProject.name(),
                                               pvsProcessReady);
+							//ensure view is in the build view
+							switchToBuilderView();
                         }
                         //remove the dialog
-                        e.form.remove();
+                        view.remove();
                     });
-                }).addListener(formEvents.FormCancelled, function (e) {
-                    e.form.remove();
-                }).addListener(formEvents.FormDataChanged, function (e) {
-                    console.log(e);
+                }).on("cancel", function (e, view) {
+                    view.remove();
                 });
             }
         });
@@ -412,7 +394,6 @@ define(function (require, exports, module) {
     }
 
     function prepareListBoxForFileDrag() {
-
         function updateProjectWithFiles(files) {
             function createFileLoadFunction(file, fileIndex) {
                 return function (event) {
@@ -423,7 +404,6 @@ define(function (require, exports, module) {
                     }
                 };
             }
-
             var i, f;
             for (i = 0; i < files.length; i++) {
                 f = files[i];
@@ -515,11 +495,11 @@ define(function (require, exports, module) {
         .addListener('ConnectionOpened', function (e) {
             log("connection to pvsio server established");
             d3.select("#btnRestartPVSioWeb").attr("disabled", null);
-            d3.select("#lblWebSocketStatus").select("i").attr("class", "icon-ok");
+            d3.select("#lblWebSocketStatus").select("span").attr("class", "glyphicon glyphicon-ok");
         }).addListener("ConnectionClosed", function (e) {
             log("connection to pvsio server closed");
             d3.select("#btnRestartPVSioWeb").attr("disabled", true);
-            d3.select("#lblWebSocketStatus").select("i").attr("class", "icon-warning-sign");
+            d3.select("#lblWebSocketStatus").select("span").attr("class", "glyphicon glyphicon-warning-sign");
         }).addListener("pvsoutput", function (e) {
             console.log(e);
             var response = prettyPrint(e.data), tmp;
@@ -527,7 +507,10 @@ define(function (require, exports, module) {
             ws.value(parseState(e.data).display);
             console.log(response);
             pvsio_response_log(response);
-            displayManager.updateDisplay(response);
+			//render displays
+			WidgetManager.getDisplayWidgets().forEach(function (w) {
+				w.render(response);
+			});
         }).addListener("InputUpdated", function (e) {
             pvsio_commands_log(JSON.stringify(e.data));
         }).addListener("processExited", function (e) {
@@ -535,44 +518,20 @@ define(function (require, exports, module) {
             console.log("Server process exited -- server message was ...");
             console.log(e);
             log(JSON.stringify(e));
-            d3.select("#lblPVSioStatus").select("i").attr("class", "icon-warning-sign");
+            d3.select("#lblPVSioStatus").select("span").attr("class", "glyphicon glyphicon-warning-sign");
         }).logon();
 
-
-
-    //updateSourceCode("ui_th: THEORY BEGIN \r\n \r\nEND ui_th");
     d3.select("#header #txtProjectName").property("value", "");
-
-    /**
-     * Add event listener for deleting a created mark
-     */
-    d3.select("body").on("keydown", function () {
-        if (d3.event.which === 46) {
-            d3.event.preventDefault();
-            d3.selectAll(".mark.selected")
-                .each(function (d) {
-                    widgetMaps.get(d3.select(this).attr("id")).remove();
-                });
-        }
-    });
 
     /**
      * Add event listener for toggling the prototyping layer and the interaction layer
      */
     d3.select("#btnBuilderView").classed("selected", true).on("click", function () {
-        d3.select("img").style("z-index", -2);
-        d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
-        d3.select(this).classed('selected', true);
-        d3.select("div.display,#controlsContainer button").classed("builder", true);
-        d3.select("div.display,#controlsContainer button").classed("simulator", false);
+        switchToBuilderView();
     });
 
     d3.select("#btnSimulatorView").on("click", function () {
-        d3.select("img").style("z-index", 2);
-        d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
-        d3.select(this).classed('selected', true);
-        d3.select("div.display,#controlsContainer button").classed("simulator", true);
-        d3.select("div.display,#controlsContainer button").classed("builder", false);
+		switchToSimulatorView();
     });
 
     d3.select("#saveProject").on("click", function () {
@@ -581,12 +540,15 @@ define(function (require, exports, module) {
         */
         function _doSave() {
             currentProject.save(function (err, project) {
-                currentProject = project;
-                //repaint the list and sourcecode toolbar
-                if (currentProject.pvsFiles()) {
-                    pvsFilesListBox.updateView();
-                    updateSourceCodeToolbarButtons(pvsFilesListBox.selectedItem());
-                }
+				if (!err) {
+					console.log("project saved");
+					currentProject = project;
+					//repaint the list and sourcecode toolbar
+					if (currentProject.pvsFiles()) {
+						pvsFilesListBox.updateView();
+						updateSourceCodeToolbarButtons(pvsFilesListBox.selectedItem());
+					}
+				}
             });
         }
         //prompt for a name if there is no name
@@ -601,6 +563,7 @@ define(function (require, exports, module) {
                         pvsFilesListBox.updateView();
                         updateProjectName(currentProject.name());
                         updateSourceCodeToolbarButtons(pvsFilesListBox.selectedItem());
+						console.log("project saved");
                     }
                 });
             } else {
@@ -609,7 +572,6 @@ define(function (require, exports, module) {
         } else {
             _doSave();
         }
-
     });
 
     d3.select("#openProject").on("click", function () {
@@ -617,13 +579,13 @@ define(function (require, exports, module) {
     });
 
     d3.select("#newProject").on("click", function () {
-        newProjectForm.create().addListener(formEvents.FormCancelled, function (e) {
+        newProjectForm.create().on("cancel", function (e, formView) {
             console.log(e);
-            e.form.remove();
-        }).addListener(formEvents.FormSubmitted, function (e) {
+            formView.remove();
+        }).on("ok", function (e, formView) {
             console.log(e);
-            e.form.remove();
-            newProject(e.formJSON);
+            formView.remove();
+            newProject(e.data);
         });
     });
     //handle typecheck event
@@ -679,7 +641,6 @@ define(function (require, exports, module) {
                           pvsProcessReady);
         }
     });
-    resizeImageDiv();
     preparePageForImageUpload();
     prepareListBoxForFileDrag();
 });
