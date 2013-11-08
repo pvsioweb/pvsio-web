@@ -8,7 +8,7 @@
 define(function (require, exports, module) {
 	"use strict";
 	var FormUtils					= require("./FormUtils"),
-		template					= require("text!./editWidget.handlebars"),
+		template					= require("text!./templates/editWidget.handlebars"),
 		d3							= require("d3/d3");
 	
 	var regexOptionMap = {"\\w+": "optString", "[0-9/.]+": "optNumeric"};

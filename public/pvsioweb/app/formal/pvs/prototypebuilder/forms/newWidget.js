@@ -8,7 +8,7 @@
 define(function (require, exports, module) {
 	"use strict";
 	var FormUtils					= require("./FormUtils"),
-		template					= require("text!./createWidget.handlebars"),
+		template					= require("text!./templates/createWidget.handlebars"),
 		d3							= require("d3/d3");
 	
 	function updateRegex() {

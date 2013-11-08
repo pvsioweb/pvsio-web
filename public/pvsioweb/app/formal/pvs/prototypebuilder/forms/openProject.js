@@ -8,7 +8,7 @@
 define(function (require, exports, module) {
 	"use strict";
 	var d3						= require("d3/d3"),
-		template				= require("text!./openProject.handlebars"),
+		template				= require("text!./templates/openProject.handlebars"),
 		FormUtils				= require("./FormUtils");
 	
 	

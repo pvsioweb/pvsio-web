@@ -8,7 +8,7 @@
 define(function (require, exports, module) {
 	"use strict";
 	var d3			= require("d3/d3"),
-		npTempl		= require("text!./newProject.handlebars"),
+		npTempl		= require("text!./templates/newProject.handlebars"),
 		FormUtils = require("./FormUtils");
 	
 	var NewProjectView = Backbone.View.extend({
