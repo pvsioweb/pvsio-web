@@ -12,7 +12,7 @@ define([], function () {
 	mappings.preset = {};
 	mappings.active = {};
 	
-	mappings.preset.string = {value: "\\w+", label: "String"};
+	mappings.preset.string = {value: "\"[\\w\\s.]+\"", label: "String"};
 	mappings.preset.numeric = {value: "[0-9\/.]+", label: "Numeric"};
 	
 	return mappings;
