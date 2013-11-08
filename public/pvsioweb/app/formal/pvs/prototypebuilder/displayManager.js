@@ -18,7 +18,14 @@ define(['./displayMappings', 'd3/d3'], function (mappings) {
 				regex = new RegExp(value.regex);
 				regexMatch = regex.exec(stateString);
 				if (regexMatch && regexMatch.length > 1) {
-					regexMatch = eval(regexMatch[1].toString());
+					if(regex.toString().indexOf("[0-9/.]+") >= 0) {
+						// it's a number
+						regexMatch = eval(regexMatch[1].toString());
+					}
+					else {
+						// it's a string, remove the double quotes and don't evalutate the expression
+						regexMatch = regexMatch[1].toString().replace(new RegExp("\"","g"),"")
+					}
 					//update the display ui element with the value
 					uiElement = value.uiElement;
 					if (uiElement) {
