@@ -10,12 +10,14 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 /**
+ * 
  * A generic wrapper for spawning a process, sending messages to a process and shutting down a process 
+ * 
  * @author Patrick Oladimeji
  * @date Dec 2, 2012 : 10:28:48 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, require, module, process */
+/*global define, d3, require, $, brackets, process, module */
 var spawn = require("child_process").spawn,
 	exec = require("child_process").exec,
 	util = require("util"),
@@ -23,18 +25,18 @@ var spawn = require("child_process").spawn,
 
 module.exports = function () {
     "use strict";
-    var proc;
-    var o = {};
+    var proc, _dataProcessor;
+    var o = {}, cbQueue = [], data = "";
     
     /**
      * Starts an interactive process with the specified parameters. The opt variable should contain
      * at least the name of the process to start
      * @param opt - parameters for starting up the process. May contain the following properties
-     *	processName: String
-     *	args: Array
-     *	onDataReceived: function to be called when the process sends something to its stdout
-     *	onErrorReceived: function to be called when the process encounters an error
-     *	onProcessExited: function to be called when the process exits
+     *      processName: String
+     *      args: Array
+     *      onDataReceived: function to be called when the process sends something to its stdout
+            onErrorReceived: function to be called when the process encounters an error
+     *      onProcessExited: function to be called when the process exits
      *  
      * @returns {___anonymous325_326}
      */
@@ -44,9 +46,13 @@ module.exports = function () {
             
             proc.stdout.setEncoding('utf8');
             proc.stderr.setEncoding("utf8");
-            if (opt.onDataReceived) {
-                proc.stdout.on("data", opt.onDataReceived);
-            }
+			
+			proc.stdout.on("data", function (data) {
+				var f = o.dataProcessor();
+				//call any callback and forward the data to onDataReceived if it exists
+				if (f) { f(data, cbQueue); }
+				if (opt.onDataReceived) { opt.onDataReceived(data); }
+			});
             if (opt.onErrorReceived) {
                 proc.stderr.on("data", opt.onErrorReceived);
             }
@@ -54,13 +60,19 @@ module.exports = function () {
                 proc.on('exit', opt.onProcessExited);
             }
         }
-        
         return o;
     };
     
+	o.dataProcessor = function (f) {
+		if (f) {
+			_dataProcessor = f;
+			return o;
+		}
+		return _dataProcessor;
+	};
     /**
-     * execute a self terminating process
-     * @param opt
+     * execute a self terminating process and calls the callback with the output of the stdout
+     * @param {String} opt A space separated string containing the process to execute and any arguments
      * @returns {___anonymous364_365}
      */
     o.exec = function (opt) {
@@ -82,17 +94,25 @@ module.exports = function () {
         }
         return o;
     };
+	
+	function write(msg, cb) {
+		cbQueue.push(cb);
+		var ok = proc.stdin.write(msg);
+		if (!ok) {
+			//wait for drain event before trying to write the command again
+			proc.stdin.once("drain", (function (m) {
+				write(m);
+			}(msg)));
+		}
+	}
+		
     /**
      * send a command to the running process
      * @param command
      * @returns {___anonymous364_365}
      */
-    o.sendCommand = function (command) {
-        if (!proc.stdin.write(command)) {
-            proc.stdin.on("drain", (function (c) {
-                return function () { proc.stdin.write(c); };
-            }(command)));
-        }
+    o.sendCommand = function (command, cb) {
+		write(command, cb);
         return o;
     };
     return o;

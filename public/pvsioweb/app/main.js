@@ -507,10 +507,6 @@ define(function (require, exports, module) {
             ws.value(parseState(e.data).display);
             console.log(response);
             pvsio_response_log(response);
-			//render displays
-			WidgetManager.getDisplayWidgets().forEach(function (w) {
-				w.render(response);
-			});
         }).addListener("InputUpdated", function (e) {
             pvsio_commands_log(JSON.stringify(e.data));
         }).addListener("processExited", function (e) {

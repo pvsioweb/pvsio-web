@@ -10,7 +10,7 @@ define(function (require, exports, module) {
     var wsclient            = require("websockets/wsClient"),
         eventDispatcher     = require("util/eventDispatcher"),
         property            = require("util/property"),
-        serverFunctions     = require("websockets/pvs/ServerFunctions"),
+       // serverFunctions     = require("websockets/pvs/ServerFunctions"),
         wsSingleton;
     
     function createWebSocket() {
@@ -39,24 +39,24 @@ define(function (require, exports, module) {
         
         o.startPVSProcess = function (sourceFile, projectName, cb) {
             sourceFile = sourceFile.split(".pvs")[0];
-            wscBase.send({type: serverFunctions.StartProcess, data: {fileName: sourceFile, projectName: projectName}},
+            wscBase.send({type: "startProcess", data: {fileName: sourceFile, projectName: projectName}},
                     cb);
         };
         
         o.sendGuiAction = function (action, cb) {
-            wscBase.send({type: serverFunctions.SendUICommand, data: {command: action}}, cb);
+            wscBase.send({type: "sendCommand", data: {command: action}}, cb);
             wscBase.fire({type: "InputUpdated", data: action});
             return o;
         };
         
         o.getFile = function (fileName, cb) {
-            var token = {type: serverFunctions.ReadFile, fileName: fileName};
+            var token = {type: "readFile", fileName: fileName};
             wscBase.send(token, cb);
             return o;
         };
         
         o.writeFile = function (data, cb) {
-            var token = {type: serverFunctions.WriteFile, data: data};
+            var token = {type: "writeFile", data: data};
             wscBase.send(token, cb);
             return o;
         };

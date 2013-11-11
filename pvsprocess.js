@@ -51,6 +51,34 @@ module.exports = function () {
 		return workspaceDir;
 	};
 	
+	function filterLines(lines) {
+		return lines.filter(function (d) {
+			return wordsIgnored.indexOf(d.trim()) < 0;
+		});
+	}
+	
+	function arrayToOutputString(lines) {
+		return lines.join("").replace(/,/g, ", ").replace(/\s+\:\=/g, ":=").replace(/\:\=\s+/g, ":=");
+	}
+	
+	function processDataFunc() {
+		var res = [];
+		return function (data, cbQueue) {
+			var lines = data.split("\n");
+			if (readyString === lines[lines.length - 1].trim()) {
+				var f = cbQueue[0];
+				if (f && typeof f === "function") {
+					lines.pop();//get rid of last line
+					res = res.concat(filterLines(lines));
+					f(arrayToOutputString(res));
+					cbQueue.shift();//remove the head of the queue
+					res = [];
+				}
+			} else {
+				res = res.concat(filterLines(lines));
+			}
+		};
+	}
 	/**
 	 * starts the pvs process with the given sourcefile 
 	 * @param {String} filename source file to load with pvsio
@@ -60,9 +88,8 @@ module.exports = function () {
 	o.start = function (file, callback, processReadyCallback) {
 		filename = file;
         function onDataReceived(data) {
-  			// this shows the original PVSio output
-            		util.log(data);
-
+			// this shows the original PVSio output
+			util.log(data);
 			var lines = data.split("\n").map(function (d) {
 				return d.trim();
 			});
@@ -74,19 +101,20 @@ module.exports = function () {
 			}));
 			
 			if (processReady && lastLine.indexOf(readyString) > -1) {
-                		var outString = output.join("").replace(/,/g, ", ").replace(/\s+\:\=/g, ":=").replace(/\:\=\s+/g, ":=");
-                		//This is a hack to remove garbage collection messages from the output string before we send to the client
-                		var croppedString = outString.substring(0, outString.indexOf("(#"));
-                		outString = outString.substring(outString.indexOf("(#"));
-                		// util.log(outString);
+				var outString = arrayToOutputString(output);
+				//This is a hack to remove garbage collection messages from the output string before we send to the client
+				///TODO not sure if this works as intended
+				var croppedString = outString.substring(0, outString.indexOf("(#"));
+				outString = outString.substring(outString.indexOf("(#"));
 				callback({type: "pvsoutput", data: [outString]});
 				//clear the output
 				output  = [];
 			} else if (lastLine.indexOf(readyString) > -1) {
-                		//last line of the output is the ready string
+				//last line of the output is the ready string
 				processReadyCallback({type: "processReady", data: output});
 				processReady = true;
 				output = [];
+				pvs.dataProcessor(processDataFunc());
 			}
 		}
 		
@@ -102,7 +130,6 @@ module.exports = function () {
 			onProcessExited: onProcessExited});
 		
 		util.log("pvsio process started with file " + filename + "; process working directory is :" + o.workspaceDir());
-
 		return o;
 	};
 	
@@ -111,9 +138,9 @@ module.exports = function () {
 	 * will be by the 'on data' event of the process standard output stream
 	 * @param {string} command the command to send to pvsio
 	 */
-	o.sendCommand = function (command) {
+	o.sendCommand = function (command, callback) {
 		util.log("sending command " + command + " to process");
-		pvs.sendCommand(command);
+		pvs.sendCommand(command, callback);
 		return o;
 	};
     

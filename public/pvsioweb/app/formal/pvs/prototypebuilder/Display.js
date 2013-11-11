@@ -26,6 +26,7 @@ define(function (require, exports, module) {
 			var regexp = new RegExp(this.regex());
 			var match = regexp.exec(stateString);
 			if (match && match.length > 1) {
+				///TODO remember to sort out Paolo's bugfix (@69992fda)
 				return match[1].toString();
 			}
 		}

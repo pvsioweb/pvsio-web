@@ -9,7 +9,8 @@ define(function (require, exports, module) {
     "use strict";
     var Widget = require("./Widget"),
 		property = require("util/property"),
-		Timer	= require("util/Timer");
+		Timer	= require("util/Timer"),
+		WidgetManager			= require("pvsioweb/WidgetManager")();
 	//define timer for sensing hold down actions on buttons
 	var btnTimer = new Timer(250), timerTickFunction = null;
 	//add event listener for timer's tick 
@@ -30,6 +31,14 @@ define(function (require, exports, module) {
 		this.functionText = property.call(this);
 		this.imageMap = property.call(this);
     }
+	
+	///TODO this should be moved out of this file and promoted to a property, or a function parameter in createImageMap
+	function renderResponse(err, res) {
+		//render displays
+		WidgetManager.getDisplayWidgets().forEach(function (w) {
+			w.render(res.data);
+		});
+	}
     
     Button.prototype = Object.create(Widget.prototype);
     Button.prototype.constructor = Button;
@@ -76,13 +85,13 @@ define(function (require, exports, module) {
 			events = widget.events();
 			//perform the click event if there is one
 			if (events && events.indexOf('click') > -1) {
-				ws.sendGuiAction("click_" + f + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");");
+				ws.sendGuiAction("click_" + f + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");", renderResponse);
 			}
 			
 			timerTickFunction = function () {
 				console.log("button pressed");
 				if (events && events.indexOf('press/release') > -1) {
-					ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");");
+					ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", renderResponse);
 				}
 			};
 			btnTimer.interval(widget.recallRate()).start();
@@ -90,7 +99,7 @@ define(function (require, exports, module) {
 			if (btnTimer.getCurrentCount() > 0) {
 				var f = widget.functionText();
 				if (events && events.indexOf('press/release') > -1) {
-					ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");");
+					ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", renderResponse);
 				}
 			}
 			mouseup(d3.event);
@@ -98,7 +107,7 @@ define(function (require, exports, module) {
 			if (btnTimer.getCurrentCount() > 0) {
 				var f = widget.functionText();
 				if (events && events.indexOf('press/release') > -1) {
-					ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");");
+					ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", renderResponse);
 				}
 			}
 			mouseup(d3.event);
