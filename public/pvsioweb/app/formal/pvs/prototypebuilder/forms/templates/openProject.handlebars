@@ -1,0 +1,19 @@
+<form class="center dialog shadow form-horizontal" onsubmit="return false">
+	<legend class="header">Open Project</legend>
+	<div class="form-group">
+		<label class="control-label col-sm-4" for="projectName">Select Project</label>
+		<div class="col-sm-8">
+			<select id="projectName" class="form-control" type="text" value="" name="projectName" required="true">
+				{{#each projects}}
+					<option value="{{this}}">{{this}}</option>
+				{{/each}}
+			</select>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-offset-4 col-sm-8">
+			<button type="button" class="btn btn-danger left" id="btnCancel">Cancel</button>
+			<button type="submit" class="btn btn-success right" id="btnOk">OK</button>
+		</div>
+	</div>
+</form>

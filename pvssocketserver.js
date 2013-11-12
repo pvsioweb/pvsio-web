@@ -253,7 +253,6 @@ function run() {
             callBack: cb
         });
     }
-    
    
     /**
         get function maps for client sockets
@@ -300,8 +299,10 @@ function run() {
             },
             "sendCommand": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
-                p.sendCommand(token.data.command);
-                console.log(p.workspaceDir());
+                p.sendCommand(token.data.command, function (data) {
+					var res = {id: token.id, data: data};
+					processCallback(res, socket);
+				});
             },
             "startProcess": function (token, socket, socketid) {
                 util.log("Calling start process for client... " + socketid);

@@ -3,36 +3,37 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>PVSio-Web Interactive Prototype Builder</title>
-<link href="pvsioweb/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="pvsioweb/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
 <link href="pvsioweb/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 <link href="pvsioweb/css/style.css" type="text/css" rel="stylesheet">
+<link href="pvsioweb/css/image-mapper.css" type="text/css" rel="stylesheet">
 </head>
 <body>
 	<div id="content" class="center">
 		<div id="header">
-			<a class="btn" id="newProject"><i class="icon-file"></i> New Project</a>
-			<a class="btn" id="openProject"><i class="icon-folder-open"></i> Open Project</a>
-			<a class="btn" id="saveProject"><i class="icon-hdd"></i> Save Project</a>
-			<a class="btn" id="btnLoadPicture"><i class="icon-picture"></i> Change Picture</a>
+			<a class="btn btn-default" id="newProject"><span class="glyphicon glyphicon-file"></span> New Project</a>
+			<a class="btn btn-default" id="openProject"><span class="glyphicon glyphicon-folder-open"></span> Open Project</a>
+			<a class="btn btn-default" id="saveProject"><span class="glyphicon glyphicon-hdd"></span> Save Project</a>
+			<a class="btn btn-default" id="btnLoadPicture"><span class="glyphicon glyphicon-picture"></span> Change Picture</a>
 			<input type="file" class="hide" id="btnSelectPicture" name="selectPicture">
-			<span>    Project  </span><input type="text" placeholder="Untitled Project" id="txtProjectName" value="" class="input-Med" readonly="readonly">
+			<span>    Project  </span>
+			<input type="text" placeholder="Untitled Project" id="txtProjectName" value="" class="input-Med" readonly="readonly">
 		</div>
 		<div id="body">
 			<div id="imageDiv">
 				<div id="imageDragAndDrop" class="dndcontainer">
 					<span class="center">Drag  user interface picture here or if you prefer, use the button below</span>
 					<br/>
-					<a class="btn btn-primary center" id='btnLoadPicture'><i class="icon-picture icon-white"></i> Load Picture</a>
+					<button class="btn btn-primary center" id='btnLoadPicture'> Load Picture</button>
 				</div>
 				<img src="pvsioweb/image/start.png" usemap="#prototypeMap" />
-				<div id="prototypeImage"></div>
 				<div id='console'></div>
 			</div>
 			<div id="controlsContainer">
 				<button id="btnBuilderView">Builder View</button>
 				<button id="btnSimulatorView">Simulator View</button>
-                <a id="lblWebSocketStatus" class="status right">WebSocket <i class="icon-ok"></i></a>
-                <a id="lblPVSioStatus" class="status right">PVSio <i class="icon-warning-sign"></i></a>
+                <a id="lblWebSocketStatus" class="status right">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
+                <a id="lblPVSioStatus" class="status right">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
 			</div>
 			
 			<div id='logsDiv'>
@@ -53,7 +54,7 @@
 					<h2>Formal specification source file</h2> 
                     <div id="editorToolbar">
                         <button class="btn " id="btnTypeCheck">Typecheck</button>
-                        <button class="btn" id="btnSetMainFile"><i class="icon-star"></i> Set As Main File</button>
+                        <button class="btn" id="btnSetMainFile"><span class="glyphicon glyphicon-star"></span> Set As Main File</button>
 <!--                        <button class="btn" id="btnSaveFile">Save File</button>
 
                         <button class="btn" id="btnSaveAll">Save All Files</button>
@@ -62,12 +63,14 @@
                     </div>
 				</div>
 				<div id="sourcecode-editor-wrapper">
+<!--
 					<div id="specDragAndDrop" class="dndcontainer">
 						<span class="center">Drag PVS file here or if you prefer, use the button below</span>
 						<br/>
-						<a class="btn btn-primary center" id='btnLoadSpec'><i class="icon-file-white"></i>Load Spec</a>
+						<a class="btn btn-primary center" id='btnLoadSpec'><span class="glyphicon glyphicon-file-white"></span>Load Spec</a>
 						<input type="file" class="hide" id="btnSelectSpec" name="selectSpec">
 					</div>
+-->
 					<div id="pvsFiles">
                     
                     </div>
@@ -79,8 +82,11 @@
 				
 			</div>
 			
+			<script type="text/javascript" src="pvsioweb/lib/jquery.js"></script>
             <script type="text/javascript" src="pvsioweb/lib/underscore/underscore.js"></script>
-           <!--	 <script type="text/javascript" src="pvsioweb/lib/d3/d3.js"></script>-->
+			<script type="text/javascript" src="pvsioweb/lib/backbone.js"></script>
+           	<script type="text/javascript" src="pvsioweb/lib/handlebars-v1.1.0.js"></script>
+			<script type="text/javascript" src="pvsioweb/bootstrap/js/bootstrap.min.js"></script>
 			<script type="text/javascript" src="require.js" data-main="index.js"></script>
 	
 		</div>
