@@ -1,0 +1,146 @@
+#ContainerStateMachine  {
+	position:       absolute;
+	border:         2px solid;
+	background:     #fffcec;
+ 	width:          930px;
+	border-radius:  10px;
+   	height:         800px;
+	left:		1px;
+	/*display:        none; */
+}
+#stateMachineToolbar {
+    margin-bottom: 10px;   
+    margin-top: 10px;   
+}
+
+
+#button_state:hover	    {
+
+	cursor:		default;
+	box-shadow:     0 1px 3px rgba(0,0,0,0.8);
+	
+}
+#button_junction:hover	    {
+
+	cursor:		default;
+	box-shadow:     0 1px 3px rgba(0,0,0,0.8);
+}
+#button_deftrans:hover	    {
+
+	cursor:		default;
+	box-shadow:     0 1px 3px rgba(0,0,0,0.8);
+}
+
+#button_box:hover	    {
+
+	cursor:		default;
+	box-shadow:     0 1px 3px rgba(0,0,0,0.8);
+}
+
+
+.draggable              {
+
+	cursor: move;
+
+
+}
+
+.resizable-se		{
+
+	cursor: se-resize ;
+
+}
+
+.resizable-sw		{
+
+	cursor: sw-resize ;
+
+}
+.resizable-ne		{
+
+	cursor: ne-resize ;
+
+}
+
+.resizable-nw		{
+
+	cursor: nw-resize ;
+}
+
+.arrow			{
+
+	cursor: crosshair;
+}
+
+
+ul#context-menu {
+   position: relative;
+   display: none;
+   /*sample style attributes follow*/
+   width: 100px;
+   background: #333;
+   cursor: pointer;
+   color: #fff;
+   font-size: 12px;
+}
+
+ul#context-menu li {
+   margin: 3px;
+   padding: 3px;
+   background: #000;
+}
+
+.editor_inside_chart {
+
+   position: absolute;
+   width: 330px;
+   height: 330px;
+   left: 30px;
+   top: 30px;
+   display: none;
+}
+.button_inside_svg {
+
+  position: absolute;
+  top: 30px;
+  width:30px;
+  height:30px;
+  border-width: 1px;
+  border-style: none;
+  border-color: white;
+  display:block;
+  background-image: url("../../img/text.png");
+
+
+}
+
+.resize_button_inside_svg {
+  position: absolute;
+
+}
+
+#infoBox {
+  position: absolute;
+  top:	    60px;
+  width:    180px;
+  height:   60px;
+  left:    940px;
+  border-width : 5px;
+  border-style: dotted;
+  background :  #D0F18F;
+  font-family: Tahoma, sans-serif;
+
+}
+#infoBoxModifiable {
+  position: absolute;
+  top:	    150px;
+  width:    180px;
+  height:   300px;
+  left:    940px;
+  border-width : 5px;
+  border-style: dotted;
+  background :  #CEF6F5;
+  font-family: Tahoma, sans-serif;
+
+
+}

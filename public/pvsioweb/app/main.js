@@ -22,12 +22,23 @@ define(function (require, exports, module) {
 		NewWidgetView			= require("pvsioweb/forms/newWidget"),
 		EditWidgetView			= require("pvsioweb/forms/editWidget"),
 		WidgetManager			= require("pvsioweb/WidgetManager")(),
-		uidGenerator			= require("util/uuidGenerator");
+		uidGenerator			= require("util/uuidGenerator"),
+		stateMachine            = require("../lib/statemachine/stateMachine"),
+        handlerFile             = require("../lib/fileHandler/fileHandler"),
+        pvsWriter               = require("../lib/statemachine/stateToPvsSpecificationWriter"),
+		pvsLanguage				= require("../lib/statemachine/pvsLanguage");
+
 
     var currentProject = new Project(""), ws, pvsFilesListBox, fileContents = {};
     var tempImageName, tempSpecName, mapCreator;
     var editor = ace.edit("editor");
-    editor.getSession().setMode('ace/mode/text');
+	editor.getSession().setMode('ace/mode/pvsLanguage');
+
+
+    var default_project_name = "default_pvsProject";
+    /* Setting a default name of the project      */ 
+    currentProject.name(default_project_name);
+
 
 	function _updateWidgetWithProperties(widget, properties) {
 		_.each(properties, function (val, key) {
@@ -140,7 +151,7 @@ define(function (require, exports, module) {
                 }
                 return c;
             };
-        pvsFilesListBox = new ListView("#pvsFiles", files, listLabelFunction, classFunc);
+        pvsFilesListBox = ListView.ListView("#pvsFiles", files, listLabelFunction, classFunc);
         var pvsFile;
 
         function rebindEditorChangeEvent(pvsFile) {
@@ -180,7 +191,9 @@ define(function (require, exports, module) {
                     }
                 });
             }
-            updateSourceCodeToolbarButtons(pvsFile);
+			// User has clicked on a file, so we have to update updateLastClickedFile variable in Project 
+			// currentProject.updateLastClickedFile(pvsFile);
+            updateSourceCodeToolbarButtons(pvsFile);			
         });
     }
 
@@ -250,11 +263,15 @@ define(function (require, exports, module) {
         d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
     }
 	
-    function loadWidgetDefinitions(defs) {
-        //clear old widhget maps and area def
+	function clearWidgetAreas() {
+		//clear old widhget maps and area def
+        if (mapCreator) {
+            mapCreator.clear();
+        }
         WidgetManager.clearWidgets();
-        d3.selectAll("#prototypeImage .mark, #prototypeMap area").remove();
+	}
 
+    function loadWidgetDefinitions(defs) {
         if (defs) {
             console.log(defs);
             var key, w, widget, property;
@@ -314,6 +331,7 @@ define(function (require, exports, module) {
                         console.log(currentProject);
                         //only update the image and pvsfile if a real project was selected
                         if (currentProject.name() !== "") {
+                            clearWidgetAreas();
                             d3.select("div#body").style("display", null);
                             editor.removeAllListeners("change");
                             editor.setValue("");
@@ -336,6 +354,8 @@ define(function (require, exports, module) {
                                               pvsProcessReady);
 							//ensure view is in the build view
 							switchToBuilderView();
+
+							ListView.showContentFileInEditor(currentProject, editor, ws);
                         }
                         //remove the dialog
                         view.remove();
@@ -435,12 +455,27 @@ define(function (require, exports, module) {
             return false;
         };
     }
+
+        function createFileLoadFunction(file) {
+            return function (cb) {
+                var fr = new FileReader();
+                fr.onload = function (event) {
+		    var a = event.target.result;
+                    currentProject.addSpecFile(file.name, event.target.result);
+                    cb();
+                };
+                fr.readAsText(file);
+            };
+        }
+
     /**
      * data has .prototypeImage, .pvsSpec, .projectName
      */
     function newProject(data) {
+		clearWidgetAreas();
         //update the current project with info from data and saveNew
         currentProject.name(data.projectName);
+		console.log("NEW PROJECT " );
         var q = queue(), i;
         q.defer(function (cb) {
             var fr = new FileReader();
@@ -450,18 +485,8 @@ define(function (require, exports, module) {
             };
             fr.readAsDataURL(data.prototypeImage[0]);
         });
-
-        function createFileLoadFunction(file) {
-            return function (cb) {
-                var fr = new FileReader();
-                fr.onload = function (event) {
-                    currentProject.addSpecFile(file.name, event.target.result);
-                    cb();
-                };
-                fr.readAsText(file);
-            };
-        }
-
+        
+                
         for (i = 0; i < data.pvsSpec.length; i++) {
             q.defer(createFileLoadFunction(data.pvsSpec[i]));
         }
@@ -547,12 +572,43 @@ define(function (require, exports, module) {
 				}
             });
         }
+
+	if (currentProject.name() == default_project_name ) {
+            var name = prompt("Your project has default name, you can change it now (if not, please click on cancel)");
+            if (name && name.trim().length > 0) {
+	
+
+                currentProject.name(name);
+                currentProject.saveNew(function (err, project) {
+                    if (!err) {
+                        currentProject = project;
+                        //pvsFilesListBox.updateView();
+                        updateProjectName(currentProject.name());
+                        //updateSourceCodeToolbarButtons(pvsFilesListBox.selectedItem());
+                    }
+                });
+            } 
+        }
+
         //prompt for a name if there is no name
         ///TODO this section could use a better prompt for requesting project name
+	
         if (currentProject.name().length === 0) {
             var name = prompt("Please enter a name for the project");
             if (name && name.trim().length > 0) {
+	
+
+		var stateMachineisLoaded;
+	        stateMachineisLoaded = _stateMachine_isLoaded();
                 currentProject.name(name);
+		if( stateMachineisLoaded != "" )  {
+			currentProject.stateMachine(stateMachineisLoaded);
+
+		        if( pvsFilesListBox === undefined )
+			  	renderSourceFileList(currentProject.pvsFiles())
+	
+		}
+
                 currentProject.saveNew(function (err, project) {
                     if (!err) {
                         currentProject = project;
@@ -610,6 +666,8 @@ define(function (require, exports, module) {
                 //if there was no error update the main file else alert user
                 currentProject.mainPVSFile(pvsFile);
                 pvsFilesListBox.updateView();
+		///FIXME 
+		
             });
         }
     });
@@ -637,6 +695,117 @@ define(function (require, exports, module) {
                           pvsProcessReady);
         }
     });
-    preparePageForImageUpload();
-    prepareListBoxForFileDrag();
+
+    /** NEW: StateChart **************************************************************************/   
+    d3.select("#state_machine").on("click", function () { stateMachine.init(editor); });
+    d3.select("#button_state").on("click", function () { stateMachine.add_node_mode(); });
+    d3.select("#button_transition").on("click", function () { stateMachine.add_transition_mode(); });
+    d3.select("#button_self_transition").on("click", function () { stateMachine.add_self_transition_mode(); });
+   	var modifiedUser = 0;
+    var myState = new Array();
+    myState[0] = { 
+			name : "S1",
+                        id   : 0
+
+	};
+    myState[1] = {
+		        name : "S2",
+	                id   : 0
+	};
+    /// When User clicks on New File button #new_file a pvs file is created and showed in file list box
+    d3.select("#new_file").on("click", function ( ) {	
+
+	ListView.new_file(currentProject, editor, ws);
+    ListView.showContentFileInEditor(currentProject, editor);
+	   
+
+      /******MYTEST*****/
+	editor.on("change", function (e) {
+                //ideally one should use information from ace to set the dirty mark on the document
+                //e.g editor.getSession().getUndoManager().hasUndo();
+		if( modifiedUser)
+		{
+		    return;
+		}
+		pvsWriter.userModification(e, editor);
+            });
+       modifiedUser = 1;
+       pvsWriter.newPVSSpecification("myTheory",editor);
+       /*pvsWriter.addState(myState[0],editor);
+       pvsWriter.addTransition("E_RequestToStart", 1, editor);
+       pvsWriter.addConditionInTransition(1, myState[0], myState[1],editor); 
+       pvsWriter.addConditionInTransition(1, myState[0], myState[1],editor); 
+       pvsWriter.addEntryCondition(1, "current_state = Checking",editor);
+       pvsWriter.addEntryCondition(1, "current_state = s1", editor, "OR");
+       pvsWriter.setInitialState("S1", editor);*/
+       //pvsWriter.addTransition("E_RequestToStart", 1, editor);
+       modifiedUser = 0;
+	
+    });
+
+    
+    /// When user clicks on open_file button #open_file, a form is showed 
+    d3.select("#open_file").on("click", function () {
+	
+	ListView.open_file_form(currentProject, editor, ws); //Define in: /public/pvsioweb/app/formal/pvs/prototypebuilder/ListView.js
+        ListView.showContentFileInEditor(currentProject, editor);
+    });
+	
+    /// User wants to rename a file 
+    d3.select("#rename_file").on("click", function () {
+        ListView.renameFileProject(currentProject, editor, ws);
+    });
+   
+   /// User wants to split the screen 
+    d3.select("#splitView").on("click", function () {
+	
+        document.getElementById("sourcecode-editor-wrapper").style.visibility = 'visible';
+	document.getElementById("editor").style.top = "900px";	
+	document.getElementById("specification_log_Container").style.visibility = 'hidden';
+        document.getElementById("ContainerStateMachine").style.weight = '400px';
+	
+    });
+
+    /// User wants to close a file (it will be not shown in file list box on the right ) 
+    d3.select("#close_file").on("click", function () {
+	
+        ListView.closeFile(currentProject, editor, ws );
+	
+    });
+
+    /// User wants to see all files of the project 
+    d3.select("#show_all_files").on("click", function () {
+	
+        ListView.showAllFiles(currentProject, editor, ws );
+	
+    });
+
+    /// User wants to delete a file from the project  
+    d3.select("#delete_file").on("click", function () {
+	
+        ListView.deleteFile(currentProject, editor, ws );
+        
+	
+    });
+	
+   /* d3.select("#infoBoxModifiable").on("change", function () {
+	
+	stateMachine.changeTextArea();
+	 
+    });*/
+
+    document.getElementById("startEmulink").disabled = false;
+    /// User wants to start emulink 
+    d3.select("#startEmulink").on("click", function () {
+	
+	  stateMachine.init(editor);
+//	  this.style.visibility = 'hidden';  	
+//          document.getElementById('state_machine_toolbar_menu').style.top = '600px';
+    });    
+	
+    
+    /*********************************************************************************************/
+	preparePageForImageUpload();
+    prepareListBoxForFileDrag(); 
+    updateProjectName(default_project_name);
 });

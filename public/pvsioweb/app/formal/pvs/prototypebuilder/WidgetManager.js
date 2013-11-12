@@ -40,7 +40,7 @@ define(function (require, exports, module) {
 	
     WidgetManager.prototype.updateLocation = function (widget, pos) {
 		if (typeof widget === "string") { widget = this.getWidget(widget); }
-        if (widget.imageMap()) {
+        if (widget && widget.imageMap()) {
             widget.imageMap().attr("coords", [pos.x, pos.y, pos.x + pos.width, pos.y + pos.height].join(","));
         } else {
 			throw new Error("Image Map has not be initialised for this Widget");

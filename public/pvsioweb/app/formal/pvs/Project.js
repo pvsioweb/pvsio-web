@@ -66,7 +66,8 @@ define(function (require, exports, module) {
         this.path = function () {
             return project.path() + "/" + this.name();
         };
-        
+        //-----
+		this.toBeShown = true;
         return eventDispatcher(this);
     }
     
@@ -78,7 +79,10 @@ define(function (require, exports, module) {
         this.widgetDefinitions = property.call(this);
         this.image = property.call(this);
         this.pvsFiles = property.call(this, []);
-        
+	
+	// State Variable about user input 
+	this.lastClickedFile = undefined;
+             
         //add event listeners
         this.name.addListener(propertyChangedEvent, function (event) {
             _dirty = true;
@@ -112,10 +116,71 @@ define(function (require, exports, module) {
             return this;
         };
         
-        this.removeFile = function (fileName) {
-            ///TODO implement file removal
+        this.removeFile = function (fileReference) {
+            
+	    var arrayFile = this.pvsFiles();
+	    var index;
+	    for( index in arrayFile )
+	    {
+	         if( arrayFile[index] === fileReference )
+	         {   arrayFile.splice(index, 1); 
+                     break;
+                 }
+                     
+            }
         };
         
+	this.stateMachine = function(stateMachineisLoaded) 
+	{
+	        var i = 0;
+		var x ;
+		for (x in stateMachineisLoaded[0] )  {
+		
+			console.log(x);
+			console.log(stateMachineisLoaded[1][i]);
+		
+	    		this.addSpecFile(stateMachineisLoaded[0][x], stateMachineisLoaded[1][i]);
+			i = i + 1;
+	
+	        }
+	};
+	
+	
+	/// Update lastClickedFile 	
+	this.updateLastClickedFile = function(pvsFile)
+	{
+	     this.lastClickedFile = pvsFile;     	
+	
+	}
+	
+	/// User wants to rename lastClickedFile in newName
+	this.rename_file = function(newName)
+	{
+             
+	     this.lastClickedFile.name = property.call(this.lastClickedFile, newName);
+	     
+	
+	}
+	
+	/// User wants to make all files visible 
+	this.setAllfilesVisible = function()
+	{
+	     var listFiles = this.pvsFiles();
+	     var index;
+	
+	     for( index in listFiles )
+	     {
+		  listFiles[index].toBeShown = true;
+	     
+	     }
+	}
+	
+	/// User has choosen to not see last file clicked (it will be showed in file list box)
+	this.notShowFile = function()
+	{
+	     this.lastClickedFile.toBeShown = false;
+	}
+
         this.saveFile = function (file, cb) {
             if (!_.isArray(file)) {
                 file = [file];
@@ -133,7 +198,7 @@ define(function (require, exports, module) {
             //do save
             var imageName, pvsSpecName, fd;
             if (this.name() && this.name().trim().length > 0) {
-                //porject has already been created so save the widgets and the sourcecode if it has changed
+                //project has already been created so save the widgets and the sourcecode if it has changed
                 var q = queue();
                 q.defer(saveWidgetDefinition, this);
                 if (this.pvsFiles()) {
@@ -142,7 +207,7 @@ define(function (require, exports, module) {
                     }), this);
                 }
                
-                if (this.image().dirty()) {
+                if (this.image() &&  this.image().dirty()) {
                     q.defer(saveImageFile, this);
                 }
                 q.awaitAll(function (err, res) {

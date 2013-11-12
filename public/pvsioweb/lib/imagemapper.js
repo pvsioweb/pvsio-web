@@ -186,6 +186,9 @@
         }
         
         var res = {
+			clear: function () {
+				d3.select(config.parent + " svg").remove();
+			},
             restoreRectRegion: restoreRectRegion,
             getImageMapData: getImageMapData,
             on: function (type, f) {

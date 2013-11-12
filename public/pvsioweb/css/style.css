@@ -1,6 +1,18 @@
+#pvsSpecification{
+	position:       relative;
+}
+
+#graphicalEditor{
+	position:       relative;
+}
+
 #content{
 	width: 1130px;
 	position: relative;
+}
+
+svg.image-map-layer{
+	background: transparent;
 }
 
 label[for=selectPicture]{
@@ -107,28 +119,25 @@ source code ection styling
 }
 #sourcecode-editor-wrapper{
     width: 1130px;
-    height: 800px;
+    height: 400px;
    	position:relative;
 }
 
 #pvsFiles {
-	position:absolute;
-	top:0px;
-	width:200px;
-    height: 800px;
+    position: absolute;
+    display:inline-block;
+    width: 200px;
+    height: 380px;
     border: 1px solid #ddd;
-    border-right: 1px solid #444;
-}
+    right: -9px;
+  }
 
 #editor{
 	z-index: 30;
-	width: 900px;
-	height: 800px;
+	width: 930px;
+	height: 380px;
 	border: 1px solid black;
     display: inline-block;
-	position:absolute;
-	top: 0px;
-	left: 205px;
 }
 
 #pvsFiles .fileListItem {
@@ -136,6 +145,7 @@ source code ection styling
     padding: 3px 5px 3px 3px;
     cursor: pointer;
     border-bottom: 1px solid #eee;
+	overflow: hidden;
 }
 
 #pvsFiles.drag-over{
@@ -143,6 +153,7 @@ source code ection styling
 }
 #pvsFiles .file-label {
     width: 150px;
+    display: inline-block;
     overflow: hidden;
 }
 .fileListItem.dirty .list-icon-dirty{
@@ -178,7 +189,7 @@ source code ection styling
     border-left: 14px solid #444;
     display: inline-block;
     position: absolute;
-    left: 197px;
+    right: -9px;
     top: 0px;
     width: 0;
     height: 0;
@@ -186,6 +197,7 @@ source code ection styling
 }
 #editorToolbar{
     margin-bottom: 10px;   
+    margin-top: 10px;   
 }
 /*** end source code section **/
 

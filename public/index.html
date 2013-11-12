@@ -7,6 +7,8 @@
 <link href="pvsioweb/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 <link href="pvsioweb/css/style.css" type="text/css" rel="stylesheet">
 <link href="pvsioweb/css/image-mapper.css" type="text/css" rel="stylesheet">
+<link href="pvsioweb/css/state_machine.css" type="text/css" rel="stylesheet">
+<link href="pvsioweb/css/graph.css" type="text/css" rel="stylesheet">
 </head>
 <body>
 	<div id="content" class="center">
@@ -35,57 +37,68 @@
                 <a id="lblWebSocketStatus" class="status right">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
                 <a id="lblPVSioStatus" class="status right">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
 			</div>
+	
+			<!-- container for specification source code -->
+			<div id='pvsSpecification'>
+				<div id="editorToolbar">
+<!--					<button class="btn btn-danger" id="btnRestartPVSioWeb">Restart PVSio Process</button>-->
+					<hr>
+					<button class="btn" id="new_file">New File</button>
+					<button class="btn" id="open_file">Open File</button>
+					<button class="btn" id="btnSetMainFile"><i class="icon-star"></i> Set As Main File</button>
+					<button class="btn" id="btnSaveFile">Save File</button>
+					<button class="btn" id="btnSaveAll">Save All Files</button>					
+					<button class="btn" id="delete_file">Delete File</button>
+					<button class="btn" id="rename_file">Rename File</button>
+					<button class="btn" id="close_file">Close File</button>
+					<button class="btn" id="show_all_files">Show all files</button>
+					<button class="btn" id="btnTypeCheck">Typecheck</button>
+				</div>
+				<div id="sourcecode-editor-wrapper">
+					<div id="specDragAndDrop" class="dndcontainer">
+						<span class="center">Drag PVS file here or if you prefer, use the button below</span>
+						<br/>
+						<a class="btn btn-primary center" id='btnLoadSpec'><i class="icon-file-white"></i>Load Spec</a>
+						<input type="file" class="hide" id="btnSelectSpec" name="selectSpec">
+					</div>
+					<div id="pvsFiles"></div>
+					<div id="editor"></div>
+				</div>
+			</div>
+
 			
+			<!-- container for graphical editor -->
+			<div id="graphicalEditor">
+				<hr>
+				<div id="stateMachineToolbar" >
+					<button class="btn" id="startEmulink" > New Diagram </button>
+					<button class="btn" id="button_state" > New State </button>
+					<button class="btn" id="button_transition" > New Transition </button>
+					<button class="btn" id="button_self_transition" > New Self-Transition </button>
+				</div>
+				<div id="ContainerStateMachine" ></div>
+				<div id="state_machine_toolbar" ></div>
+				<textarea id="infoBox" readonly>TIP: Select a state or a transition to see its properties</textarea>
+				<textarea id="infoBoxModifiable" ></textarea>		
+			</div>				
+
 			<div id='logsDiv'>
 				<div id='pvsio_commands_log_Container' class='pvsio-log-container'>
 					<h2>GUI frontend commands</h2>
-					
 					<div id='pvsio_commands_log'></div>
 				</div>
-			
 				<div id='pvsio_response_log_Container' class='pvsio-log-container'>
 					<h2>PVSio backend replies</h2>
 					<div id='pvsio_response_log'></div>
 				</div>
-			</div>
-			<!-- container for specification source code -->
-			<div id='specification_log_Container' class="clear-both">
-				<div>
-					<h2>Formal specification source file</h2> 
-                    <div id="editorToolbar">
-                        <button class="btn " id="btnTypeCheck">Typecheck</button>
-                        <button class="btn" id="btnSetMainFile"><span class="glyphicon glyphicon-star"></span> Set As Main File</button>
-<!--                        <button class="btn" id="btnSaveFile">Save File</button>
-
-                        <button class="btn" id="btnSaveAll">Save All Files</button>
--->
-                        <button class="btn btn-danger" id="btnRestartPVSioWeb">Restart PVSio Process</button>
-                    </div>
-				</div>
-				<div id="sourcecode-editor-wrapper">
-<!--
-					<div id="specDragAndDrop" class="dndcontainer">
-						<span class="center">Drag PVS file here or if you prefer, use the button below</span>
-						<br/>
-						<a class="btn btn-primary center" id='btnLoadSpec'><span class="glyphicon glyphicon-file-white"></span>Load Spec</a>
-						<input type="file" class="hide" id="btnSelectSpec" name="selectSpec">
-					</div>
--->
-					<div id="pvsFiles">
-                    
-                    </div>
-					<div id="editor">
-					
-	
-					</div>
-				</div>
-				
-			</div>
+			</div>			
+			
+			
 			
 			<script type="text/javascript" src="pvsioweb/lib/jquery.js"></script>
-            <script type="text/javascript" src="pvsioweb/lib/underscore/underscore.js"></script>
+			<script type="text/javascript" src="pvsioweb/lib/underscore/underscore.js"></script>
 			<script type="text/javascript" src="pvsioweb/lib/backbone.js"></script>
-           	<script type="text/javascript" src="pvsioweb/lib/handlebars-v1.1.0.js"></script>
+			<script type="text/javascript" src="pvsioweb/lib/handlebars-v1.1.0.js"></script>
 			<script type="text/javascript" src="pvsioweb/bootstrap/js/bootstrap.min.js"></script>
 			<script type="text/javascript" src="require.js" data-main="index.js"></script>
 	
