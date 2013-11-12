@@ -63,20 +63,20 @@ module.exports = function () {
 	
 	function processDataFunc() {
 		var res = [];
-		return function (data, cbQueue) {
+		return function (data, cb) {
 			var lines = data.split("\n");
 			if (readyString === lines[lines.length - 1].trim()) {
-				var f = cbQueue[0];
-				if (f && typeof f === "function") {
+				if (cb && typeof cb === "function") {
 					lines.pop();//get rid of last line
 					res = res.concat(filterLines(lines));
-					f(arrayToOutputString(res));
-					cbQueue.shift();//remove the head of the queue
+					cb(arrayToOutputString(res));
 					res = [];
+					return true;
 				}
 			} else {
 				res = res.concat(filterLines(lines));
 			}
+			return false;
 		};
 	}
 	/**

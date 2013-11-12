@@ -50,7 +50,11 @@ module.exports = function () {
 			proc.stdout.on("data", function (data) {
 				var f = o.dataProcessor();
 				//call any callback and forward the data to onDataReceived if it exists
-				if (f) { f(data, cbQueue); }
+				if (f) {
+					if (f(data, cbQueue[0])) {
+						cbQueue.shift();
+					}				
+				}
 				if (opt.onDataReceived) { opt.onDataReceived(data); }
 			});
             if (opt.onErrorReceived) {
@@ -62,7 +66,12 @@ module.exports = function () {
         }
         return o;
     };
-    
+    /**
+	 * A function that is parses the data stream and forwards the result to a callback function as appropriate.
+	 * This would typically be when a specified token is found in the output stream.
+	 * The function takes a string and a callback function as parameter and should return true if the callback function
+	 * has been invoked
+	 */
 	o.dataProcessor = function (f) {
 		if (f) {
 			_dataProcessor = f;
