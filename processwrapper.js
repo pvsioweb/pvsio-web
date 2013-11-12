@@ -53,7 +53,7 @@ module.exports = function () {
 				if (f) {
 					if (f(data, cbQueue[0])) {
 						cbQueue.shift();
-					}				
+					}
 				}
 				if (opt.onDataReceived) { opt.onDataReceived(data); }
 			});
