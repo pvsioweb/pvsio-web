@@ -21,15 +21,6 @@ BEGIN
   tau(s:Vect2,v:(converging?(s))) : nnreal = 
     -sqv(s)/(s*v)
 
-  tau_def : LEMMA
-    converging?(s)(v) IMPLIES
-    tau(s,v) = range(s)/closure_rate(s,v)
-
-%|- tau_def : PROOF
-%|- (then (skeep) (expand* "range" "closure_rate" "tau" "converging?")
-%|-  (grind-reals) (rewrite "sq" :dir rl) (rewrite "sq_norm"))
-%|- QED
-
   % Time of closest point of approach
   tcpa(s,v) : nnreal =
     IF converging?(s)(v) THEN
@@ -37,15 +28,5 @@ BEGIN
     ELSE
        0
     ENDIF
-
-  tau_ge_tcpa : LEMMA
-    converging?(s)(v) IMPLIES 
-      tau(s,v) >= tcpa(s,v)
-
-%|- tau_ge_tcpa : PROOF
-%|- (then (skeep) (expand* "tau" "tcpa" "converging?") (assert)
-%|-  (neg-formula 1) (grind-reals) (rewrite "sq" :dir rl)
-%|-  (use "cauchy_schwartz") (grind-reals))
-%|- QED
 
 END TCAS_tau

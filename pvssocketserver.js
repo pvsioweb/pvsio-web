@@ -12,7 +12,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 /**
  * This file creates a connection to a pvsio process run locally or at specified host.
- * It also creates an express webserver to serve demo applications e.g. the infusion 
+ * It also creates an express webserver to serve demo applications e.g. the infusion
  * pump pvsio demo.
  * The websocket connection started by this process listens for 3 commands:
  * sendCommand: used to send a pvsio command to the processs
@@ -44,7 +44,7 @@ function run() {
         httpServer              = http.createServer(webserver),
         baseProjectDir              = __dirname + "/public/projects/";
     var p, clientid = 0, WebSocketServer = ws.Server;
-    
+
     /**
      * Utility function that dispatches responses to websocket clients
      * @param {{type:string, data}} token The token to send to the client
@@ -61,7 +61,7 @@ function run() {
             socket.send(JSON.stringify(tok));
         }
     }
-    
+
     /**
      * save the file described in request parameter into the uploads directory
      * @param {object} token
@@ -116,7 +116,7 @@ function run() {
             }
         });
     }
-    
+
     /**
      * Creates a project
      * @param {Request} req
@@ -139,21 +139,21 @@ function run() {
                 fs.mkdirSync(projectPath);
                 obj.projectPath = projectPath;
                 obj.name = projectName;
-                
+
                 if (imageName && imageData) {
                     var imageString = imageData.replace(/^data:image\/(\w+);base64,/, "");
                     fs.writeFileSync(projectPath + "/" + imageName, imageString, "base64");
                     obj.image = imageName;
                     obj.imageData = imageData;
                 }
-                
+
                 if (specFiles) {
                     specFiles.forEach(function (f) {
                         fs.writeFileSync(projectPath + "/" + f.fileName, f.fileContent);
                     });
                     obj.pvsFiles = specFiles;
                 }
-                
+
                 if (mainPVSFile) {
                     obj.mainPVSFile = mainPVSFile;
                     //create a main file in the project settings
@@ -165,7 +165,7 @@ function run() {
         }
         return obj;
     }
-    
+
     /**
     * open a project with the specified name
     */
@@ -206,7 +206,7 @@ function run() {
             return null;
         }
     }
-    
+
     /**
      * Lists all the projects on the server by listing folder names in the projects directory
      * @return {Array<string>} A list of project names
@@ -227,7 +227,7 @@ function run() {
         }
         return res;
     }
-    
+
     //create logger
     webserver.use("/demos", function (req, res, next) {
         console.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
@@ -236,7 +236,7 @@ function run() {
     //create the express static server and use public dir as the default serving directory
     webserver.use(express.static(__dirname + "/public"));
     webserver.use(express.bodyParser({ keepExtensions: true, uploadDir: __dirname + uploadDir}));
-    
+
     /**
      * used to manage file upload process for pvsio-web
      */
@@ -246,14 +246,14 @@ function run() {
         //should return a map of oldname to new name for the uploaded files
         res.send({fileName: fileName});
     });
-    
+
     function typeCheck(filePath, cb) {
         procWrapper().exec({
             command: "proveit " + filePath,
             callBack: cb
         });
     }
-   
+
     /**
         get function maps for client sockets
     */
@@ -300,9 +300,9 @@ function run() {
             "sendCommand": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 p.sendCommand(token.data.command, function (data) {
-					var res = {id: token.id, data: data};
-					processCallback(res, socket);
-				});
+                    var res = {id: token.id, data: data};
+                    processCallback(res, socket);
+                });
             },
             "startProcess": function (token, socket, socketid) {
                 util.log("Calling start process for client... " + socketid);
@@ -336,16 +336,26 @@ function run() {
                     processCallback(res, socket);
                 });
             },
-            ///TODO rethink logic of what happens when files are written and saved
             "writeFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";
                 fs.writeFile(token.data.fileName, token.data.fileContent, encoding, function (err) {
                     var res = {id: token.id, serverSent: new Date().getTime()};
-                    ///continue here !!! files saved need to inform client about need to restart pvsioweb with appropriate files
+                    ///files saved need to inform client about need to restart pvsioweb with appropriate files
                     if (!err) {
-                        util.log("Source code has been saved. Closing process ... " + socketid);
+                        util.log("Source code has been saved." + socketid);
                         res.type = "fileSaved";
+                    } else {
+                        res.err = err;
+                    }
+                    processCallback(res, socket);
+                });
+            },
+            "deleteFile": function (token, socket, socketid) {
+                fs.unlink(token.fileName, function (err) {
+                    var res = {id: token.id, serverSent: new Date().getTime()};
+                    if (!err) {
+                        res.type = "fileDeleted";
                     } else {
                         res.err = err;
                     }
@@ -353,10 +363,10 @@ function run() {
                 });
             }
         };
-        
+
         return map;
     }
-    
+
     var wsServer = new WebSocketServer({server: httpServer});
     wsServer.on("connection", function (socket) {
         var socketid =  clientid++;
@@ -371,7 +381,7 @@ function run() {
                 util.log("f is something unexpected -- I expected a function but got type " + typeof f);
             }
         });
-        
+
         socket.on("close", function (e) {
             util.log("closing websocket client " + socketid);
             var _p = pvsioProcessMap[socketid];
@@ -381,11 +391,11 @@ function run() {
             delete pvsioProcessMap[socketid];
         });
     });
-    
+
     wsServer.on("error", function (err) {
         util.log(JSON.stringify(err));
     });
-    
+
     httpServer.listen(port);
     console.log("http server started .." + "now listening on port " + port);
 }

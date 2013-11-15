@@ -10,7 +10,8 @@ BEGIN
   TCAS_Z?(sl,soz,voz,siz,viz) : bool =
     LET sz = soz-siz,
         vz = voz-viz IN
-    ...
+      abs(sz) < Thr(sl,ZTHR) OR 
+      (sz*vz < 0 AND tcoa(sz,vz) < Thr(sl,TAU))
 
   TCAS_Z_safe : LEMMA
     abs(soz-siz) < Thr(sl,ZTHR) IMPLIES

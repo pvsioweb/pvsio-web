@@ -106,6 +106,11 @@ area{
 /**
 source code ection styling
 */
+
+fileListItem.hide {
+	display: none;	
+}
+
 #pvsFiles ul {
     list-style-type: none;
     margin: 0;

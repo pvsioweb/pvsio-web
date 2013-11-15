@@ -8,6 +8,13 @@
   define, window, process, Packages,
   java, location, Components, FileUtils */
 
+/**
+ * 
+ * @author Patrick Oladimeji
+ * @date 11/13/13 11:18:32 AM
+ */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*global define, d3, require, $, brackets, window, MouseEvent */
 define(['module'], function (module) {
     'use strict';
 

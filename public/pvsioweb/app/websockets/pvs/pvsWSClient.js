@@ -10,7 +10,6 @@ define(function (require, exports, module) {
     var wsclient            = require("websockets/wsClient"),
         eventDispatcher     = require("util/eventDispatcher"),
         property            = require("util/property"),
-       // serverFunctions     = require("websockets/pvs/ServerFunctions"),
         wsSingleton;
     
     function createWebSocket() {

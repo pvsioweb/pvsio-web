@@ -1,9 +1,51 @@
-top: THEORY
- BEGIN
+top : THEORY
+BEGIN
 
-  IMPORTING TCAS_tables, TCAS_2D[TA_thr]
-
+  IMPORTING Units,        % Unit conversion functions
+            TCAS_tables,  % TCAS threshold tables
+            TCAS_tau,     % Definition of tau and TCPA
+            TCAS_2D,      % 2-D alerting logic
+            TCAS_2Ds,     % Sound variant to 2-D logic
+            TCAS_safety,  % Safety properties
+            TCAS_tcoa,TCAS_Z,Util,TCAS_TA,TCAS_RA,TCAS,
+	    Extra, Bands
+            
     time: TYPE = real
+
+    TRK_Triple: TYPE = [# range: [real, real], color: Color #]
+    TRK_BAND: TYPE = list[TRK_Triple]
+    clearBands: TRK_BAND = (: :)
+    test_trkBand: TRK_BAND =
+    		  (: (# range := ( -6, 0), color := Red #),
+    		     (# range := ( 2, 6), color := Red #),
+		     (# range := ( 0, 0.3), color := Yellow #) :)
+
+    pos2D(p:Vect2): Position = (p`x,p`y,0)
+    CONVERSION pos2D
+
+
+    find_trk(deg: subrange(-30,30), trkBand: TRK_BAND)
+    	    (so: Vect2, vo: Nz_vect2, si: Vect2, vi: Nz_vect2): TRK_BAND =
+     LET vi = mk_velocity(deg,gsi,0),
+         tcas_ta = TCAS_TA?(so,vo,si,vi),
+	 tcas_ra = TCAS_RA?(so,vo,si,vi) IN
+	 IF tcas_ta AND tcas_ra THEN (: (# range := (10 * to_rad(deg), to_rad(deg + 1)), color := Red #) :)
+	 ELSIF tcas_ta AND NOT tcas_ra THEN (: (# range := (10 * to_rad(deg), to_rad(deg + 1)), color := Yellow #) :)
+	 ELSE (: (# range := (10 * to_rad(deg), to_rad(deg + 1)), color := None #) :) ENDIF
+
+    find_trk_recursive_aux
+	    (deg: subrange(-30,30), trkBand: TRK_BAND)
+    	    (so: Vect2, vo: Nz_vect2, si: Vect2, vi: Nz_vect2): RECURSIVE TRK_BAND =
+     LET trkBand: TRK_BAND = trkBand o find_trk(deg, trkBand)(so,vo,si,vi)
+      IN IF deg = -30 THEN trkBand
+         ELSE find_trk_recursive_aux(deg - 1, trkBand)(so,vo,si,vi) ENDIF
+    MEASURE deg
+
+    find_trk_recursive
+    	    (so: Vect2, vo: Nz_vect2, si: Vect2, vi: Nz_vect2): TRK_BAND = 
+      find_trk_recursive_aux(30, clearBands)(so, vo, si, vi)
+
+
 
     state: TYPE = [#    
        % ownship's position and velocity
@@ -21,7 +63,8 @@ top: THEORY
        Range: {x: real | x = range(so - si) / nmi},
        DMOD: {x: real | x = TA_thr(SL, DMOD) / nmi}, % distance modification
        t: time,
-       TA: bool % traffic alert
+       TA: bool, % traffic alert
+       trkBand: TRK_BAND
     #]
 
     init(t0: time): state = 
@@ -45,10 +88,11 @@ top: THEORY
        Range:= range(so_ - si_) / nmi,
        DMOD := TA_thr(SL_, DMOD) / nmi,
        t  := t0,
-       TA := TCAS_2D?(SL_, so_ + t0 * vo_, vo_, si_ + t0 * vi_, vi_) 
+       TA := TCAS_2D[TCAS_tables.TA_thr].TCAS_2D?(SL_, so_ + t0 * vo_, vo_, si_ + t0 * vi_, vi_),
+       trkBand := clearBands
     #)
 
-    % tick is used to advance time with a resolution deltaT
+    % tick is used to execute a simulation step; simulation time is advanced of deltaT
     deltaT: real = 0.5
     tick(st: state): state =
       LET so_: Vect2 = so(st) + deltaT * vo(st),
@@ -63,7 +107,13 @@ top: THEORY
 		    Range:= range(so_ - si_) / nmi,
        		    DMOD := TA_thr(SL(st), DMOD) / nmi,
        		    t  := t_,
-       		    TA := TCAS_2D?(SL(st), so_, vo(st), si_, vi(st)) ]
+       		    TA := TCAS_2D[TCAS_tables.TA_thr].TCAS_2D?(SL(st), so_, vo(st), si_, vi(st)),
+		    trkBand := find_trk_recursive(so(st), vo(st), si(st), vi(st)) ]
+
+    ntick(n: nat)(st:state): RECURSIVE state = 
+        if( n = 0) then st
+	else let new_st = tick(st) in ntick(n-1)(new_st) endif
+      measure n
     
     click_tick(st: state): state = tick(st)
 
@@ -78,5 +128,10 @@ top: THEORY
     click_slowDOWNy(st: state): state =
       IF vo(st)`y - deltaV >= 0 THEN st WITH [ vo := (vo(st)`x, vo(st)`y - deltaV) ] ELSE st ENDIF
 
-
- END top
+    %--  EXAMPLES  -------------------------------------------------------------------
+    example_0: state = init(0)
+    example_1: state = tick(init(0))
+    example_2: state = ntick(2)(init(0))
+    example_n(n:nat): state = ntick(n)(init(0))    
+      
+END top

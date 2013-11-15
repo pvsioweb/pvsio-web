@@ -6,7 +6,7 @@
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
 /*global define, d3, require, __dirname, process*/
-define(['util/eventDispatcher', 'util/events'], function (eventDispatcher, events) {
+define(['util/eventDispatcher'], function (eventDispatcher) {
     "use strict";
 	//defines property function
 	return function (v) {
@@ -16,7 +16,7 @@ define(['util/eventDispatcher', 'util/events'], function (eventDispatcher, event
             }
 			//fire property changed event if _ (incoming) is not equal to v (old property)
 			if (v !== _) {
-				var event = {type: events.PropertyChanged, old: v, fresh: _};
+				var event = {type: "PropertyChanged", old: v, fresh: _};
 				v = _;
 				p.fire(event);
 			}

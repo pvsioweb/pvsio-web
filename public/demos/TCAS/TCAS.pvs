@@ -1,16 +1,24 @@
 TCAS : THEORY
 BEGIN
 
-  IMPORTING TCAS_TA, TCAS_RA, Extra,
-            interval_arith@strategies
+  IMPORTING TCAS_TA, TCAS_RA, Extra
+            %,interval_arith@strategies
 
   so  : Position = (0,0,3000*ft)
   vo  : Velocity = (0,600*knt,0)
   si  : Position = (1*nmi,1*nmi,3200*ft)
   gsi : nzreal   = 600*knt   % Intruder's ground speed
 
-  find_trk : void = 
-    FORALL(deg:subrange(-30,30)): ...
+  find_trk : void =
+    FORALL(deg:subrange(-30,30)): 
+      LET vi = mk_velocity(deg,gsi,0) IN
+      IF TCAS_TA?(so,vo,si,vi) AND NOT TCAS_RA?(so,vo,si,vi) THEN
+        println("Deg: "+deg)
+      ELSE
+        skip
+      ENDIF
+
+  trki : real = -20 % Found intruder's track (in degrees)
 
   TA_issued : LEMMA
     LET vi = mk_velocity(trki,gsi,0) IN
