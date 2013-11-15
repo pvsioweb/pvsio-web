@@ -62,9 +62,6 @@ define(function (require, exports, module) {
 		//create elements
 		var listBox = d3.select(elementId).html("").append("ul");
 		this._listBox = listBox;
-		//Set an Id, this way I can get a reference (see function: showContentFileinEditor )
-		listBox.attr("id", "listBox");
-
 		var listItems = listBox.selectAll("li").data(data).enter()
 			.append("li");
 		this._listItems = listItems;
@@ -85,7 +82,7 @@ define(function (require, exports, module) {
 	ListView.prototype.updateView = function () {
 		//update the class information on all list itmes
 		this._listItems.attr("class", this.classFunction())
-			.html(this.labelFunction());
+			.select("span.file-label").html(this.labelFunction());
 		if (this.selectedItem()) {
 			renderSelectedItem(this.selectedIndex(), d3.select(this._listItems[0][this.selectedIndex()]), this._listItems);
 		}
@@ -100,4 +97,6 @@ define(function (require, exports, module) {
 		}
 		return this;
 	};
+	
+	module.exports = ListView;
 });

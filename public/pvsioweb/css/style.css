@@ -103,6 +103,9 @@ area{
 	background: #ddd;
 }
 
+div.displayWidget{
+	text-shadow: 1px 1px 10px #888;	
+}
 /**
 source code ection styling
 */
@@ -131,10 +134,12 @@ fileListItem.hide {
 #pvsFiles {
     position: absolute;
     display:inline-block;
-    width: 200px;
+    width: 210px;
     height: 380px;
     border: 1px solid #ddd;
-    right: -9px;
+    right: -26px;
+	overflow-y: scroll;
+	font-size:12px;
   }
 
 #editor{
@@ -210,8 +215,8 @@ fileListItem.hide {
 #console {
 	position: absolute;
 	top:0px;
-	right: -190px;
-	height: 95%;
+	right: -250px;
+	height: 100%;
 	width: 160px;
 	color: white;
 	background: #333;

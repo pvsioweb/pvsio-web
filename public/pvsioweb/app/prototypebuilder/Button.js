@@ -9,8 +9,7 @@ define(function (require, exports, module) {
     "use strict";
     var Widget = require("./Widget"),
 		property = require("util/property"),
-		Timer	= require("util/Timer"),
-		WidgetManager			= require("pvsioweb/WidgetManager")();
+		Timer	= require("util/Timer");
 	//define timer for sensing hold down actions on buttons
 	var btnTimer = new Timer(250), timerTickFunction = null;
 	//add event listener for timer's tick 
@@ -31,14 +30,6 @@ define(function (require, exports, module) {
 		this.functionText = property.call(this);
 		this.imageMap = property.call(this);
     }
-	
-	///TODO this should be moved out of this file and promoted to a property, or a function parameter in createImageMap
-	function renderResponse(err, res) {
-		//render displays
-		WidgetManager.getDisplayWidgets().forEach(function (w) {
-			w.render(res.data);
-		});
-	}
     
     Button.prototype = Object.create(Widget.prototype);
     Button.prototype.constructor = Button;
@@ -75,7 +66,7 @@ define(function (require, exports, module) {
 	 * @override
 	 * @param {!pvsWSClient} ws A websocket client to use for sending gui actions to the server process
 	 */
-	Button.prototype.createImageMap = function (ws) {
+	Button.prototype.createImageMap = function (ws, renderResponse) {
 		var area = Button.prototype.parentClass.createImageMap.apply(this, arguments),
 			widget = this,
 			f,

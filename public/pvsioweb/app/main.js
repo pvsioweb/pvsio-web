@@ -11,15 +11,15 @@ define(function (require, exports, module) {
     var pvsws                   = require("websockets/pvs/pvsWSClient"),
         ace                     = require("ace/ace"),
         ListView                = require("pvsioweb/ListView"),
-        Project                 = require("project/Project").Project,
+        Project                 = require("project/Project"),
         d3                      = require("d3/d3"),
         queue                   = require("d3/queue"),
-        WidgetManager            = require("pvsioweb/WidgetManager")(),
+        WidgetManager            = require("pvsioweb/WidgetManager").getWidgetManager(),
 		ProjectManager			= require("project/ProjectManager"),
 		Logger					= require("util/Logger"),
-		ui						= require("./insterface"),
+		ui						= require("./interface"),
      
-        pvsLanguage                = require("../lib/statemachine/pvsLanguage");
+        pvsLanguage                = require("lib/statemachine/pvsLanguage");
 
     var editor = ace.edit("editor");
     var currentProject = new Project(""), ws, pvsFilesListBox, fileContents = {},
@@ -82,5 +82,5 @@ define(function (require, exports, module) {
 	ui.bindListeners(projectManager);
     projectManager.preparePageForImageUpload();
     projectManager.prepareListBoxForFileDrag();
-    projectManager.updateProjectName(default_project_name);
+//    projectManager.updateProjectName(default_project_name);
 });

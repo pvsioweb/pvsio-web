@@ -39,7 +39,7 @@ define(function (require, exports, module) {
 			w = this.element().attr("width") + "px", h = this.element().attr("height") + "px";
 		var text = d3.select("div." + this.id());
 		if (text.empty()) {
-			text = d3.select("#imageDiv").append("div").attr("class", this.id());
+			text = d3.select("#imageDiv").append("div").attr("class", this.id() + " displayWidget");
 		}
 		text.html(dispVal).style("left", x).style("top", y).style("position", "absolute")
 				.style("width", w).style("height", h).style("color", "white")
@@ -54,6 +54,11 @@ define(function (require, exports, module) {
 			predefinedRegex: this.predefinedRegex(),
 			prefix: this.prefix()
 		};
+	};
+	
+	Display.prototype.remove = function () {
+		Display.prototype.parentClass.remove.apply(this);
+		d3.select("div." + this.id()).remove();
 	};
 	
     module.exports = Display;

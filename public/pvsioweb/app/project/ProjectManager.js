@@ -9,7 +9,7 @@ define(function (require, exports, module) {
 	"use strict";
 	var property = require("util/property"),
 		Project = require("./Project"),
-		ListView = require("prototypebuilder/ListView"),
+		ListView = require("pvsioweb/ListView"),
 		ProjectFile = require("./ProjectFile"),
 		WSManager = require("websockets/pvs/WSManager"),
 		fs	= require("lib/fileHandler/fileHandler"),
@@ -17,7 +17,7 @@ define(function (require, exports, module) {
         newProjectForm          = require("pvsioweb/forms/newProject"),
 		openProjectForm         = require("pvsioweb/forms/openProject"),
 		openFilesForm = require("pvsioweb/forms/openFiles"),
-		WidgetManager = require("pvsioweb/WidgetManager")();
+		WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager();
 
 	///	Used to change name of default files (i.e: default_name + counter ) 
 	var counter = 0;
@@ -57,18 +57,18 @@ define(function (require, exports, module) {
 	}
 	
 	function updateListView(event) {
-		pvsFilesListView.updateView();
+		if (pvsFilesListView) {	pvsFilesListView.updateView(); }
 	}
 
 	function ProjectManager(project, editor) {
-		this.project = property.call(this)
+		this.project = property.call(this, project)
 			.addListener("PropertyChanged", function (e) {
 				updateListView();
-				this.addListener("ProjectMainSpecFileChanged", updateListView);
-				this.pvsFiles().clearListeners()
+				e.fresh.addListener("ProjectMainSpecFileChanged", updateListView);
+				e.fresh.pvsFiles.clearListeners()
 					.addListener("PropertyChanged", updateListView);
 			});
-		this.editor = property.call(editor);
+		this.editor = property.call(this, editor);
 	}
 	
 	ProjectManager.prototype.renderSourceFileList = function () {
@@ -78,7 +78,7 @@ define(function (require, exports, module) {
 			return d.name();
 		}, classFunc = function (d) {
 			var c = "fileListItem ";
-			if (d.visible()) {
+			if (!d.visible()) {
 				c = c.concat(" hide");
 			}
 			if (d.dirty()) {
@@ -211,13 +211,11 @@ define(function (require, exports, module) {
 	ProjectManager.prototype.newFile = function (name, content) {
 		var default_name = "MyTheory", default_content = " THEORY BEGIN \nEND ";
 		var init_content;
-
 		if (!name) {
 			init_content = default_name + counter;
 			name = init_content + ".pvs";
 			counter = counter + 1;
 		}
-
 		if (!content) {
 			content = init_content + default_content + init_content;
 		}
@@ -262,6 +260,7 @@ define(function (require, exports, module) {
 							var p = initFromJSON(res.project);
 							WidgetManager.clearWidgetAreas();
 							d3.select("div#body").style("display", null);
+							pm.project(p);
 							pm.editor().removeAllListeners("change");
 							pm.editor().setValue("");
 							if (p.image()) {
@@ -277,7 +276,7 @@ define(function (require, exports, module) {
 							pm.updateProjectName(p.name());
 							d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
 							pvsFilesListView.selectItem(p.mainPVSFile() || p.pvsFiles()[0]);
-							callback(p);
+							if (callback) { callback(p); }
 						}
 					});
 					//remove the dialog
@@ -324,7 +323,7 @@ define(function (require, exports, module) {
         d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
     };
 	
-	ProjectManager.prototype.prepareForImageUpload = function () {
+	ProjectManager.prototype.preparePageForImageUpload = function () {
         var imageExts = ["png", "jpg", "jpeg"], pm = this;
 		
         //add listener for  upload button

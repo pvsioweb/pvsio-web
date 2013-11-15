@@ -10,7 +10,7 @@ define(function (require, exports, module) {
     var property            = require("util/property"),
         eventDispatcher     = require("util/eventDispatcher"),
         WSManager           = require("websockets/pvs/WSManager"),
-        WidgetManager       = require("pvsioweb/WidgetManager")(),
+        WidgetManager       = require("pvsioweb/WidgetManager").getWidgetManager(),
         queue               = require("d3/queue"),
 		ProjectFile			= require("./ProjectFile");
     
@@ -70,25 +70,25 @@ define(function (require, exports, module) {
 	
 		// State Variable about user input 
 		this.lastClickedFile = undefined;
-             
+        var project = this;
         //add event listeners
         this.name.addListener(propertyChangedEvent, function (event) {
-            this._dirty(true);
+            project._dirty(true);
             this.fire({type: "ProjectNameChanged", previous: event.old, current: event.fresh});
         });
         
         this.mainPVSFile.addListener(propertyChangedEvent, function (event) {
-            this._dirty(true);
+            project._dirty(true);
             this.fire({type: "ProjectMainSpecFileChanged", previous: event.old, current: event.fresh});
         });
         
         this.image.addListener(propertyChangedEvent, function (event) {
-			this._dirty(true);
+			project._dirty(true);
             this.fire({type: "ProjectImageChanged", previous: event.old, current: event.fresh});
         });
         
         this.widgetDefinitions.addListener(propertyChangedEvent, function (event) {
-            this._dirty(true);
+            project._dirty(true);
             this.fire({type: "WidgetDefinitionChanged", previous: event.old, current: event.fresh});
         });
         
@@ -206,6 +206,6 @@ define(function (require, exports, module) {
 	};
 
     
-    exports.Project = Project;
+    module.exports = Project;
     
 });

@@ -18,9 +18,16 @@ define(function (require, exports, module) {
 		NewWidgetView            = require("pvsioweb/forms/newWidget");
 	var wm, mapCreator;
 	
-   
+   ///TODO this should be moved out of this file and promoted to a property, or a function parameter in createImageMap
+	function renderResponse(err, res) {
+		//render displays
+		wm.getDisplayWidgets().forEach(function (w) {
+			w.render(res.data);
+		});
+	}
+	
 	function createImageMap(widget) {
-        if (widget.needsImageMap()) { widget.createImageMap(WSManager.getWebSocket()); }
+        if (widget.needsImageMap()) { widget.createImageMap(WSManager.getWebSocket(), renderResponse); }
     }
 
 	
@@ -68,7 +75,7 @@ define(function (require, exports, module) {
                 createImageMap(widget);
                 //set the font-size of the mark to be 80% of the height and the id of the mark
                 mark.on("dblclick", function () {
-                    handleWidgetEdit(mark);
+                    handleWidgetEdit(wm.getWidget(mark.attr("id")));
                 });
             });
         }
@@ -99,12 +106,12 @@ define(function (require, exports, module) {
                         d3.select(region.node().parentNode).remove();
                     });
             }).on("resize", function (e) {
-                WidgetManager.updateLocation(e.region.attr("id"), e.pos);
+                wm.updateLocation(e.region.attr("id"), e.pos);
             }).on("move", function (e) {
-                WidgetManager.updateLocation(e.region.attr("id"), e.pos);
+                wm.updateLocation(e.region.attr("id"), e.pos);
             }).on("remove", function (e) {
                 e.regions.each(function () {
-                    var w = WidgetManager.getWidget(d3.select(this).attr("id"));
+                    var w = wm.getWidget(d3.select(this).attr("id"));
                     if (w) {
                         w.remove();
                     } else {
@@ -121,7 +128,7 @@ define(function (require, exports, module) {
 		return mapCreator;
 	};
 	 
-    WidgetManager.prototype.clearWidgets = function () {
+    WidgetManager.prototype.clearWidgetAreas = function () {
         //clear old widhget maps and area def
         if (this.mapCreator()) {
             this.mapCreator().clear();
@@ -183,10 +190,12 @@ define(function (require, exports, module) {
 		this._widgets = {};
 	};
 	
-    module.exports = function () {
-		if (!wm) {
-			wm = new WidgetManager();
+    module.exports = {
+		getWidgetManager: function () {
+			if (!wm) {
+				wm = new WidgetManager();
+			}
+			return wm;
 		}
-		return wm;
 	};
 });

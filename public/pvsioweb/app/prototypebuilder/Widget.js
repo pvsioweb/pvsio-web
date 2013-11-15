@@ -4,7 +4,7 @@
  * @date 10/30/13 22:59:02 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent */
+/*global define, d3, require, $, brackets, window, MouseEvent, _*/
 define(function (require, exports, module) {
     "use strict";
     var property = require("util/property"),
@@ -47,6 +47,15 @@ define(function (require, exports, module) {
 			
 		widget.imageMap(area);
 		return area;
+	};
+	
+	Widget.prototype.updateWithProperties = function (props) {
+		var w = this;
+		_.each(props, function (val, key) {
+			if (w[key]) {
+				w[key](val);
+			}
+		});
 	};
 	
     module.exports = Widget;

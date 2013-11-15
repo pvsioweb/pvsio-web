@@ -9,9 +9,9 @@ define(function (require, exports, module) {
 	"use strict";
 	var WSManager = require("websockets/pvs/WSManager"),
 		Logger	= require("util/Logger"),
-		stateMachine            = require("../lib/statemachine/stateMachine"),
-        handlerFile             = require("../lib/fileHandler/fileHandler"),
-        pvsWriter               = require("../lib/statemachine/stateToPvsSpecificationWriter");
+		stateMachine            = require("lib/statemachine/stateMachine"),
+        handlerFile             = require("lib/fileHandler/fileHandler"),
+        pvsWriter               = require("lib/statemachine/stateToPvsSpecificationWriter");
 	
     function switchToBuilderView() {
         d3.select(".image-map-layer").style("opacity", 1).style("z-index", 190);
@@ -63,7 +63,14 @@ define(function (require, exports, module) {
 		});
 	
 		d3.select("#openProject").on("click", function () {
-			projectManager.openProject();
+			projectManager.openProject(function (project) {
+				var ws = WSManager.getWebSocket();
+				ws.lastState("init(0)");
+				if (project.mainPVSFile()) {
+					ws.startPVSProcess(project.mainPVSFile().name(), project.name(), pvsProcessReady);
+				}
+				switchToBuilderView();
+			});
 		});
 	
 		d3.select("#newProject").on("click", function () {
