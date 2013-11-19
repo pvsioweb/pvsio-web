@@ -1,5 +1,6 @@
 /**
- * Base widget implementation
+ * @module Widget
+ * @desc Base widget implementation
  * @author Patrick Oladimeji
  * @date 10/30/13 22:59:02 PM
  */
@@ -14,29 +15,67 @@ define(function (require, exports, module) {
         var x = +mark.attr("x"), y = +mark.attr("y"), w = +mark.attr("width"), h = +mark.attr("height");
 		return x + "," + y +	"," + (x + w) + "," + (y + h);
 	}
-	
+	/**@class Widget*/
+	/**
+		@constructor
+		@desc Creates a new Widget
+		@param {string} id The id for the widget's html element
+		@param {string} type The type of the widget "button or display"
+		@this Widget
+	 */
     function Widget(id, type) {
+		/**
+			get or set the widget id.
+			@type {string}
+		 */
         this.id = property.call(this, id);
+		/**
+			get or set the widget type
+			@type {string}
+		 */
         this.type = property.call(this, type);
+		/** 
+			get or set the widget element. This is a d3 selection object.
+			@type {d3.selection}
+		 */
         this.element = property.call(this);
+		/**
+			get or set the image map area for this widget
+			@type {d3.selection}
+		 */
 		this.imageMap = property.call(this);
     }
-    
+    /**
+	 * Removes the widget from the interface
+	 * @memberof Widget
+	 */
     Widget.prototype.remove = function () {
 		d3.select(this.parentGroup()).remove();
     };
-    
+    /**
+		Gets the <g> or group layer on which this widget is drawn
+		@memberof Widget
+	 */
     Widget.prototype.parentGroup = function () {
         if (this.element()) {
             return this.element().node().parentNode;
         }
     };
-    
+    /**
+		Gets whether an imageMap has been created and set for this widget. Usually called before {Widget#createImageMap}
+		@returns {boolean}
+		@memberof Widget
+	 */
 	Widget.prototype.needsImageMap = function () {
 		return !this.imageMap();
 	};
-	
-	Widget.prototype.createImageMap = function (ws) {
+	/**
+		Creats and image map area for this widget using its position for the coords of the area.
+		Adds the created area to the widget's imageMap property.
+		@returns {object} the area element created
+		@memberof Widget
+	 */
+	Widget.prototype.createImageMap = function () {
 		var coords = getCoords(this.element());
 		var events, f, widget = this, href = this.type() === "button" ? "#" : null;
 		var area = d3.select("map#prototypeMap").append("area");
@@ -49,6 +88,12 @@ define(function (require, exports, module) {
 		return area;
 	};
 	
+	/**
+		Updates the current widget with the properties supplied
+		@param {object} props A JSON object containing keys representing properties in the widget
+		@returns {Widget} the updated widget
+		@memberof Widget
+	 */
 	Widget.prototype.updateWithProperties = function (props) {
 		var w = this;
 		_.each(props, function (val, key) {
@@ -56,6 +101,7 @@ define(function (require, exports, module) {
 				w[key](val);
 			}
 		});
+		return this;
 	};
 	
     module.exports = Widget;

@@ -47,12 +47,15 @@ define(function (require, exports, module) {
 	/**
 	
 	*/
-	function createFileLoadFunction(file, callback) {
-        return function () {
+	function createFileLoadFunction(file, onFileLoaded) {
+        return function (cb) {
             var fr = new FileReader();
             fr.onload = function (event) {
                 var content = event.target.result;
-                callback(content);
+				if (onFileLoaded && typeof onFileLoaded === "function") {
+					onFileLoaded(file.name, content);
+				}
+				cb();
             };
             fr.readAsText(file);
         };
@@ -64,9 +67,7 @@ define(function (require, exports, module) {
 	
 	/************* Exported Function ************************************************/
 	module.exports = {
-	
 		readFile: readFile,
-	
 		/**  Delete file, which is passed as parameter, from the project    */
 		deleteFile: deleteFile,
 		createFileLoadFunction: createFileLoadFunction

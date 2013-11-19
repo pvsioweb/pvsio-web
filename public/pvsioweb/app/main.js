@@ -82,5 +82,4 @@ define(function (require, exports, module) {
 	ui.bindListeners(projectManager);
     projectManager.preparePageForImageUpload();
     projectManager.prepareListBoxForFileDrag();
-//    projectManager.updateProjectName(default_project_name);
 });

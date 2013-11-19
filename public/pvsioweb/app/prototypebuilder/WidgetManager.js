@@ -1,5 +1,6 @@
 /**
- * WidgetManager deals with interacting with user interface widgets used for prototyping picture based uis.
+ * @module WidgetManager
+ * @desc WidgetManager deals with interacting with user interface widgets used for prototyping picture based uis.
  * @author Patrick Oladimeji
  * @date 10/30/13 21:42:56 PM
  */
@@ -44,12 +45,23 @@ define(function (require, exports, module) {
             });
         }
     }
-	
+	/**
+		@class WidgetManager
+		@classdesc WidgetManager deals with interacting with user interface widgets used for prototyping picture based uis.
+	*/
+	/**
+	 * Instantiates a new WidgetManager
+		@constructor
+	 */
 	function WidgetManager() {
         this._widgets = {};
     }
     
-	
+	/**
+		Restores the widget definitions passed in the parameter.
+		@param {Object} defs JSOn specification for the widget definitions to restore
+		@memberof WidgetManager
+	 */
     WidgetManager.prototype.restoreWidgetDefinitions = function (defs) {
 		var wm = this;
         if (defs) {
@@ -123,11 +135,18 @@ define(function (require, exports, module) {
         }});
     };
 
-	
+	/**
+		Get the current map creator
+		@memberof WidgetManager
+	 */
 	WidgetManager.prototype.mapCreator = function () {
 		return mapCreator;
 	};
-	 
+	
+	/**
+		Clears the widget areas on the interface.
+		@memberof WidgetManager
+	 */
     WidgetManager.prototype.clearWidgetAreas = function () {
         //clear old widhget maps and area def
         if (this.mapCreator()) {
@@ -135,32 +154,57 @@ define(function (require, exports, module) {
         }
         this.clearWidgets();
     };
-	
+	/**
+		Gets the widget with the specified id.
+		@param {string} id The html element id of the widget
+		@memberof WidgetManager
+	 */
     WidgetManager.prototype.getWidget = function (id) {
         return this._widgets[id];
     };
-    
+    /**
+		Adds the specified widget to the list of widgets.
+		@param {Widget} widget The widget to add.
+		@memberof WidgetManager
+	 */
     WidgetManager.prototype.addWidget = function (widget) {
         this._widgets[widget.id()] = widget;
     };
-    
+    /**
+		Removes the specified widget from the list of widgets.
+		@param {Widget} widget The widget to remove.
+		@memberof WidgetManager
+	 */
     WidgetManager.prototype.removeWidget = function (widget) {
         widget.remove();
         delete this._widgets[widget.id()];
     };
-    
+    /**
+		Gets a list of all the display widgets loaded on the page.
+		@returns {Display[]}
+		@memberof WidgetManager
+	 */
 	WidgetManager.prototype.getDisplayWidgets = function () {
 		return _.filter(this._widgets, function (w) {
 			return w.type() === "display";
 		});
 	};
-	
+	/**
+		Gets a list of all the button widgets loaded on the page.
+		@returns {Button[]}
+		@memberof WidgetManager
+	 */
 	WidgetManager.prototype.getButtonWidgets = function () {
 		return _.filter(this._widgets, function (w) {
 			return w.type() === "button";
 		});
 	};
-	
+	/**
+		Update  the location of the widget by updating the image map coords to the position given.
+		@param {Widget} widget The widget to update
+		@param {{x: number, y: number}} pos The new position
+		@memberof WidgetManager
+	 */
     WidgetManager.prototype.updateLocation = function (widget, pos) {
 		if (typeof widget === "string") { widget = this.getWidget(widget); }
         if (widget && widget.imageMap()) {
@@ -171,6 +215,7 @@ define(function (require, exports, module) {
     };
     /**
      * Returns a JSON object representing widget definitions for the currently open project
+	   @memberof WidgetManager
      */
     WidgetManager.prototype.getWidgetDefinitions = function () {
         var widgets = [], regionDefs = [];
@@ -191,6 +236,9 @@ define(function (require, exports, module) {
 	};
 	
     module.exports = {
+		/**
+		 * Returns a singleton instance of the WidgetManager
+		 */
 		getWidgetManager: function () {
 			if (!wm) {
 				wm = new WidgetManager();

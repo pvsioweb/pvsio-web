@@ -1,4 +1,5 @@
 /**
+ * @module ProjectManager
  * Project Manager
  * @author Patrick Oladimeji
  * @date 11/15/13 9:49:03 AM
@@ -24,6 +25,17 @@ define(function (require, exports, module) {
 	var pvsFilesListView;
     var default_project_name = "default_pvsProject";
 	
+	function noop() {}
+	
+	/**
+	 * Updates the name of the project on the document title
+	 */
+	function projectNameChanged(event) {
+		var name = event.current;
+        document.title = "PVSio-Web -- " + name;
+        d3.select("#header #txtProjectName").property("value", name);
+	}
+	
 	function updateSourceCodeToolbarButtons(pvsFile, currentProject) {
 		//update status of the set main file button based on the selected file
 		if (pvsFile) {
@@ -42,16 +54,13 @@ define(function (require, exports, module) {
 		}
 	}
 	
-	
 	/** 
 	 *  Shows all files in the project in file list view box 
-	 *  @param  currentProject - reference to the project whose files have to be showed 
-	 *  @param  editor         - reference to editor 
-	 *  @param  ws             - reference to webSocket 
+	 *  @param  {Project} currentProject - reference to the project whose files have to be showed 
+	 *  @param  {ace} editor         - reference to editor 
 	 *  @returns void 
-	 *	      
 	 */
-	function showAllFiles(currentProject, editor, ws) {
+	function showAllFiles(currentProject, editor) {
 		currentProject.setAllfilesVisible();
 		pvsFilesListView.updateView();
 	}
@@ -60,17 +69,38 @@ define(function (require, exports, module) {
 		if (pvsFilesListView) {	pvsFilesListView.updateView(); }
 	}
 
+	/**
+	 * Creates a new instance of the ProjectManager. It currently adds a listview for the files loaded into the
+	 * project and keeps the list up to date whenever the project changes or the files within the project changes.
+	 * @param {Project} project The project currently being managed
+	 * @param {editor} editor The editor panel where the sped code is loaded
+	 * @constructor 
+	 */
 	function ProjectManager(project, editor) {
 		this.project = property.call(this, project)
+			.addListener("ProjectNameChanged", projectNameChanged)
 			.addListener("PropertyChanged", function (e) {
 				updateListView();
-				e.fresh.addListener("ProjectMainSpecFileChanged", updateListView);
+				e.fresh.addListener("ProjectMainSpecFileChanged", updateListView)
+					.addListener("ProjectNameChanged", projectNameChanged);
 				e.fresh.pvsFiles.clearListeners()
 					.addListener("PropertyChanged", updateListView);
+				//update the project name
+				projectNameChanged({current: e.fresh.name()});
 			});
 		this.editor = property.call(this, editor);
+		
 	}
+	/**
+	 * Shows all the files in the project including closed files.
+	 */
+	ProjectManager.prototype.showAllFiles = function () {
+		showAllFiles(this.project(), this.editor());
+	};
 	
+	/**
+	 * Renders the list of pvs files in the project
+	 */
 	ProjectManager.prototype.renderSourceFileList = function () {
 		var currentProject = this.project(), files = currentProject.pvsFiles(), editor = this.editor();
 		var ws = WSManager.getWebSocket();
@@ -90,27 +120,14 @@ define(function (require, exports, module) {
 			return c;
 		};
 		pvsFilesListView = new ListView("#pvsFiles", files, listLabelFunction, classFunc);
-
-		function rebindEditorChangeEvent(pvsFile) {
-			//update editor changed listener so that the project filecontent is updated when the editor is changed
-			editor.on("change", function () {
-				//ideally one should use information from ace to set the dirty mark on the document
-				//e.g editor.getSession().getUndoManager().hasUndo();
-				pvsFile.content(editor.getValue()).dirty(true); //update the selected project file content
-				updateSourceCodeToolbarButtons(pvsFile, currentProject);
-				pvsFilesListView.updateView();
-			});
-		}
-
+		
 		pvsFilesListView.addListener("SelectedIndexChanged", function (event) {
 			//fetch sourcecode for selected file and update editor
 			var pvsFile = event.selectedItem;
 			if (pvsFile.content()) {
-				editor.removeAllListeners("change");
 				editor.setValue(pvsFile.content());
 				editor.clearSelection();
 				editor.moveCursorTo(0, 0);
-				rebindEditorChangeEvent(pvsFile);
 			} else {
 				//fetch file contents from server and set the value
 				var f = currentProject.path() + "/" + pvsFile.name();
@@ -121,7 +138,6 @@ define(function (require, exports, module) {
 						editor.setValue(pvsFile.content());
 						editor.clearSelection();
 						editor.moveCursorTo(0, 0);
-						rebindEditorChangeEvent(pvsFile);
 					} else {
 						///TODO show error loading file
 						console.log(JSON.stringify(err));
@@ -131,17 +147,33 @@ define(function (require, exports, module) {
 			updateSourceCodeToolbarButtons(pvsFile, currentProject);
 		});
 
+		//update editor changed listener so that the project filecontent is updated when the editor is changed
+		editor.on("change", function () {
+			//ideally one should use information from ace to set the dirty mark on the document
+			//e.g editor.getSession().getUndoManager().hasUndo();
+			var pvsFile = pvsFilesListView.selectedItem();
+			if (pvsFile) {
+				var dirty = pvsFile.content() !== editor.getValue();
+				pvsFile.content(editor.getValue()).dirty(dirty); //update the selected project file content
+				updateSourceCodeToolbarButtons(pvsFile, currentProject);
+				pvsFilesListView.updateView();
+			}
+			
+		});
 		return pvsFilesListView;
 	};
-
+	/**
+	 * Gets the file selected in the source files list view.
+	 * @returns {?ProjectFile} The project source file selected or null if no item was selected
+	 */
 	ProjectManager.prototype.getSelectedFile = function () {
-		return pvsFilesListView.getSelectedItem();
+		return pvsFilesListView.selectedItem();
 	};
 
 	/** 
 	 *  Prompt user to get a new name for the selected file
 	 *  @param  file            - reference to the file to rename
-	 *  @returns void
+	 * ///FIXME change the prompt to a form dialog
 	 */
 	ProjectManager.prototype.renameFile = function (file) {
 		if (file) {
@@ -155,22 +187,15 @@ define(function (require, exports, module) {
 
 	/** 
 	 *  Remove user's selected file from file list box (not from the project itself)
-	 *
-	 *  @param  currentProject            - reference to the project user is using
-	 *  @param  editor                    - reference to editor
-	 *  @param  ws                        - reference to webSocket
-	 *
-	 *  @returns void
-	 *
+	 *  @param  {!ProjectFile} file   The file to close from the list view
 	 */
 	ProjectManager.prototype.closeFile = function (file) {
 		if (file) {
 			this.project().hideFile(file);
 			pvsFilesListView.updateView();
-			//renderSourceFileList(currentProject.pvsFiles(), currentProject, editor, ws);
-	
-			///If user has clicked on a file, its content is shown in the editor, but editor should be empty at this time 
-	
+			if (file === pvsFilesListView.selectedItem()) {
+				pvsFilesListView.selectedItem(undefined).selectedIndex(-1);
+			}
 			this.editor().setValue("");
 			this.editor().clearSelection();
 			this.editor().moveCursorTo(0, 0);
@@ -179,15 +204,11 @@ define(function (require, exports, module) {
 
 	/** 
 	 *  Delete a file from a project
-	 *
-	 *  @param  currentProject - reference to the project where file to delete is
-	 *  @param  editor         - reference to editor
-	 *  @param  ws             - reference to webSocket
-	 *
-	 *  @returns void
-	 *
+	 *  @param  {ProjectFile} file The file to delete from the project
+	 *  @param  {ProjectManager~onFileDeleted}  cb Callback function to invoke once file has been deleted
 	 */
 	ProjectManager.prototype.deleteFile = function (file, cb) {
+	///FIXME this function should prompt user for confirmation through a dialog
 		if (file) {
 			this.project().removeFile(file);
 			pvsFilesListView.updateView();
@@ -197,16 +218,9 @@ define(function (require, exports, module) {
 	};
 
 	/** 
-	 * Create a new file and add it in the project passed as parameter.The New file will be shown in file list box.
-	 *
-	 *  @param  currentProject            - project reference where file will be added
-	 *  @param  editor                    - reference to editor
-	 *  @param  ws                        - reference to webSocket
-	 *  @param  {string} [name]           - name of the file. If undefined a default name will be used
-	 *  @param  {string} [content]        - textual content of the file. If undefined a default content will be used
-	 *
-	 *  @returns void
-	 *
+	 * Create a new file and add it to the current Project. The New file will be shown in file list box.
+	 *  @param  {?string} name           - name of the file. If undefined a default name will be used
+	 *  @param  {?string} content       - textual content of the file. If undefined a default content will be used
 	 */
 	ProjectManager.prototype.newFile = function (name, content) {
 		var default_name = "MyTheory", default_content = " THEORY BEGIN \nEND ";
@@ -221,9 +235,16 @@ define(function (require, exports, module) {
 		}
 
 		this.project().addSpecFile(name, content);
-		pvsFilesListView.selectItem(_.last(this.project().pvsFiles())).updateView();
+		pvsFilesListView.updateView()
+			.selectItem(_.last(this.project().pvsFiles()));
 	};
 
+	/**
+	 * Creats a new instance of a project from json data
+	 * @param {{name: string, projectPath: string, pvsFiles: string[], mainPVSFile: ?string,
+		image: ?string, imageData: ?string, widgetDefinition: ?string}} obj The json data from which the new project is instantiated
+	 * @return {Project}
+	 */
 	function initFromJSON(obj) {
 		var p = new Project(obj.name).path(obj.projectPath);
 		if (obj.pvsFiles) {
@@ -273,7 +294,6 @@ define(function (require, exports, module) {
 							if (p.pvsFiles()) {
 								pm.renderSourceFileList(p.pvsFiles());
 							}
-							pm.updateProjectName(p.name());
 							d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
 							pvsFilesListView.selectItem(p.mainPVSFile() || p.pvsFiles()[0]);
 							if (callback) { callback(p); }
@@ -287,16 +307,21 @@ define(function (require, exports, module) {
             }
         });
     };
-
+	/**
+	 * Opens a form that allows a user to select specification files to add to the project.
+	 * Selected files are added to the project, but changes are not persisted until project.save is invoked.
+	 * @param {callback} [cb = function () {}] function to invoke after files have been loaded into the project
+	 */
 	ProjectManager.prototype.openFiles = function (cb) {
 		var project = this.project(), editor = this.editor();
+		cb = cb || noop;
 		openFilesForm.create().on("cancel", function (e, view) {
 			view.remove();
 		}).on("ok", function (e, view) {
 			var q = queue();
 			e.data.pvsSpec.forEach(function (spec) {
-				q.defer(fs.createFileLoadFunction(spec, function (content) {
-					project.addSpecFile(spec.name, content);
+				q.defer(fs.createFileLoadFunction(spec, function (name, content) {
+					project.addSpecFile(name, content);
 				}));
 			});
 			q.awaitAll(function (err, res) {
@@ -310,13 +335,10 @@ define(function (require, exports, module) {
 			view.remove();
 		});
 	};
-	
-	ProjectManager.prototype.updateProjectName = function (name) {
-        document.title = "PVSio-Web -- " + name;
-        d3.select("#header #txtProjectName").property("value", name);
-		return this;
-	};
-	
+	/**
+	 * Updates the project image with in the prototype builder
+	 * @param {String} imageData The url or base64 encoded string to put in the src attribute of the img element
+	 */
 	ProjectManager.prototype.updateImage = function (imageData) {
         d3.select("#imageDiv img").attr("src", imageData);
         //hide the draganddrop stuff
@@ -413,9 +435,11 @@ define(function (require, exports, module) {
         };
     };
 	 
-	/** data has .prototypeImage, .pvsSpec, .projectName
+	/** 
+	 * Creates a new Project. Displays the new Project dialog and handles the response 
      */
-	ProjectManager.prototype.newProject = function (data) {
+	ProjectManager.prototype.newProject = function () {
+		var pm = this;
 		newProjectForm.create().on("cancel", function (e, formView) {
             console.log(e);
             formView.remove();
@@ -424,7 +448,7 @@ define(function (require, exports, module) {
             console.log(e);
             formView.remove();
 			WidgetManager.clearWidgetAreas();
-			var pm = this;
+		
 			var project = pm.project();
 			//update the current project with info from data and saveNew
 			project.name(data.projectName);
@@ -440,9 +464,10 @@ define(function (require, exports, module) {
 			});
 	
 			for (i = 0; i < data.pvsSpec.length; i++) {
-				q.defer(fs.createFileLoadFunction(data.pvsSpec[i]));
+				q.defer(fs.createFileLoadFunction(data.pvsSpec[i], function (name, content) {
+					project.addSpecFile(name, content);
+				}));
 			}
-	
 			q.awaitAll(function (err, res) {
 				project.saveNew(function (err, res) {
 					console.log({err: err, res: res});
@@ -453,8 +478,8 @@ define(function (require, exports, module) {
 						project.pvsFiles().forEach(function (f) {
 							f.dirty(false);
 						});
-						pm.updateProjectName(project.name());
 						pm.renderSourceFileList();
+						pvsFilesListView.selectedItem(project.mainPVSFile() || project.pvsFiles()[0]);
 					}
 				});
 			});
@@ -462,8 +487,12 @@ define(function (require, exports, module) {
 		
        
     };
-	
-	ProjectManager.prototype.saveProject = function (project) {
+	/**
+	 * Saves the specified project.
+	 * @param {Project} project The project to save
+	 * @param {ProjectManager~onProjectSaved} cb The callback to invoke when the project save has returned
+	 */
+	ProjectManager.prototype.saveProject = function (project, cb) {
 		var pm = this;
 		project = project || pm.project();
 		/**
@@ -492,7 +521,6 @@ define(function (require, exports, module) {
                     if (!err) {
                         project = res;
                         pvsFilesListView.updateView();
-                        pm.updateProjectName(project.name());
                         pm.updateSourceCodeToolbarButtons(pvsFilesListView.selectedItem());
                     }
                 });
@@ -501,6 +529,16 @@ define(function (require, exports, module) {
 			_doSave();
 		}
 	};
+	
 	module.exports = ProjectManager;
-
+/**
+ * @callback ProjectManager~onProjectSaved
+ * @param {object} err This value is set if any error occurs during the save operation.
+ * @param {Project} project The project saved.
+ */
+/**
+ * @callback ProjectManager~onFileDeleted
+ * @param {object} err
+ * @param {string} success
+ */
 });

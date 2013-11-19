@@ -41,12 +41,6 @@ define(function (require, exports, module) {
 		this.selectedIndex = property.call(this, -1);
 		this.selectedItem = property.call(this);
 
-		//Select just files have to be shown 
-		var filesToShow = data.filter(function (d) {
-			return d.visible();
-		});
-		data = filesToShow;
-
 		//define simple string based label function if none was given
 		labelFunction = labelFunction || function (d) {
 			return d.toString();
@@ -62,26 +56,26 @@ define(function (require, exports, module) {
 		//create elements
 		var listBox = d3.select(elementId).html("").append("ul");
 		this._listBox = listBox;
-		var listItems = listBox.selectAll("li").data(data).enter()
-			.append("li");
-		this._listItems = listItems;
-		listItems.append("span").attr("class", "list-icon list-icon-main");
-		listItems.append("span").attr("class", "list-icon list-icon-dirty");
-		listItems.append("span").attr("class", "file-label").html(labelFunction);
-
-		//add listener for selection events
-		var listView = this;
-		listItems.on("click", function (d, i) {
-			selectItem(i, d, listView);
-		});
-
-		
-		this.updateView();
+		this.updateView(data.filter(function (d) {return d.visible(); }));
 	}
 	
-	ListView.prototype.updateView = function () {
+	ListView.prototype.updateView = function (data) {
+		var lv = this;
+		var listItems = this._listBox.selectAll("li");
+		if (data) {
+			var list = listItems.data(data);
+			listItems = list.enter().append("li").attr("class", this.classFunction());
+			listItems.append("span").attr("class", "list-icon list-icon-main");
+			listItems.append("span").attr("class", "list-icon list-icon-dirty");
+			listItems.append("span").attr("class", "file-label").html(this.labelFunction());
+			listItems.on("click", function (d, i) {
+				selectItem(i, d, lv);
+			});
+			list.exit().remove();
+		}
+		this._listItems = listItems;
 		//update the class information on all list itmes
-		this._listItems.attr("class", this.classFunction())
+		listItems.attr("class", this.classFunction())
 			.select("span.file-label").html(this.labelFunction());
 		if (this.selectedItem()) {
 			renderSelectedItem(this.selectedIndex(), d3.select(this._listItems[0][this.selectedIndex()]), this._listItems);
@@ -90,7 +84,7 @@ define(function (require, exports, module) {
 	};
 
 	ListView.prototype.selectItem = function (item) {
-		var data = this._listItems.data();
+		var data = this._listBox.selectAll("li").data();
 		var itemIndex = data.indexOf(item);
 		if (itemIndex > -1) {
 			selectItem(itemIndex, item, this);

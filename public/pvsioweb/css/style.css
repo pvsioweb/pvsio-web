@@ -134,10 +134,10 @@ fileListItem.hide {
 #pvsFiles {
     position: absolute;
     display:inline-block;
-    width: 210px;
+    width: 250px;
     height: 380px;
     border: 1px solid #ddd;
-    right: -26px;
+    right: -60px;
 	overflow-y: scroll;
 	font-size:12px;
   }
@@ -162,7 +162,7 @@ fileListItem.hide {
     border:3px dashed #393;
 }
 #pvsFiles .file-label {
-    width: 150px;
+    width: 140px;
     display: inline-block;
     overflow: hidden;
 }
@@ -217,7 +217,7 @@ fileListItem.hide {
 	top:0px;
 	right: -250px;
 	height: 100%;
-	width: 160px;
+	width: 240px;
 	color: white;
 	background: #333;
 	padding: 10px;

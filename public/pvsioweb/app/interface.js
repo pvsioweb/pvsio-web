@@ -13,6 +13,9 @@ define(function (require, exports, module) {
         handlerFile             = require("lib/fileHandler/fileHandler"),
         pvsWriter               = require("lib/statemachine/stateToPvsSpecificationWriter");
 	
+	/**
+	 * Switches the prototoyping layer to the builder layer
+	 */
     function switchToBuilderView() {
         d3.select(".image-map-layer").style("opacity", 1).style("z-index", 190);
         d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
@@ -20,7 +23,7 @@ define(function (require, exports, module) {
         d3.select("div.display,#controlsContainer button").classed("builder", true);
         d3.select("div.display,#controlsContainer button").classed("simulator", false);
     }
-
+	/** Switches the prototyping layer to the simulator/testing layer */
     function switchToSimulatorView() {
         d3.select(".image-map-layer").style("opacity", 0.1).style("z-index", -2);
         d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
@@ -202,12 +205,6 @@ define(function (require, exports, module) {
 			projectManager.deleteFile(projectManager.getSelectedFile());
 		});
 	
-	   /* d3.select("#infoBoxModifiable").on("change", function () {
-	
-		stateMachine.changeTextArea();
-	
-		});*/
-	
 		document.getElementById("startEmulink").disabled = false;
 		/// User wants to start emulink
 		d3.select("#startEmulink").on("click", function () {
@@ -216,6 +213,9 @@ define(function (require, exports, module) {
 	}
 	
 	module.exports = {
+		/**
+		* Binds user interface elements to event listeners
+		*/
 		bindListeners: bindListeners
 	};
 });
