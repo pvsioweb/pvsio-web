@@ -15,9 +15,10 @@ define(function (require, exports, module) {
         var x = +mark.attr("x"), y = +mark.attr("y"), w = +mark.attr("width"), h = +mark.attr("height");
 		return x + "," + y +	"," + (x + w) + "," + (y + h);
 	}
-	/**@class Widget*/
+	
+	/**@class Widget */
 	/**
-		@constructor
+		@constructor Widget
 		@desc Creates a new Widget
 		@param {string} id The id for the widget's html element
 		@param {string} type The type of the widget "button or display"

@@ -1,0 +1,46 @@
+<div id="content" class="center">
+		<div id="header">
+			<a class="btn btn-default" id="newProject"><span class="glyphicon glyphicon-file"></span> New Project</a>
+			<a class="btn btn-default" id="openProject"><span class="glyphicon glyphicon-folder-open"></span> Open Project</a>
+			<a class="btn btn-default" id="saveProject"><span class="glyphicon glyphicon-hdd"></span> Save Project</a>
+			<a class="btn btn-default" id="btnLoadPicture"><span class="glyphicon glyphicon-picture"></span> Change Picture</a>
+			<input type="file" class="hide" id="btnSelectPicture" name="selectPicture">
+			<span>    Project  </span>
+			<input type="text" placeholder="Untitled Project" id="txtProjectName" value="" class="input-Med" readonly="readonly">
+		</div>
+		<div id="body">
+			<div id="imageDiv">
+				<div id="imageDragAndDrop" class="dndcontainer">
+					<span class="center">Drag  user interface picture here or if you prefer, use the button below</span>
+					<br/>
+					<button class="btn btn-primary center" id='btnLoadPicture'> Load Picture</button>
+				</div>
+				<img src="pvsioweb/image/start.png" usemap="#prototypeMap" />
+				<div id='console'></div>
+			</div>
+			<div id="controlsContainer">
+				<button id="btnBuilderView">Builder View</button>
+				<button id="btnSimulatorView">Simulator View</button>
+                <a id="lblWebSocketStatus" class="status right">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
+                <a id="lblPVSioStatus" class="status right">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
+			</div>
+	
+			<!-- container for specification source code -->
+			
+			<div id='logsDiv'>
+				<div id='pvsio_commands_log_Container' class='pvsio-log-container'>
+					<h2>GUI frontend commands</h2>
+					<div id='pvsio_commands_log'></div>
+				</div>
+				<div id='pvsio_response_log_Container' class='pvsio-log-container'>
+					<h2>PVSio backend replies</h2>
+					<div id='pvsio_response_log'></div>
+				</div>
+			</div>	
+		</div>
+	
+	</div>
+	
+	<map name="prototypeMap" id="prototypeMap">
+	
+	</map>

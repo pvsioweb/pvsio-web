@@ -1,5 +1,6 @@
 /**
- * @file Module representing a Spec or image file in  a project
+ * @module ProjectFile
+ * @desc Module representing a Spec or image file in  a project
  * @author Patrick Oladimeji
  * @date 11/15/13 10:19:27 AM
  */
@@ -10,13 +11,8 @@ define(function (require, exports, module) {
 	var property = require("util/property"),
 		eventDispatcher = require("util/eventDispatcher");
 
-	/** 
-		@class ProjectFile
-		@classdesc Module representing a spec or image file in a project
-	*/
 	/**
-	 * Constructs a new project file 
-	 * @constructor
+	 * @constructor ProjectFile
 	 * @param {string} name The name of the file
 	 * @param {Project} project The project to which this file belongs
 	 * @this ProjectFile

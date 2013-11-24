@@ -14,7 +14,6 @@ define(function (require, exports, module) {
     
     function createWebSocket() {
         var wscBase = wsclient();
-        
         var o  = eventDispatcher({});
         o.serverUrl = function (url) {
             if (url) {
@@ -25,7 +24,6 @@ define(function (require, exports, module) {
         };
         
         o.lastState = property.call(o, "init(0)");
-        o.value = property.call(o, "0");
         
         o.logon = function () {
             wscBase.logon();
@@ -36,14 +34,19 @@ define(function (require, exports, module) {
             wscBase.close();
         };
         
-        o.startPVSProcess = function (sourceFile, projectName, cb) {
-            sourceFile = sourceFile.split(".pvs")[0];
-            wscBase.send({type: "startProcess", data: {fileName: sourceFile, projectName: projectName}},
-                    cb);
+        o.startPVSProcess = function (data, cb) {
+            var sourceFile = data.fileName.split(".pvs")[0];
+            wscBase.send({type: "startProcess", data: {fileName: sourceFile, projectName: data.projectName, demoName: data.demoName}}, cb);
         };
         
         o.sendGuiAction = function (action, cb) {
-            wscBase.send({type: "sendCommand", data: {command: action}}, cb);
+            wscBase.send({type: "sendCommand", data: {command: action}}, function (err, res) {
+				//do stuff to update the explored state graph and invoke the callback with the same parameters
+				wscBase.fire({type: "GraphUpdate", transition: action, target: res.data, source: o.lastState()});
+				//update the lastState 
+				o.lastState(res.data);
+				if (cb && typeof cb === "function") { cb(err, res); }
+			});
             wscBase.fire({type: "InputUpdated", data: action});
             return o;
         };
@@ -57,11 +60,6 @@ define(function (require, exports, module) {
         o.writeFile = function (data, cb) {
             var token = {type: "writeFile", data: data};
             wscBase.send(token, cb);
-            return o;
-        };
-        
-        o.resetLastState = function () {
-            o.lastState("init(" + o.value() + ")");
             return o;
         };
         

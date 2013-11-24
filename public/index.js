@@ -10,7 +10,7 @@ require.config({
     paths: {
         "ace": "../lib/ace",
         "d3": "../lib/d3",
-        "pvsioweb": "prototypebuilder",
+        "pvsioweb": "plugins/prototypebuilder",
         "imagemapper": "../lib/imagemapper",
         "text": "../lib/text",
         "lib": "../lib"

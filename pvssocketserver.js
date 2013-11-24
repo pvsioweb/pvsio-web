@@ -306,6 +306,8 @@ function run() {
             },
             "startProcess": function (token, socket, socketid) {
                 util.log("Calling start process for client... " + socketid);
+				var root = token.data.projectName ? "/public/projects/" + token.data.projectName:
+					token.data.demoName ? "/public/demos/" + token.data.demoName : "";
                 p = pvsioProcessMap[socketid];
                 //close the process if it exists and recreate it
                 if (p) {
@@ -317,7 +319,7 @@ function run() {
                 pvsioProcessMap[socketid] = p;
                 //set the workspace dir and start the pvs process with a callback for processing any responses from
                 //the process
-                p.workspaceDir(__dirname + "/public/projects/" + token.data.projectName)
+                p.workspaceDir(__dirname + root )
                     .start(token.data.fileName, function (token) {
                         token.socketId = socketid;
                         processCallback(token, socket);

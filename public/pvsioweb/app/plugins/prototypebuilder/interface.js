@@ -8,10 +8,7 @@
 define(function (require, exports, module) {
 	"use strict";
 	var WSManager = require("websockets/pvs/WSManager"),
-		Logger	= require("util/Logger"),
-		stateMachine            = require("lib/statemachine/stateMachine"),
-        handlerFile             = require("lib/fileHandler/fileHandler"),
-        pvsWriter               = require("lib/statemachine/stateToPvsSpecificationWriter");
+		Logger	= require("util/Logger");
 	
 	/**
 	 * Switches the prototoyping layer to the builder layer
@@ -32,7 +29,6 @@ define(function (require, exports, module) {
         d3.select("div.display,#controlsContainer button").classed("builder", false);
     }
 	
-	
     function pvsProcessReady(err, e) {
         var pvsioStatus = d3.select("#lblPVSioStatus");
         pvsioStatus.select("span").remove();
@@ -40,7 +36,6 @@ define(function (require, exports, module) {
             var msg = ("pvsio process ready");
             Logger.log(msg);
             pvsioStatus.append("span").attr("class", "glyphicon glyphicon-ok");
-
         } else {
             console.log(err);
             pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
@@ -70,7 +65,7 @@ define(function (require, exports, module) {
 				var ws = WSManager.getWebSocket();
 				ws.lastState("init(0)");
 				if (project.mainPVSFile()) {
-					ws.startPVSProcess(project.mainPVSFile().name(), project.name(), pvsProcessReady);
+					ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()}, pvsProcessReady);
 				}
 				switchToBuilderView();
 			});
@@ -131,91 +126,21 @@ define(function (require, exports, module) {
 			var project = projectManager.project(), ws = WSManager.getWebSocket();
 			if (project && project.mainPVSFile()) {
 				ws.lastState("init(0)");
-				ws.startPVSProcess(project.mainPVSFile().name(), project.name(),
+				ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()},
 							  pvsProcessReady);
 			}
 		});
+	}
 	
-		/** NEW: StateChart **************************************************************************/
-		d3.select("#state_machine").on("click", function () { stateMachine.init(projectManager.editor()); });
-		d3.select("#button_state").on("click", function () { stateMachine.add_node_mode(); });
-		d3.select("#button_transition").on("click", function () { stateMachine.add_transition_mode(); });
-		d3.select("#button_self_transition").on("click", function () { stateMachine.add_self_transition_mode(); });
-		var modifiedUser = 0;
-		var myState = [];
-		myState[0] = {
-			name : "S1",
-			id   : 0
-		};
-		myState[1] = {
-			name : "S2",
-			id   : 0
-		};
-		/// When User clicks on New File button #new_file a pvs file is created and showed in file list box
-		d3.select("#new_file").on("click", function () {
-			var editor = projectManager.editor();
-			projectManager.newFile();
-			/******MYTEST*****/
-			editor.on("change", function (e) {
-				//ideally one should use information from ace to set the dirty mark on the document
-				//e.g editor.getSession().getUndoManager().hasUndo();
-				if (modifiedUser) {
-					return;
-				}
-				pvsWriter.userModification(e, editor);
-			});
-			modifiedUser = 1;
-			pvsWriter.newPVSSpecification("myTheory", editor);
-			modifiedUser = 0;
-		});
-	
-	
-		/// When user clicks on open_file button #open_file, a form is showed
-		d3.select("#open_file").on("click", function () {
-			projectManager.openFiles(function () {
-				Logger.log("files added to project ..");
-			});
-		});
-	
-		/// User wants to rename a file
-		d3.select("#rename_file").on("click", function () {
-			projectManager.renameFile(projectManager.getSelectedFile());
-		});
-	
-	   /// User wants to split the screen
-		d3.select("#splitView").on("click", function () {
-			document.getElementById("sourcecode-editor-wrapper").style.visibility = 'visible';
-			document.getElementById("editor").style.top = "900px";
-			document.getElementById("specification_log_Container").style.visibility = 'hidden';
-			document.getElementById("ContainerStateMachine").style.weight = '400px';
-		});
-	
-		/// User wants to close a file (it will be not shown in file list box on the right )
-		d3.select("#close_file").on("click", function () {
-			projectManager.closeFile(projectManager.getSelectedFile());
-		});
-	
-		/// User wants to see all files of the project
-		d3.select("#show_all_files").on("click", function () {
-			projectManager.showAllFiles();
-		});
-	
-		/// User wants to delete a file from the project
-		d3.select("#delete_file").on("click", function () {
-			projectManager.deleteFile(projectManager.getSelectedFile());
-		});
-	
-		document.getElementById("startEmulink").disabled = false;
-		/// User wants to start emulink
-		d3.select("#startEmulink").on("click", function () {
-			stateMachine.init(projectManager.editor());
-		});
+	function createHtmlElements() {
+		var content = require("text!pvsioweb/forms/maincontent.handlebars");
+		d3.select("body").html(content);
 	}
 	
 	module.exports = {
-		/**
-		* Binds user interface elements to event listeners
-		*/
-		bindListeners: bindListeners
+		init: function (projectManager) {
+			createHtmlElements();
+			bindListeners(projectManager);
+		}
 	};
 });

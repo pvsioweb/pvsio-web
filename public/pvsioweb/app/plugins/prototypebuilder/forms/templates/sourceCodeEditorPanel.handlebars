@@ -1,0 +1,25 @@
+<div id='pvsSpecification'>
+	<div id="editorToolbar">
+<!--					<button class="btn btn-danger" id="btnRestartPVSioWeb">Restart PVSio Process</button>-->
+		<button class="btn" id="new_file">New File</button>
+		<button class="btn" id="open_file">Open File</button>
+		<button class="btn" id="btnSetMainFile"><i class="icon-star"></i> Set As Main File</button>
+		<button class="btn" id="btnSaveFile">Save File</button>
+		<button class="btn" id="btnSaveAll">Save All Files</button>					
+		<button class="btn" id="delete_file">Delete File</button>
+		<button class="btn" id="rename_file">Rename File</button>
+		<button class="btn" id="close_file">Close File</button>
+		<button class="btn" id="show_all_files">Show all files</button>
+		<button class="btn" id="btnTypeCheck">Typecheck</button>
+	</div>
+	<div id="sourcecode-editor-wrapper">
+		<div id="specDragAndDrop" class="dndcontainer">
+			<span class="center">Drag PVS file here or if you prefer, use the button below</span>
+			<br/>
+			<a class="btn btn-primary center" id='btnLoadSpec'><i class="icon-file-white"></i>Load Spec</a>
+			<input type="file" class="hide" id="btnSelectSpec" name="selectSpec">
+		</div>
+		<div id="pvsFiles"></div>
+		<div id="editor"></div>
+	</div>
+</div>

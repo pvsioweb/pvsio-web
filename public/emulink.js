@@ -1,20 +1,27 @@
 /**
- * Main entry point for pvsioweb module
+ * Interactive prototype builder for PVSio based on the html map attribute
  * @author Patrick Oladimeji
- * @date 4/19/13 17:23:31 PM
+ * @date Dec 3, 2012 : 4:42:55 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true*/
-/*global define, d3, require, $, brackets, _, window, MouseEvent, FormData, document, setTimeout, clearInterval, FileReader */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
+/*global define, d3, require,module, WebSocket*/
+require.config({
+    baseUrl: 'pvsioweb/app',
+    paths: {
+        "ace": "../lib/ace",
+        "d3": "../lib/d3",
+        "pvsioweb": "plugins/prototypebuilder",
+        "imagemapper": "../lib/imagemapper",
+        "text": "../lib/text",
+        "lib": "../lib"
+    }
+});
 
-define(function (require, exports, module) {
+require(["PVSioWebClient", "util/Logger", "plugins/emulink/Emulink"], function (PVSioWeb, Logger, Emulink) {
     "use strict";
-	var PVSioWeb = require("./PVSioWebClient"),
-		Logger = require("util/Logger"),
-		PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder");
-	
 	var client = new PVSioWeb();
 	
-	client.registerPlugin(PrototypeBuilder);
+	client.registerPlugin(Emulink);
 	
 	/**
      * utitlity function to pretty print pvsio output
@@ -34,6 +41,7 @@ define(function (require, exports, module) {
 	}).addListener("pvsoutput", function (e) {
 		console.log(e);
 		var response = prettyPrint(e.data), tmp;
+		client.getWebSocket().lastState(e.data);
 		console.log(response);
 		Logger.pvsio_response_log(response);
 	}).addListener("processExited", function (e) {

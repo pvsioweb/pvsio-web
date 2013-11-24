@@ -51,7 +51,7 @@ define(function (require, exports, module) {
 	*/
 	/**
 	 * Instantiates a new WidgetManager
-		@constructor
+	 * @private
 	 */
 	function WidgetManager() {
         this._widgets = {};
