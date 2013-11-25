@@ -52,6 +52,7 @@ define(function (require, exports, module) {
 			} else {
 				d3.select("#btnSaveFile").attr("disabled", true);
 			}
+			pvsFilesListView.updateView();
 		}
 	}
 	
@@ -70,6 +71,19 @@ define(function (require, exports, module) {
 		if (pvsFilesListView) {	pvsFilesListView.updateView(); }
 	}
 
+	function editorChangedListener(editor, pm, pvsFileListView) {
+		return function () {
+			//ideally one should use information from ace to set the dirty mark on the document
+			//e.g editor.getSession().getUndoManager().hasUndo();
+			var pvsFile = pvsFilesListView.selectedItem();
+			if (pvsFile) {
+				var dirty = pvsFile.content() !== editor.getValue();
+				pvsFile.content(editor.getValue()).dirty(dirty); //update the selected project file content
+				updateSourceCodeToolbarButtons(pvsFile, pm.project());
+				pvsFilesListView.updateView();
+			}
+		};
+	}
 	/**
 	 * Creates a new instance of the ProjectManager. It currently adds a listview for the files loaded into the
 	 * project and keeps the list up to date whenever the project changes or the files within the project changes.
@@ -79,6 +93,7 @@ define(function (require, exports, module) {
 	 */
 	function ProjectManager(project, editor) {
 		eventDispatcher(this);
+		var pm = this;
 		
 		this.project = property.call(this, project)
 			.addListener("ProjectNameChanged", projectNameChanged)
@@ -91,7 +106,10 @@ define(function (require, exports, module) {
 				//update the project name
 				projectNameChanged({current: e.fresh.name()});
 			});
-		this.editor = property.call(this, editor);
+		this.editor = property.call(this, editor)
+			.addListener("PropertyChanged", function (e) {
+				e.fresh.on("change", editorChangedListener(e.fresh, pm, pvsFilesListView));
+			});
 		
 	}
 	/**
@@ -107,6 +125,7 @@ define(function (require, exports, module) {
 	 * @memberof ProjectManager
 	 */
 	ProjectManager.prototype.renderSourceFileList = function () {
+		var pm = this;
 		var currentProject = this.project(), files = currentProject.pvsFiles(), editor = this.editor();
 		var ws = WSManager.getWebSocket();
 		var listLabelFunction = function (d) {
@@ -143,6 +162,7 @@ define(function (require, exports, module) {
 						editor.setValue(pvsFile.content());
 						editor.clearSelection();
 						editor.moveCursorTo(0, 0);
+						editor.on("change", editorChangedListener(editor, pm, pvsFilesListView));
 					} else {
 						///TODO show error loading file
 						console.log(JSON.stringify(err));
@@ -151,20 +171,7 @@ define(function (require, exports, module) {
 			}
 			updateSourceCodeToolbarButtons(pvsFile, currentProject);
 		});
-
-		//update editor changed listener so that the project filecontent is updated when the editor is changed
-		editor.on("change", function () {
-			//ideally one should use information from ace to set the dirty mark on the document
-			//e.g editor.getSession().getUndoManager().hasUndo();
-			var pvsFile = pvsFilesListView.selectedItem();
-			if (pvsFile) {
-				var dirty = pvsFile.content() !== editor.getValue();
-				pvsFile.content(editor.getValue()).dirty(dirty); //update the selected project file content
-				updateSourceCodeToolbarButtons(pvsFile, currentProject);
-				pvsFilesListView.updateView();
-			}
-			
-		});
+		
 		return pvsFilesListView;
 	};
 	/**
@@ -307,6 +314,7 @@ define(function (require, exports, module) {
 							}
 							d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
 							pvsFilesListView.selectItem(p.mainPVSFile() || p.pvsFiles()[0]);
+							pm.editor().on("change", editorChangedListener(pm.editor(), pm, pvsFilesListView));
 							if (callback) { callback(p); }
 						}
 					});
@@ -527,7 +535,7 @@ define(function (require, exports, module) {
                     //repaint the list and sourcecode toolbar
                     if (project.pvsFiles()) {
                         pvsFilesListView.updateView();
-                        updateSourceCodeToolbarButtons(pvsFilesListView.selectedItem());
+                        updateSourceCodeToolbarButtons(pvsFilesListView.selectedItem(), project);
                     }
                 }
             });
@@ -541,7 +549,7 @@ define(function (require, exports, module) {
                     if (!err) {
                         project = res;
                         pvsFilesListView.updateView();
-                        pm.updateSourceCodeToolbarButtons(pvsFilesListView.selectedItem());
+                        pm.updateSourceCodeToolbarButtons(pvsFilesListView.selectedItem(), project);
                     }
                 });
             }
@@ -549,6 +557,9 @@ define(function (require, exports, module) {
 			_doSave();
 		}
 	};
+	
+	
+	ProjectManager.prototype.updateSourceCodeToolbarButtons = updateSourceCodeToolbarButtons;
 	
 	module.exports = ProjectManager;
 /**

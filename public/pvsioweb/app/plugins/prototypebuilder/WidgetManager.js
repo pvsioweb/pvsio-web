@@ -226,6 +226,9 @@ define(function (require, exports, module) {
         return {widgetMaps: widgets, regionDefs: regionDefs};
     };
     
+	/**
+		Removes all the widgets on the interface
+	 */
     WidgetManager.prototype.clearWidgets = function () {
 		_.each(this._widgets, function (value, key) {
 			value.remove();//remove the widgets from the interface

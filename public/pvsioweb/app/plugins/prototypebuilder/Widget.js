@@ -52,6 +52,9 @@ define(function (require, exports, module) {
 	 */
     Widget.prototype.remove = function () {
 		d3.select(this.parentGroup()).remove();
+		if (this.imageMap()) {
+			this.imageMap().remove();
+		}
     };
     /**
 		Gets the <g> or group layer on which this widget is drawn

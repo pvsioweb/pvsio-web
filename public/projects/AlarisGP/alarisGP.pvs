@@ -1,7 +1,7 @@
 alarisGP: THEORY
  BEGIN
 
-  %-- constants & type definitions --------------------------------------------------------------------------------
+  %-- constants & type definitions -sdd-------------------------------------------------------------------------------
   max: nonneg_real = 1200
   min: nonneg_real = 0.01
   alaris_real: TYPE = {x: nonneg_real | x <= max}

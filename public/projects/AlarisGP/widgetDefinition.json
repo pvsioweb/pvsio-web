@@ -41,15 +41,15 @@
    ],
    "type": "Button",
    "recallRate": 250
+  },
+  "Display1381864430983": {
+   "predefinedRegex": "[0-9/.]+",
+   "regex": "test:=([0-9/.]+)",
+   "prefix": "test",
+   "type": "Display"
   }
  },
  "regionDefs": [
-  {
-   "class": "Display1360329548294",
-   "shape": "rect",
-   "coords": "103.66665649414062,138.66665649414062,198.66665649414062,181.65103149414062",
-   "href": null
-  },
   {
    "class": "Button1360329596458",
    "shape": "rect",
@@ -83,7 +83,19 @@
   {
    "class": "Display1360329548294",
    "shape": "rect",
-   "coords": "103.66665649414062,138.66665649414062,198.66665649414062,181.65103149414062",
+   "coords": "216.66665649414062,152.66665649414062,311.6666564941406,195.65103149414062",
+   "href": null
+  },
+  {
+   "class": "Display1381864430983",
+   "shape": "rect",
+   "coords": "441,202,534,252",
+   "href": null
+  },
+  {
+   "class": "Display1381864430983",
+   "shape": "rect",
+   "coords": "397,162,490,212",
    "href": null
   }
  ]

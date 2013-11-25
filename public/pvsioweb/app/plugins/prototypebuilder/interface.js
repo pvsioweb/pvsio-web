@@ -113,7 +113,7 @@ define(function (require, exports, module) {
 				project.saveFile(pvsFile, function (err, res) {
 					if (!err) {
 						pvsFile.dirty(false);
-						projectManager.updateSourceCodeToolbarButtons(pvsFile);
+						projectManager.updateSourceCodeToolbarButtons(pvsFile, project);
 					} else {
 						console.log(err);
 					}
@@ -138,8 +138,8 @@ define(function (require, exports, module) {
 	}
 	
 	module.exports = {
-		init: function (projectManager) {
-			createHtmlElements();
+		init: createHtmlElements,
+		bindListeners: function (projectManager) {
 			bindListeners(projectManager);
 		}
 	};

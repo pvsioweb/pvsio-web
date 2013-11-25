@@ -22,21 +22,23 @@ define(function (require, exports, module) {
 		var currentProject = new Project(""),
 			projectManager = new ProjectManager(currentProject);
 		
-		ui.init(projectManager);
+		ui.init();//this renders the basic templates for the page
 		var editorContainer = pvsioWebClient.createCollapsiblePanel("Source code Editor");
 		var aceContainer = editorContainer.append("div").html(sourceCodeTemplate);
 		var editor = ace.edit("editor");
 		projectManager.editor(editor);
 		
+		ui.bindListeners(projectManager);
+
 		projectManager.preparePageForImageUpload();
 		projectManager.prepareListBoxForFileDrag();
 		editor.getSession().setMode('ace/mode/pvsLanguage');
 		
+		//register the graphbuilder plugin and add an event handler to reinitialise the plugin when the project changes
 		var gb = pvsioWebClient.registerPlugin(GraphBuilder);
 		
 		projectManager.addListener("ProjectChanged", function () {
-			gb.clear();
-			gb.init();
+			gb.reInitialise();
 		});
 		/////These are the api methods that the prototype builder plugin exposes
 		return {

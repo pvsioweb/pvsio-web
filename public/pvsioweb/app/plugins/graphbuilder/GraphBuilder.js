@@ -28,7 +28,10 @@ define(function (require, exports, module) {
 					svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 				})).append("g");
 			//create overlay so we can drag from anywhere on the canvas
-			svg.append("rect").attr("class", "overlay").attr("height", h).attr("width", w);
+			svg.append("rect").attr("class", "overlay").attr("height", h).attr("width", w)
+				.on("mousedown", function () {
+					d3.select(this).style("cursor", "move");
+				}).on("mouseup", function () { d3.select(this).style("cursor", null); });
 			var tooltip = canvas.append("div").attr("id", "tooltip");
 			force = d3.layout.force().size([w, h]).linkDistance(20).nodes([]).links([]).charge(-150)
 				.on("tick", function () {
@@ -111,8 +114,10 @@ define(function (require, exports, module) {
 		init();
 		
 		return {
-			init: init,
-			clear: clear
+			reInitialise: function () {
+				clear();
+				init();
+			}
 		};
 	}
 	
