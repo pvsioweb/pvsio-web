@@ -114,6 +114,7 @@ define(function (require, exports, module) {
 					if (!err) {
 						pvsFile.dirty(false);
 						projectManager.updateSourceCodeToolbarButtons(pvsFile, project);
+						projectManager.updateListView();
 					} else {
 						console.log(err);
 					}

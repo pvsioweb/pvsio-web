@@ -52,7 +52,6 @@ define(function (require, exports, module) {
 			} else {
 				d3.select("#btnSaveFile").attr("disabled", true);
 			}
-			pvsFilesListView.updateView();
 		}
 	}
 	
@@ -576,6 +575,9 @@ define(function (require, exports, module) {
 		return this;
 	};
 	
+	ProjectManager.prototype.updateListView = function () {
+		pvsFilesListView.updateView();
+	};
 	module.exports = ProjectManager;
 /**
  * @callback ProjectManager~onProjectSaved
