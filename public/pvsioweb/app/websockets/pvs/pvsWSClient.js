@@ -23,6 +23,14 @@ define(function (require, exports, module) {
             return wscBase.url();
         };
         
+		o.port = function (port) {
+			if (port) {
+				wscBase.port(port);
+				return o;
+			}
+			return wscBase.port();
+		};
+		
         o.lastState = property.call(o, "init(0)");
         
         o.logon = function () {

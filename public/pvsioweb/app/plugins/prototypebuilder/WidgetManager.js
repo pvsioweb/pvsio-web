@@ -118,9 +118,9 @@ define(function (require, exports, module) {
                         d3.select(region.node().parentNode).remove();
                     });
             }).on("resize", function (e) {
-                wm.updateLocation(e.region.attr("id"), e.pos);
+                wm.updateLocationAndSize(e.region.attr("id"), e.pos);
             }).on("move", function (e) {
-                wm.updateLocation(e.region.attr("id"), e.pos);
+                wm.updateLocationAndSize(e.region.attr("id"), e.pos);
             }).on("remove", function (e) {
                 e.regions.each(function () {
                     var w = wm.getWidget(d3.select(this).attr("id"));
@@ -202,16 +202,14 @@ define(function (require, exports, module) {
 	/**
 		Update  the location of the widget by updating the image map coords to the position given.
 		@param {Widget} widget The widget to update
-		@param {{x: number, y: number}} pos The new position
+		@param {{x: number, y: number, width: number, height: number}} pos The new position and size
 		@memberof WidgetManager
 	 */
-    WidgetManager.prototype.updateLocation = function (widget, pos) {
+    WidgetManager.prototype.updateLocationAndSize = function (widget, pos) {
 		if (typeof widget === "string") { widget = this.getWidget(widget); }
-        if (widget && widget.imageMap()) {
-            widget.imageMap().attr("coords", [pos.x, pos.y, pos.x + pos.width, pos.y + pos.height].join(","));
-        } else {
-			throw new Error("Image Map has not be initialised for this Widget");
-		}
+        if (widget) {
+            widget.updateLocationAndSize(pos);
+        }
     };
     /**
      * Returns a JSON object representing widget definitions for the currently open project

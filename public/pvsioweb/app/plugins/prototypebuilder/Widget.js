@@ -104,6 +104,15 @@ define(function (require, exports, module) {
 		});
 		return this;
 	};
+	/**
+		Updates the location and size of the widget to the new position
+		@param {{x: number, y: number, width: number, height: number}} pos The new position  and size of the widget
+		@returns {Widget}
+		@memberof Widget
+	*/
+	Widget.prototype.updateLocationAndSize = function (pos) {
+		this.imageMap().attr("coords", [pos.x, pos.y, pos.x + pos.width, pos.y + pos.height].join(","));
+	};
 	
     module.exports = Widget;
 });

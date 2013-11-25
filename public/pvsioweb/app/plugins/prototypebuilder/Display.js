@@ -61,5 +61,14 @@ define(function (require, exports, module) {
 		d3.select("div." + this.id()).remove();
 	};
 	
+	/**
+		Updates the location of the display widget with the given position
+	*/
+	Display.prototype.updateLocationAndSize = function (pos) {
+		Display.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
+		d3.select("div." + this.id()).style("left", pos.x + "px").style("y", pos.y + "px")
+			.style("width", pos.width + "px").style("height", pos.height + "px");
+	};
+	
     module.exports = Display;
 });

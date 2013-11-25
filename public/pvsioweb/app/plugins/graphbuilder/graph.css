@@ -1,6 +1,6 @@
 .node {
-	fill: #ddd;
-	stroke: #bbb;
+	fill: #aaa;
+	stroke: #eee;
 }
 
 .edge {
@@ -27,6 +27,16 @@
 	color: white;
 	border-radius: 5px;
 	padding: 5px 8px;
-	width: 200px;
+	width: 350px;
 	text-align:center;
+	z-index:40000;
+}
+
+.collapsible-panel.graph-container svg{
+	cursor: default;
+}
+
+svg rect.overlay {
+	fill: none;
+	pointer-events: all;
 }

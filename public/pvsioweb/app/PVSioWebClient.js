@@ -1,5 +1,6 @@
 /**
- * PVSio WebClient
+ * PVSio WebClient is the core component of pvsioweb. It creates a websocket connection to a nodejs server running
+ * on localhost on port 8082
  * @author Patrick Oladimeji
  * @date 4/19/13 17:23:31 PM
  */
@@ -11,8 +12,16 @@ define(function (require, exports, module) {
     var pvsws                   = require("websockets/pvs/pvsWSClient"),
 		eventDispatcher			= require("util/eventDispatcher"),
 		d3						= require("d3/d3"),
-		ws;
+		property				= require("util/property"),
+		ws,
+		_port = 8082,
+		url = window.location.origin.indexOf("file") === 0 ?
+				("ws://localhost") : ("ws://" + window.location.hostname);
 	
+	/**
+	 * Creates a new PVSioWeb client object. This object is an event emitter and emits the following events:
+	 *
+	 */
 	function PVSioWeb() {
 		eventDispatcher(this);
 		var _pvsioweb = this;
@@ -20,9 +29,6 @@ define(function (require, exports, module) {
 		 * create pvs websocket connection
 		 * add listeners for pvs process events
 		 */
-		var port = 8082;
-		var url = window.location.origin.indexOf("file") === 0 ?
-				("ws://localhost:" + port) : ("ws://" + window.location.hostname + ":" +  port);
 		ws = pvsws()
 			.serverUrl(url)
 			.addListener('ConnectionOpened', function (e) {
@@ -35,9 +41,12 @@ define(function (require, exports, module) {
 				_pvsioweb.fire(e);
 			});
 	}
+	PVSioWeb.prototype.port = property.call(PVSioWeb.prototype, _port);
+	
+	PVSioWeb.prototype.serverUrl = property.call(PVSioWeb.prototype, url);
 	
 	PVSioWeb.prototype.connectToServer = function () {
-		ws.logon();
+		ws.serverUrl(this.serverUrl()).port(this.port()).logon();
 		return this;
 	};
 	

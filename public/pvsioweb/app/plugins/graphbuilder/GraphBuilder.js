@@ -11,8 +11,8 @@ define(function (require, exports, module) {
 		eventDispatcher = require("util/eventDispatcher");
 	
 	function GraphBuilder(pvsioWebClient) {
-		var canvas = pvsioWebClient.createCollapsiblePanel("Visualisation of State Transition Diagram")
-			.attr("class", "graph-container");
+		var canvas = pvsioWebClient.createCollapsiblePanel("Visualisation of State Transition Diagram");
+		canvas.classed("graph-container", true);
 		
 		var ws = pvsioWebClient.getWebSocket(),
 			nodesHash = {},
@@ -23,17 +23,25 @@ define(function (require, exports, module) {
 			force,
 			onGraphUpdate;
 		function init() {
-			var svg = canvas.append("svg").attr("width", w).attr("height", h).append("g");
+			var svg = canvas.append("svg").attr("width", w).attr("height", h).append("g")
+				.call(d3.behavior.zoom().scaleExtent([0.4, 10]).on("zoom", function () {
+					svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+				})).append("g");
+			//create overlay so we can drag from anywhere on the canvas
+			svg.append("rect").attr("class", "overlay").attr("height", h).attr("width", w);
 			var tooltip = canvas.append("div").attr("id", "tooltip");
-			force = d3.layout.force().size([w, h]).linkDistance(30).nodes([]).links([]).charge(-150)
+			force = d3.layout.force().size([w, h]).linkDistance(20).nodes([]).links([]).charge(-150)
 				.on("tick", function () {
+					svg.selectAll("circle.node").attr("cx", function (d) {
+						return d.x;
+					}).attr("cy", function (d) {
+						return d.y;
+					});
 					svg.selectAll("line.edge").attr("x1", function (d) { return d.source.x; })
 						.attr("y1", function (d) { return d.source.y; })
 						.attr("y2", function (d) {return d.target.y; })
 						.attr("x2", function (d) {return d.target.x; });
 					
-					svg.selectAll("circle.node").attr("cx", function (d) {return d.x; })
-						.attr("cy", function (d) {return d.y; });
 				});
 			
 			function updateGraph(nodes, edges, currentEdge) {
@@ -60,7 +68,7 @@ define(function (require, exports, module) {
 							.style("left", (d3.event.layerX + 10) + "px").style("display", null);
 					}).on("mouseout", function (d, i) {
 						tooltip.style("display", "none");
-					});
+					}).call(force.drag);
 				nodeEls.classed("selected", function (d, i) {
 					return currentEdge.target === i;
 				});

@@ -16,9 +16,12 @@ define(function (require, exports, module) {
     module.exports = function () {
         var o = eventDispatcher({}), ws, callbackRegistry = {};
         o.url = property.call(o, "ws://localhost");
+		o.port = property.call(o);
         o.logon = function () {
             if (!ws) {
-                ws = new WebSocket(o.url());
+				var wsUrl = o.url();
+				if (o.port()) { wsUrl = wsUrl + ":" + o.port(); }
+                ws = new WebSocket(wsUrl);
                 ws.onopen = function (event) {
                     o.fire({type: events.ConnectionOpened, event: event});
                 };
