@@ -149,13 +149,6 @@
    "recallRate": "250",
    "functionText": "btnOK",
    "boundFunctions": "click_btnOK, press_btnOK, release_btnOK"
-  },
-  {
-   "type": "display",
-   "id": "display_921839eb-1c09-4dd0-81a1-49b6816c9faa",
-   "regex": "programmedValue:=([0-9/.]+)",
-   "predefinedRegex": "[0-9/.]+",
-   "prefix": "programmedValue"
   }
  ],
  "regionDefs": [
@@ -242,12 +235,6 @@
    "shape": "rect",
    "coords": "193.5454559326172,330.6221618652344,229.5454559326172,351.6221618652344",
    "href": "#"
-  },
-  {
-   "class": "display_921839eb-1c09-4dd0-81a1-49b6816c9faa",
-   "shape": "rect",
-   "coords": "89.54545593261719,213.09091186523438,152.5454559326172,229.09091186523438",
-   "href": null
   }
  ]
 }

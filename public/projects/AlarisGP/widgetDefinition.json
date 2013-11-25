@@ -1,65 +1,68 @@
 {
- "widgetMaps": {
-  "Display1360329548294": {
-   "predefinedRegex": "[0-9/.]+",
+ "widgetMaps": [
+  {
+   "type": "display",
+   "id": "Display1360329548294",
    "regex": "display:=([0-9/.]+)",
-   "prefix": "display",
-   "type": "Display"
-  },
-  "Button1360329596458": {
-   "functionText": "UP",
-   "events": [
-    "click",
-    "press/release"
-   ],
-   "type": "Button",
-   "recallRate": 250
-  },
-  "Button1360329611671": {
-   "functionText": "up",
-   "events": [
-    "click",
-    "press/release"
-   ],
-   "type": "Button",
-   "recallRate": 250
-  },
-  "Button1360329650659": {
-   "functionText": "dn",
-   "events": [
-    "click",
-    "press/release"
-   ],
-   "type": "Button",
-   "recallRate": 250
-  },
-  "Button1360329673407": {
-   "functionText": "DN",
-   "events": [
-    "click",
-    "press/release"
-   ],
-   "type": "Button",
-   "recallRate": 250
-  },
-  "Display1381864430983": {
    "predefinedRegex": "[0-9/.]+",
-   "regex": "test:=([0-9/.]+)",
-   "prefix": "test",
-   "type": "Display"
+   "prefix": "display"
+  },
+  {
+   "events": [
+    "click",
+    "press/release"
+   ],
+   "id": "Button1360329596458",
+   "type": "button",
+   "recallRate": 250,
+   "functionText": "UP",
+   "boundFunctions": "click_UP, press_UP, release_UP"
+  },
+  {
+   "events": [
+    "click",
+    "press/release"
+   ],
+   "id": "Button1360329611671",
+   "type": "button",
+   "recallRate": 250,
+   "functionText": "up",
+   "boundFunctions": "click_up, press_up, release_up"
+  },
+  {
+   "events": [
+    "click",
+    "press/release"
+   ],
+   "id": "Button1360329650659",
+   "type": "button",
+   "recallRate": 250,
+   "functionText": "dn",
+   "boundFunctions": "click_dn, press_dn, release_dn"
+  },
+  {
+   "events": [
+    "click",
+    "press/release"
+   ],
+   "id": "Button1360329673407",
+   "type": "button",
+   "recallRate": 250,
+   "functionText": "DN",
+   "boundFunctions": "click_DN, press_DN, release_DN"
   }
- },
+ ],
  "regionDefs": [
+  {
+   "class": "Display1360329548294",
+   "shape": "rect",
+   "coords": "110.66665649414062,117.66665649414062,205.66665649414062,160.65103149414062",
+   "href": null
+  },
   {
    "class": "Button1360329596458",
    "shape": "rect",
    "coords": "97.66665649414062,264.6666564941406,117.66665649414062,286.6510314941406",
-   "href": "#"
-  },
-  {
-   "class": "Button1360329596458",
-   "shape": "rect",
-   "coords": "96.6666488647461,264.6666564941406,116.6666488647461,286.6510314941406",
    "href": "#"
   },
   {
@@ -77,26 +80,8 @@
   {
    "class": "Button1360329673407",
    "shape": "rect",
-   "coords": "186.6666717529297,265.6666564941406,203.6510467529297,285.6666564941406",
+   "coords": "186.6666717529297,265.6666564941406,207.6510467529297,287.6666564941406",
    "href": "#"
-  },
-  {
-   "class": "Display1360329548294",
-   "shape": "rect",
-   "coords": "216.66665649414062,152.66665649414062,311.6666564941406,195.65103149414062",
-   "href": null
-  },
-  {
-   "class": "Display1381864430983",
-   "shape": "rect",
-   "coords": "441,202,534,252",
-   "href": null
-  },
-  {
-   "class": "Display1381864430983",
-   "shape": "rect",
-   "coords": "397,162,490,212",
-   "href": null
   }
  ]
 }
