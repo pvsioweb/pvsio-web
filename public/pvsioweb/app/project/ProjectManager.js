@@ -561,6 +561,21 @@ define(function (require, exports, module) {
 	
 	ProjectManager.prototype.updateSourceCodeToolbarButtons = updateSourceCodeToolbarButtons;
 	
+	/**
+		Restarts the pvsio web process with the current project. The callback is invoked once the process is ready
+		@param {ProjectManager~pvsProcessReady} callback The function to call when the process is ready
+	*/
+	ProjectManager.prototype.restartPVSioWeb = function (callback) {
+		callback = callback || noop;
+		var project = this.project(), ws = WSManager.getWebSocket();
+		if (project && project.mainPVSFile()) {
+			ws.lastState("init(0)");
+			ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()},
+						  callback);
+		}
+		return this;
+	};
+	
 	module.exports = ProjectManager;
 /**
  * @callback ProjectManager~onProjectSaved
@@ -571,5 +586,10 @@ define(function (require, exports, module) {
  * @callback ProjectManager~onFileDeleted
  * @param {object} err
  * @param {string} success
+ */
+/**
+ * @callback ProjectManager~pvsProcessReady
+ * @param {object} err This value is set if there is an error on the server (e.g. process failed to start)
+ * @param {object} data This contains the console output when a pvsprocess starts
  */
 });
