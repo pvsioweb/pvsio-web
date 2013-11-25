@@ -494,6 +494,7 @@ define(function (require, exports, module) {
 						project.pvsFiles().forEach(function (f) {
 							f.dirty(false);
 						});
+						WidgetManager.updateMapCreator();
 						pm.renderSourceFileList();
 						pvsFilesListView.selectedItem(project.mainPVSFile() || project.pvsFiles()[0]);
 						//fire project changed event

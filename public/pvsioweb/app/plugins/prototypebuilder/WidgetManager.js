@@ -109,9 +109,9 @@ define(function (require, exports, module) {
                         var widget = e.data.type === "button" ? new Button(id) : new Display(id);
                         region.classed(widget.type(), true)
                             .attr("id", id);
-                        widget.updateWidthProperties(e.data);
+                        widget.updateWithProperties(e.data);
                         widget.element(region);
-                        widget.createImageMap(ws);
+                        createImageMap(widget);
                         wm.addWidget(widget);
                     }).on("cancel", function (e, view) {
                         view.remove();
