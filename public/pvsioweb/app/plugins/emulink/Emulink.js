@@ -14,11 +14,6 @@ define(function (require, exports, module) {
 		PrototypeBuilder		= require("pvsioweb/PrototypeBuilder"),
 		Logger					= require("util/Logger");
 	
-	function createHtmlElements() {
-		var content = require("text!plugins/emulink/forms/maincontent.handlebars");
-		$("#content").append(content);
-	}
-	
 	function Emulink(pvsioWebClient) {
 		//register prototype builder as a plugin since this plugin depends on it
 		var pb = pvsioWebClient.registerPlugin(PrototypeBuilder);
@@ -26,7 +21,8 @@ define(function (require, exports, module) {
 			editor = pb.getEditor();
 		
 		//create the user interface elements
-		createHtmlElements();
+		var content = pvsioWebClient.createCollapsiblePanel("Emulink");
+		content.html(require("text!plugins/emulink/forms/maincontent.handlebars"));
 		
 		/** NEW: StateChart **************************************************************************/
 		d3.select("#state_machine").on("click", function () { stateMachine.init(projectManager.editor()); });
