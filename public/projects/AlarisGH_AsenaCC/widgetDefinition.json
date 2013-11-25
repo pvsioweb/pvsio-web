@@ -1,5 +1,11 @@
 {
  "widgetMaps": {
+  "Display1357494252462": {
+   "predefinedRegex": "[0-9/.]+",
+   "regex": "left_display:=([0-9/.]+)",
+   "prefix": "left_display",
+   "type": "Display"
+  }, 
   "Button1357377446210": {
    "functionText": "UP",
    "events": [
@@ -8,18 +14,6 @@
    ],
    "type": "Button",
    "recallRate": 250
-  },
-  "Display1357381783023": {
-   "predefinedRegex": "[0-9/.]+",
-   "regex": "display := ([0-9/.]+)",
-   "prefix": "display",
-   "type": "Display"
-  },
-  "Display1357494252462": {
-   "predefinedRegex": "[0-9/.]+",
-   "regex": "display:=([0-9/.]+)",
-   "prefix": "display",
-   "type": "Display"
   },
   "Button1357494276363": {
    "functionText": "UP",
@@ -88,12 +82,6 @@
    "shape": "rect",
    "coords": "349,168,391,206",
    "href": "#"
-  },
-  {
-   "class": "Display1357494252462",
-   "shape": "rect",
-   "coords": "201,87,400,136",
-   "href": null
   }
  ]
 }
