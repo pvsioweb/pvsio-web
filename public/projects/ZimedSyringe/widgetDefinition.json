@@ -1,0 +1,87 @@
+{
+ "widgetMaps": [
+  {
+   "type": "display",
+   "id": "display_58f9aa5c-b14d-4c5d-cb25-3f534cf8c4aa",
+   "regex": "d:=([0-9/.]+)",
+   "predefinedRegex": "[0-9/.]+",
+   "prefix": "d"
+  },
+  {
+   "events": [
+    "click",
+    "press/release"
+   ],
+   "id": "button_62dde9fa-cdf4-48ae-d864-4e95e4bfded7",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "up",
+   "boundFunctions": "click_up, press_up, release_up"
+  },
+  {
+   "events": [
+    "click",
+    "press/release"
+   ],
+   "id": "button_507a79a0-6e31-4eab-8ac3-36fdb836c68c",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "dn",
+   "boundFunctions": "click_dn, press_dn, release_dn"
+  },
+  {
+   "events": [
+    "click",
+    "press/release"
+   ],
+   "id": "button_c44134ef-8992-4735-fbd2-b59ac293e9bc",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "lf",
+   "boundFunctions": "click_lf, press_lf, release_lf"
+  },
+  {
+   "events": [
+    "click",
+    "press/release"
+   ],
+   "id": "button_4260ecb6-cd35-4aa4-a9b7-f2928905a792",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "rt",
+   "boundFunctions": "click_rt, press_rt, release_rt"
+  }
+ ],
+ "regionDefs": [
+  {
+   "class": "display_58f9aa5c-b14d-4c5d-cb25-3f534cf8c4aa",
+   "shape": "rect",
+   "coords": "88.33332824707031,181.3229217529297,150.3333282470703,201.3229217529297",
+   "href": null
+  },
+  {
+   "class": "button_62dde9fa-cdf4-48ae-d864-4e95e4bfded7",
+   "shape": "rect",
+   "coords": "107,271,132,295",
+   "href": "#"
+  },
+  {
+   "class": "button_507a79a0-6e31-4eab-8ac3-36fdb836c68c",
+   "shape": "rect",
+   "coords": "105,325,132,348",
+   "href": "#"
+  },
+  {
+   "class": "button_c44134ef-8992-4735-fbd2-b59ac293e9bc",
+   "shape": "rect",
+   "coords": "80,297,105,323",
+   "href": "#"
+  },
+  {
+   "class": "button_4260ecb6-cd35-4aa4-a9b7-f2928905a792",
+   "shape": "rect",
+   "coords": "134,296,158,326",
+   "href": "#"
+  }
+ ]
+}
