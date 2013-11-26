@@ -59,7 +59,9 @@ define(function (require, exports, module) {
             }
             return o;
         };
-        
+        /**
+            closes the websocket connection
+        */
         o.close = function () {
             if (ws) {
                 ws.close();
