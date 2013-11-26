@@ -84,6 +84,18 @@ define(function (require, exports, module) {
 		}
 		return content;
 	};
+    /**
+        Adds a stylesheet with the specified url to the page
+     */
+    PVSioWeb.prototype.addStyleSheet = function (url, cb) {
+        cb = cb || function () {};
+        var link = d3.select("html head").append("link").attr("type", "text/css").attr("rel", "stylesheet").attr("href", url);
+        link.on("load", function () {
+            cb(null, link);
+        }).on("error", function () {
+            cb("error");
+        });
+    };
 	
 	module.exports = PVSioWeb;
 });

@@ -22,7 +22,8 @@ define(function (require, exports, module) {
 			radius = 6,
 			force,
 			onGraphUpdate;
-		function init() {
+		
+        function init() {
 			var svg = canvas.append("svg").attr("width", w).attr("height", h).append("g")
 				.call(d3.behavior.zoom().scaleExtent([0.4, 10]).on("zoom", function () {
 					svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");

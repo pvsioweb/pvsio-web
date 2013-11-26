@@ -536,6 +536,7 @@ define(function (require, exports, module) {
                         pvsFilesListView.updateView();
                         updateSourceCodeToolbarButtons(pvsFilesListView.selectedItem(), project);
                     }
+                    pm.fire({type: "ProjectSaved", project: project});
                 }
             });
         }
@@ -549,6 +550,7 @@ define(function (require, exports, module) {
                         project = res;
                         pvsFilesListView.updateView();
                         pm.updateSourceCodeToolbarButtons(pvsFilesListView.selectedItem(), project);
+                        pm.fire({type: "ProjectSaved", project: project});
                     }
                 });
             }
