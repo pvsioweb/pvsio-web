@@ -268,8 +268,10 @@ define(function (require, exports, module) {
 				_thisProject.pvsFiles().forEach(function (f) {
 					f.dirty(false);
 				});
+                if (_thisProject.image()) {
+                    _thisProject.image().dirty(false);
+                }
                 _thisProject.path(res.projectPath);
-                _thisProject.image().dirty(false);
 			}
 			cb(err, _thisProject);
 		});
