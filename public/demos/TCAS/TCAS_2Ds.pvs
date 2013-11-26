@@ -1,0 +1,23 @@
+TCAS_2Ds[(IMPORTING TCAS_tables) Thr : TCAS_Table] : THEORY
+BEGIN
+
+  IMPORTING TCAS_tau
+
+  sl : VAR SensitivityLevel
+
+  % so,vo is 2D ownship position and velocity
+  % si,vi is 2D intruder position and velocity
+  so,si : VAR Vect2
+  vo,vi : VAR Nz_vect2
+
+  TCAS_2D?(sl,so,vo,si,vi) : bool =
+    LET s = so-si,
+        v = vo-vi IN
+      range(s) < Thr(sl,DMOD) OR
+      (converging?(s)(v) AND tau(s,v) < Thr(sl,TAU))
+
+  TCAS_2D_safe : LEMMA
+    range(so-si) < Thr(sl,DMOD) IMPLIES
+    TCAS_2D?(sl,so,vo,si,vi)
+        
+END TCAS_2Ds

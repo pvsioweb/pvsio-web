@@ -1,0 +1,45 @@
+TCAS_safety : THEORY
+BEGIN
+
+  IMPORTING TCAS_tables,  
+            TCAS_2D[TA_thr],
+	    interval_arith@strategies4Q
+
+  sl : SensitivityLevel = 8
+  so : Vect2 = (0,0)
+  vo : Nz_vect2 = (0,600*knt)
+
+  TCAS_unsafe : LEMMA
+    EXISTS (six,siy,vix,viy: real):
+      abs(six) <= TA_thr(sl,DMOD) AND 
+      abs(siy) <= TA_thr(sl,DMOD) AND
+      abs(vix) <= 600*knt  AND abs(viy) <= 600*knt  AND
+      LET si : Vect2 = (six,siy),     
+          vi : Vect2 = (vix,viy) IN
+      250*knt <= norm(vi) AND norm(vi) <= 600*knt AND
+      converging?(so-si)(vo-vi) AND
+      range(so-si) < TA_thr(sl,DMOD) AND
+      tau(so-si,vo-vi) > TA_thr(sl,TAU)
+
+  si : Vect2 = (-54171/40,78247/40)
+  vi : Nz_vect2 = (-463/3,463/3)
+
+  alerts : void =
+    LET i = query_int("Time Period? ") IN
+    printf("TAs in [~a,~a]: ",(-i,i)) &
+    FORALL(t:subrange(-i,i)):
+    IF TCAS_2D?(sl,so+t*vo,vo,si+t*vi,vi) THEN
+      print(t+" ")
+    ELSE
+      skip
+    ENDIF
+
+  TCAS_safe_past : LEMMA
+    FORALL(t:real): t ## [| 1, 40 |] IMPLIES 
+      TCAS_2D?(sl,so-t*vo,vo,si-t*vi,vi)
+
+  TCAS_safe_future : LEMMA
+    FORALL(t:real): t ## [| 2, 4 |] IMPLIES 
+      TCAS_2D?(sl,so+t*vo,vo,si+t*vi,vi)
+
+END TCAS_safety
