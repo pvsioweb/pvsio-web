@@ -5,9 +5,10 @@
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3, require, $, brackets, window, document */
-define([], function () {
-	"use strict";
-	return function (el, width, height) {
+
+define(function (require, exports, module) {
+    "use strict";
+	module.exports = function (el, width, height) {
 		width = width || 200;
 		height = height || 80;
 		var font = (height * 0.5) + "px sans-serif",

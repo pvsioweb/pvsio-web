@@ -6,10 +6,13 @@
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
 /*global define, d3, require, __dirname, process*/
-define(['util/eventDispatcher'], function (eventDispatcher) {
+
+define(function (require, exports, module) {
     "use strict";
+    var eventDispatcher = require("util/eventDispatcher");
+
 	//defines property function
-	return function (v) {
+	module.exports = function (v) {
 		var p = function (_) {
 			if (!arguments.length) {
 				return v;

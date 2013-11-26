@@ -8,16 +8,18 @@
 define(function (require, exports, module) {
 	"use strict";
 	
-	  /**
+    /**
      * log the message
+        @private
      */
     function log(msg) {
         console.log(msg);
         d3.select("#console").insert('p', 'p').html(msg);
     }
 
-	    /***
-     * ##### dealing with logging input and output of pvs
+    /**
+     * dealing with logging input and output of pvs
+     * @private
      */
     function console_log(msg) {
         console.log(msg);

@@ -16,10 +16,9 @@ define(function (require, exports, module) {
 		return x + "," + y +	"," + (x + w) + "," + (y + h);
 	}
 	
-	/**@class Widget */
 	/**
-		@constructor Widget
-		@desc Creates a new Widget
+		Creates a new Widget
+		@constructor
 		@param {string} id The id for the widget's html element
 		@param {string} type The type of the widget "button or display"
 		@this Widget

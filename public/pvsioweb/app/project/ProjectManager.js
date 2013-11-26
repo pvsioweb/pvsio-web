@@ -30,6 +30,7 @@ define(function (require, exports, module) {
 	
 	/**
 	 * Updates the name of the project on the document title
+     * @private
 	 */
 	function projectNameChanged(event) {
 		var name = event.current;
@@ -59,7 +60,8 @@ define(function (require, exports, module) {
 	 *  Shows all files in the project in file list view box 
 	 *  @param  {Project} currentProject - reference to the project whose files have to be showed 
 	 *  @param  {ace} editor         - reference to editor 
-	 *  @returns void 
+	 *  @returns void
+     *  @private
 	 */
 	function showAllFiles(currentProject, editor) {
 		currentProject.setAllfilesVisible();
@@ -88,12 +90,16 @@ define(function (require, exports, module) {
 	 * project and keeps the list up to date whenever the project changes or the files within the project changes.
 	 * @param {Project} project The project currently being managed
 	 * @param {editor} editor The editor panel where the sped code is loaded
-	 * @constructor ProjectManager
+	 * @constructor
+     * @this ProjectManager
 	 */
 	function ProjectManager(project, editor) {
 		eventDispatcher(this);
 		var pm = this;
-		
+		/**
+            get or set the current {Project}
+            @type {Project}
+        */
 		this.project = property.call(this, project)
 			.addListener("ProjectNameChanged", projectNameChanged)
 			.addListener("PropertyChanged", function (e) {
@@ -260,6 +266,7 @@ define(function (require, exports, module) {
 	 * @param {{name: string, projectPath: string, pvsFiles: string[], mainPVSFile: ?string,
 		image: ?string, imageData: ?string, widgetDefinition: ?string}} obj The json data from which the new project is instantiated
 	 * @return {Project}
+     * @private
 	 */
 	function initFromJSON(obj) {
 		var p = new Project(obj.name).path(obj.projectPath);

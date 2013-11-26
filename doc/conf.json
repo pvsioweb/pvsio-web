@@ -1,0 +1,11 @@
+{
+  "plugins": ["JSDocPvsio"],
+  "source": {
+    "include": ["../public/pvsioweb/app"]
+  },
+    "opts": {
+        "recurse": true,
+        "verbose": true,
+        "destination": "./client"
+    }
+}

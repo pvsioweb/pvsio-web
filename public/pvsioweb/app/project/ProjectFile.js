@@ -12,7 +12,7 @@ define(function (require, exports, module) {
 		eventDispatcher = require("util/eventDispatcher");
 
 	/**
-	 * @constructor ProjectFile
+	 * @constructor
 	 * @param {string} name The name of the file
 	 * @param {Project} project The project to which this file belongs
 	 * @this ProjectFile

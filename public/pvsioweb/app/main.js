@@ -18,6 +18,7 @@ define(function (require, exports, module) {
 	
 	/**
      * utitlity function to pretty print pvsio output
+     * @private
      */
     function prettyPrint(msg) {
         return msg ? msg.toString().replace(/,,/g, ",") : msg;

@@ -12,6 +12,7 @@ define(function (require, exports, module) {
 	
 	/**
 	 * Switches the prototoyping layer to the builder layer
+     * @private
 	 */
     function switchToBuilderView() {
         d3.select(".image-map-layer").style("opacity", 1).style("z-index", 190);
@@ -20,7 +21,9 @@ define(function (require, exports, module) {
         d3.select("div.display,#controlsContainer button").classed("builder", true);
         d3.select("div.display,#controlsContainer button").classed("simulator", false);
     }
-	/** Switches the prototyping layer to the simulator/testing layer */
+	/** Switches the prototyping layer to the simulator/testing layer 
+        @private
+    */
     function switchToSimulatorView() {
         d3.select(".image-map-layer").style("opacity", 0.1).style("z-index", -2);
         d3.selectAll("#controlsContainer button, div.display").classed("selected", false);

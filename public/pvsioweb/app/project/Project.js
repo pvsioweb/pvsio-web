@@ -1,4 +1,4 @@
-/**
+/**@module Project
  * Represents a pvsio web project
  * @author Patrick Oladimeji
  * @date 6/20/13 9:45:59 AM
@@ -59,7 +59,6 @@ define(function (require, exports, module) {
         });
     }
     
-	/** @class Project */
 	/**
 	 * Creates a new project
 	 * @constructor

@@ -1,4 +1,5 @@
 /**
+ * @module PVSioWebClient
  * PVSio WebClient is the core component of pvsioweb. It creates a websocket connection to a nodejs server running
  * on localhost on port 8082
  * @author Patrick Oladimeji
@@ -20,15 +21,13 @@ define(function (require, exports, module) {
 	
 	/**
 	 * Creates a new PVSioWeb client object. This object is an event emitter and emits the following events:
-	 *
+	 * @constructor
 	 */
 	function PVSioWeb() {
 		eventDispatcher(this);
 		var _pvsioweb = this;
-		/**
-		 * create pvs websocket connection
-		 * add listeners for pvs process events
-		 */
+		//create pvs websocket connection
+		//add listeners for pvs process events
 		ws = pvsws()
 			.serverUrl(url)
 			.addListener('ConnectionOpened', function (e) {
@@ -41,6 +40,7 @@ define(function (require, exports, module) {
 				_pvsioweb.fire(e);
 			});
 	}
+    /**get or set the port for the server connection */
 	PVSioWeb.prototype.port = property.call(PVSioWeb.prototype, _port);
 	
 	PVSioWeb.prototype.serverUrl = property.call(PVSioWeb.prototype, url);

@@ -27,7 +27,7 @@ define(function (require, exports, module) {
 	
 	/**
 	 Creates a new Button with the specified id.
-	 @constructor Button
+	 @constructor
 	 @param {string} id The id for the widget's html element
 	 @this Button
 	 */
