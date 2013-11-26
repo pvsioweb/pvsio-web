@@ -578,6 +578,7 @@ define(function (require, exports, module) {
 	ProjectManager.prototype.updateListView = function () {
 		pvsFilesListView.updateView();
 	};
+	
 	module.exports = ProjectManager;
 /**
  * @callback ProjectManager~onProjectSaved

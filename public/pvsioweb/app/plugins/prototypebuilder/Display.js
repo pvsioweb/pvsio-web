@@ -28,13 +28,12 @@ define(function (require, exports, module) {
 			if (match && match.length > 1) {
 				///TODO: remember to sort out Patrick's concerns on this :) [was: remember to sort out Paolo's bugfix (@69992fda)]
 				// return match[1].toString();
-				if(regexp.toString().indexOf("[0-9/.]+") >= 0) {
+				if (regexp.toString().indexOf("[0-9/.]+") >= 0) {
 					// it's a number
 					match = eval(match[1].toString());
-				}
-				else {
+				} else {
 					// don't evalutate the expression, and remove double quotes if needed
-					match = match[1].toString().replace(new RegExp("\"","g"),"")
+					match = match[1].toString().replace(new RegExp("\"", "g"), "");
 				}
 				return match;
 			}
