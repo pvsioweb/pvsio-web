@@ -24,6 +24,8 @@ BEGIN
     CONVERSION pos2D
 
 
+    step: nat = 10
+
     find_trk(deg: subrange(-30,30), trkBand: TRK_BAND)
     	    (so: Vect2, vo: Nz_vect2, si: Vect2, vi: Nz_vect2): TRK_BAND =
      LET vi = mk_velocity(deg,gsi,0),
@@ -37,8 +39,8 @@ BEGIN
 	    (deg: subrange(-30,30), trkBand: TRK_BAND)
     	    (so: Vect2, vo: Nz_vect2, si: Vect2, vi: Nz_vect2): RECURSIVE TRK_BAND =
      LET trkBand: TRK_BAND = trkBand o find_trk(deg, trkBand)(so,vo,si,vi)
-      IN IF deg = -30 THEN trkBand
-         ELSE find_trk_recursive_aux(deg - 1, trkBand)(so,vo,si,vi) ENDIF
+      IN IF deg <= -30 THEN trkBand
+         ELSE find_trk_recursive_aux(deg - step, trkBand)(so,vo,si,vi) ENDIF
     MEASURE deg
 
     find_trk_recursive
@@ -66,6 +68,26 @@ BEGIN
        TA: bool, % traffic alert
        trkBand: TRK_BAND
     #]
+
+
+    toString(st: state): string =
+       "(#" 
+       + "so := " + "(# x := " + so(st)`x + ", y := " + so(st)`y + "#)"
+       + "vo := " + "(# x := " + vo(st)`x + ", y := " + vo(st)`y + "#)"
+       + "si := " + "(# x := " + si(st)`x + ", y := " + si(st)`y + "#)"
+       + "vi := " + "(# x := " + vi(st)`x + ", y := " + vi(st)`y + "#)"
+       + "SL := " + SL(st)
+       + "Tau := " + Tau(st)
+       + "TAU := " + TAU(st)
+       + "TCPA := " + TCPA(st)
+       + "Converging := " + Converging(st)
+       + "Range := " + Range(st)
+       + "DMOD := " + DMOD(st)
+       + "t := " + t(st)
+       + "TA := " + TA(st)
+       + "trkBand := ..." 
+       + "#)"
+    CONVERSION toString
 
     init(t0: time): state = 
       LET so_: Vect2 = (0,0),

@@ -227,8 +227,7 @@ require(["websockets/pvs/pvsWSClient"], function(pvsws){
         .lastState("init(0)")
         .serverUrl(url)
         .addListener('ConnectionOpened', function(e){
-            ws.startPVSProcess("top", "../demos/TCAS" ,
-                function (e) {
+            ws.startPVSProcess({fileName: "top.pvs", demoName: "TCAS"}, function (err, event) {
                 ws.sendGuiAction("init(0);");
                 log("TCAS-demo ready");});
             init();
@@ -247,4 +246,3 @@ require(["websockets/pvs/pvsWSClient"], function(pvsws){
             onOutPutUpdated(output);
         }).logon();
 });
-
