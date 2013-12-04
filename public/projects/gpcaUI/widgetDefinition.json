@@ -1,48 +1,57 @@
 {
- "widgetMaps": {
-  "Display1360333691427": {
-   "predefinedRegex": "[0-9/.]+",
+ "widgetMaps": [
+  {
+   "type": "display",
+   "id": "Display1360333691427",
    "regex": "display:=([0-9/.]+)",
-   "prefix": "display",
-   "type": "Display"
+   "predefinedRegex": "[0-9/.]+",
+   "prefix": "display"
   },
-  "Button1360333703845": {
+  {
+   "events": [
+    "click",
+    "press/release"
+   ],
+   "id": "Button1360333703845",
+   "type": "button",
+   "recallRate": 250,
    "functionText": "up",
+   "boundFunctions": "click_up, press_up, release_up"
+  },
+  {
    "events": [
     "click",
     "press/release"
    ],
-   "type": "Button",
-   "recallRate": 250
-  },
-  "Button1360334003368": {
+   "id": "Button1360334003368",
+   "type": "button",
+   "recallRate": "250",
    "functionText": "dn",
+   "boundFunctions": "click_dn, press_dn, release_dn"
+  },
+  {
    "events": [
     "click",
     "press/release"
    ],
-   "type": "Button",
-   "recallRate": 250
-  },
-  "Button1360334013028": {
+   "id": "Button1360334013028",
+   "type": "button",
+   "recallRate": "250",
    "functionText": "lf",
-   "events": [
-    "click",
-    "press/release"
-   ],
-   "type": "Button",
-   "recallRate": 250
+   "boundFunctions": "click_lf, press_lf, release_lf"
   },
-  "Button1360334022698": {
-   "functionText": "rt",
+  {
    "events": [
     "click",
     "press/release"
    ],
-   "type": "Button",
-   "recallRate": 250
+   "id": "Button1360334022698",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "rt",
+   "boundFunctions": "click_rt, press_rt, release_rt"
   }
- },
+ ],
  "regionDefs": [
   {
    "class": "Display1360333691427",
@@ -53,56 +62,26 @@
   {
    "class": "Button1360333703845",
    "shape": "rect",
-   "coords": "488.888916015625,29.888885498046875,530.873291015625,70.87326049804688",
+   "coords": "488.888916015625,29.888885498046875,534.873291015625,70.87326049804688",
    "href": "#"
   },
   {
    "class": "Button1360334003368",
    "shape": "rect",
-   "coords": "493.888916015625,115.88888549804688,526.857666015625,155.88888549804688",
+   "coords": "493.888916015625,115,533.857666015625,157",
    "href": "#"
   },
   {
    "class": "Button1360334013028",
    "shape": "rect",
-   "coords": "449.8888854980469,69.88888549804688,482.8576354980469,109.88888549804688",
+   "coords": "449.8888854980469,69.88888549804688,488.8576354980469,113.88888549804688",
    "href": "#"
   },
   {
    "class": "Button1360334022698",
    "shape": "rect",
-   "coords": "534.888916015625,73.88888549804688,568.873291015625,109.87326049804688",
+   "coords": "534.888916015625,73.88888549804688,571.873291015625,112.87326049804688",
    "href": "#"
-  },
-  {
-   "class": "Button1360333703845",
-   "shape": "rect",
-   "coords": "488.888916015625,29.888885498046875,530.873291015625,70.87326049804688",
-   "href": "#"
-  },
-  {
-   "class": "Button1360334013028",
-   "shape": "rect",
-   "coords": "449.8888854980469,69.88888549804688,482.8576354980469,109.88888549804688",
-   "href": "#"
-  },
-  {
-   "class": "Button1360334003368",
-   "shape": "rect",
-   "coords": "493.888916015625,115.88888549804688,526.857666015625,155.88888549804688",
-   "href": "#"
-  },
-  {
-   "class": "Button1360334022698",
-   "shape": "rect",
-   "coords": "534.888916015625,73.88888549804688,568.873291015625,109.87326049804688",
-   "href": "#"
-  },
-  {
-   "class": "Display1360333691427",
-   "shape": "rect",
-   "coords": "166.88888549804688,54.88888168334961,375.8732604980469,112.87325668334961",
-   "href": null
   }
  ]
 }

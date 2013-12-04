@@ -1,17 +1,19 @@
 Extra : THEORY
 BEGIN
 
-   IMPORTING Util, 
-             trig_fnd@sincos_def,
-             trig_fnd@atan2
+   IMPORTING Util%, 
+             %trig_fnd@sincos_def,
+             %trig_fnd@atan2
 
    deg : VAR real    % Track
    gs  : VAR posreal % Ground speed
    vs  : VAR real    % Vertical speed
 
-   mysin(x:real) : real = sin(x)
-   mycos(x:real) : real = cos(x)
-   myatan2(x:real,y:{z:real|x=0 => z/=0}) : real = atan2(x,y) 
+   pi  : real = 3.14 % approximation, to speed up typechecking
+
+   mysin(x:real) : real %= sin(x)
+   mycos(x:real) : real %= cos(x)
+   myatan2(x:real,y:{z:real|x=0 => z/=0}) : real %= atan2(x,y) 
 
    to_rad(deg:real) : real = deg*pi/180
    to_deg(rad:real) : real = rad*180/pi

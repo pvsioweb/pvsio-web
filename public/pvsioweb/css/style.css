@@ -1,6 +1,47 @@
+span.toggle-collapse {
+	display: inline-block;
+	width: 25px;
+	height: 25px;
+	cursor: pointer;
+	padding: 5px;
+}
+
+.collapsible-panel-parent {
+	width: 100%;
+	overflow:hidden;
+	border:1px solid #ccc;
+	animation-duration: 2s;
+	margin-bottom: 5px;
+}
+
+.collapsible-panel-parent span.header{
+	margin-left: 10px;
+	display:inline-block;
+}
+
+div.header {
+	padding: 5px;
+	border:1px solid black;
+}
+.collapsible-panel {
+	
+}
+
+#pvsSpecification{
+	position:       relative;
+}
+
+#graphicalEditor{
+	position:       relative;
+}
+
 #content{
 	width: 1130px;
 	position: relative;
+}
+
+svg.image-map-layer{
+	background: transparent;
 }
 
 label[for=selectPicture]{
@@ -91,9 +132,17 @@ area{
 	background: #ddd;
 }
 
+div.displayWidget{
+	text-shadow: 1px 1px 10px #888;	
+}
 /**
 source code ection styling
 */
+
+fileListItem.hide {
+	display: none;	
+}
+
 #pvsFiles ul {
     list-style-type: none;
     margin: 0;
@@ -107,28 +156,27 @@ source code ection styling
 }
 #sourcecode-editor-wrapper{
     width: 1130px;
-    height: 800px;
+    height: 400px;
    	position:relative;
 }
 
 #pvsFiles {
-	position:absolute;
-	top:0px;
-	width:200px;
-    height: 800px;
+    position: absolute;
+    display:inline-block;
+    width: 230px;
+    height: 400px;
     border: 1px solid #ddd;
-    border-right: 1px solid #444;
-}
+    right: 0px;
+	overflow-y: scroll;
+	font-size:12px;
+  }
 
 #editor{
 	z-index: 30;
 	width: 900px;
-	height: 800px;
+	height: 400px;
 	border: 1px solid black;
     display: inline-block;
-	position:absolute;
-	top: 0px;
-	left: 205px;
 }
 
 #pvsFiles .fileListItem {
@@ -136,13 +184,15 @@ source code ection styling
     padding: 3px 5px 3px 3px;
     cursor: pointer;
     border-bottom: 1px solid #eee;
+	overflow: hidden;
 }
 
 #pvsFiles.drag-over{
     border:3px dashed #393;
 }
 #pvsFiles .file-label {
-    width: 150px;
+    width: 140px;
+    display: inline-block;
     overflow: hidden;
 }
 .fileListItem.dirty .list-icon-dirty{
@@ -178,14 +228,14 @@ source code ection styling
     border-left: 14px solid #444;
     display: inline-block;
     position: absolute;
-    left: 197px;
+    right: -9px;
     top: 0px;
     width: 0;
     height: 0;
     z-index: 20000;
 }
 #editorToolbar{
-    margin-bottom: 10px;   
+    padding: 10px;
 }
 /*** end source code section **/
 
@@ -193,9 +243,9 @@ source code ection styling
 #console {
 	position: absolute;
 	top:0px;
-	right: -190px;
-	height: 95%;
-	width: 160px;
+	right: -220px;
+	height: 100%;
+	width: 200px;
 	color: white;
 	background: #333;
 	padding: 10px;

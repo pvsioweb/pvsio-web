@@ -4,13 +4,14 @@ BEGIN
   sz : VAR real
   vz : VAR nzreal
 
-  tcoa(sz,vz) : real = 
-    ... % Time to co-altitude
+  tcoa(sz,vz) : real = -sz/vz
 
-  tcoa_sound : LEMMA T
-    ... % Relative altitude at time to co-altitude is 0
+  tcoa_sound : LEMMA
+    LET t = tcoa(sz,vz) IN
+      sz+t*vz = 0
 
   tcoa_pos : LEMMA
-    ... % Time to co-altitude is positive when sz*vz < 0
+    sz*vz < 0 IMPLIES
+    tcoa(sz,vz) > 0
 
 END TCAS_tcoa

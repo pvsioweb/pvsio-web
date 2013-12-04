@@ -45,7 +45,13 @@ The installer will copy pvsio-web in /usr/local/lib/node_modules/pvsio-web. By d
 (where "myUserName" is to be replaced with the actual username on your machine)
 
 ### git
-clone this repository, cd into the pvsio-web directory and run: "node pvssocketserver.js"
+Create a directory pvsio-web. Open a Terminal in the created directory, and clone the pvsio-web repository using the following command:
+
+    git clone https://github.com/thehogfather/pvsio-web.git
+
+Then, from the pvsio-web directory, run the command:
+
+    node pvssocketserver.js
 
 Running pvsio-web
 -----------------

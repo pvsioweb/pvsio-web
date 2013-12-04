@@ -2,7 +2,8 @@ TCAS_RA : THEORY
 BEGIN
 
   IMPORTING TCAS_tables, Util,
-            ...
+            TCAS_2Ds[RA_thr],
+            TCAS_Z[RA_thr]
  
 %  The following types are defined in Util.pvs  
 %  Velocity : TYPE = {v: Vect3 | nz_vect2?(v)}
@@ -14,6 +15,11 @@ BEGIN
   TCAS_RA?(so,vo,si,vi) : bool =
     LET sl = sensitivity_level(so`z) IN
       sl > 2 AND
-    ...
+      TCAS_2D?(sl,so,vo,si,vi) AND
+      TCAS_Z?(sl,so`z,vo`z,si`z,vi`z) AND
+      LET s = so-si,
+          v = vo-vi,
+          t = tcpa(s,v) IN
+          range(s+t*v) < RA_thr(sl,DMOD)
 
 END TCAS_RA

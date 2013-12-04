@@ -7,15 +7,17 @@ BEGIN
   so,si : VAR Vect2    % 2D ownship's and intruder's position 
   vo,vi : VAR Nz_vect2 % 2D ownship's and intruder's velocity
 
-  TCAS_2D?(sl, so, vo, si, vi): bool =
-      LET s = so - si, v = vo - vi IN 
-       IF converging?(s)(v) 
-        THEN tau(s, v) < Thr(sl, TAU) 
-        ELSE range(s) < Thr(sl, DMOD) ENDIF
-
+  TCAS_2D?(sl,so,vo,si,vi) : bool =
+    LET s = so-si,
+        v = vo-vi IN
+      IF converging?(s)(v) THEN
+        tau(s,v) < Thr(sl,TAU)
+      ELSE
+        range(s) < Thr(sl,DMOD)
+      ENDIF
 
   TCAS_2D_safe : LEMMA
     range(so-si) < Thr(sl,DMOD) IMPLIES
     TCAS_2D?(sl,so,vo,si,vi)
-
+        
 END TCAS_2D

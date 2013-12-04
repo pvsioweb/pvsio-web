@@ -1,68 +1,62 @@
 {
- "widgetMaps": {
-  "Button1357377446210": {
-   "functionText": "UP",
+ "widgetMaps": [
+  {
+   "type": "display",
+   "id": "Display1357494252462",
+   "regex": "left_display:=([0-9/.]+)",
+   "predefinedRegex": "[0-9/.]+",
+   "prefix": "left_display"
+  },
+  {
    "events": [
     "click",
     "press/release"
    ],
-   "type": "Button",
-   "recallRate": 250
-  },
-  "Display1357381783023": {
-   "predefinedRegex": "[0-9/.]+",
-   "regex": "display := ([0-9/.]+)",
-   "prefix": "display",
-   "type": "Display"
-  },
-  "Display1357494252462": {
-   "predefinedRegex": "[0-9/.]+",
-   "regex": "display:=([0-9/.]+)",
-   "prefix": "display",
-   "type": "Display"
-  },
-  "Button1357494276363": {
+   "id": "Button1357494276363",
+   "type": "button",
+   "recallRate": 250,
    "functionText": "UP",
+   "boundFunctions": "click_UP, press_UP, release_UP"
+  },
+  {
    "events": [
     "click",
     "press/release"
    ],
-   "type": "Button",
-   "recallRate": 250
-  },
-  "Button1357494286330": {
+   "id": "Button1357494286330",
+   "type": "button",
+   "recallRate": 250,
    "functionText": "up",
+   "boundFunctions": "click_up, press_up, release_up"
+  },
+  {
    "events": [
     "click",
     "press/release"
    ],
-   "type": "Button",
-   "recallRate": 250
-  },
-  "Button1357494295183": {
+   "id": "Button1357494295183",
+   "type": "button",
+   "recallRate": 250,
    "functionText": "dn",
-   "events": [
-    "click",
-    "press/release"
-   ],
-   "type": "Button",
-   "recallRate": 250
+   "boundFunctions": "click_dn, press_dn, release_dn"
   },
-  "Button1357494307176": {
-   "functionText": "DN",
+  {
    "events": [
     "click",
     "press/release"
    ],
-   "type": "Button",
-   "recallRate": 250
+   "id": "Button1357494307176",
+   "type": "button",
+   "recallRate": 250,
+   "functionText": "DN",
+   "boundFunctions": "click_DN, press_DN, release_DN"
   }
- },
+ ],
  "regionDefs": [
   {
    "class": "Display1357494252462",
    "shape": "rect",
-   "coords": "201,87,400,136",
+   "coords": "210,87,400,135",
    "href": null
   },
   {
@@ -86,14 +80,8 @@
   {
    "class": "Button1357494307176",
    "shape": "rect",
-   "coords": "349,168,391,206",
+   "coords": "353,169,395,207",
    "href": "#"
-  },
-  {
-   "class": "Display1357494252462",
-   "shape": "rect",
-   "coords": "201,87,400,136",
-   "href": null
   }
  ]
 }
