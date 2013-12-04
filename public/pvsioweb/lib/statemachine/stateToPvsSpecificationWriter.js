@@ -667,6 +667,7 @@ function WriterOnContent( editor)
     }
     this.addFieldInState = function(nameField, typeName)
     {
+        /* FIXME  */
         var startTag = "%{\"_block\" : \"BlockStart\", \"_id\" : \"State\"}";
         var endTag = "%{\"_block\" : \"BlockEnd\", \"_id\" : \"State\"}";
         

@@ -62,7 +62,6 @@ var update_node_size = function (id, width, height) {
 	var theNode = graph.nodes.get(id);
 	theNode.height = height;
 	theNode.width = width;
-    console.log("NEW SIZE " , width, height );
 	graph.nodes.set(id, theNode);
 }
 
@@ -123,8 +122,7 @@ var links;
     
 function buildGraph()
 {
-    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height).attr("id", "canvas").style("background",              "#fffcec");
-    
+    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height).attr("id", "canvas").style("background",              "#fffcec");    
     
     emulink();
     
@@ -142,7 +140,7 @@ function restoreGraph(graphToRestore, editor, ws, currentProject, pm)
          var currentNode = nodesToRestore[id];
          console.log("ReSt ",currentNode.height, currentNode.width);
          workAround.push(currentNode);
-         comeOn.push(add_node(currentNode.x, currentNode.y, currentNode.name, currentNode.height, currentNode.width));
+         comeOn.push(add_node(currentNode.x, currentNode.y, currentNode.name));
     }
     for( var id in edgesToRestore)
     {
@@ -842,6 +840,7 @@ var emulink = function() {
     
     d3.select("#addFieldState")
       .on("click", function () {
+          restart();
           var newField = prompt("Please enter name and type of the field separated by comma", "current_output, int");
           
           if( !newField)
@@ -875,7 +874,9 @@ module.exports = {
     getGraphDefinition : getGraphDefinition,
     restoreGraph : restoreGraph,
     buildGraph : buildGraph,
-    add_node : function(x,y,label,writer) { add_node(x,y,label,writer); emulink(); }
+    add_node : function(x,y,label,writer) { var ret = add_node(x,y,label,writer);  return ret; },
+    add_edge : function(source, target, lab, notWr) {add_edge(source, target, lab, notWr);  },
+    emulink: emulink
 };
 
 

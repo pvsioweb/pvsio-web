@@ -61,6 +61,7 @@ define(function (require, exports, module) {
         drawer.buildGraph();
         parser = new Parser(editor_, sm);
         parser.startParsing();
+        drawer.emulink();
     }
     
     /**************  Utility Functions private to the module    ******************************************************/    
@@ -73,12 +74,18 @@ define(function (require, exports, module) {
         this.tagStart = ": \"BlockStart\"";
         this.tagEnd = "BlockEnd";
         
+        this.source = "\"_source\" : ";
+        this.lengthSource = this.source.length;
+        
+        this.target ="\"_target\" : ";
+        this.lengthTarget = this.target.length;
+        
         this.kindOfTag = "\"_type\":";
         this.lengthKindOfTag = this.kindOfTag.length;
         
         
-        this.listOfNodes = {};
-        this.listOfEdges = {};
+        this.listOfNodes = new Array();
+        this.listOfEdges = new Array();
         this.listOfFunctions = {};        
         
         this.startParsing = function()
@@ -132,9 +139,6 @@ define(function (require, exports, module) {
                 var a = initialTag.indexOf(this.kindOfTag);
                 /*Getting which kind of tag is */
                 kindOfTag = initialTag.substring(initialTag.indexOf(this.kindOfTag) + this.lengthKindOfTag, initialTag.indexOf('}'));
-                
-                console.log("KINDOFTAG", kindOfTag);                
-                console.log("CONTENT :" , content);
                
                 this.dispatcher(content, kindOfTag);
                 
@@ -142,6 +146,11 @@ define(function (require, exports, module) {
                 objectSearch.range = new Range(currentTagEnd.end.row, 0, lengthDocument, 1000);
                 currentTag = this.editor.find(objectSearch);
             }
+            
+            console.log("**** END PARSING *****");
+            console.log(this.listOfEdges);
+            console.log(this.listOfNodes);
+            this.createEdge();
             
         }
         
@@ -155,7 +164,7 @@ define(function (require, exports, module) {
                }            
                if( kindOfTag === "Edge" )
                {
-                   this.parseEdge(kindOfTag);
+                   this.parseEdge(content);
                    return;
                }            
         }
@@ -174,14 +183,64 @@ define(function (require, exports, module) {
             
             for( var i = 0; i<length; i++ )
             {
-                 drawer.add_node(undefined, undefined, listNodes[i], 1);
+                 this.listOfNodes.push(drawer.add_node(undefined, undefined, listNodes[i], 1));
   
             }
             
         }
         this.parseEdge = function(content)
         {
+            var nameEdge = content.substring(0, content.indexOf('(')).replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"");
+            var condition = content.indexOf('BlockStart');
+            var tagProcessing ;
+            var source, target;
+            this.listOfEdges.push(new Array());
+            var array = this.listOfEdges[this.listOfEdges.length -1];
+            array.push(nameEdge);
+            while( condition != -1 )
+            {
+                /*Getting entire tag */
+                tagProcessing = content.substring(content.indexOf('BlockStart'));
+                tagProcessing = tagProcessing.substring(0,  tagProcessing.indexOf('}'));
+                content = content.substring(content.indexOf('BlockStart') + 5);
+                condition = content.indexOf('BlockStart');
+                
+                source = tagProcessing.substring(tagProcessing.indexOf(this.source) + this.lengthSource);
+                source = source.substring(0, source.indexOf(','));
+                                                 
+                target = tagProcessing.substring(tagProcessing.indexOf(this.target) + this.lengthTarget);
+                target = target.substring(0, target.indexOf(',')); 
+                                                 
+                console.log("source", source);
+                console.log("target", target);
+                array.push(source);
+                array.push(target);
+                
+            }
             
+        }
+        this.createEdge = function()
+        {   
+            var currentEdge ;
+            for( var i = 0; i < this.listOfEdges.length; i++ )
+            {
+                 currentEdge = this.listOfEdges[i];
+                 for( var j = 1; j < currentEdge.length; j = j + 2)
+                 {
+                      this.drawer.add_edge(this.findCorrispondentNode(currentEdge[j]), this.findCorrispondentNode(currentEdge[j +1]), 
+                                           currentEdge[0], 1);   
+                     
+                 }
+            }
+            
+        }
+        this.findCorrispondentNode = function(nameNode)
+        {
+            for( var i = 0; i < this.listOfNodes.length; i++ )
+                 if( this.listOfNodes[i].name === nameNode )
+                     return this.listOfNodes[i];
+            
+            console.log("ERROR: findCorrispondentNode");
         }
         
     }
