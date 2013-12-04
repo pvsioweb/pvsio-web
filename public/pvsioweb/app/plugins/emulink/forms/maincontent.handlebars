@@ -1,14 +1,19 @@
 <!-- container for graphical editor -->
-<div id="graphicalEditor">
-	<hr>
-	<div id="stateMachineToolbar" >
-		<button class="btn" id="startEmulink" > New Diagram </button>
-		<button class="btn" id="button_state" > New State </button>
-		<button class="btn" id="button_transition" > New Transition </button>
-		<button class="btn" id="button_self_transition" > New Self-Transition </button>
-	</div>
-	<div id="ContainerStateMachine" ></div>
-	<div id="state_machine_toolbar" ></div>
-	<textarea id="infoBox" readonly>TIP: Select a state or a transition to see its properties</textarea>
-	<textarea id="infoBoxModifiable" ></textarea>		
-</div>			
+			<div id="graphicalEditor">
+				<hr>
+				<div id="stateMachineToolbar" >
+					<button class="btn" id="startEmulink" > New Diagram </button>
+					<button class="btn" id="button_state" > New State </button>
+					<button class="btn" id="button_transition" > New Transition </button>
+					<button class="btn" id="button_self_transition" > New Self-Transition </button>
+                    <button class="btn" id="hideTags"> Hide tags</button>
+                    <button class="btn" id="showTags"> Show tags</button>
+                    <button class="btn" id="addFieldState" >New field </button>  
+                    <button class="btn" id="specificationToDiagram" >Create Diagram from Specification </button>
+				</div>
+				<div id="ContainerStateMachine" ></div>
+				<div id="state_machine_toolbar" ></div>
+				<textarea id="infoBox" readonly>TIP: Select a state or a transition to see its properties</textarea>
+				<textarea id="infoBoxModifiable" ></textarea>		
+                <textarea id="warningDebug" >Warning debug </textarea>
+			</div>				

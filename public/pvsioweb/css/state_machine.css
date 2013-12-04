@@ -140,6 +140,15 @@ ul#context-menu li {
   border-style: dotted;
   background :  #CEF6F5;
   font-family: Tahoma, sans-serif;
-
-
+}
+#warningDebug {
+  position: absolute;
+  top:	    280px;
+  width:    180px;
+  height:   300px;
+  left:    940px;
+  border-width : 5px;
+  border-style: dotted;
+  background :  #AAFFFF;
+  font-family: Tahoma, sans-serif;
 }

@@ -10,14 +10,16 @@ define(function (require, exports, module) {
     "use strict";
 	var PVSioWeb = require("./PVSioWebClient"),
 		Logger = require("util/Logger"),
-		PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder");
+//		PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
+		Emulink = require("plugins/emulink/Emulink");
 	
 	var client = new PVSioWeb();
 	
-	client.registerPlugin(PrototypeBuilder);
+//	client.registerPlugin(PrototypeBuilder);
+	client.registerPlugin(Emulink);
 	
 	/**
-     * utitlity function to pretty print pvsio output
+     * utility function to pretty print pvsio output
      * @private
      */
     function prettyPrint(msg) {

@@ -76,12 +76,17 @@ define(function (require, exports, module) {
 		return function () {
 			//ideally one should use information from ace to set the dirty mark on the document
 			//e.g editor.getSession().getUndoManager().hasUndo();
-			var pvsFile = pvsFilesListView.selectedItem();
-			if (pvsFile) {
-				var dirty = pvsFile.content() !== editor.getValue();
-				pvsFile.content(editor.getValue()).dirty(dirty); //update the selected project file content
-				updateSourceCodeToolbarButtons(pvsFile, pm.project());
-				pvsFilesListView.updateView();
+			if(pvsFileListView) {
+				var pvsFile = pvsFilesListView.selectedItem();
+				if (pvsFile) {
+					var dirty = pvsFile.content() !== editor.getValue();
+					pvsFile.content(editor.getValue()).dirty(dirty); //update the selected project file content
+					updateSourceCodeToolbarButtons(pvsFile, pm.project());
+					pvsFilesListView.updateView();
+				}
+			}
+			else {
+				console.log("warning: ProjectManager:editorChangeListener: pvsFileListView is undefined");
 			}
 		};
 	}
