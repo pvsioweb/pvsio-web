@@ -1,5 +1,5 @@
 /**
- * 
+ * This is a JSDoc plugin used to strip off the "define(.." and ")};" in amd defined modules
  * @author Patrick Oladimeji
  * @date 11/26/13 20:18:10 PM
  */
