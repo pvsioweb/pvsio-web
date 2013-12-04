@@ -156,7 +156,7 @@ define(function (require, exports, module) {
         
         this.dispatcher = function(content, kindOfTag)
         {
-               kindOfTag = kindOfTag.replace(/\s+/g, "").replace('"', "", 'g');
+               kindOfTag = kindOfTag.replace(/\s+/g, "").replace(/\"/g, "");
                if( kindOfTag === "Nodes" )
                {   
                    this.parseNodes(content);
@@ -208,11 +208,11 @@ define(function (require, exports, module) {
                 
                 source = tagProcessing.substring(tagProcessing.indexOf(this.source) + this.lengthSource);
                 source = source.substring(0, source.indexOf(','));
-                source = source.replace('"', "", 'g').replace(/\s+/g,"");
+                source = source.replace(/\"/g, "").replace(/\s+/g,"");
                                                  
                 target = tagProcessing.substring(tagProcessing.indexOf(this.target) + this.lengthTarget);
                 target = target.substring(0, target.indexOf(',')); 
-                target = target.replace('"', "", 'g').replace(/\s+/g,"");    
+                target = target.replace(/\"/g, "").replace(/\s+/g,"");    
                 
                 console.log("source", source);
                 console.log("target", target);
