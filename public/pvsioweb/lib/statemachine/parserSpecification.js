@@ -136,7 +136,7 @@ define(function (require, exports, module) {
                     return false;
                 }
                 
-                var a = initialTag.indexOf(this.kindOfTag);
+                initialTag.indexOf(this.kindOfTag);
                 /*Getting which kind of tag is */
                 kindOfTag = initialTag.substring(initialTag.indexOf(this.kindOfTag) + this.lengthKindOfTag, initialTag.indexOf('}'));
                
@@ -147,9 +147,6 @@ define(function (require, exports, module) {
                 currentTag = this.editor.find(objectSearch);
             }
             
-            console.log("**** END PARSING *****");
-            console.log(this.listOfEdges);
-            console.log(this.listOfNodes);
             this.createEdge();
             
         }
@@ -183,6 +180,7 @@ define(function (require, exports, module) {
             
             for( var i = 0; i<length; i++ )
             {
+                 listNodes[i] = listNodes[i].replace(/\s+/g,"");
                  this.listOfNodes.push(drawer.add_node(undefined, undefined, listNodes[i], 1));
   
             }
@@ -207,10 +205,12 @@ define(function (require, exports, module) {
                 
                 source = tagProcessing.substring(tagProcessing.indexOf(this.source) + this.lengthSource);
                 source = source.substring(0, source.indexOf(','));
+                source = source.replace('"', "", 'g').replace(/\s+/g,"");
                                                  
                 target = tagProcessing.substring(tagProcessing.indexOf(this.target) + this.lengthTarget);
                 target = target.substring(0, target.indexOf(',')); 
-                                                 
+                target = target.replace('"', "", 'g').replace(/\s+/g,"");    
+                
                 console.log("source", source);
                 console.log("target", target);
                 array.push(source);
