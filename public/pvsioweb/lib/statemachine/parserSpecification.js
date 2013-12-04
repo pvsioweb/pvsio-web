@@ -83,6 +83,9 @@ define(function (require, exports, module) {
         this.kindOfTag = "\"_type\":";
         this.lengthKindOfTag = this.kindOfTag.length;
         
+        this.defaultPosX = 100;
+        this.defaultPosY = 100;
+        
         
         this.listOfNodes = new Array();
         this.listOfEdges = new Array();
@@ -181,7 +184,7 @@ define(function (require, exports, module) {
             for( var i = 0; i<length; i++ )
             {
                  listNodes[i] = listNodes[i].replace(/\s+/g,"");
-                 this.listOfNodes.push(drawer.add_node(undefined, undefined, listNodes[i], 1));
+                 this.listOfNodes.push(drawer.add_node(this.defaultPosX, this.defaultPosY, listNodes[i], 1));
   
             }
             
