@@ -43,18 +43,28 @@ define(function (require, exports, module) {
     /**get or set the port for the server connection */
 	PVSioWeb.prototype.port = property.call(PVSioWeb.prototype, _port);
 	
+    /**
+        Get or set the url for the server connection
+    */
 	PVSioWeb.prototype.serverUrl = property.call(PVSioWeb.prototype, url);
-	
+	/**
+        Initiate connection to the server
+    */
 	PVSioWeb.prototype.connectToServer = function () {
 		ws.serverUrl(this.serverUrl()).port(this.port()).logon();
 		return this;
 	};
 	
+    /**
+        Disconnects from the server
+    */
 	PVSioWeb.prototype.disconnectFromServer = function () {
 		ws.close();
 		return this;
 	};
-	
+	/**
+        Get the websocket connection
+    */
 	PVSioWeb.prototype.getWebSocket = function () { return ws; };
 	
 	PVSioWeb.prototype.registerPlugin = function (plugin) {
@@ -63,6 +73,11 @@ define(function (require, exports, module) {
 		}
 	};
 	
+    /**
+        Creates a collapsible panel on the client app
+        @param {?string} headerText The title text to use in the panel header
+        @returns {d3.selection} The div created
+    */
 	PVSioWeb.prototype.createCollapsiblePanel = function (headerText) {
 		var div = d3.select("#content").append("div").attr("class", "collapsible-panel-parent");
 		var header = div.append("div").classed("header", true);
