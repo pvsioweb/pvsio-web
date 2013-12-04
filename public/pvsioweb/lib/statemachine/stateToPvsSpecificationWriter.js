@@ -1,5 +1,4 @@
 /**
- * 
  * @author Enrico D'Urso
  * @date 11/13/13 11:48:50 AM
  */
@@ -9,14 +8,13 @@
 
 
 /**
-     * @fileOverview Utility functions to translate from a graphic specification to a pvs specification.
-     * @version 0.2
-     */
+ * @fileOverview Utility functions to translate from a graphic specification to a pvs specification.
+ * @version 0.2
+ */
 
 
 /**
-     * 
-     * @module stateToPvsSpecificationWriter
+ * @module stateToPvsSpecificationWriter
  */
 
 
@@ -24,7 +22,7 @@ define(function (require, exports, module) {
 	"use strict";
 
  
-  /**************     State Variables                              ************************************************/
+/**************     State Variables                              ************************************************/
 	var writer;
     var hashTableContentEditor;
     var drawer;
@@ -32,8 +30,8 @@ define(function (require, exports, module) {
     var ws;
     var editor;
     var pm;
-  /**************  Exported Functions Definition                    ************************************************/
-    
+
+/**************  Exported Functions Definition                    ************************************************/    
 function init(editor_, wsocket, curProj, projManager)
 {
     ws = wsocket;
@@ -44,30 +42,12 @@ function init(editor_, wsocket, curProj, projManager)
     writer = new WriterOnContent(editor);
 }
     
-function setTagsName(tagStateNameStart, tagStateNameEnd)
-{
-    writer.setTagsName(tagStateNameStart, tagStateNameEnd);    
-}
-function setTagsState(tagStateStart, tagStateEnd)
-{
-    writer.setTagsState(tagStateStart, tagStateEnd);   
-}
-function setTagsFunc(tagFuncStart, tagFuncEnd)
-{
-    writer.setTagsFunc(tagFuncStart, tagFuncEnd);
-}
-function setTagsPer(tagPerStart, tagPerEnd)
-{
-    writer.setTagsPer(tagPerStart, tagPerEnd);
-}
-function setTagsEdge(tagEdgeStart, tagEdgeEnd)
-{
-    writer.setTagsEdge(tagEdgeStart, tagEdgeEnd);
-}
-function setTagsCond(tagCondStart, tagEdgeEnd)
-{
-    writer.setTagsCond(tagCondStart, tagEdgeEnd);   
-}
+function setTagsName(tagStateNameStart, tagStateNameEnd) { writer.setTagsName(tagStateNameStart, tagStateNameEnd); }
+function setTagsState(tagStateStart, tagStateEnd) { writer.setTagsState(tagStateStart, tagStateEnd); }
+function setTagsFunc(tagFuncStart, tagFuncEnd) { writer.setTagsFunc(tagFuncStart, tagFuncEnd); }
+function setTagsPer (tagPerStart,  tagPerEnd)  { writer.setTagsPer(tagPerStart, tagPerEnd); }
+function setTagsEdge(tagEdgeStart, tagEdgeEnd) { writer.setTagsEdge(tagEdgeStart, tagEdgeEnd); }
+function setTagsCond(tagCondStart, tagEdgeEnd) { writer.setTagsCond(tagCondStart, tagEdgeEnd); }
 
 /** 
  *  Create a new pvs specification   
@@ -82,8 +62,6 @@ function newSpecification(nameTheory)
 	    writer.createSkeletonSpecification(nameTheory);
         var fileHandlerEmulink = require("pvsioweb/../emulink/fileHandler/fileHandler");
         fileHandlerEmulink.new_file(currentProject, editor, ws, nameTheory, editor.getValue(), pm);
-        
-        hideTags();
 }
 
 /** 
@@ -103,18 +81,14 @@ function addState(newState)
         ///Get StateNames in String format: StateName: TYPE = {X0,X1...};
         var stateNamesString = writer.getStateNames();
         ///Building an array filled with the labels of the nodes: [X0,X1..]
-        var stateNamesArray = stateNamesString.substring(stateNamesString.indexOf('{') + 1, stateNamesString.indexOf('}'))
-                                              .split(',');
+        var stateNamesArray = stateNamesString.substring(stateNamesString.indexOf('{') + 1, stateNamesString.indexOf('}')).split(',');
     
         /// Check If newState.name is already in stateNames (checking is made only if stateNamesArray is defined ) 
         if( stateNamesArray){ hasBeenStateAlreadyAdded = itemIsContained(stateNamesArray, newState.name); }
     
         if( !hasBeenStateAlreadyAdded) { writer.addState(newState.name); }
-        else                             { console.log("ERROR addState: Trying to add a state already added "); }
+        else { console.log("ERROR addState: Trying to add a state already added "); }
 
-        if( ! writer.tagsHaveToBeShowed )
-            hideTags();
-    
         writer.leaveLockOnEditor();
 }
  
@@ -134,14 +108,11 @@ function addFieldInState(nameField, typeName)
     writer.getLockOnEditor();
     
     writer.addFieldInState(nameField, typeName);
-    
-    if( ! writer.tagsHaveToBeShowed )
-        hideTags();
-    
+        
     writer.leaveLockOnEditor();
     writer.restoreCursorPosition();
-    
 }
+
 /** 
  *  Add operation to do in a condition  
  *
@@ -158,10 +129,7 @@ function addOperationInCondition(nameTrans, sourceName, targetName, operation)
     writer.getLockOnEditor();
     
     writer.addOperationInCondition(nameTrans, sourceName, targetName, operation);
-    
-    if( ! writer.tagsHaveToBeShowed )
-        hideTags();
-    
+        
     writer.leaveLockOnEditor();    
 }
 
@@ -193,8 +161,6 @@ function addTransition(newTransition)
     writer.getLockOnEditor();
     
 	writer.addTransition(newTransition );
-    if( ! writer.tagsHaveToBeShowed )
-        hideTags();
 	noFocus();  
     
     writer.leaveLockOnEditor();
@@ -216,8 +182,6 @@ function addConditionInTransition(transitionName, source, target)
     writer.getLockOnEditor();
     
 	writer.addConditionInTransition(transitionName, source.name, target.name);	
-    if( ! writer.tagsHaveToBeShowed )
-        hideTags();
 	//noFocus();
     
     writer.leaveLockOnEditor();
@@ -231,8 +195,7 @@ function addConditionInTransition(transitionName, source, target)
 function noFocus()
 {
     
-    if( ! writer )
-        return;
+    if( ! writer ) { return; }
     
 	//writer.editor.gotoLine(0);
 	if( writer.lastMarker )
@@ -251,11 +214,10 @@ function noFocus()
  */
 function focusOnFun(edge, clickedOn)
 {
-     if( ! writer )
-         return;
+     if( ! writer ) { return; }
     
      noFocus();
-    
+
      var rangeFold = writer.editor.getSelectionRange();    
      var range = writer.editor.getSelectionRange();
      /***********************/
@@ -263,8 +225,6 @@ function focusOnFun(edge, clickedOn)
      var realNameEdge = edge.name.indexOf('{') == -1 ? edge.name : edge.name.substring(0, edge.name.indexOf('{'));
      var arrayTag = writer.buildTagCond(realNameEdge, edge.source.name, edge.target.name );
     
-     if( writer.tagsHaveToBeShowed )
-         clickedOn = false;
     //FIXME: delete clickedOn
     clickedOn = false;
     
@@ -288,38 +248,28 @@ function focusOnFun(edge, clickedOn)
               if( content.replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"") === arrayTag[1].replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"") )
               {
                   range.end.row = folds[i].start.row ;
-                  range.end.column = 100;
+                  range.end.column = 0;
               }
          }
      }
      else
      {
-     
-         var objectSearch = { 
-  		        	wholeWord: false,
-                    wrap : true,
-			        range: null
-                        }; 
+         var objectSearch = { wholeWord: false, wrap : true, range: null }; 
 
          var initSearch = writer.editor.find(arrayTag[0].replace(/(\r\n|\n|\r)/gm,""), objectSearch);
          var endSearch = writer.editor.find(arrayTag[1].replace(/(\r\n|\n|\r)/gm,""), objectSearch);
 
          range.start.row = initSearch.start.row + 1;
          range.start.column = 0;
-         range.end.column = 100;
-         range.end.row = endSearch.start.row - 1;
+         range.end.column = 0;
+         range.end.row = endSearch.start.row;
      }
-     
      
      /// Saving range that is going to be highlighted
      writer.lastMarker = range;
   
      /// Highlighting text 
      writer.editor.addSelectionMarker(range);
-    
-     restoreTags();
-        
-	
 }
 
 /** 
@@ -330,34 +280,27 @@ function focusOnFun(edge, clickedOn)
  */
 function focusOn(node)
 {
-    if( ! writer)
-        return;
+    if( ! writer) { return; }
+
 	noFocus();
         
-    var objectSearch = { 
-  			     wholeWord: false,
-			     caseSensitive : true,
-			     range: null
-		      }; 
+    var objectSearch = { wholeWord: false, caseSensitive : true, range: null }; 
     
     var range =  writer.editor.getSelectionRange();
-	var tmp = writer.editor.find("{" + node.name, objectSearch);
 
-    if( ! tmp )
-	    tmp = writer.editor.find("," + node.name, objectSearch);
-    
-     range.start.row = tmp.start.row ;
-     range.start.column = tmp.start.column + 1;
-     range.end.column = tmp.end.column ;
-     range.end.row = tmp.end.row  ;
+	var tmp = writer.editor.find("{" + node.name, objectSearch);
+    if( ! tmp ) { tmp = writer.editor.find("," + node.name, objectSearch); }
+
+	range.start.row = tmp.start.row;
+	range.start.column = tmp.start.column + 1;
+	range.end.column = tmp.end.column ;
+	range.end.row = tmp.end.row;
      
-     
-     /// Saving range that is going to be highlighted
-     writer.lastMarker = range;
-  
-     /// Highlighting text 
-     writer.editor.addSelectionMarker(range);
-        
+	/// Saving range that is going to be highlighted
+	writer.lastMarker = range;
+
+	/// Highlighting text 
+	writer.editor.addSelectionMarker(range);        
 }
 
 /** 
@@ -371,17 +314,14 @@ function changeStateName(oldName, newName)
 {
     writer.getLockOnEditor();
     
-	var objectSearch = { 
-  			     wholeWord: true,
-			     caseSensitive : true,
-			     range: null
-		           }; 
+	var objectSearch = { wholeWord: true, caseSensitive : true, range: null }; 
 
 	writer.editor.find(oldName, objectSearch);
 	writer.editor.replaceAll(newName);
     
     writer.leaveLockOnEditor();
 }
+
 /** 
  *  This function is called when the user changes the name of an edge, we need to change the PVS specification to be consistent with new name of    
     the edge
@@ -400,82 +340,21 @@ function changeFunName(oldName, newName, sourceName, targetName, counter)
     
     writer.getLockOnEditor();
     
-    if( counter > 1 )
-    {   
-        writer.deleteCondInTrans(oldName, sourceName, targetName); // Delete transition 
-    }
-    else 
-    {
-        writer.deleteTransition(oldName);  // Just delete condition  
-    }
+    if( counter > 1 ) { writer.deleteCondInTrans(oldName, sourceName, targetName); } // Delete transition  
+    else { writer.deleteTransition(oldName); } // Just delete condition
     
     writer.addTransition(newName ); // Create a new transition (if already present it will be not created)
     writer.addConditionInTransition(newName, sourceName, targetName); // Add condition 
-    
-    restoreTags();
-    
-    writer.leaveLockOnEditor();    
-
-}
-    
-function restoreTags()
-{
-     if( ! writer.tagsHaveToBeShowed )
-         writer.timeOutTag = setTimeout(function(){ hideTags(); }, 10 ); 
-}
         
-function hideTags()
-{   
-    writer.editor.find("");
-    var Range = require("ace/range").Range;
-    var lengthDocument = writer.editor.session.getLength();
-    var objectSearch = { 
-                        needle: "%{\"_block\"",
-                        wholeWord: false,
-                        range : new Range(0, 0, lengthDocument, 1000)
-				        
-			           };
-    var currentTag = writer.editor.find(objectSearch);
-    while( currentTag != undefined )
-    {
-        writer.editor.session.addFold("", new Range(currentTag.start.row, currentTag.start.column, currentTag.end.row, 100));
-        objectSearch.range =  new Range(currentTag.start.row +1, 0, lengthDocument, 100)
-        currentTag = writer.editor.find(objectSearch);
-    }
-    objectSearch = { 
-                        needle: "\n  %{\"_block\"",
-                        wholeWord: false,
-                        range : new Range(0, 0, lengthDocument, 1000)
-				        
-			           };
-    currentTag = writer.editor.find(objectSearch);
-    while( currentTag != undefined )
-    {
-        writer.editor.session.addFold("", new Range(currentTag.start.row, currentTag.start.column, currentTag.end.row, 100));
-        objectSearch.range =  new Range(currentTag.start.row +1, 0, lengthDocument, 100)
-        currentTag = writer.editor.find(objectSearch);
-    }
-    
-    writer.tagsHaveToBeShowed = false;
-}
-    
-function showTags()
-{
-    var folds = writer.editor.session.getAllFolds();
-    writer.editor.session.removeFolds(folds);
-    writer.tagsHaveToBeShowed = true;
+    writer.leaveLockOnEditor();    
 }
 
-function undo()
-{
-    writer.editor.undo();       
-}
+function undo() { writer.editor.undo(); }
 
-function redo()
-{
-    writer.editor.redo();       
-}
-  /**************  Utility Functions private to the module    ******************************************************/    
+function redo() { writer.editor.redo(); }
+
+
+/**************  Utility Functions private to the module    ******************************************************/    
     
 //Pure utility function used to check if item is an element of array
 function itemIsContained(array, item)
@@ -497,22 +376,20 @@ function WriterOnContent( editor)
 	this.delimitator = "";
 	this.editor = editor;
     this.userIsModifying = 0;
-    this.timeOut = undefined;
-    this.timeOutTags = undefined;
-    this.cursorPosition;
-    this.tagsHaveToBeShowed = false;    
-    
-	this.content; 
+    this.cursorPosition = 0;
+	this.content = "";
 
     /********* Functions about Editor changing (Note: I need to define them here ********/
     
     this.handleUserModificationOnEditor = function()
     {
         console.log("USER MODIFICATION"); 
-        clearTimeout(writer.timeOut);
-        writer.timeOut = setTimeout(function(){writer.parseToFindDiagramSpecificationInconsistency() } , 1000 );
-        
+		//// FIXME: this interferes with the autocompletion: the contextual menu created
+		////          by the autocompletion functionality disappears when parseToFindInconsistency is invoked
+//        clearTimeout(writer.timeOut);
+//        writer.timeOut = setTimeout(function(){writer.parseToFindDiagramSpecificationInconsistency() } , 1000 );        
     }
+
     this.parseToFindDiagramSpecificationInconsistency = function()
     { 
         writer.saveCursorPosition();
@@ -535,10 +412,8 @@ function WriterOnContent( editor)
         editor.find(''); // This is an hack to make disappear selection created indirectly to find content
         
         writer.restoreCursorPosition();
-        
-        hideTags();
-        
     }
+
     this.checkConsistenceStateNames = function(nodesInDiagram, stateNamesInSpecification)
     {
         var debug = document.getElementById("warningDebug");
@@ -554,7 +429,10 @@ function WriterOnContent( editor)
         
         // Basically, we are getting just the name of the states and putting them in an array using split
         // Example: StateName: TYPE = {X0,X1};  ---> [X0, X1] 
-        nodesInStateNames = stateNamesInSpecification.substring(stateNamesInSpecification.indexOf('{') + 1,                                                                                 stateNamesInSpecification.indexOf('}') ).split(',');
+        nodesInStateNames = stateNamesInSpecification.substring(
+								stateNamesInSpecification.indexOf('{') + 1, 
+								stateNamesInSpecification.indexOf('}') 
+							).split(',');
         
         numberOfStatesInDiagram = nodesInDiagram.length;
         
@@ -634,22 +512,10 @@ function WriterOnContent( editor)
         
         
     }
-    this.createFuncTag = function(tagFunc, nameFunction)
-    {
-        return tagFunc.replace("*nameFunc*", nameFunction);   
-    }
-    this.createPerTag = function(tagPer, namePer)
-    {
-        return tagPer.replace("*namePer*", namePer);
-    }
-    this.createCondTag = function(tagCond, nameCond, source, target)
-    {
-        return tagCond.replace("*nameCond*", nameCond).replace("*SRC*", source).replace("*TRT*", target);
-    }
-    this.createEdgeTag = function(tagEdge, nameEdge)
-    {
-        return tagEdge.replace("*nameEdge*", nameEdge);   
-    }
+    this.createFuncTag = function(tagFunc, nameFunction) { return tagFunc.replace("*nameFunc*", nameFunction); }
+    this.createPerTag = function(tagPer, namePer) { return tagPer.replace("*namePer*", namePer); }
+    this.createCondTag = function(tagCond, nameCond, source, target) { return tagCond.replace("*nameCond*", nameCond).replace("*SRC*", source).replace("*TRT*", target); }
+    this.createEdgeTag = function(tagEdge, nameEdge) { return tagEdge.replace("*nameEdge*", nameEdge); }
     this.createSkeletonSpecification = function(nameTheory)
     {
         this.nameTheory = nameTheory;
@@ -672,14 +538,13 @@ function WriterOnContent( editor)
                    "  leave_state(s: StateName)(st: State): State = st WITH [ previous_state := s ] \n" +
                    this.createFuncTag(this.tagFuncEnd, "leave_state" ) + "\n" + 
                    this.createFuncTag(this.tagFuncStart, "enter_into" ) + "\n" + 
-                   "  enter_into(s: StateName)(st:State): State = st WITH [ current_state := s ] \n\n" +
+                   "  enter_into(s: StateName)(st:State): State = st WITH [ current_state := s ] \n" +
                    this.createFuncTag(this.tagFuncEnd, "enter_into" ) +"\n\n" + 
                    " END " + this.nameTheory;   
         
         this.editor.setValue(this.content);
 	    this.editor.clearSelection();
 	    this.editor.moveCursorTo(0, 0);
-        
     }
     this.checkConsistenceOperation = function(operation)
     {
@@ -708,13 +573,11 @@ function WriterOnContent( editor)
                  break;
              }            
         }
-        if( ! missField)
-            return;
+        if( ! missField) { return; }
         
         var debug = document.getElementById("warningDebug");
         debug.value = "\t   DeBuG \n";
         debug.value = debug.value + "Warning: " + fieldStateInOperation + " is not in PVS State ";
-
     }
     this.changeEditor = function() 
     {   
@@ -725,37 +588,21 @@ function WriterOnContent( editor)
             console.log("Change Editor :", "empty");
         
         if( writer.userIsModifying ) { writer.handleUserModificationOnEditor(); }
-        else                         { console.log("Writer has modified editor content"); }
+        else { console.log("Writer has modified editor content"); }
     }
     
     editor.getSession().on('change', this.changeEditor );    
     this.userIsModifying = 1;
 
-    this.getLockOnEditor = function()
-    {
-        this.userIsModifying = 0;    
-    }
-    this.leaveLockOnEditor = function()
-    {
-        this.userIsModifying = 1;   
-    }
-    this.saveCursorPosition = function()
-    {
-        this.cursorPosition = this.editor.getCursorPosition();
-    }
-    this.restoreCursorPosition = function()
-    {
-        this.editor.moveCursorToPosition(this.cursorPosition);   
-    }
+    this.getLockOnEditor    = function() { this.userIsModifying = 0; }
+    this.leaveLockOnEditor  = function() { this.userIsModifying = 1; }
+    this.saveCursorPosition = function() { this.cursorPosition = this.editor.getCursorPosition(); }
+    this.restoreCursorPosition = function() { this.editor.moveCursorToPosition(this.cursorPosition); }
 
     this.getContentBetweenTags = function(startTag, endTag)
     {
         var range = editor.getSelectionRange();
-		var objectSearch = {    
-                                wrap: true,
-                                wholeWord: false,
-				                range: null
-			               }; 
+		var objectSearch = { wrap: true, wholeWord: false, range: null }; 
 
         startTag = startTag.replace(/(\r\n|\n|\r)/gm,"");
         endTag = endTag.replace(/(\r\n|\n|\r)/gm,"");
@@ -764,18 +611,16 @@ function WriterOnContent( editor)
 		var endSearch  = editor.find(endTag, objectSearch, true);
 		var content;	
 
-        if( initSearch === undefined || endSearch === undefined )
-            return undefined;
+        if( initSearch === undefined || endSearch === undefined ) { return undefined; }
         
 		range.start.column = 0;
-		range.end.column= 11111; ///FIXME
+		range.end.column = 0;
 		range.start.row = initSearch.start.row +1 ;
-		range.end.row = endSearch.start.row -1;
+		range.end.row = endSearch.start.row;
 		
 		content = editor.session.getTextRange(range); 
         
-        return content;
-        
+        return content;        
     }
     this.setTagsName = function(tagStateNameStart, tagStateNameEnd)
     {
@@ -818,8 +663,7 @@ function WriterOnContent( editor)
                          "  IN " +content.substring(content.indexOf("IN") + 2);
         
         this.editor.find(arrayTag[0] + content + arrayTag[1]);
-        this.editor.replace(arrayTag[0] + newContent + arrayTag[1]);
-        
+        this.editor.replace(arrayTag[0] + newContent + arrayTag[1]);        
     }
     this.addFieldInState = function(nameField, typeName)
     {
@@ -843,39 +687,34 @@ function WriterOnContent( editor)
         }   
         newContent = newContent + "  #]";
         
-        
         this.editor.find(oldContent);
         this.editor.replace(newContent);
     }
 	this.addState = function(newState)
 	{          
 		var range = editor.getSelectionRange();
-		var objectSearch = { 
-  				     wholeWord: false,
-				     range: null
-			           }; 
+		var objectSearch = { wholeWord: false, range: null }; 
 
 		var init = this.tagStateNameStart;
 		var end = this.tagStateNameEnd;
 
 		var initSearch = editor.find(init, objectSearch, true);
 		var endSearch  = editor.find(end, objectSearch, true);
-		var content;	
 
 		range.start.column = 0;
-		range.end.column= 11111; ///FIXME
+		range.end.column = 0;
 		range.start.row = initSearch.end.row + 1;
-		range.end.row = endSearch.end.row - 1;
+		range.end.row = (endSearch.end.row - 1 > range.start.row)? endSearch.end.row - 1 : range.start.row;
 		
 		//Content should be the list of the states
-		content = editor.session.getTextRange(range); 
+//		var content = editor.session.getTextRange(range); -- replaced with getLines, so that column number is not needed anymore
+		var content = editor.session.getLines(range.start.row, range.end.row).join("");
 
-		var index;
         var symbol_beg = "";
 		var newStateString;
 
 		///Checking if a state has been already added 
-		index = content.indexOf('}');
+		var index = content.indexOf('}');
 		if( index == -1 ) ///If not, add also the '{' at the beginning 
 		{
 		    symbol_beg = " = {";
@@ -892,9 +731,6 @@ function WriterOnContent( editor)
         var tmp = new Object();
         tmp.name = newState;
         focusOn(tmp);
-        
-
-
 	} 
         
     this.removeState = function(stateToRemove, stateCounter )
@@ -914,25 +750,20 @@ function WriterOnContent( editor)
             newContent = newContent.replace(" ,", "").replace(", ,","").replace(", ","");
             editor.replace(newContent);    
             //FIXME: ADD delete Node in function
-                    
     }
 	
 	this.addTransition = function (newTransition)
 	{        
 		var range = editor.getSelectionRange();
         
-        var objectSearch = { 
-  				              wholeWord: false,
-                              wrap:true,
-				              range: null
-			               }; 
+        var objectSearch = { wholeWord: false, wrap: true, range: null }; 
         
 		//Before adding a Transition, we need to check if it has been already created	
-		var checkingString = "(st:(per_" + newTransition + " ))";
+		var checkingString = "(st: (per_" + newTransition + " ))";
 		var checkingSearch = editor.find(checkingString, objectSearch);
 
-		if( checkingSearch ) //If initial Tag is present, transition has been already created 
-		    return;
+		// If initial Tag is present, transition has been already created 
+		if( checkingSearch ) { return; }
 
 		//Transition function has not been already created
 		var end = "END " + this.nameTheory;
@@ -948,18 +779,17 @@ function WriterOnContent( editor)
 		editor.gotoLine(endSearch.end.row , 1000, true);
         
 		content = this.createPerTag(this.tagPerStart, newTransition) + 
-		          "\n" +  "  per_" + newTransition + "(st:State ) : bool = true\n" +
+		          "\n" +  "  per_" + newTransition + "(st: State) : bool = true\n" +
                   this.createPerTag(this.tagPerEnd, newTransition)   + "\n\n";  
 	
 		content = content + this.createEdgeTag(this.tagEdgeStart, newTransition) + 
 			  "\n" +
-			  "  " + newTransition + "(st:(per_" + newTransition + " )):State = \n" +
+			  "  " + newTransition + "(st: (per_" + newTransition + ")): State = \n" +
 			  "  COND\n" +
 			  "  ENDCOND\n" +
 			  this.createEdgeTag(this.tagEdgeEnd, newTransition) +  "\n"; 			  
 			
 		editor.insert("\n" + content + "\n");
-        
 	}
 	this.buildTagCond = function(nameTransition, sourceName, targetName)
     {
@@ -1007,7 +837,6 @@ function WriterOnContent( editor)
         edge.name = nameTransition;
         
 		focusOnFun(edge);
-        	
 	}
 
     this.buildTagFunction = function(transName)
@@ -1095,7 +924,6 @@ function WriterOnContent( editor)
 
         noFocus();
         return content;
-        
         }
 }
 
@@ -1138,16 +966,14 @@ function keepTrackEditorContentHashTable()
              
         }
         return nodesName;
-        
     }
     
 
 }
     
-     /*************    Exported Function               ************************************************/
+/*************    Exported Function               ************************************************/
 
-
-    module.exports = {
+module.exports = {
         newSpecification : newSpecification,
         addState : addState,
         removeState : removeState,
@@ -1163,8 +989,6 @@ function keepTrackEditorContentHashTable()
         click : noFocus,
         addFieldInState : addFieldInState,
         addOperationInCondition: addOperationInCondition,
-        hideTags: hideTags,
-        showTags: showTags,
         setTagsName : setTagsName,
         setTagsState : setTagsState,
         setTagsFunc : setTagsFunc,
@@ -1173,7 +997,7 @@ function keepTrackEditorContentHashTable()
         setTagsEdge : setTagsEdge,
         init : init
 
-   };
+};
 
 
 
