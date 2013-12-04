@@ -29,7 +29,7 @@ var nodeIDGenerator = 0;
 var newNodeID = function () { return nodeIDGenerator++; }
 var minBoxWidth  = 60; 
 var minBoxHeight = 60;
-var curvyLines = false;
+var curvyLines = true;
 var add_node = function (positionX, positionY, label, notWriter ) {
 	var _id = "X" + newNodeID();
 	var node = { 
@@ -122,8 +122,7 @@ var links;
     
 function buildGraph()
 {
-    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height).attr("id", "canvas").style("background",              "#fffcec");    
-    
+    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height).attr("id", "canvas").style("background",              "#fffcec");        
     emulink();
     
 }
@@ -138,7 +137,6 @@ function restoreGraph(graphToRestore, editor, ws, currentProject, pm)
     for( var id in nodesToRestore)
     {
          var currentNode = nodesToRestore[id];
-         console.log("ReSt ",currentNode.height, currentNode.width);
          workAround.push(currentNode);
          comeOn.push(add_node(currentNode.x, currentNode.y, currentNode.name));
     }
