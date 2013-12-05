@@ -223,47 +223,17 @@ function focusOnFun(edge, clickedOn)
      /***********************/
      
      var realNameEdge = edge.name.indexOf('{') == -1 ? edge.name : edge.name.substring(0, edge.name.indexOf('{'));
-     var arrayTag = writer.buildTagCond(realNameEdge, edge.source.name, edge.target.name );
-    
-    //FIXME: delete clickedOn
-    clickedOn = false;
-    
-     if( clickedOn)
-     {   
-         var folds = writer.editor.session.getAllFolds();
-         
-         for( var i = 0; i < folds.length; i++)
-         {
-              rangeFold.start.row = folds[i].start.row ;
-              rangeFold.end.row = folds[i].end.row;
-              rangeFold.start.column = folds[i].start.column;
-              rangeFold.end.column = folds[i].end.column;
-              var content = writer.editor.session.getTextRange(rangeFold);
-             
-              if( content.replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"") === arrayTag[0].replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"") )
-              {
-                  range.start.row = folds[i].end.row +1;
-                  range.start.column = 0;
-              }
-              if( content.replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"") === arrayTag[1].replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"") )
-              {
-                  range.end.row = folds[i].start.row ;
-                  range.end.column = 0;
-              }
-         }
-     }
-     else
-     {
-         var objectSearch = { wholeWord: false, wrap : true, range: null }; 
+     var arrayTag = writer.buildTagCond(realNameEdge, edge.source.name, edge.target.name );    
 
-         var initSearch = writer.editor.find(arrayTag[0].replace(/(\r\n|\n|\r)/gm,""), objectSearch);
-         var endSearch = writer.editor.find(arrayTag[1].replace(/(\r\n|\n|\r)/gm,""), objectSearch);
+     var objectSearch = { wholeWord: false, wrap : true, range: null }; 
+     var initSearch = writer.editor.find(arrayTag[0].replace(/(\r\n|\n|\r)/gm,""), objectSearch);
+     var endSearch = writer.editor.find(arrayTag[1].replace(/(\r\n|\n|\r)/gm,""), objectSearch);
 
-         range.start.row = initSearch.start.row + 1;
-         range.start.column = 0;
-         range.end.column = 0;
-         range.end.row = endSearch.start.row;
-     }
+     range.start.row = initSearch.start.row + 1;
+     range.start.column = 0;
+     range.end.column = 0;
+     range.end.row = endSearch.start.row;
+
      
      /// Saving range that is going to be highlighted
      writer.lastMarker = range;
@@ -284,11 +254,12 @@ function focusOn(node)
 
 	noFocus();
         
-    var objectSearch = { wholeWord: false, caseSensitive : true, range: null }; 
+    var rangeNames = writer.getRangeStateNames();
+    var objectSearch = { wholeWord: false, caseSensitive : true, range: rangeNames }; 
     
     var range =  writer.editor.getSelectionRange();
 
-	var tmp = writer.editor.find("{" + node.name, objectSearch);
+	var tmp = writer.editor.find(node.name, objectSearch);
     if( ! tmp ) { tmp = writer.editor.find("," + node.name, objectSearch); }
 
 	range.start.row = tmp.start.row;
@@ -373,7 +344,7 @@ function itemIsContained(array, item)
 function WriterOnContent( editor)
 {
     this.defaultStateName = "  StateName: TYPE";
-	this.delimitator = "";
+	this.delimitator = ',' ;
 	this.editor = editor;
     this.userIsModifying = 0;
     this.cursorPosition = 0;
@@ -514,7 +485,7 @@ function WriterOnContent( editor)
     }
     this.createFuncTag = function(tagFunc, nameFunction) { return tagFunc.replace("*nameFunc*", nameFunction); }
     this.createPerTag = function(tagPer, namePer) { return tagPer.replace("*namePer*", namePer); }
-    this.createCondTag = function(tagCond, nameCond, source, target) { return tagCond.replace("*nameCond*", nameCond).replace("*SRC*", source).replace("*TRT*", target); }
+    this.createCondTag = function(tagCond, nameCond, source, target) { return tagCond.replace("*nameCond*", nameCond).replace("*SRC*", "\""+source+"\"").replace("*TRT*","\""+target+"\""); }
     this.createEdgeTag = function(tagEdge, nameEdge) { return tagEdge.replace("*nameEdge*", nameEdge); }
     this.createSkeletonSpecification = function(nameTheory)
     {
@@ -708,7 +679,6 @@ function WriterOnContent( editor)
 		range.end.row = (endSearch.end.row - 1 > range.start.row)? endSearch.end.row - 1 : range.start.row;
 		
 		//Content should be the list of the states
-//		var content = editor.session.getTextRange(range); -- replaced with getLines, so that column number is not needed anymore
 		var content = editor.session.getLines(range.start.row, range.end.row).join("");
 
         var symbol_beg = "";
@@ -720,6 +690,7 @@ function WriterOnContent( editor)
 		{
 		    symbol_beg = " = {";
 		    index = content.indexOf('E') + 1;
+            this.delimitator = "";
 	    }
 		
 		newStateString = content.substring(0, index);
@@ -757,17 +728,17 @@ function WriterOnContent( editor)
 	{        
 		var range = editor.getSelectionRange();
         
-        var objectSearch = { wholeWord: false, wrap: true, range: null }; 
+        var objectSearch = { wholeWord: true, wrap: true, range: null }; 
         
 		//Before adding a Transition, we need to check if it has been already created	
-		var checkingString = "(st: (per_" + newTransition + " ))";
+		var checkingString = this.createEdgeTag(this.tagEdgeStart, newTransition);
 		var checkingSearch = editor.find(checkingString, objectSearch);
 
 		// If initial Tag is present, transition has been already created 
 		if( checkingSearch ) { return; }
 
 		//Transition function has not been already created
-		var end = "END " + this.nameTheory;
+		var end = "END";
 
 		var endSearch = editor.find(end, objectSearch, true);
 		var content;	
@@ -898,6 +869,29 @@ function WriterOnContent( editor)
         this.deleteContent(tagFun[0]);
         this.deleteContent(contentFun);
         this.deleteContent(tagFun[1]);      
+        
+    }
+    this.getRangeStateNames = function()
+    {
+        var range = editor.getSelectionRange();
+		var objectSearch = { 
+  				             wholeWord: false,
+				             range: null
+			               }; 
+
+        var init = this.tagStateNameStart;
+		var end  = this.tagStateNameEnd;
+
+		var initSearch = editor.find(init, objectSearch, true);
+		var endSearch = editor.find(end, objectSearch, true);
+		var content;	
+
+		range.start.column = 0;
+		range.end.column= 11111; ///FIXME
+		range.start.row = initSearch.end.row + 1;
+		range.end.row = endSearch.end.row - 1;
+        
+        return range;
         
     }
     this.getStateNames = function()
