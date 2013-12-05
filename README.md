@@ -26,9 +26,9 @@ To install, use one of the following methods:
 ### method 1: download pvsio-web as a zip file & use npm to resolve dependencies
 Download the zip archive of the project from [https://github.com/thehogfather/pvsio-web/archive/master.zip](https://github.com/thehogfather/pvsio-web/archive/master.zip). Extract the zip file to a location of your preference.
 
-Then, download all remaining dependencies by running the following command from a Terminal window opened in the extracted folder:
+Then, download all remaining dependencies by running the following command from a Terminal window opened in the pvsio-web folder:
 
-    npm install
+    sudo npm install
 
 
 ### method 2: use npm to download pvsio-web and resolve dependencies
@@ -45,6 +45,10 @@ The installer will copy pvsio-web in /usr/local/lib/node_modules/pvsio-web. By d
 Create a directory pvsio-web. Open a Terminal in the created directory, and clone the pvsio-web repository using the following command:
 
     git clone https://github.com/thehogfather/pvsio-web.git
+
+Then, download all remaining dependencies by running the following command from a Terminal window opened in the pvsio-web folder:
+
+    sudo npm install
 
 
 Running pvsio-web
