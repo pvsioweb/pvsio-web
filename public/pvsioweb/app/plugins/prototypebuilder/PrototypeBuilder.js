@@ -39,6 +39,8 @@ define(function (require, exports, module) {
         });
 		// this enables syntax highlighting
 		editor.getSession().setMode("ace/mode/pvsLanguage");
+		// this removes the printing margin, which is not necessary for now
+		editor.setShowPrintMargin(false);
 
 		projectManager.editor(editor);
 		
