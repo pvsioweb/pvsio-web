@@ -33,14 +33,14 @@ var curvyLines = true;
 // force layout parameters
 var distance = 300;
 var strength = 0; // must be between 0 and 1
-var charge = -5000; // positive value = repulsion; negative value = attraction; for graphs, negative values should be used
+var charge = -50; // positive value = repulsion; negative value = attraction; for graphs, negative values should be used
 
 var animatedLayout = false;
 
 var add_node = function (positionX, positionY, label, notWriter ) {
 	var _id = "X" + newNodeID();
 	var node = { 
-			fixed: false,
+			fixed: true,
 			reflexive: false,
 			id   : _id, // node id must be unique
 			name : (label === undefined)? _id : label,
@@ -49,7 +49,7 @@ var add_node = function (positionX, positionY, label, notWriter ) {
 			px   : positionX,
 			py   : positionY,
 			height: minBoxHeight,
-			width :  minBoxWidth,
+			width : minBoxWidth,
 			weight: 0,
             warning : new Object()
 	};
