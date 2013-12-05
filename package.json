@@ -2,7 +2,7 @@
     "name":"pvsio-web",
     "author":"Patrick Oladimeji <patrick@dustygem.co.uk>",
     "description":"A javascript library to connect to and communicate with a pvsio process using websockets",
-    "version":"0.0.17",
+    "version":"0.0.18",
     "preferGlobal":"true",
     "main":"./pvssocketserver.js",
     "bin":"./pvssocketserver.js",
@@ -14,7 +14,7 @@
         "type":"git",
         "url":"https://github.com/thehogfather/pvsio-web"
     },
-    "license":"MIT",
+    "license":"GPL3",
     "engine":{
         "node":">=0.8"
     }
