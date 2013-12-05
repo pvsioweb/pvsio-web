@@ -11,3 +11,5 @@ public/projects/*/pvsbin/*
 *.summary
 pvs-attachments
 node_modules/*
+doc/out
+doc/client
