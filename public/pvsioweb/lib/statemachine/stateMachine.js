@@ -865,7 +865,7 @@ var emulink = function() {
 
 
 module.exports = {
-	init: function (editor, wsocket, currentProject, pm) { return init(editor, wsocket, currentProject, pm); },
+	init: function (editor, wsocket, currentProject, pm, start) { return init(editor, wsocket, currentProject, pm, start); },
 	changeTextArea : changeTextArea,
 	add_node_mode: function(){ return toggle_editor_mode(MODE.ADD_NODE); },
 	add_transition_mode: function() { return toggle_editor_mode(MODE.ADD_TRANSITION); },
