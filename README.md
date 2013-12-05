@@ -21,7 +21,7 @@ Note that pvsio-web depends on NodeJS (http://nodejs.org/download/). Please down
 
 Installation
 ------------
-To install, use one of the following methods:
+To install pvsio-web, use one of the following methods:
 
 ### method 1: download pvsio-web as a zip file & use npm to resolve dependencies
 Download the zip archive of the project from [https://github.com/thehogfather/pvsio-web/archive/master.zip](https://github.com/thehogfather/pvsio-web/archive/master.zip). Extract the zip file to a location of your preference.
