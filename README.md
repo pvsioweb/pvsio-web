@@ -70,9 +70,9 @@ A demo of a realistic medical infusion pump is included in the pvsio-web distrib
 
 To execute the demo:
 
-Start the pvsio-web backed by typing the following command in a Terminal window, and leave the Terminal window open:
+Open a Terminal window in the pvsio-web directory, and use the following command to start the pvsio-web backend (leave the Terminal window open):
 
-    /usr/local/lib/node_modules/pvsio-web/start.sh
+    ./start.sh
 
 Start the pvsio-web frontend by opening a browser at the following address:
 
