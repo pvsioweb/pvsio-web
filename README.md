@@ -21,20 +21,17 @@ Note that pvsio-web depends on NodeJS (http://nodejs.org/download/). Please down
 
 Installation
 ------------
-To install, use
+To install, use one of the following methods:
 
-### zip
-Download the zip archive of the project from [https://github.com/thehogfather/pvsio-web/archive/master.zip](https://github.com/thehogfather/pvsio-web/archive/master.zip)
+### method 1: download pvsio-web as a zip file & use npm to resolve dependencies
+Download the zip archive of the project from [https://github.com/thehogfather/pvsio-web/archive/master.zip](https://github.com/thehogfather/pvsio-web/archive/master.zip). Extract the zip file to a location of your preference.
 
-Extract the zip file to a location of your preference.
-
-To download all the dependencies of the project, change directory into the extracted folder and run
+Then, download all remaining dependencies by running the following command from a Terminal window opened in the extracted folder:
 
     npm install
 
-Continue as in the instruction for __'Running pvsio-web'__
 
-### npm
+### method 2: use npm to download pvsio-web and resolve dependencies
 
     sudo npm install pvsio-web -g
 
@@ -44,22 +41,19 @@ The installer will copy pvsio-web in /usr/local/lib/node_modules/pvsio-web. By d
 
 (where "myUserName" is to be replaced with the actual username on your machine)
 
-### git
+### method 3: clone git repository
 Create a directory pvsio-web. Open a Terminal in the created directory, and clone the pvsio-web repository using the following command:
 
     git clone https://github.com/thehogfather/pvsio-web.git
 
-Then, from the pvsio-web directory, run the command:
-
-    node pvssocketserver.js
 
 Running pvsio-web
 -----------------
 To run pvsio-web, a backend and a frontend need to be started.
 
-To start the backend: open a Terminal window, and use the following command (and leave the Terminal window open):
+To start the backend: open a Terminal window in the pvsio-web directory, and use the following command (and leave the Terminal window open):
 
-    /usr/local/lib/node_modules/pvsio-web/start.sh
+    ./start.sh
 
 To start the frontend: open a browser (Firefox 21 or greater, or Chrome), and type the following address in the address bar:
 
