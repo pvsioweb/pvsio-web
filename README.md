@@ -31,7 +31,7 @@ Then, download all remaining dependencies by running the following command from 
     sudo npm install
 
 
-### method 2: use npm to download pvsio-web and resolve dependencies
+### method 2: use npm to download pvsio-web
 
     sudo npm install pvsio-web -g
 
