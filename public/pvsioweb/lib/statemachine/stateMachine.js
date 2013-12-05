@@ -286,7 +286,7 @@ function getEdgesInDiagram()
     return edgesNode;
 }   
 /// Function init is the entry point of the Emulink graphical editor
-function init(_editor, wsocket, currentProject, pm) {
+function init(_editor, wsocket, currentProject, pm, start) {
 
     // After last modifications (Emulink commented) I need to create here SVG 
     svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height).attr("id",    "canvas").style("background", "#fffcec");
@@ -308,10 +308,13 @@ function init(_editor, wsocket, currentProject, pm) {
     pvsWriter.setTagsEdge(tagEdgeStart, tagEdgeEnd);
     pvsWriter.setTagsCond(tagCondStart, tagCondEnd);
     
-	pvsWriter.newSpecification("myTheory"); 
-    
     // Start Emulink
 	emulink();
+    
+    if( ! start)
+        return;
+    
+	pvsWriter.newSpecification("myTheory"); 
 
 }
 
