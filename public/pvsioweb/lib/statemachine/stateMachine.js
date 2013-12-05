@@ -30,10 +30,17 @@ var newNodeID = function () { return nodeIDGenerator++; }
 var minBoxWidth  = 60; 
 var minBoxHeight = 60;
 var curvyLines = true;
+// force layout parameters
+var distance = 300;
+var strength = 0; // must be between 0 and 1
+var charge = -5000; // positive value = repulsion; negative value = attraction; for graphs, negative values should be used
+
+var animatedLayout = false;
+
 var add_node = function (positionX, positionY, label, notWriter ) {
 	var _id = "X" + newNodeID();
 	var node = { 
-			fixed: true,
+			fixed: false,
 			reflexive: false,
 			id   : _id, // node id must be unique
 			name : (label === undefined)? _id : label,
@@ -52,8 +59,7 @@ var add_node = function (positionX, positionY, label, notWriter ) {
 	// add node
 	graph.nodes.set(node.id, node);
     
-    if( notWriter )
-        return node;
+    if( notWriter ) { return node; }
 	// update pvs theory accordingly
 	pvsWriter.addState(node);
     return node;
@@ -79,12 +85,11 @@ var add_edge = function (source, target, label, notWriter) {
 	// add edge
 	graph.edges.set(edge.id, edge);
     
-    if( notWriter )
-        return;
+    if( notWriter ) { return; }
+
 	// update pvs theory accordingly
 	pvsWriter.addTransition(edge.name, edge.id);
 	pvsWriter.addConditionInTransition(edge.name, source, target);
-	
 }
 
 
@@ -122,9 +127,9 @@ var links;
     
 function buildGraph()
 {
-    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height).attr("id", "canvas").style("background",              "#fffcec");        
+    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
+			.attr("id", "canvas").style("background", "#fffcec");
     emulink();
-    
 }
 
 function restoreGraph(graphToRestore, editor, ws, currentProject, pm)
@@ -154,16 +159,12 @@ function restoreGraph(graphToRestore, editor, ws, currentProject, pm)
          }
          add_edge(currentEdge.source, currentEdge.target, currentEdge.label);
     } 
-
     emulink();
 }
 
 
-function getGraphDefinition()
-{
-    return JSON.stringify(graph);    
-}
-    
+function getGraphDefinition() { return JSON.stringify(graph); }
+
 
 function showInformationInTextArea(element) {
 	var textArea = document.getElementById("infoBox");
@@ -182,8 +183,7 @@ function showInformationInTextArea(element) {
 
 function changeTextArea(node, path) {
     
-	if( selected_nodes.length == 0 && selected_edges.length == 0 ) {
-        
+	if( selected_nodes.length == 0 && selected_edges.length == 0 ) {        
 	    document.getElementById('infoBox').value = " ";
         document.getElementById('infoBoxModifiable').value= " ";
 	}
@@ -245,10 +245,9 @@ function changeTextArea(node, path) {
         
         /// Change name in the PVS specification
         pvsWriter.changeFunName(oldName, realName, sourceName, targetName, counter);   
-        if( newOperation )
-            pvsWriter.addOperationInCondition(realName, sourceName, targetName, newOperation);
-        
-        
+        if( newOperation ) { 
+			pvsWriter.addOperationInCondition(realName, sourceName, targetName, newOperation); 
+		}
     }
 }
 
@@ -289,7 +288,8 @@ function getEdgesInDiagram()
 function init(_editor, wsocket, currentProject, pm, start) {
 
     // After last modifications (Emulink commented) I need to create here SVG 
-    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height).attr("id",    "canvas").style("background", "#fffcec");
+    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
+			.attr("id", "canvas").style("background", "#fffcec");
 
     ws = wsocket;
 
@@ -310,12 +310,8 @@ function init(_editor, wsocket, currentProject, pm, start) {
     
     // Start Emulink
 	emulink();
-    
-    if( ! start)
-        return;
-    
+    if( ! start) { return; }
 	pvsWriter.newSpecification("myTheory"); 
-
 }
 
 var emulink = function() {
@@ -327,7 +323,9 @@ var emulink = function() {
 		.nodes(graph.nodes.values())
 		.links(graph.edges.values())
 		.size([width, height])
-		.linkDistance(150)
+		.linkDistance(distance)
+		.linkStrength(strength)
+		.charge(charge)
 		.on('tick', tick);
 
 	var resize = d3.behavior.drag().origin(function() {
@@ -359,7 +357,7 @@ var emulink = function() {
     function dragend(d, i) {
 		if(editor_mode == MODE.DEFAULT) {
 		    tick();
-		    force.resume();
+			if(animatedLayout) { force.resume(); }
 		}
     }
 
@@ -472,10 +470,10 @@ var emulink = function() {
 					.nodes(graph.nodes.values())
 					.links(graph.edges.values())
 					.size([width, height])
-					.linkDistance(150)
-					.charge(-500)
+					.linkDistance(distance)
+					.linkStrength(strength)
+					.charge(charge)
 					.on('tick', tick);
-
 
 		//--- paths -----------------------------------------------------------------------------------------------
 		path = path.data(graph.edges.values());
