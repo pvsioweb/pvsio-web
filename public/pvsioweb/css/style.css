@@ -215,7 +215,7 @@ fileListItem.hide {
     background-image:url(../bootstrap/img/glyphicons-halflings-white.png);
 }
 .fileListItem.selected {
-    background: #444;
+    background: steelblue;
     color: #ddd;
     border: 1px solid #222;
     border-right:1px solid #444;
@@ -223,12 +223,11 @@ fileListItem.hide {
 
 #pvsFiles .fileListItem.selected .file-label:after {
     content: "";
-    border-top: 14px solid transparent;
-    border-bottom: 11px solid transparent;
-    border-left: 14px solid #444;
+    border-top: 14px solid #444;
+    border-left: 14px solid transparent;
     display: inline-block;
     position: absolute;
-    right: -9px;
+    right: 0px;
     top: 0px;
     width: 0;
     height: 0;
