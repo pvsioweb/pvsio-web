@@ -31,7 +31,7 @@ define(function (require, exports, module) {
 			editor = pb.getEditor();
         ws = pvsioWebClient.getWebSocket();
         var currentProject = projectManager.project();	
-        
+        var fileCounter = 0;
     
 		//create the user interface elements
 		createHtmlElements(pvsioWebClient);
@@ -43,47 +43,42 @@ define(function (require, exports, module) {
 
         /// When User clicks on New File button #new_file a pvs file is created and showed in file list box
         d3.select("#new_file").on("click", function ( ) {	
-
-            ListView.new_file(currentProject, editor, ws);
-            ListView.showContentFileInEditor(currentProject, editor);	
+            projectManager.newFile();
         });
     
         d3.select("#save_file").on("click", function () {
-        
+            
         });
 
     
         /// When user clicks on open_file button #open_file, a form is showed 
         d3.select("#open_file").on("click", function () {
-	
-	        ListView.open_file_form(currentProject, editor, ws); //Define in: /public/pvsioweb/app/formal/pvs/prototypebuilder/ListView.js
-            ListView.showContentFileInEditor(currentProject, editor);
+	       projectManager.openFiles(function () {
+               //insert anything here if you need something to happen after files are added
+           });
         });
 	
         /// User wants to rename a file 
         d3.select("#rename_file").on("click", function () {
-            ListView.renameFileProject(currentProject, editor, ws);
+            projectManager.renameFile(projectManager.getSelectedFile());
         });
    
 
         /// User wants to close a file (it will be not shown in file list box on the right ) 
         d3.select("#close_file").on("click", function () {
-	
-            ListView.closeFile(currentProject, editor, ws );
-	
+	       projectManager.closeFile(projectManager.getSelectedFile());	
         });
 
         /// User wants to see all files of the project 
         d3.select("#show_all_files").on("click", function () {
-	
-            ListView.showAllFiles(currentProject, editor, ws );
-	
+	       projectManager.showAllFiles();
         });
 
         /// User wants to delete a file from the project  
         d3.select("#delete_file").on("click", function () {
-	
-            ListView.deleteFile(currentProject, editor, ws );	
+	       projectManager.deleteFile(projectManager.getSelectedFile(), function () {
+                //do somethng when file is deleted 
+           });
         });
     
         /// User wants to perform an undo operation on the Editor    

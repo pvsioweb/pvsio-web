@@ -16,6 +16,7 @@ define(function (require, exports, module) {
 	function renderSelectedItem(index, el, listItems) {
 		listItems.classed("selected", false);
 		el.classed("selected", true);
+        d3.select("#pvsFiles").node().scrollTop = el.node().offsetTop;
 	}
 	
 	function selectItem(index, item, listView) {
@@ -73,7 +74,7 @@ define(function (require, exports, module) {
 			});
 			list.exit().remove();
 		}
-		this._listItems = listItems;
+		this._listItems = this._listBox.selectAll("li");
 		//update the class information on all list itmes
 		listItems.attr("class", this.classFunction()).select("span.file-label").html(this.labelFunction());
 		if (this.selectedItem()) {
