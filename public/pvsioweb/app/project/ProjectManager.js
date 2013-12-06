@@ -158,9 +158,11 @@ define(function (require, exports, module) {
 			//fetch sourcecode for selected file and update editor
 			var pvsFile = event.selectedItem;
 			if (pvsFile.content()) {
+				editor.removeAllListeners("change");
 				editor.setValue(pvsFile.content());
 				editor.clearSelection();
 				editor.moveCursorTo(0, 0);
+				editor.on("change", editorChangedListener(editor, pm, pvsFilesListView));
 			} else {
 				//fetch file contents from server and set the value
 				var f = currentProject.path() + "/" + pvsFile.name();
