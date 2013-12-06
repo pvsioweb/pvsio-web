@@ -14,7 +14,7 @@ define(function (require, exports, module) {
 		ListView = require("pvsioweb/ListView"),
 		ProjectFile = require("./ProjectFile"),
 		WSManager = require("websockets/pvs/WSManager"),
-		fs	= require("lib/fileHandler/fileHandler"),
+		fs	= require("util/fileHandler"),
 		queue = require("d3/queue"),
         newProjectForm          = require("pvsioweb/forms/newProject"),
 		openProjectForm         = require("pvsioweb/forms/openProject"),
@@ -76,7 +76,7 @@ define(function (require, exports, module) {
 		return function () {
 			//ideally one should use information from ace to set the dirty mark on the document
 			//e.g editor.getSession().getUndoManager().hasUndo();
-			if(pvsFileListView) {
+			if (pvsFileListView) {
 				var pvsFile = pvsFilesListView.selectedItem();
 				if (pvsFile) {
 					var dirty = pvsFile.content() !== editor.getValue();
@@ -84,8 +84,7 @@ define(function (require, exports, module) {
 					updateSourceCodeToolbarButtons(pvsFile, pm.project());
 					pvsFilesListView.updateView();
 				}
-			}
-			else {
+			} else {
 				console.log("warning: ProjectManager:editorChangeListener: pvsFileListView is undefined");
 			}
 		};

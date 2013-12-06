@@ -9,7 +9,7 @@
 define(function (require, exports, module) {
 	"use strict";
 	var stateMachine            = require("lib/statemachine/stateMachine"),
-        handlerFile             = require("lib/fileHandler/fileHandler"),
+        handlerFile             = require("util/fileHandler"),
         pvsWriter               = require("lib/statemachine/stateToPvsSpecificationWriter"),
         parserSpecification     = require("lib/statemachine/parserSpecification"),
 		PrototypeBuilder		= require("pvsioweb/PrototypeBuilder"),
