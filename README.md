@@ -14,7 +14,7 @@ Once PVS is installed, please add the PVS executable files pvs, pvsio and provei
     sudo ln -s /opt/pvs6.0/pvsio /usr/bin/pvsio
     sudo ln -s /opt/pvs6.0/proveit /usr/bin/proveit
 
-#### prerequisite 2: NodeJS
+### prerequisite 2: NodeJS
 NodeJS (http://nodejs.org/download/) is required to run pvsio-web. Please download and install NodeJS before proceeding to installing pvsio-web.
 
 Installation
