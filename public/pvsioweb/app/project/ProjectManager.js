@@ -263,7 +263,7 @@ define(function (require, exports, module) {
 		}
 
 		this.project().addSpecFile(name, content);
-		pvsFilesListView.updateView()
+		pvsFilesListView.updateView(this.project().pvsFiles())
 			.selectItem(_.last(this.project().pvsFiles()));
 	};
 
@@ -358,7 +358,8 @@ define(function (require, exports, module) {
 			});
 			q.awaitAll(function (err, res) {
 				if (!err) {//done opening files and we have added them to the project
-					pvsFilesListView.updateView();
+					pvsFilesListView.updateView()
+                        .selectItem(_.last(project.pvsFiles()));
 					cb();
 				} else {
 					console.log("error opening files");
