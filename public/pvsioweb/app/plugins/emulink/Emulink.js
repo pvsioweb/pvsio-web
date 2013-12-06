@@ -20,7 +20,7 @@ define(function (require, exports, module) {
 	
 	function createHtmlElements(pvsioWebClient) {
 		var content = require("text!plugins/emulink/forms/maincontent.handlebars");
-        var canvas = pvsioWebClient.createCollapsiblePanel("Visualisation of Emulink");
+        var canvas = pvsioWebClient.createCollapsiblePanel("Statechart editor");
         canvas = canvas.html(content); 
 	}
 	

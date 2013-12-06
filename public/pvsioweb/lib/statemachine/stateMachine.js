@@ -104,24 +104,29 @@ var ws;
 var width =  930;
 var height = 800;
 var svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height).attr("id", "canvas").style("background", "#fffcec");
+
+
+var BLOCK_START = "%{\"_block\" : \"BlockStart\"";
+var BLOCK_END   = "%{\"_block\" : \"BlockEnd\"";
+var ID_FIELD    = "\"_id\"";
     
-var tagStateNameStart = "  %{\"_block\" : \"BlockStart\", \"_id\" : \"StateName\", \"_type\": \"Nodes\"}";    
-var tagStateNameEnd = "  %{\"_block\" : \"BlockEnd\", \"_id\" : \"StateName\", \"_type\": \"Nodes\"}";
+var tagStateNameStart = "  " + BLOCK_START + ", " + ID_FIELD + " : \"StateName\", \"_type\": \"Nodes\"}";    
+var tagStateNameEnd   = "  " + BLOCK_END   + ", " + ID_FIELD + " : \"StateName\", \"_type\": \"Nodes\"}";
 
-var tagStateStart = "  %{\"_block\" : \"BlockStart\", \"_id\" : \"State\", \"_type\": \"State\"}"; 
-var tagStateEnd = "  %{\"_block\" : \"BlockEnd\", \"_id\" : \"State\", \"_type\": \"State\"}";
+var tagStateStart = "  " + BLOCK_START + ", " + ID_FIELD + " : \"State\", \"_type\": \"State\"}"; 
+var tagStateEnd   = "  " + BLOCK_END   + ", " + ID_FIELD + " : \"State\", \"_type\": \"State\"}";
 
-var tagFuncStart = "  %{\"_block\" : \"BlockStart\", \"_id\" : \"*nameFunc*\", \"_type\": \"Function\"}";
-var tagFuncEnd = "  %{\"_block\" : \"BlockEnd\", \"_id\" : \"*nameFunc*\", \"_type\": \"Function\"}";
+var tagFuncStart = "  " + BLOCK_START + ", " + ID_FIELD + " : \"*nameFunc*\", \"_type\": \"Function\"}";
+var tagFuncEnd   = "  " + BLOCK_END   + ", " + ID_FIELD + " : \"*nameFunc*\", \"_type\": \"Function\"}";
 
-var tagPerStart = "  %{\"_block\": \"BlockStart\" , \"_id\" : \"*namePer*\", \"_type\": \"Permission\"}";
-var tagPerEnd = "  %{\"_block\": \"BlockEnd\" , \"_id\" : \"*namePer*\", \"_type\": \"Permission\"}";
+var tagPerStart = "  " + BLOCK_START + ", " + ID_FIELD + " : \"*namePer*\", \"_type\": \"Permission\"}";
+var tagPerEnd   = "  " + BLOCK_END   + ", " + ID_FIELD + " : \"*namePer*\", \"_type\": \"Permission\"}";
 
-var tagEdgeStart = "  %{\"_block\": \"BlockStart\" , \"_id\" : \"*nameEdge*\", \"_type\": \"Edge\"}";
-var tagEdgeEnd = "  %{\"_block\": \"BlockEnd\" , \"_id\" : \"*nameEdge*\", \"_type\": \"Edge\"}";
+var tagEdgeStart = "  " + BLOCK_START + ", " + ID_FIELD + " : \"*nameEdge*\", \"_type\": \"Edge\"}";
+var tagEdgeEnd   = "  " + BLOCK_END   + ", " + ID_FIELD + " : \"*nameEdge*\", \"_type\": \"Edge\"}";
 
-var tagCondStart = "  %{\"_block\": \"BlockStart\", \"_id\" : \"*nameCond*\", \"_source\" : *SRC*, \"_target\" : *TRT*, \"_type\": \"Transition\"}";    
-var tagCondEnd = "  %{\"_block\": \"BlockEnd\", \"_id\" : \"*nameCond*\", \"_source\" : *SRC*, \"_target\" : *TRT*, \"_type\": \"Transition\"}";
+var tagCondStart = "  " + BLOCK_START + ", " + ID_FIELD + " : \"*nameCond*\", \"_source\" : *SRC*, \"_target\" : *TRT*, \"_type\": \"Transition\"}";    
+var tagCondEnd   = "  " + BLOCK_END   + ", " + ID_FIELD + " : \"*nameCond*\", \"_source\" : *SRC*, \"_target\" : *TRT*, \"_type\": \"Transition\"}";
 
 var links;
     
@@ -442,8 +447,17 @@ var emulink = function() {
 					return d.source.x + 64;
 				}
 				else {
+					var deltaY = d.target.y - d.source.y;
 					var deltaX = d.target.x - d.source.x;
-					return d.source.x + (deltaX * 0.4);
+					var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+					var phi = (dist == 0)? 0 : Math.acos(deltaX / dist);
+					if(deltaY >= 0) {
+						var posX = Math.cos(-phi + 0.5) * dist * 0.3;
+						return d.source.x + posX;
+					}
+					// else
+					var posX = Math.cos(phi + 0.5) * dist * 0.3;
+					return d.source.x + posX;
 				}
 			})
 			.attr("y", function(d) { 
@@ -453,8 +467,17 @@ var emulink = function() {
 				}
 				else {
 					var deltaY = d.target.y - d.source.y;
-					var labelOffset = 8; // TODO: relate this value to the font size
-					return d.source.y + (deltaY * 0.4) - labelOffset; 
+					var deltaX = d.target.x - d.source.x;
+					var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+					var phi = (dist == 0)? 0 : Math.asin(deltaY / dist);
+					if(deltaX >= 0) {
+						var posY = Math.sin(-phi + 0.5) * dist / 4;
+						return d.source.y - posY;
+					}
+					else {
+						var posY = Math.sin(phi + 0.5) * dist / 4;
+						return d.source.y + posY;
+					}
 				}
 			});
 

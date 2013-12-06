@@ -23,7 +23,7 @@ define(function (require, exports, module) {
 			projectManager = new ProjectManager(currentProject);
 		
 		ui.init();//this renders the basic templates for the page
-		var editorContainer = pvsioWebClient.createCollapsiblePanel("Source code Editor");
+		var editorContainer = pvsioWebClient.createCollapsiblePanel("PVS Editor");
 		var aceContainer = editorContainer.append("div").html(sourceCodeTemplate);
 
 		// this enable autocompletion
