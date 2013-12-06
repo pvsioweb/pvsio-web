@@ -698,7 +698,7 @@ require(["gpca/gip", "websockets/pvs/pvsWSClient"], function(_g, pvsws){
 		.lastState("GPCA_init(0)")
 		.serverUrl(url) 
 		.addListener('ConnectionOpened', function(e){
-			ws.startPVSProcess("main", "../demos/GPCA-UI_PVS" , function (e) {
+			ws.startPVSProcess({fileName: "main.pvs", demoName: "../demos/GPCA-UI_PVS"}, function (e, event) {
                 ws.sendGuiAction("GPCA_init(0);");
                 console.style.display = "none";
                 log("GPCA-UI ready");

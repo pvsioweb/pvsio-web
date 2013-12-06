@@ -54,11 +54,11 @@ define(function (require, exports, module) {
      *  @returns void 
      *	      
     */
-    function init(editor_, sm)
+    function init(editor_, sm, curProj, ws, pm)
     {
         editor = editor_;
         drawer = sm;
-        drawer.buildGraph();
+        drawer.init(editor, ws, curProj, pm, false);
         parser = new Parser(editor_, sm);
         parser.startParsing();
         drawer.emulink();
@@ -213,9 +213,7 @@ define(function (require, exports, module) {
                 target = tagProcessing.substring(tagProcessing.indexOf(this.target) + this.lengthTarget);
                 target = target.substring(0, target.indexOf(',')); 
                 target = target.replace(/\"/g, "").replace(/\s+/g,"");    
-                
-                console.log("source", source);
-                console.log("target", target);
+      
                 array.push(source);
                 array.push(target);
                 

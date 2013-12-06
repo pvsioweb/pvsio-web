@@ -30,9 +30,9 @@ define(function (require, exports, module) {
 				selectedItem: item,
 				selectedItemString: label(item)
 			};
-			listView.fire(event);
 			listView.selectedIndex(index); //update selected index
 			listView.selectedItem(item); //and selected item
+			listView.fire(event);
 		}
 	}
 	
@@ -75,11 +75,11 @@ define(function (require, exports, module) {
 		}
 		this._listItems = listItems;
 		//update the class information on all list itmes
-		listItems.attr("class", this.classFunction())
-			.select("span.file-label").html(this.labelFunction());
+		/** FIXME: THESE TWO LINES OF CODE ARE CREATING THE FOLLOWING PROBLEM: FILES ARE FLAGGED AS DIRTY WHEN CHANGING SELECTION
+		listItems.attr("class", this.classFunction()).select("span.file-label").html(this.labelFunction());
 		if (this.selectedItem()) {
 			renderSelectedItem(this.selectedIndex(), d3.select(this._listItems[0][this.selectedIndex()]), this._listItems);
-		}
+		}*/
 		return this;
 	};
 

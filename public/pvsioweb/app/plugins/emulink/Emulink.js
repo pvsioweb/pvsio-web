@@ -110,7 +110,7 @@ define(function (require, exports, module) {
         
         d3.select("#specificationToDiagram").on("click", function() {
             
-            parserSpecification.init(editor, stateMachine);
+            parserSpecification.init(editor, stateMachine, currentProject, ws, projectManager, false);
         });
 	
         /* d3.select("#infoBoxModifiable").on("change", function () {
@@ -122,7 +122,7 @@ define(function (require, exports, module) {
         document.getElementById("startEmulink").disabled = false;
         /// User wants to start emulink 
         d3.select("#startEmulink").on("click", function () {
-	        stateMachine.init(editor, ws, currentProject, projectManager);
+	        stateMachine.init(editor, ws, currentProject, projectManager, true);
             currentProject.name("default_pvsProject");
             emulinkHasBeenUsed = true;
         });    

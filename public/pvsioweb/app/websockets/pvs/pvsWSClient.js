@@ -61,8 +61,13 @@ define(function (require, exports, module) {
             @param {callback} cb The callback function to invoke when the process has started
         */
         o.startPVSProcess = function (data, cb) {
-            var sourceFile = data.fileName.split(".pvs")[0];
-            wscBase.send({type: "startProcess", data: {fileName: sourceFile, projectName: data.projectName, demoName: data.demoName}}, cb);
+			if(data && data.fileName) {
+		        var sourceFile = data.fileName.split(".pvs")[0];
+		        wscBase.send({type: "startProcess", data: {fileName: sourceFile, projectName: data.projectName, demoName: data.demoName}}, cb);
+			}
+			else {
+				console.log("ERROR: Failed to load pvs file " + data.demoName + "/" + data.fileName);
+			}
         };
         
         /**
