@@ -162,7 +162,7 @@ function restoreGraph(graphToRestore, editor, ws, currentProject, pm)
              if( workAround[i].name == currentEdge.target.name )
                  currentEdge.target = comeOn[i];
          }
-         add_edge(currentEdge.source, currentEdge.target, currentEdge.label, true);
+         add_edge(currentEdge.source, currentEdge.target, currentEdge.name, true);
     } 
     emulink();
 }
