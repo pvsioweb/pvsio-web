@@ -139,7 +139,7 @@ function buildGraph()
 
 function restoreGraph(graphToRestore, editor, ws, currentProject, pm)
 {
-    init(editor, ws, currentProject, pm);
+    init(editor, ws, currentProject, pm, false);
     var nodesToRestore = graphToRestore.nodes;
     var edgesToRestore = graphToRestore.edges;
     var workAround = new Array();
@@ -148,7 +148,7 @@ function restoreGraph(graphToRestore, editor, ws, currentProject, pm)
     {
          var currentNode = nodesToRestore[id];
          workAround.push(currentNode);
-         comeOn.push(add_node(currentNode.x, currentNode.y, currentNode.name));
+         comeOn.push(add_node(currentNode.x, currentNode.y, currentNode.name, true));
     }
     for( var id in edgesToRestore)
     {
@@ -162,7 +162,7 @@ function restoreGraph(graphToRestore, editor, ws, currentProject, pm)
              if( workAround[i].name == currentEdge.target.name )
                  currentEdge.target = comeOn[i];
          }
-         add_edge(currentEdge.source, currentEdge.target, currentEdge.label);
+         add_edge(currentEdge.source, currentEdge.target, currentEdge.label, true);
     } 
     emulink();
 }
@@ -290,7 +290,7 @@ function getEdgesInDiagram()
     return edgesNode;
 }   
 /// Function init is the entry point of the Emulink graphical editor
-function init(_editor, wsocket, currentProject, pm, start) {
+function init(_editor, wsocket, currentProject, pm, startWriter) {
 
     // After last modifications (Emulink commented) I need to create here SVG 
     svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
@@ -315,12 +315,14 @@ function init(_editor, wsocket, currentProject, pm, start) {
     
     // Start Emulink
 	emulink();
-    if( ! start) { return; }
+    
+    if( ! startWriter) { return; }
 	pvsWriter.newSpecification("myTheory"); 
 }
 
 var emulink = function() {
 
+    console.log("emulink is called");
 	var colors = d3.scale.category10();
 
 	// init D3 force layout

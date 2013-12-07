@@ -106,6 +106,7 @@ define(function (require, exports, module) {
         d3.select("#specificationToDiagram").on("click", function() {
             
             parserSpecification.init(editor, stateMachine, currentProject, ws, projectManager, false);
+            emulinkHasBeenUsed = true;
         });
 	
         /* d3.select("#infoBoxModifiable").on("change", function () {
