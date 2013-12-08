@@ -427,10 +427,10 @@ var emulink = function() {
 					var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 					var normX = deltaX / dist;
 					var normY = deltaY / dist;
-					var sourcePaddingX = boxWidth * 0.4;
-					var sourcePaddingY = boxHeight * 0.4;
-					var targetPaddingX = boxWidth * 0.6;
-					var targetPaddingY = boxHeight * 0.6;
+					var sourcePaddingX = d.source.width * 0.4; //boxWidth * 0.4;
+					var sourcePaddingY = d.source.height * 0.4;//boxHeight * 0.4;
+					var targetPaddingX = d.target.width * 0.7; //boxWidth * 0.6;
+					var targetPaddingY = d.target.height * 0.4;//boxHeight * 0.6;
 					var sourceX = d.source.x + (sourcePaddingX * normX);
 					var sourceY = d.source.y + (sourcePaddingY * normY);
 					var targetX = d.target.x - (targetPaddingX * normX);
@@ -441,48 +441,6 @@ var emulink = function() {
 					return "m" + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY; // this draws a straight line
 				}
 			});
-		// move edge label accordingly
-		path.select("text")
-			.attr("x", function(d) {
-				if(d.target.x == d.source.x && d.target.y == d.source.y) {
-					// self-edge
-					return d.source.x + 64;
-				}
-				else {
-					var deltaY = d.target.y - d.source.y;
-					var deltaX = d.target.x - d.source.x;
-					var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-					var phi = (dist == 0)? 0 : Math.acos(deltaX / dist);
-					if(deltaY >= 0) {
-						var posX = Math.cos(-phi + 0.5) * dist * 0.3;
-						return d.source.x + posX;
-					}
-					// else
-					var posX = Math.cos(phi + 0.5) * dist * 0.3;
-					return d.source.x + posX;
-				}
-			})
-			.attr("y", function(d) { 
-				if(d.target.x == d.source.x && d.target.y == d.source.y) {
-					// self-edge
-					return d.source.y - 40;
-				}
-				else {
-					var deltaY = d.target.y - d.source.y;
-					var deltaX = d.target.x - d.source.x;
-					var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-					var phi = (dist == 0)? 0 : Math.asin(deltaY / dist);
-					if(deltaX >= 0) {
-						var posY = Math.sin(-phi + 0.5) * dist / 4;
-						return d.source.y - posY;
-					}
-					else {
-						var posY = Math.sin(phi + 0.5) * dist / 4;
-						return d.source.y + posY;
-					}
-				}
-			});
-
 		// move nodes if they are dragged
 		node.attr('transform', function(d) {
 			return 'translate(' + d.x + ',' + d.y + ')';
@@ -506,11 +464,13 @@ var emulink = function() {
 		var pathCanvas = path.enter().append('svg:g');
 		pathCanvas
 			.append('svg:path')
+			.attr("id", function(d) { return d.id; })
 			.attr('class', 'link')
 			.classed('selected', function(d) { return d === selected_link; })
 			.style('marker-start', function(d) { return d.left ? 'url(#start-arrow)' : ''; })
 			.style('marker-end', 'url(#end-arrow)')
 			.style("cursor", "pointer") // change cursor shape
+			.attr("stroke-width", "80")
 			.on('mousedown', function(d) {
 				if(d3.event.ctrlKey) {
 					//TODO: use the ctrl key to allow the selection of multiple nodes
@@ -527,7 +487,12 @@ var emulink = function() {
 			});
 		pathCanvas
 			.append('svg:text')
-			.attr('class', 'id')
+			.attr('class', 'id')			
+			.append("textPath")
+			.attr("xlink:href",function(d) { return "#" + d.id; })
+			.attr("startOffset", "50%")
+			.attr("dy", "0.3em")
+			.style("text-anchor", "middle")
 			.text(function(d) { return d.name; })
 			.style("cursor", "pointer") // change cursor shape
 			.on('mousedown', function(d) { // FIXME: THIS HANDLER IS NEVER TRIGGERED
