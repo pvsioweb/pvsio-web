@@ -540,13 +540,7 @@ function WriterOnContent( editor)
         debug.value = debug.value + "Warning: " + fieldStateInOperation + " is not in PVS State ";
     }
     this.changeEditor = function() 
-    {   
-        //Save the content file
-        if( currentProject.pvsFiles().length)
-            currentProject.pvsFiles()[0].content(writer.editor.getValue()).dirty(true);
-        else
-            console.log("Change Editor :", "empty");
-        
+    {          
         if( writer.userIsModifying ) { writer.handleUserModificationOnEditor(); }
         else { console.log("Writer has modified editor content"); }
     }
