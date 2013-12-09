@@ -130,6 +130,17 @@ var tagCondEnd   = "  " + BLOCK_END   + ", " + ID_FIELD + " : \"*nameCond*\", \"
 
 var links;
     
+function clearSvg()
+{
+    graph.nodes.forEach(function(key, value) {
+                        graph.nodes.remove(key);
+                    });
+    
+    graph.edges.forEach(function(key, value) {        
+                        graph.edges.remove(key);        
+                    });
+}
+    
 function buildGraph()
 {
     svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
@@ -879,7 +890,8 @@ module.exports = {
     buildGraph : buildGraph,
     add_node : function(x,y,label,writer) { var ret = add_node(x,y,label,writer);  return ret; },
     add_edge : function(source, target, lab, notWr) {add_edge(source, target, lab, notWr);  },
-    emulink: emulink
+    emulink: emulink,
+    clearSvg : clearSvg
 };
 
 
