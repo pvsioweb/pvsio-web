@@ -429,18 +429,39 @@ var emulink = function() {
 					var normY = deltaY / dist;
 					var sourcePaddingX = d.source.width * 0.4; //boxWidth * 0.4;
 					var sourcePaddingY = d.source.height * 0.4;//boxHeight * 0.4;
-					var targetPaddingX = d.target.width * 0.7; //boxWidth * 0.6;
-					var targetPaddingY = d.target.height * 0.4;//boxHeight * 0.6;
+					var targetPaddingX = d.target.width; //boxWidth * 0.6;
+					var targetPaddingY = d.target.height;//boxHeight * 0.6;
 					var sourceX = d.source.x + (sourcePaddingX * normX);
 					var sourceY = d.source.y + (sourcePaddingY * normY);
 					var targetX = d.target.x - (targetPaddingX * normX);
 					var targetY = d.target.y - (targetPaddingY * normY);
-					if(curvyLines) { 
+					if(curvyLines && deltaX >= 0){
+						if(deltaY > 40) {
+							targetPaddingX = d.target.width * 0.2; //boxWidth * 0.6;
+							targetPaddingY = d.target.height * 0.6;//boxHeight * 0.6;
+							targetX = d.target.x + targetPaddingX;
+							targetY = d.target.y - targetPaddingY;
+						}
+						else if(deltaY >= 0){
+							targetPaddingX = d.target.width * 0.6; //boxWidth * 0.6;
+							targetPaddingY = d.target.height * 0.2;//boxHeight * 0.6;
+							targetX = d.target.x - targetPaddingX;
+							targetY = d.target.y - targetPaddingY;
+						}
+						else {
+							targetPaddingX = d.target.width * 0.6; //boxWidth * 0.6;
+							targetPaddingY = d.target.height * 0.2;//boxHeight * 0.6;
+							targetX = d.target.x - targetPaddingX;
+							targetY = d.target.y + targetPaddingY;
+						}
 						return "m" + sourceX + ',' + sourceY + "A" + dist + "," + dist + " 0 0,1 " + targetX + "," + targetY; 
 					}
 					return "m" + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY; // this draws a straight line
 				}
 			});
+		path.select("text")
+			.attr("dy", "-5")
+			.style("fill","blue");
 		// move nodes if they are dragged
 		node.attr('transform', function(d) {
 			return 'translate(' + d.x + ',' + d.y + ')';
@@ -470,7 +491,7 @@ var emulink = function() {
 			.style('marker-start', function(d) { return d.left ? 'url(#start-arrow)' : ''; })
 			.style('marker-end', 'url(#end-arrow)')
 			.style("cursor", "pointer") // change cursor shape
-			.attr("stroke-width", "80")
+			.style("stroke-width", "3")
 			.on('mousedown', function(d) {
 				if(d3.event.ctrlKey) {
 					//TODO: use the ctrl key to allow the selection of multiple nodes
@@ -491,7 +512,6 @@ var emulink = function() {
 			.append("textPath")
 			.attr("xlink:href",function(d) { return "#" + d.id; })
 			.attr("startOffset", "50%")
-			.attr("dy", "0.3em")
 			.style("text-anchor", "middle")
 			.text(function(d) { return d.name; })
 			.style("cursor", "pointer") // change cursor shape

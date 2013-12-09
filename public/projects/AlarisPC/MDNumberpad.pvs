@@ -120,21 +120,4 @@ MDNumberpad: THEORY
 	programmedValue := 0
    #)
 
-
-   %-- interface functions for pvsio-web
-   %click_btn0(st: state): state = processKey(KEY_0)(st)
-   %click_btn1(st: state): state = processKey(KEY_1)(st)
-   %click_btn2(st: state): state = processKey(KEY_2)(st)
-   %click_btn3(st: state): state = processKey(KEY_3)(st)
-   %click_btn4(st: state): state = processKey(KEY_4)(st)
-   %click_btn5(st: state): state = processKey(KEY_5)(st)
-   %click_btn6(st: state): state = processKey(KEY_6)(st)
-   %click_btn7(st: state): state = processKey(KEY_7)(st)
-   %click_btn8(st: state): state = processKey(KEY_8)(st)
-   %click_btn9(st: state): state = processKey(KEY_9)(st)
-   %click_btnOK(st: state): state = processKey(KEY_OK)(st)
-   %click_btnCLR(st: state): state = processKey(KEY_RESET)(st)
-   %click_btnPOINT(st: state): state = processKey(KEY_DOT)(st)
-
  END MDNumberpad
-

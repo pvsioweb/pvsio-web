@@ -14,7 +14,11 @@ main: THEORY
   %{"_block" : "BlockEnd", "_id" : "State", "_type": "State"}
 
   %{"_block" : "BlockStart", "_id" : "initial_state"}
-  initial_state: State 
+  initial_state(x: real): State = (#
+   	current_state := Ready,
+	previous_state := Ready,
+	numberpad := init_numberpad(x)
+   #)
   %{"_block" : "BlockEnd", "_id" : "initial_state"}
 
   %{"_block" : "BlockStart", "_id" : "leave_state", "_type": "Function"}
@@ -208,11 +212,7 @@ main: THEORY
      ELSE -> st
     ENDCOND
 
-   init(x: real): State = (#
-   	current_state := Ready,
-	previous_state := Ready,
-	numberpad := init_numberpad(x)
-   #)
+   init(x: real): State = initial_state(x)
 
 
 

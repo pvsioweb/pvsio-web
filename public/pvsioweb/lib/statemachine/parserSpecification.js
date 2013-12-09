@@ -184,7 +184,8 @@ define(function (require, exports, module) {
             for( var i = 0; i<length; i++ )
             {
                  listNodes[i] = listNodes[i].replace(/\s+/g,"");
-                 this.listOfNodes.push(drawer.add_node(this.defaultPosX, this.defaultPosY, listNodes[i], 1));
+				 // FIXME: avoid magic numbers!
+                 this.listOfNodes.push(drawer.add_node(Math.random() * 800, Math.random() * 800, listNodes[i], 1));
   
             }
             
