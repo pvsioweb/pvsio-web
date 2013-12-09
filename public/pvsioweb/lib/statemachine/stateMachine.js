@@ -442,17 +442,11 @@ var emulink = function() {
 							targetX = d.target.x + targetPaddingX;
 							targetY = d.target.y - targetPaddingY;
 						}
-						else if(deltaY >= 0){
-							targetPaddingX = d.target.width * 0.6; //boxWidth * 0.6;
-							targetPaddingY = d.target.height * 0.2;//boxHeight * 0.6;
-							targetX = d.target.x - targetPaddingX;
-							targetY = d.target.y - targetPaddingY;
-						}
 						else {
 							targetPaddingX = d.target.width * 0.6; //boxWidth * 0.6;
 							targetPaddingY = d.target.height * 0.2;//boxHeight * 0.6;
 							targetX = d.target.x - targetPaddingX;
-							targetY = d.target.y + targetPaddingY;
+							targetY = d.target.y - targetPaddingY;
 						}
 						return "m" + sourceX + ',' + sourceY + "A" + dist + "," + dist + " 0 0,1 " + targetX + "," + targetY; 
 					}
