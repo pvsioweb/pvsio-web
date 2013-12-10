@@ -263,6 +263,7 @@ function run() {
             "setMainFile": function (token, socket, socketid) {
                 changeProjectSetting(token.projectName, "mainPVSFile", token.fileName, function (res) {
                     res.id = token.id;
+                    res.socketId = socketid;
                     res.serverSent = new Date().getTime();
                     processCallback(res, socket);
                 });
@@ -270,18 +271,19 @@ function run() {
             "saveTempFile": function (token, socket, socketid) {
                 saveTempFile(token, function (res) {
                     res.id = token.id;
+                    res.socketId = socketid;
                     res.serverSent = new Date().getTime();
                     processCallback(res, socket);
                 });
             },
             "listProjects": function (token, socket, socketid) {
                 var projects = listProjects();
-                var res = projects.err ? projects : {id: token.id, serverSent: new Date().getTime(), projects: projects};
+                var res = projects.err ? projects : {id: token.id, serverSent: new Date().getTime(), projects: projects, socketId: socketid};
                 processCallback(res, socket);
             },
             "openProject": function (token, socket, socketid) {
                 var project = openProject(token.name);
-                var res = {project: project, id: token.id, serverSent: new Date().getTime()};
+                var res = {project: project, id: token.id, serverSent: new Date().getTime(), socketId: socketid};
                 processCallback(res, socket);
             },
             "createProject": function (token, socket, socketid) {
@@ -289,19 +291,20 @@ function run() {
                 pvsioProcessMap[socketid] = p;
                 var res = createProject(token);
                 res.id = token.id;
+                res.socketId = socketid;
                 res.serverSent = new Date().getTime();
                 processCallback(res, socket);
             },
             "typeCheck": function (token, socket, socketid) {
                 typeCheck(token.filePath, function (err, stdout, stderr) {
-                    var res = {id: token.id, err: err, stdout: stdout, stderr: stderr};
+                    var res = {id: token.id, err: err, stdout: stdout, stderr: stderr, socketId: socketid};
                     processCallback(res, socket);
                 });
             },
             "sendCommand": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 p.sendCommand(token.data.command, function (data) {
-                    var res = {id: token.id, data: data};
+                    var res = {id: token.id, data: data, socketId: socketid};
                     processCallback(res, socket);
                 });
             },
@@ -328,6 +331,7 @@ function run() {
                         function (res) {
                             res.id = token.id;
                             res.serverSent = new Date().getTime();
+                            res.socketId = socketid;
                             processCallback(res, socket);
                         });
             },
@@ -335,7 +339,7 @@ function run() {
                 p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";
                 fs.readFile(token.fileName, encoding, function (err, content) {
-                    var res = err ? {err: err} : {id: token.id, serverSent: new Date().getTime(), fileContent: content};
+                    var res = err ? {err: err} : {id: token.id, serverSent: new Date().getTime(), fileContent: content, socketId: socketid};
                     processCallback(res, socket);
                 });
             },
@@ -343,7 +347,7 @@ function run() {
                 p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";
                 fs.writeFile(token.data.fileName, token.data.fileContent, encoding, function (err) {
-                    var res = {id: token.id, serverSent: new Date().getTime()};
+                    var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
                     ///files saved need to inform client about need to restart pvsioweb with appropriate files
                     if (!err) {
                         util.log("Source code has been saved." + socketid);
@@ -356,7 +360,7 @@ function run() {
             },
             "deleteFile": function (token, socket, socketid) {
                 fs.unlink(token.fileName, function (err) {
-                    var res = {id: token.id, serverSent: new Date().getTime()};
+                    var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
                     if (!err) {
                         res.type = "fileDeleted";
                     } else {
