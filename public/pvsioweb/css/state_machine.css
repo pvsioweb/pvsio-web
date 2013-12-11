@@ -13,7 +13,7 @@
 }
 
 
-#button_state:hover	    {
+#button_state:hover	  {
 
 	cursor:		default;
 	box-shadow:     0 1px 3px rgba(0,0,0,0.8);
@@ -115,24 +115,22 @@ ul#context-menu li {
 
 .resize_button_inside_svg {
   position: absolute;
-
 }
 
 #infoBox {
   position: absolute;
-  top:	    60px;
+  top:	    155px;
   width:    180px;
-  height:   60px;
+  height:   80px;
   left:    940px;
   border-width : 5px;
   border-style: dotted;
   background :  #D0F18F;
   font-family: Tahoma, sans-serif;
-
 }
 #infoBoxModifiable {
   position: absolute;
-  top:	    150px;
+  top:	    235px;
   width:    180px;
   height:   300px;
   left:    940px;
@@ -143,7 +141,7 @@ ul#context-menu li {
 }
 #warningDebug {
   position: absolute;
-  top:	    280px;
+  top:	    400px;
   width:    180px;
   height:   300px;
   left:    940px;
@@ -151,4 +149,23 @@ ul#context-menu li {
   border-style: dotted;
   background :  #AAFFFF;
   font-family: Tahoma, sans-serif;
+}
+#emulinkInfo {
+  position: relative;
+  top: -25px;
+  height: 80px;
+  width: 800px;
+  color: #FF0000; /*#53760D;*/
+  font: 24px/30px cursive;
+  border-style: dotted;
+}
+#modifyPropertiesToolbarNode{
+ border:-style: dotted;
+ font: 20px/24px cursive; 
+ display: none;
+}
+#modifyPropertiesToolbarEdge{
+ border:-style: dotted;
+ font: 20px/24px cursive;    
+ display:none;
 }

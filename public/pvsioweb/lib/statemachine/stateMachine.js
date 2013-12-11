@@ -502,11 +502,12 @@ var emulink = function() {
 					//TODO: use the ctrl key to allow the selection of multiple nodes
 				}
 				else {
+                    document.getElementById("modifyPropertiesToolbarEdge").style.display = "block";
+                    document.getElementById("modifyPropertiesToolbarNode").style.display = "none";
 					showInformationInTextArea(d);
 					pvsWriter.focusOnFun(d, true);
                     selected_nodes.splice(0, selected_nodes.length);
                     selected_edges.splice(0, selected_edges.length);
-                    console.log("Add Edge in array");
 					selected_edges.push(d);
                     selected_node = null;
 				}
@@ -532,6 +533,7 @@ var emulink = function() {
 					selected_edges.push(d);
 				}
 			});
+
 		// update existing links
 		path.classed('selected', function(d) { return d === selected_link; })
 			.style('marker-start', function(d) { return d.left ? 'url(#start-arrow)' : ''; })
@@ -613,8 +615,10 @@ var emulink = function() {
                                                 
 						// update borders of nodes
 						node.selectAll("rect").style("stroke", "").style("stroke-width", "");
-
-						// update information in the text area
+                        // showing toolbar node and hidding toolbar edge
+                        document.getElementById("modifyPropertiesToolbarEdge").style.display = "none";
+                        document.getElementById("modifyPropertiesToolbarNode").style.display = "block";
+                        // update information in the text area
 						showInformationInTextArea(d);
 						// highlight code in the pvs theory
 						pvsWriter.focusOn(d);
@@ -629,7 +633,6 @@ var emulink = function() {
 					if(mousedown_node) {
 						// update mouseup_node
 						mouseup_node = d;
-
 						// TODO: allow self-loops
 						if(mouseup_node === mousedown_node) { resetMouseVars(); return; }
 
@@ -850,6 +853,80 @@ var emulink = function() {
 		restart();
 	  });
     
+    d3.select("#changeNameNode")
+      .on("click", function () {
+          
+        var object = selected_nodes[ selected_nodes.length -1];
+        var newName = prompt("Please enter the node new name",object.name);
+        if( newName.length == 0 || newName === object.name )
+            return;
+          
+        /// Change name in the canvas 
+	    var oldId = object.id;
+		var oldName = object.name;
+
+		node.selectAll("text").text(function(d) { 
+			if(d.id == oldId) { return newName; }
+			return d.name;
+		});
+		var newNode = graph.nodes.get(oldId);
+		newNode.name = newName;
+		graph.nodes.set(oldId, newNode);
+
+	    /// Change name in the PVS specification
+	    pvsWriter.changeStateName(oldName, newName);
+           
+        restart();
+      });
+    
+      d3.select("#changeNameEdge")
+      .on("click", function () {
+          
+        var object = selected_edges[ selected_edges.length - 1];
+        var newName = prompt("Please enter the edge new name", object.name);
+        if( newName.length == 0 || newName === object.name )
+            return;
+        var sourceName = object.source.name;
+        var targetName = object.target.name;
+        var oldId = object.id;
+		var oldName = object.name;
+        var counter = 0;
+        
+        path.selectAll("textPath").text(function(d) { 
+            
+            var tmp = d.name;            
+            if(tmp == oldName ) { counter ++; }
+			if( d.id == oldId) { 
+                    return newName;
+            }
+			return d.name;
+		});
+		var newNode = graph.edges.get(oldId);
+        
+		newNode.name = newName;
+		graph.edges.set(oldId, newNode);
+        
+        /// Change name in the PVS specification
+        pvsWriter.changeFunName(oldName, newName, sourceName, targetName, counter);             
+        restart();
+      });
+    
+    d3.select("#addOperation")
+    .on("click", function () {        
+        var object = selected_edges[ selected_edges.length - 1];        
+        var fieldState = prompt("State field to change");
+        if( fieldState.length == 0 )
+            return;
+        var value = prompt("Value for " + fieldState);
+        if( value.length == 0 )
+            return;
+        
+        var operation = fieldState + ":= " + value;
+        pvsWriter.addOperationInCondition(object.name, object.source.name, object.target.name, operation); 
+        
+        
+    });
+    
 
     
     d3.select("#addFieldState")
@@ -880,7 +957,10 @@ var emulink = function() {
 module.exports = {
 	init: function (editor, wsocket, currentProject, pm, start) { return init(editor, wsocket, currentProject, pm, start); },
 	changeTextArea : changeTextArea,
-	add_node_mode: function(){ return toggle_editor_mode(MODE.ADD_NODE); },
+	add_node_mode: function(){ if( d3.select("#ContainerStateMachine").selectAll("svg")[0].length )
+                               return toggle_editor_mode(MODE.ADD_NODE);
+                               document.getElementById("emulinkInfo").value = "Emulink Status: NOT ACTIVE;\nClick on New Diagram to Activate Emulink";
+                             },
 	add_transition_mode: function() { return toggle_editor_mode(MODE.ADD_TRANSITION); },
 	add_self_transition_mode: function() { return toggle_editor_mode(MODE.ADD_SELF_TRANSITION); },
     getNodesInDiagram : getNodesInDiagram,

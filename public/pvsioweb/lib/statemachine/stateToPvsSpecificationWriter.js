@@ -625,12 +625,14 @@ function WriterOnContent( editor)
         
         operation = "   new_st = new_st WITH [ " + operation + " ]";
         var arrayTag = this.buildTagCond(nameTrans, sourceName, targetName);
+        arrayTag[0] = arrayTag[0].replace(/(\r\n|\n|\r)/gm, "");
+        arrayTag[1] = arrayTag[1].replace(/(\r\n|\n|\r)/gm, "");
         var content = this.getContentBetweenTags(arrayTag[0], arrayTag[1], false);
-        var newContent = content.substring(0, content.indexOf('IN') - 9) + "," + "\n    " + operation + "\n    " +
-                         "  IN " +content.substring(content.indexOf("IN") + 2);
         
-        this.editor.find(arrayTag[0] + content + arrayTag[1]);
-        this.editor.replace(arrayTag[0] + newContent + arrayTag[1]);        
+        var newContent = content.substring(0, content.indexOf("IN")) + "," + operation + "\n    " + content.substring(content.indexOf("IN") -2) ;
+        
+        var a =this.editor.find(content );
+        this.editor.replace( newContent );        
     }
     this.addFieldInState = function(nameField, typeName)
     {

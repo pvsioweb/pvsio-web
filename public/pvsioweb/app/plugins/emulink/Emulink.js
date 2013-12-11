@@ -23,7 +23,12 @@ define(function (require, exports, module) {
         var canvas = pvsioWebClient.createCollapsiblePanel("Statechart editor");
         canvas = canvas.html(content); 
 	}
-	
+	function showEmulinkStatus()
+    {
+        document.getElementById("emulinkInfo").value = "Emulink Status: Active ";
+        document.getElementById("emulinkInfo").style.color = "#53760D";
+        
+    }
 	function Emulink(pvsioWebClient) {
 		//register prototype builder as a plugin since this plugin depends on it
 		var pb = pvsioWebClient.registerPlugin(PrototypeBuilder);
@@ -40,7 +45,7 @@ define(function (require, exports, module) {
         d3.select("#button_state").on("click", function () { stateMachine.add_node_mode(); });
         d3.select("#button_transition").on("click", function () { stateMachine.add_transition_mode(); });
         d3.select("#button_self_transition").on("click", function () { stateMachine.add_self_transition_mode(); });
-
+        
         /// When User clicks on New File button #new_file a pvs file is created and showed in file list box
         d3.select("#new_file").on("click", function ( ) {	
             projectManager.newFile();
@@ -103,21 +108,23 @@ define(function (require, exports, module) {
             pvsWriter.showTags();
         });
         
-        d3.select("#specificationToDiagram").on("click", function() {
-            
+        d3.select("#specificationToDiagram").on("click", function() {            
             parserSpecification.init(editor, stateMachine, currentProject, ws, projectManager, false);
+            showEmulinkStatus();
             emulinkHasBeenUsed = true;
         });
+        
 	
         /* d3.select("#infoBoxModifiable").on("change", function () {
 	
 	    stateMachine.changeTextArea();
 	 
         });*/
-
+        document.getElementById("emulinkInfo").value = "Emulink status: NOT active";
         document.getElementById("startEmulink").disabled = false;
         /// User wants to start emulink 
         d3.select("#startEmulink").on("click", function () {
+            showEmulinkStatus();
 	        stateMachine.init(editor, ws, currentProject, projectManager, true);
             currentProject.name("default_pvsProject");
             emulinkHasBeenUsed = true;
@@ -155,6 +162,7 @@ define(function (require, exports, module) {
                         var graphDefinitionObject = JSON.parse(res.fileContent);
                         stateMachine.restoreGraph(graphDefinitionObject, editor, ws, project, projectManager);
                         emulinkHasBeenUsed = true;
+                        showEmulinkStatus();
 					} else {
 						///TODO show error loading file
 						console.log(JSON.stringify(err));
