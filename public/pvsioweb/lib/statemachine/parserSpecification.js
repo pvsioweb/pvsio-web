@@ -177,7 +177,6 @@ define(function (require, exports, module) {
                 console.log("No nodes Found");
                 return;
             }
-            console.log("TMP IS ",tmp);
             var listNodes = tmp.split(',');
             var length = listNodes.length;
             

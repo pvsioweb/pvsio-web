@@ -1,6 +1,9 @@
 <!-- container for graphical editor -->
 			<div id="graphicalEditor">
 				<hr>
+                <div id= "emulinkStatusBar">
+                <textarea id="emulinkInfo" readonly> </textarea>                
+                </div>
 				<div id="stateMachineToolbar" >
 					<button class="btn" id="startEmulink" > New Diagram </button>
 					<button class="btn" id="button_state" > New State </button>
@@ -9,6 +12,13 @@
                     <button class="btn" id="addFieldState" >New field </button>  
                     <button class="btn" id="specificationToDiagram" >Create Diagram from Specification </button>
 				</div>
+                <div id="modifyPropertiesToolbarNode" >
+                    <button class="btn" id="changeNameNode" > Modify name</button>
+                </div>
+                <div id="modifyPropertiesToolbarEdge" >
+                    <button class="btn" id="changeNameEdge" > Modify name</button>
+                    <button class="btn" id="addOperation"> Add Operation</button>
+                </div>
 				<div id="ContainerStateMachine" ></div>
 				<div id="state_machine_toolbar" ></div>
 				<textarea id="infoBox" readonly>TIP: Select a state or a transition to see its properties</textarea>
