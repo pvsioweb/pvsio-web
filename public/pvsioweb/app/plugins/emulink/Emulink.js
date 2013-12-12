@@ -116,6 +116,7 @@ define(function (require, exports, module) {
         });
         
         d3.select("#startSimulation").on("click", function() {
+			d3.select(this).html("Animation Enabled").classed("btn btn-success", true).attr("disabled", true);
             Simulator.init(ws); 
             console.log("OK");
             //Simulator.setInitState("INITSTATE");
@@ -130,6 +131,7 @@ define(function (require, exports, module) {
         document.getElementById("startEmulink").disabled = false;
         /// User wants to start emulink 
         d3.select("#startEmulink").on("click", function () {
+			d3.select(this).html("Diagram created").classed("btn-danger", false).classed("btn-success", true).attr("disabled", true);
             showEmulinkStatus();
 	        stateMachine.init(editor, ws, currentProject, projectManager, true);
             currentProject.name("default_pvsProject");

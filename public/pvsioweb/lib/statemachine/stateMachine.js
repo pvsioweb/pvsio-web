@@ -38,36 +38,48 @@ var charge = -50; // positive value = repulsion; negative value = attraction; fo
 var animatedLayout = false;
 
 /**
- * highlightElements changes the colour of the elements whose label is in the array 'labels' specified as parameter.
+ * highlightElements changes the colour of the nodes in array 'nodes' specified as parameter.
  * This function is used during simulations to put in evidence the state changes caused by a user action
  * Example of invocation: highlightElements(["Ready","click_POINT", "Process_DP"]);
  * 
  */
-var highlightElements = function ( labels ) {
+var highlightElements = function ( nodes ) {
 	// highlight nodes
 	svg.selectAll("g").selectAll("g").select("rect")
 		.style("fill", function (d) {
-				for(var i = 0; i < labels.length; i++) {
-					if(labels[i] == d.name) {
+				for(var i = 0; i < nodes.length; i++) {
+					if(nodes[i] == d.name) {
 						return "white";
 					}
 				}
 				return "";
 			})
 		.style("stroke", function (d) {
-			for(var i = 0; i < labels.length; i++) {
-				if(labels[i] == d.name) {
+			for(var i = 0; i < nodes.length; i++) {
+				if(nodes[i] == d.name) {
 					return "green";
 				}
 			}
 			return "";})
 		.style("stroke-width", 3);
-	//highlight edges
+
+	// find edges that connect the nodes
+	var labels = [];
+	for(var i = 1; i < nodes.length; i++) {
+		var source = nodes[i-1];
+		var target = nodes[i];
+		// FIXME: for now we work under the assumption that at most one link exists between source and target, and source and target have unique names
+		var link = graph.edges.values().filter(function(l) { return (l.source.name === source && l.target.name === target); })[0];
+		if(link) { labels.push(link); }
+	}
+
 	svg.selectAll("path")		
 		.style("stroke", function (d) {
 			if(d) {
 				for(var i = 0; i < labels.length; i++) {
-					if(labels[i] == d.name) {
+					if(labels[i].name == d.name 
+						&& labels[i].source.name == d.source.name
+						&& labels[i].target.name == d.target.name) {
 						return "green";
 					}
 				}
