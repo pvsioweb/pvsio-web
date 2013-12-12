@@ -987,7 +987,8 @@ var emulink = function() {
 					var originalName = object.name;
 					var counter = 0;
 
-					// FIXME: this is not working!
+					// FIXME: re-enable this for self-edges only
+					/*
 					path.selectAll("text").text( function(d) {
 						// FIXME: it's not safe to count the occurrences here! Please use the graph structure.
 						if(d.name == originalName ) { counter++; }
@@ -997,13 +998,33 @@ var emulink = function() {
 							return d.name;
 						}
 					});
+					*/
 
+					/* this works in Firefox but not in Chrome -- could be a bug in Chrome's Javascript implementation
+					 * as a workaround, we directly manipulate DOM
 					path.selectAll("textPath").text( function(d) {
 						if(d.name == originalName ) { counter++; }
 						if(d.id == id) { return newName; }
 						return d.name;
-					});
-					
+					});*/
+
+					// here's the workaround for the bug with textPath in Chrome
+					var textPathID = "textPath:" + id;
+					if(path.selectAll("text")) {
+						for(var i = 0; i < path.selectAll("text").length; i++) {
+							if(path.selectAll("text")[i] && path.selectAll("text")[i][1] && path.selectAll("text")[i][1].childNodes[0]) {
+								if(path.selectAll("text")[i][1].childNodes[0].id == textPathID) {
+									// remove the textpath child
+									var textPath = path.selectAll("text")[i][1].removeChild(path.selectAll("text")[i][1].childNodes[0]);
+									// replace the text in textPath with the new label
+									textPath.removeChild(textPath.childNodes[0]);
+									textPath.appendChild(document.createTextNode(newName));
+									// append the textPath back
+									path.selectAll("text")[i][1].appendChild(textPath);
+								}
+							}
+						}					
+					}
 					var newNode = graph.edges.get(id);
 
 					newNode.name = newName;
