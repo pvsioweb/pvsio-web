@@ -625,7 +625,7 @@ function WriterOnContent( editor)
     {
         this.checkConsistenceOperation(operation);
         
-        operation = "   new_st = new_st WITH [ " + operation + " ]";
+        operation = "  new_st = new_st WITH [ " + operation + " ]";
         var arrayTag = this.buildTagCond(nameTrans, sourceName, targetName);
         arrayTag[0] = arrayTag[0].replace(/(\r\n|\n|\r)/gm, "");
         arrayTag[1] = arrayTag[1].replace(/(\r\n|\n|\r)/gm, "");
@@ -633,7 +633,7 @@ function WriterOnContent( editor)
         
         var newContent = content.substring(0, content.indexOf("IN")) + "," + operation + "\n    " + content.substring(content.indexOf("IN") -2) ;
         
-        var a =this.editor.find(content );
+        this.editor.find(content );
         this.editor.replace( newContent );        
     }
     this.addFieldInState = function(nameField, typeName)
