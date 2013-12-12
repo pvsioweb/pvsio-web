@@ -38,12 +38,41 @@ var charge = -50; // positive value = repulsion; negative value = attraction; fo
 var animatedLayout = false;
 
 /**
- * highlightElements changes the colour of the elements whose label is in the list specified as parameter.
+ * highlightElements changes the colour of the elements whose label is in the array 'labels' specified as parameter.
  * This function is used during simulations to put in evidence the state changes caused by a user action
+ * Example of invocation: highlightElements(["Ready","click_POINT", "Process_DP"]);
  * 
  */
 var highlightElements = function ( labels ) {
-	
+	// highlight nodes
+	svg.selectAll("g").selectAll("g").select("rect")
+		.style("fill", function (d) {
+				for(var i = 0; i < labels.length; i++) {
+					if(labels[i] == d.name) {
+						return "white";
+					}
+				}
+				return "";
+			})
+		.style("stroke", function (d) {
+			for(var i = 0; i < labels.length; i++) {
+				if(labels[i] == d.name) {
+					return "green";
+				}
+			}
+			return "";})
+		.style("stroke-width", 3);
+	//highlight edges
+	svg.selectAll("path")		
+		.style("stroke", function (d) {
+			if(d) {
+				for(var i = 0; i < labels.length; i++) {
+					if(labels[i] == d.name) {
+						return "green";
+					}
+				}
+				return "grey";}
+			})
 }
 
 var add_node = function (positionX, positionY, label, notWriter ) {
@@ -1045,7 +1074,8 @@ module.exports = {
     add_node : function(x,y,label,writer) { var ret = add_node(x,y,label,writer);  return ret; },
     add_edge : function(source, target, lab, notWr) {add_edge(source, target, lab, notWr);  },
     emulink: emulink,
-    clearSvg : clearSvg
+    clearSvg : clearSvg,
+	highlightElements: highlightElements
 };
 
 
