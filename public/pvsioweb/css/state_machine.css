@@ -148,12 +148,12 @@ ul#context-menu li {
   font-family: Tahoma, sans-serif;
 }
 #emulinkInfo {
-  position: relative;
-  top: -25px;
-  height: 80px;
-  width: 800px;
+  position: absolute;
+  left:    940px;
+  height: 130px;
+  width: 180px;
   color: #FF0000; /*#53760D;*/
-  font: 24px/30px cursive;
+  font: 16px/18px cursive;
 }
 #modifyPropertiesToolbar{
 	width: 930px;

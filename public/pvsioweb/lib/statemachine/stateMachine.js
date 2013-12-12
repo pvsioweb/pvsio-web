@@ -43,6 +43,19 @@ var animatedLayout = false;
  * Example of invocation: highlightElements(["Ready","click_POINT", "Process_DP"]);
  * 
  */
+
+var restoreColorNodesAndEdges = function ()
+{
+	var colors = d3.scale.category10();
+    svg.selectAll("g").selectAll("g").select("rect").style('fill', function(d) { return colors(d.id); })
+			.style('stroke', function(d) { return d3.rgb(colors(d.id)).darker().toString(); });   
+
+    svg.selectAll("path")		
+		.style("stroke", function (d) {
+			if(d) { return "black"; }
+			});    
+}
+    
 var highlightElements = function ( nodes ) {
 	// highlight nodes
 	svg.selectAll("g").selectAll("g").select("rect")
@@ -1113,7 +1126,8 @@ module.exports = {
     add_edge : function(source, target, lab, notWr) {add_edge(source, target, lab, notWr);  },
     emulink: emulink,
     clearSvg : clearSvg,
-	highlightElements: highlightElements
+	highlightElements: highlightElements,
+    restoreColorNodesAndEdges : restoreColorNodesAndEdges
 };
 
 
