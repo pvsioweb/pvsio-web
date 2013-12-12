@@ -340,6 +340,8 @@ function WriterOnContent( editor)
     this.userIsModifying = 0;
     this.cursorPosition = 0;
 	this.content = "";
+    this.tagFieldStateStart = "%{\"_block\" : \"BlockStart\", \"_id\" : \"State\", \"_type\": \"State\"}" ;
+    this.tagFieldStateEnd = "%{\"_block\" : \"BlockEnd\", \"_id\" : \"State\", \"_type\": \"State\"}";
 
     /********* Functions about Editor changing (Note: I need to define them here ********/
     
@@ -638,9 +640,8 @@ function WriterOnContent( editor)
     }
     this.addFieldInState = function(nameField, typeName)
     {
-        /* FIXME  */
-        var startTag = "%{\"_block\" : \"BlockStart\", \"_id\" : \"State\"}";
-        var endTag = "%{\"_block\" : \"BlockEnd\", \"_id\" : \"State\"}";
+        var startTag = this.tagFieldStateStart;
+        var endTag = this.tagFieldStateEnd;
         
         var oldContent = this.getContentBetweenTags(startTag, endTag, false);
         /// Getting just name and type 
@@ -657,10 +658,11 @@ function WriterOnContent( editor)
              var comma = (i == (length - 1 )) ? "\n" : ",\n" ;
              newContent = newContent + "     "  +  arrayFields[i].replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"")  +  comma ;
         }   
-        newContent = newContent + "  #]";
+        newContent = newContent + "  #]\n";
         
         this.editor.find(oldContent);
         this.editor.replace(newContent);
+        this.editor.find('');
     }
 	this.addState = function(newState)
 	{          
