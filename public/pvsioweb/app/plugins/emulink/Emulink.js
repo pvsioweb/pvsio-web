@@ -13,7 +13,8 @@ define(function (require, exports, module) {
         pvsWriter               = require("lib/statemachine/stateToPvsSpecificationWriter"),
         parserSpecification     = require("lib/statemachine/parserSpecification"),
 		PrototypeBuilder		= require("pvsioweb/PrototypeBuilder"),
-		Logger					= require("util/Logger");
+		Logger					= require("util/Logger"),
+        Simulator               = require("plugins/emulink/simulator");
         
     var emulinkHasBeenUsed = false; //Default: Current Project is not Emulink Project
     var ws;
@@ -114,6 +115,11 @@ define(function (require, exports, module) {
             emulinkHasBeenUsed = true;
         });
         
+        d3.select("#startSimulation").on("click", function() {
+            Simulator.init(ws); 
+            console.log("OK");
+            //Simulator.setInitState("INITSTATE");
+        });
 	
         /* d3.select("#infoBoxModifiable").on("change", function () {
 	
@@ -129,7 +135,7 @@ define(function (require, exports, module) {
             currentProject.name("default_pvsProject");
             emulinkHasBeenUsed = true;
         });    
-	
+	   
         //Adding Listener triggered when user saves a project
 		projectManager.addListener("ProjectSaved", function (event) { 
             
