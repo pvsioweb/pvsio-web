@@ -119,7 +119,7 @@ define(function (require, exports, module) {
             var simulationIsActive = Simulator.init(ws); 
             if( simulationIsActive ) { d3.select(this).html("Animation Enabled").classed("btn btn-success", true); }
             else
-                d3.select(this).html("Enable diagram animation").classed("btn btn-success", false).classed("btn", true);
+                d3.select(this).html("Enable Animation").classed("btn btn-success", false).classed("btn", true);
 
             //Simulator.setInitState("INITSTATE");
         });

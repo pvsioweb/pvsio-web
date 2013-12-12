@@ -44,18 +44,18 @@ main: THEORY
   %{"_block" : "BlockEnd", "_id" : "click_DIGIT", "_type": "Edge"}
 
 
-  %{"_block" : "BlockStart", "_id" : " click_POINT", "_type": "Permission"}
+  %{"_block" : "BlockStart", "_id" : "click_POINT", "_type": "Permission"}
   per_click_POINT(st: State) : bool = st`current_state = Ready
-  %{"_block" : "BlockEnd", "_id" : " click_POINT", "_type": "Permission"}
-  %{"_block" : "BlockStart", "_id" : " click_POINT", "_type": "Edge"}
+  %{"_block" : "BlockEnd", "_id" : "click_POINT", "_type": "Permission"}
+  %{"_block" : "BlockStart", "_id" : "click_POINT", "_type": "Edge"}
   click_POINT(st: (per_click_POINT)): State = 
   COND
-  %{"_block" : "BlockStart", "_id" : " click_POINT", "_source" : "Ready", "_target" : "Process_DP", "_type": "Transition"}
+  %{"_block" : "BlockStart", "_id" : "click_POINT", "_source" : "Ready", "_target" : "Process_DP", "_type": "Transition"}
      st`current_state = Ready
     -> LET new_st = leave_state(Ready)(st),
        	   new_st = new_st WITH [ numberpad := dotClicked(numberpad(st)) ]
         IN enter_into(Process_DP)(new_st)
-  %{"_block" : "BlockEnd", "_id" : " click_POINT", "_source" : "Ready", "_target" : "Process_DP", "_type": "Transition"}
+  %{"_block" : "BlockEnd", "_id" : "click_POINT", "_source" : "Ready", "_target" : "Process_DP", "_type": "Transition"}
 
   ENDCOND
   %{"_block" : "BlockEnd", "_id" : " click_POINT", "_type": "Edge"}

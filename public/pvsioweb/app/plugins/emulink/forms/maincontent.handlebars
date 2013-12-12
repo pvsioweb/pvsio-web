@@ -1,27 +1,26 @@
 <!-- container for graphical editor -->
 			<div id="graphicalEditor">
-				<hr>
                 <div id= "emulinkStatusBar">
                 <textarea id="emulinkInfo" readonly> </textarea>                
                 </div>
 				<div id="stateMachineToolbar" >
-					<button class="btn btn-danger" id="startEmulink" > New Diagram </button>
-					<button class="btn" id="button_state" > New State </button>
-					<button class="btn" id="button_transition" > New Transition </button>
-					<button class="btn" id="button_self_transition" > New Self-Transition </button>
-                    <button class="btn" id="specificationToDiagram" >Generate Diagram from Specification </button>
-                    <button class="btn btn-default" id="startSimulation"> Enable diagram animation</button>
+					<button class="btn btn-danger" id="startEmulink"    > New Diagram </button>
+					<button class="btn" id="button_state"               > New State </button>
+					<button class="btn" id="button_transition"          > New Transition </button>
+					<button class="btn" id="button_self_transition"     > New Self-Transition </button>
+                    <button class="btn" id="specificationToDiagram"     > Generate Diagram from Specification </button>
+                    <button class="btn btn-default" id="startSimulation"> Enable Animation</button>
 				</div>
                 <div id="modifyPropertiesToolbar" >
                     <button class="btn" id="changeNameNode" > Edit State Name</button>
                     <button class="btn" id="changeNameEdge" > Edit Transition Name</button>
-                    <button class="btn" id="addOperation"> Add Action</button>
-                    <button class="btn" id="addFieldState" >New field </button>  
+                    <button class="btn" id="addOperation"   > Add Transition Action</button>
+                    <button class="btn" id="addFieldState"  > Add State Field</button>  
 
-                </div>
+                </div><br>
 				<div id="ContainerStateMachine" ></div>
 				<div id="state_machine_toolbar" ></div>
-				<textarea id="infoBox" readonly>TIP: Select a state or a transition to see its properties</textarea>
-				<textarea id="infoBoxModifiable" ></textarea>		
-                <textarea id="warningDebug" >Warning debug </textarea>
+				<textarea id="infoBox" readonly >TIP: Select a state or a transition to see its properties</textarea>
+				<textarea id="infoBoxModifiable"></textarea>		
+                <textarea id="warningDebug"     >Warning debug </textarea>
 			</div>				

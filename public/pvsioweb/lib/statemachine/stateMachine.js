@@ -495,7 +495,12 @@ var emulink = function() {
 	var mouseup_node   = null;
 	var mouseup_link   = null;
 
-	function resetMouseVars() { mouseup_node = null; mousedown_link = null; }
+	function resetMouseVars() { 
+		// TODO: mousedown_node is handled within the functions -- code cleanup is needed!
+		mouseup_node = null; 
+		mousedown_link = null; 
+		mouseup_link = null;
+	}
 
 	var boxWidth  = minBoxWidth; //FIXME: Remove these 2 global variables 
 	var boxHeight = minBoxHeight;
@@ -590,6 +595,8 @@ var emulink = function() {
 			.style("cursor", "pointer") // change cursor shape
 			.style("stroke-width", "3")
 			.on('mousedown', function(d) {
+				// update mousedown_link
+				mousedown_link = d;
 				if(d3.event.ctrlKey) {
 					//TODO: use the ctrl key to allow the selection of multiple nodes
 				}
@@ -598,7 +605,13 @@ var emulink = function() {
 					pvsWriter.focusOnFun(d, true);
 					clear_selection();
 					selected_edges.set(d.id, d);
+					// highlight only selected edges
+					path.selectAll("path").classed("selected", function(d) { return selected_edges.has(d.id); });
 				}
+			})
+			.on('mouseup', function(d) {
+				// update mouseup_link
+				mouseup_link = d;
 			});
 		pathCanvas
 			.append("svg:text")
@@ -622,6 +635,8 @@ var emulink = function() {
 					pvsWriter.focusOnFun(d);
 					clear_selection();
 					selected_edges.set(d.id, d);
+					// highlight only selected edges
+					path.selectAll("path").classed("selected", function(d) { return selected_edges.has(d.id); });
 				}
 			});
 		pathCanvas
@@ -870,10 +885,8 @@ var emulink = function() {
 
 	function mouseup() {
 		// click on the svg canvas, deselect all nodes
-		if(mouseup_node != mousedown_node) {
-			resetMouseVars();
-			clear_node_selection(); 
-		}
+		if(mouseup_node != mousedown_node) { clear_node_selection(); }
+		if(!mouseup_link || !mousedown_link || (mouseup_link != mousedown_link)) { clear_edge_selection(); }
 		if(mousedown_node) {
 			// hide drag line
 			drag_line.classed('hidden', true).style('marker-end', '');
