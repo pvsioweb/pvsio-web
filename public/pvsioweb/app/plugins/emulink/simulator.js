@@ -26,7 +26,7 @@
     /**************     State Variables                         ****************************************************/
     var drawer = require("../../lib/statemachine/stateMachine");
     var simulator;
-    
+    var simulationIsActive = false;
     /**************  Exported Functions Definition               *****************************************************/
         
     /** 
@@ -36,7 +36,18 @@
     */
     function init(ws)
     {
-       simulator = new Simulator(ws);
+       if( simulationIsActive)
+       {   simulationIsActive = false;
+           drawer.restoreColorNodesAndEdges();
+           return simulationIsActive;
+       }
+       else
+           simulationIsActive = true;
+        
+       if( ! simulator)
+           simulator = new Simulator(ws);
+        
+       return simulationIsActive;
     }
      
         
@@ -63,7 +74,8 @@
         }
         this.ws.addListener("pvsoutput", function (e) 
         {
-            
+            if( ! simulationIsActive)
+                return;
             var response = prettyPrint(e.data);
             console.log("Simulator", response);
             var current_state = response.match(simulator.currentStateString+"(.*?)[, #]");

@@ -83,7 +83,7 @@ define(function (require, exports, module) {
         /// User wants to delete a file from the project  
         d3.select("#delete_file").on("click", function () {
 	       projectManager.deleteFile(projectManager.getSelectedFile(), function () {
-                //do somethng when file is deleted 
+                //do something when file is deleted 
            });
         });
     
@@ -115,10 +115,12 @@ define(function (require, exports, module) {
             emulinkHasBeenUsed = true;
         });
         
-        d3.select("#startSimulation").on("click", function() {
-			d3.select(this).html("Animation Enabled").classed("btn btn-success", true).attr("disabled", true);
-            Simulator.init(ws); 
-            console.log("OK");
+        d3.select("#startSimulation").on("click", function() {            
+            var simulationIsActive = Simulator.init(ws); 
+            if( simulationIsActive ) { d3.select(this).html("Animation Enabled").classed("btn btn-success", true); }
+            else
+                d3.select(this).html("Enable diagram animation").classed("btn btn-success", false).classed("btn", true);
+
             //Simulator.setInitState("INITSTATE");
         });
 	
