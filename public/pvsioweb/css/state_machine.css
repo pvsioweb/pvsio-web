@@ -123,8 +123,7 @@ ul#context-menu li {
   width:    180px;
   height:   80px;
   left:    940px;
-  border-width : 5px;
-  border-style: dotted;
+  border-width : 1px;
   background :  #D0F18F;
   font-family: Tahoma, sans-serif;
 }
@@ -134,8 +133,7 @@ ul#context-menu li {
   width:    180px;
   height:   300px;
   left:    940px;
-  border-width : 5px;
-  border-style: dotted;
+  border-width : 1px;
   background :  #CEF6F5;
   font-family: Tahoma, sans-serif;
 }
@@ -145,8 +143,7 @@ ul#context-menu li {
   width:    180px;
   height:   300px;
   left:    940px;
-  border-width : 5px;
-  border-style: dotted;
+  border-width : 1px;
   background :  #AAFFFF;
   font-family: Tahoma, sans-serif;
 }
@@ -157,7 +154,11 @@ ul#context-menu li {
   width: 800px;
   color: #FF0000; /*#53760D;*/
   font: 24px/30px cursive;
-  border-style: dotted;
+}
+#modifyPropertiesToolbar{
+	width: 930px;
+	font-family: Tahoma, sans-serif; 
+	display: block;
 }
 #modifyPropertiesToolbarNode{
  border:-style: dotted;

@@ -37,6 +37,15 @@ var charge = -50; // positive value = repulsion; negative value = attraction; fo
 
 var animatedLayout = false;
 
+/**
+ * highlightElements changes the colour of the elements whose label is in the list specified as parameter.
+ * This function is used during simulations to put in evidence the state changes caused by a user action
+ * 
+ */
+var highlightElements = function ( labels ) {
+	
+}
+
 var add_node = function (positionX, positionY, label, notWriter ) {
 	var _id = "X" + newNodeID();
 	var node = { 
@@ -63,6 +72,12 @@ var add_node = function (positionX, positionY, label, notWriter ) {
 	// update pvs theory accordingly
 	pvsWriter.addState(node);
     return node;
+}
+var delete_node = function (id) {
+    graph.nodes.remove(id);
+}
+var delete_all_nodes = function () {
+    graph.nodes.forEach(function(key, value) { graph.nodes.remove(key); });
 }
 var update_node_size = function (id, width, height) {
 	var theNode = graph.nodes.get(id);
@@ -91,13 +106,18 @@ var add_edge = function (source, target, label, notWriter) {
 	pvsWriter.addTransition(edge.name, edge.id);
 	pvsWriter.addConditionInTransition(edge.name, source, target);
 }
-
+var delete_edge = function (id) {
+	graph.edges.remove(id);
+}
+var delete_all_edges = function () {
+    graph.edges.forEach(function(key, value) { graph.edges.remove(key); });
+}
 
 var MODE = { DEFAULT: 0, ADD_NODE: 1, ADD_TRANSITION: 2, ADD_SELF_TRANSITION: 3 };
 var editor_mode = MODE.DEFAULT;
 
-var selected_nodes = [];
-var selected_edges = [];
+var selected_nodes = d3.map();
+var selected_edges = d3.map();
 var ws;
 
 // creation of svg element to draw the graph
@@ -129,16 +149,11 @@ var tagCondStart = "  " + BLOCK_START + ", " + ID_FIELD + " : \"*nameCond*\", \"
 var tagCondEnd   = "  " + BLOCK_END   + ", " + ID_FIELD + " : \"*nameCond*\", \"_source\" : *SRC*, \"_target\" : *TRT*, \"_type\": \"Transition\"}";
 
 var links;
-    
-function clearSvg()
-{
-    graph.nodes.forEach(function(key, value) {
-                        graph.nodes.remove(key);
-                    });
-    
-    graph.edges.forEach(function(key, value) {        
-                        graph.edges.remove(key);        
-                    });
+
+// FIXME: this should be renamed into delete_graph
+function clearSvg() {
+	delete_all_nodes();
+	delete_all_edges();    
 }
     
 function buildGraph()
@@ -181,6 +196,20 @@ function restoreGraph(graphToRestore, editor, ws, currentProject, pm)
 
 function getGraphDefinition() { return JSON.stringify(graph); }
 
+var clear_node_selection = function () {
+	selected_nodes.forEach(function(key, value) { selected_nodes.remove(key); });
+	svg.selectAll("g").selectAll("g").select("rect").style("stroke", "").style("stroke-width", "");
+}
+
+var clear_edge_selection = function () {
+	selected_edges.forEach(function(key, value) { selected_edges.remove(key); });
+	svg.selectAll("path").classed("selected", false);
+}
+
+var clear_selection = function () {
+	clear_node_selection();
+	clear_edge_selection();
+}
 
 function showInformationInTextArea(element) {
 	var textArea = document.getElementById("infoBox");
@@ -199,7 +228,7 @@ function showInformationInTextArea(element) {
 
 function changeTextArea(node, path) {
     
-	if( selected_nodes.length == 0 && selected_edges.length == 0 ) {        
+	if( selected_nodes.keys().length == 0 && selected_edges.keys().length == 0 ) {        
 	    document.getElementById('infoBox').value = " ";
         document.getElementById('infoBoxModifiable').value= " ";
 	}
@@ -210,9 +239,9 @@ function changeTextArea(node, path) {
 	var realName = name.substring(name.indexOf(':') + 2);
     var newOperation = realName.substring(realName.indexOf('{') + 1, realName.indexOf('}') );
     		
-	if( selected_nodes.length ) {    
+	if( selected_nodes.keys().length == 1 ) {    
 	    /// Change name in the canvas 
-	    var object = selected_nodes[ selected_nodes.length -1];
+	    var object = selected_nodes.get(selected_nodes.keys());
 	    var oldId = object.id;
 		var oldName = object.name;
 
@@ -229,9 +258,9 @@ function changeTextArea(node, path) {
         
         return;
 	}
-    if( selected_edges.length )
+    if( selected_edges.keys().length == 1)
     {
-        var object = selected_edges[ selected_edges.length - 1];
+        var object = selected_edges.get(selected_edges.keys());
         var sourceName = object.source.name;
         var targetName = object.target.name;
         var oldId = object.id;
@@ -290,16 +319,9 @@ function toggle_editor_mode(m) {
 	return set_editor_mode(MODE.DEFAULT);
 }
 
-function getNodesInDiagram()
-{
-    var arrayNode = graph.nodes.values();        
-    return arrayNode;
-}
-function getEdgesInDiagram()
-{
-    var edgesNode = graph.edges.values();
-    return edgesNode;
-}   
+function getNodesInDiagram() { return graph.nodes.values(); }
+function getEdgesInDiagram() { return graph.edges.values(); }   
+
 /// Function init is the entry point of the Emulink graphical editor
 function init(_editor, wsocket, currentProject, pm, startWriter) {
 
@@ -309,7 +331,7 @@ function init(_editor, wsocket, currentProject, pm, startWriter) {
 
     ws = wsocket;
 
-    document.getElementById('infoBox').value = "TIP: Click on an Element to see  its property";
+    document.getElementById('infoBox').value = "TIP: Click on any element to see its properties";
 	document.getElementById('infoBoxModifiable').value= "TIP: After clicking on an element, editable properties will be showed here";
 	
 	/// creating new specification (just scheleton )
@@ -367,7 +389,7 @@ var emulink = function() {
 		    d.px += d3.event.dx;
 		    d.py += d3.event.dy;
 		    d.x += d3.event.dx;
-		    d.y += d3.event.dy; 
+		    d.y += d3.event.dy;
 		    tick();
 		}
     }
@@ -417,6 +439,7 @@ var emulink = function() {
 	var mousedown_link = null;
 	var mousedown_node = null;
 	var mouseup_node   = null;
+	var mouseup_link   = null;
 
 	function resetMouseVars() { mouseup_node = null; mousedown_link = null; }
 
@@ -438,10 +461,10 @@ var emulink = function() {
 					var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 					var normX = deltaX / dist;
 					var normY = deltaY / dist;
-					var sourcePaddingX = d.source.width * 0.4; //boxWidth * 0.4;
-					var sourcePaddingY = d.source.height * 0.4;//boxHeight * 0.4;
-					var targetPaddingX = d.target.width; //boxWidth * 0.6;
-					var targetPaddingY = d.target.height;//boxHeight * 0.6;
+					var sourcePaddingX = d.source.width  * 0.6; //boxWidth * 0.4;
+					var sourcePaddingY = d.source.height * 0.6;//boxHeight * 0.4;
+					var targetPaddingX = d.target.width  * 0.8; //boxWidth * 0.6;
+					var targetPaddingY = d.target.height * 0.8;//boxHeight * 0.6;
 					var sourceX = d.source.x + (sourcePaddingX * normX);
 					var sourceY = d.source.y + (sourcePaddingY * normY);
 					var targetX = d.target.x - (targetPaddingX * normX);
@@ -463,13 +486,29 @@ var emulink = function() {
 					}
 					return "m" + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY; // this draws a straight line
 				}
+			}).classed("selected", function(d) {
+				return selected_edges.has(d.id);
 			});
-		path.select("text")
+		path.selectAll("text")
 			.attr("dy", "-5")
-			.style("fill","blue");
+			.style("fill","blue")
+			.attr("x", function(d) {
+				if(d.target.id == d.source.id) {
+					// self-edge
+					return d.source.x + 32;
+				}
+				// else do nothing -- textpath will take care of placing the text
+			})
+			.attr("y", function(d) { 
+				if(d.target.id == d.source.id) {
+					// self-edge
+					return d.source.y - 40;
+				}
+				// else do nothing -- textpath will take care of placing the text
+			});
 		// move nodes if they are dragged
-		node.attr('transform', function(d) {
-			return 'translate(' + d.x + ',' + d.y + ')';
+		node.attr("transform", function(d) {
+				return "translate(" + d.x + "," + d.y + ")";
 		});
 	}
 
@@ -492,7 +531,6 @@ var emulink = function() {
 			.append('svg:path')
 			.attr("id", function(d) { return d.id; })
 			.attr('class', 'link')
-			.classed('selected', function(d) { return d === selected_link; })
 			.style('marker-start', function(d) { return d.left ? 'url(#start-arrow)' : ''; })
 			.style('marker-end', 'url(#end-arrow)')
 			.style("cursor", "pointer") // change cursor shape
@@ -502,24 +540,24 @@ var emulink = function() {
 					//TODO: use the ctrl key to allow the selection of multiple nodes
 				}
 				else {
-                    document.getElementById("modifyPropertiesToolbarEdge").style.display = "block";
-                    document.getElementById("modifyPropertiesToolbarNode").style.display = "none";
 					showInformationInTextArea(d);
 					pvsWriter.focusOnFun(d, true);
-                    selected_nodes.splice(0, selected_nodes.length);
-                    selected_edges.splice(0, selected_edges.length);
-					selected_edges.push(d);
-                    selected_node = null;
+					clear_selection();
+					selected_edges.set(d.id, d);
 				}
 			});
 		pathCanvas
-			.append('svg:text')
-			.attr('class', 'id')			
-			.append("textPath")
-			.attr("xlink:href",function(d) { return "#" + d.id; })
-			.attr("startOffset", "50%")
-			.style("text-anchor", "middle")
-			.text(function(d) { return d.name; })
+			.append("svg:text")
+			.attr("class", "label")
+			.attr("id", function(d) { return "text:" + d.id; })
+			.text(function(d) {
+				if(d.target.id == d.source.id) {
+					// text for self edges is rendered as standard text field
+					return d.name;
+				}
+				// text for other edges is rendered as textpath
+				return "";
+			})
 			.style("cursor", "pointer") // change cursor shape
 			.on('mousedown', function(d) { // FIXME: THIS HANDLER IS NEVER TRIGGERED
 				if(d3.event.ctrlKey) {
@@ -528,16 +566,41 @@ var emulink = function() {
 				else {
 					showInformationInTextArea(d);
 					pvsWriter.focusOnFun(d);
-                    selected_nodes.splice(0, selected_nodes.length);
-                    selected_edges.splice(0, selected_edges.length);
-					selected_edges.push(d);
+					clear_selection();
+					selected_edges.set(d.id, d);
+				}
+			});
+		pathCanvas
+			.append("svg:text")
+			.append("textPath")
+			.classed("selected", true)
+			.attr("class", "label")
+			.attr("id", function(d) { return "textPath:" + d.id; })
+			.attr("xlink:href", function(d) { return "#" + d.id; })
+			.attr("startOffset", "50%")
+			.style("text-anchor", "middle")
+			.text(function(d) { 
+				if(d.target.id == d.source.id) {
+					// text for self edges is rendered as standard text field
+					return "";
+				}
+				// text for other edges is rendered here
+				return d.name;
+			})
+			.style("cursor", "pointer") // change cursor shape
+			// FIXME: THIS HANDLER IS NEVER TRIGGERED -- cant understand why!
+			.on('mousedown', function(d) { 
+				if(d3.event.ctrlKey) {
+					//TODO: use the ctrl key to allow the selection of multiple nodes
+				}
+				else {
+					showInformationInTextArea(d);
+					pvsWriter.focusOnFun(d);
+					clear_selection();
+					selected_edges.set(d.id, d);
 				}
 			});
 
-		// update existing links
-		path.classed('selected', function(d) { return d === selected_link; })
-			.style('marker-start', function(d) { return d.left ? 'url(#start-arrow)' : ''; })
-			.style('marker-end', 'url(#end-arrow)');
 		// remove old links
 		path.exit().remove();
 
@@ -557,7 +620,7 @@ var emulink = function() {
 			.attr("opacity", "0.9")
 			.style('fill', function(d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
 			.style('stroke', function(d) { return d3.rgb(colors(d.id)).darker().toString(); })
-			.classed('reflexive', function(d) { return d.reflexive; })
+			.classed('reflexive', true)
 			.on('mouseover', function(d) {
 				d3.select(this).attr('transform', 'scale(1.1)');
 				if(!mousedown_node || d === mousedown_node) return;
@@ -569,12 +632,12 @@ var emulink = function() {
 				if(!mousedown_node || d === mousedown_node) return;
 			})
 			.on('mousedown', function(d) {
-				d3.select(this).attr('transform', 'scale(1)');
+				// update mousedown_node
+				mousedown_node = d;
 				// create an arrow when the editor is in mode add_transition
 				if(editor_mode == MODE.ADD_TRANSITION) {
 					svg.classed('ctrl', true);		  
 					// select node
-					mousedown_node = d;
 					if(mousedown_node === selected_node) { selected_node = null; }
 					else { selected_node = mousedown_node; }
 					selected_link = null;
@@ -586,7 +649,6 @@ var emulink = function() {
 				}
 				else if(editor_mode == MODE.ADD_SELF_TRANSITION) {
 					// select node
-					mousedown_node = d;
 					selected_node = mousedown_node;
 					selected_link = null;
 					// reposition drag line
@@ -604,20 +666,22 @@ var emulink = function() {
 					}
 					else {
 						// if the ctrl key is not pressed, reset selection first, and then select the node
-                        selected_edges.splice(0, selected_edges.length);
-
-						selected_nodes.splice(0,selected_nodes.length);
-						selected_nodes.push(d);
+						clear_node_selection();
+						selected_nodes.set(d.id, d);
         
                         //START WriterModification: I need to select the node to be able to delete it when user types 'canc'
                         //selected_node = d;
                         //END 
                                                 
-						// update borders of nodes
-						node.selectAll("rect").style("stroke", "").style("stroke-width", "");
+						// highlight only selected nodes
+						node.selectAll("rect")
+							.style("stroke", function(d) {
+								if(selected_nodes.has(d.id)) { return "black"; }
+								return ""; 	})
+							.style("stroke-width", function(d) {
+								if(selected_nodes.has(d.id)) { return 2; }
+								return 0;});
                         // showing toolbar node and hidding toolbar edge
-                        document.getElementById("modifyPropertiesToolbarEdge").style.display = "none";
-                        document.getElementById("modifyPropertiesToolbarNode").style.display = "block";
                         // update information in the text area
 						showInformationInTextArea(d);
 						// highlight code in the pvs theory
@@ -625,40 +689,42 @@ var emulink = function() {
 						// and drag nodes if needed
 						node.call(node_drag);
 					}
+					// do not propagate event to parents, otherwhise the selection will be cleared
+//					event.stopPropagation();
 				}
+				// finally, highlight selected node
+				d3.select(this).style("stroke", "black").style("stroke-width", "2");
 			})
 			.on('mouseup', function(d) {
-				d3.select(this).attr('transform', 'scale(1.1)');
+				// update mouseup_node
+				mouseup_node = d;
 				if(editor_mode == MODE.ADD_TRANSITION) {
 					if(mousedown_node) {
-						// update mouseup_node
-						mouseup_node = d;
-						// TODO: allow self-loops
-						if(mouseup_node === mousedown_node) { resetMouseVars(); return; }
+						if(mouseup_node != mousedown_node) {
+							// add link to graph (update if exists)
+							var source = mousedown_node;
+							var target = mouseup_node;
+							var direction = 'right';
+							if(graph && graph.edges) {
+								var link = graph.edges.values().filter(function(l) { return (l.source === source && l.target === target); })[0];
+								if(link) { link[direction] = true; } 
+								else { 
+									add_edge(source, target);
+									link = graph.edges.values().filter(function(l) { return (l.source === source && l.target === target); })[0];
+								}
 
-						// add link to graph (update if exists)
-						var source = mousedown_node;
-						var target = mouseup_node;
-						var direction = 'right';
-						links = graph.edges.values();
-						var link = links.filter(function(l) { return (l.source === source && l.target === target); })[0];
-						if(link) { link[direction] = true; } 
-						else { add_edge(source, target); }
-
-						// select new link
-						selected_link = link;
-						selected_node = null;
-
-						// restore target node size
-						d3.select(this).attr('transform', 'scale(1)');
-
+								// automatically select created link, if any has been created
+								if(link) {
+									clear_selection();
+									selected_edges.set(link.id, link);
+								}
+							}
+						}
 						// redraw svg
 						restart();
 					}
 				}
 				else if(editor_mode == MODE.ADD_SELF_TRANSITION) {
-					// update mouseup_node
-					mouseup_node = d;
 					// create the self-loops only if the mouse is still on the same source node
 					if(mouseup_node == mousedown_node) { 
 						resetMouseVars();
@@ -675,8 +741,7 @@ var emulink = function() {
 			});
 		// update existing nodes (reflexive & selected visual states)
 		node.selectAll('node')
-		.style('fill', function(d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
-		.classed('reflexive', function(d) { return d.reflexive; });
+		.style('fill', function(d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); });
 		// render resize tool for nodes
 		nodeCanvas.append("rect").classed("resizeTool", true)
 			.attr("width", 20).attr("height", 20)
@@ -728,20 +793,6 @@ var emulink = function() {
 		}
 	}
 
-	function mousedown() {
-
-        if(editor_mode == MODE.ADD_NODE) {
-			// insert new node at point
-			var point = d3.mouse(this);
-			add_node(point[0], point[1]);
-			restart();
-		}
-		if(selected_nodes.length == 0) {
-			// click on the svg canvas, deselect all nodes
-			node.selectAll("rect").style("stroke", "").style("stroke-width", "");
-		}
-	}
-
 	function mousemove() {
 		if(!mousedown_node) return;
 		// update drag line
@@ -752,7 +803,23 @@ var emulink = function() {
 		restart();
 	}
 
+	function mousedown() {
+		// if editor is in ADD_NODE mode, then create a new node and select the created node
+		// FIXME: to select the created node we need to modify add_node so that it returns the created node
+        if(editor_mode == MODE.ADD_NODE) {
+			// insert new node at point
+			var point = d3.mouse(this);
+			add_node(point[0], point[1]);
+			restart();
+		}
+	}
+
 	function mouseup() {
+		// click on the svg canvas, deselect all nodes
+		if(mouseup_node != mousedown_node) {
+			resetMouseVars();
+			clear_node_selection(); 
+		}
 		if(mousedown_node) {
 			// hide drag line
 			drag_line.classed('hidden', true).style('marker-end', '');
@@ -855,76 +922,83 @@ var emulink = function() {
     
     d3.select("#changeNameNode")
       .on("click", function () {
-          
-        var object = selected_nodes[ selected_nodes.length -1];
-        var newName = prompt("Please enter the node new name",object.name);
-        if( newName.length == 0 || newName === object.name )
-            return;
-          
-        /// Change name in the canvas 
-	    var oldId = object.id;
-		var oldName = object.name;
+			if(selected_nodes.keys().length == 1) {
+				var object = selected_nodes.get(selected_nodes.keys());
+				var newName = prompt("Please enter new node label",object.name);
+				if( newName && newName.length ) {
+					/// Change name in the canvas 
+					var oldId = object.id;
+					var oldName = object.name;
 
-		node.selectAll("text").text(function(d) { 
-			if(d.id == oldId) { return newName; }
-			return d.name;
-		});
-		var newNode = graph.nodes.get(oldId);
-		newNode.name = newName;
-		graph.nodes.set(oldId, newNode);
+					node.selectAll("text").text(function(d) { 
+					if(d.id == oldId) { return newName; }
+					return d.name;
+					});
+					var newNode = graph.nodes.get(oldId);
+					newNode.name = newName;
+					graph.nodes.set(oldId, newNode);
 
-	    /// Change name in the PVS specification
-	    pvsWriter.changeStateName(oldName, newName);
-           
-        restart();
+					/// Change name in the PVS specification
+					pvsWriter.changeStateName(oldName, newName);
+
+					restart();
+				}
+			}
       });
     
-      d3.select("#changeNameEdge")
+	d3.select("#changeNameEdge")
       .on("click", function () {
-          
-        var object = selected_edges[ selected_edges.length - 1];
-        var newName = prompt("Please enter the edge new name", object.name);
-        if( newName.length == 0 || newName === object.name )
-            return;
-        var sourceName = object.source.name;
-        var targetName = object.target.name;
-        var oldId = object.id;
-		var oldName = object.name;
-        var counter = 0;
-        
-        path.selectAll("textPath").text(function(d) { 
-            
-            var tmp = d.name;            
-            if(tmp == oldName ) { counter ++; }
-			if( d.id == oldId) { 
-                    return newName;
-            }
-			return d.name;
-		});
-		var newNode = graph.edges.get(oldId);
-        
-		newNode.name = newName;
-		graph.edges.set(oldId, newNode);
-        
-        /// Change name in the PVS specification
-        pvsWriter.changeFunName(oldName, newName, sourceName, targetName, counter);             
-        restart();
+			if(selected_edges.keys().length == 1) {
+				var object = selected_edges.get(selected_edges.keys());
+				var newName = prompt("Please enter new edge label", object.name);
+				if( newName && newName.length > 0 ) {
+					var sourceName = object.source.name;
+					var targetName = object.target.name;
+					var id = object.id;
+					var originalName = object.name;
+					var counter = 0;
+
+					// FIXME: this is not working!
+					path.selectAll("text").text( function(d) {
+						// FIXME: it's not safe to count the occurrences here! Please use the graph structure.
+						if(d.name == originalName ) { counter++; }
+						// self edges store the label in field text; other edges use textPath
+						if(object.source.id == object.target.id){
+							if(d.id == id) { return newName; }
+							return d.name;
+						}
+					});
+
+					path.selectAll("textPath").text( function(d) {
+						if(d.name == originalName ) { counter++; }
+						if(d.id == id) { return newName; }
+						return d.name;
+					});
+					
+					var newNode = graph.edges.get(id);
+
+					newNode.name = newName;
+					graph.edges.set(id, newNode);
+
+					/// Change name in the PVS specification
+					pvsWriter.changeFunName(originalName, newName, sourceName, targetName, counter);             
+					restart();
+				}
+			}
       });
     
     d3.select("#addOperation")
-    .on("click", function () {        
-        var object = selected_edges[ selected_edges.length - 1];        
-        var fieldState = prompt("State field to change");
-        if( fieldState.length == 0 )
-            return;
-        var value = prompt("Value for " + fieldState);
-        if( value.length == 0 )
-            return;
-        
-        var operation = fieldState + ":= " + value;
-        pvsWriter.addOperationInCondition(object.name, object.source.name, object.target.name, operation); 
-        
-        
+	  .on("click", function () {
+			if(selected_edges.keys().length == 1) {
+				var object = selected_edges.get(selected_edges.keys());        
+				var fieldState = prompt("State field to change");
+				if( fieldState.length == 0 ) { return; }
+				var value = prompt("Value for " + fieldState);
+				if( value.length == 0 ) { return; }
+
+				var operation = fieldState + ":= " + value;
+				pvsWriter.addOperationInCondition(object.name, object.source.name, object.target.name, operation); 
+			}
     });
     
 

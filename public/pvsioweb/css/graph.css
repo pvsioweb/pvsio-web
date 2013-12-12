@@ -35,12 +35,12 @@ path.link.hidden {
   stroke-width: 0;
 }
 
-circle.node {
+node {
   stroke-width: 1.5px;
   cursor: pointer;
 }
 
-circle.node.reflexive {
+node.reflexive {
   stroke: #000 !important;
   stroke-width: 2.5px;
 }
