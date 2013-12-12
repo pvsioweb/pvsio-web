@@ -987,6 +987,13 @@ var emulink = function() {
 					var originalName = object.name;
 					var counter = 0;
 
+					var edges = graph.edges.values();
+					for(var i = 0; i < edges.length; i++) {
+						if(edges[i].name == originalName) {
+							counter++;
+						}
+					}
+
 					// FIXME: re-enable this for self-edges only
 					/*
 					path.selectAll("text").text( function(d) {

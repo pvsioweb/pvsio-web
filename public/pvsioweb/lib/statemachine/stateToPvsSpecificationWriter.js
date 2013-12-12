@@ -243,8 +243,10 @@ function focusOnFun(edge, clickedOn)
      var initSearch = writer.editor.find(needle1, searchOptions);
      var endSearch = writer.editor.find(needle2, searchOptions);
 
-     /// move the cursor to the first selected row
-	 writer.editor.moveCursorTo(initSearch.start.row + 1, 0);  
+     /// move the cursor to the first selected row, if a match has been found
+	 if(initSearch) {
+		 writer.editor.moveCursorTo(initSearch.start.row + 1, 0);
+	 }
 }
 
 /** 
