@@ -117,9 +117,19 @@ ul#context-menu li {
   position: absolute;
 }
 
+#emulinkInfo {
+  position: absolute;
+  top:	    100px;
+  width:    180px;
+  height:   50px;
+  left:    940px;
+  border-width : 1px;
+  background :  #FF0000;
+  font-family: Tahoma, sans-serif;
+}
 #infoBox {
   position: absolute;
-  top:	    155px;
+  top:	    150px;
   width:    180px;
   height:   80px;
   left:    940px;
@@ -129,7 +139,7 @@ ul#context-menu li {
 }
 #infoBoxModifiable {
   position: absolute;
-  top:	    235px;
+  top:	    230px;
   width:    180px;
   height:   300px;
   left:    940px;
@@ -139,21 +149,13 @@ ul#context-menu li {
 }
 #warningDebug {
   position: absolute;
-  top:	    400px;
+  top:	    530px;
   width:    180px;
   height:   300px;
   left:    940px;
   border-width : 1px;
   background :  #AAFFFF;
   font-family: Tahoma, sans-serif;
-}
-#emulinkInfo {
-  position: absolute;
-  left:    940px;
-  height: 130px;
-  width: 180px;
-  color: #FF0000; /*#53760D;*/
-  font: 16px/18px cursive;
 }
 #modifyPropertiesToolbar{
 	width: 930px;

@@ -40,7 +40,7 @@ var animatedLayout = false;
 /**
  * highlightElements changes the colour of the nodes in array 'nodes' specified as parameter.
  * This function is used during simulations to put in evidence the state changes caused by a user action
- * Example of invocation: highlightElements(["Ready","click_POINT", "Process_DP"]);
+ * Example of invocation: highlightElements(["Ready", "Process_DP"]);
  * 
  */
 
@@ -51,9 +51,8 @@ var restoreColorNodesAndEdges = function ()
 			.style('stroke', function(d) { return d3.rgb(colors(d.id)).darker().toString(); });   
 
     svg.selectAll("path")		
-		.style("stroke", function (d) {
-			if(d) { return "black"; }
-			});    
+		.style("stroke", "black")
+		.style("stroke-width", 1);
 }
     
 var highlightElements = function ( nodes ) {
@@ -98,6 +97,17 @@ var highlightElements = function ( nodes ) {
 				}
 				return "grey";}
 			})
+		.style("stroke-width", function (d) {
+			if(d) {
+				for(var i = 0; i < labels.length; i++) {
+					if(labels[i].name == d.name 
+						&& labels[i].source.name == d.source.name
+						&& labels[i].target.name == d.target.name) {
+						return 3;
+					}
+				}
+				return 1;}
+		});
 }
 
 var add_node = function (positionX, positionY, label, notWriter ) {
@@ -459,23 +469,12 @@ var emulink = function() {
 	svg.append('svg:defs').append('svg:marker')
 		.attr('id', 'end-arrow')
 		.attr('viewBox', '0 -5 10 10')
-		.attr('refX', 6)
-		.attr('markerWidth', 3)
-		.attr('markerHeight', 3)
+		.attr('refX', 9)
+		.attr('markerWidth', 16)
+		.attr('markerHeight', 16)
 		.attr('orient', 'auto')
 		.append('svg:path')
-		.attr('d', 'M0,-5L10,0L0,5')
-		.attr('fill', '#000');
-
-	svg.append('svg:defs').append('svg:marker')
-		.attr('id', 'start-arrow')
-		.attr('viewBox', '0 -5 10 10')
-		.attr('refX', 4)
-		.attr('markerWidth', 3)
-		.attr('markerHeight', 3)
-		.attr('orient', 'auto')
-		.append('svg:path')
-		.attr('d', 'M10,-5L0,0L10,5')
+		.attr('d', 'M4,0 L1,-3 L10,0 L1,3 L4,0')
 		.attr('fill', '#000');
 
 	// line displayed when dragging new nodes
@@ -515,35 +514,47 @@ var emulink = function() {
 					return "M" + (d.source.x + 16) + ',' + (d.source.y - 32) + "q 64 -16 16 16";
 				}
 				else {
-					var deltaX = d.target.x - d.source.x;
-					var deltaY = d.target.y - d.source.y;
-					var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-					var normX = deltaX / dist;
-					var normY = deltaY / dist;
-					var sourcePaddingX = d.source.width  * 0.6; //boxWidth * 0.4;
-					var sourcePaddingY = d.source.height * 0.6;//boxHeight * 0.4;
-					var targetPaddingX = d.target.width  * 0.8; //boxWidth * 0.6;
-					var targetPaddingY = d.target.height * 0.8;//boxHeight * 0.6;
-					var sourceX = d.source.x + (sourcePaddingX * normX);
-					var sourceY = d.source.y + (sourcePaddingY * normY);
-					var targetX = d.target.x - (targetPaddingX * normX);
-					var targetY = d.target.y - (targetPaddingY * normY);
-					if(curvyLines && deltaX >= 0){
-						if(deltaY > 40) {
-							targetPaddingX = d.target.width * 0.2; //boxWidth * 0.6;
-							targetPaddingY = d.target.height * 0.6;//boxHeight * 0.6;
-							targetX = d.target.x + targetPaddingX;
-							targetY = d.target.y - targetPaddingY;
-						}
-						else {
-							targetPaddingX = d.target.width * 0.6; //boxWidth * 0.6;
-							targetPaddingY = d.target.height * 0.2;//boxHeight * 0.6;
-							targetX = d.target.x - targetPaddingX;
-							targetY = d.target.y - targetPaddingY;
-						}
-						return "m" + sourceX + ',' + sourceY + "A" + dist + "," + dist + " 0 0,1 " + targetX + "," + targetY; 
+					var dx = d.target.x - d.source.x;
+					var dy = d.target.y - d.source.y;
+					var dist = Math.sqrt(dx * dx + dy * dy);
+					var sourceX = d.source.x;
+					var sourceY = d.source.y;
+					var targetX = d.target.x;
+					var targetY = d.target.y;
+
+					// to adjust the arrow pointing at the target, we reason using Cartesian quadrants:
+					// the source node is at the center of the axes, and the target is in one of the quadrants
+					//  II  |  I
+					// -----s-----
+					// III  |  IV
+					// NOTE: SVG has the y axis inverted with respect to the Cartesian y axis
+					if(dx >= 0 && dy < 0) {
+						// target in quadrant I
+						// for targets in quadrant I, round links draw convex arcs
+						// --> place the arrow on the left side of the target
+						targetX -= minBoxWidth * 0.6;
 					}
-					return "m" + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY; // this draws a straight line
+					else if(dx < 0 && dy < 0) {
+						// target in quadrant II
+						// for targets in quadrant I, round links draw concave arcs
+						// --> place the arrow at the bottom of the target
+						targetY += minBoxHeight * 0.6;
+					}
+					else if(dx < 0 && dy >= 0) {
+						// target in quadrant III
+						// for targets in quadrant IV, round links draw concave arcs
+						// --> place the arrow on the right side of the target
+						targetX += minBoxWidth * 0.6;
+					}
+					else if(dx >= 0 && dy >= 0) {
+						// target in quadrant IV
+						// for targets in quadrant IV, round links draw convex arcs
+						// --> place the arrow at the top of the target
+						targetY -= minBoxHeight * 0.6;
+					}
+					return "m" + sourceX + ',' + sourceY + "A" + dist + "," + dist + " 0 0,1 " + targetX + "," + targetY; 
+					// this draws straight lines
+					//return "m" + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
 				}
 			}).classed("selected", function(d) {
 				return selected_edges.has(d.id);
@@ -590,10 +601,11 @@ var emulink = function() {
 			.append('svg:path')
 			.attr("id", function(d) { return d.id; })
 			.attr('class', 'link')
+			.style("markerUnits", "userSpaceOnUse")
 			.style('marker-start', function(d) { return d.left ? 'url(#start-arrow)' : ''; })
 			.style('marker-end', 'url(#end-arrow)')
 			.style("cursor", "pointer") // change cursor shape
-			.style("stroke-width", "3")
+			.style("stroke-width", "1")
 			.on('mousedown', function(d) {
 				// update mousedown_link
 				mousedown_link = d;
