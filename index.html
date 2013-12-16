@@ -33,13 +33,13 @@
 			<p>A javascript library to connect to and communicate with a pvsio process using websockets.</p>
 			
 			<h2>Prerequisites</h2>
-			<h3>PVS</h3>
-			<p>Before installation, please ensure you download and install pvs and pvsio on your computer and make sure pvsio is available as a command on your path.
-			Visit <a href="http://pvs.csl.sri.com/download.shtml">http://pvs.csl.sri.com/download.shtml</a> to download PVS.</p>
+			<h3>prerequisite 1: PVS</h3>
+			<p>PVS <a href="http://pvs.csl.sri.com/download.shtml">(http://pvs.csl.sri.com/download.shtml)</a> is required to run pvsio-web. Please download and install PVS before installing pvsio-web.</p>
 			
-			<h4>Add PVS to your path</h4>
-			<p>You will need to add pvs, pvsio and proveit to your PATH alternatively  you can create symbolic links in /usr/bin for pvs, pvsio, and proveit with the ln command.
-			For instance, assuming that pvs is installed in /opt/pvs6.0/pvs, the following commands should be executed in a terminal/shell:
+            <p>
+                Once PVS is installed, please add the PVS executable files pvs, pvsio and proveit to your PATH. Alternatively you can create symbolic links to those files in /usr/bin. For instance, assuming that PVS is installed in /opt/pvs6.0/pvs, the following commands should be executed in a Terminal window to create the symbolic links:
+            </p>
+			
 			<ul>
 				<li>	sudo ln -s /opt/pvs6.0/pvs /usr/bin/pvs
 				<li>	sudo ln -s /opt/pvs6.0/pvsio /usr/bin/pvsio
@@ -47,42 +47,68 @@
 			</ul>
 			</p>
 			
-			<h3>nodejs</h3>
-			<p>This package also depends on nodejs (<a href="http://nodejs.org/download/">http://nodejs.org/download/</a>). Please download and install nodejs before proceeding to installing pvsio-web.</p>
+			<h3>prerequisite 2: Node.js</h3>
+			<p>Node.js (<a href="http://nodejs.org/download/">http://nodejs.org/download/</a>) is required to run pvsio-web. Please download and install nodejs before proceeding to installing pvsio-web.</p>
 			
 			<h2>Installation</h2>
-			
-			<h3>git</h3>
-			
-			<p>clone this repository, cd into the pvsio-web directory and run
-			    node pvssocketserver.js</p>
-			
-			<h3>npm install (recommended)</h3>
-			
-			<p>To install, use 
-			    npm install pvsio-web -g
-			or (if your /usr/local/ directory is owned by root)
-			    sudo npm install pvsio-web -g </p>
-			
-			<h2>Uninstallation</h2>
+			<p>To install pvsio-web, use one of the following methods:</p>
+			<h3>method 1: download pvsio-web as a zip file and use npm to resolve dependencies</h3>
+			<p>Download the zip archive of the project from <a href="https://github.com/thehogfather/pvsio-web/archive/master.zip">https://github.com/thehogfather/pvsio-web/archive/master.zip</a>. Extract the zip file to a location of your preference.</p>
+
+          <p>
+Then, download all remaining dependencies by running the following command from a Terminal window opened in the pvsio-web folder:</p>
+			<ul>
+                <li>sudo npm install</li>
+            </ul>
+			<h3>use npm to download pvsio-web</h3>
+			<ul>
+                <li>sudo npm install pvsio-web -g</li>
+            </ul>
+			<p>
+                The installer will copy pvsio-web in /usr/local/lib/node_modules/pvsio-web. By default, the directory is owned by "nobody". You will need to change the ownership and assign it to your user with the following command:
+            </p>
+            <ul>
+                <li>sudo chown -R myUserName /usr/local/lib/node_modules/pvsio-web</li>
+            </ul>
+			<p>(where "myUserName" is to be replaced with the actual username on your machine)</p>
+		  
+          <h3>method 3: clone git repository</h3>
+          <p>Create a directory pvsio-web. Open a Terminal in the created directory, and clone the pvsio-web repository using the following command:</p>
+          <ul>
+                <li>git clone https://github.com/thehogfather/pvsio-web.git</li>
+          </ul>
+          <p>Then, download all remaining dependencies by running the following command from a Terminal window opened in the pvsio-web folder:</p>
+          <ul>
+            <li>sudo npm install</li>
+          </ul>
+          
+          <h2>Running pvsio-web</h2>
+          <p>To run pvsio-web, a backend and a frontend need to be started.
+
+To start the backend: open a Terminal window in the pvsio-web directory, and use the following command (and leave the Terminal window open):</p>
+          
+          <ul><li>./start.sh</li></ul>
+          <p>To start the frontend: open a browser (Firefox 21 or greater, or Chrome), and type the following address in the address bar:</p>
+          <ul><li>http://localhost:8082</li></ul>
+          
+          <h2>Demos</h2>
+          <p>A demo of a realistic medical infusion pump is included in the pvsio-web distribution.
+
+To execute the demo:
+
+Open a Terminal window in the pvsio-web directory, and use the following command to start the pvsio-web backend (leave the Terminal window open):</p>
+            <ul><li>./start.sh</li></ul>
+          <p>Start the pvsio-web frontend by opening a browser at the following address:</p>
+          <ul><li>http://localhost:8082/demos/GPCA-UI_PVS/NavKeys</li></ul>
+          
+          <h2>Wiki</h2>
+			A more comprehensive guide about pvsio-web can be found <a href='https://github.com/thehogfather/pvsio-web/wiki'>here</a>.
+          <h2>Uninstallation</h2>
 			
 			<p>To uninstall use
 			[sudo] npm uninstall pvsio-web -g</p>
 			
-			<h2>Running</h2>
 			
-			<p>To start the server, use 
-			    sudo pvsio-web</p>
-			
-			<h2>Demo</h2>
-			<!-- 
-			<p>You can interact with the infusion pump demo by navigating to 
-			http://localhost:8081/demos/pump/</p> -->
-			
-			<p>You can interact with the interactive prototype builder by navigating your browser to
-			http://localhost:8081/</p>
-			<h2>Wiki</h2>
-			A more comprehensive guide about pvsio-web can be found <a href='https://github.com/thehogfather/pvsio-web/wiki'>here</a>.
 			
         </section>
 
