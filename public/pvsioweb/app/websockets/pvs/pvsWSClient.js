@@ -61,13 +61,19 @@ define(function (require, exports, module) {
             @param {callback} cb The callback function to invoke when the process has started
         */
         o.startPVSProcess = function (data, cb) {
-			if(data && data.fileName) {
+			if (data && data.fileName) {
 		        var sourceFile = data.fileName.split(".pvs")[0];
 		        wscBase.send({type: "startProcess", data: {fileName: sourceFile, projectName: data.projectName, demoName: data.demoName}}, cb);
-			}
-			else {
+			} else {
 				console.log("ERROR: Failed to load pvs file " + data.demoName + "/" + data.fileName);
 			}
+        };
+        /**
+            Closes the pvsio process attributed to this websocket connection if there is one
+            @param {function} cb The function to invoke when process has been closed
+        */
+        o.closePVSProcess = function (cb) {
+            wscBase.send({type: "closeProcess"}, cb);
         };
         
         /**

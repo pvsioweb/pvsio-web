@@ -335,6 +335,19 @@ function run() {
                             processCallback(res, socket);
                         });
             },
+            "closeProcess": function (token, socket, socketid) {//closes pvs process
+                p = pvsioProcessMap[socketid];
+                var res = {id: token.id, socketId: socketid};
+                if (p) {
+                    p.close();
+                    delete pvsioProcessMap[socketid];
+                    res.message = "process closed";
+                } else {
+                    res.type = "attempting to close undefined process";
+                }
+                processCallback(res, socket);
+                
+            },
             "readFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";

@@ -293,7 +293,7 @@ define(function (require, exports, module) {
 		p.widgetDefinitions(obj.widgetDefinition);
 		return p;
 	}
-
+    
 	ProjectManager.prototype.openProject = function (callback) {
 		var pm = this;
 		var ws = WSManager.getWebSocket();
@@ -319,13 +319,16 @@ define(function (require, exports, module) {
 								WidgetManager.updateMapCreator(function () {
 									WidgetManager.restoreWidgetDefinitions(p.widgetDefinitions());
 								});
-							}
+                                d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+							} else {
+                                //show the image drag and drop div
+                                d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
+                            }
 							//list all other files
 							if (p.pvsFiles()) {
 								pm.renderSourceFileList(p.pvsFiles());
+                                pvsFilesListView.selectItem(p.mainPVSFile() || p.pvsFiles()[0]);
 							}
-							d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
-							pvsFilesListView.selectItem(p.mainPVSFile() || p.pvsFiles()[0]);
 							pm.editor().on("change", editorChangedListener(pm.editor(), pm, pvsFilesListView));
 							if (callback) { callback(p); }
 						}

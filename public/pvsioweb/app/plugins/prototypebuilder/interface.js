@@ -31,7 +31,7 @@ define(function (require, exports, module) {
         d3.select("div.display,#controlsContainer button").classed("simulator", true);
         d3.select("div.display,#controlsContainer button").classed("builder", false);
     }
-	
+    
     function pvsProcessReady(err, e) {
         var pvsioStatus = d3.select("#lblPVSioStatus");
         pvsioStatus.select("span").remove();
@@ -64,12 +64,19 @@ define(function (require, exports, module) {
 		});
 	
 		d3.select("#openProject").on("click", function () {
+            var pvsioStatus = d3.select("#lblPVSioStatus");
+            pvsioStatus.select("span").remove();
 			projectManager.openProject(function (project) {
 				var ws = WSManager.getWebSocket();
 				ws.lastState("init(0)");
 				if (project.mainPVSFile()) {
 					ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()}, pvsProcessReady);
-				}
+				} else {
+                    //close pvsio process for previous project
+                    ws.closePVSProcess(function (err, res) {
+                        pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
+                    });
+                }
 				switchToBuilderView();
 			});
 		});
