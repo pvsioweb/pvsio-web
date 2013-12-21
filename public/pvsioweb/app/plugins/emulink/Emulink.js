@@ -160,7 +160,7 @@ define(function (require, exports, module) {
         });
         
         
-        projectManager.addListener("ProjectChanged", function (event) { 
+        projectManager.addListener("ProjectChanged", function (event) {              
              var emulinkSvg = d3.select("#ContainerStateMachine").selectAll("svg");
              //Checking if svg has been already created, if dirty we will clear it 
              if( emulinkSvg[0].length ){ emulinkSvg.remove(); stateMachine.clearSvg(); }             

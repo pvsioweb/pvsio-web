@@ -26,7 +26,7 @@ var modifiedUser = 0;
 var pvsWriter = require("../statemachine/stateToPvsSpecificationWriter");
 var graph = { nodes: d3.map(), edges: d3.map() };
 var nodeIDGenerator = 0;
-var newNodeID = function () { return nodeIDGenerator++; }
+var newNodeID = function () { return nodeIDGenerator++; };
 var minBoxWidth  = 60; 
 var minBoxHeight = 60;
 var curvyLines = true;
@@ -150,7 +150,46 @@ var update_node_size = function (id, width, height) {
 	graph.nodes.set(id, theNode);
 }
 
+function modifyLabelEdgeToDisplayAction(object, path)
+{
+    var id = object.id;
+    var textID = "text:" + id;
+    if(object.source.id == object.target.id) {
+        path.selectAll("text.label").text( function(d) {
+            if(d.id == id) { return d.name + createStringFromArray(d.listOfOperations); }
+            return d.name ;
+        });
+    }
+    else {
+        // other edges store the label as textPath
+        /* this works in Firefox but not in Chrome -- could be a bug in Chrome's Javascript implementation
+         * as a workaround, we directly manipulate DOM
+        path.selectAll("textPath").text( function(d) {
+            if(d.name == originalName ) { counter++; }
+            if(d.id == id) { return newName; }
+            return d.name;
+        });*/
 
+        // here's the workaround for the bug with textPath in Chrome
+        var textPathID = "textPath:" + id;
+        if(path.selectAll("text")) {
+            for(var i = 0; i < path.selectAll("text").length; i++) {
+                if(path.selectAll("text")[i] && path.selectAll("text")[i][1] && path.selectAll("text")[i][1].childNodes[0]) {
+                    if(path.selectAll("text")[i][1].childNodes[0].id == textPathID) {
+                        // remove the textpath child
+                        var textPath = path.selectAll("text")[i][1].removeChild(path.selectAll("text")[i][1].childNodes[0]);
+                        // replace the text in textPath with the new label
+                        textPath.removeChild(textPath.childNodes[0]);
+                        textPath.appendChild(document.createTextNode(object.name + createStringFromArray(object.listOfOperations)));
+                        // append the textPath back
+                        path.selectAll("text")[i][1].appendChild(textPath);
+                    }
+                }
+            }					
+        }
+    }
+      
+}
 var edgeIDGenerator = 0;
 var newEdgeID = function () { return edgeIDGenerator++; }
 var add_edge = function (source, target, label, notWriter) {
@@ -164,11 +203,12 @@ var add_edge = function (source, target, label, notWriter) {
 	// add edge
 	graph.edges.set(edge.id, edge);
     
-    if( notWriter ) { return; }
+    if( notWriter ) { return edge; }
 
 	// update pvs theory accordingly
 	pvsWriter.addTransition(edge.name, edge.id);
 	pvsWriter.addConditionInTransition(edge.name, source, target);
+    return edge;
 }
 var delete_edge = function (id) {
 	graph.edges.remove(id);
@@ -211,6 +251,10 @@ var tagEdgeEnd   = "  " + BLOCK_END   + ", " + ID_FIELD + " : \"*nameEdge*\", \"
 
 var tagCondStart = "  " + BLOCK_START + ", " + ID_FIELD + " : \"*nameCond*\", \"_source\" : *SRC*, \"_target\" : *TRT*, \"_type\": \"Transition\"}";    
 var tagCondEnd   = "  " + BLOCK_END   + ", " + ID_FIELD + " : \"*nameCond*\", \"_source\" : *SRC*, \"_target\" : *TRT*, \"_type\": \"Transition\"}";
+    
+var tagFieldStateStart = "  " + BLOCK_START + ", " + ID_FIELD + " : \"State\", \"_type\": \"State\"}";
+var tagFieldStateEnd = "  " + BLOCK_END + ", " + ID_FIELD + " : \"State\", \"_type\": \"State\"}";
+    
 
 var links;
 
@@ -252,7 +296,9 @@ function restoreGraph(graphToRestore, editor, ws, currentProject, pm)
              if( workAround[i].name == currentEdge.target.name )
                  currentEdge.target = comeOn[i];
          }
-         add_edge(currentEdge.source, currentEdge.target, currentEdge.name, true);
+         var edgeJustAdded = add_edge(currentEdge.source, currentEdge.target, currentEdge.name, true);
+         if( currentEdge.listOfOperations )
+             edgeJustAdded.listOfOperations = currentEdge.listOfOperations;
     } 
     emulink();
 }
@@ -275,6 +321,15 @@ var clear_selection = function () {
 	clear_edge_selection();
 }
 
+function createStringFromArray(array)
+{
+    if( ! array ) { return "";}
+    var ret = "  {";
+    array.forEach(function(item){
+        ret = ret + item + "; "        
+    })
+    return ret + " }";    
+}
 function showInformationInTextArea(element) {
 	var textArea = document.getElementById("infoBox");
 	var type = "TYPE:   " ;
@@ -409,12 +464,13 @@ function init(_editor, wsocket, currentProject, pm, startWriter) {
     pvsWriter.setTagsPer(tagPerStart, tagPerEnd);
     pvsWriter.setTagsEdge(tagEdgeStart, tagEdgeEnd);
     pvsWriter.setTagsCond(tagCondStart, tagCondEnd);
+    pvsWriter.setTagsField(tagFieldStateStart, tagFieldStateEnd);
     
     // Start Emulink
 	emulink();
     
     if( ! startWriter) { return; }
-	pvsWriter.newSpecification("myTheory"); 
+	pvsWriter.newSpecification("myTheory.pvs"); 
 }
 
 var emulink = function() {
@@ -443,7 +499,7 @@ var emulink = function() {
 					   .on("dragend", dragend);
 
     function dragstart(d, i) {
-        force.stop() // stops the force auto positioning before you start dragging
+        force.stop(); // stops the force auto positioning before you start dragging
     }
 
     function dragmove(d, i) {
@@ -632,7 +688,7 @@ var emulink = function() {
 			.text(function(d) {
 				if(d.target.id == d.source.id) {
 					// text for self edges is rendered as standard text field
-					return d.name;
+					return d.name + createStringFromArray(d.listOfOperations);
 				}
 				// text for other edges is rendered as textpath
 				return "";
@@ -666,7 +722,7 @@ var emulink = function() {
 					return "";
 				}
 				// text for other edges is rendered here
-				return d.name;
+				return d.name + createStringFromArray(d.listOfOperations);
 			})
 			.style("cursor", "pointer") // change cursor shape
 			// FIXME: THIS HANDLER IS NEVER TRIGGERED -- cant understand why!
@@ -1102,7 +1158,12 @@ var emulink = function() {
 				if( value.length == 0 ) { return; }
 
 				var operation = fieldState + ":= " + value;
+				//Insert new operation in the list of operations 
+				if( ! object.listOfOperations ) { object.listOfOperations = new Array();}
+			    object.listOfOperations.push(operation);
 				pvsWriter.addOperationInCondition(object.name, object.source.name, object.target.name, operation); 
+                modifyLabelEdgeToDisplayAction(object, path);
+                restart();
 			}
     });
     
