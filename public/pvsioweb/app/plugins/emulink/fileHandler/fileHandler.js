@@ -34,7 +34,9 @@
 
 define(function (require, exports, module) {
 	"use strict";
-
+    
+var counter = "";
+    
 function new_file(currentProject, editor, ws, name, content, pm )
 {
 	var default_name = "MyTheory";

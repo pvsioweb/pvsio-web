@@ -31,7 +31,19 @@ define(function (require, exports, module) {
     var editor;
     var pm;
 
-/**************  Exported Functions Definition                    ************************************************/    
+/**************  Exported Functions Definition                    ************************************************/   
+    
+/** 
+ *  This function has to be called at first, before calling any other functions in this module   
+ *
+ *  @param editor_           - Reference to the editor which will be used   
+ *  @param wsocket           - Reference to webSocket
+ *  @param curProj           - Reference to the current project 
+ *  @param projManager       - Rerence to ProjectManager instance 
+ *
+ *  @returns void 
+ *	      
+ */
 function init(editor_, wsocket, curProj, projManager)
 {
     ws = wsocket;
@@ -39,15 +51,26 @@ function init(editor_, wsocket, curProj, projManager)
     currentProject = curProj;
     editor = editor_;
     pm = projManager;  
-    writer = new WriterOnContent(editor);
-}
+    writer = new WriterOnContent(editor_);
     
+}
+
+/** 
+ *  This set of functions allow to set tag format, if they are not called, default tags will be used    
+ *
+ *  @param tagStart          - Start tag string format 
+ *  @param tagEnd            - End tag string format 
+ *
+ *  @returns void 
+ *	      
+ */
 function setTagsName(tagStateNameStart, tagStateNameEnd) { writer.setTagsName(tagStateNameStart, tagStateNameEnd); }
 function setTagsState(tagStateStart, tagStateEnd) { writer.setTagsState(tagStateStart, tagStateEnd); }
 function setTagsFunc(tagFuncStart, tagFuncEnd) { writer.setTagsFunc(tagFuncStart, tagFuncEnd); }
 function setTagsPer (tagPerStart,  tagPerEnd)  { writer.setTagsPer(tagPerStart, tagPerEnd); }
 function setTagsEdge(tagEdgeStart, tagEdgeEnd) { writer.setTagsEdge(tagEdgeStart, tagEdgeEnd); }
 function setTagsCond(tagCondStart, tagEdgeEnd) { writer.setTagsCond(tagCondStart, tagEdgeEnd); }
+function setTagsField(tagFieldStart, tagFieldEnd) {writer.setTagsField(tagFieldStart, tagFieldEnd);  }
 
 /** 
  *  Create a new pvs specification   
@@ -58,7 +81,7 @@ function setTagsCond(tagCondStart, tagEdgeEnd) { writer.setTagsCond(tagCondStart
  *	      
  */
 function newSpecification(nameTheory)
-{
+{       
 	    writer.createSkeletonSpecification(nameTheory);
         var fileHandlerEmulink = require("pvsioweb/../emulink/fileHandler/fileHandler");
         fileHandlerEmulink.new_file(currentProject, editor, ws, nameTheory, editor.getValue(), pm);
@@ -119,7 +142,7 @@ function addFieldInState(nameField, typeName)
  *  @param {string} nameTrans     - Name of the transition which contains the condition
  *  @param {string} sourceName    - Name of the source node in the condition
  *  @param {string} targetName    - Name of the target node in the condition
- *  @param {string} operation     - Operation is to be added 
+ *  @param {string} operation     - Operation  to be added 
  *  @returns void 
  *	      
  */  
@@ -333,15 +356,40 @@ function itemIsContained(array, item)
 }
     
 function WriterOnContent( editor)
-{
+{   
     this.defaultStateName = "  StateName: TYPE";
 	this.delimitator = ',' ;
 	this.editor = editor;
     this.userIsModifying = 0;
     this.cursorPosition = 0;
 	this.content = "";
-    this.tagFieldStateStart = "%{\"_block\" : \"BlockStart\", \"_id\" : \"State\", \"_type\": \"State\"}" ;
-    this.tagFieldStateEnd = "%{\"_block\" : \"BlockEnd\", \"_id\" : \"State\", \"_type\": \"State\"}";
+    this.BLOCK_START = "%{\"_block\" : \"BlockStart\"";
+    this.BLOCK_END   = "%{\"_block\" : \"BlockEnd\"";
+    this.ID_FIELD    = "\"_id\"";
+    
+    /* List of tag string which will be used by default if user don't modify them */
+    
+    this.tagStateNameStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : \"StateName\", \"_type\": \"Nodes\"}";    
+    this.tagStateNameEnd   = "  " + this.BLOCK_END   + ", " + this.ID_FIELD + " : \"StateName\", \"_type\": \"Nodes\"}";
+
+    this.tagStateStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : \"State\", \"_type\": \"State\"}"; 
+    this.tagStateEnd   = "  " + this.BLOCK_END   + ", " + this.ID_FIELD + " : \"State\", \"_type\": \"State\"}";
+
+    this.tagFuncStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : \"*nameFunc*\", \"_type\": \"Function\"}";
+    this.tagFuncEnd   = "  " + this.BLOCK_END   + ", " + this.ID_FIELD + " : \"*nameFunc*\", \"_type\": \"Function\"}";
+
+    this.tagPerStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : \"*namePer*\", \"_type\": \"Permission\"}";
+    this.tagPerEnd   = "  " + this.BLOCK_END   + ", " + this.ID_FIELD + " : \"*namePer*\", \"_type\": \"Permission\"}";
+
+    this.tagEdgeStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : \"*nameEdge*\", \"_type\": \"Edge\"}";
+    this.tagEdgeEnd   = "  " + this.BLOCK_END   + ", " + this.ID_FIELD + " : \"*nameEdge*\", \"_type\": \"Edge\"}";
+
+    this.tagCondStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : \"*nameCond*\", \"_source\" : *SRC*, \"_target\" : *TRT*, \"_type\":"                                   +  "\"Transition\"}";    
+    this.tagCondEnd   = "  " + this.BLOCK_END   + ", " + this.ID_FIELD + " : \"*nameCond*\", \"_source\" : *SRC*, \"_target\" : *TRT*, \"_type\":"
+                        +  "\"Transition\"}";
+    
+    this.tagFieldStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : \"State\", \"_type\": \"State\"}";
+    this.tagFieldEnd = "  " + this.BLOCK_END + ", " + this.ID_FIELD + " : \"State\", \"_type\": \"State\"}";
 
     /********* Functions about Editor changing (Note: I need to define them here ********/
     
@@ -353,7 +401,7 @@ function WriterOnContent( editor)
 //        clearTimeout(writer.timeOut);
 //        writer.timeOut = setTimeout(function(){writer.parseToFindDiagramSpecificationInconsistency() } , 1000 );        
     }
-
+    
     this.parseToFindDiagramSpecificationInconsistency = function()
     { 
         writer.saveCursorPosition();
@@ -482,8 +530,7 @@ function WriterOnContent( editor)
     this.createEdgeTag = function(tagEdge, nameEdge) { return tagEdge.replace("*nameEdge*", nameEdge); }
     this.createSkeletonSpecification = function(nameTheory)
     {
-        this.nameTheory = nameTheory;
-        
+        this.nameTheory = nameTheory.indexOf(".pvs") == -1 ? nameTheory : nameTheory.substring(0, nameTheory.indexOf(".pvs"));
         this.content = 
                    this.nameTheory + ": THEORY \n  BEGIN\n\n" +
 		           this.tagStateNameStart + "\n" + 
@@ -543,13 +590,19 @@ function WriterOnContent( editor)
         debug.value = "\t   DeBuG \n";
         debug.value = debug.value + "Warning: " + fieldStateInOperation + " is not in PVS State ";
     }
+    
     this.changeEditor = function() 
     {          
         if( writer.userIsModifying ) { writer.handleUserModificationOnEditor(); }
         else { console.log("Writer has modified editor content"); }
+        // When Emulink will be able to handle more files this code is not working
+        if( currentProject.pvsFiles().length)
+        {   currentProject.pvsFiles()[0].dirty(true);
+            currentProject.pvsFiles()[0].content(writer.editor.getValue());
+        }
     }
     
-    editor.getSession().on('change', this.changeEditor );    
+    this.editor.getSession().on('change', this.changeEditor );    
     this.userIsModifying = 1;
 
     this.getLockOnEditor    = function() { this.userIsModifying = 0; }
@@ -598,6 +651,11 @@ function WriterOnContent( editor)
         this.tagStateNameStart = tagStateNameStart;
         this.tagStateNameEnd = tagStateNameEnd;
     }
+    this.setTagsField = function(tagFieldStart, tagFieldEnd)
+    {   
+        this.tagFieldStart = tagFieldStart;
+        this.tagFieldEnd = tagFieldEnd;
+    }
     this.setTagsState = function(tagStateStart, tagStateEnd)
     {
         this.tagStateStart = tagStateStart;
@@ -633,6 +691,12 @@ function WriterOnContent( editor)
         arrayTag[1] = arrayTag[1].replace(/(\r\n|\n|\r)/gm, "");
         var content = this.getContentBetweenTags(arrayTag[0], arrayTag[1], false);
         
+        if( content == "" )
+        {
+            console.log("Error in addOperationInCondition, content is empty");
+            return;
+        }
+        
         var newContent = content.substring(0, content.indexOf("IN")) + "," + operation + "\n    " + content.substring(content.indexOf("IN") -2) ;
         
         this.editor.find(content );
@@ -640,10 +704,18 @@ function WriterOnContent( editor)
     }
     this.addFieldInState = function(nameField, typeName)
     {
-        var startTag = this.tagFieldStateStart;
-        var endTag = this.tagFieldStateEnd;
+        var startTag = this.tagFieldStart;
+        var endTag = this.tagFieldEnd;
         
         var oldContent = this.getContentBetweenTags(startTag, endTag, false);
+        
+        //Checking error in getting content
+        if( oldContent == "" )
+        {
+            console.log("Error in addFieldInState, content is empty");
+            return;
+        }
+        
         /// Getting just name and type 
         var content = oldContent.substring(oldContent.indexOf('#') + 1, oldContent.lastIndexOf('#') );
         
@@ -738,7 +810,7 @@ function WriterOnContent( editor)
 		var blockStartNeedle = "%{\"_block\"" + spaceRegex + ":" + spaceRegex + "\"BlockStart\"";
 		var blockEndNeedle   = "%{\"_block\"" + spaceRegex + ":" + spaceRegex + "\"BlockEnd\"";
 		var idNeedle         = "\"_id\""    + spaceRegex + ":" + spaceRegex + "\"" + newTransition + "\"";
-		var typeEdgeNeedle       = "\"_type\""  + spaceRegex + ":" + spaceRegex + "\"Edge\"";
+		var typeEdgeNeedle   = "\"_type\""  + spaceRegex + ":" + spaceRegex + "\"Edge\"";
 
         var firstTag  = blockStartNeedle + separatorRegex + idNeedle + separatorRegex + typeEdgeNeedle;
         var secondTag = blockEndNeedle + separatorRegex + idNeedle + separatorRegex + typeEdgeNeedle;
@@ -885,12 +957,24 @@ function WriterOnContent( editor)
         var contentFun;
         
         var contentPer = this.getContentBetweenTags(tagPerFun[0], tagPerFun[1], false);
+        
+        if( contentPer == "" )
+        {
+            console.log("Error in deleteTransition, contentPer is empty");
+            return;
+        }
 
         this.deleteContent(tagPerFun[0]);
         this.deleteContent(contentPer);
         this.deleteContent(tagPerFun[1]);
         
         contentFun = this.getContentBetweenTags(tagFun[0], tagFun[1], false);  
+        
+        if( contentFun == "" )
+        {
+            console.log("Error in addOperationInCondition, contentFun is empty");
+            return;
+        }
 
         this.deleteContent(tagFun[0]);
         this.deleteContent(contentFun);
@@ -901,6 +985,7 @@ function WriterOnContent( editor)
     {
         var range = editor.getSelectionRange();
 		var objectSearch = { 
+                             wrap: true,
   				             wholeWord: false,
 				             range: null
 			               }; 
@@ -922,75 +1007,11 @@ function WriterOnContent( editor)
     }
     this.getStateNames = function()
     {
-        var range = editor.getSelectionRange();
-		var objectSearch = { 
-  				             wholeWord: false,
-				             range: null
-			               }; 
-
-        var init = this.tagStateNameStart;
-		var end  = this.tagStateNameEnd;
-
-		var initSearch = editor.find(init, objectSearch, true);
-		var endSearch = editor.find(end, objectSearch, true);
-		var content;	
-
-		range.start.column = 0;
-		range.end.column= 11111; ///FIXME
-		range.start.row = initSearch.end.row + 1;
-		range.end.row = endSearch.end.row - 1;
-		
-		//Content should be the list of the states
-		content = editor.session.getTextRange(range); 
-
-        noFocus();
-        return content;
-        }
+        var listStatesNames = this.getContentBetweenTags(this.tagStateNameStart, this.tagStateNameEnd);        
+        return listStatesNames;    
+    }
 }
 
-function keepTrackEditorContentHashTable()
-{
-    this.nodes = {};
-    this.nodeLength = 0;
-    this.functions = {};
-    this.functionLength = 0;
-            
-    this.addState = function(nodeId, nodeName)
-    {
-         if( this.nodes.hasOwnProperty(nodeId) )
-             return false;
-         
-         this.nodes[nodeId] = nodeName;
-         this.nodeLength ++;
-            
-         return this.nodeLength;     
-    }
-        
-    this.removeState = function(nodeId)
-    {
-         if( ! this.nodes.hasOwnProperty(nodeId) )
-             return false;
-          
-         delete this.nodes[nodeId];
-         this.nodeLength --;
-    
-         return this.nodeLength; 
-    
-    }
-    this.getAllNodes = function()
-    {
-        var nodesName = new Array();
-        for( var id in this.nodes)
-        {
-             console.log(id, this.nodes[id]);
-             nodesName.push(this.nodes[id]);
-             
-        }
-        return nodesName;
-    }
-    
-
-}
     
 /*************    Exported Function               ************************************************/
 
@@ -1016,7 +1037,8 @@ module.exports = {
         setTagsPer : setTagsPer,
         setTagsCond : setTagsCond,
         setTagsEdge : setTagsEdge,
-        init : init
+        init : init,
+        setTagsField : setTagsField
 
 };
 
