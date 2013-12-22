@@ -306,6 +306,15 @@ function changeStateName(oldName, newName)
     
     writer.leaveLockOnEditor();
 }
+    
+function addSwitchCond(nameTrans, sourceName, targetName, cond)
+{
+    writer.getLockOnEditor();
+    
+    writer.addSwitchCond(nameTrans, sourceName, targetName, cond);
+    
+    writer.leaveLockOnEditor();
+}
 
 /** 
  *  This function is called when the user changes the name of an edge, we need to change the PVS specification to be consistent with new name of    
@@ -627,6 +636,26 @@ function WriterOnContent( editor)
 		}
 		// else
 		return "";
+    }
+    this.addSwitchCond = function(nameTrans, sourceName, targetName, cond)
+    {
+        var arrayTag = this.buildTagCond(nameTrans, sourceName, targetName);
+        arrayTag[0] = arrayTag[0].replace(/(\r\n|\n|\r)/gm, "");
+        arrayTag[1] = arrayTag[1].replace(/(\r\n|\n|\r)/gm, "");
+        var content = this.getContentBetweenTags(arrayTag[0], arrayTag[1], false);
+        
+        if( content == "" )
+        {
+            console.log("Error in addSwitchCond, content is empty");
+            return;
+        }
+        
+        var newContent = content.substring(0, content.indexOf("->")) + "  & " + "st`" + cond + "\n    " + 
+            content.substring(content.indexOf("->") -2) ;
+        
+        this.editor.find(content );
+        this.editor.replace( newContent );      
+        
     }
     this.getContentBetweenTags = function(startTag, endTag, isRegexp)
     {
@@ -1020,6 +1049,7 @@ module.exports = {
         addState : addState,
         removeState : removeState,
 		addTransition : addTransition,
+        addSwitchCond : addSwitchCond,
 		addConditionInTransition : addConditionInTransition,
 		noFocus : noFocus,
 		focusOn : focusOn,
