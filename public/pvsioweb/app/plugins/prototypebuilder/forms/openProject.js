@@ -4,7 +4,7 @@
  * @date Jan 5, 2013 : 6:42:35 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
-/*global define, d3, require, $, Handlebars, Backbone*/
+/*global define, d3, require, $, Handlebars, Backbone, self*/
 define(function (require, exports, module) {
 	"use strict";
 	var d3						= require("d3/d3"),
@@ -14,7 +14,7 @@ define(function (require, exports, module) {
 	
 	var OpenProjectView = Backbone.View.extend({
 		initialize: function (data) {
-			d3.select(this.el).attr("class", "overlay");
+			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
 			this.render(data);
 		},
 		render: function (data) {

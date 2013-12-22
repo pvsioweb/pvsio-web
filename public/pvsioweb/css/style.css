@@ -71,13 +71,13 @@ div.downloader{
 	width: 500px;
 }
 .overlay{
+    display: table;
 	position: absolute;
 	top:0px;
 	left: 0px;
 	height: 100%;
 	width: 100%;
 	z-index: 2000000;
-	padding-top: 100px;
 }
 #header{
 	height: 50px;
@@ -367,4 +367,9 @@ div.detailsForm select, div.detailsForm textarea{
 
 .tab-content {
 	margin-top: 20px;
+}
+
+.form-center {
+    display: table-cell;
+    vertical-align: middle;§
 }
