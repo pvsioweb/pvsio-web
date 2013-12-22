@@ -115,6 +115,7 @@ define(function (require, exports, module) {
             emulinkHasBeenUsed = true;
         });
         
+        
         d3.select("#startSimulation").on("click", function() {            
             var simulationIsActive = Simulator.init(ws); 
             if( simulationIsActive ) { d3.select(this).html("Animation Enabled").classed("btn btn-success", true); }
