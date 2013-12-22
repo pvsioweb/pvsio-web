@@ -157,7 +157,7 @@ function modifyLabelEdgeToDisplayActionAndCond(object, path)
     if(object.source.id == object.target.id) {
         path.selectAll("text.label").text( function(d) {
             if(d.id == id) { return d.name + createStringFromArray(d); }
-            return d.name ;
+            return d.name + createStringFromArray(d);
         });
     }
     else {
