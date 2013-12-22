@@ -4,7 +4,7 @@
  * @date 11/5/13 13:16:05 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, Handlebars, Backbone */
+/*global define, d3, require, $, brackets, window, Handlebars, Backbone, self */
 define(function (require, exports, module) {
 	"use strict";
 	var FormUtils					= require("./FormUtils"),
@@ -36,7 +36,7 @@ define(function (require, exports, module) {
 	
 	var EditWidgetView	= Backbone.View.extend({
 		initialize: function (data) {
-			d3.select(this.el).attr("class", "overlay");
+			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
 			this.render(data.widget);
 		},
 		render: function (widget) {

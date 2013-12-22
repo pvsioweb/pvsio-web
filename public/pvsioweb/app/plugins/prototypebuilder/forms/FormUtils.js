@@ -35,7 +35,7 @@ define(function (require, exports, module) {
 		});
 		return res;
 	}
-	
+   
 	module.exports = {
 		serializeForm:	serializeForm,
 		validateForm: validate
