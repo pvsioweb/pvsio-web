@@ -490,7 +490,6 @@ define(function (require, exports, module) {
 			var project = new Project();// pm.project();
 			//update the current project with info from data and saveNew
 			project.name(data.projectName);
-			console.log("NEW PROJECT ");
 			var q = queue(), i;
 			q.defer(function (cb) {
 				var fr = new FileReader();
@@ -562,6 +561,7 @@ define(function (require, exports, module) {
             name = prompt("Your project has default name, you can change it now (if not, please click on cancel)");
             if (name && name.trim().length > 0) {
                 project.name(name);
+                projectNameChanged({current: name});
                 project.saveNew(function (err, res) {
                     if (!err) {
                         project = res;
