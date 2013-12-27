@@ -1069,6 +1069,10 @@ var emulink = function() {
 		changeTextArea(node, path);
 		restart();
 	  });
+	d3.select("#AddEmulinkFile")
+	  .on("Click"), function () {
+	  	
+	  }
     
     d3.select("#changeNameNode")
       .on("click", function () {
@@ -1235,7 +1239,7 @@ var emulink = function() {
 
 
 module.exports = {
-	init: function (editor, wsocket, currentProject, pm, start) { return init(editor, wsocket, currentProject, pm, start); },
+	init: function (editor, wsocket, currentProject, pm, start) { document.getElementById("AddEmulinkFile").disabled = false; return init(editor, wsocket, currentProject, pm, start); },
 	changeTextArea : changeTextArea,
 	add_node_mode: function(){ if( d3.select("#ContainerStateMachine").selectAll("svg")[0].length )
                                return toggle_editor_mode(MODE.ADD_NODE);

@@ -36,6 +36,7 @@ define(function (require, exports, module) {
 	"use strict";
     
 var counter = "";
+
     
 function new_file(currentProject, editor, ws, name, content, pm )
 {
@@ -60,7 +61,8 @@ function new_file(currentProject, editor, ws, name, content, pm )
     currentProject.addSpecFile(name, content);
         
     //FIXME: Maybe we needn't call renderSourceFileList each time
-    pm.renderSourceFileList();
+    var a = pm.renderSourceFileList();
+    a.selectItem(currentProject.pvsFiles()[0]);
 }
 
     module.exports = {

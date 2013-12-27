@@ -37,8 +37,7 @@ define(function (require, exports, module) {
 			editor = pb.getEditor();
         ws = pvsioWebClient.getWebSocket();
         var currentProject = projectManager.project();	
-        var fileCounter = 0;
-    
+        
 		//create the user interface elements
 		createHtmlElements(pvsioWebClient);
 		/** NEW: StateChart **************************************************************************/   
@@ -46,7 +45,6 @@ define(function (require, exports, module) {
         d3.select("#button_state").on("click", function () { stateMachine.add_node_mode(); });
         d3.select("#button_transition").on("click", function () { stateMachine.add_transition_mode(); });
         d3.select("#button_self_transition").on("click", function () { stateMachine.add_self_transition_mode(); });
-        
         /// When User clicks on New File button #new_file a pvs file is created and showed in file list box
         d3.select("#new_file").on("click", function ( ) {	
             projectManager.newFile();
@@ -132,6 +130,7 @@ define(function (require, exports, module) {
         });*/
         document.getElementById("emulinkInfo").value = "Emulink status: NOT active";
         document.getElementById("startEmulink").disabled = false;
+        document.getElementById("AddEmulinkFile").disabled = true;
         /// User wants to start emulink 
         d3.select("#startEmulink").on("click", function () {
 			d3.select(this).html("Diagram created").classed("btn-danger", false).classed("btn-success", true).attr("disabled", true);
@@ -149,8 +148,8 @@ define(function (require, exports, module) {
             {    
                  var project = event.project;
                  var gd = stateMachine.getGraphDefinition();
-		         var data  = {"fileName": project.path() + "/graphDefinition.json", fileContent: gd};
-		         ws.writeFile(data, function (err, res) {
+		           var data  = {"fileName": project.path() + "/graphDefinition.json", fileContent: gd};
+		           ws.writeFile(data, function (err, res) {
                  if (!err) {
                         console.log("Graph Saved");
                  }
@@ -159,7 +158,6 @@ define(function (require, exports, module) {
             }
         
         });
-        
         
         projectManager.addListener("ProjectChanged", function (event) {              
              var emulinkSvg = d3.select("#ContainerStateMachine").selectAll("svg");

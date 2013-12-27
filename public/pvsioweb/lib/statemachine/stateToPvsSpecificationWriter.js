@@ -604,11 +604,6 @@ function WriterOnContent( editor)
     {          
         if( writer.userIsModifying ) { writer.handleUserModificationOnEditor(); }
         else { console.log("Writer has modified editor content"); }
-        // When Emulink will be able to handle more files this code is not working
-        if( currentProject.pvsFiles().length)
-        {   currentProject.pvsFiles()[0].dirty(true);
-            currentProject.pvsFiles()[0].content(writer.editor.getValue());
-        }
     }
     
     this.editor.getSession().on('change', this.changeEditor );    

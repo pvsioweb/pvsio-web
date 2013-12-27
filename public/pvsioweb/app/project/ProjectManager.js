@@ -76,6 +76,8 @@ define(function (require, exports, module) {
 		return function () {
 			//ideally one should use information from ace to set the dirty mark on the document
 			//e.g editor.getSession().getUndoManager().hasUndo();
+            if (!pvsFileListView )
+                pvsFileListView = pm.renderSourceFileList();
 			if (pvsFileListView) {
 				var pvsFile = pvsFilesListView.selectedItem();
 				if (pvsFile) {
