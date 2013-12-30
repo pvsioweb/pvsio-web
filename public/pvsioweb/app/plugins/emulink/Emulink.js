@@ -130,14 +130,20 @@ define(function (require, exports, module) {
         });*/
         document.getElementById("emulinkInfo").value = "Emulink status: NOT active";
         document.getElementById("startEmulink").disabled = false;
-        document.getElementById("AddEmulinkFile").disabled = true;
         /// User wants to start emulink 
         d3.select("#startEmulink").on("click", function () {
-			d3.select(this).html("Diagram created").classed("btn-danger", false).classed("btn-success", true).attr("disabled", true);
-            showEmulinkStatus();
-	        stateMachine.init(editor, ws, currentProject, projectManager, true);
-            currentProject.name("default_pvsProject");
-            emulinkHasBeenUsed = true;
+			//d3.select(this).html("Diagram created").classed("btn-danger", false).classed("btn-success", true).attr("disabled", true);
+            if( ! emulinkHasBeenUsed )
+            {   
+                showEmulinkStatus();
+	            stateMachine.init(editor, ws, currentProject, projectManager, true);
+                currentProject.name("default_pvsProject");
+                emulinkHasBeenUsed = true;
+            }
+            
+            stateMachine.addNewDiagram();
+
+            
         });    
 	   
         //Adding Listener triggered when user saves a project
@@ -148,8 +154,8 @@ define(function (require, exports, module) {
             {    
                  var project = event.project;
                  var gd = stateMachine.getGraphDefinition();
-		           var data  = {"fileName": project.path() + "/graphDefinition.json", fileContent: gd};
-		           ws.writeFile(data, function (err, res) {
+		         var data  = {"fileName": project.path() + "/graphDefinition.json", fileContent: gd};
+		         ws.writeFile(data, function (err, res) {
                  if (!err) {
                         console.log("Graph Saved");
                  }
@@ -165,11 +171,13 @@ define(function (require, exports, module) {
              if( emulinkSvg[0].length ){ emulinkSvg.remove(); stateMachine.clearSvg(); }             
              emulinkHasBeenUsed = false;
              var project = event.current; 
+             var fileToShow = project.mainPVSFile() || project.pvsFiles()[0];
+             fileToShow = fileToShow.name();
              var f = project.path() + "/" + "graphDefinition.json";
              ws.getFile(f, function (err, res) {
 					if (!err) {
                         var graphDefinitionObject = JSON.parse(res.fileContent);
-                        stateMachine.restoreGraph(graphDefinitionObject, editor, ws, project, projectManager);
+                        stateMachine.restoreGraph(graphDefinitionObject, editor, ws, project, projectManager, fileToShow);
                         emulinkHasBeenUsed = true;
                         showEmulinkStatus();
 					} else {

@@ -31,6 +31,7 @@ define(function (require, exports, module) {
     var editor;
     var pm;
 
+
 /**************  Exported Functions Definition                    ************************************************/   
     
 /** 
@@ -82,9 +83,10 @@ function setTagsField(tagFieldStart, tagFieldEnd) {writer.setTagsField(tagFieldS
  */
 function newSpecification(nameTheory)
 {       
-	    writer.createSkeletonSpecification(nameTheory);
         var fileHandlerEmulink = require("pvsioweb/../emulink/fileHandler/fileHandler");
         fileHandlerEmulink.new_file(currentProject, editor, ws, nameTheory, editor.getValue(), pm);
+	    writer.createSkeletonSpecification(nameTheory);
+        
 }
 
 /** 

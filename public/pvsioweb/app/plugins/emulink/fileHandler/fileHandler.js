@@ -59,10 +59,9 @@ function new_file(currentProject, editor, ws, name, content, pm )
 	if( ! content ){ content = init_content + default_content + init_content; }   
 
     currentProject.addSpecFile(name, content);
-        
-    //FIXME: Maybe we needn't call renderSourceFileList each time
-    var a = pm.renderSourceFileList();
-    a.selectItem(currentProject.pvsFiles()[0]);
+    var fileToSelect = currentProject.pvsFiles().length - 1; 
+    var listView = pm.renderSourceFileList();
+    listView.selectItem(currentProject.pvsFiles()[fileToSelect]);
 }
 
     module.exports = {

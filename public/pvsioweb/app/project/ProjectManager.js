@@ -159,6 +159,8 @@ define(function (require, exports, module) {
 		pvsFilesListView.addListener("SelectedIndexChanged", function (event) {
 			//fetch sourcecode for selected file and update editor
 			var pvsFile = event.selectedItem;
+			pm.fire({type: "SelectedIndexChanged", current: event});
+			
 			if (pvsFile.content()) {
 				editor.removeAllListeners("change");
 				editor.setValue(pvsFile.content());
@@ -253,7 +255,7 @@ define(function (require, exports, module) {
 	 * @memberof ProjectManager
 	 */
 	ProjectManager.prototype.newFile = function (name, content) {
-		var default_name = "MyTheory", default_content = " THEORY BEGIN \nEND ";
+		var default_name = "My__Theory", default_content = " THEORY BEGIN \nEND ";
 		var init_content;
 		if (!name) {
 			init_content = default_name + counter;

@@ -144,7 +144,7 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
 	Project.prototype.addSpecFile = function (fileName, fileContent) {
-		var newSpec = new ProjectFile(fileName).content(fileContent).dirty(true);
+		var newSpec = new ProjectFile(fileName, this).content(fileContent).dirty(true);
 		this.pvsFiles().push(newSpec);
 		return this;
 	};
