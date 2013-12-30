@@ -8,7 +8,7 @@
 
 /**
  * @fileOverview This file contains Emulink, a graphical editor similar to Simulink/Statecharts.
- * @version 0.1
+ * @version 0.3
  */
 
  
@@ -34,8 +34,42 @@ var curvyLines = true;
 var distance = 300;
 var strength = 0; // must be between 0 and 1
 var charge = -50; // positive value = repulsion; negative value = attraction; for graphs, negative values should be used
-
 var animatedLayout = false;
+
+// Save number of diagrams created by using Emulink
+var diagramsInfo = {};
+var numberFiles = 0;
+var lastFileShown;
+var numberDiagramStillToRestore = 0;
+
+var addNewDiagram = function()
+{
+    var name = "myTheory" + numberFiles + ".pvs";
+    pvsWriter.newSpecification(name);
+    numberFiles ++;
+
+}
+/** 
+ *  This function is called when user has just selected an emulink file in the listView,
+ *  we need to add nodes and edges objects in  graph.nodes and graph.edges to render them   
+ *
+ *  @param diagramObject    - object having nodes and edges properties 
+ *  
+ *  @returns void 
+ *	      
+ */
+var restoreGraphAfterSwitchingEmulinkFiles = function(diagramObject)
+{
+	var nodes = diagramObject.nodes;
+	var edges = diagramObject.edges;
+	
+	nodes.forEach(function(item){
+		graph.nodes.set(item.id, item);
+	});
+	edges.forEach(function(item){
+		graph.edges.set(item.id, item);
+	});
+}
 
 /**
  * highlightElements changes the colour of the nodes in array 'nodes' specified as parameter.
@@ -263,17 +297,17 @@ function clearSvg() {
 	delete_all_nodes();
 	delete_all_edges();    
 }
-    
-function buildGraph()
+/** 
+ *  This function is called when a diagram has to be drawn first time after restoring from saving,
+ *  We need to call add_node() and add_edge() otherwise nodes and edges will be disconnected    
+ *
+ *  @param graphToRestore  - object having nodes and edges properties 
+ *
+ *  @returns void 
+ *	      
+ */
+function restoreDiagramFirstTimeAfterReloadingFromSaving(graphToRestore)
 {
-    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
-			.attr("id", "canvas").style("background", "#fffcec");
-    emulink();
-}
-
-function restoreGraph(graphToRestore, editor, ws, currentProject, pm)
-{
-    init(editor, ws, currentProject, pm, false);
     var nodesToRestore = graphToRestore.nodes;
     var edgesToRestore = graphToRestore.edges;
     var workAround = new Array();
@@ -286,7 +320,6 @@ function restoreGraph(graphToRestore, editor, ws, currentProject, pm)
     }
     for( var id in edgesToRestore)
     {
-         console.log(edgesToRestore[id]);
          var currentEdge = edgesToRestore[id];
          for( var i = 0; i < workAround.length; i++ )
          {
@@ -302,11 +335,56 @@ function restoreGraph(graphToRestore, editor, ws, currentProject, pm)
          if( currentEdge.listConditions )
              edgeJustAdded.listConditions = currentEdge.listConditions;
     } 
+    numberDiagramStillToRestore --;
+}  
+function buildGraph()
+{
+    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
+			.attr("id", "canvas").style("background", "#fffcec");
     emulink();
 }
+/** 
+ *  This function is called when an emulink project is restored from saving   
+ *
+ *  @param graphToRestore  - associative array (Key is the name of the file, value is an object having 
+ *                           nodes and edges properties ) 
+ *
+ *  @returns void 
+ *	      
+ */
+function restoreGraph(graphToRestore, editor, ws, currentProject, pm, fileToShow)
+{
+    init(editor, ws, currentProject, pm, false);
+    diagramsInfo = graphToRestore; //diagramsInfo is the associative array used in this module
+    numberDiagramStillToRestore = Object.keys(graphToRestore).length; //Number of Diagram in emulink project just open
+    numberFiles = numberDiagramStillToRestore;
+    lastFileShown = fileToShow;   //fileToShow is the name of the mainPvsFile or the first file in the project
+    var diagramInfo = diagramsInfo[fileToShow]; //Get value using file name as key 
+    if( diagramInfo ) //If fileToShow has diagram information, display it in SVG 
+		restoreDiagramFirstTimeAfterReloadingFromSaving(diagramInfo);
 
+    emulink();    
+}
+/** 
+ *  This function is called when a project has to be saved  
+ *
+ *  @returns associative array which has diagrams information (edges and nodes)
+ *	      
+ */
+function getGraphDefinition() 
+{
+	if( lastFileShown) //The file shown could be not saved, save it and return 
+	{   
+		var nodes = getNodesInDiagram();
+		var edges = getEdgesInDiagram();
 
-function getGraphDefinition() { return JSON.stringify(graph); }
+		if( nodes.length ) // But save just if there is something to save!
+		{   var graphToSave = { nodes: getNodesInDiagram(), edges: getEdgesInDiagram()};
+    	    diagramsInfo[lastFileShown] = graphToSave;
+    	}
+	}
+	return JSON.stringify(diagramsInfo); 
+}
 
 var clear_node_selection = function () {
 	selected_nodes.forEach(function(key, value) { selected_nodes.remove(key); });
@@ -323,6 +401,7 @@ var clear_selection = function () {
 	clear_edge_selection();
 }
 
+// FIXME: Change name of this function
 function createStringFromArray(object)
 {
     var array = object.listOfOperations;
@@ -343,8 +422,7 @@ function createStringFromArray(object)
         })
        ret = ret + " ]";
     } 
-    return ret;
-    
+    return ret;    
 }
 function showInformationInTextArea(element) {
 	var textArea = document.getElementById("infoBox");
@@ -389,8 +467,7 @@ function changeTextArea(node, path) {
 		graph.nodes.set(oldId, newNode);
 
 	    /// Change name in the PVS specification
-	    pvsWriter.changeStateName(oldName, realName );
-        
+	    pvsWriter.changeStateName(oldName, realName );        
         return;
 	}
     if( selected_edges.keys().length == 1)
@@ -460,6 +537,37 @@ function getEdgesInDiagram() { return graph.edges.values(); }
 /// Function init is the entry point of the Emulink graphical editor
 function init(_editor, wsocket, currentProject, pm, startWriter) {
 
+	pm.addListener("SelectedIndexChanged", function (event) {
+		
+	if( lastFileShown) //Since file selected is going to be changed, we need to save diagram information ...
+	{
+		var nodes = getNodesInDiagram();
+		var edges = getEdgesInDiagram();
+
+		if( nodes.length ) // But save just if there is something to save!
+		{   var graphToSave = { nodes: getNodesInDiagram(), edges: getEdgesInDiagram()};
+    	    diagramsInfo[lastFileShown] = graphToSave;
+    	}
+	}	
+	// ...and clearing SVG
+    svg.remove();
+    clearSvg();
+
+    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
+			.attr("id", "canvas").style("background", "#fffcec");
+
+	lastFileShown = event.current.selectedItemString; //Update last file shown 
+
+	var diagramInfo = diagramsInfo[lastFileShown]; //Get information fresh file to display 
+	if( diagramInfo) //If it has diagram information 
+		if( numberDiagramStillToRestore ) // Check if this is shown for first time after reloading 
+		    restoreDiagramFirstTimeAfterReloadingFromSaving(diagramInfo);
+	    else
+		    restoreGraphAfterSwitchingEmulinkFiles(diagramInfo);
+
+	emulink();
+	}); //End listener
+	
     // After last modifications (Emulink commented) I need to create here SVG 
     svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
 			.attr("id", "canvas").style("background", "#fffcec");
@@ -483,14 +591,13 @@ function init(_editor, wsocket, currentProject, pm, startWriter) {
     
     // Start Emulink
 	emulink();
-    
+    return;
     if( ! startWriter) { return; }
 	pvsWriter.newSpecification("myTheory.pvs"); 
 }
 
 var emulink = function() {
 
-    console.log("emulink is called");
 	var colors = d3.scale.category10();
 
 	// init D3 force layout
@@ -1069,10 +1176,6 @@ var emulink = function() {
 		changeTextArea(node, path);
 		restart();
 	  });
-	d3.select("#AddEmulinkFile")
-	  .on("Click"), function () {
-	  	
-	  }
     
     d3.select("#changeNameNode")
       .on("click", function () {
@@ -1228,7 +1331,6 @@ var emulink = function() {
               return;
           }
           pvsWriter.addFieldInState(newField[0], newField[1]);
-          console.log(newField);
       });
 	// app starts here
 	svg.on('mousedown', mousedown).on('mousemove', mousemove).on('mouseup', mouseup);
@@ -1239,10 +1341,10 @@ var emulink = function() {
 
 
 module.exports = {
-	init: function (editor, wsocket, currentProject, pm, start) { document.getElementById("AddEmulinkFile").disabled = false; return init(editor, wsocket, currentProject, pm, start); },
+	init: function (editor, wsocket, currentProject, pm, start) { return init(editor, wsocket, currentProject, pm, start); },
 	changeTextArea : changeTextArea,
 	add_node_mode: function(){ if( d3.select("#ContainerStateMachine").selectAll("svg")[0].length )
-                               return toggle_editor_mode(MODE.ADD_NODE);
+                                   return toggle_editor_mode(MODE.ADD_NODE);
                                document.getElementById("emulinkInfo").value = "Emulink Status: NOT ACTIVE;\nClick on New Diagram to Activate Emulink";
                              },
 	add_transition_mode: function() { return toggle_editor_mode(MODE.ADD_TRANSITION); },
@@ -1257,7 +1359,8 @@ module.exports = {
     emulink: emulink,
     clearSvg : clearSvg,
 	highlightElements: highlightElements,
-    restoreColorNodesAndEdges : restoreColorNodesAndEdges
+    restoreColorNodesAndEdges : restoreColorNodesAndEdges,
+    addNewDiagram : addNewDiagram
 };
 
 

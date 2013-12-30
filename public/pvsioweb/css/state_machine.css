@@ -3,13 +3,14 @@
 	background:     #fffcec;
  	width:          930px;
 	border-radius:  10px;
-   	height:         800px;
+  height:         800px;
 	left:		1px;
 	/*display:        none; */
 }
 #stateMachineToolbar {
     margin-bottom: 10px;   
-    margin-top: 10px;   
+    margin-top: 10px; 
+    border: groove 7px red;
 }
 
 
@@ -30,18 +31,16 @@
 	box-shadow:     0 1px 3px rgba(0,0,0,0.8);
 }
 
-#button_box:hover	    {
+#button_box:hover	{
 
 	cursor:		default;
 	box-shadow:     0 1px 3px rgba(0,0,0,0.8);
 }
 
 
-.draggable              {
+.draggable      {
 
 	cursor: move;
-
-
 }
 
 .resizable-se		{
@@ -99,7 +98,6 @@ ul#context-menu li {
    display: none;
 }
 .button_inside_svg {
-
   position: absolute;
   top: 30px;
   width:30px;
@@ -109,8 +107,6 @@ ul#context-menu li {
   border-color: white;
   display:block;
   background-image: url("../../img/text.png");
-
-
 }
 
 .resize_button_inside_svg {
@@ -161,6 +157,8 @@ ul#context-menu li {
 	width: 930px;
 	font-family: Tahoma, sans-serif; 
 	display: block;
+  border-style: ridge; 
+  border-color: red; 
 }
 #modifyPropertiesToolbarNode{
  border:-style: dotted;
