@@ -165,8 +165,6 @@ define(function (require, exports, module) {
 		pvsFilesListView.addListener("SelectedIndexChanged", function (event) {
 			//fetch sourcecode for selected file and update editor
 			var pvsFile = event.selectedItem;
-			pm.fire({type: "SelectedIndexChanged", current: event});
-			
 			if (pvsFile.content()) {
 				editor.removeAllListeners("change");
 				editor.setValue(pvsFile.content());
@@ -191,6 +189,9 @@ define(function (require, exports, module) {
 				});
 			}
 			updateSourceCodeToolbarButtons(pvsFile, currentProject);
+            //bubble the event
+            event.type = "SelectedFileChanged";
+            pm.fire(event);
 		});
 		
 		return pvsFilesListView;

@@ -537,7 +537,7 @@ function getEdgesInDiagram() { return graph.edges.values(); }
 /// Function init is the entry point of the Emulink graphical editor
 function init(_editor, wsocket, currentProject, pm, startWriter) {
 
-	pm.addListener("SelectedIndexChanged", function (event) {
+	pm.addListener("SelectedFileChanged", function (event) {
 		
 	if( lastFileShown) //Since file selected is going to be changed, we need to save diagram information ...
 	{
