@@ -10,6 +10,7 @@ define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
 		property = require("util/property"),
+        eventDispatcher = require("util/eventDispatcher"),
 		imageMapper             = require("imagemapper"),
 		WSManager				= require("websockets/pvs/WSManager"),
         uidGenerator            = require("util/uuidGenerator"),
@@ -55,6 +56,7 @@ define(function (require, exports, module) {
 	 */
 	function WidgetManager() {
         this._widgets = {};
+        eventDispatcher(this);
     }
     
 	/**
@@ -94,7 +96,7 @@ define(function (require, exports, module) {
     };
 
 	WidgetManager.prototype.updateMapCreator = function (cb) {
-		var ws = WSManager.getWebSocket(), wm = this;
+		var ws = WSManager.getWebSocket(), wm = this, event = {type: "WidgetModified"};
         imageMapper({element: "#imageDiv img", parent: "#imageDiv", onReady: function (mc) {
             mapCreator = mc.on("create", function (e) {
                 var region = e.region;
@@ -113,14 +115,23 @@ define(function (require, exports, module) {
                         widget.element(region);
                         createImageMap(widget);
                         wm.addWidget(widget);
+                        event.action = "create";
+                        event.widget = widget;
+                        wm.fire(event);
                     }).on("cancel", function (e, view) {
                         view.remove();
                         d3.select(region.node().parentNode).remove();
                     });
             }).on("resize", function (e) {
                 wm.updateLocationAndSize(e.region.attr("id"), e.pos);
+                event.action = "resize";
+                event.widget = wm.getWidget(e.region.attr("id"));
+                wm.fire(event);
             }).on("move", function (e) {
                 wm.updateLocationAndSize(e.region.attr("id"), e.pos);
+                event.action = "move";
+                event.widget = wm.getWidget(e.region.attr("id"));
+                wm.fire(event);
             }).on("remove", function (e) {
                 e.regions.each(function () {
                     var w = wm.getWidget(d3.select(this).attr("id"));
@@ -130,6 +141,8 @@ define(function (require, exports, module) {
                         d3.select(this.parentNode).remove();
                     }
                 });
+                event.action = "remove";
+                wm.fire(event);
             });
             if (cb) { cb(); }
         }});

@@ -27,7 +27,7 @@ define(function (require, exports, module) {
 			"click #btnCancel": "cancel"
 		},
 		ok: function (event) {
-			var form = d3.select(this.el).select("form").node();
+			var form = this.el;
 			if (FormUtils.validateForm(form)) {
 				var formdata = FormUtils.serializeForm(form);
 				this.trigger("ok", {data: formdata, el: this.el}, this);

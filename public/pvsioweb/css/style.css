@@ -67,7 +67,6 @@ div.downloader{
 
 .dialog{
 	background: white;
-	padding: 20px;
 	width: 500px;
 }
 .overlay{
@@ -371,5 +370,13 @@ div.detailsForm select, div.detailsForm textarea{
 
 .form-center {
     display: table-cell;
-    vertical-align: middle;§
+    vertical-align: middle;
+}
+
+ .overlay .panel {
+    width: 500px;
+}
+
+.panel-footer {
+    min-height:50px;
 }
