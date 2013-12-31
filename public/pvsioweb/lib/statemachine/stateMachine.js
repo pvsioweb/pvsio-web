@@ -556,7 +556,7 @@ function init(_editor, wsocket, currentProject, pm, startWriter) {
     svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
 			.attr("id", "canvas").style("background", "#fffcec");
 
-	lastFileShown = event.current.selectedItemString; //Update last file shown 
+	lastFileShown = event.selectedItemString; //Update last file shown 
 
 	var diagramInfo = diagramsInfo[lastFileShown]; //Get information fresh file to display 
 	if( diagramInfo) //If it has diagram information 
