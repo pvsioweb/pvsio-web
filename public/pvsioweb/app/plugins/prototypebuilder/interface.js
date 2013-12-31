@@ -8,7 +8,8 @@
 define(function (require, exports, module) {
 	"use strict";
 	var WSManager = require("websockets/pvs/WSManager"),
-		Logger	= require("util/Logger");
+		Logger	= require("util/Logger"),
+        SaveProjectChanges = require("project/forms/SaveProjectChanges");
 	
 	/**
 	 * Switches the prototoyping layer to the builder layer
@@ -66,19 +67,37 @@ define(function (require, exports, module) {
 		d3.select("#openProject").on("click", function () {
             var pvsioStatus = d3.select("#lblPVSioStatus");
             pvsioStatus.select("span").remove();
-			projectManager.openProject(function (project) {
-				var ws = WSManager.getWebSocket();
-				ws.lastState("init(0)");
-				if (project.mainPVSFile()) {
-					ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()}, pvsProcessReady);
-				} else {
-                    //close pvsio process for previous project
-                    ws.closePVSProcess(function (err, res) {
-                        pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
+            
+            function _doOpenProject() {
+                projectManager.openProject(function (project) {
+                    var ws = WSManager.getWebSocket();
+                    ws.lastState("init(0)");
+                    if (project.mainPVSFile()) {
+                        ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()}, pvsProcessReady);
+                    } else {
+                        //close pvsio process for previous project
+                        ws.closePVSProcess(function (err, res) {
+                            pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
+                        });
+                    }
+                    switchToBuilderView();
+                });
+            }
+            
+            var currentProject = projectManager.project();
+            if (currentProject && currentProject._dirty()) {
+                //show save project dialog for the current project
+                SaveProjectChanges.create(currentProject)
+                    .on("yes", function (e, view) {
+                        view.remove();
+                        projectManager.saveProject(currentProject, _doOpenProject);
+                    }).on("no", function (e, view) {
+                        view.remove();
+                        _doOpenProject();
                     });
-                }
-				switchToBuilderView();
-			});
+            } else {
+                _doOpenProject();
+            }
 		});
 	
 		d3.select("#newProject").on("click", function () {

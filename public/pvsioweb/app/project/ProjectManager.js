@@ -19,6 +19,7 @@ define(function (require, exports, module) {
         newProjectForm          = require("pvsioweb/forms/newProject"),
 		openProjectForm         = require("pvsioweb/forms/openProject"),
 		openFilesForm = require("pvsioweb/forms/openFiles"),
+        saveProjectChanges = require("project/forms/SaveProjectChanges"),
 		WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager();
 
 	///	Used to change name of default files (i.e: default_name + counter ) 
@@ -76,8 +77,9 @@ define(function (require, exports, module) {
 		return function () {
 			//ideally one should use information from ace to set the dirty mark on the document
 			//e.g editor.getSession().getUndoManager().hasUndo();
-            if (!pvsFileListView )
+            if (!pvsFileListView) {
                 pvsFileListView = pm.renderSourceFileList();
+            }
 			if (pvsFileListView) {
 				var pvsFile = pvsFilesListView.selectedItem();
 				if (pvsFile) {
@@ -85,9 +87,8 @@ define(function (require, exports, module) {
 					pvsFile.content(editor.getValue()).dirty(dirty); //update the selected project file content
 					updateSourceCodeToolbarButtons(pvsFile, pm.project());
 					pvsFilesListView.updateView();
+                    pm.project()._dirty(true);
 				}
-			} else {
-				console.log("warning: ProjectManager:editorChangeListener: pvsFileListView is undefined");
 			}
 		};
 	}
@@ -121,7 +122,12 @@ define(function (require, exports, module) {
 			.addListener("PropertyChanged", function (e) {
 				e.fresh.on("change", editorChangedListener(e.fresh, pm, pvsFilesListView));
 			});
-		
+		window.onbeforeunload =  function (event) {
+            var p = pm.project();
+            if (p && p._dirty()) {
+                return "Are you sure you want to exit? All unsaved changed will be lost.";
+            }
+        };
 	}
 	/**
 	 * Shows all the files in the project including closed files.
@@ -292,7 +298,7 @@ define(function (require, exports, module) {
 		if (obj.image && obj.imageData) {
 			p.image(new ProjectFile(obj.image, p).type("image").content(obj.imageData));
 		}
-		p.widgetDefinitions(obj.widgetDefinition);
+		p.widgetDefinitions(obj.widgetDefinition)._dirty(false);
 		return p;
 	}
     
@@ -555,10 +561,13 @@ define(function (require, exports, module) {
                         updateSourceCodeToolbarButtons(pvsFilesListView.selectedItem(), project);
                     }
                     pm.fire({type: "ProjectSaved", project: project});
+                    if (typeof cb === "function") {
+                        cb();
+                    }
                 }
             });
         }
-
+        ///FIXME change this to a proper form dialog using html templates
         if (project.name() === default_project_name) {
             name = prompt("Your project has default name, you can change it now (if not, please click on cancel)");
             if (name && name.trim().length > 0) {
@@ -570,6 +579,9 @@ define(function (require, exports, module) {
                         pvsFilesListView.updateView();
                         pm.updateSourceCodeToolbarButtons(pvsFilesListView.selectedItem(), project);
                         pm.fire({type: "ProjectSaved", project: project});
+                        if (typeof cb === "function") {
+                            cb();
+                        }
                     }
                 });
             }
