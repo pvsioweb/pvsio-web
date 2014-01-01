@@ -42,6 +42,8 @@ var numberFiles = 0;
 var lastFileShown;
 var numberDiagramStillToRestore = 0;
 
+var defaultTransition = false;
+
 var addNewDiagram = function()
 {
     var name = "myTheory" + numberFiles + ".pvs";
@@ -144,7 +146,7 @@ var highlightElements = function ( nodes ) {
 		});
 }
 
-var add_node = function (positionX, positionY, label, notWriter ) {
+var add_node = function (positionX, positionY, label, notWriter, height_, width_, falseNode ) {
 	var _id = "X" + newNodeID();
 	var node = { 
 			fixed: true,
@@ -155,17 +157,19 @@ var add_node = function (positionX, positionY, label, notWriter ) {
 			y    : positionY,
 			px   : positionX,
 			py   : positionY,
-			height: minBoxHeight,
-			width : minBoxWidth,
+			height: (height_ === undefined) ? minBoxHeight : height_,
+			width : (width_ === undefined) ?  minBoxWidth : width_,
 			weight: 0,
             warning : new Object()
 	};
 
     node.warning.notPresentInSpec = false;
     node.warning.labelAlreadyUsed = false;
+   	if(falseNode) {node.falseNode = true;}
+
 	// add node
 	graph.nodes.set(node.id, node);
-    
+
     if( notWriter ) { return node; }
 	// update pvs theory accordingly
 	pvsWriter.addState(node);
@@ -316,7 +320,7 @@ function restoreDiagramFirstTimeAfterReloadingFromSaving(graphToRestore)
     {
          var currentNode = nodesToRestore[id];
          workAround.push(currentNode);
-         comeOn.push(add_node(currentNode.x, currentNode.y, currentNode.name, true));
+         comeOn.push(add_node(currentNode.x, currentNode.y, currentNode.name, true, currentNode.height, currentNode.width, currentNode.falseNode));
     }
     for( var id in edgesToRestore)
     {
@@ -535,7 +539,7 @@ function getNodesInDiagram() { return graph.nodes.values(); }
 function getEdgesInDiagram() { return graph.edges.values(); }   
 
 /// Function init is the entry point of the Emulink graphical editor
-function init(_editor, wsocket, currentProject, pm, startWriter) {
+function init(_editor, wsocket, currentProject, pm, startWriter, nameFile) {
 
 	pm.addListener("SelectedFileChanged", function (event) {
 		
@@ -567,7 +571,7 @@ function init(_editor, wsocket, currentProject, pm, startWriter) {
 
 	emulink();
 	}); //End listener
-	
+	lastFileShown = nameFile;
     // After last modifications (Emulink commented) I need to create here SVG 
     svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
 			.attr("id", "canvas").style("background", "#fffcec");
@@ -699,6 +703,12 @@ var emulink = function() {
 					var sourceY = d.source.y;
 					var targetX = d.target.x;
 					var targetY = d.target.y;
+
+					if( d.source.falseNode) {
+						sourceY = sourceY - 18;
+						sourceX = sourceX - 12;
+					}
+
 
 					// to adjust the arrow pointing at the target, we reason using Cartesian quadrants:
 					// the source node is at the center of the axes, and the target is in one of the quadrants
@@ -873,11 +883,12 @@ var emulink = function() {
 			.attr("x", function(d) { return -boxWidth/2; }) // translate x,y so they correspond to the center of the box (rather than the top-left corner)
 			.attr("y", function(d) { return -boxHeight/2; })
 			.attr("rx", boxWidth/10).attr("ry", boxHeight/10) // rouded edges
-			.attr("width", boxWidth).attr("height", boxHeight)
+			.attr("width", function(d) { return d.width; }).attr("height", function (d){return d.height;})
 			.attr("id", function(d) {return d.id; })
 			.style("cursor", "pointer") // change cursor shape
 			.attr("opacity", "0.9")
-			.style('fill', function(d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
+			.style('fill', function(d) { 
+				if( d.falseNode) return "black"; return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
 			.style('stroke', function(d) { return d3.rgb(colors(d.id)).darker().toString(); })
 			.classed('reflexive', true)
 			.on('mouseover', function(d) {
@@ -993,6 +1004,14 @@ var emulink = function() {
 						restart();
 					}
 				}
+				else if(defaultTransition)
+				{
+					var posX = d.x ;
+					var posY = d.y + d.height;
+					var falseNode = add_node(posX, posY, "", true, 20, 20, true);
+					add_edge(falseNode, d, "", true);
+					restart();
+				}
 				else {
 					showInformationInTextArea(d);
 					pvsWriter.focusOn(d);
@@ -1003,7 +1022,7 @@ var emulink = function() {
 		.style('fill', function(d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); });
 		// render resize tool for nodes
 		nodeCanvas.append("rect").classed("resizeTool", true)
-			.attr("width", 20).attr("height", 20)
+			.attr("width", function (d) { if(d.falseNode) return 0; return 20;}).attr("height", function(d){ if(d.falseNode) return 0; return 20;})
 			.attr("x", function(d) { return boxWidth/2 - 18; })
 			.attr("y", function(d) { return boxHeight/2 - 18; }) // place the resize box at the lower right corner of the node
 			.attr("rx", 2).attr("ry", 2) // rouded edges
@@ -1332,6 +1351,14 @@ var emulink = function() {
           }
           pvsWriter.addFieldInState(newField[0], newField[1]);
       });
+
+      d3.select("#defaultTransition").on("click", function () {
+      	defaultTransition = ! defaultTransition;
+      	if( defaultTransition )
+      	    document.getElementById("defaultTransition").style.border = "3px solid #AD235E";
+        else
+        	document.getElementById("defaultTransition").style.border = "";
+      })
 	// app starts here
 	svg.on('mousedown', mousedown).on('mousemove', mousemove).on('mouseup', mouseup);
 	d3.select(window).on('keydown', keydown).on('keyup', keyup);
@@ -1341,7 +1368,7 @@ var emulink = function() {
 
 
 module.exports = {
-	init: function (editor, wsocket, currentProject, pm, start) { return init(editor, wsocket, currentProject, pm, start); },
+	init: function (editor, wsocket, currentProject, pm, start, sf) { return init(editor, wsocket, currentProject, pm, start, sf); },
 	changeTextArea : changeTextArea,
 	add_node_mode: function(){ if( d3.select("#ContainerStateMachine").selectAll("svg")[0].length )
                                    return toggle_editor_mode(MODE.ADD_NODE);

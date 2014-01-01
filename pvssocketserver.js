@@ -43,7 +43,7 @@ function run() {
         workspace               = __dirname + "/public",
         pvsioProcessMap         = {},//each client should get his own process
         httpServer              = http.createServer(webserver),
-        baseProjectDir              = __dirname + "/public/projects/";
+        baseProjectDir          = __dirname + "/public/projects/";
     var p, clientid = 0, WebSocketServer = ws.Server;
 
     /**
@@ -96,7 +96,7 @@ function run() {
             });
         }
         //if file does not exist, create it. Else read the property file and update just the key value specified
-        fs.exists(file, function (exists) {
+        fs.exists(file, function (exists) { 
             if (!exists) {
                 props[key] = value;
                 writeFile(props, callback);
@@ -258,7 +258,7 @@ function run() {
     /**
         get function maps for client sockets
     */
-    function createClientFunctionMaps() {
+    function createClientFunctionMaps() { 
         var map = {
             "setMainFile": function (token, socket, socketid) {
                 changeProjectSetting(token.projectName, "mainPVSFile", token.fileName, function (res) {

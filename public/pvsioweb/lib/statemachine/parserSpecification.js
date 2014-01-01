@@ -54,11 +54,11 @@ define(function (require, exports, module) {
      *  @returns void 
      *	      
     */
-    function init(editor_, sm, curProj, ws, pm)
+    function init(editor_, sm, curProj, ws, pm, selectedFileChanged)
     {
         editor = editor_;
         drawer = sm;
-        drawer.init(editor, ws, curProj, pm, false);
+        drawer.init(editor, ws, curProj, pm, false, selectedFileChanged);
         parser = new Parser(editor_, sm);
         parser.startParsing();
         drawer.emulink();
