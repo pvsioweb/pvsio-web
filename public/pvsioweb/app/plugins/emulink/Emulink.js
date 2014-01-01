@@ -15,7 +15,7 @@ define(function (require, exports, module) {
 		PrototypeBuilder		= require("pvsioweb/PrototypeBuilder"),
 		Logger					= require("util/Logger"),
         Simulator               = require("plugins/emulink/simulator");
-        
+
     var emulinkHasBeenUsed = false; //Default: Current Project is not Emulink Project
     var ws;
 	
@@ -36,10 +36,16 @@ define(function (require, exports, module) {
 		var projectManager = pb.getProjectManager(),
 			editor = pb.getEditor();
         ws = pvsioWebClient.getWebSocket();
-        var currentProject = projectManager.project();	
+        var currentProject = projectManager.project();
+        var selectedFileChanged;	
         
 		//create the user interface elements
 		createHtmlElements(pvsioWebClient);
+
+        projectManager.addListener("SelectedFileChanged", function (event) {
+                selectedFileChanged = event.selectedItemString;
+        });
+
 		/** NEW: StateChart **************************************************************************/   
         d3.select("#state_machine").on("click", function () { stateMachine.init(editor, ws, currentProject, projectManager); });
         d3.select("#button_state").on("click", function () { stateMachine.add_node_mode(); });
@@ -106,9 +112,10 @@ define(function (require, exports, module) {
         d3.select("#showTags").on("click", function() {
             pvsWriter.showTags();
         });
-        
-        d3.select("#specificationToDiagram").on("click", function() {            
-            parserSpecification.init(editor, stateMachine, currentProject, ws, projectManager, false);
+
+        d3.select("#specificationToDiagram").on("click", function() {     
+            
+            parserSpecification.init(editor, stateMachine, currentProject, ws, projectManager, selectedFileChanged);
             showEmulinkStatus();
             emulinkHasBeenUsed = true;
         });

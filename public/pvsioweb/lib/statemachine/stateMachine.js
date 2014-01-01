@@ -539,7 +539,7 @@ function getNodesInDiagram() { return graph.nodes.values(); }
 function getEdgesInDiagram() { return graph.edges.values(); }   
 
 /// Function init is the entry point of the Emulink graphical editor
-function init(_editor, wsocket, currentProject, pm, startWriter) {
+function init(_editor, wsocket, currentProject, pm, startWriter, nameFile) {
 
 	pm.addListener("SelectedFileChanged", function (event) {
 		
@@ -571,7 +571,7 @@ function init(_editor, wsocket, currentProject, pm, startWriter) {
 
 	emulink();
 	}); //End listener
-	
+	lastFileShown = nameFile;
     // After last modifications (Emulink commented) I need to create here SVG 
     svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
 			.attr("id", "canvas").style("background", "#fffcec");
@@ -1368,7 +1368,7 @@ var emulink = function() {
 
 
 module.exports = {
-	init: function (editor, wsocket, currentProject, pm, start) { return init(editor, wsocket, currentProject, pm, start); },
+	init: function (editor, wsocket, currentProject, pm, start, sf) { return init(editor, wsocket, currentProject, pm, start, sf); },
 	changeTextArea : changeTextArea,
 	add_node_mode: function(){ if( d3.select("#ContainerStateMachine").selectAll("svg")[0].length )
                                    return toggle_editor_mode(MODE.ADD_NODE);
