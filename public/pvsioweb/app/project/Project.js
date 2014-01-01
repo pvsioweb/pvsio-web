@@ -124,7 +124,12 @@ define(function (require, exports, module) {
         });
         
         eventDispatcher(this);
+        //listen for widget manager event for widget modification
+        WidgetManager.addListener("WidgetModified", function (e) {
+            project._dirty(true);
+        });
     }
+    
     /**
 	 * Updates the project image.
 	 * @param {!String} imageName The fileName for the new image

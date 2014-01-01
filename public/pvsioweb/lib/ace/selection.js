@@ -76,12 +76,12 @@ var Selection = function(session) {
     this.anchor = this.selectionAnchor = this.doc.createAnchor(0, 0);
 
     var self = this;
-    this.lead.on("change", function(e) {
+    this.lead.on("change", function(e) {        
         self._emit("changeCursor");
         if (!self.$isEmpty)
             self._emit("changeSelection");
         if (!self.$keepDesiredColumnOnChange && e.old.column != e.value.column)
-            self.$desiredColumn = null;
+            self.$desiredColumn = null;        
     });
 
     this.selectionAnchor.on("change", function() {

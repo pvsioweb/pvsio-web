@@ -541,7 +541,7 @@ function getEdgesInDiagram() { return graph.edges.values(); }
 /// Function init is the entry point of the Emulink graphical editor
 function init(_editor, wsocket, currentProject, pm, startWriter) {
 
-	pm.addListener("SelectedIndexChanged", function (event) {
+	pm.addListener("SelectedFileChanged", function (event) {
 		
 	if( lastFileShown) //Since file selected is going to be changed, we need to save diagram information ...
 	{
@@ -560,7 +560,7 @@ function init(_editor, wsocket, currentProject, pm, startWriter) {
     svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
 			.attr("id", "canvas").style("background", "#fffcec");
 
-	lastFileShown = event.current.selectedItemString; //Update last file shown 
+	lastFileShown = event.selectedItemString; //Update last file shown 
 
 	var diagramInfo = diagramsInfo[lastFileShown]; //Get information fresh file to display 
 	if( diagramInfo) //If it has diagram information 

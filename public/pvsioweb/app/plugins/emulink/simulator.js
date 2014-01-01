@@ -34,7 +34,7 @@
      *  @returns void 
      *	      
     */
-    function init(ws)
+    function init(ws) 
     {
        if( simulationIsActive)
        {   simulationIsActive = false;
@@ -70,7 +70,7 @@
         
         this.setInitState = function(state)
         {
-            this.currentState = state;   
+            this.currentState = state;
         }
         this.ws.addListener("pvsoutput", function (e) 
         {
@@ -79,13 +79,13 @@
             var response = prettyPrint(e.data);
             console.log("Simulator", response);
             var current_state = response.match(simulator.currentStateString+"(.*?)[, #]");
-            var previous_state = response.match(simulator.previousStateString+"(.*?)[, #]");             
+            var previous_state = response.match(simulator.previousStateString+"(.*?)[, #]");
             
             if( !previous_state || !current_state )
                 return;
-            
-            simulator.previous_state = previous_state[1];            
-            simulator.newState = current_state[1];            
+
+            simulator.previous_state = previous_state[1];
+            simulator.newState = current_state[1];
             
             simulator.render();    
 	    })
