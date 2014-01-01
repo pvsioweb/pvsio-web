@@ -171,6 +171,7 @@ define(function (require, exports, module) {
              if( emulinkSvg[0].length ){ emulinkSvg.remove(); stateMachine.clearSvg(); }             
              emulinkHasBeenUsed = false;
              var project = event.current; 
+             currentProject = project;
              var fileToShow = project.mainPVSFile() || project.pvsFiles()[0];
              fileToShow = fileToShow.name();
              var f = project.path() + "/" + "graphDefinition.json";
@@ -188,7 +189,7 @@ define(function (require, exports, module) {
         
         });
         
-        
+
         
 		return this;
 	}
