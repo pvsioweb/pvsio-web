@@ -58,7 +58,7 @@ main: THEORY
   %{"_block" : "BlockEnd", "_id" : "click_POINT", "_source" : "Ready", "_target" : "Process_DP", "_type": "Transition"}
 
   ENDCOND
-  %{"_block" : "BlockEnd", "_id" : " click_POINT", "_type": "Edge"}
+  %{"_block" : "BlockEnd", "_id" : "click_POINT", "_type": "Edge"}
   %{"_block" : "BlockStart", "_id" : "click_CLEAR", "_type": "Permission"}
   per_click_CLEAR(st: State) : bool = st`current_state = Ready OR st`current_state = Error
   %{"_block" : "BlockEnd", "_id" : "click_CLEAR", "_type": "Permission"}
@@ -104,7 +104,6 @@ main: THEORY
   %{"_block" : "BlockStart", "_id" : "tick", "_type": "Edge"}
   tick(st: (per_tick)): State = 
   COND
-
   %{"_block" : "BlockStart", "_id" : "tick", "_source" : "Process_Digit", "_target" : "Ready", "_type": "Transition"}
      st`current_state = Process_Digit AND numberpad(st)`rejectKeys = FALSE
     -> LET new_st = leave_state(Process_Digit)(st)
