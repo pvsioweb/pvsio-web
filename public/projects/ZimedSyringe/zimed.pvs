@@ -2,13 +2,15 @@ zimed: THEORY
  BEGIN
  
   %-- constants
-  max: posreal = 99999;
+  max: posreal = 99.99;
   alarmType: TYPE = {silent, beep, muted}
+  maxCursor: posreal = 1
+  minCursor: negreal = -2
 
   %-- type definitions
   %-- data entry
   zimed_real: TYPE = {r: nonneg_real | r <= max}
-  Cursor: TYPE = {i: int | i >= -2 AND i <= 4}
+  Cursor: TYPE = {i: int | i >= minCursor AND i <= maxCursor}
 
   State: TYPE = [#
      on    : int, % on flag
@@ -90,8 +92,8 @@ zimed: THEORY
    LAMBDA(st: State):
      LET i = c(st) IN
       COND
-        i < 4 -> st WITH [ c := i + 1 ],
-        i = 4 -> st 
+        i < maxCursor -> st WITH [ c := i + 1 ],
+        i = maxCursor -> st 
       ENDCOND
 
   %-- right button
@@ -99,8 +101,8 @@ zimed: THEORY
     LAMBDA(st: State): 
       LET i = c(st) IN
        COND
-         i > -2 -> st WITH [ c := i - 1 ],
-         i = -2 -> st
+         i > minCursor -> st WITH [ c := i - 1 ],
+         i = minCursor -> st
        ENDCOND
 
 
