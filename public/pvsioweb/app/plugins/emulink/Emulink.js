@@ -14,7 +14,8 @@ define(function (require, exports, module) {
         parserSpecification     = require("lib/statemachine/parserSpecification"),
 		PrototypeBuilder		= require("pvsioweb/PrototypeBuilder"),
 		Logger					= require("util/Logger"),
-        Simulator               = require("plugins/emulink/simulator");
+        Simulator               = require("plugins/emulink/simulator"),
+        EmulinkFile             = require("plugins/emulink/fileHandler/fileHandler");
 
     var emulinkHasBeenUsed = false; //Default: Current Project is not Emulink Project
     var ws;
@@ -114,7 +115,13 @@ define(function (require, exports, module) {
         });
 
         d3.select("#specificationToDiagram").on("click", function() {     
-            
+            // User has just copied into the editor without opening any project
+            if( currentProject.pvsFiles().length == 0)
+            {
+                currentProject.name("default_pvsProject");
+                EmulinkFile.new_file(currentProject, editor, ws, "TheoryEmulink.pvs", editor.getValue(), projectManager );
+
+            }
             parserSpecification.init(editor, stateMachine, currentProject, ws, projectManager, selectedFileChanged);
             showEmulinkStatus();
             emulinkHasBeenUsed = true;

@@ -110,21 +110,22 @@ define(function (require, exports, module) {
                                  needle: this.tagEnd,
                                  wrap: true,
                                  wholeWord: false,
-                                 range : null
+                                 range : null,
+                                 regExp: true
 				        
                                };
             this.editor.moveCursorTo(0, 0);
             var currentTag = this.editor.find(objectSearch);
             var currentTagEnd = this.editor.find(objectSearchEnd);
-            
+            finalTag = this.tagEnd;
             while( currentTag != undefined )
             {            
                 /* Get the entire line */
                 initialTag = this.editor.session.getTextRange(new Range(currentTag.start.row, 0, 
                                                                         currentTag.start.row, 1000)).replace(/(\r\n|\n|\r)/gm,"");                
                 /* Transform start Tag into end Tag */
-                finalTag = initialTag.replace("BlockStart", "BlockEnd");
-                
+                //finalTag = initialTag.replace("BlockStart", "BlockEnd");
+                finalTag = this.getFinalTagFromStartOne(initialTag);
                 objectSearchEnd.needle = finalTag;
                 objectSearchEnd.range = new Range(currentTag.start.row, 0, lengthDocument, 100);
                 /* getting end tag from the content */
@@ -242,6 +243,42 @@ define(function (require, exports, module) {
                      return this.listOfNodes[i];
             
             console.log("ERROR: findCorrispondentNode");
+        }
+        this.getFinalTagFromStartOne = function(initTag)
+        {   
+            var spaceRegex = "[\\s]*";
+            var separatorRegex = spaceRegex + "," + spaceRegex;
+            var type, typeTransitionNeedle, id;
+            
+            if( initTag.indexOf("_type") == -1)
+                return initTag.replace("BlockStart", "BlockEnd");
+            
+            type = initTag.substring(initTag.indexOf("_type") + 5); //  :  " Type " ...
+            type = type.substring(type.indexOf(':') +1); //  " Type " ..
+            type = type.substring(type.indexOf('"') +1); //  Type  " ..
+            type = type.substring(0, type.indexOf('"')); // Type 
+            type = type.replace(/\s+/g,""); //Type
+            type = spaceRegex + type + spaceRegex;
+            typeTransitionNeedle = "\"_type\""  + spaceRegex + ":" + spaceRegex + "\"" + type + "\"";
+
+            id = initTag.substring(initTag.indexOf("_id") + 3); // :  " ID ",  "_type..
+            id = id.substring(id.indexOf(':') +1, id.indexOf(',')); //   " ID "
+            id = id.replace(/\"/g, "").replace(/\s+/g,""); //ID
+            id = spaceRegex +  id + spaceRegex ;
+            
+
+            var blockEndNeedle   = "%{\"_block\"" + spaceRegex + ":" + spaceRegex + "\"BlockEnd\"";
+            var idNeedle         = "\"_id\""    + spaceRegex + ":" + spaceRegex + "\"" + id + "\"";
+            
+
+
+            var needle  =  blockEndNeedle   + separatorRegex 
+                           + idNeedle       + separatorRegex 
+                           + typeTransitionNeedle;
+
+            return needle;
+
+
         }
         
     }
