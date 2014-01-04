@@ -45,6 +45,8 @@ define(function (require, exports, module) {
     var tagCondStart = "  %{\"_block\": \"BlockStart\", \"_id\" : \"*nameCond*\", \"_source\" : *SRC*, \"_target\" : *TRT*, \"_type\": \"Transition\"}";    
     var tagCondEnd = "  %{\"_block\": \"BlockEnd\", \"_id\" : \"*nameCond*\", \"_source\" : *SRC*, \"_target\" : *TRT*, \"_type\": \"Transition\"}";
 
+    var begin ;
+    var end;
     /**************  Exported Functions Definition               *****************************************************/
     
     /** 
@@ -83,16 +85,32 @@ define(function (require, exports, module) {
         this.kindOfTag = "\"_type\":";
         this.lengthKindOfTag = this.kindOfTag.length;
         
+        this.switchCond = "\"_cond\" :";
+        this.lengthSwitchCond = this.switchCond.length;
+
         this.defaultPosX = 100;
         this.defaultPosY = 100;
         
         
         this.listOfNodes = new Array();
         this.listOfEdges = new Array();
-        this.listOfFunctions = {};        
-        
-        this.startParsing = function()
+        this.listOfFunctions = {}; 
+
+        this.switchCondObject = {};
+       
+        this.transformKeyAndValueAvoidingSpaces = function(objectBlock)
         {
+                var newObjectWithoutSpaces = {};
+                for( var key in objectBlock)
+                {    var value = objectBlock[key];
+                      (key = key.replace(/\s+/g, ""));
+                    newObjectWithoutSpaces[key] = value.replace(/\s+/g, "");
+                };
+                return newObjectWithoutSpaces;
+
+        }
+        this.startParsing = function()
+        {   begin= new Date().getMilliseconds();
             var content;
             var initialTag;
             var finalTag;
@@ -118,13 +136,17 @@ define(function (require, exports, module) {
             var currentTag = this.editor.find(objectSearch);
             var currentTagEnd = this.editor.find(objectSearchEnd);
             finalTag = this.tagEnd;
+
+
             while( currentTag != undefined )
             {            
                 /* Get the entire line */
                 initialTag = this.editor.session.getTextRange(new Range(currentTag.start.row, 0, 
-                                                                        currentTag.start.row, 1000)).replace(/(\r\n|\n|\r)/gm,"");                
+                                                                        currentTag.start.row, 1000)).replace(/(\r\n|\n|\r)/gm,"");     
+                var stringJson = initialTag.substring(initialTag.indexOf('{') );
+                var objectBlock = JSON.parse(stringJson);   
+                objectBlock = this.transformKeyAndValueAvoidingSpaces(objectBlock);        
                 /* Transform start Tag into end Tag */
-                //finalTag = initialTag.replace("BlockStart", "BlockEnd");
                 finalTag = this.getFinalTagFromStartOne(initialTag);
                 objectSearchEnd.needle = finalTag;
                 objectSearchEnd.range = new Range(currentTag.start.row, 0, lengthDocument, 100);
@@ -140,11 +162,14 @@ define(function (require, exports, module) {
                     return false;
                 }
                 
-                initialTag.indexOf(this.kindOfTag);
+                //initialTag.indexOf(this.kindOfTag);
                 /*Getting which kind of tag is */
-                kindOfTag = initialTag.substring(initialTag.indexOf(this.kindOfTag) + this.lengthKindOfTag, initialTag.indexOf('}'));
-               
-                this.dispatcher(content, kindOfTag);
+                //kindOfTag = initialTag.substring(initialTag.indexOf(this.kindOfTag) + this.lengthKindOfTag, initialTag.indexOf('}'));
+
+                /* In this new version we can safely get the kind of tag using _type property, simple! */
+                kindOfTag = objectBlock._type;
+
+                this.dispatcher(content, kindOfTag, objectBlock._id);
                 
                 /* Updating search range */
                 objectSearch.range = new Range(currentTagEnd.end.row, 0, lengthDocument, 1000);
@@ -152,12 +177,16 @@ define(function (require, exports, module) {
             }
             
             this.createEdge();
+
+            end  = new Date().getMilliseconds();
+            var diff = end - begin;
+            console.log("\n******* " + diff + " *******\n" );
             
         }
         
-        this.dispatcher = function(content, kindOfTag)
+        this.dispatcher = function(content, kindOfTag, id)
         {
-               kindOfTag = kindOfTag.replace(/\s+/g, "").replace(/\"/g, "");
+               
                if( kindOfTag === "Nodes" )
                {   
                    this.parseNodes(content);
@@ -165,7 +194,7 @@ define(function (require, exports, module) {
                }            
                if( kindOfTag === "Edge" )
                {
-                   this.parseEdge(content);
+                   this.parseEdge(content, id);
                    return;
                }            
         }
@@ -190,9 +219,9 @@ define(function (require, exports, module) {
             }
             
         }
-        this.parseEdge = function(content)
+        this.parseEdge = function(content, nameOfEdge)
         {
-            var nameEdge = content.substring(0, content.indexOf('(')).replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"");
+            var nameEdge = nameOfEdge;
             var condition = content.indexOf('BlockStart');
             var tagProcessing ;
             var source, target;
@@ -202,10 +231,18 @@ define(function (require, exports, module) {
             while( condition != -1 )
             {
                 /*Getting entire tag */
-                tagProcessing = content.substring(content.indexOf('BlockStart'));
-                tagProcessing = tagProcessing.substring(0,  tagProcessing.indexOf('}'));
+                tagProcessing = content.substring(content.indexOf("BlockStart"));
+                tagProcessing = tagProcessing.substring(0,  tagProcessing.indexOf('\n'));
+                tagProcessing = tagProcessing.substring(tagProcessing.indexOf("_id"));
+                tagProcessing = "{\"" + tagProcessing;
+
+                var objectBlock = JSON.parse(tagProcessing);   
+                objectBlock = this.transformKeyAndValueAvoidingSpaces(objectBlock); 
+
+                
                 content = content.substring(content.indexOf('BlockStart') + 5);
                 condition = content.indexOf('BlockStart');
+                /*
                 
                 source = tagProcessing.substring(tagProcessing.indexOf(this.source) + this.lengthSource);
                 source = source.substring(0, source.indexOf(','));
@@ -213,7 +250,25 @@ define(function (require, exports, module) {
                                                  
                 target = tagProcessing.substring(tagProcessing.indexOf(this.target) + this.lengthTarget);
                 target = target.substring(0, target.indexOf(',')); 
-                target = target.replace(/\"/g, "").replace(/\s+/g,"");    
+                target = target.replace(/\"/g, "").replace(/\s+/g,"");  */  
+                source = objectBlock._source;
+                target = objectBlock._target;
+
+                var switchCond = tagProcessing.indexOf(this.switchCond);
+                var allCond = "";
+                var tmpTagProcessing = tagProcessing;
+                while( switchCond != -1)
+                {
+                    tmpTagProcessing = tmpTagProcessing.substring(switchCond + this.lengthSwitchCond);
+                    var tmpSwitchCond = tmpTagProcessing.substring(0, tmpTagProcessing.indexOf('}'));
+                    tmpSwitchCond = tmpSwitchCond.replace(/\"/g, "").replace(/\s+/g,"");
+                    if( allCond == "")
+                        allCond = allCond + tmpSwitchCond;
+                    else
+                        allCond =  allCond + "," + tmpSwitchCond;
+                    switchCond = tmpTagProcessing.indexOf(this.switchCond);
+                }
+                if( allCond !== ""){this.switchCondObject[nameEdge + "," + source + "," + target] = allCond; }
       
                 array.push(source);
                 array.push(target);
@@ -224,13 +279,27 @@ define(function (require, exports, module) {
         this.createEdge = function()
         {   
             var currentEdge ;
+            var nameSource, nameTarget, nameEdge;
             for( var i = 0; i < this.listOfEdges.length; i++ )
             {
                  currentEdge = this.listOfEdges[i];
                  for( var j = 1; j < currentEdge.length; j = j + 2)
                  {
-                      this.drawer.add_edge(this.findCorrispondentNode(currentEdge[j]), this.findCorrispondentNode(currentEdge[j +1]), 
+                      var edgeJustInsert = this.drawer.add_edge((nameSource = this.findCorrispondentNode(currentEdge[j])), 
+                                                                 (nameTarget = this.findCorrispondentNode(currentEdge[j +1])), 
                                            currentEdge[0], 1);   
+                      nameSource = nameSource.name;
+                      nameTarget = nameTarget.name;
+                      nameEdge = currentEdge[0];
+                      var listCond = this.switchCondObject[nameEdge + "," + nameSource + "," + nameTarget ];
+                      if( listCond )
+                      {   if( edgeJustInsert.listConditions === undefined )
+                              edgeJustInsert.listConditions = new Array();
+                          var arrayCond = listCond.split(',');
+                          arrayCond.forEach(function (item ) {
+                              edgeJustInsert.listConditions.push(item);
+                          });
+                  }
                      
                  }
             }

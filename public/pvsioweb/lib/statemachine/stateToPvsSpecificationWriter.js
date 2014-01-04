@@ -402,6 +402,8 @@ function WriterOnContent( editor)
     this.tagFieldStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : \"State\", \"_type\": \"State\"}";
     this.tagFieldEnd = "  " + this.BLOCK_END + ", " + this.ID_FIELD + " : \"State\", \"_type\": \"State\"}";
 
+    this.tagSwitchCond = "{\"_cond\" : \"*COND*\"}";
+
     /********* Functions about Editor changing (Note: I need to define them here ********/
     
     this.handleUserModificationOnEditor = function()
@@ -637,6 +639,8 @@ function WriterOnContent( editor)
     this.addSwitchCond = function(nameTrans, sourceName, targetName, cond)
     {
         var arrayTag = this.buildTagCond(nameTrans, sourceName, targetName);
+        var arrayTagCopy = arrayTag;
+
         arrayTag[0] = arrayTag[0].replace(/(\r\n|\n|\r)/gm, "");
         arrayTag[1] = arrayTag[1].replace(/(\r\n|\n|\r)/gm, "");
         var content = this.getContentBetweenTags(arrayTag[0], arrayTag[1], false);
@@ -651,8 +655,19 @@ function WriterOnContent( editor)
             content.substring(content.indexOf("->") -2) ;
         
         this.editor.find(content );
-        this.editor.replace( newContent );      
+        this.editor.replace( newContent );     
+
+        this.addSwitchCondInTag(arrayTagCopy[0], arrayTagCopy[1], cond); 
         
+    }
+    this.addSwitchCondInTag = function(startTag, endTag, cond)
+    {
+        var newStartTag = startTag + this.tagSwitchCond.replace("*COND*", cond);
+        var newEndTag = endTag + this.tagSwitchCond.replace("*COND*", cond);
+        this.editor.find(startTag);
+        this.editor.replace(newStartTag); 
+        this.editor.find(endTag);
+        this.editor.replace(newEndTag);
     }
     this.getContentBetweenTags = function(startTag, endTag, isRegexp)
     {

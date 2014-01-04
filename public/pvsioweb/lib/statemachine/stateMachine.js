@@ -1382,7 +1382,7 @@ module.exports = {
     restoreGraph : restoreGraph,
     buildGraph : buildGraph,
     add_node : function(x,y,label,writer) { var ret = add_node(x,y,label,writer);  return ret; },
-    add_edge : function(source, target, lab, notWr) {add_edge(source, target, lab, notWr);  },
+    add_edge : function(source, target, lab, notWr) { return add_edge(source, target, lab, notWr);  },
     emulink: emulink,
     clearSvg : clearSvg,
 	highlightElements: highlightElements,
