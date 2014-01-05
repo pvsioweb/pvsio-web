@@ -85,8 +85,15 @@ define(function (require, exports, module) {
         this.kindOfTag = "\"_type\":";
         this.lengthKindOfTag = this.kindOfTag.length;
         
-        this.switchCond = "\"_cond\" :";
+        this.switchCond = "_switchCond";
         this.lengthSwitchCond = this.switchCond.length;
+
+        this.sourceTag = "_source";
+        this.targetTag = "_target";
+        this.typeTag = "_type";
+        this.idTag = "_id";
+        this.transActTag = "_transAct";
+
 
         this.defaultPosX = 100;
         this.defaultPosY = 100;
@@ -97,16 +104,20 @@ define(function (require, exports, module) {
         this.listOfFunctions = {}; 
 
         this.switchCondObject = {};
+        this.transActionObject = {};
        
         this.transformKeyAndValueAvoidingSpaces = function(objectBlock)
         {
-                var newObjectWithoutSpaces = {};
-                for( var key in objectBlock)
-                {    var value = objectBlock[key];
-                      (key = key.replace(/\s+/g, ""));
-                    newObjectWithoutSpaces[key] = value.replace(/\s+/g, "");
-                };
-                return newObjectWithoutSpaces;
+            var newObjectWithoutSpaces = {};
+            for( var key in objectBlock)
+            {    var value = objectBlock[key];
+                 key = key.replace(/\s+/g, "");
+                 if( typeof value === "string" )
+                     newObjectWithoutSpaces[key] = value.replace(/\s+/g, "");
+                 else
+                     newObjectWithoutSpaces[key] = value;
+            };
+            return newObjectWithoutSpaces;
 
         }
         this.startParsing = function()
@@ -162,14 +173,11 @@ define(function (require, exports, module) {
                     return false;
                 }
                 
-                //initialTag.indexOf(this.kindOfTag);
-                /*Getting which kind of tag is */
-                //kindOfTag = initialTag.substring(initialTag.indexOf(this.kindOfTag) + this.lengthKindOfTag, initialTag.indexOf('}'));
-
+                
                 /* In this new version we can safely get the kind of tag using _type property, simple! */
-                kindOfTag = objectBlock._type;
+                kindOfTag = objectBlock[this.typeTag];
 
-                this.dispatcher(content, kindOfTag, objectBlock._id);
+                this.dispatcher(content, kindOfTag, objectBlock[this.idTag]);
                 
                 /* Updating search range */
                 objectSearch.range = new Range(currentTagEnd.end.row, 0, lengthDocument, 1000);
@@ -228,48 +236,41 @@ define(function (require, exports, module) {
             this.listOfEdges.push(new Array());
             var array = this.listOfEdges[this.listOfEdges.length -1];
             array.push(nameEdge);
-            while( condition != -1 )
+            while( condition != -1 ) //Getting and processing each condition inside transition
             {
                 /*Getting entire tag */
                 tagProcessing = content.substring(content.indexOf("BlockStart"));
                 tagProcessing = tagProcessing.substring(0,  tagProcessing.indexOf('\n'));
                 tagProcessing = tagProcessing.substring(tagProcessing.indexOf("_id"));
-                tagProcessing = "{\"" + tagProcessing;
+                tagProcessing = "{\"" + tagProcessing; // Formatting in JSON String
 
-                var objectBlock = JSON.parse(tagProcessing);   
+                var objectBlock;
+                try 
+                {
+                    objectBlock = JSON.parse(tagProcessing);
+
+                }   
+                catch(error)
+                {
+                    console.log("Error in ParseEdge\n" + error );
+                    alert("Error in ParseEdge\n" + error);
+                    alert("Please write to e.durso7@gmail.com about this error");
+                    return;
+                }
                 objectBlock = this.transformKeyAndValueAvoidingSpaces(objectBlock); 
 
                 
                 content = content.substring(content.indexOf('BlockStart') + 5);
                 condition = content.indexOf('BlockStart');
-                /*
-                
-                source = tagProcessing.substring(tagProcessing.indexOf(this.source) + this.lengthSource);
-                source = source.substring(0, source.indexOf(','));
-                source = source.replace(/\"/g, "").replace(/\s+/g,"");
-                                                 
-                target = tagProcessing.substring(tagProcessing.indexOf(this.target) + this.lengthTarget);
-                target = target.substring(0, target.indexOf(',')); 
-                target = target.replace(/\"/g, "").replace(/\s+/g,"");  */  
-                source = objectBlock._source;
-                target = objectBlock._target;
+               
+                source = objectBlock[this.sourceTag]; //Getting source of edge
+                target = objectBlock[this.targetTag]; //Getting target of edge
+                var allCond = objectBlock[this.switchCond];
+                if( allCond ){ this.switchCondObject[nameEdge + "," + source + "," + target] = allCond; }
 
-                var switchCond = tagProcessing.indexOf(this.switchCond);
-                var allCond = "";
-                var tmpTagProcessing = tagProcessing;
-                while( switchCond != -1)
-                {
-                    tmpTagProcessing = tmpTagProcessing.substring(switchCond + this.lengthSwitchCond);
-                    var tmpSwitchCond = tmpTagProcessing.substring(0, tmpTagProcessing.indexOf('}'));
-                    tmpSwitchCond = tmpSwitchCond.replace(/\"/g, "").replace(/\s+/g,"");
-                    if( allCond == "")
-                        allCond = allCond + tmpSwitchCond;
-                    else
-                        allCond =  allCond + "," + tmpSwitchCond;
-                    switchCond = tmpTagProcessing.indexOf(this.switchCond);
-                }
-                if( allCond !== ""){this.switchCondObject[nameEdge + "," + source + "," + target] = allCond; }
-      
+                var allTrans = objectBlock[this.transActTag];
+                if( allTrans){ this.transActionObject[ nameEdge + "," + source + "," + target] = allTrans;}
+
                 array.push(source);
                 array.push(target);
                 
@@ -295,13 +296,20 @@ define(function (require, exports, module) {
                       if( listCond )
                       {   if( edgeJustInsert.listConditions === undefined )
                               edgeJustInsert.listConditions = new Array();
-                          var arrayCond = listCond.split(',');
-                          arrayCond.forEach(function (item ) {
+                          listCond.forEach(function (item ) {
                               edgeJustInsert.listConditions.push(item);
                           });
-                  }
+                      }
+                      var listTransAct = this.transActionObject[nameEdge + "," + nameSource + "," + nameTarget ];
+                      if( listTransAct )
+                      {  if( edgeJustInsert.listOfOperations === undefined )
+                              edgeJustInsert.listOfOperations = new Array();
+                         listTransAct.forEach(function (item ) {
+                              edgeJustInsert.listOfOperations.push(item);
+                          });
                      
-                 }
+                      }
+                }
             }
             
         }

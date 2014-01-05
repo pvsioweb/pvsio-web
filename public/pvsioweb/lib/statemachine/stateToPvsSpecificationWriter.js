@@ -403,6 +403,8 @@ function WriterOnContent( editor)
     this.tagFieldEnd = "  " + this.BLOCK_END + ", " + this.ID_FIELD + " : \"State\", \"_type\": \"State\"}";
 
     this.tagSwitchCond = "{\"_cond\" : \"*COND*\"}";
+    this.switchCondTag = "_switchCond";
+    this.transActTag = "_transAct";
 
     /********* Functions about Editor changing (Note: I need to define them here ********/
     
@@ -636,9 +638,31 @@ function WriterOnContent( editor)
 		// else
 		return "";
     }
-    this.addSwitchCond = function(nameTrans, sourceName, targetName, cond)
+    this.findRealTagCond = function(nameTrans, sourceName, targetName)
     {
         var arrayTag = this.buildTagCond(nameTrans, sourceName, targetName);
+        var arrayTagToReturn = new Array();
+        var range = editor.getSelectionRange();
+        var objectSearch = { wrap: true, wholeWord: false, range: null }; 
+
+        arrayTag.forEach(function( currentTag)
+            {
+                var tmp = currentTag.replace(/(\r\n|\n|\r)/g, "");
+                tmp = currentTag.substring(0, currentTag.lastIndexOf('}'));
+                tmp = writer.editor.find(tmp, objectSearch, false);
+                range.start = tmp.start;
+                range.end = tmp.end;
+                range.end.column = 1000; //FIXME
+                var realTag = writer.editor.session.getTextRange(range);
+                arrayTagToReturn.push(realTag);
+
+            });
+        return arrayTagToReturn;
+
+    }
+    this.addSwitchCond = function(nameTrans, sourceName, targetName, cond)
+    {
+        var arrayTag = this.findRealTagCond(nameTrans, sourceName, targetName);
         var arrayTagCopy = arrayTag;
 
         arrayTag[0] = arrayTag[0].replace(/(\r\n|\n|\r)/gm, "");
@@ -657,17 +681,55 @@ function WriterOnContent( editor)
         this.editor.find(content );
         this.editor.replace( newContent );     
 
-        this.addSwitchCondInTag(arrayTagCopy[0], arrayTagCopy[1], cond); 
+        this.addSwitchCondInTag(arrayTagCopy, cond); 
         
     }
-    this.addSwitchCondInTag = function(startTag, endTag, cond)
-    {
-        var newStartTag = startTag + this.tagSwitchCond.replace("*COND*", cond);
-        var newEndTag = endTag + this.tagSwitchCond.replace("*COND*", cond);
-        this.editor.find(startTag);
-        this.editor.replace(newStartTag); 
-        this.editor.find(endTag);
-        this.editor.replace(newEndTag);
+    this.addSwitchCondInTag = function(arrayTag, cond)
+    {  
+        arrayTag.forEach(function( currentTag )
+        {
+            var currentTagJson = currentTag.substring(currentTag.indexOf('{'));
+            var actualObject;
+            var newTag;
+            var tmpObject = {};          
+            var alreadyExist = false;
+            try {
+                actualObject = JSON.parse(currentTagJson); //Getting Object
+                var switchCond = actualObject[writer.switchCondTag]; //Getting conditions field
+                if( ! switchCond ) //If does not exist, create this field
+                    switchCond = new Array();
+                else
+                {   
+                    alreadyExist = true;
+                }
+                switchCond.push(cond); //Insert condition
+                tmpObject[writer.switchCondTag] = switchCond; 
+                newTag = JSON.stringify(tmpObject); //We cannot stringify actualObject to preserve spaces 
+
+            }
+            catch( err)
+            {
+                console.log("Error in addSwitchCond \n" + err);
+                alert("Error in addSwitchCond \n" + err);
+                return;
+            }
+            newTag = newTag.replace('{', "").replace('}', ""); //Stringify add brackets we do not need them
+
+            if( alreadyExist === false ) //If there was no cond. field add it at the end 
+            {   
+                newTag = currentTag.substring(0, currentTag.lastIndexOf('}')) + ", " + newTag + '}';
+            }
+            else
+            {   var oldCondField = currentTag.substring(currentTag.indexOf(writer.switchCondTag));
+                oldCondField = oldCondField.substring(0, oldCondField.indexOf(']') + 1);
+                newTag = newTag.replace("\"", ""); //delete initial " created by stringify
+                newTag = currentTag.replace(oldCondField, newTag);
+            }
+
+            writer.editor.find(currentTag);
+            writer.editor.replace(newTag);     
+
+        }); //End Loop
     }
     this.getContentBetweenTags = function(startTag, endTag, isRegexp)
     {
@@ -725,9 +787,10 @@ function WriterOnContent( editor)
     this.addOperationInCondition = function(nameTrans, sourceName, targetName, operation)
     {
         this.checkConsistenceOperation(operation);
-        
+        var rawOperation = operation;
         operation = "  new_st = new_st WITH [ " + operation + " ]";
-        var arrayTag = this.buildTagCond(nameTrans, sourceName, targetName);
+        var arrayTag = this.findRealTagCond(nameTrans, sourceName, targetName);
+        var arrayTagCopy = arrayTag;
         arrayTag[0] = arrayTag[0].replace(/(\r\n|\n|\r)/gm, "");
         arrayTag[1] = arrayTag[1].replace(/(\r\n|\n|\r)/gm, "");
         var content = this.getContentBetweenTags(arrayTag[0], arrayTag[1], false);
@@ -741,7 +804,55 @@ function WriterOnContent( editor)
         var newContent = content.substring(0, content.indexOf("IN")) + "," + operation + "\n    " + content.substring(content.indexOf("IN") -2) ;
         
         this.editor.find(content );
-        this.editor.replace( newContent );        
+        this.editor.replace( newContent );    
+        this.addOperationInTagCond(arrayTagCopy, rawOperation);    
+    }
+    this.addOperationInTagCond = function(arrayTag, operation)
+    {
+        arrayTag.forEach(function( currentTag )
+        {
+            var currentTagJson = currentTag.substring(currentTag.indexOf('{'));
+            var actualObject;
+            var newTag;
+            var tmpObject = {};          
+            var alreadyExist = false;
+            try {
+                actualObject = JSON.parse(currentTagJson); //Getting Object
+                var transActTag = actualObject[writer.transActTag]; //Getting conditions field
+                if( ! transActTag) //If does not exist, create this field
+                    transActTag = new Array();
+                else
+                {   
+                    alreadyExist = true;
+                }
+                transActTag.push(operation); //Insert condition
+                tmpObject[writer.transActTag] = transActTag; 
+                newTag = JSON.stringify(tmpObject); //We cannot stringify actualObject to preserve spaces 
+
+            }
+            catch( err)
+            {
+                console.log("Error in addOperationInTagCond  \n" + err);
+                alert("Error in addOperationInTagCond  \n" + err);
+                return;
+            }
+            newTag = newTag.replace('{', "").replace('}', ""); //Stringify add brackets we do not need them
+
+            if( alreadyExist === false ) //If there was no cond. field add it at the end 
+            {   
+                newTag = currentTag.substring(0, currentTag.lastIndexOf('}')) + ", " + newTag + '}';
+            }
+            else
+            {   var oldTransOperField = currentTag.substring(currentTag.indexOf(writer.transActTag));
+                oldTransOperField = oldTransOperField.substring(0, oldTransOperField.indexOf(']') + 1);
+                newTag = newTag.replace("\"", ""); //delete initial " created by stringify
+                newTag = currentTag.replace(oldTransOperField, newTag);
+            }
+
+            writer.editor.find(currentTag);
+            writer.editor.replace(newTag);     
+
+        }); //End Loop
     }
     this.addFieldInState = function(nameField, typeName)
     {
