@@ -42,8 +42,6 @@ var numberFiles = 0;
 var lastFileShown;
 var numberDiagramStillToRestore = 0;
 
-var defaultTransition = false;
-
 var addNewDiagram = function()
 {
     var name = "myTheory" + numberFiles + ".pvs";
@@ -255,7 +253,7 @@ var delete_all_edges = function () {
     graph.edges.forEach(function(key, value) { graph.edges.remove(key); });
 }
 
-var MODE = { DEFAULT: 0, ADD_NODE: 1, ADD_TRANSITION: 2, ADD_SELF_TRANSITION: 3 };
+var MODE = { DEFAULT: 0, ADD_NODE: 1, ADD_TRANSITION: 2, ADD_SELF_TRANSITION: 3, ADD_DEFAULT_TRANSITION: 4 };
 var editor_mode = MODE.DEFAULT;
 
 var selected_nodes = d3.map();
@@ -516,6 +514,7 @@ function set_editor_mode(m) {
 	// reset borders
 	document.getElementById("button_self_transition").style.border = "";
 	document.getElementById("button_transition").style.border = "";
+	document.getElementById("button_default_transition").style.border = "";
 	document.getElementById("button_state").style.border = "";
 	// set new editor mode
 	editor_mode = m;
@@ -524,6 +523,9 @@ function set_editor_mode(m) {
 	}
 	else if(editor_mode == MODE.ADD_SELF_TRANSITION) {
 		document.getElementById("button_self_transition").style.border = "3px solid #AD235E";
+	}
+	else if(editor_mode == MODE.ADD_DEFAULT_TRANSITION) {
+		document.getElementById("button_default_transition").style.border = "3px solid #AD235E";
 	}
 	else if(editor_mode == MODE.ADD_NODE) {
 		document.getElementById("button_state").style.border = "3px solid #AD235E";
@@ -1004,10 +1006,11 @@ var emulink = function() {
 						restart();
 					}
 				}
-				else if(defaultTransition)
+				else if(editor_mode == MODE.ADD_DEFAULT_TRANSITION)
 				{
-					var posX = d.x ;
-					var posY = d.y + d.height;
+					//FIXME: do we really need a new node? we could just draw an incoming edge and append a round symbol at the other extreme of the edge
+					var posX = d.x - minBoxWidth/2;
+					var posY = d.y - minBoxHeight/2;
 					var falseNode = add_node(posX, posY, "", true, 20, 20, true);
 					add_edge(falseNode, d, "", true);
 					restart();
@@ -1352,12 +1355,9 @@ var emulink = function() {
           pvsWriter.addFieldInState(newField[0], newField[1]);
       });
 
-      d3.select("#defaultTransition").on("click", function () {
-      	defaultTransition = ! defaultTransition;
-      	if( defaultTransition )
-      	    document.getElementById("defaultTransition").style.border = "3px solid #AD235E";
-        else
-        	document.getElementById("defaultTransition").style.border = "";
+      d3.select("#button_default_transition").on("click", function () {
+			toggle_editor_mode(MODE.ADD_DEFAULT_TRANSITION);
+			//TODO: implement the corresponding pvsWriter function and invoke it here
       })
 	// app starts here
 	svg.on('mousedown', mousedown).on('mousemove', mousemove).on('mouseup', mouseup);
@@ -1376,6 +1376,7 @@ module.exports = {
                              },
 	add_transition_mode: function() { return toggle_editor_mode(MODE.ADD_TRANSITION); },
 	add_self_transition_mode: function() { return toggle_editor_mode(MODE.ADD_SELF_TRANSITION); },
+	add_default_transition_mode: function() { return toggle_editor_mode(MODE.ADD_DEFAULT_TRANSITION); },
     getNodesInDiagram : getNodesInDiagram,
     getEdgesInDiagram : getEdgesInDiagram,
     getGraphDefinition : getGraphDefinition,

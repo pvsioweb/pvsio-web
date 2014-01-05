@@ -10,7 +10,6 @@
 #stateMachineToolbar {
     margin-bottom: 10px;   
     margin-top: 10px; 
-    border: groove 7px red;
 }
 
 
@@ -157,8 +156,6 @@ ul#context-menu li {
 	width: 930px;
 	font-family: Tahoma, sans-serif; 
 	display: block;
-  border-style: ridge; 
-  border-color: red; 
 }
 #modifyPropertiesToolbarNode{
  border:-style: dotted;
