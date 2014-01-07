@@ -413,8 +413,8 @@ function WriterOnContent( editor)
         console.log("USER MODIFICATION"); 
 		//// FIXME: this interferes with the autocompletion: the contextual menu created
 		////          by the autocompletion functionality disappears when parseToFindInconsistency is invoked
-//        clearTimeout(writer.timeOut);
-//        writer.timeOut = setTimeout(function(){writer.parseToFindDiagramSpecificationInconsistency() } , 1000 );        
+        clearTimeout(writer.timeOut);
+        writer.timeOut = setTimeout(function(){writer.parseToFindDiagramSpecificationInconsistency() } , 20000 );        
     }
     
     this.parseToFindDiagramSpecificationInconsistency = function()
@@ -480,63 +480,57 @@ function WriterOnContent( editor)
         console.log("ConsistenceStateNames finished ");
         
     }
+    this.buildIdealContentFromEdge = function(edge)
+    {
+        var source = edge.source.name;
+        var target = edge.target.name;
+        var listOfOper = edge.listOfOperations;
+        var listOfCond = edge.listConditions;
+        var stringToReturn = "st`current_state =" + source;
+
+        if( listOfCond )
+            listOfCond.forEach(function(cond){
+                  stringToReturn = stringToReturn + "& st`" + cond;
+            });
+
+        stringToReturn = stringToReturn + "-> LET new_st = leave_state(" + source + ")(st)";
+
+        if( listOfOper)
+            listOfOper.forEach(function(oper){
+                 stringToReturn = stringToReturn + ", new_st = new_st WITH [" + oper + "]";
+            });
+
+        stringToReturn = stringToReturn + "IN enter_into(" + target + ")(new_st)";
+
+        return stringToReturn;
+    }
     this.checkConsistenceTransFunction = function (edgesInDiagram)
     {
            var debug = document.getElementById("warningDebug");
-        
-           var length = edgesInDiagram.length;
-           for( var i = 0; i<length; i++)
-           {
-                var currentEdge = edgesInDiagram[i];
-                var currentName = currentEdge.name.indexOf('{') == -1 ? currentEdge.name 
-                                                                      : currentEdge.name.substring(0, currentEdge.name.indexOf('{'));
-                var operation = currentEdge.name.substring(currentEdge.name.indexOf('{') +1, currentEdge.name.indexOf('}'));
-                var currentSource = currentEdge.source.name;
-                var currentTarget = currentEdge.target.name;
-                
-                /* Checking if the function is defined; example: looking for  tick(st:(per_tick )):State = */
-                var isFunctionPresent = writer.editor.find(currentName + "(st:(per_" + currentName + " )):State =");
-                if( isFunctionPresent === undefined )
+          
+           edgesInDiagram.forEach( function(currentEdge) {
+
+
+                var idealContent = writer.buildIdealContentFromEdge( currentEdge);
+                var realContent = writer.findRealTagCond(currentEdge.name, currentEdge.source.name, 
+                                                         currentEdge.target.name);
+                realContent = writer.getContentBetweenTags(realContent[0].replace(/(\r\n|\n|\r)/gm,""), 
+                                                           realContent[1].replace(/(\r\n|\n|\r)/gm,""), false);
+
+                /* To make comparison delete spaces \n and \t */;
+                idealContent = idealContent.replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"");
+                realContent = realContent.replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"");
+
+                /* Delete last ',' if it is present */ 
+                if( realContent.slice(-1) === ',')
+                    realContent = realContent.substring(0, realContent.length -1);
+
+                if( idealContent !== realContent)
                 {
-                    debug.value = debug.value + currentName + "is not defined or is badly defined";
-                    return;                    
+                    debug.value = debug.value + "\nInconsitence found in " + currentEdge.name;
+                    console.log("\nInconsitence found in " + currentEdge.name);
                 }
-                var currentCondBlock = writer.buildTagCond(currentName, currentSource, currentTarget);
-                var content = writer.getContentBetweenTags(currentCondBlock[0], currentCondBlock[1], false);
-               
-                if( !content || content == "" )
-                {
-                    debug.value = debug.value + "Impossible to check " + currentName + " " + currentSource + " " + currentTarget + "\n";
-                    continue;
-                }
-                // CurrentState should be the current state, example: st`current_state = X0 --> X0
-                var currentState = content.substring(content.indexOf('=') +1, content.indexOf('->') -1 );
-                // Just cleaning the string from white space and \n
-                currentState = currentState.replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"");
-                if( currentState !== currentSource )
-                {
-                    console.log("currentState is wrong in " + currentName + " function " );
-                    debug.value = debug.value + " error in st`current_state in " + currentName + " function\n " ;
-                }
-               
-                var currentCond = content.substring(content.indexOf("new_st"), content.indexOf("(new_st)") + 8).
-                                          replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"");
-      
-               
-               /* FIXME:
-                if( currentCond !== "new_st=leave_state(" + currentSource + ")(st)" + "INenter_into(" + currentTarget +
-                                    ")(new_st)")
-                {
-                    console.log("Error in condition in function " + currentName );
-                    debug.value = debug.value + " error in condition, it should be : " + 
-                                  "new_st=leave_state(" + currentSource + ")(st)" + "IN enter_into(" + currentTarget +
-                                    ")(new_st)";
-                }         
-                */
-                
-                
-           }
-        
+           });                 
         
     }
     this.createFuncTag = function(tagFunc, nameFunction) { return tagFunc.replace("*nameFunc*", nameFunction); }
