@@ -414,7 +414,7 @@ function WriterOnContent( editor)
 		//// FIXME: this interferes with the autocompletion: the contextual menu created
 		////          by the autocompletion functionality disappears when parseToFindInconsistency is invoked
         clearTimeout(writer.timeOut);
-        writer.timeOut = setTimeout(function(){writer.parseToFindDiagramSpecificationInconsistency() } , 20000 );        
+        writer.timeOut = setTimeout(function(){writer.parseToFindDiagramSpecificationInconsistency() } , 2000 );        
     }
     
     this.parseToFindDiagramSpecificationInconsistency = function()
@@ -517,6 +517,8 @@ function WriterOnContent( editor)
                 realContent = writer.getContentBetweenTags(realContent[0].replace(/(\r\n|\n|\r)/gm,""), 
                                                            realContent[1].replace(/(\r\n|\n|\r)/gm,""), false);
 
+                /* Delete comments if they are present */
+                realContent = realContent.replace( /%.*?\n/g, '' );
                 /* To make comparison delete spaces \n and \t */;
                 idealContent = idealContent.replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"");
                 realContent = realContent.replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"");
