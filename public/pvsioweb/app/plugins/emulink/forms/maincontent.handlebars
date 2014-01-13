@@ -6,16 +6,18 @@
                     <button class="btn btn-default" id="startSimulation"> Enable Animation</button>
 				</div>
                 <div id="modifyPropertiesToolbar" >
-                    <button id="button_state"   > New State </button>
-                    <button id="changeNameNode" > Edit State Name</button> 
-                    <button id="addFieldState"  > Add Field</button> 
+                    <button id="button_state" disabled = "true"  > New State </button>
+                    <button id="changeNameNode" disabled = "true"> Edit State Name</button> 
+                    <button id="addFieldState"  disabled = "true"> Add Field</button> 
+                    <button id="deleteNode"    disabled= "true"> Delete node </button>
 					<br><br>
-                    <button id="button_transition" > New Transition </button>
-                    <button id="button_self_transition" > New Self-Transition </button>
-                    <button id="button_default_transition" > New Default Transition </button>
-                    <button id="changeNameEdge" > Edit Transition Name</button>
-                    <button id="addCondition"   > Add Condition</button>
-                    <button id="addOperation"   > Add Action</button>
+                    <button id="button_transition" disabled = "true"> New Transition </button>
+                    <button id="button_self_transition" disabled = "true"> New Self-Transition </button>
+                    <!-- <button id="button_default_transition" disabled = "true"> New Default Transition </button> -->
+                    <button id="deleteEdge" disabled = "true" > Delete edge </button>
+                    <button id="changeNameEdge" disabled = "true" > Edit Transition Name</button>
+                    <button id="addCondition"  disabled = "true" > Add Condition</button>
+                    <button id="addOperation" disabled = "true"  > Add Action</button>
                 </div><br>
 				<div id="ContainerStateMachine" ></div>
 				<div id="state_machine_toolbar" ></div>
