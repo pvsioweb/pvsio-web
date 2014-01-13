@@ -47,6 +47,12 @@ var addNewDiagram = function()
     var name = "myTheory" + numberFiles + ".pvs";
     pvsWriter.newSpecification(name);
     numberFiles ++;
+    setButtonsEnabledOrDisabledAboutEdge(true);
+    setButtonsEnabledOrDisabledAboutNode(true);
+    document.getElementById("addFieldState").disabled = false;
+    document.getElementById("button_state").disabled = false;
+    document.getElementById("button_transition").disabled = true;
+	document.getElementById("button_self_transition").disabled = true;
 
 }
 /** 
@@ -145,6 +151,10 @@ var highlightElements = function ( nodes ) {
 }
 
 var add_node = function (positionX, positionY, label, notWriter, height_, width_, falseNode ) {
+
+	document.getElementById("button_transition").disabled = false;
+	document.getElementById("button_self_transition").disabled = false;
+
 	var _id = "X" + newNodeID();
 	var node = { 
 			fixed: true,
@@ -173,8 +183,27 @@ var add_node = function (positionX, positionY, label, notWriter, height_, width_
 	pvsWriter.addState(node);
     return node;
 }
+var setButtonsEnabledOrDisabledAboutNode = function(disabled)
+{
+	var buttonId = ["changeNameNode", "deleteNode"];
+	buttonId.forEach(function(button) { 
+		var refButton = document.getElementById(button);
+		if( refButton.disabled != disabled )
+		    refButton.disabled = disabled;
+	});
+}
+var setButtonsEnabledOrDisabledAboutEdge = function(disabled)
+{
+	var buttonId = ["changeNameEdge", "addCondition", "addOperation", "deleteEdge"];
+	buttonId.forEach(function(button) { 
+		var refButton = document.getElementById(button);
+		if( refButton.disabled != disabled )
+		    refButton.disabled = disabled;
+	});
+}
 var delete_node = function (id) {
     graph.nodes.remove(id);
+    console.log(graph.nodes)
 }
 var delete_all_nodes = function () {
     graph.nodes.forEach(function(key, value) { graph.nodes.remove(key); });
@@ -391,11 +420,14 @@ function getGraphDefinition()
 var clear_node_selection = function () {
 	selected_nodes.forEach(function(key, value) { selected_nodes.remove(key); });
 	svg.selectAll("g").selectAll("g").select("rect").style("stroke", "").style("stroke-width", "");
+	setButtonsEnabledOrDisabledAboutNode(true);
+
 }
 
 var clear_edge_selection = function () {
 	selected_edges.forEach(function(key, value) { selected_edges.remove(key); });
 	svg.selectAll("path").classed("selected", false);
+	setButtonsEnabledOrDisabledAboutEdge(true);
 }
 
 var clear_selection = function () {
@@ -403,6 +435,85 @@ var clear_selection = function () {
 	clear_edge_selection();
 }
 
+var deleteNodeAndTransition = function(node, flagObject)
+{
+	// Delete node from SVG 
+    delete_node(node.id);
+
+    // Delete node from specification
+    var numberNodesStillPresent = getNodesInDiagram().length;
+    if(numberNodesStillPresent == 0) 
+    {
+    	document.getElementById("button_transition").disabled = true;
+	    document.getElementById("button_self_transition").disabled = true;
+    }
+    pvsWriter.deleteNode(node.name, numberNodesStillPresent);
+
+    var edges = getEdgesInDiagram();
+    var toDelete = {};
+    if( flagObject.deleteTransIn && flagObject.deleteTransOut )
+    {
+    	edges.forEach(function(key) 
+    		{
+
+    			if( key.source.id === node.id || key.target.id === node.id )
+    			{	
+    				delete_edge(key.id); //Delete from SVG 
+    				pvsWriter.deleteCondition(key.name, key.source.name, key.target.name);
+    				toDelete[key.name] = key.name;
+    			}
+    		});
+    }
+    else if( flagObject.deleteTransOut )
+    {
+    	edges.forEach(function(key) 
+    		{
+    			if( key.source.id === node.id )
+    			{	
+    				delete_edge(key.id); //Delete from SVG 
+    				pvsWriter.deleteCondition(key.name, key.source.name, key.target.name)
+    				toDelete[key.name] = key.name;    				
+    			}
+    		});
+
+    }
+    else if( flagObject.deleteTransIn )
+    {
+    	edges.forEach(function(key) 
+    		{
+    			if( key.target.id === node.id )
+    			{	
+    			    delete_edge(key.id); //Delete from SVG 
+    				pvsWriter.deleteCondition(key.name, key.source.name, key.target.name)
+    				toDelete[key.name] = key.name;
+    			}
+    		});
+    }
+    edges = getEdgesInDiagram();
+    for( var nameEdge in toDelete)
+    { 	
+         var flagDelete = true;
+    	 edges.forEach(function(key)
+    		{
+    			if( nameEdge === key.name) { flagDelete = false;}
+    		});
+    	 if( flagDelete) {pvsWriter.deleteTrans(nameEdge); }	
+	}
+}
+
+var deleteEdge = function(edge)
+{
+	delete_edge(edge.id);
+	var edges = getEdgesInDiagram();
+	var counter = 0;
+	edges.forEach(function( key)
+	     {
+	     	if( key.name === edge.name){ counter ++; }
+	     }
+	 );
+	if( counter > 0) { pvsWriter.deleteCondition(edge.name, edge.source.name, edge.target.name); }
+	else { pvsWriter.deleteTrans(edge.name); }
+}
 // FIXME: Change name of this function
 function createStringFromArray(object)
 {
@@ -514,7 +625,7 @@ function set_editor_mode(m) {
 	// reset borders
 	document.getElementById("button_self_transition").style.border = "";
 	document.getElementById("button_transition").style.border = "";
-	document.getElementById("button_default_transition").style.border = "";
+	//document.getElementById("button_default_transition").style.border = "";
 	document.getElementById("button_state").style.border = "";
 	// set new editor mode
 	editor_mode = m;
@@ -784,7 +895,7 @@ var emulink = function() {
 					.on('tick', tick);
 
 		//--- paths -----------------------------------------------------------------------------------------------
-		path = path.data(graph.edges.values());
+		path = path.data(graph.edges.values(), function(d) {return d.id;});
 		// add new links
 		var pathCanvas = path.enter().append('svg:g');
 		pathCanvas
@@ -806,6 +917,7 @@ var emulink = function() {
 					showInformationInTextArea(d);
 					pvsWriter.focusOnFun(d, true);
 					clear_selection();
+					setButtonsEnabledOrDisabledAboutEdge(false);
 					selected_edges.set(d.id, d);
 					// highlight only selected edges
 					path.selectAll("path").classed("selected", function(d) { return selected_edges.has(d.id); });
@@ -876,7 +988,7 @@ var emulink = function() {
 		path.exit().remove();
 
 		//--- nodes -----------------------------------------------------------------------------------------------
-		node = node.data(graph.nodes.values());
+		node = node.data(graph.nodes.values(), function(d) {return d.id;});
 		// add new nodes; the svg:g element creates a canvas that allows us to group three shapes together: box, label, resize tool
 		var nodeCanvas = node.enter().append('svg:g');
 		nodeCanvas
@@ -939,12 +1051,7 @@ var emulink = function() {
 					else {
 						// if the ctrl key is not pressed, reset selection first, and then select the node
 						clear_node_selection();
-						selected_nodes.set(d.id, d);
-        
-                        //START WriterModification: I need to select the node to be able to delete it when user types 'canc'
-                        //selected_node = d;
-                        //END 
-                                                
+						selected_nodes.set(d.id, d);                                                
 						// highlight only selected nodes
 						node.selectAll("rect")
 							.style("stroke", function(d) {
@@ -1016,6 +1123,7 @@ var emulink = function() {
 					restart();
 				}
 				else {
+			        setButtonsEnabledOrDisabledAboutNode(false);
 					showInformationInTextArea(d);
 					pvsWriter.focusOn(d);
 				}
@@ -1337,7 +1445,26 @@ var emulink = function() {
     });
     
 
-    
+    d3.select("#deleteNode")
+      .on("click", function() {
+      	  if( selected_nodes.keys().length == 1) {
+      	  	 var node = selected_nodes.get(selected_nodes.keys());		
+			 var flagObject = { deleteTransIn : true, deleteTransOut : true };
+			 deleteNodeAndTransition(node, flagObject);
+   	         setButtonsEnabledOrDisabledAboutNode(true);
+			 restart();
+		  }
+
+      });
+    d3.select("#deleteEdge")
+       .on("click", function() {
+       	   if( selected_edges.keys().length == 1) {
+       	   	 var edge = selected_edges.get(selected_edges.keys());
+       	   	 deleteEdge(edge);
+       	   	 setButtonsEnabledOrDisabledAboutEdge(true);
+       	   	 restart();
+       	   }
+       })
     d3.select("#addFieldState")
       .on("click", function () {
           restart();

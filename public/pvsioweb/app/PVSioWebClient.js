@@ -83,7 +83,7 @@ define(function (require, exports, module) {
 		var header = div.append("div").classed("header", true);
 		var content = div.append("div").attr("class", "collapsible-panel");
 		
-		header.append("span").attr("class", "toggle-collapse glyphicon glyphicon-minus-sign").on("click", function () {
+		header.append("span").attr("class", "toggle-collapse glyphicon glyphicon-plus-sign").on("click", function () {
 			var d = d3.select(this);
 			if (d.classed("glyphicon-minus-sign")) {
 				content.style("display", "none");
@@ -97,6 +97,7 @@ define(function (require, exports, module) {
 		if (headerText) {
 			header.append("span").html(headerText).attr("class", "header");
 		}
+		content.style("display", "none");
 		return content;
 	};
     /**

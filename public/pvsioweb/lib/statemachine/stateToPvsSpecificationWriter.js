@@ -169,7 +169,7 @@ function addOperationInCondition(nameTrans, sourceName, targetName, operation)
 function removeState(stateToRemove, nodeCounter)
 {
     writer.getLockOnEditor();
-    writer.removeState(stateToRemove.name, nodeCounter);
+    writer.removeState(stateToRemove, nodeCounter);
     writer.leaveLockOnEditor();
 }
 
@@ -343,6 +343,24 @@ function changeFunName(oldName, newName, sourceName, targetName, counter)
     writer.addConditionInTransition(newName, sourceName, targetName); // Add condition 
         
     writer.leaveLockOnEditor();    
+}
+
+function deleteCondition(nameTrans, sourceName, targetName)
+{
+    writer.getLockOnEditor();
+
+    writer.deleteCondInTrans(nameTrans, sourceName, targetName);
+
+    writer.leaveLockOnEditor();   
+
+}
+function deleteTrans(nameTrans )
+{
+    writer.getLockOnEditor();
+
+    writer.deleteTransition(nameTrans);
+
+    writer.leaveLockOnEditor(); 
 }
 
 function undo() { writer.editor.undo(); }
@@ -887,7 +905,7 @@ function WriterOnContent( editor)
 	this.addState = function(newState)
 	{          
 		var range = editor.getSelectionRange();
-		var objectSearch = { wholeWord: false, range: null }; 
+		var objectSearch = { wrap:true, wholeWord: false, range: null }; 
 
 		var init = this.tagStateNameStart;
 		var end = this.tagStateNameEnd;
@@ -928,22 +946,20 @@ function WriterOnContent( editor)
 	} 
         
     this.removeState = function(stateToRemove, stateCounter )
-    {        
-            //First we need to remove state from StateNames                 
-            var content = this.getStateNames();
-            var newContent;
-            
-            //Processing situation  in which there are no states 
-            editor.find(content);
-            if( stateCounter === 0 )
-            {
-                editor.replace(this.defaultStateName);
-                return;    
-            }
-            newContent = content.replace(stateToRemove, " ");
-            newContent = newContent.replace(" ,", "").replace(", ,","").replace(", ","");
-            editor.replace(newContent);    
-            //FIXME: ADD delete Node in function
+    {              
+         var objectSearch = { wrap: true, wholeWord: false, range: null }; 
+         var content = this.getStateNames();
+         var newContent;            
+         //Processing situation  in which there are no states 
+         editor.find(content);
+         if( stateCounter === 0 )
+         {
+             editor.replace(this.defaultStateName +"\n");
+             return;    
+         }
+         newContent = content.replace(stateToRemove, " ");
+         newContent = newContent.replace(" ,", "").replace(", ,","").replace(", ","");
+         editor.replace(newContent);    
     }
 	
 	this.addTransition = function (newTransition)
@@ -1074,6 +1090,7 @@ function WriterOnContent( editor)
         contentEditor = contentEditor.replace(/^\s*$[\n\r]{2,}/gm, '');
         
         this.editor.setValue(contentEditor);    
+        this.editor.find("");
     }
     this.deleteCondInTrans = function(transName, sourceName, targetName)
     { 
@@ -1187,7 +1204,10 @@ module.exports = {
         setTagsCond : setTagsCond,
         setTagsEdge : setTagsEdge,
         init : init,
-        setTagsField : setTagsField
+        setTagsField : setTagsField,
+        deleteCondition : deleteCondition,
+        deleteNode : removeState,
+        deleteTrans: deleteTrans
 
 };
 

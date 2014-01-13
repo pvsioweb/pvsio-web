@@ -47,7 +47,6 @@ define(function (require, exports, module) {
                 selectedFileChanged = event.selectedItemString;
         });
 
-		/** NEW: StateChart **************************************************************************/   
         d3.select("#state_machine").on("click", function () { stateMachine.init(editor, ws, currentProject, projectManager); });
         d3.select("#button_state").on("click", function () { stateMachine.add_node_mode(); });
         d3.select("#button_transition").on("click", function () { stateMachine.add_transition_mode(); });
