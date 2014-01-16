@@ -761,7 +761,7 @@ function WriterOnContent( editor)
 		var objectSearch = { wrap: true, wholeWord: false, range: null, regExp: isRegexp }; 
         
 		var initSearch = editor.find(startTag, objectSearch, true);
-		var endSearch  = editor.find(endTag, objectSearch, true);
+        var endSearch  = editor.find(endTag, objectSearch, true);
 
         if(initSearch && endSearch) {
 			range.start.column = 0;
@@ -1080,24 +1080,6 @@ function WriterOnContent( editor)
         
         return arrayTagPerFun;
     }
-    this.deleteContent = function(contentToDelete)
-    {
-		//FIXME: ace has a function to delete the content of a selection -- let's use it!
-        if( typeof contentToDelete === 'string' ) 
-            contentToDelete = [ contentToDelete ];
-        
-        var contentEditor = this.editor.getValue();
-        
-        for( var i = 0; i < contentToDelete.length; i++)
-        {
-             contentEditor = contentEditor.replace(contentToDelete[i], '');    
-        }
-        
-        contentEditor = contentEditor.replace(/^\s*$[\n\r]{2,}/gm, '');
-        
-        this.editor.setValue(contentEditor);    
-        this.editor.find("");
-    }
     this.howManyConditions = function(transName)
     {
         var tagStart = this.createEdgeTag(this.tagEdgeStart, transName);
@@ -1116,7 +1098,7 @@ function WriterOnContent( editor)
     this.getRange = function(start, end)
     {
         var range = editor.getSelectionRange();
-        var objectSearch = { wrap: true, wholeWord: false, range: null, regExp: true }; 
+        var objectSearch = { wrap: true, range: null, regExp: true }; 
         
         var initSearch = editor.find(start, objectSearch);
         var endSearch  = editor.find(end, objectSearch);
@@ -1129,27 +1111,55 @@ function WriterOnContent( editor)
             return range;
         }
     }
-    this.deleteSeparatorInCond = function(transName)
+    this.deleteSeparatorInCond = function(transName, numberOfConditions)
     {
         var tagEdgeStart = this.createEdgeTag(this.tagEdgeStart, transName);
         var tagEdgeEnd = this.createEdgeTag(this.tagEdgeEnd, transName);
-        var range = this.getRange(tagEdgeStart, tagEdgeEnd);
+        var range = this.getRange(tagEdgeStart, tagEdgeEnd); //Get Range of the whole transition
 
-        var objectSearch = { wrap: true, wholeWord: false, range: range, regExp: true }; 
+        var objectSearch = { range: range, regExp: true }; 
 
+        /* Finding start of the separator block */ 
         var separatorInit = this.editor.find(this.separatorTagStartRegex, objectSearch);
+        /* Finding end of the separator block */
         var separatorEnd = this.editor.find(this.separatorTagEndRegex, objectSearch);
 
+        /* If nothing has been found, just return */
         if( separatorInit === undefined || separatorEnd === undefined)
             return ;
-        range.start.column = 0;
-        range.end.column = separatorEnd.end.column;
-        range.start.row = separatorInit.start.row;
-        range.end.row =  separatorEnd.end.row;
+
+        var separatorFound = 0;
+        var lastSeparatorInit;
+        var lastSeparatorEnd;
+
+        while( separatorInit && separatorEnd )
+        {      
+               separatorFound ++;
+               lastSeparatorInit = separatorInit;
+               lastSeparatorEnd = separatorEnd;
+               objectSearch.range.start.row = separatorEnd.end.row + 1;
+               separatorInit = this.editor.find(this.separatorTagStartRegex, objectSearch); 
+               separatorEnd = this.editor.find(this.separatorTagEndRegex, objectSearch);  
+        }
+        if( separatorFound == numberOfConditions -1) /* Nothing to do */
+            return;
+
+        /* Setting new range */
+        range.start.column = lastSeparatorInit.start.column;
+        range.end.column = lastSeparatorEnd.end.column;
+        range.start.row = lastSeparatorInit.start.row;
+        range.end.row =  lastSeparatorEnd.end.row;
+
+        /* Getting text */
         var contentToDelete = this.editor.session.getTextRange(range);
 
+        /*Finding it we add it in the current Selection so .. */
         this.editor.find(contentToDelete, objectSearch);
-        this.editor.replace("");
+
+        /* .. we can delete easily */
+        this.editor.removeLines();
+
+        //this.editor.replace("");
     }
     this.deleteCondInTrans = function(transName, sourceName, targetName)
     { 
@@ -1167,43 +1177,39 @@ function WriterOnContent( editor)
         var secondTag = blockEndNeedle + separatorRegex + idNeedle + separatorRegex
 						+ sourceNeedle + separatorRegex + targetNeedle + separatorRegex + typeTransitionNeedle;
 
-		var ans = this.getContentAndTags(firstTag, secondTag, true);
-    
-		this.deleteContent(ans);
+        var rangeToDelete = this.getRange(firstTag, secondTag);
+
+        this.editor.session.doc.removeLines(rangeToDelete.start.row, rangeToDelete.end.row);
+
         var howManyConditions = this.howManyConditions(transName);
-        if( howManyConditions == 1) { this.deleteSeparatorInCond(transName);}
+        this.deleteSeparatorInCond(transName, howManyConditions);
 
     }
     this.deleteTransition = function(nameFun) 
-    {        
+    {       
+
         var tagFun = this.buildTagFunction(nameFun);
         var tagPerFun = this.buildTagPerFunction(nameFun);
-        var contentFun;
-        
-        var contentPer = this.getContentBetweenTags(tagPerFun[0], tagPerFun[1], false);
-        
-        if( contentPer == "" )
-        {
-            console.log("Error in deleteTransition, contentPer is empty");
-            return;
-        }
+        var rangePerFunction = this.getRange(tagPerFun[0], tagPerFun[1]);
 
-        this.deleteContent(tagPerFun[0]);
-        this.deleteContent(contentPer);
-        this.deleteContent(tagPerFun[1]);
-        
-        contentFun = this.getContentBetweenTags(tagFun[0], tagFun[1], false);  
-        
-        if( contentFun == "" )
-        {
-            console.log("Error in addOperationInCondition, contentFun is empty");
-            return;
-        }
+        /* Clearing selection in the editor */
+        this.editor.selection.clearSelection();
+                
+        if( rangePerFunction) { this.editor.session.doc.removeLines(rangePerFunction.start.row, 
+                                                                    rangePerFunction.end.row
+                                ); 
+                              }
+        else { console.log("Warning: rangePerFunction is empty"); }
 
-        this.deleteContent(tagFun[0]);
-        this.deleteContent(contentFun);
-        this.deleteContent(tagFun[1]);      
-        
+        /* Getting range of transition itself, note that you cannot do this earlier than now 
+           because of the changing of the editor content after last removing */
+        var rangeWholeTransition = this.getRange(tagFun[0], tagFun[1]);
+
+        if( rangeWholeTransition ) { this.editor.session.doc.removeLines(rangeWholeTransition.start.row,
+                                                                         rangeWholeTransition.end.row
+                                      ); 
+                                   }
+        else { console.log("Error: Transition to delete has not been found"); }     
     }
     this.getRangeStateNames = function()
     {
