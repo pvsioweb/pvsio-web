@@ -392,8 +392,12 @@ function WriterOnContent( editor)
     this.userIsModifying = 0;
     this.cursorPosition = 0;
 	this.content = "";
-    this.BLOCK_START = "%{\"_block\" : \"BlockStart\"";
-    this.BLOCK_END   = "%{\"_block\" : \"BlockEnd\"";
+    this.spaceRegex = "[\\s]*";
+    this.separatorRegex = this.spaceRegex + "," + this.spaceRegex;
+    this.BLOCK_START = "%{\"_block\"" + this.spaceRegex + ":" + this.spaceRegex + "\"BlockStart\"";
+    this.BLOCK_END   = "%{\"_block\"" + this.spaceRegex + ":" + this.spaceRegex + "\"BlockEnd\"";
+    this.BLOCK_START_ = "%{\"_block\"" + " : " + "\"BlockStart\"";
+    this.BLOCK_END_ = "%{\"_block\"" + " : " + "\"BlockEnd\"";
     this.ID_FIELD    = "\"_id\"";
     
     /* List of tag string which will be used by default if user don't modify them */
@@ -410,8 +414,8 @@ function WriterOnContent( editor)
     this.tagPerStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : \"*namePer*\", \"_type\": \"Permission\"}";
     this.tagPerEnd   = "  " + this.BLOCK_END   + ", " + this.ID_FIELD + " : \"*namePer*\", \"_type\": \"Permission\"}";
 
-    this.tagEdgeStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : \"*nameEdge*\", \"_type\": \"Edge\"}";
-    this.tagEdgeEnd   = "  " + this.BLOCK_END   + ", " + this.ID_FIELD + " : \"*nameEdge*\", \"_type\": \"Edge\"}";
+    this.tagEdgeStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : " + this.spaceRegex + "\"*nameEdge*\"" + this.spaceRegex +", \"_type\": \"Edge\"}";
+    this.tagEdgeEnd   = "  " + this.BLOCK_END + ", " + this.ID_FIELD + " : " + this.spaceRegex + "\"*nameEdge*\"" + this.spaceRegex +", \"_type\": \"Edge\"}";
 
     this.tagCondStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : \"*nameCond*\", \"_source\" : *SRC*, \"_target\" : *TRT*, \"_type\":"                                   +  "\"Transition\"}";    
     this.tagCondEnd   = "  " + this.BLOCK_END   + ", " + this.ID_FIELD + " : \"*nameCond*\", \"_source\" : *SRC*, \"_target\" : *TRT*, \"_type\":"
@@ -423,6 +427,12 @@ function WriterOnContent( editor)
     this.tagSwitchCond = "{\"_cond\" : \"*COND*\"}";
     this.switchCondTag = "_switchCond";
     this.transActTag = "_transAct";
+
+    this.separatorTagStart = "  " + this.BLOCK_START_ + ", " + "\"_type\": \"Separator\"}";
+    this.separatorTagEnd = "  " + this.BLOCK_END_ + ", " + "\"_type\": \"Separator\"}";
+
+    this.separatorTagStartRegex =  "  " + this.BLOCK_START + ", " + "\"_type\": \"Separator\"}";
+    this.separatorTagEndRegex = "  " + this.BLOCK_END + ", " + "\"_type\": \"Separator\"}";
 
     /********* Functions about Editor changing (Note: I need to define them here ********/
     
@@ -961,7 +971,6 @@ function WriterOnContent( editor)
          newContent = newContent.replace(" ,", "").replace(", ,","").replace(", ","");
          editor.replace(newContent);    
     }
-	
 	this.addTransition = function (newTransition)
 	{        
 		var range = editor.getSelectionRange();
@@ -1028,22 +1037,20 @@ function WriterOnContent( editor)
 		var blockStartNeedle = "%{\"_block\"" + spaceRegex + ":" + spaceRegex + "\"BlockStart\"";
 		var blockEndNeedle   = "%{\"_block\"" + spaceRegex + ":" + spaceRegex + "\"BlockEnd\"";
 		var idNeedle         = "\"_id\""    + spaceRegex + ":" + spaceRegex + "\"" + transitionName + "\"";
-		var typeEdgeNeedle       = "\"_type\""  + spaceRegex + ":" + spaceRegex + "\"Edge\"";
+		var typeEdgeNeedle   = "\"_type\""  + spaceRegex + ":" + spaceRegex + "\"Edge\"";
 
         var firstTag  = blockStartNeedle + separatorRegex + idNeedle + separatorRegex + typeEdgeNeedle;
         var secondTag = blockEndNeedle + separatorRegex + idNeedle + separatorRegex + typeEdgeNeedle;
         
-		var ans = this.getContentBetweenTags(firstTag, secondTag, true);
-        var comma = (ans.indexOf('%') == -1)? '' : ',';
-        
+		var ans = this.getContentBetweenTags(firstTag, secondTag, true);        
 		var searchOptions = { wholeWord: false, range: null, regExp: false }; 
 		var endSearch = editor.find(ans, searchOptions);
-
+        var separator = (ans.indexOf('%') == -1) ? '' : "\n" + this.separatorTagStart + "\n    ,\n"  + this.separatorTagEnd + "\n";
 		// FIXME: need to improve the code here!
 		editor.gotoLine(endSearch.start.row +2  , 1000, true);        
         editor.insert(condTag[0]);
 		editor.insert("     st`current_state = "  + sourceName + "\n    -> LET new_st = leave_state("+sourceName +")(st)" +
-                              "\n        IN enter_into("+ targetName + ")(new_st)" + comma);
+                              "\n        IN enter_into("+ targetName + ")(new_st)" + separator );
         editor.insert(condTag[1]);
         
         var edge = new Object();
@@ -1055,7 +1062,6 @@ function WriterOnContent( editor)
         
 		focusOnFun(edge);
 	}
-
     this.buildTagFunction = function(transName)
     {
         var arrayTagFunc = new Array();
@@ -1092,11 +1098,61 @@ function WriterOnContent( editor)
         this.editor.setValue(contentEditor);    
         this.editor.find("");
     }
+    this.howManyConditions = function(transName)
+    {
+        var tagStart = this.createEdgeTag(this.tagEdgeStart, transName);
+        var tagEnd = this.createEdgeTag(this.tagEdgeEnd, transName);
+        var content = this.getContentAndTags(tagStart, tagEnd, true);
+        var tagCond = this.BLOCK_START + ", " + this.ID_FIELD + " : " + this.spaceRegex + "\"" + transName + "\""
+        var regex = new RegExp(tagCond, "g");
+        var howManyConditions = content.match(regex);
+        if( howManyConditions)
+        {
+            howManyConditions = howManyConditions.length -1;
+            return howManyConditions;
+        }
+        return -1;
+    }
+    this.getRange = function(start, end)
+    {
+        var range = editor.getSelectionRange();
+        var objectSearch = { wrap: true, wholeWord: false, range: null, regExp: true }; 
+        
+        var initSearch = editor.find(start, objectSearch);
+        var endSearch  = editor.find(end, objectSearch);
+
+        if(initSearch && endSearch) {
+            range.start.column = initSearch.start.column;
+            range.end.column = endSearch.end.column;
+            range.start.row = initSearch.start.row;
+            range.end.row = endSearch.end.row ;
+            return range;
+        }
+    }
+    this.deleteSeparatorInCond = function(transName)
+    {
+        var tagEdgeStart = this.createEdgeTag(this.tagEdgeStart, transName);
+        var tagEdgeEnd = this.createEdgeTag(this.tagEdgeEnd, transName);
+        var range = this.getRange(tagEdgeStart, tagEdgeEnd);
+
+        var objectSearch = { wrap: true, wholeWord: false, range: range, regExp: true }; 
+
+        var separatorInit = this.editor.find(this.separatorTagStartRegex, objectSearch);
+        var separatorEnd = this.editor.find(this.separatorTagEndRegex, objectSearch);
+
+        if( separatorInit === undefined || separatorEnd === undefined)
+            return ;
+        range.start.column = 0;
+        range.end.column = separatorEnd.end.column;
+        range.start.row = separatorInit.start.row;
+        range.end.row =  separatorEnd.end.row;
+        var contentToDelete = this.editor.session.getTextRange(range);
+
+        this.editor.find(contentToDelete, objectSearch);
+        this.editor.replace("");
+    }
     this.deleteCondInTrans = function(transName, sourceName, targetName)
     { 
-//       var tagCond = this.buildTagCond(transName, sourceName, targetName);
-//       var content = this.getContentBetweenTags(tagCond[0], tagCond[1], false);
-
 		var spaceRegex = "[\\s]*";
 		var separatorRegex = spaceRegex + "," + spaceRegex;
 		var blockStartNeedle = "%{\"_block\"" + spaceRegex + ":" + spaceRegex + "\"BlockStart\"";
@@ -1114,6 +1170,9 @@ function WriterOnContent( editor)
 		var ans = this.getContentAndTags(firstTag, secondTag, true);
     
 		this.deleteContent(ans);
+        var howManyConditions = this.howManyConditions(transName);
+        if( howManyConditions == 1) { this.deleteSeparatorInCond(transName);}
+
     }
     this.deleteTransition = function(nameFun) 
     {        
