@@ -1111,28 +1111,44 @@ function WriterOnContent( editor)
             return range;
         }
     }
-    this.deleteSeparatorInCond = function(transName)
+    this.deleteSeparatorInCond = function(transName, numberOfConditions)
     {
         var tagEdgeStart = this.createEdgeTag(this.tagEdgeStart, transName);
         var tagEdgeEnd = this.createEdgeTag(this.tagEdgeEnd, transName);
         var range = this.getRange(tagEdgeStart, tagEdgeEnd); //Get Range of the whole transition
 
-        var objectSearch = { wrap: true, wholeWord: false, range: range, regExp: true }; 
+        var objectSearch = { range: range, regExp: true }; 
 
         /* Finding start of the separator block */ 
         var separatorInit = this.editor.find(this.separatorTagStartRegex, objectSearch);
         /* Finding end of the separator block */
         var separatorEnd = this.editor.find(this.separatorTagEndRegex, objectSearch);
 
-        /* If at least one is not found, just return */
+        /* If nothing has been found, just return */
         if( separatorInit === undefined || separatorEnd === undefined)
             return ;
 
+        var separatorFound = 0;
+        var lastSeparatorInit;
+        var lastSeparatorEnd;
+
+        while( separatorInit && separatorEnd )
+        {      
+               separatorFound ++;
+               lastSeparatorInit = separatorInit;
+               lastSeparatorEnd = separatorEnd;
+               objectSearch.range.start.row = separatorEnd.end.row + 1;
+               separatorInit = this.editor.find(this.separatorTagStartRegex, objectSearch); 
+               separatorEnd = this.editor.find(this.separatorTagEndRegex, objectSearch);  
+        }
+        if( separatorFound == numberOfConditions -1) /* Nothing to do */
+            return;
+
         /* Setting new range */
-        range.start.column = separatorInit.start.column;
-        range.end.column = separatorEnd.end.column;
-        range.start.row = separatorInit.start.row;
-        range.end.row =  separatorEnd.end.row;
+        range.start.column = lastSeparatorInit.start.column;
+        range.end.column = lastSeparatorEnd.end.column;
+        range.start.row = lastSeparatorInit.start.row;
+        range.end.row =  lastSeparatorEnd.end.row;
 
         /* Getting text */
         var contentToDelete = this.editor.session.getTextRange(range);
@@ -1166,7 +1182,7 @@ function WriterOnContent( editor)
         this.editor.session.doc.removeLines(rangeToDelete.start.row, rangeToDelete.end.row);
 
         var howManyConditions = this.howManyConditions(transName);
-        if( howManyConditions == 1) { this.deleteSeparatorInCond(transName);}
+        this.deleteSeparatorInCond(transName, howManyConditions);
 
     }
     this.deleteTransition = function(nameFun) 
