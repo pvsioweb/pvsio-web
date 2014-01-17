@@ -284,7 +284,7 @@ function focusOn(node) {
     if(writer) {
 		noFocus();
 		var rangeNames = writer.getRangeStateNames();
-		var searchOptions = { wholeWord: false, caseSensitive: true, range: rangeNames, regExp: true };
+		var searchOptions = { wholeWord: false, caseSensitive: true, range: rangeNames};
 		var needle = node.name;
 		writer.editor.find(needle, searchOptions)
 	}
@@ -442,7 +442,7 @@ function WriterOnContent( editor)
 		//// FIXME: this interferes with the autocompletion: the contextual menu created
 		////          by the autocompletion functionality disappears when parseToFindInconsistency is invoked
         clearTimeout(writer.timeOut);
-        writer.timeOut = setTimeout(function(){writer.parseToFindDiagramSpecificationInconsistency() } , 2000 );        
+        writer.timeOut = setTimeout(function(){writer.parseToFindDiagramSpecificationInconsistency() } , 10000 );        
     }
     
     this.parseToFindDiagramSpecificationInconsistency = function()
@@ -666,23 +666,18 @@ function WriterOnContent( editor)
     {
         var arrayTag = this.buildTagCond(nameTrans, sourceName, targetName);
         var arrayTagToReturn = new Array();
-        var range = editor.getSelectionRange();
-        var objectSearch = { wrap: true, wholeWord: false, range: null }; 
+        var objectSearch = { wrap: true, range: null }; 
 
         arrayTag.forEach(function( currentTag)
             {
                 var tmp = currentTag.replace(/(\r\n|\n|\r)/g, "");
-                tmp = currentTag.substring(0, currentTag.lastIndexOf('}'));
+                tmp = tmp.substring(0, currentTag.lastIndexOf('}'));
                 tmp = writer.editor.find(tmp, objectSearch, false);
-                range.start = tmp.start;
-                range.end = tmp.end;
-                range.end.column = 1000; //FIXME
-                var realTag = writer.editor.session.getTextRange(range);
+                var realTag = writer.editor.session.getLine(tmp.end.row);
                 arrayTagToReturn.push(realTag);
 
             });
         return arrayTagToReturn;
-
     }
     this.addSwitchCond = function(nameTrans, sourceName, targetName, cond)
     {
@@ -972,9 +967,7 @@ function WriterOnContent( editor)
          editor.replace(newContent);    
     }
 	this.addTransition = function (newTransition)
-	{        
-		var range = editor.getSelectionRange();
-        
+	{               
         var objectSearch = { wholeWord: true, wrap: true, range: null }; 
         
 		//Before adding a Transition, we need to check if it has been already created	
@@ -998,13 +991,8 @@ function WriterOnContent( editor)
 
 		var endSearch = editor.find(end, objectSearch, true);
 		var content;	
-	
-		range.start.column = 0;
-		range.end.column= 11111; ///FIXME
-		range.start.row = endSearch.end.row - 1;
-		range.end.row = endSearch.end.row - 1;
- 
-		editor.gotoLine(endSearch.end.row , 1000, true);
+
+		this.editor.gotoLine(endSearch.end.row , 1000, true);
         
 		content = this.createPerTag(this.tagPerStart, newTransition) + 
 		          "\n" +  "  per_" + newTransition + "(st: State) : bool = true\n" +
@@ -1017,7 +1005,7 @@ function WriterOnContent( editor)
 			  "  ENDCOND\n" +
 			  this.createEdgeTag(this.tagEdgeEnd, newTransition) +  "\n"; 			  
 			
-		editor.insert("\n" + content + "\n");
+		this.editor.insert("\n" + content + "\n");
 	}
 	this.buildTagCond = function(nameTransition, sourceName, targetName)
     {
@@ -1042,12 +1030,15 @@ function WriterOnContent( editor)
         var firstTag  = blockStartNeedle + separatorRegex + idNeedle + separatorRegex + typeEdgeNeedle;
         var secondTag = blockEndNeedle + separatorRegex + idNeedle + separatorRegex + typeEdgeNeedle;
         
-		var ans = this.getContentBetweenTags(firstTag, secondTag, true);        
-		var searchOptions = { wholeWord: false, range: null, regExp: false }; 
-		var endSearch = editor.find(ans, searchOptions);
+        /* Getting actual transition content    */
+		var ans = this.getContentBetweenTags(firstTag, secondTag, true);     
+        var rangeTrans = this.getRange(firstTag, secondTag);   
+		var searchOptions = { range: rangeTrans, wholeWord: true }; 
+
+		var endSearch = editor.find("COND", searchOptions);
+        this.editor.clearSelection(); // clearing selection otherwise it will be overwritten
         var separator = (ans.indexOf('%') == -1) ? '' : "\n" + this.separatorTagStart + "\n    ,\n"  + this.separatorTagEnd + "\n";
-		// FIXME: need to improve the code here!
-		editor.gotoLine(endSearch.start.row +2  , 1000, true);        
+		editor.moveCursorTo(endSearch.end.row , endSearch.end.column + 1);        
         editor.insert(condTag[0]);
 		editor.insert("     st`current_state = "  + sourceName + "\n    -> LET new_st = leave_state("+sourceName +")(st)" +
                               "\n        IN enter_into("+ targetName + ")(new_st)" + separator );
@@ -1144,22 +1135,9 @@ function WriterOnContent( editor)
         if( separatorFound == numberOfConditions -1) /* Nothing to do */
             return;
 
-        /* Setting new range */
-        range.start.column = lastSeparatorInit.start.column;
-        range.end.column = lastSeparatorEnd.end.column;
-        range.start.row = lastSeparatorInit.start.row;
-        range.end.row =  lastSeparatorEnd.end.row;
+        /*Deleting last separator, which should not be there */
+        this.editor.session.doc.removeLines(lastSeparatorInit.start.row, lastSeparatorEnd.end.row);
 
-        /* Getting text */
-        var contentToDelete = this.editor.session.getTextRange(range);
-
-        /*Finding it we add it in the current Selection so .. */
-        this.editor.find(contentToDelete, objectSearch);
-
-        /* .. we can delete easily */
-        this.editor.removeLines();
-
-        //this.editor.replace("");
     }
     this.deleteCondInTrans = function(transName, sourceName, targetName)
     { 
@@ -1213,32 +1191,11 @@ function WriterOnContent( editor)
     }
     this.getRangeStateNames = function()
     {
-        var range = editor.getSelectionRange();
-		var objectSearch = { 
-                             wrap: true,
-  				             wholeWord: false,
-				             range: null
-			               }; 
-
-        var init = this.tagStateNameStart;
-		var end  = this.tagStateNameEnd;
-
-		var initSearch = editor.find(init, objectSearch, true);
-		var endSearch = editor.find(end, objectSearch, true);
-		var content;	
-
-		range.start.column = 0;
-		range.end.column= 11111; ///FIXME
-		range.start.row = initSearch.end.row + 1;
-		range.end.row = endSearch.end.row - 1;
-        
-        return range;
-        
+        return this.getRange(this.tagStateNameStart, this.tagStateNameEnd);        
     }
     this.getStateNames = function()
     {
-        var listStatesNames = this.getContentBetweenTags(this.tagStateNameStart, this.tagStateNameEnd);        
-        return listStatesNames;    
+       return this.getContentBetweenTags(this.tagStateNameStart, this.tagStateNameEnd);        
     }
 }
 
