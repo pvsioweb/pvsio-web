@@ -5,7 +5,8 @@
    "id": "display_58f9aa5c-b14d-4c5d-cb25-3f534cf8c4aa",
    "regex": "d:=([0-9/.]+)",
    "predefinedRegex": "[0-9/.]+",
-   "prefix": "d"
+   "prefix": "d",
+   "cursorName": "c"
   },
   {
    "events": [
@@ -56,7 +57,7 @@
   {
    "class": "display_58f9aa5c-b14d-4c5d-cb25-3f534cf8c4aa",
    "shape": "rect",
-   "coords": "86.33332824707031,185.3229217529297,145.3333282470703,217.3229217529297",
+   "coords": "85.54545593261719,185.3229217529297,150.5454559326172,216.3229217529297",
    "href": null
   },
   {
