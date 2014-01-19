@@ -80,6 +80,7 @@ define(function (require, exports, module) {
 			var disp = new CursoredDisplay("display", w, h);
 			// parse cursor position
 			var res = this.parseStateRaw(stateString);
+			//FIXME: this assumes that the cursor name is "c" -- we need to use the actual cursor name used in the spec!
 			disp.renderNumber(dispVal.toString(), +res.c);
 		}
     };

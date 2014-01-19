@@ -29,7 +29,7 @@ gpcaUI: THEORY
      tick_enabled: int, % true when timed transitions in the UI are active
      %-- data etry state
      display     : device_real, % display
-     cursor      : Cursor, % cursor
+     c      : Cursor, % cursor
      memory      : Memory, % memory
      unit	 : number_unit % display unit
    #]
@@ -47,7 +47,7 @@ gpcaUI: THEORY
 	  ctrl_ready  := FALSE,
 	  tick_enabled:= FALSE,
 	  display     := x,
-	  cursor      := 0,
+	  c     := 0,
 	  memory      := NA,
 	  unit	      := mL
   #)
@@ -62,7 +62,7 @@ gpcaUI: THEORY
 	  ctrl_ready(st)  = FALSE AND
 	  tick_enabled(st)= FALSE AND
 	  display(st)     = 0 AND
-	  cursor(st)      = 0 AND
+	  c(st)      = 0 AND
 	  memory(st)      = NA
   
 
@@ -126,7 +126,7 @@ gpcaUI: THEORY
   pow10(i: Cursor): device_real = ^(10,i);
 
   min_value(st: gpcaui_state): device_real = 
-   LET i = cursor(st), val = display(st) 
+   LET i = c(st), val = display(st) 
     IN IF i >= 3 AND val >= 1          THEN 1
        ELSIF (i >= 0 AND i < 3) 
              OR (i < 0 AND val >= 0.1) THEN 0.1 ELSE 0 ENDIF
@@ -150,7 +150,7 @@ gpcaUI: THEORY
   dn: [gpcaui_state -> gpcaui_state] =
       LAMBDA (st: gpcaui_state):
         LET val = display(st),
-            i = cursor(st),
+            i = c(st),
             mem = memory(st),
             min_val = min_value(st),
             new_val =
@@ -167,7 +167,7 @@ gpcaUI: THEORY
   up: [gpcaui_state -> gpcaui_state] =
       LAMBDA (st: gpcaui_state):
         LET val = display(st),
-            i = cursor(st),
+            i = c(st),
             mem = memory(st),
             new_val =
               COND val + pow10(i) >= max -> val,
@@ -182,19 +182,19 @@ gpcaUI: THEORY
   %-- left button
   lf: [gpcaui_state -> gpcaui_state] =
    LAMBDA(st: gpcaui_state):
-     LET val = display(st), i = cursor(st), mem = memory(st) IN
+     LET val = display(st), i = c(st), mem = memory(st) IN
       COND
-        i < 4 -> st WITH [ display := val, cursor := i + 1, memory := NA ],
-        i = 4 -> st WITH [ display := val, cursor := i    , memory := mem ]
+        i < 4 -> st WITH [ display := val, c := i + 1, memory := NA ],
+        i = 4 -> st WITH [ display := val, c := i    , memory := mem ]
       ENDCOND
 
   %-- right button
   rt: [gpcaui_state -> gpcaui_state] =
     LAMBDA(st: gpcaui_state): 
-      LET val = display(st), i = cursor(st), mem = memory(st), min_pos = min_position(st) IN
+      LET val = display(st), i = c(st), mem = memory(st), min_pos = min_position(st) IN
        COND
-         i > min_pos  -> st WITH [ display := val, cursor := i - 1 ],
-         i <= min_pos -> st WITH [ display := val, cursor := i     ]
+         i > min_pos  -> st WITH [ display := val, c := i - 1 ],
+         i <= min_pos -> st WITH [ display := val, c := i     ]
        ENDCOND
 
 
