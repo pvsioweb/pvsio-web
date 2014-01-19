@@ -84,7 +84,7 @@ arcomedical: THEORY
         LET new_val = d(st) - pow10(i),
 	    ans = COND
 	    	    new_val >= 0 -> new_val,
-		    new_val < 0  -> 0
+		    new_val < 0  -> d(st)
 	    	  ENDCOND
          IN st WITH [ d := ans,
 	       	      disp0 := updateDisplay(0)(ans),
