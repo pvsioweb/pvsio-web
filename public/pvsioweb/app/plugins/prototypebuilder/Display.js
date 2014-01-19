@@ -73,7 +73,7 @@ define(function (require, exports, module) {
 							  .style("font-size", (parseFloat(h) * 0.8) + "px"); 
 		}
 		else {
-			h = h*1.5;
+//			h = h*1.5;
 			text.style("left", x + "px").style("top", y + "px").style("position", "absolute")
 				.style("width", w + "px").style("height", h + "px").style("color", "white")
 				.append("canvas").attr("width", w).attr("height", h).attr("id", "display");
