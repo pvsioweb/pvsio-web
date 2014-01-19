@@ -935,6 +935,14 @@ var emulink = function() {
 			.on('mouseup', function(d) {
 				// update mouseup_link
 				mouseup_link = d;
+			})
+			.on('mouseover', function(d) {
+				// zoom edge
+				d3.select(this).style("stroke-width", function(d){ return 1.5;});
+			})
+			.on('mouseout', function(d) {
+				// restore edge size
+				d3.select(this).style("stroke-width", function(d){ return 1;});
 			});
 		pathCanvas
 			.append("svg:text")
@@ -1015,12 +1023,13 @@ var emulink = function() {
 			.style('stroke', function(d) { return d3.rgb(colors(d.id)).darker().toString(); })
 			.classed('reflexive', true)
 			.on('mouseover', function(d) {
+				// zoom target node
 				d3.select(this).attr('transform', 'scale(1.1)');
 				if(!mousedown_node || d === mousedown_node) return;
-				// enlarge target node
-				d3.select(this).attr('transform', 'scale(1.1)');
+//				d3.select(this).attr('transform', 'scale(1.1)');
 			})
 			.on('mouseout', function(d) {
+				// restore node size
 				d3.select(this).attr('transform', 'scale(1)');
 				if(!mousedown_node || d === mousedown_node) return;
 			})
