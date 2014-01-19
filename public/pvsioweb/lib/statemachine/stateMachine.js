@@ -420,13 +420,22 @@ function getGraphDefinition()
 var clear_node_selection = function () {
 	selected_nodes.forEach(function(key, value) { selected_nodes.remove(key); });
 	svg.selectAll("g").selectAll("g").select("rect").style("stroke", "").style("stroke-width", "");
+	// FIXME: the following code is not clean, because the buttons are just for debugging and therefore we should not link
+    //         generic functions like clear_node_selection to these debugging buttons.
+    //         The clean way to implement this is to create a new variable that stores information about the functionalities
+    //         that should be enabled or disabled. These variables are exported to other modules, so that the user interface
+    //         can be updated accordingly (in this case, by enabling/disabling the buttons).
 	setButtonsEnabledOrDisabledAboutNode(true);
-
 }
 
 var clear_edge_selection = function () {
 	selected_edges.forEach(function(key, value) { selected_edges.remove(key); });
 	svg.selectAll("path").classed("selected", false);
+	// FIXME: the following code is not clean, because the buttons are just for debugging and therefore we should not link
+    //         generic functions like clear_node_selection to these debugging buttons.
+    //         The clean way to implement this is to create a new variable that stores information about the functionalities
+    //         that should be enabled or disabled. These variables are exported to other modules, so that the user interface
+    //         can be updated accordingly (in this case, by enabling/disabling the buttons).
 	setButtonsEnabledOrDisabledAboutEdge(true);
 }
 
@@ -1051,6 +1060,7 @@ var emulink = function() {
 					else {
 						// if the ctrl key is not pressed, reset selection first, and then select the node
 						clear_node_selection();
+						setButtonsEnabledOrDisabledAboutNode(false);
 						selected_nodes.set(d.id, d);                                                
 						// highlight only selected nodes
 						node.selectAll("rect")
