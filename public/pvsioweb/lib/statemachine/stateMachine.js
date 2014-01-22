@@ -35,7 +35,8 @@ var distance = 300;
 var strength = 0; // must be between 0 and 1
 var charge = -50; // positive value = repulsion; negative value = attraction; for graphs, negative values should be used
 var animatedLayout = false;
-
+var zoomCounter = 1;
+var translateZoom = 0;
 // Save number of diagrams created by using Emulink
 var diagramsInfo = {};
 var numberFiles = 0;
@@ -53,6 +54,9 @@ var addNewDiagram = function()
     document.getElementById("button_state").disabled = false;
     document.getElementById("button_transition").disabled = true;
 	document.getElementById("button_self_transition").disabled = true;
+	document.getElementById("zoom").disabled = false;
+	document.getElementById("zoom_").disabled = false;
+	document.getElementById("resetZoom").disabled = false;
 
 }
 /** 
@@ -288,13 +292,36 @@ var editor_mode = MODE.DEFAULT;
 var selected_nodes = d3.map();
 var selected_edges = d3.map();
 var ws;
+var MAX_ZOOM = 1.8;
+var MIN_ZOOM = 0.3;
 
 // creation of svg element to draw the graph
 var width =  930;
 var height = 800;
-var svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height).attr("id", "canvas").style("background", "#fffcec");
+var svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
+                   .attr("id", "canvas").style("background", "#fffcec");
 
+var zoom = function(delta)
+{
+	if( delta > 0)
+	    zoomCounter += 0.3;
+	else
+		zoomCounter -= 0.3;
 
+	if( zoomCounter > MAX_ZOOM ) { zoomCounter = MAX_ZOOM; }
+	else if( zoomCounter < MIN_ZOOM) { zoomCounter = MIN_ZOOM; }
+	else { 	translateZoom = eval(translateZoom - delta *30); }
+
+	svg.attr("transform", "translate(" + translateZoom + "," + 1 + ")scale(" + zoomCounter + ")");
+	
+}
+var resetZoom = function()
+{
+	svg.attr("transform", "translate(" + 1 + "," + 1 + ")scale(" + 1 + ")");
+	zoomCounter = 1;
+	translateZoom = 0;
+
+}
 var BLOCK_START = "%{\"_block\" : \"BlockStart\"";
 var BLOCK_END   = "%{\"_block\" : \"BlockEnd\"";
 var ID_FIELD    = "\"_id\"";
@@ -681,6 +708,8 @@ function init(_editor, wsocket, currentProject, pm, startWriter, nameFile) {
 
     svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
 			.attr("id", "canvas").style("background", "#fffcec");
+
+
 
 	lastFileShown = event.selectedItemString; //Update last file shown 
 
@@ -1319,7 +1348,15 @@ var emulink = function() {
 		}
 	}
 
-
+	d3.select("#zoom").on("click", function () {
+            zoom(1);
+        });
+	d3.select("#zoom_").on("click", function () {
+            zoom(-1);
+        });
+	d3.select("#resetZoom").on("click", function() {
+			resetZoom();
+	    });
 	d3.select("#infoBoxModifiable")
 	  .on("change", function () {
 		changeTextArea(node, path);
