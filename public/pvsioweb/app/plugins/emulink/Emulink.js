@@ -8,10 +8,10 @@
 /*global define, d3, require, $, brackets, window, document */
 define(function (require, exports, module) {
 	"use strict";
-	var stateMachine            = require("lib/statemachine/stateMachine"),
+	var stateMachine            = require("plugins/emulink/stateMachine"),
         handlerFile             = require("util/fileHandler"),
-        pvsWriter               = require("lib/statemachine/stateToPvsSpecificationWriter"),
-        parserSpecification     = require("lib/statemachine/parserSpecification"),
+        pvsWriter               = require("plugins/emulink/stateToPvsSpecificationWriter"),
+        parserSpecification     = require("plugins/emulink/parserSpecification"),
 		PrototypeBuilder		= require("pvsioweb/PrototypeBuilder"),
 		Logger					= require("util/Logger"),
         Simulator               = require("plugins/emulink/simulator"),

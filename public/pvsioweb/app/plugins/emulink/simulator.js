@@ -24,7 +24,7 @@
     
     
     /**************     State Variables                         ****************************************************/
-    var drawer = require("../../lib/statemachine/stateMachine");
+    var drawer = require("plugins/emulink/stateMachine");
     var simulator;
     var simulationIsActive = false;
     /**************  Exported Functions Definition               *****************************************************/
