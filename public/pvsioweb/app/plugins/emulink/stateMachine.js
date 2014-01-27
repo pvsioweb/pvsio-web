@@ -42,6 +42,7 @@ var diagramsInfo = {};
 var numberFiles = 0;
 var lastFileShown;
 var numberDiagramStillToRestore = 0;
+var svgReference = {};
 
 var addNewDiagram = function()
 {
@@ -57,7 +58,7 @@ var addNewDiagram = function()
 	document.getElementById("zoom").disabled = false;
 	document.getElementById("zoom_").disabled = false;
 	document.getElementById("resetZoom").disabled = false;
-
+	document.getElementById("toPDF").disabled = false;
 }
 /** 
  *  This function is called when user has just selected an emulink file in the listView,
@@ -98,7 +99,18 @@ var restoreColorNodesAndEdges = function ()
 		.style("stroke", "black")
 		.style("stroke-width", 1);
 }
-    
+
+var getXMLSVG = function ()
+{
+	var serializer = new XMLSerializer();
+	var canvas = d3.select('#canvas').node();
+	if( canvas)
+    {	var xmlString = serializer.serializeToString(d3.select('#canvas').node());
+        svgReference[lastFileShown] = xmlString;
+	    return svgReference;
+	}
+	return null;
+}
 var highlightElements = function ( nodes ) {
 	// highlight nodes
 	svg.selectAll("g").selectAll("g").select("rect")
@@ -700,6 +712,10 @@ function init(_editor, wsocket, currentProject, pm, startWriter, nameFile) {
 		if( nodes.length ) // But save just if there is something to save!
 		{   var graphToSave = { nodes: getNodesInDiagram(), edges: getEdgesInDiagram()};
     	    diagramsInfo[lastFileShown] = graphToSave;
+    	    /* Even saving XML SVG in case user wants to get a PDF */
+    	    var serializer = new XMLSerializer();
+        	var xmlString = serializer.serializeToString(d3.select('#canvas').node());
+    	    svgReference[lastFileShown] = xmlString;
     	}
 	}	
 	// ...and clearing SVG
@@ -945,6 +961,8 @@ var emulink = function() {
 			.style('marker-end', 'url(#end-arrow)')
 			.style("cursor", "pointer") // change cursor shape
 			.style("stroke-width", "1")
+			.attr("fill-opacity","0")
+			.attr("stroke","black")
 			.on('mousedown', function(d) {
 				// update mousedown_link
 				mousedown_link = d;
@@ -975,6 +993,8 @@ var emulink = function() {
 			});
 		pathCanvas
 			.append("svg:text")
+			.attr('font-family',"Verdana")
+			.attr('font-weight','bold') 
 			.attr("class", "label")
 			.attr("id", function(d) { return "text:" + d.id; })
 			.text(function(d) {
@@ -1001,6 +1021,8 @@ var emulink = function() {
 			});
 		pathCanvas
 			.append("svg:text")
+			.attr('font-family',"Verdana")
+			.attr('font-weight','bold') 
 			.append("textPath")
 			.classed("selected", true)
 			.attr("class", "label")
@@ -1195,6 +1217,8 @@ var emulink = function() {
 		nodeCanvas.append('svg:text')
 			.attr('x', 0)
 			.attr('y', 4)
+			.attr('font-family',"Verdana")
+			.attr('font-weight','bold') 
 			.attr('class', 'id')
 			.text(function(d) { return d.name; });
 		// remove old nodes
@@ -1571,7 +1595,8 @@ module.exports = {
     clearSvg : clearSvg,
 	highlightElements: highlightElements,
     restoreColorNodesAndEdges : restoreColorNodesAndEdges,
-    addNewDiagram : addNewDiagram
+    addNewDiagram : addNewDiagram,
+    getXMLSVG : getXMLSVG
 };
 
 

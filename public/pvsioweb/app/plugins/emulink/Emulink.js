@@ -15,6 +15,7 @@ define(function (require, exports, module) {
 		PrototypeBuilder		= require("pvsioweb/PrototypeBuilder"),
 		Logger					= require("util/Logger"),
         Simulator               = require("plugins/emulink/simulator"),
+        PDFHandler              = require("plugins/emulink/PDFHandler"),
         EmulinkFile             = require("plugins/emulink/fileHandler/fileHandler");
 
     var emulinkHasBeenUsed = false; //Default: Current Project is not Emulink Project
@@ -47,6 +48,10 @@ define(function (require, exports, module) {
                 selectedFileChanged = event.selectedItemString;
         });
 
+        d3.select("#toPDF").on("click", function() { PDFHandler.toPDF(currentProject, stateMachine, ws); });
+        projectManager.addListener("SelectedFileChanged", function (event) {
+                selectedFileChanged = event.selectedItemString;
+        });
         d3.select("#state_machine").on("click", function () { stateMachine.init(editor, ws, currentProject, projectManager); });
         d3.select("#button_state").on("click", function () { stateMachine.add_node_mode(); });
         d3.select("#button_transition").on("click", function () { stateMachine.add_transition_mode(); });
