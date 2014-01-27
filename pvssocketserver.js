@@ -7,50 +7,51 @@ This file is part of pvsio-web.
 
 pvsio-web is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-pvsio-web is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+pvsio-web is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License along with Foobar. If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * This file creates a connection to a pvsio process run locally or at specified host.
- * It also creates an express webserver to serve demo applications e.g. the infusion
- * pump pvsio demo.
- * The websocket connection started by this process listens for 3 commands:
- * sendCommand: used to send a pvsio command to the processs
- * startProcess: used to start the pvsio process
- * getSourceCode: used to get the source code of the pvs code being executed
- * @author patrick
- * @date 28 Jul 2012 21:52:31
- *
- */
+* This file creates a connection to a pvsio process run locally or at specified host.
+* It also creates an express webserver to serve demo applications e.g. the infusion
+* pump pvsio demo.
+* The websocket connection started by this process listens for 3 commands:
+* sendCommand: used to send a pvsio command to the processs
+* startProcess: used to start the pvsio process
+* getSourceCode: used to get the source code of the pvs code being executed
+* @author patrick
+* @date 28 Jul 2012 21:52:31
+*
+*/
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true, node: true */
 /*global */
 
 function run() {
     "use strict";
 
-    var pvsio                   = require("./pvsprocess"),
-        ws                      = require("ws"),
-        util                    = require("util"),
-        http                    = require("http"),
-        fs                      = require("fs"),
-        express                 = require("express"),
-        webserver               = express(),
-        procWrapper             = require("./processwrapper"),
-        uploadDir               = "/public/uploads",
-        host                    = "0.0.0.0",
-        port                    = 8082,
-        workspace               = __dirname + "/public",
-        pvsioProcessMap         = {},//each client should get his own process
-        httpServer              = http.createServer(webserver),
-        baseProjectDir          = __dirname + "/public/projects/";
+    var pvsio = require("./pvsprocess"),
+        ws = require("ws"),
+        util = require("util"),
+        http = require("http"),
+        fs = require("fs"),
+        express = require("express"),
+        webserver = express(),
+        procWrapper = require("./processwrapper"),
+        uploadDir = "/public/uploads",
+        host = "0.0.0.0",
+        port = 8082,
+        workspace = __dirname + "/public",
+        pvsioProcessMap = {},//each client should get his own process
+        httpServer = http.createServer(webserver),
+        baseProjectDir = __dirname + "/public/projects/",
+        PDFHandler = require("./plugin/PDFHandler");
     var p, clientid = 0, WebSocketServer = ws.Server;
 
     /**
-     * Utility function that dispatches responses to websocket clients
-     * @param {{type:string, data}} token The token to send to the client
-     * @param {Socket} socket The websocket to use to send the token
-     */
+* Utility function that dispatches responses to websocket clients
+* @param {{type:string, data}} token The token to send to the client
+* @param {Socket} socket The websocket to use to send the token
+*/
     function processCallback(tok, socket) {
         //called when any data is recieved from pvs process
         //if the type of the token is 'processExited' then send message to client if the socket is still open
@@ -64,9 +65,9 @@ function run() {
     }
 
     /**
-     * save the file described in request parameter into the uploads directory
-     * @param {object} token
-     */
+* save the file described in request parameter into the uploads directory
+* @param {object} token
+*/
     function saveTempFile(token, cb) {
         var fileContent = token.fileContent;
         var fileName = token.newFileName;
@@ -80,8 +81,8 @@ function run() {
         cb({fileName: fileName});
     }
     /**
-     * reads and changes the settings in the .pvsioweb file in the project root
-    */
+* reads and changes the settings in the .pvsioweb file in the project root
+*/
     function changeProjectSetting(projectName, key, value, callback) {
         var file = baseProjectDir + projectName + "/.pvsioweb", props = {};
         //write the property file in the project root
@@ -96,7 +97,7 @@ function run() {
             });
         }
         //if file does not exist, create it. Else read the property file and update just the key value specified
-        fs.exists(file, function (exists) { 
+        fs.exists(file, function (exists) {
             if (!exists) {
                 props[key] = value;
                 writeFile(props, callback);
@@ -104,7 +105,7 @@ function run() {
                 fs.readFile(file, {encoding: "utf8"}, function (err, res) {
                     props = {err: err};
                     if (!err) {
-                        props =  JSON.parse(res) || props;
+                        props = JSON.parse(res) || props;
                         props[key] = value;
                         //write the file back
                         writeFile(props, callback);
@@ -119,10 +120,10 @@ function run() {
     }
 
     /**
-     * Creates a project
-     * @param {Request} req
-     * @param {Response} res
-     */
+* Creates a project
+* @param {Request} req
+* @param {Response} res
+*/
     function createProject(opt) {
         var projectName = opt.projectName,
             imageName = opt.imageFileName,
@@ -168,13 +169,13 @@ function run() {
     }
 
     /**
-    * open a project with the specified name
-    */
+* open a project with the specified name
+*/
     function openProject(name) {
         console.log('opening project..' + name);
         var imageExts = ["jpg", "jpeg", "png"], specExts = ["pvs"],
-            projectPath = baseProjectDir + name,  stat = fs.statSync(projectPath),
-            res =  {name: name, projectPath: projectPath};
+            projectPath = baseProjectDir + name, stat = fs.statSync(projectPath),
+            res = {name: name, projectPath: projectPath};
         if (stat.isDirectory()) {
             fs.readdirSync(projectPath).forEach(function (file) {
                 stat = fs.statSync(projectPath + "/" + file);
@@ -209,9 +210,9 @@ function run() {
     }
 
     /**
-     * Lists all the projects on the server by listing folder names in the projects directory
-     * @return {Array<string>} A list of project names
-     */
+* Lists all the projects on the server by listing folder names in the projects directory
+* @return {Array<string>} A list of project names
+*/
     function listProjects() {
         var res;
         try {
@@ -231,7 +232,7 @@ function run() {
 
     //create logger
     webserver.use("/demos", function (req, res, next) {
-        console.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
+        console.log('Method: %s, Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
         next();
     });
     //create the express static server and use public dir as the default serving directory
@@ -239,8 +240,8 @@ function run() {
     webserver.use(express.bodyParser({ keepExtensions: true, uploadDir: __dirname + uploadDir}));
 
     /**
-     * used to manage file upload process for pvsio-web
-     */
+* used to manage file upload process for pvsio-web
+*/
     webserver.all("/upload", function (req, res) {
         util.log(JSON.stringify(req.files));
         var fileName = req.files.file.path.split("/").slice(-1).join("");
@@ -256,9 +257,9 @@ function run() {
     }
 
     /**
-        get function maps for client sockets
-    */
-    function createClientFunctionMaps() { 
+get function maps for client sockets
+*/
+    function createClientFunctionMaps() {
         var map = {
             "setMainFile": function (token, socket, socketid) {
                 changeProjectSetting(token.projectName, "mainPVSFile", token.fileName, function (res) {
@@ -310,8 +311,8 @@ function run() {
             },
             "startProcess": function (token, socket, socketid) {
                 util.log("Calling start process for client... " + socketid);
-				var root = token.data.projectName ? "/public/projects/" + token.data.projectName:
-					token.data.demoName ? "/public/demos/" + token.data.demoName : "";
+                                var root = token.data.projectName ? "/public/projects/" + token.data.projectName:
+                                        token.data.demoName ? "/public/demos/" + token.data.demoName : "";
                 p = pvsioProcessMap[socketid];
                 //close the process if it exists and recreate it
                 if (p) {
@@ -381,6 +382,21 @@ function run() {
                     }
                     processCallback(res, socket);
                 });
+            },
+            "toPDF": function (token, socket, socketid) {
+                var PDFHandlerObj = PDFHandler();
+                var path =  'public/' + 'tmp' + socketid + '/';
+                var pathDownload = 'tmp' + socketid + '/';
+                PDFHandlerObj.createPDF(token, path, function (exitStatus) {
+                    var res = {id: token.id};
+                    if (exitStatus < 0) {
+                        res.err = 'There was an issue creating PDF';
+                    } else { 
+                        res.path = pathDownload + 'out.pdf';
+                    }
+                    processCallback(res, socket);
+                });    
+                                        
             }
         };
 
@@ -389,7 +405,7 @@ function run() {
 
     var wsServer = new WebSocketServer({server: httpServer});
     wsServer.on("connection", function (socket) {
-        var socketid =  clientid++;
+        var socketid = clientid++;
         var functionMaps = createClientFunctionMaps();
         socket.on("message", function (m) {
             var token = JSON.parse(m);
