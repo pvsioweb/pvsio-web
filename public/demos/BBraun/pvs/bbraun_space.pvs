@@ -15,16 +15,14 @@ bbraun_space: THEORY
      NA: NA?   
    END Memory
 
-  State: TYPE = [#
-     on    : int, % on flag
-     inf   : int, % infusing flag
-     r     : bbraun_real, % rate
-     v     : bbraun_real, % vtbi
-     %-- data etry state
-     d     : bbraun_real, % display
-     c     : Cursor, % cursor
-     m     : Memory  % memory
-   #]
+  State: TYPE =
+        [# on: int,
+           inf: int,
+           r: bbraun_real,
+           v: bbraun_real,
+           d: bbraun_real,
+           c: Cursor,
+           m: Memory #]
 
   int2boolean(i: int): boolean = IF i > 0 THEN TRUE ELSE FALSE ENDIF
   CONVERSION int2boolean

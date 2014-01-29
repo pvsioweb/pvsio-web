@@ -76,14 +76,19 @@ define(function (require, exports, module) {
     /**
         Creates a collapsible panel on the client app
         @param {?string} headerText The title text to use in the panel header
+		@param {boolean} showContent Whether the default initial state of the panel is open (showContent == true) or closed (showContent == true or undefined)
         @returns {d3.selection} The div created
     */
-	PVSioWeb.prototype.createCollapsiblePanel = function (headerText) {
+	PVSioWeb.prototype.createCollapsiblePanel = function (headerText, showContent) {
 		var div = d3.select("#content").append("div").attr("class", "collapsible-panel-parent");
 		var header = div.append("div").classed("header", true);
 		var content = div.append("div").attr("class", "collapsible-panel");
 		
-		header.append("span").attr("class", "toggle-collapse glyphicon glyphicon-plus-sign").on("click", function () {
+		header.append("span")
+			.attr("class", function() { 
+				if(showContent == true) { return "toggle-collapse glyphicon glyphicon-minus-sign"; }
+				return "toggle-collapse glyphicon glyphicon-plus-sign"; })
+			.on("click", function () {
 			var d = d3.select(this);
 			if (d.classed("glyphicon-minus-sign")) {
 				content.style("display", "none");
@@ -97,7 +102,7 @@ define(function (require, exports, module) {
 		if (headerText) {
 			header.append("span").html(headerText).attr("class", "header");
 		}
-		content.style("display", "none");
+		if (showContent != true) { content.style("display", "none"); }
 		return content;
 	};
     /**

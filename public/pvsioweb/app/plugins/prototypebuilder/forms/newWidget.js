@@ -62,7 +62,7 @@ define(function (require, exports, module) {
 			updateRegex();
 		},
 		ok: function (event) {
-			var form = this.el;
+			var form = d3.select(this.el).select("form");
 			var type = form.select("li.active a").html().toLowerCase();
 			var activeForm = form.select("#" + type).node();
 			if (FormUtils.validateForm(activeForm)) {

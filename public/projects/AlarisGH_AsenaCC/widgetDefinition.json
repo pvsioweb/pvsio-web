@@ -56,7 +56,7 @@
   {
    "class": "Display1357494252462",
    "shape": "rect",
-   "coords": "210,87,400,135",
+   "coords": "256,91,376,137",
    "href": null
   },
   {
@@ -68,13 +68,13 @@
   {
    "class": "Button1357494286330",
    "shape": "rect",
-   "coords": "235,168,267,200",
+   "coords": "235,168,269,200",
    "href": "#"
   },
   {
    "class": "Button1357494295183",
    "shape": "rect",
-   "coords": "305,170,337,195",
+   "coords": "305,170,345,199",
    "href": "#"
   },
   {

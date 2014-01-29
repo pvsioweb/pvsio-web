@@ -35,7 +35,8 @@ var distance = 300;
 var strength = 0; // must be between 0 and 1
 var charge = -50; // positive value = repulsion; negative value = attraction; for graphs, negative values should be used
 var animatedLayout = false;
-
+var zoomCounter = 1;
+var translateZoom = 0;
 // Save number of diagrams created by using Emulink
 var diagramsInfo = {};
 var numberFiles = 0;
@@ -53,6 +54,9 @@ var addNewDiagram = function()
     document.getElementById("button_state").disabled = false;
     document.getElementById("button_transition").disabled = true;
 	document.getElementById("button_self_transition").disabled = true;
+	document.getElementById("zoom").disabled = false;
+	document.getElementById("zoom_").disabled = false;
+	document.getElementById("resetZoom").disabled = false;
 
 }
 /** 
@@ -288,13 +292,36 @@ var editor_mode = MODE.DEFAULT;
 var selected_nodes = d3.map();
 var selected_edges = d3.map();
 var ws;
+var MAX_ZOOM = 1.8;
+var MIN_ZOOM = 0.3;
 
 // creation of svg element to draw the graph
 var width =  930;
 var height = 800;
-var svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height).attr("id", "canvas").style("background", "#fffcec");
+var svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
+                   .attr("id", "canvas").style("background", "#fffcec");
 
+var zoom = function(delta)
+{
+	if( delta > 0)
+	    zoomCounter += 0.3;
+	else
+		zoomCounter -= 0.3;
 
+	if( zoomCounter > MAX_ZOOM ) { zoomCounter = MAX_ZOOM; }
+	else if( zoomCounter < MIN_ZOOM) { zoomCounter = MIN_ZOOM; }
+	else { 	translateZoom = eval(translateZoom - delta *30); }
+
+	svg.attr("transform", "translate(" + translateZoom + "," + 1 + ")scale(" + zoomCounter + ")");
+	
+}
+var resetZoom = function()
+{
+	svg.attr("transform", "translate(" + 1 + "," + 1 + ")scale(" + 1 + ")");
+	zoomCounter = 1;
+	translateZoom = 0;
+
+}
 var BLOCK_START = "%{\"_block\" : \"BlockStart\"";
 var BLOCK_END   = "%{\"_block\" : \"BlockEnd\"";
 var ID_FIELD    = "\"_id\"";
@@ -420,13 +447,22 @@ function getGraphDefinition()
 var clear_node_selection = function () {
 	selected_nodes.forEach(function(key, value) { selected_nodes.remove(key); });
 	svg.selectAll("g").selectAll("g").select("rect").style("stroke", "").style("stroke-width", "");
+	// FIXME: the following code is not clean, because the buttons are just for debugging and therefore we should not link
+    //         generic functions like clear_node_selection to these debugging buttons.
+    //         The clean way to implement this is to create a new variable that stores information about the functionalities
+    //         that should be enabled or disabled. These variables are exported to other modules, so that the user interface
+    //         can be updated accordingly (in this case, by enabling/disabling the buttons).
 	setButtonsEnabledOrDisabledAboutNode(true);
-
 }
 
 var clear_edge_selection = function () {
 	selected_edges.forEach(function(key, value) { selected_edges.remove(key); });
 	svg.selectAll("path").classed("selected", false);
+	// FIXME: the following code is not clean, because the buttons are just for debugging and therefore we should not link
+    //         generic functions like clear_node_selection to these debugging buttons.
+    //         The clean way to implement this is to create a new variable that stores information about the functionalities
+    //         that should be enabled or disabled. These variables are exported to other modules, so that the user interface
+    //         can be updated accordingly (in this case, by enabling/disabling the buttons).
 	setButtonsEnabledOrDisabledAboutEdge(true);
 }
 
@@ -672,6 +708,8 @@ function init(_editor, wsocket, currentProject, pm, startWriter, nameFile) {
 
     svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
 			.attr("id", "canvas").style("background", "#fffcec");
+
+
 
 	lastFileShown = event.selectedItemString; //Update last file shown 
 
@@ -926,6 +964,14 @@ var emulink = function() {
 			.on('mouseup', function(d) {
 				// update mouseup_link
 				mouseup_link = d;
+			})
+			.on('mouseover', function(d) {
+				// zoom edge
+				d3.select(this).style("stroke-width", function(d){ return 1.5;});
+			})
+			.on('mouseout', function(d) {
+				// restore edge size
+				d3.select(this).style("stroke-width", function(d){ return 1;});
 			});
 		pathCanvas
 			.append("svg:text")
@@ -1006,12 +1052,13 @@ var emulink = function() {
 			.style('stroke', function(d) { return d3.rgb(colors(d.id)).darker().toString(); })
 			.classed('reflexive', true)
 			.on('mouseover', function(d) {
+				// zoom target node
 				d3.select(this).attr('transform', 'scale(1.1)');
 				if(!mousedown_node || d === mousedown_node) return;
-				// enlarge target node
-				d3.select(this).attr('transform', 'scale(1.1)');
+//				d3.select(this).attr('transform', 'scale(1.1)');
 			})
 			.on('mouseout', function(d) {
+				// restore node size
 				d3.select(this).attr('transform', 'scale(1)');
 				if(!mousedown_node || d === mousedown_node) return;
 			})
@@ -1051,6 +1098,7 @@ var emulink = function() {
 					else {
 						// if the ctrl key is not pressed, reset selection first, and then select the node
 						clear_node_selection();
+						setButtonsEnabledOrDisabledAboutNode(false);
 						selected_nodes.set(d.id, d);                                                
 						// highlight only selected nodes
 						node.selectAll("rect")
@@ -1300,7 +1348,15 @@ var emulink = function() {
 		}
 	}
 
-
+	d3.select("#zoom").on("click", function () {
+            zoom(1);
+        });
+	d3.select("#zoom_").on("click", function () {
+            zoom(-1);
+        });
+	d3.select("#resetZoom").on("click", function() {
+			resetZoom();
+	    });
 	d3.select("#infoBoxModifiable")
 	  .on("change", function () {
 		changeTextArea(node, path);

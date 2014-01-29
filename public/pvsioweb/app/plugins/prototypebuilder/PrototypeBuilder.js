@@ -13,7 +13,7 @@ define(function (require, exports, module) {
 		ProjectManager			= require("project/ProjectManager"),
 		Logger					= require("util/Logger"),
 		ui						= require("pvsioweb/interface"),
-        pvsLanguage             = require("lib/statemachine/pvsLanguage"),
+        pvsLanguage             = require("plugins/emulink/pvsLanguage"),
 		GraphBuilder			= require("plugins/graphbuilder/GraphBuilder"),
 		sourceCodeTemplate		= require("text!pvsioweb/forms/templates/sourceCodeEditorPanel.handlebars");
 	

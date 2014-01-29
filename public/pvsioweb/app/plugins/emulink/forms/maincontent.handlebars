@@ -2,8 +2,14 @@
 			<div id="graphicalEditor">
 				<div id="stateMachineToolbar" >
 					<button class="btn btn-danger" id="startEmulink"    > New Diagram </button>
+					<button class="btn" id ="zoom" disabled="true";> Zoom + </button>
+					<button class="btn" id ="zoom_" disabled="true"> Zoom -</button>
+					<button class="btn" id ="resetZoom" disabled="true"> Reset Zoom </button>
 					<button class="btn" id="specificationToDiagram"     > Generate Diagram from Specification </button>
-                    <button class="btn btn-default" id="startSimulation"> Enable Animation</button>
+					<button class="btn btn-default" id="startSimulation"> Enable Animation</button>
+					<button class="btn" id="toPDF" disabled = "true" > Create PDF Report </button>
+					<a id="downloadPDF" href="" download="Emulink PDF Report" style="display: none;"> Download PDF Report</a>
+                    
 				</div>
                 <div id="modifyPropertiesToolbar" >
                     <button id="button_state" disabled = "true"  > New State </button>
@@ -24,6 +30,6 @@
 					<textarea id="emulinkInfo" readonly> </textarea>
 					<textarea id="infoBox" readonly >TIP: Select a state or a transition to see its properties</textarea>
 					<textarea id="infoBoxModifiable" readonly ></textarea>		
-		            <textarea id="warningDebug" readonly >Warning debug </textarea>
+		            <textarea id="warningDebug" readonly >Debug panel</textarea>
 				</div>
 			</div>			
