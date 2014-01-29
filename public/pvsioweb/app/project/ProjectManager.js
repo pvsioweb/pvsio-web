@@ -11,7 +11,7 @@ define(function (require, exports, module) {
 	var property = require("util/property"),
 		eventDispatcher = require("util/eventDispatcher"),
 		Project = require("./Project"),
-		ListView = require("pvsioweb/ListView"),
+        FileTreeView = require("pvsioweb/FileTreeView"),
 		ProjectFile = require("./ProjectFile"),
 		WSManager = require("websockets/pvs/WSManager"),
 		fs	= require("util/fileHandler"),
@@ -41,6 +41,9 @@ define(function (require, exports, module) {
 	
 	function updateSourceCodeToolbarButtons(pvsFile, currentProject) {
 		//update status of the set main file button based on the selected file
+        if (typeof pvsFile === "string" && currentProject) {
+            pvsFile = currentProject.getSpecFile(pvsFile);
+        }
 		if (pvsFile) {
 			if (currentProject.mainPVSFile() && currentProject.mainPVSFile().name() === pvsFile.name()) {
 				d3.select("#btnSetMainFile").attr("disabled", true);
@@ -57,36 +60,20 @@ define(function (require, exports, module) {
 		}
 	}
 	
-	/** 
-	 *  Shows all files in the project in file list view box 
-	 *  @param  {Project} currentProject - reference to the project whose files have to be showed 
-	 *  @param  {ace} editor         - reference to editor 
-	 *  @returns void
-     *  @private
-	 */
-	function showAllFiles(currentProject, editor) {
-		currentProject.setAllfilesVisible();
-		pvsFilesListView.updateView();
-	}
-	
-	function updateListView(event) {
-		if (pvsFilesListView) {	pvsFilesListView.updateView(); }
-	}
-
-	function editorChangedListener(editor, pm, pvsFileListView) {
+	function editorChangedListener(editor, pm, pvsFilesListView) {
 		return function () {
 			//ideally one should use information from ace to set the dirty mark on the document
 			//e.g editor.getSession().getUndoManager().hasUndo();
-            if (!pvsFileListView) {
-                pvsFileListView = pm.renderSourceFileList();
+            if (!pvsFilesListView) {
+                pvsFilesListView = pm.renderSourceFileList();
             }
-			if (pvsFileListView) {
-				var pvsFile = pvsFilesListView.selectedItem();
+			if (pvsFilesListView) {
+                var project = pm.project();
+				var pvsFile = project.getSpecFile(pvsFilesListView.getSelectedItem());
 				if (pvsFile) {
 					var dirty = pvsFile.content() !== editor.getValue();
 					pvsFile.content(editor.getValue()).dirty(dirty); //update the selected project file content
 					updateSourceCodeToolbarButtons(pvsFile, pm.project());
-					pvsFilesListView.updateView();
                     pm.project()._dirty(true);
 				}
 			}
@@ -110,11 +97,10 @@ define(function (require, exports, module) {
 		this.project = property.call(this, project)
 			.addListener("ProjectNameChanged", projectNameChanged)
 			.addListener("PropertyChanged", function (e) {
-				updateListView();
-				e.fresh.addListener("ProjectMainSpecFileChanged", updateListView)
+				e.fresh.addListener("ProjectMainSpecFileChanged", noop)
 					.addListener("ProjectNameChanged", projectNameChanged);
 				e.fresh.pvsFiles.clearListeners()
-					.addListener("PropertyChanged", updateListView);
+					.addListener("PropertyChanged", noop);
 				//update the project name
 				projectNameChanged({current: e.fresh.name()});
 			});
@@ -130,65 +116,47 @@ define(function (require, exports, module) {
         };
 	}
 	/**
-	 * Shows all the files in the project including closed files.
-	 * @memberof ProjectManager
-	 */
-	ProjectManager.prototype.showAllFiles = function () {
-		showAllFiles(this.project(), this.editor());
-	};
-	
-	/**
 	 * Renders the list of pvs files in the project
 	 * @memberof ProjectManager
 	 */
-	ProjectManager.prototype.renderSourceFileList = function () {
+	ProjectManager.prototype.renderSourceFileList = function (folderStructure) {
 		var pm = this;
-		var currentProject = this.project(), files = currentProject.pvsFiles(), editor = this.editor();
+		var currentProject = this.project(), editor = this.editor();
 		var ws = WSManager.getWebSocket();
-		var listLabelFunction = function (d) {
-			return d.name();
-		}, classFunc = function (d) {
-			var c = "fileListItem ";
-			if (!d.visible()) {
-				c = c.concat(" hide");
-			}
-			if (d.dirty()) {
-				c = c.concat(" dirty");
-			}
-			if (currentProject.mainPVSFile() && d.name() === currentProject.mainPVSFile().name()) {
-				c = c.concat(" main-file");
-			}
-			return c;
-		};
-		pvsFilesListView = new ListView("#pvsFiles", files, listLabelFunction, classFunc);
+		pvsFilesListView = new FileTreeView("#pvsFiles", folderStructure, currentProject);
 		
-		pvsFilesListView.addListener("SelectedIndexChanged", function (event) {
+		pvsFilesListView.addListener("SelectedFileChanged", function (event) {
 			//fetch sourcecode for selected file and update editor
-			var pvsFile = event.selectedItem;
-			if (pvsFile.content()) {
-				editor.removeAllListeners("change");
-				editor.setValue(pvsFile.content());
-				editor.clearSelection();
-				editor.moveCursorTo(0, 0);
-				editor.on("change", editorChangedListener(editor, pm, pvsFilesListView));
-			} else {
-				//fetch file contents from server and set the value
-				var f = currentProject.path() + "/" + pvsFile.name();
-				ws.getFile(f, function (err, res) {
-					if (!err) {
-						editor.removeAllListeners("change");
-						pvsFile.content(res.fileContent).dirty(false);
-						editor.setValue(pvsFile.content());
-						editor.clearSelection();
-						editor.moveCursorTo(0, 0);
-						editor.on("change", editorChangedListener(editor, pm, pvsFilesListView));
-					} else {
-						///TODO show error loading file
-						console.log(JSON.stringify(err));
-					}
-				});
-			}
-			updateSourceCodeToolbarButtons(pvsFile, currentProject);
+            if (event.selectedItem && !event.selectedItem.isDirectory) {
+                var pvsFile = currentProject.getSpecFile(event.selectedItem.file);
+                if (!pvsFile) {//load the pvsfile and add to the project
+                    pvsFile = currentProject.addSpecFile(event.selectedItem.file.substr(currentProject.path().length));
+                }
+                if (pvsFile.content()) {
+                    editor.removeAllListeners("change");
+                    editor.setValue(pvsFile.content());
+                    editor.clearSelection();
+                    editor.moveCursorTo(0, 0);
+                    editor.on("change", editorChangedListener(editor, pm, pvsFilesListView));
+                } else {
+                    //fetch file contents from server and set the value
+                    var f = currentProject.path() + "/" + pvsFile.name();
+                    ws.getFile(f, function (err, res) {
+                        if (!err) {
+                            editor.removeAllListeners("change");
+                            pvsFile.content(res.fileContent).dirty(false);
+                            editor.setValue(pvsFile.content());
+                            editor.clearSelection();
+                            editor.moveCursorTo(0, 0);
+                            editor.on("change", editorChangedListener(editor, pm, pvsFilesListView));
+                        } else {
+                            ///TODO show error loading file
+                            console.log(JSON.stringify(err));
+                        }
+                    });
+                }
+                updateSourceCodeToolbarButtons(pvsFile, currentProject);
+            }
             //bubble the event
             event.type = "SelectedFileChanged";
             pm.fire(event);
@@ -202,58 +170,36 @@ define(function (require, exports, module) {
 	 * @memberof ProjectManager
 	 */
 	ProjectManager.prototype.getSelectedFile = function () {
-		return pvsFilesListView.selectedItem();
+		return this.project().getSpecFile(pvsFilesListView.getSelectedItem());
 	};
 
 	/** 
-	 *  Prompt user to get a new name for the selected file
+	 *  Change the name of the specified file
 	 *  @param  file            - reference to the file to rename
-	 * ///FIXME change the prompt to a form dialog
-	 * @memberof ProjectManager
+     *  @param {string} newName the new name to give the file
+	 *  @memberof ProjectManager
+     *  @deprecated
 	 */
-	ProjectManager.prototype.renameFile = function (file) {
-		if (file) {
-			var newName = prompt("Enter a new file name ", file.name());
-			if (newName && newName.trim().length) {
-				this.project.renameFile(file, newName);
-				pvsFilesListView.updateView();
-			}
+	ProjectManager.prototype.renameFile = function (file, newName) {
+		if (file && newName && file.name() !== newName) {
+            this.project.renameFile(file, newName.trim());
 		}
 	};
 
-	/** 
-	 *  Remove user's selected file from file list box (not from the project itself)
-	 *  @param  {!ProjectFile} file   The file to close from the list view
-	 * @memberof ProjectManager
-	 */
-	ProjectManager.prototype.closeFile = function (file) {
-		if (file) {
-			this.project().hideFile(file);
-			pvsFilesListView.updateView();
-			if (file === pvsFilesListView.selectedItem()) {
-				pvsFilesListView.selectedItem(undefined).selectedIndex(-1);
-			}
-			this.editor().setValue("");
-			this.editor().clearSelection();
-			this.editor().moveCursorTo(0, 0);
-		}
-	};
-
-	/** 
-	 *  Delete a file from a project
-	 *  @param  {ProjectFile} file The file to delete from the project
-	 *  @param  {ProjectManager~onFileDeleted}  cb Callback function to invoke once file has been deleted
-	 * @memberof ProjectManager
-	 */
-	ProjectManager.prototype.deleteFile = function (file, cb) {
-	///FIXME this function should prompt user for confirmation through a dialog
-		if (file) {
-			this.project().removeFile(file);
-			pvsFilesListView.updateView();
-			this.editor().setValue("");
-			fs.deleteFile(file.path(), cb);
-		}
-	};
+//	/** 
+//	 *  Delete a file from a project
+//	 *  @param  {ProjectFile} file The file to delete from the project
+//	 *  @param  {ProjectManager~onFileDeleted}  cb Callback function to invoke once file has been deleted
+//	 * @memberof ProjectManager
+//	 */
+//	ProjectManager.prototype.deleteFile = function (file, cb) {
+//	///FIXME this function should prompt user for confirmation through a dialog
+//		if (file) {
+//			this.project().removeFile(file);
+//			this.editor().setValue("");
+//			fs.deleteFile(file.path(), cb);
+//		}
+//	};
 
 	/** 
 	 * Create a new file and add it to the current Project. The New file will be shown in file list box.
@@ -273,9 +219,7 @@ define(function (require, exports, module) {
 			content = init_content + default_content + init_content;
 		}
 
-		this.project().addSpecFile(name, content);
-		pvsFilesListView.updateView(this.project().pvsFiles())
-			.selectItem(_.last(this.project().pvsFiles()));
+		return this.project().addSpecFile(name, content);
 	};
 
 	/**
@@ -286,17 +230,16 @@ define(function (require, exports, module) {
      * @private
 	 */
 	function initFromJSON(obj) {
-		var p = new Project(obj.name).path(obj.projectPath);
+		var p = new Project(obj.name).path(obj.projectPath), pf;
 		if (obj.pvsFiles) {
 			//create project files and assign the mainpvsfile appropriately
-			var pvsProjectFiles = obj.pvsFiles.map(function (f) {
-				var pf = new ProjectFile(f, p);
+			obj.pvsFiles.forEach(function (f) {
 				if (f === obj.mainPVSFile) {
+                    pf = new ProjectFile(f, p);
 					p.mainPVSFile(pf);
 				}
-				return pf;
+				p.addSpecFile(f);
 			});
-			p.pvsFiles(pvsProjectFiles);
 		}
 		if (obj.image && obj.imageData) {
 			p.image(new ProjectFile(obj.image, p).type("image").content(obj.imageData));
@@ -337,8 +280,8 @@ define(function (require, exports, module) {
                             }
 							//list all other files
 							if (p.pvsFiles()) {
-								pm.renderSourceFileList(p.pvsFiles());
-                                pvsFilesListView.selectItem(p.mainPVSFile() || p.pvsFiles()[0]);
+								pm.renderSourceFileList(res.project.folderStructure);
+                                pvsFilesListView.selectItem(p.mainPVSFile() || p.pvsFilesList()[0]);
 							}
 							pm.editor().on("change", editorChangedListener(pm.editor(), pm, pvsFilesListView));
 							if (callback) { callback(p); }
@@ -359,7 +302,8 @@ define(function (require, exports, module) {
 	 * @memberof ProjectManager
 	 */
 	ProjectManager.prototype.openFiles = function (cb) {
-		var project = this.project(), editor = this.editor();
+		///TODO fix this function!!!
+        var project = this.project(), editor = this.editor();
 		cb = cb || noop;
 		openFilesForm.create().on("cancel", function (e, view) {
 			view.remove();
@@ -372,8 +316,7 @@ define(function (require, exports, module) {
 			});
 			q.awaitAll(function (err, res) {
 				if (!err) {//done opening files and we have added them to the project
-					pvsFilesListView.updateView()
-                        .selectItem(_.last(project.pvsFiles()));
+					pvsFilesListView.selectItem(_.last(project.pvsFilesList()));
 					cb();
 				} else {
 					console.log("error opening files");
@@ -439,50 +382,7 @@ define(function (require, exports, module) {
         };
     };
 	
-	ProjectManager.prototype.prepareListBoxForFileDrag = function () {
-		var project = this.project(), pm = this;
-        function updateProjectWithFiles(files) {
-            function createFileLoadFunction(file, fileIndex) {
-                return function (event) {
-                    project.addSpecFile(file.name, event.target.result);
-                    if (fileIndex === files.length - 1) {
-                        //render file list view
-                        pm.renderSourceFileList(project.pvsFiles());
-                    }
-                };
-            }
-            var i, f;
-            for (i = 0; i < files.length; i++) {
-                f = files[i];
-                var fr = new FileReader();
-                fr.onload = createFileLoadFunction(f, i);
-                fr.readAsText(f);
-            }
-        }
 
-        var allowedExtensions = ["pvs"];
-        var lstBox = d3.select("#pvsFiles").node();
-        lstBox.ondragover = function () {
-            d3.select("#pvsFiles").classed("drag-over", true);
-            return false;
-        };
-        lstBox.ondragend = function (event) {
-            d3.select("#pvsFiles").classed("drag-over", false);
-            event.preventDefault();
-            event.stopPropagation();
-            return false;
-        };
-
-        lstBox.ondrop = function (event) {
-            d3.select("#pvsFiles").classed("drag-over", false);
-            var files = event.dataTransfer.files;
-            updateProjectWithFiles(files);
-            event.preventDefault();
-            event.stopPropagation();
-            return false;
-        };
-    };
-	 
 	/** 
 	 * Creates a new Project. Displays the new Project dialog and handles the response 
      * @memberof ProjectManager
@@ -525,12 +425,12 @@ define(function (require, exports, module) {
 						if (project.image()) {
 							pm.updateImage(project.image().content());
 						}
-						project.pvsFiles().forEach(function (f) {
+						project.pvsFilesList().forEach(function (f) {
 							f.dirty(false);
 						});
 						WidgetManager.updateMapCreator();
-						pm.renderSourceFileList();
-						pvsFilesListView.selectedItem(project.mainPVSFile() || project.pvsFiles()[0]);
+						pm.renderSourceFileList(res.folderStructure);
+						pvsFilesListView.selectItem(project.mainPVSFile() || project.pvsFilesList()[0]);
 						//fire project changed event
 						pm.fire({type: "ProjectChanged", current: project, previous: pm.project()});
 						pm.project(project);
@@ -559,9 +459,8 @@ define(function (require, exports, module) {
                     console.log("project saved");
                     project = p;
                     //repaint the list and sourcecode toolbar
-                    if (project.pvsFiles()) {
-                        pvsFilesListView.updateView();
-                        updateSourceCodeToolbarButtons(pvsFilesListView.selectedItem(), project);
+                    if (project.pvsFilesList().length) {
+                        updateSourceCodeToolbarButtons(pvsFilesListView.getSelectedItem(), project);
                     }
                     pm.fire({type: "ProjectSaved", project: project});
                     if (typeof cb === "function") {
@@ -579,8 +478,7 @@ define(function (require, exports, module) {
                 project.saveNew(function (err, res) {
                     if (!err) {
                         project = res;
-                        pvsFilesListView.updateView();
-                        pm.updateSourceCodeToolbarButtons(pvsFilesListView.selectedItem(), project);
+                        pm.updateSourceCodeToolbarButtons(pvsFilesListView.getSelectedItem(), project);
                         pm.fire({type: "ProjectSaved", project: project});
                         if (typeof cb === "function") {
                             cb();
@@ -592,7 +490,6 @@ define(function (require, exports, module) {
 			_doSave();
 		}
 	};
-	
 	
 	ProjectManager.prototype.updateSourceCodeToolbarButtons = updateSourceCodeToolbarButtons;
 	

@@ -16,6 +16,7 @@ define(function (require, exports, module) {
     
     var propertyChangedEvent = "PropertyChanged";
     
+    ///TODO review and ensure this works with a map of pvsfiles
     function saveSourceCode(files, project, cb) {
         var ws = WSManager.getWebSocket();
 		var q = queue();
@@ -23,11 +24,11 @@ define(function (require, exports, module) {
             q.defer(ws.writeFile, {fileName: f.path(), fileContent: f.content()});
         });
         q.awaitAll(function (err, res) {
-            var pvsFiles = project.pvsFiles().filter(function (p) { return p.dirty(); });
+            var dirtyFiles = project.dirtyFiles();
             //update status of files successfully saved
             res.forEach(function (response, index) {
                 if (response.type === "fileSaved") {
-                    pvsFiles[index].dirty(false);
+                    dirtyFiles[index].dirty(false);
                 }
             });
             cb(err, res);
@@ -50,7 +51,8 @@ define(function (require, exports, module) {
     
     function saveImageFile(project, cb) {
         var ws = WSManager.getWebSocket();
-        var data = {"fileName": project.path() + "/" + project.image().name(), fileContent: project.image().content(), encoding: "base64"};
+        var data = {"fileName": project.path() + "/" + project.image().name(),
+                    fileContent: project.image().content(), encoding: "base64"};
         ws.writeFile(data, function (err, res) {
             if (!err) {
                 project.image().dirty(false);
@@ -97,9 +99,9 @@ define(function (require, exports, module) {
         this.image = property.call(this);
 		/** 
 			get or set the pvsFiles in a project
-			@type {ProjectFile[]}
+			@type {ProjectFile {}}
 		*/
-        this.pvsFiles = property.call(this, []);
+        this.pvsFiles = property.call(this, {});
 	
         var project = this;
         //add event listeners
@@ -149,11 +151,27 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
 	Project.prototype.addSpecFile = function (fileName, fileContent) {
-		var newSpec = new ProjectFile(fileName, this).content(fileContent).dirty(true);
-		this.pvsFiles().push(newSpec);
-		return this;
+		var newSpec = new ProjectFile(fileName, this).content(fileContent);
+		this.pvsFiles()[newSpec.path()] = newSpec;
+        this.fire({type: "SpecFileAdded", file: newSpec});
+        var project = this;
+        //register event for the newspec and bubble up the dirty flag changed event from project
+        newSpec.addListener("DirtyFlagChanged", function (event) {
+            project.fire({type: "SpecDirtyFlagChanged", file: newSpec});
+        }).dirty(true);
+		return newSpec;
 	};
-     
+    
+    /**
+     * Gets the pvsSpec file with the specified Name
+     * @param {!String} fileName path to the spec file
+     * @returns {ProjectFile}
+     * @memeberof Project
+     */
+    Project.prototype.getSpecFile = function (fileName) {
+        return this.pvsFiles()[fileName];
+    };
+    
 	/**
 	 * Removes the specified file from the list of specification (.pvs) files.
 	 * @param {!ProjectFile} file The file to remove.
@@ -162,10 +180,14 @@ define(function (require, exports, module) {
 	Project.prototype.removeFile = function (file) {
 		///FIXME this function might not trigger a propertyChanged event on pvsFiles
 		//since the files are being modified without using the setter function pvsFiles(updatedList)
-		var fileIndex = this.pvsFiles().indexOf(file);
-		if (fileIndex > -1) {
-			this.pvsFiles().splice(fileIndex, 1);
-		}
+        var path = file.path();
+        var deletedFile = this.pvsFiles()[path];
+        if (deletedFile) {
+            delete this.pvsFiles()[path];
+            this.fire({event: "SpecFileDeleted", file: deletedFile, path: path});
+            deletedFile.clearListeners();
+        }
+        return this;
 	};
     
 	/** A function about state machines */
@@ -190,11 +212,23 @@ define(function (require, exports, module) {
 	 */
 	Project.prototype.renameFile = function (file, newName) {
 		file.name(newName);
+        var p = this;
+        var ws = WSManager.getWebSocket();
+        ws.send({type: "renameFile", oldPath: file.path(), newPath: this.path() + "/" + newName}, function (err) {
+            if (!err) {
+                p.fire({type: "SpecFileRenamed", file: file});
+            } else {
+                ///TODO error
+                console.log(err);
+            }
+        });
 	};
 	
-	/** User wants to make all files visible */
+	/** User wants to make all files visible 
+     * @deprecated
+    */
 	Project.prototype.setAllfilesVisible = function () {
-		this.pvsFiles().forEach(function (file) {
+		this.pvsFilesList().forEach(function (file) {
 			file.visible(true);
 		});
 	};
@@ -235,29 +269,42 @@ define(function (require, exports, module) {
 			var q = queue();
 			q.defer(saveWidgetDefinition, this);
 			if (this.pvsFiles()) {
-				q.defer(saveSourceCode, this.pvsFiles().filter(function (f) {
-					return f.dirty();
-				}), this);
+				q.defer(saveSourceCode, this.dirtyFiles(), this);
 			}
 		   
 			if (this.image() &&  this.image().dirty()) {
 				q.defer(saveImageFile, this);
 			}
 			q.awaitAll(function (err, res) {
-				if (!err) { _thisProject._dirty(false); }
-				cb(err, _thisProject);
+				if (!err) {
+                    _thisProject._dirty(false);
+                    _thisProject.fire({type: "ProjectSaved", project: _thisProject});
+                }
+                if (cb) { cb(err, _thisProject); }
 			});
 		}
 		return this;
 	};
+    
+    Project.prototype.pvsFilesList = function () {
+        return Object.keys(this.pvsFiles()).map(function (path) {
+            return this.pvsFiles()[path];
+        }, this);
+    };
+    
+    Project.prototype.dirtyFiles = function () {
+        return this.pvsFilesList().filter(function (d) {
+            return d.dirty();
+        });
+    };
     
 	///FIXME this should be a private function called from project.save
 	Project.prototype.saveNew = function (cb) {
 		var _thisProject = this;
 		var wd = WidgetManager.getWidgetDefinitions();
 		var wdStr = JSON.stringify(wd, null, " ");
-		var ws = WSManager.getWebSocket(), specFiles = this.pvsFiles().map(function (f, i) {
-			return {fileName: f.name(), fileContent: f.content()};
+		var ws = WSManager.getWebSocket(), specFiles = this.pvsFilesList().map(function (f, i) {
+			return {fileName: f.name(), fileContent: f.content(), path: f.path()};
 		});
 		var token = {type: "createProject", projectName: this.name(), specFiles: specFiles, widgetDefinitions: wdStr};
 		if (this.mainPVSFile()) {
@@ -269,7 +316,7 @@ define(function (require, exports, module) {
 		}
 		ws.send(token, function (err, res) {
 			if (!err) {
-				_thisProject.pvsFiles().forEach(function (f) {
+				_thisProject.pvsFilesList().forEach(function (f) {
 					f.dirty(false);
 				});
                 if (_thisProject.image()) {
@@ -280,7 +327,6 @@ define(function (require, exports, module) {
 			cb(err, _thisProject);
 		});
 	};
-
     
     module.exports = Project;
     

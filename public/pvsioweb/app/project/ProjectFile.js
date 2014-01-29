@@ -18,10 +18,17 @@ define(function (require, exports, module) {
 	 * @this ProjectFile
 	 */
     function ProjectFile(name, project) {
+        eventDispatcher(this);
+        var pf = this;
 		/** get or set the dirty flag on this file. A file is dirty if its content has been edited but not persisted 
 			@type {boolean}
 		*/
         this.dirty = property.call(this, false);
+        //fire event whenever the dirty flag changes
+        this.dirty.addListener("PropertyChanged", function (event) {
+            pf.fire({type: "DirtyFlagChanged",  previous: event.old,
+                       current: event.fresh, file: name, path: project.path() + "/" + name});
+        });
 		/** 
 			get or set the type of this file. Files can currently be image or text
 			@type {string}
@@ -50,7 +57,7 @@ define(function (require, exports, module) {
 			@type {boolean}
 		*/
 		this.visible = property.call(this, true);
-        return eventDispatcher(this);
+        return pf;
     }
     
 	module.exports = ProjectFile;

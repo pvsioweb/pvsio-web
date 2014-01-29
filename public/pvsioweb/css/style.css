@@ -1,3 +1,7 @@
+.jstree-contextmenu {
+    z-index: 2;   
+}
+
 span.toggle-collapse {
 	display: inline-block;
 	width: 25px;
@@ -142,11 +146,13 @@ fileListItem.hide {
 	display: none;	
 }
 
+/*
 #pvsFiles ul {
     list-style-type: none;
     margin: 0;
 	padding:0;
 }
+*/
 .list-icon {
     display: inline-block;
     width: 14px;
@@ -178,6 +184,7 @@ fileListItem.hide {
     display: inline-block;
 }
 
+/*
 #pvsFiles .fileListItem {
     position:relative;
     padding: 3px 5px 3px 3px;
@@ -194,6 +201,7 @@ fileListItem.hide {
     display: inline-block;
     overflow: hidden;
 }
+*/
 .fileListItem.dirty .list-icon-dirty{
     background-image:url(../bootstrap/img/glyphicons-halflings.png);
     background-position:-456px -96px;
@@ -248,6 +256,7 @@ fileListItem.hide {
 	background: #333;
 	padding: 10px;
 	font: 10px Arial;
+    overflow-y: scroll;
 }
 
 #pvsio_commands_log {

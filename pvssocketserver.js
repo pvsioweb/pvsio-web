@@ -30,11 +30,13 @@ function run() {
     "use strict";
 
     var pvsio                   = require("./pvsprocess"),
+        path                    = require("path"),
         ws                      = require("ws"),
         util                    = require("util"),
         http                    = require("http"),
         fs                      = require("fs"),
         express                 = require("express"),
+        queue                   = require("queue-async"),
         webserver               = express(),
         procWrapper             = require("./processwrapper"),
         uploadDir               = "/public/uploads",
@@ -46,6 +48,22 @@ function run() {
         baseProjectDir          = __dirname + "/public/projects/";
     var p, clientid = 0, WebSocketServer = ws.Server;
 
+    function getFolderStructure(root) {
+        var s = fs.statSync(root);
+        var file = {name: root};
+        if (s.isDirectory()) {
+            var files = fs.readdirSync(root);
+            file.isDirectory = true;
+            file.children = files.map(function (f, i) {
+                return getFolderStructure(path.join(root, f));
+            });
+            return file;
+        
+        } else {
+            return file;
+        }
+    }
+    
     /**
      * Utility function that dispatches responses to websocket clients
      * @param {{type:string, data}} token The token to send to the client
@@ -117,7 +135,7 @@ function run() {
             }
         });
     }
-
+    
     /**
      * Creates a project
      * @param {Request} req
@@ -140,7 +158,8 @@ function run() {
                 fs.mkdirSync(projectPath);
                 obj.projectPath = projectPath;
                 obj.name = projectName;
-
+                obj.folderStructure = getFolderStructure(projectPath);
+                
                 if (imageName && imageData) {
                     var imageString = imageData.replace(/^data:image\/(\w+);base64,/, "");
                     fs.writeFileSync(projectPath + "/" + imageName, imageString, "base64");
@@ -172,9 +191,12 @@ function run() {
     */
     function openProject(name) {
         console.log('opening project..' + name);
-        var imageExts = ["jpg", "jpeg", "png"], specExts = ["pvs"],
-            projectPath = baseProjectDir + name,  stat = fs.statSync(projectPath),
-            res =  {name: name, projectPath: projectPath};
+        var imageExts = ["jpg", "jpeg", "png"], 
+            specExts = ["pvs"],
+            projectPath = baseProjectDir + name,  
+            stat = fs.statSync(projectPath),
+            folderStructure = getFolderStructure(projectPath),
+            res =  {name: name, projectPath: projectPath, folderStructure: folderStructure};
         if (stat.isDirectory()) {
             fs.readdirSync(projectPath).forEach(function (file) {
                 stat = fs.statSync(projectPath + "/" + file);
@@ -260,6 +282,36 @@ function run() {
     */
     function createClientFunctionMaps() { 
         var map = {
+            "renameFile": function (token, socket, socketid) {
+                fs.rename(token.oldPath, token.newPath, function (err) {
+                    processCallback({id: token.id, socketId: socketid, err: err});
+                });
+            },
+            "readDirectory": function (token, socket, socketid) {
+                fs.readdir(token.path, function (err, files) {
+                    if (!err) {
+                        //get stat attributes for all the files using an async call
+                        var q = queue();
+                        files.forEach(function (f, i) {
+                            q.defer(fs.stat, f);
+                        });
+                        q.awaitAll(function (err, res) {
+                            var result = res.map(function (d, i) {
+                                return {name: files[i], isDirectory: d.isDirectory()};
+                            });
+                            processCallback({id: token.id,
+                                             socketId: socketid, files: result, err: err}, socket);
+                        });
+                    } else {
+                        processCallback({id: token.id, socketId: socketid, err: err}, socket);
+                    }
+                });
+            },
+            "writeDirectory": function (token, socket, socketid) {
+                fs.mkdir(token.path, function (err) {
+                    processCallback({id: token.id, socketId: socketid, err: err}, socket);
+                });
+            },
             "setMainFile": function (token, socket, socketid) {
                 changeProjectSetting(token.projectName, "mainPVSFile", token.fileName, function (res) {
                     res.id = token.id;

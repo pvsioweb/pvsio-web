@@ -164,7 +164,7 @@ define(function (require, exports, module) {
 	
 	function createHtmlElements() {
 		var content = require("text!pvsioweb/forms/maincontent.handlebars");
-		d3.select("body").html(content);
+		$("body").append(content);
 	}
 	
 	module.exports = {

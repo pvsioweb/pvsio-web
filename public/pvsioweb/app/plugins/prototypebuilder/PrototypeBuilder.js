@@ -8,7 +8,6 @@
 define(function (require, exports, module) {
 	"use strict";
 	var  ace                    = require("ace/ace"),
-        ListView                = require("pvsioweb/ListView"),
         Project                 = require("project/Project"),
         d3                      = require("d3/d3"),
 		ProjectManager			= require("project/ProjectManager"),
@@ -32,10 +31,10 @@ define(function (require, exports, module) {
 		editor.setOptions({
 			enableBasicAutocompletion: true
 		});
-        editor.commands.on("afterExec", function(e){
-            if (e.command.name == "insertstring"&&/^[\w.]$/.test(e.args)) {
-                editor.execCommand("startAutocomplete")
-             }
+        editor.commands.on("afterExec", function (e) {
+            if (e.command.name === "insertstring" && /^[\w.]$/.test(e.args)) {
+                editor.execCommand("startAutocomplete");
+            }
         });
 		// this enables syntax highlighting
 		editor.getSession().setMode("ace/mode/pvsLanguage");
@@ -47,7 +46,7 @@ define(function (require, exports, module) {
 		ui.bindListeners(projectManager);
 
 		projectManager.preparePageForImageUpload();
-		projectManager.prepareListBoxForFileDrag();
+		//projectManager.prepareListBoxForFileDrag();
 		
 		//register the graphbuilder plugin and add an event handler to reinitialise the plugin when the project changes
 		var gb = pvsioWebClient.registerPlugin(GraphBuilder);

@@ -29,7 +29,7 @@
  *  @param  {string} [content]        - textual content of the file. If undefined a default content will be used  
  *
  *  @returns void 
- *	      
+ *	@deprecated !!! there should be no need to use this file. It should be managed within FileTreeView      
  */
 
 define(function (require, exports, module) {
