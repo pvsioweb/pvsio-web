@@ -11,7 +11,17 @@ define(function (require, exports, module) {
         property                = require("util/property"),
         WSManager				= require("websockets/pvs/WSManager");
     
-    var folderData, elementId, ws = WSManager.getWebSocket();
+    var folderData, elementId, project, ws = WSManager.getWebSocket(), fileCounter = 0;
+    
+    /**
+        utility function to convert filenames to valid html ids
+        @param {string} fileName the path to convert
+        @return {string} a string valid for use as an html element id
+    */
+    function fileNameToId(fileName) {
+        var res = fileName.replace(/[\s\.\$\/]/gi, "_");
+        return res;
+    }
     
     function removeNode(node) {
         var t = $(elementId).jstree(true);
@@ -33,8 +43,20 @@ define(function (require, exports, module) {
         t.edit(node);
     }
     
-    function addNode(node) {
-        
+    function addNode(node, nodetype) {
+        var t = $(elementId).jstree(true);
+        var newNode = t.create_node(node, nodetype);
+        if (newNode) {
+            t.edit(newNode);
+        }
+    }
+    
+    function addFolder(node) {
+        addNode(node, {text: "Unititled" + fileCounter++, isDirectory: true});
+    }
+    
+    function addFile(node) {
+        addNode(node, {text: "Unititled" + fileCounter++, isDirectory: false});
     }
     
     function contextMenuItems(node) {
@@ -83,16 +105,19 @@ define(function (require, exports, module) {
 //        }
     };
    
-    
-    function jsTreeData(folderStructure, parent) {
+    /**
+        parses the folderstructure and returns a tree that can be used by jstree
+    */
+    function jsTreeData(folderStructure, parent, project) {
+        var id = fileNameToId(folderStructure.name.substr(project.path().length + 1));
         var res = {text: folderStructure.isDirectory ? folderStructure.name.substr(parent.length) :
                     folderStructure.name.substr(parent.length + 1),
-                   file: folderStructure.name,
+                   file: folderStructure.name, id: id,
                    isDirectory: folderStructure.isDirectory};
         if (folderStructure.children) {
             //allow only directories and .pvs files
             res.children = folderStructure.children.map(function (child) {
-                return jsTreeData(child, folderStructure.name);
+                return jsTreeData(child, folderStructure.name, project);
             }).filter(function (f) {
                 return f.text.split(".").slice(-1).join("") === "pvs" || f.isDirectory;
             });
@@ -100,12 +125,13 @@ define(function (require, exports, module) {
         return res;
     }
     
-    function FileTreeView(_elId, folderStructure, project) {
+    function FileTreeView(_elId, folderStructure, _project) {
         eventDispatcher(this);
         var ftv = this;
         elementId = _elId;
+        project = _project;
         $(elementId).jstree("destroy");
-        folderData = jsTreeData(folderStructure, folderStructure.name);
+        folderData = jsTreeData(folderStructure, folderStructure.name, project);
         $(elementId).jstree({
             core: {
                 data: folderData.children
@@ -130,11 +156,16 @@ define(function (require, exports, module) {
             }
             ftv.fire(event);
         }).on("rename_node.jstree", function (e, data) {
-            console.log(data);
-            var fileRef = project.getSpecFile(data.node.original.file);
-            if (fileRef.name() !== data.text) {
-                //rename file on disk
-                project.renameFile(fileRef, data.text);
+            //this is called whenever user renames or creates a new node
+            //it is a new node if the data starts with Unititled
+            if (data.old.indexOf("Untitled") === 0) {
+               // var newName
+            } else {
+                var fileRef = project.getSpecFile(data.node.original.file);
+                if (fileRef.name() !== data.text) {
+                    //rename file on disk
+                    project.renameFile(fileRef, data.text);
+                }
             }
         });
         //if there is a project add listener to changes to files etc
@@ -155,21 +186,34 @@ define(function (require, exports, module) {
     
     FileTreeView.prototype.selectItem = function (item) {
         var t = $(elementId).jstree(true);
-        t.select_node(item.name());
+        var id = project ? item.path().substr(project.path().length + 1) : item.name();
+        id = fileNameToId(id);
+        t.select_node(id);
     };
     
+    /**
+     * Renames the selected file to the name specified
+     * @param {string} newName The newName to give the file.
+     */
     FileTreeView.prototype.renameSelected = function (newName) {
         var t = $(elementId).jstree(true);
         var selected = t.get_selected(true);
         return t.rename_node(selected, newName);
     };
     
+    /**
+     * Deletes the selected file
+     */
     FileTreeView.prototype.deleteSelected = function () {
         var t = $(elementId).jstree(true);
         var selected = t.get_selected(true);
         return t.delete_node(selected);
     };
     
+    /**
+        Gets the selected file in the treeview
+        @returns {String} The full path to the selected file
+     */
     FileTreeView.prototype.getSelectedItem = function () {
         var t = $(elementId).jstree(true);
         var selection = t.get_selected(true);
