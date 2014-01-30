@@ -674,7 +674,7 @@ function WriterOnContent( editor)
         arrayTag.forEach(function( currentTag)
             {
                 var tmp = currentTag.replace(/(\r\n|\n|\r)/g, "");
-                tmp = tmp.substring(0, currentTag.lastIndexOf('}'));
+                tmp = tmp.substring(0, tmp.lastIndexOf('}'));
                 tmp = writer.editor.find(tmp, objectSearch, false);
                 var realTag = writer.editor.session.getLine(tmp.end.row);
                 arrayTagToReturn.push(realTag);

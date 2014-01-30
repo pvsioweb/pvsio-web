@@ -565,17 +565,8 @@ var deleteEdge = function(edge)
 // FIXME: Change name of this function
 function createStringFromArray(object)
 {
-    var array = object.listOfOperations;
-    var ret = "";
-    
-    if( array )
-    {   ret = "{";
-        array.forEach(function(item){
-               ret = ret + item + "; "        
-    })
-       ret = ret + " }";
-    }
-    array = object.listConditions;
+    var ret = "";    
+    var array = object.listConditions;
     if( array )
     {   ret = ret + " [ ";
         array.forEach(function(item){
@@ -583,6 +574,15 @@ function createStringFromArray(object)
         })
        ret = ret + " ]";
     } 
+    array = object.listOfOperations;
+    if( array )
+    {   ret = ret + " /";
+        array.forEach(function(item){
+               ret = ret + item + "; "        
+    })
+       
+    }
+    
     return ret;    
 }
 function showInformationInTextArea(element) {
