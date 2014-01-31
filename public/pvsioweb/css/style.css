@@ -2,6 +2,14 @@
     z-index: 2;   
 }
 
+.jstree-node.directory{
+    font-weight:bold;
+}
+
+.jstree-node.file {
+    font-weight:normal;
+}
+
 span.toggle-collapse {
 	display: inline-block;
 	width: 25px;

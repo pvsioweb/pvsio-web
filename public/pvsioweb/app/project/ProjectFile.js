@@ -17,7 +17,7 @@ define(function (require, exports, module) {
 	 * @param {Project} project The project to which this file belongs
 	 * @this ProjectFile
 	 */
-    function ProjectFile(name, project) {
+    function ProjectFile(path, project) {
         eventDispatcher(this);
         var pf = this;
 		/** get or set the dirty flag on this file. A file is dirty if its content has been edited but not persisted 
@@ -27,7 +27,7 @@ define(function (require, exports, module) {
         //fire event whenever the dirty flag changes
         this.dirty.addListener("PropertyChanged", function (event) {
             pf.fire({type: "DirtyFlagChanged",  previous: event.old,
-                       current: event.fresh, file: name, path: project.path() + "/" + name});
+                       current: event.fresh, path: path, projectPath: project.path()});
         });
 		/** 
 			get or set the type of this file. Files can currently be image or text
@@ -43,18 +43,20 @@ define(function (require, exports, module) {
 		/** get or set the name of the file
 			@type {string}
 		*/
-        this.name = property.call(this, name);
+        this.name = function () {
+            return this.path().substr(this.path().lastIndexOf("/") + 1);
+        };
+        
 		/**
 		 * get the full path of the file
 		 * @returns {string}
 		 */
-        this.path = function () {
-            return project.path() + "/" + this.name();
-        };
+        this.path = property.call(this, path);
 		
         //-----
 		/** get or set the visibility of this file in the project view
 			@type {boolean}
+            @deperecated
 		*/
 		this.visible = property.call(this, true);
         return pf;

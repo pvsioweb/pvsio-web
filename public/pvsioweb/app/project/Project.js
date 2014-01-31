@@ -138,20 +138,20 @@ define(function (require, exports, module) {
 	 * @param {!String} imageData The base64 string or url path for the image
 	 * @memberof Project
 	 */
-	Project.prototype.changeImage = function (imageName, imageData) {
-		var newImage = new ProjectFile(imageName, this).type("image").content(imageData).dirty(true);
+	Project.prototype.changeImage = function (imagePath, imageData) {
+		var newImage = new ProjectFile(imagePath, this).type("image").content(imageData).dirty(true);
 		this.image(newImage);
 		return this;
 	};
        
 	/**
 	 * Adds a new specification file to the project
-	 * @param {!String} fileName The name of the file to add
+	 * @param {!String} filePath The path of the file to add
 	 * @param {!String} fileContent The content of the file to add
 	 * @memberof Project
 	 */
-	Project.prototype.addSpecFile = function (fileName, fileContent) {
-		var newSpec = new ProjectFile(fileName, this).content(fileContent);
+	Project.prototype.addSpecFile = function (filePath, fileContent) {
+		var newSpec = new ProjectFile(filePath, this).content(fileContent);
 		this.pvsFiles()[newSpec.path()] = newSpec;
         this.fire({type: "SpecFileAdded", file: newSpec});
         var project = this;
@@ -204,6 +204,35 @@ define(function (require, exports, module) {
 	    }
 	};
 	
+    /**
+        Changes the name of a folder in the project directory to a new given name
+        @param {string} oldName the oldName of the folder
+        @param {string} newName the new Name of the folder
+        This function should ensure that only folders within the project can be changed
+    */
+    Project.prototype.renameFolder = function (oldName, newName) {
+        var p = this;
+        if (oldName.indexOf(this.path()) === 0 && newName.indexOf(this.path()) === 0) {
+            WSManager.getWebSocket().send({type: "renameFile", oldPath: oldName, newPath: newName}, function (err) {
+                if (!err) {
+                    //no error so need to modify the paths for all the files affected by the renaming
+                    var pvsFiles = p.pvsFilesList().filter(function (f) {
+                        return f.path().indexOf(oldName) === 0;
+                    });
+                    pvsFiles.forEach(function (f) {
+                        var newFolderName = newName.substring(newName.lastIndexOf("/") + 1);
+                        var nameRelToProject = newName.substr(p.path().length + 1);
+                        nameRelToProject = nameRelToProject.substr(-1) === "/" ?
+                                nameRelToProject.substr(0, nameRelToProject.length - 1) : nameRelToProject;
+                        var newFileName = nameRelToProject + "/" + f.name().substring(f.name().lastIndexOf("/") + 1);
+                        f.name(newFileName);
+                    });
+                } else { console.log(err); }
+            });
+        } else {
+            console.log("error. attempting to changed folder outside project");
+        }
+    };
 	/**
 	 * Rename a given file. Currently this sets the name property of the file parameter. Not clear about persistence.
 	 * @param {!ProjectFile} file The file to rename
@@ -211,32 +240,20 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
 	Project.prototype.renameFile = function (file, newName) {
-		file.name(newName);
         var p = this;
         var ws = WSManager.getWebSocket();
-        ws.send({type: "renameFile", oldPath: file.path(), newPath: this.path() + "/" + newName}, function (err) {
+        var baseDir = file.path().substring(0, file.path().lastIndexOf("/")),
+            newPath = baseDir + "/" + newName;
+        ws.send({type: "renameFile", oldPath: file.path(),
+                 newPath: newPath}, function (err) {
             if (!err) {
+                file.path(newPath);
                 p.fire({type: "SpecFileRenamed", file: file});
             } else {
                 ///TODO error
                 console.log(err);
             }
         });
-	};
-	
-	/** User wants to make all files visible 
-     * @deprecated
-    */
-	Project.prototype.setAllfilesVisible = function () {
-		this.pvsFilesList().forEach(function (file) {
-			file.visible(true);
-		});
-	};
-	
-	/// User has choosen to not see last file clicked (it will be showed in file list box)
-	//@deprecated set projectFile.visible({boolean}) instead
-	Project.prototype.hideFile = function (file) {
-		file.visible(false);
 	};
 
 	/**

@@ -104,12 +104,21 @@ define(function (require, exports, module) {
         };
         /**
             Writes the content passed using the specified fileName
-            @param {{fileName: string, fileContent: string}} data The details of the file to write
+            @param {{fileName: string, fileContent: string}} token The details of the file to write
             @param {callback} cb The callback to invoke with the result of the write operation.
         */
-        o.writeFile = function (data, cb) {
-            var token = {type: "writeFile", data: data};
+        o.writeFile = function (token, cb) {
+            token.type = "writeFile";
             wscBase.send(token, cb);
+            return o;
+        };
+        /**
+            creates a directory with the specified path.
+            @param {string} path the path to the directory to create
+            @param {callback} cb the callback function to invoke when the function returns from the server
+        */
+        o.writeDirectory = function (path, cb) {
+            wscBase.send({type: "writeDirectory", path: path}, cb);
             return o;
         };
         /**

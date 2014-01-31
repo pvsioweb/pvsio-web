@@ -11,7 +11,7 @@ define(function (require, exports, module) {
         property                = require("util/property"),
         WSManager				= require("websockets/pvs/WSManager");
     
-    var folderData, elementId, project, ws = WSManager.getWebSocket(), fileCounter = 0;
+    var folderData, elementId, project, ws = WSManager.getWebSocket(), fileCounter = 0, unSavedName = "Untitled";
     
     /**
         utility function to convert filenames to valid html ids
@@ -43,20 +43,27 @@ define(function (require, exports, module) {
         t.edit(node);
     }
     
-    function addNode(node, nodetype) {
+    function addNode(node, nodeData) {
         var t = $(elementId).jstree(true);
-        var newNode = t.create_node(node, nodetype);
+        t.deselect_all(true);
+        if (node.original.isDirectory) {
+            nodeData.folder = node.original.file;
+        } else {
+            nodeData.folder = node.original.file.substring(0, node.original.file.indexOf(node.original.text) - 1);
+            nodeData.parent = node.parent;
+        }
+        var newNode = t.create_node(node, nodeData);
         if (newNode) {
             t.edit(newNode);
         }
     }
     
     function addFolder(node) {
-        addNode(node, {text: "Unititled" + fileCounter++, isDirectory: true});
+        addNode(node, {text: unSavedName + fileCounter++, isDirectory: true});
     }
     
     function addFile(node) {
-        addNode(node, {text: "Unititled" + fileCounter++, isDirectory: false});
+        addNode(node, {text: unSavedName + fileCounter++, isDirectory: false});
     }
     
     function contextMenuItems(node) {
@@ -78,13 +85,13 @@ define(function (require, exports, module) {
             newFile: {
                 label: "New File",
                 action: function () {
-                    
+                    addFile(node);
                 }
             },
             newFolder: {
                 label: "New Folder",
                 action: function () {
-                    
+                    addFolder(node);
                 }
             }
         };
@@ -96,13 +103,9 @@ define(function (require, exports, module) {
     
     //set default tree property
     $.jstree.defaults.core = {
-        themes: { variant: "small", stripes: true, icons: true},
+        themes: { variant: "small", stripes: false, icons: true},
         multiple: false,
-        check_callback: true// function (op, node, node_parent, node_position) {
-            //op can be create_node, rename_node, delete_node, move_node or copy_node
-            //only allow rename node for now
-//            return true; //op === "rename_node" ? true : false;
-//        }
+        check_callback: true
     };
    
     /**
@@ -110,10 +113,15 @@ define(function (require, exports, module) {
     */
     function jsTreeData(folderStructure, parent, project) {
         var id = fileNameToId(folderStructure.name.substr(project.path().length + 1));
-        var res = {text: folderStructure.isDirectory ? folderStructure.name.substr(parent.length) :
-                    folderStructure.name.substr(parent.length + 1),
+        var res = {text: folderStructure.name.substr(parent.length + 1),
                    file: folderStructure.name, id: id,
                    isDirectory: folderStructure.isDirectory};
+        if (res.isDirectory) {
+            res.li_attr = {"class": "directory"};
+        } else {
+            res.li_attr = {"class": "file"};
+        }
+        
         if (folderStructure.children) {
             //allow only directories and .pvs files
             res.children = folderStructure.children.map(function (child) {
@@ -125,16 +133,18 @@ define(function (require, exports, module) {
         return res;
     }
     
+    
     function FileTreeView(_elId, folderStructure, _project) {
         eventDispatcher(this);
         var ftv = this;
         elementId = _elId;
         project = _project;
+    
         $(elementId).jstree("destroy");
-        folderData = jsTreeData(folderStructure, folderStructure.name, project);
+        folderData = jsTreeData(folderStructure, "", project);
         $(elementId).jstree({
             core: {
-                data: folderData.children
+                data: folderData
             },
             types: {
                 dirty: {icon: "glyphicon glyphicon-asterisk"},
@@ -158,13 +168,38 @@ define(function (require, exports, module) {
         }).on("rename_node.jstree", function (e, data) {
             //this is called whenever user renames or creates a new node
             //it is a new node if the data starts with Unititled
-            if (data.old.indexOf("Untitled") === 0) {
-               // var newName
+            
+            if (data.node.original.text.indexOf("Untitled") === 0) {
+                var newPath = data.node.original.folder + "/" + data.text;
+                var t = $(elementId).jstree(true);//change the id of the inserted object and 
+                var newNodeId = fileNameToId(newPath);
+                t.set_id(data.node, newNodeId);
+                //write the file to the server then add the file to the project
+                if (data.node.original.isDirectory) {
+                    ws.writeDirectory(newPath, function (err, res) {
+                        if (err) {
+                            t.select_node(newNodeId);
+                        } else {
+                            console.log(err);
+                        }
+                    });
+                } else {
+                    ws.writeFile({fileName: newPath, fileContent: ""}, function (err, res) {
+                        if (!err) {
+                            project.addSpecFile(newPath, "");
+                            t.select_node(newNodeId);
+                        } else { console.log(err); }
+                    });
+                }
             } else {
-                var fileRef = project.getSpecFile(data.node.original.file);
-                if (fileRef.name() !== data.text) {
-                    //rename file on disk
-                    project.renameFile(fileRef, data.text);
+                if (data.node.original.isDirectory) {
+                    project.renameFolder(data.original.file, data.text);
+                } else {
+                    var fileRef = project.getSpecFile(data.node.original.file);
+                    if (fileRef.name() !== data.text) {
+                        //rename file on disk
+                        project.renameFile(fileRef, data.text);
+                    }
                 }
             }
         });
@@ -186,7 +221,7 @@ define(function (require, exports, module) {
     
     FileTreeView.prototype.selectItem = function (item) {
         var t = $(elementId).jstree(true);
-        var id = project ? item.path().substr(project.path().length + 1) : item.name();
+        var id = item.path();
         id = fileNameToId(id);
         t.select_node(id);
     };

@@ -11,7 +11,7 @@ define(function (require, exports, module) {
 	var PVSioWeb = require("./PVSioWebClient"),
 		Logger = require("util/Logger"),
 //		PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
-		Emulink = require("plugins/emulink/Emulink"); 
+		Emulink = require("plugins/emulink/Emulink");
 		
 	var client = new PVSioWeb();
 	

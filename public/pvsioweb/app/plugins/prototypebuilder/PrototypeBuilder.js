@@ -46,7 +46,6 @@ define(function (require, exports, module) {
 		ui.bindListeners(projectManager);
 
 		projectManager.preparePageForImageUpload();
-		//projectManager.prepareListBoxForFileDrag();
 		
 		//register the graphbuilder plugin and add an event handler to reinitialise the plugin when the project changes
 		var gb = pvsioWebClient.registerPlugin(GraphBuilder);

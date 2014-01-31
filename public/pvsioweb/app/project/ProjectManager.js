@@ -50,7 +50,6 @@ define(function (require, exports, module) {
 			} else {
 				d3.select("#btnSetMainFile").attr("disabled", null);
 			}
-
 			//update status of file save button based on the selected file
 			if (pvsFile.dirty()) {
 				d3.select("#btnSaveFile").attr("disabled", null);
@@ -130,9 +129,9 @@ define(function (require, exports, module) {
             if (event.selectedItem && !event.selectedItem.isDirectory) {
                 var pvsFile = currentProject.getSpecFile(event.selectedItem.file);
                 if (!pvsFile) {//load the pvsfile and add to the project
-                    pvsFile = currentProject.addSpecFile(event.selectedItem.file.substr(currentProject.path().length));
+                    pvsFile = currentProject.addSpecFile(event.selectedItem.file);
                 }
-                if (pvsFile.content()) {
+                if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
                     editor.removeAllListeners("change");
                     editor.setValue(pvsFile.content());
                     editor.clearSelection();
@@ -207,19 +206,12 @@ define(function (require, exports, module) {
 	 *  @param  {?string} content       - textual content of the file. If undefined a default content will be used
 	 * @memberof ProjectManager
 	 */
-	ProjectManager.prototype.newFile = function (name, content) {
+	ProjectManager.prototype.newFile = function (path, content) {
 		var default_name = "My__Theory", default_content = " THEORY BEGIN \nEND ";
-		var init_content;
-		if (!name) {
-			init_content = default_name + counter;
-			name = init_content + ".pvs";
-			counter = counter + 1;
-		}
-		if (!content) {
-			content = init_content + default_content + init_content;
-		}
-
-		return this.project().addSpecFile(name, content);
+		var init_content = default_name + counter;
+        path = path || (this.project().path() + "/" + default_content + counter++ + ".pvs");
+        content = content || (init_content + default_content + init_content);
+		return this.project().addSpecFile(path, content);
 	};
 
 	/**
@@ -233,16 +225,16 @@ define(function (require, exports, module) {
 		var p = new Project(obj.name).path(obj.projectPath), pf;
 		if (obj.pvsFiles) {
 			//create project files and assign the mainpvsfile appropriately
-			obj.pvsFiles.forEach(function (f) {
-				if (f === obj.mainPVSFile) {
-                    pf = new ProjectFile(f, p);
+			obj.pvsFiles.forEach(function (path) {
+				if (path === obj.mainPVSFile) {
+                    pf = new ProjectFile(path, p);
 					p.mainPVSFile(pf);
 				}
-				p.addSpecFile(f);
+				p.addSpecFile(path);
 			});
 		}
-		if (obj.image && obj.imageData) {
-			p.image(new ProjectFile(obj.image, p).type("image").content(obj.imageData));
+		if (obj.imagePath && obj.imageData) {
+			p.image(new ProjectFile(obj.imagePath, p).type("image").content(obj.imageData));
 		}
 		p.widgetDefinitions(obj.widgetDefinition)._dirty(false);
 		return p;
@@ -310,8 +302,8 @@ define(function (require, exports, module) {
 		}).on("ok", function (e, view) {
 			var q = queue();
 			e.data.pvsSpec.forEach(function (spec) {
-				q.defer(fs.createFileLoadFunction(spec, function (name, content) {
-					project.addSpecFile(name, content);
+				q.defer(fs.createFileLoadFunction(spec, function (spec, content) {
+					project.addSpecFile(spec.path, content);
 				}));
 			});
 			q.awaitAll(function (err, res) {
@@ -398,7 +390,7 @@ define(function (require, exports, module) {
             formView.remove();
 			WidgetManager.clearWidgetAreas();
 		
-			var project = new Project();// pm.project();
+			var project = new Project();
 			//update the current project with info from data and saveNew
 			project.name(data.projectName);
 			var q = queue(), i;
@@ -411,8 +403,8 @@ define(function (require, exports, module) {
 				fr.readAsDataURL(data.prototypeImage[0]);
 			});
 	
-			function onSpecFileLoaded(name, content) {
-				project.addSpecFile(name, content);
+			function onSpecFileLoaded(spec, content) {
+				project.addSpecFile(spec.path, content);
 			}
 			
 			for (i = 0; i < data.pvsSpec.length; i++) {

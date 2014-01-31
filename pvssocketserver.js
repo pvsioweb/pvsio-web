@@ -161,17 +161,21 @@ function run() {
                 obj.folderStructure = getFolderStructure(projectPath);
                 
                 if (imageName && imageData) {
-                    var imageString = imageData.replace(/^data:image\/(\w+);base64,/, "");
-                    fs.writeFileSync(projectPath + "/" + imageName, imageString, "base64");
-                    obj.image = imageName;
+                    var imageString = imageData.replace(/^data:image\/(\w+);base64,/, ""),
+                        imagePath = path.join(projectPath, imageName);
+                    fs.writeFileSync(imagePath, imageString, "base64");
+                    obj.imagePath = imagePath;
                     obj.imageData = imageData;
                 }
 
                 if (specFiles) {
-                    specFiles.forEach(function (f) {
-                        fs.writeFileSync(projectPath + "/" + f.fileName, f.fileContent);
+                    var files = specFiles.map(function (f) {
+                        return {path: path.join(projectPath, f.fileName), fileContent: f.fileContent};
                     });
-                    obj.pvsFiles = specFiles;
+                    files.forEach(function (f) {
+                        fs.writeFileSync(f.path, f.fileContent);
+                    });
+                    obj.pvsFiles = files;
                 }
 
                 if (mainPVSFile) {
@@ -199,23 +203,24 @@ function run() {
             res =  {name: name, projectPath: projectPath, folderStructure: folderStructure};
         if (stat.isDirectory()) {
             fs.readdirSync(projectPath).forEach(function (file) {
-                stat = fs.statSync(projectPath + "/" + file);
+                var filePath = path.join(projectPath, file);
+                stat = fs.statSync(filePath);
                 if (stat.isFile()) {
                     var ext = file.indexOf(".") > -1 ? file.split(".")[1].toLowerCase() : "";
                     if (imageExts.indexOf(ext) > -1) {
-                        res.image = file;
-                        res.imageData = "data:image/" + ext + ";base64," + fs.readFileSync(projectPath + "/" + file, "base64");
+                        res.imagePath = filePath;
+                        res.imageData = "data:image/" + ext + ";base64," + fs.readFileSync(filePath, "base64");
                     } else if (specExts.indexOf(ext) > -1) {
                         res.pvsFiles = res.pvsFiles || [];
-                        res.pvsFiles.push(file);
+                        res.pvsFiles.push(filePath);
                     } else if (file === "widgetDefinition.json") {
-                        res.widgetDefinition = JSON.parse(fs.readFileSync(projectPath + "/" + file, "utf8"));
+                        res.widgetDefinition = JSON.parse(fs.readFileSync(filePath, "utf8"));
                     } else if (file === ".pvsioweb") {
-                        var config = JSON.parse(fs.readFileSync(projectPath + "/" + file, "utf8"));
+                        var config = JSON.parse(fs.readFileSync(filePath, "utf8"));
                         res.mainPVSFile = config.mainPVSFile;
                     } else {
                         res.other = res.other || [];
-                        res.other.push(file);
+                        res.other.push(filePath);
                     }
                 }
             });
@@ -284,7 +289,7 @@ function run() {
         var map = {
             "renameFile": function (token, socket, socketid) {
                 fs.rename(token.oldPath, token.newPath, function (err) {
-                    processCallback({id: token.id, socketId: socketid, err: err});
+                    processCallback({id: token.id, socketId: socketid, err: err}, socket);
                 });
             },
             "readDirectory": function (token, socket, socketid) {
@@ -411,7 +416,7 @@ function run() {
             "writeFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";
-                fs.writeFile(token.data.fileName, token.data.fileContent, encoding, function (err) {
+                fs.writeFile(token.fileName, token.fileContent, encoding, function (err) {
                     var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
                     ///files saved need to inform client about need to restart pvsioweb with appropriate files
                     if (!err) {

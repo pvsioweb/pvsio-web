@@ -53,7 +53,7 @@ define(function (require, exports, module) {
             fr.onload = function (event) {
                 var content = event.target.result;
 				if (onFileLoaded && typeof onFileLoaded === "function") {
-					onFileLoaded(file.name, content);
+					onFileLoaded(file, content);
 				}
 				cb();
             };
