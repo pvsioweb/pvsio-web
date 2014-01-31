@@ -1,5 +1,5 @@
 ({
-	optimize: "uglify",
+	optimize: "none",
 	baseUrl: "../public/pvsioweb/app",
  	paths: {
         "ace": "../lib/ace",
