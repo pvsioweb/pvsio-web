@@ -10,6 +10,9 @@
 #stateMachineToolbar {
     margin-bottom: 10px;   
     margin-top: 10px; 
+    border-width:5px;
+    width:    755px;
+    border-style:double;
 }
 
 
@@ -155,6 +158,8 @@ ul#context-menu li {
 #modifyPropertiesToolbar{
 	width: 930px;
 	font-family: Tahoma, sans-serif; 
+  border-width:5px;
+  border-style:double;
 	display: block;
 }
 #modifyPropertiesToolbarNode{
@@ -166,4 +171,10 @@ ul#context-menu li {
  border:-style: dotted;
  font: 20px/24px cursive;    
  display:none;
+}
+#viewMenu{
+ border-width:5px;
+ width:    265px;
+ border-style:double;
+ font: 20px/24px ;
 }
