@@ -170,6 +170,7 @@ var add_node = function (positionX, positionY, label, notWriter, height_, width_
 
 	document.getElementById("button_transition").disabled = false;
 	document.getElementById("button_self_transition").disabled = false;
+	document.getElementById("button_default_transition").disabled = false;
 
 	var _id = "X" + newNodeID();
 	var node = { 
@@ -310,8 +311,9 @@ var MIN_ZOOM = 0.3;
 // creation of svg element to draw the graph
 var width =  930;
 var height = 800;
-var svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
-                   .attr("id", "canvas").style("background", "#fffcec");
+//var svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
+  //                 .attr("id", "canvas").style("background", "#fffcec");
+var svg = null;
 
 var zoom = function(delta)
 {
@@ -325,6 +327,9 @@ var zoom = function(delta)
 	else { 	translateZoom = eval(translateZoom - delta *30); }
 
 	svg.attr("transform", "translate(" + translateZoom + "," + 1 + ")scale(" + zoomCounter + ")");
+
+	/* This line should solve the Chrome issue when zooming */
+	//svg.style("-webkit-transform", "translate("+ 1 + "px," + 1 + "px) scale(" + zoomCounter+ ")");
 	
 }
 var resetZoom = function()
@@ -673,7 +678,7 @@ function set_editor_mode(m) {
 	// reset borders
 	document.getElementById("button_self_transition").style.border = "";
 	document.getElementById("button_transition").style.border = "";
-	//document.getElementById("button_default_transition").style.border = "";
+	document.getElementById("button_default_transition").style.border = "";
 	document.getElementById("button_state").style.border = "";
 	// set new editor mode
 	editor_mode = m;
@@ -739,9 +744,8 @@ function init(_editor, wsocket, currentProject, pm, startWriter, nameFile) {
 	emulink();
 	}); //End listener
 	lastFileShown = nameFile;
-    // After last modifications (Emulink commented) I need to create here SVG 
-    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
-			.attr("id", "canvas").style("background", "#fffcec");
+	if( !svg ) { svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
+			.attr("id", "canvas").style("background", "#fffcec"); }
 
     ws = wsocket;
 
