@@ -10,6 +10,14 @@
     font-weight:normal;
 }
 
+.jstree-node.file.dirty {
+    font-style: italic;
+}
+
+.main-file a: after {
+    content: " [main]"
+}
+
 span.toggle-collapse {
 	display: inline-block;
 	width: 25px;

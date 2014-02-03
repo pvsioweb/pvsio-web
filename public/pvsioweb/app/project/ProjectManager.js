@@ -139,7 +139,7 @@ define(function (require, exports, module) {
                     editor.on("change", editorChangedListener(editor, pm, pvsFilesListView));
                 } else {
                     //fetch file contents from server and set the value
-                    var f = currentProject.path() + "/" + pvsFile.name();
+                    var f = pvsFile.path();
                     ws.getFile(f, function (err, res) {
                         if (!err) {
                             editor.removeAllListeners("change");
@@ -226,7 +226,10 @@ define(function (require, exports, module) {
 		if (obj.pvsFiles) {
 			//create project files and assign the mainpvsfile appropriately
 			obj.pvsFiles.forEach(function (path) {
-				if (path === obj.mainPVSFile) {
+                var mainFilePath = obj.mainPVSFile.indexOf("/") === 0 ? obj.mainPVSFile
+                    : p.path() + "/" + obj.mainPVSFile;
+                
+				if (path === mainFilePath) {
                     pf = new ProjectFile(path, p);
 					p.mainPVSFile(pf);
 				}
@@ -501,7 +504,7 @@ define(function (require, exports, module) {
 	};
 	
 	ProjectManager.prototype.updateListView = function () {
-		pvsFilesListView.updateView();
+		//pvsFilesListView.updateView();
 	};
 	
 	module.exports = ProjectManager;

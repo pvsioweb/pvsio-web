@@ -49,9 +49,11 @@ define(function (require, exports, module) {
         if (node.original.isDirectory) {
             nodeData.folder = node.original.file;
         } else {
+            //selected node is a file so we need to create the new node as a sibling element
             nodeData.folder = node.original.file.substring(0, node.original.file.indexOf(node.original.text) - 1);
-            nodeData.parent = node.parent;
+            node = node.parent;
         }
+        nodeData.file = nodeData.folder + "/" + nodeData.text;
         var newNode = t.create_node(node, nodeData);
         if (newNode) {
             t.edit(newNode);
@@ -103,7 +105,7 @@ define(function (require, exports, module) {
     
     //set default tree property
     $.jstree.defaults.core = {
-        themes: { variant: "small", stripes: false, icons: true},
+        themes: { variant: "small", stripes: false, icons: false},
         multiple: false,
         check_callback: true
     };
@@ -112,7 +114,7 @@ define(function (require, exports, module) {
         parses the folderstructure and returns a tree that can be used by jstree
     */
     function jsTreeData(folderStructure, parent, project) {
-        var id = fileNameToId(folderStructure.name.substr(project.path().length + 1));
+        var id = fileNameToId(folderStructure.name.substr(project.path().length + 1)) || "project_root";
         var res = {text: folderStructure.name.substr(parent.length + 1),
                    file: folderStructure.name, id: id,
                    isDirectory: folderStructure.isDirectory};
@@ -141,17 +143,12 @@ define(function (require, exports, module) {
         project = _project;
     
         $(elementId).jstree("destroy");
-        folderData = jsTreeData(folderStructure, "", project);
+        folderData = jsTreeData(folderStructure, folderStructure.name.substring(0, folderStructure.name.lastIndexOf("/")), project);
         $(elementId).jstree({
             core: {
                 data: folderData
             },
-            types: {
-                dirty: {icon: "glyphicon glyphicon-asterisk"},
-                main: {icon: "glyphicon glyphicon-star"},
-                "default" : {icon: "glyphicon "}
-            },
-            plugins: ["types", "contextmenu"],
+            plugins: ["contextmenu"],
             contextmenu: {
                 items: contextMenuItems
             }
@@ -168,41 +165,53 @@ define(function (require, exports, module) {
         }).on("rename_node.jstree", function (e, data) {
             //this is called whenever user renames or creates a new node
             //it is a new node if the data starts with Unititled
-            
-            if (data.node.original.text.indexOf("Untitled") === 0) {
-                var newPath = data.node.original.folder + "/" + data.text;
+            var newPath;
+            if (data.node.original.text.indexOf(unSavedName) === 0) {
+                newPath = data.node.original.folder + "/" + data.text;
                 var t = $(elementId).jstree(true);//change the id of the inserted object and 
-                var newNodeId = fileNameToId(newPath);
+                var newNodeId = fileNameToId(newPath.substr(project.path().length + 1));
                 t.set_id(data.node, newNodeId);
                 //write the file to the server then add the file to the project
                 if (data.node.original.isDirectory) {
                     ws.writeDirectory(newPath, function (err, res) {
-                        if (err) {
+                        if (!err) {
+                            data.node.original.text = data.text;
+                            data.node.original.file = newPath;
                             t.select_node(newNodeId);
-                        } else {
-                            console.log(err);
-                        }
+                        } else { console.log(err); }
                     });
                 } else {
                     ws.writeFile({fileName: newPath, fileContent: ""}, function (err, res) {
                         if (!err) {
                             project.addSpecFile(newPath, "");
+                            data.node.original.text = data.text;
+                            data.node.original.file = newPath;
                             t.select_node(newNodeId);
                         } else { console.log(err); }
                     });
                 }
             } else {
                 if (data.node.original.isDirectory) {
-                    project.renameFolder(data.original.file, data.text);
+                    var oldPath = data.node.original.file;
+                    newPath = oldPath.substr(0, oldPath.indexOf(data.node.original.text)) + data.text;
+                    project.renameFolder(oldPath, newPath, function () {
+                        data.node.original.text = data.text;
+                        data.node.original.file = newPath;
+                    });
                 } else {
                     var fileRef = project.getSpecFile(data.node.original.file);
                     if (fileRef.name() !== data.text) {
                         //rename file on disk
-                        project.renameFile(fileRef, data.text);
+                        project.renameFile(fileRef, data.text, function () {
+                            data.node.original.text = data.text;
+                            data.node.original.file = newPath;
+                        });
                     }
                 }
             }
         });
+        //open the root node of the project
+        $(elementId).jstree(true).open_node(folderData.id);
         //if there is a project add listener to changes to files etc
         if (project) {
             project.addListener("SpecDirtyFlagChanged", function (event) {
@@ -210,18 +219,28 @@ define(function (require, exports, module) {
                 var file = event.file;
                 var t = $(elementId).jstree(true);
                 var selection = t.get_selected(true);
-                var flag = file.dirty() ? "dirty" : "default";
-                flag += project.mainPVSFile() === file ? " main" : "";
                 if (selection) {
-                    t.set_type(selection, flag);
+                    selection.forEach(function (s) {
+                        var el =  $("#" + s.id);
+                        if (file.dirty()) {
+                            el.addClass("dirty");
+                        } else {
+                            el.removeClass("dirty");
+                        }
+                    });
                 }
+            }).addListener("ProjectMainSpecFileChanged", function (event) {
+                var prevId = event.previous.path().substr(project.path().length + 1);
+                var currId = event.current.path().substr(project.path().length + 1);
+                $("#" + fileNameToId(prevId)).removeClass("main-file");
+                $("#" + fileNameToId(currId)).addClass("main-file");
             });
         }
     }
     
     FileTreeView.prototype.selectItem = function (item) {
         var t = $(elementId).jstree(true);
-        var id = item.path();
+        var id = item.path().substr(project.path().length + 1);
         id = fileNameToId(id);
         t.select_node(id);
     };

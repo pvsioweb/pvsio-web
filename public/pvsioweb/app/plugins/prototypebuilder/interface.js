@@ -127,11 +127,13 @@ define(function (require, exports, module) {
 			var pvsFile = projectManager.getSelectedFile(), project = projectManager.project();
 			if (pvsFile) {
 				var ws = WSManager.getWebSocket();
-				ws.send({type: "setMainFile", projectName: project.name(), fileName: pvsFile.name()}, function (err, res) {
+				ws.send({type: "setMainFile", projectName: project.name(), fileName: pvsFile.path()}, function (err, res) {
 					//if there was no error update the main file else alert user
-					project.mainPVSFile(pvsFile);
-					///FIXME
-	
+                    if (!err) {
+                        project.mainPVSFile(pvsFile);
+                    } else {
+                        console.log(err);
+                    }
 				});
 			}
 		});

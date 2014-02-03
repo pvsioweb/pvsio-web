@@ -107,22 +107,22 @@ define(function (require, exports, module) {
         //add event listeners
         this.name.addListener(propertyChangedEvent, function (event) {
             project._dirty(true);
-            this.fire({type: "ProjectNameChanged", previous: event.old, current: event.fresh});
+            project.fire({type: "ProjectNameChanged", previous: event.old, current: event.fresh});
         });
         
         this.mainPVSFile.addListener(propertyChangedEvent, function (event) {
             project._dirty(true);
-            this.fire({type: "ProjectMainSpecFileChanged", previous: event.old, current: event.fresh});
+            project.fire({type: "ProjectMainSpecFileChanged", previous: event.old, current: event.fresh});
         });
         
         this.image.addListener(propertyChangedEvent, function (event) {
 			project._dirty(true);
-            this.fire({type: "ProjectImageChanged", previous: event.old, current: event.fresh});
+            project.fire({type: "ProjectImageChanged", previous: event.old, current: event.fresh});
         });
         
         this.widgetDefinitions.addListener(propertyChangedEvent, function (event) {
             project._dirty(true);
-            this.fire({type: "WidgetDefinitionChanged", previous: event.old, current: event.fresh});
+            project.fire({type: "WidgetDefinitionChanged", previous: event.old, current: event.fresh});
         });
         
         eventDispatcher(this);
@@ -210,23 +210,20 @@ define(function (require, exports, module) {
         @param {string} newName the new Name of the folder
         This function should ensure that only folders within the project can be changed
     */
-    Project.prototype.renameFolder = function (oldName, newName) {
+    Project.prototype.renameFolder = function (oldName, newName, cb) {
         var p = this;
         if (oldName.indexOf(this.path()) === 0 && newName.indexOf(this.path()) === 0) {
             WSManager.getWebSocket().send({type: "renameFile", oldPath: oldName, newPath: newName}, function (err) {
                 if (!err) {
-                    //no error so need to modify the paths for all the files affected by the renaming
+                    //no error so need to modify the paths for all the files affected by the renaming action
                     var pvsFiles = p.pvsFilesList().filter(function (f) {
                         return f.path().indexOf(oldName) === 0;
                     });
                     pvsFiles.forEach(function (f) {
-                        var newFolderName = newName.substring(newName.lastIndexOf("/") + 1);
-                        var nameRelToProject = newName.substr(p.path().length + 1);
-                        nameRelToProject = nameRelToProject.substr(-1) === "/" ?
-                                nameRelToProject.substr(0, nameRelToProject.length - 1) : nameRelToProject;
-                        var newFileName = nameRelToProject + "/" + f.name().substring(f.name().lastIndexOf("/") + 1);
-                        f.name(newFileName);
+                        var newPath = f.path().replace(oldName, newName);
+                        f.path(newPath);
                     });
+                    if (cb) {cb(); }
                 } else { console.log(err); }
             });
         } else {
@@ -239,7 +236,7 @@ define(function (require, exports, module) {
 	 * @param {!string} newName The new name to give the file
 	 * @memberof Project
 	 */
-	Project.prototype.renameFile = function (file, newName) {
+	Project.prototype.renameFile = function (file, newName, cb) {
         var p = this;
         var ws = WSManager.getWebSocket();
         var baseDir = file.path().substring(0, file.path().lastIndexOf("/")),
@@ -249,6 +246,7 @@ define(function (require, exports, module) {
             if (!err) {
                 file.path(newPath);
                 p.fire({type: "SpecFileRenamed", file: file});
+                if (cb) {cb(); }
             } else {
                 ///TODO error
                 console.log(err);
