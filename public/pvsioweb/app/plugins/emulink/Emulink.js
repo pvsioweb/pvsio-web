@@ -43,6 +43,8 @@ define(function (require, exports, module) {
         
 		//create the user interface elements
 		createHtmlElements(pvsioWebClient);
+        //document.getElementById("button_state").style.cursor = 'not-allowed';
+
 
         projectManager.addListener("SelectedFileChanged", function (event) {
                 selectedFileChanged = event.selectedItemString;
