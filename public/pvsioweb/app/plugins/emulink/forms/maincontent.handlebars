@@ -1,31 +1,40 @@
 <!-- container for graphical editor -->
 			<div id="graphicalEditor">
 				<div id="stateMachineToolbar" >
-					<button class="btn btn-danger" id="startEmulink"    > New Diagram </button>
-					<button class="btn" id ="zoom" disabled="true";> Zoom + </button>
-					<button class="btn" id ="zoom_" disabled="true"> Zoom -</button>
-					<button class="btn" id ="resetZoom" disabled="true"> Reset Zoom </button>
+					<p style="font-family:verdana;  font-style:italic; margin-left: 310px; color:red; font-size:20px;" > Main Bar</p> 
+					<button class="btn btn-danger" id="startEmulink" > New Diagram </button>
 					<button class="btn" id="specificationToDiagram"     > Generate Diagram from Specification </button>
 					<button class="btn btn-default" id="startSimulation"> Enable Animation</button>
 					<button class="btn" id="toPDF" disabled = "true" > Create PDF Report </button>
-					<a id="downloadPDF" href="" download="Emulink PDF Report" style="display: none;"> Download PDF Report</a>
-                    
+					<a id="downloadPDF" href="" download="Emulink PDF Report" style="display: none;"> Download PDF Report</a>                    
 				</div>
                 <div id="modifyPropertiesToolbar" >
-                    <button id="button_state" disabled = "true"  > New State </button>
-                    <button id="changeNameNode" disabled = "true"> Edit State Name</button> 
-                    <button id="addFieldState"  disabled = "true"> Add Field</button> 
-                    <button id="deleteNode"    disabled= "true"> Delete node </button>
-					<br><br>
-                    <button id="button_transition" disabled = "true"> New Transition </button>
-                    <button id="button_self_transition" disabled = "true"> New Self-Transition </button>
-                    <!-- <button id="button_default_transition" disabled = "true"> New Default Transition </button> -->
-                    <button id="deleteEdge" disabled = "true" > Delete edge </button>
-                    <button id="changeNameEdge" disabled = "true" > Edit Transition Name</button>
-                    <button id="addCondition"  disabled = "true" > Add Condition</button>
-                    <button id="addOperation" disabled = "true"  > Add Action</button>
-                </div><br>
-				<div id="ContainerStateMachine" ></div>
+
+                    <p style="font-family:verdana; margin-left:310px; font-style:italic; color:red; font-size:20px;" > Edit Bar</p>
+                    <p style="font-family:verdana; font-weight:bold; color:blue; font-size:15px;" > State Editor: </p>
+                    <button class="emulinkButton" id="button_state" disabled = "true" style="cursor: not-allowed;"  > New State </button>
+                    <button class="emulinkButton" id="changeNameNode" style="cursor: not-allowed;" disabled = "true"> Edit State Name</button> 
+                    <button class="emulinkButton" id="addFieldState"  style="cursor: not-allowed;" disabled = "true"> Add Field</button> 
+                    <button class="emulinkButton" id="deleteNode" style="cursor: not-allowed;"    disabled= "true"> Delete node </button>
+					<br> 
+					<p style="font-family:verdana;color:blue; font-weight:bold; font-size:15px;" > Transition Editor: </p>
+                    <button class="emulinkButton" style="cursor: not-allowed;" id="button_transition" disabled = "true"> New Transition </button>
+                    <button class="emulinkButton" style="cursor: not-allowed;" id="button_self_transition" disabled = "true"> New Self-Transition </button>
+                    <button class="emulinkButton" style="cursor: not-allowed;" id="button_default_transition" disabled = 'true'> New Default Transition </button> 
+                    <button class="emulinkButton" style="cursor: not-allowed;" id="deleteEdge" disabled = "true" > Delete transition </button>
+                    <button class="emulinkButton" style="cursor: not-allowed;" id="changeNameEdge" disabled = "true" > Edit Transition Name</button>
+                    <button class="emulinkButton" style="cursor: not-allowed;" id="addCondition"  disabled = "true" > Add Condition</button>
+                    <button class="emulinkButton" style="cursor: not-allowed;" id="addOperation" disabled = "true"  > Add Action</button>
+                </div>
+                <div id="viewMenu" >
+                	<p style="font-family:verdana; margin-left:310px; font-style:italic;  color:red; font-size:20px;" > Zoom Bar</p>
+                	<button class="btn" id ="zoom" disabled="true";> Zoom + </button>
+					<button class="btn" id ="zoom_" disabled="true"> Zoom -</button>
+					<button class="btn" id ="resetZoom" disabled="true"> Reset Zoom </button>
+				</div>
+				<div id="ContainerStateMachine" >
+				<p style="font-family:verdana; margin-left:310px; color:red; font-style:italic; font-size:20px;" > Drawing area</p> <br>
+				</div>
 				<div id="state_machine_toolbar" ></div>
 					<textarea id="emulinkInfo" readonly> </textarea>
 					<textarea id="infoBox" readonly >TIP: Select a state or a transition to see its properties</textarea>

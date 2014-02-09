@@ -25,8 +25,7 @@ var editor;
 var modifiedUser = 0;
 var pvsWriter = require("plugins/emulink/stateToPvsSpecificationWriter");
 var graph = { nodes: d3.map(), edges: d3.map() };
-var nodeIDGenerator = 0;
-var newNodeID = function () { return nodeIDGenerator++; };
+
 var minBoxWidth  = 60; 
 var minBoxHeight = 60;
 var curvyLines = true;
@@ -35,26 +34,253 @@ var distance = 300;
 var strength = 0; // must be between 0 and 1
 var charge = -50; // positive value = repulsion; negative value = attraction; for graphs, negative values should be used
 var animatedLayout = false;
-var zoomCounter = 1;
-var translateZoom = 0;
-// Save number of diagrams created by using Emulink
-var diagramsInfo = {};
-var numberFiles = 0;
-var lastFileShown;
-var numberDiagramStillToRestore = 0;
+
+
+
 var svgReference = {};
 
-var addNewDiagram = function()
+
+
+
+var nodeAndEdgeHandler = new NodeAndEdgeHandler();
+/* nodeAndEdgeHandler, here all the functions which handle node and edge */
+
+	/* ************************************************************ */
+function NodeAndEdgeHandler()
 {
-    var name = "myTheory" + numberFiles + ".pvs";
+	this.nodeIDGenerator = 0;
+	this.edgeIDGenerator = 0;
+
+}
+NodeAndEdgeHandler.prototype.newNodeID = function () { return nodeAndEdgeHandler.nodeIDGenerator++; };
+NodeAndEdgeHandler.prototype.add_node = function(positionX, positionY, label, notWriter, height_, width_, falseNode ) 
+{
+	document.getElementById("button_transition").disabled = false;
+	document.getElementById("button_self_transition").disabled = false;
+	document.getElementById("button_default_transition").disabled = false;
+	document.getElementById("button_transition").style.cursor = 'pointer';
+	document.getElementById("button_self_transition").style.cursor = 'pointer';
+	document.getElementById("button_default_transition").style.cursor = 'pointer';
+
+	var _id = "X" + nodeAndEdgeHandler.newNodeID();
+	var node = { 
+			fixed: true,
+			reflexive: false,
+			id   : _id, // node id must be unique
+			name : (label === undefined)? _id : label,
+			x    : positionX,
+			y    : positionY,
+			px   : positionX,
+			py   : positionY,
+			height: (height_ === undefined) ? minBoxHeight : height_,
+			width : (width_ === undefined) ?  minBoxWidth : width_,
+			weight: 0,
+            warning : new Object()
+	};
+
+    node.warning.notPresentInSpec = false;
+    node.warning.labelAlreadyUsed = false;
+   	if(falseNode) {node.falseNode = true;}
+
+	// add node
+	graph.nodes.set(node.id, node);
+
+    if( notWriter ) { return node; }
+	// update pvs theory accordingly
+	pvsWriter.addState(node);
+    return node;
+}
+NodeAndEdgeHandler.prototype.newEdgeID = function()
+{
+	return nodeAndEdgeHandler.edgeIDGenerator ++;
+}
+NodeAndEdgeHandler.prototype.add_edge = function(source, target, label, notWriter) 
+{
+	var _id = "T" + nodeAndEdgeHandler.newEdgeID();
+	var edge = {
+		id: _id, // edge id must be unique
+		source: source,
+		target: target,
+		name : (label === undefined)? "tick" : label,
+	};
+	// add edge
+	graph.edges.set(edge.id, edge);
+    
+    if( notWriter ) { return edge; }
+
+	// update pvs theory accordingly
+	pvsWriter.addTransition(edge.name, edge.id);
+	pvsWriter.addConditionInTransition(edge.name, source, target);
+    return edge;
+}
+NodeAndEdgeHandler.prototype.delete_node = function (id) 
+{
+    graph.nodes.remove(id);
+}
+NodeAndEdgeHandler.prototype.delete_all_nodes = function () {
+    graph.nodes.forEach(function(key, value) { graph.nodes.remove(key); });
+}
+NodeAndEdgeHandler.prototype.deleteNodeAndTransition = function(node, flagObject)
+{
+	// Delete node from SVG 
+    nodeAndEdgeHandler.delete_node(node.id);
+
+    // Delete node from specification
+    var numberNodesStillPresent = getNodesInDiagram().length;
+    if(numberNodesStillPresent == 0) 
+    {
+    	document.getElementById("button_transition").disabled = true;
+	    document.getElementById("button_self_transition").disabled = true;
+    }
+    pvsWriter.deleteNode(node.name, numberNodesStillPresent);
+
+    var edges = getEdgesInDiagram();
+    var toDelete = {};
+    if( flagObject.deleteTransIn && flagObject.deleteTransOut )
+    {
+    	edges.forEach(function(key) 
+    		{
+
+    			if( key.source.id === node.id || key.target.id === node.id )
+    			{	
+    				nodeAndEdgeHandler.delete_edge(key.id); //Delete from SVG 
+    				pvsWriter.deleteCondition(key.name, key.source.name, key.target.name);
+    				toDelete[key.name] = key.name;
+    			}
+    		});
+    }
+    else if( flagObject.deleteTransOut )
+    {
+    	edges.forEach(function(key) 
+    		{
+    			if( key.source.id === node.id )
+    			{	
+    				nodeAndEdgeHandler.delete_edge(key.id); //Delete from SVG 
+    				pvsWriter.deleteCondition(key.name, key.source.name, key.target.name)
+    				toDelete[key.name] = key.name;    				
+    			}
+    		});
+
+    }
+    else if( flagObject.deleteTransIn )
+    {
+    	edges.forEach(function(key) 
+    		{
+    			if( key.target.id === node.id )
+    			{	
+    			    nodeAndEdgeHandler.delete_edge(key.id); //Delete from SVG 
+    				pvsWriter.deleteCondition(key.name, key.source.name, key.target.name)
+    				toDelete[key.name] = key.name;
+    			}
+    		});
+    }
+    edges = getEdgesInDiagram();
+    for( var nameEdge in toDelete)
+    { 	
+         var flagDelete = true;
+    	 edges.forEach(function(key)
+    		{
+    			if( nameEdge === key.name) { flagDelete = false;}
+    		});
+    	 if( flagDelete) {pvsWriter.deleteTrans(nameEdge); }	
+	}
+}
+NodeAndEdgeHandler.prototype.update_node_size = function(id, width, height) 
+{
+	var theNode = graph.nodes.get(id);
+	theNode.height = height;
+	theNode.width = width;
+	graph.nodes.set(id, theNode);
+}
+NodeAndEdgeHandler.prototype.delete_edge = function (id)
+{
+	graph.edges.remove(id);
+}
+NodeAndEdgeHandler.prototype.delete_all_edges = function () 
+{
+    graph.edges.forEach(function(key, value) { graph.edges.remove(key); });
+}
+NodeAndEdgeHandler.prototype.modifyLabelEdgeToDisplayActionAndCond = function(object, path)
+{
+    var id = object.id;
+    var textID = "text:" + id;
+    if(object.source.id == object.target.id) {
+        path.selectAll("text.label").text( function(d) {
+            if(d.id == id) { return d.name + createStringFromArray(d); }
+            return d.name + createStringFromArray(d);
+        });
+    }
+    else {
+        // other edges store the label as textPath
+        /* this works in Firefox but not in Chrome -- could be a bug in Chrome's Javascript implementation
+         * as a workaround, we directly manipulate DOM
+        path.selectAll("textPath").text( function(d) {
+            if(d.name == originalName ) { counter++; }
+            if(d.id == id) { return newName; }
+            return d.name;
+        });*/
+
+        // here's the workaround for the bug with textPath in Chrome
+        var textPathID = "textPath:" + id;
+        if(path.selectAll("text")) {
+            for(var i = 0; i < path.selectAll("text").length; i++) {
+                if(path.selectAll("text")[i] && path.selectAll("text")[i][1] && path.selectAll("text")[i][1].childNodes[0]) {
+                    if(path.selectAll("text")[i][1].childNodes[0].id == textPathID) {
+                        // remove the textpath child
+                        var textPath = path.selectAll("text")[i][1].removeChild(path.selectAll("text")[i][1].childNodes[0]);
+                        // replace the text in textPath with the new label
+                        textPath.removeChild(textPath.childNodes[0]);
+                        textPath.appendChild(document.createTextNode(object.name + createStringFromArray(object)));
+                        // append the textPath back
+                        path.selectAll("text")[i][1].appendChild(textPath);
+                    }
+                }
+            }					
+        }
+    }
+      
+}
+NodeAndEdgeHandler.prototype.deleteEdge = function(edge)
+{
+	nodeAndEdgeHandler.delete_edge(edge.id);
+	var edges = getEdgesInDiagram();
+	var counter = 0;
+	edges.forEach(function( key)
+	     {
+	     	if( key.name === edge.name){ counter ++; }
+	     }
+	 );
+	if( counter > 0) { pvsWriter.deleteCondition(edge.name, edge.source.name, edge.target.name); }
+	else { pvsWriter.deleteTrans(edge.name); }
+}
+/* * ********************************************* ***************************************** */
+
+var diagramHandler = new DiagramHandler();
+/* diagramHandler, here all the functions which handle diagram */
+
+/* ************************************************************ */
+function DiagramHandler()
+{
+	this.numberFiles = 0;
+	this.numberDiagramStillToRestore = 0;
+	this.diagramsInfo = {}; 
+	this.lastFileShown = "";
+}
+DiagramHandler.prototype.addNewDiagram = function()
+{
+    var name = "myTheory" + diagramHandler.numberFiles + ".pvs";
     pvsWriter.newSpecification(name);
-    numberFiles ++;
-    setButtonsEnabledOrDisabledAboutEdge(true);
-    setButtonsEnabledOrDisabledAboutNode(true);
+    diagramHandler.numberFiles ++;
+    setInteractionEnabledOrDisabledAboutEdge(true);
+    setInteractionEnabledOrDisabledAboutNode(true);
     document.getElementById("addFieldState").disabled = false;
+    document.getElementById("addFieldState").style.cursor = 'pointer';
     document.getElementById("button_state").disabled = false;
+    document.getElementById("button_state").style.cursor = 'pointer';
     document.getElementById("button_transition").disabled = true;
+    document.getElementById("button_transition").style.cursor = 'not-allowed';
 	document.getElementById("button_self_transition").disabled = true;
+	document.getElementById("button_self_transition").style.cursor = 'not-allowed';
 	document.getElementById("zoom").disabled = false;
 	document.getElementById("zoom_").disabled = false;
 	document.getElementById("resetZoom").disabled = false;
@@ -69,7 +295,7 @@ var addNewDiagram = function()
  *  @returns void 
  *	      
  */
-var restoreGraphAfterSwitchingEmulinkFiles = function(diagramObject)
+DiagramHandler.prototype.restoreGraphAfterSwitchingEmulinkFiles = function(diagramObject)
 {
 	var nodes = diagramObject.nodes;
 	var edges = diagramObject.edges;
@@ -82,37 +308,193 @@ var restoreGraphAfterSwitchingEmulinkFiles = function(diagramObject)
 	});
 }
 
-/**
- * highlightElements changes the colour of the nodes in array 'nodes' specified as parameter.
- * This function is used during simulations to put in evidence the state changes caused by a user action
- * Example of invocation: highlightElements(["Ready", "Process_DP"]);
- * 
- */
+// FIXME: this should be renamed into delete_graph
+DiagramHandler.prototype.clearSvg = function() {
 
-var restoreColorNodesAndEdges = function ()
+	nodeAndEdgeHandler.delete_all_nodes();
+	nodeAndEdgeHandler.delete_all_edges();    
+}
+
+/** 
+ *  This function is called when a diagram has to be drawn first time after restoring from saving,
+ *  We need to call add_node() and add_edge() otherwise nodes and edges will be disconnected    
+ *
+ *  @param graphToRestore  - object having nodes and edges properties 
+ *
+ *  @returns void 
+ *	      
+ */
+DiagramHandler.prototype.restoreDiagramFirstTimeAfterReloadingFromSaving = function(graphToRestore)
+{
+    var nodesToRestore = graphToRestore.nodes;
+    var edgesToRestore = graphToRestore.edges;
+    var workAround = new Array();
+    var comeOn = new Array();
+    for( var id in nodesToRestore)
+    {
+         var currentNode = nodesToRestore[id];
+         workAround.push(currentNode);
+         comeOn.push(nodeAndEdgeHandler.add_node(currentNode.x, currentNode.y, currentNode.name, true, currentNode.height, currentNode.width, currentNode.falseNode));
+    }
+    for( var id in edgesToRestore)
+    {
+         var currentEdge = edgesToRestore[id];
+         for( var i = 0; i < workAround.length; i++ )
+         {
+             if ( workAround[i].name == currentEdge.source.name )
+                 currentEdge.source = comeOn[i];
+             
+             if( workAround[i].name == currentEdge.target.name )
+                 currentEdge.target = comeOn[i];
+         }
+         var edgeJustAdded = nodeAndEdgeHandler.add_edge(currentEdge.source, currentEdge.target, currentEdge.name, true);
+         if( currentEdge.listOfOperations )
+             edgeJustAdded.listOfOperations = currentEdge.listOfOperations;        
+         if( currentEdge.listConditions )
+             edgeJustAdded.listConditions = currentEdge.listConditions;
+    } 
+    diagramHandler.numberDiagramStillToRestore --;
+}
+DiagramHandler.prototype.buildGraph = function()
+{
+    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
+			.attr("id", "canvas").style("background", "#fffcec");
+    emulink();
+}  
+/** 
+ *  This function is called when an emulink project is restored from saving   
+ *
+ *  @param graphToRestore  - associative array (Key is the name of the file, value is an object having 
+ *                           nodes and edges properties ) 
+ *
+ *  @returns void 
+ *	      
+ */
+DiagramHandler.prototype.restoreGraph = function(graphToRestore, editor, ws, currentProject, pm, fileToShow)
+{
+    diagramHandler.init(editor, ws, currentProject, pm, false);
+    diagramHandler.diagramsInfo = graphToRestore; //diagramsInfo is the associative array used in this module
+    diagramHandler.numberDiagramStillToRestore = Object.keys(graphToRestore).length; //Number of Diagram in emulink project just open
+    diagramHandler.numberFiles = diagramHandler.numberDiagramStillToRestore;
+    diagramHandler.lastFileShown = fileToShow;   //fileToShow is the name of the mainPvsFile or the first file in the project
+    var diagramInfo = diagramHandler.diagramsInfo[fileToShow]; //Get value using file name as key 
+    if( diagramInfo ) //If fileToShow has diagram information, display it in SVG 
+		diagramHandler.restoreDiagramFirstTimeAfterReloadingFromSaving(diagramInfo);
+
+    emulink();    
+}
+
+/** 
+ *  This function is called when a project has to be saved  
+ *
+ *  @returns associative array which has diagrams information (edges and nodes)
+ *	      
+ */
+DiagramHandler.prototype.getGraphDefinition = function() 
+{
+	if( diagramHandler.lastFileShown) //The file shown could be not saved, save it and return 
+	{   
+		var nodes = getNodesInDiagram();
+		var edges = getEdgesInDiagram();
+
+		if( nodes.length ) // But save just if there is something to save!
+		{   var graphToSave = { nodes: getNodesInDiagram(), edges: getEdgesInDiagram()};
+    	    diagramHandler.diagramsInfo[diagramHandler.lastFileShown] = graphToSave;
+    	}
+	}
+	return JSON.stringify(diagramHandler.diagramsInfo); 
+}
+DiagramHandler.prototype.init = function(_editor, wsocket, currentProject, pm, startWriter, nameFile) 
+{
+
+	pm.addListener("SelectedFileChanged", function (event) {
+		
+	if( diagramHandler.lastFileShown) //Since file selected is going to be changed, we need to save diagram information ...
+	{
+		var nodes = getNodesInDiagram();
+		var edges = getEdgesInDiagram();
+
+		if( nodes.length ) // But save just if there is something to save!
+		{   var graphToSave = { nodes: getNodesInDiagram(), edges: getEdgesInDiagram()};
+    	    diagramHandler.diagramsInfo[diagramHandler.lastFileShown] = graphToSave;
+    	    /* Even saving XML SVG in case user wants to get a PDF */
+    	    var serializer = new XMLSerializer();
+        	var xmlString = serializer.serializeToString(d3.select('#canvas').node());
+    	    svgReference[diagramHandler.lastFileShown] = xmlString;
+    	}
+	}	
+	// ...and clearing SVG
+    svgViewHandler.svg.remove();
+    diagramHandler.clearSvg();
+
+    svgViewHandler.svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
+			.attr("id", "canvas").style("background", "#fffcec");
+
+
+
+	diagramHandler.lastFileShown = event.selectedItemString; //Update last file shown 
+
+	var diagramInfo = diagramHandler.diagramsInfo[diagramHandler.lastFileShown]; //Get information fresh file to display 
+	if( diagramInfo) //If it has diagram information 
+		if( diagramHandler.numberDiagramStillToRestore ) // Check if this is shown for first time after reloading 
+		    diagramHandler.restoreDiagramFirstTimeAfterReloadingFromSaving(diagramInfo);
+	    else
+		    diagramHandler.restoreGraphAfterSwitchingEmulinkFiles(diagramInfo);
+
+	emulink();
+	}); //End listener
+	diagramHandler.lastFileShown = nameFile;
+	if( !svgViewHandler.svg ) { svgViewHandler.svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
+			.attr("id", "canvas").style("background", "#fffcec"); }
+
+    ws = wsocket;
+
+    document.getElementById('infoBox').value = "TIP: Click on any element to see its properties";
+	document.getElementById('infoBoxModifiable').value= "TIP: After clicking on an element, editable properties will be showed here";
+	
+	editor = _editor;
+    
+    pvsWriter.init(editor, ws, currentProject, pm);    
+    pvsWriter.setTagsName(tagStateNameStart, tagStateNameEnd);
+    pvsWriter.setTagsState(tagStateStart, tagStateEnd);
+    pvsWriter.setTagsFunc(tagFuncStart, tagFuncEnd);
+    pvsWriter.setTagsPer(tagPerStart, tagPerEnd);
+    pvsWriter.setTagsEdge(tagEdgeStart, tagEdgeEnd);
+    pvsWriter.setTagsCond(tagCondStart, tagCondEnd);
+    pvsWriter.setTagsField(tagFieldStateStart, tagFieldStateEnd);
+    
+    // Start Emulink
+	emulink();
+}
+
+/* * ********************************************* ***************************************** */
+
+var svgViewHandler = new SvgViewHandler();
+/* svgViewHandler, here all the functions which handle svg */
+
+/* ************************************************************ */
+function SvgViewHandler()
+{	
+	this.svg = null;
+	this.translateZoom = 0;
+	this.MAX_ZOOM = 1.8;
+	this.MIN_ZOOM = 0.3;
+	this.zoomCounter = 1;
+}
+
+SvgViewHandler.prototype.restoreColorNodesAndEdges = function()
 {
 	var colors = d3.scale.category10();
-    svg.selectAll("g").selectAll("g").select("rect").style('fill', function(d) { return colors(d.id); })
+    svgViewHandler.svg.selectAll("g").selectAll("g").select("rect").style('fill', function(d) { return colors(d.id); })
 			.style('stroke', function(d) { return d3.rgb(colors(d.id)).darker().toString(); });   
 
-    svg.selectAll("path")		
+    svgViewHandler.svg.selectAll("path")		
 		.style("stroke", "black")
 		.style("stroke-width", 1);
 }
-
-var getXMLSVG = function ()
-{
-	var serializer = new XMLSerializer();
-	var canvas = d3.select('#canvas').node();
-	if( canvas)
-    {	var xmlString = serializer.serializeToString(d3.select('#canvas').node());
-        svgReference[lastFileShown] = xmlString;
-	    return svgReference;
-	}
-	return null;
-}
-var highlightElements = function ( nodes ) {
+SvgViewHandler.prototype.highlightElements = function ( nodes ) {
 	// highlight nodes
+	var svg = svgViewHandler.svg;
 	svg.selectAll("g").selectAll("g").select("rect")
 		.style("fill", function (d) {
 				for(var i = 0; i < nodes.length; i++) {
@@ -165,138 +547,101 @@ var highlightElements = function ( nodes ) {
 				return 1;}
 		});
 }
+SvgViewHandler.prototype.zoom = function(delta)
+{
+	if( delta > 0)
+	    svgViewHandler.zoomCounter += 0.3;
+	else
+		svgViewHandler.zoomCounter -= 0.3;
 
-var add_node = function (positionX, positionY, label, notWriter, height_, width_, falseNode ) {
+	if( svgViewHandler.zoomCounter > svgViewHandler.MAX_ZOOM ) { svgViewHandler.zoomCounter = svgViewHandler.MAX_ZOOM; }
+	else if( svgViewHandler.zoomCounter < svgViewHandler.MIN_ZOOM) { svgViewHandler.zoomCounter = svgViewHandler.MIN_ZOOM; }
+	else { 	svgViewHandler.translateZoom = eval(svgViewHandler.translateZoom - delta *30); }
 
-	document.getElementById("button_transition").disabled = false;
-	document.getElementById("button_self_transition").disabled = false;
+	svgViewHandler.svg.attr("transform", "translate(" + svgViewHandler.translateZoom + "," + 1 + ")scale(" + svgViewHandler.zoomCounter + ")");
 
-	var _id = "X" + newNodeID();
-	var node = { 
-			fixed: true,
-			reflexive: false,
-			id   : _id, // node id must be unique
-			name : (label === undefined)? _id : label,
-			x    : positionX,
-			y    : positionY,
-			px   : positionX,
-			py   : positionY,
-			height: (height_ === undefined) ? minBoxHeight : height_,
-			width : (width_ === undefined) ?  minBoxWidth : width_,
-			weight: 0,
-            warning : new Object()
-	};
-
-    node.warning.notPresentInSpec = false;
-    node.warning.labelAlreadyUsed = false;
-   	if(falseNode) {node.falseNode = true;}
-
-	// add node
-	graph.nodes.set(node.id, node);
-
-    if( notWriter ) { return node; }
-	// update pvs theory accordingly
-	pvsWriter.addState(node);
-    return node;
+	/* This line should solve the Chrome issue when zooming */
+	//svg.style("-webkit-transform", "translate("+ 1 + "px," + 1 + "px) scale(" + zoomCounter+ ")");
+	
 }
-var setButtonsEnabledOrDisabledAboutNode = function(disabled)
+SvgViewHandler.prototype.resetZoom = function()
+{
+	svgViewHandler.svg.attr("transform", "translate(" + 1 + "," + 1 + ")scale(" + 1 + ")");
+	svgViewHandler.zoomCounter = 1;
+	svgViewHandler.translateZoom = 0;
+
+}
+
+SvgViewHandler.prototype.clear_node_selection = function () {
+	selected_nodes.forEach(function(key, value) { selected_nodes.remove(key); });
+	svgViewHandler.svg.selectAll("g").selectAll("g").select("rect").style("stroke", "").style("stroke-width", "");
+	// FIXME: the following code is not clean, because the buttons are just for debugging and therefore we should not link
+    //         generic functions like clear_node_selection to these debugging buttons.
+    //         The clean way to implement this is to create a new variable that stores information about the functionalities
+    //         that should be enabled or disabled. These variables are exported to other modules, so that the user interface
+    //         can be updated accordingly (in this case, by enabling/disabling the buttons).
+	setInteractionEnabledOrDisabledAboutNode(true);
+}
+
+SvgViewHandler.prototype.clear_edge_selection = function () {
+	selected_edges.forEach(function(key, value) { selected_edges.remove(key); });
+	svgViewHandler.svg.selectAll("path").classed("selected", false);
+	// FIXME: the following code is not clean, because the buttons are just for debugging and therefore we should not link
+    //         generic functions like clear_node_selection to these debugging buttons.
+    //         The clean way to implement this is to create a new variable that stores information about the functionalities
+    //         that should be enabled or disabled. These variables are exported to other modules, so that the user interface
+    //         can be updated accordingly (in this case, by enabling/disabling the buttons).
+	setInteractionEnabledOrDisabledAboutEdge(true);
+}
+
+var clear_selection = function () {
+	svgViewHandler.clear_node_selection();
+	svgViewHandler.clear_edge_selection();
+}
+/* * ********************************************* ***************************************** */
+
+
+
+var getXMLSVG = function ()
+{
+	var serializer = new XMLSerializer();
+	var canvas = d3.select('#canvas').node();
+	if( canvas)
+    {	var xmlString = serializer.serializeToString(d3.select('#canvas').node());
+        svgReference[diagramHandler.lastFileShown] = xmlString;
+	    return svgReference;
+	}
+	return null;
+}
+
+
+var setInteractionEnabledOrDisabledAboutNode = function(disabled)
 {
 	var buttonId = ["changeNameNode", "deleteNode"];
 	buttonId.forEach(function(button) { 
 		var refButton = document.getElementById(button);
 		if( refButton.disabled != disabled )
 		    refButton.disabled = disabled;
+		if( disabled)
+			refButton.style.cursor = 'not-allowed';
+		else
+			refButton.style.cursor = 'pointer';
 	});
 }
-var setButtonsEnabledOrDisabledAboutEdge = function(disabled)
+var setInteractionEnabledOrDisabledAboutEdge = function(disabled)
 {
 	var buttonId = ["changeNameEdge", "addCondition", "addOperation", "deleteEdge"];
 	buttonId.forEach(function(button) { 
 		var refButton = document.getElementById(button);
 		if( refButton.disabled != disabled )
 		    refButton.disabled = disabled;
+		if( disabled)
+			refButton.style.cursor = 'not-allowed';
+		else
+			refButton.style.cursor = 'pointer';
 	});
 }
-var delete_node = function (id) {
-    graph.nodes.remove(id);
-    console.log(graph.nodes)
-}
-var delete_all_nodes = function () {
-    graph.nodes.forEach(function(key, value) { graph.nodes.remove(key); });
-}
-var update_node_size = function (id, width, height) {
-	var theNode = graph.nodes.get(id);
-	theNode.height = height;
-	theNode.width = width;
-	graph.nodes.set(id, theNode);
-}
 
-function modifyLabelEdgeToDisplayActionAndCond(object, path)
-{
-    var id = object.id;
-    var textID = "text:" + id;
-    if(object.source.id == object.target.id) {
-        path.selectAll("text.label").text( function(d) {
-            if(d.id == id) { return d.name + createStringFromArray(d); }
-            return d.name + createStringFromArray(d);
-        });
-    }
-    else {
-        // other edges store the label as textPath
-        /* this works in Firefox but not in Chrome -- could be a bug in Chrome's Javascript implementation
-         * as a workaround, we directly manipulate DOM
-        path.selectAll("textPath").text( function(d) {
-            if(d.name == originalName ) { counter++; }
-            if(d.id == id) { return newName; }
-            return d.name;
-        });*/
-
-        // here's the workaround for the bug with textPath in Chrome
-        var textPathID = "textPath:" + id;
-        if(path.selectAll("text")) {
-            for(var i = 0; i < path.selectAll("text").length; i++) {
-                if(path.selectAll("text")[i] && path.selectAll("text")[i][1] && path.selectAll("text")[i][1].childNodes[0]) {
-                    if(path.selectAll("text")[i][1].childNodes[0].id == textPathID) {
-                        // remove the textpath child
-                        var textPath = path.selectAll("text")[i][1].removeChild(path.selectAll("text")[i][1].childNodes[0]);
-                        // replace the text in textPath with the new label
-                        textPath.removeChild(textPath.childNodes[0]);
-                        textPath.appendChild(document.createTextNode(object.name + createStringFromArray(object)));
-                        // append the textPath back
-                        path.selectAll("text")[i][1].appendChild(textPath);
-                    }
-                }
-            }					
-        }
-    }
-      
-}
-var edgeIDGenerator = 0;
-var newEdgeID = function () { return edgeIDGenerator++; }
-var add_edge = function (source, target, label, notWriter) {
-	var _id = "T" + newEdgeID();
-	var edge = {
-		id: _id, // edge id must be unique
-		source: source,
-		target: target,
-		name : (label === undefined)? "tick" : label,
-	};
-	// add edge
-	graph.edges.set(edge.id, edge);
-    
-    if( notWriter ) { return edge; }
-
-	// update pvs theory accordingly
-	pvsWriter.addTransition(edge.name, edge.id);
-	pvsWriter.addConditionInTransition(edge.name, source, target);
-    return edge;
-}
-var delete_edge = function (id) {
-	graph.edges.remove(id);
-}
-var delete_all_edges = function () {
-    graph.edges.forEach(function(key, value) { graph.edges.remove(key); });
-}
 
 var MODE = { DEFAULT: 0, ADD_NODE: 1, ADD_TRANSITION: 2, ADD_SELF_TRANSITION: 3, ADD_DEFAULT_TRANSITION: 4 };
 var editor_mode = MODE.DEFAULT;
@@ -304,36 +649,15 @@ var editor_mode = MODE.DEFAULT;
 var selected_nodes = d3.map();
 var selected_edges = d3.map();
 var ws;
-var MAX_ZOOM = 1.8;
-var MIN_ZOOM = 0.3;
+
 
 // creation of svg element to draw the graph
 var width =  930;
 var height = 800;
-var svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
-                   .attr("id", "canvas").style("background", "#fffcec");
+//var svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
+  //                 .attr("id", "canvas").style("background", "#fffcec");
 
-var zoom = function(delta)
-{
-	if( delta > 0)
-	    zoomCounter += 0.3;
-	else
-		zoomCounter -= 0.3;
 
-	if( zoomCounter > MAX_ZOOM ) { zoomCounter = MAX_ZOOM; }
-	else if( zoomCounter < MIN_ZOOM) { zoomCounter = MIN_ZOOM; }
-	else { 	translateZoom = eval(translateZoom - delta *30); }
-
-	svg.attr("transform", "translate(" + translateZoom + "," + 1 + ")scale(" + zoomCounter + ")");
-	
-}
-var resetZoom = function()
-{
-	svg.attr("transform", "translate(" + 1 + "," + 1 + ")scale(" + 1 + ")");
-	zoomCounter = 1;
-	translateZoom = 0;
-
-}
 var BLOCK_START = "%{\"_block\" : \"BlockStart\"";
 var BLOCK_END   = "%{\"_block\" : \"BlockEnd\"";
 var ID_FIELD    = "\"_id\"";
@@ -362,220 +686,13 @@ var tagFieldStateEnd = "  " + BLOCK_END + ", " + ID_FIELD + " : \"State\", \"_ty
 
 var links;
 
-// FIXME: this should be renamed into delete_graph
-function clearSvg() {
-	delete_all_nodes();
-	delete_all_edges();    
-}
-/** 
- *  This function is called when a diagram has to be drawn first time after restoring from saving,
- *  We need to call add_node() and add_edge() otherwise nodes and edges will be disconnected    
- *
- *  @param graphToRestore  - object having nodes and edges properties 
- *
- *  @returns void 
- *	      
- */
-function restoreDiagramFirstTimeAfterReloadingFromSaving(graphToRestore)
-{
-    var nodesToRestore = graphToRestore.nodes;
-    var edgesToRestore = graphToRestore.edges;
-    var workAround = new Array();
-    var comeOn = new Array();
-    for( var id in nodesToRestore)
-    {
-         var currentNode = nodesToRestore[id];
-         workAround.push(currentNode);
-         comeOn.push(add_node(currentNode.x, currentNode.y, currentNode.name, true, currentNode.height, currentNode.width, currentNode.falseNode));
-    }
-    for( var id in edgesToRestore)
-    {
-         var currentEdge = edgesToRestore[id];
-         for( var i = 0; i < workAround.length; i++ )
-         {
-             if ( workAround[i].name == currentEdge.source.name )
-                 currentEdge.source = comeOn[i];
-             
-             if( workAround[i].name == currentEdge.target.name )
-                 currentEdge.target = comeOn[i];
-         }
-         var edgeJustAdded = add_edge(currentEdge.source, currentEdge.target, currentEdge.name, true);
-         if( currentEdge.listOfOperations )
-             edgeJustAdded.listOfOperations = currentEdge.listOfOperations;        
-         if( currentEdge.listConditions )
-             edgeJustAdded.listConditions = currentEdge.listConditions;
-    } 
-    numberDiagramStillToRestore --;
-}  
-function buildGraph()
-{
-    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
-			.attr("id", "canvas").style("background", "#fffcec");
-    emulink();
-}
-/** 
- *  This function is called when an emulink project is restored from saving   
- *
- *  @param graphToRestore  - associative array (Key is the name of the file, value is an object having 
- *                           nodes and edges properties ) 
- *
- *  @returns void 
- *	      
- */
-function restoreGraph(graphToRestore, editor, ws, currentProject, pm, fileToShow)
-{
-    init(editor, ws, currentProject, pm, false);
-    diagramsInfo = graphToRestore; //diagramsInfo is the associative array used in this module
-    numberDiagramStillToRestore = Object.keys(graphToRestore).length; //Number of Diagram in emulink project just open
-    numberFiles = numberDiagramStillToRestore;
-    lastFileShown = fileToShow;   //fileToShow is the name of the mainPvsFile or the first file in the project
-    var diagramInfo = diagramsInfo[fileToShow]; //Get value using file name as key 
-    if( diagramInfo ) //If fileToShow has diagram information, display it in SVG 
-		restoreDiagramFirstTimeAfterReloadingFromSaving(diagramInfo);
 
-    emulink();    
-}
-/** 
- *  This function is called when a project has to be saved  
- *
- *  @returns associative array which has diagrams information (edges and nodes)
- *	      
- */
-function getGraphDefinition() 
-{
-	if( lastFileShown) //The file shown could be not saved, save it and return 
-	{   
-		var nodes = getNodesInDiagram();
-		var edges = getEdgesInDiagram();
 
-		if( nodes.length ) // But save just if there is something to save!
-		{   var graphToSave = { nodes: getNodesInDiagram(), edges: getEdgesInDiagram()};
-    	    diagramsInfo[lastFileShown] = graphToSave;
-    	}
-	}
-	return JSON.stringify(diagramsInfo); 
-}
-
-var clear_node_selection = function () {
-	selected_nodes.forEach(function(key, value) { selected_nodes.remove(key); });
-	svg.selectAll("g").selectAll("g").select("rect").style("stroke", "").style("stroke-width", "");
-	// FIXME: the following code is not clean, because the buttons are just for debugging and therefore we should not link
-    //         generic functions like clear_node_selection to these debugging buttons.
-    //         The clean way to implement this is to create a new variable that stores information about the functionalities
-    //         that should be enabled or disabled. These variables are exported to other modules, so that the user interface
-    //         can be updated accordingly (in this case, by enabling/disabling the buttons).
-	setButtonsEnabledOrDisabledAboutNode(true);
-}
-
-var clear_edge_selection = function () {
-	selected_edges.forEach(function(key, value) { selected_edges.remove(key); });
-	svg.selectAll("path").classed("selected", false);
-	// FIXME: the following code is not clean, because the buttons are just for debugging and therefore we should not link
-    //         generic functions like clear_node_selection to these debugging buttons.
-    //         The clean way to implement this is to create a new variable that stores information about the functionalities
-    //         that should be enabled or disabled. These variables are exported to other modules, so that the user interface
-    //         can be updated accordingly (in this case, by enabling/disabling the buttons).
-	setButtonsEnabledOrDisabledAboutEdge(true);
-}
-
-var clear_selection = function () {
-	clear_node_selection();
-	clear_edge_selection();
-}
-
-var deleteNodeAndTransition = function(node, flagObject)
-{
-	// Delete node from SVG 
-    delete_node(node.id);
-
-    // Delete node from specification
-    var numberNodesStillPresent = getNodesInDiagram().length;
-    if(numberNodesStillPresent == 0) 
-    {
-    	document.getElementById("button_transition").disabled = true;
-	    document.getElementById("button_self_transition").disabled = true;
-    }
-    pvsWriter.deleteNode(node.name, numberNodesStillPresent);
-
-    var edges = getEdgesInDiagram();
-    var toDelete = {};
-    if( flagObject.deleteTransIn && flagObject.deleteTransOut )
-    {
-    	edges.forEach(function(key) 
-    		{
-
-    			if( key.source.id === node.id || key.target.id === node.id )
-    			{	
-    				delete_edge(key.id); //Delete from SVG 
-    				pvsWriter.deleteCondition(key.name, key.source.name, key.target.name);
-    				toDelete[key.name] = key.name;
-    			}
-    		});
-    }
-    else if( flagObject.deleteTransOut )
-    {
-    	edges.forEach(function(key) 
-    		{
-    			if( key.source.id === node.id )
-    			{	
-    				delete_edge(key.id); //Delete from SVG 
-    				pvsWriter.deleteCondition(key.name, key.source.name, key.target.name)
-    				toDelete[key.name] = key.name;    				
-    			}
-    		});
-
-    }
-    else if( flagObject.deleteTransIn )
-    {
-    	edges.forEach(function(key) 
-    		{
-    			if( key.target.id === node.id )
-    			{	
-    			    delete_edge(key.id); //Delete from SVG 
-    				pvsWriter.deleteCondition(key.name, key.source.name, key.target.name)
-    				toDelete[key.name] = key.name;
-    			}
-    		});
-    }
-    edges = getEdgesInDiagram();
-    for( var nameEdge in toDelete)
-    { 	
-         var flagDelete = true;
-    	 edges.forEach(function(key)
-    		{
-    			if( nameEdge === key.name) { flagDelete = false;}
-    		});
-    	 if( flagDelete) {pvsWriter.deleteTrans(nameEdge); }	
-	}
-}
-
-var deleteEdge = function(edge)
-{
-	delete_edge(edge.id);
-	var edges = getEdgesInDiagram();
-	var counter = 0;
-	edges.forEach(function( key)
-	     {
-	     	if( key.name === edge.name){ counter ++; }
-	     }
-	 );
-	if( counter > 0) { pvsWriter.deleteCondition(edge.name, edge.source.name, edge.target.name); }
-	else { pvsWriter.deleteTrans(edge.name); }
-}
 // FIXME: Change name of this function
 function createStringFromArray(object)
 {
-    var array = object.listOfOperations;
-    var ret = "";
-    
-    if( array )
-    {   ret = "{";
-        array.forEach(function(item){
-               ret = ret + item + "; "        
-    })
-       ret = ret + " }";
-    }
-    array = object.listConditions;
+    var ret = "";    
+    var array = object.listConditions;
     if( array )
     {   ret = ret + " [ ";
         array.forEach(function(item){
@@ -583,6 +700,15 @@ function createStringFromArray(object)
         })
        ret = ret + " ]";
     } 
+    array = object.listOfOperations;
+    if( array )
+    {   ret = ret + " /";
+        array.forEach(function(item){
+               ret = ret + item + "; "        
+    })
+       
+    }
+    
     return ret;    
 }
 function showInformationInTextArea(element) {
@@ -673,7 +799,7 @@ function set_editor_mode(m) {
 	// reset borders
 	document.getElementById("button_self_transition").style.border = "";
 	document.getElementById("button_transition").style.border = "";
-	//document.getElementById("button_default_transition").style.border = "";
+	document.getElementById("button_default_transition").style.border = "";
 	document.getElementById("button_state").style.border = "";
 	// set new editor mode
 	editor_mode = m;
@@ -699,76 +825,11 @@ function toggle_editor_mode(m) {
 function getNodesInDiagram() { return graph.nodes.values(); }
 function getEdgesInDiagram() { return graph.edges.values(); }   
 
-/// Function init is the entry point of the Emulink graphical editor
-function init(_editor, wsocket, currentProject, pm, startWriter, nameFile) {
 
-	pm.addListener("SelectedFileChanged", function (event) {
-		
-	if( lastFileShown) //Since file selected is going to be changed, we need to save diagram information ...
-	{
-		var nodes = getNodesInDiagram();
-		var edges = getEdgesInDiagram();
-
-		if( nodes.length ) // But save just if there is something to save!
-		{   var graphToSave = { nodes: getNodesInDiagram(), edges: getEdgesInDiagram()};
-    	    diagramsInfo[lastFileShown] = graphToSave;
-    	    /* Even saving XML SVG in case user wants to get a PDF */
-    	    var serializer = new XMLSerializer();
-        	var xmlString = serializer.serializeToString(d3.select('#canvas').node());
-    	    svgReference[lastFileShown] = xmlString;
-    	}
-	}	
-	// ...and clearing SVG
-    svg.remove();
-    clearSvg();
-
-    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
-			.attr("id", "canvas").style("background", "#fffcec");
-
-
-
-	lastFileShown = event.selectedItemString; //Update last file shown 
-
-	var diagramInfo = diagramsInfo[lastFileShown]; //Get information fresh file to display 
-	if( diagramInfo) //If it has diagram information 
-		if( numberDiagramStillToRestore ) // Check if this is shown for first time after reloading 
-		    restoreDiagramFirstTimeAfterReloadingFromSaving(diagramInfo);
-	    else
-		    restoreGraphAfterSwitchingEmulinkFiles(diagramInfo);
-
-	emulink();
-	}); //End listener
-	lastFileShown = nameFile;
-    // After last modifications (Emulink commented) I need to create here SVG 
-    svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
-			.attr("id", "canvas").style("background", "#fffcec");
-
-    ws = wsocket;
-
-    document.getElementById('infoBox').value = "TIP: Click on any element to see its properties";
-	document.getElementById('infoBoxModifiable').value= "TIP: After clicking on an element, editable properties will be showed here";
-	
-	editor = _editor;
-    
-    pvsWriter.init(editor, ws, currentProject, pm);
-    
-    pvsWriter.setTagsName(tagStateNameStart, tagStateNameEnd);
-    pvsWriter.setTagsState(tagStateStart, tagStateEnd);
-    pvsWriter.setTagsFunc(tagFuncStart, tagFuncEnd);
-    pvsWriter.setTagsPer(tagPerStart, tagPerEnd);
-    pvsWriter.setTagsEdge(tagEdgeStart, tagEdgeEnd);
-    pvsWriter.setTagsCond(tagCondStart, tagCondEnd);
-    pvsWriter.setTagsField(tagFieldStateStart, tagFieldStateEnd);
-    
-    // Start Emulink
-	emulink();
-    return;
-    if( ! startWriter) { return; }
-	pvsWriter.newSpecification("myTheory.pvs"); 
-}
 
 var emulink = function() {
 
+	var svg = svgViewHandler.svg;
 	var colors = d3.scale.category10();
 
 	// init D3 force layout
@@ -815,7 +876,7 @@ var emulink = function() {
     }
 
 	// define arrow markers for graph links
-	svg.append('svg:defs').append('svg:marker')
+	svgViewHandler.svg.append('svg:defs').append('svg:marker')
 		.attr('id', 'end-arrow')
 		.attr('viewBox', '0 -5 10 10')
 		.attr('refX', 9)
@@ -973,7 +1034,7 @@ var emulink = function() {
 					showInformationInTextArea(d);
 					pvsWriter.focusOnFun(d, true);
 					clear_selection();
-					setButtonsEnabledOrDisabledAboutEdge(false);
+					setInteractionEnabledOrDisabledAboutEdge(false);
 					selected_edges.set(d.id, d);
 					// highlight only selected edges
 					path.selectAll("path").classed("selected", function(d) { return selected_edges.has(d.id); });
@@ -1119,8 +1180,8 @@ var emulink = function() {
 					}
 					else {
 						// if the ctrl key is not pressed, reset selection first, and then select the node
-						clear_node_selection();
-						setButtonsEnabledOrDisabledAboutNode(false);
+						svgViewHandler.clear_node_selection();
+						setInteractionEnabledOrDisabledAboutNode(false);
 						selected_nodes.set(d.id, d);                                                
 						// highlight only selected nodes
 						node.selectAll("rect")
@@ -1158,7 +1219,7 @@ var emulink = function() {
 								var link = graph.edges.values().filter(function(l) { return (l.source === source && l.target === target); })[0];
 								if(link) { link[direction] = true; } 
 								else { 
-									add_edge(source, target);
+									nodeAndEdgeHandler.add_edge(source, target);
 									link = graph.edges.values().filter(function(l) { return (l.source === source && l.target === target); })[0];
 								}
 
@@ -1178,7 +1239,7 @@ var emulink = function() {
 					if(mouseup_node == mousedown_node) { 
 						resetMouseVars();
 						// add self-edge
-						add_edge(d,d);
+						nodeAndEdgeHandler.add_edge(d,d);
 						// redraw svg
 						restart();
 					}
@@ -1188,12 +1249,12 @@ var emulink = function() {
 					//FIXME: do we really need a new node? we could just draw an incoming edge and append a round symbol at the other extreme of the edge
 					var posX = d.x - minBoxWidth/2;
 					var posY = d.y - minBoxHeight/2;
-					var falseNode = add_node(posX, posY, "", true, 20, 20, true);
-					add_edge(falseNode, d, "", true);
+					var falseNode = nodeAndEdgeHandler.add_node(posX, posY, "", true, 20, 20, true);
+					nodeAndEdgeHandler.add_edge(falseNode, d, "", true);
 					restart();
 				}
 				else {
-			        setButtonsEnabledOrDisabledAboutNode(false);
+			        setInteractionEnabledOrDisabledAboutNode(false);
 					showInformationInTextArea(d);
 					pvsWriter.focusOn(d);
 				}
@@ -1250,7 +1311,7 @@ var emulink = function() {
 				resizeTool.attr("y", function(d) { return d3.event.dy + resizeToolY; });
 			}
 			// update info in graph
-			update_node_size(nodeID,boxWidth,boxHeight);
+			nodeAndEdgeHandler.update_node_size(nodeID,boxWidth,boxHeight);
 		}
 	}
 
@@ -1270,15 +1331,15 @@ var emulink = function() {
         if(editor_mode == MODE.ADD_NODE) {
 			// insert new node at point
 			var point = d3.mouse(this);
-			add_node(point[0], point[1]);
+			nodeAndEdgeHandler.add_node(point[0], point[1]);
 			restart();
 		}
 	}
 
 	function mouseup() {
 		// click on the svg canvas, deselect all nodes
-		if(mouseup_node != mousedown_node) { clear_node_selection(); }
-		if(!mouseup_link || !mousedown_link || (mouseup_link != mousedown_link)) { clear_edge_selection(); }
+		if(mouseup_node != mousedown_node) { svgViewHandler.clear_node_selection(); }
+		if(!mouseup_link || !mousedown_link || (mouseup_link != mousedown_link)) { svgViewHandler.clear_edge_selection(); }
 		if(mousedown_node) {
 			// hide drag line
 			drag_line.classed('hidden', true).style('marker-end', '');
@@ -1373,13 +1434,13 @@ var emulink = function() {
 	}
 
 	d3.select("#zoom").on("click", function () {
-            zoom(1);
+            svgViewHandler.zoom(1);
         });
 	d3.select("#zoom_").on("click", function () {
-            zoom(-1);
+            svgViewHandler.zoom(-1);
         });
 	d3.select("#resetZoom").on("click", function() {
-			resetZoom();
+			svgViewHandler.resetZoom();
 	    });
 	d3.select("#infoBoxModifiable")
 	  .on("change", function () {
@@ -1499,7 +1560,7 @@ var emulink = function() {
                     object.listConditions = new Array();
                 object.listConditions.push(conditionToAdd); 
                 pvsWriter.addSwitchCond(object.name, object.source.name, object.target.name, conditionToAdd);
-                modifyLabelEdgeToDisplayActionAndCond(object, path);
+                nodeAndEdgeHandler.modifyLabelEdgeToDisplayActionAndCond(object, path);
                 restart();
              }  
           
@@ -1519,7 +1580,7 @@ var emulink = function() {
 				if( ! object.listOfOperations ) { object.listOfOperations = new Array();}
 			    object.listOfOperations.push(operation);
 				pvsWriter.addOperationInCondition(object.name, object.source.name, object.target.name, operation); 
-                modifyLabelEdgeToDisplayActionAndCond(object, path);
+                nodeAndEdgeHandler.modifyLabelEdgeToDisplayActionAndCond(object, path);
                 restart();
 			}
     });
@@ -1530,8 +1591,8 @@ var emulink = function() {
       	  if( selected_nodes.keys().length == 1) {
       	  	 var node = selected_nodes.get(selected_nodes.keys());		
 			 var flagObject = { deleteTransIn : true, deleteTransOut : true };
-			 deleteNodeAndTransition(node, flagObject);
-   	         setButtonsEnabledOrDisabledAboutNode(true);
+			 nodeAndEdgeHandler.deleteNodeAndTransition(node, flagObject);
+   	         setInteractionEnabledOrDisabledAboutNode(true);
 			 restart();
 		  }
 
@@ -1540,8 +1601,8 @@ var emulink = function() {
        .on("click", function() {
        	   if( selected_edges.keys().length == 1) {
        	   	 var edge = selected_edges.get(selected_edges.keys());
-       	   	 deleteEdge(edge);
-       	   	 setButtonsEnabledOrDisabledAboutEdge(true);
+       	   	 nodeAndEdgeHandler.deleteEdge(edge);
+       	   	 setInteractionEnabledOrDisabledAboutEdge(true);
        	   	 restart();
        	   }
        })
@@ -1575,7 +1636,7 @@ var emulink = function() {
 
 
 module.exports = {
-	init: function (editor, wsocket, currentProject, pm, start, sf) { return init(editor, wsocket, currentProject, pm, start, sf); },
+	init: function (editor, wsocket, currentProject, pm, start, sf) { return diagramHandler.init(editor, wsocket, currentProject, pm, start, sf); },
 	changeTextArea : changeTextArea,
 	add_node_mode: function(){ if( d3.select("#ContainerStateMachine").selectAll("svg")[0].length )
                                    return toggle_editor_mode(MODE.ADD_NODE);
@@ -1586,16 +1647,16 @@ module.exports = {
 	add_default_transition_mode: function() { return toggle_editor_mode(MODE.ADD_DEFAULT_TRANSITION); },
     getNodesInDiagram : getNodesInDiagram,
     getEdgesInDiagram : getEdgesInDiagram,
-    getGraphDefinition : getGraphDefinition,
-    restoreGraph : restoreGraph,
-    buildGraph : buildGraph,
-    add_node : function(x,y,label,writer) { var ret = add_node(x,y,label,writer);  return ret; },
-    add_edge : function(source, target, lab, notWr) { return add_edge(source, target, lab, notWr);  },
+    getGraphDefinition : diagramHandler.getGraphDefinition,
+    restoreGraph : diagramHandler.restoreGraph,
+    buildGraph : diagramHandler.buildGraph,
+    add_node : function(x,y,label,writer) { return nodeAndEdgeHandler.add_node(x,y,label,writer); },
+    add_edge : function(source, target, lab, notWr) { return nodeAndEdgeHandler.add_edge(source, target, lab, notWr);  },
     emulink: emulink,
-    clearSvg : clearSvg,
-	highlightElements: highlightElements,
-    restoreColorNodesAndEdges : restoreColorNodesAndEdges,
-    addNewDiagram : addNewDiagram,
+    clearSvg : diagramHandler.clearSvg,
+	highlightElements: svgViewHandler.highlightElements,
+    restoreColorNodesAndEdges : svgViewHandler.restoreColorNodesAndEdges,
+    addNewDiagram : diagramHandler.addNewDiagram,
     getXMLSVG : getXMLSVG
 };
 

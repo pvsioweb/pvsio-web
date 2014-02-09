@@ -10,6 +10,9 @@
 #stateMachineToolbar {
     margin-bottom: 10px;   
     margin-top: 10px; 
+    border-width:5px;
+    width:    930px;
+    border-style:double;
 }
 
 
@@ -155,6 +158,8 @@ ul#context-menu li {
 #modifyPropertiesToolbar{
 	width: 930px;
 	font-family: Tahoma, sans-serif; 
+  border-width:5px;
+  border-style:double;
 	display: block;
 }
 #modifyPropertiesToolbarNode{
@@ -166,4 +171,28 @@ ul#context-menu li {
  border:-style: dotted;
  font: 20px/24px cursive;    
  display:none;
+}
+#viewMenu{
+ border-width:5px;
+ width:    930px;
+ border-style:double;
+ font: 20px/24px ;
+}
+.emulinkButton{
+ padding: 10px 15px 11px !important;
+ font-size: 11px ;
+ font-weight: bold;
+ color: #000015;
+ border-radius: 60px;
+ -moz-border-radius: 60px;
+ -webkit-border-radius: 60px;
+ border: 1px solid #660000;
+ cursor: pointer;
+ box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+ -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+ -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+}
+
+#buttonDisabled{
+  background:#dddddd;
 }
