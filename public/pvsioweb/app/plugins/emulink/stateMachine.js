@@ -55,12 +55,12 @@ function NodeAndEdgeHandler()
 NodeAndEdgeHandler.prototype.newNodeID = function () { return nodeAndEdgeHandler.nodeIDGenerator++; };
 NodeAndEdgeHandler.prototype.add_node = function(positionX, positionY, label, notWriter, height_, width_, falseNode ) 
 {
-	document.getElementById("button_transition").disabled = false;
-	document.getElementById("button_self_transition").disabled = false;
-	document.getElementById("button_default_transition").disabled = false;
-	document.getElementById("button_transition").style.cursor = 'pointer';
-	document.getElementById("button_self_transition").style.cursor = 'pointer';
-	document.getElementById("button_default_transition").style.cursor = 'pointer';
+    var buttonClass = [".button_transition", ".button_self_transition", ".button_default_transition"];
+    buttonClass.forEach(function(button) { 
+        $(button).each(function(index, element) {
+            $(element).prop("disabled", false);
+        });     
+    });
 
 	var _id = "X" + nodeAndEdgeHandler.newNodeID();
 	var node = { 
@@ -275,16 +275,26 @@ DiagramHandler.prototype.addNewDiagram = function()
     setInteractionEnabledOrDisabledAboutNode(true);
     document.getElementById("addFieldState").disabled = false;
     document.getElementById("addFieldState").style.cursor = 'pointer';
-    document.getElementById("button_state").disabled = false;
-    document.getElementById("button_state").style.cursor = 'pointer';
-    document.getElementById("button_transition").disabled = true;
-    document.getElementById("button_transition").style.cursor = 'not-allowed';
-	document.getElementById("button_self_transition").disabled = true;
-	document.getElementById("button_self_transition").style.cursor = 'not-allowed';
-	document.getElementById("zoom").disabled = false;
-	document.getElementById("zoom_").disabled = false;
-	document.getElementById("resetZoom").disabled = false;
-	document.getElementById("toPDF").disabled = false;
+
+    $(".button_state").each(function(index, element) {
+           $(element).prop("disabled", false);
+    });     
+    $(".button_transition").each(function(index, element) {
+           $(element).prop("disabled", true);
+    });
+    $(".button_self_transition").each(function(index, element) {
+           $(element).prop("disabled", true);
+    });
+    $(".toPDF").each(function(index, element) {
+           $(element).prop("disabled", false);
+    });
+    $(".zoom").each(function(index, element) {
+           $(element).prop("disabled", false);
+    });
+    $(".zoom_").each(function(index, element) {
+           $(element).prop("disabled", false);
+    });
+	
 }
 /** 
  *  This function is called when user has just selected an emulink file in the listView,
@@ -617,29 +627,43 @@ var getXMLSVG = function ()
 
 var setInteractionEnabledOrDisabledAboutNode = function(disabled)
 {
-	var buttonId = ["changeNameNode", "deleteNode"];
-	buttonId.forEach(function(button) { 
-		var refButton = document.getElementById(button);
-		if( refButton.disabled != disabled )
-		    refButton.disabled = disabled;
-		if( disabled)
-			refButton.style.cursor = 'not-allowed';
-		else
-			refButton.style.cursor = 'pointer';
+	var buttonClass = [".changeNameNode", ".deleteNode"];
+
+	buttonClass.forEach(function(button) { 
+        $(button).each(function(index, element) {
+            $(element).prop("disabled",disabled);
+        });		
 	});
 }
-var setInteractionEnabledOrDisabledAboutEdge = function(disabled)
+var setInteractionEnabledOrDisabledAboutEdge = function(disabled, d)
 {
-	var buttonId = ["changeNameEdge", "addCondition", "addOperation", "deleteEdge"];
-	buttonId.forEach(function(button) { 
-		var refButton = document.getElementById(button);
-		if( refButton.disabled != disabled )
-		    refButton.disabled = disabled;
-		if( disabled)
-			refButton.style.cursor = 'not-allowed';
-		else
-			refButton.style.cursor = 'pointer';
-	});
+	var buttonClass = [".changeNameEdge", ".addCondition", ".addOperation", ".deleteEdge"];
+	buttonClass.forEach(function(button) { 
+        $(button).each(function(index, element) {
+            $(element).prop("disabled",disabled);
+        });     
+    });
+	if( disabled === false)
+	{
+		if( d.listConditions) 
+        {   buttonClass = [".rmvCond", ".modifyCondition"];
+            buttonClass.forEach(function(button) { 
+                $(button).each(function(index, element) {
+                $(element).prop("disabled",disabled);
+               });     
+            });
+        }
+		if( d.listOfOperations) 
+        {   buttonClass = [".rmvOper", ".modifyOperation"];
+            buttonClass.forEach(function(button) { 
+                $(button).each(function(index, element) {
+                $(element).prop("disabled",disabled);
+               });     
+            });
+        }
+	}
+	
+
 }
 
 
@@ -652,7 +676,7 @@ var ws;
 
 
 // creation of svg element to draw the graph
-var width =  930;
+var width =  900;
 var height = 800;
 //var svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
   //                 .attr("id", "canvas").style("background", "#fffcec");
@@ -797,23 +821,37 @@ function changeTextArea(node, path) {
 
 function set_editor_mode(m) {
 	// reset borders
-	document.getElementById("button_self_transition").style.border = "";
+	/*document.getElementById("button_self_transition").style.border = "";
 	document.getElementById("button_transition").style.border = "";
 	document.getElementById("button_default_transition").style.border = "";
-	document.getElementById("button_state").style.border = "";
+	document.getElementById("button_state").style.border = "";*/
+    var buttonClass = [".button_self_transition", ".button_transition", ".button_default_transition", ".button_state"];
+    buttonClass.forEach(function(button) { 
+        $(button).each(function(index, element) {
+            $(element).css("border","");
+        });     
+    });
 	// set new editor mode
 	editor_mode = m;
 	if(editor_mode == MODE.ADD_TRANSITION) {
-		document.getElementById("button_transition").style.border = "3px solid #AD235E";
+        $(".button_transition").each(function(index, element) {
+            $(element).css("border","3px solid #AD235E");
+        });  
 	}
 	else if(editor_mode == MODE.ADD_SELF_TRANSITION) {
-		document.getElementById("button_self_transition").style.border = "3px solid #AD235E";
+        $(".button_self_transition").each(function(index, element) {
+            $(element).css("border","3px solid #AD235E");
+        }); 
 	}
 	else if(editor_mode == MODE.ADD_DEFAULT_TRANSITION) {
-		document.getElementById("button_default_transition").style.border = "3px solid #AD235E";
+        $(".button_default_transition").each(function(index, element) {
+            $(element).css("border","3px solid #AD235E");
+        }); 
 	}
 	else if(editor_mode == MODE.ADD_NODE) {
-		document.getElementById("button_state").style.border = "3px solid #AD235E";
+        $(".button_state").each(function(index, element) {
+            $(element).css("border","3px solid #AD235E");
+        }); 
 	}
 }
 
@@ -1034,7 +1072,7 @@ var emulink = function() {
 					showInformationInTextArea(d);
 					pvsWriter.focusOnFun(d, true);
 					clear_selection();
-					setInteractionEnabledOrDisabledAboutEdge(false);
+					setInteractionEnabledOrDisabledAboutEdge(false, d);
 					selected_edges.set(d.id, d);
 					// highlight only selected edges
 					path.selectAll("path").classed("selected", function(d) { return selected_edges.has(d.id); });
@@ -1251,6 +1289,7 @@ var emulink = function() {
 					var posY = d.y - minBoxHeight/2;
 					var falseNode = nodeAndEdgeHandler.add_node(posX, posY, "", true, 20, 20, true);
 					nodeAndEdgeHandler.add_edge(falseNode, d, "", true);
+                    pvsWriter.addDefaultTransition(d.name);
 					restart();
 				}
 				else {
@@ -1433,10 +1472,10 @@ var emulink = function() {
 		}
 	}
 
-	d3.select("#zoom").on("click", function () {
+	d3.selectAll(".zoom").on("click", function () {
             svgViewHandler.zoom(1);
         });
-	d3.select("#zoom_").on("click", function () {
+	d3.selectAll(".zoom_").on("click", function () {
             svgViewHandler.zoom(-1);
         });
 	d3.select("#resetZoom").on("click", function() {
@@ -1550,7 +1589,7 @@ var emulink = function() {
 			}}
       });
     
-    d3.select("#addCondition")
+    d3.selectAll(".addCondition")
       .on("click", function() {
             if( selected_edges.keys().length == 1) {
                 var object = selected_edges.get(selected_edges.keys());
@@ -1566,7 +1605,7 @@ var emulink = function() {
           
       });
     
-    d3.select("#addOperation")
+    d3.selectAll(".addOperation")
 	  .on("click", function () {
 			if(selected_edges.keys().length == 1) {
 				var object = selected_edges.get(selected_edges.keys());        
@@ -1585,8 +1624,46 @@ var emulink = function() {
 			}
     });
     
-
-    d3.select("#deleteNode")
+$(function(){
+    $.contextMenu({
+        selector: '.context-menu-one', 
+        trigger: 'left',
+        className: 'condition-title',
+        build: function($trigger, e) {
+            // this callback is executed every time the menu is to be shown
+            // its results are destroyed every time the menu is hidden
+            var object = selected_edges.get(selected_edges.keys());
+            var itemsToUse = {};
+            for( var i = 0; i < object.listConditions.length; i++)
+            {
+                var tmp = {};
+                tmp["name"] = object.listConditions[i];
+                tmp["icon"] = "edit";
+                itemsToUse[object.listConditions[i]] = tmp;
+            }
+            itemsToUse["sep1"] = "---------";
+            itemsToUse["quit"] = {name: "Quit", icon: "quit"};
+            return {
+                callback: function(key, options) 
+                    // Go Ahead Here                     
+                },
+                items: itemsToUse,
+                zIndex: 10,
+                position: function(opt, x, y) {
+                    opt.$menu.position({
+                    my: 'center top',
+                    at: 'center bottom',
+                    of: opt.$trigger
+                });
+                }
+            }; 
+        }             
+    });
+    
+});
+    
+    
+    d3.selectAll(".deleteNode")
       .on("click", function() {
       	  if( selected_nodes.keys().length == 1) {
       	  	 var node = selected_nodes.get(selected_nodes.keys());		
@@ -1597,7 +1674,7 @@ var emulink = function() {
 		  }
 
       });
-    d3.select("#deleteEdge")
+    d3.selectAll(".deleteEdge")
        .on("click", function() {
        	   if( selected_edges.keys().length == 1) {
        	   	 var edge = selected_edges.get(selected_edges.keys());
@@ -1623,7 +1700,7 @@ var emulink = function() {
           pvsWriter.addFieldInState(newField[0], newField[1]);
       });
 
-      d3.select("#button_default_transition").on("click", function () {
+      d3.selectAll(".button_default_transition").on("click", function () {
 			toggle_editor_mode(MODE.ADD_DEFAULT_TRANSITION);
 			//TODO: implement the corresponding pvsWriter function and invoke it here
       })

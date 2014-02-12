@@ -1,44 +1,157 @@
 <!-- container for graphical editor -->
 			<div id="graphicalEditor">
-				<div id="stateMachineToolbar" >
-					<p style="font-family:verdana;  font-style:italic; margin-left: 310px; color:red; font-size:20px;" > Main Bar</p> 
-					<button class="btn btn-danger" id="startEmulink" > New Diagram </button>
-					<button class="btn" id="specificationToDiagram"     > Generate Diagram from Specification </button>
-					<button class="btn btn-default" id="startSimulation"> Enable Animation</button>
-					<button class="btn" id="toPDF" disabled = "true" > Create PDF Report </button>
-					<a id="downloadPDF" href="" download="Emulink PDF Report" style="display: none;"> Download PDF Report</a>                    
-				</div>
-                <div id="modifyPropertiesToolbar" >
+				<div id='emulinkMenu'>
+					<ul>
+   						<!-- Main Menu  -->
+   						<li class='has-sub'><a href='#'><span>Main menu</span></a>
+   					        <ul>
+   					            <li class='active'> 
+   					                <button class="emulinkButton startEmulink"  > Create new Diagram </button>
+   					            </li>
+   					            <li class='active'>
+   					            	<button class="emulinkButton" id="specificationToDiagram" > Generate Diagram from Specification </button>
+   					            </li>
+   					            <li class='active'>
+   					                <button class="emulinkButton" id="startSimulation"> Enable Animation</button>
+   					             </li>
+   					             <li class='active'>
+   					                <button class="emulinkButton toPDF"  disabled = "true" > Create PDF Report </button>
+								 </li>
+								 <li class='active'>
+								 	<a id="downloadPDF" class="emulinkButton" href="" download="Emulink PDF Report" style="display: none;"> Download PDF Report</a> 
+								 </li>
+   					        </ul>
+   						</li>
+   						<!-- END Main Menu -->  
+   						<!-- Editor Menu -->
+   						<li class='has-sub'><a href='#'><span>Editor Menu</span></a>
+   							<ul>
+   								<li class='has-sub'><a href='#'><span>State Editor</span></a>
+   									<ul>
+   										<li class='active'>
+   											<button class="emulinkButton button_state"  disabled = "true"> New State </button>
+   										</li>
+   										<li class='active'>
+   								    		<button class="emulinkButton" id="addFieldState"   disabled = "true">Add Field</button>
+   										</li>
+   										<li class='active'>
+   											<button class="emulinkButton changeNameNode" disabled = "true"> Edit State Name</button>
+   										</li>
+   										<li class='active'>
+   											<button class="emulinkButton deleteNode" disabled= "true"> Delete node </button>
+   										</li>
+   									
+   									</ul>
+   								</li>
+   							
+   								<li class='has-sub'> <a href='#'><span>Transition Editor</span></a>
+   									<ul>
+                                 <li class='has-sub'> <a href='#'><span>Create</span></a>
+                                 <ul>
+   									      <li class='active'>
+   											    <button class="emulinkButton button_transition" disabled = "true"> Transition </button>	
+   										    </li>
+   										   <li class='active'>
+   											    <button class="emulinkButton button_self_transition" disabled = "true"> Self-Transition </button>
+   										   </li>
+   										   <li class='active'>
+   											   <button class="emulinkButton button_default_transition"   disabled = 'true'> Default Transition </button> 
+   										   </li>
+                                 </ul>
+                                 </li>
+                                 <li class='has-sub'> <a href='#'><span>Remove</span></a>
+                                 <ul>
+                                    <li class='active'>
+                                       <button class="emulinkButton deleteEdge"  disabled = "true" >  Transition </button>
+                                     </li>
+                                    <li class='active'>
+                                        <button class="emulinkButton rmvCond" id="rmvCond" disabled="true">  Condition </button>
+                                    </li>
+                                    <li class='active'>
+                                        <button class="emulinkButton rmvOper" id="rmvOper" disabled='true' >  Operation
+                                    </button>
+                                    </li>
+                                    <li class='active'>
+                                        <button class="emulinkButton rmvDefTrans"  disabled='true' >  Default Transition
+                                    </button>
+                                    </li>
+                                 </ul>
+                                 </li>
+                                 <li class='has-sub'> <a href='#'><span>Edit</span></a>
+                                 <ul>
+                                    <li class='active'>
+                                       <button class="emulinkButton changeNameEdge"  disabled = "true" > Transition Name</button>
+                                    </li>
+                                    <li class='active '>
+                                        <button class="emulinkButton modifyCondition context-menu-one " disabled = "true" >  Condition</button>
+                                    </li>  
+                                    <li class='active'>
+                                        <button class="emulinkButton modifyOperation"  disabled = "true" > Operation</button>
+                                    </li>                     
 
-                    <p style="font-family:verdana; margin-left:310px; font-style:italic; color:red; font-size:20px;" > Edit Bar</p>
-                    <p style="font-family:verdana; font-weight:bold; color:blue; font-size:15px;" > State Editor: </p>
-                    <button class="emulinkButton" id="button_state" disabled = "true" style="cursor: not-allowed;"  > New State </button>
-                    <button class="emulinkButton" id="changeNameNode" style="cursor: not-allowed;" disabled = "true"> Edit State Name</button> 
-                    <button class="emulinkButton" id="addFieldState"  style="cursor: not-allowed;" disabled = "true"> Add Field</button> 
-                    <button class="emulinkButton" id="deleteNode" style="cursor: not-allowed;"    disabled= "true"> Delete node </button>
-					<br> 
-					<p style="font-family:verdana;color:blue; font-weight:bold; font-size:15px;" > Transition Editor: </p>
-                    <button class="emulinkButton" style="cursor: not-allowed;" id="button_transition" disabled = "true"> New Transition </button>
-                    <button class="emulinkButton" style="cursor: not-allowed;" id="button_self_transition" disabled = "true"> New Self-Transition </button>
-                    <button class="emulinkButton" style="cursor: not-allowed;" id="button_default_transition" disabled = 'true'> New Default Transition </button> 
-                    <button class="emulinkButton" style="cursor: not-allowed;" id="deleteEdge" disabled = "true" > Delete transition </button>
-                    <button class="emulinkButton" style="cursor: not-allowed;" id="changeNameEdge" disabled = "true" > Edit Transition Name</button>
-                    <button class="emulinkButton" style="cursor: not-allowed;" id="addCondition"  disabled = "true" > Add Condition</button>
-                    <button class="emulinkButton" style="cursor: not-allowed;" id="addOperation" disabled = "true"  > Add Action</button>
-                </div>
-                <div id="viewMenu" >
-                	<p style="font-family:verdana; margin-left:310px; font-style:italic;  color:red; font-size:20px;" > Zoom Bar</p>
-                	<button class="btn" id ="zoom" disabled="true";> Zoom + </button>
-					<button class="btn" id ="zoom_" disabled="true"> Zoom -</button>
-					<button class="btn" id ="resetZoom" disabled="true"> Reset Zoom </button>
-				</div>
-				<div id="ContainerStateMachine" >
-				<p style="font-family:verdana; margin-left:310px; color:red; font-style:italic; font-size:20px;" > Drawing area</p> <br>
-				</div>
-				<div id="state_machine_toolbar" ></div>
-					<textarea id="emulinkInfo" readonly> </textarea>
-					<textarea id="infoBox" readonly >TIP: Select a state or a transition to see its properties</textarea>
-					<textarea id="infoBoxModifiable" readonly ></textarea>		
-		            <textarea id="warningDebug" readonly >Debug panel</textarea>
-				</div>
+                                 </ul>
+                                 </li>
+   									   <li class='has-sub'> <a href='#'><span>Add</span></a>
+                                 <ul>
+                                    <li class='active'>
+                                        <button class="emulinkButton addCondition"  disabled = "true" >  Condition</button> 
+                                     </li>
+                                    <li class='active'>
+                                        <button class="emulinkButton addOperation"  disabled = "true"  >  Action</button>
+                                    </li>                                    
+                                 </ul>
+                                 </li>
+                                 
+   										   								    	
+   								    </ul>
+   							    </li>
+
+   							</ul>
+
+   						</li>
+   						
+               			<!-- View Menu -->
+   						<li class='has-sub'><a href='#'><span>View Menu</span></a>
+   							<ul>
+   								<li class='active'>
+   									<button class="emulinkButton" id ="zoom" disabled="true";> Zoom + </button>
+   								</li>
+   								<li class='active'>
+   									<button class="emulinkButton" id ="zoom_" disabled="true"> Zoom -</button>
+   								</li>
+   								<li class='active'>
+   									<button class="emulinkButton" id ="resetZoom" disabled="true"> Reset Zoom </button>
+   								</li>
+   							</ul>
+   						</li>
+   						<!-- END View Menu -->
+               			
+   						<li><a href='https://github.com/thehogfather/pvsio-web' target="_blank" ><span>About</span></a></li>
+   						<li class='last'><a href='#'><span>Contact</span></a></li>
+					</ul>
+			</div>
+			<br><br><br><br>
+         <div id="emulinkToolbarWrapper">
+            <div id='emulinkToolbar'>
+               <button class="emulinkButtonToolbar button_state"  disabled = "true"> New State </button>
+               <button class="emulinkButtonToolbar button_transition" disabled = "true"> New Transition </button>  
+               <button class="emulinkButtonToolbar zoom "  disabled="true"> Zoom + </button>
+               <button class="emulinkButtonToolbar zoom_" disabled="true"> Zoom -</button>
+            </div>
+         </div>
+        
+         <div id="ContainerStateMachineWrapper">
+            <br><br><br><br>
+            <p style="font-family:verdana; margin-left:0px; color:#327875; font-style:italic;font-weight: bold; font-size:20px;" >Drawing area</p> 
+               
+			   <div id="ContainerStateMachine" >
+			       
+			   </div>
+         </div>
+			<div id="state_machine_toolbar" >
+				<textarea id="emulinkInfo" readonly> </textarea>
+				<textarea id="infoBox" readonly >TIP: Select a state or a transition to see its properties</textarea>
+				<textarea id="infoBoxModifiable" readonly ></textarea>		
+		        <textarea id="warningDebug" readonly >Debug panel</textarea>
+				
 			</div>			

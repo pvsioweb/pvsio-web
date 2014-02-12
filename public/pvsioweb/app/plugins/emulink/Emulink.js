@@ -49,15 +49,25 @@ define(function (require, exports, module) {
         projectManager.addListener("SelectedFileChanged", function (event) {
                 selectedFileChanged = event.selectedItemString;
         });
-
-        d3.select("#toPDF").on("click", function() { PDFHandler.toPDF(currentProject, stateMachine, ws); });
+        $('#emulinkMenu').prepend('<div id="menu-button">Menu</div>');
+        $('#emulinkMenu #menu-button').on('click', function(){
+            var menu = $(this).next('ul');
+            if (menu.hasClass('open')) {
+                menu.removeClass('open');
+            }
+            else {
+                menu.addClass('open');
+            }
+       });
+    
+        d3.selectAll(".toPDF").on("click", function() { PDFHandler.toPDF(currentProject, stateMachine, ws); });
         projectManager.addListener("SelectedFileChanged", function (event) {
                 selectedFileChanged = event.selectedItemString;
         });
-        d3.select("#state_machine").on("click", function () { stateMachine.init(editor, ws, currentProject, projectManager); });
-        d3.select("#button_state").on("click", function () { stateMachine.add_node_mode(); });
-        d3.select("#button_transition").on("click", function () { stateMachine.add_transition_mode(); });
-        d3.select("#button_self_transition").on("click", function () { stateMachine.add_self_transition_mode(); });
+        d3.selectAll(".state_machine").on("click", function () { stateMachine.init(editor, ws, currentProject, projectManager); });
+        d3.selectAll(".button_state").on("click", function () { stateMachine.add_node_mode(); });
+        d3.selectAll(".button_transition").on("click", function () { stateMachine.add_transition_mode(); });
+        d3.selectAll(".button_self_transition").on("click", function () { stateMachine.add_self_transition_mode(); });
         /// When User clicks on New File button #new_file a pvs file is created and showed in file list box
         d3.select("#new_file").on("click", function ( ) {	
             projectManager.newFile();
@@ -75,28 +85,27 @@ define(function (require, exports, module) {
            });
         });
 	
-//        /// User wants to rename a file 
-//        d3.select("#rename_file").on("click", function () {
-//            projectManager.renameFile(projectManager.getSelectedFile());
-//        });
-//   
-//
-//        /// User wants to close a file (it will be not shown in file list box on the right ) 
-//        d3.select("#close_file").on("click", function () {
-//	       projectManager.closeFile(projectManager.getSelectedFile());	
-//        });
-//
-//        /// User wants to see all files of the project 
-//        d3.select("#show_all_files").on("click", function () {
-//	       projectManager.showAllFiles();
-//        });
-//
-//        /// User wants to delete a file from the project  
-//        d3.select("#delete_file").on("click", function () {
-//	       projectManager.deleteFile(projectManager.getSelectedFile(), function () {
-//                //do something when file is deleted 
-//           });
-//        });
+        /// User wants to rename a file 
+        d3.select("#rename_file").on("click", function () {
+            projectManager.renameFile(projectManager.getSelectedFile());
+        });   
+
+        /// User wants to close a file (it will be not shown in file list box on the right ) 
+        d3.select("#close_file").on("click", function () {
+	       projectManager.closeFile(projectManager.getSelectedFile());	
+        });
+
+        /// User wants to see all files of the project 
+        d3.select("#show_all_files").on("click", function () {
+	       projectManager.showAllFiles();
+        });
+
+        /// User wants to delete a file from the project  
+        d3.select("#delete_file").on("click", function () {
+	       projectManager.deleteFile(projectManager.getSelectedFile(), function () {
+                //do something when file is deleted 
+           });
+        });
     
         /// User wants to perform an undo operation on the Editor    
         d3.select("#undoEditor").on("click", function () {
@@ -149,10 +158,12 @@ define(function (require, exports, module) {
 	 
         });*/
         document.getElementById("emulinkInfo").value = "Emulink status: NOT active";
-        document.getElementById("startEmulink").disabled = false;
+
+        $(".startEmulink").each(function(index, element) {
+                $(element).prop("disabled",false);
+        }); 
         /// User wants to start emulink 
-        d3.select("#startEmulink").on("click", function () {
-			//d3.select(this).html("Diagram created").classed("btn-danger", false).classed("btn-success", true).attr("disabled", true);
+        d3.selectAll(".startEmulink").on("click", function () {
             if( ! emulinkHasBeenUsed )
             {   
                 showEmulinkStatus();
@@ -161,9 +172,7 @@ define(function (require, exports, module) {
                 emulinkHasBeenUsed = true;
             }
             
-            stateMachine.addNewDiagram();
-
-            
+            stateMachine.addNewDiagram();            
         });    
 	   
         //Adding Listener triggered when user saves a project
