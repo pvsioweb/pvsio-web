@@ -9,7 +9,8 @@ define(function (require, exports, module) {
     "use strict";
     var eventDispatcher = require("util/eventDispatcher"),
         property                = require("util/property"),
-        WSManager				= require("websockets/pvs/WSManager");
+        WSManager				= require("websockets/pvs/WSManager"),
+        QuestionForm            = require("pvsioweb/forms/displayQuestion");
     
     var folderData, elementId, project, ws = WSManager.getWebSocket(), fileCounter = 0, unSavedName = "Untitled";
     
@@ -26,16 +27,19 @@ define(function (require, exports, module) {
     function removeNode(node) {
         var t = $(elementId).jstree(true);
         //show confirmation dialog
-        
-        //send request to remove file using the wsmanager
-        ws.send({type: "deleteFile", fileName: node.original.file}, function (err, res) {
-            if (!err) {
-                t.delete_node(node);
-            } else {
-                //show error
-                console.log(err);
-            }
-        });
+        QuestionForm.create({header: "Confirm Delete", question: "Are you sure you want to delete " + node.text})
+            .on("ok", function (e, view) {
+                //send request to remove file using the wsmanager
+                ws.send({type: "deleteFile", fileName: node.original.file}, function (err, res) {
+                    if (!err) {
+                        t.delete_node(node);
+                    } else {
+                        //show error
+                        console.log(err);
+                    }
+                });
+                view.remove();
+            }).on("cancel", function (e, view) { view.remove(); });
     }
     
     function renameNode(node) {
@@ -97,9 +101,6 @@ define(function (require, exports, module) {
                 }
             }
         };
-        if (node.original.isDirectory) {
-            delete items.deleteItem;
-        }
         return items;
     }
     
@@ -143,7 +144,8 @@ define(function (require, exports, module) {
         project = _project;
     
         $(elementId).jstree("destroy");
-        folderData = jsTreeData(folderStructure, folderStructure.name.substring(0, folderStructure.name.lastIndexOf("/")), project);
+        folderData = jsTreeData(folderStructure,
+                                folderStructure.name.substring(0, folderStructure.name.lastIndexOf("/")), project);
         $(elementId).jstree({
             core: {
                 data: folderData
@@ -190,7 +192,7 @@ define(function (require, exports, module) {
                         } else { console.log(err); }
                     });
                 }
-            } else {
+            } else if (data.node.original.text.trim() !== data.text.trim()) {//file name should be different before we attempt saving
                 if (data.node.original.isDirectory) {
                     var oldPath = data.node.original.file;
                     newPath = oldPath.substr(0, oldPath.indexOf(data.node.original.text)) + data.text;
