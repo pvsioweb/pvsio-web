@@ -10,6 +10,7 @@ define(function (require, exports, module) {
     var Widget = require("./Widget");
     var property = require("util/property");
 	var CursoredDisplay = require("widgets/CursoredDisplay");
+    var Speaker  = require("widgets/TextSpeaker");
 	
     function Display(id) {
         Widget.call(this, id, "display");
@@ -17,6 +18,7 @@ define(function (require, exports, module) {
 		this.predefinedRegex = property.call(this);
 		this.prefix = property.call(this);
 		this.cursorName = property.call(this);
+        this.auditoryFeedback = property.call(this);
     }
     
     Display.prototype = Object.create(Widget.prototype);
@@ -46,7 +48,7 @@ define(function (require, exports, module) {
     /**
         parse the raw state string from pvsio process into key value pairs
     */
-    Display.prototype.parseStateRaw = function(str) {
+    Display.prototype.parseStateRaw = function (str) {
         var args = str[0].split(","), res = {};
         args.forEach(function (d) {
             var t = d.split(":=");
@@ -57,22 +59,21 @@ define(function (require, exports, module) {
 
 	Display.prototype.render = function (stateString) {
 		var dispVal = this.parseState(stateString);
-		var y = this.element().attr("y"), 
+		var y = this.element().attr("y"),
 			x = this.element().attr("x"),
-			w = this.element().attr("width"), 
+			w = this.element().attr("width"),
 			h = this.element().attr("height");
 		var text = d3.select("div." + this.id());
 		if (!text.empty()) {
 			text.remove();
 		}
 		text = d3.select("#imageDiv").append("div").attr("class", this.id() + " displayWidget");
-		var cursoredDisplay = (this.cursorName())? true : false;
-		if(!cursoredDisplay) {
+		var cursoredDisplay = (this.cursorName()) ? true : false;
+		if (!cursoredDisplay) {
 			text.html(dispVal).style("left", x + "px").style("top", y + "px").style("position", "absolute")
 							  .style("width", w + "px").style("height", h + "px").style("color", "white")
-							  .style("font-size", (parseFloat(h) * 0.8) + "px"); 
-		}
-		else {
+							  .style("font-size", (parseFloat(h) * 0.8) + "px");
+		} else {
 //			h = h*1.5;
 			text.style("left", x + "px").style("top", y + "px").style("position", "absolute")
 				.style("width", w + "px").style("height", h + "px").style("color", "white")
@@ -83,6 +84,10 @@ define(function (require, exports, module) {
 			//FIXME: this assumes that the cursor name is "c" -- we need to use the actual cursor name used in the spec!
 			disp.renderNumber(dispVal.toString(), +res.c);
 		}
+        //read out the display if audio is enabled for this display widget
+        if (this.auditoryFeedback()) {
+            Speaker.speak(dispVal.toString());
+        }
     };
     
     Display.prototype.toJSON = function () {
@@ -92,7 +97,8 @@ define(function (require, exports, module) {
 			regex: this.regex(),
 			predefinedRegex: this.predefinedRegex(),
 			prefix: this.prefix(),
-			cursorName: this.cursorName()
+			cursorName: this.cursorName(),
+            auditoryFeedback: this.auditoryFeedback()
 		};
 	};
 	

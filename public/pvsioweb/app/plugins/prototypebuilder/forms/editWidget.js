@@ -54,6 +54,10 @@ define(function (require, exports, module) {
 			} else {
 				var optId = regexOptionMap[widget.predefinedRegex()] || "optCustom";
 				d3.select("option#" + optId).attr("selected", true);
+                //select the audiofeedback checkbox if this is a property in the object
+                if (widget.auditoryFeedback()){
+                    d3.select("input[type='checkbox'][name='auditoryFeedback']").attr("checked", true);
+                }
 			}
 			return this;
 		},
