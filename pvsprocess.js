@@ -80,6 +80,16 @@ module.exports = function () {
 			return false;
 		};
 	}
+    
+    o.removeFile = function (path, cb) {
+        if (path.indexOf(workspaceDir) === 0) {
+            pvs.exec({command: "rm -rf " + path, callBack:cb});
+        } else {
+            var error = ("cannot delete a folder outside the context of the current project");
+            console.log(error);
+            cb(error);
+        }
+    };
 	/**
 	 * starts the pvs process with the given sourcefile 
 	 * @param {String} filename source file to load with pvsio

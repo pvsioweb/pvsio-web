@@ -45,6 +45,7 @@ function run() {
         workspace               = __dirname + "/public",
         pvsioProcessMap         = {},//each client should get his own process
         httpServer              = http.createServer(webserver),
+        Promise                 = require("es6-promise").Promise,
         baseProjectDir          = __dirname + "/public/projects/";
     var p, clientid = 0, WebSocketServer = ws.Server;
 
@@ -429,7 +430,8 @@ function run() {
                 });
             },
             "deleteFile": function (token, socket, socketid) {
-                fs.unlink(token.fileName, function (err) {
+                p = pvsioProcessMap[socketid];
+                p.removeFile(token.fileName, function (err, res) {
                     var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
                     if (!err) {
                         res.type = "fileDeleted";

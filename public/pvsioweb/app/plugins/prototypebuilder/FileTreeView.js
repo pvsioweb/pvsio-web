@@ -54,7 +54,7 @@ define(function (require, exports, module) {
             nodeData.folder = node.original.file;
         } else {
             //selected node is a file so we need to create the new node as a sibling element
-            nodeData.folder = node.original.file.substring(0, node.original.file.indexOf(node.original.text) - 1);
+            nodeData.folder = node.original.file.substring(0, node.original.file.lastIndexOf("/"));
             node = node.parent;
         }
         nodeData.file = nodeData.folder + "/" + nodeData.text;
@@ -135,8 +135,7 @@ define(function (require, exports, module) {
         }
         return res;
     }
-    
-    
+
     function FileTreeView(_elId, folderStructure, _project) {
         eventDispatcher(this);
         var ftv = this;
@@ -195,7 +194,7 @@ define(function (require, exports, module) {
             } else if (data.node.original.text.trim() !== data.text.trim()) {//file name should be different before we attempt saving
                 if (data.node.original.isDirectory) {
                     var oldPath = data.node.original.file;
-                    newPath = oldPath.substr(0, oldPath.indexOf(data.node.original.text)) + data.text;
+                    newPath = oldPath.substr(0, oldPath.lastIndexOf("/")) + "/" + data.text;
                     project.renameFolder(oldPath, newPath, function () {
                         data.node.original.text = data.text;
                         data.node.original.file = newPath;
@@ -212,6 +211,7 @@ define(function (require, exports, module) {
                 }
             }
         });
+        
         //open the root node of the project
         $(elementId).jstree(true).open_node(folderData.id);
         //if there is a project add listener to changes to files etc

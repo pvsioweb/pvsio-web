@@ -9,7 +9,8 @@
     "dependencies":{
         "ws":"0.4.x",
         "express":"3.x",
-        "queue-async": "1.x"
+        "queue-async": "1.x",
+        "es6-promise": "0.1.x"
     },
     "repository":{
         "type":"git",
