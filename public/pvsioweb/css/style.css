@@ -405,3 +405,47 @@ div.detailsForm select, div.detailsForm textarea{
 .panel-footer {
     min-height:50px;
 }
+
+#scripts {
+    position: absolute;
+    top: 0px;
+    height: 50%;
+    width: 200px;
+    right: 1px;
+    background: #eee;
+}
+
+#play {
+    position: absolute;
+    display: none;
+    top: 50px;
+    right: 5px;
+    -webkit-border-radius: 10px;
+    padding: 10px;
+    background: #444;
+    color: #26c95e;
+    cursor: pointer;
+    border: 1px solid white;
+}
+
+#record {
+    position: absolute;
+    display: none;
+    top: 5px;
+    right: 5px;
+    -webkit-border-radius: 10px;
+    padding: 10px;
+    background: #e00404;
+    color: white;
+    cursor: pointer;
+    border: 1px solid white;
+}
+
+@keyframes fade {
+    from { opacity: 1.0; }
+    50% { opacity: 0.7; }
+    to { opacity: 1.0; }
+}
+.recording {
+    -webkit-animation:fade 3000ms infinite;
+}

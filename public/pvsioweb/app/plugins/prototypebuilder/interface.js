@@ -9,7 +9,10 @@ define(function (require, exports, module) {
 	"use strict";
 	var WSManager = require("websockets/pvs/WSManager"),
 		Logger	= require("util/Logger"),
-        SaveProjectChanges = require("project/forms/SaveProjectChanges");
+        Recorder = require("util/ActionRecorder"),
+        ScriptPlayer = require("util/ScriptPlayer"),
+        SaveProjectChanges = require("project/forms/SaveProjectChanges"),
+        Prompt  = require("pvsioweb/forms/displayPrompt");
 	
 	/**
 	 * Switches the prototoyping layer to the builder layer
@@ -19,8 +22,9 @@ define(function (require, exports, module) {
         d3.select(".image-map-layer").style("opacity", 1).style("z-index", 190);
         d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
         d3.select("#btnBuilderView").classed('selected', true);
-        d3.select("div.display,#controlsContainer button").classed("builder", true);
-        d3.select("div.display,#controlsContainer button").classed("simulator", false);
+        d3.selectAll("div.display,#controlsContainer button").classed("builder", true);
+        d3.selectAll("div.display,#controlsContainer button").classed("simulator", false);
+        d3.selectAll("#record").style("display", "none");
     }
 	/** Switches the prototyping layer to the simulator/testing layer 
         @private
@@ -29,8 +33,9 @@ define(function (require, exports, module) {
         d3.select(".image-map-layer").style("opacity", 0.1).style("z-index", -2);
         d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
         d3.select("#btnSimulatorView").classed('selected', true);
-        d3.select("div.display,#controlsContainer button").classed("simulator", true);
-        d3.select("div.display,#controlsContainer button").classed("builder", false);
+        d3.selectAll("div.display,#controlsContainer button").classed("simulator", true);
+        d3.selectAll("div.display,#controlsContainer button").classed("builder", false);
+        d3.selectAll("#record").style("display", "block");
     }
     
     function pvsProcessReady(err, e) {
@@ -47,6 +52,7 @@ define(function (require, exports, module) {
     }
 
 	function bindListeners(projectManager) {
+        var actions, recStartState, recStartTime, scriptName;
 		d3.select("#header #txtProjectName").property("value", "");
 	
 		/**
@@ -60,6 +66,32 @@ define(function (require, exports, module) {
 			switchToSimulatorView();
 		});
 	
+        d3.select("#record").on("click", function () {
+            var label = d3.select(this).html().trim();
+            if (label === "Record") {
+                d3.select(this).html(" Stop Recording").classed("recording", true);
+                Recorder.startRecording();
+                recStartState = WSManager.getWebSocket().lastState();
+                recStartTime = new Date().getTime();
+                scriptName = "Script_" + recStartTime;
+            } else {
+                d3.select(this).html(" Record").classed("recording", false);
+                actions = Recorder.stopRecording();
+                //do something with actions
+                console.log(actions);
+                //ask user to give name to script
+                Prompt.create({header: "Would you like to give your script a name?"})
+                    .on("ok", function (e, view) {
+                        scriptName = e.data.prompt.trim() || scriptName;
+                        view.remove();
+                        ScriptPlayer.addScript(scriptName, actions, recStartState);
+                    }).on("cancel", function (e, view) {
+                        view.remove();
+                        ScriptPlayer.addScript(scriptName, actions, recStartState);
+                    });
+            }
+        });
+        
 		d3.select("#saveProject").on("click", function () {
 			projectManager.saveProject();
 		});

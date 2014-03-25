@@ -85,24 +85,25 @@ define(function (require, exports, module) {
 		var content = div.append("div").attr("class", "collapsible-panel");
 		
 		header.append("span")
-			.attr("class", function() { 
-				if(showContent == true) { return "toggle-collapse glyphicon glyphicon-minus-sign"; }
-				return "toggle-collapse glyphicon glyphicon-plus-sign"; })
+			.attr("class", function () {
+				if (showContent === true) { return "toggle-collapse glyphicon glyphicon-minus-sign"; }
+				return "toggle-collapse glyphicon glyphicon-plus-sign";
+            })
 			.on("click", function () {
-			var d = d3.select(this);
-			if (d.classed("glyphicon-minus-sign")) {
-				content.style("display", "none");
-				d3.select(this).classed("glyphicon-plus-sign", true).classed("glyphicon-minus-sign", false);
-			} else {
-				content.style("display", null);
-				d3.select(this).classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
-			}
-		});
+                var d = d3.select(this);
+                if (d.classed("glyphicon-minus-sign")) {
+                    content.style("display", "none");
+                    d3.select(this).classed("glyphicon-plus-sign", true).classed("glyphicon-minus-sign", false);
+                } else {
+                    content.style("display", null);
+                    d3.select(this).classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
+                }
+            });
 		
 		if (headerText) {
 			header.append("span").html(headerText).attr("class", "header");
 		}
-		if (showContent != true) { content.style("display", "none"); }
+		if (!showContent) { content.style("display", "none"); }
 		return content;
 	};
     /**

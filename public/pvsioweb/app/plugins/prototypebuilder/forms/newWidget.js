@@ -10,13 +10,6 @@ define(function (require, exports, module) {
 	var FormUtils					= require("./FormUtils"),
 		template					= require("text!./templates/createWidget.handlebars"),
 		d3							= require("d3/d3");
-	
-	function updateRegex() {
-        var predefined = d3.select("#predefinedRegex").property("value"),
-			prefix = d3.select("#prefix").property("value"),
-			r = prefix + ":=(" + predefined + ")";
-        d3.select("#regex").property("value", r);
-    }
 
 	function updateBoundFunctionsLabel() {
         var f = d3.select("#functionText").property("value"),
@@ -50,16 +43,11 @@ define(function (require, exports, module) {
 			"click #btnCancel": "cancel",
 			"click #displayTab": "displayTabClicked",
 			"click #buttonTab": "buttonTabClicked",
-			"change #predefinedRegex": "regexChanged",
 			"change input[type='checkbox'][name='events']": "eventsChanged",
-			"keyup #functionText": "eventsChanged",
-			"keyup #prefix": "regexChanged"
+			"keyup #functionText": "eventsChanged"
 		},
 		eventsChanged: function (event) {
 			updateBoundFunctionsLabel();
-		},
-		regexChanged: function (event) {
-			updateRegex();
 		},
 		ok: function (event) {
 			var form = d3.select(this.el).select("form");

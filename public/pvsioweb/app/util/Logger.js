@@ -7,7 +7,6 @@
 /*global define, d3, require, $, brackets, window, MouseEvent, document */
 define(function (require, exports, module) {
 	"use strict";
-	
     /**
      * log the message
         @private
@@ -44,7 +43,7 @@ define(function (require, exports, module) {
         var c = document.getElementById('specification_log');
         c.innerHTML = msg + "<br>" + c.innerHTML;
     }
-
+    
 	module.exports = {
 		log: log,
 		console_log: console_log,

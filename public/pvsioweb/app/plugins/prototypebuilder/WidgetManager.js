@@ -22,9 +22,10 @@ define(function (require, exports, module) {
 	
    ///TODO this should be moved out of this file and promoted to a property, or a function parameter in createImageMap
 	function renderResponse(err, res) {
+        var state = res.data.join("");
 		//render displays
 		wm.getDisplayWidgets().forEach(function (w) {
-			w.render(res.data);
+			w.render(state);
 		});
 	}
 	

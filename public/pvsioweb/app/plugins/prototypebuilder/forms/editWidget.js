@@ -10,14 +10,6 @@ define(function (require, exports, module) {
 	var FormUtils					= require("./FormUtils"),
 		template					= require("text!./templates/editWidget.handlebars"),
 		d3							= require("d3/d3");
-	
-	var regexOptionMap = {"\\w+": "optString", "[0-9/.]+": "optNumeric"};
-	function updateRegex() {
-        var predefined = d3.select("#predefinedRegex").property("value"),
-			prefix = d3.select("#prefix").property("value"),
-			r = prefix + ":=(" + predefined + ")";
-        d3.select("#regex").property("value", r);
-    }
 
 	function updateBoundFunctionsLabel() {
         var f = d3.select("#functionText").property("value"),
@@ -51,25 +43,17 @@ define(function (require, exports, module) {
 				widget.events().forEach(function (e) {
 					d3.select("input[type='checkbox'][value='" + e + "']").attr("checked", true);
 				});
-			} else {
-				var optId = regexOptionMap[widget.predefinedRegex()] || "optCustom";
-				d3.select("option#" + optId).attr("selected", true);
 			}
 			return this;
 		},
 		events: {
-			"change #predefinedRegex": "regexChanged",
 			"change input[type='checkbox'][name='events']": "eventsChanged",
 			"click #btnOk": "ok",
 			"click #btnCancel": "cancel",
-			"keyup #functionText": "eventsChanged",
-			"keyup #prefix": "regexChanged"
+			"keyup #functionText": "eventsChanged"
 		},
 		eventsChanged: function (event) {
 			updateBoundFunctionsLabel();
-		},
-		regexChanged: function (event) {
-			updateRegex();
 		},
 		ok: function (event) {
 			var form = this.el;
