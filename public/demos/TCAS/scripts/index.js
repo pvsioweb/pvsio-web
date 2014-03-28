@@ -12,7 +12,7 @@ require.config({
     }
 });
 
-require(["PVSioWebClient", "../../demos/TCAS/scripts/PVSioStateParser",
+require(["PVSioWebClient", "util/PVSioStateParser",
          "d3/d3", "../../demos/TCAS/scripts/TCASView"], function (PVSioWebClient, StateParser, d3, TCASView) {
     "use strict";
 
