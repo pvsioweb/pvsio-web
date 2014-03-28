@@ -16,7 +16,9 @@ define(function (require, exports, module) {
 	function renderSelectedItem(index, el, listItems) {
 		listItems.classed("selected", false);
 		el.classed("selected", true);
-        d3.select("#pvsFiles").node().scrollTop = el.node().offsetTop;
+        if (!el.empty()) {
+            d3.select("#pvsFiles").node().scrollTop = el.node().offsetTop;
+        }
 	}
 	
 	function selectItem(index, item, listView) {
