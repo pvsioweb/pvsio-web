@@ -129,7 +129,6 @@ area{
 #imageDiv{
 	position: relative;
 	border: 1px solid black;
-	width: 910px;
 }
 #controlsContainer{
 	position: relative;
@@ -261,18 +260,22 @@ fileListItem.hide {
 }
 /*** end source code section **/
 
-
 #console {
+    height: 50%;
+    width: 100%;
+    overflow-y: scroll;
+    color: white;
+}
+#rightPanel {
 	position: absolute;
 	top:0px;
 	right: -220px;
 	height: 100%;
 	width: 200px;
-	color: white;
 	background: #333;
 	padding: 10px;
 	font: 10px Arial;
-    overflow-y: scroll;
+    overflow: hidden;
 }
 
 #pvsio_commands_log {
@@ -413,6 +416,7 @@ div.detailsForm select, div.detailsForm textarea{
     width: 200px;
     right: 1px;
     background: #eee;
+    overflow-y: scroll;
 }
 
 #play {

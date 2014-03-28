@@ -16,6 +16,7 @@ define(function (require, exports, module) {
         initialize: function (data) {
             d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
             this.render(data);
+            this._data = data;
         },
         render: function (data) {
             var template = Handlebars.compile(formTemplate);
@@ -24,18 +25,18 @@ define(function (require, exports, module) {
             return this;
         },
         events: {
-			"click #btnOk": "ok",
-			"click #btnCancel": "cancel"
+			"click #btnRight": "right",
+			"click #btnLeft": "left"
 		},
-		ok: function (event) {
+		right: function (event) {
 			var form = this.el;
 			if (FormUtils.validateForm(form)) {
 				var formdata = FormUtils.serializeForm(form);
-				this.trigger("ok", {data: formdata, el: this.el}, this);
+				this.trigger(this._data.buttons[1].toLowerCase(), {data: formdata, el: this.el}, this);
 			}
 		},
-		cancel: function (event) {
-			this.trigger("cancel", {el: this.el}, this);
+		left: function (event) {
+			this.trigger(this._data.buttons[0].toLowerCase(), {el: this.el}, this);
 		}
     });
     

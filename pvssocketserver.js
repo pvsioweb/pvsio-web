@@ -219,6 +219,8 @@ function run() {
                     } else if (file === ".pvsioweb") {
                         var config = JSON.parse(fs.readFileSync(filePath, "utf8"));
                         res.mainPVSFile = config.mainPVSFile;
+                    } else if(file === "scripts.json") {
+                        res.scripts = JSON.parse(fs.readFileSyn(filePath, "utf8"));
                     } else {
                         res.other = res.other || [];
                         res.other.push(filePath);

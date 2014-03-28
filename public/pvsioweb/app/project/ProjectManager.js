@@ -236,10 +236,16 @@ define(function (require, exports, module) {
 				p.addSpecFile(path);
 			});
 		}
+        if (obj.scripts) {
+            obj.scripts.forEach(function (s) {
+                p.addScript(s);
+            });
+        }
 		if (obj.imagePath && obj.imageData) {
 			p.image(new ProjectFile(obj.imagePath, p).type("image").content(obj.imageData));
 		}
 		p.widgetDefinitions(obj.widgetDefinition)._dirty(false);
+        
 		return p;
 	}
     

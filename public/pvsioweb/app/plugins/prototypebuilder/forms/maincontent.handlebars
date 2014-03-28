@@ -18,19 +18,24 @@
 					<button class="btn btn-primary center" id='btnLoadPicture'> Load Picture</button>
 				</div>
 				<img src="pvsioweb/image/start.png" usemap="#prototypeMap" />
-				<div id='console'></div>
+				
 			</div>
+            <div id="rightPanel">
+                <div id='console'></div>
+                <!-- container for specification source code -->
+			    <div id="scripts"> 
+                    <ul class="list-group">
+    
+                    </ul>
+                </div>
+            </div>
 			<div id="controlsContainer">
 				<button id="btnBuilderView">Builder View</button>
 				<button id="btnSimulatorView">Simulator View</button>
                 <a id="lblWebSocketStatus" class="status right">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
                 <a id="lblPVSioStatus" class="status right">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
 			</div>
-	
-			<!-- container for specification source code -->
-			<div id="scripts">
-                    
-            </div>
+	                    
 			<div id='logsDiv'>
 				<div id='pvsio_commands_log_Container' class='pvsio-log-container'>
 					<h2>GUI frontend commands</h2>

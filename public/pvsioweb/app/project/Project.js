@@ -11,6 +11,7 @@ define(function (require, exports, module) {
         eventDispatcher     = require("util/eventDispatcher"),
         WSManager           = require("websockets/pvs/WSManager"),
         WidgetManager       = require("pvsioweb/WidgetManager").getWidgetManager(),
+        ScriptPlayer        = require("util/ScriptPlayer"),
         queue               = require("d3/queue"),
 		ProjectFile			= require("./ProjectFile");
     
@@ -48,6 +49,17 @@ define(function (require, exports, module) {
             cb(err, res);
         });
 	}
+    
+    function saveInteractionScripts(project, cb) {
+        var ws = WSManager.getWebSocket();
+        var scripts = JSON.stringify(project.scripts(), null, " ");
+        var data = {fileName: project.path() + "/scripts.json", fileContent: scripts};
+        ws.writeFile(data, function (err, res) {
+            if (cb && typeof cb === "function") {
+                cb(err, res);
+            }
+        });
+    }
     
     function saveImageFile(project, cb) {
         var ws = WSManager.getWebSocket();
@@ -103,6 +115,8 @@ define(function (require, exports, module) {
 		*/
         this.pvsFiles = property.call(this, {});
 	
+        this.scripts = property.call(this, []);
+        
         var project = this;
         //add event listeners
         this.name.addListener(propertyChangedEvent, function (event) {
@@ -283,6 +297,8 @@ define(function (require, exports, module) {
 			//project has already been created so save the widgets and the sourcecode if it has changed
 			var q = queue();
 			q.defer(saveWidgetDefinition, this);
+            q.defer(saveInteractionScripts, this);
+            
 			if (this.pvsFiles()) {
 				q.defer(saveSourceCode, this.dirtyFiles(), this);
 			}
@@ -290,6 +306,7 @@ define(function (require, exports, module) {
 			if (this.image() &&  this.image().dirty()) {
 				q.defer(saveImageFile, this);
 			}
+            
 			q.awaitAll(function (err, res) {
 				if (!err) {
                     _thisProject._dirty(false);
@@ -342,6 +359,15 @@ define(function (require, exports, module) {
 			cb(err, _thisProject);
 		});
 	};
+    
+    /**
+        Adds a script to the project
+    */
+    Project.prototype.addScript = function (script) {
+        this.scripts().push(script);
+        ScriptPlayer.addScriptToView(script);
+        this._dirty(true);
+    };
     
     module.exports = Project;
     

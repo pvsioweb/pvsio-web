@@ -10,7 +10,8 @@ define(function (require, exports, module) {
 	var WSManager = require("websockets/pvs/WSManager"),
 		Logger	= require("util/Logger"),
         Recorder = require("util/ActionRecorder"),
-        ScriptPlayer = require("util/ScriptPlayer"),
+        ScriptItemView = require("pvsioweb/forms/ScriptItemView"),
+        WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager(),
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
         Prompt  = require("pvsioweb/forms/displayPrompt");
 	
@@ -53,6 +54,7 @@ define(function (require, exports, module) {
 
 	function bindListeners(projectManager) {
         var actions, recStartState, recStartTime, scriptName;
+        
 		d3.select("#header #txtProjectName").property("value", "");
 	
 		/**
@@ -67,7 +69,7 @@ define(function (require, exports, module) {
 		});
 	
         d3.select("#record").on("click", function () {
-            var label = d3.select(this).html().trim();
+            var label = d3.select(this).html().trim(), script;
             if (label === "Record") {
                 d3.select(this).html(" Stop Recording").classed("recording", true);
                 Recorder.startRecording();
@@ -80,14 +82,17 @@ define(function (require, exports, module) {
                 //do something with actions
                 console.log(actions);
                 //ask user to give name to script
-                Prompt.create({header: "Would you like to give your script a name?"})
-                    .on("ok", function (e, view) {
+                Prompt.create({header: "Would you like to save this script?",
+                               message: "Please enter a name for your script",
+                               buttons: ["Delete", "Save"]})
+                    .on("save", function (e, view) {
                         scriptName = e.data.prompt.trim() || scriptName;
                         view.remove();
-                        ScriptPlayer.addScript(scriptName, actions, recStartState);
-                    }).on("cancel", function (e, view) {
+                        script = {name: scriptName, actions: actions, startState: recStartState};
+                        //add the script to the project
+                        projectManager.project().addScript(script);
+                    }).on("delete", function (e, view) {
                         view.remove();
-                        ScriptPlayer.addScript(scriptName, actions, recStartState);
                     });
             }
         });
@@ -105,7 +110,8 @@ define(function (require, exports, module) {
                     var ws = WSManager.getWebSocket();
                     ws.lastState("init(0)");
                     if (project.mainPVSFile()) {
-                        ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()}, pvsProcessReady);
+                        ws.startPVSProcess({fileName: project.mainPVSFile().name(),
+                                            projectName: project.name()}, pvsProcessReady);
                     } else {
                         //close pvsio process for previous project
                         ws.closePVSProcess(function (err, res) {

@@ -8,17 +8,27 @@
 define(function (require, exports, module) {
     "use strict";
     var ws = require("websockets/pvs/WSManager").getWebSocket(),
-        PlayListView = require("pvsioweb/forms/PlayListView"),
-        WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager();
-    var scripts = [];
-    var playList = PlayListView.create(scripts);
-       
+        WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager(),
+        ScriptItemView = require("pvsioweb/forms/ScriptItemView"),
+        d3 = require("d3");
+
     function render(stateString, display) {
         display.render(stateString);
     }
     
+    function getButtonCoords(id) {
+        var coords = d3.select("." + id).attr("coords");
+        coords = coords.split(",");
+        return {x1: +coords[0], y1: +coords[1], x2: +coords[2], y2: coords[3]};
+    }
+
+    function halo(pos) {
+            
+    }
+    
     function play(actions, display) {
         var action = actions.shift();
+
         var command = action.action + "_" + action.functionText + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");";
         ws.sendGuiAction(command, function (err, res) {
             var stateString = res.data.join("");
@@ -31,23 +41,32 @@ define(function (require, exports, module) {
             }, interval);
         }
     }
+
     
-    function addScript(name, actions, startState) {
+    /**
+        Adds the specified script to the list view
+    */
+    function addScriptToView(script) {
+        var actions = script.actions,
+            startState = script.startState;
         var time = actions[actions.length - 1].ts - actions[0].ts;
-        scripts.push({name: name, actions: actions, time: (time / 1000).toFixed(1) + "s", startState: startState});
-        playList = PlayListView.create(scripts);
+        script.time = (time / 1000) + "s";
+        startState = Array.isArray(startState) ? startState.join("") : startState;
         var display = WidgetManager.getDisplayWidgets()[0];
-        
-        playList.on("scriptClicked", function (name) {
-            var script = scripts.filter(function (d) {return d.name === name; });
-            ws.lastState(startState);
-            script = script ? script[0] : [];
-            play(script.actions.map(function (d) {return d; }), display);
+
+        ScriptItemView.create(script).on("scriptClicked", function (name) {
+            ws.lastState(script.startState);
+            //render the last state
+            if (script.startState !== "init(0)") {
+                display.render(script.startState);
+            }
+            play(script.actions.map(function (d) {
+                return d;
+            }), display);
         });
     }
-      
     module.exports = {
         play: play,
-        addScript: addScript
+        addScriptToView: addScriptToView
     };
 });

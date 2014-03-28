@@ -40,19 +40,20 @@ define(function (require, exports, module) {
 		*/
         this.content = property.call(this);
 		
-		/** get or set the name of the file
-			@type {string}
-		*/
-        this.name = function () {
-            return this.path().substr(this.path().lastIndexOf("/") + 1);
-        };
-        
+		
 		/**
 		 * get the full path of the file
 		 * @returns {string}
 		 */
         this.path = property.call(this, path);
 		
+        /** get or set the name of the file
+			@type {string}
+		*/
+        this.name = function () {
+            return this.path().substr(this.path().lastIndexOf("/") + 1);
+        };
+        
         //-----
 		/** get or set the visibility of this file in the project view
 			@type {boolean}
