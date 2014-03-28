@@ -159,7 +159,6 @@ function run() {
                 fs.mkdirSync(projectPath);
                 obj.projectPath = projectPath;
                 obj.name = projectName;
-                obj.folderStructure = getFolderStructure(projectPath);
                 
                 if (imageName && imageData) {
                     var imageString = imageData.replace(/^data:image\/(\w+);base64,/, ""),
@@ -177,6 +176,8 @@ function run() {
                         fs.writeFileSync(f.path, f.fileContent);
                     });
                     obj.pvsFiles = files;
+                    //by default set the main pvs file to be the first item in the list after sort
+                    mainPVSFile = mainPVSFile || files.sort()[0].path;
                 }
 
                 if (mainPVSFile) {
@@ -184,6 +185,9 @@ function run() {
                     //create a main file in the project settings
                     changeProjectSetting(projectName, "mainPVSFile", mainPVSFile);
                 }
+                //get project folder structure once all files have been wrtten
+                obj.folderStructure = getFolderStructure(projectPath);
+                
             }
         } catch (err) {
             obj.err = err;

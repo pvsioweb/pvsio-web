@@ -54,6 +54,25 @@ define(function (require, exports, module) {
 
 	function bindListeners(projectManager) {
         var actions, recStartState, recStartTime, scriptName;
+        //add event listener for restarting the pvsio web server whenever the project changes
+        projectManager.addListener("ProjectChanged", function (event) {
+            var pvsioStatus = d3.select("#lblPVSioStatus");
+            pvsioStatus.select("span").remove();
+            
+            var project = event.current;
+            var ws = WSManager.getWebSocket();
+            ws.lastState("init(0)");
+            if (project.mainPVSFile()) {
+                ws.startPVSProcess({fileName: project.mainPVSFile().name(),
+                                    projectName: project.name()}, pvsProcessReady);
+            } else {
+                //close pvsio process for previous project
+                ws.closePVSProcess(function (err, res) {
+                    pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
+                });
+            }
+            switchToBuilderView();
+        });
         
 		d3.select("#header #txtProjectName").property("value", "");
 	
@@ -102,23 +121,10 @@ define(function (require, exports, module) {
 		});
 	
 		d3.select("#openProject").on("click", function () {
-            var pvsioStatus = d3.select("#lblPVSioStatus");
-            pvsioStatus.select("span").remove();
             
             function _doOpenProject() {
                 projectManager.openProject(function (project) {
-                    var ws = WSManager.getWebSocket();
-                    ws.lastState("init(0)");
-                    if (project.mainPVSFile()) {
-                        ws.startPVSProcess({fileName: project.mainPVSFile().name(),
-                                            projectName: project.name()}, pvsProcessReady);
-                    } else {
-                        //close pvsio process for previous project
-                        ws.closePVSProcess(function (err, res) {
-                            pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
-                        });
-                    }
-                    switchToBuilderView();
+                    console.log(project.name() + " has been opened!");
                 });
             }
             
@@ -139,7 +145,9 @@ define(function (require, exports, module) {
 		});
 	
 		d3.select("#newProject").on("click", function () {
-			projectManager.newProject();
+			projectManager.newProject(function () {
+                console.log("new project created!");
+            });
 		});
 		//handle typecheck event
 		//this function should be edited to only act on the selected file when multiple files are in use

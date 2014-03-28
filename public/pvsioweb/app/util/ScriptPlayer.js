@@ -10,7 +10,7 @@ define(function (require, exports, module) {
     var ws = require("websockets/pvs/WSManager").getWebSocket(),
         WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager(),
         ScriptItemView = require("pvsioweb/forms/ScriptItemView"),
-        d3 = require("d3");
+        d3 = require("d3/d3");
 
     function render(stateString, display) {
         display.render(stateString);

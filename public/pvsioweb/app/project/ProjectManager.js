@@ -5,7 +5,7 @@
  * @date 11/15/13 9:49:03 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, _, document, FileReader*/
+/*global define, d3, require, $, brackets, window, _, Promise, document, FileReader*/
 define(function (require, exports, module) {
 	"use strict";
 	var property = require("util/property"),
@@ -389,7 +389,7 @@ define(function (require, exports, module) {
      * @memberof ProjectManager
      */
 	ProjectManager.prototype.newProject = function () {
-		var pm = this;
+		var pm = this, previousProject = pm.project();
 		newProjectForm.create().on("cancel", function (e, formView) {
             console.log(e);
             formView.remove();
@@ -402,42 +402,42 @@ define(function (require, exports, module) {
 			var project = new Project();
 			//update the current project with info from data and saveNew
 			project.name(data.projectName);
-			var q = queue(), i;
-			q.defer(function (cb) {
-				var fr = new FileReader();
-				fr.onload = function (event) {
-					project.changeImage(data.prototypeImage[0].name, event.target.result);
-					cb();
-				};
-				fr.readAsDataURL(data.prototypeImage[0]);
-			});
-	
-			function onSpecFileLoaded(spec, content) {
-				project.addSpecFile(spec.path, content);
+			var i, promises = [];
+            fs.readLocalFileAsDataURL(data.prototypeImage[0])
+                .then(function (res) {
+                    project.changeImage(data.prototypeImage[0].name, res);
+                });
+            //create promises for the pvs source files
+            for (i = 0; i < data.pvsSpec.length; i++) {
+				promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
 			}
-			
-			for (i = 0; i < data.pvsSpec.length; i++) {
-				q.defer(fs.createFileLoadFunction(data.pvsSpec[i], onSpecFileLoaded));
-			}
-			q.awaitAll(function (err, res) {
-				project.saveNew(function (err, res) {
-					console.log({err: err, res: res});
-					if (!err) {
-						if (project.image()) {
-							pm.updateImage(project.image().content());
-						}
-						project.pvsFilesList().forEach(function (f) {
-							f.dirty(false);
-						});
-						WidgetManager.updateMapCreator();
-						pm.renderSourceFileList(res.folderStructure);
-						pvsFilesListView.selectItem(project.mainPVSFile() || project.pvsFilesList()[0]);
-						//fire project changed event
-						pm.fire({type: "ProjectChanged", current: project, previous: pm.project()});
-						pm.project(project);
-					}
-				});
-			});
+            
+            Promise.all(promises)
+                .then(function (pvsFiles) {
+                    pvsFiles.forEach(function (specContent, index) {
+                        project.addSpecFile(data.pvsSpec[index].name, specContent);
+                    });
+                }).then(function () {
+                    project.saveNew(function (err, res, folderStructure) {
+                        console.log({err: err, res: res});
+                        if (!err) {
+                            if (project.image()) {
+                                pm.updateImage(project.image().content());
+                            }
+                            project.pvsFilesList().forEach(function (f) {
+                                f.dirty(false);
+                            });
+                            //set the main pvs file
+                            project.mainPVSFile(project.pvsFilesList()[0]);
+                            WidgetManager.updateMapCreator();
+                            pm.project(project);
+                            pm.renderSourceFileList(folderStructure);
+                            pvsFilesListView.selectItem(project.mainPVSFile() || project.pvsFilesList()[0]);
+                            //fire project changed event
+                            pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
+                        }
+                    });
+                });
         });
     };
 	

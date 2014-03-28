@@ -336,7 +336,7 @@ define(function (require, exports, module) {
 		var wd = WidgetManager.getWidgetDefinitions();
 		var wdStr = JSON.stringify(wd, null, " ");
 		var ws = WSManager.getWebSocket(), specFiles = this.pvsFilesList().map(function (f, i) {
-			return {fileName: f.name(), fileContent: f.content(), path: f.path()};
+			return {fileName: f.name(), fileContent: f.content()};
 		});
 		var token = {type: "createProject", projectName: this.name(), specFiles: specFiles, widgetDefinitions: wdStr};
 		if (this.mainPVSFile()) {
@@ -356,7 +356,7 @@ define(function (require, exports, module) {
                 }
                 _thisProject.path(res.projectPath);
 			}
-			cb(err, _thisProject);
+			cb(err, _thisProject, res.folderStructure);
 		});
 	};
     
