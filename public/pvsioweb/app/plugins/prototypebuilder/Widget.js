@@ -80,7 +80,7 @@ define(function (require, exports, module) {
 	 */
 	Widget.prototype.createImageMap = function () {
 		var coords = getCoords(this.element());
-		var events, f, widget = this, href = this.type() === "button" ? "#" : null;
+		var events, f, widget = this, href = this.type() === "button" ? "#!" : null;
 		var area = d3.select("map#prototypeMap").append("area");
 		area.attr("class", this.id())
 			.attr("shape", "rect")
