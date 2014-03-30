@@ -1,35 +1,95 @@
 <!-- container for graphical editor -->
-			<div id="graphicalEditor">
-				<div id="stateMachineToolbar" >
-					<button class="btn btn-danger" id="startEmulink"    > New Diagram </button>
-					<button class="btn" id ="zoom" disabled="true";> Zoom + </button>
-					<button class="btn" id ="zoom_" disabled="true"> Zoom -</button>
-					<button class="btn" id ="resetZoom" disabled="true"> Reset Zoom </button>
-					<button class="btn" id="specificationToDiagram"     > Generate Diagram from Specification </button>
-					<button class="btn btn-default" id="startSimulation"> Enable Animation</button>
-					<button class="btn" id="toPDF" disabled = "true" > Create PDF Report </button>
-					<a id="downloadPDF" href="" download="Emulink PDF Report" style="display: none;"> Download PDF Report</a>
-                    
-				</div>
-                <div id="modifyPropertiesToolbar" >
-                    <button id="button_state" disabled = "true"  > New State </button>
-                    <button id="changeNameNode" disabled = "true"> Edit State Name</button> 
-                    <button id="addFieldState"  disabled = "true"> Add Field</button> 
-                    <button id="deleteNode"    disabled= "true"> Delete node </button>
-					<br><br>
-                    <button id="button_transition" disabled = "true"> New Transition </button>
-                    <button id="button_self_transition" disabled = "true"> New Self-Transition </button>
-                    <!-- <button id="button_default_transition" disabled = "true"> New Default Transition </button> -->
-                    <button id="deleteEdge" disabled = "true" > Delete edge </button>
-                    <button id="changeNameEdge" disabled = "true" > Edit Transition Name</button>
-                    <button id="addCondition"  disabled = "true" > Add Condition</button>
-                    <button id="addOperation" disabled = "true"  > Add Action</button>
-                </div><br>
-				<div id="ContainerStateMachine" ></div>
-				<div id="state_machine_toolbar" ></div>
-					<textarea id="emulinkInfo" readonly> </textarea>
-					<textarea id="infoBox" readonly >TIP: Select a state or a transition to see its properties</textarea>
-					<textarea id="infoBoxModifiable" readonly ></textarea>		
-		            <textarea id="warningDebug" readonly >Debug panel</textarea>
-				</div>
-			</div>			
+<div id="graphicalEditor">
+
+<!--
+	<div id="stateMachineToolbar" >
+		<button class="btn btn-danger" id="startEmulink"    > New Diagram </button>
+		<button class="btn" id ="zoom" disabled="true";> Zoom + </button>
+		<button class="btn" id ="zoom_" disabled="true"> Zoom -</button>
+		<button class="btn" id ="resetZoom" disabled="true"> Reset Zoom </button>
+		<button class="btn" id="specificationToDiagram"     > Generate Diagram from Specification </button>
+		<button class="btn btn-default" id="startSimulation"> Enable Animation</button>
+		<button class="btn" id="toPDF" disabled = "true" > Create PDF Report </button>
+		<a id="downloadPDF" href="" download="Emulink PDF Report" style="display: none;"> Download PDF Report</a>
+        
+	</div>
+    <div id="modifyPropertiesToolbar" >
+        <button id="button_state" disabled = "true"  > New State </button>
+        <button id="changeNameNode" disabled = "true"> Edit State Name</button> 
+        <button id="addFieldState"  disabled = "true"> Add Field</button> 
+        <button id="deleteNode"    disabled= "true"> Delete node </button>
+		<br><br>
+        <button id="button_transition" disabled = "true"> New Transition </button>
+        <button id="button_self_transition" disabled = "true"> New Self-Transition </button>
+        <button id="deleteEdge" disabled = "true" > Delete edge </button>
+        <button id="changeNameEdge" disabled = "true" > Edit Transition Name</button>
+        <button id="addCondition"  disabled = "true" > Add Condition</button>
+        <button id="addOperation" disabled = "true"  > Add Action</button>
+    </div><br>
+-->
+	<div id="stateMachineMenu" >
+		<ul class="dropdown dropdown-horizontal">
+<!--			<li><a href='#!' id="newDiagram" class="active"><span>New Diagram</span></a></li> -->
+			<li class='has-sub'><a href='#!'><span>States</span></a>
+				<ul>
+					<li><a href='#!' id="button_state"><span>New state</span></a></li>
+					<li><a href='#!' id="addFieldState"><span>New field</span></a></li>
+					<li><a href='#!' id="changeNameNode"><span>Rename selected state</span></a></li>
+					<li class='last' id="deleteNode"><a href='#!'><span>Delete selected state (and all incoming/outgoing transitions)</span></a></li>
+				</ul>
+			</li>
+			<li class='has-sub'><a href='#!'><span>Transitions</span></a>
+				<ul>
+					<li><a href='#!' id="button_transition"><span>New transition</span></a></li>
+					<li><a href='#!' id="button_self_transition"><span>New self-transition</span></a></li>
+					<!--				       <li><a href='#!'><span>New default transition</span></a></li> -->
+					<li><a href='#!' id="addCondition"><span>Add condition to selected transition</span></a></li>
+					<li><a href='#!' id="addOperation"><span>Add action to selected transition</span></a></li>
+					<!--				       <li><a href='#!'><span>New parameter</span></a></li> -->
+					<li><a href='#!' id="changeNameEdge"><span>Rename selected transition</span></a></li>
+					<!--				       <li><a href='#!'><span>Change action</span></a></li>
+					<li><a href='#!'><span>Change condition</span></a></li> -->
+					<li><a href='#!' id="deleteEdge"><span>Delete selected transition</span></a></li>
+					<!--				       <li><a href='#1'><span>Delete default transition</span></a></li>
+					<li><a href='#!'><span>Delete action</span></a></li>
+					<li class='last'><a href='#!'><span>Remove condition from selected transition</span></a></li>-->
+				</ul>
+			</li>
+			<li class='has-sub'><a href='#!'><span>Constants</span></a>
+				<ul>
+					<li class='last'><a href='#!'><span>New constant</span></a></li>
+				</ul>
+			</li>
+		   <li class='has-sub'><a href='#!'><span>View</span></a>
+				<ul>
+					<li><a href='#1'><span>Zoom+</span></a></li>
+					<li><a href='#!'><span>Zoom-</span></a></li>
+					<li class='last'><a href='#!'><span>Reset zoom</span></a></li>
+				</ul>
+		   </li>
+		   <li class='active has-sub'><a href='#!'><span>Utilities</span></a>
+				<ul>
+					<li><a href='#!'><span>Generate diagram from specification</span></a></li>
+					<li><a href='#!'><span>Enable animation</span></a></li>
+					<li class='last'><a href='#!'><span>Create PDF report</span></a></li>
+				</ul>
+		   </li>
+		   <li class='active has-sub'><a href='#!'><span>Help</span></a>
+				<ul>
+					<li><a href='#!'><span>Online help</span></a></li>
+					<li><a href='#!'><span>Report an issue...</span></a></li>
+					<li><a href='#!'><span>About</span></a></li>
+				</ul>
+		   </li>
+		</ul>
+	</div>
+
+	<div id="ContainerStateMachine" ></div>
+	<div id="state_machine_toolbar" ></div>
+		<!-- <textarea id="emulinkInfo" readonly> </textarea> -->
+		<textarea id="infoBox" readonly >TIP: Use the Emulink menu to create states and transitions</textarea>
+		<textarea id="infoBoxModifiable" readonly >Diagram Editor (to be implemented) </textarea>
+        <!-- <textarea id="warningDebug" readonly >Debug messages</textarea> -->
+	</div>
+</div>			
+

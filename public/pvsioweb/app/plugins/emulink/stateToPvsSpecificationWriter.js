@@ -442,7 +442,10 @@ function WriterOnContent( editor)
 		//// FIXME: this interferes with the autocompletion: the contextual menu created
 		////          by the autocompletion functionality disappears when parseToFindInconsistency is invoked
         clearTimeout(writer.timeOut);
-        writer.timeOut = setTimeout(function(){writer.parseToFindDiagramSpecificationInconsistency() } , 10000 );        
+        // commented out: we want to avoid automatic actions because they require additional computation power
+        //                which is an issue on mobile devices (e.g., tablets).
+        //                TODO: modify this so that consistency is checked on demand when the user performs a specific action
+		//writer.timeOut = setTimeout(function(){writer.parseToFindDiagramSpecificationInconsistency() } , 10000 );        
     }
     
     this.parseToFindDiagramSpecificationInconsistency = function()
@@ -456,12 +459,11 @@ function WriterOnContent( editor)
         
         /****************** Checking stateNames **************/
 
-        writer.checkConsistenceStateNames(nodesInDiagram, stateNamesInSpecification);      
+//        writer.checkConsistenceStateNames(nodesInDiagram, stateNamesInSpecification);      
         
         /****************** Checking transFunctions **********/
         
-        if( edgesInDiagram.length )
-            writer.checkConsistenceTransFunction(edgesInDiagram);
+//        if( edgesInDiagram.length ) { writer.checkConsistenceTransFunction(edgesInDiagram); }
         /******************************************************/
         
         editor.find(''); // This is an hack to make disappear selection created indirectly to find content
@@ -471,7 +473,7 @@ function WriterOnContent( editor)
 
     this.checkConsistenceStateNames = function(nodesInDiagram, stateNamesInSpecification)
     {
-        var debug = document.getElementById("warningDebug");
+//        var debug = document.getElementById("warningDebug");
         var nodesInStateNames;
         var listEmpty = false;
         var numberOfStatesInDiagram;
@@ -536,7 +538,7 @@ function WriterOnContent( editor)
     }
     this.checkConsistenceTransFunction = function (edgesInDiagram)
     {
-           var debug = document.getElementById("warningDebug");
+//           var debug = document.getElementById("warningDebug");
           
            edgesInDiagram.forEach( function(currentEdge) {
 
@@ -628,9 +630,10 @@ function WriterOnContent( editor)
         }
         if( ! missField) { return; }
         
-        var debug = document.getElementById("warningDebug");
+/*        var debug = document.getElementById("warningDebug");
         debug.value = "\t   DeBuG \n";
         debug.value = debug.value + "Warning: " + fieldStateInOperation + " is not in PVS State ";
+*/
     }
     
     this.changeEditor = function() 
@@ -674,10 +677,15 @@ function WriterOnContent( editor)
         arrayTag.forEach(function( currentTag)
             {
                 var tmp = currentTag.replace(/(\r\n|\n|\r)/g, "");
-                tmp = tmp.substring(0, currentTag.lastIndexOf('}'));
+                tmp = tmp.substring(0, currentTag.lastIndexOf('}') - 1); // removing the final curly bracket because the search needs to be done only on the first part of the tag (tags can include additional fields, e.g., transition actions or transition conditions). We don't want to check those additional fields because buildTagCond does not support them yet, and in the current implementation start and end nodes are in any case sufficient to identify transitions.
                 tmp = writer.editor.find(tmp, objectSearch, false);
-                var realTag = writer.editor.session.getLine(tmp.end.row);
-                arrayTagToReturn.push(realTag);
+				if(tmp) { 
+					var realTag = writer.editor.session.getLine(tmp.end.row);
+	                arrayTagToReturn.push(realTag);
+				}
+				else {
+					alert("Parser error. Debug info: empty seach for the following string " + tmp );
+				}
 
             });
         return arrayTagToReturn;
@@ -808,7 +816,7 @@ function WriterOnContent( editor)
     }
     this.addOperationInCondition = function(nameTrans, sourceName, targetName, operation)
     {
-        this.checkConsistenceOperation(operation);
+//        this.checkConsistenceOperation(operation);
         var rawOperation = operation;
         operation = "  new_st = new_st WITH [ " + operation + " ]";
         var arrayTag = this.findRealTagCond(nameTrans, sourceName, targetName);

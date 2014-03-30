@@ -20,25 +20,36 @@ define(function (require, exports, module) {
 
     var emulinkHasBeenUsed = false; //Default: Current Project is not Emulink Project
     var ws;
+	var currentProject;
+	var projectManager;
+	var editor;
 	
 	function createHtmlElements(pvsioWebClient) {
 		var content = require("text!plugins/emulink/forms/maincontent.handlebars");
-        var canvas = pvsioWebClient.createCollapsiblePanel("Statechart editor");
-        canvas = canvas.html(content); 
+        var canvas = pvsioWebClient.createCollapsiblePanel("Statechart Editor");
+        canvas = canvas.html(content);
+		// start emulink
+        if( ! emulinkHasBeenUsed ) {   
+            showEmulinkStatus();
+            stateMachine.init(editor, ws, currentProject, projectManager, true);
+            currentProject.name("default_pvsProject");
+            emulinkHasBeenUsed = true;
+        }
+        stateMachine.addNewDiagram();
 	}
-	function showEmulinkStatus()
-    {
-        document.getElementById("emulinkInfo").value = "Emulink Status: Active ";
-        document.getElementById("emulinkInfo").style.color = "#53760D";
-        
+
+	function showEmulinkStatus() {
+//        document.getElementById("emulinkInfo").value = "Emulink Status: Active ";
+//        document.getElementById("emulinkInfo").style.color = "#53760D";
     }
+
 	function Emulink(pvsioWebClient) {
 		//register prototype builder as a plugin since this plugin depends on it
 		var pb = pvsioWebClient.registerPlugin(PrototypeBuilder);
-		var projectManager = pb.getProjectManager(),
-			editor = pb.getEditor();
+		projectManager = pb.getProjectManager();
+		editor = pb.getEditor();
         ws = pvsioWebClient.getWebSocket();
-        var currentProject = projectManager.project();
+        currentProject = projectManager.project();
         var selectedFileChanged;	
         
 		//create the user interface elements
@@ -146,7 +157,7 @@ define(function (require, exports, module) {
 	    stateMachine.changeTextArea();
 	 
         });*/
-        document.getElementById("emulinkInfo").value = "Emulink status: NOT active";
+/*        document.getElementById("emulinkInfo").value = "Emulink status: NOT active";
         document.getElementById("startEmulink").disabled = false;
         /// User wants to start emulink 
         d3.select("#startEmulink").on("click", function () {
@@ -158,12 +169,9 @@ define(function (require, exports, module) {
                 currentProject.name("default_pvsProject");
                 emulinkHasBeenUsed = true;
             }
-            
-            stateMachine.addNewDiagram();
-
-            
+            stateMachine.addNewDiagram();          
         });    
-	   
+	   */
         //Adding Listener triggered when user saves a project
 		projectManager.addListener("ProjectSaved", function (event) { 
             

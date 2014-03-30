@@ -1,10 +1,11 @@
 #ContainerStateMachine  {
 	border:         2px solid;
 	background:     #fffcec;
- 	width:          930px;
-	border-radius:  10px;
-  height:         800px;
+ 	width:          934px;
+	border-radius:  4px;
+	height:         844px;
 	left:		1px;
+	cursor: default;
 	/*display:        none; */
 }
 #stateMachineToolbar {
@@ -122,11 +123,21 @@ ul#context-menu li {
   background :  #FF0000;
   font-family: Tahoma, sans-serif;
 }
-#infoBox {
+#infoBox-old {
   position: absolute;
   top:	    150px;
   width:    180px;
   height:   80px;
+  left:    940px;
+  border-width : 1px;
+  background :  #D0F18F;
+  font-family: Tahoma, sans-serif;
+}
+#infoBox {
+  position: absolute;
+  top:	    0px;
+  width:   180px;
+  height:  220px;
   left:    940px;
   border-width : 1px;
   background :  #D0F18F;
@@ -142,11 +153,21 @@ ul#context-menu li {
   background :  #CEF6F5;
   font-family: Tahoma, sans-serif;
 }
-#warningDebug {
+#warningDebug-old {
   position: absolute;
   top:	    530px;
   width:    180px;
   height:   300px;
+  left:    940px;
+  border-width : 1px;
+  background :  #AAFFFF;
+  font-family: Tahoma, sans-serif;
+}
+#warningDebug {
+  position: absolute;
+  top:	    230px;
+  width:    180px;
+  height:   500px;
   left:    940px;
   border-width : 1px;
   background :  #AAFFFF;
