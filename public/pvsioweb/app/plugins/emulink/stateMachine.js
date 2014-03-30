@@ -856,7 +856,7 @@ var emulink = function() {
 	// update force layout (called automatically each iteration)
 	function tick() {
 		// draw directed edges with proper padding from node centers
-		path.select("path")
+		path.selectAll("path")
 			.attr('d', function(d) {
 				if(d.target.x == d.source.x && d.target.y == d.source.y) {
 					// self-edge
@@ -937,6 +937,12 @@ var emulink = function() {
 		});
 	}
 
+
+    var stroke_width_large = 20;
+	var stroke_width_normal = 1;
+	var stroke_width_highlighted = 1.5;
+
+
 	// update graph (called when needed)
 	function restart() {
 		force = d3.layout.force()
@@ -952,7 +958,46 @@ var emulink = function() {
 		path = path.data(graph.edges.values(), function(d) {return d.id;});
 		// add new links
 		var pathCanvas = path.enter().append('svg:g');
-		pathCanvas
+
+        var expandedPathCanvas = pathCanvas.append("svg:g");
+		expandedPathCanvas
+			.append('svg:path')
+			.attr("id", function(d) { return d.id + "_selection_overlay"; })
+			.attr('class', 'link')
+			.style("markerUnits", "userSpaceOnUse")
+			.style("cursor", "pointer") // change cursor shape
+			.style("stroke-width", stroke_width_large)
+			.attr("opacity","0")
+			.attr("stroke","black")
+			.on('mousedown', function(d) {
+				// update mousedown_link
+				mousedown_link = d;
+				if(d3.event.ctrlKey) {
+					//TODO: use the ctrl key to allow the selection of multiple nodes
+				}
+				else {
+					showInformationInTextArea(d);
+					pvsWriter.focusOnFun(d, true);
+					clear_selection();
+					setButtonsEnabledOrDisabledAboutEdge(false);
+					selected_edges.set(d.id, d);
+					// highlight only selected edges
+					path.selectAll("path").classed("selected", function(d) { return selected_edges.has(d.id); });
+				}
+			})
+			.on('mouseup', function(d) {
+				// update mouseup_link
+				mouseup_link = d;
+			})
+			.on('mouseover', function(d) {
+				// zoom edge
+				d3.select(this.parentNode.lastChild).style("stroke-width", function(d){ return stroke_width_highlighted;});
+			})
+			.on('mouseout', function(d) {
+				// restore edge size
+				d3.select(this.parentNode.lastChild).style("stroke-width", function(d){ return stroke_width_normal;});
+			});
+		expandedPathCanvas
 			.append('svg:path')
 			.attr("id", function(d) { return d.id; })
 			.attr('class', 'link')
@@ -960,7 +1005,7 @@ var emulink = function() {
 			.style('marker-start', function(d) { return d.left ? 'url(#start-arrow)' : ''; })
 			.style('marker-end', 'url(#end-arrow)')
 			.style("cursor", "pointer") // change cursor shape
-			.style("stroke-width", "1")
+			.style("stroke-width", stroke_width_normal)
 			.attr("fill-opacity","0")
 			.attr("stroke","black")
 			.on('mousedown', function(d) {
@@ -985,12 +1030,13 @@ var emulink = function() {
 			})
 			.on('mouseover', function(d) {
 				// zoom edge
-				d3.select(this).style("stroke-width", function(d){ return 1.5;});
+				d3.select(this).style("stroke-width", function(d){ return stroke_width_highlighted;});
 			})
 			.on('mouseout', function(d) {
 				// restore edge size
-				d3.select(this).style("stroke-width", function(d){ return 1;});
+				d3.select(this).style("stroke-width", function(d){ return stroke_width_normal;});
 			});
+
 		pathCanvas
 			.append("svg:text")
 			.attr('font-family',"Verdana")
