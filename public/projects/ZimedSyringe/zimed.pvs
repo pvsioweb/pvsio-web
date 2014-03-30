@@ -4,7 +4,7 @@ zimed: THEORY
   %-- constants
   max: posreal = 99.99;
   alarmType: TYPE = {silent, beep, muted}
-  maxCursor: posreal = 1
+  maxCursor: posreal = 2
   minCursor: negreal = -2
 
   %-- type definitions
@@ -93,7 +93,7 @@ zimed: THEORY
      LET i = c(st) IN
       COND
         i < maxCursor -> st WITH [ c := i + 1 ],
-        i = maxCursor -> st 
+        i = maxCursor -> st WITH [ c := minCursor ]
       ENDCOND
 
   %-- right button
@@ -102,7 +102,7 @@ zimed: THEORY
       LET i = c(st) IN
        COND
          i > minCursor -> st WITH [ c := i - 1 ],
-         i = minCursor -> st
+         i = minCursor -> st WITH [ c := maxCursor]
        ENDCOND
 
 
@@ -143,5 +143,7 @@ zimed: THEORY
   press_rt(st: State): State = zimed_rt(st)
   release_rt(st: State): State = st
   click_rt(st: State): State = release_rt(press_rt(st))
+  
+  click_ON(st: State): State = init(0) WITH [ on := 1 ]
 
  END zimed
