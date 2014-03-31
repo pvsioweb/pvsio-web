@@ -345,21 +345,23 @@ function changeFunName(oldName, newName, sourceName, targetName, counter)
     writer.leaveLockOnEditor();    
 }
 
+function addDefaultTransition(stateName)
+{
+    writer.getLockOnEditor();
+    writer.addDefaultTransition(stateName);
+    writer.leaveLockOnEditor();
+}
 function deleteCondition(nameTrans, sourceName, targetName)
 {
     writer.getLockOnEditor();
-
     writer.deleteCondInTrans(nameTrans, sourceName, targetName);
-
     writer.leaveLockOnEditor();   
 
 }
 function deleteTrans(nameTrans )
 {
     writer.getLockOnEditor();
-
     writer.deleteTransition(nameTrans);
-
     writer.leaveLockOnEditor(); 
 }
 
@@ -423,6 +425,9 @@ function WriterOnContent( editor)
     
     this.tagFieldStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : \"State\", \"_type\": \"State\"}";
     this.tagFieldEnd = "  " + this.BLOCK_END + ", " + this.ID_FIELD + " : \"State\", \"_type\": \"State\"}";
+
+    this.tagInitStateStart = " " + this.BLOCK_START + ", " + this.ID_FIELD +  " : \"initial_state\"}";
+    this.tagInitStateEnd = " " + this.BLOCK_END + ", " + this.ID_FIELD +  " : \"initial_state\"}";
 
     this.tagSwitchCond = "{\"_cond\" : \"*COND*\"}";
     this.switchCondTag = "_switchCond";
@@ -806,6 +811,17 @@ function WriterOnContent( editor)
     {
         this.tagCondStart = tagCondStart;
         this.tagCondEnd = tagCondEnd;
+    }
+    
+    this.addDefaultTransition = function(stateName)
+    {
+        var oldContent = this.getContentBetweenTags(this.tagInitStateStart, this.tagInitStateEnd, true);        
+        var newContent = "  initial_state : State = (#\n\t\tcurrent_state := " + stateName + ",\n\t\tprevious_state := "
+            + stateName + "\n\t\t#)\n";
+        var objectSearch = { wrap: true, range: null, wholeWord: false, regExp: false };
+        writer.editor.find(oldContent, objectSearch);
+        writer.editor.replace(newContent);
+        
     }
     this.addOperationInCondition = function(nameTrans, sourceName, targetName, operation)
     {
@@ -1400,7 +1416,8 @@ module.exports = {
         setTagsField : setTagsField,
         deleteCondition : deleteCondition,
         deleteNode : removeState,
-        deleteTrans: deleteTrans
+        deleteTrans: deleteTrans,
+        addDefaultTransition : addDefaultTransition
 
 };
 

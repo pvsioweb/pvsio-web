@@ -8,49 +8,58 @@
 
 define(function (require, exports, module) {
     "use strict";
-    var groups = {"(#": "#)", "(": ")", "(:": ":)", "#)": "(#", ")": "(", ":)": "):"};
+    var groups = {
+        "(#": "#)",
+        "(": ")",
+        "(:": ":)",
+        "#)": "(#",
+        ")": "(",
+        ":)": "):"
+    };
     /**
         Matches an alphabetic character
     */
     function alpha(c) {
         return (/[a-z]/i).test(c);
     }
-    
+
     /** matches a numeric character */
     function num(d) {
         return (/[0-9]/).test(d);
     }
-    
+
     /** matches a space character */
     function space(s) {
         return (/\s/).test(s);
     }
-    
+
     /** matches a comma */
     function comma(c) {
         return (/\,/).test(c);
     }
-    
+
     /** matches a word character */
     function wordChar(c) {
-        return (/\w/).test(c);
+        return (/[\w]/).test(c);
     }
-    
+
     /**
         evaluates a numeric string represented as a fraction. If the string is not a fraction, it converts the string to a number.
     */
     function evaluate(str) {
-        var args = str.split("/");
-        if (args.length !== 2) {
-            if (!isNaN(+str)) {
-                return +str;
-            } else {
-                return str;
+        if (str) {
+            var args = str.split("/");
+            if (args.length !== 2) {
+                if (!isNaN(+str)) {
+                    return +str;
+                } else {
+                    return str;
+                }
             }
+            return +args[0] / +args[1];
         }
-        return +args[0] / +args[1];
     }
-    
+
     /**
         Reads the given string from the specified start position until the specified condition returns false or
         the end of the string is reached.
@@ -60,21 +69,32 @@ define(function (require, exports, module) {
         @return {string, number} An object representing the word consumed by the read process and the last index of the character read before the condition returned false or the end of the string was reached.
     */
     function readUntil(str, start, cond) {
-        var i = start, word = "";
+        var i = start,
+            word = "";
         for (i = start; i < str.length; i++) {
             if (!cond(str[i], str[i - 1])) {
-                return {word: word, index: i};
+                return {
+                    word: word,
+                    index: i
+                };
             } else {
                 word = word.concat(str[i]);
             }
         }
-        return {word: word, index: i};
+        return {
+            word: word,
+            index: i
+        };
     }
-    
-    function isclosebr(s) {return s.indexOf(")") >= 0; }
-    
-    function isopenbr(s) {return s.indexOf("(") >= 0; }
-    
+
+    function isclosebr(s) {
+        return s.indexOf(")") >= 0;
+    }
+
+    function isopenbr(s) {
+        return s.indexOf("(") >= 0;
+    }
+
     function wordBeforeEqual(ch, prev) {
         return (prev + ch) !== ":=";
     }
@@ -89,7 +109,7 @@ define(function (require, exports, module) {
         });
         return obj;
     }
-    
+
     /**
         Parses a string value representing PVSio function output and returns a JSON object representing the same information.
         "(", and "(:" designate the beginning of a list and are thus converted to arrays. "(#" designate the beginning of a 
@@ -121,7 +141,7 @@ define(function (require, exports, module) {
                     return !(stack.length === 0 && prev.concat(ch) === close);
                 });
                 subValue.index = subValue.index + 1;
-                if (br === "(#") {//we are reading key-value pairs
+                if (br === "(#") { //we are reading key-value pairs
                     index = 0;
                     res = {};
                     //while we can still find a comma after parsing a value,
@@ -129,15 +149,18 @@ define(function (require, exports, module) {
                     do {
                         var key = readUntil(subValue.word, index + 1, wordBeforeEqual);
                         key.word = key.word.trim();
-                        key.word = key.word.substr(0, key.word.length - 1);//removing spaces and last char ":"
+                        key.word = key.word.substr(0, key.word.length - 1); //removing spaces and last char ":"
                         key.index = key.index + 1;
                         val = parseValue(subValue.word.substring(key.index));
                         res[key.word] = val.value;
                         index = (val.index + key.index);
                     } while (subValue.word[index] === ",");
-               
-                    return {value: res, index: subValue.index};
-                } else if (br === "(:") {//we are reading a list
+
+                    return {
+                        value: res,
+                        index: subValue.index
+                    };
+                } else if (br === "(:") { //we are reading a list
                     res = [];
                     index = 0;
                     do {
@@ -145,26 +168,37 @@ define(function (require, exports, module) {
                         res.push(val.value);
                         index += val.index;
                     } while (subValue.word[index++] === ",");
-                    return {value: res, index: subValue.index};
+                    return {
+                        value: res,
+                        index: subValue.index
+                    };
                 }
-                
+
             } else {
                 //just an open bracket -- htey usually signify a list of some sort
                 subValue = readUntil(value, token.index + 1, function (ch, prev) {
                     return ch !== ")";
                 });
                 //parse the list as an array separated by commas and return it
-                res = subValue.word.split(",").map(function (d) {return d.trim(); });
-                return {value: res, index: subValue.index};
+                res = subValue.word.split(",").map(function (d) {
+                    return d.trim();
+                });
+                return {
+                    value: res,
+                    index: subValue.index
+                };
             }
         } else {
             token = readUntil(value, token.index, function (ch, prev) {
-                return wordChar(ch, prev) || num(ch) || (/[\/\.\-\"\']/).test(ch);
+                return wordChar(ch, prev) || num(ch) || (/[\/\.\-\"\'\s\_]/).test(ch);
             });
-            return {value: token.word, index: token.index};
+            return {
+                value: token.word,
+                index: token.index
+            };
         }
     }
-    
+
     module.exports = {
         parse: function (state) {
             return parseValue(state).value;

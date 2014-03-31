@@ -10,7 +10,8 @@ define(function (require, exports, module) {
     var Widget = require("./Widget"),
         property = require("util/property"),
         CursoredDisplay = require("widgets/CursoredDisplay"),
-        StateParser = require("util/PVSioStateParser");
+        StateParser = require("util/PVSioStateParser"),
+        Speaker  = require("widgets/TextSpeaker");
 	
     function Display(id) {
         Widget.call(this, id, "display");
@@ -18,6 +19,7 @@ define(function (require, exports, module) {
 		//this.predefinedRegex = property.call(this);
 		this.displayKey = property.call(this);
 		this.cursorName = property.call(this);
+        this.auditoryFeedback = property.call(this);
     }
     
     Display.prototype = Object.create(Widget.prototype);
@@ -27,6 +29,9 @@ define(function (require, exports, module) {
 	Display.prototype.render = function (stateString) {
 		var state = StateParser.parse(stateString);
         var dispVal = StateParser.evaluate(StateParser.resolve(state, this.displayKey()));
+        if (typeof dispVal === "string") {
+            dispVal = dispVal.replace(/[\"\']/g, "");
+        }
 		var y = this.element().attr("y"),
 			x = this.element().attr("x"),
 			w = this.element().attr("width"),
@@ -51,6 +56,10 @@ define(function (require, exports, module) {
 			
 			disp.renderNumber(dispVal.toString(), +state[this.cursorName()]);
 		}
+        //read out the display if audio is enabled for this display widget
+        if (this.auditoryFeedback()) {
+            Speaker.speak(dispVal.toString());
+        }
     };
     
     Display.prototype.toJSON = function () {
@@ -58,7 +67,8 @@ define(function (require, exports, module) {
 			type: this.type(),
 			id: this.id(),
 			displayKey: this.displayKey(),
-			cursorName: this.cursorName()
+			cursorName: this.cursorName(),
+            auditoryFeedback: this.auditoryFeedback()
 		};
 	};
 	
