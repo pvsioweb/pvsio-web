@@ -16,19 +16,29 @@ define(function (require, exports, module) {
         display.render(stateString);
     }
     
-    function getButtonCoords(id) {
+    function getButtonPos(id) {
         var coords = d3.select("." + id).attr("coords");
         coords = coords.split(",");
         return {x1: +coords[0], y1: +coords[1], x2: +coords[2], y2: coords[3]};
     }
 
     function halo(pos) {
-            
+        var w = pos.x2 - pos.x1, hrad = w / 2, h = pos.y2 - pos.y1, vrad = h / 2, brad = hrad + "px " + vrad + "px";
+        var mark = d3.select(".animation-halo");
+        if (mark.empty()) {
+            mark = d3.select("#imageDiv").append("div").attr("class", "animation-halo");
+        }
+        mark.style("top", pos.y1 + "px").style("left", pos.x1 + "px")
+            .style("width", (pos.x2 - pos.x1) + "px").style("height", (pos.y2 - pos.y1) + "px")
+            .style("border-top-left-radius", brad).style("border-top-right-radius", brad)
+            .style("border-bottom-left-radius", brad).style("border-bottom-right-radius", brad);
+        
     }
     
     function play(actions, display) {
         var action = actions.shift();
-
+        var pos = getButtonPos(action.id);
+        halo(pos);
         var command = action.action + "_" + action.functionText + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");";
         ws.sendGuiAction(command, function (err, res) {
             var stateString = res.data.join("");
@@ -52,9 +62,9 @@ define(function (require, exports, module) {
         var time = actions[actions.length - 1].ts - actions[0].ts;
         script.time = (time / 1000) + "s";
         startState = Array.isArray(startState) ? startState.join("") : startState;
-        var display = WidgetManager.getDisplayWidgets()[0];
 
         ScriptItemView.create(script).on("scriptClicked", function (name) {
+            var display = WidgetManager.getDisplayWidgets()[0];
             ws.lastState(script.startState);
             //render the last state
             if (script.startState !== "init(0)") {
@@ -67,6 +77,9 @@ define(function (require, exports, module) {
     }
     module.exports = {
         play: play,
-        addScriptToView: addScriptToView
+        addScriptToView: addScriptToView,
+        clearView: function () {
+            d3.select("#scripts ul").html("");
+        }
     };
 });
