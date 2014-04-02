@@ -53,7 +53,6 @@ define(function (require, exports, module) {
 				.append("canvas").attr("width", w).attr("height", h).attr("id", "display");
 			var disp = new CursoredDisplay("display", w, h);
 			// parse cursor position
-			
 			disp.renderNumber(dispVal.toString(), +state[this.cursorName()]);
 		}
         //read out the display if audio is enabled for this display widget

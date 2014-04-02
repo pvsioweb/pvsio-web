@@ -118,7 +118,8 @@ define(function (require, exports, module) {
         var id = fileNameToId(folderStructure.name.substr(project.path().length + 1)) || "project_root";
         var res = {text: folderStructure.name.substr(parent.length + 1),
                    file: folderStructure.name, id: id,
-                   isDirectory: folderStructure.isDirectory};
+                   isDirectory: folderStructure.isDirectory,
+                  folder: (folderStructure.isDirectory ? folderStructure.name : folderStructure.name.substring(0, folderStructure.name.lastIndexOf("/")))};
         if (res.isDirectory) {
             res.li_attr = {"class": "directory"};
         } else {
@@ -166,13 +167,13 @@ define(function (require, exports, module) {
         }).on("rename_node.jstree", function (e, data) {
             //this is called whenever user renames or creates a new node
             //it is a new node if the data starts with Unititled
-            var newPath;
+            var newPath = data.node.original.folder + "/" + data.text;
+            //if the file item is unsaved then write the file to the server then add the file to the project
             if (data.node.original.text.indexOf(unSavedName) === 0) {
-                newPath = data.node.original.folder + "/" + data.text;
                 var t = $(elementId).jstree(true);//change the id of the inserted object and 
                 var newNodeId = fileNameToId(newPath.substr(project.path().length + 1));
                 t.set_id(data.node, newNodeId);
-                //write the file to the server then add the file to the project
+                //if adding directory or file update the node data accordingly
                 if (data.node.original.isDirectory) {
                     ws.writeDirectory(newPath, function (err, res) {
                         if (!err) {

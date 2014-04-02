@@ -44,10 +44,6 @@ require(["PVSioWebClient", "util/PVSioStateParser",
             var state = StateParser.parse(pvsState);
             responses.push(state);
             TCASView.render(state);
-            if (responses.length % 10 === 0) {
-                showRange();
-                console.log(state);
-            }
         });
     }
         
@@ -57,7 +53,6 @@ require(["PVSioWebClient", "util/PVSioStateParser",
             timer = setInterval(tick, t);
             d3.select("#pause").on("click", function () {
                 clearInterval(timer);
-                
             });
             
             d3.select("#resume").on("click", function () {

@@ -254,11 +254,14 @@ define(function (require, exports, module) {
         var p = this;
         var ws = WSManager.getWebSocket();
         var baseDir = file.path().substring(0, file.path().lastIndexOf("/")),
-            newPath = baseDir + "/" + newName;
+            newPath = baseDir + "/" + newName,
+            oldPath = file.path();
         ws.send({type: "renameFile", oldPath: file.path(),
                  newPath: newPath}, function (err) {
             if (!err) {
                 file.path(newPath);
+                p.pvsFiles()[newPath] = file;
+                delete p.pvsFiles()[oldPath];
                 p.fire({type: "SpecFileRenamed", file: file});
                 if (cb) {cb(); }
             } else {

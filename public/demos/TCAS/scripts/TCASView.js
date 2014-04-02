@@ -7,7 +7,9 @@
 /*global define, d3, require, $, brackets, window, MouseEvent */
 define(function (require, exports, module) {
     "use strict";
-    var StateParser = require("./PVSioStateParser");
+    var StateParser = require("util/PVSioStateParser"),
+        d3 = require("d3/d3");
+    
     var h = 1200, w = 1200;
     function drawIntruder(pos) {
         
@@ -51,19 +53,29 @@ define(function (require, exports, module) {
     function normalisePos(pos) {
         pos.x = StateParser.evaluate(pos.x) + w / 2;
         pos.y = StateParser.evaluate(pos.y) + h / 2;
-//        pos.x = pos.x / 10;
-//        pos.y = pos.y / 10;
         return pos;
     }
     
     function render(state) {
-        var canvas = document.getElementById('canvas').getContext("2d");
+        //create the canvas if it does not already exist
+        var canvasEl = d3.select("canvas");
+        if (canvasEl.empty()) {
+            canvasEl = d3.select("#canvas").append("canvas").attr("width", w + "px").attr("height", h + "px");
+        }
+        var canvas = canvasEl.node().getContext("2d");
         canvas.clearRect(0, 0, w, h);
+        if (!state.si || !state.so) {
+            return;
+        }
         var ipos = normalisePos(state.si);
-        var spos = normalisePos(state.so);
+        var opos = normalisePos(state.so);
+        var center = {x: w / 2, y: h / 2};
+        var iPosRel = {x: opos.x - ipos.x, y: opos.y - ipos.y};
         
-        drawSelf(canvas, ipos);
-        drawSelf(canvas, spos);
+        //draw the intruder position
+        drawSelf(canvas, {x: center.x + iPosRel.x, y: center.y + iPosRel.y});
+        //draw the own position
+        drawSelf(canvas, center);
     }
     
     module.exports = {

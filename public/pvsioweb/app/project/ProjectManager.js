@@ -16,6 +16,7 @@ define(function (require, exports, module) {
 		WSManager = require("websockets/pvs/WSManager"),
 		fs	= require("util/fileHandler"),
 		queue = require("d3/queue"),
+        ScriptPlayer = require("util/ScriptPlayer"),
         newProjectForm          = require("pvsioweb/forms/newProject"),
 		openProjectForm         = require("pvsioweb/forms/openProject"),
 		openFilesForm = require("pvsioweb/forms/openFiles"),
@@ -262,6 +263,7 @@ define(function (require, exports, module) {
                     //open selected project
 					ws.send({type: "openProject", name: e.data.projectName}, function (err, res) {
 						if (!err) {
+                            ScriptPlayer.clearView();
 							var p = initFromJSON(res.project);
 							WidgetManager.clearWidgetAreas();
 							d3.select("div#body").style("display", null);
@@ -398,7 +400,7 @@ define(function (require, exports, module) {
             console.log(e);
             formView.remove();
 			WidgetManager.clearWidgetAreas();
-		
+            ScriptPlayer.clearView();
 			var project = new Project();
 			//update the current project with info from data and saveNew
 			project.name(data.projectName);
