@@ -61,7 +61,7 @@ define(function (require, exports, module) {
             startState = script.startState;
         var time = actions[actions.length - 1].ts - actions[0].ts;
         script.time = (time / 1000) + "s";
-        startState = Array.isArray(startState) ? startState.join("") : startState;
+        script.startState = Array.isArray(startState) ? startState.join("") : startState;
 
         ScriptItemView.create(script).on("scriptClicked", function (name) {
             var display = WidgetManager.getDisplayWidgets()[0];
