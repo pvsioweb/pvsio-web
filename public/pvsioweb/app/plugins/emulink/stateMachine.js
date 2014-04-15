@@ -507,6 +507,12 @@ function SvgViewHandler()
 	this.zoomCounter = 1;
 }
 
+
+var stroke_width_large = 20;
+var stroke_width_normal = 1;
+var stroke_width_highlighted = 1.5;
+
+
 SvgViewHandler.prototype.restoreColorNodesAndEdges = function()
 {
 	var colors = d3.scale.category10();
@@ -515,7 +521,10 @@ SvgViewHandler.prototype.restoreColorNodesAndEdges = function()
 
     svgViewHandler.svg.selectAll("path")		
 		.style("stroke", "black")
-		.style("stroke-width", 1);
+//		.style("stroke-width", 1);
+		.style("stroke-width", function() { 
+			if(this.id && this.id != "" && this.id.indexOf("_selection_overlay") < 0) { return stroke_width_normal; }
+			return this.style.stroke-width; });
 }
 SvgViewHandler.prototype.highlightElements = function ( nodes ) {
 	// highlight nodes
@@ -570,11 +579,12 @@ SvgViewHandler.prototype.highlightElements = function ( nodes ) {
 				for(var i = 0; i < labels.length; i++) {
 					if(labels[i].name == d.name 
 						&& labels[i].source.name == d.source.name
-						&& labels[i].target.name == d.target.name) {
-						return 3;
+						&& labels[i].target.name == d.target.name
+						&& this.id && this.id != "" && this.id.indexOf("_selection_overlay") < 0) {
+							return 3;
 					}
 				}
-				return 1;}
+				return this.style.stroke-width;}
 		});
 }
 SvgViewHandler.prototype.zoom = function(delta)
@@ -1071,10 +1081,6 @@ var emulink = function() {
 				return "translate(" + d.x + "," + d.y + ")";
 		});
 	};
-
-    var stroke_width_large = 20;
-	var stroke_width_normal = 1;
-	var stroke_width_highlighted = 1.5;
 
 	// update graph (called when needed)
 	function restart() {

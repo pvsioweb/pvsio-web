@@ -145,10 +145,8 @@ define(function (require, exports, module) {
         
         d3.select("#startSimulation").on("click", function() {            
             var simulationIsActive = Simulator.init(ws); 
-            if( simulationIsActive ) { d3.select(this).html("Animation Enabled").classed("btn btn-success", true); }
-            else
-                d3.select(this).html("Enable Animation").classed("btn btn-success", false).classed("btn", true);
-
+            if( simulationIsActive ) { d3.select(this).html("Disable Animation"); }
+            else { d3.select(this).html("Enable Animation"); }
             //Simulator.setInitState("INITSTATE");
         });
 	
