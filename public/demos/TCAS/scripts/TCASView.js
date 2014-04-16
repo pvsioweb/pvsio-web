@@ -18,6 +18,8 @@ define(function (require, exports, module) {
     function drawCross(canvas, pos) {
         var size = 5;
         canvas.save();
+        canvas.fillStyle = "#ddd";
+        canvas.strokeStyle = "#ddd";
         canvas.beginPath();
         canvas.moveTo(pos.x, pos.y - size);
         canvas.lineTo(pos.x, pos.y + size);
@@ -46,8 +48,34 @@ define(function (require, exports, module) {
         
     }
     
-    function drawPointer() {
-        
+    function drawTick(angle, center, c) {
+        var tickLength = 5, radius = 90;
+        var x1 = center.x + radius * Math.cos(angle),
+            x2 = center.x + (radius - tickLength) * Math.cos(angle),
+            y1 = center.x + radius * Math.sin(angle),
+            y2 = center.x + (radius - tickLength) * Math.sin(angle);
+        c.beginPath();
+        c.moveTo(x1, y1);
+        c.lineTo(x2, y2);
+        c.stroke();
+    }
+    
+    function drawRangeBands(bands, ownPos, c) {
+        var color;
+        bands.forEach(function (band) {
+            color = band.color.toLowerCase();
+            if (color === "none") {
+                color = "white";
+            }
+            
+            band.range.forEach(function (angle) {
+                c.save();
+                c.strokeStyle = color;
+                drawTick(angle, ownPos, c);
+                c.restore();
+            });
+            
+        });
     }
     
     function normalisePos(pos) {
@@ -64,6 +92,8 @@ define(function (require, exports, module) {
         }
         var canvas = canvasEl.node().getContext("2d");
         canvas.clearRect(0, 0, w, h);
+        canvas.fillStyle = "black";
+        canvas.fillRect(0, 0, w, h);
         if (!state.si || !state.so) {
             return;
         }
@@ -76,6 +106,12 @@ define(function (require, exports, module) {
         drawSelf(canvas, {x: center.x + iPosRel.x, y: center.y + iPosRel.y});
         //draw the own position
         drawSelf(canvas, center);
+        var bands = state.trkBand.map(function (band) {
+            return {color: band.color, range: band.range.map(function (d) {
+                return StateParser.evaluate(d);
+            })};
+        });
+        drawRangeBands(bands, center, canvas);
     }
     
     module.exports = {

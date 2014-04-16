@@ -26,14 +26,16 @@ BEGIN
 
     step: nat = 10
 
+    to_rad(deg: real): real = deg * pi / 180
+
     find_trk(deg: subrange(-30,30), trkBand: TRK_BAND)
     	    (so: Vect2, vo: Nz_vect2, si: Vect2, vi: Nz_vect2): TRK_BAND =
      LET vi = mk_velocity(deg,gsi,0),
          tcas_ta = TCAS_TA?(so,vo,si,vi),
 	 tcas_ra = TCAS_RA?(so,vo,si,vi) IN
-	 IF tcas_ta AND tcas_ra THEN (: (# range := (10 * to_rad(deg), to_rad(deg + 1)), color := Red #) :)
-	 ELSIF tcas_ta AND NOT tcas_ra THEN (: (# range := (10 * to_rad(deg), to_rad(deg + 1)), color := Yellow #) :)
-	 ELSE (: (# range := (10 * to_rad(deg), to_rad(deg + 1)), color := None #) :) ENDIF
+	 IF tcas_ta AND tcas_ra THEN (: (# range := (to_rad(deg), to_rad(deg+step)), color := Red #) :)
+	 ELSIF tcas_ta AND NOT tcas_ra THEN (: (# range := (to_rad(deg), to_rad(deg+step)), color := Yellow #) :)
+	 ELSE (: (# range := (to_rad(deg), to_rad(deg+step)), color := None #) :) ENDIF
 
     find_trk_recursive_aux
 	    (deg: subrange(-30,30), trkBand: TRK_BAND)
