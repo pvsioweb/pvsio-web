@@ -30,15 +30,14 @@
 	<div id="stateMachineMenu" >
 		<ul class="dropdown dropdown-horizontal">
 <!--			<li><a href='#!' id="newDiagram" class="active"><span>New Diagram</span></a></li> -->
-			<li class='has-sub'><a href='#!'><span>States</span></a>
+			<li class='active has-sub'><a href='#!'><span>States</span></a>
 				<ul>
 					<li><a href='#!' id="button_state"><span>New state</span></a></li>
-					<li><a href='#!' id="addFieldState"><span>New field</span></a></li>
 					<li><a href='#!' id="changeNameNode"><span>Rename selected state</span></a></li>
-					<li class='last' id="deleteNode"><a href='#!'><span>Delete selected state (and all incoming/outgoing transitions)</span></a></li>
+					<li><a href='#!' id="deleteNode"><span>Delete selected state and the associated transitions</span></a></li>
 				</ul>
 			</li>
-			<li class='has-sub'><a href='#!'><span>Transitions</span></a>
+			<li class='active has-sub'><a href='#!'><span>Transitions</span></a>
 				<ul>
 					<li><a href='#!' id="button_transition"><span>New transition</span></a></li>
 					<li><a href='#!' id="button_self_transition"><span>New self-transition</span></a></li>
@@ -55,23 +54,28 @@
 					<li class='last'><a href='#!'><span>Remove condition from selected transition</span></a></li>-->
 				</ul>
 			</li>
-			<li class='has-sub'><a href='#!'><span>Constants</span></a>
+			<li class='active has-sub'><a href='#!'><span>Constants</span></a>
 				<ul>
-					<li class='last'><a href='#!'><span>New constant</span></a></li>
+					<li><a href='#!'><span>New constant</span></a></li>
 				</ul>
 			</li>
-		   <li class='has-sub'><a href='#!'><span>View</span></a>
+			<li class='active has-sub'><a href='#!'><span>Variables</span></a>
 				<ul>
-					<li><a href='#!' id ="zoom"><span>Zoom+</span></a></li>
-					<li><a href='#!' id ="zoom_"><span>Zoom-</span></a></li>
-					<li class='last'><a href='#!' id ="resetZoom"><span>Reset zoom</span></a></li>
+					<li><a href='#!' id="button_add_field"><span>New state variable</span></a></li>
 				</ul>
-		   </li>
+			</li>
 		   <li class='active has-sub'><a href='#!'><span>Utilities</span></a>
 				<ul>
 					<li><a href='#!' id="specificationToDiagram"><span>Generate diagram from specification</span></a></li>
 					<li><a href='#!' id="startSimulation"><span>Enable animation</span></a></li>
 					<!-- <li class='last'><a href='#!'><span>Create PDF report</span></a></li> -->
+				</ul>
+		   </li>
+		   <li class='active has-sub'><a href='#!'><span>Zoom</span></a>
+				<ul>
+					<li><a href='#!' id ="zoom"><span>Zoom+</span></a></li>
+					<li><a href='#!' id ="zoom_"><span>Zoom-</span></a></li>
+					<li class='last'><a href='#!' id ="resetZoom"><span>Reset zoom</span></a></li>
 				</ul>
 		   </li>
 		   <li class='active has-sub'><a href='#!'><span>Help</span></a>
@@ -81,14 +85,19 @@
 					<li><a href='#!'><span>About</span></a></li>
 				</ul>
 		   </li>
+
 		</ul>
 	</div>
-
+	<div id="stateMachineInfoBar" >
+		<ul class="dropdown dropdown-horizontal">
+		   <li class='active'><a href='#!' id="infoBar"><span>Editor mode: browse diagram</span></a>
+		</ul>
+	</div>
 	<div id="ContainerStateMachine" ></div>
 	<div id="state_machine_toolbar" ></div>
 		<!-- <textarea id="emulinkInfo" readonly> </textarea> -->
-		<textarea id="infoBox" readonly >TIP: Use the Emulink menu to create states and transitions</textarea>
-		<textarea id="infoBoxModifiable" readonly >Diagram Editor (to be implemented) </textarea>
+		<textarea id="infoBox" readonly ></textarea>
+		<textarea id="infoBoxModifiable" readonly >This space is for the Advanced Diagram Editor (this plugin will be implemented soon!) </textarea>
         <!-- <textarea id="warningDebug" readonly >Debug messages</textarea> -->
 	</div>
 </div>			

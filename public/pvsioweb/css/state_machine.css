@@ -1,3 +1,11 @@
+#stateMachineMenu {
+	float: left;
+}
+#stateMachineInfoBar {
+	float: right;
+	padding-right: 194px;
+}
+
 #ContainerStateMachine  {
 	border:         2px solid;
 	background:     #fffcec;

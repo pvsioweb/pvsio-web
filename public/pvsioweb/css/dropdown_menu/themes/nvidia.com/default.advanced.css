@@ -55,6 +55,10 @@ ul.dropdown ul a:hover {
  background-color: #76b900;
 }
 
+ul.dropdown ul a:active {
+ background-color: steelblue;
+}
+
 
 /* -- Drop-down open -- */
 
@@ -67,3 +71,4 @@ ul.dropdown ul li:hover > a.dir {
  background-color: #76b900;
  color: #fff;
 }
+
