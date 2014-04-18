@@ -1,7 +1,12 @@
-pvsio-web
+PVSio-web
 =========
 
-A javascript library to connect to and communicate with a pvsio process using websockets.
+PVSio-web is a new graphical tool to prototype and analyse user interface software. It provides the typical functionalities of an animation environment that allows designers to load and simulate realistic user interfaces. Underneath, it uses SRI's state-of-the-art theorem prover PVS for analysis, and the pvsio component as a basis for simulation. 
+
+Simulations created with PVSio-web can be watched in this youtube video https://www.youtube.com/watch?v=T0QmUe0bwL8
+
+A live version of PVSio-web executed on a cloud server can be found at http://www.pvsioweb.org/
+
 
 Prerequisites
 -------------
