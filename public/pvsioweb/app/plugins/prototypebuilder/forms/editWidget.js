@@ -41,9 +41,12 @@ define(function (require, exports, module) {
 			//update form
 			if (widget.type() === "button") {
 				widget.events().forEach(function (e) {
-					d3.select("input[type='checkbox'][value='" + e + "']").attr("checked", true);
+					d3.select("input[type='checkbox'][value='" + e + "']").property("checked", true);
 				});
 			}
+            if (widget.auditoryFeedback && widget.auditoryFeedback()) {
+                d3.select("input[type='checkbox'][name='auditoryFeedback']").property("checked", true);
+            }
 			return this;
 		},
 		events: {
@@ -57,8 +60,10 @@ define(function (require, exports, module) {
 		},
 		ok: function (event) {
 			var form = this.el;
-			if (FormUtils.validateForm(form)) {
+			if (FormUtils.validateForm(form, "input[type='checkbox'][name='events'], input[type='text'], textarea")) {
 				var formdata = FormUtils.serializeForm(form);
+                //add auditory feedback property manually
+                formdata.auditoryFeedback = d3.select("input[type='checkbox'][name='auditoryFeedback']").property("checked");
 				this.trigger("ok", {data: formdata, el: this.el, event: event}, this);
 			}
 		},

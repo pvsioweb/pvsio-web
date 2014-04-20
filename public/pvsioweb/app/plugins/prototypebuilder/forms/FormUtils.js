@@ -14,7 +14,7 @@ define(function (require, exports, module) {
 		var res = {};
 		d3.select(el).selectAll(inputSelectors).each(function () {
 			var el = d3.select(this);
-			if (el.attr("type") === "checkbox") {
+			if (el.attr("type") === "checkbox" && this.checked) {
 				//store as array if it is a checkbox
 				if (!res[el.attr("name")]) { res[el.attr("name")] = []; }
 				res[el.attr("name")].push(el.property("value"));

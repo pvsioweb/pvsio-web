@@ -60,7 +60,7 @@ define(function (require, exports, module) {
         var actions = script.actions,
             startState = script.startState;
         var time = actions[actions.length - 1].ts - actions[0].ts;
-        script.time = (time / 1000) + "s";
+        script.time = Math.round(time / 1000) + "s";
         script.startState = Array.isArray(startState) ? startState.join("") : startState;
 
         ScriptItemView.create(script).on("scriptClicked", function (name) {
