@@ -48,8 +48,9 @@ define(function (require, exports, module) {
         
     }
     
-    function drawTick(angle, center, c) {
-        var tickLength = 5, radius = 90;
+    function drawTick(angle, center, c, tickLength) {
+        var  radius = 90;
+        tickLength = tickLength || 5;
         var x1 = center.x + radius * Math.cos(angle),
             x2 = center.x + (radius - tickLength) * Math.cos(angle),
             y1 = center.x + radius * Math.sin(angle),
@@ -112,6 +113,9 @@ define(function (require, exports, module) {
             })};
         });
         drawRangeBands(bands, center, canvas);
+        var needleAngle = Math.atan(StateParser.evaluate(state.vo.y) / StateParser.evaluate(state.vo.x));
+        canvas.strokeStyle = "red";
+        drawTick(needleAngle, center, canvas, 80);
     }
     
     module.exports = {
