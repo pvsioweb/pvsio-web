@@ -1,27 +1,31 @@
+#stateMachineMenu {
+	float: left;
+}
+#stateMachineInfoBar {
+	float: right;
+	padding-right: 194px;
+}
+
 #ContainerStateMachine  {
 	border:         2px solid;
 	background:     #fffcec;
- 	width:          920px;
-	border-radius:  10px;
-  height:         800px;
-  border-color: #327875;
-	
+ 	width:          934px;
+	border-radius:  4px;
+	height:         844px;
+	left:		1px;
+	cursor: default;
 	/*display:        none; */
 }
 #stateMachineToolbar {
     margin-bottom: 10px;   
     margin-top: 10px; 
-    border-width:5px;
-    width:    930px;
-    border-style:double;
 }
-
 
 
 #button_state:hover	  {
 
 	cursor:		default;
-	
+	box-shadow:     0 1px 3px rgba(0,0,0,0.8);
 	
 }
 #button_junction:hover	    {
@@ -127,11 +131,21 @@ ul#context-menu li {
   background :  #FF0000;
   font-family: Tahoma, sans-serif;
 }
-#infoBox {
+#infoBox-old {
   position: absolute;
   top:	    150px;
   width:    180px;
   height:   80px;
+  left:    940px;
+  border-width : 1px;
+  background :  #D0F18F;
+  font-family: Tahoma, sans-serif;
+}
+#infoBox {
+  position: absolute;
+  top:	    0px;
+  width:   180px;
+  height:  220px;
   left:    940px;
   border-width : 1px;
   background :  #D0F18F;
@@ -147,7 +161,7 @@ ul#context-menu li {
   background :  #CEF6F5;
   font-family: Tahoma, sans-serif;
 }
-#warningDebug {
+#warningDebug-old {
   position: absolute;
   top:	    530px;
   width:    180px;
@@ -157,11 +171,19 @@ ul#context-menu li {
   background :  #AAFFFF;
   font-family: Tahoma, sans-serif;
 }
+#warningDebug {
+  position: absolute;
+  top:	    230px;
+  width:    180px;
+  height:   500px;
+  left:    940px;
+  border-width : 1px;
+  background :  #AAFFFF;
+  font-family: Tahoma, sans-serif;
+}
 #modifyPropertiesToolbar{
 	width: 930px;
 	font-family: Tahoma, sans-serif; 
-  border-width:5px;
-  border-style:double;
 	display: block;
 }
 #modifyPropertiesToolbarNode{
@@ -173,508 +195,4 @@ ul#context-menu li {
  border:-style: dotted;
  font: 20px/24px cursive;    
  display:none;
-}
-
-@import url(http://fonts.googleapis.com/css?family=PT+Sans:400,700);
-
-.emulinkButton{
-  -moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
-  -webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
-  box-shadow:inset 0px 1px 0px 0px #ffffff;
-  background-color:transparent;
-  -moz-border-radius:6px;
-  -webkit-border-radius:6px;
-  border-radius:6px;
-  border:1px solid #dcdcdc;
-  display:inline-block;
-  cursor:pointer;
-  color: #bd1813;
-  font-family:arial;
-  font-size:15px;
-  font-weight:bold;
-  padding:6px 24px;
-  text-decoration:none;
-  text-shadow:0px 1px 0px #ffffff;
-  min-width: 145px;
-  min-height: 40px;
-}
-.emulinkButton:hover {
-  background-color:transparent;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.8);
-  color: #112b8f;
-}
-.emulinkButton:active {
-  position:relative;
-  top:1px;
-}
-.emulinkButton:disabled { 
-  background-color: #D8D8D8;
-  cursor: not-allowed;
-  color: #B0B0B0;
-}
-#emulinkMenu {
-  background: #327875;
-  margin: 0;
-  width: auto;
-  padding: 0;
-  line-height: 1;
-  display: block;
-  position: relative;
-  font-family: arial;
-}
-#emulinkMenu ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: block;
-}
-#emulinkMenu ul:after {
-  content: ' ';
-  display: block;
-  font-size: 0;
-  height: 0;
-  clear: both;
-  visibility: hidden;
-}
-#emulinkMenu ul li {
-  margin: 0;
-  padding: 0;
-  display: block;
-  position: relative;
-}
-#emulinkMenu ul li a {
-  text-decoration: none;
-  display: block;
-  margin: 0;
-  -webkit-transition: color .2s ease;
-  -moz-transition: color .2s ease;
-  -ms-transition: color .2s ease;
-  -o-transition: color .2s ease;
-  transition: color .2s ease;
-}
-#emulinkMenu ul li ul {
-  position: absolute;
-  left: -9999px;
-  top: auto;
-}
-#emulinkMenu ul li ul li {
-  max-height: 0;
-  position: absolute;
-  -webkit-transition: max-height 0.4s ease-out;
-  -moz-transition: max-height 0.4s ease-out;
-  -ms-transition: max-height 0.4s ease-out;
-  -o-transition: max-height 0.4s ease-out;
-  transition: max-height 0.4s ease-out;
-  background: #ffffff;
-}
-#emulinkMenu ul li ul li.has-sub:after {
-  display: block;
-  position: absolute;
-  content: '';
-  height: 10px;
-  width: 10px;
-  font-weight:bold;
-  border-radius: 5px;
-  background: #bd1813;
-  z-index: 1;
-  top: 13px;
-  right: 15px;
-}
-#emulinkMenu ul li ul li.has-sub:before {
-  display: block;
-  position: absolute;
-  content: '';
-  height: 0;
-  width: 0;
-  border: 3px solid transparent;
-  border-left-color: #ffffff;
-  z-index: 2;
-  top: 15px;
-  right: 15px;
-}
-#emulinkMenu ul li ul li a {
-  font-size: 15px;
-  font-weight: bold;
-  text-transform: none;
-  color: #bd1813;
-  letter-spacing: 0;
-  display: block;
-  width: 140px;
-  padding: 11px 10px 11px 20px;
-}
-#emulinkMenu ul li ul li:hover > a,
-#emulinkMenu ul li ul li.active > a {
-  color: #112b8f;
-}
-#emulinkMenu ul li ul li:hover:after,
-#emulinkMenu ul li ul li.active:after {
-  background: #112b8f;
-}
-#emulinkMenu ul li ul li:hover > ul {
-  left: 138px;
-  top: 0;
-}
-#emulinkMenu ul li ul li:hover > ul > li {
-  max-height: 72px;
-  position: relative;
-}
-#emulinkMenu > ul > li {
-  float: left;
-}
-
-#emulinkMenu > ul > li:after {
-  content: '';
-  display: block;
-  position: absolute;
-  width: 100%;
-  height: 0;
-  top: 0;
-  z-index: 0;
-  background: #ffffff;
-  -webkit-transition: height .2s;
-  -moz-transition: height .2s;
-  -ms-transition: height .2s;
-  -o-transition: height .2s;
-  transition: height .2s;
-}
-#emulinkMenu > ul > li.has-sub > a {
-  padding-right: 40px;
-}
-#emulinkMenu > ul > li.has-sub > a:after {
-  display: block;
-  content: '';
-  background: #bfc1de;
-  height: 12px;
-  width: 12px;
-  position: absolute;
-  border-radius: 13px;
-  right: 14px;
-  top: 16px;
-}
-#emulinkMenu > ul > li.has-sub > a:before {
-  display: block;
-  content: '';
-  border: 4px solid transparent;
-  border-top-color: #327875;
-  z-index: 2;
-  height: 0;
-  width: 0;
-  position: absolute;
-  right: 16px;
-  top: 21px;
-}
-#emulinkMenu > ul > li > a {
-  color: #bfc1de;
-  padding: 15px 20px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  font-size: 14px;
-  z-index: 2;
-  position: relative;
-}
-#emulinkMenu > ul > li:hover:after,
-#emulinkMenu > ul > li.active:after {
-  height: 100%;
-}
-#emulinkMenu > ul > li:hover > a,
-#emulinkMenu > ul > li.active > a {
-  color: #112b8f;
-}
-#emulinkMenu > ul > li:hover > a:after,
-#emulinkMenu > ul > li.active > a:after {
-  background: #112b8f;
-}
-#emulinkMenu > ul > li:hover > a:before,
-#emulinkMenu > ul > li.active > a:before {
-  border-top-color: #ffffff;
-}
-#emulinkMenu > ul > li:hover > ul {
-  left: 0;
-}
-#emulinkMenu > ul > li:hover > ul > li {
-  max-height: 72px;
-  position: relative;
-}
-#emulinkMenu #menu-button {
-  display: none;
-}
-@media all and (max-width: 768px), only screen and (-webkit-min-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (min--moz-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (-o-min-device-pixel-ratio: 2/1) and (max-width: 1024px), only screen and (min-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (min-resolution: 192dpi) and (max-width: 1024px), only screen and (min-resolution: 2dppx) and (max-width: 1024px) {
-  #emulinkMenu > ul {
-    max-height: 0;
-    overflow: hidden;
-    -webkit-transition: max-height 0.35s ease-out;
-    -moz-transition: max-height 0.35s ease-out;
-    -ms-transition: max-height 0.35s ease-out;
-    -o-transition: max-height 0.35s ease-out;
-    transition: max-height 0.35s ease-out;
-  }
-  #emulinkMenu > ul.open {
-    max-height: 1000px;
-    border-top: 1px solid rgba(110, 110, 110, 0.25);
-  }
-  #emulinkMenu ul {
-    width: 100%;
-  }
-  #emulinkMenu ul > li {
-    float: none;
-  }
-  #emulinkMenu ul li a {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    width: 100%;
-    padding: 12px 20px;
-  }
-  #emulinkMenu ul > li:after {
-    display: none;
-  }
-  #emulinkMenu ul li.has-sub > a:after,
-  #emulinkMenu ul li.has-sub > a:before,
-  #emulinkMenu ul li ul li.has-sub:after,
-  #emulinkMenu ul li ul li.has-sub:before {
-    display: none;
-  }
-  #emulinkMenu ul li ul,
-  #emulinkMenu ul li ul li ul,
-  #emulinkMenu ul li ul li:hover > ul {
-    left: 0;
-    position: relative;
-  }
-  #emulinkMenu ul li ul li,
-  #emulinkMenu ul li:hover > ul > li {
-    max-height: 999px;
-    position: relative;
-    background: none;
-  }
-  #emulinkMenu ul li ul li a {
-    padding: 8px 20px 8px 35px;
-    color: #bfc1de;
-  }
-  #emulinkMenu ul li ul ul li a {
-    padding: 8px 20px 8px 50px;
-  }
-  #emulinkMenu ul li ul li:hover > a {
-    color: #112b8f;
-  }
-  #emulinkMenu #menu-button {
-    display: block;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    width: 100%;
-    padding: 15px 20px;
-    text-transform: uppercase;
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 1px;
-    color: #bfc1de;
-    cursor: pointer;
-  }
-  #emulinkMenu #menu-button:after {
-    display: block;
-    content: '';
-    position: absolute;
-    height: 3px;
-    width: 22px;
-    border-top: 2px solid #bfc1de;
-    border-bottom: 2px solid #bfc1de;
-    right: 20px;
-    top: 16px;
-  }
-  #emulinkMenu #menu-button:before {
-    display: block;
-    content: '';
-    position: absolute;
-    height: 3px;
-    width: 22px;
-    border-top: 2px solid #bfc1de;
-    right: 20px;
-    top: 26px;
-  }
-}
-#emulinkToolbar {
-    border-style: solid;
-    border-width: 3px;
-    border-color: #327875;
-    width:920px;
-    
-  }
- .emulinkButtonToolbar {
-  font-size:13px;
-  font-family:Arial;
-  font-weight:bold;
-  -moz-border-radius:42px;
-  -webkit-border-radius:42px;
-  border-radius:42px;
-  border:1px solid #268a16;
-  padding:9px 18px;
-  text-decoration:none;
-  color:#327875;
-  
-}
-.emulinkButtonToolbar:hover
- {
-  box-shadow: 0 1px 3px rgba(0,0,0,0.8);
-  color: #112b8f;
-  color : blue;
-  
-}
-.emulinkButtonToolbar:active 
-{
-  position:relative;  
-  top:1px;
-}
-.emulinkButtonToolbar:disabled { 
-  
-  background: #BDBDBD;
-  background-color: #D8D8D8;
-  cursor: not-allowed;
-  color: #B0B0B0;
-}
-.context-menu-list {
-    margin:0; 
-    padding:0;
-    
-    min-width: 120px;
-    max-width: 250px;
-    display: inline-block;
-    position: absolute;
-    list-style-type: none;
-    
-    border: 1px solid #DDD;
-    background: #EEE;
-    
-    -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-       -moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-        -ms-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-         -o-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    
-    font-family: Verdana, Arial, Helvetica, sans-serif;
-    font-size: 11px;
-}
-
-.context-menu-item {
-    padding: 2px 2px 2px 24px;
-    background-color: #EEE;
-    position: relative;
-    -webkit-user-select: none;
-       -moz-user-select: -moz-none;
-        -ms-user-select: none;
-            user-select: none;
-}
-
-.context-menu-separator {
-    padding-bottom:0;
-    border-bottom: 1px solid #DDD;
-}
-
-.context-menu-item > label > input,
-.context-menu-item > label > textarea {
-    -webkit-user-select: text;
-       -moz-user-select: text;
-        -ms-user-select: text;
-            user-select: text;
-}
-
-.context-menu-item.hover {
-    cursor: pointer;
-    background-color: #39F;
-}
-
-.context-menu-item.disabled {
-    color: #666;
-}
-
-.context-menu-input.hover,
-.context-menu-item.disabled.hover {
-    cursor: default;
-    background-color: #EEE;
-}
-
-.context-menu-submenu:after {
-    content: ">";
-    color: #666;
-    position: absolute;
-    top: 0;
-    right: 3px;
-    z-index: 1;
-}
-
-/* icons
-    #protip:
-    In case you want to use sprites for icons (which I would suggest you do) have a look at
-    http://css-tricks.com/13224-pseudo-spriting/ to get an idea of how to implement 
-    .context-menu-item.icon:before {}
- */
-.context-menu-item.icon { min-height: 18px; background-repeat: no-repeat; background-position: 4px 2px; }
-.context-menu-item.icon-edit { background-image: url(images/page_white_edit.png); }
-.context-menu-item.icon-cut { background-image: url(images/cut.png); }
-.context-menu-item.icon-copy { background-image: url(images/page_white_copy.png); }
-.context-menu-item.icon-paste { background-image: url(images/page_white_paste.png); }
-.context-menu-item.icon-delete { background-image: url(images/page_white_delete.png); }
-.context-menu-item.icon-add { background-image: url(images/page_white_add.png); }
-.context-menu-item.icon-quit { background-image: url(images/door.png); }
-
-/* vertically align inside labels */
-.context-menu-input > label > * { vertical-align: top; }
-
-/* position checkboxes and radios as icons */
-.context-menu-input > label > input[type="checkbox"],
-.context-menu-input > label > input[type="radio"] {
-    margin-left: -17px;
-}
-.context-menu-input > label > span {
-    margin-left: 5px;
-}
-
-.context-menu-input > label,
-.context-menu-input > label > input[type="text"],
-.context-menu-input > label > textarea,
-.context-menu-input > label > select {
-    display: block;
-    width: 100%;
-    
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-        -ms-box-sizing: border-box;
-         -o-box-sizing: border-box;
-            box-sizing: border-box;
-}
-
-.context-menu-input > label > textarea {
-    height: 100px;
-}
-.context-menu-item > .context-menu-list {
-    display: none;
-    /* re-positioned by js */
-    right: -5px;
-    top: 5px;
-}
-
-.context-menu-item.hover > .context-menu-list {
-    display: block;
-}
-
-.context-menu-accesskey {
-    text-decoration: underline;
-}
-/* menu header */
-.condition-title:before {
-    content: "Choose action to modify";
-    display: block;
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    background: #DDD;
-    padding: 2px;
-    
-    font-family: Verdana, Arial, Helvetica, sans-serif;
-    font-size: 11px;
-    font-weight: bold;
-}
-.condition-title :first-child {
-    margin-top: 32px;
 }

@@ -1,157 +1,104 @@
 <!-- container for graphical editor -->
-			<div id="graphicalEditor">
-				<div id='emulinkMenu'>
-					<ul>
-   						<!-- Main Menu  -->
-   						<li class='has-sub'><a href='#'><span>Main menu</span></a>
-   					        <ul>
-   					            <li class='active'> 
-   					                <button class="emulinkButton startEmulink"  > Create new Diagram </button>
-   					            </li>
-   					            <li class='active'>
-   					            	<button class="emulinkButton" id="specificationToDiagram" > Generate Diagram from Specification </button>
-   					            </li>
-   					            <li class='active'>
-   					                <button class="emulinkButton" id="startSimulation"> Enable Animation</button>
-   					             </li>
-   					             <li class='active'>
-   					                <button class="emulinkButton toPDF"  disabled = "true" > Create PDF Report </button>
-								 </li>
-								 <li class='active'>
-								 	<a id="downloadPDF" class="emulinkButton" href="" download="Emulink PDF Report" style="display: none;"> Download PDF Report</a> 
-								 </li>
-   					        </ul>
-   						</li>
-   						<!-- END Main Menu -->  
-   						<!-- Editor Menu -->
-   						<li class='has-sub'><a href='#'><span>Editor Menu</span></a>
-   							<ul>
-   								<li class='has-sub'><a href='#'><span>State Editor</span></a>
-   									<ul>
-   										<li class='active'>
-   											<button class="emulinkButton button_state"  disabled = "true"> New State </button>
-   										</li>
-   										<li class='active'>
-   								    		<button class="emulinkButton" id="addFieldState"   disabled = "true">Add Field</button>
-   										</li>
-   										<li class='active'>
-   											<button class="emulinkButton changeNameNode" disabled = "true"> Edit State Name</button>
-   										</li>
-   										<li class='active'>
-   											<button class="emulinkButton deleteNode" disabled= "true"> Delete node </button>
-   										</li>
-   									
-   									</ul>
-   								</li>
-   							
-   								<li class='has-sub'> <a href='#'><span>Transition Editor</span></a>
-   									<ul>
-                                 <li class='has-sub'> <a href='#'><span>Create</span></a>
-                                 <ul>
-   									      <li class='active'>
-   											    <button class="emulinkButton button_transition" disabled = "true"> Transition </button>	
-   										    </li>
-   										   <li class='active'>
-   											    <button class="emulinkButton button_self_transition" disabled = "true"> Self-Transition </button>
-   										   </li>
-   										   <li class='active'>
-   											   <button class="emulinkButton button_default_transition"   disabled = 'true'> Default Transition </button> 
-   										   </li>
-                                 </ul>
-                                 </li>
-                                 <li class='has-sub'> <a href='#'><span>Remove</span></a>
-                                 <ul>
-                                    <li class='active'>
-                                       <button class="emulinkButton deleteEdge"  disabled = "true" >  Transition </button>
-                                     </li>
-                                    <li class='active'>
-                                        <button class="emulinkButton rmvCond" id="rmvCond" disabled="true">  Condition </button>
-                                    </li>
-                                    <li class='active'>
-                                        <button class="emulinkButton rmvOper" id="rmvOper" disabled='true' >  Operation
-                                    </button>
-                                    </li>
-                                    <li class='active'>
-                                        <button class="emulinkButton rmvDefTrans"  disabled='true' >  Default Transition
-                                    </button>
-                                    </li>
-                                 </ul>
-                                 </li>
-                                 <li class='has-sub'> <a href='#'><span>Edit</span></a>
-                                 <ul>
-                                    <li class='active'>
-                                       <button class="emulinkButton changeNameEdge"  disabled = "true" > Transition Name</button>
-                                    </li>
-                                    <li class='active '>
-                                        <button class="emulinkButton modifyCondition context-menu-one " disabled = "true" >  Condition</button>
-                                    </li>  
-                                    <li class='active'>
-                                        <button class="emulinkButton modifyOperation"  disabled = "true" > Operation</button>
-                                    </li>                     
+<div id="graphicalEditor">
 
-                                 </ul>
-                                 </li>
-   									   <li class='has-sub'> <a href='#'><span>Add</span></a>
-                                 <ul>
-                                    <li class='active'>
-                                        <button class="emulinkButton addCondition"  disabled = "true" >  Condition</button> 
-                                     </li>
-                                    <li class='active'>
-                                        <button class="emulinkButton addOperation"  disabled = "true"  >  Action</button>
-                                    </li>                                    
-                                 </ul>
-                                 </li>
-                                 
-   										   								    	
-   								    </ul>
-   							    </li>
-
-   							</ul>
-
-   						</li>
-   						
-               			<!-- View Menu -->
-   						<li class='has-sub'><a href='#'><span>View Menu</span></a>
-   							<ul>
-   								<li class='active'>
-   									<button class="emulinkButton" id ="zoom" disabled="true";> Zoom + </button>
-   								</li>
-   								<li class='active'>
-   									<button class="emulinkButton" id ="zoom_" disabled="true"> Zoom -</button>
-   								</li>
-   								<li class='active'>
-   									<button class="emulinkButton" id ="resetZoom" disabled="true"> Reset Zoom </button>
-   								</li>
-   							</ul>
-   						</li>
-   						<!-- END View Menu -->
-               			
-   						<li><a href='https://github.com/thehogfather/pvsio-web' target="_blank" ><span>About</span></a></li>
-   						<li class='last'><a href='#'><span>Contact</span></a></li>
-					</ul>
-			</div>
-			<br><br><br><br>
-         <div id="emulinkToolbarWrapper">
-            <div id='emulinkToolbar'>
-               <button class="emulinkButtonToolbar button_state"  disabled = "true"> New State </button>
-               <button class="emulinkButtonToolbar button_transition" disabled = "true"> New Transition </button>  
-               <button class="emulinkButtonToolbar zoom "  disabled="true"> Zoom + </button>
-               <button class="emulinkButtonToolbar zoom_" disabled="true"> Zoom -</button>
-            </div>
-         </div>
+<!--
+	<div id="stateMachineToolbar" >
+		<button class="btn btn-danger" id="startEmulink"    > New Diagram </button>
+		<button class="btn" id ="zoom" disabled="true";> Zoom + </button>
+		<button class="btn" id ="zoom_" disabled="true"> Zoom -</button>
+		<button class="btn" id ="resetZoom" disabled="true"> Reset Zoom </button>
+		<button class="btn" id="specificationToDiagram"     > Generate Diagram from Specification </button>
+		<button class="btn btn-default" id="startSimulation"> Enable Animation</button>
+		<button class="btn" id="toPDF" disabled = "true" > Create PDF Report </button>
+		<a id="downloadPDF" href="" download="Emulink PDF Report" style="display: none;"> Download PDF Report</a>
         
-         <div id="ContainerStateMachineWrapper">
-            <br><br><br><br>
-            <p style="font-family:verdana; margin-left:0px; color:#327875; font-style:italic;font-weight: bold; font-size:20px;" >Drawing area</p> 
-               
-			   <div id="ContainerStateMachine" >
-			       
-			   </div>
-         </div>
-			<div id="state_machine_toolbar" >
-				<textarea id="emulinkInfo" readonly> </textarea>
-				<textarea id="infoBox" readonly >TIP: Select a state or a transition to see its properties</textarea>
-				<textarea id="infoBoxModifiable" readonly ></textarea>		
-		        <textarea id="warningDebug" readonly >Debug panel</textarea>
-				
-			</div>			
+	</div>
+    <div id="modifyPropertiesToolbar" >
+        <button id="button_state" disabled = "true"  > New State </button>
+        <button id="changeNameNode" disabled = "true"> Edit State Name</button> 
+        <button id="addFieldState"  disabled = "true"> Add Field</button> 
+        <button id="deleteNode"    disabled= "true"> Delete node </button>
+		<br><br>
+        <button id="button_transition" disabled = "true"> New Transition </button>
+        <button id="button_self_transition" disabled = "true"> New Self-Transition </button>
+        <button id="deleteEdge" disabled = "true" > Delete edge </button>
+        <button id="changeNameEdge" disabled = "true" > Edit Transition Name</button>
+        <button id="addCondition"  disabled = "true" > Add Condition</button>
+        <button id="addOperation" disabled = "true"  > Add Action</button>
+    </div><br>
+-->
+	<div id="stateMachineMenu" >
+		<ul class="dropdown dropdown-horizontal">
+<!--			<li><a href='#!' id="newDiagram" class="active"><span>New Diagram</span></a></li> -->
+			<li class='active has-sub'><a href='#!'><span>States</span></a>
+				<ul>
+					<li><a href='#!' id="button_state"><span>New state</span></a></li>
+					<li><a href='#!' id="changeNameNode"><span>Rename selected state</span></a></li>
+					<li><a href='#!' id="deleteNode"><span>Delete selected state and the associated transitions</span></a></li>
+				</ul>
+			</li>
+			<li class='active has-sub'><a href='#!'><span>Transitions</span></a>
+				<ul>
+					<li><a href='#!' id="button_transition"><span>New transition</span></a></li>
+					<li><a href='#!' id="button_self_transition"><span>New self-transition</span></a></li>
+					<!--				       <li><a href='#!'><span>New default transition</span></a></li> -->
+					<li><a href='#!' id="addCondition"><span>Add condition to selected transition</span></a></li>
+					<li><a href='#!' id="addOperation"><span>Add action to selected transition</span></a></li>
+					<!--				       <li><a href='#!'><span>New parameter</span></a></li> -->
+					<li><a href='#!' id="changeNameEdge"><span>Rename selected transition</span></a></li>
+					<!--				       <li><a href='#!'><span>Change action</span></a></li>
+					<li><a href='#!'><span>Change condition</span></a></li> -->
+					<li><a href='#!' id="deleteEdge"><span>Delete selected transition</span></a></li>
+					<!--				       <li><a href='#1'><span>Delete default transition</span></a></li>
+					<li><a href='#!'><span>Delete action</span></a></li>
+					<li class='last'><a href='#!'><span>Remove condition from selected transition</span></a></li>-->
+				</ul>
+			</li>
+			<li class='active has-sub'><a href='#!'><span>Constants</span></a>
+				<ul>
+					<li><a href='#!'><span>New constant</span></a></li>
+				</ul>
+			</li>
+			<li class='active has-sub'><a href='#!'><span>Variables</span></a>
+				<ul>
+					<li><a href='#!' id="button_add_field"><span>New state variable</span></a></li>
+				</ul>
+			</li>
+		   <li class='active has-sub'><a href='#!'><span>Utilities</span></a>
+				<ul>
+					<li><a href='#!' id="specificationToDiagram"><span>Generate diagram from specification</span></a></li>
+					<li><a href='#!' id="startSimulation"><span>Enable animation</span></a></li>
+					<!-- <li class='last'><a href='#!'><span>Create PDF report</span></a></li> -->
+				</ul>
+		   </li>
+		   <li class='active has-sub'><a href='#!'><span>Zoom</span></a>
+				<ul>
+					<li><a href='#!' id ="zoom"><span>Zoom+</span></a></li>
+					<li><a href='#!' id ="zoom_"><span>Zoom-</span></a></li>
+					<li class='last'><a href='#!' id ="resetZoom"><span>Reset zoom</span></a></li>
+				</ul>
+		   </li>
+		   <li class='active has-sub'><a href='#!'><span>Help</span></a>
+				<ul>
+					<li><a href='#!'><span>Online help</span></a></li>
+					<li><a href='#!'><span>Report an issue...</span></a></li>
+					<li><a href='#!'><span>About</span></a></li>
+				</ul>
+		   </li>
+
+		</ul>
+	</div>
+	<div id="stateMachineInfoBar" >
+		<ul class="dropdown dropdown-horizontal">
+		   <li class='active'><a href='#!' id="infoBar"><span>Editor mode: browse diagram</span></a>
+		</ul>
+	</div>
+	<div id="ContainerStateMachine" ></div>
+	<div id="state_machine_toolbar" ></div>
+		<!-- <textarea id="emulinkInfo" readonly> </textarea> -->
+		<textarea id="infoBox" readonly ></textarea>
+		<textarea id="infoBoxModifiable" readonly >This space is for the Advanced Diagram Editor (this plugin will be implemented soon!) </textarea>
+        <!-- <textarea id="warningDebug" readonly >Debug messages</textarea> -->
+	</div>
+</div>			
+

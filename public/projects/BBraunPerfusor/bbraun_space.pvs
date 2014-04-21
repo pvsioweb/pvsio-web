@@ -198,4 +198,6 @@ bbraun_space: THEORY
   release_rt(st: State): State = st
   click_rt(st: State): State = release_rt(press_rt(st))
 
+  click_clear(st: State): State = init(0) WITH [ on := 1 ]
+
  END bbraun_space

@@ -15,14 +15,14 @@ require.config({
 
 require(["cursorDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioWebClient"], function (CursoredDisplay, GraphBuilder, PVSioWebClient) {
     "use strict";
-    var w = 170, h = 48;
+    var w = 228, h = 64;
 	var client = new PVSioWebClient();
     //create a collapsible panel using the pvsiowebclient instance
     var imageHolder = client.createCollapsiblePanel("BBraun Space", true).style("position", "relative");
     //insert the html into the panel (note that this could have used templates or whatever)
     imageHolder.html('<img src="image.png" usemap="#prototypeMap"/>');
     //append a div that will contain the canvas element
-    var content = imageHolder.append("div").style("position", "absolute").style("top", "76px").style("left", "125px")
+    var content = imageHolder.append("div").style("position", "absolute").style("top", "232px").style("left", "84px")
         .style("height", h + "px").style("width", w + "px");
     //append the canvas element
 	var display = content.append("canvas").attr("width", w).attr("height", h).attr("id", "display");

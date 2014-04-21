@@ -345,23 +345,21 @@ function changeFunName(oldName, newName, sourceName, targetName, counter)
     writer.leaveLockOnEditor();    
 }
 
-function addDefaultTransition(stateName)
-{
-    writer.getLockOnEditor();
-    writer.addDefaultTransition(stateName);
-    writer.leaveLockOnEditor();
-}
 function deleteCondition(nameTrans, sourceName, targetName)
 {
     writer.getLockOnEditor();
+
     writer.deleteCondInTrans(nameTrans, sourceName, targetName);
+
     writer.leaveLockOnEditor();   
 
 }
 function deleteTrans(nameTrans )
 {
     writer.getLockOnEditor();
+
     writer.deleteTransition(nameTrans);
+
     writer.leaveLockOnEditor(); 
 }
 
@@ -426,13 +424,9 @@ function WriterOnContent( editor)
     this.tagFieldStart = "  " + this.BLOCK_START + ", " + this.ID_FIELD + " : \"State\", \"_type\": \"State\"}";
     this.tagFieldEnd = "  " + this.BLOCK_END + ", " + this.ID_FIELD + " : \"State\", \"_type\": \"State\"}";
 
-    this.tagInitStateStart = " " + this.BLOCK_START + ", " + this.ID_FIELD +  " : \"initial_state\"}";
-    this.tagInitStateEnd = " " + this.BLOCK_END + ", " + this.ID_FIELD +  " : \"initial_state\"}";
-
     this.tagSwitchCond = "{\"_cond\" : \"*COND*\"}";
     this.switchCondTag = "_switchCond";
     this.transActTag = "_transAct";
-    this.statePerTag = "_states";
 
     this.separatorTagStart = "  " + this.BLOCK_START_ + ", " + "\"_type\": \"Separator\"}";
     this.separatorTagEnd = "  " + this.BLOCK_END_ + ", " + "\"_type\": \"Separator\"}";
@@ -448,7 +442,10 @@ function WriterOnContent( editor)
 		//// FIXME: this interferes with the autocompletion: the contextual menu created
 		////          by the autocompletion functionality disappears when parseToFindInconsistency is invoked
         clearTimeout(writer.timeOut);
-        writer.timeOut = setTimeout(function(){writer.parseToFindDiagramSpecificationInconsistency() } , 10000 );        
+        // commented out: we want to avoid automatic actions because they require additional computation power
+        //                which is an issue on mobile devices (e.g., tablets).
+        //                TODO: modify this so that consistency is checked on demand when the user performs a specific action
+		//writer.timeOut = setTimeout(function(){writer.parseToFindDiagramSpecificationInconsistency() } , 10000 );        
     }
     
     this.parseToFindDiagramSpecificationInconsistency = function()
@@ -462,12 +459,11 @@ function WriterOnContent( editor)
         
         /****************** Checking stateNames **************/
 
-        writer.checkConsistenceStateNames(nodesInDiagram, stateNamesInSpecification);      
+//        writer.checkConsistenceStateNames(nodesInDiagram, stateNamesInSpecification);      
         
         /****************** Checking transFunctions **********/
         
-        if( edgesInDiagram.length )
-            writer.checkConsistenceTransFunction(edgesInDiagram);
+//        if( edgesInDiagram.length ) { writer.checkConsistenceTransFunction(edgesInDiagram); }
         /******************************************************/
         
         editor.find(''); // This is an hack to make disappear selection created indirectly to find content
@@ -477,7 +473,7 @@ function WriterOnContent( editor)
 
     this.checkConsistenceStateNames = function(nodesInDiagram, stateNamesInSpecification)
     {
-        var debug = document.getElementById("warningDebug");
+//        var debug = document.getElementById("warningDebug");
         var nodesInStateNames;
         var listEmpty = false;
         var numberOfStatesInDiagram;
@@ -542,7 +538,7 @@ function WriterOnContent( editor)
     }
     this.checkConsistenceTransFunction = function (edgesInDiagram)
     {
-           var debug = document.getElementById("warningDebug");
+//           var debug = document.getElementById("warningDebug");
           
            edgesInDiagram.forEach( function(currentEdge) {
 
@@ -634,9 +630,10 @@ function WriterOnContent( editor)
         }
         if( ! missField) { return; }
         
-        var debug = document.getElementById("warningDebug");
+/*        var debug = document.getElementById("warningDebug");
         debug.value = "\t   DeBuG \n";
         debug.value = debug.value + "Warning: " + fieldStateInOperation + " is not in PVS State ";
+*/
     }
     
     this.changeEditor = function() 
@@ -680,10 +677,15 @@ function WriterOnContent( editor)
         arrayTag.forEach(function( currentTag)
             {
                 var tmp = currentTag.replace(/(\r\n|\n|\r)/g, "");
-                tmp = tmp.substring(0, tmp.lastIndexOf('}'));
+                tmp = tmp.substring(0, currentTag.lastIndexOf('}') - 1); // removing the final curly bracket because the search needs to be done only on the first part of the tag (tags can include additional fields, e.g., transition actions or transition conditions). We don't want to check those additional fields because buildTagCond does not support them yet, and in the current implementation start and end nodes are in any case sufficient to identify transitions.
                 tmp = writer.editor.find(tmp, objectSearch, false);
-                var realTag = writer.editor.session.getLine(tmp.end.row);
-                arrayTagToReturn.push(realTag);
+				if(tmp) { 
+					var realTag = writer.editor.session.getLine(tmp.end.row);
+	                arrayTagToReturn.push(realTag);
+				}
+				else {
+					alert("Parser error. Debug info: empty seach for the following string " + tmp );
+				}
 
             });
         return arrayTagToReturn;
@@ -812,20 +814,9 @@ function WriterOnContent( editor)
         this.tagCondStart = tagCondStart;
         this.tagCondEnd = tagCondEnd;
     }
-    
-    this.addDefaultTransition = function(stateName)
-    {
-        var oldContent = this.getContentBetweenTags(this.tagInitStateStart, this.tagInitStateEnd, true);        
-        var newContent = "  initial_state : State = (#\n\t\tcurrent_state := " + stateName + ",\n\t\tprevious_state := "
-            + stateName + "\n\t\t#)\n";
-        var objectSearch = { wrap: true, range: null, wholeWord: false, regExp: false };
-        writer.editor.find(oldContent, objectSearch);
-        writer.editor.replace(newContent);
-        
-    }
     this.addOperationInCondition = function(nameTrans, sourceName, targetName, operation)
     {
-        this.checkConsistenceOperation(operation);
+//        this.checkConsistenceOperation(operation);
         var rawOperation = operation;
         operation = "  new_st = new_st WITH [ " + operation + " ]";
         var arrayTag = this.findRealTagCond(nameTrans, sourceName, targetName);
@@ -916,7 +907,7 @@ function WriterOnContent( editor)
         
         var newContent ="  State: TYPE = [#\n";
         var length = arrayFields.length ;
-        for( var i = 0; i < length; i ++)
+        for( var i = 0; i < length ; i ++)
         {
              var comma = (i == (length - 1 )) ? "\n" : ",\n" ;
              newContent = newContent + "     "  +  arrayFields[i].replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g,"")  +  comma ;
@@ -1015,7 +1006,7 @@ function WriterOnContent( editor)
 		this.editor.gotoLine(endSearch.end.row , 1000, true);
         
 		content = this.createPerTag(this.tagPerStart, newTransition) + 
-		          "\n" +  "  per_" + newTransition + "(st: State) : bool = false\n" +
+		          "\n" +  "  per_" + newTransition + "(st: State) : bool = true\n" +
                   this.createPerTag(this.tagPerEnd, newTransition)   + "\n\n";  
 	
 		content = content + this.createEdgeTag(this.tagEdgeStart, newTransition) + 
@@ -1029,177 +1020,17 @@ function WriterOnContent( editor)
 	}
 	this.buildTagCond = function(nameTransition, sourceName, targetName)
     {
-        var tagCondArray = new Array();
+           var tagCondArray = new Array();
         
-        tagCondArray.push("\n" + this.createCondTag(this.tagCondStart, nameTransition, sourceName, targetName) + "\n" );        
-        tagCondArray.push("\n" + this.createCondTag(this.tagCondEnd, nameTransition, sourceName, targetName) + "\n" );
+           tagCondArray.push("\n" + this.createCondTag(this.tagCondStart, nameTransition, sourceName, targetName) + "\n" );        
+           tagCondArray.push("\n" + this.createCondTag(this.tagCondEnd, nameTransition, sourceName, targetName) + "\n" );
         
-        return tagCondArray;         
-    }
-    this.findRealTagPer = function(nameTrans)
-    {
-        var arrayTag = new Array();
-        arrayTag.push(this.createPerTag(this.tagPerStart, nameTrans));
-        arrayTag.push(this.createPerTag(this.tagPerEnd, nameTrans));
-        var arrayTagToReturn = new Array();
-        var objectSearch = { wrap: true, range: null, wholeWord: false }; 
-
-        arrayTag.forEach(function( currentTag)
-            {
-                var tmp = currentTag.replace(/(\r\n|\n|\r)/g, "");
-                tmp = tmp.substring(tmp.indexOf('%'));
-                tmp = tmp.substring(0, tmp.lastIndexOf('}'));
-                tmp = writer.editor.find(tmp, objectSearch, false);
-                var realTag = writer.editor.session.getLine(tmp.end.row);
-                arrayTagToReturn.push(realTag);
-
-            });
-        return arrayTagToReturn;
-    }
-    this.addStateInPerTag = function(arrayTag, stateName)
-    {
-        var stateList;
-        var returnNull = false;
-        arrayTag.forEach(function( currentTag )
-        {
-            var currentTagJson = currentTag.substring(currentTag.indexOf('{'));
-            var actualObject;
-            var newTag;
-            var tmpObject = {};         
-            var alreadyExist = false;
-            try {
-                actualObject = JSON.parse(currentTagJson); //Getting Object
-                stateList = actualObject[writer.statePerTag]; //Getting conditions field
-                if( ! stateList ) //If does not exist, create this field
-                    stateList = new Array();
-                else
-                {   
-                    alreadyExist = true;
-                }
-                stateList.push(stateName); //Insert condition
-                tmpObject[writer.statePerTag] = stateList; 
-                newTag = JSON.stringify(tmpObject); //We cannot stringify actualObject to preserve spaces 
-
-            }
-            catch( err)
-            {
-                console.log("Error in addStateInPerTag \n" + err);
-                alert("Error in addStateInPerTag \n" + err);
-                return;
-            }
-            newTag = newTag.replace('{', "").replace('}', ""); //Stringify add brackets we do not need them
-
-            if( alreadyExist === false ) //If there was no cond. field add it at the end 
-            {   
-                newTag = currentTag.substring(0, currentTag.lastIndexOf('}')) + ", " + newTag + '}';
-            }
-            else
-            {   
-                var oldCondField = currentTag.substring(currentTag.indexOf(writer.statePerTag));
-                oldCondField = oldCondField.substring(0, oldCondField.indexOf(']') + 1);
-                if( oldCondField.indexOf('"' + stateName + '"') >= 0 ) //No double inclusion
-                {   
-                    returnNull = true;
-                }   
-                newTag = newTag.replace("\"", ""); //delete initial " created by stringify
-                newTag = currentTag.replace(oldCondField, newTag);
-
-            }
-
-            var objectSearch = { wrap: true, range: null, wholeWord: false, regExp: false };
-            writer.editor.find(currentTag, objectSearch, false);
-            writer.editor.replace(newTag); 
-        });
-        if( ! returnNull)
-            return stateList;
-
-        return null;
-    }
-    this.deleteStateInPerTag = function(arrayTag, stateName)
-    {
-        var stateList;
-        var returnNull = false;
-        arrayTag.forEach(function( currentTag )
-        {
-            var currentTagJson = currentTag.substring(currentTag.indexOf('{'));
-            var actualObject;
-            var newTag;
-            var tmpObject = {};         
-            try {
-                actualObject = JSON.parse(currentTagJson); //Getting Object
-                stateList = actualObject[writer.statePerTag]; //Getting conditions field
-                if( ! stateList ) //If does not exist, create this field
-                {
-                    returnNull = true;
-                    return;
-                }    
-                var counter = 0;
-                var removeIndex = 0;
-                stateList.forEach(function( item ) 
-                    {
-                        if( item === stateName )
-                            removeIndex = counter;
-                        counter ++;    
-                    });
-                stateList.splice(removeIndex, 1);
-                tmpObject[writer.statePerTag] = stateList; 
-                newTag = JSON.stringify(tmpObject); //We cannot stringify actualObject to preserve spaces 
-
-            }
-            catch( err)
-            {
-                console.log("Error in removeStateInPerTag \n" + err);
-                alert("Error in removeStateInPerTag \n" + err);
-                return;
-            }
-            newTag = newTag.replace('{', "").replace('}', ""); //Stringify add brackets we do not need them
-            var oldCondField = currentTag.substring(currentTag.indexOf(writer.statePerTag));
-            oldCondField = oldCondField.substring(0, oldCondField.indexOf(']') + 1);
-            newTag = newTag.replace("\"", ""); //delete initial " created by stringify
-            newTag = currentTag.replace(oldCondField, newTag);        
-            var objectSearch = { wrap: true, range: null, wholeWord: false, regExp: false };
-            writer.editor.find(currentTag, objectSearch, false);
-            writer.editor.replace(newTag); 
-        });
-        if( !returnNull)
-            return stateList;
-
-        return null;
-    }
-    this.modifyStatesInPerFunction = function(oldContent, stateList)
-    {
-        if( ! stateList )
-            return;
-        var newContent = oldContent.substring(0, oldContent.indexOf('='));
-        var usefulListStates = "";
-        newContent = newContent + "= ";
-        var counter = 0;
-        stateList.forEach(function( stateName)
-        {   
-            if( usefulListStates.indexOf("__" + stateName + "__") >= 0 )
-                return;
-            if( counter ++ == 0 )
-                newContent = newContent + "st`current_state = " + stateName;
-            else
-                newContent = newContent + " or st`current_state = " + stateName;
-            usefulListStates = usefulListStates + "__" + stateName + "__,";
-        });
-        newContent = newContent + "\n";
-        writer.editor.find(oldContent);
-        writer.editor.replace(newContent);  
-    }
-    this.addStateInPerFunction = function(transName, stateName)
-    {
-        var arrayTag = this.findRealTagPer(transName);
-        arrayTag[0] = arrayTag[0].replace(/(\r\n|\n|\r)/gm, "");
-        arrayTag[1] = arrayTag[1].replace(/(\r\n|\n|\r)/gm, "");
-        var oldContent = this.getContentBetweenTags(arrayTag[0], arrayTag[1]);
-        var stateList = this.addStateInPerTag(arrayTag, stateName);
-        this.modifyStatesInPerFunction(oldContent, stateList);     
+           return tagCondArray;         
     }
 	this.addConditionInTransition = function(transitionName, sourceName, targetName )
 	{        
 	    var condTag = this.buildTagCond(transitionName, sourceName, targetName);
+
 		var spaceRegex = "[\\s]*";
 		var separatorRegex = spaceRegex + "," + spaceRegex;
 		var blockStartNeedle = "%{\"_block\"" + spaceRegex + ":" + spaceRegex + "\"BlockStart\"";
@@ -1230,8 +1061,6 @@ function WriterOnContent( editor)
         edge.source.name = sourceName;
         edge.target.name = targetName;
         edge.name = transitionName;
-
-        this.addStateInPerFunction(transitionName, sourceName);
         
 		focusOnFun(edge);
 	}
@@ -1344,15 +1173,10 @@ function WriterOnContent( editor)
         var howManyConditions = this.howManyConditions(transName);
         this.deleteSeparatorInCond(transName, howManyConditions);
 
-        var arrayTag = this.findRealTagPer(transName);
-        arrayTag[0] = arrayTag[0].replace(/(\r\n|\n|\r)/gm, "");
-        arrayTag[1] = arrayTag[1].replace(/(\r\n|\n|\r)/gm, "");
-        var oldContent = this.getContentBetweenTags(arrayTag[0], arrayTag[1]);
-        var stateList = this.deleteStateInPerTag(arrayTag, sourceName);
-        this.modifyStatesInPerFunction(oldContent, stateList);
     }
     this.deleteTransition = function(nameFun) 
     {       
+
         var tagFun = this.buildTagFunction(nameFun);
         var tagPerFun = this.buildTagPerFunction(nameFun);
         var rangePerFunction = this.getRange(tagPerFun[0], tagPerFun[1]);
@@ -1416,8 +1240,7 @@ module.exports = {
         setTagsField : setTagsField,
         deleteCondition : deleteCondition,
         deleteNode : removeState,
-        deleteTrans: deleteTrans,
-        addDefaultTransition : addDefaultTransition
+        deleteTrans: deleteTrans
 
 };
 

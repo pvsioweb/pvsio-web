@@ -8,67 +8,139 @@
 /*global define, d3, require, $, brackets, window, document */
 define(function (require, exports, module) {
 	"use strict";
-	var stateMachine            = require("plugins/emulink/stateMachine"),
+	var stateMachine			= require("plugins/emulink/stateMachine"),
         handlerFile             = require("util/fileHandler"),
         pvsWriter               = require("plugins/emulink/stateToPvsSpecificationWriter"),
         parserSpecification     = require("plugins/emulink/parserSpecification"),
 		PrototypeBuilder		= require("pvsioweb/PrototypeBuilder"),
 		Logger					= require("util/Logger"),
         Simulator               = require("plugins/emulink/simulator"),
-        PDFHandler              = require("plugins/emulink/PDFHandler"),
+       // PDFHandler              = require("plugins/emulink/PDFHandler"),
         EmulinkFile             = require("plugins/emulink/fileHandler/fileHandler");
 
     var emulinkHasBeenUsed = false; //Default: Current Project is not Emulink Project
     var ws;
+	var currentProject;
+	var projectManager;
+	var editor;
 	
+	function init_menu() {
+		var infoBox = document.getElementById("infoBar");
+		if(infoBox) {
+			infoBox.style.background = "seagreen";
+			infoBox.style.color = "white";
+			infoBox.style.cursor = "default";
+		}
+	}
+
 	function createHtmlElements(pvsioWebClient) {
 		var content = require("text!plugins/emulink/forms/maincontent.handlebars");
-        var canvas = pvsioWebClient.createCollapsiblePanel("Statechart editor");
-        canvas = canvas.html(content); 
+        var canvas = pvsioWebClient.createCollapsiblePanel("Statechart Editor");
+        canvas = canvas.html(content);
+		// start emulink
+        if( ! emulinkHasBeenUsed ) {   
+            showEmulinkStatus();
+            stateMachine.init(editor, ws, currentProject, projectManager, true);
+            currentProject.name("default_pvsProject");
+            emulinkHasBeenUsed = true;
+        }
+        stateMachine.addNewDiagram();
+		init_menu();
 	}
-	function showEmulinkStatus()
-    {
-        document.getElementById("emulinkInfo").value = "Emulink Status: Active ";
-        document.getElementById("emulinkInfo").style.color = "#53760D";
-        
+
+	function showEmulinkStatus() {
+//        document.getElementById("emulinkInfo").value = "Emulink Status: Active ";
+//        document.getElementById("emulinkInfo").style.color = "#53760D";
     }
+
+
+	function highlightSelectedFunction(m) {
+		// reset colors	of all functions in the menu
+		document.getElementById("button_state").style.background = "";
+		document.getElementById("button_transition").style.background = "";
+		document.getElementById("button_self_transition").style.background = "";
+		document.getElementById("button_add_field").style.background = "";
+		// highlight selected function in the menu
+		if( m == stateMachine.MODE.ADD_NODE && document.getElementById("button_state") ) {
+			document.getElementById("button_state").style.background = "steelblue";
+		}
+		if( m == stateMachine.MODE.ADD_TRANSITION && document.getElementById("button_transition") ) {
+			document.getElementById("button_transition").style.background = "steelblue";
+		}
+		if( m == stateMachine.MODE.ADD_SELF_TRANSITION && document.getElementById("button_self_transition") ) {
+			document.getElementById("button_self_transition").style.background = "steelblue";
+		}
+		if( m == stateMachine.MODE.ADD_FIELD && document.getElementById("button_add_field") ) {
+			document.getElementById("button_add_field").style.background = "steelblue";
+		}
+	}
+
+	function modeChange_callback(event) {
+		var infoBar = document.getElementById("infoBar");
+		if(infoBar) { 
+			infoBar.textContent = "Editor mode: " + stateMachine.mode2string(event.mode); 
+		}
+		var infoBox = document.getElementById("infoBox");
+		if(infoBox) {
+			infoBox.value = (event.message && event.message != "")? 
+							event.message : stateMachine.modeTooltip(event.mode);	
+		}
+		// highlight selected function in the menu
+		highlightSelectedFunction(event.mode);
+
+		// debug line
+		console.log(event.mode);
+	}
+
 	function Emulink(pvsioWebClient) {
 		//register prototype builder as a plugin since this plugin depends on it
 		var pb = pvsioWebClient.registerPlugin(PrototypeBuilder);
-		var projectManager = pb.getProjectManager(),
-			editor = pb.getEditor();
+		projectManager = pb.getProjectManager();
+		editor = pb.getEditor();
         ws = pvsioWebClient.getWebSocket();
-        var currentProject = projectManager.project();
+        currentProject = projectManager.project();
         var selectedFileChanged;	
         
+		stateMachine.addListener("editormodechanged", modeChange_callback);
 		//create the user interface elements
 		createHtmlElements(pvsioWebClient);
-        //document.getElementById("button_state").style.cursor = 'not-allowed';
-
 
         projectManager.addListener("SelectedFileChanged", function (event) {
                 selectedFileChanged = event.selectedItemString;
         });
-        $('#emulinkMenu').prepend('<div id="menu-button">Menu</div>');
-        $('#emulinkMenu #menu-button').on('click', function(){
-            var menu = $(this).next('ul');
-            if (menu.hasClass('open')) {
-                menu.removeClass('open');
-            }
-            else {
-                menu.addClass('open');
-            }
-       });
-    
-        d3.selectAll(".toPDF").on("click", function() { PDFHandler.toPDF(currentProject, stateMachine, ws); });
+		// d3.select("#toPDF").on("click", function() { PDFHandler.toPDF(currentProject, stateMachine, ws); });
         projectManager.addListener("SelectedFileChanged", function (event) {
                 selectedFileChanged = event.selectedItemString;
         });
-        d3.selectAll(".state_machine").on("click", function () { stateMachine.init(editor, ws, currentProject, projectManager); });
-        d3.selectAll(".button_state").on("click", function () { stateMachine.add_node_mode(); });
-        d3.selectAll(".button_transition").on("click", function () { stateMachine.add_transition_mode(); });
-        d3.selectAll(".button_self_transition").on("click", function () { stateMachine.add_self_transition_mode(); });
-        /// When User clicks on New File button #new_file a pvs file is created and showed in file list box
+        d3.select("#state_machine").on("click", function () { 
+			stateMachine.init(editor, ws, currentProject, projectManager); 
+		});
+        d3.select("#button_state").on("click", function () { 
+			stateMachine.add_node_mode(); 
+		});
+        d3.select("#button_transition").on("click", function () { 
+			stateMachine.add_transition_mode(); 
+		});
+        d3.select("#button_self_transition").on("click", function () { 
+			stateMachine.add_self_transition_mode(); 
+		});
+		d3.select("#button_add_field").on("click", function () {
+			stateMachine.add_field_mode_start();
+			var newField = prompt("Please enter type and name of the new state variable (for example, int value)", 
+									"fieldtype fieldname");
+			if(!newField || newField.split(' ').length != 2) {
+				if(newField) { alert("Wrong format: new state variable has not been added"); }
+				return stateMachine.add_field_mode_end(null, null);
+			}
+			var field_name = newField.split(' ')[0];
+			var field_type = newField.split(' ')[1];
+			var msg = "State variable " + field_name 
+					+ " of type " + field_type + " successfully added."
+			stateMachine.add_field_mode_end(field_name, field_type, msg);
+		});
+
+
+        // creates a new PVS file and displays it in file browser
         d3.select("#new_file").on("click", function ( ) {	
             projectManager.newFile();
         });
@@ -88,7 +160,8 @@ define(function (require, exports, module) {
         /// User wants to rename a file 
         d3.select("#rename_file").on("click", function () {
             projectManager.renameFile(projectManager.getSelectedFile());
-        });   
+        });
+   
 
         /// User wants to close a file (it will be not shown in file list box on the right ) 
         d3.select("#close_file").on("click", function () {
@@ -131,13 +204,13 @@ define(function (require, exports, module) {
 
         d3.select("#specificationToDiagram").on("click", function() {     
             // User has just copied into the editor without opening any project
-            if( currentProject.pvsFilesList().length == 0)
-            {
+            if( currentProject.pvsFiles().length == 0) {
                 currentProject.name("default_pvsProject");
-                EmulinkFile.new_file(currentProject, editor, ws, "TheoryEmulink.pvs", editor.getValue(), projectManager );
-
+                EmulinkFile.new_file(currentProject, editor,
+									 ws, "TheoryEmulink.pvs", editor.getValue(), projectManager );
             }
-            parserSpecification.init(editor, stateMachine, currentProject, ws, projectManager, selectedFileChanged);
+            parserSpecification.init(editor, stateMachine, currentProject, 
+										ws, projectManager, selectedFileChanged);
             showEmulinkStatus();
             emulinkHasBeenUsed = true;
         });
@@ -145,10 +218,8 @@ define(function (require, exports, module) {
         
         d3.select("#startSimulation").on("click", function() {            
             var simulationIsActive = Simulator.init(ws); 
-            if( simulationIsActive ) { d3.select(this).html("Animation Enabled").classed("btn btn-success", true); }
-            else
-                d3.select(this).html("Enable Animation").classed("btn btn-success", false).classed("btn", true);
-
+            if( simulationIsActive ) { d3.select(this).html("Disable Animation"); }
+            else { d3.select(this).html("Enable Animation"); }
             //Simulator.setInitState("INITSTATE");
         });
 	
@@ -157,13 +228,11 @@ define(function (require, exports, module) {
 	    stateMachine.changeTextArea();
 	 
         });*/
-        document.getElementById("emulinkInfo").value = "Emulink status: NOT active";
-
-        $(".startEmulink").each(function(index, element) {
-                $(element).prop("disabled",false);
-        }); 
+/*        document.getElementById("emulinkInfo").value = "Emulink status: NOT active";
+        document.getElementById("startEmulink").disabled = false;
         /// User wants to start emulink 
-        d3.selectAll(".startEmulink").on("click", function () {
+        d3.select("#startEmulink").on("click", function () {
+			//d3.select(this).html("Diagram created").classed("btn-danger", false).classed("btn-success", true).attr("disabled", true);
             if( ! emulinkHasBeenUsed )
             {   
                 showEmulinkStatus();
@@ -171,10 +240,9 @@ define(function (require, exports, module) {
                 currentProject.name("default_pvsProject");
                 emulinkHasBeenUsed = true;
             }
-            
-            stateMachine.addNewDiagram();            
+            stateMachine.addNewDiagram();          
         });    
-	   
+	   */
         //Adding Listener triggered when user saves a project
 		projectManager.addListener("ProjectSaved", function (event) { 
             
@@ -201,7 +269,7 @@ define(function (require, exports, module) {
              emulinkHasBeenUsed = false;
              var project = event.current; 
              currentProject = project;
-             var fileToShow = project.mainPVSFile() || project.pvsFilesList()[0];
+             var fileToShow = project.mainPVSFile() || project.pvsFiles()[0];
              fileToShow = fileToShow.name();
              var f = project.path() + "/" + "graphDefinition.json";
              ws.getFile(f, function (err, res) {
@@ -217,8 +285,6 @@ define(function (require, exports, module) {
              });
         
         });
-        
-
         
 		return this;
 	}

@@ -24,6 +24,9 @@ var ace   = require("ace/ace");
 var editor;
 var modifiedUser = 0;
 var pvsWriter = require("plugins/emulink/stateToPvsSpecificationWriter");
+
+var eventDispatcher = require("util/eventDispatcher");
+
 var graph = { nodes: d3.map(), edges: d3.map() };
 
 var minBoxWidth  = 60; 
@@ -50,18 +53,13 @@ function NodeAndEdgeHandler()
 {
 	this.nodeIDGenerator = 0;
 	this.edgeIDGenerator = 0;
+    this.defTrans = null;
+    this.defTransFalseNodeId = null;
 
 }
 NodeAndEdgeHandler.prototype.newNodeID = function () { return nodeAndEdgeHandler.nodeIDGenerator++; };
 NodeAndEdgeHandler.prototype.add_node = function(positionX, positionY, label, notWriter, height_, width_, falseNode ) 
 {
-    var buttonClass = [".button_transition", ".button_self_transition", ".button_default_transition"];
-    buttonClass.forEach(function(button) { 
-        $(button).each(function(index, element) {
-            $(element).prop("disabled", false);
-        });     
-    });
-
 	var _id = "X" + nodeAndEdgeHandler.newNodeID();
 	var node = { 
 			fixed: true,
@@ -90,12 +88,10 @@ NodeAndEdgeHandler.prototype.add_node = function(positionX, positionY, label, no
 	pvsWriter.addState(node);
     return node;
 }
-NodeAndEdgeHandler.prototype.newEdgeID = function()
-{
-	return nodeAndEdgeHandler.edgeIDGenerator ++;
+NodeAndEdgeHandler.prototype.newEdgeID = function() { 
+	return nodeAndEdgeHandler.edgeIDGenerator++; 
 }
-NodeAndEdgeHandler.prototype.add_edge = function(source, target, label, notWriter) 
-{
+NodeAndEdgeHandler.prototype.add_edge = function(source, target, label, notWriter) {
 	var _id = "T" + nodeAndEdgeHandler.newEdgeID();
 	var edge = {
 		id: _id, // edge id must be unique
@@ -113,95 +109,82 @@ NodeAndEdgeHandler.prototype.add_edge = function(source, target, label, notWrite
 	pvsWriter.addConditionInTransition(edge.name, source, target);
     return edge;
 }
-NodeAndEdgeHandler.prototype.delete_node = function (id) 
-{
+NodeAndEdgeHandler.prototype.delete_node = function (id) {
     graph.nodes.remove(id);
 }
 NodeAndEdgeHandler.prototype.delete_all_nodes = function () {
     graph.nodes.forEach(function(key, value) { graph.nodes.remove(key); });
 }
-NodeAndEdgeHandler.prototype.deleteNodeAndTransition = function(node, flagObject)
-{
+NodeAndEdgeHandler.prototype.deleteNodeAndTransition = function(node, flagObject) {
 	// Delete node from SVG 
     nodeAndEdgeHandler.delete_node(node.id);
 
     // Delete node from specification
     var numberNodesStillPresent = getNodesInDiagram().length;
-    if(numberNodesStillPresent == 0) 
-    {
-    	document.getElementById("button_transition").disabled = true;
-	    document.getElementById("button_self_transition").disabled = true;
-    }
     pvsWriter.deleteNode(node.name, numberNodesStillPresent);
 
     var edges = getEdgesInDiagram();
     var toDelete = {};
-    if( flagObject.deleteTransIn && flagObject.deleteTransOut )
-    {
-    	edges.forEach(function(key) 
-    		{
-
-    			if( key.source.id === node.id || key.target.id === node.id )
-    			{	
+    if( flagObject.deleteTransIn && flagObject.deleteTransOut ) {
+    	edges.forEach(function(key) {
+    			if( key.source.id === node.id || key.target.id === node.id ) {	
     				nodeAndEdgeHandler.delete_edge(key.id); //Delete from SVG 
-    				pvsWriter.deleteCondition(key.name, key.source.name, key.target.name);
-    				toDelete[key.name] = key.name;
+                    if( ! key.source.falseNode  ) {   
+						pvsWriter.deleteCondition(key.name, key.source.name, key.target.name);
+    				    toDelete[key.name] = key.name;
+                    }
     			}
     		});
     }
-    else if( flagObject.deleteTransOut )
-    {
-    	edges.forEach(function(key) 
-    		{
-    			if( key.source.id === node.id )
-    			{	
+    else if( flagObject.deleteTransOut ) {
+    	edges.forEach(function(key) {
+    			if( key.source.id === node.id ) {	
     				nodeAndEdgeHandler.delete_edge(key.id); //Delete from SVG 
-    				pvsWriter.deleteCondition(key.name, key.source.name, key.target.name)
-    				toDelete[key.name] = key.name;    				
+                    if( ! key.source.falseNode ) {   
+						pvsWriter.deleteCondition(key.name, key.source.name, key.target.name)
+    				    toDelete[key.name] = key.name;
+                    }    				
     			}
     		});
 
     }
-    else if( flagObject.deleteTransIn )
-    {
-    	edges.forEach(function(key) 
-    		{
-    			if( key.target.id === node.id )
-    			{	
+    else if( flagObject.deleteTransIn ) {
+    	edges.forEach(function(key) {
+    			if( key.target.id === node.id ) {	
     			    nodeAndEdgeHandler.delete_edge(key.id); //Delete from SVG 
-    				pvsWriter.deleteCondition(key.name, key.source.name, key.target.name)
-    				toDelete[key.name] = key.name;
+                    if( ! key.source.falseNode ) {   
+						pvsWriter.deleteCondition(key.name, key.source.name, key.target.name)
+    				    toDelete[key.name] = key.name;
+                    }
     			}
     		});
     }
     edges = getEdgesInDiagram();
-    for( var nameEdge in toDelete)
-    { 	
+    for( var nameEdge in toDelete) { 	
          var flagDelete = true;
-    	 edges.forEach(function(key)
-    		{
-    			if( nameEdge === key.name) { flagDelete = false;}
-    		});
+    	 edges.forEach(function(key) { if( nameEdge === key.name) { flagDelete = false;} });
     	 if( flagDelete) {pvsWriter.deleteTrans(nameEdge); }	
 	}
+    if( node.id === nodeAndEdgeHandler.defTrans) {
+        nodeAndEdgeHandler.delete_node(nodeAndEdgeHandler.defTransFalseNodeId);
+        pvsWriter.deleteDefTrans();
+        nodeAndEdgeHandler.defTrans = null;
+        nodeAndEdgeHandler.defTransFalseNodeId = null;
+    }
 }
-NodeAndEdgeHandler.prototype.update_node_size = function(id, width, height) 
-{
+NodeAndEdgeHandler.prototype.update_node_size = function(id, width, height) {
 	var theNode = graph.nodes.get(id);
 	theNode.height = height;
 	theNode.width = width;
 	graph.nodes.set(id, theNode);
 }
-NodeAndEdgeHandler.prototype.delete_edge = function (id)
-{
+NodeAndEdgeHandler.prototype.delete_edge = function (id) {
 	graph.edges.remove(id);
 }
-NodeAndEdgeHandler.prototype.delete_all_edges = function () 
-{
+NodeAndEdgeHandler.prototype.delete_all_edges = function () {
     graph.edges.forEach(function(key, value) { graph.edges.remove(key); });
 }
-NodeAndEdgeHandler.prototype.modifyLabelEdgeToDisplayActionAndCond = function(object, path)
-{
+NodeAndEdgeHandler.prototype.modifyLabelEdgeToDisplayActionAndCond = function(object, path) {
     var id = object.id;
     var textID = "text:" + id;
     if(object.source.id == object.target.id) {
@@ -212,25 +195,30 @@ NodeAndEdgeHandler.prototype.modifyLabelEdgeToDisplayActionAndCond = function(ob
     }
     else {
         // other edges store the label as textPath
-        /* this works in Firefox but not in Chrome -- could be a bug in Chrome's Javascript implementation
-         * as a workaround, we directly manipulate DOM
+        /* this commented works in Firefox but not in Chrome
+		 * it could be because of a bug in Chrome's Javascript implementation
         path.selectAll("textPath").text( function(d) {
             if(d.name == originalName ) { counter++; }
             if(d.id == id) { return newName; }
             return d.name;
         });*/
 
-        // here's the workaround for the bug with textPath in Chrome
+        // here's the workaround for the bug with textPath in Chrome: direct manipulation of DOM
         var textPathID = "textPath:" + id;
         if(path.selectAll("text")) {
             for(var i = 0; i < path.selectAll("text").length; i++) {
-                if(path.selectAll("text")[i] && path.selectAll("text")[i][1] && path.selectAll("text")[i][1].childNodes[0]) {
+                if(path.selectAll("text")[i] 
+					&& path.selectAll("text")[i][1] 
+					&& path.selectAll("text")[i][1].childNodes[0]) {
                     if(path.selectAll("text")[i][1].childNodes[0].id == textPathID) {
                         // remove the textpath child
-                        var textPath = path.selectAll("text")[i][1].removeChild(path.selectAll("text")[i][1].childNodes[0]);
+                        var textPath = path.selectAll("text")[i][1]
+											.removeChild(path.selectAll("text")[i][1]
+											.childNodes[0]);
                         // replace the text in textPath with the new label
                         textPath.removeChild(textPath.childNodes[0]);
-                        textPath.appendChild(document.createTextNode(object.name + createStringFromArray(object)));
+                        textPath.appendChild(document.createTextNode(object.name 
+																		+ createStringFromArray(object)));
                         // append the textPath back
                         path.selectAll("text")[i][1].appendChild(textPath);
                     }
@@ -240,16 +228,11 @@ NodeAndEdgeHandler.prototype.modifyLabelEdgeToDisplayActionAndCond = function(ob
     }
       
 }
-NodeAndEdgeHandler.prototype.deleteEdge = function(edge)
-{
+NodeAndEdgeHandler.prototype.deleteEdge = function(edge) {
 	nodeAndEdgeHandler.delete_edge(edge.id);
 	var edges = getEdgesInDiagram();
 	var counter = 0;
-	edges.forEach(function( key)
-	     {
-	     	if( key.name === edge.name){ counter ++; }
-	     }
-	 );
+	edges.forEach(function( key) { if( key.name === edge.name){ counter ++; } });
 	if( counter > 0) { pvsWriter.deleteCondition(edge.name, edge.source.name, edge.target.name); }
 	else { pvsWriter.deleteTrans(edge.name); }
 }
@@ -259,42 +242,16 @@ var diagramHandler = new DiagramHandler();
 /* diagramHandler, here all the functions which handle diagram */
 
 /* ************************************************************ */
-function DiagramHandler()
-{
+function DiagramHandler() {
 	this.numberFiles = 0;
 	this.numberDiagramStillToRestore = 0;
 	this.diagramsInfo = {}; 
 	this.lastFileShown = "";
 }
-DiagramHandler.prototype.addNewDiagram = function()
-{
+DiagramHandler.prototype.addNewDiagram = function() {
     var name = "myTheory" + diagramHandler.numberFiles + ".pvs";
     pvsWriter.newSpecification(name);
     diagramHandler.numberFiles ++;
-    setInteractionEnabledOrDisabledAboutEdge(true);
-    setInteractionEnabledOrDisabledAboutNode(true);
-    document.getElementById("addFieldState").disabled = false;
-    document.getElementById("addFieldState").style.cursor = 'pointer';
-
-    $(".button_state").each(function(index, element) {
-           $(element).prop("disabled", false);
-    });     
-    $(".button_transition").each(function(index, element) {
-           $(element).prop("disabled", true);
-    });
-    $(".button_self_transition").each(function(index, element) {
-           $(element).prop("disabled", true);
-    });
-    $(".toPDF").each(function(index, element) {
-           $(element).prop("disabled", false);
-    });
-    $(".zoom").each(function(index, element) {
-           $(element).prop("disabled", false);
-    });
-    $(".zoom_").each(function(index, element) {
-           $(element).prop("disabled", false);
-    });
-	
 }
 /** 
  *  This function is called when user has just selected an emulink file in the listView,
@@ -305,8 +262,7 @@ DiagramHandler.prototype.addNewDiagram = function()
  *  @returns void 
  *	      
  */
-DiagramHandler.prototype.restoreGraphAfterSwitchingEmulinkFiles = function(diagramObject)
-{
+DiagramHandler.prototype.restoreGraphAfterSwitchingEmulinkFiles = function(diagramObject) {
 	var nodes = diagramObject.nodes;
 	var edges = diagramObject.edges;
 	
@@ -320,7 +276,6 @@ DiagramHandler.prototype.restoreGraphAfterSwitchingEmulinkFiles = function(diagr
 
 // FIXME: this should be renamed into delete_graph
 DiagramHandler.prototype.clearSvg = function() {
-
 	nodeAndEdgeHandler.delete_all_nodes();
 	nodeAndEdgeHandler.delete_all_edges();    
 }
@@ -334,8 +289,7 @@ DiagramHandler.prototype.clearSvg = function() {
  *  @returns void 
  *	      
  */
-DiagramHandler.prototype.restoreDiagramFirstTimeAfterReloadingFromSaving = function(graphToRestore)
-{
+DiagramHandler.prototype.restoreDiagramFirstTimeAfterReloadingFromSaving = function(graphToRestore) {
     var nodesToRestore = graphToRestore.nodes;
     var edgesToRestore = graphToRestore.edges;
     var workAround = new Array();
@@ -418,50 +372,53 @@ DiagramHandler.prototype.init = function(_editor, wsocket, currentProject, pm, s
 {
 
 	pm.addListener("SelectedFileChanged", function (event) {
-		
-	if( diagramHandler.lastFileShown) //Since file selected is going to be changed, we need to save diagram information ...
-	{
-		var nodes = getNodesInDiagram();
-		var edges = getEdgesInDiagram();
+		//Since file selected is going to be changed, we need to save diagram information ...
+		if( diagramHandler.lastFileShown) {
+			var nodes = getNodesInDiagram();
+			var edges = getEdgesInDiagram();
+			if( nodes.length ) {
+				// But save just if there is something to save!
+				var graphToSave = { nodes: getNodesInDiagram(), edges: getEdgesInDiagram()};
+			    diagramHandler.diagramsInfo[diagramHandler.lastFileShown] = graphToSave;
+			    /* Even saving XML SVG in case user wants to get a PDF */
+			    var serializer = new XMLSerializer();
+		    	var xmlString = serializer.serializeToString(d3.select('#canvas').node());
+			    svgReference[diagramHandler.lastFileShown] = xmlString;
+			}
+		}	
+		// ...and clearing SVG
+		svgViewHandler.svg.remove();
+		diagramHandler.clearSvg();
 
-		if( nodes.length ) // But save just if there is something to save!
-		{   var graphToSave = { nodes: getNodesInDiagram(), edges: getEdgesInDiagram()};
-    	    diagramHandler.diagramsInfo[diagramHandler.lastFileShown] = graphToSave;
-    	    /* Even saving XML SVG in case user wants to get a PDF */
-    	    var serializer = new XMLSerializer();
-        	var xmlString = serializer.serializeToString(d3.select('#canvas').node());
-    	    svgReference[diagramHandler.lastFileShown] = xmlString;
-    	}
-	}	
-	// ...and clearing SVG
-    svgViewHandler.svg.remove();
-    diagramHandler.clearSvg();
+		svgViewHandler.svg = d3.select("#ContainerStateMachine").append("svg")
+								.attr("width", width).attr("height", height)
+								.attr("id", "canvas").style("background", "#fffcec");
 
-    svgViewHandler.svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
-			.attr("id", "canvas").style("background", "#fffcec");
+		// Update last file shown 
+		diagramHandler.lastFileShown = event.selectedItemString;
 
+		// Get information fresh file to display
+		var diagramInfo = diagramHandler.diagramsInfo[diagramHandler.lastFileShown];  
+		if( diagramInfo) {
+			//If it has diagram information 
+			if( diagramHandler.numberDiagramStillToRestore ) {
+				// Check if this is shown for first time after reloading 
+				diagramHandler.restoreDiagramFirstTimeAfterReloadingFromSaving(diagramInfo);
+			}
+			else {
+				diagramHandler.restoreGraphAfterSwitchingEmulinkFiles(diagramInfo);
+			}
+		}
+		emulink();
+		}); //End listener
 
-
-	diagramHandler.lastFileShown = event.selectedItemString; //Update last file shown 
-
-	var diagramInfo = diagramHandler.diagramsInfo[diagramHandler.lastFileShown]; //Get information fresh file to display 
-	if( diagramInfo) //If it has diagram information 
-		if( diagramHandler.numberDiagramStillToRestore ) // Check if this is shown for first time after reloading 
-		    diagramHandler.restoreDiagramFirstTimeAfterReloadingFromSaving(diagramInfo);
-	    else
-		    diagramHandler.restoreGraphAfterSwitchingEmulinkFiles(diagramInfo);
-
-	emulink();
-	}); //End listener
 	diagramHandler.lastFileShown = nameFile;
-	if( !svgViewHandler.svg ) { svgViewHandler.svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
-			.attr("id", "canvas").style("background", "#fffcec"); }
+	if( !svgViewHandler.svg ) { 
+		svgViewHandler.svg = d3.select("#ContainerStateMachine").append("svg")
+								.attr("width", width).attr("height", height)
+								.attr("id", "canvas").style("background", "#fffcec"); }
 
-    ws = wsocket;
-
-    document.getElementById('infoBox').value = "TIP: Click on any element to see its properties";
-	document.getElementById('infoBoxModifiable').value= "TIP: After clicking on an element, editable properties will be showed here";
-	
+    ws = wsocket;	
 	editor = _editor;
     
     pvsWriter.init(editor, ws, currentProject, pm);    
@@ -492,6 +449,12 @@ function SvgViewHandler()
 	this.zoomCounter = 1;
 }
 
+
+var stroke_width_large = 20;
+var stroke_width_normal = 1;
+var stroke_width_highlighted = 1.5;
+
+
 SvgViewHandler.prototype.restoreColorNodesAndEdges = function()
 {
 	var colors = d3.scale.category10();
@@ -500,7 +463,9 @@ SvgViewHandler.prototype.restoreColorNodesAndEdges = function()
 
     svgViewHandler.svg.selectAll("path")		
 		.style("stroke", "black")
-		.style("stroke-width", 1);
+		.style("stroke-width", function() { 
+			if(this.id && this.id != "" && this.id.indexOf("_selection_overlay") < 0) { return stroke_width_normal; }
+			return this.style.stroke-width; });
 }
 SvgViewHandler.prototype.highlightElements = function ( nodes ) {
 	// highlight nodes
@@ -508,17 +473,14 @@ SvgViewHandler.prototype.highlightElements = function ( nodes ) {
 	svg.selectAll("g").selectAll("g").select("rect")
 		.style("fill", function (d) {
 				for(var i = 0; i < nodes.length; i++) {
-					if(nodes[i] == d.name) {
-						return "white";
-					}
+                    if( i == 0 && nodes[i] == d.name ) { return "red"; }
+					else if(nodes[i] == d.name) { return "white"; 	}
 				}
 				return "";
 			})
 		.style("stroke", function (d) {
 			for(var i = 0; i < nodes.length; i++) {
-				if(nodes[i] == d.name) {
-					return "green";
-				}
+				if(nodes[i] == d.name) { return "green"; }
 			}
 			return "";})
 		.style("stroke-width", 3);
@@ -550,11 +512,18 @@ SvgViewHandler.prototype.highlightElements = function ( nodes ) {
 				for(var i = 0; i < labels.length; i++) {
 					if(labels[i].name == d.name 
 						&& labels[i].source.name == d.source.name
-						&& labels[i].target.name == d.target.name) {
-						return 3;
+						&& labels[i].target.name == d.target.name
+						&& this.id && this.id != "" 
+						&& this.id.indexOf("_selection_overlay") < 0) {
+							return 3;
 					}
 				}
-				return 1;}
+				if(this.id && this.id != "" 
+					&& this.id.indexOf("_selection_overlay") < 0) { 
+						return stroke_width_normal; 
+				}
+				return this.style.stroke-width;
+			}
 		});
 }
 SvgViewHandler.prototype.zoom = function(delta)
@@ -585,23 +554,11 @@ SvgViewHandler.prototype.resetZoom = function()
 SvgViewHandler.prototype.clear_node_selection = function () {
 	selected_nodes.forEach(function(key, value) { selected_nodes.remove(key); });
 	svgViewHandler.svg.selectAll("g").selectAll("g").select("rect").style("stroke", "").style("stroke-width", "");
-	// FIXME: the following code is not clean, because the buttons are just for debugging and therefore we should not link
-    //         generic functions like clear_node_selection to these debugging buttons.
-    //         The clean way to implement this is to create a new variable that stores information about the functionalities
-    //         that should be enabled or disabled. These variables are exported to other modules, so that the user interface
-    //         can be updated accordingly (in this case, by enabling/disabling the buttons).
-	setInteractionEnabledOrDisabledAboutNode(true);
 }
 
 SvgViewHandler.prototype.clear_edge_selection = function () {
 	selected_edges.forEach(function(key, value) { selected_edges.remove(key); });
 	svgViewHandler.svg.selectAll("path").classed("selected", false);
-	// FIXME: the following code is not clean, because the buttons are just for debugging and therefore we should not link
-    //         generic functions like clear_node_selection to these debugging buttons.
-    //         The clean way to implement this is to create a new variable that stores information about the functionalities
-    //         that should be enabled or disabled. These variables are exported to other modules, so that the user interface
-    //         can be updated accordingly (in this case, by enabling/disabling the buttons).
-	setInteractionEnabledOrDisabledAboutEdge(true);
 }
 
 var clear_selection = function () {
@@ -625,49 +582,42 @@ var getXMLSVG = function ()
 }
 
 
-var setInteractionEnabledOrDisabledAboutNode = function(disabled)
-{
-	var buttonClass = [".changeNameNode", ".deleteNode"];
+var MODE = { DEFAULT: 0, ADD_NODE: 1, ADD_TRANSITION: 2, ADD_SELF_TRANSITION: 3, ADD_DEFAULT_TRANSITION: 4,
+			  ADD_FIELD: 5 };
 
-	buttonClass.forEach(function(button) { 
-        $(button).each(function(index, element) {
-            $(element).prop("disabled",disabled);
-        });		
-	});
+function mode2string(mode) {
+	if(mode == MODE.DEFAULT) { return "browse diagram"; }
+	else if(mode == MODE.ADD_NODE) { return "add state"; }
+	else if(mode == MODE.ADD_TRANSITION) { return "add transition"; }
+	else if(mode == MODE.ADD_SELF_TRANSITION) { return "add self-transition"; }
+	else if(mode == MODE.ADD_DEFAULT_TRANSITION) { return "add default transition"; }
+	else if(mode == MODE.ADD_FIELD) { return "add state variable"; }
+	else return "error: unknown mode";
 }
-var setInteractionEnabledOrDisabledAboutEdge = function(disabled, d)
-{
-	var buttonClass = [".changeNameEdge", ".addCondition", ".addOperation", ".deleteEdge"];
-	buttonClass.forEach(function(button) { 
-        $(button).each(function(index, element) {
-            $(element).prop("disabled",disabled);
-        });     
-    });
-	if( disabled === false)
-	{
-		if( d.listConditions) 
-        {   buttonClass = [".rmvCond", ".modifyCondition"];
-            buttonClass.forEach(function(button) { 
-                $(button).each(function(index, element) {
-                $(element).prop("disabled",disabled);
-               });     
-            });
-        }
-		if( d.listOfOperations) 
-        {   buttonClass = [".rmvOper", ".modifyOperation"];
-            buttonClass.forEach(function(button) { 
-                $(button).each(function(index, element) {
-                $(element).prop("disabled",disabled);
-               });     
-            });
-        }
+
+function modeTooltip(mode) {
+	if(mode == MODE.DEFAULT) { 
+		return "To add new states and transitions to the diagram"
+		   + ", please toggle commands in the editor menu."; }
+	else if(mode == MODE.ADD_NODE) { 
+		return "To add a new state, please click on an empty area of the diagram."; 
 	}
-	
-
+	else if(mode == MODE.ADD_TRANSITION) { 
+		return "To add a new transition between states"
+		  + ", please drag the mouse from the source state to the target state."; 
+	}
+	else if(mode == MODE.ADD_SELF_TRANSITION) { 
+		return "To add a self-transition to a state, click on the state."; 
+	}
+	else if(mode == MODE.ADD_DEFAULT_TRANSITION) { 
+		return "To add a default transition to a state, click on the state."; 
+	}
+	else if(mode == MODE.ADD_FIELD) { 
+		return "Please enter name and type of the new state variable in the dialog box."
+	}
+	else return "Error: unexpected editor mode -- please report a bug.";
 }
 
-
-var MODE = { DEFAULT: 0, ADD_NODE: 1, ADD_TRANSITION: 2, ADD_SELF_TRANSITION: 3, ADD_DEFAULT_TRANSITION: 4 };
 var editor_mode = MODE.DEFAULT;
 
 var selected_nodes = d3.map();
@@ -750,8 +700,7 @@ function showInformationInTextArea(element) {
 	textArea.value = name;
 }
 
-function changeTextArea(node, path) {
-    
+function changeTextArea(node, path) {    
 	if( selected_nodes.keys().length == 0 && selected_edges.keys().length == 0 ) {        
 	    document.getElementById('infoBox').value = " ";
         document.getElementById('infoBoxModifiable').value= " ";
@@ -793,7 +742,8 @@ function changeTextArea(node, path) {
         
         path.selectAll("text").text(function(d) { 
             
-            var tmp = d.name.indexOf('{') == -1 ? d.name : d.name.substring(0,d.name.indexOf('{'));            
+            var tmp = (d.name.indexOf('{') == -1) ? 
+						d.name : d.name.substring(0,d.name.indexOf('{'));            
             if(tmp == oldName ) { counter ++; }
 			if( d.id == oldId) { 
                 if( ! newOperation)
@@ -819,44 +769,21 @@ function changeTextArea(node, path) {
     }
 }
 
-function set_editor_mode(m) {
-	// reset borders
-	/*document.getElementById("button_self_transition").style.border = "";
-	document.getElementById("button_transition").style.border = "";
-	document.getElementById("button_default_transition").style.border = "";
-	document.getElementById("button_state").style.border = "";*/
-    var buttonClass = [".button_self_transition", ".button_transition", ".button_default_transition", ".button_state"];
-    buttonClass.forEach(function(button) { 
-        $(button).each(function(index, element) {
-            $(element).css("border","");
-        });     
-    });
-	// set new editor mode
-	editor_mode = m;
-	if(editor_mode == MODE.ADD_TRANSITION) {
-        $(".button_transition").each(function(index, element) {
-            $(element).css("border","3px solid #AD235E");
-        });  
-	}
-	else if(editor_mode == MODE.ADD_SELF_TRANSITION) {
-        $(".button_self_transition").each(function(index, element) {
-            $(element).css("border","3px solid #AD235E");
-        }); 
-	}
-	else if(editor_mode == MODE.ADD_DEFAULT_TRANSITION) {
-        $(".button_default_transition").each(function(index, element) {
-            $(element).css("border","3px solid #AD235E");
-        }); 
-	}
-	else if(editor_mode == MODE.ADD_NODE) {
-        $(".button_state").each(function(index, element) {
-            $(element).css("border","3px solid #AD235E");
-        }); 
-	}
+
+function create_new_field(field_name, field_type) {
+	pvsWriter.addFieldInState(field_name, field_type);
 }
 
-function toggle_editor_mode(m) {
-	if(editor_mode != m) { return set_editor_mode(m); }
+
+function set_editor_mode(mode, msg) {
+	// set new editor mode
+	editor_mode = mode;
+	var event = {type: "editormodechanged", mode: editor_mode, message: msg};
+	sm.fire(event);
+}
+
+function toggle_editor_mode(mode, msg) {
+	if(editor_mode != mode) { return set_editor_mode(mode, msg); }
 	return set_editor_mode(MODE.DEFAULT);
 }
 
@@ -866,6 +793,8 @@ function getEdgesInDiagram() { return graph.edges.values(); }
 
 
 var emulink = function() {
+
+	set_editor_mode(MODE.DEFAULT);
 
 	var svg = svgViewHandler.svg;
 	var colors = d3.scale.category10();
@@ -955,7 +884,7 @@ var emulink = function() {
 	// update force layout (called automatically each iteration)
 	function tick() {
 		// draw directed edges with proper padding from node centers
-		path.select("path")
+		path.selectAll("path")
 			.attr('d', function(d) {
 				if(d.target.x == d.source.x && d.target.y == d.source.y) {
 					// self-edge
@@ -1010,9 +939,7 @@ var emulink = function() {
 					// this draws straight lines
 					//return "m" + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
 				}
-			}).classed("selected", function(d) {
-				return selected_edges.has(d.id);
-			});
+			});//.classed("selected", function(d) { return selected_edges.has(d.id); });
 		path.selectAll("text")
 			.attr("dy", "-5")
 			.style("fill","blue")
@@ -1034,7 +961,7 @@ var emulink = function() {
 		node.attr("transform", function(d) {
 				return "translate(" + d.x + "," + d.y + ")";
 		});
-	}
+	};
 
 	// update graph (called when needed)
 	function restart() {
@@ -1051,7 +978,46 @@ var emulink = function() {
 		path = path.data(graph.edges.values(), function(d) {return d.id;});
 		// add new links
 		var pathCanvas = path.enter().append('svg:g');
-		pathCanvas
+
+        var expandedPathCanvas = pathCanvas.append("svg:g");
+		expandedPathCanvas
+			.append('svg:path')
+			.attr("id", function(d) { return d.id + "_selection_overlay"; })
+			.attr('class', 'link')
+			.style("markerUnits", "userSpaceOnUse")
+			.style("cursor", "pointer") // change cursor shape
+			.style("stroke-width", stroke_width_large)
+			.attr("opacity","0")
+			.attr("stroke","black")
+			.on('mousedown', function(d) {
+				// update mousedown_link
+				mousedown_link = d;
+				if(d3.event.ctrlKey) {
+					//TODO: use the ctrl key to allow the selection of multiple nodes
+				}
+				else {
+					showInformationInTextArea(d);
+					pvsWriter.focusOnFun(d, true);
+					clear_selection();
+					selected_edges.set(d.id, d);
+					// highlight only selected edges
+					d3.select(this.parentNode.lastChild).classed("selected", function(d) { return selected_edges.has(d.id); });
+				}
+			})
+			.on('mouseup', function(d) {
+				// update mouseup_link
+				mouseup_link = d;
+			})
+			.on('mouseover', function(d) {
+				// zoom edge
+				d3.select(this.parentNode.lastChild).style("stroke-width", function(d){ return stroke_width_highlighted;});
+			})
+			.on('mouseout', function(d) {
+				// restore edge size
+				d3.select(this.parentNode.lastChild).style("stroke-width", function(d){ return stroke_width_normal;});
+			});
+
+		expandedPathCanvas
 			.append('svg:path')
 			.attr("id", function(d) { return d.id; })
 			.attr('class', 'link')
@@ -1059,7 +1025,7 @@ var emulink = function() {
 			.style('marker-start', function(d) { return d.left ? 'url(#start-arrow)' : ''; })
 			.style('marker-end', 'url(#end-arrow)')
 			.style("cursor", "pointer") // change cursor shape
-			.style("stroke-width", "1")
+			.style("stroke-width", stroke_width_normal)
 			.attr("fill-opacity","0")
 			.attr("stroke","black")
 			.on('mousedown', function(d) {
@@ -1072,10 +1038,9 @@ var emulink = function() {
 					showInformationInTextArea(d);
 					pvsWriter.focusOnFun(d, true);
 					clear_selection();
-					setInteractionEnabledOrDisabledAboutEdge(false, d);
 					selected_edges.set(d.id, d);
 					// highlight only selected edges
-					path.selectAll("path").classed("selected", function(d) { return selected_edges.has(d.id); });
+					d3.select(this).classed("selected", function(d) { return selected_edges.has(d.id); });
 				}
 			})
 			.on('mouseup', function(d) {
@@ -1084,12 +1049,14 @@ var emulink = function() {
 			})
 			.on('mouseover', function(d) {
 				// zoom edge
-				d3.select(this).style("stroke-width", function(d){ return 1.5;});
+				d3.select(this).style("stroke-width", function(d){ return stroke_width_highlighted;});
 			})
 			.on('mouseout', function(d) {
 				// restore edge size
-				d3.select(this).style("stroke-width", function(d){ return 1;});
+				d3.select(this).style("stroke-width", function(d){ return stroke_width_normal;});
 			});
+
+
 		pathCanvas
 			.append("svg:text")
 			.attr('font-family',"Verdana")
@@ -1219,7 +1186,6 @@ var emulink = function() {
 					else {
 						// if the ctrl key is not pressed, reset selection first, and then select the node
 						svgViewHandler.clear_node_selection();
-						setInteractionEnabledOrDisabledAboutNode(false);
 						selected_nodes.set(d.id, d);                                                
 						// highlight only selected nodes
 						node.selectAll("rect")
@@ -1267,6 +1233,8 @@ var emulink = function() {
 									selected_edges.set(link.id, link);
 								}
 							}
+							// restore default editor mode
+							set_editor_mode(MODE.DEFAULT)
 						}
 						// redraw svg
 						restart();
@@ -1278,6 +1246,8 @@ var emulink = function() {
 						resetMouseVars();
 						// add self-edge
 						nodeAndEdgeHandler.add_edge(d,d);
+						// restore default editor mode
+						set_editor_mode(MODE.DEFAULT)
 						// redraw svg
 						restart();
 					}
@@ -1290,10 +1260,15 @@ var emulink = function() {
 					var falseNode = nodeAndEdgeHandler.add_node(posX, posY, "", true, 20, 20, true);
 					nodeAndEdgeHandler.add_edge(falseNode, d, "", true);
                     pvsWriter.addDefaultTransition(d.name);
+                    nodeAndEdgeHandler.defTrans = d.id;
+                    nodeAndEdgeHandler.defTransFalseNodeId = falseNode.id;
+					// restore default editor mode
+                    set_editor_mode(MODE.DEFAULT);                  
+//                    $(".button_default_transition").each(function(index, element) { $(element).css("border",""); });                 
+					// redraw svg
 					restart();
 				}
 				else {
-			        setInteractionEnabledOrDisabledAboutNode(false);
 					showInformationInTextArea(d);
 					pvsWriter.focusOn(d);
 				}
@@ -1371,6 +1346,9 @@ var emulink = function() {
 			// insert new node at point
 			var point = d3.mouse(this);
 			nodeAndEdgeHandler.add_node(point[0], point[1]);
+			// restore default editor mode
+			set_editor_mode(MODE.DEFAULT)
+			// redraw svg
 			restart();
 		}
 	}
@@ -1487,33 +1465,8 @@ var emulink = function() {
 		restart();
 	  });
     
-    d3.select("#changeNameNode")
-      .on("click", function () {
-			if(selected_nodes.keys().length == 1) {
-				var object = selected_nodes.get(selected_nodes.keys());
-				var newName = prompt("Please enter new node label",object.name);
-				if( newName && newName.length ) {
-					/// Change name in the canvas 
-					var oldId = object.id;
-					var oldName = object.name;
-
-					node.selectAll("text").text(function(d) { 
-					if(d.id == oldId) { return newName; }
-					return d.name;
-					});
-					var newNode = graph.nodes.get(oldId);
-					newNode.name = newName;
-					graph.nodes.set(oldId, newNode);
-
-					/// Change name in the PVS specification
-					pvsWriter.changeStateName(oldName, newName);
-
-					restart();
-				}
-			}
-      });
     
-	d3.select("#changeNameEdge")
+	d3.selectAll("#changeNameEdge")
       .on("click", function () {
 			if(selected_edges.keys().length == 1) {
 				var object = selected_edges.get(selected_edges.keys());
@@ -1589,12 +1542,12 @@ var emulink = function() {
 			}}
       });
     
-    d3.selectAll(".addCondition")
+    d3.selectAll("#addCondition")
       .on("click", function() {
             if( selected_edges.keys().length == 1) {
                 var object = selected_edges.get(selected_edges.keys());
                 var conditionToAdd = prompt("Type condition: e.g.: a = 5");
-                if( conditionToAdd.length == 0 ) { return; };
+                if( conditionToAdd == null || conditionToAdd.length == 0 ) { return; };
                 if( ! object.listConditions )
                     object.listConditions = new Array();
                 object.listConditions.push(conditionToAdd); 
@@ -1604,13 +1557,40 @@ var emulink = function() {
              }  
           
       });
-    
-    d3.selectAll(".addOperation")
+    d3.selectAll(".rmvCond_")
+      .on("click", function() {
+            if( selected_edges.keys().length == 1) {
+                var object = selected_edges.get(selected_edges.keys());
+                nodeAndEdgeHandler.modifyLabelEdgeToDisplayActionAndCond(object, path);
+                restart();
+             }            
+      });
+      d3.selectAll(".rmvOper_")
+      .on("click", function() {
+            if( selected_edges.keys().length == 1) {
+                var object = selected_edges.get(selected_edges.keys());
+                nodeAndEdgeHandler.modifyLabelEdgeToDisplayActionAndCond(object, path);
+                restart();
+             }            
+      });
+    d3.selectAll(".rmvDefTrans")
+      .on("click", function() {
+            if( selected_edges.keys().length == 1) {
+                var object = selected_edges.get(selected_edges.keys());
+                var node = object.source;      
+                nodeAndEdgeHandler.delete_node(node.id); 
+                nodeAndEdgeHandler.delete_edge(object.id);
+                pvsWriter.deleteDefTrans();
+                nodeAndEdgeHandler.defTrans = null;
+                restart();
+             }            
+      });
+    d3.selectAll("#addOperation")
 	  .on("click", function () {
 			if(selected_edges.keys().length == 1) {
 				var object = selected_edges.get(selected_edges.keys());        
 				var fieldState = prompt("State field to change");
-				if( fieldState.length == 0 ) { return; }
+				if( fieldState == null || fieldState.length == 0 ) { return; }
 				var value = prompt("Value for " + fieldState);
 				if( value.length == 0 ) { return; }
 
@@ -1622,86 +1602,28 @@ var emulink = function() {
                 nodeAndEdgeHandler.modifyLabelEdgeToDisplayActionAndCond(object, path);
                 restart();
 			}
-    });
-    
-$(function(){
-    $.contextMenu({
-        selector: '.context-menu-one', 
-        trigger: 'left',
-        className: 'condition-title',
-        build: function($trigger, e) {
-            // this callback is executed every time the menu is to be shown
-            // its results are destroyed every time the menu is hidden
-            var object = selected_edges.get(selected_edges.keys());
-            var itemsToUse = {};
-            for( var i = 0; i < object.listConditions.length; i++)
-            {
-                var tmp = {};
-                tmp["name"] = object.listConditions[i];
-                tmp["icon"] = "edit";
-                itemsToUse[object.listConditions[i]] = tmp;
-            }
-            itemsToUse["sep1"] = "---------";
-            itemsToUse["quit"] = {name: "Quit", icon: "quit"};
-            return {
-                callback: function(key, options) 
-                    // Go Ahead Here                     
-                },
-                items: itemsToUse,
-                zIndex: 10,
-                position: function(opt, x, y) {
-                    opt.$menu.position({
-                    my: 'center top',
-                    at: 'center bottom',
-                    of: opt.$trigger
-                });
-                }
-            }; 
-        }             
-    });
-    
-});
-    
-    
-    d3.selectAll(".deleteNode")
+    });   
+    d3.selectAll("#deleteNode")
       .on("click", function() {
       	  if( selected_nodes.keys().length == 1) {
       	  	 var node = selected_nodes.get(selected_nodes.keys());		
 			 var flagObject = { deleteTransIn : true, deleteTransOut : true };
 			 nodeAndEdgeHandler.deleteNodeAndTransition(node, flagObject);
-   	         setInteractionEnabledOrDisabledAboutNode(true);
 			 restart();
 		  }
 
       });
-    d3.selectAll(".deleteEdge")
+    d3.selectAll("#deleteEdge")
        .on("click", function() {
        	   if( selected_edges.keys().length == 1) {
        	   	 var edge = selected_edges.get(selected_edges.keys());
        	   	 nodeAndEdgeHandler.deleteEdge(edge);
-       	   	 setInteractionEnabledOrDisabledAboutEdge(true);
        	   	 restart();
        	   }
        })
-    d3.select("#addFieldState")
-      .on("click", function () {
-          restart();
-          var newField = prompt("Please enter name and type of the field separated by comma", "current_output, int");
-          
-          if( !newField)
-              return;
-          
-          newField = newField.split(',');
-          if( newField.length != 2 )
-          {
-              alert("Error in adding field");
-              return;
-          }
-          pvsWriter.addFieldInState(newField[0], newField[1]);
-      });
 
-      d3.selectAll(".button_default_transition").on("click", function () {
-			toggle_editor_mode(MODE.ADD_DEFAULT_TRANSITION);
+	d3.selectAll(".button_default_transition").on("click", function () {
+			set_editor_mode(MODE.ADD_DEFAULT_TRANSITION);
 			//TODO: implement the corresponding pvsWriter function and invoke it here
       })
 	// app starts here
@@ -1712,16 +1634,23 @@ $(function(){
      
 
 
-module.exports = {
+var sm = {
 	init: function (editor, wsocket, currentProject, pm, start, sf) { return diagramHandler.init(editor, wsocket, currentProject, pm, start, sf); },
 	changeTextArea : changeTextArea,
-	add_node_mode: function(){ if( d3.select("#ContainerStateMachine").selectAll("svg")[0].length )
-                                   return toggle_editor_mode(MODE.ADD_NODE);
-                               document.getElementById("emulinkInfo").value = "Emulink Status: NOT ACTIVE;\nClick on New Diagram to Activate Emulink";
-                             },
+	add_node_mode: function(){ return toggle_editor_mode(MODE.ADD_NODE); },
 	add_transition_mode: function() { return toggle_editor_mode(MODE.ADD_TRANSITION); },
 	add_self_transition_mode: function() { return toggle_editor_mode(MODE.ADD_SELF_TRANSITION); },
 	add_default_transition_mode: function() { return toggle_editor_mode(MODE.ADD_DEFAULT_TRANSITION); },
+	add_field_mode_start: function() { return toggle_editor_mode(MODE.ADD_FIELD); },
+	add_field_mode_end: function(field_type, field_name, msg) { 
+		var msg = "";
+		if(field_name && field_type) { 
+			create_new_field(field_name, field_type); 
+			msg = "State variable " + field_name 
+					+ " of type " + field_type + " successfully added."
+		}
+		toggle_editor_mode(MODE.DEFAULT, msg);
+	},
     getNodesInDiagram : getNodesInDiagram,
     getEdgesInDiagram : getEdgesInDiagram,
     getGraphDefinition : diagramHandler.getGraphDefinition,
@@ -1734,9 +1663,15 @@ module.exports = {
 	highlightElements: svgViewHandler.highlightElements,
     restoreColorNodesAndEdges : svgViewHandler.restoreColorNodesAndEdges,
     addNewDiagram : diagramHandler.addNewDiagram,
-    getXMLSVG : getXMLSVG
+    getXMLSVG : getXMLSVG,
+	mode2string : mode2string,
+	modeTooltip : modeTooltip,
+	MODE : MODE
 };
 
+sm = eventDispatcher(sm);
+
+module.exports = sm;
 
 
 });
