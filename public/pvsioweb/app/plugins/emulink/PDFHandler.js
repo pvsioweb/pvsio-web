@@ -38,7 +38,7 @@
    function toPDF(currentProject, stateMachine, ws)
    {
    		var xmlSvg = stateMachine.getXMLSVG();
-        var contentFileArray = currentProject.pvsFiles();
+        var contentFileArray = currentProject.pvsFilesList();
         if( contentFileArray.length == 0 && xmlSvg === null )
         {
         	alert("PDF creation has been aborted, content would be empty");

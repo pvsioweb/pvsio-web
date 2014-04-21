@@ -204,7 +204,7 @@ define(function (require, exports, module) {
 
         d3.select("#specificationToDiagram").on("click", function() {     
             // User has just copied into the editor without opening any project
-            if( currentProject.pvsFiles().length == 0) {
+            if( currentProject.pvsFilesList().length == 0) {
                 currentProject.name("default_pvsProject");
                 EmulinkFile.new_file(currentProject, editor,
 									 ws, "TheoryEmulink.pvs", editor.getValue(), projectManager );
@@ -269,7 +269,7 @@ define(function (require, exports, module) {
              emulinkHasBeenUsed = false;
              var project = event.current; 
              currentProject = project;
-             var fileToShow = project.mainPVSFile() || project.pvsFiles()[0];
+             var fileToShow = project.mainPVSFile() || project.pvsFilesList()[0];
              fileToShow = fileToShow.name();
              var f = project.path() + "/" + "graphDefinition.json";
              ws.getFile(f, function (err, res) {

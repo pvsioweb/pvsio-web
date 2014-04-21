@@ -58,10 +58,10 @@ function new_file(currentProject, editor, ws, name, content, pm )
 	
 	if( ! content ){ content = init_content + default_content + init_content; }   
 
-    currentProject.addSpecFile(name, content);
-    var fileToSelect = currentProject.pvsFiles().length - 1; 
-    var listView = pm.renderSourceFileList();
-    listView.selectItem(currentProject.pvsFiles()[fileToSelect]);
+    currentProject.path("").addSpecFile(name, content);
+    var fileToSelect = currentProject.pvsFiles()[name]; 
+    var fileView = pm.renderSourceFileList({name: name, children: []});
+    fileView.selectItem(fileToSelect);
 }
 
     module.exports = {
