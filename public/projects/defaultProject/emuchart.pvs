@@ -1,0 +1,26 @@
+emuchart: THEORY 
+  BEGIN
+
+  %{"_block" : "BlockStart", "_id" : "StateName", "_type": "Nodes"}
+  StateName: TYPE
+  %{"_block" : "BlockEnd", "_id" : "StateName", "_type": "Nodes"}
+
+  %{"_block" : "BlockStart", "_id" : "State", "_type": "State"}
+  State: TYPE = [#
+    current_state: StateName, 
+    previous_state: StateName 
+  #]
+  %{"_block" : "BlockEnd", "_id" : "State", "_type": "State"}
+
+  %{"_block" : "BlockStart", "_id" : "initial_state"}
+  initial_state: State 
+  %{"_block" : "BlockEnd", "_id" : "initial_state"}
+
+  %{"_block" : "BlockStart", "_id" : "leave_state", "_type": "Function"}
+  leave_state(s: StateName)(st: State): State = st WITH [ previous_state := s ] 
+  %{"_block" : "BlockEnd", "_id" : "leave_state", "_type": "Function"}
+  %{"_block" : "BlockStart", "_id" : "enter_into", "_type": "Function"}
+  enter_into(s: StateName)(st:State): State = st WITH [ current_state := s ] 
+  %{"_block" : "BlockEnd", "_id" : "enter_into", "_type": "Function"}
+
+ END emuchart
