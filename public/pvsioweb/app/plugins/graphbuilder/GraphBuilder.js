@@ -11,7 +11,7 @@ define(function (require, exports, module) {
 		eventDispatcher = require("util/eventDispatcher");
 	
 	function GraphBuilder(pvsioWebClient) {
-		var canvas = pvsioWebClient.createCollapsiblePanel("Visualisation of State Transition Diagram");
+		var canvas = pvsioWebClient.createCollapsiblePanel("State Transitions Logger");
 		canvas.classed("graph-container", true);
 		
 		var ws = pvsioWebClient.getWebSocket(),

@@ -362,6 +362,35 @@ define(function (require, exports, module) {
 			cb(err, _thisProject, res.folderStructure);
 		});
 	};
+
+	Project.prototype.saveDefaultProject = function (cb) {
+		var _thisProject = this;
+		var wd = WidgetManager.getWidgetDefinitions();
+		var wdStr = JSON.stringify(wd, null, " ");
+		var ws = WSManager.getWebSocket(), specFiles = this.pvsFilesList().map(function (f, i) {
+			return {fileName: f.name(), fileContent: f.content()};
+		});
+		var token = {type: "createDefaultProject", projectName: this.name(), specFiles: specFiles, widgetDefinitions: wdStr};
+		if (this.mainPVSFile()) {
+			token.mainPVSFile = this.mainPVSFile().name();
+		}
+		if (this.image()) {
+			token.imageFileName = this.image().name();
+			token.imageData =  this.image().content();
+		}
+		ws.send(token, function (err, res) {
+			if (!err) {
+				_thisProject.pvsFilesList().forEach(function (f) {
+					f.dirty(false);
+				});
+                if (_thisProject.image()) {
+                    _thisProject.image().dirty(false);
+                }
+                _thisProject.path(res.projectPath);
+			}
+			cb(err, _thisProject, res.folderStructure);
+		});
+	};
     
     /**
         Adds a script to the project

@@ -49,14 +49,9 @@ define(function (require, exports, module) {
     function evaluate(str) {
         if (typeof str === "string") {
             var args = str.split("/");
-            if (args.length !== 2) {
-                if (!isNaN(+str)) {
-                    return +str;
-                } else {
-                    return str;
-                }
+            if (args.length === 2 && !isNaN(+args[0]) && !isNaN(+args[1])) {
+                return +args[0] / +args[1];
             }
-            return +args[0] / +args[1];
         }
         return str;
     }
@@ -176,7 +171,7 @@ define(function (require, exports, module) {
                 }
 
             } else {
-                //just an open bracket -- htey usually signify a list of some sort
+                //just an open bracket -- they usually signify a list of some sort
                 subValue = readUntil(value, token.index + 1, function (ch, prev) {
                     return ch !== ")";
                 });
@@ -191,7 +186,7 @@ define(function (require, exports, module) {
             }
         } else {
             token = readUntil(value, token.index, function (ch, prev) {
-                return wordChar(ch, prev) || num(ch) || (/[\/\.\-\"\'\s\_]/).test(ch);
+                return wordChar(ch, prev) || num(ch) || (/[\/\.\-\"\'\s\_\:]/).test(ch);
             });
             return {
                 value: token.word,

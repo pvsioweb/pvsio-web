@@ -41,6 +41,19 @@ define(function (require, exports, module) {
                 view.remove();
             }).on("cancel", function (e, view) { view.remove(); });
     }
+
+    function hideNode(node) {
+        var t = $(elementId).jstree(true);
+        // show confirmation dialog
+        QuestionForm.create({
+            header: "Confirm Hide",
+            question: "Are you sure you want to hide " + node.text
+        }).on("ok", function (e, view) {
+            // remove node from treeview
+            t.delete_node(node);
+            view.remove();
+        }).on("cancel", function (e, view) { view.remove(); });
+    }
     
     function renameNode(node) {
         var t = $(elementId).jstree(true);
@@ -79,6 +92,13 @@ define(function (require, exports, module) {
                 action: function () {
                     console.log("rename");
                     renameNode(node);
+                }
+            },
+            hideItem: {
+                label: "Hide",
+                action: function () {
+                    console.log("hide");
+                    hideNode(node);
                 }
             },
             deleteItem: {

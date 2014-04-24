@@ -53,6 +53,10 @@ define(function (require, exports, module) {
 		projectManager.addListener("ProjectChanged", function () {
 			gb.reInitialise();
 		});
+        
+        // create and default initial empty project containing an empty file (main.pvs)
+        projectManager.createDefaultProject();
+        
 		/////These are the api methods that the prototype builder plugin exposes
 		return {
 			getProjectManager: function () {
