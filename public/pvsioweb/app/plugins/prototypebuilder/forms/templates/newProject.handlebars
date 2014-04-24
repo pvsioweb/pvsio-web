@@ -1,8 +1,8 @@
 <div class="form-center">
     <div class="panel panel-info dialog shadow center">
         <div class="panel-heading">New Project</div>
-        <div class="panel-body">
-            <form class="center form-horizontal" onsubmit="return false" role="form">
+        <form class="center form-horizontal" onsubmit="return false" role="form">
+            <div class="panel-body">
                 <div class="form-group">
                     <label for="projectName" class="col-sm-4 control-label">Project Name</label>
                     <div class="col-sm-8">
@@ -21,12 +21,11 @@
                         <input id="pvsSpec" class="form-control" type="file" value="" name="pvsSpec" required="true" multiple="true">
                     </div>
                 </div>
-            </form>
-        </div>
-        <div class="panel-footer">
-            <button type="button" class="btn btn-danger left" id="btnCancel">Cancel</button>
-            <button type="submit" class="btn btn-success right" id="btnOk">OK</button>
-        </div>
+            </div>
+            <div class="panel-footer">
+                <button type="button" class="btn btn-danger left" id="btnCancel">Cancel</button>
+                <button type="submit" class="btn btn-success right" id="btnOk">OK</button>
+            </div>
+        </form>
     </div>
-
 </div>
