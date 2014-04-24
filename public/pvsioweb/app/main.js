@@ -14,10 +14,11 @@ define(function (require, exports, module) {
 		Emulink = require("plugins/emulink/Emulink");
 		
 	var client = new PVSioWeb();
-	
+    client.connectToServer();
 //	client.registerPlugin(PrototypeBuilder);
-	client.registerPlugin(Emulink);
-
+    setTimeout(function () {
+        client.registerPlugin(Emulink);
+    }, 2000);
 	/**
      * utility function to pretty print pvsio output
      * @private
@@ -46,5 +47,4 @@ define(function (require, exports, module) {
 		d3.select("#lblPVSioStatus").select("span").attr("class", "glyphicon glyphicon-warning-sign");
 	});
 	
-	client.connectToServer();
 });
