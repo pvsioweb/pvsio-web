@@ -115,7 +115,7 @@ function run() {
             });
         }
         //if file does not exist, create it. Else read the property file and update just the key value specified
-        fs.exists(file, function (exists) { 
+        fs.exists(file, function (exists) {
             if (!exists) {
                 props[key] = value;
                 writeFile(props, callback);
@@ -136,6 +136,29 @@ function run() {
             }
         });
     }
+
+    /**
+     * Creates a project
+     * @param {Request} req
+     * @param {Response} res
+     */
+    function createDefaultProject(opt) {
+        var projectPath = baseProjectDir + opt.projectName;
+        var obj = {type: "projectCreated"};
+        try {
+            if (fs.existsSync(projectPath) === false) {
+                //create a project folder
+                fs.mkdirSync(projectPath);
+            }
+            obj.projectPath = projectPath;
+            obj.name = opt.projectName;
+            console.log(obj.projectPath + " successfully created.");
+        } catch (err) {
+            obj.err = err;
+            console.log("Error while trying to create project: " + err.toString());
+        }
+        return obj;
+    }
     
     /**
      * Creates a project
@@ -153,13 +176,13 @@ function run() {
         var obj = {type: "projectCreated"};
         try {
             if (fs.existsSync(projectPath)) {
-                obj.err = "Project with the same name exists. Please choose a different name. Old project name was " + projectPath;
+                obj.err = projectName + " already exists. Please choose a different name";
             } else {
                 //create a project folder
                 fs.mkdirSync(projectPath);
                 obj.projectPath = projectPath;
                 obj.name = projectName;
-                
+
                 if (imageName && imageData) {
                     var imageString = imageData.replace(/^data:image\/(\w+);base64,/, ""),
                         imagePath = path.join(projectPath, imageName);
@@ -168,7 +191,7 @@ function run() {
                     obj.imageData = imageData;
                 }
 
-                if (specFiles) {
+                if (specFiles && specFiles.length > 0) {
                     var files = specFiles.map(function (f) {
                         return {path: path.join(projectPath, f.fileName), fileContent: f.fileContent};
                     });
@@ -187,10 +210,10 @@ function run() {
                 }
                 //get project folder structure once all files have been wrtten
                 obj.folderStructure = getFolderStructure(projectPath);
-                
             }
         } catch (err) {
             obj.err = err;
+            console.log("Error while trying to create project: " + err.toString());
         }
         return obj;
     }
@@ -199,10 +222,10 @@ function run() {
     * open a project with the specified name
     */
     function openProject(name) {
-        console.log('opening project..' + name);
-        var imageExts = ["jpg", "jpeg", "png"], 
+        console.log("opening project " + name + " ...");
+        var imageExts = ["jpg", "jpeg", "png"],
             specExts = ["pvs"],
-            projectPath = baseProjectDir + name,  
+            projectPath = baseProjectDir + name,
             stat = fs.statSync(projectPath),
             folderStructure = getFolderStructure(projectPath),
             res =  {name: name, projectPath: projectPath, folderStructure: folderStructure};
@@ -223,7 +246,7 @@ function run() {
                     } else if (file === ".pvsioweb") {
                         var config = JSON.parse(fs.readFileSync(filePath, "utf8"));
                         res.mainPVSFile = config.mainPVSFile;
-                    } else if(file === "scripts.json") {
+                    } else if (file === "scripts.json") {
                         res.scripts = JSON.parse(fs.readFileSync(filePath, "utf8"));
                     } else {
                         res.other = res.other || [];
@@ -292,7 +315,7 @@ function run() {
     /**
         get function maps for client sockets
     */
-    function createClientFunctionMaps() { 
+    function createClientFunctionMaps() {
         var map = {
             "renameFile": function (token, socket, socketid) {
                 fs.rename(token.oldPath, token.newPath, function (err) {
@@ -359,6 +382,15 @@ function run() {
                 res.serverSent = new Date().getTime();
                 processCallback(res, socket);
             },
+            "createDefaultProject": function (token, socket, socketid) {
+                p = pvsioProcessMap[socketid] || pvsio();
+                pvsioProcessMap[socketid] = p;
+                var res = createDefaultProject(token);
+                res.id = token.id;
+                res.socketId = socketid;
+                res.serverSent = new Date().getTime();
+                processCallback(res, socket);
+            },
             "typeCheck": function (token, socket, socketid) {
                 typeCheck(token.filePath, function (err, stdout, stderr) {
                     var res = {id: token.id, err: err, stdout: stdout, stderr: stderr, socketId: socketid};
@@ -374,8 +406,9 @@ function run() {
             },
             "startProcess": function (token, socket, socketid) {
                 util.log("Calling start process for client... " + socketid);
-				var root = token.data.projectName ? "/public/projects/" + token.data.projectName:
-					token.data.demoName ? "/public/demos/" + token.data.demoName : "";
+				var root = token.data.projectName ?
+                            "/public/projects/" + token.data.projectName
+                            : token.data.demoName ? "/public/demos/" + token.data.demoName : "";
                 p = pvsioProcessMap[socketid];
                 //close the process if it exists and recreate it
                 if (p) {
@@ -387,7 +420,7 @@ function run() {
                 pvsioProcessMap[socketid] = p;
                 //set the workspace dir and start the pvs process with a callback for processing any responses from
                 //the process
-                p.workspaceDir(__dirname + root )
+                p.workspaceDir(__dirname + root)
                     .start(token.data.fileName, function (token) {
                         token.socketId = socketid;
                         processCallback(token, socket);
@@ -423,11 +456,14 @@ function run() {
             "writeFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";
+                // directory "projects" is the base path for creating files
+                token.fileName = baseProjectDir + token.fileName;
                 fs.writeFile(token.fileName, token.fileContent, encoding, function (err) {
                     var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
                     ///files saved need to inform client about need to restart pvsioweb with appropriate files
                     if (!err) {
-                        util.log("Source code has been saved." + socketid);
+                        util.log("dbg: file " + token.fileName
+                                 + " saved successfully (socket id = " + socketid + ")");
                         res.type = "fileSaved";
                     } else {
                         res.err = err;
@@ -448,19 +484,16 @@ function run() {
                 });
             },
             "toPDF": function (token, socket, socketid) {
-                var PDFHandlerObj = PDFHandler();
+                var PDFHandlerObj = new PDFHandler();
                 var path =  'public/' + 'tmp' + socketid + '/';
                 var pathDownload = 'tmp' + socketid + '/';
                 PDFHandlerObj.createPDF(token, path, function (exitStatus) {
                     var res = {id: token.id};
                     if (exitStatus < 0) {
                         res.err = 'There was an issue creating PDF';
-                    } else { 
-                        res.path = pathDownload + 'out.pdf';
-                    }
+                    } else { res.path = pathDownload + 'out.pdf'; }
                     processCallback(res, socket);
-                });    
-                                        
+                });
             }
         };
 
