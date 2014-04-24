@@ -1512,6 +1512,9 @@ define(function (require, exports, module) {
         
         // create a new PVS file "emuchart.pvs" containing the annotated PVS code for specifying Emucharts
         projectManager.createFile("emuchart.pvs", pvsWriter.newEmuchartSpecification("emuchart"));
+        
+        // start interactive emulink GUI
+        emulink();
     };
 
     /* * ********************************************* ***************************************** */
