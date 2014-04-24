@@ -22,6 +22,29 @@
 }
 
 
+#EmuchartLogo.hidden{
+    display: none;
+}
+
+#EmuchartLogo.Start{
+	background: white;
+	text-align: center;
+	position: relative;
+	height: 320px;
+	width: 100%;
+	z-index: 999999;
+}
+
+#EmuchartLogo.Start span{
+	display: block;
+	margin-top: 120px;
+	width: 400px;
+	font-size: 30px;
+	font-family: Times, serif;
+	line-height: 1.1;
+	text-align: center;
+}
+
 #button_state:hover	  {
 
 	cursor:		default;

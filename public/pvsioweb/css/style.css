@@ -55,6 +55,14 @@ div.header {
 	position:       relative;
 }
 
+#graphicalEditor.hidden {
+	display: none;
+}
+#graphicalEditor.block {
+	display: block;
+}
+
+
 #content{
 	width: 1130px;
 	position: relative;
