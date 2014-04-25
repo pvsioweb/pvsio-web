@@ -27,7 +27,7 @@ define(function (require, exports, module) {
 	var counter = 0;
 	var pvsFilesListView;
     var defaultTheoryName = "main";
-    var defaultProjectName = "defaultProject";
+    var defaultProjectName = "defaultProject";///FIXME export this variable to a module of constants
     var defaultContent = defaultTheoryName + ": THEORY\n"
                             + " BEGIN\n "
                             + "  %-- Please type your PVS specification here!\n"
@@ -549,52 +549,21 @@ define(function (require, exports, module) {
         // update the current project with info from data and saveNew
         project.name(data.projectName);
         project.path(data.projectName);
-                
-        // create default project
-        project.saveDefaultProject(function (err, res, folderStructure) {
+        project.addSpecFile(data.pvsSpec[0], defaultContent);
+        project.saveNew(function (err, res, folderStructure) {
             console.log({err: err, res: res});
             if (!err) {
-                // create default file
-                var newPath = data.projectName + "/" + data.pvsSpec[0];
-                ws.writeFile({ fileName: newPath, fileContent: defaultContent }, function (e, res) {
-                    if (!e) {
-                        // and open the default project in the UI
-                        ws.send({type: "openProject", name: data.projectName}, function (err, res) {
-                            if (!err) {
-                                ScriptPlayer.clearView();
-                                var p = initFromJSON(res.project);
-                                WidgetManager.clearWidgetAreas();
-                                d3.select("div#body").style("display", null);
-                                pm.fire({type: "ProjectChanged", current: p, previous: pm.project()});
-                                pm.project(p);
-                                pm.editor().removeAllListeners("change");
-                                pm.editor().setValue("");
-                                if (p.image()) {
-                                    pm.updateImage(p.image().content());
-                                    WidgetManager.updateMapCreator(function () {
-                                        WidgetManager.restoreWidgetDefinitions(p.widgetDefinitions());
-                                    });
-                                    d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
-                                } else {
-                                    //show the image drag and drop div
-                                    d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
-                                }
-                                //list all other files
-                                if (p.pvsFiles()) {
-                                    pm.renderSourceFileList(res.project.folderStructure);
-                                    pvsFilesListView.selectItem(p.mainPVSFile() || p.pvsFilesList()[0]);
-                                }
-                                pm.editor().on("change",
-                                               editorChangedListener(pm.editor(),
-                                                                     pm, pvsFilesListView));
-                                // and finally, invoke the callback function
-                                if(cb) { cb(); }
-                            }
-                        });
-                    } else { console.log(e); }
-                });
+                project.pvsFilesList().forEach(function (f) { f.dirty(false); });
+                //set the main pvs file
+                project.mainPVSFile(project.pvsFilesList()[0]);
+                WidgetManager.updateMapCreator();
+                pm.project(project);
+                pm.renderSourceFileList(folderStructure);
+                pvsFilesListView.selectItem(project.mainPVSFile() || project.pvsFilesList()[0]);
+                //fire project changed event
+                pm.fire({type: "ProjectChanged", current: project, previous: project});
             } else { alert(err.toString()); }
-        });
+        });        
         return data;
     };
     
@@ -603,14 +572,8 @@ define(function (require, exports, module) {
      * @memberof ProjectManager
      */
 	ProjectManager.prototype.createFile = function (filename, content) {
-        var ws = WSManager.getWebSocket();
-        var newPath = this.project().name() + "/" + filename;
-        ws.writeFile({ fileName: newPath, fileContent: content }, function (err, res) {
-            if (!err) {
-                // TODO: show file in the UI
-                console.log("file " + newPath + " created.");
-            }
-        });
+        var newPath = this.project().path() + "/" + filename;
+        this.project().addSpecFile(newPath, content);
     };
     
 	module.exports = ProjectManager;

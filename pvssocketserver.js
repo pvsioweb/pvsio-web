@@ -136,86 +136,82 @@ function run() {
             }
         });
     }
-
-    /**
-     * Creates a project
-     * @param {Request} req
-     * @param {Response} res
-     */
-    function createDefaultProject(opt) {
-        var projectPath = baseProjectDir + opt.projectName;
-        var obj = {type: "projectCreated"};
-        try {
-            if (fs.existsSync(projectPath) === false) {
-                //create a project folder
-                fs.mkdirSync(projectPath);
-            }
-            obj.projectPath = projectPath;
-            obj.name = opt.projectName;
-            console.log(obj.projectPath + " successfully created.");
-        } catch (err) {
-            obj.err = err;
-            console.log("Error while trying to create project: " + err.toString());
-        }
-        return obj;
-    }
     
     /**
      * Creates a project
      * @param {Request} req
      * @param {Response} res
      */
-    function createProject(opt) {
+    function createProject(opt, cb, p) {
         var projectName = opt.projectName,
             imageName = opt.imageFileName,
             imageData = opt.imageData,
             projectPath = baseProjectDir + projectName,
             specFiles = opt.specFiles,
             mainPVSFile = opt.mainPVSFile,
+            overWrite = opt.overWrite,
             widgetDefinitions = opt.widgetDefinitions;
         var obj = {type: "projectCreated"};
+        
+        function doCreate(cb) {
+            fs.mkdirSync(projectPath);
+            obj.projectPath = projectPath;
+            obj.name = projectName;
+
+            if (imageName && imageData) {
+                var imageString = imageData.replace(/^data:image\/(\w+);base64,/, ""),
+                    imagePath = path.join(projectPath, imageName);
+                fs.writeFileSync(imagePath, imageString, "base64");
+                obj.imagePath = imagePath;
+                obj.imageData = imageData;
+            }
+
+            if (specFiles && specFiles.length > 0) {
+                var files = specFiles.map(function (f) {
+                    return {path: path.join(projectPath, f.fileName), fileContent: f.fileContent};
+                });
+                files.forEach(function (f) {
+                    fs.writeFileSync(f.path, f.fileContent);
+                });
+                obj.pvsFiles = files;
+                //by default set the main pvs file to be the first item in the list after sort
+                mainPVSFile = mainPVSFile || files.sort()[0].path;
+            }
+
+            if (mainPVSFile) {
+                obj.mainPVSFile = mainPVSFile;
+                //create a main file in the project settings
+                changeProjectSetting(projectName, "mainPVSFile", mainPVSFile);
+            }
+            //get project folder structure once all files have been wrtten
+            obj.folderStructure = getFolderStructure(projectPath);
+            
+            if (cb && typeof cb === "function") { cb(obj); }
+        }
         try {
-            if (fs.existsSync(projectPath)) {
+            var exists = fs.existsSync(projectPath);
+            if (exists && !overWrite) {
                 obj.err = projectName + " already exists. Please choose a different name";
+                cb(obj);
+            } else if (exists && overWrite) {
+                p.removeFile(projectPath, function (err) {
+                    if (err) {
+                        obj.err = err;
+                        cb(obj);
+                    } else {
+                        doCreate(cb);
+                    }
+                });
+                
             } else {
                 //create a project folder
-                fs.mkdirSync(projectPath);
-                obj.projectPath = projectPath;
-                obj.name = projectName;
-
-                if (imageName && imageData) {
-                    var imageString = imageData.replace(/^data:image\/(\w+);base64,/, ""),
-                        imagePath = path.join(projectPath, imageName);
-                    fs.writeFileSync(imagePath, imageString, "base64");
-                    obj.imagePath = imagePath;
-                    obj.imageData = imageData;
-                }
-
-                if (specFiles && specFiles.length > 0) {
-                    var files = specFiles.map(function (f) {
-                        return {path: path.join(projectPath, f.fileName), fileContent: f.fileContent};
-                    });
-                    files.forEach(function (f) {
-                        fs.writeFileSync(f.path, f.fileContent);
-                    });
-                    obj.pvsFiles = files;
-                    //by default set the main pvs file to be the first item in the list after sort
-                    mainPVSFile = mainPVSFile || files.sort()[0].path;
-                }
-
-                if (mainPVSFile) {
-                    obj.mainPVSFile = mainPVSFile;
-                    //create a main file in the project settings
-                    changeProjectSetting(projectName, "mainPVSFile", mainPVSFile);
-                }
-                //get project folder structure once all files have been wrtten
-                obj.folderStructure = getFolderStructure(projectPath);
+                doCreate(cb);
             }
         } catch (err) {
             obj.err = err;
             console.log("Error while trying to create project: " + err.toString());
+            if (cb && typeof cb === "function") { cb(obj); }
         }
-        return obj;
     }
 
     /**
@@ -376,20 +372,13 @@ function run() {
             "createProject": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid] || pvsio();
                 pvsioProcessMap[socketid] = p;
-                var res = createProject(token);
-                res.id = token.id;
-                res.socketId = socketid;
-                res.serverSent = new Date().getTime();
-                processCallback(res, socket);
-            },
-            "createDefaultProject": function (token, socket, socketid) {
-                p = pvsioProcessMap[socketid] || pvsio();
-                pvsioProcessMap[socketid] = p;
-                var res = createDefaultProject(token);
-                res.id = token.id;
-                res.socketId = socketid;
-                res.serverSent = new Date().getTime();
-                processCallback(res, socket);
+                createProject(token, function (res) {
+                    res.id = token.id;
+                    res.socketId = socketid;
+                    res.serverSent = new Date().getTime();
+                    processCallback(res, socket);
+                }, p);
+                
             },
             "typeCheck": function (token, socket, socketid) {
                 typeCheck(token.filePath, function (err, stdout, stderr) {

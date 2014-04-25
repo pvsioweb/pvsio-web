@@ -341,7 +341,7 @@ define(function (require, exports, module) {
 		var ws = WSManager.getWebSocket(), specFiles = this.pvsFilesList().map(function (f, i) {
 			return {fileName: f.name(), fileContent: f.content()};
 		});
-		var token = {type: "createProject", projectName: this.name(), specFiles: specFiles, widgetDefinitions: wdStr};
+		var token = {type: "createProject", projectName: this.name(), specFiles: specFiles, widgetDefinitions: wdStr, overWrite: _thisProject.name()  === "defaultProject"};
 		if (this.mainPVSFile()) {
 			token.mainPVSFile = this.mainPVSFile().name();
 		}
@@ -352,6 +352,8 @@ define(function (require, exports, module) {
 		ws.send(token, function (err, res) {
 			if (!err) {
 				_thisProject.pvsFilesList().forEach(function (f) {
+                    //since this is a newly saved file, need to update the path to a full one
+                    f.path(res.projectPath + "/" + f.path());
 					f.dirty(false);
 				});
                 if (_thisProject.image()) {
@@ -359,36 +361,9 @@ define(function (require, exports, module) {
                 }
                 _thisProject.path(res.projectPath);
 			}
-			cb(err, _thisProject, res.folderStructure);
-		});
-	};
-
-	Project.prototype.saveDefaultProject = function (cb) {
-		var _thisProject = this;
-		var wd = WidgetManager.getWidgetDefinitions();
-		var wdStr = JSON.stringify(wd, null, " ");
-		var ws = WSManager.getWebSocket(), specFiles = this.pvsFilesList().map(function (f, i) {
-			return {fileName: f.name(), fileContent: f.content()};
-		});
-		var token = {type: "createDefaultProject", projectName: this.name(), specFiles: specFiles, widgetDefinitions: wdStr};
-		if (this.mainPVSFile()) {
-			token.mainPVSFile = this.mainPVSFile().name();
-		}
-		if (this.image()) {
-			token.imageFileName = this.image().name();
-			token.imageData =  this.image().content();
-		}
-		ws.send(token, function (err, res) {
-			if (!err) {
-				_thisProject.pvsFilesList().forEach(function (f) {
-					f.dirty(false);
-				});
-                if (_thisProject.image()) {
-                    _thisProject.image().dirty(false);
-                }
-                _thisProject.path(res.projectPath);
-			}
-			cb(err, _thisProject, res.folderStructure);
+            if (cb && typeof cb === "function") {
+                cb(err, _thisProject, res.folderStructure);
+            }
 		});
 	};
     

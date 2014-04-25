@@ -67,8 +67,11 @@ define(function (require, exports, module) {
     
     function addNode(node, nodeData, edit) {
         var t = $(elementId).jstree(true);
+        if (typeof node === "string") {
+            node = t.get_node(node);
+        }
         t.deselect_all(true);
-        if (node.original.isDirectory) {
+        if (node.original && node.original.isDirectory) {
             nodeData.folder = node.original.file;
         } else {
             //selected node is a file so we need to create the new node as a sibling element
@@ -266,7 +269,7 @@ define(function (require, exports, module) {
             }).addListener("SpecFileAdded", function (event) {
                 //select the parent node for the file in the project
                 var f = event.file, parentNode = f.path().substring(0, f.path().lastIndexOf("/"));
-                var parentId = fileNameToId(parentNode);
+                var parentId = fileNameToId(parentNode.substr(project.path().length + 1) || "project_root");
                 addNode(parentId, {text: f.name(), isDirectory: false});
             }).addListener("SpecFileRemoved", function (event) {
                 var f = event.file, parentNode = f.path().substring(0, f.path().lastIndexOf("/"));
