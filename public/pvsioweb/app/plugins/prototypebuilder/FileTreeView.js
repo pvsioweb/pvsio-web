@@ -24,15 +24,20 @@ define(function (require, exports, module) {
         return res;
     }
     
-    function removeNode(node) {
+    function removeFile(node) {
         var t = $(elementId).jstree(true);
+        t.delete_node(node);
+        t.redraw(true);
+    }
+    
+    function removeNode(node) {
         //show confirmation dialog
         QuestionForm.create({header: "Confirm Delete", question: "Are you sure you want to delete " + node.text})
             .on("ok", function (e, view) {
                 //send request to remove file using the wsmanager
                 ws.send({type: "deleteFile", fileName: node.original.file}, function (err, res) {
                     if (!err) {
-                        t.delete_node(node);
+                        removeFile(node);
                     } else {
                         //show error
                         console.log(err);
@@ -60,7 +65,7 @@ define(function (require, exports, module) {
         t.edit(node);
     }
     
-    function addNode(node, nodeData) {
+    function addNode(node, nodeData, edit) {
         var t = $(elementId).jstree(true);
         t.deselect_all(true);
         if (node.original.isDirectory) {
@@ -72,17 +77,17 @@ define(function (require, exports, module) {
         }
         nodeData.file = nodeData.folder + "/" + nodeData.text;
         var newNode = t.create_node(node, nodeData);
-        if (newNode) {
+        if (newNode && edit) {
             t.edit(newNode);
         }
     }
     
     function addFolder(node) {
-        addNode(node, {text: unSavedName + fileCounter++, isDirectory: true});
+        addNode(node, {text: unSavedName + fileCounter++, isDirectory: true}, true);
     }
     
     function addFile(node) {
-        addNode(node, {text: unSavedName + fileCounter++, isDirectory: false});
+        addNode(node, {text: unSavedName + fileCounter++, isDirectory: false}, true);
     }
     
     function contextMenuItems(node) {
@@ -157,6 +162,7 @@ define(function (require, exports, module) {
         return res;
     }
 
+    
     function FileTreeView(_elId, folderStructure, _project) {
         eventDispatcher(this);
         var ftv = this;
@@ -257,6 +263,15 @@ define(function (require, exports, module) {
                 var currId = event.current.path().substr(project.path().length + 1);
                 $("#" + fileNameToId(prevId)).removeClass("main-file");
                 $("#" + fileNameToId(currId)).addClass("main-file");
+            }).addListener("SpecFileAdded", function (event) {
+                //select the parent node for the file in the project
+                var f = event.file, parentNode = f.path().substring(0, f.path().lastIndexOf("/"));
+                var parentId = fileNameToId(parentNode);
+                addNode(parentId, {text: f.name(), isDirectory: false});
+            }).addListener("SpecFileRemoved", function (event) {
+                var f = event.file, parentNode = f.path().substring(0, f.path().lastIndexOf("/"));
+                var parentId = fileNameToId(parentNode);
+                removeFile(parentId);
             });
         }
     }
@@ -296,6 +311,7 @@ define(function (require, exports, module) {
         var selection = t.get_selected(true);
         return selection ? selection[0].original.file : undefined;
     };
+    
     
     module.exports = FileTreeView;
 });
