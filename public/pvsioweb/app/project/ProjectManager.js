@@ -563,7 +563,7 @@ define(function (require, exports, module) {
                 //fire project changed event
                 pm.fire({type: "ProjectChanged", current: project, previous: project});
             } else { alert(err.toString()); }
-        });        
+        });
         return data;
     };
     

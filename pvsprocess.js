@@ -17,10 +17,11 @@ You should have received a copy of the GNU General Public License along with Foo
  * @project JSLib
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, require, module, process */
+/*global define, require, module, process, __dirname */
 
 var childprocess = require("child_process"),
 	util = require("util"),
+    path = require("path"),
 	fs = require("fs");
 var procWrapper = require("./processwrapper");
 var spawn = childprocess.spawn;
@@ -36,7 +37,7 @@ module.exports = function () {
         filename,
         processReady                        = false,
         pvsio,
-        workspaceDir                        = process.cwd() + "/public/";
+        workspaceDir                        = __dirname + "/public/";
 	/**
 	 * get or set the workspace dir. this is the base directory of the pvs source code
 	 * @param {String} dir
@@ -81,12 +82,15 @@ module.exports = function () {
 		};
 	}
     
-    o.removeFile = function (path, cb) {
-        if (path.indexOf(workspaceDir) === 0) {
-            pvs.exec({command: "rm -rf " + path, callBack:cb});
+    o.removeFile = function (filePath, cb) {
+        var np = path.normalize(filePath);
+        
+        if (np.indexOf(workspaceDir) === 0) {
+            pvs.exec({command: "rm -rf " + np, callBack: cb});
         } else {
             var error = ("cannot delete a folder outside the context of the current project");
             console.log(error);
+            console.log(util.format("path: %s, workspace: %s, normalised Path: %s", filePath, workspaceDir, np));
             cb(error);
         }
     };

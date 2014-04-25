@@ -268,12 +268,14 @@ define(function (require, exports, module) {
                 $("#" + fileNameToId(currId)).addClass("main-file");
             }).addListener("SpecFileAdded", function (event) {
                 //select the parent node for the file in the project
+                var t = $(elementId).jstree(true);
                 var f = event.file, parentNode = f.path().substring(0, f.path().lastIndexOf("/"));
                 var fileId = fileNameToId(f.path().substr(project.path().length + 1));
                 //create a node in the tree if it does not already exist
-                if (!$(elementId).jstree(true).get_node(fileId)) {
+                if (!t.get_node(fileId)) {
                     var parentId = fileNameToId(parentNode.substr(project.path().length + 1) || "project_root");
-                    addNode(parentId, {text: f.name(), isDirectory: false});
+                    addNode(parentId, {text: f.name(), isDirectory: false, id: fileId});
+                    t.select_node(fileId);
                 }
             }).addListener("SpecFileRemoved", function (event) {
                 var f = event.file, parentNode = f.path().substring(0, f.path().lastIndexOf("/"));
