@@ -8,8 +8,8 @@
     "bin":"./pvssocketserver.js",
     "dependencies":{
         "ws":"0.4.x",
-        "express":"3.x",
-        "queue-async": "1.x",
+        "express": "~4.0.0",
+        "body-parser": "~1.0.0",
         "es6-promise": "0.1.x"
     },
     "repository":{

@@ -36,7 +36,7 @@ function run() {
         http                    = require("http"),
         fs                      = require("fs"),
         express                 = require("express"),
-        queue                   = require("queue-async"),
+        bodyParser              = require("body-parser"),
         webserver               = express(),
         procWrapper             = require("./processwrapper"),
         uploadDir               = "/public/uploads",
@@ -289,7 +289,7 @@ function run() {
     });
     //create the express static server and use public dir as the default serving directory
     webserver.use(express.static(__dirname + "/public"));
-    webserver.use(express.bodyParser({ keepExtensions: true, uploadDir: __dirname + uploadDir}));
+    webserver.use(bodyParser({ keepExtensions: true, uploadDir: __dirname + uploadDir}));
 
     /**
      * used to manage file upload process for pvsio-web
@@ -322,17 +322,27 @@ function run() {
                 fs.readdir(token.path, function (err, files) {
                     if (!err) {
                         //get stat attributes for all the files using an async call
-                        var q = queue();
-                        files.forEach(function (f, i) {
-                            q.defer(fs.stat, f);
-                        });
-                        q.awaitAll(function (err, res) {
-                            var result = res.map(function (d, i) {
-                                return {name: files[i], isDirectory: d.isDirectory()};
+                        var promises = [] = files.map(function (f, i) {
+                            return new Promise(function (resolve, reject) {
+                                fs.stat(f, function (err, res) {
+                                    if (err) {
+                                        reject(err);
+                                    } else {
+                                        resolve(res);
+                                    }
+                                });
                             });
-                            processCallback({id: token.id,
-                                             socketId: socketid, files: result, err: err}, socket);
                         });
+                        
+                        Promise.all(promises)
+                            .then(function (res) {
+                                 var result = res.map(function (d, i) {
+                                        return {name: files[i], isDirectory: d.isDirectory()};
+                                    });
+                                    processCallback({id: token.id, socketId: socketid, files: result, err: err}, socket);
+                            }, function (err) {
+                                processCallback({id: token.id, socketId: socketid, err: err}, socket);
+                            });
                     } else {
                         processCallback({id: token.id, socketId: socketid, err: err}, socket);
                     }
