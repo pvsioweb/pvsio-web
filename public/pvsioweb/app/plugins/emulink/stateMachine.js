@@ -1455,50 +1455,50 @@ define(function (require, exports, module) {
         editor = _editor;
         projectManager = _projectManager;
         
-        // add listeners
-        projectManager.addListener("SelectedFileChanged", function (event) {
-            // Since file selected is going to be changed, 
-            // we need to save diagram information ...
-            if (diagramHandler.lastFileShown) {
-                var nodes = getNodesInDiagram();
-                var edges = getEdgesInDiagram();
-                if (nodes.length) {
-                    // But save just if there is something to save!
-                    var graphToSave = {
-                        nodes: getNodesInDiagram(),
-                        edges: getEdgesInDiagram()
-                    };
-                    diagramHandler.diagramsInfo[diagramHandler.lastFileShown] = graphToSave;
-                    /* Even saving XML SVG in case user wants to get a PDF */
-                    var serializer = new XMLSerializer();
-                    var xmlString = serializer.serializeToString(d3.select('#canvas').node());
-                    svgReference[diagramHandler.lastFileShown] = xmlString;
-                }
-            }
-            // ...and clear SVG
-            svgViewHandler.svg.remove();
-            diagramHandler.clearSvg();
-
-            svgViewHandler.svg = d3.select("#ContainerStateMachine").append("svg")
-                                    .attr("width", width).attr("height", height)
-                                    .attr("id", "canvas").style("background", "#fffcec");
-
-            // Update last file shown 
-            diagramHandler.lastFileShown = event.selectedItemString;
-
-            // Get information fresh file to display
-            var diagramInfo = diagramHandler.diagramsInfo[diagramHandler.lastFileShown];
-            if (diagramInfo) {
-                //If it has diagram information 
-                if (diagramHandler.numberDiagramStillToRestore) {
-                    // Check if this is shown for first time after reloading 
-                    diagramHandler.restoreDiagramFirstTimeAfterReloadingFromSaving(diagramInfo);
-                } else {
-                    diagramHandler.restoreGraphAfterSwitchingEmulinkFiles(diagramInfo);
-                }
-            }
-            emulink();
-        }); //End listener
+//        // add listeners
+//        projectManager.addListener("SelectedFileChanged", function (event) {
+//            // Since file selected is going to be changed, 
+//            // we need to save diagram information ...
+//            if (diagramHandler.lastFileShown) {
+//                var nodes = getNodesInDiagram();
+//                var edges = getEdgesInDiagram();
+//                if (nodes.length) {
+//                    // But save just if there is something to save!
+//                    var graphToSave = {
+//                        nodes: getNodesInDiagram(),
+//                        edges: getEdgesInDiagram()
+//                    };
+//                    diagramHandler.diagramsInfo[diagramHandler.lastFileShown] = graphToSave;
+//                    /* Even saving XML SVG in case user wants to get a PDF */
+//                    var serializer = new XMLSerializer();
+//                    var xmlString = serializer.serializeToString(d3.select('#canvas').node());
+//                    svgReference[diagramHandler.lastFileShown] = xmlString;
+//                }
+//            }
+//            // ...and clear SVG
+//            svgViewHandler.svg.remove();
+//            diagramHandler.clearSvg();
+//
+//            svgViewHandler.svg = d3.select("#ContainerStateMachine").append("svg")
+//                                    .attr("width", width).attr("height", height)
+//                                    .attr("id", "canvas").style("background", "#fffcec");
+//
+//            // Update last file shown 
+//            diagramHandler.lastFileShown = event.selectedItemString;
+//
+//            // Get information fresh file to display
+//            var diagramInfo = diagramHandler.diagramsInfo[diagramHandler.lastFileShown];
+//            if (diagramInfo) {
+//                //If it has diagram information 
+//                if (diagramHandler.numberDiagramStillToRestore) {
+//                    // Check if this is shown for first time after reloading 
+//                    diagramHandler.restoreDiagramFirstTimeAfterReloadingFromSaving(diagramInfo);
+//                } else {
+//                    diagramHandler.restoreGraphAfterSwitchingEmulinkFiles(diagramInfo);
+//                }
+//            }
+//            emulink();
+//        }); //End listener
         
         diagramHandler.lastFileShown = nameFile;
         if (!svgViewHandler.svg) {
