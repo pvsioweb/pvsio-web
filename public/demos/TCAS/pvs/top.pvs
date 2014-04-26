@@ -117,7 +117,7 @@ BEGIN
     #)
 
     % tick is used to execute a simulation step; simulation time is advanced of deltaT
-    deltaT: real = 0.01
+    deltaT: real = 0.5;
     tick(st: state): state =
       LET so_: Vect2 = so(st) + deltaT * vo(st),
           si_: Vect2 = si(st) + deltaT * vi(st),

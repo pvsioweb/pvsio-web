@@ -42,6 +42,7 @@ require(["PVSioWebClient", "util/PVSioStateParser",
             var pvsState = res.data.join("").replace(/d0/g, "");
             ws.lastState(pvsState);
             var state = StateParser.parse(pvsState);
+            console.log(pvsState);
             responses.push(state);
             TCASView.render(state);
         });

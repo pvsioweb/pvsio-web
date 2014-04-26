@@ -11,6 +11,8 @@ define(function (require, exports, module) {
         d3 = require("d3/d3");
     
     var h = 1200, w = 1200;
+    var angleOffset = Math.PI / 2, nmi = 1852, pixelToNMI = 32;
+    var colorMap = {"yellow": "rgba(255,255,0,0.5)", "white": "rgba(255,255,255,0.5)"};
     function drawIntruder(pos) {
         
     }
@@ -32,6 +34,7 @@ define(function (require, exports, module) {
     function drawCircle(c, pos, rad) {
         c.save();
         c.beginPath();
+        c.lineWidth = 1;
         c.strokeStyle = "#ddd";
         c.arc(pos.x, pos.y, rad, 0, 360 * Math.PI / 180);
         c.stroke();
@@ -49,13 +52,15 @@ define(function (require, exports, module) {
     }
     
     function drawTick(angle, center, c, tickLength) {
-        var  radius = 90;
-        tickLength = tickLength || 5;
+        var  radius = 180;
+        angle += angleOffset;
+        tickLength = tickLength || 10;
         var x1 = center.x + radius * Math.cos(angle),
             x2 = center.x + (radius - tickLength) * Math.cos(angle),
             y1 = center.x + radius * Math.sin(angle),
             y2 = center.x + (radius - tickLength) * Math.sin(angle);
         c.beginPath();
+        c.lineWidth = 4;
         c.moveTo(x1, y1);
         c.lineTo(x2, y2);
         c.stroke();
@@ -69,23 +74,35 @@ define(function (require, exports, module) {
                 color = "white";
             }
             
-            band.range.forEach(function (angle) {
-                c.save();
-                c.strokeStyle = color;
-                drawTick(angle, ownPos, c);
-                c.restore();
-            });
+//            band.range.forEach(function (angle) {
+//                c.save();
+//                c.strokeStyle = colorMap[color];
+//                drawTick(angle, ownPos, c);
+//                c.restore();
+//            });
+            //draw an arc for each begining and end of banf
+            var first = band.range[0] + angleOffset,
+                last = band.range[band.range.length - 1]  + angleOffset;
             
+            c.save();
+            c.strokeStyle = colorMap[color];
+            c.lineWidth = 20;
+            c.beginPath();
+            c.arc(ownPos.x, ownPos.y, 175, first, last);
+            c.stroke();
+            c.restore();
         });
     }
     
     function normalisePos(pos) {
-        pos.x = StateParser.evaluate(pos.x) + w / 2;
-        pos.y = StateParser.evaluate(pos.y) + h / 2;
+        pos.x = (StateParser.evaluate(pos.x) + w / 2);// * -1;
+        pos.y = (StateParser.evaluate(pos.y) + h / 2);// * -1;
         return pos;
     }
     
+    
     function render(state) {
+        console.log(state);
         //create the canvas if it does not already exist
         var canvasEl = d3.select("canvas");
         if (canvasEl.empty()) {
@@ -95,18 +112,20 @@ define(function (require, exports, module) {
         canvas.clearRect(0, 0, w, h);
         canvas.fillStyle = "black";
         canvas.fillRect(0, 0, w, h);
+        canvas.drawImage(document.getElementById("tcas_deck"), 0, 0);
         if (!state.si || !state.so) {
             return;
         }
+        var center = {x: w / 2, y: h / 2};
+
         var ipos = normalisePos(state.si);
         var opos = normalisePos(state.so);
-        var center = {x: w / 2, y: h / 2};
-        var iPosRel = {x: opos.x - ipos.x, y: opos.y - ipos.y};
-        
+        var iPosRel = {x: (ipos.x - opos.x) * pixelToNMI / nmi, y: -1 * (ipos.y - opos.y) * pixelToNMI / nmi};
+        var ownPos = {x: center.x, y: center.y + 64};
         //draw the intruder position
-        drawSelf(canvas, {x: center.x + iPosRel.x, y: center.y + iPosRel.y});
+        drawCircle(canvas, {x: ownPos.x + iPosRel.x, y: ownPos.y + iPosRel.y}, 5);
         //draw the own position
-        drawSelf(canvas, center);
+        drawSelf(canvas, ownPos);
         var bands = state.trkBand.map(function (band) {
             return {color: band.color, range: band.range.map(function (d) {
                 return StateParser.evaluate(d);
@@ -114,8 +133,8 @@ define(function (require, exports, module) {
         });
         drawRangeBands(bands, center, canvas);
         var needleAngle = Math.atan(StateParser.evaluate(state.vo.y) / StateParser.evaluate(state.vo.x));
-        canvas.strokeStyle = "red";
-        drawTick(needleAngle, center, canvas, 80);
+        canvas.strokeStyle = "rgba(255,255,255,0.7)";
+        drawTick(needleAngle, center, canvas, 170);
     }
     
     module.exports = {
