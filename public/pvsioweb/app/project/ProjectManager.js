@@ -133,9 +133,10 @@ define(function (require, exports, module) {
 		pvsFilesListView.addListener("SelectedFileChanged", function (event) {
 			//fetch sourcecode for selected file and update editor
             if (event.selectedItem && !event.selectedItem.isDirectory) {
-                var pvsFile = currentProject.getSpecFile(event.selectedItem.file);
-                if (!pvsFile) {//load the pvsfile and add to the project
-                    pvsFile = currentProject.addSpecFile(event.selectedItem.file);
+                var pvsFile = currentProject.getSpecFile(event.selectedItem.path);
+                if (!pvsFile) {//load the pvsfile and add to the project 
+                    //since we are not passing a file content it will get loaded over websocket when requested
+                    pvsFile = currentProject.addSpecFile(event.selectedItem.path);
                 }
                 if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
                     editor.removeAllListeners("change");

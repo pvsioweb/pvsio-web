@@ -51,11 +51,13 @@ function run() {
 
     function getFolderStructure(root) {
         var s = fs.statSync(root);
-        var file = {name: root};
+        var file = {path: root, name: root.substr(root.lastIndexOf("/") + 1)};
         if (s.isDirectory()) {
             var files = fs.readdirSync(root);
             file.isDirectory = true;
-            file.children = files.map(function (f, i) {
+            file.children = files.filter(function (f) {
+                return f.split(".").slice(-1).join("") === "pvs";
+            }).map(function (f, i) {
                 return getFolderStructure(path.join(root, f));
             });
             return file;
@@ -456,7 +458,7 @@ function run() {
                 p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";
                 // directory "projects" is the base path for creating files
-                token.fileName = baseProjectDir + token.fileName;
+                token.fileName = path.resolve(baseProjectDir, token.fileName);
                 fs.writeFile(token.fileName, token.fileContent, encoding, function (err) {
                     var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
                     ///files saved need to inform client about need to restart pvsioweb with appropriate files
