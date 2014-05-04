@@ -1,0 +1,218 @@
+main: THEORY 
+  BEGIN IMPORTING MDNumberpad
+
+  %{"_block" : "BlockStart", "_id" : "StateName", "_type": "Nodes"}
+  StateName: TYPE = { Ready, Process_Enter, Process_Digit, Process_DP, Process_Clear, Error };
+  %{"_block" : "BlockEnd", "_id" : "StateName", "_type": "Nodes"}
+
+  %{"_block" : "BlockStart", "_id" : "State", "_type": "State"}
+  State: TYPE = [#
+    current_state: StateName, 
+    previous_state: StateName,
+    numberpad: state
+  #]
+  %{"_block" : "BlockEnd", "_id" : "State", "_type": "State"}
+
+  %{"_block" : "BlockStart", "_id" : "initial_state"}
+  initial_state(x: real): State = (#
+   	current_state := Ready,
+	previous_state := Ready,
+	numberpad := init_numberpad(x)
+   #)
+  %{"_block" : "BlockEnd", "_id" : "initial_state"}
+
+  %{"_block" : "BlockStart", "_id" : "leave_state", "_type": "Function"}
+  leave_state(s: StateName)(st: State): State = st WITH [ previous_state := s ] 
+  %{"_block" : "BlockEnd", "_id" : "leave_state", "_type": "Function"}
+  %{"_block" : "BlockStart", "_id" : "enter_into", "_type": "Function"}
+  enter_into(s: StateName)(st:State): State = st WITH [ current_state := s ] 
+  %{"_block" : "BlockEnd", "_id" : "enter_into", "_type": "Function"}
+
+  %{"_block" : "BlockStart", "_id" : "click_DIGIT", "_type": "Permission"}
+  per_click_DIGIT(st: State) : bool = st`current_state = Ready
+  %{"_block" : "BlockEnd", "_id" : "click_DIGIT", "_type": "Permission"}
+  %{"_block" : "BlockStart", "_id" : "click_DIGIT", "_type": "Edge"}
+  click_DIGIT(key: KEY_CODE)(st: (per_click_DIGIT)): State = 
+  COND
+  %{"_block" : "BlockStart", "_id" : "click_DIGIT", "_source" : "Ready", "_target" : "Process_Digit", "_type": "Transition"}
+     st`current_state = Ready
+    -> LET new_st = leave_state(Ready)(st),
+       	   new_st = new_st WITH [ numberpad := processKey(key)(numberpad(st)) ]
+        IN enter_into(Process_Digit)(new_st)
+  %{"_block" : "BlockEnd", "_id" : "click_DIGIT", "_source" : "Ready", "_target" : "Process_Digit", "_type": "Transition"}
+  ENDCOND
+  %{"_block" : "BlockEnd", "_id" : "click_DIGIT", "_type": "Edge"}
+
+
+  %{"_block" : "BlockStart", "_id" : "click_POINT", "_type": "Permission"}
+  per_click_POINT(st: State) : bool = st`current_state = Ready
+  %{"_block" : "BlockEnd", "_id" : "click_POINT", "_type": "Permission"}
+  %{"_block" : "BlockStart", "_id" : "click_POINT", "_type": "Edge"}
+  click_POINT(st: (per_click_POINT)): State = 
+  COND
+  %{"_block" : "BlockStart", "_id" : "click_POINT", "_source" : "Ready", "_target" : "Process_DP", "_type": "Transition"}
+     st`current_state = Ready
+    -> LET new_st = leave_state(Ready)(st),
+       	   new_st = new_st WITH [ numberpad := dotClicked(numberpad(st)) ]
+        IN enter_into(Process_DP)(new_st)
+  %{"_block" : "BlockEnd", "_id" : "click_POINT", "_source" : "Ready", "_target" : "Process_DP", "_type": "Transition"}
+
+  ENDCOND
+  %{"_block" : "BlockEnd", "_id" : "click_POINT", "_type": "Edge"}
+  %{"_block" : "BlockStart", "_id" : "click_CLEAR", "_type": "Permission"}
+  per_click_CLEAR(st: State) : bool = st`current_state = Ready OR st`current_state = Error
+  %{"_block" : "BlockEnd", "_id" : "click_CLEAR", "_type": "Permission"}
+  %{"_block" : "BlockStart", "_id" : "click_CLEAR", "_type": "Edge"}
+  click_CLEAR(st: (per_click_CLEAR)): State = 
+  COND
+  %{"_block" : "BlockStart", "_id" : "click_CLEAR", "_source" : "Ready", "_target" : "Process_Clear", "_type": "Transition"}
+     st`current_state = Ready
+    -> LET new_st = leave_state(Ready)(st),
+       	   new_st = new_st WITH [ numberpad := resetClicked(numberpad(st)) ]
+        IN enter_into(Process_Clear)(new_st),
+  %{"_block" : "BlockEnd", "_id" : "click_CLEAR", "_source" : "Ready", "_target" : "Process_Clear", "_type": "Transition"}
+  %{"_block" : "BlockStart", "_id" : "click_CLEAR", "_source" : "Error", "_target" : "Process_Clear", "_type": "Transition"}
+     st`current_state = Error
+    -> LET new_st = leave_state(Error)(st),
+       	   new_st = new_st WITH [ numberpad := resetClicked(numberpad(st)) ]
+        IN enter_into(Process_Clear)(new_st)
+  %{"_block" : "BlockEnd", "_id" : "click_CLEAR", "_source" : "Error", "_target" : "Process_Clear", "_type": "Transition"}
+  ENDCOND
+  %{"_block" : "BlockEnd", "_id" : "click_CLEAR", "_type": "Edge"}
+
+  %{"_block" : "BlockStart", "_id" : "click_ENTER", "_type": "Permission"}
+  per_click_ENTER(st: State) : bool = st`current_state = Ready
+  %{"_block" : "BlockEnd", "_id" : "click_ENTER", "_type": "Permission"}
+  %{"_block" : "BlockStart", "_id" : "click_ENTER", "_type": "Edge"}
+  click_ENTER(st: (per_click_ENTER)): State = 
+  COND
+  %{"_block" : "BlockStart", "_id" : "click_ENTER", "_source" : "Ready", "_target" : "Process_Enter", "_type": "Transition"}
+     st`current_state = Ready
+    -> LET new_st = leave_state(Ready)(st),
+       	   new_st = new_st WITH [ numberpad := okClicked(numberpad(st)) ]
+        IN enter_into(Process_Enter)(new_st)
+  %{"_block" : "BlockEnd", "_id" : "click_ENTER", "_source" : "Ready", "_target" : "Process_Enter", "_type": "Transition"}
+
+  ENDCOND
+  %{"_block" : "BlockEnd", "_id" : "click_ENTER", "_type": "Edge"}
+
+
+  %{"_block" : "BlockStart", "_id" : "tick", "_type": "Permission"}
+  per_tick(st: State) : bool =  st`current_state = Process_Digit OR st`current_state = Process_Enter 
+  	       	      	     	  OR st`current_state = Process_Clear OR st`current_state = Process_DP;
+  %{"_block" : "BlockEnd", "_id" : "tick", "_type": "Permission"}
+  %{"_block" : "BlockStart", "_id" : "tick", "_type": "Edge"}
+  tick(st: (per_tick)): State = 
+  COND
+  %{"_block" : "BlockStart", "_id" : "tick", "_source" : "Process_Digit", "_target" : "Ready", "_type": "Transition"}
+     st`current_state = Process_Digit AND numberpad(st)`rejectKeys = FALSE
+    -> LET new_st = leave_state(Process_Digit)(st)
+        IN enter_into(Ready)(new_st),
+  %{"_block" : "BlockEnd", "_id" : "tick", "_source" : "Process_Digit", "_target" : "Ready", "_type": "Transition"}
+
+  %{"_block" : "BlockStart", "_id" : "tick", "_source" : "Process_Digit", "_target" : "Error", "_type": "Transition"}
+     st`current_state = Process_Digit AND numberpad(st)`rejectKeys = TRUE
+    -> LET new_st = leave_state(Process_Digit)(st)
+        IN enter_into(Error)(new_st),
+  %{"_block" : "BlockEnd", "_id" : "tick", "_source" : "Process_Digit", "_target" : "Error", "_type": "Transition"}
+
+  %{"_block" : "BlockStart", "_id" : "tick", "_source" : "Process_Enter", "_target" : "Ready", "_type": "Transition"}
+     st`current_state = Process_Enter AND numberpad(st)`rejectKeys = FALSE
+    -> LET new_st = leave_state(Process_Enter)(st)
+        IN enter_into(Ready)(new_st),
+  %{"_block" : "BlockEnd", "_id" : "tick", "_source" : "Process_Enter", "_target" : "Ready", "_type": "Transition"}
+
+  %{"_block" : "BlockStart", "_id" : "tick", "_source" : "Process_Enter", "_target" : "Error", "_type": "Transition"}
+     st`current_state = Process_Enter AND numberpad(st)`rejectKeys = TRUE
+    -> LET new_st = leave_state(Process_Enter)(st)
+        IN enter_into(Error)(new_st),
+  %{"_block" : "BlockEnd", "_id" : "tick", "_source" : "Process_Enter", "_target" : "Error", "_type": "Transition"}
+
+  %{"_block" : "BlockStart", "_id" : "tick", "_source" : "Process_Clear", "_target" : "Ready", "_type": "Transition"}
+     st`current_state = Process_Clear
+    -> LET new_st = leave_state(Process_Clear)(st)
+        IN enter_into(Ready)(new_st),
+  %{"_block" : "BlockEnd", "_id" : "tick", "_source" : "Process_Clear", "_target" : "Ready", "_type": "Transition"}
+
+  %{"_block" : "BlockStart", "_id" : "tick", "_source" : "Process_DP", "_target" : "Ready", "_type": "Transition"}
+     st`current_state = Process_DP
+    -> LET new_st = leave_state(Process_DP)(st)
+        IN enter_into(Ready)(new_st)
+  %{"_block" : "BlockEnd", "_id" : "tick", "_source" : "Process_DP", "_target" : "Ready", "_type": "Transition"}
+
+  ENDCOND
+  %{"_block" : "BlockEnd", "_id" : "tick", "_type": "Edge"}
+
+
+   %-- interface functions for pvsio-web
+   click_btn0(st: State): State =
+    COND 
+     per_click_DIGIT(st) -> LET new_st = click_DIGIT(KEY_0)(st) IN tick(new_st),
+     ELSE -> st 
+    ENDCOND
+   click_btn1(st: State): State =
+    COND 
+     per_click_DIGIT(st) -> LET new_st = click_DIGIT(KEY_1)(st) IN tick(new_st),
+     ELSE -> st
+    ENDCOND
+   click_btn2(st: State): State =
+    COND 
+     per_click_DIGIT(st) -> LET new_st = click_DIGIT(KEY_2)(st) IN tick(new_st),
+     ELSE -> st
+    ENDCOND
+   click_btn3(st: State): State =
+    COND 
+     per_click_DIGIT(st) -> LET new_st = click_DIGIT(KEY_3)(st) IN tick(new_st),
+     ELSE -> st
+    ENDCOND
+   click_btn4(st: State): State =
+    COND 
+     per_click_DIGIT(st) -> LET new_st = click_DIGIT(KEY_4)(st) IN tick(new_st),
+     ELSE -> st
+    ENDCOND
+   click_btn5(st: State): State =
+    COND 
+     per_click_DIGIT(st) -> LET new_st = click_DIGIT(KEY_5)(st) IN tick(new_st),
+     ELSE -> st
+    ENDCOND
+   click_btn6(st: State): State =
+    COND 
+     per_click_DIGIT(st) -> LET new_st = click_DIGIT(KEY_6)(st) IN tick(new_st),
+     ELSE -> st
+    ENDCOND
+   click_btn7(st: State): State =
+    COND 
+     per_click_DIGIT(st) -> LET new_st = click_DIGIT(KEY_7)(st) IN tick(new_st),
+     ELSE -> st
+    ENDCOND
+   click_btn8(st: State): State =
+    COND 
+     per_click_DIGIT(st) -> LET new_st = click_DIGIT(KEY_8)(st) IN tick(new_st),
+     ELSE -> st
+    ENDCOND
+   click_btn9(st: State): State =
+    COND 
+     per_click_DIGIT(st) -> LET new_st = click_DIGIT(KEY_9)(st) IN tick(new_st),
+     ELSE -> st
+    ENDCOND
+   click_btnOK(st: State): State = 
+    COND 
+     per_click_ENTER(st) -> LET new_st = click_ENTER(st) IN tick(new_st),
+     ELSE -> st
+    ENDCOND
+   click_btnCLR(st: State): State = 
+    COND 
+     per_click_CLEAR(st) -> LET new_st = click_CLEAR(st) IN tick(new_st),
+     ELSE -> st
+    ENDCOND
+   click_btnPOINT(st: State): State = 
+    COND
+     per_click_POINT(st) -> LET new_st = click_POINT(st) IN tick(new_st),
+     ELSE -> st
+    ENDCOND
+
+   init(x: real): State = initial_state(x)
+
+
+
+ END main

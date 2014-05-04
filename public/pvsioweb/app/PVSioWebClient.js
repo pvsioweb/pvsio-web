@@ -48,11 +48,11 @@ define(function (require, exports, module) {
     */
 	PVSioWeb.prototype.serverUrl = property.call(PVSioWeb.prototype, url);
 	/**
-        Initiate connection to the server
+        Initiate connection to the server.
+        Returns a promise object that resolves to the websocket connection when the connection opens
     */
 	PVSioWeb.prototype.connectToServer = function () {
-		ws.serverUrl(this.serverUrl()).port(this.port()).logon();
-		return this;
+		return ws.serverUrl(this.serverUrl()).port(this.port()).logon();
 	};
 	
     /**
@@ -66,12 +66,6 @@ define(function (require, exports, module) {
         Get the websocket connection
     */
 	PVSioWeb.prototype.getWebSocket = function () { return ws; };
-	
-	PVSioWeb.prototype.registerPlugin = function (plugin) {
-		if (plugin && typeof plugin === "function") {
-			return plugin(this);
-		}
-	};
 	
     /**
         Creates a collapsible panel on the client app
@@ -106,6 +100,20 @@ define(function (require, exports, module) {
 		if (!showContent) { content.style("display", "none"); }
 		return content;
 	};
+    
+    /**
+        Removes the collapsible panel with the given header text.
+        @param {d3.selection} container The div returned from a call to createCollapsiblePanel
+    */
+    PVSioWeb.prototype.removeCollapsiblePanel = function (container) {
+        if (container && !container.empty() && container.node()) {
+            var parent = d3.select(container.node().parentElement);
+            if (parent.classed("collapsible-panel-parent")) {
+                parent.remove();
+            }
+        }
+    };
+    
     /**
         Adds a stylesheet with the specified url to the page
      */

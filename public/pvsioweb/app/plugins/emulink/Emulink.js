@@ -12,15 +12,17 @@ define(function (require, exports, module) {
         handlerFile             = require("util/fileHandler"),
         pvsWriter               = require("plugins/emulink/stateToPvsSpecificationWriter"),
         parserSpecification     = require("plugins/emulink/parserSpecification"),
-		PrototypeBuilder		= require("pvsioweb/PrototypeBuilder"),
+		PrototypeBuilder		= require("plugins/prototypebuilder/PrototypeBuilder"),
 		Logger					= require("util/Logger"),
-        Simulator               = require("plugins/emulink/simulator");
+        Simulator               = require("plugins/emulink/simulator"),
+        PluginManager           = require("plugins/PluginManager");
        // PDFHandler              = require("plugins/emulink/PDFHandler");
 
     var projectManager;
     var editor;
     var ws;
     var selectedFileChanged;
+    var pvsioWebClient;
     	
 	function createHtmlElements(pvsioWebClient, prototypeBuilder) {
 		var content = require("text!plugins/emulink/forms/maincontent.handlebars");
@@ -258,9 +260,23 @@ define(function (require, exports, module) {
         });
         
     }
-	function Emulink(pvsioWebClient) {
-        // register prototype builder as a plugin since this plugin depends on it
-        var prototypeBuilder = pvsioWebClient.registerPlugin(PrototypeBuilder);
+	
+    function Emulink(client) {
+        pvsioWebClient = client;
+	}
+    
+    Emulink.prototype.getDependencies = function () {
+        return [PrototypeBuilder];
+    };
+    
+    Emulink.prototype.initialise = function () {
+        var pm = PluginManager.getInstance();
+        //enable the plugin -- this should also enable any dependencies defined in getDependencies method
+        pm.enablePlugin(this, pvsioWebClient);
+        var prototypeBuilder = pm.getPlugin(PrototypeBuilder);
+        if (!prototypeBuilder) {
+            throw new Error("An instance of the prototype builder plugin was not found :(");
+        }
 
         // create local references to PVS editor, websocket client, and project manager
         editor = prototypeBuilder.getEditor();
@@ -274,9 +290,11 @@ define(function (require, exports, module) {
         
         // create user interface elements
 		createHtmlElements(pvsioWebClient, prototypeBuilder);
+    };
+    
+    Emulink.prototype.unload = function () {
         
-		return this;
-	}
+    };
 	
 	module.exports = Emulink;
 });

@@ -4,7 +4,7 @@
  * @date 6/20/13 9:45:59 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent, _ , FileReader*/
+/*global define, d3, require, $, brackets, window, MouseEvent, _ , FileReader, Promise*/
 define(function (require, exports, module) {
     "use strict";
     var property            = require("util/property"),
@@ -12,65 +12,87 @@ define(function (require, exports, module) {
         WSManager           = require("websockets/pvs/WSManager"),
         WidgetManager       = require("pvsioweb/WidgetManager").getWidgetManager(),
         ScriptPlayer        = require("util/ScriptPlayer"),
-        queue               = require("d3/queue"),
 		ProjectFile			= require("./ProjectFile");
     
     var propertyChangedEvent = "PropertyChanged";
     
     ///TODO review and ensure this works with a map of pvsfiles
-    function saveSourceCode(files, project, cb) {
+    function saveSourceCode(files, project) {
         var ws = WSManager.getWebSocket();
-		var q = queue();
-        files.forEach(function (f) {
-            q.defer(ws.writeFile, {fileName: f.path(), fileContent: f.content()});
-        });
-        q.awaitAll(function (err, res) {
-            var dirtyFiles = project.dirtyFiles();
-            //update status of files successfully saved
-            res.forEach(function (response, index) {
-                if (response.type === "fileSaved") {
-                    dirtyFiles[index].dirty(false);
-                }
+        var promises =  files.map(function (f, i) {
+            return new Promise(function (resolve, reject) {
+                ws.writeFile({filename: f.path(), fileContent: f.content()}, function (err, res) {
+                    if (!err) {
+                        resolve(err);
+                    } else {
+                        reject(err);
+                    }
+                });
             });
-            cb(err, res);
+        });
+       
+        return new Promise(function (resolve, reject) {
+            Promise.all(promises).then(function (res) {
+                var dirtyFiles = project.dirtyFiles();
+                res.forEach(function (response, index) {
+                    if (response.type === "fileSaved") {
+                        dirtyFiles[index].dirty(false);
+                    }
+                });
+                resolve(res);
+            }, reject);
         });
 	}
 
-    function saveWidgetDefinition(project, cb) {
+    function saveWidgetDefinition(project) {
 		//save to the user's drive
         var ws = WSManager.getWebSocket();
         var wd = WidgetManager.getWidgetDefinitions();
 		var wdStr = JSON.stringify(wd, null, " ");
 		var data  = {"fileName": project.path() + "/widgetDefinition.json", fileContent: wdStr};
-		ws.writeFile(data, function (err, res) {
-            if (!err) {
-                project.widgetDefinitions(wd);
-            }
-            cb(err, res);
+        return new Promise(function (resolve, reject) {
+            ws.writeFile(data, function (err, res) {
+                if (!err) {
+                    project.widgetDefinitions(wd);
+                    resolve(res);
+                } else {
+                    reject(err);
+                }
+            });
         });
 	}
     
-    function saveInteractionScripts(project, cb) {
+    function saveInteractionScripts(project) {
         var ws = WSManager.getWebSocket();
         var scripts = JSON.stringify(project.scripts(), null, " ");
         var data = {fileName: project.path() + "/scripts.json", fileContent: scripts};
-        ws.writeFile(data, function (err, res) {
-            if (cb && typeof cb === "function") {
-                cb(err, res);
-            }
+        return new Promise(function (resolve, reject) {
+            ws.writeFile(data, function (err, res) {
+                if (!err) {
+                    resolve(res);
+                } else {
+                    reject(err);
+                }
+            });
         });
     }
     
-    function saveImageFile(project, cb) {
+    function saveImageFile(project) {
         var ws = WSManager.getWebSocket();
         var data = {"fileName": project.path() + "/" + project.image().name(),
                     fileContent: project.image().content(), encoding: "base64"};
-        ws.writeFile(data, function (err, res) {
-            if (!err) {
-                project.image().dirty(false);
-            }
-            cb(err, res);
+        
+        return new Promise(function (resolve, reject) {
+            ws.writeFile(data, function (err, res) {
+                if (!err) {
+                    project.image().dirty(false);
+                    resolve(res);
+                } else {
+                    reject(err);
+                }
+            });
         });
+        
     }
     
 	/**
@@ -282,8 +304,14 @@ define(function (require, exports, module) {
 			file = [file];
 		}
 		var _thisProject = this;
-		saveSourceCode(file, this, function (err, res) {
-			cb(err, _thisProject);
+		saveSourceCode(file, this).then(function (res) {
+            if (cb && typeof cb === "function") {
+                cb(null, _thisProject);
+            }
+        }, function (err) {
+            if (cb && typeof cb === "function") {
+                cb(err);
+            }
 		});
 		return this;
 	};
@@ -298,25 +326,15 @@ define(function (require, exports, module) {
 		var imageName, pvsSpecName, fd;
 		if (this.name() && this.name().trim().length > 0) {
 			//project has already been created so save the widgets and the sourcecode if it has changed
-			var q = queue();
-			q.defer(saveWidgetDefinition, this);
-            q.defer(saveInteractionScripts, this);
-            
-			if (this.pvsFiles()) {
-				q.defer(saveSourceCode, this.dirtyFiles(), this);
-			}
-		   
-			if (this.image() &&  this.image().dirty()) {
-				q.defer(saveImageFile, this);
-			}
-            
-			q.awaitAll(function (err, res) {
-				if (!err) {
+            Promise.all([saveWidgetDefinition(this), saveInteractionScripts(this),
+                         saveSourceCode(this.dirtyFiles(), this), saveImageFile(this)])
+                .then(function (res) {
                     _thisProject._dirty(false);
                     _thisProject.fire({type: "ProjectSaved", project: _thisProject});
-                }
-                if (cb) { cb(err, _thisProject); }
-			});
+                    if (cb && typeof cb === "function") { cb(null, _thisProject); }
+                }, function (err) {
+                    if (cb && typeof cb === "function") { cb(err); }
+                });
 		}
 		return this;
 	};

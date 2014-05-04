@@ -41,11 +41,11 @@ define(function (require, exports, module) {
         */
         o.lastState = property.call(o, "init(0)");
         /**
-            Initiates a connection to the pvsioweb websocket server
+            Initiates a connection to the pvsioweb websocket server.
+            Returns a promise that resolves when the connection is opened
         */
         o.logon = function () {
-            wscBase.logon();
-            return o;
+            return wscBase.logon();
         };
         
         /**

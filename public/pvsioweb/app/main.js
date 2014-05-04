@@ -8,17 +8,33 @@
 
 define(function (require, exports, module) {
     "use strict";
-	var PVSioWeb = require("./PVSioWebClient"),
+	var PVSioWebClient = require("PVSioWebClient"),
 		Logger = require("util/Logger"),
-//		PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder");
-		Emulink = require("plugins/emulink/Emulink");
+		PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
+        Emulink = require("plugins/emulink/Emulink"),
+		GraphBuilder			= require("plugins/graphbuilder/GraphBuilder"),
+        PluginManager = require("plugins/PluginManager");
 		
-	var client = new PVSioWeb();
-    client.connectToServer();
-//	client.registerPlugin(PrototypeBuilder);
-    setTimeout(function () {
-        client.registerPlugin(Emulink);
-    }, 2000);
+	var client = new PVSioWebClient(), pb;
+    client.connectToServer()
+        .then(function (ws) {
+//            pb = new PrototypeBuilder(client);
+//            pb.initialise();
+//            
+//            var projectManager = pb.getProjectManager();
+//            var editor = pb.getEditor();
+//            
+//            //register the graphbuilder plugin and add an event handler to reinitialise the plugin when the project changes
+//            var gb = new GraphBuilder(client);
+//            gb.initialise();
+//            projectManager.addListener("ProjectChanged", function () {
+//                gb.reInitialise();
+//            });
+            
+            var emulink = new Emulink(client);
+            PluginManager.getInstance().enablePlugin(emulink, client);
+            
+        });
 	/**
      * utility function to pretty print pvsio output
      * @private

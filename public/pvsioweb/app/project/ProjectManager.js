@@ -527,11 +527,6 @@ define(function (require, exports, module) {
 		}
 		return this;
 	};
-	
-	ProjectManager.prototype.updateListView = function () {
-		//pvsFilesListView.updateView();
-	};
-
     
 	/** 
 	 * Creates a new default Project.
@@ -563,9 +558,11 @@ define(function (require, exports, module) {
                 pvsFilesListView.selectItem(project.mainPVSFile() || project.pvsFilesList()[0]);
                 //fire project changed event
                 pm.fire({type: "ProjectChanged", current: project, previous: project});
-            } else { alert(err.toString()); }
+            }
+            if (cb && typeof cb === "function") {
+                cb(err, res);
+            }
         });
-        return data;
     };
     
     /** 

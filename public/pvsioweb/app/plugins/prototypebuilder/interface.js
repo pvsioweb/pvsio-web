@@ -191,7 +191,6 @@ define(function (require, exports, module) {
 					if (!err) {
 						pvsFile.dirty(false);
 						projectManager.updateSourceCodeToolbarButtons(pvsFile, project);
-						projectManager.updateListView();
 					} else {
 						console.log(err);
 					}
@@ -217,6 +216,9 @@ define(function (require, exports, module) {
 	
 	module.exports = {
 		init: createHtmlElements,
+        unload: function () {
+            d3.select("div#content.center").remove();
+        },
 		bindListeners: function (projectManager) {
 			bindListeners(projectManager);
 		}

@@ -118,7 +118,14 @@ define(function (require, exports, module) {
 			reInitialise: function () {
 				clear();
 				init();
-			}
+			},
+            initialise: function () {
+                init();
+            },
+            unload: function () {
+                clear();
+                pvsioWebClient.removeCollapsiblePanel(canvas);
+            }
 		};
 	}
 	
