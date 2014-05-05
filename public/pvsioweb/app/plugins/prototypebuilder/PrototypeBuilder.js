@@ -8,22 +8,23 @@
 define(function (require, exports, module) {
 	"use strict";
 	var  ace                    = require("ace/ace"),
+        ace_language_tools      = require("ace/ext/language_tools"),
         Project                 = require("project/Project"),
+        PVSioWebClient          = require("PVSioWebClient"),
         d3                      = require("d3/d3"),
 		ProjectManager			= require("project/ProjectManager"),
 		Logger					= require("util/Logger"),
-		ui						= require("pvsioweb/interface"),
         pvsLanguage             = require("plugins/emulink/pvsLanguage"),
 		sourceCodeTemplate		= require("text!pvsioweb/forms/templates/sourceCodeEditorPanel.handlebars");
-	
+	var instance;
     var currentProject,
         projectManager,
         editor,
         editorContainer,
         pvsioWebClient;
     
-	function PrototypeBuilder(client) {
-        pvsioWebClient = client;
+	function PrototypeBuilder() {
+        pvsioWebClient = PVSioWebClient.getInstance();
 		currentProject = new Project("");
         projectManager = new ProjectManager(currentProject);
 	}
@@ -32,13 +33,11 @@ define(function (require, exports, module) {
     PrototypeBuilder.prototype.getDependencies = function () { return []; };
     
     PrototypeBuilder.prototype.initialise = function () {
-        ui.init();//this renders the basic templates for the page
         editorContainer = pvsioWebClient.createCollapsiblePanel("PVS Editor");
         var aceContainer = editorContainer.append("div").html(sourceCodeTemplate);
 
         // this enable autocompletion
         editor = ace.edit("editor");
-        ace.require("ace/ext/language_tools");
         editor.setOptions({
             enableBasicAutocompletion: true
         });
@@ -54,18 +53,16 @@ define(function (require, exports, module) {
 
         projectManager.editor(editor);
 
-        ui.bindListeners(projectManager);
-
         projectManager.preparePageForImageUpload();
 
         // create and default initial empty project containing an empty file (main.pvs)
         projectManager.createDefaultProject();
 
     };
+   
     PrototypeBuilder.prototype.unload = function () {
         editor = null;
         pvsioWebClient.removeCollapsiblePanel(editorContainer);
-        ui.unload();
     };
     PrototypeBuilder.prototype.getProjectManager = function () {
         return projectManager;
@@ -74,5 +71,12 @@ define(function (require, exports, module) {
         return editor;
     };
 	
-    module.exports = PrototypeBuilder;
+    module.exports = {
+        getInstance: function () {
+            if (!instance) {
+                instance = new PrototypeBuilder();
+            }
+            return instance;
+        }
+    };
 });

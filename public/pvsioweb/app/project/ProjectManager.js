@@ -549,7 +549,6 @@ define(function (require, exports, module) {
         project.saveNew(function (err, res, folderStructure) {
             console.log({err: err, res: res});
             if (!err) {
-                project.pvsFilesList().forEach(function (f) { f.dirty(false); });
                 //set the main pvs file
                 project.mainPVSFile(project.pvsFilesList()[0]);
                 WidgetManager.updateMapCreator();
@@ -557,7 +556,7 @@ define(function (require, exports, module) {
                 pm.renderSourceFileList(folderStructure);
                 pvsFilesListView.selectItem(project.mainPVSFile() || project.pvsFilesList()[0]);
                 //fire project changed event
-                pm.fire({type: "ProjectChanged", current: project, previous: project});
+                pm.fire({type: "ProjectChanged", current: project});
             }
             if (cb && typeof cb === "function") {
                 cb(err, res);

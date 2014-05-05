@@ -1,19 +1,3 @@
-.jstree-contextmenu {
-    z-index: 2;   
-}
-
-.jstree-node.directory{
-    font-weight:bold;
-}
-
-.jstree-node.file {
-    font-weight:normal;
-}
-
-.jstree-node.file.dirty {
-    font-style: italic;
-}
-
 .main-file a: after {
     content: " [main]"
 }
@@ -365,7 +349,7 @@ intput:invalid, select:invalid{
 	border: 4px dashed teal;
 	height: 100%;
 	width: 100%;
-	z-index: 999999;
+	z-index: 5;
 }
 
 #specDragAndDrop.dndcontainer{
@@ -383,7 +367,7 @@ intput:invalid, select:invalid{
 }
 .detailsForm {
 	position: absolute;
-	z-index: 200;
+	z-index: 4;
 	background: white;
 	padding: 30px;
 	cursor: move;

@@ -94,7 +94,7 @@ define(function (require, exports, module) {
                 console.log(event);
                 var file = event.file;
                 //set file as dirty
-                
+                treeList.markDirty(file.path(), file.dirty());
             }).addListener("ProjectMainSpecFileChanged", function (event) {
                //change the main file class
                 

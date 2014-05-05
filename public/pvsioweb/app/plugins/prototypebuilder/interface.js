@@ -4,10 +4,12 @@
  * @date 11/15/13 16:29:55 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, document */
+/*global define, d3, require, $, brackets, window, document, Backbone, Handlebars */
 define(function (require, exports, module) {
 	"use strict";
 	var WSManager = require("websockets/pvs/WSManager"),
+        Emulink = require("plugins/emulink/Emulink"),
+        GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
 		Logger	= require("util/Logger"),
         Recorder = require("util/ActionRecorder"),
         ScriptItemView = require("pvsioweb/forms/ScriptItemView"),
@@ -15,6 +17,8 @@ define(function (require, exports, module) {
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
         Prompt  = require("pvsioweb/forms/displayPrompt");
 	
+    var template = require("text!pvsioweb/forms/maincontent.handlebars");
+    
 	/**
 	 * Switches the prototoyping layer to the builder layer
      * @private
@@ -189,7 +193,6 @@ define(function (require, exports, module) {
 			if (pvsFile) {
 				project.saveFile(pvsFile, function (err, res) {
 					if (!err) {
-						pvsFile.dirty(false);
 						projectManager.updateSourceCodeToolbarButtons(pvsFile, project);
 					} else {
 						console.log(err);
@@ -209,13 +212,37 @@ define(function (require, exports, module) {
 		});
 	}
 	
-	function createHtmlElements() {
-		var content = require("text!pvsioweb/forms/maincontent.handlebars");
-		$("body").append(content);
-	}
-	
+    var  MainView = Backbone.View.extend({
+        initialize: function (data) {
+			this.render(data);
+		},
+		render: function (data) {
+			var t = Handlebars.compile(template);
+			this.$el.html(t(data));
+			$("body").append(this.el);
+			return this;
+		},
+		events: {
+            "change input[type='checkbox']": "checkboxClicked"
+		},
+        checkboxClicked: function (event) {
+            this.trigger("pluginToggled", event);
+        },
+		scriptClicked: function (event) {
+            this.trigger("scriptClicked", $(event.target).attr("name"));
+        }
+    });
+    
+    function createHtmlElements(data) {
+        data = data || {plugins: [Emulink.getInstance(), GraphBuilder.getInstance()].map(function (p) {
+            return {label: p.constructor.name, plugin: p};
+        })};
+        return new MainView(data);
+    }
 	module.exports = {
-		init: createHtmlElements,
+		init: function (data) {
+            return createHtmlElements(data);
+        },
         unload: function () {
             d3.select("div#content.center").remove();
         },

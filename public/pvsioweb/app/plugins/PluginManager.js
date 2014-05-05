@@ -9,25 +9,23 @@ define(function (require, exports, module) {
     "use strict";
     var enabledPlugins;//contains instances of plugins
     
-    var instance, pvsioWebClient;
+    var instance;
     
-    function PluginManager(client) {
-        pvsioWebClient = client;
+    function PluginManager() {
         enabledPlugins = [];
     }
-  
-    PluginManager.prototype.enablePlugin = function (plugin, client) {
+    
+    PluginManager.prototype.enablePlugin = function (plugin) {
         var pm = this;
         if (enabledPlugins.indexOf(plugin) < 0) {
             enabledPlugins.push(plugin);
             //initialise the plugin after loading and initialising any dependencies
             var dependencies = plugin.getDependencies();
             if (dependencies && dependencies.length) {
-                dependencies.filter(function (type) {
-                    return !pm.isLoaded(type);
-                }).forEach(function (PluginDependency) {
-                    var instance = new PluginDependency(client);
-                    pm.enablePlugin(instance, client);
+                dependencies.filter(function (p) {
+                    return !pm.isLoaded(p);
+                }).forEach(function (p) {
+                    pm.enablePlugin(p);
                 });
             }
             plugin.initialise();
@@ -47,14 +45,8 @@ define(function (require, exports, module) {
         return enabledPlugins;
     };
     
-    PluginManager.prototype.getPlugin = function (type) {
-        return _.find(enabledPlugins, function (p) {
-            return p instanceof type;
-        });
-    };
-    
-    PluginManager.prototype.isLoaded = function (type) {
-        return this.getPlugin(type) ? true : false;
+    PluginManager.prototype.isLoaded = function (p) {
+        return enabledPlugins.indexOf(p) > -1 ? true : false;
     };
     
     module.exports = {

@@ -15,18 +15,20 @@ define(function (require, exports, module) {
 		PrototypeBuilder		= require("plugins/prototypebuilder/PrototypeBuilder"),
 		Logger					= require("util/Logger"),
         Simulator               = require("plugins/emulink/simulator"),
-        PluginManager           = require("plugins/PluginManager");
+        PVSioWebClient          = require("PVSioWebClient");
        // PDFHandler              = require("plugins/emulink/PDFHandler");
 
+    var instance;
     var projectManager;
     var editor;
     var ws;
     var selectedFileChanged;
     var pvsioWebClient;
+    var canvas;
     	
-	function createHtmlElements(pvsioWebClient, prototypeBuilder) {
+	function createHtmlElements() {
 		var content = require("text!plugins/emulink/forms/maincontent.handlebars");
-        var canvas = pvsioWebClient.createCollapsiblePanel("Emuchart Editor");
+        canvas = pvsioWebClient.createCollapsiblePanel("Emuchart Editor");
         canvas = canvas.html(content);
 		var infoBox = document.getElementById("infoBar");
 		if (infoBox) {
@@ -261,23 +263,17 @@ define(function (require, exports, module) {
         
     }
 	
-    function Emulink(client) {
-        pvsioWebClient = client;
+    function Emulink() {
+        pvsioWebClient = PVSioWebClient.getInstance();
 	}
     
     Emulink.prototype.getDependencies = function () {
-        return [PrototypeBuilder];
+        return [PrototypeBuilder.getInstance()];
     };
     
     Emulink.prototype.initialise = function () {
-        var pm = PluginManager.getInstance();
         //enable the plugin -- this should also enable any dependencies defined in getDependencies method
-        pm.enablePlugin(this, pvsioWebClient);
-        var prototypeBuilder = pm.getPlugin(PrototypeBuilder);
-        if (!prototypeBuilder) {
-            throw new Error("An instance of the prototype builder plugin was not found :(");
-        }
-
+        var prototypeBuilder = PrototypeBuilder.getInstance();
         // create local references to PVS editor, websocket client, and project manager
         editor = prototypeBuilder.getEditor();
         ws = pvsioWebClient.getWebSocket();
@@ -289,12 +285,21 @@ define(function (require, exports, module) {
         stateMachine.addListener("editormodechanged", modeChange_callback);
         
         // create user interface elements
-		createHtmlElements(pvsioWebClient, prototypeBuilder);
+		createHtmlElements();
     };
     
     Emulink.prototype.unload = function () {
-        
+        PVSioWebClient.getInstance().removeCollapsiblePanel(canvas);
+        canvas = null;
+        PVSioWebClient.getInstance().getProjectManager().createDefaultProject();
     };
 	
-	module.exports = Emulink;
+	module.exports = {
+        getInstance: function () {
+            if (!instance) {
+                instance = new Emulink();
+            }
+            return instance;
+        }
+    };
 });

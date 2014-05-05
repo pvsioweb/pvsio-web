@@ -16,14 +16,13 @@ define(function (require, exports, module) {
     
     var propertyChangedEvent = "PropertyChanged";
     
-    ///TODO review and ensure this works with a map of pvsfiles
     function saveSourceCode(files, project) {
         var ws = WSManager.getWebSocket();
         var promises =  files.map(function (f, i) {
             return new Promise(function (resolve, reject) {
-                ws.writeFile({filename: f.path(), fileContent: f.content()}, function (err, res) {
+                ws.writeFile({fileName: f.path(), fileContent: f.content()}, function (err, res) {
                     if (!err) {
-                        resolve(err);
+                        resolve(res);
                     } else {
                         reject(err);
                     }
@@ -300,19 +299,20 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
 	Project.prototype.saveFile = function (file, cb) {
-		if (!_.isArray(file)) {
+		if (!Array.isArray(file)) {
 			file = [file];
 		}
 		var _thisProject = this;
-		saveSourceCode(file, this).then(function (res) {
-            if (cb && typeof cb === "function") {
-                cb(null, _thisProject);
-            }
-        }, function (err) {
-            if (cb && typeof cb === "function") {
-                cb(err);
-            }
-		});
+		saveSourceCode(file, this)
+            .then(function (res) {
+                if (cb && typeof cb === "function") {
+                    cb(null, _thisProject);
+                }
+            }, function (err) {
+                if (cb && typeof cb === "function") {
+                    cb(err);
+                }
+            });
 		return this;
 	};
     /**
@@ -370,8 +370,11 @@ define(function (require, exports, module) {
 		ws.send(token, function (err, res) {
 			if (!err) {
 				_thisProject.pvsFilesList().forEach(function (f) {
+                    var oldkey = f.path();
                     //since this is a newly saved file, need to update the path to a full one
                     f.path(res.projectPath + "/" + f.path());
+                    delete _thisProject.pvsFiles()[oldkey];
+                    _thisProject.pvsFiles()[f.path()] = f;
 					f.dirty(false);
 				});
                 if (_thisProject.image()) {

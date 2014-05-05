@@ -46,6 +46,6 @@ div.contextmenu {
     min-width: 40px;
 }
 
-.even{
-
+.node.dirty {
+    font-style: italic;
 }

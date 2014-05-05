@@ -1,10 +1,26 @@
 <div id="content" class="center">
-		<div id="header">
+		<div id="header" class="btn-group">
 			<a class="btn btn-default" id="newProject"><span class="glyphicon glyphicon-file"></span> New Project</a>
 			<a class="btn btn-default" id="openProject"><span class="glyphicon glyphicon-folder-open"></span> Open Project</a>
 			<a class="btn btn-default" id="saveProject"><span class="glyphicon glyphicon-hdd"></span> Save Project</a>
 			<a class="btn btn-default" id="btnLoadPicture"><span class="glyphicon glyphicon-picture"></span> Change Picture</a>
 			<input type="file" class="hide" id="btnSelectPicture" name="selectPicture">
+            
+            <div class="btn-group">
+                    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                        Plugins <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        {{#each plugins}}
+                        <li>
+                            <input type="checkbox" name="{{label}}">
+                            <span>
+                                {{label}}
+                            </span>
+                        </li>
+                        {{/each}}
+                    </ul>
+            </div>
 			<span>    Project  </span>
 			<input type="text" placeholder="Untitled Project" id="txtProjectName" value="" class="input-Med" readonly="readonly">
 		</div>

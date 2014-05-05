@@ -17,7 +17,8 @@ define(function (require, exports, module) {
 		ws,
 		_port = 8082,
 		url = window.location.origin.indexOf("file") === 0 ?
-				("ws://localhost") : ("ws://" + window.location.hostname);
+				("ws://localhost") : ("ws://" + window.location.hostname),
+        instance;
 	
 	/**
 	 * Creates a new PVSioWeb client object. This object is an event emitter and emits the following events:
@@ -127,5 +128,12 @@ define(function (require, exports, module) {
         });
     };
 	
-	module.exports = PVSioWeb;
+	module.exports = {
+        getInstance: function () {
+            if (!instance) {
+                instance = new PVSioWeb();
+            }
+            return instance;
+        }
+    };
 });

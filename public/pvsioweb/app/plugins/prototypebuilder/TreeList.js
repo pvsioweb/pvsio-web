@@ -189,6 +189,14 @@ define(function (require, exports, module) {
         }
     };
     
+    TreeList.prototype.markDirty = function (path, sign) {
+        var fst = this;
+        d3.select(el).selectAll(".node")
+            .filter(function (d) {
+                return d.path === path;
+            }).classed("dirty", sign ? true : false);
+    };
+    
     /**
         adds the data to the parent
     */

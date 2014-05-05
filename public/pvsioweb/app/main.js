@@ -10,14 +10,33 @@ define(function (require, exports, module) {
     "use strict";
 	var PVSioWebClient = require("PVSioWebClient"),
 		Logger = require("util/Logger"),
+        ui = require("plugins/prototypebuilder/interface"),
 		PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
         Emulink = require("plugins/emulink/Emulink"),
 		GraphBuilder			= require("plugins/graphbuilder/GraphBuilder"),
         PluginManager = require("plugins/PluginManager");
 		
-	var client = new PVSioWebClient(), pb;
+	var client = PVSioWebClient.getInstance(), pb, pm = PluginManager.getInstance();
     client.connectToServer()
         .then(function (ws) {
+            ui.init()
+                .on("pluginToggled", function (event) {
+                    var plugin;
+                    switch (event.target.getAttribute("name")) {
+                    case "Emulink":
+                        plugin = Emulink.getInstance();
+                        break;
+                    case "GraphBuilder":
+                        plugin = GraphBuilder.getInstance();
+                        break;
+                    }
+                    
+                    if (event.target.checked) {
+                        pm.enablePlugin(plugin);
+                    } else {
+                        pm.disablePlugin(plugin);
+                    }
+                });
 //            pb = new PrototypeBuilder(client);
 //            pb.initialise();
 //            
@@ -31,8 +50,12 @@ define(function (require, exports, module) {
 //                gb.reInitialise();
 //            });
             
-            var emulink = new Emulink(client);
-            PluginManager.getInstance().enablePlugin(emulink, client);
+//            var emulink = Emulink.getInstance();
+//            pm.enablePlugin(emulink);
+            
+            pb = PrototypeBuilder.getInstance();
+            pm.enablePlugin(pb);
+            ui.bindListeners(pb.getProjectManager());
             
         });
 	/**
