@@ -36,13 +36,14 @@ define(function (require, exports, module) {
             var e = {type: "SelectedFileChanged", selectedItem: event.data};
             ftv.fire(e);
         }).addListener("Rename", function (event) {
-            var oldPath = event.data.path;
+            var oldPath = event.data.path,
+                f = project.pvsFiles()[oldPath];
             treeList.createNodeEditor(event.data, function (node) {
                 if (event.data.isDirectory) {
                     project.renameFolder(oldPath, node.path, function () { });
                 } else {
                     //rename file on disk
-                    project.renameFile(oldPath, node.path, function () {});
+                    project.renameFile(f, node.name, function () {});
                 }
             });
         }).addListener("New File", function (event) {

@@ -243,29 +243,31 @@ define(function (require, exports, module) {
 	
     /**
         Changes the name of a folder in the project directory to a new given name
-        @param {string} oldName the oldName of the folder
-        @param {string} newName the new Name of the folder
+        @param {string} oldPath the old path of the folder
+        @param {string} newPath the new path of the folder
+        @param {function} cb a call back function to invoke when the server function has returned
         This function should ensure that only folders within the project can be changed
     */
-    Project.prototype.renameFolder = function (oldName, newName, cb) {
+    Project.prototype.renameFolder = function (oldPath, newPath, cb) {
         var p = this;
-        if (oldName.indexOf(this.path()) === 0 && newName.indexOf(this.path()) === 0) {
-            WSManager.getWebSocket().send({type: "renameFile", oldPath: oldName, newPath: newName}, function (err) {
-                if (!err) {
-                    //no error so need to modify the paths for all the files affected by the renaming action
-                    var pvsFiles = p.pvsFilesList().filter(function (f) {
-                        return f.path().indexOf(oldName) === 0;
-                    });
-                    pvsFiles.forEach(function (f) {
-                        var newPath = f.path().replace(oldName, newName);
-                        f.path(newPath);
-                    });
-                    if (cb) {cb(); }
-                } else { console.log(err); }
-            });
-        } else {
-            console.log("error. attempting to changed folder outside project");
-        }
+        WSManager.getWebSocket().send({type: "renameFile", oldPath: oldPath, newPath: newPath}, function (err, res) {
+            if (!err) {
+                //no error so need to modify the paths for all the files affected by the renaming action
+                var pvsFiles = p.pvsFilesList().filter(function (f) {
+                    return f.path().indexOf(oldPath) === 0;
+                });
+                pvsFiles.forEach(function (f) {
+                    var newFilePath = f.path().replace(oldPath, newPath);
+                    f.path(newFilePath);
+                });
+                //update the project path if the oldname was the project path
+                if (oldPath === p.path()) {
+                    p.path(newPath);
+                    p.name(newPath.substr(newPath.lastIndexOf("/")));
+                }
+            } else { console.log(err); }
+            if (cb && typeof cb === "function") {cb(err, res); }
+        });
     };
 	/**
 	 * Rename a given file. Currently this sets the name property of the file parameter. Not clear about persistence.
@@ -279,18 +281,17 @@ define(function (require, exports, module) {
         var baseDir = file.path().substring(0, file.path().lastIndexOf("/")),
             newPath = baseDir + "/" + newName,
             oldPath = file.path();
-        ws.send({type: "renameFile", oldPath: file.path(),
-                 newPath: newPath}, function (err) {
+        ws.send({type: "renameFile", oldPath: oldPath,
+                 newPath: newPath}, function (err, res) {
             if (!err) {
                 file.path(newPath);
                 p.pvsFiles()[newPath] = file;
                 delete p.pvsFiles()[oldPath];
                 p.fire({type: "SpecFileRenamed", file: file});
-                if (cb) {cb(); }
             } else {
-                ///TODO error
                 console.log(err);
             }
+            if (cb && typeof cb === "function") {cb(err, res); }
         });
 	};
 

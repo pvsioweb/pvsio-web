@@ -61,7 +61,11 @@ define(function (require, exports, module) {
             
             cachedData = deepCopy(data, ["parent"]);
             menus.on("click", function (d, i) {
-                var event = {type: d, data: selectedData.isDirectory ? selectedData : selectedData.parent};
+                //we want to rename or delete the actually selected data but we need to add items to the selected data
+                //only if the selected item is a directory, if not a directory we want to add to the parent
+                var data = ["Rename", "Delete"].indexOf(d) > -1 ? selectedData :
+                            selectedData.isDirectory ? selectedData : selectedData.parent;
+                var event = {type: d, data: data};
                 console.log(event);
                 fst.fire(event);
                 div.remove();

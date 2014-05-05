@@ -85,7 +85,7 @@ module.exports = function () {
     o.removeFile = function (filePath, cb) {
         var np = path.normalize(filePath);
         
-        if (np.indexOf(workspaceDir) === 0) {
+        if (np.indexOf(path.dirname(workspaceDir)) === 0) {
             pvs.exec({command: "rm -rf " + np, callBack: cb});
         } else {
             var error = ("cannot delete a folder outside the context of the current project");

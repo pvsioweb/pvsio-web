@@ -189,7 +189,7 @@ define(function (require, exports, module) {
 	 */
 	ProjectManager.prototype.renameFile = function (file, newName) {
 		if (file && newName && file.name() !== newName) {
-            this.project.renameFile(file, newName.trim());
+            this.project().renameFile(file, newName.trim());
 		}
 	};
 

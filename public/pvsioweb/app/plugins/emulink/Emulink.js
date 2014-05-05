@@ -69,47 +69,6 @@ define(function (require, exports, module) {
 					+ " of type " + field_type + " successfully added.";
 			stateMachine.add_field_mode_end(field_name, field_type, msg);
 		});
-
-
-        // creates a new PVS file and displays it in file browser
-        d3.select("#new_file").on("click", function () {
-            projectManager.newFile();
-        });
-    
-        d3.select("#save_file").on("click", function () {
-            
-        });
-
-    
-        /// When user clicks on open_file button #open_file, a form is showed 
-        d3.select("#open_file").on("click", function () {
-            projectManager.openFiles(function () {
-               //insert anything here if you need something to happen after files are added
-            });
-        });
-	
-        /// User wants to rename a file 
-        d3.select("#rename_file").on("click", function () {
-            projectManager.renameFile(projectManager.getSelectedFile());
-        });
-   
-
-        /// User wants to close a file (it will be not shown in file list box on the right ) 
-        d3.select("#close_file").on("click", function () {
-            projectManager.closeFile(projectManager.getSelectedFile());
-        });
-
-        /// User wants to see all files of the project 
-        d3.select("#show_all_files").on("click", function () {
-            projectManager.showAllFiles();
-        });
-
-        /// User wants to delete a file from the project  
-        d3.select("#delete_file").on("click", function () {
-            projectManager.deleteFile(projectManager.getSelectedFile(), function () {
-                //do something when file is deleted 
-            });
-        });
     
         /// User wants to perform an undo operation on the Editor    
         d3.select("#undoEditor").on("click", function () {
@@ -241,7 +200,7 @@ define(function (require, exports, module) {
         projectManager.addListener("ProjectChanged", function (event) {
             var emulinkSvg = d3.select("#ContainerStateMachine").selectAll("svg");
             //Checking if svg has been already created, if dirty we will clear it 
-            if (emulinkSvg[0].length) {
+            if (!emulinkSvg.empty()) {
                 emulinkSvg.remove();
                 stateMachine.clearSvg();
             }
@@ -291,7 +250,7 @@ define(function (require, exports, module) {
     Emulink.prototype.unload = function () {
         PVSioWebClient.getInstance().removeCollapsiblePanel(canvas);
         canvas = null;
-        PVSioWebClient.getInstance().getProjectManager().createDefaultProject();
+        projectManager.createDefaultProject();
     };
 	
 	module.exports = {
