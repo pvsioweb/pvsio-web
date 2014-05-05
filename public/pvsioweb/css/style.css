@@ -462,3 +462,10 @@ div.detailsForm select, div.detailsForm textarea{
 .recording {
     -webkit-animation:fade 3000ms infinite;
 }
+
+.btn-group > span {
+    position: absolute;
+    width: 712px;
+    padding-left: 216px;
+    padding-top: 8px;
+}
