@@ -208,7 +208,6 @@ define(function (require, exports, module) {
         parent.children = parent.children || parent._children || [];
         parent.children.push(item);
         this.render(parent);
-        this.selectItem(item.path);
         return item;
     };
     
@@ -242,6 +241,7 @@ define(function (require, exports, module) {
                     fst.renameItem(n, sel.html());
                     if (onEnter && typeof onEnter === "function") {
                         onEnter(n);
+                        sel.node().click();
                     }
                 } else if (event.which === 27) {
                     event.preventDefault();

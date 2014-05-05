@@ -136,7 +136,8 @@ define(function (require, exports, module) {
                 var pvsFile = currentProject.getSpecFile(event.selectedItem.path);
                 if (!pvsFile) {//load the pvsfile and add to the project 
                     //since we are not passing a file content it will get loaded over websocket when requested
-                    pvsFile = currentProject.addSpecFile(event.selectedItem.path);
+                    //we supress the spec file added event because the file already exists in the file tree
+                    pvsFile = currentProject.addSpecFile(event.selectedItem.path, "", true);
                 }
                 if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
                     editor.removeAllListeners("change");

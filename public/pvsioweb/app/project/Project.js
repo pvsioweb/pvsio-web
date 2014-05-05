@@ -32,10 +32,9 @@ define(function (require, exports, module) {
        
         return new Promise(function (resolve, reject) {
             Promise.all(promises).then(function (res) {
-                var dirtyFiles = project.dirtyFiles();
                 res.forEach(function (response, index) {
                     if (response.type === "fileSaved") {
-                        dirtyFiles[index].dirty(false);
+                        files[index].dirty(false);
                     }
                 });
                 resolve(res);
@@ -183,12 +182,15 @@ define(function (require, exports, module) {
 	 * Adds a new specification file to the project
 	 * @param {!String} filePath The path of the file to add
 	 * @param {!String} fileContent The content of the file to add
+     * @param {boolean} supressEvent Set true to supress the SpecFileAdded event or false otherwise
 	 * @memberof Project
 	 */
-	Project.prototype.addSpecFile = function (filePath, fileContent) {
+	Project.prototype.addSpecFile = function (filePath, fileContent, supressEvent) {
 		var newSpec = new ProjectFile(filePath, this).content(fileContent);
 		this.pvsFiles()[newSpec.path()] = newSpec;
-        this.fire({type: "SpecFileAdded", file: newSpec});
+        if (!supressEvent) {
+            this.fire({type: "SpecFileAdded", file: newSpec});
+        }
         var project = this;
         //register event for the newspec and bubble up the dirty flag changed event from project
         newSpec.addListener("DirtyFlagChanged", function (event) {

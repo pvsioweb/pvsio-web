@@ -49,10 +49,12 @@ define(function (require, exports, module) {
             var name = unSavedName + fileCounter++;
             var newFileData = {name: name, path: event.data.path + "/" + name };
             newFileData = treeList.addItem(newFileData, event.data);
+            treeList.selectItem(newFileData.path);
             treeList.createNodeEditor(newFileData, function (node) {
                 ws.writeFile({fileName: node.path, fileContent: ""}, function (err, res) {
                     if (!err) {
-                        project.addSpecFile(node.path, "");
+                        //add the spec file to the project and supress the event so we dont create multiple files
+                        project.addSpecFile(node.path, "", true);
                     } else { console.log(err); }
                 });
             }, function (node) {
