@@ -16,17 +16,16 @@ div.contextmenu {
     font-family: lancelot, georgia, "courier new";
 }
 
-.contextmenu li:hover, .node:hover, .node.selected {
+.contextmenu li:hover, .node:hover {
     background: #abdbf2;
     border: none;
 }
 
  ul {
     margin: 0;
-    padding: 0;
+    padding: 0;     
 }
 #tree li{
-
 }
 
 #tree{
@@ -34,10 +33,10 @@ div.contextmenu {
     height: 400px;
     overflow-y: auto;
     overflow-x: hidden;
-    cursor: default;
 }
 .node {
-    width: 100%;   
+    width: 100%;
+    cursor: pointer;
 }
 
 .treelist .node .label {
@@ -48,4 +47,28 @@ div.contextmenu {
 
 .node.dirty {
     font-style: italic;
+}
+
+
+.node.selected {
+    background: steelblue;
+    color: #ddd;
+    border: 1px solid #444;
+}
+
+.node.selected .label {
+    color: white;
+}
+
+.node.selected .label:after {
+    content: "";
+    border-top: 14px solid #444;
+    border-left: 14px solid transparent;
+    display: inline-block;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 0;
+    height: 0;
+    z-index: 20000;
 }
