@@ -9,7 +9,7 @@ define(function (require, exports, module) {
     "use strict";
     var data,
         el,
-        listHeight = 10,
+        listHeight = 10, //FIXME: this variable is never used!
         duration = 200,
         contextMenuItems = ["New File", "New Folder", "Rename", "Delete"],
         selectedData,
@@ -86,7 +86,7 @@ define(function (require, exports, module) {
     
     TreeList.prototype.render =   function (parent, noAnimation) {
         var fst = this;
-        var tree = d3.layout.treelist().childIndent(10);
+        var tree = d3.layout.treelist().childIndent(10).nodeHeight(28);
         var nodes = tree.nodes(data);
         var links = tree.links(nodes);
         var size = tree.size();
