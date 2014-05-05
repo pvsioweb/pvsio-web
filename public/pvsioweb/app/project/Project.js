@@ -263,7 +263,7 @@ define(function (require, exports, module) {
                 //update the project path if the oldname was the project path
                 if (oldPath === p.path()) {
                     p.path(newPath);
-                    p.name(newPath.substr(newPath.lastIndexOf("/")));
+                    p.name(newPath.substr(newPath.lastIndexOf("/") + 1));
                 }
             } else { console.log(err); }
             if (cb && typeof cb === "function") {cb(err, res); }

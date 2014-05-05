@@ -165,7 +165,7 @@ define(function (require, exports, module) {
 					if (err) {
 //						alert(JSON.stringify(err));
                         var msg = res.stdout;
-                        msg = msg.substring(msg.indexOf("Writing output to file"), msg.length-1);
+                        msg = msg.substring(msg.indexOf("Writing output to file"), msg.length - 1);
                         alert("Typecheck error -- please check the output file for details.\n\n" + msg);
 					} else {
 						console.log(res);
