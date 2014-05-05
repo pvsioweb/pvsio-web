@@ -349,7 +349,7 @@ intput:invalid, select:invalid{
 	border: 4px dashed teal;
 	height: 100%;
 	width: 100%;
-	z-index: 5;
+	z-index: 191;
 }
 
 #specDragAndDrop.dndcontainer{
