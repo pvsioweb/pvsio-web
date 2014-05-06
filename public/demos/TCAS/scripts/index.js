@@ -17,7 +17,7 @@ require(["PVSioWebClient", "util/PVSioStateParser",
     "use strict";
 
     var timer, t = 500;
-    var client = new PVSioWebClient();
+    var client = PVSioWebClient.getInstance();
     var ws = client.getWebSocket();
     var responses = [];
            
