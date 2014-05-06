@@ -37,7 +37,8 @@ define(function (require, exports, module) {
 			widgetData.isDisplay = widget.type() === "display";
 			this.$el.html(t(widgetData));
 			$("body").append(this.el);
-			
+			this.widget = widget;
+            
 			//update form
 			if (widget.type() === "button") {
 				widget.events().forEach(function (e) {
@@ -61,9 +62,11 @@ define(function (require, exports, module) {
 		ok: function (event) {
 			var form = this.el;
 			if (FormUtils.validateForm(form, "input[type='checkbox'][name='events'], input[type='text'], textarea")) {
-				var formdata = FormUtils.serializeForm(form);
+				var formdata = FormUtils.serializeForm(form, "input");
                 //add auditory feedback property manually
-                formdata.auditoryFeedback = d3.select("input[type='checkbox'][name='auditoryFeedback']").property("checked");
+                if (this.widget.auditoryFeedback && this.widget.auditoryFeedback()) {
+                    formdata.auditoryFeedback = d3.select("input[type='checkbox'][name='auditoryFeedback']").property("checked");
+                }
 				this.trigger("ok", {data: formdata, el: this.el, event: event}, this);
 			}
 		},
