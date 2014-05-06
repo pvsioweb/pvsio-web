@@ -49,6 +49,9 @@ define(function (require, exports, module) {
             setTimeout(function () {
                 play(actions, display);
             }, interval);
+        } else {
+            //remove the halo at the end of the actions playback
+            d3.select(".animation-halo").remove();
         }
     }
 
