@@ -54,7 +54,7 @@ define(function (require, exports, module) {
 			var type = form.select("li.active a").html().toLowerCase();
 			var activeForm = form.select("#" + type).node();
 			if (FormUtils.validateForm(activeForm)) {
-				var formdata = FormUtils.serializeForm(activeForm);
+				var formdata = FormUtils.serializeForm(activeForm, "input");
 				formdata.type = type;
 				this.trigger("ok", {data: formdata, el: this.el, event: event}, this);
 			}
