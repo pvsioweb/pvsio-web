@@ -15,7 +15,8 @@ define(function (require, exports, module) {
         ScriptItemView = require("pvsioweb/forms/ScriptItemView"),
         WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager(),
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
-        Prompt  = require("pvsioweb/forms/displayPrompt");
+        Prompt  = require("pvsioweb/forms/displayPrompt"),
+        Notification = require("pvsioweb/forms/displayNotification");
 	
     var template = require("text!pvsioweb/forms/maincontent.handlebars");
     
@@ -164,13 +165,24 @@ define(function (require, exports, module) {
 					btn.html("Typecheck").attr("disabled", null);
 					if (err) {
 //						alert(JSON.stringify(err));
+                        console.log(res);
+                        console.log(err);
                         var msg = res.stdout;
-                        msg = msg.substring(msg.indexOf("Writing output to file"), msg.length - 1);
-                        alert("Typecheck error -- please check the output file for details.\n\n" + msg);
+                        msg = msg.substring(msg.indexOf("Writing output to file"), msg.length);
+                        Notification.create(
+                            {header: "Typecheck error, please check the output file for details.",
+                             notification: msg.split("\n")})
+                            .on("ok", function (e, view) { view.remove(); });                        
 					} else {
-						console.log(res);
+                        console.log(res);
+                        var msg = res.stdout;
+                        msg = msg.substring(msg.indexOf("Proof summary"), msg.length);
 						///TODO: show nicer alert and visualisation for type checking info
-						alert(res.stdout);
+//						alert(msg);
+                        Notification.create(
+                            {header: "Theories typechecked successfully!",
+                             notification: msg.split("\n")})
+                            .on("ok", function (e, view) { view.remove(); });                        
 					}
 				});
 			}
