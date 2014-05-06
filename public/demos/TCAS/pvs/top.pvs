@@ -72,31 +72,14 @@ BEGIN
     #]
 
 
-    toString(st: state): string =
-       "(#" 
-       + "so := " + "(# x := " + so(st)`x + ", y := " + so(st)`y + "#)"
-       + "vo := " + "(# x := " + vo(st)`x + ", y := " + vo(st)`y + "#)"
-       + "si := " + "(# x := " + si(st)`x + ", y := " + si(st)`y + "#)"
-       + "vi := " + "(# x := " + vi(st)`x + ", y := " + vi(st)`y + "#)"
-       + "SL := " + SL(st)
-       + "Tau := " + Tau(st)
-       + "TAU := " + TAU(st)
-       + "TCPA := " + TCPA(st)
-       + "Converging := " + Converging(st)
-       + "Range := " + Range(st)
-       + "DMOD := " + DMOD(st)
-       + "t := " + t(st)
-       + "TA := " + TA(st)
-       + "trkBand := ..." 
-       + "#)"
-    CONVERSION toString
+
 
     init(t0: time): state = 
       LET so_: Vect2 = (0,0),
           vo_: Nz_vect2 = (0,600*knt),
-          si_: Vect2 = (-54171/400,78247/400),
+          si_: Vect2 = (-54171/40,78247/40),
           vi_: Nz_vect2 = (-463/3,463/3),
-	  SL_: SensitivityLevel = 8  IN (#
+	  SL_: SensitivityLevel = 8 IN (#
        % ownship's position and velocity
        so := so_,
        vo := vo_,
@@ -116,7 +99,7 @@ BEGIN
        trkBand := clearBands
     #)
 
-    % tick is used to execute a simulation step; simulation time is advanced of deltaT
+    % tick is used to execute a simulation step; each simulation step automatically advances time of deltaT virtual seconds
     deltaT: real = 0.5;
     tick(st: state): state =
       LET so_: Vect2 = so(st) + deltaT * vo(st),
@@ -141,7 +124,7 @@ BEGIN
     
     click_tick(st: state): state = tick(st)
 
-    % click_speedUP/click_slowDOWN is used to increase the ownship's speed of deltaV
+    % click_speedUP/click_slowDOWN can be used to increase and decrease the ownship's speed
     deltaV: real = 0.1
     click_speedUPx(st: state): state =
       st WITH [ vo := (vo(st)`x + deltaV, vo(st)`y) ]

@@ -40,6 +40,9 @@ require(["PVSioWebClient", "util/PVSioStateParser",
     function tick() {
         ws.sendGuiAction("tick(" + ws.lastState() + ");", function (err, res) {
             var pvsState = res.data.join("").replace(/d0/g, "");
+            
+            pvsState = pvsState.substring(pvsState.indexOf("(#"));
+            
             ws.lastState(pvsState);
             var state = StateParser.parse(pvsState);
             console.log(pvsState);

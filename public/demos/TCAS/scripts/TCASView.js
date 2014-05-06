@@ -11,8 +11,13 @@ define(function (require, exports, module) {
         d3 = require("d3/d3");
     
     var h = 1200, w = 1200;
-    var angleOffset = Math.PI / 2, nmi = 1852, pixelToNMI = 32;
+    var angleOffset = Math.PI / 2, nmi = 1852, nmiToPixel = 32;
     var colorMap = {"yellow": "rgba(255,255,0,0.5)", "white": "rgba(255,255,255,0.5)"};
+    var maxRange = 180;
+    function distance (relPosition) {
+        return Math.sqrt(relPosition.x * relPosition.x + relPosition.y * relPosition.y);
+    }
+    
     function drawIntruder(pos) {
         
     }
@@ -94,9 +99,16 @@ define(function (require, exports, module) {
         });
     }
     
-    function normalisePos(pos) {
-        pos.x = (StateParser.evaluate(pos.x) + w / 2);// * -1;
-        pos.y = (StateParser.evaluate(pos.y) + h / 2);// * -1;
+    
+    function translate (pos, trans) {
+        pos.x += trans.x;
+        pos.y += trans.y;
+        return pos;
+    }
+    
+    function normalisePos (pos) {
+        pos.x = (StateParser.evaluate(pos.x) * nmiToPixel / nmi);
+        pos.y = (StateParser.evaluate(pos.y) * nmiToPixel / nmi * -1); // svg y axis is flipped wrt the y Cartesian axis
         return pos;
     }
     
@@ -118,12 +130,14 @@ define(function (require, exports, module) {
         }
         var center = {x: w / 2, y: h / 2};
 
-        var ipos = normalisePos(state.si);
-        var opos = normalisePos(state.so);
-        var iPosRel = {x: (ipos.x - opos.x) * pixelToNMI / nmi, y: -1 * (ipos.y - opos.y) * pixelToNMI / nmi};
-        var ownPos = {x: center.x, y: center.y + 64};
-        //draw the intruder position
-        drawCircle(canvas, {x: ownPos.x + iPosRel.x, y: ownPos.y + iPosRel.y}, 5);
+        var ipos = translate(normalisePos(state.si), center);
+        var opos = translate(normalisePos(state.so), center);
+        var iPosRel = { x: (ipos.x - opos.x) , y: (ipos.y - opos.y) };
+        var ownPos = { x: center.x, y: center.y + 64 };
+        //draw the intruder position (if within a given range)
+        if (distance(iPosRel) < maxRange) {
+            drawCircle(canvas, {x: ownPos.x + iPosRel.x, y: ownPos.y + iPosRel.y}, 5);
+        }
         //draw the own position
         drawSelf(canvas, ownPos);
         var bands = state.trkBand.map(function (band) {
