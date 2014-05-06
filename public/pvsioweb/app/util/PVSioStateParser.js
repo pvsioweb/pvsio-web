@@ -44,7 +44,7 @@ define(function (require, exports, module) {
     }
 
     /**
-        evaluates a numeric string represented as a fraction. If the string is not a fraction, it converts the string to a number.
+        evaluates a numeric string represented as a fraction. If the string is not a fraction, it converts the string to a number. If the argument is not a string, then the argument is returned unchanged.
     */
     function evaluate(str) {
         if (typeof str === "string") {
@@ -52,6 +52,7 @@ define(function (require, exports, module) {
             if (args.length === 2 && !isNaN(+args[0]) && !isNaN(+args[1])) {
                 return +args[0] / +args[1];
             }
+            return +str;
         }
         return str;
     }
