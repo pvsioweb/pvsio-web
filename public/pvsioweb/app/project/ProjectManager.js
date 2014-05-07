@@ -301,25 +301,34 @@ define(function (require, exports, module) {
 	 */
 	ProjectManager.prototype.openFiles = function (cb) {
 		///TODO fix this function!!!
+        var pm = this;
         var project = this.project(), editor = this.editor();
 		cb = cb || noop;
 		openFilesForm.create().on("cancel", function (e, view) {
 			view.remove();
 		}).on("ok", function (e, view) {
-			var q = queue();
-			e.data.pvsSpec.forEach(function (spec) {
-				q.defer(fs.createFileLoadFunction(spec, function (spec, content) {
-					project.addSpecFile(spec.path, content);
-				}));
-			});
-			q.awaitAll(function (err, res) {
-				if (!err) {//done opening files and we have added them to the project
-					pvsFilesListView.selectItem(_.last(project.pvsFilesList()));
-					cb();
-				} else {
-					console.log("error opening files");
-				}
-			});
+            var i = 0, promises = [], data = e.data, currLength = project.pvsFilesList().length;
+            //create promises for the pvs source files, if any is specified in data
+            if (data.pvsSpec) {
+                for (i = 0; i < data.pvsSpec.length; i++) {
+                    promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
+                }
+            }
+
+            Promise.all(promises)
+                .then(function (pvsFiles) {
+                    pvsFiles.forEach(function (specContent, index) {
+                        project.addSpecFile(data.pvsSpec[index].name, specContent);
+                    });
+                }).then(function () {
+                    // clear dirty flags
+                    project.pvsFilesList().forEach(function (f) { f.dirty(false); });                
+                    // select the first of the opened files 
+                    // FIXME: we are assuming here that the files are added at the end of the list; need a cleaner way to select the file
+                    pvsFilesListView.selectItem(project.pvsFilesList()[currLength]);
+                    // fire project changed event
+                    pm.fire({type: "ProjectChanged", current: project, previous: project});
+                });
 			view.remove();
 		});
 	};

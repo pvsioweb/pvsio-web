@@ -216,6 +216,14 @@ define(function (require, exports, module) {
 			}
 		});
 	
+        d3.select("#btnOpenFile").on("click", function () {
+            projectManager.openFiles(function () {
+                if (!err) { 
+                    projectManager.updateSourceCodeToolbarButtons(pvsFile, project);
+                } else { console.log(err); }
+            });
+        });
+        
 		d3.select("#btnRestartPVSioWeb").on("click", function () {
 			//try to start process on server
 			var project = projectManager.project(), ws = WSManager.getWebSocket();
