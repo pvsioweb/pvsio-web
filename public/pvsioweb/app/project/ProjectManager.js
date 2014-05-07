@@ -300,7 +300,6 @@ define(function (require, exports, module) {
 	 * @memberof ProjectManager
 	 */
 	ProjectManager.prototype.openFiles = function (cb) {
-		///TODO fix this function!!!
         var pm = this;
         var project = this.project(), editor = this.editor();
 		cb = cb || noop;

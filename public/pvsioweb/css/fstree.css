@@ -35,7 +35,6 @@ div.contextmenu {
     height: 400px;
     overflow-y: auto;
     overflow-x: auto;
-    padding: 0;
 }
 .node {
     width: 100%;
