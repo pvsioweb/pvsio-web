@@ -472,6 +472,24 @@ function run() {
                     processCallback(res, socket);
                 });
             },
+            "writeImage": function (token, socket, socketid) {
+                p = pvsioProcessMap[socketid];
+                var encoding = token.encoding || "base64";
+                // directory "projects" is the base path for creating files
+                token.fileName = path.resolve(baseProjectDir, token.fileName);
+                token.fileContent = token.fileContent.replace(/^data:image\/(\w+);base64,/, "");
+                fs.writeFile(token.fileName, token.fileContent, encoding, function (err) {
+                    var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
+                    if (!err) {
+                        util.log("dbg: file " + token.fileName
+                                 + " saved successfully (socket id = " + socketid + ")");
+                        res.type = "fileSaved";
+                    } else {
+                        res.err = err;
+                    }
+                    processCallback(res, socket);
+                });
+            },
             "deleteFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 p.removeFile(token.fileName, function (err, res) {

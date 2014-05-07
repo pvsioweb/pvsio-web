@@ -77,11 +77,11 @@ define(function (require, exports, module) {
     
     function saveImageFile(project) {
         var ws = WSManager.getWebSocket();
-        var data = {"fileName": project.path() + "/" + project.image().name(),
+        var data = {"type" : "writeImage", "fileName": project.path() + "/" + project.image().name(),
                     fileContent: project.image().content(), encoding: "base64"};
         
         return new Promise(function (resolve, reject) {
-            ws.writeFile(data, function (err, res) {
+            ws.send(data, function (err, res) {
                 if (!err) {
                     project.image().dirty(false);
                     resolve(res);

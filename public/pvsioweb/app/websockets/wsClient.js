@@ -62,7 +62,7 @@ define(function (require, exports, module) {
         o.send = function (token, cb) {
             var id = uuid();
             if (token && token.type) {
-                token.id = id;
+                token.id = token.id || id;
                 token.sent = new Date().getTime();
                 callbackRegistry[id] = cb;
                 ws.send(JSON.stringify(token));
