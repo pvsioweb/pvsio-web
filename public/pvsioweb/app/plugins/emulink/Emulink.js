@@ -16,7 +16,6 @@ define(function (require, exports, module) {
 		Logger					= require("util/Logger"),
         Simulator               = require("plugins/emulink/simulator"),
         PVSioWebClient          = require("PVSioWebClient");
-       // PDFHandler              = require("plugins/emulink/PDFHandler");
 
     var instance;
     var projectManager;
@@ -133,7 +132,6 @@ define(function (require, exports, module) {
             stateMachine.addNewDiagram();          
         });    
 	   */
-        // d3.select("#toPDF").on("click", function() { PDFHandler.toPDF(currentProject, stateMachine, ws); });
 	}
 
 	function highlightSelectedFunction(m) {
