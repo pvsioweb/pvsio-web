@@ -483,18 +483,6 @@ function run() {
                     }
                     processCallback(res, socket);
                 });
-            },
-            "toPDF": function (token, socket, socketid) {
-                var PDFHandlerObj = new PDFHandler();
-                var path =  'public/' + 'tmp' + socketid + '/';
-                var pathDownload = 'tmp' + socketid + '/';
-                PDFHandlerObj.createPDF(token, path, function (exitStatus) {
-                    var res = {id: token.id};
-                    if (exitStatus < 0) {
-                        res.err = 'There was an issue creating PDF';
-                    } else { res.path = pathDownload + 'out.pdf'; }
-                    processCallback(res, socket);
-                });
             }
         };
 
