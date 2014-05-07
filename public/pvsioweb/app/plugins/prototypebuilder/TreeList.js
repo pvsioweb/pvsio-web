@@ -17,6 +17,7 @@ define(function (require, exports, module) {
     var globalId = 0;
     var eventDispatcher = require("util/eventDispatcher"),
         deepCopy = require("util/deepcopy");
+    var contextMenuCreated = false; // this is needed to avoid creeating multiple menus
     
     /**
         Find the node with the give id
@@ -75,12 +76,18 @@ define(function (require, exports, module) {
         //create custom context menu for the list item
         d3.select(el).node().oncontextmenu = function (event) {
             event.preventDefault();
+            if(contextMenuCreated === true) {
+                // delete existing context menu before creating a new one
+                d3.select("div.contextmenu").remove();    
+            }
             createMenu(contextMenuItems, event, selectedData);
+            contextMenuCreated = true;
             return false;
         };
         //create event to clear any context menu items
         document.onclick = function (event) {
             d3.select("div.contextmenu").remove();
+            contextMenuCreated === false;
         };
     }
     
