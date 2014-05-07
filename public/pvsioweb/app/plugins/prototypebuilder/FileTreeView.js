@@ -47,7 +47,7 @@ define(function (require, exports, module) {
                 }
             });
         }).addListener("New File", function (event) {
-            var name = unSavedName + fileCounter++;
+            var name = unSavedName + fileCounter++ + ".pvs";
             var newFileData = {name: name, path: event.data.path + "/" + name };
             newFileData = treeList.addItem(newFileData, event.data);
             treeList.selectItem(newFileData.path);

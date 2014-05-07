@@ -169,6 +169,8 @@ define(function (require, exports, module) {
                     return selectedData === d;
                 });
                 var event = {type: "SelectedItemChanged", data: d};
+                // clear all editable flags
+                ul.selectAll("li.node").select(".label").attr("contentEditable", false);
                 console.log(event);
                 fst.fire(event);
             }
