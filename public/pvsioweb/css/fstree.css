@@ -23,20 +23,24 @@ div.contextmenu {
 
  ul {
     margin: 0;
-    padding: 0;     
-}
-#tree li{
+    padding: 0;
+    white-space: nowrap;
 }
 
-#tree{
+#tree li {
+}
+
+#tree {
     width: 350px;
     height: 400px;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
+    padding: 0;
 }
 .node {
     width: 100%;
     cursor: pointer;
+    border: none;
 }
 
 .treelist .node .label {
@@ -49,26 +53,9 @@ div.contextmenu {
     font-style: italic;
 }
 
-
-.node.selected {
-    background: steelblue;
-    color: #ddd;
-    border: 1px solid #444;
-}
-
 .node.selected .label {
     color: white;
-}
-
-.node.selected .label:after {
-    content: "";
-    border-top: 14px solid #444;
-    border-left: 14px solid transparent;
-    display: inline-block;
-    position: absolute;
-    right: 0px;
-    top: 0px;
-    width: 0;
-    height: 0;
-    z-index: 20000;
+    position: relative;
+    background: steelblue;
+    border: 1px solid #444;
 }
