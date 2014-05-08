@@ -36,13 +36,13 @@ define(function (require, exports, module) {
             var e = {type: "SelectedFileChanged", selectedItem: event.data};
             ftv.fire(e);
         }).addListener("Rename", function (event) {
-            var oldPath = event.data.path,
-                f = project.pvsFiles()[oldPath];
-            treeList.createNodeEditor(event.data, function (node) {
+//            var oldPath = event.data.path;
+            treeList.createNodeEditor(event.data, function (node, oldPath) {
+                var f = project.pvsFiles()[oldPath];
                 if (event.data.isDirectory) {
                     project.renameFolder(oldPath, node.path, function () {
                         if (oldPath === project.path()) {
-                            //change project name and path
+                            // we are renaming the project
                             project.name(node.name);
                             project.path(node.path);
                         }
@@ -57,11 +57,14 @@ define(function (require, exports, module) {
             var newFileData = {name: name, path: event.data.path + "/" + name };
             newFileData = treeList.addItem(newFileData, event.data);
             treeList.selectItem(newFileData.path);
-            treeList.createNodeEditor(newFileData, function (node) {
-                ws.writeFile({fileName: node.path, fileContent: ""}, function (err, res) {
+            treeList.createNodeEditor(newFileData, function (node, oldPath) {
+                var file = project.pvsFiles()[oldPath];
+                file.path(node.path);
+                ws.writeFile({fileName: file.path(), fileContent: file.content()}, function (err, res) {
                     if (!err) {
                         //add the spec file to the project and supress the event so we dont create multiple files
-                        project.addSpecFile(node.path, "", true);
+                        //project.addSpecFile(node.path, "", true);
+                        console.log(res);
                     } else { console.log(err); }
                 });
             }, function (node) {
@@ -71,7 +74,8 @@ define(function (require, exports, module) {
             var name = unSavedName + fileCounter++;
             var newFolderData = {name: name, path: event.data.path + "/" + name, children: [], isDirectory: true};
             newFolderData = treeList.addItem(newFolderData, event.data);
-            treeList.createNodeEditor(newFolderData, function (node) {
+            treeList.selectItem(newFolderData.path);
+            treeList.createNodeEditor(newFolderData, function (node, oldPath) {
                 ws.writeDirectory(node.path, function (err, res) {
                     if (!err) {
                         console.log(res);
