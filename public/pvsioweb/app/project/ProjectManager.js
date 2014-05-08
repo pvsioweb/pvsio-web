@@ -28,12 +28,16 @@ define(function (require, exports, module) {
 	var pvsFilesListView;
     var defaultTheoryName = "main";
     var defaultProjectName = "defaultProject";///FIXME export this variable to a module of constants
-    var defaultContent = defaultTheoryName + ": THEORY\n"
+    var emptyTheoryContent = ": THEORY\n"
                             + " BEGIN\n "
                             + "  %-- Please type your PVS specification here!\n"
-                            + " END " + defaultTheoryName;
+                            + " END "; // theory name needs to be included at the beginning and end
 	
 	function noop() {}
+    
+    function makeEmptyTheory(name) {
+        return name + emptyTheoryContent + name;
+    }
 	
 	/**
 	 * Updates the name of the project on the document title
@@ -137,7 +141,9 @@ define(function (require, exports, module) {
                 if (!pvsFile) {//load the pvsfile and add to the project 
                     //since we are not passing a file content it will get loaded over websocket when requested
                     //we supress the spec file added event because the file already exists in the file tree
-                    pvsFile = currentProject.addSpecFile(event.selectedItem.path, "", true);
+                    var theoryName = event.selectedItem.name.substr(0, event.selectedItem.name.indexOf(".pvs"));
+                    pvsFile = currentProject.addSpecFile(event.selectedItem.path,
+                                                         makeEmptyTheory(theoryName), true);
                 }
                 if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
                     editor.removeAllListeners("change");
@@ -605,7 +611,7 @@ define(function (require, exports, module) {
         // update the current project with info from data and saveNew
         project.name(data.projectName);
         project.path(data.projectName);
-        project.addSpecFile(data.pvsSpec[0], defaultContent);
+        project.addSpecFile(data.pvsSpec[0], makeEmptyTheory(defaultTheoryName));
         project.saveNew(function (err, res, folderStructure) {
             console.log({err: err, res: res});
             if (!err) {
