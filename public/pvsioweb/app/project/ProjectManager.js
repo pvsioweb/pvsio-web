@@ -321,7 +321,7 @@ define(function (require, exports, module) {
                     });
                 }).then(function () {
                     // clear dirty flags
-                    project.pvsFilesList().forEach(function (f) { f.dirty(false); });                
+                    project.pvsFilesList().forEach(function (f) { f.dirty(false); });
                     // select the first of the opened files 
                     // FIXME: we are assuming here that the files are added at the end of the list; need a cleaner way to select the file
                     pvsFilesListView.selectItem(project.pvsFilesList()[currLength]);
@@ -396,7 +396,7 @@ define(function (require, exports, module) {
      *                                            pvsSpec (vector of strings)
      * @memberof ProjectManager
      */
-    ProjectManager.prototype.createProject = function (data) {
+    ProjectManager.prototype.createProject = function (data, cb) {
         var pm = this;
         WidgetManager.clearWidgetAreas();
         ScriptPlayer.clearView();
@@ -416,7 +416,11 @@ define(function (require, exports, module) {
         //create promises for the pvs source files, if any is specified in data
         if (data.pvsSpec) {
             for (i = 0; i < data.pvsSpec.length; i++) {
-                promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
+                if (data.pvsSpec[i].name !== undefined && data.pvsSpec[i].content !== undefined) {
+                    promises.push(data.pvsSpec[i].content);
+                } else {
+                    promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
+                }
             }
         }
 
@@ -441,11 +445,18 @@ define(function (require, exports, module) {
                         WidgetManager.updateMapCreator();
                         pm.project(project);
                         pm.renderSourceFileList(folderStructure);
-                        pvsFilesListView.selectItem(project.mainPVSFile() || project.pvsFilesList()[0]);
+                        pvsFilesListView.selectItem(project.mainPVSFile()
+                                                        || project.pvsFilesList()[0]
+                                                        || project.path());
                         //fire project changed event
                         pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
+            
                     } else {
                         alert(err.toString());
+                    }
+                    //invoke callback
+                    if (cb && typeof cb === "function") {
+                        cb(err, project);
                     }
                 });
             });
@@ -500,7 +511,7 @@ define(function (require, exports, module) {
         }
         ///FIXME change this to a proper form dialog using html templates
         if (project.name() === defaultProjectName) {
-            name = prompt("Your project has default name, you can change it now (if not, please click on cancel)");
+            name = prompt("Your project has default name, please enter a new project name");
             if (name && name.trim().length > 0) {
                 project.name(name);
                 projectNameChanged({current: name});
@@ -520,6 +531,46 @@ define(function (require, exports, module) {
 		}
 	};
 	
+	/**
+	 * Saves pvs files to disk, interactive version, asks to set project name if current project has default name
+	 * @param {ProjectFile} file The file to save.
+	 * @param {Project~onProjectSaved} cb The callback function to invoke when file has been saved
+	 * @memberof Project
+	 */
+	ProjectManager.prototype.saveFiles = function (pvsFiles, cb) {
+        if (pvsFiles) {
+            var pm = this;
+            var project = pm.project();
+            if (pm.project().name() === defaultProjectName) {
+                var name = prompt("Your project has default name, please enter a new project name");
+                if (name && name.trim().length > 0) {
+                    project.name(name);
+                    var data = { projectName: name,
+                                 pvsSpec: [],
+                                 prototypeImage: [] };
+					var i = 0;
+					for (i = 0; i < pvsFiles.length; i++) {
+						data.pvsSpec.push({name: pvsFiles[i].name(), content: pvsFiles[i].content()});
+					}
+                    // create a new empty project
+                    pm.createProject(data, function (err, newProject) {
+                        console.log("project created");
+                    });
+                } else {
+                    alert("Error: files not saved (project name \"" + name + "\" is not a valid name.)");
+                    return;
+                }
+            } else {
+                // save files in the current project
+                project.saveFile(pvsFiles, function (err, res) {
+                    if (!err) {
+                        pm.updateSourceCodeToolbarButtons(pvsFiles, project);
+                    } else { console.log(err); }
+                });
+            }
+        }
+    };
+    
 	ProjectManager.prototype.updateSourceCodeToolbarButtons = updateSourceCodeToolbarButtons;
 	
 	/**
@@ -572,7 +623,7 @@ define(function (require, exports, module) {
             }
         });
     };
-    
+     
     /** 
 	 * Creates a new file in the current project.
      * @memberof ProjectManager

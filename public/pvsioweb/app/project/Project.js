@@ -76,21 +76,22 @@ define(function (require, exports, module) {
     }
     
     function saveImageFile(project) {
-        var ws = WSManager.getWebSocket();
-        var data = {"type" : "writeImage", "fileName": project.path() + "/" + project.image().name(),
-                    fileContent: project.image().content(), encoding: "base64"};
-        
-        return new Promise(function (resolve, reject) {
-            ws.send(data, function (err, res) {
-                if (!err) {
-                    project.image().dirty(false);
-                    resolve(res);
-                } else {
-                    reject(err);
-                }
+        if (project && project.image()) {
+            var ws = WSManager.getWebSocket();
+            var data = {"type" : "writeImage", "fileName": project.path() + "/" + project.image().name(),
+                        fileContent: project.image().content(), encoding: "base64"};
+
+            return new Promise(function (resolve, reject) {
+                ws.send(data, function (err, res) {
+                    if (!err) {
+                        project.image().dirty(false);
+                        resolve(res);
+                    } else {
+                        reject(err);
+                    }
+                });
             });
-        });
-        
+        }
     }
     
 	/**

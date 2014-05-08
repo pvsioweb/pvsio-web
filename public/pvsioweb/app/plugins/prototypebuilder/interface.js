@@ -204,18 +204,29 @@ define(function (require, exports, module) {
 		});
 	
 		d3.select("#btnSaveFile").on("click", function () {
-			var pvsFile = projectManager.getSelectedFile(), project = projectManager.project();
-			if (pvsFile) {
-				project.saveFile(pvsFile, function (err, res) {
-					if (!err) {
-						projectManager.updateSourceCodeToolbarButtons(pvsFile, project);
-					} else {
-						console.log(err);
-					}
-				});
+			var project = projectManager.project();
+			if (project) {
+                var pvsFile = projectManager.getSelectedFile();
+                projectManager.saveFiles([pvsFile], function (err, res) {
+                    if (!err) {
+                        projectManager.updateSourceCodeToolbarButtons(pvsFile, project);
+                    } else { console.log(err); }
+                });
 			}
 		});
 	
+		d3.select("#btnSaveAll").on("click", function () {
+			var project = projectManager.project();
+			if (project) {
+                var pvsFiles = project.pvsFilesList();
+                projectManager.saveFiles(pvsFiles, function (err, res) {
+                    if (!err) {
+                        projectManager.updateSourceCodeToolbarButtons(pvsFile, project);
+                    } else { console.log(err); }
+                });
+			}
+		});
+
         d3.select("#btnOpenFile").on("click", function () {
             projectManager.openFiles(function () {
                 if (!err) { 
