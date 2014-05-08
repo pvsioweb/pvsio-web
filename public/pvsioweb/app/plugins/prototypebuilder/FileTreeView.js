@@ -40,10 +40,11 @@ define(function (require, exports, module) {
                 f = project.pvsFiles()[oldPath];
             treeList.createNodeEditor(event.data, function (node) {
                 if (event.data.isDirectory) {
-                    project.renameFolder(oldPath, node.path, function () { 
-                        if (oldPath == project.path()) {
-                            // we are renaming the project
+                    project.renameFolder(oldPath, node.path, function () {
+                        if (oldPath === project.path()) {
+                            //change project name and path
                             project.name(node.name);
+                            project.path(node.path);
                         }
                     });
                 } else {

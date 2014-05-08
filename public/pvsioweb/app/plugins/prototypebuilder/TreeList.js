@@ -17,7 +17,7 @@ define(function (require, exports, module) {
     var globalId = 0;
     var eventDispatcher = require("util/eventDispatcher"),
         deepCopy = require("util/deepcopy");
-    var contextMenuCreated = false; // this is needed to avoid creeating multiple menus
+//    var contextMenuCreated = false; // this is needed to avoid creeating multiple menus
     
     /**
         Find the node with the give id
@@ -76,18 +76,18 @@ define(function (require, exports, module) {
         //create custom context menu for the list item
         d3.select(el).node().oncontextmenu = function (event) {
             event.preventDefault();
-            if(contextMenuCreated === true) {
-                // delete existing context menu before creating a new one
-                d3.select("div.contextmenu").remove();    
-            }
+//            if (contextMenuCreated === true) {
+            // delete existing context menu before creating a new one
+            d3.select("div.contextmenu").remove();
+//            }
             createMenu(contextMenuItems, event, selectedData);
-            contextMenuCreated = true;
+//            contextMenuCreated = true;
             return false;
         };
         //create event to clear any context menu items
         document.onclick = function (event) {
             d3.select("div.contextmenu").remove();
-            contextMenuCreated === false;
+//            contextMenuCreated === false;
         };
     }
     
@@ -192,6 +192,7 @@ define(function (require, exports, module) {
             nodes.classed("selected", function (d) {
                 if (d.path === path) {
                     selectedData = d;
+                    
                     return true;
                 } else {
                     return false;
@@ -199,6 +200,10 @@ define(function (require, exports, module) {
             });
             //fire selected item changed event
             fst.fire({type: "SelectedItemChanged", data: selectedData});
+            
+            setTimeout(function () {
+                d3.select(el).node().scrollTop = selectedData.y;
+            }, duration);
         }
     };
     
@@ -246,7 +251,7 @@ define(function (require, exports, module) {
         ed.each(function (d, i) {
             var sel = d3.select(this);
             this.focus();
-            this.click();
+//            this.click();
             this.onkeydown = function (event) {
                 if (event.which === 13) {
                     event.preventDefault();
