@@ -518,7 +518,8 @@ define(function (require, exports, module) {
         ///FIXME change this to a proper form dialog using html templates
         if (project.name() === defaultProjectName) {
             name = prompt("Your project has default name, please enter a new project name");
-            if (name && name.trim().length > 0) {
+            
+            if (name && name !== defaultProjectName && name.trim().length > 0) {
                 project.name(name);
                 projectNameChanged({current: name});
                 project.saveNew(function (err, res) {
@@ -531,6 +532,9 @@ define(function (require, exports, module) {
                         }
                     }
                 });
+            } else {
+                if (name) { alert("Error: project not saved (project name \"" + name + "\" is not a valid name.)"); }
+                if (typeof cb === "function") { cb(); }
             }
         } else {
 			_doSave();
@@ -549,7 +553,7 @@ define(function (require, exports, module) {
             var project = pm.project();
             if (pm.project().name() === defaultProjectName) {
                 var name = prompt("Your project has default name, please enter a new project name");
-                if (name && name.trim().length > 0) {
+                if (name && name !== defaultProjectName && name.trim().length > 0) {
                     project.name(name);
                     var data = { projectName: name,
                                  pvsSpec: [],
@@ -563,14 +567,17 @@ define(function (require, exports, module) {
                         console.log("project created");
                     });
                 } else {
-                    alert("Error: files not saved (project name \"" + name + "\" is not a valid name.)");
-                    return;
+                    if (name) { alert("Error: files not saved (project name \"" + name + "\" is not a valid name.)"); }
+                    if (typeof cb === "function") { cb(); }
                 }
             } else {
                 // save files in the current project
                 project.saveFile(pvsFiles, function (err, res) {
                     if (!err) {
                         pm.updateSourceCodeToolbarButtons(pvsFiles, project);
+                        if (typeof cb === "function") {
+                            cb();
+                        }
                     } else { console.log(err); }
                 });
             }
