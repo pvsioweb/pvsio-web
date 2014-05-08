@@ -242,7 +242,8 @@ define(function (require, exports, module) {
         var nodes = d3.select(el).selectAll(".node").filter(function (d) {
             return d === n;
         });
-        var ed = nodes.select(".label").attr("contentEditable", true);
+        var ed = nodes.select(".label").attr("contentEditable", true),
+            oldPath = node.path;
         ed.each(function (d, i) {
             var sel = d3.select(this);
             this.focus();
@@ -253,16 +254,28 @@ define(function (require, exports, module) {
                     sel.attr("contentEditable", false);
                     fst.renameItem(n, sel.html());
                     if (onEnter && typeof onEnter === "function") {
-                        onEnter(n);
-                        sel.node().click();
+                        onEnter(n, oldPath);
+//                        sel.node().click();
                     }
+                    sel.node().onkeydown = null;
                 } else if (event.which === 27) {
                     event.preventDefault();
                     sel.attr("contentEditable", false).html(n.name);
                     if (onCancel && typeof onCancel === "function") {
-                        onCancel(n);
+                        onCancel(n, oldPath);
                     }
+                    sel.node().onkeydown = null;
                 }
+                
+            };
+            
+            this.onblur = function (event) {
+                if (onEnter && typeof onEnter === "function") {
+                    fst.renameItem(n, sel.html());
+                    onEnter(n, oldPath);
+//                    sel.node().click();
+                }
+                sel.node().onblur = null;
             };
         });
     };
