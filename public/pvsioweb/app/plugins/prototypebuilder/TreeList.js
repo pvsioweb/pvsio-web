@@ -252,7 +252,6 @@ define(function (require, exports, module) {
         ed.each(function (d, i) {
             var sel = d3.select(this);
             this.focus();
-//            this.click();
             this.onkeydown = function (event) {
                 if (event.which === 13) {
                     event.preventDefault();
@@ -260,9 +259,9 @@ define(function (require, exports, module) {
                     fst.renameItem(n, sel.html());
                     if (onEnter && typeof onEnter === "function") {
                         onEnter(n, oldPath);
-//                        sel.node().click();
                     }
                     sel.node().onkeydown = null;
+                    sel.node().onblur = null;
                 } else if (event.which === 27) {
                     event.preventDefault();
                     sel.attr("contentEditable", false).html(n.name);
@@ -270,6 +269,7 @@ define(function (require, exports, module) {
                         onCancel(n, oldPath);
                     }
                     sel.node().onkeydown = null;
+                    sel.node().onblur = null;
                 }
                 
             };
@@ -278,7 +278,6 @@ define(function (require, exports, module) {
                 if (onEnter && typeof onEnter === "function") {
                     fst.renameItem(n, sel.html());
                     onEnter(n, oldPath);
-//                    sel.node().click();
                 }
                 sel.node().onblur = null;
             };
