@@ -397,7 +397,6 @@ function run() {
                     }
                     processCallback({id: token.id, socketId: socketid, err: err}, socket);
                 });
-                processCallback(token, socket);
             },
             "readDirectory": function (token, socket, socketid) {
                 fs.readdir(token.path, function (err, files) {
