@@ -24,11 +24,14 @@ BEGIN
     CONVERSION pos2D
 
 
-    step: nat = 10
 
     to_rad(deg: real): real = deg * pi / 180
 
-    find_trk(deg: subrange(-30,30), trkBand: TRK_BAND)
+    maxDeg: real = 360
+    minDeg: real = -360
+    step: nat = 36
+
+    find_trk(deg: subrange(minDeg,maxDeg), trkBand: TRK_BAND)
     	    (so: Vect2, vo: Nz_vect2, si: Vect2, vi: Nz_vect2): TRK_BAND =
      LET vi = mk_velocity(deg,gsi,0),
          tcas_ta = TCAS_TA?(so,vo,si,vi),
@@ -38,16 +41,16 @@ BEGIN
 	 ELSE (: (# range := (to_rad(deg), to_rad(deg+step)), color := None #) :) ENDIF
 
     find_trk_recursive_aux
-	    (deg: subrange(-30,30), trkBand: TRK_BAND)
+	    (deg: subrange(minDeg,maxDeg), trkBand: TRK_BAND)
     	    (so: Vect2, vo: Nz_vect2, si: Vect2, vi: Nz_vect2): RECURSIVE TRK_BAND =
      LET trkBand: TRK_BAND = trkBand o find_trk(deg, trkBand)(so,vo,si,vi)
-      IN IF deg <= -30 THEN trkBand
+      IN IF deg <= minDeg THEN trkBand
          ELSE find_trk_recursive_aux(deg - step, trkBand)(so,vo,si,vi) ENDIF
     MEASURE deg
 
     find_trk_recursive
     	    (so: Vect2, vo: Nz_vect2, si: Vect2, vi: Nz_vect2): TRK_BAND = 
-      find_trk_recursive_aux(30, clearBands)(so, vo, si, vi)
+      find_trk_recursive_aux(maxDeg, clearBands)(so, vo, si, vi)
 
 
 

@@ -12,7 +12,7 @@ define(function (require, exports, module) {
     
     var h = 1200, w = 1200;
     var angleOffset = Math.PI / 2, nmi = 1852, nmiToPixel = 32;
-    var colorMap = {"yellow": "rgba(255,255,0,0.5)", "white": "rgba(255,255,255,0.5)"};
+    var colorMap = {"yellow": "rgba(255,255,0,0.5)", "transparent": "rgba(255,255,255,0)"};
     var maxRange = 180;
     function distance (relPosition) {
         return Math.sqrt(relPosition.x * relPosition.x + relPosition.y * relPosition.y);
@@ -39,7 +39,7 @@ define(function (require, exports, module) {
     function drawCircle(c, pos, rad) {
         c.save();
         c.beginPath();
-        c.lineWidth = 1;
+        c.lineWidth = 2;
         c.strokeStyle = "#ddd";
         c.arc(pos.x, pos.y, rad, 0, 360 * Math.PI / 180);
         c.stroke();
@@ -47,17 +47,21 @@ define(function (require, exports, module) {
         c.restore();
     }
     
-    function drawRhombus(c, pos, color) {
+    function drawDiamond(c, pos, color) {
         
     }
     
     function drawSelf(canvas, pos) {
         drawCross(canvas, pos);
-        
     }
     
-    function drawTick(angle, center, c, tickLength) {
-        var  radius = 180;
+    function drawText (text, x, y, c) {
+        c.fillStyle = "white";
+        c.font = "normal 10px Arial";
+        c.fillText(text, x, y);
+    }
+
+    function drawTick(radius, angle, center, c, tickLength) {
         angle += angleOffset;
         tickLength = tickLength || 10;
         var x1 = center.x + radius * Math.cos(angle),
@@ -76,18 +80,18 @@ define(function (require, exports, module) {
         bands.forEach(function (band) {
             color = band.color.toLowerCase();
             if (color === "none") {
-                color = "white";
+                color = "transparent";
             }
             
 //            band.range.forEach(function (angle) {
 //                c.save();
 //                c.strokeStyle = colorMap[color];
-//                drawTick(angle, ownPos, c);
+//                drawTick(160, angle, ownPos, c);
 //                c.restore();
 //            });
-            //draw an arc for each begining and end of banf
-            var first = band.range[0] + angleOffset,
-                last = band.range[band.range.length - 1]  + angleOffset;
+            //draw an arc for each begining and end of band -- the normalisation factor 0.4 is due to the TCAS display which goes from 0 to 6 and from -6 to 0, and also forms an incomplete circle
+            var first = band.range[0] * 0.4,
+                last = band.range[band.range.length - 1] * 0.4;
             
             c.save();
             c.strokeStyle = colorMap[color];
@@ -133,7 +137,7 @@ define(function (require, exports, module) {
         var ipos = translate(normalisePos(state.si), center);
         var opos = translate(normalisePos(state.so), center);
         var iPosRel = { x: (ipos.x - opos.x) , y: (ipos.y - opos.y) };
-        var ownPos = { x: center.x, y: center.y + 64 };
+        var ownPos = { x: center.x, y: center.y + 2 * nmiToPixel };
         //draw the intruder position (if within a given range)
         if (distance(iPosRel) < maxRange) {
             drawCircle(canvas, {x: ownPos.x + iPosRel.x, y: ownPos.y + iPosRel.y}, 5);
@@ -148,7 +152,7 @@ define(function (require, exports, module) {
         drawRangeBands(bands, center, canvas);
         var needleAngle = Math.atan(StateParser.evaluate(state.vo.y) / StateParser.evaluate(state.vo.x));
         canvas.strokeStyle = "rgba(255,255,255,0.7)";
-        drawTick(needleAngle, center, canvas, 170);
+        drawTick(180, needleAngle, center, canvas, 170);
     }
     
     module.exports = {
