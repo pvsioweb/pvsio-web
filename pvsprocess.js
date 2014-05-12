@@ -119,9 +119,10 @@ module.exports = function () {
 				var outString = arrayToOutputString(output);
 				//This is a hack to remove garbage collection messages from the output string before we send to the client
 				///TODO not sure if this works as intended
-				var croppedString = outString.substring(0, outString.indexOf("(#"));
-				outString = outString.substring(outString.indexOf("(#"));
-				callback({type: "pvsoutput", data: [outString]});
+                if(outString.indexOf("(#") >= 0) {
+                    outString = outString.substring(outString.indexOf("(#"));
+                    callback({type: "pvsoutput", data: [outString]});
+                }
 				//clear the output
 				output  = [];
 			} else if (lastLine.indexOf(readyString) > -1) {
@@ -144,7 +145,8 @@ module.exports = function () {
 			onDataReceived: onDataReceived,
 			onProcessExited: onProcessExited});
 		
-		util.log("pvsio process started with file " + filename + "; process working directory is :" + o.workspaceDir());
+		util.log("PVSio process started with theory " + filename);
+        util.log("Process context is " + o.workspaceDir());
 		return o;
 	};
 	

@@ -206,6 +206,7 @@ define(function (require, exports, module) {
      * @returns {ProjectFile}
      * @memeberof Project
      */
+    //FIXME: sometimes the key is fileName, sometimes is path --- the correct key should be path!
     Project.prototype.getSpecFile = function (fileName) {
         return this.pvsFiles()[fileName];
     };
@@ -241,7 +242,23 @@ define(function (require, exports, module) {
 			}
 	    }
 	};
-	
+
+    /**
+        Sets the project name
+        @param {string} newPath the new project name
+        This function should always be used when setting a new project name as it ensures consistency between project name and path in the file names
+    */
+    Project.prototype.setProjectName = function (newName) {
+        var oldName = this.name();
+        this.name(newName);
+        this.path(newName);
+        if (this.pvsFiles()) {
+            this.pvsFilesList().forEach(function (f) {
+                f.path(f.path().replace(oldName, newName));
+            });
+        }
+    };
+    
     /**
         Changes the name of a folder in the project directory to a new given name
         @param {string} oldPath the old path of the folder
@@ -251,23 +268,24 @@ define(function (require, exports, module) {
     */
     Project.prototype.renameFolder = function (oldPath, newPath, cb) {
         var p = this;
-        WSManager.getWebSocket().send({type: "renameFile", oldPath: oldPath, newPath: newPath}, function (err, res) {
+        var ws = WSManager.getWebSocket();
+        ws.send({type: "renameFile", oldPath: oldPath, newPath: newPath}, function (err, res) {
             if (!err) {
-                //no error so need to modify the paths for all the files affected by the renaming action
-                var pvsFiles = p.pvsFilesList().filter(function (f) {
-                    return f.path().indexOf(oldPath) === 0;
-                });
-                pvsFiles.forEach(function (f) {
-                    var newFilePath = f.path().replace(oldPath, newPath);
-                    f.path(newFilePath);
-                });
-                //update the project path if the oldname was the project path
+                // check if we are renaming the project
                 if (oldPath === p.path()) {
-                    p.path(newPath);
-                    p.name(newPath.substr(newPath.lastIndexOf("/") + 1));
+                    p.setProjectName(newPath);
+                } else {
+                    //no error so need to modify the paths for all the files affected by the renaming action
+                    var pvsFiles = p.pvsFilesList().filter(function (f) {
+                        return f.path().indexOf(oldPath) === 0;
+                    });
+                    pvsFiles.forEach(function (f) {
+                        var newFilePath = f.path().replace(oldPath, newPath);
+                        f.path(newFilePath);
+                    });
                 }
             } else { console.log(err); }
-            if (cb && typeof cb === "function") {cb(err, res); }
+            if (cb && typeof cb === "function") { cb(err, res); }
         });
     };
 	/**
@@ -356,14 +374,20 @@ define(function (require, exports, module) {
     };
     
 	///FIXME this should be a private function called from project.save
-	Project.prototype.saveNew = function (cb) {
+	Project.prototype.saveNew = function (newName, cb) {
 		var _thisProject = this;
 		var wd = WidgetManager.getWidgetDefinitions();
 		var wdStr = JSON.stringify(wd, null, " ");
-		var ws = WSManager.getWebSocket(), specFiles = this.pvsFilesList().map(function (f, i) {
-			return {fileName: f.name(), fileContent: f.content()};
-		});
-		var token = {type: "createProject", projectName: this.name(), specFiles: specFiles, widgetDefinitions: wdStr, overWrite: _thisProject.name()  === "defaultProject"};
+		var ws = WSManager.getWebSocket();
+        var specFiles = this.pvsFilesList().map(function (f, i) {
+                return { fileName: f.path().replace(_thisProject.name(), newName), fileContent: f.content() };
+            });
+		var token = { type: "createProject",
+                      projectName: newName,
+                      specFiles: specFiles,
+                      widgetDefinitions: wdStr,
+                      overWrite: _thisProject.name()  === "defaultProject" };
+        //FIXME: we are not saving empty folders -- do we want this behaviour?
 		if (this.mainPVSFile()) {
 			token.mainPVSFile = this.mainPVSFile().name();
 		}
@@ -373,18 +397,11 @@ define(function (require, exports, module) {
 		}
 		ws.send(token, function (err, res) {
 			if (!err) {
-				_thisProject.pvsFilesList().forEach(function (f) {
-                    var oldkey = f.path();
-                    //since this is a newly saved file, need to update the path to a full one
-                    f.path(res.projectPath + "/" + f.path());
-                    delete _thisProject.pvsFiles()[oldkey];
-                    _thisProject.pvsFiles()[f.path()] = f;
-					f.dirty(false);
-				});
                 if (_thisProject.image()) {
                     _thisProject.image().dirty(false);
                 }
                 _thisProject.path(res.projectPath);
+                _thisProject.name(res.name);
 			}
             if (cb && typeof cb === "function") {
                 cb(err, _thisProject, res.folderStructure);

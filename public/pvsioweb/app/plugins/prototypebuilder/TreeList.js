@@ -281,6 +281,7 @@ define(function (require, exports, module) {
     };
     
     TreeList.prototype.renameItem = function (item, newName) {
+        // FIXME: it's note safe to use replace because the string to be replaced could be (part of) the name of subdirectories listed in the path
         item.path = item.path.replace(item.name, newName);
         item.name = newName;
     };
@@ -288,6 +289,13 @@ define(function (require, exports, module) {
     TreeList.prototype.getSelectedItem = function () {
         return selectedData;
     };
+
+    TreeList.prototype.renameRoot = function (newName) {
+        // we assume here that the first label in the tree is always the project name
+        this.renameItem(d3.select(el).select(".label").data()[0], newName);
+        d3.select(el).select(".label").text(newName);
+    };
+
     module.exports = TreeList;
 
 });

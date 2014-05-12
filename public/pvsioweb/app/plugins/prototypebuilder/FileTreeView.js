@@ -13,7 +13,8 @@ define(function (require, exports, module) {
         QuestionForm            = require("pvsioweb/forms/displayQuestion"),
         TreeList                = require("./TreeList");
     
-    var folderData, elementId, project, ws = WSManager.getWebSocket(), fileCounter = 0, unSavedName = "Untitled", treeList;
+    var folderData, elementId, project, ws = WSManager.getWebSocket(), fileCounter = 0, folderCounter = 0,
+        unSavedFileName = "untitled_file", unSavedFolderName = "untitled_folder", treeList;
     
     /**
         utility function to convert filenames to valid html ids
@@ -36,42 +37,42 @@ define(function (require, exports, module) {
             var e = {type: "SelectedFileChanged", selectedItem: event.data};
             ftv.fire(e);
         }).addListener("Rename", function (event) {
-//            var oldPath = event.data.path;
             treeList.createNodeEditor(event.data, function (node, oldPath) {
                 var f = project.pvsFiles()[oldPath];
                 if (event.data.isDirectory) {
-                    project.renameFolder(oldPath, node.path, function () {
-                        if (oldPath === project.path()) {
-                            // we are renaming the project
-                            project.name(node.name);
-                        }
-                    });
-                } else {
-                    //rename file on disk
-                    project.renameFile(f, node.name, function () {});
-                }
+                    project.renameFolder(oldPath, node.path);
+                } else { project.renameFile(f, node.name); }
             });
         }).addListener("New File", function (event) {
-            var name = unSavedName + fileCounter++ + ".pvs";
-            var newFileData = {name: name, path: event.data.path + "/" + name };
+            var name = (fileCounter === 0) ? unSavedFileName + ".pvs" : unSavedFileName + "_" + fileCounter + ".pvs";
+            fileCounter++;
+            // make sure that the path is relative to the project folder
+            var path = event.data.path + "/" + name;
+            var newFileData = {name: name, path: path };
             newFileData = treeList.addItem(newFileData, event.data);
             treeList.selectItem(newFileData.path);
             treeList.createNodeEditor(newFileData, function (node, oldPath) {
                 var file = project.pvsFiles()[oldPath];
                 file.path(node.path);
-                ws.writeFile({fileName: file.path(), fileContent: file.content()}, function (err, res) {
-                    if (!err) {
-                        //add the spec file to the project and supress the event so we dont create multiple files
-                        //project.addSpecFile(node.path, "", true);
-                        console.log(res);
-                    } else { console.log(err); }
-                });
+                ws.writeFile({projectName: project.name(),
+                              fileName: file.path(),
+                              fileContent: file.content()},
+                              function (err, res) {
+                        if (!err) {
+                            //add the spec file to the project and supress the event so we dont create multiple files
+                            //project.addSpecFile(node.path, "", true);
+                            console.log(res);
+                        } else { console.log(err); }
+                    });
             }, function (node) {
                 treeList.removeItem(node.path);
             });
         }).addListener("New Folder", function (event) {
-            var name = unSavedName + fileCounter++;
-            var newFolderData = {name: name, path: event.data.path + "/" + name, children: [], isDirectory: true};
+            var name = (folderCounter === 0) ? unSavedFolderName : unSavedFolderName + "_" + folderCounter;
+            folderCounter++;
+            // make sure that the path is relative to the project folder
+            var path = event.data.path + "/" + name;
+            var newFolderData = {name: name, path: path, children: [], isDirectory: true};
             newFolderData = treeList.addItem(newFolderData, event.data);
             treeList.selectItem(newFolderData.path);
             treeList.createNodeEditor(newFolderData, function (node, oldPath) {
@@ -152,7 +153,7 @@ define(function (require, exports, module) {
     FileTreeView.prototype.renameSelected = function (newName) {
         treeList.renameItem(treeList.getSelectedItem(), newName);
     };
-    
+
     /**
         Gets the selected file in the treeview
         @returns {String} The full path to the selected file
@@ -162,6 +163,14 @@ define(function (require, exports, module) {
         return res ? res.path : undefined;
     };
     
-    
+    /**
+     * Renames the project
+     * @param {string} newName The new project name.
+     */
+    FileTreeView.prototype.renameProject = function (newProjectName) {
+        treeList.renameRoot(newProjectName);
+    };
+
+
     module.exports = FileTreeView;
 });

@@ -13,7 +13,7 @@ define(function (require, exports, module) {
 
 	/**
 	 * @constructor
-	 * @param {string} name The name of the file
+	 * @param {string} path The name of the file, i.e., the *relative path* from the project directory
 	 * @param {Project} project The project to which this file belongs
 	 * @this ProjectFile
 	 */

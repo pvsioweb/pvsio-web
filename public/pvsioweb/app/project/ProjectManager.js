@@ -49,13 +49,13 @@ define(function (require, exports, module) {
         d3.select("#header #txtProjectName").property("value", name);
 	}
 	
-	function updateSourceCodeToolbarButtons(pvsFile, currentProject) {
+	function updateSourceCodeToolbarButtons(pvsFile, project) {
 		//update status of the set main file button based on the selected file
-        if (typeof pvsFile === "string" && currentProject) {
-            pvsFile = currentProject.getSpecFile(pvsFile);
+        if (typeof pvsFile === "string" && project) {
+            pvsFile = project.getSpecFile(pvsFile);
         }
 		if (pvsFile) {
-			if (currentProject.mainPVSFile() && currentProject.mainPVSFile().name() === pvsFile.name()) {
+			if (project.mainPVSFile() && project.mainPVSFile().name() === pvsFile.name()) {
 				d3.select("#btnSetMainFile").attr("disabled", true);
 			} else {
 				d3.select("#btnSetMainFile").attr("disabled", null);
@@ -130,20 +130,19 @@ define(function (require, exports, module) {
 	 */
 	ProjectManager.prototype.renderSourceFileList = function (folderStructure) {
 		var pm = this;
-		var currentProject = this.project(), editor = this.editor();
+		var project = this.project(), editor = this.editor();
 		var ws = WSManager.getWebSocket();
-		pvsFilesListView = new FileTreeView("#pvsFiles", folderStructure, currentProject);
+		pvsFilesListView = new FileTreeView("#pvsFiles", folderStructure, project);
 		
 		pvsFilesListView.addListener("SelectedFileChanged", function (event) {
 			//fetch sourcecode for selected file and update editor
             if (event.selectedItem && !event.selectedItem.isDirectory) {
-                var pvsFile = currentProject.getSpecFile(event.selectedItem.path);
+                var pvsFile = project.getSpecFile(event.selectedItem.path);
                 if (!pvsFile) {//load the pvsfile and add to the project 
                     //since we are not passing a file content it will get loaded over websocket when requested
                     //we supress the spec file added event because the file already exists in the file tree
                     var theoryName = event.selectedItem.name.substr(0, event.selectedItem.name.indexOf(".pvs"));
-                    pvsFile = currentProject.addSpecFile(event.selectedItem.path,
-                                                         makeEmptyTheory(theoryName), true);
+                    pvsFile = project.addSpecFile(event.selectedItem.path, makeEmptyTheory(theoryName), true);
                 }
                 if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
                     editor.removeAllListeners("change");
@@ -168,7 +167,7 @@ define(function (require, exports, module) {
                         }
                     });
                 }
-                updateSourceCodeToolbarButtons(pvsFile, currentProject);
+                updateSourceCodeToolbarButtons(pvsFile, project);
             }
             //bubble the event
             event.type = "SelectedFileChanged";
@@ -437,7 +436,7 @@ define(function (require, exports, module) {
                     project.addSpecFile(data.pvsSpec[index].name, specContent);
                 });
             }).then(function () {
-                project.saveNew(function (err, res, folderStructure) {
+                project.saveNew(data.projectName, function (err, res, folderStructure) {
                     console.log({err: err, res: res});
                     if (!err) {
                         if (project.image()) {
@@ -520,16 +519,15 @@ define(function (require, exports, module) {
             name = prompt("Your project has default name, please enter a new project name");
             
             if (name && name !== defaultProjectName && name.trim().length > 0) {
-                project.name(name);
-                projectNameChanged({current: name});
-                project.saveNew(function (err, res) {
+                project.saveNew(name, function (err, res) {
                     if (!err) {
                         project = res;
+                        project.setProjectName(name);
+                        projectNameChanged({current: name});
+                        pvsFilesListView.renameProject(name);
                         pm.updateSourceCodeToolbarButtons(pvsFilesListView.getSelectedItem(), project);
                         pm.fire({type: "ProjectSaved", project: project});
-                        if (typeof cb === "function") {
-                            cb();
-                        }
+                        if (typeof cb === "function") { cb(); }
                     }
                 });
             } else {
@@ -608,22 +606,22 @@ define(function (require, exports, module) {
     ProjectManager.prototype.createDefaultProject = function (cb) {
         var pm = this;
         var ws = WSManager.getWebSocket();
+        var defaultFileName = defaultTheoryName + ".pvs";
+        var defaultFilePath = defaultProjectName + "/" + defaultFileName;
         var data = { projectName: defaultProjectName,
-                     pvsSpec: [ defaultTheoryName + ".pvs" ],
+                     pvsSpec: [ defaultFilePath ],
                      prototypeImage: [] };
         
         WidgetManager.clearWidgetAreas();
         ScriptPlayer.clearView();
-        var project = new Project();
-        // update the current project with info from data and saveNew
-        project.name(data.projectName);
-        project.path(data.projectName);
+        var project = new Project(data.projectName);
         project.addSpecFile(data.pvsSpec[0], makeEmptyTheory(defaultTheoryName));
-        project.saveNew(function (err, res, folderStructure) {
+
+        project.saveNew(data.projectName, function (err, res, folderStructure) {
             console.log({err: err, res: res});
             if (!err) {
                 //set the main pvs file
-                project.mainPVSFile(project.pvsFilesList()[0]);
+                project.mainPVSFile(new ProjectFile(defaultFilePath, defaultFileName));
                 WidgetManager.updateMapCreator();
                 pm.project(project);
                 pm.renderSourceFileList(folderStructure);
@@ -642,8 +640,7 @@ define(function (require, exports, module) {
      * @memberof ProjectManager
      */
 	ProjectManager.prototype.createFile = function (filename, content) {
-        var newPath = this.project().path() + "/" + filename;
-        this.project().addSpecFile(newPath, content);
+        this.project().addSpecFile(filename, content);
     };
     
 	module.exports = ProjectManager;

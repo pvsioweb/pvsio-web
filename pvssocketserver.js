@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+//#!/usr/bin/env node
 /**
 Copyright (c) 2012
 
@@ -138,6 +138,57 @@ function run() {
             }
         });
     }
+
+    
+    /**
+     * creates a directory structure
+     */
+    function mkdirRecursive(dirPath, cb) {
+        fs.mkdir(dirPath, function (error) {
+            if (error && error.errno === 34) {
+                // the callback will be invoked only by the first instance of mkdirRecursive
+                var parentDirectory = dirPath.substr(0, dirPath.lastIndexOf("/"));
+                mkdirRecursive(parentDirectory, function f() {
+                    fs.mkdir(dirPath, cb);
+                });
+            } else {
+                // if the path has been created successfully, just invoke the callback function (if any)
+                if (cb && typeof cb === "function") { cb(); }
+            }
+        });
+    }
+    
+    /**
+     * writes files (directory structure is automatically created
+     */
+    
+    
+    function writeFiles(files, cb) {
+        function writeFilesAux(files, i, cb) {
+            if (i < files.length && i >= 0) {
+                var f, dir;
+                f = files[i];
+                dir = f.path.substr(0, f.path.lastIndexOf("/")); //FIXME: use system functions to retrieve the file separator
+                util.log("dbg: generating directory structure " + dir);
+                mkdirRecursive(dir, function (err) {
+                    fs.writeFile(f.path, f.fileContent, function (err) {
+                        if (!err) {
+                            util.log("dbg: file " + f.path + " saved successfully!");
+                            i++;
+                            if (i < files.length) {
+                                writeFilesAux(files, i, cb);
+                            } else {
+                                util.log("dbg: all files have been processed... sending data back to client.");
+                                if (cb && typeof cb === "function") { cb(files, err); }
+                            }
+                        } else { util.log("dbg: error while saving file " + f.path + " (" + err + ")"); }
+                    });
+                });
+            }
+        }
+        writeFilesAux(files, 0, cb);
+    }
+    
     
     /**
      * Creates a project
@@ -154,8 +205,40 @@ function run() {
             overWrite = opt.overWrite,
             widgetDefinitions = opt.widgetDefinitions;
         var obj = {type: "projectCreated"};
-        
+            
         function doCreate(cb) {
+            // utility functions
+            function complete_doCreate(files, err) {
+                // always return paths relative to baseProjectDir
+                var i;
+                files.forEach(function (f) {
+                    f.path = f.path.replace(projectPath, projectName);
+                });
+                obj.pvsFiles = files;
+                
+                //by default set the main pvs file to be the first item in the list after sort
+                mainPVSFile = mainPVSFile || files.sort()[0].path;
+                if (mainPVSFile) {
+                    obj.mainPVSFile = mainPVSFile;
+                    // create a main file in the project settings
+                    changeProjectSetting(projectName, "mainPVSFile", obj.mainPVSFile);
+                }
+                
+                // get project folder structure once all files have been wrtten
+                obj.folderStructure = getFolderStructure(projectPath);
+                // and make sure that the folder structure contains paths relative to baseProject
+                obj.folderStructure.path = obj.folderStructure.name;
+                obj.folderStructure.children.forEach(function (child) {
+                    child.path = child.path.replace(projectPath, projectName);
+                });
+//                for (i in obj.folderStructure.children) {
+//                    obj.folderStructure.children[i].path = obj.folderStructure.children[i].path.replace(projectPath + "/", "");
+//                }
+                obj.projectPath = obj.folderStructure.path;
+                if (cb && typeof cb === "function") { cb(obj); }
+            }
+
+
             fs.mkdirSync(projectPath);
             obj.projectPath = projectPath;
             obj.name = projectName;
@@ -170,25 +253,14 @@ function run() {
 
             if (specFiles && specFiles.length > 0) {
                 var files = specFiles.map(function (f) {
+                    if (f.fileName.indexOf(projectName) === 0) {
+                        return {path: path.join(baseProjectDir, f.fileName), fileContent: f.fileContent};
+                    }
+                    console.log("dbg: Warning, deprecated filenames (project name not included in the filename)");
                     return {path: path.join(projectPath, f.fileName), fileContent: f.fileContent};
                 });
-                files.forEach(function (f) {
-                    fs.writeFileSync(f.path, f.fileContent);
-                });
-                obj.pvsFiles = files;
-                //by default set the main pvs file to be the first item in the list after sort
-                mainPVSFile = mainPVSFile || files.sort()[0].path;
+                writeFiles(files, complete_doCreate);
             }
-
-            if (mainPVSFile) {
-                obj.mainPVSFile = mainPVSFile;
-                //create a main file in the project settings
-                changeProjectSetting(projectName, "mainPVSFile", mainPVSFile);
-            }
-            //get project folder structure once all files have been wrtten
-            obj.folderStructure = getFolderStructure(projectPath);
-            
-            if (cb && typeof cb === "function") { cb(obj); }
         }
         try {
             var exists = fs.existsSync(projectPath);
@@ -211,7 +283,7 @@ function run() {
             }
         } catch (err) {
             obj.err = err;
-            console.log("Error while trying to create project: " + err.toString());
+            console.log("dbg: Error while trying to create project: " + err.toString());
             if (cb && typeof cb === "function") { cb(obj); }
         }
     }
@@ -220,7 +292,7 @@ function run() {
     * open a project with the specified name
     */
     function openProject(name) {
-        console.log("opening project " + name + " ...");
+        console.log("dbg: Opening project " + name + " ...");
         var imageExts = ["jpg", "jpeg", "png"],
             specExts = ["pvs"],
             projectPath = baseProjectDir + name,
@@ -309,16 +381,23 @@ function run() {
             callBack: cb
         });
     }
-
+    
     /**
         get function maps for client sockets
     */
     function createClientFunctionMaps() {
         var map = {
             "renameFile": function (token, socket, socketid) {
-                fs.rename(token.oldPath, token.newPath, function (err) {
+                var oldPath = path.join(baseProjectDir, token.oldPath);
+                var newPath = path.join(baseProjectDir, token.newPath);
+                fs.rename(oldPath, newPath, function (err) {
+                    if (err) {
+                        console.log("dbg: warning, error while renaming " + token.oldPath
+                                    + " into " + token.newPath + " (" + err + ")");
+                    }
                     processCallback({id: token.id, socketId: socketid, err: err}, socket);
                 });
+                processCallback(token, socket);
             },
             "readDirectory": function (token, socket, socketid) {
                 fs.readdir(token.path, function (err, files) {
@@ -338,10 +417,10 @@ function run() {
                         
                         Promise.all(promises)
                             .then(function (res) {
-                                 var result = res.map(function (d, i) {
+                                var result = res.map(function (d, i) {
                                         return {name: files[i], isDirectory: d.isDirectory()};
                                     });
-                                    processCallback({id: token.id, socketId: socketid, files: result, err: err}, socket);
+                                processCallback({id: token.id, socketId: socketid, files: result, err: err}, socket);
                             }, function (err) {
                                 processCallback({id: token.id, socketId: socketid, err: err}, socket);
                             });
@@ -457,20 +536,20 @@ function run() {
             "writeFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";
-                // directory "projects" is the base path for creating files
-                token.fileName = path.resolve(baseProjectDir, token.fileName);
-                fs.writeFile(token.fileName, token.fileContent, encoding, function (err) {
+                var projectPath = baseProjectDir + token.projectName;
+                function complete_writeFile(files, err) {
                     var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
-                    ///files saved need to inform client about need to restart pvsioweb with appropriate files
-                    if (!err) {
-                        util.log("dbg: file " + token.fileName
-                                 + " saved successfully (socket id = " + socketid + ")");
-                        res.type = "fileSaved";
-                    } else {
-                        res.err = err;
-                    }
                     processCallback(res, socket);
-                });
+                }
+                
+                var filePath = token.fileName;
+                if (filePath.indexOf(projectPath) === 0) {
+                    console.log("dbg: Warning, deprecated filenames (project name not included in the filename)");
+                    filePath = path.join(projectPath, filePath);
+                } else { filePath = path.join(baseProjectDir, filePath); }
+                
+                var files = [{path: filePath, fileContent: token.fileContent}];
+                writeFiles(files, complete_writeFile);
             },
             "writeImage": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
@@ -493,7 +572,7 @@ function run() {
             "deleteFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 p.removeFile(token.fileName, function (err, res) {
-                    var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
+                    res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
                     if (!err) {
                         res.type = "fileDeleted";
                     } else {
