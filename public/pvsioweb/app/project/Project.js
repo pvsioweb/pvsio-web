@@ -386,7 +386,7 @@ define(function (require, exports, module) {
                       projectName: newName,
                       specFiles: specFiles,
                       widgetDefinitions: wdStr,
-                      overWrite: _thisProject.name()  === "defaultProject" };
+                      overWrite: newName  === "defaultProject" };
         //FIXME: we are not saving empty folders -- do we want this behaviour?
 		if (this.mainPVSFile()) {
 			token.mainPVSFile = this.mainPVSFile().name();
