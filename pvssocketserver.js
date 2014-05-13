@@ -55,11 +55,14 @@ function run() {
         if (s.isDirectory()) {
             var files = fs.readdirSync(root);
             file.isDirectory = true;
-            file.children = files.filter(function (f) {
-                return f.split(".").slice(-1).join("") === "pvs";
-            }).map(function (f, i) {
+            file.children = files.map(function (f, i) {
                 return getFolderStructure(path.join(root, f));
             });
+            if (file.children) {
+                file.children = file.children.filter(function (f) {
+                    return f.isDirectory || f.name.split(".").slice(-1).join("") === "pvs";
+                });
+            }
             return file;
         
         } else {
@@ -179,7 +182,7 @@ function run() {
                                 writeFilesAux(files, i, cb);
                             } else {
                                 util.log("dbg: all files have been processed... sending data back to client.");
-                                if (cb && typeof cb === "function") { cb(files, err); }
+                                if (cb && typeof cb === "function") { cb(err, files); }
                             }
                         } else { util.log("dbg: error while saving file " + f.path + " (" + err + ")"); }
                     });
@@ -208,9 +211,8 @@ function run() {
             
         function doCreate(cb) {
             // utility functions
-            function complete_doCreate(files, err) {
+            function complete_doCreate(err, files) {
                 // always return paths relative to baseProjectDir
-                var i;
                 files.forEach(function (f) {
                     f.path = f.path.replace(projectPath, projectName);
                 });
@@ -231,9 +233,6 @@ function run() {
                 obj.folderStructure.children.forEach(function (child) {
                     child.path = child.path.replace(projectPath, projectName);
                 });
-//                for (i in obj.folderStructure.children) {
-//                    obj.folderStructure.children[i].path = obj.folderStructure.children[i].path.replace(projectPath + "/", "");
-//                }
                 obj.projectPath = obj.folderStructure.path;
                 if (cb && typeof cb === "function") { cb(obj); }
             }
@@ -289,48 +288,65 @@ function run() {
     }
 
     /**
-    * open a project with the specified name
+    * open a project with the specified projectName
     */
-    function openProject(name) {
-        console.log("dbg: Opening project " + name + " ...");
+    function openProject(projectName) {
+        console.log("dbg: Opening project " + projectName + " ...");
         var imageExts = ["jpg", "jpeg", "png"],
             specExts = ["pvs"],
-            projectPath = baseProjectDir + name,
+            projectPath = baseProjectDir + projectName,
             stat = fs.statSync(projectPath),
-            folderStructure = getFolderStructure(projectPath),
-            res =  {name: name, projectPath: projectPath, folderStructure: folderStructure};
-        if (stat.isDirectory()) {
-            fs.readdirSync(projectPath).forEach(function (file) {
-                var filePath = path.join(projectPath, file);
-                stat = fs.statSync(filePath);
-                if (stat.isFile()) {
-                    var ext = file.indexOf(".") > -1 ? file.split(".")[1].toLowerCase() : "";
-                    if (imageExts.indexOf(ext) > -1) {
-                        res.imagePath = filePath;
-                        res.imageData = "data:image/" + ext + ";base64," + fs.readFileSync(filePath, "base64");
-                    } else if (specExts.indexOf(ext) > -1) {
-                        res.pvsFiles = res.pvsFiles || [];
-                        res.pvsFiles.push(filePath);
-                    } else if (file === "widgetDefinition.json") {
-                        res.widgetDefinition = JSON.parse(fs.readFileSync(filePath, "utf8"));
-                    } else if (file === ".pvsioweb") {
-                        var config = JSON.parse(fs.readFileSync(filePath, "utf8"));
-                        res.mainPVSFile = config.mainPVSFile;
-                    } else if (file === "scripts.json") {
-                        res.scripts = JSON.parse(fs.readFileSync(filePath, "utf8"));
-                    } else {
-                        res.other = res.other || [];
-                        res.other.push(filePath);
+            res = { name: projectName };
+        
+        function openProjectAux(folder) {
+            var stat = fs.statSync(folder);
+            if (stat.isDirectory()) {
+                fs.readdirSync(folder).forEach(function (file) {
+                    var filePath = path.join(folder, file);
+                    stat = fs.statSync(filePath);
+                    if (stat.isFile()) {
+                        var ext = file.indexOf(".") > -1 ? file.split(".")[1].toLowerCase() : "";
+                        if (imageExts.indexOf(ext) > -1) {
+                            res.imagePath = filePath.replace(baseProjectDir, "");
+                            res.imageData = "data:image/" + ext + ";base64," + fs.readFileSync(filePath, "base64");
+                        } else if (specExts.indexOf(ext) > -1) {
+                            res.pvsFiles = res.pvsFiles || [];
+                            res.pvsFiles.push({path: filePath.replace(baseProjectDir, ""),
+                                               fileContent: fs.readFileSync(filePath, 'utf8')});
+                        } else if (file === "widgetDefinition.json") {
+                            res.widgetDefinition = JSON.parse(fs.readFileSync(filePath, "utf8"));
+                        } else if (file === ".pvsioweb") {
+                            var config = JSON.parse(fs.readFileSync(filePath, "utf8"));
+                            res.mainPVSFile = config.mainPVSFile;
+                        } else if (file === "scripts.json") {
+                            res.scripts = JSON.parse(fs.readFileSync(filePath, "utf8"));
+                        } else {
+                            res.other = res.other || [];
+                            res.other.push(filePath.replace(baseProjectDir, ""));
+                        }
+                    } else if (stat.isDirectory) {
+                        openProjectAux(filePath);
                     }
-                }
-            });
+                });
+            }
+        }
+
+        if (stat.isDirectory()) {
+            openProjectAux(projectPath);
             //load the first file if there is no .pvsioweb file in the root of the project
             if (!res.mainPVSFile && res.pvsFiles && res.pvsFiles.length) {
-                res.pvsFiles.sort();
+                res.pvsFiles.sort(function (a, b) { return a.path < b.path ? -1 : a.path === b.path ? 0 : 1; });
                 res.mainPVSFile = res.pvsFiles[res.pvsFiles.length - 1];
             }
+            res.folderStructure = getFolderStructure(projectPath);
+            res.folderStructure.path = res.folderStructure.name;
+            res.folderStructure.children.forEach(function (child) {
+                child.path = child.path.replace(projectPath, projectName);
+            });
+            res.projectPath = res.folderStructure.path;
             return res;
         } else {
+            console.log("dbg: error while opening project " + projectPath);
             return null;
         }
     }

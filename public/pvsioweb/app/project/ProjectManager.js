@@ -226,15 +226,24 @@ define(function (require, exports, module) {
 		var p = new Project(obj.name).path(obj.projectPath), pf;
 		if (obj.pvsFiles) {
 			//create project files and assign the mainpvsfile appropriately
-			obj.pvsFiles.forEach(function (path) {
-                var mainFilePath = obj.mainPVSFile.indexOf("/") === 0 ? obj.mainPVSFile
-                    : p.path() + "/" + obj.mainPVSFile;
-                
-				if (path === mainFilePath) {
-                    pf = new ProjectFile(path, p);
+			obj.pvsFiles.forEach(function (file) {
+				if (file.path === obj.mainPVSFile.path) {
+                    pf = new ProjectFile(file.path, p).content(file.fileContent);
+                    
 					p.mainPVSFile(pf);
 				}
-				p.addSpecFile(path);
+                p.addSpecFile(file.path, file.fileContent);
+//                var currentFile =  obj.folderStructure.children.filter(function (f) { return f.path === file.path; });
+//                if (currentFile && currentFile.length > 0) {
+//                    //this means files having the same path exist in the children list!!
+//                    //log debug and pick the first item in currentFile
+//                    if (currentFile.length > 1) {
+//                        console.log("dbg: warning, unexpected aliasing for file " + file.path);
+//                    }
+//                    p.addSpecFile(currentFile[0].path, currentFile[0].fileContent);
+//                } else {
+//                    console.log("dbg: warning, unable to render content of " + file.path);
+//                }
 			});
 		}
         if (obj.scripts) {
@@ -267,8 +276,10 @@ define(function (require, exports, module) {
 							var p = initFromJSON(res.project);
 							WidgetManager.clearWidgetAreas();
 							d3.select("div#body").style("display", null);
-							pm.fire({type: "ProjectChanged", current: p, previous: pm.project()});
 							pm.project(p);
+                            // always set mainPVSfile because ProjectChanged will trigger an invocation of pvsio with that file
+                            pm.project().mainPVSFile(pm.project().mainPVSFile() || pm.project().pvsFilesList()[0]);
+                            pm.fire({type: "ProjectChanged", current: p, previous: pm.project()});
 							pm.editor().removeAllListeners("change");
 							pm.editor().setValue("");
 							if (p.image()) {
