@@ -539,6 +539,11 @@ define(function (require, exports, module) {
                         pm.updateSourceCodeToolbarButtons(pvsFilesListView.getSelectedItem(), project);
                         pm.fire({type: "ProjectSaved", project: project});
                         if (typeof cb === "function") { cb(); }
+                    } else {
+                        if (err.code === "EEXIST") {
+                            alert("Error: project not saved (project name \"" + name + "\" already exists, please use a different name.)");
+                        }
+                        if (typeof cb === "function") { cb(); }
                     }
                 });
             } else {

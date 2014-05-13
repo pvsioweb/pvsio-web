@@ -264,30 +264,47 @@ function run() {
                 writeFiles(files, complete_doCreate);
             }
         }
-        try {
-            var exists = fs.existsSync(projectPath);
-            if (exists && !overWrite) {
-                obj.err = projectName + " already exists. Please choose a different name";
-                cb(obj);
-            } else if (exists && overWrite) {
+        
+        fs.mkdir(projectPath, function (err) {
+            if (!err || (err.code === "EEXIST" && overWrite)) {
                 p.removeFile(projectPath, function (err) {
-                    if (err) {
-                        obj.err = err;
-                        cb(obj);
-                    } else {
+                    if (!err) {
                         doCreate(cb);
+                    } else {
+                        obj.err = err;
+                        if (cb && typeof cb === "function") { cb(obj); }
                     }
                 });
-                
             } else {
-                //create a project folder
-                doCreate(cb);
+                obj.err = err;
+                if (cb && typeof cb === "function") { cb(obj); }
             }
-        } catch (err) {
-            obj.err = err;
-            console.log("dbg: Error while trying to create project: " + err.toString());
-            if (cb && typeof cb === "function") { cb(obj); }
-        }
+        });
+        
+//        try {
+//            var exists = fs.existsSync(projectPath);
+//            if (exists && !overWrite) {
+//                obj.err = projectName + " already exists. Please choose a different name";
+//                cb(obj);
+//            } else if (exists && overWrite) {
+//                p.removeFile(projectPath, function (err) {
+//                    if (err) {
+//                        obj.err = err;
+//                        cb(obj);
+//                    } else {
+//                        doCreate(cb);
+//                    }
+//                });
+//                
+//            } else {
+//                //create a project folder
+//                doCreate(cb);
+//            }
+//        } catch (err) {
+//            obj.err = err;
+//            console.log("dbg: Error while trying to create project: " + err.toString());
+//            if (cb && typeof cb === "function") { cb(obj); }
+//        }
     }
 
     /**
