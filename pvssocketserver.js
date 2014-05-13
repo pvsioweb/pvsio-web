@@ -63,9 +63,12 @@ function run() {
                     return (f.isDirectory && f.name !== "pvsbin") || f.name.split(".").slice(-1).join("") === "pvs";
                 });
             }
+            
+            file.path = file.path.replace(baseProjectDir, "");
             return file;
         
         } else {
+            file.path = file.path.replace(baseProjectDir, "");
             return file;
         }
     }
