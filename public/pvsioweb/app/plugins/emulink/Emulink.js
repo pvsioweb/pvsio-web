@@ -248,7 +248,6 @@ define(function (require, exports, module) {
     Emulink.prototype.unload = function () {
         PVSioWebClient.getInstance().removeCollapsiblePanel(canvas);
         canvas = null;
-        projectManager.createDefaultProject();
     };
 	
 	module.exports = {
