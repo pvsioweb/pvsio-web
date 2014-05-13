@@ -60,7 +60,7 @@ function run() {
             });
             if (file.children) {
                 file.children = file.children.filter(function (f) {
-                    return f.isDirectory || f.name.split(".").slice(-1).join("") === "pvs";
+                    return (f.isDirectory && f.name !== "pvsbin") || f.name.split(".").slice(-1).join("") === "pvs";
                 });
             }
             return file;
