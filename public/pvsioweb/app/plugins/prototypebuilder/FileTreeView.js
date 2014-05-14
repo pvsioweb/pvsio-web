@@ -86,19 +86,22 @@ define(function (require, exports, module) {
             });
         }).addListener("Delete", function (event) {
             var path = event.data.path;
-            QuestionForm.create({header: "Confirm Delete", question: "Are you sure you want to delete " + path})
-                .on("ok", function (e, view) {
-                    //send request to remove file using the wsmanager
-                    ws.send({type: "deleteFile", fileName: path}, function (err, res) {
-                        if (!err) {
-                            treeList.removeItem(path);
-                        } else {
-                            //show error
-                            console.log(err);
-                        }
-                    });
-                    view.remove();
-                }).on("cancel", function (e, view) { view.remove(); });
+            QuestionForm.create({
+                header: "Confirm Delete",
+                question: "Are you sure you want to delete " + path + "?",
+                buttons: ["Cancel", "Delete"]
+            }).on("ok", function (e, view) {
+                //send request to remove file using the wsmanager
+                ws.send({type: "deleteFile", fileName: path}, function (err, res) {
+                    if (!err) {
+                        treeList.removeItem(path);
+                    } else {
+                        //show error
+                        console.log(err);
+                    }
+                });
+                view.remove();
+            }).on("cancel", function (e, view) { view.remove(); });
         });
 
         //if there is a project add listener to changes to files etc

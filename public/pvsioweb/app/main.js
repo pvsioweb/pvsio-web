@@ -68,11 +68,11 @@ define(function (require, exports, module) {
     
     client.addListener('WebSocketConnectionOpened', function (e) {
 		Logger.log("connection to pvsio server established");
-		d3.select("#btnRestartPVSioWeb").attr("disabled", null);
+		d3.select("#btnCompile").attr("disabled", null);
 		d3.select("#lblWebSocketStatus").select("span").attr("class", "glyphicon glyphicon-ok");
 	}).addListener("WebSocketConnectionClosed", function (e) {
 		Logger.log("connection to pvsio server closed");
-		d3.select("#btnRestartPVSioWeb").attr("disabled", true);
+		d3.select("#btnCompile").attr("disabled", true);
 		d3.select("#lblWebSocketStatus").select("span").attr("class", "glyphicon glyphicon-warning-sign");
 	}).addListener("pvsoutput", function (e) {
 		console.log(e);

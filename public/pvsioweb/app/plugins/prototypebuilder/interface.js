@@ -157,35 +157,44 @@ define(function (require, exports, module) {
 		//handle typecheck event
 		//this function should be edited to only act on the selected file when multiple files are in use
 		d3.select("#btnTypeCheck").on("click", function () {
-			var pvsFile = projectManager.getSelectedFile(), project = projectManager.project();
-			if (pvsFile) {
-				var btn = d3.select(this).html("Typechecking ...").attr("disabled", true);
-				var ws = WSManager.getWebSocket();
-				ws.send({type: "typeCheck", filePath: project.path() + "/" + pvsFile.name()}, function (err, res) {
-					btn.html("Typecheck").attr("disabled", null);
-					if (err) {
-//						alert(JSON.stringify(err));
-                        console.log(res);
-                        console.log(err);
+            function typecheck(pvsFile) {
+                var btn = d3.select("#btnTypeCheck").html("Typechecking ...").attr("disabled", true);
+                var ws = WSManager.getWebSocket();
+                ws.send({type: "typeCheck", filePath: pvsFile.name()},
+                         function (err, res) {
+                        btn.html("Typecheck").attr("disabled", null);
                         var msg = res.stdout;
-                        msg = msg.substring(msg.indexOf("Writing output to file"), msg.length);
-                        Notification.create(
-                            {header: "Typecheck error, please check the output file for details.",
-                             notification: msg.split("\n")})
-                            .on("ok", function (e, view) { view.remove(); });                        
-					} else {
-                        console.log(res);
-                        var msg = res.stdout;
-                        msg = msg.substring(msg.indexOf("Proof summary"), msg.length);
-						///TODO: show nicer alert and visualisation for type checking info
-//						alert(msg);
-                        Notification.create(
-                            {header: "Theories typechecked successfully!",
-                             notification: msg.split("\n")})
-                            .on("ok", function (e, view) { view.remove(); });                        
-					}
-				});
-			}
+                        if (err) {
+                            console.log(res);
+                            console.log(err);
+                            msg = msg.substring(msg.indexOf("Writing output to file"), msg.length);
+                            Notification.create({
+                                header: "Typecheck error, please check the output file for details.",
+                                notification: msg.split("\n")
+                            }).on("ok", function (e, view) { view.remove(); });
+                        } else {
+                            console.log(res);
+                            msg = msg.substring(msg.indexOf("Proof summary"), msg.length);
+                            Notification.create({
+                                header: "Theories in " + projectManager.project().name() + " typechecked successfully!",
+                                notification: msg.split("\n")
+                            }).on("ok", function (e, view) { view.remove(); });
+                        }
+                    });
+            }
+            
+			var pvsFile = projectManager.getSelectedFile();
+			if (!pvsFile || pvsFile.dirty()) {
+                //ask user to give name to script
+                var msg = "File " + pvsFile.name() + " has unsaved changes."
+                            + "\nPlease save file before typechecking.";
+                Notification.create({
+                    header: "Typechecking unsaved files",
+                    notification: msg.split("\n")
+                }).on("ok", function (e, view) {
+                    view.remove();
+                });
+            } else { typecheck(pvsFile); }
 		});
 	
 		d3.select("#btnSetMainFile").on("click", function () {
@@ -208,9 +217,10 @@ define(function (require, exports, module) {
 			if (project) {
                 var pvsFile = projectManager.getSelectedFile();
                 projectManager.saveFiles([pvsFile], function (err, res) {
-                    if (!err) {
-                        projectManager.updateSourceCodeToolbarButtons(pvsFile, project);
-                    } else { console.log(err); }
+                    if (err) {
+                        alert(err);
+                        console.log(err);
+                    }
                 });
 			}
 		});
@@ -219,30 +229,37 @@ define(function (require, exports, module) {
 			var project = projectManager.project();
 			if (project) {
                 var pvsFiles = project.pvsFilesList();
-                projectManager.saveFiles(pvsFiles, function (err, res) {
-                    if (!err) {
-                        projectManager.updateSourceCodeToolbarButtons(pvsFile, project);
-                    } else { console.log(err); }
-                });
+                projectManager.saveFiles(pvsFiles);
 			}
 		});
 
-        d3.select("#btnOpenFile").on("click", function () {
-            projectManager.openFiles(function () {
-                if (!err) { 
-                    projectManager.updateSourceCodeToolbarButtons(pvsFile, project);
-                } else { console.log(err); }
-            });
+        d3.select("#btnImportFiles").on("click", function () {
+            projectManager.openFiles();
         });
         
-		d3.select("#btnRestartPVSioWeb").on("click", function () {
-			//try to start process on server
-			var project = projectManager.project(), ws = WSManager.getWebSocket();
-			if (project && project.mainPVSFile()) {
-				ws.lastState("init(0)");
-				ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()},
-							  pvsProcessReady);
-			}
+		d3.select("#btnCompile").on("click", function () {
+			function compile() {
+                //compilation is emulated by restarting the pvsioweb process on the server
+                var project = projectManager.project(), ws = WSManager.getWebSocket();
+                if (project && project.mainPVSFile()) {
+                    ws.lastState("init(0)");
+                    ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()},
+                                  pvsProcessReady);
+                }
+            }
+
+            var pvsFile = projectManager.getSelectedFile();
+			if (!pvsFile || pvsFile.dirty()) {
+                // prompt a message that the file has not been saved yet
+                var msg = "File " + pvsFile.name() + " has unsaved changes."
+                            + "\nPlease save file before compiling.";
+                Notification.create({
+                    header: "Compiling unsaved file",
+                    notification: msg.split("\n")
+                }).on("ok", function (e, view) {
+                    view.remove();
+                });
+            } else { compile(); }
 		});
 	}
 	

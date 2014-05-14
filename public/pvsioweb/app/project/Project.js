@@ -196,7 +196,7 @@ define(function (require, exports, module) {
         //register event for the newspec and bubble up the dirty flag changed event from project
         newSpec.addListener("DirtyFlagChanged", function (event) {
             project.fire({type: "SpecDirtyFlagChanged", file: newSpec});
-        }).dirty(true);
+        });// adding a file to the project does not change the file, so no need to set the dirty flag for the file (.dirty(true);)
 		return newSpec;
 	};
     

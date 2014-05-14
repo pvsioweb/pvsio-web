@@ -49,25 +49,7 @@ define(function (require, exports, module) {
         d3.select("#header #txtProjectName").property("value", name);
 	}
 	
-	function updateSourceCodeToolbarButtons(pvsFile, project) {
-		//update status of the set main file button based on the selected file
-        if (typeof pvsFile === "string" && project) {
-            pvsFile = project.getSpecFile(pvsFile);
-        }
-		if (pvsFile) {
-			if (project.mainPVSFile() && project.mainPVSFile().name() === pvsFile.name()) {
-				d3.select("#btnSetMainFile").attr("disabled", true);
-			} else {
-				d3.select("#btnSetMainFile").attr("disabled", null);
-			}
-			//update status of file save button based on the selected file
-			if (pvsFile.dirty()) {
-				d3.select("#btnSaveFile").attr("disabled", null);
-			} else {
-				d3.select("#btnSaveFile").attr("disabled", true);
-			}
-		}
-	}
+
 	
 	function editorChangedListener(editor, pm, pvsFilesListView) {
 		return function () {
@@ -82,7 +64,6 @@ define(function (require, exports, module) {
 				if (pvsFile) {
 					var dirty = pvsFile.content() !== editor.getValue();
 					pvsFile.content(editor.getValue()).dirty(dirty); //update the selected project file content
-					updateSourceCodeToolbarButtons(pvsFile, pm.project());
                     pm.project()._dirty(true);
 				}
 			}
@@ -167,7 +148,6 @@ define(function (require, exports, module) {
                         }
                     });
                 }
-                updateSourceCodeToolbarButtons(pvsFile, project);
             }
             //bubble the event
             event.type = "SelectedFileChanged";
@@ -292,10 +272,12 @@ define(function (require, exports, module) {
                                 //show the image drag and drop div
                                 d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
                             }
-							//list all other files
+							//list all files
 							if (p.pvsFiles()) {
 								pm.renderSourceFileList(res.project.folderStructure);
                                 pvsFilesListView.selectItem(p.mainPVSFile() || p.pvsFilesList()[0]);
+                                // clear dirty flags
+                                p.pvsFilesList().forEach(function (f) { f.dirty(false); });
 							}
 							pm.editor().on("change", editorChangedListener(pm.editor(), pm, pvsFilesListView));
 							if (callback) { callback(p); }
@@ -315,10 +297,9 @@ define(function (require, exports, module) {
 	 * @param {callback} [cb = function () {}] function to invoke after files have been loaded into the project
 	 * @memberof ProjectManager
 	 */
-	ProjectManager.prototype.openFiles = function (cb) {
+	ProjectManager.prototype.openFiles = function () {
         var pm = this;
         var project = this.project(), editor = this.editor();
-		cb = cb || noop;
 		openFilesForm.create().on("cancel", function (e, view) {
 			view.remove();
 		}).on("ok", function (e, view) {
@@ -416,9 +397,7 @@ define(function (require, exports, module) {
         var pm = this;
         WidgetManager.clearWidgetAreas();
         ScriptPlayer.clearView();
-        var project = new Project();
-        // update the current project with info from data and saveNew
-        project.name(data.projectName);
+        var project = new Project(data.projectName);
         var i, promises = [];
         
         // load image, if any is specified in data
@@ -515,13 +494,10 @@ define(function (require, exports, module) {
                     console.log("project saved");
                     project = p;
                     //repaint the list and sourcecode toolbar
-                    if (project.pvsFilesList().length) {
-                        updateSourceCodeToolbarButtons(pvsFilesListView.getSelectedItem(), project);
-                    }
+                    project.pvsFilesList().forEach(function (f) { f.dirty(false); });
+                    project._dirty(false);
                     pm.fire({type: "ProjectSaved", project: project});
-                    if (typeof cb === "function") {
-                        cb();
-                    }
+                    if (typeof cb === "function") { cb(); }
                 }
             });
         }
@@ -534,9 +510,10 @@ define(function (require, exports, module) {
                     if (!err) {
                         project = res;
                         project.setProjectName(name);
+						project.pvsFilesList().forEach(function (f) { f.dirty(false); });
+						project._dirty(false);
                         projectNameChanged({current: name});
                         pvsFilesListView.renameProject(name);
-                        pm.updateSourceCodeToolbarButtons(pvsFilesListView.getSelectedItem(), project);
                         pm.fire({type: "ProjectSaved", project: project});
                         if (typeof cb === "function") { cb(); }
                     } else {
@@ -547,12 +524,12 @@ define(function (require, exports, module) {
                     }
                 });
             } else {
-                if (name) { alert("Error: project not saved (project name \"" + name + "\" is not a valid name.)"); }
+                if (name) {
+                    alert("Error: project not saved (project name \"" + name + "\" is not a valid name.)");
+                }
                 if (typeof cb === "function") { cb(); }
             }
-        } else {
-			_doSave();
-		}
+        } else { _doSave(); }
 	};
 	
 	/**
@@ -564,42 +541,22 @@ define(function (require, exports, module) {
 	ProjectManager.prototype.saveFiles = function (pvsFiles, cb) {
         if (pvsFiles) {
             var pm = this;
-            var project = pm.project();
-            if (pm.project().name() === defaultProjectName) {
-                var name = prompt("Your project has default name, please enter a new project name");
-                if (name && name !== defaultProjectName && name.trim().length > 0) {
-                    project.name(name);
-                    var data = { projectName: name,
-                                 pvsSpec: [],
-                                 prototypeImage: [] };
-					var i = 0;
-					for (i = 0; i < pvsFiles.length; i++) {
-						data.pvsSpec.push({name: pvsFiles[i].name(), content: pvsFiles[i].content()});
-					}
-                    // create a new empty project
-                    pm.createProject(data, function (err, newProject) {
-                        console.log("project created");
-                    });
-                } else {
-                    if (name) { alert("Error: files not saved (project name \"" + name + "\" is not a valid name.)"); }
-                    if (typeof cb === "function") { cb(); }
-                }
+            var project = this.project();
+            if (project.name() === defaultProjectName) {
+                this.saveProject(project, cb);
             } else {
-                // save files in the current project
+                // save all files, the project has already a valid name
                 project.saveFile(pvsFiles, function (err, res) {
                     if (!err) {
-                        pm.updateSourceCodeToolbarButtons(pvsFiles, project);
-                        if (typeof cb === "function") {
-                            cb();
-                        }
+                        project.pvsFilesList().forEach(function (f) { f.dirty(false); });
+                        project._dirty(false);
                     } else { console.log(err); }
+                    if (typeof cb === "function") { cb(err, res); }
                 });
             }
         }
     };
-    
-	ProjectManager.prototype.updateSourceCodeToolbarButtons = updateSourceCodeToolbarButtons;
-	
+    	
 	/**
 		Restarts the pvsio web process with the current project. The callback is invoked once the process is ready
 		@param {ProjectManager~pvsProcessReady} callback The function to call when the process is ready
@@ -609,8 +566,10 @@ define(function (require, exports, module) {
 		var project = this.project(), ws = WSManager.getWebSocket();
 		if (project && project.mainPVSFile()) {
 			ws.lastState("init(0)");
-			ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()},
-						  callback);
+			ws.startPVSProcess({
+                fileName: project.mainPVSFile().name(),
+                projectName: project.name()
+            }, callback);
 		}
 		return this;
 	};
