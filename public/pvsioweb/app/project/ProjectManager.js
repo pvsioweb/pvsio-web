@@ -306,11 +306,16 @@ define(function (require, exports, module) {
 	 * @param {callback} [cb = function () {}] function to invoke after files have been loaded into the project
 	 * @memberof ProjectManager
 	 */
-	ProjectManager.prototype.openFiles = function () {
+	ProjectManager.prototype.openFiles = function (cb) {
         var pm = this;
-        var project = this.project(), editor = this.editor();
+        var project = this.project(),
+            editor = this.editor(),
+            err,
+            res;
 		openFilesForm.create().on("cancel", function (e, view) {
 			view.remove();
+            err = { msg: "cancelled by user" };
+            if (cb && typeof cb === "function") { cb(err, res); }
 		}).on("ok", function (e, view) {
             var i = 0, promises = [], data = e.data, currLength = project.pvsFilesList().length;
             //create promises for the pvs source files, if any is specified in data
@@ -326,15 +331,24 @@ define(function (require, exports, module) {
                         project.addSpecFile(data.pvsSpec[index].name, specContent);
                     });
                 }).then(function () {
-                    // clear dirty flags
-                    project.pvsFilesList().forEach(function (f) { f.dirty(false); });
-                    // select the first of the opened files 
-                    // FIXME: we are assuming here that the files are added at the end of the list; need a cleaner way to select the file
-                    pvsFilesListView.selectItem(project.pvsFilesList()[currLength]);
-                    // fire project changed event
-                    pm.fire({type: "ProjectChanged", current: project, previous: project});
+                    // select the first of the opened files and fire project changed event
+                    if (data.pvsSpec[0]) {
+                        pvsFilesListView.selectItem(
+                            project.pvsFiles()[data.pvsSpec[0].name]
+                        );
+                        // fire project changed event
+                        pm.fire({
+                            type: "ProjectChanged",
+                            current: project,
+                            previous: project
+                        });
+                    }
+                    view.remove();
+                    var msg = (project.pvsFilesList().length - currLength)
+                                + " added to the project";
+                    res = { msg: msg };
+                    if (cb && typeof cb === "function") { cb(err, res); }
                 });
-			view.remove();
 		});
 	};
 	/**
