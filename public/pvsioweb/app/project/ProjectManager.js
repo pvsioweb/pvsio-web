@@ -262,16 +262,6 @@ define(function (require, exports, module) {
                             pm.fire({type: "ProjectChanged", current: p, previous: pm.project()});
 							pm.editor().removeAllListeners("change");
 							pm.editor().setValue("");
-							if (p.image()) {
-								pm.updateImage(p.image().content());
-								WidgetManager.updateMapCreator(function () {
-									WidgetManager.restoreWidgetDefinitions(p.widgetDefinitions());
-								});
-                                d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
-							} else {
-                                //show the image drag and drop div
-                                d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
-                            }
 							//list all files
 							if (p.pvsFiles()) {
 								pm.renderSourceFileList(res.project.folderStructure);
@@ -280,7 +270,26 @@ define(function (require, exports, module) {
                                 p.pvsFilesList().forEach(function (f) { f.dirty(false); });
 							}
 							pm.editor().on("change", editorChangedListener(pm.editor(), pm, pvsFilesListView));
-							if (callback) { callback(p); }
+							// update image -- note that we need to wait the callback as image loading may take a little while in some cases
+							if (p.image()) {
+								pm.updateImage(p.image(), function (res) {
+                                    if (res.type !== "error") {
+                                        WidgetManager.updateMapCreator(function () {
+                                            WidgetManager.restoreWidgetDefinitions(p.widgetDefinitions());
+                                        });
+                                        d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+                                    } else {
+                                        console.log(res);
+                                        //show the image drag and drop div
+                                        d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
+                                    }
+                                    if (callback && typeof callback === "function") { callback(p); }
+                                });
+							} else {
+                                //show the image drag and drop div
+                                d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
+                                if (callback && typeof callback === "function") { callback(p); }
+                            }
 						}
 					});
 					//remove the dialog
@@ -333,10 +342,25 @@ define(function (require, exports, module) {
 	 * @param {String} imageData The url or base64 encoded string to put in the src attribute of the img element
 	 * @memberof ProjectManager
 	 */
-	ProjectManager.prototype.updateImage = function (imageData) {
-        d3.select("#imageDiv img").attr("src", imageData);
-        //hide the draganddrop stuff
-        d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+	ProjectManager.prototype.updateImage = function (image, cb) {
+        var img = new Image();
+        
+        function imageLoadComplete(res) {
+            d3.select("#imageDiv img").attr("src", img.src).attr("height", img.height).attr("width", img.width);
+            //hide the draganddrop stuff
+            d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+            // invoke callback, if any
+            if (cb && typeof cb === "function") { cb(res); }
+        }
+        function imageLoadError(res) {
+            alert("Failed to load picture " + img.name);
+            if (cb && typeof cb === "function") { cb(res); }
+        }
+   
+        img.onload = imageLoadComplete;
+        img.onerror = imageLoadError;
+        img.name = image.path();
+        img.src = image.content();
     };
 	
 	ProjectManager.prototype.preparePageForImageUpload = function () {
@@ -347,12 +371,28 @@ define(function (require, exports, module) {
             d3.select("#btnSelectPicture").node().click();
         });
 
-        function _updateImage(file) {
+        function _updateImage(file, cb) {
             var fr = new FileReader(), ext = file.name.split(".").slice(-1).join("");
             fr.onload = function (event) {
-                var imageData = event.target.result;
-                pm.updateImage(imageData);
-                pm.project().changeImage("image." + ext, imageData);
+                var image = { name   : function () { return file.name; },
+                              path   : function () { return file.name; },
+                              content: function () { return event.target.result; } };
+//                var imageData = event.target.result;
+                pm.updateImage(image, function (res) {
+                    if (res.type !== "error") {
+                        pm.project().changeImage("image." + ext, image.content());
+                        // resize svg area and restore widget definitions, if any
+                        WidgetManager.updateMapCreator(function () {
+                            WidgetManager.restoreWidgetDefinitions(pm.project().widgetDefinitions());
+                        });
+                        d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+                    } else {
+                        console.log(res);
+                        //show the image drag and drop div
+                        d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
+                    }
+                    if (cb && typeof cb === "function") { cb(res); }
+                });
             };
             fr.readAsDataURL(file);
         }
@@ -378,10 +418,12 @@ define(function (require, exports, module) {
         c.ondrop =  function (e) {
             d3.select(c).style("border", null);
             var file = e.dataTransfer.files[0];
-            _updateImage(file);
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
+            _updateImage(file, function (res) {
+                console.log(res);
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            });
         };
     };
 	
@@ -429,9 +471,6 @@ define(function (require, exports, module) {
                 project.saveNew(data.projectName, function (err, res, folderStructure) {
                     console.log({err: err, res: res});
                     if (!err) {
-                        if (project.image()) {
-                            pm.updateImage(project.image().content());
-                        }
                         project.pvsFilesList().forEach(function (f) {
                             f.dirty(false);
                         });
@@ -443,15 +482,23 @@ define(function (require, exports, module) {
                         pvsFilesListView.selectItem(project.mainPVSFile()
                                                         || project.pvsFilesList()[0]
                                                         || project.path());
-                        //fire project changed event
-                        pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
-            
+                        if (project.image()) {
+                            pm.updateImage(project.image(), function (res) {
+                                //fire project changed event
+                                pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
+                                //invoke callback
+                                if (cb && typeof cb === "function") { cb(err, project); }
+                            });
+                        } else {
+                            //fire project changed event
+                            pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
+                            //invoke callback
+                            if (cb && typeof cb === "function") { cb(err, project); }
+                        }
                     } else {
                         alert(err.toString());
-                    }
-                    //invoke callback
-                    if (cb && typeof cb === "function") {
-                        cb(err, project);
+                        //invoke callback
+                        if (cb && typeof cb === "function") { cb(err, project); }
                     }
                 });
             });
