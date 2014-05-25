@@ -4,8 +4,9 @@
  * @author Patrick Oladimeji
  * @date 11/15/13 9:49:03 AM
  */
+/*jshint undef: true, unused: true*/
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, _, Promise, document, FileReader*/
+/*global define, d3, window, Promise, document, FileReader, Image*/
 define(function (require, exports, module) {
 	"use strict";
 	var property = require("util/property"),
@@ -15,23 +16,20 @@ define(function (require, exports, module) {
 		ProjectFile = require("./ProjectFile"),
 		WSManager = require("websockets/pvs/WSManager"),
 		fs	= require("util/fileHandler"),
-		queue = require("d3/queue"),
         ScriptPlayer = require("util/ScriptPlayer"),
         newProjectForm          = require("pvsioweb/forms/newProject"),
 		openProjectForm         = require("pvsioweb/forms/openProject"),
 		openFilesForm = require("pvsioweb/forms/openFiles"),
-        saveProjectChanges = require("project/forms/SaveProjectChanges"),
 		WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager();
 
 	///	Used to change name of default files (i.e: default_name + counter ) 
-	var counter = 0;
-	var pvsFilesListView;
+	var pvsFilesListView, _projectManager;
     var defaultTheoryName = "main";
     var defaultProjectName = "defaultProject";///FIXME export this variable to a module of constants
-    var emptyTheoryContent = ": THEORY\n"
-                            + " BEGIN\n "
-                            + "  %-- Please type your PVS specification here!\n"
-                            + " END "; // theory name needs to be included at the beginning and end
+    var emptyTheoryContent = ": THEORY\n" +
+                            " BEGIN\n " +
+                            "  %-- Please type your PVS specification here!\n" +
+                            " END "; // theory name needs to be included at the beginning and end
 	
 	function noop() {}
     
@@ -48,27 +46,18 @@ define(function (require, exports, module) {
         document.title = "PVSio-Web -- " + name;
         d3.select("#header #txtProjectName").property("value", name);
 	}
-	
 
-	
-	function editorChangedListener(editor, pm, pvsFilesListView) {
-		return function () {
-			//ideally one should use information from ace to set the dirty mark on the document
-			//e.g editor.getSession().getUndoManager().hasUndo();
-            if (!pvsFilesListView) {
-                pvsFilesListView = pm.renderSourceFileList();
+    function _editorChangedHander(editor) {
+        if (pvsFilesListView) {
+            var pvsFile = _projectManager.project().getSpecFile(pvsFilesListView.getSelectedItem());
+            if (pvsFile) {
+                var dirty = pvsFile.content() !== editor.getValue();
+                pvsFile.content(editor.getValue()).dirty(dirty); //update the selected project file content
+                _projectManager.project()._dirty(dirty || _projectManager.project()._dirty());
             }
-			if (pvsFilesListView) {
-                var project = pm.project();
-				var pvsFile = project.getSpecFile(pvsFilesListView.getSelectedItem());
-				if (pvsFile) {
-					var dirty = pvsFile.content() !== editor.getValue();
-					pvsFile.content(editor.getValue()).dirty(dirty); //update the selected project file content
-                    pm.project()._dirty(true);
-				}
-			}
-		};
-	}
+        }
+    }
+	
 	/**
 	 * Creates a new instance of the ProjectManager. It currently adds a listview for the files loaded into the
 	 * project and keeps the list up to date whenever the project changes or the files within the project changes.
@@ -79,7 +68,7 @@ define(function (require, exports, module) {
 	 */
 	function ProjectManager(project, editor) {
 		eventDispatcher(this);
-		var pm = this;
+		_projectManager = this;
 		/**
             get or set the current {Project}
             @type {Project}
@@ -96,10 +85,10 @@ define(function (require, exports, module) {
 			});
 		this.editor = property.call(this, editor)
 			.addListener("PropertyChanged", function (e) {
-				e.fresh.on("change", editorChangedListener(e.fresh, pm, pvsFilesListView));
+				e.fresh.on("change", _editorChangedHander);
 			});
-		window.onbeforeunload =  function (event) {
-            var p = pm.project();
+		window.onbeforeunload =  function () {
+            var p = _projectManager.project();
             if (p && p._dirty()) {
                 return "Are you sure you want to exit? All unsaved changed will be lost.";
             }
@@ -126,22 +115,18 @@ define(function (require, exports, module) {
                     pvsFile = project.addSpecFile(event.selectedItem.path, makeEmptyTheory(theoryName), true);
                 }
                 if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
-                    editor.removeAllListeners("change");
+                    editor.off("change", _editorChangedHander);
                     editor.setValue(pvsFile.content());
-                    editor.clearSelection();
-                    editor.moveCursorTo(0, 0);
-                    editor.on("change", editorChangedListener(editor, pm, pvsFilesListView));
+                    editor.on("change", _editorChangedHander);
                 } else {
                     //fetch file contents from server and set the value
                     var f = pvsFile.path();
                     ws.getFile(f, function (err, res) {
                         if (!err) {
-                            editor.removeAllListeners("change");
+                            editor.off("change", _editorChangedHander);
                             pvsFile.content(res.fileContent).dirty(false);
                             editor.setValue(pvsFile.content());
-                            editor.clearSelection();
-                            editor.moveCursorTo(0, 0);
-                            editor.on("change", editorChangedListener(editor, pm, pvsFilesListView));
+                            editor.on("change", _editorChangedHander);
                         } else {
                             ///TODO show error loading file
                             console.log(JSON.stringify(err));
@@ -260,7 +245,7 @@ define(function (require, exports, module) {
                             // always set mainPVSfile because ProjectChanged will trigger an invocation of pvsio with that file
                             pm.project().mainPVSFile(pm.project().mainPVSFile() || pm.project().pvsFilesList()[0]);
                             pm.fire({type: "ProjectChanged", current: p, previous: pm.project()});
-							pm.editor().removeAllListeners("change");
+							pm.editor().off("change", _editorChangedHander);
 							pm.editor().setValue("");
 							//list all files
 							if (p.pvsFiles()) {
@@ -269,7 +254,7 @@ define(function (require, exports, module) {
                                 // clear dirty flags
                                 p.pvsFilesList().forEach(function (f) { f.dirty(false); });
 							}
-							pm.editor().on("change", editorChangedListener(pm.editor(), pm, pvsFilesListView));
+							pm.editor().on("change", _editorChangedHander);
 							// update image -- note that we need to wait the callback as image loading may take a little while in some cases
 							if (p.image()) {
 								pm.updateImage(p.image(), function (res) {
@@ -309,7 +294,6 @@ define(function (require, exports, module) {
 	ProjectManager.prototype.openFiles = function (cb) {
         var pm = this;
         var project = this.project(),
-            editor = this.editor(),
             err,
             res;
 		openFilesForm.create().on("cancel", function (e, view) {
@@ -344,8 +328,8 @@ define(function (require, exports, module) {
                         });
                     }
                     view.remove();
-                    var msg = (project.pvsFilesList().length - currLength)
-                                + " added to the project";
+                    var msg = (project.pvsFilesList().length - currLength) + 
+                            " added to the project";
                     res = { msg: msg };
                     if (cb && typeof cb === "function") { cb(err, res); }
                 });
@@ -493,11 +477,11 @@ define(function (require, exports, module) {
                         WidgetManager.updateMapCreator();
                         pm.project(project);
                         pm.renderSourceFileList(folderStructure);
-                        pvsFilesListView.selectItem(project.mainPVSFile()
-                                                        || project.pvsFilesList()[0]
-                                                        || project.path());
+                        pvsFilesListView.selectItem(project.mainPVSFile() ||
+                                                    project.pvsFilesList()[0] ||
+                                                    project.path());
                         if (project.image()) {
-                            pm.updateImage(project.image(), function (res) {
+                            pm.updateImage(project.image(), function () {
                                 //fire project changed event
                                 pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
                                 //invoke callback
@@ -523,7 +507,7 @@ define(function (require, exports, module) {
 	 * Creates a new Project -- interactive version: displays the new Project dialog and handles the response 
      * @memberof ProjectManager
      */
-	ProjectManager.prototype.newProject = function (projectName, pvsSpec) {
+	ProjectManager.prototype.newProject = function () {
         var pm = this;
         newProjectForm.create().on("cancel", function (e, formView) {
             console.log(e);
@@ -601,7 +585,6 @@ define(function (require, exports, module) {
 	 */
 	ProjectManager.prototype.saveFiles = function (pvsFiles, cb) {
         if (pvsFiles) {
-            var pm = this;
             var project = this.project();
             if (project.name() === defaultProjectName) {
                 this.saveProject(project, cb);
@@ -641,7 +624,6 @@ define(function (require, exports, module) {
      */
     ProjectManager.prototype.createDefaultProject = function (cb) {
         var pm = this;
-        var ws = WSManager.getWebSocket();
         var defaultFileName = defaultTheoryName + ".pvs";
         var defaultFilePath = defaultProjectName + "/" + defaultFileName;
         var data = { projectName: defaultProjectName,

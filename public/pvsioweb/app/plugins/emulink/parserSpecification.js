@@ -120,13 +120,14 @@ define(function (require, exports, module) {
             return newObjectWithoutSpaces;
 
         }
+        //FIXME: this function will have an undefined behaviour since we are no longer using ace
         this.startParsing = function()
         {   begin= new Date().getMilliseconds();
             var content;
             var initialTag;
             var finalTag;
             var kindOfTag;
-            var Range = require("ace/range").Range;
+           // var Range = require("ace/range").Range;
             var lengthDocument = this.editor.session.getLength();
             var objectSearch = { 
                                  needle: this.tagStart,

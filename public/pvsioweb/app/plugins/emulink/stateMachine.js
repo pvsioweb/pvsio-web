@@ -22,7 +22,6 @@ define(function (require, exports, module) {
     "use strict";
 
     var d3    = require("d3/d3");
-    var ace   = require("ace/ace");
     var editor;
     var modifiedUser = 0;
     var pvsWriter = require("plugins/emulink/stateToPvsSpecificationWriter");
