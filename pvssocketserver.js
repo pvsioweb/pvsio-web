@@ -33,7 +33,6 @@ function run() {
     var pvsio                   = require("./pvsprocess"),
         path                    = require("path"),
         ws                      = require("ws"),
-        util                    = require("util"),
         http                    = require("http"),
         fs                      = require("fs"),
         express                 = require("express"),
@@ -74,6 +73,29 @@ function run() {
     }
     
     /**
+     Writes a file with the specified content to the specified path
+     @param {string} fullPath the full path to the file
+     @param {string} fileContent the content of the file
+     @param {string?} fileEncoding the encoding to use for writing the file (defaults to utf8)
+     @returns {Promise} a promise that resolves when file has been written or rejects when an error occurs
+    */
+    function writeFile(fullPath, fileContent, fileEncoding) {
+        return new Promise(function (resolve, reject) {
+            if (typeof fullPath !== "string" || typeof fileContent !== "string") {
+                reject("Both fullPath and fileContent must be strings");
+            } else {
+                fs.writeFile(fullPath, fileContent, fileEncoding, function (err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(fullPath);
+                    }
+                });
+            }
+        });
+    }
+    
+    /**
      * Utility function that dispatches responses to websocket clients
      * @param {{type:string, data}} token The token to send to the client
      * @param {Socket} socket The websocket to use to send the token
@@ -109,40 +131,33 @@ function run() {
     /**
      * reads and changes the settings in the .pvsioweb file in the project root
     */
-    function changeProjectSetting(projectName, key, value, callback) {
-        var file = baseProjectDir + projectName + "/.pvsioweb", props = {};
-        //write the property file in the project root
-        function writeFile(props, cb) {
-            fs.writeFile(file, JSON.stringify(props, null, " "), function (err) {
-                if (err) {
-                    props.err = err;
-                }
-                if (cb) {
-                    cb(props);
+    function changeProjectSetting(projectName, key, value) {
+        var file = baseProjectDir + projectName + "/.pvsioweb",
+            props = {};
+        return new Promise(function (resolve, reject) {
+            //if file does not exist, create it. Else read the property file and update just the key value specified
+            fs.exists(file, function (exists) {
+                if (!exists) {
+                    props[key] = value;
+                    writeFile(file, JSON.stringify(props, null, " "))
+                        .then(resolve, reject);
+                } else {
+                    fs.readFile(file, {encoding: "utf8"}, function (err, res) {
+                        props = {err: err};
+                        if (!err) {
+                            props =  JSON.parse(res) || props;
+                            props[key] = value;
+                            //write the file back
+                            writeFile(file, JSON.stringify(props, null, " "))
+                                .then(resolve, reject);
+                        } else {//there was an error so reject the promise
+                            reject(err);
+                        }
+                    });
                 }
             });
-        }
-        //if file does not exist, create it. Else read the property file and update just the key value specified
-        fs.exists(file, function (exists) {
-            if (!exists) {
-                props[key] = value;
-                writeFile(props, callback);
-            } else {
-                fs.readFile(file, {encoding: "utf8"}, function (err, res) {
-                    props = {err: err};
-                    if (!err) {
-                        props =  JSON.parse(res) || props;
-                        props[key] = value;
-                        //write the file back
-                        writeFile(props, callback);
-                    } else {
-                        if (callback) {
-                            callback(props);
-                        }
-                    }
-                });
-            }
         });
+        
     }
 
     
@@ -159,7 +174,7 @@ function run() {
                 });
             } else {
                 // if the path has been created successfully, just invoke the callback function (if any)
-                if (cb && typeof cb === "function") { cb(); }
+                if (cb && typeof cb === "function") { cb(error); }
             }
         });
     }
@@ -168,7 +183,7 @@ function run() {
      * writes files (directory structure is automatically created
      */
     
-    ///FIXME: It is not clear how this functions handles errors
+    ///FIXME: It is not clear how this function handles errors
     function writeFiles(files, cb) {
         function writeFilesAux(files, i, cb) {
             if (i < files.length && i >= 0) {
@@ -177,18 +192,23 @@ function run() {
                 dir = f.path.substr(0, f.path.lastIndexOf(path.sep));
                 logger.debug("generating directory structure " + dir);
                 mkdirRecursive(dir, function (err) {
-                    fs.writeFile(f.path, f.fileContent, {encoding: f.encoding || "utf8"}, function (err) {
-                        if (!err) {
-                            logger.debug("file " + f.path + " saved successfully!");
-                            i++;
-                            if (i < files.length) {
-                                writeFilesAux(files, i, cb);
-                            } else {
-                                logger.debug("all files have been processed... sending data back to client.");
-                                if (cb && typeof cb === "function") { cb(err, files); }
-                            }
-                        } else { logger.debug("error while saving file " + f.path + " (" + err + ")"); }
-                    });
+                    if (!err) {
+                        fs.writeFile(f.path, f.fileContent, {encoding: f.encoding || "utf8"}, function (err) {
+                            if (!err) {
+                                logger.debug("file " + f.path + " saved successfully!");
+                                i++;
+                                if (i < files.length) {
+                                    writeFilesAux(files, i, cb);
+                                } else {
+                                    logger.debug("all files have been processed... sending data back to client.");
+                                    if (cb && typeof cb === "function") { cb(err, files); }
+                                }
+                            } else { logger.debug("error while saving file " + f.path + " (" + err + ")"); }
+                        });
+                    } else {
+                        logger.error("An error occured while calling mkdirRecursive", err);
+                        if (cb && typeof cb === "function") { cb(err); }
+                    }
                 });
             }
         }
@@ -212,8 +232,11 @@ function run() {
         var obj = {type: "projectCreated"};
             
         function doCreate(cb) {
+            cb = cb || function () {};
             // utility functions
+            ///FIXME rewrite this to handle err variable
             function complete_doCreate(err, files) {
+                var promises = [];
                 // always return paths relative to baseProjectDir
                 files.forEach(function (f) {
                     f.path = f.path.replace(projectPath, projectName);
@@ -222,11 +245,6 @@ function run() {
                 
                 //by default set the main pvs file to be the first item in the list after sort
                 mainPVSFile = mainPVSFile || files.sort()[0].path;
-                if (mainPVSFile) {
-                    obj.mainPVSFile = mainPVSFile;
-                    // create a main file in the project settings
-                    changeProjectSetting(projectName, "mainPVSFile", obj.mainPVSFile);
-                }
                 
                 // get project folder structure once all files have been wrtten
                 obj.folderStructure = getFolderStructure(projectPath);
@@ -236,13 +254,22 @@ function run() {
                     child.path = child.path.replace(projectPath, projectName);
                 });
                 obj.projectPath = obj.folderStructure.path;
-                if (widgetDefinitions) {
-                    fs.writeFile(path.join(projectPath, "widgetDefinition.json"), widgetDefinitions, function (err) {
-                        obj.err = err;
-                        if (cb && typeof cb === "function") { cb(obj); }
-                    });
+                
+                if (mainPVSFile) {
+                    obj.mainPVSFile = mainPVSFile;
+                    // create a main file in the project settings
+                    promises.push(changeProjectSetting(projectName, "mainPVSFile", obj.mainPVSFile));
                 }
-               
+                if (widgetDefinitions) {
+                    promises.push(writeFile(path.join(projectPath, "widgetDefinition.json"), widgetDefinitions));
+                }
+                Promise.all(promises)
+                    .then(function () {
+                        cb(obj);
+                    }, function (err) {
+                        obj.err = err;
+                        cb(obj);
+                    });
             }
 
             fs.mkdirSync(projectPath);
@@ -256,7 +283,7 @@ function run() {
                 obj.imagePath = imagePath;
                 obj.imageData = imageData;
             }
-
+            ///FIXME potentially this branch and consequently the complete_doCreate wont get called if there are no spec files in the project
             if (specFiles && specFiles.length > 0) {
                 var files = specFiles.map(function (f) {
                     if (f.fileName.indexOf(projectName) === 0) {
@@ -268,7 +295,7 @@ function run() {
                 writeFiles(files, complete_doCreate);
             }
         }
-        
+        //create project path and create contents
         fs.mkdir(projectPath, function (err) {
             if (!err || (err.code === "EEXIST" && overWrite)) {
                 p.removeFile(projectPath, function (err) {
@@ -552,7 +579,7 @@ function run() {
                 var encoding = token.encoding || "utf8";
                 var projectPath = baseProjectDir + token.projectName;
                 
-                function complete_writeFile(err, files) {
+                function complete_writeFile(err) {
                     var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid, err: err};
                     processCallback(res, socket);
                 }
