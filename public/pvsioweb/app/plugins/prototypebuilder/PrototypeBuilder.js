@@ -24,7 +24,7 @@ define(function (require, exports, module) {
     
     require("cm/addon/fold/foldcode");
     require("cm/addon/fold/foldgutter");
-    require("cm/addon/fold/indent-fold");
+    require("cm/addon/fold/indentFold");
     require("cm/mode/pvs/pvs");
     
 	function PrototypeBuilder() {
@@ -42,7 +42,7 @@ define(function (require, exports, module) {
 
         // this enable autocompletion
         editor = new CodeMirror(d3.select("#editor").node(), {
-            mode: "pvs", lineNumbers: true, foldGutter: true, gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]});
+            mode: "pvs", lineNumbers: true, foldGutter: true, autofocus: true, gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]});
         editor.setSize("100%", "100%");
         projectManager.editor(editor);
 

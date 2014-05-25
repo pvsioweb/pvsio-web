@@ -117,6 +117,7 @@ define(function (require, exports, module) {
                 if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
                     editor.off("change", _editorChangedHander);
                     editor.setValue(pvsFile.content());
+                    editor.focus();
                     editor.on("change", _editorChangedHander);
                 } else {
                     //fetch file contents from server and set the value
@@ -126,6 +127,7 @@ define(function (require, exports, module) {
                             editor.off("change", _editorChangedHander);
                             pvsFile.content(res.fileContent).dirty(false);
                             editor.setValue(pvsFile.content());
+                            editor.focus();
                             editor.on("change", _editorChangedHander);
                         } else {
                             ///TODO show error loading file
