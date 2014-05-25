@@ -1,0 +1,16 @@
+<div class="form-center">
+    <div class="panel panel-info shadow center">
+        <div class="panel-heading">{{header}}</div>
+        <div class="panel-body" style="overflow-y: scroll; height: 120px;">
+            <p contenteditable="true" id="label">
+            {{#each label}}
+            {{this}}<br/>
+            {{/each}}
+            </p>
+        </div>
+        <div class="panel-footer">
+            <button type="button" class="btn btn-danger left" id="btnLeft">{{buttons.[0]}}</button>
+            <button type="submit" class="btn btn-success right" id="btnRight">{{buttons.[1]}}</button>
+        </div>
+    </div>
+</div>

@@ -8,15 +8,17 @@
 /*global define, d3, require, $, brackets, window, document */
 define(function (require, exports, module) {
 	"use strict";
-	var stateMachine			= require("plugins/emulink/stateMachine"),
-        handlerFile             = require("util/fileHandler"),
-        pvsWriter               = require("plugins/emulink/stateToPvsSpecificationWriter"),
-        parserSpecification     = require("plugins/emulink/parserSpecification"),
-		PrototypeBuilder		= require("plugins/prototypebuilder/PrototypeBuilder"),
-		Logger					= require("util/Logger"),
-        Simulator               = require("plugins/emulink/simulator"),
-        PVSioWebClient          = require("PVSioWebClient");
-
+	var stateMachine		= require("plugins/emulink/stateMachine"),
+        handlerFile         = require("util/fileHandler"),
+        pvsWriter           = require("plugins/emulink/stateToPvsSpecificationWriter"),
+        parserSpecification = require("plugins/emulink/parserSpecification"),
+		PrototypeBuilder	= require("plugins/prototypebuilder/PrototypeBuilder"),
+		Logger				= require("util/Logger"),
+        Simulator           = require("plugins/emulink/simulator"),
+        PVSioWebClient      = require("PVSioWebClient"),
+        EditorModeUtils     = require("plugins/emulink/EmuchartsEditorModes"),
+        EmuchartsManager    = require("plugins/emulink/EmuchartsManager");
+    
     var instance;
     var projectManager;
     var editor;
@@ -24,12 +26,15 @@ define(function (require, exports, module) {
     var selectedFileChanged;
     var pvsioWebClient;
     var canvas;
-    	
+    
+    var emuchartsManager;
+    var MODE = new EditorModeUtils();
+    
 	function createHtmlElements() {
 		var content = require("text!plugins/emulink/forms/maincontent.handlebars");
-        canvas = pvsioWebClient.createCollapsiblePanel("Emuchart Editor");
+        canvas = pvsioWebClient.createCollapsiblePanel("Emulink");
         canvas = canvas.html(content);
-		var infoBox = document.getElementById("infoBar");
+		var infoBox = document.getElementById("EmuchartsEditorMode");
 		if (infoBox) {
 			infoBox.style.background = "seagreen";
 			infoBox.style.color = "white";
@@ -37,10 +42,41 @@ define(function (require, exports, module) {
 		}
         
         // add listeners
+        // this first listner is obsolete
         d3.select("#button_newDiagram").on("click", function () {
 			stateMachine.init(editor, ws, projectManager);
             d3.select("#EmuchartLogo").classed("hidden", true);
             d3.select("#graphicalEditor").classed("hidden", false);
+		});
+        
+        d3.select("#btnNewEmuchart").on("click", function () {
+            d3.select("#EmuchartLogo").classed("hidden", true);
+            d3.select("#graphicalEditor").classed("hidden", false);
+            emuchartsManager.newEmucharts("emucharts.pvs");
+            // set initial editor mode
+            emuchartsManager.set_editor_mode(MODE.BROWSE());
+            // render emuchart
+            emuchartsManager.render();
+        });
+        d3.select("#btnLoadEmuchart").on("click", function () {
+            projectManager.openFiles(function (err, res) {
+                if (!err) {
+                    var emucharts = projectManager.project()
+                                        .pvsFiles()["graphDefinition.json"];
+                    if (emucharts) {
+                        d3.select("#EmuchartLogo").classed("hidden", true);
+                        d3.select("#graphicalEditor").classed("hidden", false);
+                        emuchartsManager.importEmucharts(emucharts);
+                        // set initial editor mode
+                        emuchartsManager.set_editor_mode(MODE.BROWSE());
+                        // render emuchart                        
+                        emuchartsManager.render();
+                    }
+                } else {
+                    alert(err.msg);
+                    console.log(err);
+                }
+            });
 		});
         d3.select("#button_state").on("click", function () {
 			stateMachine.add_node_mode();
@@ -132,49 +168,80 @@ define(function (require, exports, module) {
             stateMachine.addNewDiagram();          
         });    
 	   */
+                
+        d3.select("#btn_toolbarAddState").on("click", function () {
+            emuchartsManager.set_editor_mode(MODE.ADD_STATE());
+        });
+        d3.select("#btn_toolbarAddTransition").on("click", function () {
+            emuchartsManager.set_editor_mode(MODE.ADD_TRANSITION());
+        });
+        d3.select("#btn_toolbarBrowse").on("click", function () {
+            emuchartsManager.set_editor_mode(MODE.BROWSE());
+        });
+        d3.select("#btn_toolbarRename").on("click", function () {
+            emuchartsManager.set_editor_mode(MODE.RENAME());
+        });
+
 	}
 
+    function resetToolbarColors() {
+        document.getElementById("btn_toolbarBrowse").style.background = "black";
+        document.getElementById("btn_toolbarAddState").style.background = "black";
+        document.getElementById("btn_toolbarAddTransition").style.background = "black";
+        document.getElementById("btn_toolbarRename").style.background = "black";
+    }
+    
 	function highlightSelectedFunction(m) {
-		// reset colors	of all functions in the menu
-		document.getElementById("button_state").style.background = "";
-		document.getElementById("button_transition").style.background = "";
-		document.getElementById("button_self_transition").style.background = "";
-		document.getElementById("button_add_field").style.background = "";
-		// highlight selected function in the menu
-		if (m === stateMachine.MODE.ADD_NODE
-                && document.getElementById("button_state")) {
-            document.getElementById("button_state").style.background = "steelblue";
-		}
-		if (m === stateMachine.MODE.ADD_TRANSITION
-                && document.getElementById("button_transition")) {
-            document.getElementById("button_transition").style.background = "steelblue";
-		}
-		if (m === stateMachine.MODE.ADD_SELF_TRANSITION
-                && document.getElementById("button_self_transition")) {
-			document.getElementById("button_self_transition").style.background = "steelblue";
-		}
-		if (m === stateMachine.MODE.ADD_FIELD
-                && document.getElementById("button_add_field")) {
-			document.getElementById("button_add_field").style.background = "steelblue";
-		}
+		// reset toolbar colors
+        resetToolbarColors();
+        if (m === MODE.BROWSE()) {
+            document.getElementById("btn_toolbarBrowse").style.background = "green";
+        } else if (m === MODE.ADD_STATE()) {
+            document.getElementById("btn_toolbarAddState").style.background = "steelblue";
+        } else if (m === MODE.ADD_TRANSITION()) {
+            document.getElementById("btn_toolbarAddTransition").style.background = "steelblue";
+        } else if (m === MODE.RENAME()) {
+            document.getElementById("btn_toolbarRename").style.background = "steelblue";
+        }
+        
+//		document.getElementById("button_state").style.background = "";
+//		document.getElementById("button_transition").style.background = "";
+//		document.getElementById("button_add_field").style.background = "";
+//		// highlight selected function in the menu
+//		if (m === stateMachine.MODE.ADD_NODE
+//                && document.getElementById("button_state")) {
+//            document.getElementById("button_state").style.background = "steelblue";
+//		}
+//		if (m === stateMachine.MODE.ADD_TRANSITION
+//                && document.getElementById("button_transition")) {
+//            document.getElementById("button_transition").style.background = "steelblue";
+//		}
+//		if (m === stateMachine.MODE.ADD_SELF_TRANSITION
+//                && document.getElementById("button_self_transition")) {
+//			document.getElementById("button_self_transition").style.background = "steelblue";
+//		}
+//		if (m === stateMachine.MODE.ADD_FIELD
+//                && document.getElementById("button_add_field")) {
+//			document.getElementById("button_add_field").style.background = "steelblue";
+//		}
 	}
 
+    
 	function modeChange_callback(event) {
-		var infoBar = document.getElementById("infoBar");
-		if (infoBar) {
-			infoBar.textContent = "Editor mode: "
-                                    + stateMachine.mode2string(event.mode);
+		var EmuchartsEditorMode = document.getElementById("EmuchartsEditorMode");
+		if (EmuchartsEditorMode) {
+            if (event.mode === MODE.BROWSE()) {
+                EmuchartsEditorMode.style.background = "green";
+            } else { EmuchartsEditorMode.style.background = "steelblue"; }
+			EmuchartsEditorMode.textContent = "Editor mode: " + MODE.mode2string(event.mode);
 		}
 		var infoBox = document.getElementById("infoBox");
 		if (infoBox) {
 			infoBox.value = (event.message && event.message !== "") ?
-							event.message : stateMachine.modeTooltip(event.mode);
+                    event.message : MODE.modeTooltip(event.mode);
 		}
 		// highlight selected function in the menu
 		highlightSelectedFunction(event.mode);
-
-		// debug line
-		console.log(event.mode);
 	}
 
     
@@ -192,7 +259,7 @@ define(function (require, exports, module) {
                          + "/graphDefinition.json", fileContent: gd};
             ws.writeFile(data, function (err, res) {
                 if (!err) { console.log("Graph Saved");
-                    } else { console.log("ERRORE SAVING JSON GRAPH", err); }
+                    } else { console.log("ERROR SAVING JSON GRAPH", err); }
             });
         });
         projectManager.addListener("ProjectChanged", function (event) {
@@ -219,9 +286,15 @@ define(function (require, exports, module) {
         });
         
     }
-	
+
+    /**
+	 * Constructor
+	 * @memberof Emulink
+	 */
     function Emulink() {
         pvsioWebClient = PVSioWebClient.getInstance();
+        emuchartsManager = new EmuchartsManager();
+        emuchartsManager.addListener("emuCharts_editorModeChanged", modeChange_callback);
 	}
     
     Emulink.prototype.getDependencies = function () {
