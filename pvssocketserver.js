@@ -23,8 +23,9 @@ You should have received a copy of the GNU General Public License along with Foo
  * @date 28 Jul 2012 21:52:31
  *
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true, node: true */
-/*global */
+/*jshint unused: true, undef: true*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, undef: true, node: true */
+/*global __dirname*/
 
 function run() {
     "use strict";
@@ -40,12 +41,11 @@ function run() {
         webserver               = express(),
         procWrapper             = require("./processwrapper"),
         uploadDir               = "/public/uploads",
-        host                    = "0.0.0.0",
         port                    = 8082,
-        workspace               = __dirname + "/public",
         pvsioProcessMap         = {},//each client should get his own process
         httpServer              = http.createServer(webserver),
         Promise                 = require("es6-promise").Promise,
+        logger                  = require("tracer").console(),
         baseProjectDir          = __dirname + "/public/projects/";
     var p, clientid = 0, WebSocketServer = ws.Server;
 
@@ -55,7 +55,7 @@ function run() {
         if (s.isDirectory()) {
             var files = fs.readdirSync(root);
             file.isDirectory = true;
-            file.children = files.map(function (f, i) {
+            file.children = files.map(function (f) {
                 return getFolderStructure(path.join(root, f));
             });
             if (file.children) {
@@ -168,33 +168,32 @@ function run() {
      * writes files (directory structure is automatically created
      */
     
-    
+    ///FIXME: It is not clear how this functions handles errors
     function writeFiles(files, cb) {
         function writeFilesAux(files, i, cb) {
             if (i < files.length && i >= 0) {
                 var f, dir;
                 f = files[i];
-                dir = f.path.substr(0, f.path.lastIndexOf("/")); //FIXME: use system functions to retrieve the file separator
-                util.log("dbg: generating directory structure " + dir);
+                dir = f.path.substr(0, f.path.lastIndexOf(path.sep));
+                logger.debug("generating directory structure " + dir);
                 mkdirRecursive(dir, function (err) {
-                    fs.writeFile(f.path, f.fileContent, function (err) {
+                    fs.writeFile(f.path, f.fileContent, {encoding: f.encoding || "utf8"}, function (err) {
                         if (!err) {
-                            util.log("dbg: file " + f.path + " saved successfully!");
+                            logger.debug("file " + f.path + " saved successfully!");
                             i++;
                             if (i < files.length) {
                                 writeFilesAux(files, i, cb);
                             } else {
-                                util.log("dbg: all files have been processed... sending data back to client.");
+                                logger.debug("all files have been processed... sending data back to client.");
                                 if (cb && typeof cb === "function") { cb(err, files); }
                             }
-                        } else { util.log("dbg: error while saving file " + f.path + " (" + err + ")"); }
+                        } else { logger.debug("error while saving file " + f.path + " (" + err + ")"); }
                     });
                 });
             }
         }
         writeFilesAux(files, 0, cb);
     }
-    
     
     /**
      * Creates a project
@@ -237,9 +236,14 @@ function run() {
                     child.path = child.path.replace(projectPath, projectName);
                 });
                 obj.projectPath = obj.folderStructure.path;
-                if (cb && typeof cb === "function") { cb(obj); }
+                if (widgetDefinitions) {
+                    fs.writeFile(path.join(projectPath, "widgetDefinition.json"), widgetDefinitions, function (err) {
+                        obj.err = err;
+                        if (cb && typeof cb === "function") { cb(obj); }
+                    });
+                }
+               
             }
-
 
             fs.mkdirSync(projectPath);
             obj.projectPath = projectPath;
@@ -258,7 +262,7 @@ function run() {
                     if (f.fileName.indexOf(projectName) === 0) {
                         return {path: path.join(baseProjectDir, f.fileName), fileContent: f.fileContent};
                     }
-                    console.log("dbg: Warning, deprecated filenames (project name not included in the filename)");
+                    logger.debug("Warning, deprecated filenames (project name not included in the filename)");
                     return {path: path.join(projectPath, f.fileName), fileContent: f.fileContent};
                 });
                 writeFiles(files, complete_doCreate);
@@ -280,38 +284,13 @@ function run() {
                 if (cb && typeof cb === "function") { cb(obj); }
             }
         });
-        
-//        try {
-//            var exists = fs.existsSync(projectPath);
-//            if (exists && !overWrite) {
-//                obj.err = projectName + " already exists. Please choose a different name";
-//                cb(obj);
-//            } else if (exists && overWrite) {
-//                p.removeFile(projectPath, function (err) {
-//                    if (err) {
-//                        obj.err = err;
-//                        cb(obj);
-//                    } else {
-//                        doCreate(cb);
-//                    }
-//                });
-//                
-//            } else {
-//                //create a project folder
-//                doCreate(cb);
-//            }
-//        } catch (err) {
-//            obj.err = err;
-//            console.log("dbg: Error while trying to create project: " + err.toString());
-//            if (cb && typeof cb === "function") { cb(obj); }
-//        }
     }
 
     /**
     * open a project with the specified projectName
     */
     function openProject(projectName) {
-        console.log("dbg: Opening project " + projectName + " ...");
+        logger.debug("Opening project " + projectName + " ...");
         var imageExts = ["jpg", "jpeg", "png"],
             specExts = ["pvs"],
             projectPath = baseProjectDir + projectName,
@@ -366,7 +345,7 @@ function run() {
             res.projectPath = res.folderStructure.path;
             return res;
         } else {
-            console.log("dbg: error while opening project " + projectPath);
+            logger.error("error while opening project " + projectPath);
             return null;
         }
     }
@@ -378,7 +357,7 @@ function run() {
     function listProjects() {
         var res;
         try {
-            res = fs.readdirSync(baseProjectDir).map(function (d, i) {
+            res = fs.readdirSync(baseProjectDir).map(function (d) {
                 var stat = fs.statSync(baseProjectDir + d);
                 if (stat.isDirectory()) {
                     return d;
@@ -394,7 +373,7 @@ function run() {
 
     //create logger
     webserver.use("/demos", function (req, res, next) {
-        console.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
+        logger.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
         next();
     });
     //create the express static server and use public dir as the default serving directory
@@ -405,7 +384,7 @@ function run() {
      * used to manage file upload process for pvsio-web
      */
     webserver.all("/upload", function (req, res) {
-        util.log(JSON.stringify(req.files));
+        logger.debug(JSON.stringify(req.files));
         var fileName = req.files.file.path.split("/").slice(-1).join("");
         //should return a map of oldname to new name for the uploaded files
         res.send({fileName: fileName});
@@ -428,8 +407,8 @@ function run() {
                 var newPath = path.join(baseProjectDir, token.newPath);
                 fs.rename(oldPath, newPath, function (err) {
                     if (err) {
-                        console.log("dbg: warning, error while renaming " + token.oldPath
-                                    + " into " + token.newPath + " (" + err + ")");
+                        logger.debug("warning, error while renaming " + token.oldPath +
+                                    " into " + token.newPath + " (" + err + ")");
                     }
                     processCallback({id: token.id, socketId: socketid, err: err}, socket);
                 });
@@ -438,7 +417,7 @@ function run() {
                 fs.readdir(token.path, function (err, files) {
                     if (!err) {
                         //get stat attributes for all the files using an async call
-                        var promises = [] = files.map(function (f, i) {
+                        var promises = files.map(function (f) {
                             return new Promise(function (resolve, reject) {
                                 fs.stat(f, function (err, res) {
                                     if (err) {
@@ -520,7 +499,7 @@ function run() {
                 });
             },
             "startProcess": function (token, socket, socketid) {
-                util.log("Calling start process for client... " + socketid);
+                logger.info("Calling start process for client... " + socketid);
 				var root = token.data.projectName ?
                             "/public/projects/" + token.data.projectName
                             : token.data.demoName ? "/public/demos/" + token.data.demoName : "";
@@ -572,18 +551,19 @@ function run() {
                 p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";
                 var projectPath = baseProjectDir + token.projectName;
-                function complete_writeFile(files, err) {
-                    var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
+                
+                function complete_writeFile(err, files) {
+                    var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid, err: err};
                     processCallback(res, socket);
                 }
                 
                 var filePath = token.fileName;
                 if (filePath.indexOf(projectPath) === 0) {
-                    console.log("dbg: Warning, deprecated filenames (project name not included in the filename)");
+                    logger.debug("Warning, deprecated filenames (project path should not be included in the filename)");
                     filePath = path.join(projectPath, filePath);
                 } else { filePath = path.join(baseProjectDir, filePath); }
                 
-                var files = [{path: filePath, fileContent: token.fileContent}];
+                var files = [{path: filePath, fileContent: token.fileContent, encoding: encoding}];
                 writeFiles(files, complete_writeFile);
             },
             "writeImage": function (token, socket, socketid) {
@@ -595,8 +575,8 @@ function run() {
                 fs.writeFile(token.fileName, token.fileContent, encoding, function (err) {
                     var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
                     if (!err) {
-                        util.log("dbg: file " + token.fileName
-                                 + " saved successfully (socket id = " + socketid + ")");
+                        logger.debug("file " + token.fileName +
+                                 " saved successfully (socket id = " + socketid + ")");
                         res.type = "fileSaved";
                     } else {
                         res.err = err;
@@ -632,12 +612,12 @@ function run() {
                 //call the function with token and socket as parameter
                 f(token, socket, socketid);
             } else {
-                util.log("f is something unexpected -- I expected a function but got type " + typeof f);
+                logger.warn("f is something unexpected -- I expected a function but got type " + typeof f);
             }
         });
 
-        socket.on("close", function (e) {
-            util.log("closing websocket client " + socketid);
+        socket.on("close", function () {
+            logger.info("closing websocket client " + socketid);
             var _p = pvsioProcessMap[socketid];
             if (_p) {
                 _p.close();
@@ -647,11 +627,11 @@ function run() {
     });
 
     wsServer.on("error", function (err) {
-        util.log(JSON.stringify(err));
+        logger.error(JSON.stringify(err));
     });
 
     httpServer.listen(port);
-    console.log("http server started .." + "now listening on port " + port);
+    logger.info("http server started .." + "now listening on port " + port);
 }
 
 run();
