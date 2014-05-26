@@ -33,6 +33,7 @@ define(function (require, exports, module) {
     
     // variables used for animation
     var selected = d3.map(); // stores the ids of selected states and transitions
+    var zoomLevel;
     // mouse event vars used for identifying gestures like creating a new transition
     var mousedown = { node: null, path: null };
     var mouseup = { node: null, path: null };
@@ -57,6 +58,9 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     function EmuchartsEditor(emucharts) {
+        this.zoomLevel = 1;
+        this.d3EventScale = d3.behavior.zoom().scale();
+        this.d3EventTranslate = d3.behavior.zoom().translate();
         this.emucharts = emucharts;
         eventDispatcher(this);
     }
@@ -82,6 +86,40 @@ define(function (require, exports, module) {
     function trim(val, min, max) {
         return (val < max) ? ((val > min) ? val : min) : max;
     }
+    function inc02(val, max) {
+        return (val + 0.2 < max) ? val + 0.2 : val;
+    }
+    function dec02(val, min) {
+        return (val - 0.2 > min) ? val - 0.2 : val;
+    }
+    
+	/**
+	 * Interface functions for zooming in and out
+     * @returns trimmed value
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.zoomChart = function () {
+        if (this.emucharts && this.emucharts.nodes && this.emucharts.nodes.empty() === false && this.zoomLevel) {
+            d3.select("#ContainerStateMachine svg").select("#States")
+                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
+            d3.select("#ContainerStateMachine svg").select("#Transitions")
+                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
+            d3.select("#ContainerStateMachine svg").select("#dragline")
+                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
+        }
+    };
+    EmuchartsEditor.prototype.zoom_in = function () {
+        this.zoomLevel = inc02(this.zoomLevel, 4);
+        this.zoomChart();
+    };
+    EmuchartsEditor.prototype.zoom_out = function () {
+        this.zoomLevel = dec02(this.zoomLevel, 0.5);
+        this.zoomChart();
+    };
+    EmuchartsEditor.prototype.zoom_reset = function () {
+        this.zoomLevel = 1;
+        this.zoomChart();
+    };
     
 	/**
 	 * Utility function for creating an empty svg area and definitions
@@ -146,12 +184,20 @@ define(function (require, exports, module) {
         var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
             if (_this.emucharts && _this.emucharts.nodes && _this.emucharts.nodes.empty() === false) {
                 _this.preventCreation = true;
+                if (d3.event.scale < _this.d3EventScale) {
+                    _this.zoomLevel = dec02(_this.zoomLevel, 0.5);
+                } else if (d3.event.scale > _this.d3EventScale) {
+                    _this.zoomLevel = inc02(_this.zoomLevel, 4);
+                }
+                _this.d3EventScale = d3.event.scale;
+                _this.d3EventTranslate = d3.event.translate;
+                console.log(_this.zoomLevel);
                 d3.select("#ContainerStateMachine svg").select("#States")
-                    .attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+                    .attr("transform", "translate(" + _this.d3EventTranslate + ") scale(" + _this.zoomLevel + ")");
                 d3.select("#ContainerStateMachine svg").select("#Transitions")
-                    .attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+                    .attr("transform", "translate(" + _this.d3EventTranslate + ") scale(" + _this.zoomLevel + ")");
                 d3.select("#ContainerStateMachine svg").select("#dragline")
-                    .attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+                    .attr("transform", "translate(" + _this.d3EventTranslate + ") scale(" + _this.zoomLevel + ")");
             }
         });
         

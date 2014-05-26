@@ -227,6 +227,15 @@ define(function (require, exports, module) {
             this.style.background = "green";
             emuchartsManager.set_editor_mode(MODE.BROWSE());
         });
+        d3.select("#btn_toolbarZoomIn").on("click", function () {
+            emuchartsManager.zoom_in();
+        });
+        d3.select("#btn_toolbarZoomOut").on("click", function () {
+            emuchartsManager.zoom_out();
+        });
+        d3.select("#btn_toolbarZoomReset").on("click", function () {
+            emuchartsManager.zoom_reset();
+        });
 
         // menu
         d3.select("#btn_menuNewState").on("click", function () {
@@ -397,6 +406,15 @@ define(function (require, exports, module) {
                 // just remove window
                 view.remove();
             });
+        });
+        d3.select("#btn_menuZoomIn").on("click", function () {
+            emuchartsManager.zoom_in();
+        });
+        d3.select("#btn_menuZoomOut").on("click", function () {
+            emuchartsManager.zoom_out();
+        });
+        d3.select("#btn_menuZoomReset").on("click", function () {
+            emuchartsManager.zoom_reset();
         });
         
 	};

@@ -198,5 +198,29 @@ define(function (require, exports, module) {
         return _selectedEditor.add_variable(newVariable);
     };
 
+    /**
+	 * Interface function for zooming in
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.zoom_in = function () {
+        return _selectedEditor.zoom_in();
+    };
+    
+    /**
+	 * Interface function for zooming out
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.zoom_out = function () {
+        return _selectedEditor.zoom_out();
+    };
+
+    /**
+	 * Interface function for zoom reset
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.zoom_reset = function () {
+        return _selectedEditor.zoom_reset();
+    };
+
     module.exports = EmuchartsManager;
 });
