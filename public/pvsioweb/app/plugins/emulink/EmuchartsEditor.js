@@ -830,6 +830,21 @@ define(function (require, exports, module) {
         return this.renderTransitions();
     };
 
+    /**
+	 * Interface function for adding new constant definitions
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.add_constant = function (newConstant) {
+        return this.emucharts.add_constant(newConstant);
+    };
     
+    /**
+	 * Interface function for adding new state variables
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.add_variable = function (newVariable) {
+        return this.emucharts.add_variable(newVariable);
+    };
+
     module.exports = EmuchartsEditor;
 });

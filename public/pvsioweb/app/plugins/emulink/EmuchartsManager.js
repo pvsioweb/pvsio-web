@@ -182,5 +182,21 @@ define(function (require, exports, module) {
         return _selectedEditor.rename_state(stateID, newLabel);
     };
     
+    /**
+	 * Interface function for adding constants
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.add_constant = function (newConstant) {
+        return _selectedEditor.add_constant(newConstant);
+    };
+
+    /**
+	 * Interface function for adding state variables
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.add_variable = function (newVariable) {
+        return _selectedEditor.add_variable(newVariable);
+    };
+
     module.exports = EmuchartsManager;
 });

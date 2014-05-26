@@ -20,7 +20,8 @@ define(function (require, exports, module) {
         displayAddState     = require("plugins/emulink/forms/displayAddState"),
         displayAddTransition = require("plugins/emulink/forms/displayAddTransition"),
         displayRename       = require("plugins/emulink/forms/displayRename"),
-        displayDelete       = require("plugins/emulink/forms/displayDelete");
+        displayDelete       = require("plugins/emulink/forms/displayDelete"),
+        displayAddExpression = require("plugins/emulink/forms/displayAddExpression");
     
     var instance;
     var projectManager;
@@ -360,6 +361,40 @@ define(function (require, exports, module) {
                 view.remove();
             }).on("cancel", function (e, view) {
                 // just remove rename window
+                view.remove();
+            });
+        });
+        d3.select("#btn_menuNewConstant").on("click", function () {
+            displayAddExpression.create({
+                header: "Please enter new constant...",
+                textLabel: "New constant",
+                placeholder: "e.g., maxRate: real = 1200",
+                buttons: ["Cancel", "Create"]
+            }).on("create", function (e, view) {
+                var newExpression = e.data.labels.get("newExpression");
+                if (newExpression && newExpression.value !== "") {
+                    emuchartsManager.add_constant(newExpression);
+                    view.remove();
+                }
+            }).on("cancel", function (e, view) {
+                // just remove window
+                view.remove();
+            });
+        });
+        d3.select("#btn_menuNewVariable").on("click", function () {
+            displayAddExpression.create({
+                header: "Please enter new state variable...",
+                textLabel: "New state variable",
+                placeholder: "e.g., display: real",
+                buttons: ["Cancel", "Create"]
+            }).on("create", function (e, view) {
+                var newExpression = e.data.labels.get("newExpression");
+                if (newExpression && newExpression.value !== "") {
+                    emuchartsManager.add_variable(newExpression);
+                    view.remove();
+                }
+            }).on("cancel", function (e, view) {
+                // just remove window
                 view.remove();
             });
         });

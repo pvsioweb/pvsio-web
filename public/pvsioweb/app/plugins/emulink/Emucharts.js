@@ -13,6 +13,9 @@ define(function (require, exports, module) {
     
     var nodes = d3.map(),
         edges = d3.map();
+    
+    var constants, // d3.map()
+        variables; // d3.map()
 
     var defaultValues = { x: 100, y: 100, width: 36, height: 36, fontSize: 10 };
 
@@ -236,5 +239,27 @@ define(function (require, exports, module) {
         return transitions;
     };
     
+    /**
+	 * Interface function for adding new constant definitions
+     * @memberof Emucharts
+	 */
+    Emucharts.prototype.add_constant = function (newConstant) {
+        if (!this.constants) {
+            this.constants = d3.map();
+        }
+        this.constants.set(newConstant);
+    };
+    
+    /**
+	 * Interface function for adding new state variables definitions
+     * @memberof Emucharts
+	 */
+    Emucharts.prototype.add_variable = function (newVariable) {
+        if (!this.variables) {
+            this.variables = d3.map();
+        }
+        this.variables.set(newVariable);
+    };
+
     module.exports = Emucharts;
 });
