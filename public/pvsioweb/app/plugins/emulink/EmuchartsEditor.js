@@ -15,7 +15,7 @@ define(function (require, exports, module) {
         eventDispatcher = require("util/eventDispatcher"),
         EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes"),
         Emucharts = require("plugins/emulink/Emucharts"),
-        editWindow = require("plugins/emulink/forms/displayEdit");
+        displayRename       = require("plugins/emulink/forms/displayRename");
     
     // the emuchart data
     var emucharts;
@@ -274,7 +274,19 @@ define(function (require, exports, module) {
         return transitions;
     }
         
-	/**
+    /**
+	 * Utility function for removing transitions from the SVG
+     * @returns reference to the updated svg elements
+	 * @memberof EmuchartsEditor
+	 */
+    function removeTransitions(exitedTransitions) {
+        return exitedTransitions
+                    .transition().duration(320)
+                    .style("stroke-width", stroke_width_large)
+                    .style("opacity", 0).remove();
+    }
+
+    /**
 	 * Utility function for drawing transitions
 	 * @memberof EmuchartsEditor
 	 */
@@ -304,7 +316,7 @@ define(function (require, exports, module) {
             // selection path is used to ease selection with the mouse (it's wide)
             var selectionPath = enteredTransitions.append("svg:path").classed("path", true)
                 .attr("id", function (edge) {return "selectionPath_" + edge.id; })
-                .attr("opacity", "0")
+                .style("opacity", "0")
                 .attr("fill", "none")
                 .style("stroke", "grey")
                 .style("stroke-width", stroke_width_large)
@@ -379,20 +391,21 @@ define(function (require, exports, module) {
                 mousedown.edge = edge;
                 // popup rename window
                 var oldName = edge.name;
-                editWindow.create({
-                    header: "Please enter new label for transition " + edge.name + "...",
-                    label: edge.name.split("\n"),
-                    buttons: ["Cancel", "Ok"]
-                }).on("ok", function (e, view) {
-                    _this.emucharts.rename_edge(edge.id, e.data);
-                    var transitions = d3.select("#ContainerStateMachine")
-                        .select("#Transitions").selectAll(".transition")
-                        .filter(function (transition) { return edge.id === transition.id; });
-                    // refresh transitions
-                    refreshTransitions(transitions);
-                    // remove rename window
-                    console.log("Transition " + oldName + " renamed into " + e.data);
-                    view.remove();
+                var labels = [];
+                labels.push(edge.name + "  ("
+                            + edge.source.name + "->"
+                            + edge.target.name + ")");
+                displayRename.create({
+                    header: "Please enter new label...",
+                    textLabel: "Transition",
+                    currentLabels: labels,
+                    buttons: ["Cancel", "Rename"]
+                }).on("rename", function (e, view) {
+                    var transitionLabel = e.data.labels.get("newLabel");
+                    if (transitionLabel && transitionLabel.value !== "") {
+                        _this.rename_transition(edge.id, transitionLabel);
+                        view.remove();
+                    }
                 }).on("cancel", function (e, view) {
                     // just remove rename window
                     view.remove();
@@ -403,14 +416,14 @@ define(function (require, exports, module) {
         if (!this.emucharts || !this.emucharts.getEdges()) { return; }
         // create svg element, if needed
         if (svg.empty()) { svg = this.newSVG(); }
-        var transitions = this.emucharts.getEdges().values();
-        if (transitions) {
-            // bind data to svg elements
-            var svgTransitions = svg.select("#Transitions").selectAll(".transition")
-                                    .data(transitions, function (edge) { return edge.id; });
-            var enteredTransitions = svgTransitions.enter();
-            svgTransitions.exit().remove();
-            drawTransitions(enteredTransitions)
+        var edges = this.emucharts.getEdges().values();
+        if (edges) {
+            // create a group of svg elements for transitions, and bind them to data
+            var transitions = svg.select("#Transitions").selectAll(".transition")
+                                    .data(edges, function (edge) { return edge.id; });
+            var enteredTransitions = drawTransitions(transitions.enter());
+            var exitedTransitions = removeTransitions(transitions.exit());
+            enteredTransitions
                 .on("mouseover", mouseOver)
                 .on("mouseout", mouseOut)
                 .on("click", mouseClick);
@@ -473,7 +486,7 @@ define(function (require, exports, module) {
             })
             .attr("y", function (node) { return -node.width / 2; })
             .attr("rx", 6).attr("ry", 6) // draw rounded corners
-            .attr("opacity", "0.9") // make the node slightly transparent
+            .style("opacity", "0.9") // make the node slightly transparent
             .style("cursor", "pointer") // change cursor shape on mouse over
             .style("fill", function (node) { // fill the box, avoid black
                 return (node.id === 0) ? d3.rgb(colors(node.id)).brighter().toString()
@@ -497,7 +510,7 @@ define(function (require, exports, module) {
             .style("stroke", "gray") // set border colour
             .style("stroke-width", "2") // set border size
             .style("fill", "white") // set fill colour
-            .attr("opacity", "0.4") // make the resize tool slightly transparent
+            .style("opacity", "0.4") // make the resize tool slightly transparent
             .style("cursor", "move"); // change cursor shape on mouse over
         // draw state names
         var label = enteredStates.append("svg:text").classed("state_label", true)
@@ -509,7 +522,18 @@ define(function (require, exports, module) {
         return enteredStates;
     }
     
-	/**
+    /**
+	 * Utility function for removing states from the SVG
+     * @returns reference to the updated svg elements
+	 * @memberof EmuchartsEditor
+	 */
+    function removeStates(exitedStates) {
+        return exitedStates
+                    .transition().duration(320)
+                    .style("opacity", 0).remove();
+    }
+
+    /**
 	 * Utility function for drawing states
 	 * @memberof EmuchartsEditor
 	 */
@@ -616,20 +640,20 @@ define(function (require, exports, module) {
                 mousedown.node = mouseover.node;
                 // popup rename window
                 var oldName = node.name;
-                editWindow.create({
-                    header: "Please enter new label for state " + node.name + "...",
-                    label: node.name.split("\n"),
-                    buttons: ["Cancel", "Ok"]
-                }).on("ok", function (e, view) {
-                    _this.emucharts.rename_node(node.id, e.data);
-                    var states = d3.select("#ContainerStateMachine")
-                        .select("#States").selectAll(".state")
-                        .filter(function (state) { return node.id === state.id; });
-                    // refresh states
-                    refreshStates(states);
-                    // remove rename window
-                    console.log("State " + oldName + " renamed into " + e.data);
-                    view.remove();
+                var labels = [];
+                labels.push(node.name + "  (id: " + node.id + ")");
+
+                displayRename.create({
+                    header: "Please enter new label...",
+                    textLabel: "State",
+                    currentLabels: labels,
+                    buttons: ["Cancel", "Rename"]
+                }).on("rename", function (e, view) {
+                    var stateLabel = e.data.labels.get("newLabel");
+                    if (stateLabel && stateLabel.value !== "") {
+                        _this.rename_state(node.id, stateLabel);
+                        view.remove();
+                    }
                 }).on("cancel", function (e, view) {
                     // just remove rename window
                     view.remove();
@@ -648,7 +672,7 @@ define(function (require, exports, module) {
             var states = svg.select("#States").selectAll(".state")
                             .data(nodes, function (node) { return node.id; });
             var enteredStates = drawStates(states.enter());
-            var exitedStates  = states.exit();
+            var exitedStates  = removeStates(states.exit());
             var drag = d3.behavior.drag().origin(function (node) {
                 return node;
             });
@@ -721,6 +745,19 @@ define(function (require, exports, module) {
     };
 
     /**
+     * utility function to rename states
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.rename_state = function (stateID, newLabel) {
+        this.emucharts.rename_node(stateID, newLabel);
+        var states = d3.select("#ContainerStateMachine")
+            .select("#States").selectAll(".state")
+            .filter(function (state) { return state.id === stateID; });
+        // refresh states
+        refreshStates(states);
+    };
+
+    /**
 	 * Interface function for adding states
 	 * @memberof EmuchartsEditor
 	 */
@@ -732,6 +769,37 @@ define(function (require, exports, module) {
         return this.renderStates();
     };
     
+    /**
+	 * Interface function for deleting states and all transitions incoming/outgoing to this state
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.delete_state = function (stateID) {
+        var _this = this;
+        this.emucharts.nodes.remove(stateID);
+        var edges = [];
+        this.emucharts.edges.forEach(function (key) {
+            var edge = _this.emucharts.edges.get(key);
+            if ((edge.source && edge.source.id === stateID)
+                    || (edge.target && edge.target.id === stateID)) {
+                edges.push(edge.id);
+            }
+        });
+        edges.forEach(function (edge) {
+            _this.emucharts.edges.remove(edge);
+        });
+        this.renderTransitions();
+        return this.renderStates();
+    };
+
+    /**
+	 * Interface function for deleting transitions
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.delete_transition = function (transitionID) {
+        this.emucharts.edges.remove(transitionID);
+        return this.renderTransitions();
+    };
+
     /**
 	 * Interface function for adding transitions
 	 * @memberof EmuchartsEditor
@@ -752,6 +820,16 @@ define(function (require, exports, module) {
             alert("invalid nodes");
         }
     };
+
+    /**
+	 * Interface function for deleting transitions
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.delete_transitions = function (transitionID) {
+        this.emucharts.nodes.remove(transitionID);
+        return this.renderTransitions();
+    };
+
     
     module.exports = EmuchartsEditor;
 });

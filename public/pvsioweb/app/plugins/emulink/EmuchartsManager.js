@@ -124,6 +124,14 @@ define(function (require, exports, module) {
     };
 
 	/**
+	 * Interface function for deleting states
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.delete_state = function (stateID) {
+        return _selectedEditor.delete_state(stateID);
+    };
+
+    /**
 	 * Interface function for adding new transitions to the diagram
 	 * @memberof EmuchartsManager
 	 */
@@ -132,6 +140,14 @@ define(function (require, exports, module) {
     };
     
 	/**
+	 * Interface function for deleting transitions
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.delete_transition = function (transitionID) {
+        return _selectedEditor.delete_transition(transitionID);
+    };
+
+    /**
 	 * Returns an array containing the current set of states
      * Each states is given as a pair { name, id }
 	 * @memberof EmuchartsManager
@@ -158,5 +174,13 @@ define(function (require, exports, module) {
         return _selectedEditor.rename_transition(transitionID, newLabel);
     };
 
+    /**
+	 * Utility function to rename states
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.rename_state = function (stateID, newLabel) {
+        return _selectedEditor.rename_state(stateID, newLabel);
+    };
+    
     module.exports = EmuchartsManager;
 });

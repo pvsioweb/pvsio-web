@@ -1,8 +1,7 @@
-/** enter emulink code here **/
 /**
  * 
- * @author Patrick Oladimeji
- * @date 11/21/13 21:24:31 PM
+ * @author Paolo Masci
+ * @date 25/05/14 6:39:02 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3, require, $, brackets, window, document */
@@ -18,10 +17,10 @@ define(function (require, exports, module) {
         PVSioWebClient      = require("PVSioWebClient"),
         EditorModeUtils     = require("plugins/emulink/EmuchartsEditorModes"),
         EmuchartsManager    = require("plugins/emulink/EmuchartsManager"),
-        editWindow          = require("plugins/emulink/forms/displayEdit"),
         displayAddState     = require("plugins/emulink/forms/displayAddState"),
         displayAddTransition = require("plugins/emulink/forms/displayAddTransition"),
-        displayRename       = require("plugins/emulink/forms/displayRename");
+        displayRename       = require("plugins/emulink/forms/displayRename"),
+        displayDelete       = require("plugins/emulink/forms/displayDelete");
     
     var instance;
     var projectManager;
@@ -244,6 +243,51 @@ define(function (require, exports, module) {
                 view.remove();
             });
         });
+        d3.select("#btn_menuRenameState").on("click", function () {
+            var states = emuchartsManager.getStates();
+            var labels = [];
+            states.forEach(function (state) {
+                labels.push(state.name + "  (id: " + state.id + ")");
+            });
+            displayRename.create({
+                header: "Please select state and enter new label...",
+                textLabel: "Select state",
+                currentLabels: labels,
+                buttons: ["Cancel", "Rename"]
+            }).on("rename", function (e, view) {
+                var stateLabel = e.data.labels.get("newLabel");
+                if (stateLabel && stateLabel.value !== "") {
+                    var s = e.data.options.get("currentLabel");
+                    var stateID = states[s].id;
+                    emuchartsManager.rename_state(stateID, stateLabel);
+                    view.remove();
+                }
+            }).on("cancel", function (e, view) {
+                // just remove rename window
+                view.remove();
+            });
+        });
+        d3.select("#btn_menuDeleteState").on("click", function () {
+            var states = emuchartsManager.getStates();
+            var labels = [];
+            states.forEach(function (state) {
+                labels.push(state.name + "  (id: " + state.id + ")");
+            });
+            displayDelete.create({
+                header: "Please select state to be deleted...",
+                textLabel: "State to be deleted",
+                currentLabels: labels,
+                buttons: ["Cancel", "Delete"]
+            }).on("delete", function (e, view) {
+                var s = e.data.options.get("currentLabel");
+                var stateID = states[s].id;
+                emuchartsManager.delete_state(stateID);
+                view.remove();
+            }).on("cancel", function (e, view) {
+                // just remove rename window
+                view.remove();
+            });
+        });
         d3.select("#btn_menuNewTransition").on("click", function () {
             var newTransitionName = emuchartsManager.getFreshTransitionName();
             var states = emuchartsManager.getStates();
@@ -259,12 +303,14 @@ define(function (require, exports, module) {
                 buttons: ["Cancel", "Create"]
             }).on("create", function (e, view) {
                 var transitionLabel = e.data.labels.get("newLabel");
-                var sourceNode = e.data.options.get("sourceNode");
-                var sourceNodeID = states[sourceNode].id;
-                var targetNode = e.data.options.get("targetNode");
-                var targetNodeID = states[targetNode].id;
-                emuchartsManager.add_transition(transitionLabel, sourceNodeID, targetNodeID);
-                view.remove();
+                if (transitionLabel && transitionLabel.value !== "") {
+                    var sourceNode = e.data.options.get("sourceNode");
+                    var sourceNodeID = states[sourceNode].id;
+                    var targetNode = e.data.options.get("targetNode");
+                    var targetNodeID = states[targetNode].id;
+                    emuchartsManager.add_transition(transitionLabel, sourceNodeID, targetNodeID);
+                    view.remove();
+                }
             }).on("cancel", function (e, view) {
                 // just remove window
                 view.remove();
@@ -288,6 +334,29 @@ define(function (require, exports, module) {
                 var t = e.data.options.get("currentLabel");
                 var transitionID = transitions[t].id;
                 emuchartsManager.rename_transition(transitionID, transitionLabel);
+                view.remove();
+            }).on("cancel", function (e, view) {
+                // just remove rename window
+                view.remove();
+            });
+        });
+        d3.select("#btn_menuDeleteTransition").on("click", function () {
+            var transitions = emuchartsManager.getTransitions();
+            var labels = [];
+            transitions.forEach(function (transition) {
+                labels.push(transition.name + "  ("
+                            + transition.source.name + "->"
+                            + transition.target.name + ")");
+            });
+            displayDelete.create({
+                header: "Please select transition to be deleted...",
+                textLabel: "Transition to be deleted",
+                currentLabels: labels,
+                buttons: ["Cancel", "Delete"]
+            }).on("delete", function (e, view) {
+                var t = e.data.options.get("currentLabel");
+                var transitionID = transitions[t].id;
+                emuchartsManager.delete_transition(transitionID);
                 view.remove();
             }).on("cancel", function (e, view) {
                 // just remove rename window
