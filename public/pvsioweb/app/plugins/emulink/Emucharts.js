@@ -16,9 +16,12 @@ define(function (require, exports, module) {
 
     var defaultValues = { x: 100, y: 100, width: 36, height: 36, fontSize: 10 };
 
+    // FIXME: improve these functions -- here we assume that generated IDs are compact
     var nextNodeID = 0, nextEdgeID = 0;
     var newNodeID = function () { return nextNodeID++; };
     var newEdgeID = function () { return nextEdgeID++; };
+    var getFreshNodeID = function () { return nextNodeID + 1; };
+    var getFreshEdgeID = function () { return nextEdgeID + 1; };
     
 	/**
 	 * Constructor
@@ -172,5 +175,66 @@ define(function (require, exports, module) {
         }
         
     };
+        
+    /**
+	 * Returns a fresh state name
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getFreshStateName = function () {
+        return "X" + getFreshNodeID();
+    };
+    
+    /**
+	 * Returns a fresh transitions name
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getFreshTransitionName = function () {
+        return "T" + getFreshEdgeID();
+    };
+    
+    /**
+	 * Returns an array containing the current set of states
+     * Each states is given as a pair { name, id }
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getStates = function () {
+        var _this = this;
+        var states = [];
+        this.nodes.forEach(function (key) {
+            states.push({
+                name: _this.nodes.get(key).name,
+                id: key
+            });
+        });
+        return states;
+    };
+    
+    /**
+	 * Returns an array containing the current set of transitions
+     * Each transition is given as a 4-tuple { name, id, source, target }
+     * where source and target are pairs { name, id }
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getTransitions = function () {
+        var _this = this;
+        var transitions = [];
+        this.edges.forEach(function (key) {
+            var trans = _this.edges.get(key);
+            transitions.push({
+                name: trans.name,
+                id: key,
+                source: {
+                    name: trans.source.name,
+                    id: trans.source.id
+                },
+                target: {
+                    name: trans.target.name,
+                    id: trans.target.id
+                }
+            });
+        });
+        return transitions;
+    };
+    
     module.exports = Emucharts;
 });

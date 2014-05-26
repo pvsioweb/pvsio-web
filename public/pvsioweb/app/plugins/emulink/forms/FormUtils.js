@@ -1,19 +1,31 @@
 /**
  * Useful Utilities for working with html forms
- * @author Patrick Oladimeji
- * @date 11/5/13 9:22:48 AM
+ * @author Paolo Masci
+ * @date 25/5/14 2:03:48 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3, require, $, brackets, window, MouseEvent */
 
 define(function (require, exports, module) {
 	"use strict";
-    
 	function serializeForm(el, inputSelectors) {
-        return d3.select(el).select(".panel-body").select("#label").text().trim();
+        var options = d3.map();
+        var labels = d3.map();
+		inputSelectors.forEach(function (s) {
+            var elem = document.getElementById(s);
+            if (elem.selectedIndex >= 0) {
+                // listbox item
+                options.set(s, elem.selectedIndex);
+            } else if (elem.value) {
+                // inputbox item
+                labels.set(s, elem.value.trim());
+            }
+        });
+        return { options: options, labels: labels };
     }
 	
 	function validate(form, inputSelectors) {
+        // FIXME: implement this function
 		return true;
 	}
    

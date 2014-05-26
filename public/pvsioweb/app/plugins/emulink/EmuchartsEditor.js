@@ -669,7 +669,88 @@ define(function (require, exports, module) {
 	 */
     EmuchartsEditor.prototype.render = function () {
         this.renderTransitions();
-        this.renderStates();
+        return this.renderStates();
+    };
+
+    /**
+	 * Returns a fresh state name
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.getFreshStateName = function () {
+        return this.emucharts.getFreshStateName();
+    };
+    
+    /**
+	 * Returns a fresh transition name
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.getFreshTransitionName = function () {
+        return this.emucharts.getFreshTransitionName();
+    };
+    
+    /**
+	 * Returns an array containing the current set of states in the diagram
+     * Each states is given as a pair { name, id }
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.getStates = function () {
+        return this.emucharts.getStates();
+    };
+
+    /**
+	 * Returns an array containing the current set of states in the diagram
+     * Each transition is given as a 4-tuple { name, id, source, target }
+     * where source and target are pairs { name, id }
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.getTransitions = function () {
+        return this.emucharts.getTransitions();
+    };
+    
+    /**
+     * utility function to rename transitions
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.rename_transition = function (transitionID, newLabel) {
+        this.emucharts.rename_edge(transitionID, newLabel);
+        var transitions = d3.select("#ContainerStateMachine")
+                        .select("#Transitions").selectAll(".transition")
+                        .filter(function (transition) { return transition.id === transitionID; });
+        // refresh transitions
+        refreshTransitions(transitions);
+    };
+
+    /**
+	 * Interface function for adding states
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.add_state = function (stateName) {
+        // FIXME: need to adjust the position in the case svg is translated
+        this.emucharts.add_node({
+            name: stateName
+        });
+        return this.renderStates();
+    };
+    
+    /**
+	 * Interface function for adding transitions
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.add_transition = function (transitionName, from, to) {
+        var source = this.emucharts.nodes.get(from);
+        var target = this.emucharts.nodes.get(to);
+        if (source && target) {
+            // FIXME: need to adjust the position in the case svg is translated
+            this.emucharts.add_edge({
+                name: transitionName,
+                source: source,
+                target: target
+            });
+            return this.renderTransitions();
+        } else {
+            // FIXME: improve interaction & feedback
+            alert("invalid nodes");
+        }
     };
     
     module.exports = EmuchartsEditor;

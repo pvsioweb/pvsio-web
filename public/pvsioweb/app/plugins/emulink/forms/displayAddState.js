@@ -8,10 +8,10 @@
 define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
-        formTemplate = require("text!./templates/displayEdit.handlebars"),
+        formTemplate = require("text!./templates/displayAddState.handlebars"),
         FormUtils = require("./FormUtils");
     
-    var EditView = Backbone.View.extend({
+    var AddStateView = Backbone.View.extend({
         initialize: function (data) {
             d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
             this.render(data);
@@ -21,7 +21,7 @@ define(function (require, exports, module) {
             var template = Handlebars.compile(formTemplate);
             this.$el.html(template(data));
             $("body").append(this.el);
-            d3.select(this.el).select("#label").node().focus();
+            d3.select(this.el).select("#newLabel").node().focus();
             return this;
         },
         events: {
@@ -31,7 +31,7 @@ define(function (require, exports, module) {
 		right: function (event) {
 			var form = this.el;
 			if (FormUtils.validateForm(form)) {
-                var selectors = [ "label" ];
+                var selectors = [ "newLabel" ];
 				var formdata = FormUtils.serializeForm(form, selectors);
 				this.trigger(this._data.buttons[1].toLowerCase(), {data: formdata, el: this.el}, this);
 			}
@@ -48,7 +48,7 @@ define(function (require, exports, module) {
          * @param {header: {string}, textLines: {string}} data Data to use to render the form
          */
         create: function (data) {
-            return new EditView(data);
+            return new AddStateView(data);
         }
     };
 });

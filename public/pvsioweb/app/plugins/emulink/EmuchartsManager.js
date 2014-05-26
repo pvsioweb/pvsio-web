@@ -88,16 +88,74 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsManager
 	 */
     EmuchartsManager.prototype.render = function () {
-        _selectedEditor.render();
+        return _selectedEditor.render();
     };
     
+    /**
+	 * Returns a fresh state name
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getFreshStateName = function () {
+        return _selectedEditor.getFreshStateName();
+    };
     
-	/**
+    /**
+	 * Returns a fresh transition name
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getFreshTransitionName = function () {
+        return _selectedEditor.getFreshTransitionName();
+    };
+
+    /**
 	 * Interface function for changing mode in the currently selected editor
 	 * @memberof EmuchartsManager
 	 */
     EmuchartsManager.prototype.set_editor_mode = function (mode) {
-        _selectedEditor.set_editor_mode(mode);
+        return _selectedEditor.set_editor_mode(mode);
+    };
+
+	/**
+	 * Interface function for adding new states to the diagram
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.add_state = function (stateName) {
+        return _selectedEditor.add_state(stateName);
+    };
+
+	/**
+	 * Interface function for adding new transitions to the diagram
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.add_transition = function (transitionName, from, to) {
+        return _selectedEditor.add_transition(transitionName, from, to);
+    };
+    
+	/**
+	 * Returns an array containing the current set of states
+     * Each states is given as a pair { name, id }
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getStates = function () {
+        return _selectedEditor.getStates();
+    };
+    
+	/**
+	 * Returns an array containing the current set of transitions
+     * Each transition is given as a 4-tuple { name, id, source, target }
+     * where source and target are pairs { name, id }
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getTransitions = function () {
+        return _selectedEditor.getTransitions();
+    };
+
+    /**
+	 * Utility function to rename transitions
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.rename_transition = function (transitionID, newLabel) {
+        return _selectedEditor.rename_transition(transitionID, newLabel);
     };
 
     module.exports = EmuchartsManager;

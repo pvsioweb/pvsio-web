@@ -17,7 +17,11 @@ define(function (require, exports, module) {
         Simulator           = require("plugins/emulink/simulator"),
         PVSioWebClient      = require("PVSioWebClient"),
         EditorModeUtils     = require("plugins/emulink/EmuchartsEditorModes"),
-        EmuchartsManager    = require("plugins/emulink/EmuchartsManager");
+        EmuchartsManager    = require("plugins/emulink/EmuchartsManager"),
+        editWindow          = require("plugins/emulink/forms/displayEdit"),
+        displayAddState     = require("plugins/emulink/forms/displayAddState"),
+        displayAddTransition = require("plugins/emulink/forms/displayAddTransition"),
+        displayRename       = require("plugins/emulink/forms/displayRename");
     
     var instance;
     var projectManager;
@@ -28,9 +32,35 @@ define(function (require, exports, module) {
     var canvas;
     
     var emuchartsManager;
-    var MODE = new EditorModeUtils();
+    var MODE;
+
+	function modeChange_callback(event) {
+		var EmuchartsEditorMode = document.getElementById("EmuchartsEditorMode");
+		if (EmuchartsEditorMode) {
+            if (event.mode === MODE.BROWSE()) {
+                EmuchartsEditorMode.style.background = "green";
+            } else { EmuchartsEditorMode.style.background = "steelblue"; }
+			EmuchartsEditorMode.textContent = "Editor mode: " + MODE.mode2string(event.mode);
+		}
+		var infoBox = document.getElementById("infoBox");
+		if (infoBox) {
+			infoBox.value = MODE.modeTooltip(event.mode);
+		}
+	}
+
+    /**
+	 * Constructor
+	 * @memberof Emulink
+	 */
+    function Emulink() {
+        pvsioWebClient = PVSioWebClient.getInstance();
+        MODE = new EditorModeUtils();
+        emuchartsManager = new EmuchartsManager();
+        emuchartsManager.addListener("emuCharts_editorModeChanged", modeChange_callback);
+	}
+
     
-	function createHtmlElements() {
+	Emulink.prototype.createHtmlElements = function () {
 		var content = require("text!plugins/emulink/forms/maincontent.handlebars");
         canvas = pvsioWebClient.createCollapsiblePanel("Emulink");
         canvas = canvas.html(content);
@@ -47,36 +77,6 @@ define(function (require, exports, module) {
 			stateMachine.init(editor, ws, projectManager);
             d3.select("#EmuchartLogo").classed("hidden", true);
             d3.select("#graphicalEditor").classed("hidden", false);
-		});
-        
-        d3.select("#btnNewEmuchart").on("click", function () {
-            d3.select("#EmuchartLogo").classed("hidden", true);
-            d3.select("#graphicalEditor").classed("hidden", false);
-            emuchartsManager.newEmucharts("emucharts.pvs");
-            // set initial editor mode
-            emuchartsManager.set_editor_mode(MODE.BROWSE());
-            // render emuchart
-            emuchartsManager.render();
-        });
-        d3.select("#btnLoadEmuchart").on("click", function () {
-            projectManager.openFiles(function (err, res) {
-                if (!err) {
-                    var emucharts = projectManager.project()
-                                        .pvsFiles()["graphDefinition.json"];
-                    if (emucharts) {
-                        d3.select("#EmuchartLogo").classed("hidden", true);
-                        d3.select("#graphicalEditor").classed("hidden", false);
-                        emuchartsManager.importEmucharts(emucharts);
-                        // set initial editor mode
-                        emuchartsManager.set_editor_mode(MODE.BROWSE());
-                        // render emuchart                        
-                        emuchartsManager.render();
-                    }
-                } else {
-                    alert(err.msg);
-                    console.log(err);
-                }
-            });
 		});
         d3.select("#button_state").on("click", function () {
 			stateMachine.add_node_mode();
@@ -168,82 +168,134 @@ define(function (require, exports, module) {
             stateMachine.addNewDiagram();          
         });    
 	   */
-                
+
+        // bootstrap buttons
+        d3.select("#btnNewEmuchart").on("click", function () {
+            d3.select("#EmuchartLogo").classed("hidden", true);
+            d3.select("#graphicalEditor").classed("hidden", false);
+            emuchartsManager.newEmucharts("emucharts.pvs");
+            // set initial editor mode
+            emuchartsManager.set_editor_mode(MODE.BROWSE());
+            // render emuchart
+            emuchartsManager.render();
+        });
+        d3.select("#btnLoadEmuchart").on("click", function () {
+            projectManager.openFiles(function (err, res) {
+                if (!err) {
+                    var emucharts = projectManager.project()
+                                        .pvsFiles()["graphDefinition.json"];
+                    if (emucharts) {
+                        d3.select("#EmuchartLogo").classed("hidden", true);
+                        d3.select("#graphicalEditor").classed("hidden", false);
+                        emuchartsManager.importEmucharts(emucharts);
+                        // set initial editor mode
+                        emuchartsManager.set_editor_mode(MODE.BROWSE());
+                        // render emuchart                        
+                        emuchartsManager.render();
+                    }
+                } else {
+                    alert(err.msg);
+                    console.log(err);
+                }
+            });
+		});
+        
+        // toolbar
+        function resetToolbarColors() {
+            document.getElementById("btn_toolbarBrowse").style.background = "black";
+            document.getElementById("btn_toolbarAddState").style.background = "black";
+            document.getElementById("btn_toolbarAddTransition").style.background = "black";
+            document.getElementById("btn_toolbarRename").style.background = "black";
+        }
         d3.select("#btn_toolbarAddState").on("click", function () {
+            resetToolbarColors();
+            this.style.background = "steelblue";
             emuchartsManager.set_editor_mode(MODE.ADD_STATE());
         });
         d3.select("#btn_toolbarAddTransition").on("click", function () {
+            resetToolbarColors();
+            this.style.background = "steelblue";
             emuchartsManager.set_editor_mode(MODE.ADD_TRANSITION());
         });
-        d3.select("#btn_toolbarBrowse").on("click", function () {
-            emuchartsManager.set_editor_mode(MODE.BROWSE());
-        });
         d3.select("#btn_toolbarRename").on("click", function () {
+            resetToolbarColors();
+            this.style.background = "steelblue";
             emuchartsManager.set_editor_mode(MODE.RENAME());
         });
+        d3.select("#btn_toolbarBrowse").on("click", function () {
+            resetToolbarColors();
+            this.style.background = "green";
+            emuchartsManager.set_editor_mode(MODE.BROWSE());
+        });
 
-	}
-
-    function resetToolbarColors() {
-        document.getElementById("btn_toolbarBrowse").style.background = "black";
-        document.getElementById("btn_toolbarAddState").style.background = "black";
-        document.getElementById("btn_toolbarAddTransition").style.background = "black";
-        document.getElementById("btn_toolbarRename").style.background = "black";
-    }
-    
-	function highlightSelectedFunction(m) {
-		// reset toolbar colors
-        resetToolbarColors();
-        if (m === MODE.BROWSE()) {
-            document.getElementById("btn_toolbarBrowse").style.background = "green";
-        } else if (m === MODE.ADD_STATE()) {
-            document.getElementById("btn_toolbarAddState").style.background = "steelblue";
-        } else if (m === MODE.ADD_TRANSITION()) {
-            document.getElementById("btn_toolbarAddTransition").style.background = "steelblue";
-        } else if (m === MODE.RENAME()) {
-            document.getElementById("btn_toolbarRename").style.background = "steelblue";
-        }
+        // menu
+        d3.select("#btn_menuNewState").on("click", function () {
+            var label = emuchartsManager.getFreshStateName();
+            displayAddState.create({
+                header: "Please enter label for new state",
+                textLabel: "New state",
+                buttons: ["Cancel", "Create"]
+            }).on("create", function (e, view) {
+                var nodeLabel = e.data.labels.get("newLabel");
+                emuchartsManager.add_state(nodeLabel);
+                view.remove();
+            }).on("cancel", function (e, view) {
+                // just remove window
+                view.remove();
+            });
+        });
+        d3.select("#btn_menuNewTransition").on("click", function () {
+            var newTransitionName = emuchartsManager.getFreshTransitionName();
+            var states = emuchartsManager.getStates();
+            var labels = [];
+            states.forEach(function (state) {
+                labels.push(state.name + "  (id: " + state.id + ")");
+            });
+            displayAddTransition.create({
+                header: "Please enter label for new transition",
+                textLabel: "New transition",
+                sourceNodes: labels,
+                targetNodes: labels,
+                buttons: ["Cancel", "Create"]
+            }).on("create", function (e, view) {
+                var transitionLabel = e.data.labels.get("newLabel");
+                var sourceNode = e.data.options.get("sourceNode");
+                var sourceNodeID = states[sourceNode].id;
+                var targetNode = e.data.options.get("targetNode");
+                var targetNodeID = states[targetNode].id;
+                emuchartsManager.add_transition(transitionLabel, sourceNodeID, targetNodeID);
+                view.remove();
+            }).on("cancel", function (e, view) {
+                // just remove window
+                view.remove();
+            });
+        });
+        d3.select("#btn_menuRenameTransition").on("click", function () {
+            var transitions = emuchartsManager.getTransitions();
+            var labels = [];
+            transitions.forEach(function (transition) {
+                labels.push(transition.name + "  ("
+                            + transition.source.name + "->"
+                            + transition.target.name + ")");
+            });
+            displayRename.create({
+                header: "Please select transition and enter new label...",
+                textLabel: "Select transition",
+                currentLabels: labels,
+                buttons: ["Cancel", "Rename"]
+            }).on("rename", function (e, view) {
+                var transitionLabel = e.data.labels.get("newLabel");
+                var t = e.data.options.get("currentLabel");
+                var transitionID = transitions[t].id;
+                emuchartsManager.rename_transition(transitionID, transitionLabel);
+                view.remove();
+            }).on("cancel", function (e, view) {
+                // just remove rename window
+                view.remove();
+            });
+        });
         
-//		document.getElementById("button_state").style.background = "";
-//		document.getElementById("button_transition").style.background = "";
-//		document.getElementById("button_add_field").style.background = "";
-//		// highlight selected function in the menu
-//		if (m === stateMachine.MODE.ADD_NODE
-//                && document.getElementById("button_state")) {
-//            document.getElementById("button_state").style.background = "steelblue";
-//		}
-//		if (m === stateMachine.MODE.ADD_TRANSITION
-//                && document.getElementById("button_transition")) {
-//            document.getElementById("button_transition").style.background = "steelblue";
-//		}
-//		if (m === stateMachine.MODE.ADD_SELF_TRANSITION
-//                && document.getElementById("button_self_transition")) {
-//			document.getElementById("button_self_transition").style.background = "steelblue";
-//		}
-//		if (m === stateMachine.MODE.ADD_FIELD
-//                && document.getElementById("button_add_field")) {
-//			document.getElementById("button_add_field").style.background = "steelblue";
-//		}
-	}
-
-    
-	function modeChange_callback(event) {
-		var EmuchartsEditorMode = document.getElementById("EmuchartsEditorMode");
-		if (EmuchartsEditorMode) {
-            if (event.mode === MODE.BROWSE()) {
-                EmuchartsEditorMode.style.background = "green";
-            } else { EmuchartsEditorMode.style.background = "steelblue"; }
-			EmuchartsEditorMode.textContent = "Editor mode: " + MODE.mode2string(event.mode);
-		}
-		var infoBox = document.getElementById("infoBox");
-		if (infoBox) {
-			infoBox.value = (event.message && event.message !== "") ?
-                    event.message : MODE.modeTooltip(event.mode);
-		}
-		// highlight selected function in the menu
-		highlightSelectedFunction(event.mode);
-	}
-
+	};
     
     function addProjectManagerListeners() {
         projectManager.addListener("SelectedFileChanged", function (event) {
@@ -287,15 +339,6 @@ define(function (require, exports, module) {
         
     }
 
-    /**
-	 * Constructor
-	 * @memberof Emulink
-	 */
-    function Emulink() {
-        pvsioWebClient = PVSioWebClient.getInstance();
-        emuchartsManager = new EmuchartsManager();
-        emuchartsManager.addListener("emuCharts_editorModeChanged", modeChange_callback);
-	}
     
     Emulink.prototype.getDependencies = function () {
         return [PrototypeBuilder.getInstance()];
@@ -310,12 +353,12 @@ define(function (require, exports, module) {
         projectManager = prototypeBuilder.getProjectManager();
         
         // add project manager listeners
-        addProjectManagerListeners();
+//        addProjectManagerListeners();
         // add state machine editor listener
-        stateMachine.addListener("editormodechanged", modeChange_callback);
+//        stateMachine.addListener("editormodechanged", modeChange_callback);
         
         // create user interface elements
-		createHtmlElements();
+		this.createHtmlElements();
     };
     
     Emulink.prototype.unload = function () {
