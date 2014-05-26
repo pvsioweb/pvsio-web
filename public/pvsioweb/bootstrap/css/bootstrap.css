@@ -3468,14 +3468,6 @@ input[type="button"].btn-block {
   background-color: #e5e5e5;
 }
 
-.dropdown-menu .vdivider {
-  height: 14px;
-  width: 1px;
-  margin: 9px 0;
-  overflow: hidden;
-  background-color: #e5e5e5;
-}
-
 .dropdown-menu > li > a {
   display: block;
   padding: 3px 20px;
