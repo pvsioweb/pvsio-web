@@ -19,9 +19,10 @@ define(function (require, exports, module) {
         EmuchartsManager    = require("plugins/emulink/EmuchartsManager"),
         displayAddState     = require("plugins/emulink/forms/displayAddState"),
         displayAddTransition = require("plugins/emulink/forms/displayAddTransition"),
-        displayRename       = require("plugins/emulink/forms/displayRename"),
-        displayDelete       = require("plugins/emulink/forms/displayDelete"),
-        displayAddExpression = require("plugins/emulink/forms/displayAddExpression");
+        displayRename        = require("plugins/emulink/forms/displayRename"),
+        displayDelete        = require("plugins/emulink/forms/displayDelete"),
+        displayAddExpression = require("plugins/emulink/forms/displayAddExpression"),
+        QuestionForm         = require("pvsioweb/forms/displayQuestion");
     
     var instance;
     var projectManager;
@@ -48,6 +49,21 @@ define(function (require, exports, module) {
 		}
 	}
 
+    var dragging;
+    function clickSVG_handler(evt) {
+        if (!evt.preventCreation && !dragging && !evt.mouseover.node) {
+            var stateName = emuchartsManager.getFreshStateName();
+            var position = { x: evt.mouse[0], y: evt.mouse[1] };
+            emuchartsManager.add_state(stateName, position);
+        }
+        dragging = false;
+    }
+    
+    function d3ZoomTranslate_handler(evt) {
+        dragging = true;
+        emuchartsManager.d3ZoomTranslate(evt.scale, evt.translate);
+    }
+    
     /**
 	 * Constructor
 	 * @memberof Emulink
@@ -57,6 +73,8 @@ define(function (require, exports, module) {
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
         emuchartsManager.addListener("emuCharts_editorModeChanged", modeChange_callback);
+        emuchartsManager.addListener("emuCharts_clickSVG", clickSVG_handler);
+        emuchartsManager.addListener("emuCharts_d3ZoomTranslate", d3ZoomTranslate_handler);
 	}
 
     
@@ -416,6 +434,50 @@ define(function (require, exports, module) {
         d3.select("#btn_menuZoomReset").on("click", function () {
             emuchartsManager.zoom_reset();
         });
+        d3.select("#btn_menuNewChart").on("click", function () {
+            var newChart = function () {
+                d3.select("#EmuchartLogo").classed("hidden", true);
+                d3.select("#graphicalEditor").classed("hidden", false);
+                emuchartsManager.newEmucharts("emucharts.pvs");
+                // set initial editor mode
+                emuchartsManager.set_editor_mode(MODE.BROWSE());
+                // render emuchart
+                emuchartsManager.render();
+            };
+            if (!emuchartsManager.empty_chart()) {
+                // we need to delete the current chart because we handle one chart at the moment
+                QuestionForm.create({
+                    header: "Warning: the current chart will be deleted.",
+                    question: "The current chart will be deleted -- Emulink currently handles one chart at a time). "
+                                + "Confirm Delete?",
+                    buttons: ["Cancel", "Delete and Create"]
+                }).on("ok", function (e, view) {
+                    emuchartsManager.delete_chart();
+                    newChart();
+                    view.remove();
+                }).on("cancel", function (e, view) {
+                    view.remove();
+                });
+            }
+        });
+        d3.select("#btn_menuOpenChart").on("click", function () {
+            projectManager.openFiles(function (err, res) {
+                if (!err) {
+                    var emucharts = projectManager.project()
+                                        .pvsFiles()["graphDefinition.json"];
+                    if (emucharts) {
+                        emuchartsManager.importEmucharts(emucharts);
+                        // set initial editor mode
+                        emuchartsManager.set_editor_mode(MODE.BROWSE());
+                        // render emuchart                        
+                        emuchartsManager.render();
+                    }
+                } else {
+                    alert(err.msg);
+                    console.log(err);
+                }
+            });
+		});
         
 	};
     

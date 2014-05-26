@@ -169,36 +169,24 @@ define(function (require, exports, module) {
         d3.select("#ContainerStateMachine").select("svg").append("svg:g").attr("id", "States");
         
         var mouseClick = function () {
-            if (editor_mode === MODE.ADD_STATE() && !_this.preventCreation) {
-                var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
-                // create a new node at the mouse position and add it to emucharts
-                _this.emucharts.add_node({
-                    x: m[0],
-                    y: m[1]
-                });
-                // render states
-                _this.renderStates();
-            }
-            _this.preventCreation = false;
+            var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+            var event = {
+                type: "emuCharts_clickSVG",
+                mouse: m,
+                mouseover: mouseover,
+                preventCreation: editor_mode !== MODE.ADD_STATE()
+            };
+            _this.fire(event);
         };
         var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
-            if (_this.emucharts && _this.emucharts.nodes && _this.emucharts.nodes.empty() === false) {
-                _this.preventCreation = true;
-                if (d3.event.scale < _this.d3EventScale) {
-                    _this.zoomLevel = dec02(_this.zoomLevel, 0.5);
-                } else if (d3.event.scale > _this.d3EventScale) {
-                    _this.zoomLevel = inc02(_this.zoomLevel, 4);
-                }
-                _this.d3EventScale = d3.event.scale;
-                _this.d3EventTranslate = d3.event.translate;
-                console.log(_this.zoomLevel);
-                d3.select("#ContainerStateMachine svg").select("#States")
-                    .attr("transform", "translate(" + _this.d3EventTranslate + ") scale(" + _this.zoomLevel + ")");
-                d3.select("#ContainerStateMachine svg").select("#Transitions")
-                    .attr("transform", "translate(" + _this.d3EventTranslate + ") scale(" + _this.zoomLevel + ")");
-                d3.select("#ContainerStateMachine svg").select("#dragline")
-                    .attr("transform", "translate(" + _this.d3EventTranslate + ") scale(" + _this.zoomLevel + ")");
-            }
+            var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+            var event = {
+                type: "emuCharts_d3ZoomTranslate",
+                scale: d3.event.scale,
+                translate: d3.event.translate,
+                preventCreation: true
+            };
+            _this.fire(event);
         });
         
         d3.select("#ContainerStateMachine svg")
@@ -807,11 +795,13 @@ define(function (require, exports, module) {
 	 * Interface function for adding states
 	 * @memberof EmuchartsEditor
 	 */
-    EmuchartsEditor.prototype.add_state = function (stateName) {
-        // FIXME: need to adjust the position in the case svg is translated
-        this.emucharts.add_node({
-            name: stateName
-        });
+    EmuchartsEditor.prototype.add_state = function (stateName, position) {
+        var newNode = { name: stateName };
+        if (position) {
+            newNode.x = position.x;
+            newNode.y = position.y;
+        }
+        this.emucharts.add_node(newNode);
         return this.renderStates();
     };
     
@@ -868,15 +858,6 @@ define(function (require, exports, module) {
     };
 
     /**
-	 * Interface function for deleting transitions
-	 * @memberof EmuchartsEditor
-	 */
-    EmuchartsEditor.prototype.delete_transitions = function (transitionID) {
-        this.emucharts.nodes.remove(transitionID);
-        return this.renderTransitions();
-    };
-
-    /**
 	 * Interface function for adding new constant definitions
 	 * @memberof EmuchartsEditor
 	 */
@@ -892,5 +873,56 @@ define(function (require, exports, module) {
         return this.emucharts.add_variable(newVariable);
     };
 
+    /**
+	 * Interface function for deleting charts
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.delete_chart = function () {
+        var _this = this;
+        if (this.emucharts.nodes) {
+            this.emucharts.nodes.forEach(function (key) {
+                _this.delete_state(key);
+            });
+        }
+        if (this.emucharts.constants) {
+            this.emucharts.constants.forEach(function (key) {
+                _this.emucharts.constants.remove(key);
+            });
+        }
+        if (this.emucharts.variables) {
+            this.emucharts.variables.forEach(function (key) {
+                _this.emucharts.variables.remove(key);
+            });
+        }
+    };
+
+    /**
+	 * Interface function for checking whether the current chart is empty
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.empty_chart = function () {
+        return this.emucharts && this.emucharts.nodes && this.emucharts.nodes.empty()
+                && this.emucharts.edges && this.emucharts.edges.empty()
+                && this.emucharts.constants && this.emucharts.constants.empty()
+                && this.emucharts.variables && this.emucharts.variables.empty();
+    };
+
+    EmuchartsEditor.prototype.d3ZoomTranslate = function (d3Scale, d3Translate) {
+        if (d3Scale < this.d3EventScale) {
+            this.zoomLevel = dec02(this.zoomLevel, 0.5);
+        } else if (d3Scale > this.d3EventScale) {
+            this.zoomLevel = inc02(this.zoomLevel, 4);
+        }
+        this.d3EventScale = d3Scale;
+        this.d3EventTranslate = d3Translate;
+        console.log(this.zoomLevel);
+        d3.select("#ContainerStateMachine svg").select("#States")
+            .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
+        d3.select("#ContainerStateMachine svg").select("#Transitions")
+            .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
+        d3.select("#ContainerStateMachine svg").select("#dragline")
+            .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
+    };
+    
     module.exports = EmuchartsEditor;
 });

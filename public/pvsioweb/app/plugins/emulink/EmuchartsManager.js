@@ -43,6 +43,14 @@ define(function (require, exports, module) {
                 "emuCharts_editorModeChanged",
                 function (event) { _this.fire(event); }
             );
+            newEmuchartsEditor.addListener(
+                "emuCharts_clickSVG",
+                function (event) { _this.fire(event); }
+            );
+            newEmuchartsEditor.addListener(
+                "emuCharts_d3ZoomTranslate",
+                function (event) { _this.fire(event); }
+            );
             _emuchartsEditors.set(name, newEmuchartsEditor);
             _selectedEditor = newEmuchartsEditor;
         } else { console.log("dbg: warning, undefined or null emuchart name"); }
@@ -51,6 +59,7 @@ define(function (require, exports, module) {
 	/**
 	 * Imports the emuchart passed as argument.
 	 * @memberof EmuchartsManager
+     * FIXME: improve this function!
 	 */
     EmuchartsManager.prototype.importEmucharts = function (emucharts) {
         var _this = this;
@@ -74,9 +83,7 @@ define(function (require, exports, module) {
                             function (event) { _this.fire(event); }
                         );
                         _emuchartsEditors.set(name, newEmuchartsEditor);
-                        if (!_selectedEditor) {
-                            _selectedEditor = newEmuchartsEditor;
-                        }
+                        _selectedEditor = newEmuchartsEditor;
                     });
                 }
             }
@@ -119,8 +126,8 @@ define(function (require, exports, module) {
 	 * Interface function for adding new states to the diagram
 	 * @memberof EmuchartsManager
 	 */
-    EmuchartsManager.prototype.add_state = function (stateName) {
-        return _selectedEditor.add_state(stateName);
+    EmuchartsManager.prototype.add_state = function (stateName, position) {
+        return _selectedEditor.add_state(stateName, position);
     };
 
 	/**
@@ -220,6 +227,30 @@ define(function (require, exports, module) {
 	 */
     EmuchartsManager.prototype.zoom_reset = function () {
         return _selectedEditor.zoom_reset();
+    };
+
+    /**
+	 * Interface function for deleting charts
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.delete_chart = function () {
+        return _selectedEditor.delete_chart();
+    };
+    
+    /**
+	 * Interface function for checking whether the selected chart is empty
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.empty_chart = function () {
+        return _selectedEditor.empty_chart();
+    };
+    
+    /**
+	 * Interface function for handling d3 events
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.d3ZoomTranslate = function (d3Scale, d3Translate) {
+        return _selectedEditor.d3ZoomTranslate(d3Scale, d3Translate);
     };
 
     module.exports = EmuchartsManager;
