@@ -143,7 +143,7 @@ define(function (require, exports, module) {
             }
             _this.preventCreation = false;
         };
-        var zoom = d3.behavior.zoom().scaleExtent([0.5, 10]).on("zoom", function () {
+        var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
             if (_this.emucharts && _this.emucharts.nodes && _this.emucharts.nodes.empty() === false) {
                 _this.preventCreation = true;
                 d3.select("#ContainerStateMachine svg").select("#States")
