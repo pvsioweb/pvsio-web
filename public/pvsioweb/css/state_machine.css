@@ -1,5 +1,12 @@
+#EmuchartToolbar {
+    float: left;
+    position: absolute;
+    margin-top: 8px;
+}
+
 #stateMachineMenu {
 	float: left;
+    margin-left: 0px;
 }
 #stateMachineInfoBar {
 	float: right;
