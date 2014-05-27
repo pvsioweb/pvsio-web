@@ -204,9 +204,14 @@ define(function (require, exports, module) {
         var _this = this;
         var states = [];
         this.nodes.forEach(function (key) {
+            var node = _this.nodes.get(key);
             states.push({
-                name: _this.nodes.get(key).name,
-                id: key
+                name: node.name,
+                id: node.id,
+                x: node.x,
+                y: node.y,
+                width : node.width,
+                height: node.height
             });
         });
         return states;
@@ -259,6 +264,29 @@ define(function (require, exports, module) {
             this.variables = d3.map();
         }
         this.variables.set(newVariable);
+    };
+
+    
+    /**
+	 * Returns an array containing the current set of constants
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getConstants = function () {
+        if (this.constants) {
+            return this.constants.keys();
+        }
+        return [];
+    };
+    
+    /**
+	 * Returns an array containing the current set of variables
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getVariables = function () {
+        if (this.variables) {
+            return this.variables.keys();
+        }
+        return [];
     };
 
     module.exports = Emucharts;

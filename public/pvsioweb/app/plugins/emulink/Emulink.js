@@ -588,6 +588,27 @@ define(function (require, exports, module) {
                 });
             }
         });
+        d3.select("#btn_menuSaveChart").on("click", function () {
+            if (!emuchartsManager.empty_chart()) {
+                var fileName = "emulink.emdl";
+                var content = JSON.stringify({
+                    descriptor: {
+                        file_type: "emdl",
+                        version: "1.0",
+                        description: "emuchart model",
+                        chart_name: "emuchart",
+                        pvs_file: "emuchart.pvs"
+                    },
+                    chart: {
+                        states: emuchartsManager.getStates(),
+                        transitions: emuchartsManager.getTransitions(),
+                        constants: emuchartsManager.getConstants(),
+                        variables: emuchartsManager.getVariables()
+                    }
+                }, null, " ");
+                projectManager.createFile(fileName, content);
+            }
+        });
         
 	};
     
