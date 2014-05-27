@@ -35,6 +35,14 @@ define(function (require, exports, module) {
     var emuchartsManager;
     var MODE;
 
+    function resetToolbarColors() {
+        document.getElementById("btn_toolbarBrowse").style.background = "black";
+        document.getElementById("btn_toolbarAddState").style.background = "black";
+        document.getElementById("btn_toolbarAddTransition").style.background = "black";
+        document.getElementById("btn_toolbarRename").style.background = "black";
+        document.getElementById("btn_toolbarDelete").style.background = "black";
+    }
+    
 	function modeChange_callback(event) {
 		var EmuchartsEditorMode = document.getElementById("EmuchartsEditorMode");
 		if (EmuchartsEditorMode) {
@@ -252,16 +260,7 @@ define(function (require, exports, module) {
 	   */
 
         // bootstrap buttons
-        d3.select("#btnNewEmuchart").on("click", function () {
-            d3.select("#EmuchartLogo").classed("hidden", true);
-            d3.select("#graphicalEditor").classed("hidden", false);
-            emuchartsManager.newEmucharts("emucharts.pvs");
-            // set initial editor mode
-            emuchartsManager.set_editor_mode(MODE.BROWSE());
-            // render emuchart
-            emuchartsManager.render();
-        });
-        d3.select("#btnLoadEmuchart").on("click", function () {
+        function openChart() {
             projectManager.openFiles(function (err, res) {
                 if (!err) {
                     var emucharts = projectManager.project()
@@ -280,16 +279,40 @@ define(function (require, exports, module) {
                     console.log(err);
                 }
             });
+        }
+        d3.select("#btnNewEmuchart").on("click", function () {
+            d3.select("#EmuchartLogo").classed("hidden", true);
+            d3.select("#graphicalEditor").classed("hidden", false);
+            emuchartsManager.newEmucharts("emucharts.pvs");
+            // set initial editor mode
+            emuchartsManager.set_editor_mode(MODE.BROWSE());
+            // render emuchart
+            emuchartsManager.render();
+        });
+        d3.select("#btnLoadEmuchart").on("click", function () {
+            openChart();
+            resetToolbarColors();
+//            projectManager.openFiles(function (err, res) {
+//                if (!err) {
+//                    var emucharts = projectManager.project()
+//                                        .pvsFiles()["graphDefinition.json"];
+//                    if (emucharts) {
+//                        d3.select("#EmuchartLogo").classed("hidden", true);
+//                        d3.select("#graphicalEditor").classed("hidden", false);
+//                        emuchartsManager.importEmucharts(emucharts);
+//                        // set initial editor mode
+//                        emuchartsManager.set_editor_mode(MODE.BROWSE());
+//                        // render emuchart                        
+//                        emuchartsManager.render();
+//                    }
+//                } else {
+//                    alert(err.msg);
+//                    console.log(err);
+//                }
+//            });
 		});
         
         // toolbar
-        function resetToolbarColors() {
-            document.getElementById("btn_toolbarBrowse").style.background = "black";
-            document.getElementById("btn_toolbarAddState").style.background = "black";
-            document.getElementById("btn_toolbarAddTransition").style.background = "black";
-            document.getElementById("btn_toolbarRename").style.background = "black";
-            document.getElementById("btn_toolbarDelete").style.background = "black";
-        }
         d3.select("#btn_toolbarAddState").on("click", function () {
             resetToolbarColors();
             this.style.background = "steelblue";
@@ -524,6 +547,7 @@ define(function (require, exports, module) {
                 }).on("ok", function (e, view) {
                     emuchartsManager.delete_chart();
                     newChart();
+                    resetToolbarColors();
                     view.remove();
                 }).on("cancel", function (e, view) {
                     view.remove();
@@ -531,21 +555,19 @@ define(function (require, exports, module) {
             }
         });
         d3.select("#btn_menuOpenChart").on("click", function () {
-            projectManager.openFiles(function (err, res) {
-                if (!err) {
-                    var emucharts = projectManager.project()
-                                        .pvsFiles()["graphDefinition.json"];
-                    if (emucharts) {
-                        emuchartsManager.importEmucharts(emucharts);
-                        // set initial editor mode
-                        emuchartsManager.set_editor_mode(MODE.BROWSE());
-                        // render emuchart                        
-                        emuchartsManager.render();
-                    }
-                } else {
-                    alert(err.msg);
-                    console.log(err);
-                }
+            // we need to delete the current chart because we handle one chart at the moment
+            QuestionForm.create({
+                header: "Warning: the current chart will be deleted.",
+                question: "The current chart will be deleted -- Emulink currently handles one chart at a time). "
+                            + "Confirm Delete?",
+                buttons: ["Cancel", "Delete and Open"]
+            }).on("ok", function (e, view) {
+                emuchartsManager.delete_chart();
+                openChart();
+                resetToolbarColors();
+                view.remove();
+            }).on("cancel", function (e, view) {
+                view.remove();
             });
 		});
         
