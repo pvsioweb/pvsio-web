@@ -4,16 +4,14 @@
  * @date 11/21/13 15:03:48 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent */
+/*global define*/
 define(function (require, exports, module) {
 	"use strict";
-	var  CodeMirror                    = require("cm/lib/codemirror"),
+	var  CodeMirror             = require("cm/lib/codemirror"),
         Project                 = require("project/Project"),
         PVSioWebClient          = require("PVSioWebClient"),
-        d3                      = require("d3/d3"),
+        d3                      = require("d3"),
 		ProjectManager			= require("project/ProjectManager"),
-		Logger					= require("util/Logger"),
-        pvsLanguage             = require("plugins/emulink/pvsLanguage"),
 		sourceCodeTemplate		= require("text!pvsioweb/forms/templates/sourceCodeEditorPanel.handlebars");
 	var instance;
     var currentProject,
@@ -38,7 +36,7 @@ define(function (require, exports, module) {
     
     PrototypeBuilder.prototype.initialise = function () {
         editorContainer = pvsioWebClient.createCollapsiblePanel("PVS Editor");
-        var aceContainer = editorContainer.append("div").html(sourceCodeTemplate);
+        editorContainer.append("div").html(sourceCodeTemplate);
 
         // this enable autocompletion
         editor = new CodeMirror(d3.select("#editor").node(), {
@@ -47,7 +45,6 @@ define(function (require, exports, module) {
         projectManager.editor(editor);
 
         projectManager.preparePageForImageUpload();
-
         // create and default initial empty project containing an empty file (main.pvs)
         projectManager.createDefaultProject();
 
