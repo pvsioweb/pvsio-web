@@ -10,6 +10,7 @@
         "ws":"0.4.x",
         "express": "~4.0.0",
         "body-parser": "~1.0.0",
+        "tracer": "0.7.1",
         "es6-promise": "0.1.x"
     },
     "repository":{

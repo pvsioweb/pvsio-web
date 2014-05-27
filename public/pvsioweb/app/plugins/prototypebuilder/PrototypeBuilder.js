@@ -7,8 +7,7 @@
 /*global define, d3, require, $, brackets, window, MouseEvent */
 define(function (require, exports, module) {
 	"use strict";
-	var  ace                    = require("ace/ace"),
-        ace_language_tools      = require("ace/ext/language_tools"),
+	var  CodeMirror                    = require("cm/lib/codemirror"),
         Project                 = require("project/Project"),
         PVSioWebClient          = require("PVSioWebClient"),
         d3                      = require("d3/d3"),
@@ -22,6 +21,11 @@ define(function (require, exports, module) {
         editor,
         editorContainer,
         pvsioWebClient;
+    
+    require("cm/addon/fold/foldcode");
+    require("cm/addon/fold/foldgutter");
+    require("cm/addon/fold/indentFold");
+    require("cm/mode/pvs/pvs");
     
 	function PrototypeBuilder() {
         pvsioWebClient = PVSioWebClient.getInstance();
@@ -37,20 +41,9 @@ define(function (require, exports, module) {
         var aceContainer = editorContainer.append("div").html(sourceCodeTemplate);
 
         // this enable autocompletion
-        editor = ace.edit("editor");
-        editor.setOptions({
-            enableBasicAutocompletion: true
-        });
-        editor.commands.on("afterExec", function (e) {
-            if (e.command.name === "insertstring" && /^[\w.]$/.test(e.args)) {
-                editor.execCommand("startAutocomplete");
-            }
-        });
-        // this enables syntax highlighting
-        editor.getSession().setMode("ace/mode/pvsLanguage");
-        // this removes the printing margin, which is not necessary for now
-        editor.setShowPrintMargin(false);
-
+        editor = new CodeMirror(d3.select("#editor").node(), {
+            mode: "pvs", lineNumbers: true, foldGutter: true, autofocus: true, gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]});
+        editor.setSize("100%", "100%");
         projectManager.editor(editor);
 
         projectManager.preparePageForImageUpload();

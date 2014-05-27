@@ -23,16 +23,17 @@ You should have received a copy of the GNU General Public License along with Foo
  * @date 28 Jul 2012 21:52:31
  *
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true, node: true */
-/*global */
+/*jshint unused: true, undef: true*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, undef: true, node: true */
+/*global __dirname*/
 
 function run() {
     "use strict";
-
+    function noop() {}
+    
     var pvsio                   = require("./pvsprocess"),
         path                    = require("path"),
         ws                      = require("ws"),
-        util                    = require("util"),
         http                    = require("http"),
         fs                      = require("fs"),
         express                 = require("express"),
@@ -40,12 +41,11 @@ function run() {
         webserver               = express(),
         procWrapper             = require("./processwrapper"),
         uploadDir               = "/public/uploads",
-        host                    = "0.0.0.0",
         port                    = 8082,
-        workspace               = __dirname + "/public",
         pvsioProcessMap         = {},//each client should get his own process
         httpServer              = http.createServer(webserver),
         Promise                 = require("es6-promise").Promise,
+        logger                  = require("tracer").console(),
         baseProjectDir          = __dirname + "/public/projects/";
     var p, clientid = 0, WebSocketServer = ws.Server;
 
@@ -55,7 +55,7 @@ function run() {
         if (s.isDirectory()) {
             var files = fs.readdirSync(root);
             file.isDirectory = true;
-            file.children = files.map(function (f, i) {
+            file.children = files.map(function (f) {
                 return getFolderStructure(path.join(root, f));
             });
             if (file.children) {
@@ -71,6 +71,66 @@ function run() {
             file.path = file.path.replace(baseProjectDir, "");
             return file;
         }
+    }
+     /**
+     * Recursively creates a directory structure while ensuring that any non-existent parent folders
+     * are created as necessary. E.g., to create /temp/foo/foo/test in the directory /temp without a foo
+     * directory, the function ensures that the appropriate parent directories foo/foo are created
+     * @param {string} dirPath the path to the directory to create
+     * @param {function (err)} cb the callback function to invoke when the directory creation is complete
+     */
+    function mkdirRecursive(dirPath, cb) {
+        cb = cb || noop;
+        fs.mkdir(dirPath, function (error) {
+            if (error && error.errno === 34) {
+                // the callback will be invoked only by the first instance of mkdirRecursive
+                var parentDirectory = dirPath.substr(0, dirPath.lastIndexOf("/"));
+                mkdirRecursive(parentDirectory, function (err) {
+                    if (!err) {
+                        fs.mkdir(dirPath, cb);
+                    } else {
+                        cb(err);
+                    }
+                });
+            } else {
+                // if the path has been created successfully, just invoke the callback function (if any)
+                cb(error);
+            }
+        });
+    }
+    
+    /**
+     Writes a file with the specified content to the specified path. If the parent folders of the specified path
+     do not exist, they are created
+     @param {string} fullPath the full path to the file
+     @param {string} fileContent the content of the file
+     @param {string?} fileEncoding the encoding to use for writing the file (defaults to utf8)
+     @returns {Promise} a promise that resolves when file has been written or rejects when an error occurs
+    */
+    function writeFile(fullPath, fileContent, fileEncoding) {
+        fileEncoding = fileEncoding || "utf8";
+        return new Promise(function (resolve, reject) {
+            if (typeof fullPath !== "string" || typeof fileContent !== "string") {
+                reject("Both fullPath and fileContent must be strings");
+            } else {
+                var folder = fullPath.substring(0, fullPath.lastIndexOf(path.sep));
+                mkdirRecursive(folder, function (err) {
+                    if (!err || err.code === "EEXIST") {
+                        fs.writeFile(fullPath, fileContent, fileEncoding, function (err) {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve(fullPath);
+                            }
+                        });
+                    } else {
+                        reject(err);
+                    }
+                    
+                });
+                
+            }
+        });
     }
     
     /**
@@ -108,93 +168,80 @@ function run() {
     }
     /**
      * reads and changes the settings in the .pvsioweb file in the project root
+     * @param {string} projectName the name of the project
+     * @param {string} key the key of the setting to write
+     * @param {object} value the value of the setting to write
+     * @returns {Promise} a promise that is resolved when the settings file has been written.
     */
-    function changeProjectSetting(projectName, key, value, callback) {
-        var file = baseProjectDir + projectName + "/.pvsioweb", props = {};
-        //write the property file in the project root
-        function writeFile(props, cb) {
-            fs.writeFile(file, JSON.stringify(props, null, " "), function (err) {
-                if (err) {
-                    props.err = err;
-                }
-                if (cb) {
-                    cb(props);
+    function changeProjectSetting(projectName, key, value) {
+        var file = path.join(baseProjectDir, projectName, "/.pvsioweb"),
+            props = {};
+        return new Promise(function (resolve, reject) {
+            //if file does not exist, create it. Else read the property file and update just the key value specified
+            fs.exists(file, function (exists) {
+                if (!exists) {
+                    props[key] = value;
+                    writeFile(file, JSON.stringify(props, null, " "))
+                        .then(resolve, reject);
+                } else {
+                    fs.readFile(file, {encoding: "utf8"}, function (err, res) {
+                        props = {err: err};
+                        if (!err) {
+                            props =  JSON.parse(res) || props;
+                            props[key] = value;
+                            //write the file back
+                            writeFile(file, JSON.stringify(props, null, " "))
+                                .then(resolve, reject);
+                        } else {//there was an error so reject the promise
+                            reject(err);
+                        }
+                    });
                 }
             });
-        }
-        //if file does not exist, create it. Else read the property file and update just the key value specified
-        fs.exists(file, function (exists) {
-            if (!exists) {
-                props[key] = value;
-                writeFile(props, callback);
-            } else {
-                fs.readFile(file, {encoding: "utf8"}, function (err, res) {
-                    props = {err: err};
-                    if (!err) {
-                        props =  JSON.parse(res) || props;
-                        props[key] = value;
-                        //write the file back
-                        writeFile(props, callback);
-                    } else {
-                        if (callback) {
-                            callback(props);
-                        }
-                    }
-                });
-            }
         });
-    }
-
+        
+    }   
     
     /**
-     * creates a directory structure
-     */
-    function mkdirRecursive(dirPath, cb) {
-        fs.mkdir(dirPath, function (error) {
-            if (error && error.errno === 34) {
-                // the callback will be invoked only by the first instance of mkdirRecursive
-                var parentDirectory = dirPath.substr(0, dirPath.lastIndexOf("/"));
-                mkdirRecursive(parentDirectory, function f() {
-                    fs.mkdir(dirPath, cb);
-                });
-            } else {
-                // if the path has been created successfully, just invoke the callback function (if any)
-                if (cb && typeof cb === "function") { cb(); }
-            }
-        });
-    }
-    
-    /**
-     * writes files (directory structure is automatically created
-     */
-    
-    
+     * writes files to disk (directory structure is automatically created
+     * @param {array <{path:string, fileContent: string, encoding:?string}>} files the list of files to write
+     * @param {function(err)} cb the callback function to invoke when the files have been written. The err parameter of the callback will be set if an error occurred in writing any of the files.
+     */    
     function writeFiles(files, cb) {
-        function writeFilesAux(files, i, cb) {
-            if (i < files.length && i >= 0) {
-                var f, dir;
-                f = files[i];
-                dir = f.path.substr(0, f.path.lastIndexOf("/")); //FIXME: use system functions to retrieve the file separator
-                util.log("dbg: generating directory structure " + dir);
-                mkdirRecursive(dir, function (err) {
-                    fs.writeFile(f.path, f.fileContent, function (err) {
-                        if (!err) {
-                            util.log("dbg: file " + f.path + " saved successfully!");
-                            i++;
-                            if (i < files.length) {
-                                writeFilesAux(files, i, cb);
-                            } else {
-                                util.log("dbg: all files have been processed... sending data back to client.");
-                                if (cb && typeof cb === "function") { cb(err, files); }
-                            }
-                        } else { util.log("dbg: error while saving file " + f.path + " (" + err + ")"); }
-                    });
-                });
-            }
-        }
-        writeFilesAux(files, 0, cb);
+        var promises = files.map(function (f) {
+            return writeFile(f.path, f.fileContent);
+        });
+        Promise.all(promises)
+            .then(function () { cb(null, files); }, function (err) { cb(err, files); });
+//        function writeFilesAux(files, i, cb) {
+//            if (i < files.length && i >= 0) {
+//                var f, dir;
+//                f = files[i];
+//                dir = f.path.substr(0, f.path.lastIndexOf(path.sep));
+//                logger.debug("generating directory structure " + dir);
+//                mkdirRecursive(dir, function (err) {
+//                    if (!err) {
+//                        fs.writeFile(f.path, f.fileContent, {encoding: f.encoding || "utf8"}, function (err) {
+//                            if (!err) {
+//                                logger.debug("file " + f.path + " saved successfully!");
+//                                i++;
+//                                if (i < files.length) {
+//                                    writeFilesAux(files, i, cb);
+//                                } else {
+//                                    logger.debug("all files have been processed... sending data back to client.");
+//                                    if (cb && typeof cb === "function") { cb(err, files); }
+//                                }
+//                            } else { logger.debug("error while saving file " + f.path + " (" + err + ")"); }
+//                        });
+//                    } else {
+//                        logger.error("An error occured while calling mkdirRecursive", err);
+//                        if (cb && typeof cb === "function") { cb(err); }
+//                    }
+//                });
+//            }
+//        }
+//        writeFilesAux(files, 0, cb);
     }
-    
     
     /**
      * Creates a project
@@ -213,56 +260,76 @@ function run() {
         var obj = {type: "projectCreated"};
             
         function doCreate(cb) {
-            // utility functions
-            function complete_doCreate(err, files) {
-                // always return paths relative to baseProjectDir
-                files.forEach(function (f) {
-                    f.path = f.path.replace(projectPath, projectName);
-                });
-                obj.pvsFiles = files;
-                
-                //by default set the main pvs file to be the first item in the list after sort
-                mainPVSFile = mainPVSFile || files.sort()[0].path;
-                if (mainPVSFile) {
-                    obj.mainPVSFile = mainPVSFile;
-                    // create a main file in the project settings
-                    changeProjectSetting(projectName, "mainPVSFile", obj.mainPVSFile);
-                }
-                
-                // get project folder structure once all files have been wrtten
-                obj.folderStructure = getFolderStructure(projectPath);
-                // and make sure that the folder structure contains paths relative to baseProject
-                obj.folderStructure.path = obj.folderStructure.name;
-                obj.folderStructure.children.forEach(function (child) {
-                    child.path = child.path.replace(projectPath, projectName);
-                });
-                obj.projectPath = obj.folderStructure.path;
-                if (cb && typeof cb === "function") { cb(obj); }
-            }
+            cb = cb || noop;
 
+            //create the project folder
+            fs.mkdir(projectPath, function (err) {
+                if (!err) {
+                    var promises = [];
+                    obj.projectPath = projectPath;
+                    obj.name = projectName;
 
-            fs.mkdirSync(projectPath);
-            obj.projectPath = projectPath;
-            obj.name = projectName;
-
-            if (imageName && imageData) {
-                var imageString = imageData.replace(/^data:image\/(\w+);base64,/, ""),
-                    imagePath = path.join(projectPath, imageName);
-                fs.writeFileSync(imagePath, imageString, "base64");
-                obj.imagePath = imagePath;
-                obj.imageData = imageData;
-            }
-
-            if (specFiles && specFiles.length > 0) {
-                var files = specFiles.map(function (f) {
-                    if (f.fileName.indexOf(projectName) === 0) {
-                        return {path: path.join(baseProjectDir, f.fileName), fileContent: f.fileContent};
+                    //add promises to write image file
+                    if (imageName && imageData) {
+                        var imageString = imageData.replace(/^data:image\/(\w+);base64,/, ""),
+                            imagePath = path.join(projectPath, imageName);
+                        promises.push(writeFile(imagePath, imageString, "base64"));
+                        //update result obj
+                        obj.imagePath = imagePath;
+                        obj.imageData = imageData;
                     }
-                    console.log("dbg: Warning, deprecated filenames (project name not included in the filename)");
-                    return {path: path.join(projectPath, f.fileName), fileContent: f.fileContent};
-                });
-                writeFiles(files, complete_doCreate);
-            }
+                    //add promises to write spec files
+                    if (specFiles && specFiles.length > 0) {
+                        var files = specFiles.map(function (f) {
+                            if (f.fileName.indexOf(projectName) === 0) {
+                                return {path: path.join(baseProjectDir, f.fileName), fileContent: f.fileContent};
+                            }
+                            logger.debug("Warning, deprecated filenames (project name not included in the filename)");
+                            return {path: path.join(projectPath, f.fileName), fileContent: f.fileContent};
+                        });
+                        //add promises for writing spec files
+                        files.forEach(function (f) {
+                            promises.push(writeFile(f.path, f.fileContent));
+                        });
+                        //update the paths to be relative to project path
+                        obj.pvsFiles = files.map(function (f) {
+                            f.path = f.path.replace(projectPath, projectName);
+                            return f;
+                        });
+
+                        //by default set the main pvs file to be the first item in the list after sort
+                        mainPVSFile = mainPVSFile || files.sort()[0].path;
+                        if (mainPVSFile) {
+                            obj.mainPVSFile = mainPVSFile;
+                            // create a main file in the project settings
+                            promises.push(changeProjectSetting(projectName, "mainPVSFile", obj.mainPVSFile));
+                        }
+
+                    }
+                    //add promises for writing widget definitions
+                    if (widgetDefinitions) {
+                        promises.push(writeFile(path.join(projectPath, "widgetDefinition.json"), widgetDefinitions));
+                    }
+                    //exec promises and invoke callback function
+                    Promise.all(promises)
+                        .then(function () {
+                            // get project folder structure once all files have been wrtten
+                            obj.folderStructure = getFolderStructure(projectPath);
+                            // and make sure that the folder structure contains paths relative to baseProject
+                            obj.projectPath = obj.folderStructure.path;
+                    
+                            cb(obj);
+                        }, function (err) {
+                            obj.err = err;
+                            cb(obj);
+                        });
+                    
+                } else {
+                    obj.err = err;
+                    cb(obj);
+                }
+            });
+            
         }
         
         fs.mkdir(projectPath, function (err) {
@@ -280,38 +347,13 @@ function run() {
                 if (cb && typeof cb === "function") { cb(obj); }
             }
         });
-        
-//        try {
-//            var exists = fs.existsSync(projectPath);
-//            if (exists && !overWrite) {
-//                obj.err = projectName + " already exists. Please choose a different name";
-//                cb(obj);
-//            } else if (exists && overWrite) {
-//                p.removeFile(projectPath, function (err) {
-//                    if (err) {
-//                        obj.err = err;
-//                        cb(obj);
-//                    } else {
-//                        doCreate(cb);
-//                    }
-//                });
-//                
-//            } else {
-//                //create a project folder
-//                doCreate(cb);
-//            }
-//        } catch (err) {
-//            obj.err = err;
-//            console.log("dbg: Error while trying to create project: " + err.toString());
-//            if (cb && typeof cb === "function") { cb(obj); }
-//        }
     }
 
     /**
     * open a project with the specified projectName
     */
     function openProject(projectName) {
-        console.log("dbg: Opening project " + projectName + " ...");
+        logger.debug("Opening project " + projectName + " ...");
         var imageExts = ["jpg", "jpeg", "png"],
             specExts = ["pvs"],
             projectPath = baseProjectDir + projectName,
@@ -366,7 +408,7 @@ function run() {
             res.projectPath = res.folderStructure.path;
             return res;
         } else {
-            console.log("dbg: error while opening project " + projectPath);
+            logger.error("error while opening project " + projectPath);
             return null;
         }
     }
@@ -378,7 +420,7 @@ function run() {
     function listProjects() {
         var res;
         try {
-            res = fs.readdirSync(baseProjectDir).map(function (d, i) {
+            res = fs.readdirSync(baseProjectDir).map(function (d) {
                 var stat = fs.statSync(baseProjectDir + d);
                 if (stat.isDirectory()) {
                     return d;
@@ -394,7 +436,7 @@ function run() {
 
     //create logger
     webserver.use("/demos", function (req, res, next) {
-        console.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
+        logger.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
         next();
     });
     //create the express static server and use public dir as the default serving directory
@@ -405,7 +447,7 @@ function run() {
      * used to manage file upload process for pvsio-web
      */
     webserver.all("/upload", function (req, res) {
-        util.log(JSON.stringify(req.files));
+        logger.debug(JSON.stringify(req.files));
         var fileName = req.files.file.path.split("/").slice(-1).join("");
         //should return a map of oldname to new name for the uploaded files
         res.send({fileName: fileName});
@@ -428,8 +470,8 @@ function run() {
                 var newPath = path.join(baseProjectDir, token.newPath);
                 fs.rename(oldPath, newPath, function (err) {
                     if (err) {
-                        console.log("dbg: warning, error while renaming " + token.oldPath
-                                    + " into " + token.newPath + " (" + err + ")");
+                        logger.debug("warning, error while renaming " + token.oldPath +
+                                    " into " + token.newPath + " (" + err + ")");
                     }
                     processCallback({id: token.id, socketId: socketid, err: err}, socket);
                 });
@@ -438,7 +480,7 @@ function run() {
                 fs.readdir(token.path, function (err, files) {
                     if (!err) {
                         //get stat attributes for all the files using an async call
-                        var promises = [] = files.map(function (f, i) {
+                        var promises = files.map(function (f) {
                             return new Promise(function (resolve, reject) {
                                 fs.stat(f, function (err, res) {
                                     if (err) {
@@ -520,7 +562,7 @@ function run() {
                 });
             },
             "startProcess": function (token, socket, socketid) {
-                util.log("Calling start process for client... " + socketid);
+                logger.info("Calling start process for client... " + socketid);
 				var root = token.data.projectName ?
                             "/public/projects/" + token.data.projectName
                             : token.data.demoName ? "/public/demos/" + token.data.demoName : "";
@@ -572,18 +614,19 @@ function run() {
                 p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";
                 var projectPath = baseProjectDir + token.projectName;
-                function complete_writeFile(files, err) {
-                    var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
+                
+                function complete_writeFile(err) {
+                    var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid, err: err};
                     processCallback(res, socket);
                 }
                 
                 var filePath = token.fileName;
                 if (filePath.indexOf(projectPath) === 0) {
-                    console.log("dbg: Warning, deprecated filenames (project name not included in the filename)");
+                    logger.debug("Warning, deprecated filenames (project path should not be included in the filename)");
                     filePath = path.join(projectPath, filePath);
                 } else { filePath = path.join(baseProjectDir, filePath); }
                 
-                var files = [{path: filePath, fileContent: token.fileContent}];
+                var files = [{path: filePath, fileContent: token.fileContent, encoding: encoding}];
                 writeFiles(files, complete_writeFile);
             },
             "writeImage": function (token, socket, socketid) {
@@ -595,8 +638,8 @@ function run() {
                 fs.writeFile(token.fileName, token.fileContent, encoding, function (err) {
                     var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
                     if (!err) {
-                        util.log("dbg: file " + token.fileName
-                                 + " saved successfully (socket id = " + socketid + ")");
+                        logger.debug("file " + token.fileName +
+                                 " saved successfully (socket id = " + socketid + ")");
                         res.type = "fileSaved";
                     } else {
                         res.err = err;
@@ -632,12 +675,12 @@ function run() {
                 //call the function with token and socket as parameter
                 f(token, socket, socketid);
             } else {
-                util.log("f is something unexpected -- I expected a function but got type " + typeof f);
+                logger.warn("f is something unexpected -- I expected a function but got type " + typeof f);
             }
         });
 
-        socket.on("close", function (e) {
-            util.log("closing websocket client " + socketid);
+        socket.on("close", function () {
+            logger.info("closing websocket client " + socketid);
             var _p = pvsioProcessMap[socketid];
             if (_p) {
                 _p.close();
@@ -647,11 +690,11 @@ function run() {
     });
 
     wsServer.on("error", function (err) {
-        util.log(JSON.stringify(err));
+        logger.error(JSON.stringify(err));
     });
 
     httpServer.listen(port);
-    console.log("http server started .." + "now listening on port " + port);
+    logger.info("http server started .." + "now listening on port " + port);
 }
 
 run();
