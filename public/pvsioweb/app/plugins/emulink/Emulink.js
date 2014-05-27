@@ -151,6 +151,7 @@ define(function (require, exports, module) {
 
     
 	Emulink.prototype.createHtmlElements = function () {
+        var _this = this;
 		var content = require("text!plugins/emulink/forms/maincontent.handlebars");
         canvas = pvsioWebClient.createCollapsiblePanel("Emulink");
         canvas = canvas.html(content);
@@ -292,24 +293,6 @@ define(function (require, exports, module) {
         d3.select("#btnLoadEmuchart").on("click", function () {
             openChart();
             resetToolbarColors();
-//            projectManager.openFiles(function (err, res) {
-//                if (!err) {
-//                    var emucharts = projectManager.project()
-//                                        .pvsFiles()["graphDefinition.json"];
-//                    if (emucharts) {
-//                        d3.select("#EmuchartLogo").classed("hidden", true);
-//                        d3.select("#graphicalEditor").classed("hidden", false);
-//                        emuchartsManager.importEmucharts(emucharts);
-//                        // set initial editor mode
-//                        emuchartsManager.set_editor_mode(MODE.BROWSE());
-//                        // render emuchart                        
-//                        emuchartsManager.render();
-//                    }
-//                } else {
-//                    alert(err.msg);
-//                    console.log(err);
-//                }
-//            });
 		});
         
         // toolbar
@@ -554,6 +537,22 @@ define(function (require, exports, module) {
                 });
             }
         });
+        d3.select("#btn_menuCloseChart").on("click", function () {
+            if (!emuchartsManager.empty_chart()) {
+                // we need to delete the current chart because we handle one chart at the moment
+                QuestionForm.create({
+                    header: "Warning: the current chart has unsaved changes.",
+                    question: "The current chart has unsaved changes that will be lost. Confirm Close?",
+                    buttons: ["Cancel", "Confirm close"]
+                }).on("ok", function (e, view) {
+                    emuchartsManager.delete_chart();
+                    resetToolbarColors();
+                    view.remove();
+                }).on("cancel", function (e, view) {
+                    view.remove();
+                });
+            }
+        });
         d3.select("#btn_menuOpenChart").on("click", function () {
             // we need to delete the current chart because we handle one chart at the moment
             QuestionForm.create({
@@ -570,6 +569,25 @@ define(function (require, exports, module) {
                 view.remove();
             });
 		});
+        d3.select("#btn_menuQuitEmulink").on("click", function () {
+            if (!emuchartsManager.empty_chart()) {
+                // we need to delete the current chart because we handle one chart at the moment
+                QuestionForm.create({
+                    header: "Warning: the current chart has unsaved changes.",
+                    question: "The current chart has unsaved changes that will be lost. Confirm quit?",
+                    buttons: ["Cancel", "Quit Emulink"]
+                }).on("ok", function (e, view) {
+                    emuchartsManager.delete_chart();
+                    resetToolbarColors();
+                    view.remove();
+                    // FIXME: need a better way to deselect the checkbox
+                    document.getElementById("plugin_Emulink").checked = false;
+                    _this.unload();
+                }).on("cancel", function (e, view) {
+                    view.remove();
+                });
+            }
+        });
         
 	};
     
