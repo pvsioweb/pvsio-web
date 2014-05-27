@@ -10,14 +10,17 @@
 define(function (require, exports, module) {
 	"use strict";
     
-    var MODE = { BROWSE: 0, ADD_TRANSITIONS: 1, ADD_STATE: 2, RENAME: 3, ZOOM: 4 };
+    var MODE;
     
-    function EmuchartsEditorModes() {}
+    function EmuchartsEditorModes() {
+        MODE = { BROWSE: 0, ADD_TRANSITION: 1, ADD_STATE: 2, RENAME: 3, ZOOM: 4, DELETE: 5 };
+    }
     
     EmuchartsEditorModes.prototype.BROWSE = function () { return MODE.BROWSE; };
     EmuchartsEditorModes.prototype.ADD_TRANSITION = function () { return MODE.ADD_TRANSITION; };
     EmuchartsEditorModes.prototype.ADD_STATE = function () { return MODE.ADD_STATE; };
     EmuchartsEditorModes.prototype.RENAME = function () { return MODE.RENAME; };
+    EmuchartsEditorModes.prototype.DELETE = function () { return MODE.DELETE; };
     
     EmuchartsEditorModes.prototype.mode2string = function (mode) {
         if (mode === MODE.BROWSE) {
@@ -28,6 +31,8 @@ define(function (require, exports, module) {
             return "add states";
         } else if (mode === MODE.RENAME) {
             return "rename states and transitions";
+        } else if (mode === MODE.DELETE) {
+            return "delete states and transitions";
         } else { return "error: unknown mode"; }
     };
     
@@ -42,6 +47,8 @@ define(function (require, exports, module) {
             return "Click on an empty area of the diagram to create a new state.";
         } else if (mode === MODE.RENAME) {
             return "Click on states and transitions to rename them.";
+        } else if (mode === MODE.DELETE) {
+            return "Click on states and transitions to delete them.";
         } else { return "Error: unexpected editor mode -- please report a bug."; }
     };
     

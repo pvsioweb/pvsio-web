@@ -49,21 +49,72 @@ define(function (require, exports, module) {
 		}
 	}
 
-    var dragging;
-    function clickSVG_handler(evt) {
-        if (!evt.preventCreation && !dragging && !evt.mouseover.node) {
-            var stateName = emuchartsManager.getFreshStateName();
-            var position = { x: evt.mouse[0], y: evt.mouse[1] };
-            emuchartsManager.add_state(stateName, position);
-        }
-        dragging = false;
+    function createState_handler(evt) {
+        var stateName = emuchartsManager.getFreshStateName();
+        var position = { x: evt.mouse[0], y: evt.mouse[1] };
+        emuchartsManager.add_state(stateName, position);
     }
     
-    function d3ZoomTranslate_handler(evt) {
-        dragging = true;
-        emuchartsManager.d3ZoomTranslate(evt.scale, evt.translate);
+    function d3ZoomTranslate_handler(event) {
+        emuchartsManager.d3ZoomTranslate(event.scale, event.translate);
     }
     
+    function deleteTransition_handler(event) {
+        var transitionID = event.edge.id;
+        emuchartsManager.delete_transition(transitionID);
+    }
+    
+    function deleteState_handler(event) {
+        var stateID = event.node.id;
+        emuchartsManager.delete_state(stateID);
+    }
+
+    function renameState_handler(event) {
+        var node = event.node;
+        // popup rename window
+        var labels = [];
+        labels.push(node.name + "  (id: " + node.id + ")");
+        displayRename.create({
+            header: "Please enter new label...",
+            textLabel: "State",
+            currentLabels: labels, // this will show just one label, that of the node selected for renaming
+            buttons: ["Cancel", "Rename"]
+        }).on("rename", function (e, view) {
+            var newLabel = e.data.labels.get("newLabel");
+            if (newLabel && newLabel.value !== "") {
+                emuchartsManager.rename_state(node.id, newLabel);
+                view.remove();
+            }
+        }).on("cancel", function (e, view) {
+            // just remove rename window
+            view.remove();
+        });
+    }
+    
+    function renameTransition_handler(event) {
+        var edge = event.edge;
+        // popup rename window
+        var oldName = edge.name;
+        var labels = [];
+        labels.push(edge.name + "  ("
+                    + edge.source.name + "->"
+                    + edge.target.name + ")");
+        displayRename.create({
+            header: "Please enter new label...",
+            textLabel: "Transition",
+            currentLabels: labels,
+            buttons: ["Cancel", "Rename"]
+        }).on("rename", function (e, view) {
+            var transitionLabel = e.data.labels.get("newLabel");
+            if (transitionLabel && transitionLabel.value !== "") {
+                emuchartsManager.rename_transition(edge.id, transitionLabel);
+                view.remove();
+            }
+        }).on("cancel", function (e, view) {
+            // just remove rename window
+            view.remove();
+        });
+    }
     /**
 	 * Constructor
 	 * @memberof Emulink
@@ -73,8 +124,12 @@ define(function (require, exports, module) {
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
         emuchartsManager.addListener("emuCharts_editorModeChanged", modeChange_callback);
-        emuchartsManager.addListener("emuCharts_clickSVG", clickSVG_handler);
+        emuchartsManager.addListener("emuCharts_createState", createState_handler);
         emuchartsManager.addListener("emuCharts_d3ZoomTranslate", d3ZoomTranslate_handler);
+        emuchartsManager.addListener("emuCharts_deleteTransition", deleteTransition_handler);
+        emuchartsManager.addListener("emuCharts_deleteState", deleteState_handler);
+        emuchartsManager.addListener("emuCharts_renameState", renameState_handler);
+        emuchartsManager.addListener("emuCharts_renameTransition", renameTransition_handler);
 	}
 
     
@@ -224,6 +279,7 @@ define(function (require, exports, module) {
             document.getElementById("btn_toolbarAddState").style.background = "black";
             document.getElementById("btn_toolbarAddTransition").style.background = "black";
             document.getElementById("btn_toolbarRename").style.background = "black";
+            document.getElementById("btn_toolbarDelete").style.background = "black";
         }
         d3.select("#btn_toolbarAddState").on("click", function () {
             resetToolbarColors();
@@ -239,6 +295,11 @@ define(function (require, exports, module) {
             resetToolbarColors();
             this.style.background = "steelblue";
             emuchartsManager.set_editor_mode(MODE.RENAME());
+        });
+        d3.select("#btn_toolbarDelete").on("click", function () {
+            resetToolbarColors();
+            this.style.background = "steelblue";
+            emuchartsManager.set_editor_mode(MODE.DELETE());
         });
         d3.select("#btn_toolbarBrowse").on("click", function () {
             resetToolbarColors();

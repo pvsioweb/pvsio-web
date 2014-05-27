@@ -44,11 +44,27 @@ define(function (require, exports, module) {
                 function (event) { _this.fire(event); }
             );
             newEmuchartsEditor.addListener(
-                "emuCharts_clickSVG",
+                "emuCharts_createState",
                 function (event) { _this.fire(event); }
             );
             newEmuchartsEditor.addListener(
                 "emuCharts_d3ZoomTranslate",
+                function (event) { _this.fire(event); }
+            );
+            newEmuchartsEditor.addListener(
+                "emuCharts_deleteTransition",
+                function (event) { _this.fire(event); }
+            );
+            newEmuchartsEditor.addListener(
+                "emuCharts_deleteState",
+                function (event) { _this.fire(event); }
+            );
+            newEmuchartsEditor.addListener(
+                "emuCharts_renameState",
+                function (event) { _this.fire(event); }
+            );
+            newEmuchartsEditor.addListener(
+                "emuCharts_renameTransition",
                 function (event) { _this.fire(event); }
             );
             _emuchartsEditors.set(name, newEmuchartsEditor);
@@ -80,6 +96,30 @@ define(function (require, exports, module) {
                         var newEmuchartsEditor = new EmuchartsEditor(emucharts);
                         newEmuchartsEditor.addListener(
                             "emuCharts_editorModeChanged",
+                            function (event) { _this.fire(event); }
+                        );
+                        newEmuchartsEditor.addListener(
+                            "emuCharts_createState",
+                            function (event) { _this.fire(event); }
+                        );
+                        newEmuchartsEditor.addListener(
+                            "emuCharts_d3ZoomTranslate",
+                            function (event) { _this.fire(event); }
+                        );
+                        newEmuchartsEditor.addListener(
+                            "emuCharts_deleteTransition",
+                            function (event) { _this.fire(event); }
+                        );
+                        newEmuchartsEditor.addListener(
+                            "emuCharts_deleteState",
+                            function (event) { _this.fire(event); }
+                        );
+                        newEmuchartsEditor.addListener(
+                            "emuCharts_renameState",
+                            function (event) { _this.fire(event); }
+                        );
+                        newEmuchartsEditor.addListener(
+                            "emuCharts_renameTransition",
                             function (event) { _this.fire(event); }
                         );
                         _emuchartsEditors.set(name, newEmuchartsEditor);
