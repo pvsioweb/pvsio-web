@@ -191,13 +191,30 @@ define(function (require, exports, module) {
         var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
             if (editor_mode !== MODE.ADD_TRANSITION() && !mousedrag.node
                     && editor_mode !== MODE.DELETE() && editor_mode !== MODE.RENAME()) {
-                var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
-                _this.fire({
-                    type: "emuCharts_d3ZoomTranslate",
-                    scale: d3.event.scale,
-                    translate: d3.event.translate,
-                    preventCreation: true
-                });
+//                _this.fire({
+//                    type: "emuCharts_d3ZoomTranslate",
+//                    scale: d3.event.scale,
+//                    translate: d3.event.translate,
+//                    preventCreation: true
+//                });
+                //--
+                if (d3.event.scale < _this.d3EventScale) {
+                    _this.zoomLevel = dec02(_this.zoomLevel, 0.5);
+                    _this.d3EventScale = d3.event.scale;
+                    console.log("new zoom level: " + _this.zoomLevel);
+                } else if (d3.event.scale > _this.d3EventScale) {
+                    _this.zoomLevel = inc02(_this.zoomLevel, 4);
+                    _this.d3EventScale = d3.event.scale;
+                    console.log("new zoom level: " + _this.zoomLevel);
+                }
+                console.log("translation: " + d3.event.translate);
+                d3.select("#ContainerStateMachine svg").select("#States")
+                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
+                d3.select("#ContainerStateMachine svg").select("#Transitions")
+                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
+                d3.select("#ContainerStateMachine svg").select("#dragline")
+                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
+                //--
                 _this.SVGdragged = true;
             }
         });
@@ -578,6 +595,8 @@ define(function (require, exports, module) {
         
         // mouse event handlers
         var dragStart = function (node) {
+            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
+            d3.event.sourceEvent.stopPropagation();
             // update mouse variables
             mousedrag.node = { x: node.x, y: node.y, id: node.id };
             if (editor_mode === MODE.ADD_TRANSITION()) {
@@ -623,14 +642,13 @@ define(function (require, exports, module) {
         };
         var dragEnd = function (node) {
             if (editor_mode === MODE.ADD_TRANSITION()) {
-                // add new transition to emuchart
-                _this.emucharts.add_edge({
-                    name: "tick",
-                    source: mousedrag.node,
-                    target: mouseover.node
-                });
-                // render transitions
-                _this.renderTransitions();
+                if (mouseover.node) {
+                    _this.fire({
+                        type: "emuCharts_addTransition",
+                        source: mousedrag.node,
+                        target: mouseover.node
+                    });
+                }
                 // hide drag arrow & reset mouse vars
                 drag_line.classed("hidden", true).style("marker-end", "");
             } else {
@@ -894,22 +912,22 @@ define(function (require, exports, module) {
                 && this.emucharts.variables && this.emucharts.variables.empty();
     };
 
-    EmuchartsEditor.prototype.d3ZoomTranslate = function (d3Scale, d3Translate) {
-        if (d3Scale < this.d3EventScale) {
-            this.zoomLevel = dec02(this.zoomLevel, 0.5);
-        } else if (d3Scale > this.d3EventScale) {
-            this.zoomLevel = inc02(this.zoomLevel, 4);
-        }
-        this.d3EventScale = d3Scale;
-        this.d3EventTranslate = d3Translate;
-        console.log(this.zoomLevel);
-        d3.select("#ContainerStateMachine svg").select("#States")
-            .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
-        d3.select("#ContainerStateMachine svg").select("#Transitions")
-            .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
-        d3.select("#ContainerStateMachine svg").select("#dragline")
-            .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
-    };
+//    EmuchartsEditor.prototype.d3ZoomTranslate = function (d3Scale, d3Translate) {
+//        if (d3Scale < this.d3EventScale) {
+//            this.zoomLevel = dec02(this.zoomLevel, 0.5);
+//        } else if (d3Scale > this.d3EventScale) {
+//            this.zoomLevel = inc02(this.zoomLevel, 4);
+//        }
+//        this.d3EventScale = d3Scale;
+//        this.d3EventTranslate = d3Translate;
+//        console.log(this.zoomLevel);
+//        d3.select("#ContainerStateMachine svg").select("#States")
+//            .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
+//        d3.select("#ContainerStateMachine svg").select("#Transitions")
+//            .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
+//        d3.select("#ContainerStateMachine svg").select("#dragline")
+//            .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
+//    };
     
     module.exports = EmuchartsEditor;
 });

@@ -27,6 +27,42 @@ define(function (require, exports, module) {
         eventDispatcher(this);
     }
     
+    EmuchartsManager.prototype.installHandlers = function (editor) {
+        var _this = this;
+        editor.addListener(
+            "emuCharts_editorModeChanged",
+            function (event) { _this.fire(event); }
+        );
+        editor.addListener(
+            "emuCharts_createState",
+            function (event) { _this.fire(event); }
+        );
+//        editor.addListener(
+//            "emuCharts_d3ZoomTranslate",
+//            function (event) { _this.fire(event); }
+//        );
+        editor.addListener(
+            "emuCharts_deleteTransition",
+            function (event) { _this.fire(event); }
+        );
+        editor.addListener(
+            "emuCharts_deleteState",
+            function (event) { _this.fire(event); }
+        );
+        editor.addListener(
+            "emuCharts_renameState",
+            function (event) { _this.fire(event); }
+        );
+        editor.addListener(
+            "emuCharts_renameTransition",
+            function (event) { _this.fire(event); }
+        );
+        editor.addListener(
+            "emuCharts_addTransition",
+            function (event) { _this.fire(event); }
+        );
+    };
+    
 	/**
 	 * Creates a new empty emuchart using the data passed as argument.
 	 * @memberof EmuchartsManager
@@ -39,34 +75,7 @@ define(function (require, exports, module) {
             // create an editor for the new chart
             var emucharts = new Emucharts(chart.nodes, chart.edges);
             var newEmuchartsEditor = new EmuchartsEditor(emucharts);
-            newEmuchartsEditor.addListener(
-                "emuCharts_editorModeChanged",
-                function (event) { _this.fire(event); }
-            );
-            newEmuchartsEditor.addListener(
-                "emuCharts_createState",
-                function (event) { _this.fire(event); }
-            );
-            newEmuchartsEditor.addListener(
-                "emuCharts_d3ZoomTranslate",
-                function (event) { _this.fire(event); }
-            );
-            newEmuchartsEditor.addListener(
-                "emuCharts_deleteTransition",
-                function (event) { _this.fire(event); }
-            );
-            newEmuchartsEditor.addListener(
-                "emuCharts_deleteState",
-                function (event) { _this.fire(event); }
-            );
-            newEmuchartsEditor.addListener(
-                "emuCharts_renameState",
-                function (event) { _this.fire(event); }
-            );
-            newEmuchartsEditor.addListener(
-                "emuCharts_renameTransition",
-                function (event) { _this.fire(event); }
-            );
+            this.installHandlers(newEmuchartsEditor);
             _emuchartsEditors.set(name, newEmuchartsEditor);
             _selectedEditor = newEmuchartsEditor;
         } else { console.log("dbg: warning, undefined or null emuchart name"); }
@@ -94,34 +103,7 @@ define(function (require, exports, module) {
                         // associate an editor to the created emuchart
                         var emucharts = new Emucharts(chart.nodes, chart.edges);
                         var newEmuchartsEditor = new EmuchartsEditor(emucharts);
-                        newEmuchartsEditor.addListener(
-                            "emuCharts_editorModeChanged",
-                            function (event) { _this.fire(event); }
-                        );
-                        newEmuchartsEditor.addListener(
-                            "emuCharts_createState",
-                            function (event) { _this.fire(event); }
-                        );
-                        newEmuchartsEditor.addListener(
-                            "emuCharts_d3ZoomTranslate",
-                            function (event) { _this.fire(event); }
-                        );
-                        newEmuchartsEditor.addListener(
-                            "emuCharts_deleteTransition",
-                            function (event) { _this.fire(event); }
-                        );
-                        newEmuchartsEditor.addListener(
-                            "emuCharts_deleteState",
-                            function (event) { _this.fire(event); }
-                        );
-                        newEmuchartsEditor.addListener(
-                            "emuCharts_renameState",
-                            function (event) { _this.fire(event); }
-                        );
-                        newEmuchartsEditor.addListener(
-                            "emuCharts_renameTransition",
-                            function (event) { _this.fire(event); }
-                        );
+                        _this.installHandlers(newEmuchartsEditor);
                         _emuchartsEditors.set(name, newEmuchartsEditor);
                         _selectedEditor = newEmuchartsEditor;
                     });
@@ -285,13 +267,13 @@ define(function (require, exports, module) {
         return _selectedEditor.empty_chart();
     };
     
-    /**
-	 * Interface function for handling d3 events
-	 * @memberof EmuchartsManager
-	 */
-    EmuchartsManager.prototype.d3ZoomTranslate = function (d3Scale, d3Translate) {
-        return _selectedEditor.d3ZoomTranslate(d3Scale, d3Translate);
-    };
+//    /**
+//	 * Interface function for handling d3 events
+//	 * @memberof EmuchartsManager
+//	 */
+//    EmuchartsManager.prototype.d3ZoomTranslate = function (d3Scale, d3Translate) {
+//        return _selectedEditor.d3ZoomTranslate(d3Scale, d3Translate);
+//    };
 
     module.exports = EmuchartsManager;
 });

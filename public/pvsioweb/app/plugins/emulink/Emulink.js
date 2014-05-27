@@ -55,9 +55,9 @@ define(function (require, exports, module) {
         emuchartsManager.add_state(stateName, position);
     }
     
-    function d3ZoomTranslate_handler(event) {
-        emuchartsManager.d3ZoomTranslate(event.scale, event.translate);
-    }
+//    function d3ZoomTranslate_handler(event) {
+//        emuchartsManager.d3ZoomTranslate(event.scale, event.translate);
+//    }
     
     function deleteTransition_handler(event) {
         var transitionID = event.edge.id;
@@ -115,6 +115,14 @@ define(function (require, exports, module) {
             view.remove();
         });
     }
+
+    function addTransition_handler(event) {
+        var newTransitionName = emuchartsManager.getFreshTransitionName();
+        emuchartsManager.add_transition(newTransitionName,
+                                        event.source.id,
+                                        event.target.id);
+    }
+
     /**
 	 * Constructor
 	 * @memberof Emulink
@@ -125,11 +133,12 @@ define(function (require, exports, module) {
         emuchartsManager = new EmuchartsManager();
         emuchartsManager.addListener("emuCharts_editorModeChanged", modeChange_callback);
         emuchartsManager.addListener("emuCharts_createState", createState_handler);
-        emuchartsManager.addListener("emuCharts_d3ZoomTranslate", d3ZoomTranslate_handler);
+//        emuchartsManager.addListener("emuCharts_d3ZoomTranslate", d3ZoomTranslate_handler);
         emuchartsManager.addListener("emuCharts_deleteTransition", deleteTransition_handler);
         emuchartsManager.addListener("emuCharts_deleteState", deleteState_handler);
         emuchartsManager.addListener("emuCharts_renameState", renameState_handler);
         emuchartsManager.addListener("emuCharts_renameTransition", renameTransition_handler);
+        emuchartsManager.addListener("emuCharts_addTransition", addTransition_handler);
 	}
 
     
