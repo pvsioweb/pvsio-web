@@ -1,11 +1,11 @@
 /**
  * @module ProjectFile
- * @desc Module representing a Spec or image file in  a project
+ * @desc Module representing a file in  a project
  * @author Patrick Oladimeji
  * @date 11/15/13 10:19:27 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent */
+/*global define*/
 define(function (require, exports, module) {
 	"use strict";
 	var property = require("util/property"),
@@ -14,10 +14,10 @@ define(function (require, exports, module) {
 	/**
 	 * @constructor
 	 * @param {string} path The name of the file, i.e., the *relative path* from the project directory
-	 * @param {Project} project The project to which this file belongs
+     * @param {string} content the content of the file
 	 * @this ProjectFile
 	 */
-    function ProjectFile(path, project) {
+    function ProjectFile(path, content) {
         eventDispatcher(this);
         var pf = this;
 		/** get or set the dirty flag on this file. A file is dirty if its content has been edited but not persisted 
@@ -27,7 +27,7 @@ define(function (require, exports, module) {
         //fire event whenever the dirty flag changes
         this.dirty.addListener("PropertyChanged", function (event) {
             pf.fire({type: "DirtyFlagChanged",  previous: event.old,
-                       current: event.fresh, path: path, projectPath: project.path()});
+                       current: event.fresh, path: path});
         });
 		/** 
 			get or set the type of this file. Files can currently be image or text
@@ -38,9 +38,12 @@ define(function (require, exports, module) {
 			get or set the content of the file
 			@type {string}
 		*/
-        this.content = property.call(this);
-		
-		
+        this.content = property.call(this, content);
+		/**
+         * get or set the encoding of the file (default "utf8"
+         * @type {string}
+         */
+		this.encoding = property.call(this, "utf8");
 		/**
 		 * get the full path of the file
 		 * @returns {string}
@@ -53,7 +56,13 @@ define(function (require, exports, module) {
         this.name = function () {
             return this.path().substr(this.path().lastIndexOf("/") + 1);
         };
-        
+        /** get the extenstion of the file
+         * @returns {string}
+         */
+        this.extension = function () {
+            var n = this.name();
+            return n.indexOf(".") > -1 ? n.substr(n.lastIndexOf(".") + 1) : "";
+        };
         //-----
 		/** get or set the visibility of this file in the project view
 			@type {boolean}

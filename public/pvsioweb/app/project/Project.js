@@ -4,7 +4,7 @@
  * @date 6/20/13 9:45:59 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent, _ , FileReader, Promise*/
+/*global define, Promise*/
 define(function (require, exports, module) {
     "use strict";
     var property            = require("util/property"),
@@ -14,11 +14,13 @@ define(function (require, exports, module) {
         ScriptPlayer        = require("util/ScriptPlayer"),
 		ProjectFile			= require("./ProjectFile");
     
+    var _projectFiles = [];
+    
     var propertyChangedEvent = "PropertyChanged";
     
-    function saveSourceCode(files, project) {
+    function saveSourceCode(files) {
         var ws = WSManager.getWebSocket();
-        var promises =  files.map(function (f, i) {
+        var promises =  files.map(function (f) {
             return new Promise(function (resolve, reject) {
                 ws.writeFile({fileName: f.path(), fileContent: f.content()}, function (err, res) {
                     if (!err) {
@@ -135,7 +137,7 @@ define(function (require, exports, module) {
 			@type {ProjectFile {}}
 		*/
         this.pvsFiles = property.call(this, {});
-	
+	        
         this.scripts = property.call(this, []);
         
         var project = this;
@@ -162,10 +164,18 @@ define(function (require, exports, module) {
         
         eventDispatcher(this);
         //listen for widget manager event for widget modification
-        WidgetManager.addListener("WidgetModified", function (e) {
+        WidgetManager.addListener("WidgetModified", function () {
             project._dirty(true);
         });
     }
+    
+    /**
+     * Gets the list of all the files attributed to the project
+     * @returns {array<ProjectFile>} a list of project files in the project
+     */
+    Project.prototype.getProjectFiles = function () {
+        return _projectFiles;
+    };
     
     /**
 	 * Updates the project image.
@@ -174,32 +184,38 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
 	Project.prototype.changeImage = function (imagePath, imageData) {
-		var newImage = new ProjectFile(imagePath, this).type("image").content(imageData).dirty(true);
+		var newImage = new ProjectFile(imagePath).type("image").content(imageData).dirty(true);
 		this.image(newImage);
 		return this;
 	};
        
-	/**
-	 * Adds a new specification file to the project
+    /**
+	 * Adds a new generic project file to the project
 	 * @param {!String} filePath The path of the file to add
 	 * @param {!String} fileContent The content of the file to add
+     * @param {!string} encoding The encoding of the file to add
      * @param {boolean} supressEvent Set true to supress the SpecFileAdded event or false otherwise
 	 * @memberof Project
 	 */
-	Project.prototype.addSpecFile = function (filePath, fileContent, supressEvent) {
-		var newSpec = new ProjectFile(filePath, this).content(fileContent);
-		this.pvsFiles()[newSpec.path()] = newSpec;
-        if (!supressEvent) {
-            this.fire({type: "SpecFileAdded", file: newSpec});
+    Project.addProjectFile = function (filePath, fileContent, encoding, suppressEvent) {
+        encoding = encoding || "utf8";
+        var p  = this, newFile = new ProjectFile(filePath)
+                .content(fileContent)
+                .encoding(encoding);
+        _projectFiles.push(newFile);
+        if (!suppressEvent) {
+            if (newFile.extension() === "pvs") {
+                p.fire({type: "SpecFileAdded", file: newFile});
+                //register event for the newspec and bubble up the dirty flag changed event from project
+                newFile.addListener("DirtyFlagChanged", function () {
+                    p.fire({type: "SpecDirtyFlagChanged", file: newFile});
+                });
+            } else {
+                p.fire({type: "ProjectFileAdded", file: newFile});
+            }
         }
-        var project = this;
-        //register event for the newspec and bubble up the dirty flag changed event from project
-        newSpec.addListener("DirtyFlagChanged", function (event) {
-            project.fire({type: "SpecDirtyFlagChanged", file: newSpec});
-        });// adding a file to the project does not change the file, so no need to set the dirty flag for the file (.dirty(true);)
-		return newSpec;
-	};
-    
+        return newFile;
+    };
     /**
      * Gets the pvsSpec file with the specified Name
      * @param {!String} fileName path to the spec file
@@ -212,37 +228,25 @@ define(function (require, exports, module) {
     };
     
 	/**
-	 * Removes the specified file from the list of specification (.pvs) files.
+	 * Removes the specified file from the list of project files.
 	 * @param {!ProjectFile} file The file to remove.
 	 * @memberof Project
 	 */
 	Project.prototype.removeFile = function (file) {
 		///FIXME this function might not trigger a propertyChanged event on pvsFiles
 		//since the files are being modified without using the setter function pvsFiles(updatedList)
-        var path = file.path();
-        var deletedFile = this.pvsFiles()[path];
+        var fileIndex = _projectFiles.indexOf(file);
+        
+        var deletedFile = _projectFiles.splice(fileIndex, 1);
         if (deletedFile) {
-            delete this.pvsFiles()[path];
-            this.fire({event: "SpecFileDeleted", file: deletedFile, path: path});
+            this.fire({event: deletedFile.extension() === "pvs" ? "SpecFileDeleted" : "ProjectFileDeleted",
+                       file: deletedFile});
             deletedFile.clearListeners();
+            deletedFile = null;
         }
         return this;
 	};
     
-	/** A function about state machines */
-	///FIXME not sure what is going on here!!
-	Project.prototype.stateMachine = function (stateMachineisLoaded) {
-		var i = 0, x;
-		for (x in stateMachineisLoaded[0] )  {
-			if (stateMachineisLoaded[0].hasOwnProperty(x)) {
-				console.log(x);
-				console.log(stateMachineisLoaded[1][i]);
-				this.addSpecFile(stateMachineisLoaded[0][x], stateMachineisLoaded[1][i]);
-				i = i + 1;
-			}
-	    }
-	};
-
     /**
         Sets the project name
         @param {string} newPath the new project name
@@ -326,7 +330,7 @@ define(function (require, exports, module) {
 		}
 		var _thisProject = this;
 		saveSourceCode(file, this)
-            .then(function (res) {
+            .then(function () {
                 if (cb && typeof cb === "function") {
                     cb(null, _thisProject);
                 }
@@ -345,12 +349,11 @@ define(function (require, exports, module) {
 	Project.prototype.save = function (cb) {
 		var _thisProject = this;
 		//do save
-		var imageName, pvsSpecName, fd;
 		if (this.name() && this.name().trim().length > 0) {
 			//project has already been created so save the widgets and the sourcecode if it has changed
             Promise.all([saveWidgetDefinition(this), saveInteractionScripts(this),
                          saveSourceCode(this.dirtyFiles(), this), saveImageFile(this)])
-                .then(function (res) {
+                .then(function () {
                     _thisProject._dirty(false);
                     _thisProject.fire({type: "ProjectSaved", project: _thisProject});
                     if (cb && typeof cb === "function") { cb(null, _thisProject); }
@@ -379,7 +382,7 @@ define(function (require, exports, module) {
 		var wd = WidgetManager.getWidgetDefinitions();
 		var wdStr = JSON.stringify(wd, null, " ");
 		var ws = WSManager.getWebSocket();
-        var specFiles = this.pvsFilesList().map(function (f, i) {
+        var specFiles = this.pvsFilesList().map(function (f) {
                 return { fileName: f.path().replace(_thisProject.name(), newName), fileContent: f.content() };
             });
 		var token = { type: "createProject",

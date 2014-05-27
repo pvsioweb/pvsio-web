@@ -10,7 +10,7 @@ define(function (require, exports, module) {
 	var  CodeMirror             = require("cm/lib/codemirror"),
         Project                 = require("project/Project"),
         PVSioWebClient          = require("PVSioWebClient"),
-        d3                      = require("d3"),
+        d3                      = require("d3/d3"),
 		ProjectManager			= require("project/ProjectManager"),
 		sourceCodeTemplate		= require("text!pvsioweb/forms/templates/sourceCodeEditorPanel.handlebars");
 	var instance;

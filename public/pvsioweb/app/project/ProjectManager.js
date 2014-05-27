@@ -112,7 +112,7 @@ define(function (require, exports, module) {
                     //since we are not passing a file content it will get loaded over websocket when requested
                     //we supress the spec file added event because the file already exists in the file tree
                     var theoryName = event.selectedItem.name.substr(0, event.selectedItem.name.indexOf(".pvs"));
-                    pvsFile = project.addSpecFile(event.selectedItem.path, makeEmptyTheory(theoryName), true);
+                    pvsFile = project.addProjectFile(event.selectedItem.path, makeEmptyTheory(theoryName), "utf8", true);
                 }
                 if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
                     editor.off("change", _editorChangedHander);
@@ -195,23 +195,13 @@ define(function (require, exports, module) {
 			//create project files and assign the mainpvsfile appropriately
 			obj.pvsFiles.forEach(function (file) {
 				if (file.path === obj.mainPVSFile.path) {
-                    pf = new ProjectFile(file.path, p).content(file.fileContent);
+                    pf = p.addProjectFile(file.path, file.fileContent);
                     
 					p.mainPVSFile(pf);
-				}
-                p.addSpecFile(file.path, file.fileContent);
-//                var currentFile =  obj.folderStructure.children.filter(function (f) { return f.path === file.path; });
-//                if (currentFile && currentFile.length > 0) {
-//                    //this means files having the same path exist in the children list!!
-//                    //log debug and pick the first item in currentFile
-//                    if (currentFile.length > 1) {
-//                        console.log("dbg: warning, unexpected aliasing for file " + file.path);
-//                    }
-//                    p.addSpecFile(currentFile[0].path, currentFile[0].fileContent);
-//                } else {
-//                    console.log("dbg: warning, unable to render content of " + file.path);
-//                }
-			});
+				} else {
+                    p.addProjectFile(file.path, file.fileContent);
+                }
+            });
 		}
         if (obj.scripts) {
             obj.scripts.forEach(function (s) {
@@ -219,7 +209,7 @@ define(function (require, exports, module) {
             });
         }
 		if (obj.imagePath && obj.imageData) {
-			p.image(new ProjectFile(obj.imagePath, p).type("image").content(obj.imageData));
+			p.image(new ProjectFile(obj.imagePath).type("image").content(obj.imageData));
 		}
 		p.widgetDefinitions(obj.widgetDefinition)._dirty(false);
         
@@ -288,54 +278,55 @@ define(function (require, exports, module) {
         });
     };
 	/**
-	 * Opens a form that allows a user to select specification files to add to the project.
-	 * Selected files are added to the project, but changes are not persisted until project.save is invoked.
-	 * @param {callback} [cb = function () {}] function to invoke after files have been loaded into the project
+	 * Opens a form that allows a user to select a list of files.
+	 * Selected files are returned as a list parameter in the callback.
+	 * @returns a Promise that resolves  the files that have been selected and confirmed by user
 	 * @memberof ProjectManager
 	 */
-	ProjectManager.prototype.openFiles = function (cb) {
-        var pm = this;
-        var project = this.project(),
-            err,
-            res;
-		openFilesForm.create().on("cancel", function (e, view) {
-			view.remove();
-            err = { msg: "cancelled by user" };
-            if (cb && typeof cb === "function") { cb(err, res); }
-		}).on("ok", function (e, view) {
-            var i = 0, promises = [], data = e.data, currLength = project.pvsFilesList().length;
-            //create promises for the pvs source files, if any is specified in data
-            if (data.pvsSpec) {
-                for (i = 0; i < data.pvsSpec.length; i++) {
-                    promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
-                }
-            }
-
-            Promise.all(promises)
-                .then(function (pvsFiles) {
-                    pvsFiles.forEach(function (specContent, index) {
-                        project.addSpecFile(data.pvsSpec[index].name, specContent);
-                    });
-                }).then(function () {
-                    // select the first of the opened files and fire project changed event
-                    if (data.pvsSpec[0]) {
-                        pvsFilesListView.selectItem(
-                            project.pvsFiles()[data.pvsSpec[0].name]
-                        );
-                        // fire project changed event
-                        pm.fire({
-                            type: "ProjectChanged",
-                            current: project,
-                            previous: project
-                        });
+	ProjectManager.prototype.openFiles = function () {
+        var err;
+        return new Promise(function (resolve, reject) {
+            openFilesForm.create().on("cancel", function (e, view) {
+                view.remove();
+                err = { msg: "cancelled by user" };
+                reject(err);
+            }).on("ok", function (e, view) {
+                view.remove();
+                resolve(e.data.projectFiles);
+               /* var i = 0, promises = [], data = e.data, currLength = project.pvsFilesList().length;
+                //create promises for the pvs source files, if any is specified in data
+                if (data.pvsSpec) {
+                    for (i = 0; i < data.pvsSpec.length; i++) {
+                        promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
                     }
-                    view.remove();
-                    var msg = (project.pvsFilesList().length - currLength) + 
-                            " added to the project";
-                    res = { msg: msg };
-                    if (cb && typeof cb === "function") { cb(err, res); }
-                });
-		});
+                }
+
+                Promise.all(promises)
+                    .then(function (pvsFiles) {
+                        pvsFiles.forEach(function (specContent, index) {
+                            project.addProjectFile(data.pvsSpec[index].name, specContent);
+                        });
+                    }).then(function () {
+                        // select the first of the opened files and fire project changed event
+                        if (data.pvsSpec[0]) {
+                            pvsFilesListView.selectItem(
+                                project.pvsFiles()[data.pvsSpec[0].name]
+                            );
+                            // fire project changed event
+                            pm.fire({
+                                type: "ProjectChanged",
+                                current: project,
+                                previous: project
+                            });
+                        }
+                        var msg = (project.pvsFilesList().length - currLength) + 
+                                " added to the project";
+                        res = { msg: msg };
+                        if (cb && typeof cb === "function") { cb(err, res); }
+                    });*/
+            });
+        });
+		
 	};
 	/**
 	 * Updates the project image with in the prototype builder
@@ -465,7 +456,7 @@ define(function (require, exports, module) {
         Promise.all(promises)
             .then(function (pvsFiles) {
                 pvsFiles.forEach(function (specContent, index) {
-                    project.addSpecFile(data.pvsSpec[index].name, specContent);
+                    project.addProjectFile(data.pvsSpec[index].name, specContent);
                 });
             }).then(function () {
                 project.saveNew(data.projectName, function (err, res, folderStructure) {
@@ -635,13 +626,13 @@ define(function (require, exports, module) {
         WidgetManager.clearWidgetAreas();
         ScriptPlayer.clearView();
         var project = new Project(data.projectName);
-        project.addSpecFile(data.pvsSpec[0], makeEmptyTheory(defaultTheoryName));
+        project.addProjectFile(data.pvsSpec[0], makeEmptyTheory(defaultTheoryName));
 
         project.saveNew(data.projectName, function (err, res, folderStructure) {
             console.log({err: err, res: res});
             if (!err) {
                 //set the main pvs file
-                project.mainPVSFile(new ProjectFile(defaultFilePath, defaultFileName));
+                project.mainPVSFile(new ProjectFile(defaultFilePath));
                 WidgetManager.updateMapCreator();
                 pm.project(project);
                 pm.renderSourceFileList(folderStructure);
@@ -659,8 +650,9 @@ define(function (require, exports, module) {
 	 * Creates a new file in the current project.
      * @memberof ProjectManager
      */
-	ProjectManager.prototype.createFile = function (filename, content) {
-        this.project().addSpecFile(filename, content);
+	ProjectManager.prototype.createProjectFile = function (path, content) {
+        var file = new ProjectFile(path, content);
+        return file;
     };
     
 	module.exports = ProjectManager;

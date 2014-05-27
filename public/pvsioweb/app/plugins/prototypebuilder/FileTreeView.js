@@ -4,16 +4,15 @@
  * @date 1/14/14 11:53:17 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, unparam: true*/
-/*global define, d3, require, $, brackets, window, MouseEvent */
+/*global define*/
 define(function (require, exports, module) {
     "use strict";
     var eventDispatcher = require("util/eventDispatcher"),
-        property                = require("util/property"),
         WSManager				= require("websockets/pvs/WSManager"),
         QuestionForm            = require("pvsioweb/forms/displayQuestion"),
         TreeList                = require("./TreeList");
     
-    var folderData, elementId, project, ws = WSManager.getWebSocket(), fileCounter = 0, folderCounter = 0,
+    var elementId, project, ws = WSManager.getWebSocket(), fileCounter = 0, folderCounter = 0,
         unSavedFileName = "untitled_file", unSavedFolderName = "untitled_folder", treeList;
     
     /**
@@ -60,7 +59,6 @@ define(function (require, exports, module) {
                               function (err, res) {
                         if (!err) {
                             //add the spec file to the project and supress the event so we dont create multiple files
-                            //project.addSpecFile(node.path, "", true);
                             console.log(res);
                         } else { console.log(err); }
                     });
