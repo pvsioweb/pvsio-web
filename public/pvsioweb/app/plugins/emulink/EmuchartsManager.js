@@ -29,38 +29,19 @@ define(function (require, exports, module) {
     
     EmuchartsManager.prototype.installHandlers = function (editor) {
         var _this = this;
-        editor.addListener(
-            "emuCharts_editorModeChanged",
-            function (event) { _this.fire(event); }
-        );
-        editor.addListener(
-            "emuCharts_createState",
-            function (event) { _this.fire(event); }
-        );
-//        editor.addListener(
-//            "emuCharts_d3ZoomTranslate",
-//            function (event) { _this.fire(event); }
-//        );
-        editor.addListener(
-            "emuCharts_deleteTransition",
-            function (event) { _this.fire(event); }
-        );
-        editor.addListener(
-            "emuCharts_deleteState",
-            function (event) { _this.fire(event); }
-        );
-        editor.addListener(
-            "emuCharts_renameState",
-            function (event) { _this.fire(event); }
-        );
-        editor.addListener(
-            "emuCharts_renameTransition",
-            function (event) { _this.fire(event); }
-        );
-        editor.addListener(
-            "emuCharts_addTransition",
-            function (event) { _this.fire(event); }
-        );
+        editor.addListener("emuCharts_editorModeChanged", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_createState", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_deleteTransition", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_deleteState", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_renameState", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_renameTransition", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_addTransition", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_stateAdded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_stateRemoved", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_constantAdded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_variableAdded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_transitionAdded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
     };
     
 	/**

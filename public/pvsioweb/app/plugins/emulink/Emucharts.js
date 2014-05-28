@@ -16,15 +16,21 @@ define(function (require, exports, module) {
     
     var constants, // d3.map()
         variables; // d3.map()
+	var eventDispatcher = require("util/eventDispatcher");
 
     var defaultValues = { x: 100, y: 100, width: 36, height: 36, fontSize: 10 };
 
     // FIXME: improve these functions -- here we assume that generated IDs are compact
     var nextNodeID = 0, nextEdgeID = 0;
-    var newNodeID = function () { return nextNodeID++; };
-    var newEdgeID = function () { return nextEdgeID++; };
+    var newNodeID = function () { return ++nextNodeID; };
+    var newEdgeID = function () { return ++nextEdgeID; };
     var getFreshNodeID = function () { return nextNodeID + 1; };
     var getFreshEdgeID = function () { return nextEdgeID + 1; };
+    var nextConstantID = 0, nextVariableID = 0;
+    var newConstantID = function () { return ++nextConstantID; };
+    var newVariableID = function () { return ++nextVariableID; };
+    var getFreshConstantID = function () { return nextConstantID + 1; };
+    var getFreshVariableID = function () { return nextVariableID + 1; };
     
 	/**
 	 * Constructor
@@ -39,6 +45,10 @@ define(function (require, exports, module) {
             this.edges = edges;
             nextEdgeID = edges.keys().length; // FIXME: this is fragile: we need to check the actual indexes
         }
+        this.constants = d3.map();
+        this.variables = d3.map();
+		eventDispatcher(this);
+        return this;
     }
     
     Emucharts.prototype.getEdges = function () {
@@ -80,7 +90,7 @@ define(function (require, exports, module) {
                     edge.target.name = newName;
                     dirty = true;
                 }
-                if (dirty) { edges.set(key, edge); }
+                if (dirty) { this.edges.set(key, edge); }
             });
         }
         return true;
@@ -108,9 +118,36 @@ define(function (require, exports, module) {
             };
         // add the new node to the diagram
         this.nodes.set(newNode.id, newNode);
+        // fire event
+        this.fire({
+            type: "emuCharts_stateAdded",
+            state: {
+                id: id,
+                name: name
+            }
+        });
         return newNode;
     };
 
+    /**
+	 * Removes a node from the diagram
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.remove_node = function (node) {
+        var rem = this.nodes.get(node);
+        if (rem && this.nodes.remove(node)) {
+            // fire event
+            this.fire({
+                type: "emuCharts_stateRemoved",
+                state: {
+                    id: rem.id,
+                    name: rem.name
+                }
+            });
+            return true;
+        }
+        return false;
+    };
 
 	/**
 	 * Renames an existing edge
@@ -123,6 +160,22 @@ define(function (require, exports, module) {
         var edge = this.edges.get(id);
         edge.name = newName;
         this.edges.set(edge.id, edge);
+        // fire event
+        this.fire({
+            type: "emuCharts_transitionRenamed",
+            transition: {
+                id: edge.id,
+                name: edge.name,
+                source: {
+                    id: edge.source.id,
+                    name: edge.source.name
+                },
+                target: {
+                    id: edge.target.id,
+                    name: edge.target.name
+                }
+            }
+        });
         return true;
     };
     
@@ -152,9 +205,54 @@ define(function (require, exports, module) {
             };
         // add the new edge to the diagram
         this.edges.set(newEdge.id, newEdge);
+        // fire event
+        this.fire({
+            type: "emuCharts_transitionAdded",
+            transition: {
+                id: newEdge.id,
+                name: newEdge.name,
+                source: {
+                    id: newEdge.source.id,
+                    name: newEdge.source.name
+                },
+                target: {
+                    id: newEdge.target.id,
+                    name: newEdge.target.name
+                }
+            }
+        });
         return newEdge;
     };
 
+    /**
+	 * Removes an edge from the diagram
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.remove_edge = function (edge) {
+        var rem = this.edges.get(edge);
+        if (rem && this.edges.remove(edge)) {
+            // fire event
+            this.fire({
+                type: "emuCharts_transitionRemoved",
+                transition: {
+                    id: rem.id,
+                    name: rem.name,
+                    source: {
+                        id: rem.source.id,
+                        name: rem.source.name
+                    },
+                    target: {
+                        id: rem.target.id,
+                        name: rem.target.name
+                    }
+                }
+            });
+            return true;
+        }
+        return false;
+    };
+
+    
 	/**
 	 * Automatically adjusts nodes width using name length
 	 * @memberof Emucharts
@@ -216,6 +314,22 @@ define(function (require, exports, module) {
         });
         return states;
     };
+
+    /**
+	 * Returns the state associated to the provided id
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getState = function (id) {
+        return this.nodes.get(id);
+    };
+
+    /**
+	 * Returns the transition associated to the provided id
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getTransition = function (id) {
+        return this.edges.get(id);
+    };
     
     /**
 	 * Returns an array containing the current set of transitions
@@ -248,22 +362,30 @@ define(function (require, exports, module) {
 	 * Interface function for adding new constant definitions
      * @memberof Emucharts
 	 */
-    Emucharts.prototype.add_constant = function (newConstant) {
-        if (!this.constants) {
-            this.constants = d3.map();
-        }
-        this.constants.set(newConstant);
+    Emucharts.prototype.add_constant = function (name) {
+        this.constants.set(name);
+        // fire event
+        this.fire({
+            type: "emuCharts_constantAdded",
+            constant: {
+                name: name
+            }
+        });
     };
     
     /**
 	 * Interface function for adding new state variables definitions
      * @memberof Emucharts
 	 */
-    Emucharts.prototype.add_variable = function (newVariable) {
-        if (!this.variables) {
-            this.variables = d3.map();
-        }
-        this.variables.set(newVariable);
+    Emucharts.prototype.add_variable = function (name) {
+        this.variables.set(name);
+        // fire event
+        this.fire({
+            type: "emuCharts_variableAdded",
+            variable: {
+                name: name
+            }
+        });
     };
 
     
@@ -272,10 +394,7 @@ define(function (require, exports, module) {
 	 * @memberof Emucharts
 	 */
     Emucharts.prototype.getConstants = function () {
-        if (this.constants) {
-            return this.constants.keys();
-        }
-        return [];
+        return this.constants.keys();
     };
     
     /**
@@ -283,10 +402,15 @@ define(function (require, exports, module) {
 	 * @memberof Emucharts
 	 */
     Emucharts.prototype.getVariables = function () {
-        if (this.variables) {
-            return this.variables.keys();
-        }
-        return [];
+        return this.variables.keys();
+    };
+
+    /**
+	 * Utility function that checks whether the diagram is empty (i.e., 0 nodes, 0 edges)
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.empty = function () {
+        return this.nodes.empty() && this.edges.empty();
     };
 
     module.exports = Emucharts;

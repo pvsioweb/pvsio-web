@@ -22,7 +22,8 @@ define(function (require, exports, module) {
         displayRename        = require("plugins/emulink/forms/displayRename"),
         displayDelete        = require("plugins/emulink/forms/displayDelete"),
         displayAddExpression = require("plugins/emulink/forms/displayAddExpression"),
-        QuestionForm         = require("pvsioweb/forms/displayQuestion");
+        QuestionForm         = require("pvsioweb/forms/displayQuestion"),
+        EmuchartsPVSPrinter   = require("plugins/emulink/EmuchartsPVSPrinter");
     
     var instance;
     var projectManager;
@@ -34,6 +35,7 @@ define(function (require, exports, module) {
     
     var emuchartsManager;
     var MODE;
+    var emuchartsPVSPrinter;
 
     function resetToolbarColors() {
         document.getElementById("btn_toolbarBrowse").style.background = "black";
@@ -62,10 +64,6 @@ define(function (require, exports, module) {
         var position = { x: evt.mouse[0], y: evt.mouse[1] };
         emuchartsManager.add_state(stateName, position);
     }
-    
-//    function d3ZoomTranslate_handler(event) {
-//        emuchartsManager.d3ZoomTranslate(event.scale, event.translate);
-//    }
     
     function deleteTransition_handler(event) {
         var transitionID = event.edge.id;
@@ -130,12 +128,38 @@ define(function (require, exports, module) {
                                         event.source.id,
                                         event.target.id);
     }
+    
+    // dbg
+    function print_theory() {
+        var emuchart = {
+            name: "emuchart_th",
+            author: {
+                name: "Paolo Masci",
+                affiliation: "Queen Mary University of London, United Kingdom",
+                contact: "http://www.eecs.qmul.ac.uk/~masci/"
+            },
+            importings: [],
+            costants: emuchartsManager.getConstants(),
+            variables: emuchartsManager.getVariables(),
+            states: emuchartsManager.getStates(),
+            transitions: emuchartsManager.getTransitions()
+        };
+        console.log(emuchartsPVSPrinter.print(emuchart));
+    }
+    
+    function stateAdded_handler(event) { print_theory(); }
+    function stateRemoved_handler(event) { print_theory(); }
+    function constantAdded_handler(event) { print_theory(); }
+    function variableAdded_handler(event) { print_theory(); }
+    function transitionAdded_handler(event) { print_theory(); }
+    function transitionRenamed_handler(event) { print_theory(); }
 
     /**
 	 * Constructor
 	 * @memberof Emulink
 	 */
     function Emulink() {
+        emuchartsPVSPrinter = new EmuchartsPVSPrinter("emuchart_th");
         pvsioWebClient = PVSioWebClient.getInstance();
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
@@ -147,8 +171,14 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_renameState", renameState_handler);
         emuchartsManager.addListener("emuCharts_renameTransition", renameTransition_handler);
         emuchartsManager.addListener("emuCharts_addTransition", addTransition_handler);
+        
+        emuchartsManager.addListener("emuCharts_stateAdded", stateAdded_handler);
+        emuchartsManager.addListener("emuCharts_stateRemoved", stateRemoved_handler);
+        emuchartsManager.addListener("emuCharts_constantAdded", constantAdded_handler);
+        emuchartsManager.addListener("emuCharts_variableAdded", variableAdded_handler);
+        emuchartsManager.addListener("emuCharts_transitionAdded", transitionAdded_handler);
+        emuchartsManager.addListener("emuCharts_transitionRenamed", transitionRenamed_handler);
 	}
-
     
 	Emulink.prototype.createHtmlElements = function () {
         var _this = this;

@@ -13,6 +13,7 @@ define(function (require, exports, module) {
     
     var d3 = require("d3/d3"),
         eventDispatcher = require("util/eventDispatcher"),
+        Emucharts = require("plugins/emulink/Emucharts"),
         EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes");
     
     // the emuchart data
@@ -47,10 +48,17 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     function EmuchartsEditor(emucharts) {
+        var _this = this;
         this.zoomLevel = 1;
         this.d3EventScale = d3.behavior.zoom().scale();
         this.d3EventTranslate = d3.behavior.zoom().translate();
-        this.emucharts = emucharts;
+        this.emucharts = emucharts || new Emucharts();
+        this.emucharts.addListener("emuCharts_stateAdded", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_stateRemoved", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_constantAdded", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_variableAdded", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_transitionAdded", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
         this.dragged = false;
         this.SVGdragged = false;
         eventDispatcher(this);
@@ -95,7 +103,7 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     EmuchartsEditor.prototype.zoomChart = function () {
-        if (this.emucharts && this.emucharts.nodes && this.emucharts.nodes.empty() === false && this.zoomLevel) {
+        if (this.emucharts && !this.emucharts.empty() && this.zoomLevel) {
             d3.select("#ContainerStateMachine svg").select("#States")
                 .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
             d3.select("#ContainerStateMachine svg").select("#Transitions")
@@ -333,7 +341,7 @@ define(function (require, exports, module) {
 	 */
     function removeTransitions(exitedTransitions) {
         return exitedTransitions
-                    .transition().duration(320)
+                    .transition().duration(220)
                     .style("stroke-width", stroke_width_large)
                     .style("opacity", 0).remove();
     }
@@ -551,7 +559,7 @@ define(function (require, exports, module) {
             .style("stroke-width", "2") // set border size
             .style("fill", "white") // set fill colour
             .style("opacity", "0.4") // make the resize tool slightly transparent
-            .style("cursor", "move"); // change cursor shape on mouse over
+            .style("cursor", "pointer"); // change cursor shape on mouse over
         // draw state names
         var label = enteredStates.append("svg:text").classed("state_label", true)
             .attr("id", function (node) { return "label_" + node.id; })
@@ -569,7 +577,7 @@ define(function (require, exports, module) {
 	 */
     function removeStates(exitedStates) {
         return exitedStates
-                    .transition().duration(320)
+                    .transition().duration(220)
                     .style("opacity", 0).remove();
     }
 
@@ -642,10 +650,10 @@ define(function (require, exports, module) {
             } else {
                 if (mousedrag.node.x !== node.x || mousedrag.node.y !== node.y) {
                     // drag event
-                    console.log("drag");
+                    //console.log("drag");
                 } else {
                     // click event
-                    console.log("click");
+                    //console.log("click");
                     if (!_this.dragged) {
                         if (editor_mode === MODE.DELETE() && mouseover.node) {
                             _this.fire({
@@ -820,7 +828,7 @@ define(function (require, exports, module) {
 	 */
     EmuchartsEditor.prototype.delete_state = function (stateID) {
         var _this = this;
-        this.emucharts.nodes.remove(stateID);
+        this.emucharts.remove_node(stateID);
         var edges = [];
         this.emucharts.edges.forEach(function (key) {
             var edge = _this.emucharts.edges.get(key);
@@ -830,7 +838,7 @@ define(function (require, exports, module) {
             }
         });
         edges.forEach(function (edge) {
-            _this.emucharts.edges.remove(edge);
+            _this.emucharts.remove_edge(edge);
         });
         this.renderTransitions();
         return this.renderStates();
@@ -841,7 +849,7 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     EmuchartsEditor.prototype.delete_transition = function (transitionID) {
-        this.emucharts.edges.remove(transitionID);
+        this.emucharts.remove_edge(transitionID);
         return this.renderTransitions();
     };
 
@@ -850,8 +858,8 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     EmuchartsEditor.prototype.add_transition = function (transitionName, from, to) {
-        var source = this.emucharts.nodes.get(from);
-        var target = this.emucharts.nodes.get(to);
+        var source = this.emucharts.getState(from);
+        var target = this.emucharts.getState(to);
         if (source && target) {
             // FIXME: need to adjust the position in the case svg is translated
             this.emucharts.add_edge({
@@ -888,9 +896,16 @@ define(function (require, exports, module) {
 	 */
     EmuchartsEditor.prototype.delete_chart = function () {
         var _this = this;
-        if (this.emucharts.nodes) {
-            this.emucharts.nodes.forEach(function (key) {
-                _this.delete_state(key);
+        var states = this.emucharts.getStates();
+        if (states) {
+            states.forEach(function (id) {
+                _this.delete_state(id);
+            });
+        }
+        var transitions = this.emucharts.getTransitions();
+        if (transitions) {
+            transitions.forEach(function (id) {
+                _this.delete_transition(id);
             });
         }
         if (this.emucharts.constants) {
