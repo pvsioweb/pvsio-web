@@ -16,8 +16,8 @@ div.contextmenu {
     font-family: lancelot, georgia, "courier new";
 }
 
-.contextmenu li:hover, .node:hover {
-    background: #abdbf2;
+.contextmenu li:hover{
+    background: #b4b4b4;
     border: none;
 }
 
@@ -25,9 +25,6 @@ div.contextmenu {
     margin: 0;
     padding: 0;
     white-space: nowrap;
-}
-
-#tree li {
 }
 
 #tree {
@@ -42,19 +39,29 @@ div.contextmenu {
     border: none;
 }
 
-.treelist .node .label {
-    color: black;
-    display: inline-block;
-    min-width: 40px;
+.treelist .node .filename {
+   font-size: 11pt;
 }
 
 .node.dirty {
     font-style: italic;
 }
 
-.node.selected .label {
+.node.selected {
     color: white;
     position: relative;
     background: steelblue;
-    border: 1px solid #444;
+    border: 1px solid #416d91;
+}
+
+.node span {
+    margin-right: 5px;
+}
+
+.node .chevron {
+    font-size: 10px;
+}
+
+.node .line {
+    position: absolute;
 }
