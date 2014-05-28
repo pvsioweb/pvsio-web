@@ -185,7 +185,23 @@ define(function (require, exports, module) {
         return _selectedEditor.getStates();
     };
     
-	/**
+    /**
+	 * Returns an array containing the current set of constants defined in the model
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getConstants = function () {
+        return _selectedEditor.getConstants();
+    };
+
+    /**
+	 * Returns an array containing the current set of variables defined in the model
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getVariables = function () {
+        return _selectedEditor.getVariables();
+    };
+
+    /**
 	 * Returns an array containing the current set of transitions
      * Each transition is given as a 4-tuple { name, id, source, target }
      * where source and target are pairs { name, id }
