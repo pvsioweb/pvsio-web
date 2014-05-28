@@ -26,7 +26,7 @@ define(function (require, exports, module) {
      */
     EmuchartsPVSPrinter.prototype.print_states = function (emuchart) {
         var states = emuchart.states;
-        var ans = "  %-- machine states\n  MachinedState: TYPE";
+        var ans = "  %-- machine states\n  MachineState: TYPE";
         if (states && states.length > 0) {
             ans += " = { ";
             states.forEach(function (state) {
@@ -98,7 +98,7 @@ define(function (require, exports, module) {
                 if ((before === "" || before.indexOf(";") === before.length - 1
                                     || before.indexOf("(") === before.length - 1)
                         && (after === "" || after.indexOf(">") === 0
-                                || after.indexOf("=") === 0 || after.indexOf("<"))) {
+                                || after.indexOf("=") === 0 || after.indexOf("<") === 0)) {
                     // it's a variable
                     return pos;
                 }
@@ -206,7 +206,11 @@ define(function (require, exports, module) {
             var transitionsSpec = parseCases(transitions);
             // for each transition, print the transition body made out of the identifies cases
             transitionsSpec.forEach(function (signature) {
-                var tmp = "  " + signature;
+                // generate permission
+                var tmp = "  per_" + signature.substr(0, signature.indexOf("(")) +
+                            "(st: State): bool = true\n"
+                // generate transition
+                tmp += "  " + signature;
                 var cases = transitionsSpec.get(signature);
                 if (cases && cases.length > 0) {
                     tmp += " =\n   COND";
@@ -242,8 +246,8 @@ define(function (require, exports, module) {
     EmuchartsPVSPrinter.prototype.print_variables = function (emuchart) {
         var variables = emuchart.variables;
         var ans = "  %-- emuchart state\n  State: TYPE = [#\n" +
-                    "   current_state := MachineState\n" +
-                    "   previous_state := MachineState";
+                    "   current_state : MachineState,\n" +
+                    "   previous_state: MachineState";
         if (variables && variables.length > 0) {
             variables.forEach(function (name) {
                 ans += ",\n   " + name + ": " + "real"//variables.get(name);
