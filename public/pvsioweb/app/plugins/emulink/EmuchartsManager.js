@@ -72,7 +72,7 @@ define(function (require, exports, module) {
     EmuchartsManager.prototype.importEmucharts = function (emucharts) {
         var _this = this;
         if (emucharts) {
-            var emuchartsObject = JSON.parse(emucharts.content());
+            var emuchartsObject = JSON.parse(emucharts.fileContent);
             if (emuchartsObject) {
                 var emuchartsNames = Object.keys(emuchartsObject);
                 if (emuchartsNames) {

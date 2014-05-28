@@ -4,7 +4,7 @@
  * @date 25/05/14 6:39:02 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, document */
+/*global define, d3, require, $, brackets, window, document, Promise */
 define(function (require, exports, module) {
 	"use strict";
 	var stateMachine		= require("plugins/emulink/stateMachine"),
@@ -25,7 +25,8 @@ define(function (require, exports, module) {
         displayAddVariable = require("plugins/emulink/forms/displayAddVariable"),
         displayAddConstant = require("plugins/emulink/forms/displayAddConstant"),
         QuestionForm         = require("pvsioweb/forms/displayQuestion"),
-        EmuchartsPVSPrinter   = require("plugins/emulink/EmuchartsPVSPrinter");
+        EmuchartsPVSPrinter   = require("plugins/emulink/EmuchartsPVSPrinter"),
+        fs = require("util/fileHandler");
     
     var instance;
     var projectManager;
@@ -300,24 +301,30 @@ define(function (require, exports, module) {
 
         // bootstrap buttons
         function openChart() {
-            projectManager.openFiles(function (err, res) {
-                if (!err) {
-                    var emucharts = projectManager.project()
-                                        .pvsFiles()["graphDefinition.json"];
-                    if (emucharts) {
-                        d3.select("#EmuchartLogo").classed("hidden", true);
-                        d3.select("#graphicalEditor").classed("hidden", false);
-                        emuchartsManager.importEmucharts(emucharts);
-                        // set initial editor mode
-                        emuchartsManager.set_editor_mode(MODE.BROWSE());
-                        // render emuchart                        
-                        emuchartsManager.render();
+            projectManager.openFiles()
+                .then(function (files) {
+                    var promises = [], i;
+                    for (i = 0; i < files.length; i++) {
+                        promises.push(fs.readLocalFileAsText(files[i]));
                     }
-                } else {
-                    alert(err.msg);
-                    console.log(err);
-                }
-            });
+                    Promise.all(promises)
+                        .then(function (files) {
+                            files.forEach(function (f) {
+                                d3.select("#EmuchartLogo").classed("hidden", true);
+                                d3.select("#graphicalEditor").classed("hidden", false);
+                                emuchartsManager.importEmucharts(f);
+                                // set initial editor mode
+                                emuchartsManager.set_editor_mode(MODE.BROWSE());
+                                // render emuchart                        
+                                emuchartsManager.render();
+                                projectManager.project().addProjectFile(f.filePath, f.fileContent);
+                                Logger.log("emuchart file added to project " + f.filePath);
+                            });
+                        }, function (err) {
+                            Logger.log("error reading files " + err);
+                        });
+                });
+
         }
         d3.select("#btnNewEmuchart").on("click", function () {
             d3.select("#EmuchartLogo").classed("hidden", true);
@@ -622,7 +629,7 @@ define(function (require, exports, module) {
             QuestionForm.create({
                 header: "Warning: the current chart will be deleted.",
                 question: "The current chart will be deleted -- Emulink currently handles one chart at a time). "
-                            + "Confirm Delete?",
+                            + "Confirm Operation?",
                 buttons: ["Cancel", "Delete and Open"]
             }).on("ok", function (e, view) {
                 emuchartsManager.delete_chart();

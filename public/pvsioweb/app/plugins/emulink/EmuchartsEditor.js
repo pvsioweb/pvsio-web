@@ -898,18 +898,6 @@ define(function (require, exports, module) {
 	 */
     EmuchartsEditor.prototype.delete_chart = function () {
         var _this = this;
-        var states = this.emucharts.getStates();
-        if (states) {
-            states.forEach(function (id) {
-                _this.delete_state(id);
-            });
-        }
-        var transitions = this.emucharts.getTransitions();
-        if (transitions) {
-            transitions.forEach(function (id) {
-                _this.delete_transition(id);
-            });
-        }
         if (this.emucharts.constants) {
             this.emucharts.constants.forEach(function (key) {
                 _this.emucharts.constants.remove(key);
@@ -918,6 +906,18 @@ define(function (require, exports, module) {
         if (this.emucharts.variables) {
             this.emucharts.variables.forEach(function (key) {
                 _this.emucharts.variables.remove(key);
+            });
+        }
+        var transitions = this.emucharts.getTransitions();
+        if (transitions) {
+            transitions.forEach(function (transition) {
+                _this.delete_transition(transition.id);
+            });
+        }
+        var states = this.emucharts.getStates();
+        if (states) {
+            states.forEach(function (state) {
+                _this.delete_state(state.id);
             });
         }
     };
