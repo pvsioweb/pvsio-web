@@ -13,7 +13,7 @@ define(function (require, exports, module) {
      */
     function log(msg) {
         console.log(msg);
-        d3.select("#console").insert('p', 'p').html(msg);
+        d3.select("#console").insert('p', 'p').html(typeof msg === "object" ? msg.toString() : msg);
     }
 
     /**
