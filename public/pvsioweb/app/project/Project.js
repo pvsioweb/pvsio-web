@@ -370,6 +370,13 @@ define(function (require, exports, module) {
         scriptFile.content(JSON.stringify(scriptJson, null, " "));
         this._dirty(true);
     };
+    /**
+     * Overrides toString() method for Project
+     * @returns {string} project name
+     */
+    Project.prototype.toString = function () {
+        return this.name();
+    };
     
     module.exports = Project;
     

@@ -79,5 +79,12 @@ define(function (require, exports, module) {
     ProjectFile.prototype.isPVSFile = function () {
         return this.extension() === ".pvs";
     };
+    /**
+     * Overrides toString for ProjectFile
+     * @returns {string} project file's path
+     */
+    ProjectFile.prototype.toString = function () {
+        return this.path();
+    };
 	module.exports = ProjectFile;
 });

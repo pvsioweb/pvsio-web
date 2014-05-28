@@ -56,6 +56,24 @@ define(function (require, exports, module) {
         }
     }
 
+    function updateEditorToolbarButtons(pvsFile, currentProject) {
+		//update status of the set main file button based on the selected file
+		if (pvsFile) {
+			if (currentProject.mainPVSFile() && currentProject.mainPVSFile().name() === pvsFile.name()) {
+				d3.select("#btnSetMainFile").attr("disabled", true);
+			} else {
+				d3.select("#btnSetMainFile").attr("disabled", null);
+			}
+
+			//update status of file save button based on the selected file
+			if (pvsFile.dirty()) {
+				d3.select("#btnSaveFile").attr("disabled", null);
+			} else {
+				d3.select("#btnSaveFile").attr("disabled", true);
+			}
+		}
+	}
+    
 	function bindListeners(projectManager) {
         var actions, recStartState, recStartTime, scriptName;
         //add event listener for restarting the pvsio web server whenever the project changes
@@ -78,6 +96,9 @@ define(function (require, exports, module) {
                 });
             }
             switchToBuilderView();
+        }).addListener("SelectedFileChanged", function (event) {
+            var p = projectManager.project(), file = p.getProjectFile(event.selectedItem.path);
+            updateEditorToolbarButtons(file, p);
         });
         
 		d3.select("#header #txtProjectName").property("value", "");
@@ -238,7 +259,7 @@ define(function (require, exports, module) {
                     if (err) {
                         Logger.log(err);
                     } else {
-                        Logger.log(pvsFile.path() + " has beeen saved.");
+                        Logger.log(pvsFiles + " has beeen saved.");
                     }
                 });
 			}

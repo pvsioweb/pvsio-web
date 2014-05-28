@@ -48,7 +48,7 @@ define(function (require, exports, module) {
         d3.select("#header #txtProjectName").property("value", name);
 	}
 
-    function _editorChangedHander(editor) {
+    function _editorChangedHandler(editor) {
         if (pvsFilesListView) {
             var pvsFile = _projectManager.project().getProjectFile(pvsFilesListView.getSelectedItem());
             if (pvsFile) {
@@ -84,7 +84,7 @@ define(function (require, exports, module) {
 			});
 		this.editor = property.call(this, editor)
 			.addListener("PropertyChanged", function (e) {
-				e.fresh.on("change", _editorChangedHander);
+				e.fresh.on("change", _editorChangedHandler);
 			});
 		window.onbeforeunload =  function () {
             var p = _projectManager.project();
@@ -114,23 +114,22 @@ define(function (require, exports, module) {
                     pvsFile = project.addProjectFile(event.selectedItem.path, makeEmptyTheory(theoryName), "utf8", true);
                 }
                 if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
-                    editor.off("change", _editorChangedHander);
+                    editor.off("change", _editorChangedHandler);
                     editor.setValue(pvsFile.content());
                     editor.focus();
-                    editor.on("change", _editorChangedHander);
+                    editor.on("change", _editorChangedHandler);
                 } else {
                     //fetch file contents from server and set the value
                     var f = pvsFile.path();
                     ws.getFile(f, function (err, res) {
                         if (!err) {
-                            editor.off("change", _editorChangedHander);
+                            editor.off("change", _editorChangedHandler);
                             pvsFile.content(res.fileContent).dirty(false);
                             editor.setValue(pvsFile.content());
                             editor.focus();
-                            editor.on("change", _editorChangedHander);
+                            editor.on("change", _editorChangedHandler);
                         } else {
-                            ///TODO show error loading file
-                            Logger.log(JSON.stringify(err));
+                            Logger.log(err);
                         }
                     });
                 }
@@ -213,7 +212,7 @@ define(function (require, exports, module) {
                 // always set mainPVSfile because ProjectChanged will trigger an invocation of pvsio with that file
                 pm.project().mainPVSFile(pm.project().mainPVSFile() || pm.project().pvsFilesList()[0]);
                 pm.fire({type: "ProjectChanged", current: p, previous: pm.project()});
-                pm.editor().off("change", _editorChangedHander);
+                pm.editor().off("change", _editorChangedHandler);
                 pm.editor().setValue("");
                 //list all pvsfiles
                 if (p.pvsFilesList()) {
@@ -222,7 +221,7 @@ define(function (require, exports, module) {
                     // clear dirty flags
                     p.pvsFilesList().forEach(function (f) { f.dirty(false); });
                 }
-                pm.editor().on("change", _editorChangedHander);
+                pm.editor().on("change", _editorChangedHandler);
                 // update image -- note that we need to wait the callback as image loading may take a little while in some cases
                 if (image) {
                     pm.updateImage(image, function (res) {
