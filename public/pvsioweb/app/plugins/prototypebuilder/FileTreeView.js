@@ -15,16 +15,6 @@ define(function (require, exports, module) {
     var elementId, project, ws = WSManager.getWebSocket(), fileCounter = 0, folderCounter = 0,
         unSavedFileName = "untitled_file", unSavedFolderName = "untitled_folder", treeList;
     
-    /**
-        utility function to convert filenames to valid html ids
-        @param {string} fileName the path to convert
-        @return {string} a string valid for use as an html element id
-    */
-    function fileNameToId(fileName) {
-        var res = fileName.replace(/[\s\.\$\/]/gi, "_");
-        return res;
-    }
-    
     function FileTreeView(_elId, folderData, _project) {
         eventDispatcher(this);
         var ftv = this;
@@ -37,7 +27,7 @@ define(function (require, exports, module) {
             ftv.fire(e);
         }).addListener("Rename", function (event) {
             treeList.createNodeEditor(event.data, function (node, oldPath) {
-                var f = project.pvsFiles()[oldPath];
+                var f = project.getProjectFile(oldPath);
                 if (event.data.isDirectory) {
                     project.renameFolder(oldPath, node.path);
                 } else { project.renameFile(f, node.name); }
@@ -51,12 +41,9 @@ define(function (require, exports, module) {
             newFileData = treeList.addItem(newFileData, event.data);
             treeList.selectItem(newFileData.path);
             treeList.createNodeEditor(newFileData, function (node, oldPath) {
-                var file = project.pvsFiles()[oldPath];
+                var file = project.getProjectFile(oldPath);
                 file.path(node.path);
-                ws.writeFile({projectName: project.name(),
-                              fileName: file.path(),
-                              fileContent: file.content()},
-                              function (err, res) {
+                ws.writeFile({filePath: file.path(), fileContent: file.content()}, function (err, res) {
                         if (!err) {
                             //add the spec file to the project and supress the event so we dont create multiple files
                             console.log(res);
@@ -73,7 +60,7 @@ define(function (require, exports, module) {
             var newFolderData = {name: name, path: path, children: [], isDirectory: true};
             newFolderData = treeList.addItem(newFolderData, event.data);
             treeList.selectItem(newFolderData.path);
-            treeList.createNodeEditor(newFolderData, function (node, oldPath) {
+            treeList.createNodeEditor(newFolderData, function (node) {
                 ws.writeDirectory(node.path, function (err, res) {
                     if (!err) {
                         console.log(res);
@@ -90,7 +77,7 @@ define(function (require, exports, module) {
                 buttons: ["Cancel", "Delete"]
             }).on("ok", function (e, view) {
                 //send request to remove file using the wsmanager
-                ws.send({type: "deleteFile", fileName: path}, function (err, res) {
+                ws.send({type: "deleteFile", fileName: path}, function (err) {
                     if (!err) {
                         treeList.removeItem(path);
                     } else {
@@ -109,7 +96,7 @@ define(function (require, exports, module) {
                 var file = event.file;
                 //set file as dirty
                 treeList.markDirty(file.path(), file.dirty());
-            }).addListener("ProjectMainSpecFileChanged", function (event) {
+            }).addListener("ProjectMainSpecFileChanged", function () {
                //change the main file class
                 
             }).addListener("SpecFileAdded", function (event) {

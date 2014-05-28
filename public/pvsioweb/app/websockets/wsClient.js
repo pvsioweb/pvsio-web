@@ -5,7 +5,7 @@
  * @date 6/4/13 18:50:25 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent, WebSocket, Promise*/
+/*global define, WebSocket, Promise*/
 define(function (require, exports, module) {
     "use strict";
     var property = require("util/property"),

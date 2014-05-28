@@ -12,17 +12,19 @@ define(function (require, exports, module) {
         WSManager           = require("websockets/pvs/WSManager"),
         WidgetManager       = require("pvsioweb/WidgetManager").getWidgetManager(),
         ScriptPlayer        = require("util/ScriptPlayer"),
-		ProjectFile			= require("./ProjectFile");
+		ProjectFile			= require("./ProjectFile"),
+        Logger              = require("util/Logger");
     
-    var _projectFiles = [];
+    var _projectFiles;
     
     var propertyChangedEvent = "PropertyChanged";
     
-    function saveSourceCode(files) {
+    function saveFiles(files) {
         var ws = WSManager.getWebSocket();
         var promises =  files.map(function (f) {
+            var token = {filePath: f.path(), fileContent: f.content(), encoding: f.encoding() || "utf8"};
             return new Promise(function (resolve, reject) {
-                ws.writeFile({fileName: f.path(), fileContent: f.content()}, function (err, res) {
+                ws.writeFile(token, function (err, res) {
                     if (!err) {
                         resolve(res);
                     } else {
@@ -35,67 +37,15 @@ define(function (require, exports, module) {
         return new Promise(function (resolve, reject) {
             Promise.all(promises).then(function (res) {
                 res.forEach(function (response, index) {
-                    if (response.type === "fileSaved") {
+                    if (!response.err) {
                         files[index].dirty(false);
                     }
                 });
                 resolve(res);
             }, reject);
         });
-	}
-
-    function saveWidgetDefinition(project) {
-		//save to the user's drive
-        var ws = WSManager.getWebSocket();
-        var wd = WidgetManager.getWidgetDefinitions();
-		var wdStr = JSON.stringify(wd, null, " ");
-		var data  = {"fileName": project.path() + "/widgetDefinition.json", fileContent: wdStr};
-        return new Promise(function (resolve, reject) {
-            ws.writeFile(data, function (err, res) {
-                if (!err) {
-                    project.widgetDefinitions(wd);
-                    resolve(res);
-                } else {
-                    reject(err);
-                }
-            });
-        });
-	}
-    
-    function saveInteractionScripts(project) {
-        var ws = WSManager.getWebSocket();
-        var scripts = JSON.stringify(project.scripts(), null, " ");
-        var data = {fileName: project.path() + "/scripts.json", fileContent: scripts};
-        return new Promise(function (resolve, reject) {
-            ws.writeFile(data, function (err, res) {
-                if (!err) {
-                    resolve(res);
-                } else {
-                    reject(err);
-                }
-            });
-        });
     }
-    
-    function saveImageFile(project) {
-        if (project && project.image()) {
-            var ws = WSManager.getWebSocket();
-            var data = {"type" : "writeImage", "fileName": project.path() + "/" + project.image().name(),
-                        fileContent: project.image().content(), encoding: "base64"};
 
-            return new Promise(function (resolve, reject) {
-                ws.send(data, function (err, res) {
-                    if (!err) {
-                        project.image().dirty(false);
-                        resolve(res);
-                    } else {
-                        reject(err);
-                    }
-                });
-            });
-        }
-    }
-    
 	/**
 	 * Creates a new project
 	 * @constructor
@@ -103,16 +53,14 @@ define(function (require, exports, module) {
 	 * @this Project
 	 */
     function Project(name) {
+        _projectFiles = [];
 		/**
 		 * get or set if the project is dirty
 		 * @private
 		 * @type {bolean}
 		 */
         this._dirty = property.call(this, false);
-		/** get or set the path of the project
-			@type {string}
-		*/
-        this.path = property.call(this);
+		
 		/** get or set the name of the project
 			@type {String}
 		*/
@@ -122,23 +70,6 @@ define(function (require, exports, module) {
 			@type {ProjectFile}
 		*/
         this.mainPVSFile = property.call(this);
-		/** 
-			get or set the widget definitios for the project
-			@type {String}
-		*/
-        this.widgetDefinitions = property.call(this);
-		/** 
-			get or set the image for the project
-			@type {ProjectFile}
-		*/
-        this.image = property.call(this);
-		/** 
-			get or set the pvsFiles in a project
-			@type {ProjectFile {}}
-		*/
-        this.pvsFiles = property.call(this, {});
-	        
-        this.scripts = property.call(this, []);
         
         var project = this;
         //add event listeners
@@ -152,23 +83,50 @@ define(function (require, exports, module) {
             project.fire({type: "ProjectMainSpecFileChanged", previous: event.old, current: event.fresh});
         });
         
-        this.image.addListener(propertyChangedEvent, function (event) {
-			project._dirty(true);
-            project.fire({type: "ProjectImageChanged", previous: event.old, current: event.fresh});
-        });
-        
-        this.widgetDefinitions.addListener(propertyChangedEvent, function (event) {
-            project._dirty(true);
-            project.fire({type: "WidgetDefinitionChanged", previous: event.old, current: event.fresh});
-        });
-        
         eventDispatcher(this);
+        
         //listen for widget manager event for widget modification
-        WidgetManager.addListener("WidgetModified", function () {
-            project._dirty(true);
-        });
+        WidgetManager.clearListeners()
+            .addListener("WidgetModified", function () {
+                project._dirty(true);
+                var newWDStr = JSON.stringify(WidgetManager.getWidgetDefinitions());
+                //get the widget definitions and update the widgetDefinition file
+                project.getWidgetDefinitionFile().content(newWDStr).dirty(true);
+            });
     }
-    
+    /**
+     * Gets the image file for the project
+     * @returns {ProjectFile} a project file representing the image
+     */
+    Project.prototype.getImage = function () {
+        return _projectFiles.filter(function (f) {
+            return f.isImage();
+        })[0];
+    };
+    /**
+     * Gets the file in the project files list whose content is the definitions of widgets on the display
+     * @returns {ProjectFile} the project file that represents the widget definitions on the project image
+     */
+    Project.prototype.getWidgetDefinitionFile = function () {
+        var wdpath = this.name() + "/widgetDefinition.json";
+        var res = this.getProjectFile(wdpath);
+        if (!res) {
+            res = this.addProjectFile(wdpath, "").type("widgetDefinition");
+        }
+        return res;
+    };
+    /**
+     * Gets the project file that represents the sequence of play scripts created for this project
+     * @return {ProjectFile} the project file representing a sequence of recording user actions
+     */
+    Project.prototype.getRecordedScripts = function () {
+        var scriptsPath = this.name() + "/scripts.json";
+        var res = this.getProjectFile(scriptsPath);
+        if (!res) {
+            res = this.addProjectFile(scriptsPath, "").type("scripts");
+        }
+        return res;
+    };
     /**
      * Gets the list of all the files attributed to the project
      * @returns {array<ProjectFile>} a list of project files in the project
@@ -178,14 +136,18 @@ define(function (require, exports, module) {
     };
     
     /**
-	 * Updates the project image.
+	 * Updates the project image. At the moment only one image is allowed in a project so we remove the old image
+     * before adding the new one.
 	 * @param {!String} imageName The fileName for the new image
 	 * @param {!String} imageData The base64 string or url path for the image
 	 * @memberof Project
 	 */
 	Project.prototype.changeImage = function (imagePath, imageData) {
-		var newImage = new ProjectFile(imagePath).type("image").content(imageData).dirty(true);
-		this.image(newImage);
+        var oldImage = this.getImage();
+        if (oldImage) {
+            this.removeFile(oldImage);
+        }
+        this.addProjectFile(imagePath, imageData, "base64");
 		return this;
 	};
        
@@ -197,14 +159,15 @@ define(function (require, exports, module) {
      * @param {boolean} supressEvent Set true to supress the SpecFileAdded event or false otherwise
 	 * @memberof Project
 	 */
-    Project.addProjectFile = function (filePath, fileContent, encoding, suppressEvent) {
+    ///FIXME this function should throw an error if the filepath already exists?
+    Project.prototype.addProjectFile = function (filePath, fileContent, encoding, suppressEvent) {
         encoding = encoding || "utf8";
         var p  = this, newFile = new ProjectFile(filePath)
-                .content(fileContent)
-                .encoding(encoding);
+            .content(fileContent)
+            .encoding(encoding);
         _projectFiles.push(newFile);
         if (!suppressEvent) {
-            if (newFile.extension() === "pvs") {
+            if (newFile.isPVSFile()) {
                 p.fire({type: "SpecFileAdded", file: newFile});
                 //register event for the newspec and bubble up the dirty flag changed event from project
                 newFile.addListener("DirtyFlagChanged", function () {
@@ -217,14 +180,15 @@ define(function (require, exports, module) {
         return newFile;
     };
     /**
-     * Gets the pvsSpec file with the specified Name
-     * @param {!String} fileName path to the spec file
+     * Gets the project file with the specified Name
+     * @param {!String} filePath path to the spec file
      * @returns {ProjectFile}
      * @memeberof Project
      */
-    //FIXME: sometimes the key is fileName, sometimes is path --- the correct key should be path!
-    Project.prototype.getSpecFile = function (fileName) {
-        return this.pvsFiles()[fileName];
+    Project.prototype.getProjectFile = function (filePath) {
+        return _projectFiles.filter(function (f) {
+            return f.path() === filePath;
+        })[0];
     };
     
 	/**
@@ -233,8 +197,6 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
 	Project.prototype.removeFile = function (file) {
-		///FIXME this function might not trigger a propertyChanged event on pvsFiles
-		//since the files are being modified without using the setter function pvsFiles(updatedList)
         var fileIndex = _projectFiles.indexOf(file);
         
         var deletedFile = _projectFiles.splice(fileIndex, 1);
@@ -250,17 +212,9 @@ define(function (require, exports, module) {
     /**
         Sets the project name
         @param {string} newPath the new project name
-        This function should always be used when setting a new project name as it ensures consistency between project name and path in the file names
     */
     Project.prototype.setProjectName = function (newName) {
-        var oldName = this.name();
         this.name(newName);
-        this.path(newName);
-        if (this.pvsFiles()) {
-            this.pvsFilesList().forEach(function (f) {
-                f.path(f.path().replace(oldName, newName));
-            });
-        }
     };
     
     /**
@@ -276,14 +230,14 @@ define(function (require, exports, module) {
         ws.send({type: "renameFile", oldPath: oldPath, newPath: newPath}, function (err, res) {
             if (!err) {
                 // check if we are renaming the project
-                if (oldPath === p.path()) {
+                if (oldPath === p.name()) {
                     p.setProjectName(newPath);
                 } else {
                     //no error so need to modify the paths for all the files affected by the renaming action
-                    var pvsFiles = p.pvsFilesList().filter(function (f) {
+                    var affectedFiles = p.getProjectFiles().filter(function (f) {
                         return f.path().indexOf(oldPath) === 0;
                     });
-                    pvsFiles.forEach(function (f) {
+                    affectedFiles.forEach(function (f) {
                         var newFilePath = f.path().replace(oldPath, newPath);
                         f.path(newFilePath);
                     });
@@ -293,7 +247,7 @@ define(function (require, exports, module) {
         });
     };
 	/**
-	 * Rename a given file. Currently this sets the name property of the file parameter. Not clear about persistence.
+	 * Rename a given file and saves it on disk
 	 * @param {!ProjectFile} file The file to rename
 	 * @param {!string} newName The new name to give the file
 	 * @memberof Project
@@ -308,11 +262,10 @@ define(function (require, exports, module) {
                  newPath: newPath}, function (err, res) {
             if (!err) {
                 file.path(newPath);
-                p.pvsFiles()[newPath] = file;
-                delete p.pvsFiles()[oldPath];
                 p.fire({type: "SpecFileRenamed", file: file});
+                Logger.log("File " + oldPath + " has been renamed to " + newPath);
             } else {
-                console.log(err);
+                Logger.log(err);
             }
             if (cb && typeof cb === "function") {cb(err, res); }
         });
@@ -329,7 +282,7 @@ define(function (require, exports, module) {
 			file = [file];
 		}
 		var _thisProject = this;
-		saveSourceCode(file, this)
+		saveFiles(file, this)
             .then(function () {
                 if (cb && typeof cb === "function") {
                     cb(null, _thisProject);
@@ -351,10 +304,9 @@ define(function (require, exports, module) {
 		//do save
 		if (this.name() && this.name().trim().length > 0) {
 			//project has already been created so save the widgets and the sourcecode if it has changed
-            Promise.all([saveWidgetDefinition(this), saveInteractionScripts(this),
-                         saveSourceCode(this.dirtyFiles(), this), saveImageFile(this)])
+            saveFiles(this.getProjectFiles().filter(function (f) { return f.dirty(); }))
                 .then(function () {
-                    _thisProject._dirty(false);
+                    _thisProject.dirty(false);
                     _thisProject.fire({type: "ProjectSaved", project: _thisProject});
                     if (cb && typeof cb === "function") { cb(null, _thisProject); }
                 }, function (err) {
@@ -364,46 +316,37 @@ define(function (require, exports, module) {
 		return this;
 	};
     
+    /**
+    * Returns a list of project files that are pvs files
+    */
     Project.prototype.pvsFilesList = function () {
-        return Object.keys(this.pvsFiles()).map(function (path) {
-            return this.pvsFiles()[path];
-        }, this);
-    };
-    
-    Project.prototype.dirtyFiles = function () {
-        return this.pvsFilesList().filter(function (d) {
-            return d.dirty();
+        return _projectFiles.filter(function (f) {
+            return f.isPVSFile();
         });
     };
     
 	///FIXME this should be a private function called from project.save
 	Project.prototype.saveNew = function (newName, cb) {
 		var _thisProject = this;
-		var wd = WidgetManager.getWidgetDefinitions();
-		var wdStr = JSON.stringify(wd, null, " ");
 		var ws = WSManager.getWebSocket();
-        var specFiles = this.pvsFilesList().map(function (f) {
-                return { fileName: f.path().replace(_thisProject.name(), newName), fileContent: f.content() };
-            });
+        
+        var files = this.getProjectFiles().map(function (f) {
+            return {filePath: f.path().replace(_thisProject.name(), newName), fileContent: f.content(), encoding: f.encoding()};
+        });
 		var token = { type: "createProject",
                       projectName: newName,
-                      specFiles: specFiles,
-                      widgetDefinitions: wdStr,
+                      projectFiles: files,
                       overWrite: newName  === "defaultProject" };
         //FIXME: we are not saving empty folders -- do we want this behaviour?
 		if (this.mainPVSFile()) {
 			token.mainPVSFile = this.mainPVSFile().name();
 		}
-		if (this.image()) {
-			token.imageFileName = this.image().name();
-			token.imageData =  this.image().content();
-		}
+
 		ws.send(token, function (err, res) {
 			if (!err) {
-                if (_thisProject.image()) {
-                    _thisProject.image().dirty(false);
-                }
-                _thisProject.path(res.projectPath);
+                _thisProject.getProjectFiles().forEach(function (f) {
+                    f.dirty(false);
+                });
                 _thisProject.name(res.name);
 			}
             if (cb && typeof cb === "function") {
@@ -416,8 +359,15 @@ define(function (require, exports, module) {
         Adds a script to the project
     */
     Project.prototype.addScript = function (script) {
-        this.scripts().push(script);
+        var scriptFile = this.getRecordedScripts(), scriptJson;
+        if (!scriptFile.content() || scriptFile.content().trim().length === 0) {
+            scriptJson = [];
+        } else {
+            scriptJson = JSON.parse(scriptFile.content());
+        }
+        scriptJson.push(script);
         ScriptPlayer.addScriptToView(script);
+        scriptFile.content(JSON.stringify(scriptJson, null, " "));
         this._dirty(true);
     };
     

@@ -10,7 +10,7 @@ define(function (require, exports, module) {
 	"use strict";
 	var property = require("util/property"),
 		eventDispatcher = require("util/eventDispatcher");
-
+    var imageExtensions = [".jpg", ".jpeg", ".png"];
 	/**
 	 * @constructor
 	 * @param {string} path The name of the file, i.e., the *relative path* from the project directory
@@ -61,7 +61,7 @@ define(function (require, exports, module) {
          */
         this.extension = function () {
             var n = this.name();
-            return n.indexOf(".") > -1 ? n.substr(n.lastIndexOf(".") + 1) : "";
+            return n.indexOf(".") > -1 ? n.substr(n.lastIndexOf(".")) : "";
         };
         //-----
 		/** get or set the visibility of this file in the project view
@@ -72,5 +72,12 @@ define(function (require, exports, module) {
         return pf;
     }
     
+    ProjectFile.prototype.isImage = function () {
+        return imageExtensions.indexOf(this.extension()) > -1;
+    };
+    
+    ProjectFile.prototype.isPVSFile = function () {
+        return this.extension() === ".pvs";
+    };
 	module.exports = ProjectFile;
 });

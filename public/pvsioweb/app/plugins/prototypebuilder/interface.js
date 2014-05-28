@@ -4,7 +4,7 @@
  * @date 11/15/13 16:29:55 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, document, Backbone, Handlebars */
+/*global define, d3, $, Backbone, Handlebars */
 define(function (require, exports, module) {
 	"use strict";
 	var WSManager = require("websockets/pvs/WSManager"),
@@ -12,11 +12,10 @@ define(function (require, exports, module) {
         GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
 		Logger	= require("util/Logger"),
         Recorder = require("util/ActionRecorder"),
-        ScriptItemView = require("pvsioweb/forms/ScriptItemView"),
-        WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager(),
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
         Prompt  = require("pvsioweb/forms/displayPrompt"),
-        Notification = require("pvsioweb/forms/displayNotification");
+        Notification = require("pvsioweb/forms/displayNotification"),
+        fs = require("util/fileHandler");
 	
     var template = require("text!pvsioweb/forms/maincontent.handlebars");
     
@@ -44,7 +43,7 @@ define(function (require, exports, module) {
         d3.selectAll("#record").style("display", "block");
     }
     
-    function pvsProcessReady(err, e) {
+    function pvsProcessReady(err) {
         var pvsioStatus = d3.select("#lblPVSioStatus");
         pvsioStatus.select("span").remove();
         if (!err) {
@@ -52,7 +51,7 @@ define(function (require, exports, module) {
             Logger.log(msg);
             pvsioStatus.append("span").attr("class", "glyphicon glyphicon-ok");
         } else {
-            console.log(err);
+            Logger.log(err);
             pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
         }
     }
@@ -72,8 +71,10 @@ define(function (require, exports, module) {
                                     projectName: project.name()}, pvsProcessReady);
             } else {
                 //close pvsio process for previous project
-                ws.closePVSProcess(function (err, res) {
-                    pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
+                ws.closePVSProcess(function (err) {
+                    if (!err) {
+                        pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
+                    }
                 });
             }
             switchToBuilderView();
@@ -104,7 +105,7 @@ define(function (require, exports, module) {
                 d3.select(this).html(" Record").classed("recording", false);
                 actions = Recorder.stopRecording();
                 //do something with actions
-                console.log(actions);
+                Logger.log(actions);
                 //ask user to give name to script
                 Prompt.create({header: "Would you like to save this script?",
                                message: "Please enter a name for your script",
@@ -126,10 +127,13 @@ define(function (require, exports, module) {
 		});
 	
 		d3.select("#openProject").on("click", function () {
-            
             function _doOpenProject() {
-                projectManager.openProject(function (project) {
-                    console.log(project.name() + " has been opened!");
+                projectManager.selectProject(function (err, projectName) {
+                    if (!err) {
+                         projectManager.openProject(projectName, function (project) {
+                            Logger.log(project.name() + " has been opened!");
+                        });
+                    }
                 });
             }
             
@@ -151,7 +155,7 @@ define(function (require, exports, module) {
 	
 		d3.select("#newProject").on("click", function () {
 			projectManager.newProject(function () {
-                console.log("new project created!");
+                Logger.log("new project created!");
             });
 		});
 		//handle typecheck event
@@ -165,15 +169,15 @@ define(function (require, exports, module) {
                         btn.html("Typecheck").attr("disabled", null);
                         var msg = res.stdout;
                         if (err) {
-                            console.log(res);
-                            console.log(err);
+                            Logger.log(res);
+                            Logger.log(err);
                             msg = msg.substring(msg.indexOf("Writing output to file"), msg.length);
                             Notification.create({
                                 header: "Typecheck error, please check the output file for details.",
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         } else {
-                            console.log(res);
+                            Logger.log(res);
                             msg = msg.substring(msg.indexOf("Proof summary"), msg.length);
                             Notification.create({
                                 header: "Theories in " + projectManager.project().name() + " typechecked successfully!",
@@ -201,12 +205,12 @@ define(function (require, exports, module) {
 			var pvsFile = projectManager.getSelectedFile(), project = projectManager.project();
 			if (pvsFile) {
 				var ws = WSManager.getWebSocket();
-				ws.send({type: "setMainFile", projectName: project.name(), fileName: pvsFile.path()}, function (err, res) {
+				ws.send({type: "setMainFile", projectName: project.name(), fileName: pvsFile.path()}, function (err) {
 					//if there was no error update the main file else alert user
                     if (!err) {
                         project.mainPVSFile(pvsFile);
                     } else {
-                        console.log(err);
+                        Logger.log(err);
                     }
 				});
 			}
@@ -216,10 +220,11 @@ define(function (require, exports, module) {
 			var project = projectManager.project();
 			if (project) {
                 var pvsFile = projectManager.getSelectedFile();
-                projectManager.saveFiles([pvsFile], function (err, res) {
+                projectManager.saveFiles([pvsFile], function (err) {
                     if (err) {
-                        alert(err);
-                        console.log(err);
+                        Logger.log(err);
+                    } else {
+                        Logger.log(pvsFile.path() + " has beeen saved.");
                     }
                 });
 			}
@@ -229,12 +234,34 @@ define(function (require, exports, module) {
 			var project = projectManager.project();
 			if (project) {
                 var pvsFiles = project.pvsFilesList();
-                projectManager.saveFiles(pvsFiles);
+                projectManager.saveFiles(pvsFiles, function (err) {
+                    if (err) {
+                        Logger.log(err);
+                    } else {
+                        Logger.log(pvsFile.path() + " has beeen saved.");
+                    }
+                });
 			}
 		});
 
         d3.select("#btnImportFiles").on("click", function () {
-            projectManager.openFiles();
+            projectManager.openFiles()
+                .then(function (files) {
+                    var promises = [], i;
+                    for (i = 0; i < files.length; i++) {
+                        promises.push(fs.readLocalFileAsText(files[i]));
+                    }
+                    Promise.all(promises)
+                        .then(function (contents) {
+                            contents.forEach(function (f) {
+                                ///FIXME make sure we handle any errors e.g. the filePath might already exist?
+                                projectManager.project().addProjectFile(f.filePath, f.fileContent);
+                                Logger.log("file added to project " + f.filePath);
+                            });
+                        }, function (err) {
+                            Logger.log("error reading files " + err);
+                        });
+                });
         });
         
 		d3.select("#btnCompile").on("click", function () {

@@ -47,7 +47,7 @@ function run() {
         Promise                 = require("es6-promise").Promise,
         logger                  = require("tracer").console(),
         baseProjectDir          = __dirname + "/public/projects/";
-    var p, clientid = 0, WebSocketServer = ws.Server;
+    var p, clientid = 0, WebSocketServer = ws.Server, imageExts = [".jpg", ".jpeg", ".png"];
 
     function getFolderStructure(root) {
         var s = fs.statSync(root);
@@ -98,7 +98,22 @@ function run() {
             }
         });
     }
-    
+    /**
+     * Get the stat for the file in the specified path
+     * @returns {Promise} a promise that resolves with the stat object of the file
+      see http://nodejs.org/api/fs.html#fs_class_fs_stats for details
+     */
+    function stat(fullPath) {
+        return new Promise(function (resolve, reject) {
+            fs.stat(fullPath, function (err, res) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+            });
+        });
+    }
     /**
      Writes a file with the specified content to the specified path. If the parent folders of the specified path
      do not exist, they are created
@@ -120,7 +135,7 @@ function run() {
                             if (err) {
                                 reject(err);
                             } else {
-                                resolve(fullPath);
+                                resolve({filePath: fullPath, fileContent: fileContent, encoding: fileEncoding});
                             }
                         });
                     } else {
@@ -132,7 +147,63 @@ function run() {
             }
         });
     }
-    
+    /**
+        Recursively reads the files in a directory using promises
+        @param {string} fullPath the path to the directory to read
+        @param {boolean} getContent a flag to set whehter or not to return the content of the file
+        @returns {Promise} a promise that resolves with an array of objects  for the files in the given directory.
+            The object may contain just filePath prooperties or may include fileContent if the getContent parameter was passed
+    */
+    function getFilesInDirectory(fullPath, getContent) {
+        return stat(fullPath).then(function (f) {
+            if (f.isDirectory()) {
+                return new Promise(function (resolve, reject) {
+                    fs.readdir(fullPath, function (err, files) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            var promises = files.map(function (name) {
+                                var filePath = path.join(fullPath, name);
+                                return getFilesInDirectory(filePath, getContent);
+                            });
+
+                            Promise.all(promises)
+                                .then(function (res) {
+                                    var flattened = res.reduce(function (a, b) {
+                                        if (Array.isArray(b)) {
+                                            return a.concat(b);
+                                        } else {
+                                            a.push(b);
+                                            return a;
+                                        }
+                                    }, []);
+                                    resolve(flattened);
+                                }, reject);
+                        }
+                    });
+                });
+            } else {
+                if (!getContent) {
+                    return Promise.resolve({filePath: fullPath});
+                }
+                //resolve with the filename and content
+                return new Promise(function (resolve, reject) {
+                    var ext = path.extname(fullPath), isImage = imageExts.indexOf(ext) > -1;
+                    var opt = {encoding: isImage ? "base64" : "utf8"};
+                    fs.readFile(fullPath, opt, function (err, data) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve({filePath: fullPath, fileContent: isImage ?
+                                     ("data:image/" + ext.substr(1) + ";base64," + data) : data, encoding: opt.encoding});
+                        }
+                    });
+                });
+            }
+        }, function (err) {
+            return Promise.reject(err);
+        });
+    }
     /**
      * Utility function that dispatches responses to websocket clients
      * @param {{type:string, data}} token The token to send to the client
@@ -150,22 +221,6 @@ function run() {
         }
     }
 
-    /**
-     * save the file described in request parameter into the uploads directory
-     * @param {object} token
-     */
-    function saveTempFile(token, cb) {
-        var fileContent = token.fileContent;
-        var fileName = token.newFileName;
-        var oldFileName = token.oldFileName, oldFilePath = __dirname + uploadDir + "/" + oldFileName;
-        var destName = __dirname + uploadDir + "/" + fileName;
-        if (fileContent && fileName) {
-            fs.writeFileSync(destName, fileContent);
-        } else if (oldFileName && fileName) {
-            fs.renameSync(oldFilePath, destName);
-        }
-        cb({fileName: fileName});
-    }
     /**
      * reads and changes the settings in the .pvsioweb file in the project root
      * @param {string} projectName the name of the project
@@ -200,47 +255,6 @@ function run() {
             });
         });
         
-    }   
-    
-    /**
-     * writes files to disk (directory structure is automatically created
-     * @param {array <{path:string, fileContent: string, encoding:?string}>} files the list of files to write
-     * @param {function(err)} cb the callback function to invoke when the files have been written. The err parameter of the callback will be set if an error occurred in writing any of the files.
-     */    
-    function writeFiles(files, cb) {
-        var promises = files.map(function (f) {
-            return writeFile(f.path, f.fileContent);
-        });
-        Promise.all(promises)
-            .then(function () { cb(null, files); }, function (err) { cb(err, files); });
-//        function writeFilesAux(files, i, cb) {
-//            if (i < files.length && i >= 0) {
-//                var f, dir;
-//                f = files[i];
-//                dir = f.path.substr(0, f.path.lastIndexOf(path.sep));
-//                logger.debug("generating directory structure " + dir);
-//                mkdirRecursive(dir, function (err) {
-//                    if (!err) {
-//                        fs.writeFile(f.path, f.fileContent, {encoding: f.encoding || "utf8"}, function (err) {
-//                            if (!err) {
-//                                logger.debug("file " + f.path + " saved successfully!");
-//                                i++;
-//                                if (i < files.length) {
-//                                    writeFilesAux(files, i, cb);
-//                                } else {
-//                                    logger.debug("all files have been processed... sending data back to client.");
-//                                    if (cb && typeof cb === "function") { cb(err, files); }
-//                                }
-//                            } else { logger.debug("error while saving file " + f.path + " (" + err + ")"); }
-//                        });
-//                    } else {
-//                        logger.error("An error occured while calling mkdirRecursive", err);
-//                        if (cb && typeof cb === "function") { cb(err); }
-//                    }
-//                });
-//            }
-//        }
-//        writeFilesAux(files, 0, cb);
     }
     
     /**
@@ -250,74 +264,41 @@ function run() {
      */
     function createProject(opt, cb, p) {
         var projectName = opt.projectName,
-            imageName = opt.imageFileName,
-            imageData = opt.imageData,
             projectPath = baseProjectDir + projectName,
-            specFiles = opt.specFiles,
-            mainPVSFile = opt.mainPVSFile,
-            overWrite = opt.overWrite,
-            widgetDefinitions = opt.widgetDefinitions;
+            projectFiles = opt.projectFiles,
+            overWrite = opt.overWrite;
         var obj = {type: "projectCreated"};
             
         function doCreate(cb) {
             cb = cb || noop;
-
             //create the project folder
             fs.mkdir(projectPath, function (err) {
                 if (!err) {
-                    var promises = [];
-                    obj.projectPath = projectPath;
-                    obj.name = projectName;
-
-                    //add promises to write image file
-                    if (imageName && imageData) {
-                        var imageString = imageData.replace(/^data:image\/(\w+);base64,/, ""),
-                            imagePath = path.join(projectPath, imageName);
-                        promises.push(writeFile(imagePath, imageString, "base64"));
-                        //update result obj
-                        obj.imagePath = imagePath;
-                        obj.imageData = imageData;
-                    }
-                    //add promises to write spec files
-                    if (specFiles && specFiles.length > 0) {
-                        var files = specFiles.map(function (f) {
-                            if (f.fileName.indexOf(projectName) === 0) {
-                                return {path: path.join(baseProjectDir, f.fileName), fileContent: f.fileContent};
-                            }
-                            logger.debug("Warning, deprecated filenames (project name not included in the filename)");
-                            return {path: path.join(projectPath, f.fileName), fileContent: f.fileContent};
-                        });
-                        //add promises for writing spec files
-                        files.forEach(function (f) {
-                            promises.push(writeFile(f.path, f.fileContent));
-                        });
-                        //update the paths to be relative to project path
-                        obj.pvsFiles = files.map(function (f) {
-                            f.path = f.path.replace(projectPath, projectName);
-                            return f;
-                        });
-
-                        //by default set the main pvs file to be the first item in the list after sort
-                        mainPVSFile = mainPVSFile || files.sort()[0].path;
-                        if (mainPVSFile) {
-                            obj.mainPVSFile = mainPVSFile;
-                            // create a main file in the project settings
-                            promises.push(changeProjectSetting(projectName, "mainPVSFile", obj.mainPVSFile));
+                    var promises = projectFiles.map(function (file) {
+                        var ext = path.extname(file.filePath);
+                        if (imageExts.indexOf(ext) > -1) {
+                            file.fileContent = file.fileContent.replace(/^data:image\/(\w+);base64,/, "");
                         }
+                        if (file.filePath.indexOf(projectName) === 0) {
+                            file.filePath = path.join(baseProjectDir, file.filePath);
+                        } else {
+                            logger.debug("Warning, deprecated filenames (project name not included in the filename)");
+                            file.filePath = path.join(projectPath, file.filePath);
+                        }
+                        return writeFile(file.filePath, file.fileContent, file.encoding);
+                    });
 
-                    }
-                    //add promises for writing widget definitions
-                    if (widgetDefinitions) {
-                        promises.push(writeFile(path.join(projectPath, "widgetDefinition.json"), widgetDefinitions));
-                    }
                     //exec promises and invoke callback function
                     Promise.all(promises)
-                        .then(function () {
+                        .then(function (files) {
+                            obj.projectFiles = files.map(function (f) {
+                                f.filePath = f.filePath.replace(projectPath, projectName);
+                                return f;
+                            });
                             // get project folder structure once all files have been wrtten
                             obj.folderStructure = getFolderStructure(projectPath);
                             // and make sure that the folder structure contains paths relative to baseProject
-                            obj.projectPath = obj.folderStructure.path;
-                    
+                            obj.name = projectName;
                             cb(obj);
                         }, function (err) {
                             obj.err = err;
@@ -329,7 +310,6 @@ function run() {
                     cb(obj);
                 }
             });
-            
         }
         
         fs.mkdir(projectPath, function (err) {
@@ -351,66 +331,26 @@ function run() {
 
     /**
     * open a project with the specified projectName
+    * @param {string} projectName the name of the project to open 
+    * @returns {Promise} a promise that resolves with data for the opened project
     */
     function openProject(projectName) {
         logger.debug("Opening project " + projectName + " ...");
-        var imageExts = ["jpg", "jpeg", "png"],
-            specExts = ["pvs"],
-            projectPath = baseProjectDir + projectName,
-            stat = fs.statSync(projectPath),
+        var projectPath = path.join(baseProjectDir, projectName),
             res = { name: projectName };
         
-        function openProjectAux(folder) {
-            var stat = fs.statSync(folder);
-            if (stat.isDirectory()) {
-                fs.readdirSync(folder).forEach(function (file) {
-                    var filePath = path.join(folder, file);
-                    stat = fs.statSync(filePath);
-                    if (stat.isFile()) {
-                        var ext = file.indexOf(".") > -1 ? file.split(".")[1].toLowerCase() : "";
-                        if (imageExts.indexOf(ext) > -1) {
-                            res.imagePath = filePath.replace(baseProjectDir, "");
-                            res.imageData = "data:image/" + ext + ";base64," + fs.readFileSync(filePath, "base64");
-                        } else if (specExts.indexOf(ext) > -1) {
-                            res.pvsFiles = res.pvsFiles || [];
-                            res.pvsFiles.push({path: filePath.replace(baseProjectDir, ""),
-                                               fileContent: fs.readFileSync(filePath, 'utf8')});
-                        } else if (file === "widgetDefinition.json") {
-                            res.widgetDefinition = JSON.parse(fs.readFileSync(filePath, "utf8"));
-                        } else if (file === ".pvsioweb") {
-                            var config = JSON.parse(fs.readFileSync(filePath, "utf8"));
-                            res.mainPVSFile = config.mainPVSFile;
-                        } else if (file === "scripts.json") {
-                            res.scripts = JSON.parse(fs.readFileSync(filePath, "utf8"));
-                        } else {
-                            res.other = res.other || [];
-                            res.other.push(filePath.replace(baseProjectDir, ""));
-                        }
-                    } else if (stat.isDirectory) {
-                        openProjectAux(filePath);
-                    }
-                });
-            }
-        }
-
-        if (stat.isDirectory()) {
-            openProjectAux(projectPath);
-            //load the first file if there is no .pvsioweb file in the root of the project
-            if (!res.mainPVSFile && res.pvsFiles && res.pvsFiles.length) {
-                res.pvsFiles.sort(function (a, b) { return a.path < b.path ? -1 : a.path === b.path ? 0 : 1; });
-                res.mainPVSFile = res.pvsFiles[res.pvsFiles.length - 1];
-            }
-            res.folderStructure = getFolderStructure(projectPath);
-            res.folderStructure.path = res.folderStructure.name;
-            res.folderStructure.children.forEach(function (child) {
-                child.path = child.path.replace(projectPath, projectName);
-            });
-            res.projectPath = res.folderStructure.path;
-            return res;
-        } else {
-            logger.error("error while opening project " + projectPath);
-            return null;
-        }
+        return new Promise(function (resolve, reject) {
+            //get filepaths and their contents
+            getFilesInDirectory(projectPath, true)
+                .then(function (files) {
+                    res.projectFiles = files.map(function (f) {
+                        f.filePath = f.filePath.replace(projectPath, projectName);
+                        return f;
+                    });
+                    res.folderStructure = getFolderStructure(projectPath);
+                    resolve(res);
+                }, reject);
+        });
     }
 
     /**
@@ -418,20 +358,24 @@ function run() {
      * @return {Array<string>} A list of project names
      */
     function listProjects() {
-        var res;
-        try {
-            res = fs.readdirSync(baseProjectDir).map(function (d) {
-                var stat = fs.statSync(baseProjectDir + d);
-                if (stat.isDirectory()) {
-                    return d;
+        return new Promise(function (resolve, reject) {
+            fs.readdir(baseProjectDir, function (err, files) {
+                if (err) {
+                    reject(err);
                 } else {
-                    return null;
+                    Promise.all(files.map(function (file) {
+                        return stat(path.join(baseProjectDir, file))
+                            .then(function (f) {
+                                if (f.isDirectory()) {
+                                    return Promise.resolve(file);
+                                } else { return Promise.resolve(null); }
+                            });
+                    })).then(function (files) {
+                        resolve(files.filter(function (f) { return f; }));
+                    }, reject);
                 }
-            }).filter(function (d) {return d !== null; });
-        } catch (err) {
-            res = { err: err };
-        }
-        return res;
+            });
+        });
     }
 
     //create logger
@@ -519,23 +463,27 @@ function run() {
                     processCallback(res, socket);
                 });
             },
-            "saveTempFile": function (token, socket, socketid) {
-                saveTempFile(token, function (res) {
-                    res.id = token.id;
-                    res.socketId = socketid;
-                    res.serverSent = new Date().getTime();
-                    processCallback(res, socket);
-                });
-            },
             "listProjects": function (token, socket, socketid) {
-                var projects = listProjects();
-                var res = projects.err ? projects : {id: token.id, serverSent: new Date().getTime(), projects: projects, socketId: socketid};
-                processCallback(res, socket);
+                var result = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
+                listProjects()
+                    .then(function (projects) {
+                        result.projects = projects;
+                        processCallback(result, socket);
+                    }, function (err) {
+                        result.err = err;
+                        processCallback(result, socket);
+                    });
             },
             "openProject": function (token, socket, socketid) {
-                var project = openProject(token.name);
-                var res = {project: project, id: token.id, serverSent: new Date().getTime(), socketId: socketid};
-                processCallback(res, socket);
+                var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
+                openProject(token.name)
+                    .then(function (data) {
+                        res.project = data;
+                        processCallback(res, socket);
+                    }, function (err) {
+                        res.err = err;
+                        processCallback(res, socket);
+                    });
             },
             "createProject": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid] || pvsio();
@@ -605,47 +553,23 @@ function run() {
             "readFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";
-                fs.readFile(token.fileName, encoding, function (err, content) {
+                fs.readFile(token.filePath, encoding, function (err, content) {
                     var res = err ? {err: err} : {id: token.id, serverSent: new Date().getTime(), fileContent: content, socketId: socketid};
                     processCallback(res, socket);
                 });
             },
             "writeFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
-                var encoding = token.encoding || "utf8";
-                var projectPath = baseProjectDir + token.projectName;
+                var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
+                token.filePath = path.join(baseProjectDir, token.filePath);
                 
-                function complete_writeFile(err) {
-                    var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid, err: err};
-                    processCallback(res, socket);
-                }
-                
-                var filePath = token.fileName;
-                if (filePath.indexOf(projectPath) === 0) {
-                    logger.debug("Warning, deprecated filenames (project path should not be included in the filename)");
-                    filePath = path.join(projectPath, filePath);
-                } else { filePath = path.join(baseProjectDir, filePath); }
-                
-                var files = [{path: filePath, fileContent: token.fileContent, encoding: encoding}];
-                writeFiles(files, complete_writeFile);
-            },
-            "writeImage": function (token, socket, socketid) {
-                p = pvsioProcessMap[socketid];
-                var encoding = token.encoding || "base64";
-                // directory "projects" is the base path for creating files
-                token.fileName = path.resolve(baseProjectDir, token.fileName);
-                token.fileContent = token.fileContent.replace(/^data:image\/(\w+);base64,/, "");
-                fs.writeFile(token.fileName, token.fileContent, encoding, function (err) {
-                    var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
-                    if (!err) {
-                        logger.debug("file " + token.fileName +
-                                 " saved successfully (socket id = " + socketid + ")");
-                        res.type = "fileSaved";
-                    } else {
+                writeFile(token.filePath, token.fileContent, token.encoding)
+                    .then(function () {
+                        processCallback(res, socket);
+                    }, function (err) {
                         res.err = err;
-                    }
-                    processCallback(res, socket);
-                });
+                        processCallback(res, socket);
+                    });
             },
             "deleteFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
@@ -696,5 +620,4 @@ function run() {
     httpServer.listen(port);
     logger.info("http server started .." + "now listening on port " + port);
 }
-
 run();

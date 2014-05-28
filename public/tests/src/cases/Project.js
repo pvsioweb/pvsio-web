@@ -24,7 +24,7 @@ define(function (require, exports, module) {
         });
         
         it("has no files on init", function () {
-            expect(p.pvsFiles()).not.toBeFalsy();
+            expect(p.pvsFilesList()).not.toBeFalsy();
             expect(p.pvsFilesList().length).toBeFalsy();
         });
         

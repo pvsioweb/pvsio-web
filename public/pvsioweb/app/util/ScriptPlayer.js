@@ -4,7 +4,7 @@
  * @date 3/24/14 17:51:31 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, setTimeout */
+/*global define, setTimeout */
 define(function (require, exports, module) {
     "use strict";
     var ws = require("websockets/pvs/WSManager").getWebSocket(),
@@ -66,7 +66,7 @@ define(function (require, exports, module) {
         script.time = Math.round(time / 1000) + "s";
         script.startState = Array.isArray(startState) ? startState.join("") : startState;
 
-        ScriptItemView.create(script).on("scriptClicked", function (name) {
+        ScriptItemView.create(script).on("scriptClicked", function () {
             var display = WidgetManager.getDisplayWidgets()[0];
             ws.lastState(script.startState);
             //render the last state

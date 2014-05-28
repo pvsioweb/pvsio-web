@@ -4,7 +4,7 @@
  * @date 11/14/13 8:15:57 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, Promise, FileReader */
+/*global define, Promise*/
 define(function (require, exports, module) {
 	"use strict";
 	var WSManager = require("websockets/pvs/WSManager"),
@@ -57,7 +57,7 @@ define(function (require, exports, module) {
             var fr = new FileReader();
             fr.onload = function (event) {
                 var content = event.target.result;
-                resolve(content);
+                resolve({filePath: file.name, fileContent: content});
             };
             
             fr.onerror = function (event) {
@@ -73,7 +73,7 @@ define(function (require, exports, module) {
             var fr = new FileReader();
             fr.onload = function (event) {
                 var content = event.target.result;
-                resolve(content);
+                resolve({filePath: file.name, fileContent: content});
             };
             
             fr.onerror = function (event) {

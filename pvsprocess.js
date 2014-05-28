@@ -22,6 +22,7 @@ You should have received a copy of the GNU General Public License along with Foo
 var childprocess = require("child_process"),
 	util = require("util"),
     path = require("path"),
+    logger = require("tracer").console(),
 	fs = require("fs");
 var procWrapper = require("./processwrapper");
 var spawn = childprocess.spawn;
@@ -89,8 +90,8 @@ module.exports = function () {
             pvs.exec({command: "rm -rf \"" + np + "\"", callBack: cb});
         } else {
             var error = ("cannot delete a folder outside the context of the current project");
-            console.log(error);
-            console.log(util.format("path: %s, workspace: %s, normalised Path: %s", filePath, workspaceDir, np));
+            logger.error(error);
+            logger.error(util.format("path: %s, workspace: %s, normalised Path: %s", filePath, workspaceDir, np));
             cb(error);
         }
     };
@@ -104,7 +105,7 @@ module.exports = function () {
 		filename = file;
         function onDataReceived(data) {
 			// this shows the original PVSio output
-			util.log(data);
+			logger.debug(data);
 			var lines = data.split("\n").map(function (d) {
 				return d.trim();
 			});
@@ -119,7 +120,7 @@ module.exports = function () {
 				var outString = arrayToOutputString(output);
 				//This is a hack to remove garbage collection messages from the output string before we send to the client
 				///TODO not sure if this works as intended
-                if(outString.indexOf("(#") >= 0) {
+                if (outString.indexOf("(#") >= 0) {
                     outString = outString.substring(outString.indexOf("(#"));
                     callback({type: "pvsoutput", data: [outString]});
                 }
@@ -137,7 +138,7 @@ module.exports = function () {
 		function onProcessExited(code) {
 			processReady = false;
 			var msg = "pvsio process exited with code " + code + ".\n" + output.join("");
-			util.log(msg);
+			logger.info(msg);
 			callback({type: "processExited", data: msg, code: code});
 		}
 		
@@ -145,8 +146,8 @@ module.exports = function () {
 			onDataReceived: onDataReceived,
 			onProcessExited: onProcessExited});
 		
-		util.log("PVSio process started with theory " + filename);
-        util.log("Process context is " + o.workspaceDir());
+		logger.info("PVSio process started with theory " + filename);
+        logger.info("Process context is " + o.workspaceDir());
 		return o;
 	};
 	
@@ -156,7 +157,7 @@ module.exports = function () {
 	 * @param {string} command the command to send to pvsio
 	 */
 	o.sendCommand = function (command, callback) {
-		util.log("sending command " + command + " to process");
+		logger.info("sending command " + command + " to process");
 		pvs.sendCommand(command, callback);
 		return o;
 	};

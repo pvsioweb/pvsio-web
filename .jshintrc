@@ -6,5 +6,7 @@
     "eqnull": true,
     "notypeof": true,
     "devel": true,
-    "browser": true
+    "browser": true,
+    "laxbreak": true,
+    "predef": ["Promise", "require"]
 }
