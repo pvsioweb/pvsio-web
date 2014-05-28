@@ -22,6 +22,8 @@ define(function (require, exports, module) {
         displayRename        = require("plugins/emulink/forms/displayRename"),
         displayDelete        = require("plugins/emulink/forms/displayDelete"),
         displayAddExpression = require("plugins/emulink/forms/displayAddExpression"),
+        displayAddVariable = require("plugins/emulink/forms/displayAddVariable"),
+        displayAddConstant = require("plugins/emulink/forms/displayAddConstant"),
         QuestionForm         = require("pvsioweb/forms/displayQuestion"),
         EmuchartsPVSPrinter   = require("plugins/emulink/EmuchartsPVSPrinter");
     
@@ -139,7 +141,7 @@ define(function (require, exports, module) {
                 contact: "http://www.eecs.qmul.ac.uk/~masci/"
             },
             importings: [],
-            costants: emuchartsManager.getConstants(),
+            constants: emuchartsManager.getConstants(),
             variables: emuchartsManager.getVariables(),
             states: emuchartsManager.getStates(),
             transitions: emuchartsManager.getTransitions()
@@ -504,15 +506,30 @@ define(function (require, exports, module) {
             });
         });
         d3.select("#btn_menuNewConstant").on("click", function () {
-            displayAddExpression.create({
+            displayAddConstant.create({
                 header: "Please enter new constant...",
-                textLabel: "New constant",
-                placeholder: "e.g., maxRate: real = 1200",
-                buttons: ["Cancel", "Create"]
-            }).on("create", function (e, view) {
-                var newExpression = e.data.labels.get("newExpression");
-                if (newExpression && newExpression.value !== "") {
-                    emuchartsManager.add_constant(newExpression);
+                textLabel: {
+                    newConstantName: "Constant name",
+                    newConstantType: "Constant type",
+                    newConstantValue: "Constant value"
+                },
+                placeholder: {
+                    newConstantName: "Name, e.g., maxRate",
+                    newConstantType: "Type, e.g., real",
+                    newConstantValue: "Value, e.g., 1200"
+                },
+                buttons: ["Cancel", "Create constant"]
+            }).on("create constant", function (e, view) {
+                var newConstantName = e.data.labels.get("newConstantName");
+                var newConstantType = e.data.labels.get("newConstantType");
+                var newConstantValue = e.data.labels.get("newConstantValue");
+                if (newConstantName && newConstantName.value !== ""
+                        && newConstantType && newConstantType.value !== "") {
+                    emuchartsManager.add_constant({
+                        name: newConstantName,
+                        type: newConstantType,
+                        value: newConstantValue //value can be left unspecified (uninterpreted constant)
+                    });
                     view.remove();
                 }
             }).on("cancel", function (e, view) {
@@ -521,15 +538,26 @@ define(function (require, exports, module) {
             });
         });
         d3.select("#btn_menuNewVariable").on("click", function () {
-            displayAddExpression.create({
+            displayAddVariable.create({
                 header: "Please enter new state variable...",
-                textLabel: "New state variable",
-                placeholder: "e.g., display: real",
-                buttons: ["Cancel", "Create"]
-            }).on("create", function (e, view) {
-                var newExpression = e.data.labels.get("newExpression");
-                if (newExpression && newExpression.value !== "") {
-                    emuchartsManager.add_variable(newExpression);
+                textLabel: {
+                    newVariableName: "Variable name",
+                    newVariableType: "Variable type"
+                },
+                placeholder: {
+                    newVariableName: "Name, e.g., display",
+                    newVariableType: "Type, e.g., real"
+                },
+                buttons: ["Cancel", "Create variable"]
+            }).on("create variable", function (e, view) {
+                var newVariableName = e.data.labels.get("newVariableName");
+                var newVariableType = e.data.labels.get("newVariableType");
+                if (newVariableName && newVariableName.value !== ""
+                        && newVariableType && newVariableType.value !== "") {
+                    emuchartsManager.add_variable({
+                        name: newVariableName,
+                        type: newVariableType
+                    });
                     view.remove();
                 }
             }).on("cancel", function (e, view) {

@@ -369,13 +369,17 @@ define(function (require, exports, module) {
 	 * Interface function for adding new constant definitions
      * @memberof Emucharts
 	 */
-    Emucharts.prototype.add_constant = function (name) {
-        this.constants.set(name);
+    Emucharts.prototype.add_constant = function (constant) {
+        this.constants.set(
+            constant.name,
+            { type: constant.type, value: constant.value }
+        );
         // fire event
         this.fire({
             type: "emuCharts_constantAdded",
             constant: {
-                name: name
+                name: name,
+                constant: constant
             }
         });
     };
@@ -384,14 +388,12 @@ define(function (require, exports, module) {
 	 * Interface function for adding new state variables definitions
      * @memberof Emucharts
 	 */
-    Emucharts.prototype.add_variable = function (name) {
-        this.variables.set(name);
+    Emucharts.prototype.add_variable = function (variable) {
+        this.variables.set(variable.name, variable.type);
         // fire event
         this.fire({
             type: "emuCharts_variableAdded",
-            variable: {
-                name: name
-            }
+            variable: variable
         });
     };
 
@@ -401,7 +403,17 @@ define(function (require, exports, module) {
 	 * @memberof Emucharts
 	 */
     Emucharts.prototype.getConstants = function () {
-        return this.constants.keys();
+        var _this = this;
+        var ans = [];
+        this.constants.forEach(function (c) {
+            var def = _this.constants.get(c);
+            ans.push({
+                name: c,
+                type: def.type,
+                value: def.value
+            });
+        });
+        return ans;
     };
     
     /**
@@ -409,7 +421,16 @@ define(function (require, exports, module) {
 	 * @memberof Emucharts
 	 */
     Emucharts.prototype.getVariables = function () {
-        return this.variables.keys();
+        var _this = this;
+        var ans = [];
+        this.variables.forEach(function (v) {
+            var type = _this.variables.get(v);
+            ans.push({
+                name: v,
+                type: type
+            });
+        });
+        return ans;
     };
 
     /**

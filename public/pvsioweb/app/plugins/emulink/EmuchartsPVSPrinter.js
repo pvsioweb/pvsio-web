@@ -146,9 +146,9 @@ define(function (require, exports, module) {
                 if (state_update.length === 2) {
                     // check for the presence of state variables 
                     // on the right-hand side of the expression
-                    var pos = indexOfStateVariableRT(v, state_update[1]);
+                    var pos = indexOfStateVariableRT(v.name, state_update[1]);
                     if (pos >= 0) {
-                        state_update[1] = state_update[1].replace(v, v + "(st)");
+                        state_update[1] = state_update[1].replace(v.name, v.name + "(st)");
                     }
                     action = state_update[0].trim() + " := " + state_update[1].trim();
                 }
@@ -208,7 +208,7 @@ define(function (require, exports, module) {
             transitionsSpec.forEach(function (signature) {
                 // generate permission
                 var tmp = "  per_" + signature.substr(0, signature.indexOf("(")) +
-                            "(st: State): bool = true\n"
+                            "(st: State): bool = true\n";
                 // generate transition
                 tmp += "  " + signature;
                 var cases = transitionsSpec.get(signature);
@@ -220,8 +220,8 @@ define(function (require, exports, module) {
                         if (variables) {
                             variables.forEach(function (v) {
                                 // for each state variable, add suffix (st)
-                                var pos = indexOfStateVariableLF(v, cs.cond);
-                                if (pos >= 0) { cs.cond = cs.cond.replace(v, v + "(st)").trim(); }
+                                var pos = indexOfStateVariableLF(v.name, cs.cond);
+                                if (pos >= 0) { cs.cond = cs.cond.replace(v.name, v.name + "(st)").trim(); }
                             });
                         }
                         tmp += "\n    current_state(st) = " + cs.from;
@@ -249,8 +249,8 @@ define(function (require, exports, module) {
                     "   current_state : MachineState,\n" +
                     "   previous_state: MachineState";
         if (variables && variables.length > 0) {
-            variables.forEach(function (name) {
-                ans += ",\n   " + name + ": " + "real"//variables.get(name);
+            variables.forEach(function (v) {
+                ans += ",\n   " + v.name + ": " + v.type;
             });
         }
         ans += "\n  #]\n";
@@ -265,8 +265,12 @@ define(function (require, exports, module) {
         var ans = "";
         if (constants && constants.length > 0) {
             ans += "  %-- constants\n";
-            constants.forEach(function (name) {
-                ans += name + "\n";
+            constants.forEach(function (c) {
+                ans += "  " + c.name + ": " + c.type;
+                if (c.value) {
+                    ans += " = " + c.value;
+                }
+                ans += "\n";
             });
         }
         return ans;
@@ -290,8 +294,7 @@ define(function (require, exports, module) {
         
     EmuchartsPVSPrinter.prototype.print_descriptor = function (emuchart) {
         var ans = "% --------------------------------------------------------------" +
-                    "\n%  Theory: " + emuchart.name +
-                    "\n%  Generator: PVSio-web/Emulink ver1.0 (http://www.pvsioweb.org)";
+                    "\n%  Theory: " + emuchart.name;
         if (emuchart.author) {
             ans += "\n%  Author: " + emuchart.author.name +
                     "\n%          " + emuchart.author.affiliation +
@@ -302,6 +305,14 @@ define(function (require, exports, module) {
                     "\n%  " + emuchart.description;
         }
         ans += "\n% ---------------------------------------------------------------\n";
+        return ans;
+    };
+    
+    EmuchartsPVSPrinter.prototype.print_disclaimer = function () {
+        var ans = "\n% ---------------------------------------------------------------\n" +
+                    "%  PVS theory generated using PVSio-web PVSPrinter ver 0.1\n" +
+                    "%  Tool freely available at http://www.pvsioweb.org" +
+                    "\n% ---------------------------------------------------------------\n";
         return ans;
     };
     
@@ -317,6 +328,7 @@ define(function (require, exports, module) {
         ans += this.print_variables(emuchart);
         ans += this.print_transitions(emuchart);
         ans += " END " + emuchart.name + "\n";
+        ans += this.print_disclaimer();
         return ans;
     };
     
