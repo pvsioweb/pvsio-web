@@ -149,10 +149,14 @@ define(function (require, exports, module) {
     
     function stateAdded_handler(event) { print_theory(); }
     function stateRemoved_handler(event) { print_theory(); }
+    function stateRenamed_handler(event) { print_theory(); }
+    function transitionAdded_handler(event) { print_theory(); }
+    function transitionRemoved_handler(event) { print_theory(); }
+    function transitionRenamed_handler(event) { print_theory(); }
     function constantAdded_handler(event) { print_theory(); }
     function variableAdded_handler(event) { print_theory(); }
-    function transitionAdded_handler(event) { print_theory(); }
-    function transitionRenamed_handler(event) { print_theory(); }
+    
+    
 
     /**
 	 * Constructor
@@ -178,6 +182,8 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_variableAdded", variableAdded_handler);
         emuchartsManager.addListener("emuCharts_transitionAdded", transitionAdded_handler);
         emuchartsManager.addListener("emuCharts_transitionRenamed", transitionRenamed_handler);
+        emuchartsManager.addListener("emuCharts_transitionRemoved", transitionRemoved_handler);
+        emuchartsManager.addListener("emuCharts_stateRenamed", stateRenamed_handler);
 	}
     
 	Emulink.prototype.createHtmlElements = function () {

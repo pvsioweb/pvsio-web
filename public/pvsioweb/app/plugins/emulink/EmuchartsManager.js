@@ -42,6 +42,8 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_variableAdded", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_transitionAdded", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_transitionRemoved", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_stateRenamed", function (event) { _this.fire(event); });
     };
     
 	/**

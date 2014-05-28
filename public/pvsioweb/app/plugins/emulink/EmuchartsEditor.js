@@ -59,6 +59,8 @@ define(function (require, exports, module) {
         this.emucharts.addListener("emuCharts_variableAdded", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_transitionAdded", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_transitionRemoved", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_stateRenamed", function (event) { _this.fire(event); });
         this.dragged = false;
         this.SVGdragged = false;
         eventDispatcher(this);
@@ -828,7 +830,6 @@ define(function (require, exports, module) {
 	 */
     EmuchartsEditor.prototype.delete_state = function (stateID) {
         var _this = this;
-        this.emucharts.remove_node(stateID);
         var edges = [];
         this.emucharts.edges.forEach(function (key) {
             var edge = _this.emucharts.edges.get(key);
@@ -840,6 +841,7 @@ define(function (require, exports, module) {
         edges.forEach(function (edge) {
             _this.emucharts.remove_edge(edge);
         });
+        this.emucharts.remove_node(stateID);
         this.renderTransitions();
         return this.renderStates();
     };

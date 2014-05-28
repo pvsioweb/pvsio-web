@@ -90,9 +90,16 @@ define(function (require, exports, module) {
                     edge.target.name = newName;
                     dirty = true;
                 }
-                if (dirty) { this.edges.set(key, edge); }
+                if (dirty) { _this.edges.set(key, edge); }
             });
         }
+        this.fire({
+            type: "emuCharts_stateRenamed",
+            state: {
+                id: node.id,
+                name: node.name
+            }
+        });
         return true;
     };
 
