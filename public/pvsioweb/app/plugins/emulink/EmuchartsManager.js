@@ -69,28 +69,26 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsManager
      * FIXME: improve this function!
 	 */
-    EmuchartsManager.prototype.importEmucharts = function (emucharts) {
+    EmuchartsManager.prototype.importEmucharts = function (emuchartsFile) {
         var _this = this;
-        if (emucharts) {
-            var emuchartsObject = JSON.parse(emucharts.fileContent);
-            if (emuchartsObject) {
-                var emuchartsNames = Object.keys(emuchartsObject);
-                if (emuchartsNames) {
-                    // create a map for each chart
-                    emuchartsNames.forEach(function (name) {
-                        var chart = { nodes: d3.map(), edges: d3.map() };
-                        emuchartsObject[name].nodes
-                            .forEach(function (node) { chart.nodes.set(node.id, node); });
-                        emuchartsObject[name].edges
-                            .forEach(function (edge) { chart.edges.set(edge.id, edge); });
-                        // associate an editor to the created emuchart
-                        var emucharts = new Emucharts(chart.nodes, chart.edges);
-                        var newEmuchartsEditor = new EmuchartsEditor(emucharts);
-                        _this.installHandlers(newEmuchartsEditor);
-                        _emuchartsEditors.set(name, newEmuchartsEditor);
-                        _selectedEditor = newEmuchartsEditor;
-                    });
-                }
+        if (emuchartsFile && emuchartsFile.fileContent) {
+            var emuchartsNames = Object.keys(emuchartsFile.fileContent);
+            if (emuchartsNames) {
+                // create a map for each chart
+                emuchartsNames.forEach(function (name) {
+                    var chart = { nodes: d3.map(), edges: d3.map() };
+                    emuchartsFile.fileContent[name].nodes
+                        .forEach(function (node) { chart.nodes.set(node.id, node); });
+                    emuchartsFile.fileContent[name].edges
+                        .forEach(function (edge) { chart.edges.set(edge.id, edge); });
+                    // associate an editor to the created emuchart
+                    var emucharts = new Emucharts(chart.nodes, chart.edges);
+                    var newEmuchartsEditor = new EmuchartsEditor(emucharts);
+                    _this.installHandlers(newEmuchartsEditor);
+                    _emuchartsEditors.set(name, newEmuchartsEditor);
+                    _selectedEditor = newEmuchartsEditor;
+                    
+                });
             }
         } else { console.log("dbg: warning, undefined or null emuchart"); }
     };

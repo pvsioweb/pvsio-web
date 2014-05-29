@@ -41,6 +41,10 @@ define(function (require, exports, module) {
     var emuchartsPVSPrinter;
 
     function resetToolbarColors() {
+        // make sure the svg is visible
+        d3.select("#EmuchartLogo").classed("hidden", true);
+        d3.select("#graphicalEditor").classed("hidden", false);
+        // reset toolbar color
         document.getElementById("btn_toolbarBrowse").style.background = "black";
         document.getElementById("btn_toolbarAddState").style.background = "black";
         document.getElementById("btn_toolbarAddTransition").style.background = "black";
@@ -300,31 +304,19 @@ define(function (require, exports, module) {
 	   */
 
         // bootstrap buttons
-        function openChart() {
-            projectManager.openFiles()
-                .then(function (files) {
-                    var promises = [], i;
-                    for (i = 0; i < files.length; i++) {
-                        promises.push(fs.readLocalFileAsText(files[i]));
+        function openChart(callback) {
+            var opt = {
+                header: "Open EmuChart file...",
+                extensions: ".emdl"
+            };
+            fs.openLocalFileAsJSON(function (err, res) {
+                if (res) {
+                    emuchartsManager.importEmucharts(res);
+                    if (callback && typeof callback === "function") {
+                        callback(err, res);
                     }
-                    Promise.all(promises)
-                        .then(function (files) {
-                            files.forEach(function (f) {
-                                d3.select("#EmuchartLogo").classed("hidden", true);
-                                d3.select("#graphicalEditor").classed("hidden", false);
-                                emuchartsManager.importEmucharts(f);
-                                // set initial editor mode
-                                emuchartsManager.set_editor_mode(MODE.BROWSE());
-                                // render emuchart                        
-                                emuchartsManager.render();
-                                projectManager.project().addProjectFile(f.filePath, f.fileContent);
-                                Logger.log("emuchart file added to project " + f.filePath);
-                            });
-                        }, function (err) {
-                            Logger.log("error reading files " + err);
-                        });
-                });
-
+                }
+            }, opt);
         }
         d3.select("#btnNewEmuchart").on("click", function () {
             d3.select("#EmuchartLogo").classed("hidden", true);
@@ -336,8 +328,14 @@ define(function (require, exports, module) {
             emuchartsManager.render();
         });
         d3.select("#btnLoadEmuchart").on("click", function () {
-            openChart();
-            resetToolbarColors();
+            openChart(function f() {
+                // set initial editor mode
+                emuchartsManager.set_editor_mode(MODE.BROWSE());
+                // render emuchart                        
+                emuchartsManager.render();
+                // make svg visible and reset colors
+                resetToolbarColors();
+            });
 		});
         
         // toolbar
