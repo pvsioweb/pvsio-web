@@ -26,6 +26,7 @@ define(function (require, exports, module) {
         displayAddConstant = require("plugins/emulink/forms/displayAddConstant"),
         QuestionForm         = require("pvsioweb/forms/displayQuestion"),
         EmuchartsPVSPrinter   = require("plugins/emulink/EmuchartsPVSPrinter"),
+        EmuchartsLustrePrinter   = require("plugins/emulink/EmuchartsLustrePrinter"),
         fs = require("util/fileHandler");
     
     var instance;
@@ -39,6 +40,8 @@ define(function (require, exports, module) {
     var emuchartsManager;
     var MODE;
     var emuchartsPVSPrinter;
+    var emuchartsLustrePrinter;
+    
 
     function resetToolbarColors() {
         // make sure the svg is visible
@@ -153,15 +156,31 @@ define(function (require, exports, module) {
         };
         console.log(emuchartsPVSPrinter.print(emuchart));
     }
+    function print_node() {
+        var emuchart = {
+            name: "emuchart_th",
+            author: {
+                name: "Paolo Masci",
+                affiliation: "Queen Mary University of London, United Kingdom",
+                contact: "http://www.eecs.qmul.ac.uk/~masci/"
+            },
+            importings: [],
+            constants: emuchartsManager.getConstants(),
+            variables: emuchartsManager.getVariables(),
+            states: emuchartsManager.getStates(),
+            transitions: emuchartsManager.getTransitions()
+        };
+        console.log(emuchartsLustrePrinter.print(emuchart));
+    }
     
-    function stateAdded_handler(event) { print_theory(); }
-    function stateRemoved_handler(event) { print_theory(); }
-    function stateRenamed_handler(event) { print_theory(); }
-    function transitionAdded_handler(event) { print_theory(); }
-    function transitionRemoved_handler(event) { print_theory(); }
-    function transitionRenamed_handler(event) { print_theory(); }
-    function constantAdded_handler(event) { print_theory(); }
-    function variableAdded_handler(event) { print_theory(); }
+    function stateAdded_handler(event) { print_theory(); print_node(); }
+    function stateRemoved_handler(event) { print_theory(); print_node(); }
+    function stateRenamed_handler(event) { print_theory(); print_node(); }
+    function transitionAdded_handler(event) { print_theory(); print_node(); }
+    function transitionRemoved_handler(event) { print_theory(); print_node(); }
+    function transitionRenamed_handler(event) { print_theory(); print_node(); }
+    function constantAdded_handler(event) { print_theory(); print_node(); }
+    function variableAdded_handler(event) { print_theory(); print_node(); }
     
     
 
@@ -171,6 +190,7 @@ define(function (require, exports, module) {
 	 */
     function Emulink() {
         emuchartsPVSPrinter = new EmuchartsPVSPrinter("emuchart_th");
+        emuchartsLustrePrinter = new EmuchartsLustrePrinter("A");
         pvsioWebClient = PVSioWebClient.getInstance();
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
