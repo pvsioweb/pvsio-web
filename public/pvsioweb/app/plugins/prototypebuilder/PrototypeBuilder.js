@@ -43,6 +43,7 @@ define(function (require, exports, module) {
             mode: "pvs", lineNumbers: true, foldGutter: true, autofocus: true, gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]});
         editor.setSize("100%", "100%");
         projectManager.editor(editor);
+        projectManager.preparePageForImageUpload();
         // create and default initial empty project containing an empty file (main.pvs)
         projectManager.createDefaultProject();
 

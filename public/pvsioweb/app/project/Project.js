@@ -200,11 +200,12 @@ define(function (require, exports, module) {
         var fileIndex = _projectFiles.indexOf(file);
         
         var deletedFile = _projectFiles.splice(fileIndex, 1);
-        if (deletedFile) {
-            this.fire({event: deletedFile.extension() === "pvs" ? "SpecFileDeleted" : "ProjectFileDeleted",
-                       file: deletedFile});
-            deletedFile.clearListeners();
-            deletedFile = null;
+        if (deletedFile && deletedFile[0]) {
+            var f = deletedFile[0];
+            this.fire({event: f.extension() === "pvs" ? "SpecFileDeleted" : "ProjectFileDeleted",
+                       file: f});
+            f.clearListeners();
+            f = null;
         }
         return this;
 	};
