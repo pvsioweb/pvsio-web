@@ -271,7 +271,7 @@ define(function (require, exports, module) {
 	};
 	/**
 	 * Updates the project image with in the prototype builder
-	 * @param {String} imageData The url or base64 encoded string to put in the src attribute of the img element
+	 * @param {ProjectFile} image the ProjectFile representing the project image
 	 * @memberof ProjectManager
 	 */
 	ProjectManager.prototype.updateImage = function (image, cb) {
@@ -523,6 +523,54 @@ define(function (require, exports, module) {
 	ProjectManager.prototype.createProjectFile = function (path, content) {
         var file = new ProjectFile(path, content);
         return file;
+    };
+    
+    
+    ProjectManager.prototype.preparePageForImageUpload = function () {
+        var imageExts = ["png", "jpg", "jpeg"], pm = this;
+
+        //add listener for  upload button
+        d3.selectAll("#btnLoadPicture").on("click", function () {
+            d3.select("#btnSelectPicture").node().click();
+        });
+
+        function _updateImage(file) {
+            fs.readLocalFileAsDataURL(file)
+                .then(function (res) {
+                    var p = pm.project();
+                    p.changeImage(p.name() + "/" + res.filePath, res.fileContent);
+                    pm.updateImage(p.getImage());
+                }, function (err) {
+                    Logger.log(err);
+                });
+        }
+
+        d3.select("#btnSelectPicture").on("change", function () {
+            var file = d3.event.currentTarget.files[0];
+            if (file && imageExts.indexOf(file.name.split(".").slice(-1).join("").toLowerCase()) > -1) {
+                _updateImage(file);
+            }
+        });
+
+        var c = document.getElementById("imageDiv");
+        c.ondragover = function () {
+            d3.select(c).style("border", "5px dashed black");
+            return false;
+        };
+        c.ondragend = function (e) {
+            d3.select(c).style("border", null);
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        };
+        c.ondrop =  function (e) {
+            d3.select(c).style("border", null);
+            var file = e.dataTransfer.files[0];
+            _updateImage(file);
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        };
     };
     
 	module.exports = ProjectManager;
