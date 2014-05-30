@@ -44,11 +44,11 @@ define(function (require, exports, module) {
                 var file = project.getProjectFile(oldPath);
                 file.path(node.path);
                 ws.writeFile({filePath: file.path(), fileContent: file.content()}, function (err, res) {
-                        if (!err) {
-                            //add the spec file to the project and supress the event so we dont create multiple files
-                            console.log(res);
-                        } else { console.log(err); }
-                    });
+                    if (!err) {
+                        //add the spec file to the project and supress the event so we dont create multiple files
+                        console.log(res);
+                    } else { console.log(err); }
+                });
             }, function (node) {
                 treeList.removeItem(node.path);
             });
@@ -77,7 +77,7 @@ define(function (require, exports, module) {
                 buttons: ["Cancel", "Delete"]
             }).on("ok", function (e, view) {
                 //send request to remove file using the wsmanager
-                ws.send({type: "deleteFile", fileName: path}, function (err) {
+                ws.send({type: "deleteFile", filePath: path}, function (err) {
                     if (!err) {
                         treeList.removeItem(path);
                     } else {

@@ -17,7 +17,7 @@ define(function (require, exports, module) {
         cachedData;
     var globalId = 0;
     var eventDispatcher = require("util/eventDispatcher"),
-        deepCopy = require("util/deepcopy");    
+        deepCopy = require("util/deepcopy");
     /**
         Find the node with the give id
     */
@@ -119,8 +119,8 @@ define(function (require, exports, module) {
             .style("opacity", 0)
             .style("height", tree.nodeHeight() + "px")
             .on("click", function (d) {
-                toggleChildren(d);
-                fst.render(d);
+//                toggleChildren(d);
+//                fst.render(d);
                 if (selectedData !== d) {
                     selectedData = d;
                     ul.selectAll("li.node").classed("selected", function (d) {
@@ -136,21 +136,38 @@ define(function (require, exports, module) {
 
         var listWrap = enteredNodes.append("div").classed("line", true);
         var updatedNodes = nodeEls, exitedNodes = nodeEls.exit();
-        listWrap.append("span").attr("class", function (d) {
+        var chevron = listWrap.append("span").attr("class", function (d) {
             var icon = d.children ? " glyphicon-chevron-down"
                 : d._children ? "glyphicon-chevron-right" : "";
             return "chevron glyphicon " + icon;
         });
+        chevron.on("click", function (d) {
+            toggleChildren(d);
+            fst.render(d);
+            if (selectedData !== d) {
+                selectedData = d;
+                ul.selectAll("li.node").classed("selected", function (d) {
+                    return selectedData === d;
+                });
+                var event = {type: "SelectedItemChanged", data: d};
+                // clear all editable flags
+                ul.selectAll("li.node").select(".label").attr("contentEditable", false);
+                console.log(event);
+                fst.fire(event);
+            }
+        });
+
+        
         //add icons for folder for file
         listWrap.append("span").attr("class", function (d) {
-            var icon = d.children || d._children ? "glyphicon-folder-close"
+            var icon = d.isDirectory ? "glyphicon-folder-close"
                 : "glyphicon-file";
             return "glyphicon " + icon;
         });
         //add text
-        listWrap.append("span").attr("class", "filename")
+        listWrap.append("span").attr("class", "label")
             .html(function (d) { return d.name; });
-        
+
         //update chevron direction
         nodeEls.select("span.chevron").attr("class", function (d) {
             var icon = d.children ? " glyphicon-chevron-down"
@@ -170,8 +187,8 @@ define(function (require, exports, module) {
             updatedNodes = updatedNodes.transition().duration(duration);
         }
         updatedNodes.style("top", function (d) {
-                return (d.y - tree.nodeHeight()) + "px";
-            }).style("opacity", 1);
+            return (d.y - tree.nodeHeight()) + "px";
+        }).style("opacity", 1);
         updatedNodes.selectAll(".line").style("left", function (d) { return d.x + "px"; });
         //remove hidden nodes
         exitedNodes.remove();
@@ -234,45 +251,54 @@ define(function (require, exports, module) {
     };
     
     TreeList.prototype.createNodeEditor = function (node, onEnter, onCancel) {
-        var fst = this, n = find(function (t) { return t.path === node.path; }, data) || selectedData;
+        var fst = this,
+            n = find(function (t) { return t.path === node.path; }, data) || selectedData;
+        
         var nodes = d3.select(el).selectAll(".node").filter(function (d) {
             return d === n;
         });
-        var ed = nodes.select(".label").attr("contentEditable", true),
-            oldPath = node.path;
-        ed.each(function () {
-            var sel = d3.select(this);
-            this.focus();
-            this.onkeydown = function (event) {
-                if (event.which === 13) {
-                    event.preventDefault();
-                    sel.attr("contentEditable", false);
-                    fst.renameItem(n, sel.html());
-                    if (onEnter && typeof onEnter === "function") {
-                        onEnter(n, oldPath);
-                    }
-                    sel.node().onkeydown = null;
-                    sel.node().onblur = null;
-                } else if (event.which === 27) {
-                    event.preventDefault();
-                    sel.attr("contentEditable", false).html(n.name);
-                    if (onCancel && typeof onCancel === "function") {
-                        onCancel(n, oldPath);
-                    }
-                    sel.node().onkeydown = null;
-                    sel.node().onblur = null;
-                }
                 
-            };
-            
-            this.onblur = function () {
-                if (onEnter && typeof onEnter === "function") {
-                    fst.renameItem(n, sel.html());
-                    onEnter(n, oldPath);
+        // an input text element is temporarily appended to let the user type the label
+        nodes.select(".label").html("")
+            .append("input").attr("class", "input_text")
+            .attr("type", "text")
+            .attr("placeholder", node.name)
+            .attr("value", node.name);
+        
+        var input_text = nodes.select(".input_text"),
+            oldPath = node.path;
+
+        function doCreate(elem, newLabel) {
+            if (newLabel === "") { newLabel = node.name; }
+            d3.select(elem.parentNode).html(newLabel);
+            fst.renameItem(n, newLabel);
+            if (onEnter && typeof onEnter === "function") {
+                onEnter(n, oldPath);
+            }
+        }
+        
+        var label = d3.select(input_text.node().parentNode).node();
+        var input = d3.select(input_text.node()).node();
+        input.focus();
+        input.onblur = function () {
+            doCreate(this, input.value);
+            input_text.node().onblur = null;
+        };
+        input.onkeydown = function (event) {
+            if (event.which === 13) { // enter key pressed
+                event.preventDefault();
+                doCreate(this, input.value);
+                input_text.node().onkeydown = null;
+                input_text.node().onblur = null;
+            } else if (event.which === 27) { // escape key pressed
+                event.preventDefault();
+                if (onCancel && typeof onCancel === "function") {
+                    onCancel(n, oldPath);
                 }
-                sel.node().onblur = null;
-            };
-        });
+                input_text.node().onkeydown = null;
+                input_text.node().onblur = null;
+            }
+        };
     };
     
     TreeList.prototype.renameItem = function (item, newName) {

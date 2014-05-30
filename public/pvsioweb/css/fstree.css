@@ -27,7 +27,7 @@ div.contextmenu {
     white-space: nowrap;
 }
 
-#tree {
+#treelist {
     width: 350px;
     height: 400px;
     overflow-y: auto;
@@ -37,21 +37,25 @@ div.contextmenu {
     width: 100%;
     cursor: pointer;
     border: none;
+    color: grey;
+    font-weight: normal;    
 }
-
-.treelist .node .filename {
-   font-size: 11pt;
-}
-
 .node.dirty {
     font-style: italic;
 }
-
 .node.selected {
     color: white;
     position: relative;
     background: steelblue;
     border: 1px solid #416d91;
+}
+
+.treelist .node .label {
+    color: black;
+    font-weight: normal;
+}
+.treelist .node.selected .label {
+    color: white;
 }
 
 .node span {

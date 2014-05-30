@@ -573,8 +573,9 @@ function run() {
             },
             "deleteFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
-                p.removeFile(token.fileName, function (err, res) {
-                    res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
+                var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
+                token.filePath = path.join(baseProjectDir, token.filePath);
+                p.removeFile(token.filePath, function (err) {
                     if (!err) {
                         res.type = "fileDeleted";
                     } else {
