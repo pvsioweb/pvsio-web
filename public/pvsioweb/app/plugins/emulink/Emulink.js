@@ -158,15 +158,19 @@ define(function (require, exports, module) {
     }
     function print_node() {
         var emuchart = {
-            name: "emuchart_th",
+            name: "foo",
             author: {
-                name: "Paolo Masci",
-                affiliation: "Queen Mary University of London, United Kingdom",
-                contact: "http://www.eecs.qmul.ac.uk/~masci/"
+                name: "XXX",
+                affiliation: "YYY",
+                contact: "XXX@YYY"
             },
             importings: [],
             constants: emuchartsManager.getConstants(),
-            variables: emuchartsManager.getVariables(),
+            variables: {
+                input: emuchartsManager.getInputVariables(),
+                output: emuchartsManager.getOutputVariables(),
+                local: emuchartsManager.getLocalVariables()
+            },
             states: emuchartsManager.getStates(),
             transitions: emuchartsManager.getTransitions()
         };
@@ -563,25 +567,30 @@ define(function (require, exports, module) {
             });
         });
         d3.select("#btn_menuNewVariable").on("click", function () {
+            var scopeOptions = emuchartsManager.getVariableScopes();
             displayAddVariable.create({
                 header: "Please enter new state variable...",
                 textLabel: {
                     newVariableName: "Variable name",
-                    newVariableType: "Variable type"
+                    newVariableType: "Variable type",
+                    newVariableScope: "Variable scope"
                 },
                 placeholder: {
                     newVariableName: "Name, e.g., display",
                     newVariableType: "Type, e.g., real"
                 },
+                scopeOptions: scopeOptions,
                 buttons: ["Cancel", "Create variable"]
             }).on("create variable", function (e, view) {
                 var newVariableName = e.data.labels.get("newVariableName");
                 var newVariableType = e.data.labels.get("newVariableType");
+                var newVariableScope = scopeOptions[e.data.options.get("newVariableScope")];
                 if (newVariableName && newVariableName.value !== ""
                         && newVariableType && newVariableType.value !== "") {
                     emuchartsManager.add_variable({
                         name: newVariableName,
-                        type: newVariableType
+                        type: newVariableType,
+                        scope: newVariableScope
                     });
                     view.remove();
                 }

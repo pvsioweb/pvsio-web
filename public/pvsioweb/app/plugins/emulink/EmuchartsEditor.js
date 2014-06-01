@@ -775,6 +775,38 @@ define(function (require, exports, module) {
     };
 
     /**
+	 * Returns an array containing the current set of input variables defined in the diagram
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.getInputVariables = function () {
+        return this.emucharts.getInputVariables();
+    };
+
+    /**
+	 * Returns an array containing the current set of output variables defined in the diagram
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.getOutputVariables = function () {
+        return this.emucharts.getOutputVariables();
+    };
+
+    /**
+	 * Returns an array containing the current set of local variables defined in the diagram
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.getLocalVariables = function () {
+        return this.emucharts.getLocalVariables();
+    };
+
+    /**
+	 * Returns an array specifying the supported variable scopes
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.getVariableScopes = function () {
+        return this.emucharts.getVariableScopes();
+    };
+
+    /**
 	 * Returns an array containing the current set of states in the diagram
      * Each transition is given as a 4-tuple { name, id, source, target }
      * where source and target are pairs { name, id }

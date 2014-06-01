@@ -183,6 +183,38 @@ define(function (require, exports, module) {
     };
 
     /**
+	 * Returns an array containing the current set of input variables defined in the model
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getInputVariables = function () {
+        return _selectedEditor.getInputVariables();
+    };
+
+    /**
+	 * Returns an array containing the current set of output variables defined in the model
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getOutputVariables = function () {
+        return _selectedEditor.getOutputVariables();
+    };
+
+    /**
+	 * Returns an array containing the current set of local variables defined in the model
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getLocalVariables = function () {
+        return _selectedEditor.getLocalVariables();
+    };
+    
+    /**
+	 * Returns an array specifying the supported variable scopes
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getVariableScopes = function () {
+        return _selectedEditor.getVariableScopes();
+    };
+
+    /**
 	 * Returns an array containing the current set of transitions
      * Each transition is given as a 4-tuple { name, id, source, target }
      * where source and target are pairs { name, id }

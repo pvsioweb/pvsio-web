@@ -389,7 +389,7 @@ define(function (require, exports, module) {
      * @memberof Emucharts
 	 */
     Emucharts.prototype.add_variable = function (variable) {
-        this.variables.set(variable.name, variable.type);
+        this.variables.set(variable.name, variable);
         // fire event
         this.fire({
             type: "emuCharts_variableAdded",
@@ -420,17 +420,52 @@ define(function (require, exports, module) {
 	 * Returns an array containing the current set of variables
 	 * @memberof Emucharts
 	 */
-    Emucharts.prototype.getVariables = function () {
+    Emucharts.prototype.getVariables = function (scope) {
         var _this = this;
         var ans = [];
         this.variables.forEach(function (v) {
-            var type = _this.variables.get(v);
-            ans.push({
-                name: v,
-                type: type
-            });
+            var variable = _this.variables.get(v);
+            if (!scope || variable.scope === scope) {
+                ans.push({
+                    name: v,
+                    type: variable.type,
+                    scope: variable.scope
+                });
+            }
         });
         return ans;
+    };
+    
+    /**
+	 * Returns an array containing the current set of input variables
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getInputVariables = function () {
+        return this.getVariables("Input");
+    };
+
+    /**
+	 * Returns an array containing the current set of output variables
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getOutputVariables = function () {
+        return this.getVariables("Output");
+    };
+
+    /**
+	 * Returns an array containing the current set of local variables
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getLocalVariables = function () {
+        return this.getVariables("Local");
+    };
+
+    /**
+	 * Returns an array specifying the supported variable scopes
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getVariableScopes = function () {
+        return ["Local", "Input", "Output"];
     };
 
     /**
