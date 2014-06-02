@@ -38,6 +38,7 @@ define(function (require, exports, module) {
     var mouseover = { node: null, path: null };
     var mousedrag = { node: null, path: null };
     var drag_line; // drag line used when creating new transitions
+    var sensitivity = { x: 8, y: 8 };
     
     // editor modes
     var MODE = new EditorModeUtils();
@@ -214,7 +215,10 @@ define(function (require, exports, module) {
 //                d3.select("#ContainerStateMachine svg").select("#dragline")
 //                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
                 //--
-                _this.SVGdragged = true;
+                if (Math.abs(d3.event.translate[0]) > sensitivity.x
+                        || Math.abs(d3.event.translate[1]) > sensitivity.y) {
+                    _this.SVGdragged = true;
+                }
             }
         });
         
@@ -462,6 +466,15 @@ define(function (require, exports, module) {
                 });
             }
         };
+        var mouseDoubleClick = function (edge) {
+            if (editor_mode !== MODE.DELETE()) {
+                _this.fire({
+                    type: "emuCharts_renameTransition",
+                    edge: edge
+                });
+            }
+        };
+        
         
         if (!this.emucharts || !this.emucharts.getEdges()) { return; }
         // create svg element, if needed
@@ -476,7 +489,8 @@ define(function (require, exports, module) {
             enteredTransitions
                 .on("mouseover", mouseOver)
                 .on("mouseout", mouseOut)
-                .on("click", mouseClick);
+                .on("click", mouseClick)
+                .on("dblclick", mouseDoubleClick);
         }
     };
     
@@ -640,7 +654,9 @@ define(function (require, exports, module) {
         };
         var dragEnd = function (node) {
             if (editor_mode === MODE.ADD_TRANSITION()) {
-                if (mouseover.node) {
+                if (mousedrag.node && mouseover.node
+                        && (d3.mouse(this)[0] > sensitivity.x 
+                            || d3.mouse(this)[1] > sensitivity.y)) {
                     _this.fire({
                         type: "emuCharts_addTransition",
                         source: mousedrag.node,
@@ -701,6 +717,14 @@ define(function (require, exports, module) {
                 d3.select("#drag-arrow path").style("fill", "black");
             }
         };
+        var mouseDoubleClick = function (node) {
+            if (editor_mode !== MODE.DELETE()) {
+                _this.fire({
+                    type: "emuCharts_renameState",
+                    node: node
+                });
+            }
+        };
 
         if (!this.emucharts || !this.emucharts.getNodes()) { return; }
         var nodes = this.emucharts.getNodes().values();
@@ -719,7 +743,8 @@ define(function (require, exports, module) {
                 .on("dragend", dragEnd);
             enteredStates.call(drag)
                 .on("mouseover", mouseOver)
-                .on("mouseout", mouseOut);
+                .on("mouseout", mouseOut)
+                .on("dblclick", mouseDoubleClick);
         }
     };
     
