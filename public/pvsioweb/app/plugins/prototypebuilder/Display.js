@@ -28,9 +28,10 @@ define(function (require, exports, module) {
     
 	Display.prototype.render = function (stateString) {
 		var state = StateParser.parse(stateString);
-        var dispVal = StateParser.evaluate(StateParser.resolve(state, this.displayKey()));
+        var str = StateParser.resolve(state, this.displayKey());
+        var dispVal = StateParser.evaluate(str);
         if (typeof dispVal === "string") {
-            dispVal = dispVal.replace(/[\"\']/g, "");
+            dispVal = dispVal.replace(new RegExp("\"", "g"), "");
         }
 		var y = this.element().attr("y"),
 			x = this.element().attr("x"),
