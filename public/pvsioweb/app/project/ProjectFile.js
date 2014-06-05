@@ -73,7 +73,7 @@ define(function (require, exports, module) {
     }
     
     ProjectFile.prototype.isImage = function () {
-        return imageExtensions.indexOf(this.extension()) > -1;
+        return imageExtensions.indexOf(this.extension().toLowerCase()) > -1;
     };
     
     ProjectFile.prototype.isPVSFile = function () {
