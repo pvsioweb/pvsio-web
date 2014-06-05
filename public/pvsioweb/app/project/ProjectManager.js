@@ -414,6 +414,12 @@ define(function (require, exports, module) {
         */
         var name;
         function _doSave() {
+            // update widgets
+            var newWidgetDef = JSON.stringify(WidgetManager.getWidgetDefinitions(), null, " ");
+            var widgetFile = project.getWidgetDefinitionFile();
+            widgetFile.content(newWidgetDef);
+            
+            // save files
             project.save(function (err, p) {
                 if (!err) {
                     Logger.log("project saved");

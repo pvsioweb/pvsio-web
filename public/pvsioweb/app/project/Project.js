@@ -136,6 +136,19 @@ define(function (require, exports, module) {
     };
     
     /**
+     * Gets the project file with the specified Name
+     * @param {!String} filePath path to the spec file
+     * @returns {ProjectFile}
+     * @memeberof Project
+     */
+    Project.prototype.getProjectFile = function (filePath) {
+        return _projectFiles.filter(function (f) {
+            return f.path() === filePath;
+        })[0];
+    };
+    
+    
+    /**
 	 * Updates the project image. At the moment only one image is allowed in a project so we remove the old image
      * before adding the new one.
 	 * @param {!String} imageName The fileName for the new image
@@ -179,18 +192,7 @@ define(function (require, exports, module) {
         }
         return newFile;
     };
-    /**
-     * Gets the project file with the specified Name
-     * @param {!String} filePath path to the spec file
-     * @returns {ProjectFile}
-     * @memeberof Project
-     */
-    Project.prototype.getProjectFile = function (filePath) {
-        return _projectFiles.filter(function (f) {
-            return f.path() === filePath;
-        })[0];
-    };
-    
+
 	/**
 	 * Removes the specified file from the list of project files.
 	 * @param {!ProjectFile} file The file to remove.
