@@ -518,7 +518,7 @@ function run() {
                 p = pvsioProcessMap[socketid];
                 //close the process if it exists and recreate it
                 if (p) {
-                    p.close();
+                    p.close('SIGTERM', true);
                     delete pvsioProcessMap[socketid];
                 }
                 //recreate the pvsio process

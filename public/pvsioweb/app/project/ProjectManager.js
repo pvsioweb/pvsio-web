@@ -166,13 +166,13 @@ define(function (require, exports, module) {
                 if (file && file.filePath && file.fileContent) {
                     pf = p.addProjectFile(file.filePath, file.fileContent).encoding(file.encoding);
                     if (file.filePath.indexOf(".pvsioweb") > 0) {
-                        var main = JSON.parse(file.fileContent)["mainPVSFile"];
+                        var main = JSON.parse(file.fileContent).mainPVSFile;
                         if (main && main !== "") {
                             // FIXME: the file content is left undefined -- check if we ever use it!
                             var newMainFile = new ProjectFile(main)//.content(fileContent)
                                                 .encoding("utf8");
                             p.mainPVSFile(newMainFile);
-                        }    
+                        }
                     }
                 }
             });
@@ -520,7 +520,6 @@ define(function (require, exports, module) {
         project.addProjectFile(data.pvsSpec[0], makeEmptyTheory(defaultTheoryName));
 
         project.saveNew(data.projectName, function (err, res, folderStructure) {
-            Logger.log({err: err, res: res});
             if (!err) {
                 //set the main pvs file
                 project.mainPVSFile(new ProjectFile(defaultFilePath));

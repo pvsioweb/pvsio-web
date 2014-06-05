@@ -137,8 +137,16 @@ module.exports = function () {
 		
 		function onProcessExited(code) {
 			processReady = false;
-			var msg = "pvsio process exited with code " + code + ".\n" + output.join("");
-			logger.info(msg);
+			var msg;
+            if(this.silentMode) {
+                msg = "";
+            } else {
+                if (code) {
+                    msg = "pvsio process exited with code " + code + ".\n" + output.join("");
+                } else { msg = "pvsio process exited cleanly.\n" + output.join(""); }
+                logger.info(msg);
+            }
+            this.silentMode = false;
 			callback({type: "processExited", data: msg, code: code});
 		}
 		
@@ -167,7 +175,8 @@ module.exports = function () {
 	 * closes the pvsio process
      * @param {string} signal The signal to send to the kill process. Default is 'SIGTERM'
 	 */
-	o.close = function (signal) {
+	o.close = function (signal, silentMode) {
+        this.silentMode = silentMode;
 		signal = signal || 'SIGTERM';
 		pvs.kill(signal);
 		return o;

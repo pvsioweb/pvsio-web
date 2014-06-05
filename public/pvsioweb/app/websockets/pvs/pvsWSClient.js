@@ -63,7 +63,14 @@ define(function (require, exports, module) {
         o.startPVSProcess = function (data, cb) {
 			if (data && data.fileName) {
 		        var sourceFile = data.fileName.split(".pvs")[0];
-		        wscBase.send({type: "startProcess", data: {fileName: sourceFile, projectName: data.projectName, demoName: data.demoName}}, cb);
+		        wscBase.send({
+                    type: "startProcess",
+                    data: {
+                        fileName: sourceFile,
+                        projectName: data.projectName,
+                        demoName: data.demoName
+                    }
+                }, cb);
 			} else {
 				console.log("ERROR: Failed to load pvs file " + data.demoName + "/" + data.fileName);
 			}

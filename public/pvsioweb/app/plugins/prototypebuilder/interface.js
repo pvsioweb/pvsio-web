@@ -4,7 +4,7 @@
  * @date 11/15/13 16:29:55 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, $, Backbone, Handlebars */
+/*global define, d3, $, Backbone, Handlebars, Promise */
 define(function (require, exports, module) {
 	"use strict";
 	var WSManager = require("websockets/pvs/WSManager"),
@@ -47,7 +47,7 @@ define(function (require, exports, module) {
         var pvsioStatus = d3.select("#lblPVSioStatus");
         pvsioStatus.select("span").remove();
         if (!err) {
-            var msg = ("pvsio process ready");
+            var msg = ("pvsio process ready!");
             Logger.log(msg);
             pvsioStatus.append("span").attr("class", "glyphicon glyphicon-ok");
         } else {
@@ -151,8 +151,8 @@ define(function (require, exports, module) {
             function _doOpenProject() {
                 projectManager.selectProject(function (err, projectName) {
                     if (!err) {
-                         projectManager.openProject(projectName, function (project) {
-                            Logger.log(project.name() + " has been opened!");
+                        projectManager.openProject(projectName, function (project) {
+                            Logger.log("Project " + project.name() + " opened successfully!");
                         });
                     }
                 });
@@ -229,6 +229,7 @@ define(function (require, exports, module) {
 				ws.send({type: "setMainFile", projectName: project.name(), fileName: pvsFile.path()}, function (err) {
 					//if there was no error update the main file else alert user
                     if (!err) {
+                        Logger.log("main file " + pvsFile.path() + " set successfully!");
                         project.mainPVSFile(pvsFile);
                     } else {
                         Logger.log(err);
@@ -245,7 +246,7 @@ define(function (require, exports, module) {
                     if (err) {
                         Logger.log(err);
                     } else {
-                        Logger.log(pvsFile.path() + " has beeen saved.");
+                        Logger.log(pvsFile.path() + " saved successfully!");
                     }
                 });
 			}
@@ -259,7 +260,7 @@ define(function (require, exports, module) {
                     if (err) {
                         Logger.log(err);
                     } else {
-                        Logger.log(pvsFiles + " has beeen saved.");
+                        Logger.log(pvsFiles + " saved successfully!");
                     }
                 });
 			}

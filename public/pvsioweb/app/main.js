@@ -9,12 +9,12 @@
 define(function (require, exports, module) {
     "use strict";
 	var PVSioWebClient = require("PVSioWebClient"),
-		Logger = require("util/Logger"),
-        ui = require("plugins/prototypebuilder/interface"),
+		Logger         = require("util/Logger"),
+        ui             = require("plugins/prototypebuilder/interface"),
 		PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
-        Emulink = require("plugins/emulink/Emulink"),
-		GraphBuilder			= require("plugins/graphbuilder/GraphBuilder"),
-        PluginManager = require("plugins/PluginManager");
+        Emulink        = require("plugins/emulink/Emulink"),
+		GraphBuilder   = require("plugins/graphbuilder/GraphBuilder"),
+        PluginManager  = require("plugins/PluginManager");
 		
 	var client = PVSioWebClient.getInstance(), pb, pm = PluginManager.getInstance();
     client.connectToServer()
@@ -37,22 +37,6 @@ define(function (require, exports, module) {
                         pm.disablePlugin(plugin);
                     }
                 });
-//            pb = new PrototypeBuilder(client);
-//            pb.initialise();
-//            
-//            var projectManager = pb.getProjectManager();
-//            var editor = pb.getEditor();
-//            
-//            //register the graphbuilder plugin and add an event handler to reinitialise the plugin when the project changes
-//            var gb = new GraphBuilder(client);
-//            gb.initialise();
-//            projectManager.addListener("ProjectChanged", function () {
-//                gb.reInitialise();
-//            });
-            
-//            var emulink = Emulink.getInstance();
-//            pm.enablePlugin(emulink);
-            
             pb = PrototypeBuilder.getInstance();
             pm.enablePlugin(pb);
             ui.bindListeners(pb.getProjectManager());
@@ -80,9 +64,8 @@ define(function (require, exports, module) {
 		console.log(response);
 		Logger.pvsio_response_log(response);
 	}).addListener("processExited", function (e) {
-		var msg = "Warning!!!\r\nServer process exited. See console for details.";
-		Logger.log("Server process exited -- server message was ...");
-		Logger.log(JSON.stringify(e));
+//		Logger.log("Server process exited -- server message was ...");
+//		Logger.log(JSON.stringify(e));
 		d3.select("#lblPVSioStatus").select("span").attr("class", "glyphicon glyphicon-warning-sign");
 	});
 	
