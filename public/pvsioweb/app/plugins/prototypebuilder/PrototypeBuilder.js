@@ -35,12 +35,19 @@ define(function (require, exports, module) {
     PrototypeBuilder.prototype.getDependencies = function () { return []; };
     
     PrototypeBuilder.prototype.initialise = function () {
-        editorContainer = pvsioWebClient.createCollapsiblePanel("PVS Editor");
+        editorContainer = pvsioWebClient.createCollapsiblePanel("PVS Editor", true, function () {
+            editor.refresh();
+        });
         editorContainer.append("div").html(sourceCodeTemplate);
 
         // this enable autocompletion
         editor = new CodeMirror(d3.select("#editor").node(), {
-            mode: "pvs", lineNumbers: true, foldGutter: true, autofocus: true, gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]});
+            mode: "pvs",
+            lineNumbers: true,
+            foldGutter: true,
+            autofocus: true,
+            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+        });
         editor.setSize("100%", "100%");
         projectManager.editor(editor);
         projectManager.preparePageForImageUpload();

@@ -116,6 +116,7 @@ define(function (require, exports, module) {
                 if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
                     editor.off("change", _editorChangedHandler);
                     editor.setValue(pvsFile.content());
+                    editor.markClean();
                     editor.focus();
                     editor.on("change", _editorChangedHandler);
                 } else {
@@ -126,6 +127,7 @@ define(function (require, exports, module) {
                             editor.off("change", _editorChangedHandler);
                             pvsFile.content(res.fileContent).dirty(false);
                             editor.setValue(pvsFile.content());
+                            editor.markClean();
                             editor.focus();
                             editor.on("change", _editorChangedHandler);
                         } else {

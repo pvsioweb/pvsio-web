@@ -22,6 +22,7 @@ define(function (require, exports, module) {
         project = _project;
     
         treeList = new TreeList(folderData, elementId);
+        // FIXME: why are we using a different event type?
         treeList.addListener("SelectedItemChanged", function (event) {
             var e = {type: "SelectedFileChanged", selectedItem: event.data};
             ftv.fire(e);

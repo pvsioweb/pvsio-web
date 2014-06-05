@@ -9877,7 +9877,7 @@ define('PVSioWebClient',['require','exports','module','websockets/pvs/pvsWSClien
 		@param {boolean} showContent Whether the default initial state of the panel is open (showContent == true) or closed (showContent == true or undefined)
         @returns {d3.selection} The div created
     */
-	PVSioWeb.prototype.createCollapsiblePanel = function (headerText, showContent) {
+	PVSioWeb.prototype.createCollapsiblePanel = function (headerText, showContent, onClickCB) {
 		var div = d3.select("#content").append("div").attr("class", "collapsible-panel-parent");
 		var header = div.append("div").classed("header", true);
 		var content = div.append("div").attr("class", "collapsible-panel");
@@ -9887,15 +9887,18 @@ define('PVSioWebClient',['require','exports','module','websockets/pvs/pvsWSClien
 				if(showContent == true) { return "toggle-collapse glyphicon glyphicon-minus-sign"; }
 				return "toggle-collapse glyphicon glyphicon-plus-sign"; })
 			.on("click", function () {
-			var d = d3.select(this);
-			if (d.classed("glyphicon-minus-sign")) {
-				content.style("display", "none");
-				d3.select(this).classed("glyphicon-plus-sign", true).classed("glyphicon-minus-sign", false);
-			} else {
-				content.style("display", null);
-				d3.select(this).classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
-			}
-		});
+                var d = d3.select(this);
+                if (d.classed("glyphicon-minus-sign")) {
+                    content.style("display", "none");
+                    d3.select(this).classed("glyphicon-plus-sign", true).classed("glyphicon-minus-sign", false);
+                } else {
+                    content.style("display", null);
+                    d3.select(this).classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
+                }
+                if (onClickCB && typeof onClickCb === "function") {
+                    onClickCB();
+                }
+            });
 		
 		if (headerText) {
 			header.append("span").html(headerText).attr("class", "header");
