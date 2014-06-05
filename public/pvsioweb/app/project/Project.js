@@ -89,7 +89,7 @@ define(function (require, exports, module) {
         WidgetManager.clearListeners()
             .addListener("WidgetModified", function () {
                 project._dirty(true);
-                var newWDStr = JSON.stringify(WidgetManager.getWidgetDefinitions());
+                var newWDStr = JSON.stringify(WidgetManager.getWidgetDefinitions(), null, " ");
                 //get the widget definitions and update the widgetDefinition file
                 project.getWidgetDefinitionFile().content(newWDStr).dirty(true);
             });
