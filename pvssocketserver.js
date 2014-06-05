@@ -188,14 +188,15 @@ function run() {
                 }
                 //resolve with the filename and content
                 return new Promise(function (resolve, reject) {
-                    var ext = path.extname(fullPath), isImage = imageExts.indexOf(ext) > -1;
+                    var ext = path.extname(fullPath),
+                        isImage = imageExts.indexOf(ext.toLowerCase()) > -1;
                     var opt = {encoding: isImage ? "base64" : "utf8"};
                     fs.readFile(fullPath, opt, function (err, data) {
                         if (err) {
                             reject(err);
                         } else {
                             resolve({filePath: fullPath, fileContent: isImage ?
-                                     ("data:image/" + ext.substr(1) + ";base64," + data) : data, encoding: opt.encoding});
+                                     ("data:image/" + ext.substr(1).toLowerCase() + ";base64," + data) : data, encoding: opt.encoding});
                         }
                     });
                 });
