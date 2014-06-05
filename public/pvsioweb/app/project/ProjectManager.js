@@ -161,7 +161,18 @@ define(function (require, exports, module) {
         if (obj.projectFiles) {
             ///FIXME handle main pvs file, scripts and widgetDefinitions (maybe we dont need to)
             obj.projectFiles.forEach(function (file) {
-                pf = p.addProjectFile(file.filePath, file.fileContent).encoding(file.encoding);
+                if (file && file.filePath && file.fileContent) {
+                    pf = p.addProjectFile(file.filePath, file.fileContent).encoding(file.encoding);
+                    if (file.filePath.indexOf(".pvsioweb") > 0) {
+                        var main = JSON.parse(file.fileContent)["mainPVSFile"];
+                        if (main && main !== "") {
+                            // FIXME: the file content is left undefined -- check if we ever use it!
+                            var newMainFile = new ProjectFile(main)//.content(fileContent)
+                                                .encoding("utf8");
+                            p.mainPVSFile(newMainFile);
+                        }    
+                    }
+                }
             });
         }
 		
