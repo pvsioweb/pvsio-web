@@ -222,6 +222,8 @@ define(function (require, exports, module) {
                 pm.project(p);
                 // always set mainPVSfile because ProjectChanged will trigger an invocation of pvsio with that file
                 pm.project().mainPVSFile(pm.project().mainPVSFile() || pm.project().pvsFilesList()[0]);
+                pm.project()._dirty(false);
+                
                 pm.fire({type: "ProjectChanged", current: p, previous: pm.project()});
                 pm.editor().off("change", _editorChangedHandler);
                 pm.editor().setValue("");
@@ -520,6 +522,7 @@ define(function (require, exports, module) {
             if (!err) {
                 //set the main pvs file
                 project.mainPVSFile(new ProjectFile(defaultFilePath));
+                project._dirty(false);
                 WidgetManager.updateMapCreator();
                 pm.project(project);
                 pm.renderSourceFileList(folderStructure);
