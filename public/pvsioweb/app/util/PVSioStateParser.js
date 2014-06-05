@@ -52,7 +52,7 @@ define(function (require, exports, module) {
             if (args.length === 2 && !isNaN(+args[0]) && !isNaN(+args[1])) {
                 return +args[0] / +args[1];
             }
-            return +str;
+            if (!isNaN(+str)) { return +str; }
         }
         return str;
     }
