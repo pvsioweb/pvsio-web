@@ -105,7 +105,7 @@ module.exports = function () {
 		filename = file;
         function onDataReceived(data) {
 			// this shows the original PVSio output
-			logger.debug(data);
+            console.log(data.trim());
 			var lines = data.split("\n").map(function (d) {
 				return d.trim();
 			});
@@ -157,7 +157,8 @@ module.exports = function () {
 	 * @param {string} command the command to send to pvsio
 	 */
 	o.sendCommand = function (command, callback) {
-		logger.info("sending command " + command + " to process");
+//		logger.info("sending command " + command + " to process");
+        console.log(command);
 		pvs.sendCommand(command, callback);
 		return o;
 	};
