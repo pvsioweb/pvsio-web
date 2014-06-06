@@ -529,7 +529,7 @@ function run() {
                 p.workspaceDir(__dirname + root)
                     .start(token.data.fileName, function (token) {
                         token.socketId = socketid;
-                        processCallback(token, socket);
+//                        processCallback(token, socket); // this is not needed! the callback function is in sendCommand
                     },
                         function (res) {
                             res.id = token.id;

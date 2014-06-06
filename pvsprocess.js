@@ -101,38 +101,31 @@ module.exports = function () {
 	 * @param {function({type:string, data:array})} callback function to call when any data is received  in the stdout
 	 * @param {function} callback to call when processis ready
 	 */
+    // FIXME: callback is not needed! -- the callback function is already specified in pvssocket with sendCommand
 	o.start = function (file, callback, processReadyCallback) {
 		filename = file;
         function onDataReceived(data) {
 			// this shows the original PVSio output
             console.log(data.trim());
-			var lines = data.split("\n").map(function (d) {
-				return d.trim();
-			});
-			var lastLine = lines[lines.length - 1];
-			//copy lines into the output list ignoring the exit string, the startoutput string '==>'
-			//and any blank lines
-			output = output.concat(lines.filter(function (d) {
-				return wordsIgnored.indexOf(d) < 0;
-			}));
+            if (!processReady) {
+                var lines = data.split("\n").map(function (d) {
+                    return d.trim();
+                });
+                var lastLine = lines[lines.length - 1];
+                //copy lines into the output list ignoring the exit string, the startoutput string '==>'
+                //and any blank lines
+                output = output.concat(lines.filter(function (d) {
+                    return wordsIgnored.indexOf(d) < 0;
+                }));
 			
-			if (processReady && lastLine.indexOf(readyString) > -1) {
-				var outString = arrayToOutputString(output);
-				//This is a hack to remove garbage collection messages from the output string before we send to the client
-				///TODO not sure if this works as intended
-                if (outString.indexOf("(#") >= 0) {
-                    outString = outString.substring(outString.indexOf("(#"));
-                    callback({type: "pvsoutput", data: [outString]});
+                if (lastLine.indexOf(readyString) > -1) {
+                    //last line of the output is the ready string
+                    processReadyCallback({type: "processReady", data: output});
+                    processReady = true;
+                    pvs.dataProcessor(processDataFunc());
                 }
-				//clear the output
-				output  = [];
-			} else if (lastLine.indexOf(readyString) > -1) {
-				//last line of the output is the ready string
-				processReadyCallback({type: "processReady", data: output});
-				processReady = true;
-				output = [];
-				pvs.dataProcessor(processDataFunc());
-			}
+            }
+            output = [];
 		}
 		
 		function onProcessExited(code) {
