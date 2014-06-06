@@ -14,7 +14,8 @@
   {
    "type": "display",
    "id": "display_7b8effe2-55cd-485b-f7a3-3377082b3cea",
-   "displayKey": "numberpad.display"
+   "displayKey": "numberpad.display",
+   "cursorName": ""
   },
   {
    "events": [
