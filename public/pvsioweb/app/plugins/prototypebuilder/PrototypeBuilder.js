@@ -35,7 +35,7 @@ define(function (require, exports, module) {
     PrototypeBuilder.prototype.getDependencies = function () { return []; };
     
     PrototypeBuilder.prototype.initialise = function () {
-        editorContainer = pvsioWebClient.createCollapsiblePanel("PVS Editor", true, function () {
+        editorContainer = pvsioWebClient.createCollapsiblePanel("PVS Editor", false, function () {
             editor.refresh();
         });
         editorContainer.append("div").html(sourceCodeTemplate);
