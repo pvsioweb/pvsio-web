@@ -9895,7 +9895,7 @@ define('PVSioWebClient',['require','exports','module','websockets/pvs/pvsWSClien
                     content.style("display", null);
                     d3.select(this).classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
                 }
-                if (onClickCB && typeof onClickCb === "function") {
+                if (onClickCB && typeof onClickCB === "function") {
                     onClickCB();
                 }
             });
