@@ -43,7 +43,7 @@ define(function (require, exports, module) {
             var fr = new FileReader();
             fr.onload = function (event) {
                 var content = event.target.result;
-                resolve({filePath: file.name, fileContent: content});
+                resolve({fileName: file.name, fileContent: content});
             };
             fr.onerror = function (event) {
                 reject(event);

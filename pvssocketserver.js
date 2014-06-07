@@ -457,12 +457,13 @@ function run() {
                 });
             },
             "setMainFile": function (token, socket, socketid) {
-                changeProjectSetting(token.projectName, "mainPVSFile", token.fileName, function (res) {
-                    res.id = token.id;
-                    res.socketId = socketid;
-                    res.serverSent = new Date().getTime();
-                    processCallback(res, socket);
-                });
+                changeProjectSetting(token.projectName, "mainPVSFile", token.fileName)
+                    .then(function (res) {
+                        res.id = token.id;
+                        res.socketId = socketid;
+                        res.serverSent = new Date().getTime();
+                        processCallback(res, socket);
+                    });
             },
             "listProjects": function (token, socket, socketid) {
                 var result = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};

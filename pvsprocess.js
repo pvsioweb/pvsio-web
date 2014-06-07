@@ -39,6 +39,7 @@ module.exports = function () {
         processReady                        = false,
         pvsio,
         workspaceDir                        = __dirname + "/public/";
+    var _silentMode = false; // used to turn off log messages when restarting pvsio
 	/**
 	 * get or set the workspace dir. this is the base directory of the pvs source code
 	 * @param {String} dir
@@ -131,7 +132,7 @@ module.exports = function () {
 		function onProcessExited(code) {
 			processReady = false;
 			var msg;
-            if(this.silentMode) {
+            if (_silentMode) {
                 msg = "";
             } else {
                 if (code) {
@@ -139,7 +140,7 @@ module.exports = function () {
                 } else { msg = "pvsio process exited cleanly.\n" + output.join(""); }
                 logger.info(msg);
             }
-            this.silentMode = false;
+            _silentMode = false;
 			callback({type: "processExited", data: msg, code: code});
 		}
 		
@@ -147,7 +148,8 @@ module.exports = function () {
 			onDataReceived: onDataReceived,
 			onProcessExited: onProcessExited});
 		
-		logger.info("PVSio process started with theory " + filename);
+		logger.info("\n-------------------------------------\nPVSio process started with theory "
+                    + filename + "\n-------------------------------------");
         logger.info("Process context is " + o.workspaceDir());
 		return o;
 	};
@@ -169,7 +171,7 @@ module.exports = function () {
      * @param {string} signal The signal to send to the kill process. Default is 'SIGTERM'
 	 */
 	o.close = function (signal, silentMode) {
-        this.silentMode = silentMode;
+        _silentMode = silentMode;
 		signal = signal || 'SIGTERM';
 		pvs.kill(signal);
 		return o;

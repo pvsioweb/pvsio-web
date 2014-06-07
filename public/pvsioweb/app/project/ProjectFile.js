@@ -17,6 +17,7 @@ define(function (require, exports, module) {
      * @param {string} content the content of the file
 	 * @this ProjectFile
 	 */
+    //FIXME: rename this module into something like pvsiowebFile (projectFile seems to suggest that it's a file specifying a project, rather than a file of a project
     function ProjectFile(path, content) {
         eventDispatcher(this);
         var pf = this;

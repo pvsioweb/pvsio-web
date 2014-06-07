@@ -201,7 +201,6 @@ define(function (require, exports, module) {
             nodes.classed("selected", function (d) {
                 if (d.path === path) {
                     selectedData = d;
-                    
                     return true;
                 } else {
                     return false;
@@ -209,7 +208,7 @@ define(function (require, exports, module) {
             });
             //fire selected item changed event
             fst.fire({type: "SelectedItemChanged", data: selectedData});
-            
+
             setTimeout(function () {
                 d3.select(el).node().scrollTop = selectedData.y;
             }, duration);
@@ -248,6 +247,16 @@ define(function (require, exports, module) {
                 fst.render(toRemove.parent);
             }
         }
+    };
+    
+    TreeList.prototype.nodeExists = function (nodePath) {
+        var nodes = d3.select(el).selectAll(".node .label").filter(function (d) {
+            return d.path === nodePath;
+        });
+        if (!nodes.node()) {
+            return false;
+        }
+        return true;
     };
     
     TreeList.prototype.createNodeEditor = function (node, onEnter, onCancel) {
@@ -300,7 +309,7 @@ define(function (require, exports, module) {
             }
         };
     };
-    
+                
     TreeList.prototype.renameItem = function (item, newName) {
         // FIXME: it's note safe to use replace because the string to be replaced could be (part of) the name of subdirectories listed in the path
         item.path = item.path.replace(item.name, newName);

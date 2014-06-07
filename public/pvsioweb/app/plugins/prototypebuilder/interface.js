@@ -15,6 +15,7 @@ define(function (require, exports, module) {
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
         Prompt  = require("pvsioweb/forms/displayPrompt"),
         Notification = require("pvsioweb/forms/displayNotification"),
+        ProjectFile = require("project/ProjectFile"),
         fs = require("util/fileHandler");
 	
     var template = require("text!pvsioweb/forms/maincontent.handlebars");
@@ -47,7 +48,7 @@ define(function (require, exports, module) {
         var pvsioStatus = d3.select("#lblPVSioStatus");
         pvsioStatus.select("span").remove();
         if (!err) {
-            var msg = ("pvsio process ready!");
+            var msg = "PVSio process ready!";
             Logger.log(msg);
             pvsioStatus.append("span").attr("class", "glyphicon glyphicon-ok");
         } else {
@@ -221,7 +222,17 @@ define(function (require, exports, module) {
                 });
             } else { typecheck(pvsFile); }
 		});
-	
+
+        function reloadPVSio() {
+            //compilation is emulated by restarting the pvsioweb process on the server
+            var project = projectManager.project(), ws = WSManager.getWebSocket();
+            if (project && project.mainPVSFile()) {
+                ws.lastState("init(0)");
+                ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()},
+                              pvsProcessReady);
+            }
+        }
+        
 		d3.select("#btnSetMainFile").on("click", function () {
 			var pvsFile = projectManager.getSelectedFile(), project = projectManager.project();
 			if (pvsFile) {
@@ -229,8 +240,11 @@ define(function (require, exports, module) {
 				ws.send({type: "setMainFile", projectName: project.name(), fileName: pvsFile.path()}, function (err) {
 					//if there was no error update the main file else alert user
                     if (!err) {
-                        Logger.log("main file " + pvsFile.path() + " set successfully!");
+                        // set main file
                         project.mainPVSFile(pvsFile);
+                        // reload pvsio
+                        reloadPVSio();
+                        Logger.log("main file is now " + pvsFile.path());
                     } else {
                         Logger.log(err);
                     }
@@ -251,7 +265,7 @@ define(function (require, exports, module) {
                 });
 			}
 		});
-	
+
 		d3.select("#btnSaveAll").on("click", function () {
 			var project = projectManager.project();
 			if (project) {
@@ -276,27 +290,30 @@ define(function (require, exports, module) {
                     Promise.all(promises)
                         .then(function (contents) {
                             contents.forEach(function (f) {
-                                ///FIXME make sure we handle any errors e.g. the filePath might already exist?
-                                projectManager.project().addProjectFile(f.filePath, f.fileContent);
-                                Logger.log("file added to project " + f.filePath);
+                                var selectedFilePath = projectManager.getSelectedItem();
+                                // handle the special case where the project is empty -- the project home is the selected file
+                                var pathPrefix = (selectedFilePath && selectedFilePath.lastIndexOf("/") > 0) ?
+                                                    selectedFilePath.substr(0, selectedFilePath.lastIndexOf("/"))
+                                                    : projectManager.project().name();
+                                var path = pathPrefix + "/" + f.fileName;
+                                var pf = new ProjectFile(path, f.fileContent);
+                                if (!projectManager.fileExists(pf)) {
+                                    projectManager.saveFiles([pf], function (err) {
+                                        if (!err) {
+                                            projectManager.project().addProjectFile(pf.path(), f.fileContent);
+                                            projectManager.selectFile(pf);
+                                            Logger.log(pf.path() + " added to project successfully!");
+                                        } else { Logger.log(err); }
+                                    });
+                                } else {
+                                    alert("file " + pf.path() + " not imported (file already exists in project)");
+                                }
                             });
-                        }, function (err) {
-                            Logger.log("error reading files " + err);
-                        });
+                        }, function (err) { Logger.log("error reading files " + err); });
                 });
         });
         
 		d3.select("#btnCompile").on("click", function () {
-			function compile() {
-                //compilation is emulated by restarting the pvsioweb process on the server
-                var project = projectManager.project(), ws = WSManager.getWebSocket();
-                if (project && project.mainPVSFile()) {
-                    ws.lastState("init(0)");
-                    ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()},
-                                  pvsProcessReady);
-                }
-            }
-
             var pvsFile = projectManager.getSelectedFile();
 			if (!pvsFile || pvsFile.dirty()) {
                 // prompt a message that the file has not been saved yet
@@ -308,7 +325,7 @@ define(function (require, exports, module) {
                 }).on("ok", function (e, view) {
                     view.remove();
                 });
-            } else { compile(); }
+            } else { reloadPVSio(); }
 		});
 	}
 	
