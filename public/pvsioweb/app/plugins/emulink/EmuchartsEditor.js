@@ -655,8 +655,8 @@ define(function (require, exports, module) {
         var dragEnd = function (node) {
             if (editor_mode === MODE.ADD_TRANSITION()) {
                 if (mousedrag.node && mouseover.node
-                        && (d3.mouse(this)[0] > sensitivity.x 
-                            || d3.mouse(this)[1] > sensitivity.y)) {
+                        && (Math.abs(d3.mouse(this)[0]) > sensitivity.x
+                            || Math.abs(d3.mouse(this)[1]) > sensitivity.y)) {
                     _this.fire({
                         type: "emuCharts_addTransition",
                         source: mousedrag.node,
