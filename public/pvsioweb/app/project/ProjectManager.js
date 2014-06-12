@@ -514,6 +514,7 @@ define(function (require, exports, module) {
      * selects the file (of type projectFile) specified as argument
      */
     ProjectManager.prototype.selectFile = function (pf) {
+        // select item in filetree
         pvsFilesListView.selectItem(pf.path());
     };
     
@@ -582,8 +583,8 @@ define(function (require, exports, module) {
 	 * Creates a new file in the current project.
      * @memberof ProjectManager
      */
-	ProjectManager.prototype.createProjectFile = function (path, content) {
-        var file = new ProjectFile(path, content);
+	ProjectManager.prototype.createProjectFile = function (fileName, fileContent) {
+        var file = new ProjectFile(this.project().name() + "/" + fileName, fileContent);
         return file;
     };
     

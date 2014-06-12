@@ -293,7 +293,7 @@ define(function (require, exports, module) {
     };
         
     EmuchartsPVSPrinter.prototype.print_descriptor = function (emuchart) {
-        var ans = "% --------------------------------------------------------------" +
+        var ans = "% ---------------------------------------------------------------" +
                     "\n%  Theory: " + emuchart.name;
         if (emuchart.author) {
             ans += "\n%  Author: " + emuchart.author.name +

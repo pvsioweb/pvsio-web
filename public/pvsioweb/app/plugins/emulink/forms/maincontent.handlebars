@@ -79,8 +79,8 @@
 					<li><a href='#!Open chart' id="btn_menuOpenChart"><span>Open...</span></a></li>
 					<li><a href='#!Close chart' id="btn_menuCloseChart"><span>Close</span></a></li>
                     <li class="divider"></li>
-                    <li><a href='#!Save chart' id="btn_saveChart"><span>Save</span></a></li>
-                    <li><a href='#!Save as...' id="btn_saveChartAs"><span>Save as...</span></a></li>
+                    <li><a href='#!Save chart' id="btn_menuSaveChart"><span>Save</span></a></li>
+<!--                    <li><a href='#!Save as...' id="btn_saveChartAs"><span>Save as...</span></a></li>-->
 <!--                    <li><a href='#!' id="btn_saveAllCharts"><span>Save all</span></a></li>-->
                     <li class="divider"></li>
                     <li><a href='#!Quit Emulink' id="btn_menuQuitEmulink"><span>Quit</span></a></li>
@@ -113,13 +113,25 @@
                     <li class="divider"></li>
 				</ul>
 			</li>
+            <li class='active has-sub'><a href='#!'><span>Code Generators</span></a>
+				<ul>
+                    <li class="divider"></li>
+                    <li><a href='#!Generate PVS Theory' id="btn_menuPVSPrinter"><span>PVS Specification</span></a></li>
+					<li><a href='#!Generate Lustre Node' id="btn_menuLustrePrinter"><span>Lustre Specification</span></a></li>
+                    <li class="divider"></li>
+                    <li><a href='#!Generate C Code' id="btn_menuCPrinter"><span>C Code</span></a></li>
+                    <li><a href='#!Generate C++ Code' id="btn_menuCppPrinter"><span>C++ Code</span></a></li>
+                    <li><a href='#!Generate Java Code' id="btn_menuJavaPrinter"><span>Java Code</span></a></li>
+                    <li class="divider"></li>
+				</ul>
+			</li>
 		    <li class='active has-sub'><a href='#!'><span>Zoom</span></a>
 				<ul>
                     <li class="divider"></li>
 					<li><a href='#!Zoom-in' id ="btn_menuZoomIn"><span>Zoom-in</span></a></li>
 					<li><a href='#!Zoom-out' id ="btn_menuZoomOut"><span>Zoom-out</span></a></li>
 					<li><a href='#!Reset zoom' id ="btn_menuZoomReset"><span>Reset zoom</span></a></li>
-                    <li class="divider"></li>
+                    
 				</ul>
 		    </li>
 		    <li class='active has-sub'><a href='#!'><span>Help</span></a>

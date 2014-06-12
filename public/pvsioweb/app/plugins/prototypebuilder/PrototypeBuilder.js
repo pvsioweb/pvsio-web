@@ -29,6 +29,11 @@ define(function (require, exports, module) {
         pvsioWebClient = PVSioWebClient.getInstance();
 		currentProject = new Project("");
         projectManager = new ProjectManager(currentProject);
+        projectManager.addListener("SelectedFileChanged", function (event) {
+            if (editor) {
+                editor.refresh();
+            }
+        });
 	}
 	
     /////These are the api methods that the prototype builder plugin exposes

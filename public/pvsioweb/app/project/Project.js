@@ -206,8 +206,9 @@ define(function (require, exports, module) {
         var deletedFile = _projectFiles.splice(fileIndex, 1);
         if (deletedFile && deletedFile[0]) {
             var f = deletedFile[0];
-            this.fire({event: f.extension() === "pvs" ? "SpecFileDeleted" : "ProjectFileDeleted",
-                       file: f});
+            if (f.extension() === ".pvs") {
+                this.fire({ type: "SpecFileRemoved", file: f });
+            } else { this.fire({ type: "ProjectFileRemoved", file: f }); }
             f.clearListeners();
             f = null;
         }
@@ -287,6 +288,16 @@ define(function (require, exports, module) {
 			file = [file];
 		}
 		var _thisProject = this;
+        
+        // here we make sure that the file names are relative to this project
+        file.forEach(function (file) {
+            var p = file.path();
+            var prefix = _thisProject.name() + "/";
+            if (p.indexOf(prefix) !== 0) {
+                file.path(prefix + p);
+            }
+        });
+        
 		saveFiles(file, this)
             .then(function () {
                 if (cb && typeof cb === "function") {

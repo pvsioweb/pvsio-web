@@ -272,6 +272,8 @@ define(function (require, exports, module) {
                 fst.render(toRemove.parent);
             }
         }
+        // clear selected data
+        selectedData = null;
     };
     
     TreeList.prototype.nodeExists = function (nodePath) {

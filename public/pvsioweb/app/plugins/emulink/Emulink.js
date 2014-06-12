@@ -688,14 +688,14 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuSaveChart").on("click", function () {
             if (!emuchartsManager.empty_chart()) {
-                var fileName = "emulink.emdl";
+                var fileName = "emucharts.emdl";
                 var content = JSON.stringify({
                     descriptor: {
                         file_type: "emdl",
                         version: "1.0",
-                        description: "emuchart model",
-                        chart_name: "emuchart",
-                        pvs_file: "emuchart.pvs"
+                        description: "emucharts model",
+                        chart_name: "emucharts",
+                        pvs_file: "emucharts_th.pvs"
                     },
                     chart: {
                         states: emuchartsManager.getStates(),
@@ -707,7 +707,44 @@ define(function (require, exports, module) {
                 projectManager.createFile(fileName, content);
             }
         });
-        
+        d3.select("#btn_menuPVSPrinter").on("click", function () {
+            var emucharts = {
+                name: "emucharts_th",
+                author: {
+                    name: "Paolo Masci",
+                    affiliation: "Queen Mary University of London, United Kingdom",
+                    contact: "http://www.eecs.qmul.ac.uk/~masci/"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: emuchartsManager.getVariables(),
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions()
+            };
+            var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".pvs",
+                                                                 emuchartsPVSPrinter.print(emucharts));
+            if (projectManager.fileExists(emuchartsFile)) {
+                // remove file from project
+                projectManager.project().removeFile(emuchartsFile);
+            }
+            // add file to project
+            projectManager.saveFiles([emuchartsFile], function (err) {
+                var notification = "";
+                if (!err) {
+                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
+                    projectManager.selectFile(emuchartsFile);
+                    notification = "PVS Printer output is file " + emuchartsFile.path();
+                    Logger.log(notification);
+                } else {
+                    notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
+                    alert(notification);
+                    Logger.log(notification);
+                }
+            });
+            // select file
+            projectManager.selectFile(emuchartsFile);
+            var x = 0;
+        });
 	};
     
     function addProjectManagerListeners() {

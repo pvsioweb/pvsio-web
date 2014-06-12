@@ -199,20 +199,15 @@ define(function (require, exports, module) {
                         btn.html("Typecheck").attr("disabled", null);
                         var msg = res.stdout;
                         if (err) {
-                            Logger.log(res);
-                            Logger.log(err);
                             msg = msg.substring(msg.indexOf("Writing output to file"), msg.length);
                             Notification.create({
                                 header: "Typecheck error, please check the PVS output file for details.",
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         } else {
-                            var notification = pvsFile + " typechecked successfully!";
-                            d3.select("#editor-notification-area").insert("p", "p").html(notification);
-                            Logger.log(res);
                             msg = msg.substring(msg.indexOf("Proof summary"), msg.length);
                             Notification.create({
-                                header: "Theories in " + projectManager.project().name() + " typechecked successfully!",
+                                header: "Typecheck result",
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         }
