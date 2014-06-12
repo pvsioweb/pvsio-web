@@ -226,3 +226,7 @@ ul#context-menu li {
  font: 20px/24px cursive;    
  display:none;
 }
+
+#stateMachineMenu .tobeimplemented {
+  color: gray;
+}
