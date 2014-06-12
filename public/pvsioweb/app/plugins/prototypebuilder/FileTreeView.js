@@ -84,9 +84,8 @@ define(function (require, exports, module) {
                 //send request to remove file using the wsmanager
                 ws.send({type: "deleteFile", filePath: path}, function (err) {
                     if (!err) {
+                        treeList.selectNext(path);
                         treeList.removeItem(path);
-                        var parent = path.substring(0, path.lastIndexOf("/"));
-                        treeList.selectItem(parent);
                     } else {
                         //show error
                         console.log(err);
@@ -98,8 +97,8 @@ define(function (require, exports, module) {
 
         //if there is a project add listener to changes to files etc
         if (project) {
+            var _this = this;
             project.addListener("SpecDirtyFlagChanged", function (event) {
-                console.log(event);
                 var file = event.file;
                 //set file as dirty
                 treeList.markDirty(file.path(), file.dirty());

@@ -215,6 +215,31 @@ define(function (require, exports, module) {
         }
     };
     
+    /** 
+     * given a selected node, this function selects the next in the hierarchy
+     * FIXME: implement this function! now we just select the parent node
+     */
+    TreeList.prototype.selectNext = function (nodePath, index) {
+        var fst = this;
+        var nodes = d3.select(el).selectAll(".node");
+        var parent = nodePath.substring(0, nodePath.lastIndexOf("/"));
+        var path = parent;
+        nodes.classed("selected", function (d) {
+            if (d.path === path) {
+                selectedData = d;
+                return true;
+            } else {
+                return false;
+            }
+        });
+        //fire selected item changed event
+        fst.fire({type: "SelectedItemChanged", data: selectedData});
+
+        setTimeout(function () {
+            d3.select(el).node().scrollTop = selectedData.y;
+        }, duration);
+    };
+
     TreeList.prototype.markDirty = function (path, sign) {
         d3.select(el).selectAll(".node")
             .filter(function (d) {

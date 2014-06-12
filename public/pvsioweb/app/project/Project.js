@@ -174,6 +174,7 @@ define(function (require, exports, module) {
 	 */
     ///FIXME this function should throw an error if the filepath already exists?
     ///FIXME this function should take a projectFile as argument!
+    ///FIXME why are we changing the event type from DirtyFlagChanged to SpecDirtyFlagChanged?
     Project.prototype.addProjectFile = function (filePath, fileContent, encoding, suppressEvent) {
         encoding = encoding || "utf8";
         var p  = this, newFile = new ProjectFile(filePath)

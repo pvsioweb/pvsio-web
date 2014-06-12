@@ -69,8 +69,10 @@ define(function (require, exports, module) {
 			//update status of file save button based on the selected file
 			if (pvsFile.dirty()) {
 				d3.select("#btnSaveFile").attr("disabled", null);
+                d3.select("#btnSaveAll").attr("disabled", null);
 			} else {
 				d3.select("#btnSaveFile").attr("disabled", true);
+                d3.select("#btnSaveAll").attr("disabled", true);
 			}
 		}
 	}
@@ -96,6 +98,10 @@ define(function (require, exports, module) {
                     }
                 });
             }
+            project.addListener("SpecDirtyFlagChanged", function (event) {
+                d3.select("#btnSaveFile").attr("disabled", null);
+                d3.select("#btnSaveAll").attr("disabled", null);
+            });
             switchToBuilderView();
         }).addListener("SelectedFileChanged", function (event) {
             var p = projectManager.project(), file = p.getProjectFile(event.selectedItem.path);
@@ -144,7 +150,7 @@ define(function (require, exports, module) {
             }
         });
         
-		d3.select("#saveProject").on("click", function () {
+		d3.select("#btnSaveProject").on("click", function () {
 			projectManager.saveProject();
 		});
 	
@@ -153,7 +159,9 @@ define(function (require, exports, module) {
                 projectManager.selectProject(function (err, projectName) {
                     if (!err) {
                         projectManager.openProject(projectName, function (project) {
-                            Logger.log("Project " + project.name() + " opened successfully!");
+                            var notification = "Project " + project.name() + " opened successfully!";
+                            d3.select("#project-notification-area").insert("p", "p").html(notification);
+                            Logger.log(notification);
                         });
                     }
                 });
@@ -195,10 +203,12 @@ define(function (require, exports, module) {
                             Logger.log(err);
                             msg = msg.substring(msg.indexOf("Writing output to file"), msg.length);
                             Notification.create({
-                                header: "Typecheck error, please check the output file for details.",
+                                header: "Typecheck error, please check the PVS output file for details.",
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         } else {
+                            var notification = pvsFile + " typechecked successfully!";
+                            d3.select("#editor-notification-area").insert("p", "p").html(notification);
                             Logger.log(res);
                             msg = msg.substring(msg.indexOf("Proof summary"), msg.length);
                             Notification.create({
@@ -211,16 +221,9 @@ define(function (require, exports, module) {
             
 			var pvsFile = projectManager.getSelectedFile();
 			if (!pvsFile || pvsFile.dirty()) {
-                //ask user to give name to script
-                var msg = "File " + pvsFile.name() + " has unsaved changes."
-                            + "\nPlease save file before typechecking.";
-                Notification.create({
-                    header: "Typechecking unsaved files",
-                    notification: msg.split("\n")
-                }).on("ok", function (e, view) {
-                    view.remove();
-                });
-            } else { typecheck(pvsFile); }
+                document.getElementById("btnSaveFile").click();
+            }
+            typecheck(pvsFile);
 		});
 
         function reloadPVSio() {
@@ -232,6 +235,14 @@ define(function (require, exports, module) {
                               pvsProcessReady);
             }
         }
+
+        // FIXME: we need a way to detect errors
+        function compile() {
+            reloadPVSio();
+            var project = projectManager.project();
+            var notification = "Project " + project.name() + " compiled successfully!";
+            d3.select("#editor-notification-area").insert("p", "p").html(notification);
+        }
         
 		d3.select("#btnSetMainFile").on("click", function () {
 			var pvsFile = projectManager.getSelectedFile(), project = projectManager.project();
@@ -242,9 +253,13 @@ define(function (require, exports, module) {
                     if (!err) {
                         // set main file
                         project.mainPVSFile(pvsFile);
+                        // disable button
+                        d3.select("#btnSetMainFile").attr("disabled", true);
+                        var notification = pvsFile.path() + " is now the Main file";
+                        d3.select("#editor-notification-area").insert("p", "p").html(notification);
+                        Logger.log(notification);
                         // reload pvsio
                         reloadPVSio();
-                        Logger.log("main file is now " + pvsFile.path());
                     } else {
                         Logger.log(err);
                     }
@@ -256,11 +271,18 @@ define(function (require, exports, module) {
 			var project = projectManager.project();
 			if (project) {
                 var pvsFile = projectManager.getSelectedFile();
+                var notification = "";
                 projectManager.saveFiles([pvsFile], function (err) {
-                    if (err) {
-                        Logger.log(err);
+                    if (!err) {
+                        d3.select("#btnSaveFile").attr("disabled", true);
+                        d3.select("#btnSaveAll").attr("disabled", true);
+                        notification = pvsFile + " saved successfully!";
+                        d3.select("#editor-notification-area").insert("p", "p").html(notification);
+                        Logger.log(notification);
                     } else {
-                        Logger.log(pvsFile.path() + " saved successfully!");
+                        notification = err;
+                        d3.select("#editor-notification-area").insert("p", "p").html(notification);
+                        Logger.log(err);
                     }
                 });
 			}
@@ -270,11 +292,17 @@ define(function (require, exports, module) {
 			var project = projectManager.project();
 			if (project) {
                 var pvsFiles = project.pvsFilesList();
+                var notification = "";
                 projectManager.saveFiles(pvsFiles, function (err) {
-                    if (err) {
-                        Logger.log(err);
+                    if (!err) {
+                        d3.select("#btnSaveAll").attr("disabled", true);
+                        d3.select("#btnSaveFile").attr("disabled", true);
+                        notification = pvsFiles + " saved successfully!";
+                        d3.select("#editor-notification-area").insert("p", "p").html(notification);
+                        Logger.log(notification);
                     } else {
-                        Logger.log(pvsFiles + " saved successfully!");
+                        notification = "Error while saving " + pvsFiles + " (" + err + ")";
+                        Logger.log(notification);
                     }
                 });
 			}
@@ -289,26 +317,40 @@ define(function (require, exports, module) {
                     }
                     Promise.all(promises)
                         .then(function (contents) {
+                            var nImported = 0;
+                            var nSkipped = 0;
+                            var notification = "";
                             contents.forEach(function (f) {
-                                var selectedFilePath = projectManager.getSelectedItem();
+                                var selectedFile = projectManager.getSelectedFile();
+                                var selectedItem = projectManager.getSelectedItem();
                                 // handle the special case where the project is empty -- the project home is the selected file
-                                var pathPrefix = (selectedFilePath && selectedFilePath.lastIndexOf("/") > 0) ?
-                                                    selectedFilePath.substr(0, selectedFilePath.lastIndexOf("/"))
-                                                    : projectManager.project().name();
+                                var pathPrefix = (selectedFile) ?
+                                                    selectedFile.path().substr(0, selectedFile.path().lastIndexOf("/"))
+                                                    : selectedItem;
                                 var path = pathPrefix + "/" + f.fileName;
                                 var pf = new ProjectFile(path, f.fileContent);
                                 if (!projectManager.fileExists(pf)) {
+                                    nImported++;
                                     projectManager.saveFiles([pf], function (err) {
                                         if (!err) {
                                             projectManager.project().addProjectFile(pf.path(), f.fileContent);
                                             projectManager.selectFile(pf);
-                                            Logger.log(pf.path() + " added to project successfully!");
-                                        } else { Logger.log(err); }
+                                            notification = pf.path() + " added to project successfully!";
+                                            Logger.log(notification);
+                                        } else {
+                                            notification = "file " + pf.path() + " not imported (" + err + ")";
+                                            alert("file " + pf.path() + " not imported (file already exists in project)");
+                                            Logger.log(notification);
+                                        }
                                     });
                                 } else {
+                                    notification = "file " + pf.path() + " not imported (file already exists in project)";
+                                    nSkipped++;
                                     alert("file " + pf.path() + " not imported (file already exists in project)");
                                 }
                             });
+                            notification = nImported + " files imported successfully, " + nSkipped + " skipped.";
+                            d3.select("#editor-notification-area").insert("p", "p").html(notification);
                         }, function (err) { Logger.log("error reading files " + err); });
                 });
         });
@@ -316,16 +358,9 @@ define(function (require, exports, module) {
 		d3.select("#btnCompile").on("click", function () {
             var pvsFile = projectManager.getSelectedFile();
 			if (!pvsFile || pvsFile.dirty()) {
-                // prompt a message that the file has not been saved yet
-                var msg = "File " + pvsFile.name() + " has unsaved changes."
-                            + "\nPlease save file before compiling.";
-                Notification.create({
-                    header: "Compiling unsaved file",
-                    notification: msg.split("\n")
-                }).on("ok", function (e, view) {
-                    view.remove();
-                });
-            } else { reloadPVSio(); }
+                document.getElementById("btnSaveFile").click();
+            }
+            compile();
 		});
 	}
 	

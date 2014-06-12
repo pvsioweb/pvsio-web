@@ -92,8 +92,7 @@ div.downloader{
 }
 #header{
 	height: 50px;
-	padding: 15px;
-	padding-left: 0px;
+	padding: 15px 0 0 0;
 }
 .center{
 	margin-right: auto;
@@ -170,6 +169,23 @@ fileListItem.hide {
     width: 1130px;
     height: 400px;
    	position:relative;
+}
+#editor-notification-area {
+    float: right;
+    width: 350px;
+    height: 35px;
+    border: grey solid;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 10px;
+    padding: 6px 0 0 10px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
+#editor-notification-area p {
+    text-align: center;
 }
 
 #pvsFiles {
@@ -368,6 +384,35 @@ div.detailsForm select, div.detailsForm textarea{
 	margin-top: 20px;
 }
 
+#header .project-notifications {
+    float: right;
+    width: 500px;
+    margin: 0 0 0 22px;
+}
+
+#header .project-notifications input {
+    margin-top: 4px;
+    width: 160px;
+    text-align: center;
+}
+
+#project-notification-area {
+    float: right;
+    width: 330px;
+    height: 34px;
+    font-size: 10px;
+    padding: 6px 0 0 10px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    white-space: nowrap;
+    border: grey solid;
+    border-radius: 5px;
+}
+
+#project-notification-area p {
+    text-align: center;
+}
+
 .tab-content {
 	margin-top: 20px;
 }
@@ -378,7 +423,7 @@ div.detailsForm select, div.detailsForm textarea{
 }
 
  .overlay .panel {
-    width: 500px;
+    width: 540px;
 }
 
 .panel-footer {

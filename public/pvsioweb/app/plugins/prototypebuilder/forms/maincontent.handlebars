@@ -2,7 +2,7 @@
 		<div id="header" class="btn-group">
 			<a class="btn btn-default" id="newProject"><span class="glyphicon glyphicon-file"></span> New Project</a>
 			<a class="btn btn-default" id="openProject"><span class="glyphicon glyphicon-folder-open"></span> Open Project</a>
-			<a class="btn btn-default" id="saveProject"><span class="glyphicon glyphicon-hdd"></span> Save Project</a>
+			<a class="btn btn-default" id="btnSaveProject"><span class="glyphicon glyphicon-hdd"></span> Save Project</a>
 			<a class="btn btn-default" id="btnLoadPicture"><span class="glyphicon glyphicon-picture"></span> Change Picture</a>
 			<input type="file" class="hide" id="btnSelectPicture" name="selectPicture" accept="image/*">
             
@@ -20,10 +20,15 @@
                         {{/each}}
                     </ul>
             </div>
-			<span>
-                <label for="txtxProjectName">Project: </label>
-                <input type="text" placeholder="Untitled Project" id="txtProjectName" value="" class="input-Med" readonly="readonly">
-            </span>
+			<div class="project-notifications">
+                <input type="text"
+                       placeholder="Untitled Project"
+                       id="txtProjectName"
+                       value=""
+                       readonly="readonly"
+                       disabled="true">
+                <div id="project-notification-area"></div>
+            </div>
 		</div>
 		<div id="body">
 			<div id="imageDiv">

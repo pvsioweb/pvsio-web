@@ -341,14 +341,22 @@ define(function (require, exports, module) {
         }
         
         //create promises for the pvs source files, if any is specified in data
-        if (data.pvsSpec) {
+        if (data.pvsSpec && data.pvsSpec.length > 0) {
             for (i = 0; i < data.pvsSpec.length; i++) {
                 if (data.pvsSpec[i].name !== undefined && data.pvsSpec[i].content !== undefined) {
                     promises.push(data.pvsSpec[i].content);
                 } else {
+                    // FIXME: why are we trying to read pvsSpec if name is not specified?
                     promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
                 }
             }
+        } else {
+            // create one file with the default content
+            var emptySpec = {
+                filePath: defaultTheoryName + ".pvs",
+                fileContent: defaultTheoryName + emptyTheoryContent + defaultTheoryName
+            };
+            promises.push(emptySpec);
         }
 
         var previousProject = project || pm.project(), image;
@@ -387,7 +395,10 @@ define(function (require, exports, module) {
                             if (cb && typeof cb === "function") { cb(err, project); }
                         }
                     } else {
-                        alert(err.toString());
+                        if (err.code === "EEXIST") {
+                            alert("Please choose a different name -- project "
+                                        + data.projectName + " already exists.");
+                        }
                         //invoke callback
                         if (cb && typeof cb === "function") { cb(err, project); }
                     }
@@ -435,12 +446,14 @@ define(function (require, exports, module) {
             // save files
             project.save(function (err, p) {
                 if (!err) {
-                    Logger.log("project saved");
                     project = p;
                     //repaint the list and sourcecode toolbar
                     project.pvsFilesList().forEach(function (f) { f.dirty(false); });
                     project._dirty(false);
                     pm.fire({type: "ProjectSaved", project: project});
+                    var notification = "Project " + project.name() + " saved successfully!";
+                    d3.select("#project-notification-area").insert("p", "p").html(notification);
+                    Logger.log(notification);
                     if (typeof cb === "function") { cb(); }
                 }
             });
@@ -459,6 +472,9 @@ define(function (require, exports, module) {
                         projectNameChanged({current: name});
                         pvsFilesListView.renameProject(name);
                         pm.fire({type: "ProjectSaved", project: project});
+                        var notification = "Project " + project.name() + " saved successfully!";
+                        d3.select("#project-notification-area").insert("p", "p").html(notification);
+                        Logger.log(notification);
                         if (typeof cb === "function") { cb(); }
                     } else {
                         if (err.code === "EEXIST") {
