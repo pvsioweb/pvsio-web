@@ -208,10 +208,20 @@ define(function (require, exports, module) {
             transitionsSpec.forEach(function (signature) {
                 // generate permission
                 var tmp = "  per_" + signature.substr(0, signature.indexOf("(")) +
-                            "(st: State): bool = true\n";
-                // generate transition
-                tmp += "  " + signature;
+                            "(st: State): bool";
                 var cases = transitionsSpec.get(signature);
+                if (cases && cases.length > 0) {
+                    tmp += " = ";
+                    var i = 0;
+                    for (i = 0; i < cases.length; i++) {
+                        tmp += "current_state(st) = " + cases[i].from;
+                        if (i < cases.length - 1) {
+                            tmp += " OR ";
+                        }
+                    }
+                }
+                // generate transition
+                tmp += "\n  " + signature;
                 if (cases && cases.length > 0) {
                     tmp += " =\n   COND";
                     cases.forEach(function (cs) {
