@@ -32,10 +32,12 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_editorModeChanged", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_createState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteTransition", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_deleteInitialTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_renameState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_renameTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_addTransition", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_addInitialTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_stateAdded", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_stateRemoved", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_constantAdded", function (event) { _this.fire(event); });
@@ -43,6 +45,9 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_transitionAdded", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_transitionRemoved", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_initialTransitionAdded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_initialTransitionRemoved", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_stateRenamed", function (event) { _this.fire(event); });
     };
     
@@ -118,6 +123,14 @@ define(function (require, exports, module) {
     };
 
     /**
+	 * Returns a fresh name for initial transitions
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getFreshInitialTransitionName = function () {
+        return _selectedEditor.getFreshInitialTransitionName();
+    };
+
+    /**
 	 * Interface function for changing mode in the currently selected editor
 	 * @memberof EmuchartsManager
 	 */
@@ -149,12 +162,28 @@ define(function (require, exports, module) {
         return _selectedEditor.add_transition(transitionName, from, to);
     };
     
-	/**
+    /**
+	 * Interface function for adding new initial transitions to the diagram
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.add_initial_transition = function (transitionName, to) {
+        return _selectedEditor.add_initial_transition(transitionName, to);
+    };
+
+    /**
 	 * Interface function for deleting transitions
 	 * @memberof EmuchartsManager
 	 */
     EmuchartsManager.prototype.delete_transition = function (transitionID) {
         return _selectedEditor.delete_transition(transitionID);
+    };
+
+    /**
+	 * Interface function for deleting initial transitions
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.delete_initial_transition = function (transitionID) {
+        return _selectedEditor.delete_initial_transition(transitionID);
     };
 
     /**

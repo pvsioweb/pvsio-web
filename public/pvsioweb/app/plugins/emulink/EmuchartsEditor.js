@@ -61,6 +61,9 @@ define(function (require, exports, module) {
         this.emucharts.addListener("emuCharts_transitionAdded", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_transitionRemoved", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_initialTransitionAdded", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_initialTransitionRemoved", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_stateRenamed", function (event) { _this.fire(event); });
         this.dragged = false;
         this.SVGdragged = false;
@@ -153,6 +156,24 @@ define(function (require, exports, module) {
             .attr("d", "M4,0 L1,-3 L10,0 L1,3 L4,0")
             .attr("fill", "black");
         
+        var bubble = d3.select("#ContainerStateMachine").select("svg").select("defs")
+            // bubble for initial state
+            .append("svg:marker")
+            .attr("id", "bubble")
+            .attr("viewBox", "-5 -5 10 10")
+            .attr("refX", 6)
+            .attr("markerWidth", 16)
+            .attr("markerHeight", 16)
+            .attr("orient", "auto");
+        bubble.append("svg:circle")
+            .attr("r", 4)
+            .attr("stroke", "black")
+            .attr("fill", "black");
+        bubble.append("svg:circle")
+            .attr("r", 3.6)
+            .attr("stroke", "white")
+            .attr("stroke-width", "1");
+        
         d3.select("#ContainerStateMachine").select("svg").select("defs")
             // arrow for drag line
             .append("svg:marker")
@@ -172,6 +193,7 @@ define(function (require, exports, module) {
             .attr("class", "link dragline hidden")
             .attr("d", "M0,0L0,0");
         
+        d3.select("#ContainerStateMachine").select("svg").append("svg:g").attr("id", "InitialTransitions");
         d3.select("#ContainerStateMachine").select("svg").append("svg:g").attr("id", "Transitions");
         d3.select("#ContainerStateMachine").select("svg").append("svg:g").attr("id", "States");
         
@@ -188,8 +210,41 @@ define(function (require, exports, module) {
                 }
             } else { _this.SVGdragged = false; }
         };
+        var mouseDown = function () {
+            if (editor_mode === MODE.ADD_TRANSITION()) {
+                // this is equivalent to drag start
+                // create an arrow from the selected node to the cursor position
+                var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+                mousedrag.edge = { x: m[0], y: m[1] };
+                drag_line.classed("hidden", false)
+                    .style("marker-end", "url(#drag-arrow)")
+                    .attr("d", "M" + m[0] + "," + m[1] +
+                                "L" + m[0] + "," + m[1]);
+            }
+        };
+        var mouseUp = function () {
+            if (editor_mode === MODE.ADD_TRANSITION()) {
+                // this is equivalent to drag end
+                // remove drag line
+                drag_line.classed("hidden", true).style("marker-end", "");
+                if (mouseover.node && !mousedrag.node) {
+                    // fire event
+                    _this.fire({
+                        type: "emuCharts_addInitialTransition",
+                        source: null,
+                        target: mouseover.node
+                    });
+                }
+                mousedrag.edge = null;
+            }
+            _this.SVGdragged = false;
+        };
         var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
-            if (editor_mode !== MODE.ADD_TRANSITION() && !mousedrag.node &&
+            if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.edge) {
+                var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+                drag_line.attr("d", "M" + mousedrag.edge.x + "," + mousedrag.edge.y +
+                                "L" + m[0] + "," + m[1]);
+            } else if (editor_mode !== MODE.ADD_TRANSITION() && !mousedrag.node &&
                     editor_mode !== MODE.DELETE() && editor_mode !== MODE.RENAME()) {
 //                _this.fire({
 //                    type: "emuCharts_d3ZoomTranslate",
@@ -224,6 +279,8 @@ define(function (require, exports, module) {
         
         d3.select("#ContainerStateMachine svg")
             .on("click", mouseClick)
+            .on("mousedown", mouseDown)
+            .on("mouseup", mouseUp)
             .call(zoom);
 
         // return reference to svg
@@ -340,6 +397,33 @@ define(function (require, exports, module) {
         return transitions;
     }
         
+	/**
+	 * Utility function to refresh rendered initial transitions.
+     * @returns reference to the updated svg elements
+	 * @memberof EmuchartsEditor
+	 */
+    function refreshInitialTransitions(transitions) {
+        var label;
+        // refresh paths and labels
+        transitions.selectAll(".ipath").attr("d", function (edge) {
+            // refresh transition label
+            label = d3.select(this.parentNode).select(".itlabel");
+            label.text(function (edge) {
+                return edge.name + labelToString(edge);
+            });
+            // adjust text position
+            label.attr("x", function (edge) {
+                return edge.target.x - 8;
+            }).attr("y", function (edge) {
+                return edge.target.y - 44;
+            });
+            // redraw self-edge
+            return "M" + (edge.target.x - edge.target.width / 2 - 10) + ',' +
+                    (edge.target.y - edge.target.width / 2 - 32) + "q 16 8 28 28";
+        });
+        return transitions;
+    }
+    
     /**
 	 * Utility function for removing transitions from the SVG
      * @returns reference to the updated svg elements
@@ -376,7 +460,6 @@ define(function (require, exports, module) {
                 .style("stroke", "black")
                 .style("stroke-width", stroke_width_normal)
                 .style("markerUnits", "userSpaceOnUse")
-                .style("marker-start", "url(#start-arrow)")
                 .style("marker-end", "url(#end-arrow)");
 
             // selection path is used to ease selection with the mouse (it's wide)
@@ -442,14 +525,10 @@ define(function (require, exports, module) {
             return refreshTransitions(enteredTransitions);
         };
         var mouseOver = function (edge) {
-            if (editor_mode === MODE.BROWSE() || editor_mode === MODE.RENAME()) {
-                d3.select(this.firstChild).style("stroke-width", stroke_width_highlighted);
-            }
+            d3.select(this.firstChild).style("stroke-width", stroke_width_highlighted);
         };
         var mouseOut = function (edge) {
-            if (editor_mode === MODE.BROWSE() || editor_mode === MODE.RENAME()) {
-                d3.select(this.firstChild).style("stroke-width", stroke_width_normal);
-            }
+            d3.select(this.firstChild).style("stroke-width", stroke_width_normal);
         };
         var mouseClick = function (edge) {
             // update mouse variables
@@ -494,7 +573,106 @@ define(function (require, exports, module) {
         }
     };
     
-	/**
+    /**
+	 * Utility function for drawing initial transitions
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.renderInitialTransitions = function () {
+        var _this = this;
+        var svg = d3.select("#ContainerStateMachine").select("svg");
+        
+        /**
+         * Utility function for drawing transitions
+         * @returns a reference to the entered transitions
+         */
+        var drawInitialTransitions = function (enteredTransitions) {
+            enteredTransitions = enteredTransitions.append("svg:g")
+                .classed("itransition", true)
+                .attr("id", function (edge) { return edge.id; });
+
+            // visiblePath is the actual path visible to the user
+            var visiblePath = enteredTransitions.append("svg:path").classed("ipath", true)
+                .attr("id", function (edge) { return "ipath_" + edge.id; })
+                .attr("fill", "none")
+                .style("stroke", "black")
+                .style("stroke-width", stroke_width_normal)
+                .style("markerUnits", "userSpaceOnUse")
+                .style("marker-start", "url(#bubble)")
+                .style("marker-end", "url(#end-arrow)");
+
+            // selection path is used to ease selection with the mouse (it's wide)
+            var selectionPath = enteredTransitions.append("svg:path").classed("ipath", true)
+                .attr("id", function (edge) {return "iselectionPath_" + edge.id; })
+                .style("opacity", "0")
+                .attr("fill", "none")
+                .style("stroke", "grey")
+                .style("stroke-width", stroke_width_large)
+                .style("markerUnits", "userSpaceOnUse")
+                .style("cursor", "pointer");
+
+            // labels are drawn using both text and textpath
+            // the former is for self-edges, the latter for all other edges
+            var text = enteredTransitions.append("svg:text").classed("itlabel", true)
+                .attr("id", function (d) { return "itlabel_" + d.id; })
+                .style("font", "10px sans-serif")
+                .style("text-rendering", "optimizeLegibility")
+                .style("cursor", "pointer") // change cursor shape
+                .text(function (edge) {
+                    return edge.name + labelToString(edge);
+                });
+
+            return refreshInitialTransitions(enteredTransitions);
+        };
+        var mouseOver = function (edge) {
+            d3.select(this.firstChild).style("stroke-width", stroke_width_highlighted);
+        };
+        var mouseOut = function (edge) {
+            d3.select(this.firstChild).style("stroke-width", stroke_width_normal);
+        };
+        var mouseClick = function (edge) {
+            // update mouse variables
+            mousedown.edge = edge;
+            if (editor_mode === MODE.RENAME()) {
+                _this.fire({
+                    type: "emuCharts_renameInitialTransition",
+                    edge: edge
+                });
+            } else if (editor_mode === MODE.DELETE()) {
+                _this.fire({
+                    type: "emuCharts_deleteInitialTransition",
+                    edge: edge
+                });
+            }
+        };
+        var mouseDoubleClick = function (edge) {
+            if (editor_mode !== MODE.DELETE()) {
+                _this.fire({
+                    type: "emuCharts_renameInitialTransition",
+                    edge: edge
+                });
+            }
+        };
+        
+        
+        if (!this.emucharts || !this.emucharts.getInitialEdges()) { return; }
+        // create svg element, if needed
+        if (svg.empty()) { svg = this.newSVG(); }
+        var edges = this.emucharts.getInitialEdges().values();
+        if (edges) {
+            // create a group of svg elements for transitions, and bind them to data
+            var initial_transitions = svg.select("#InitialTransitions").selectAll(".itransition")
+                                    .data(edges, function (edge) { return edge.id; });
+            var enteredTransitions = drawInitialTransitions(initial_transitions.enter());
+            var exitedTransitions = removeTransitions(initial_transitions.exit());
+            enteredTransitions
+                .on("mouseover", mouseOver)
+                .on("mouseout", mouseOut)
+                .on("click", mouseClick)
+                .on("dblclick", mouseDoubleClick);
+        }
+    };
+    
+    /**
 	 * Utility function to refresh rendered states.
      * @returns reference to the updated svg elements
 	 * @memberof EmuchartsEditor
@@ -646,6 +824,19 @@ define(function (require, exports, module) {
                             return updated;
                         });
                 refreshTransitions(updatedTransitions);
+                var updatedInitialTransitions = d3.select("#ContainerStateMachine")
+                        .select("#InitialTransitions").selectAll(".itransition")
+                        .filter(function (edge) {
+                            var updated = false;
+                            if (edge.target.id === node.id) {
+                                edge.target.x = node.x;
+                                edge.target.y = node.y;
+                                updated = true;
+                            }
+                            return updated;
+                        });
+                refreshInitialTransitions(updatedInitialTransitions);
+
             } else if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.node) {
                 drag_line.attr("d", "M" + mousedrag.node.x + "," + mousedrag.node.y +
                                 "L" + (mousedrag.node.x + d3.mouse(this)[0]) +
@@ -666,10 +857,7 @@ define(function (require, exports, module) {
                 // hide drag arrow & reset mouse vars
                 drag_line.classed("hidden", true).style("marker-end", "");
             } else {
-                if (mousedrag.node.x !== node.x || mousedrag.node.y !== node.y) {
-                    // drag event
-                    //console.log("drag");
-                } else {
+                if (mousedrag.node.x === node.x && mousedrag.node.y === node.y) {
                     // click event
                     //console.log("click");
                     if (!_this.dragged) {
@@ -775,6 +963,14 @@ define(function (require, exports, module) {
     };
     
     /**
+	 * Returns a fresh name for initial transitions
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.getFreshInitialTransitionName = function () {
+        return this.emucharts.getFreshInitialTransitionName();
+    };
+
+    /**
 	 * Returns an array containing the current set of states in the diagram
      * Each states is given as a pair { name, id }
 	 * @memberof EmuchartsEditor
@@ -855,6 +1051,20 @@ define(function (require, exports, module) {
     };
 
     /**
+     * utility function to rename initial transitions
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.rename_initial_transition = function (transitionID, newLabel) {
+        this.emucharts.rename_initial_edge(transitionID, newLabel);
+        var itransitions = d3.select("#ContainerStateMachine")
+                        .select("#InitialTransitions").selectAll(".itransition")
+                        .filter(function (itransition) { return itransition.id === transitionID; });
+        // refresh transitions
+        refreshInitialTransitions(itransitions);
+    };
+
+    
+    /**
      * utility function to rename states
 	 * @memberof EmuchartsEditor
 	 */
@@ -898,8 +1108,19 @@ define(function (require, exports, module) {
         edges.forEach(function (edge) {
             _this.emucharts.remove_edge(edge);
         });
+        var initial_edges = [];
+        this.emucharts.initial_edges.forEach(function (key) {
+            var initial_edge = _this.emucharts.initial_edges.get(key);
+            if (initial_edge.target && initial_edge.target.id === stateID) {
+                initial_edges.push(initial_edge.id);
+            }
+        });
+        initial_edges.forEach(function (initial_edge) {
+            _this.emucharts.remove_initial_edge(initial_edge);
+        });
         this.emucharts.remove_node(stateID);
         this.renderTransitions();
+        this.renderInitialTransitions();
         return this.renderStates();
     };
 
@@ -912,6 +1133,15 @@ define(function (require, exports, module) {
         return this.renderTransitions();
     };
 
+    /**
+	 * Interface function for deleting initial transitions
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.delete_initial_transition = function (transitionID) {
+        this.emucharts.remove_initial_edge(transitionID);
+        return this.renderInitialTransitions();
+    };
+    
     /**
 	 * Interface function for adding transitions
 	 * @memberof EmuchartsEditor
@@ -927,6 +1157,25 @@ define(function (require, exports, module) {
                 target: target
             });
             return this.renderTransitions();
+        } else {
+            // FIXME: improve interaction & feedback
+            alert("invalid nodes");
+        }
+    };
+
+    /**
+	 * Interface function for adding initial transitions
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.add_initial_transition = function (transitionName, to) {
+        var target = this.emucharts.getState(to);
+        if (target) {
+            // FIXME: need to adjust the position in the case svg is translated
+            this.emucharts.add_initial_edge({
+                name: transitionName,
+                target: target
+            });
+            return this.renderInitialTransitions();
         } else {
             // FIXME: improve interaction & feedback
             alert("invalid nodes");

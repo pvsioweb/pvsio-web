@@ -80,6 +80,11 @@ define(function (require, exports, module) {
         emuchartsManager.delete_transition(transitionID);
     }
     
+    function deleteInitialTransition_handler(event) {
+        var transitionID = event.edge.id;
+        emuchartsManager.delete_initial_transition(transitionID);
+    }
+
     function deleteState_handler(event) {
         var stateID = event.node.id;
         emuchartsManager.delete_state(stateID);
@@ -139,6 +144,11 @@ define(function (require, exports, module) {
                                         event.target.id);
     }
     
+    function addInitialTransition_handler(event) {
+        var newTransitionName = emuchartsManager.getFreshInitialTransitionName();
+        emuchartsManager.add_initial_transition(newTransitionName, event.target.id);
+    }
+    
     // dbg
     function print_theory() {
         var emuchart = {
@@ -177,12 +187,15 @@ define(function (require, exports, module) {
         console.log(emuchartsLustrePrinter.print(emuchart));
     }
     
-    function stateAdded_handler(event) { print_theory(); print_node(); }
-    function stateRemoved_handler(event) { print_theory(); print_node(); }
-    function stateRenamed_handler(event) { print_theory(); print_node(); }
-    function transitionAdded_handler(event) { print_theory(); print_node(); }
-    function transitionRemoved_handler(event) { print_theory(); print_node(); }
-    function transitionRenamed_handler(event) { print_theory(); print_node(); }
+    function stateAdded_handler(event) { }//print_theory(); print_node(); }
+    function stateRemoved_handler(event) { }//print_theory(); print_node(); }
+    function stateRenamed_handler(event) { }//print_theory(); print_node(); }
+    function transitionAdded_handler(event) { }//print_theory(); print_node(); }
+    function transitionRemoved_handler(event) { }//print_theory(); print_node(); }
+    function transitionRenamed_handler(event) { }//print_theory(); print_node(); }
+    function initialTransitionAdded_handler(event) { console.log("initial transition added"); }//print_theory(); print_node(); }
+    function initialTransitionRemoved_handler(event) { console.log("initial transition removed"); }//print_theory(); print_node(); }
+    function initialTransitionRenamed_handler(event) { console.log("initial transition renamed"); }//print_theory(); print_node(); }    
     function constantAdded_handler(event) { print_theory(); print_node(); }
     function variableAdded_handler(event) { print_theory(); print_node(); }
     
@@ -202,10 +215,12 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_createState", createState_handler);
 //        emuchartsManager.addListener("emuCharts_d3ZoomTranslate", d3ZoomTranslate_handler);
         emuchartsManager.addListener("emuCharts_deleteTransition", deleteTransition_handler);
+        emuchartsManager.addListener("emuCharts_deleteInitialTransition", deleteInitialTransition_handler);
         emuchartsManager.addListener("emuCharts_deleteState", deleteState_handler);
         emuchartsManager.addListener("emuCharts_renameState", renameState_handler);
         emuchartsManager.addListener("emuCharts_renameTransition", renameTransition_handler);
         emuchartsManager.addListener("emuCharts_addTransition", addTransition_handler);
+        emuchartsManager.addListener("emuCharts_addInitialTransition", addInitialTransition_handler);
         
         emuchartsManager.addListener("emuCharts_stateAdded", stateAdded_handler);
         emuchartsManager.addListener("emuCharts_stateRemoved", stateRemoved_handler);
@@ -214,6 +229,9 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_transitionAdded", transitionAdded_handler);
         emuchartsManager.addListener("emuCharts_transitionRenamed", transitionRenamed_handler);
         emuchartsManager.addListener("emuCharts_transitionRemoved", transitionRemoved_handler);
+        emuchartsManager.addListener("emuCharts_initialTransitionAdded", initialTransitionAdded_handler);
+        emuchartsManager.addListener("emuCharts_initialTransitionRenamed", initialTransitionRenamed_handler);
+        emuchartsManager.addListener("emuCharts_initialTransitionRemoved", initialTransitionRemoved_handler);
         emuchartsManager.addListener("emuCharts_stateRenamed", stateRenamed_handler);
 	}
     
