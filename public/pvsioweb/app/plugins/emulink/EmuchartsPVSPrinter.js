@@ -58,8 +58,8 @@ define(function (require, exports, module) {
             name: "",
             cond: "",
             actions: [],
-            from: transition.source.id,
-            to: transition.target.id
+            from: transition.source.name,
+            to: transition.target.name
         };
         var sqOpen = transition.name.indexOf("[");
         var sqClose = transition.name.indexOf("]");
