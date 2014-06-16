@@ -206,12 +206,14 @@ define(function (require, exports, module) {
                     return false;
                 }
             });
-            //fire selected item changed event
-            fst.fire({type: "SelectedItemChanged", data: selectedData});
+            if (selectedData) {
+                //fire selected item changed event
+                fst.fire({type: "SelectedItemChanged", data: selectedData});
 
-            setTimeout(function () {
-                d3.select(el).node().scrollTop = selectedData.y;
-            }, duration);
+                setTimeout(function () {
+                    d3.select(el).node().scrollTop = selectedData.y;
+                }, duration);
+            }
         }
     };
     
