@@ -188,26 +188,40 @@ define(function (require, exports, module) {
                 Logger.log("new project created!");
             });
 		});
-		//handle typecheck event
+        
+        function reloadPVSio() {
+            //compilation is emulated by restarting the pvsioweb process on the server
+            var project = projectManager.project(), ws = WSManager.getWebSocket();
+            if (project && project.mainPVSFile()) {
+                ws.lastState("init(0)");
+                ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()},
+                              pvsProcessReady);
+            }
+        }
+        //handle typecheck event
 		//this function should be edited to only act on the selected file when multiple files are in use
 		d3.select("#btnTypeCheck").on("click", function () {
             function typecheck(pvsFile) {
                 var btn = d3.select("#btnTypeCheck").html("Typechecking ...").attr("disabled", true);
                 var ws = WSManager.getWebSocket();
                 ws.send({type: "typeCheck", filePath: pvsFile.name()},
-                         function (err, res) {
+                     function (err, res) {
                         btn.html("Typecheck").attr("disabled", null);
                         var msg = res.stdout;
-                        if (err) {
-                            msg = msg.substring(msg.indexOf("Writing output to file"), msg.length);
-                            Notification.create({
-                                header: "Typecheck error, please check the PVS output file for details.",
-                                notification: msg.split("\n")
-                            }).on("ok", function (e, view) { view.remove(); });
-                        } else {
+                        if (!err) {
+                            reloadPVSio();
+                            var project = projectManager.project();
+                            var notification = "Project " + project.name() + " compiled successfully!";
+                            d3.select("#editor-notification-area").insert("p", "p").html(notification);
                             msg = msg.substring(msg.indexOf("Proof summary"), msg.length);
                             Notification.create({
                                 header: "Typecheck result",
+                                notification: msg.split("\n")
+                            }).on("ok", function (e, view) { view.remove(); });
+                        } else {
+                            msg = msg.substring(msg.indexOf("Writing output to file"), msg.length);
+                            Notification.create({
+                                header: "Typecheck error, please check the PVS output file for details.",
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         }
@@ -220,24 +234,6 @@ define(function (require, exports, module) {
             }
             typecheck(pvsFile);
 		});
-
-        function reloadPVSio() {
-            //compilation is emulated by restarting the pvsioweb process on the server
-            var project = projectManager.project(), ws = WSManager.getWebSocket();
-            if (project && project.mainPVSFile()) {
-                ws.lastState("init(0)");
-                ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()},
-                              pvsProcessReady);
-            }
-        }
-
-        // FIXME: we need a way to detect errors
-        function compile() {
-            reloadPVSio();
-            var project = projectManager.project();
-            var notification = "Project " + project.name() + " compiled successfully!";
-            d3.select("#editor-notification-area").insert("p", "p").html(notification);
-        }
         
 		d3.select("#btnSetMainFile").on("click", function () {
 			var pvsFile = projectManager.getSelectedFile(), project = projectManager.project();
@@ -349,14 +345,6 @@ define(function (require, exports, module) {
                         }, function (err) { Logger.log("error reading files " + err); });
                 });
         });
-        
-		d3.select("#btnCompile").on("click", function () {
-            var pvsFile = projectManager.getSelectedFile();
-			if (!pvsFile || pvsFile.dirty()) {
-                document.getElementById("btnSaveFile").click();
-            }
-            compile();
-		});
 	}
 	
     var  MainView = Backbone.View.extend({
