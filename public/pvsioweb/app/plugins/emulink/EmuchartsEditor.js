@@ -212,12 +212,13 @@ define(function (require, exports, module) {
         };
         var mouseDown = function () {
             if (editor_mode === MODE.ADD_TRANSITION()) {
-                // this is equivalent to drag start
+                // this is equivalent to drag start for default-initial transitions
                 // create an arrow from the selected node to the cursor position
                 var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
                 mousedrag.edge = { x: m[0], y: m[1] };
                 drag_line.classed("hidden", false)
                     .style("marker-end", "url(#drag-arrow)")
+                    .style("marker-start", "url(#bubble)")
                     .attr("d", "M" + m[0] + "," + m[1] +
                                 "L" + m[0] + "," + m[1]);
             }
@@ -226,7 +227,7 @@ define(function (require, exports, module) {
             if (editor_mode === MODE.ADD_TRANSITION()) {
                 // this is equivalent to drag end
                 // remove drag line
-                drag_line.classed("hidden", true).style("marker-end", "");
+                drag_line.classed("hidden", true).style("marker-end", "").style("marker-start", "");
                 if (mouseover.node && !mousedrag.node) {
                     // fire event
                     _this.fire({

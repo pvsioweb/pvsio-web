@@ -77,23 +77,82 @@ define(function (require, exports, module) {
     EmuchartsManager.prototype.importEmucharts = function (emuchartsFile) {
         var _this = this;
         if (emuchartsFile && emuchartsFile.fileContent) {
-            var emuchartsNames = Object.keys(emuchartsFile.fileContent);
-            if (emuchartsNames) {
-                // create a map for each chart
-                emuchartsNames.forEach(function (name) {
-                    var chart = { nodes: d3.map(), edges: d3.map() };
-                    emuchartsFile.fileContent[name].nodes
-                        .forEach(function (node) { chart.nodes.set(node.id, node); });
-                    emuchartsFile.fileContent[name].edges
-                        .forEach(function (edge) { chart.edges.set(edge.id, edge); });
-                    // associate an editor to the created emuchart
-                    var emucharts = new Emucharts(chart.nodes, chart.edges);
-                    var newEmuchartsEditor = new EmuchartsEditor(emucharts);
-                    _this.installHandlers(newEmuchartsEditor);
-                    _emuchartsEditors.set(name, newEmuchartsEditor);
-                    _selectedEditor = newEmuchartsEditor;
-                    
-                });
+            var keys = Object.keys(emuchartsFile.fileContent);
+            if (keys) {
+                // check if this is version 1.0
+                if (emuchartsFile.fileContent && emuchartsFile.fileContent.descriptor) {
+                    var version = emuchartsFile.fileContent.descriptor.version;
+                    if (version === "1.0") {
+                        var chart = { nodes: d3.map(), edges: d3.map() };
+                        var chart_reader = emuchartsFile.fileContent.chart;
+                        if (chart_reader.states) {
+                            chart_reader.states.forEach(function (node) {
+                                chart.nodes.set(node.id, node);
+                            });
+                        }
+                        if (chart_reader.transitions) {
+                            chart_reader.transitions.forEach(function (edge) {
+                                if (edge.source) {
+                                    var source = chart_reader.states.filter(function (node) {
+                                        return node.id === edge.source.id;
+                                    });
+                                    if (source && source[0]) {
+                                        edge.source = source[0];
+                                    } else { console.log("dbg: warning, node " + edge.source.id + " not found while loading emdl file."); }
+                                }
+                                if (edge.target) {
+                                    var target = chart_reader.states.filter(function (node) {
+                                        return node.id === edge.target.id;
+                                    });
+                                    if (target && target[0]) {
+                                        edge.target = target[0];
+                                    } else { console.log("dbg: warning, node " + edge.target.id + " not found while loading emdl file."); }
+                                }
+                                chart.edges.set(edge.id, edge);
+                            });
+                        }
+                        if (chart_reader.initial_transitions) {
+                            chart_reader.initial_transitions.forEach(function (edge) {
+                                chart.initial_edges.set(edge.id, edge);
+                            });
+                        }
+                        if (chart_reader.variables) {
+                            chart_reader.variables.forEach(function (variable) {
+                                chart.variables.set(variable.name, variable);
+                            });
+                        }
+                        if (chart_reader.constants) {
+                            chart_reader.constants.forEach(function (constant) {
+                                chart.constants.set(constant.name, constant);
+                            });
+                        }
+                        // associate an editor to the created emuchart
+                        // FIXME: Improve the constructor and this importEmuchart function
+                        var emucharts = new Emucharts(chart.nodes, chart.edges);
+                        var newEmuchartsEditor = new EmuchartsEditor(emucharts);
+                        _this.installHandlers(newEmuchartsEditor);
+                        _emuchartsEditors.set(emuchartsFile.fileContent.descriptor.chart_name, newEmuchartsEditor);
+                        _selectedEditor = newEmuchartsEditor;
+                    } else {
+                        alert("Error while importing emuchart file: unsupported file version " + version);
+                    }
+                } else {
+                    console.log("Warning: deprecated file version");
+                    // create a map for each chart
+                    keys.forEach(function (name) {
+                        var chart = { nodes: d3.map(), edges: d3.map() };
+                        emuchartsFile.fileContent[name].nodes
+                            .forEach(function (node) { chart.nodes.set(node.id, node); });
+                        emuchartsFile.fileContent[name].edges
+                            .forEach(function (edge) { chart.edges.set(edge.id, edge); });
+                        // associate an editor to the created emuchart
+                        var emucharts = new Emucharts(chart.nodes, chart.edges);
+                        var newEmuchartsEditor = new EmuchartsEditor(emucharts);
+                        _this.installHandlers(newEmuchartsEditor);
+                        _emuchartsEditors.set(name, newEmuchartsEditor);
+                        _selectedEditor = newEmuchartsEditor;
+                    });
+                }
             }
         } else { console.log("dbg: warning, undefined or null emuchart"); }
     };

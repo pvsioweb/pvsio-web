@@ -677,10 +677,10 @@ define(function (require, exports, module) {
                             + "Confirm Operation?",
                 buttons: ["Cancel", "Delete and Open"]
             }).on("ok", function (e, view) {
-                emuchartsManager.delete_chart();
-                openChart();
                 resetToolbarColors();
                 view.remove();
+                emuchartsManager.delete_chart();
+                document.getElementById("btnLoadEmuchart").click();
             }).on("cancel", function (e, view) {
                 view.remove();
             });
@@ -722,7 +722,14 @@ define(function (require, exports, module) {
                         variables: emuchartsManager.getVariables()
                     }
                 }, null, " ");
-                projectManager.createFile(fileName, content);
+                var pf = projectManager.createProjectFile(fileName, content);
+                projectManager.saveFiles([pf], function (err, res) {
+                    if (!err) {
+                        alert("File " + pf.path() + " saved successfully!");
+                    } else {
+                        alert("Error while saving file " + pf.path() + " (" + err + ")");
+                    }
+                });
             }
         });
         d3.select("#btn_menuPVSPrinter").on("click", function () {
