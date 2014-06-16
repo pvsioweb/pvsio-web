@@ -137,6 +137,31 @@ define(function (require, exports, module) {
         });
     }
 
+    function renameInitialTransition_handler(event) {
+        var edge = event.edge;
+        // popup rename window
+        var oldName = edge.name;
+        var labels = [];
+        labels.push(edge.name + "  ("
+                    + "init ->"
+                    + edge.target.name + ")");
+        displayRename.create({
+            header: "Please enter new label...",
+            textLabel: "Transition",
+            currentLabels: labels,
+            buttons: ["Cancel", "Rename"]
+        }).on("rename", function (e, view) {
+            var transitionLabel = e.data.labels.get("newLabel");
+            if (transitionLabel && transitionLabel.value !== "") {
+                emuchartsManager.rename_initial_transition(edge.id, transitionLabel);
+                view.remove();
+            }
+        }).on("cancel", function (e, view) {
+            // just remove rename window
+            view.remove();
+        });
+    }
+
     function addTransition_handler(event) {
         var newTransitionName = emuchartsManager.getFreshTransitionName();
         emuchartsManager.add_transition(newTransitionName,
@@ -193,11 +218,11 @@ define(function (require, exports, module) {
     function transitionAdded_handler(event) { }//print_theory(); print_node(); }
     function transitionRemoved_handler(event) { }//print_theory(); print_node(); }
     function transitionRenamed_handler(event) { }//print_theory(); print_node(); }
-    function initialTransitionAdded_handler(event) { console.log("initial transition added"); }//print_theory(); print_node(); }
-    function initialTransitionRemoved_handler(event) { console.log("initial transition removed"); }//print_theory(); print_node(); }
-    function initialTransitionRenamed_handler(event) { console.log("initial transition renamed"); }//print_theory(); print_node(); }    
-    function constantAdded_handler(event) { print_theory(); print_node(); }
-    function variableAdded_handler(event) { print_theory(); print_node(); }
+    function initialTransitionAdded_handler(event) { }//console.log("initial transition added"); }//print_theory(); print_node(); }
+    function initialTransitionRemoved_handler(event) { }//console.log("initial transition removed"); }//print_theory(); print_node(); }
+    function initialTransitionRenamed_handler(event) { }//console.log("initial transition renamed"); }//print_theory(); print_node(); }    
+    function constantAdded_handler(event) { }//print_theory(); print_node(); }
+    function variableAdded_handler(event) { }//print_theory(); print_node(); }
     
     
 
@@ -219,6 +244,7 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_deleteState", deleteState_handler);
         emuchartsManager.addListener("emuCharts_renameState", renameState_handler);
         emuchartsManager.addListener("emuCharts_renameTransition", renameTransition_handler);
+        emuchartsManager.addListener("emuCharts_renameInitialTransition", renameInitialTransition_handler);
         emuchartsManager.addListener("emuCharts_addTransition", addTransition_handler);
         emuchartsManager.addListener("emuCharts_addInitialTransition", addInitialTransition_handler);
         
@@ -744,7 +770,8 @@ define(function (require, exports, module) {
                 constants: emuchartsManager.getConstants(),
                 variables: emuchartsManager.getVariables(),
                 states: emuchartsManager.getStates(),
-                transitions: emuchartsManager.getTransitions()
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
             };
             var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".pvs",
                                                                  emuchartsPVSPrinter.print(emucharts));

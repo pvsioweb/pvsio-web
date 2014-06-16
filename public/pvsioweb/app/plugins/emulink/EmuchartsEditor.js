@@ -1029,7 +1029,7 @@ define(function (require, exports, module) {
     };
 
     /**
-	 * Returns an array containing the current set of states in the diagram
+	 * Returns an array containing the current set of transitions in the diagram
      * Each transition is given as a 4-tuple { name, id, source, target }
      * where source and target are pairs { name, id }
 	 * @memberof EmuchartsEditor
@@ -1038,6 +1038,16 @@ define(function (require, exports, module) {
         return this.emucharts.getTransitions();
     };
     
+    /**
+	 * Returns an array containing the current set of initial transitions in the diagram
+     * Each transition is given as a 3-tuple { name, id, target }
+     * where target is a pair { name, id }
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.getInitialTransitions = function () {
+        return this.emucharts.getInitialTransitions();
+    };
+
     /**
      * utility function to rename transitions
 	 * @memberof EmuchartsEditor

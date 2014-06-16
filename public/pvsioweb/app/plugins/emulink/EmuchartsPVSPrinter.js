@@ -193,6 +193,41 @@ define(function (require, exports, module) {
         return ans;
     }
     
+    
+    /**
+     * Prints PVS definitions for Emuchart initial transitions
+     */
+    EmuchartsPVSPrinter.prototype.print_initial_transition = function (emuchart) {
+        var initial_transitions = emuchart.initial_transitions;
+        var ans = "";
+        if (initial_transitions && initial_transitions.length > 0) {
+            ans += "  %-- initial state\n";
+            ans += "  init(x: real): State = (#\n";
+            ans += "    current_state  := " + initial_transitions[0].target.name + "\n";
+            ans += "    previous_state := " + initial_transitions[0].target.name + "\n";
+            var variables = emuchart.variables;
+            if (variables) {
+                variables.forEach(function (variable) {
+                    var pos = initial_transitions[0].name.indexOf(variable.name);
+                    if (pos >= 0) {
+                        var tmp = initial_transitions[0].name.substring(pos);
+                        pos = tmp.indexOf(":=");
+                        if (pos >= 0) {
+                            tmp = tmp.substring(pos + 2);
+                            pos = tmp.indexOf(";");
+                            if (pos >= 0) {
+                                tmp = tmp.substr(0, pos).trim();
+                                ans += "    " + variable.name + " := " + tmp + "\n";
+                            }
+                        }
+                    }
+                });
+            }
+            ans += "  #)\n";
+        }
+        return ans;
+    };
+    
     /**
      * Prints PVS definitions for Emuchart transitions given in the form transition [condition] {actions}
      */
@@ -336,6 +371,7 @@ define(function (require, exports, module) {
         ans += this.print_constants(emuchart);
         ans += this.print_states(emuchart);
         ans += this.print_variables(emuchart);
+        ans += this.print_initial_transition(emuchart);
         ans += this.print_transitions(emuchart);
         ans += " END " + emuchart.name + "\n";
         ans += this.print_disclaimer();

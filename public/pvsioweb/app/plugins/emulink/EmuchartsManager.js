@@ -36,6 +36,7 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_deleteState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_renameState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_renameTransition", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_renameInitialTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_addTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_addInitialTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_stateAdded", function (event) { _this.fire(event); });
@@ -313,11 +314,29 @@ define(function (require, exports, module) {
     };
 
     /**
+	 * Returns an array containing the current set of initial transitions
+     * Each transition is given as a 3-tuple { name, id, target }
+     * where target is a pair { name, id }
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getInitialTransitions = function () {
+        return _selectedEditor.getInitialTransitions();
+    };
+
+    /**
 	 * Utility function to rename transitions
 	 * @memberof EmuchartsManager
 	 */
     EmuchartsManager.prototype.rename_transition = function (transitionID, newLabel) {
         return _selectedEditor.rename_transition(transitionID, newLabel);
+    };
+
+    /**
+	 * Utility function to rename initial transitions
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.rename_initial_transition = function (transitionID, newLabel) {
+        return _selectedEditor.rename_initial_transition(transitionID, newLabel);
     };
 
     /**

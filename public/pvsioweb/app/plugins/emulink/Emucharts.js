@@ -480,24 +480,26 @@ define(function (require, exports, module) {
     };
     
     /**
-	 * Returns the current initial transitions
-     * The transition is given as a 3-tuple { name, id, target }
+	 * Returns the current set of initial transitions
+     * Each transition is given as a 3-tuple { name, id, target }
      * where target is a pair { name, id }
 	 * @memberof Emucharts
 	 */
-    Emucharts.prototype.getInitialTransition = function () {
+    Emucharts.prototype.getInitialTransitions = function () {
         var _this = this;
-        this.edges.forEach(function (key) {
-            var trans = _this.edges.get(key);
-            return {
+        var initial_transitions = [];
+        this.initial_edges.forEach(function (key) {
+            var trans = _this.initial_edges.get(key);
+            initial_transitions.push({
                 name: trans.name,
                 id: key,
                 target: {
                     name: trans.target.name,
                     id: trans.target.id
                 }
-            };
+            });
         });
+        return initial_transitions;
     };
 
     /**
