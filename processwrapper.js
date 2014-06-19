@@ -18,16 +18,14 @@ You should have received a copy of the GNU General Public License along with Foo
  * @date Dec 2, 2012 : 10:28:48 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, process, module */
+/*global require, process, module */
 var spawn = require("child_process").spawn,
-	exec = require("child_process").exec,
-	util = require("util"),
-	fs = require("fs");
+	exec = require("child_process").exec;
 
 module.exports = function () {
     "use strict";
     var proc, _dataProcessor;
-    var o = {}, cbQueue = [], data = "";
+    var o = {}, cbQueue = [];
     
     /**
      * Starts an interactive process with the specified parameters. The opt variable should contain

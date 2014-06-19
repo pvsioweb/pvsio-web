@@ -17,15 +17,12 @@ You should have received a copy of the GNU General Public License along with Foo
  * @project JSLib
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, require, module, process, __dirname */
+/*global require, module, process, __dirname */
 
-var childprocess = require("child_process"),
-	util = require("util"),
+var util = require("util"),
     path = require("path"),
-    logger = require("tracer").console(),
-	fs = require("fs");
+    logger = require("tracer").console();
 var procWrapper = require("./processwrapper");
-var spawn = childprocess.spawn;
 module.exports = function () {
     "use strict";
     var pvs = procWrapper();
@@ -33,11 +30,9 @@ module.exports = function () {
         output                              = [],
         readyString                         = "<PVSio>",
         wordsIgnored                        = ["", "==>", readyString],
-        restarting                          = false,
-        sourceCode,
+//        restarting                          = false,
         filename,
         processReady                        = false,
-        pvsio,
         workspaceDir                        = __dirname + "/public/";
     var _silentMode = false; // used to turn off log messages when restarting pvsio
 	/**
@@ -64,7 +59,9 @@ module.exports = function () {
 	function arrayToOutputString(lines) {
 		return lines.join("").replace(/,/g, ", ").replace(/\s+\:\=/g, ":=").replace(/\:\=\s+/g, ":=");
 	}
-	
+	/**
+        This function returns a function for processing stream data that is returned by the ouput stream of a process.
+    */
 	function processDataFunc() {
 		var res = [];
 		return function (data, cb) {
@@ -97,13 +94,13 @@ module.exports = function () {
         }
     };
 	/**
-	 * starts the pvs process with the given sourcefile 
+	 * starts the pvs process with the given sourcefile, then registers a data processor with the processwrapper.
+     * The data processor function is used internally to match a command sent to the process with the corresponding
+     * callback. 
 	 * @param {String} filename source file to load with pvsio
-	 * @param {function({type:string, data:array})} callback function to call when any data is received  in the stdout
-	 * @param {function} callback to call when processis ready
+	 * @param {function} callback to call when processis ready or process exited
 	 */
-    // FIXME: callback is not needed! -- the callback function is already specified in pvssocket with sendCommand
-	o.start = function (file, callback, processReadyCallback) {
+	o.start = function (file, callback) {
 		filename = file;
         function onDataReceived(data) {
 			// this shows the original PVSio output
@@ -121,7 +118,7 @@ module.exports = function () {
 			
                 if (lastLine.indexOf(readyString) > -1) {
                     //last line of the output is the ready string
-                    processReadyCallback({type: "processReady", data: output});
+                    callback({type: "processReady", data: output});
                     processReady = true;
                     pvs.dataProcessor(processDataFunc());
                 }

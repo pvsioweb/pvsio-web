@@ -525,13 +525,10 @@ function run() {
                 //recreate the pvsio process
                 p = pvsio();
                 pvsioProcessMap[socketid] = p;
-                //set the workspace dir and start the pvs process with a callback for processing any responses from
-                //the process
+                //set the workspace dir and start the pvs process with a callback for processing process ready and exit
+                //messages from the process
                 p.workspaceDir(__dirname + root)
-                    .start(token.data.fileName, function (token) {
-                        token.socketId = socketid;
-//                        processCallback(token, socket); // this is not needed! the callback function is in sendCommand
-                    },
+                    .start(token.data.fileName,
                         function (res) {
                             res.id = token.id;
                             res.serverSent = new Date().getTime();
