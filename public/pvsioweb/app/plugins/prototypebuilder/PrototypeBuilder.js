@@ -29,18 +29,23 @@ define(function (require, exports, module) {
         pvsioWebClient = PVSioWebClient.getInstance();
 		currentProject = new Project("");
         projectManager = new ProjectManager(currentProject);
+        projectManager.addListener("SelectedFileChanged", function (event) {
+            if (editor) {
+                editor.refresh();
+            }
+        });
 	}
 	
     /////These are the api methods that the prototype builder plugin exposes
     PrototypeBuilder.prototype.getDependencies = function () { return []; };
     
     PrototypeBuilder.prototype.initialise = function () {
-        editorContainer = pvsioWebClient.createCollapsiblePanel("PVS Editor", true, function () {
+        editorContainer = pvsioWebClient.createCollapsiblePanel("PVS Editor", false, function () {
             editor.refresh();
         });
         editorContainer.append("div").html(sourceCodeTemplate);
 
-        // this enable autocompletion
+        // this enables autocompletion
         editor = new CodeMirror(d3.select("#editor").node(), {
             mode: "pvs",
             lineNumbers: true,
@@ -53,7 +58,8 @@ define(function (require, exports, module) {
         projectManager.preparePageForImageUpload();
         // create and default initial empty project containing an empty file (main.pvs)
         projectManager.createDefaultProject();
-
+        d3.select("#project-notification-area").insert("p", "p").html("PVSio-web Ready!");
+        d3.select("#editor-notification-area").insert("p", "p").html("PVS Editor Ready!");
     };
    
     PrototypeBuilder.prototype.unload = function () {

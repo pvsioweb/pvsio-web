@@ -153,6 +153,14 @@ define(function (require, exports, module) {
 	};
 
 	/**
+	 * Returns the path of the selected item (file or directory) in the source files list view
+	 * @memberof ProjectManager
+	 */
+	ProjectManager.prototype.getSelectedItem = function () {
+		return pvsFilesListView.getSelectedItem();
+	};
+
+    /**
 	 * Creats a new instance of a project from json data
 	 * @param {{name: string,  projectFiles: string[]}} obj The json data from which the new project is instantiated
 	 * @return {Project}
@@ -166,13 +174,13 @@ define(function (require, exports, module) {
                 if (file && file.filePath && file.fileContent) {
                     pf = p.addProjectFile(file.filePath, file.fileContent).encoding(file.encoding);
                     if (file.filePath.indexOf(".pvsioweb") > 0) {
-                        var main = JSON.parse(file.fileContent)["mainPVSFile"];
+                        var main = JSON.parse(file.fileContent).mainPVSFile;
                         if (main && main !== "") {
                             // FIXME: the file content is left undefined -- check if we ever use it!
                             var newMainFile = new ProjectFile(main)//.content(fileContent)
                                                 .encoding("utf8");
                             p.mainPVSFile(newMainFile);
-                        }    
+                        }
                     }
                 }
             });
@@ -294,6 +302,7 @@ define(function (require, exports, module) {
         
         function imageLoadComplete(res) {
             d3.select("#imageDiv img").attr("src", img.src).attr("height", img.height).attr("width", img.width);
+            d3.select("#imageDiv svg").attr("height", img.height).attr("width", img.width);
             //hide the draganddrop stuff
             d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
             // invoke callback, if any
@@ -332,14 +341,22 @@ define(function (require, exports, module) {
         }
         
         //create promises for the pvs source files, if any is specified in data
-        if (data.pvsSpec) {
+        if (data.pvsSpec && data.pvsSpec.length > 0) {
             for (i = 0; i < data.pvsSpec.length; i++) {
                 if (data.pvsSpec[i].name !== undefined && data.pvsSpec[i].content !== undefined) {
                     promises.push(data.pvsSpec[i].content);
                 } else {
+                    // FIXME: why are we trying to read pvsSpec if name is not specified?
                     promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
                 }
             }
+        } else {
+            // create one file with the default content
+            var emptySpec = {
+                filePath: defaultTheoryName + ".pvs",
+                fileContent: defaultTheoryName + emptyTheoryContent + defaultTheoryName
+            };
+            promises.push(emptySpec);
         }
 
         var previousProject = project || pm.project(), image;
@@ -378,7 +395,10 @@ define(function (require, exports, module) {
                             if (cb && typeof cb === "function") { cb(err, project); }
                         }
                     } else {
-                        alert(err.toString());
+                        if (err.code === "EEXIST") {
+                            alert("Please choose a different name -- project "
+                                        + data.projectName + " already exists.");
+                        }
                         //invoke callback
                         if (cb && typeof cb === "function") { cb(err, project); }
                     }
@@ -426,12 +446,14 @@ define(function (require, exports, module) {
             // save files
             project.save(function (err, p) {
                 if (!err) {
-                    Logger.log("project saved");
                     project = p;
                     //repaint the list and sourcecode toolbar
                     project.pvsFilesList().forEach(function (f) { f.dirty(false); });
                     project._dirty(false);
                     pm.fire({type: "ProjectSaved", project: project});
+                    var notification = "Project " + project.name() + " saved successfully!";
+                    d3.select("#project-notification-area").insert("p", "p").html(notification);
+                    Logger.log(notification);
                     if (typeof cb === "function") { cb(); }
                 }
             });
@@ -450,6 +472,9 @@ define(function (require, exports, module) {
                         projectNameChanged({current: name});
                         pvsFilesListView.renameProject(name);
                         pm.fire({type: "ProjectSaved", project: project});
+                        var notification = "Project " + project.name() + " saved successfully!";
+                        d3.select("#project-notification-area").insert("p", "p").html(notification);
+                        Logger.log(notification);
                         if (typeof cb === "function") { cb(); }
                     } else {
                         if (err.code === "EEXIST") {
@@ -484,8 +509,25 @@ define(function (require, exports, module) {
             });
         }
     };
+    
+    /**
+     * selects the file (of type projectFile) specified as argument
+     */
+    ProjectManager.prototype.selectFile = function (pf) {
+        // select item in filetree
+        pvsFilesListView.selectItem(pf.path());
+    };
+    
     	
-	/**
+    /**
+     * checks if file pf already exists in the project
+     * returns true if pf exists, otherwise returns false
+     */
+    ProjectManager.prototype.fileExists = function (pf) {
+        return pvsFilesListView.fileExists(pf.path());
+    };
+
+    /**
 		Restarts the pvsio web process with the current project. The callback is invoked once the process is ready
 		@param {ProjectManager~pvsProcessReady} callback The function to call when the process is ready
 	*/
@@ -520,7 +562,6 @@ define(function (require, exports, module) {
         project.addProjectFile(data.pvsSpec[0], makeEmptyTheory(defaultTheoryName));
 
         project.saveNew(data.projectName, function (err, res, folderStructure) {
-            Logger.log({err: err, res: res});
             if (!err) {
                 //set the main pvs file
                 project.mainPVSFile(new ProjectFile(defaultFilePath));
@@ -542,13 +583,14 @@ define(function (require, exports, module) {
 	 * Creates a new file in the current project.
      * @memberof ProjectManager
      */
-	ProjectManager.prototype.createProjectFile = function (path, content) {
-        var file = new ProjectFile(path, content);
+	ProjectManager.prototype.createProjectFile = function (fileName, fileContent) {
+        var file = new ProjectFile(this.project().name() + "/" + fileName, fileContent);
         return file;
     };
     
     
     ProjectManager.prototype.preparePageForImageUpload = function () {
+        // FIXME: dont rely on extensions, use a "type" field in ProjectFile to specify whether the file is an image or a text file
         var imageExts = ["png", "jpg", "jpeg"], pm = this;
 
         //add listener for  upload button

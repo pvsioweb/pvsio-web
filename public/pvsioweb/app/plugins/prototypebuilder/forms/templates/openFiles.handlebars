@@ -1,11 +1,18 @@
 <div class="form-center">
     <div class="panel panel-info center dialog shadow">
-        <div class="panel-heading">Import Files into Project</div>
+        <div class="panel-heading">Import PVS files into Project</div>
         <form class="center form-horizontal" onsubmit="return false" role="form">
             <div class="panel-body center">
                 <div class="form-group">
                     <div class="col-sm-8">
-                        <input id="projectFiles" class="form-control" type="file" value="" name="projectFiles" required="true" multiple="true">
+                        <input id="projectFiles"
+                               class="form-control"
+                               type="file"
+                               value=""
+                               name="projectFiles"
+                               required="true"
+                               accept=".pvs"
+                               multiple="true">
                     </div>
                 </div>
             </div>

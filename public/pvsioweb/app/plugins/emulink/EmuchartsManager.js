@@ -32,10 +32,13 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_editorModeChanged", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_createState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteTransition", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_deleteInitialTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_renameState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_renameTransition", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_renameInitialTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_addTransition", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_addInitialTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_stateAdded", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_stateRemoved", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_constantAdded", function (event) { _this.fire(event); });
@@ -43,6 +46,9 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_transitionAdded", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_transitionRemoved", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_initialTransitionAdded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_initialTransitionRemoved", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_stateRenamed", function (event) { _this.fire(event); });
     };
     
@@ -72,23 +78,82 @@ define(function (require, exports, module) {
     EmuchartsManager.prototype.importEmucharts = function (emuchartsFile) {
         var _this = this;
         if (emuchartsFile && emuchartsFile.fileContent) {
-            var emuchartsNames = Object.keys(emuchartsFile.fileContent);
-            if (emuchartsNames) {
-                // create a map for each chart
-                emuchartsNames.forEach(function (name) {
-                    var chart = { nodes: d3.map(), edges: d3.map() };
-                    emuchartsFile.fileContent[name].nodes
-                        .forEach(function (node) { chart.nodes.set(node.id, node); });
-                    emuchartsFile.fileContent[name].edges
-                        .forEach(function (edge) { chart.edges.set(edge.id, edge); });
-                    // associate an editor to the created emuchart
-                    var emucharts = new Emucharts(chart.nodes, chart.edges);
-                    var newEmuchartsEditor = new EmuchartsEditor(emucharts);
-                    _this.installHandlers(newEmuchartsEditor);
-                    _emuchartsEditors.set(name, newEmuchartsEditor);
-                    _selectedEditor = newEmuchartsEditor;
-                    
-                });
+            var keys = Object.keys(emuchartsFile.fileContent);
+            if (keys) {
+                // check if this is version 1.0
+                if (emuchartsFile.fileContent && emuchartsFile.fileContent.descriptor) {
+                    var version = emuchartsFile.fileContent.descriptor.version;
+                    if (version === "1.0") {
+                        var chart = { nodes: d3.map(), edges: d3.map() };
+                        var chart_reader = emuchartsFile.fileContent.chart;
+                        if (chart_reader.states) {
+                            chart_reader.states.forEach(function (node) {
+                                chart.nodes.set(node.id, node);
+                            });
+                        }
+                        if (chart_reader.transitions) {
+                            chart_reader.transitions.forEach(function (edge) {
+                                if (edge.source) {
+                                    var source = chart_reader.states.filter(function (node) {
+                                        return node.id === edge.source.id;
+                                    });
+                                    if (source && source[0]) {
+                                        edge.source = source[0];
+                                    } else { console.log("dbg: warning, node " + edge.source.id + " not found while loading emdl file."); }
+                                }
+                                if (edge.target) {
+                                    var target = chart_reader.states.filter(function (node) {
+                                        return node.id === edge.target.id;
+                                    });
+                                    if (target && target[0]) {
+                                        edge.target = target[0];
+                                    } else { console.log("dbg: warning, node " + edge.target.id + " not found while loading emdl file."); }
+                                }
+                                chart.edges.set(edge.id, edge);
+                            });
+                        }
+                        if (chart_reader.initial_transitions) {
+                            chart_reader.initial_transitions.forEach(function (edge) {
+                                chart.initial_edges.set(edge.id, edge);
+                            });
+                        }
+                        if (chart_reader.variables) {
+                            chart_reader.variables.forEach(function (variable) {
+                                chart.variables.set(variable.name, variable);
+                            });
+                        }
+                        if (chart_reader.constants) {
+                            chart_reader.constants.forEach(function (constant) {
+                                chart.constants.set(constant.name, constant);
+                            });
+                        }
+                        // associate an editor to the created emuchart
+                        // FIXME: Improve the constructor and this importEmuchart function
+                        var emucharts = new Emucharts(chart.nodes, chart.edges);
+                        var newEmuchartsEditor = new EmuchartsEditor(emucharts);
+                        _this.installHandlers(newEmuchartsEditor);
+                        _emuchartsEditors.set(emuchartsFile.fileContent.descriptor.chart_name, newEmuchartsEditor);
+                        _selectedEditor = newEmuchartsEditor;
+                    } else {
+                        alert("Error while importing emuchart file: unsupported file version " + version);
+                    }
+                } else {
+                    console.log("Warning: deprecated file version");
+                    // create a map for each chart
+                    keys.forEach(function (name) {
+                        var chart = { nodes: d3.map(), edges: d3.map() };
+                        emuchartsFile.fileContent[name].nodes
+                            .forEach(function (node) { chart.nodes.set(node.id, node); });
+                        emuchartsFile.fileContent[name].edges
+                            .forEach(function (edge) { chart.edges.set(edge.id, edge); });
+                        // associate an editor to the created emuchart
+                        var emucharts = new Emucharts(chart.nodes, chart.edges);
+                        var newEmuchartsEditor = new EmuchartsEditor(emucharts);
+                        _this.installHandlers(newEmuchartsEditor);
+                        _emuchartsEditors.set(name, newEmuchartsEditor);
+                        _selectedEditor = newEmuchartsEditor;
+                    });
+                }
             }
         } else { console.log("dbg: warning, undefined or null emuchart"); }
     };
@@ -115,6 +180,14 @@ define(function (require, exports, module) {
 	 */
     EmuchartsManager.prototype.getFreshTransitionName = function () {
         return _selectedEditor.getFreshTransitionName();
+    };
+
+    /**
+	 * Returns a fresh name for initial transitions
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getFreshInitialTransitionName = function () {
+        return _selectedEditor.getFreshInitialTransitionName();
     };
 
     /**
@@ -149,12 +222,28 @@ define(function (require, exports, module) {
         return _selectedEditor.add_transition(transitionName, from, to);
     };
     
-	/**
+    /**
+	 * Interface function for adding new initial transitions to the diagram
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.add_initial_transition = function (transitionName, to) {
+        return _selectedEditor.add_initial_transition(transitionName, to);
+    };
+
+    /**
 	 * Interface function for deleting transitions
 	 * @memberof EmuchartsManager
 	 */
     EmuchartsManager.prototype.delete_transition = function (transitionID) {
         return _selectedEditor.delete_transition(transitionID);
+    };
+
+    /**
+	 * Interface function for deleting initial transitions
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.delete_initial_transition = function (transitionID) {
+        return _selectedEditor.delete_initial_transition(transitionID);
     };
 
     /**
@@ -225,11 +314,29 @@ define(function (require, exports, module) {
     };
 
     /**
+	 * Returns an array containing the current set of initial transitions
+     * Each transition is given as a 3-tuple { name, id, target }
+     * where target is a pair { name, id }
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.getInitialTransitions = function () {
+        return _selectedEditor.getInitialTransitions();
+    };
+
+    /**
 	 * Utility function to rename transitions
 	 * @memberof EmuchartsManager
 	 */
     EmuchartsManager.prototype.rename_transition = function (transitionID, newLabel) {
         return _selectedEditor.rename_transition(transitionID, newLabel);
+    };
+
+    /**
+	 * Utility function to rename initial transitions
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.rename_initial_transition = function (transitionID, newLabel) {
+        return _selectedEditor.rename_initial_transition(transitionID, newLabel);
     };
 
     /**

@@ -12,7 +12,8 @@ define(function (require, exports, module) {
 	"use strict";
     
     var nodes = d3.map(),
-        edges = d3.map();
+        edges = d3.map(),
+        initial_edges = d3.map();
     
     var constants, // d3.map()
         variables; // d3.map()
@@ -21,11 +22,13 @@ define(function (require, exports, module) {
     var defaultValues = { x: 100, y: 100, width: 36, height: 36, fontSize: 10 };
 
     // FIXME: improve these functions -- here we assume that generated IDs are compact
-    var nextNodeID = 0, nextEdgeID = 0;
+    var nextNodeID = 0, nextEdgeID = 0, nextInitialEdgeID = 0;
     var newNodeID = function () { return ++nextNodeID; };
     var newEdgeID = function () { return ++nextEdgeID; };
+    var newInitialEdgeID = function () { return ++nextInitialEdgeID; };
     var getFreshNodeID = function () { return nextNodeID + 1; };
     var getFreshEdgeID = function () { return nextEdgeID + 1; };
+    var getFreshInitialEdgeID = function () { return nextInitialEdgeID + 1; };
     var nextConstantID = 0, nextVariableID = 0;
     var newConstantID = function () { return ++nextConstantID; };
     var newVariableID = function () { return ++nextVariableID; };
@@ -45,6 +48,10 @@ define(function (require, exports, module) {
             this.edges = edges;
             nextEdgeID = edges.keys().length; // FIXME: this is fragile: we need to check the actual indexes
         }
+        if (initial_edges) {
+            this.initial_edges = initial_edges;
+            nextInitialEdgeID = edges.keys().length;  // FIXME: this is fragile: we need to check the actual indexes
+        }
         this.constants = d3.map();
         this.variables = d3.map();
 		eventDispatcher(this);
@@ -53,6 +60,9 @@ define(function (require, exports, module) {
     
     Emucharts.prototype.getEdges = function () {
         return this.edges;
+    };
+    Emucharts.prototype.getInitialEdges = function () {
+        return this.initial_edges;
     };
     Emucharts.prototype.getNodes = function () {
         return this.nodes;
@@ -187,6 +197,32 @@ define(function (require, exports, module) {
     };
     
 	/**
+	 * Renames an existing initial edge
+     * @returns true if edge renamed successfully; otherwise returns false
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.rename_initial_edge = function (id, newName) {
+        if (!id || !this.initial_edges || !this.initial_edges.get(id)) { return false; }
+        // get edge and rename it
+        var initial_edge = this.initial_edges.get(id);
+        initial_edge.name = newName;
+        this.initial_edges.set(initial_edge.id, initial_edge);
+        // fire event
+        this.fire({
+            type: "emuCharts_initialTransitionRenamed",
+            transition: {
+                id: initial_edge.id,
+                name: initial_edge.name,
+                target: {
+                    id: initial_edge.target.id,
+                    name: initial_edge.target.name
+                }
+            }
+        });
+        return true;
+    };
+    
+    /**
 	 * Adds a new edge to the diagram
      * @returns the new edge
 	 * @memberof Emucharts
@@ -231,6 +267,45 @@ define(function (require, exports, module) {
         return newEdge;
     };
 
+	/**
+	 * Adds a new initial edge to the diagram
+     * @returns the new edge
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.add_initial_edge = function (edge) {
+        if (!edge || !edge.target) {
+            return null;
+        }
+        if (!this.nodes.has(edge.target.id)) {
+            console.log("dbg: warning, target ID not found in emuchart data. New transitions not added.");
+            return null;
+        }
+        
+        var target = this.nodes.get(edge.target.id);
+        // create a new node with a unique ID
+        var id = "IT" + newInitialEdgeID();
+        var newEdge = {
+                id  : id, // nodes have unique IDs
+                name: edge.name || id,
+                target: target
+            };
+        // add the new edge to the diagram
+        this.initial_edges.set(newEdge.id, newEdge);
+        // fire event
+        this.fire({
+            type: "emuCharts_initialTransitionAdded",
+            transition: {
+                id: newEdge.id,
+                name: newEdge.name,
+                target: {
+                    id: newEdge.target.id,
+                    name: newEdge.target.name
+                }
+            }
+        });
+        return newEdge;
+    };
+    
     /**
 	 * Removes an edge from the diagram
 	 * @memberof Emucharts
@@ -259,6 +334,29 @@ define(function (require, exports, module) {
         return false;
     };
 
+    /**
+	 * Removes an initial edge from the diagram
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.remove_initial_edge = function (initial_edge) {
+        var rem = this.initial_edges.get(initial_edge);
+        if (rem && this.initial_edges.remove(initial_edge)) {
+            // fire event
+            this.fire({
+                type: "emuCharts_initialTransitionRemoved",
+                transition: {
+                    id: rem.id,
+                    name: rem.name,
+                    target: {
+                        id: rem.target.id,
+                        name: rem.target.name
+                    }
+                }
+            });
+            return true;
+        }
+        return false;
+    };
     
 	/**
 	 * Automatically adjusts nodes width using name length
@@ -300,6 +398,14 @@ define(function (require, exports, module) {
         return "T" + getFreshEdgeID();
     };
     
+    /**
+	 * Returns a fresh initial transitions name
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getFreshInitialTransitionName = function () {
+        return "IT" + getFreshInitialEdgeID();
+    };
+
     /**
 	 * Returns an array containing the current set of states
      * Each states is given as a pair { name, id }
@@ -365,6 +471,37 @@ define(function (require, exports, module) {
         return transitions;
     };
     
+    /**
+	 * Returns the initial transition associated to the provided id
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getInitialTransition = function (id) {
+        return this.initial_edges.get(id);
+    };
+    
+    /**
+	 * Returns the current set of initial transitions
+     * Each transition is given as a 3-tuple { name, id, target }
+     * where target is a pair { name, id }
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.getInitialTransitions = function () {
+        var _this = this;
+        var initial_transitions = [];
+        this.initial_edges.forEach(function (key) {
+            var trans = _this.initial_edges.get(key);
+            initial_transitions.push({
+                name: trans.name,
+                id: key,
+                target: {
+                    name: trans.target.name,
+                    id: trans.target.id
+                }
+            });
+        });
+        return initial_transitions;
+    };
+
     /**
 	 * Interface function for adding new constant definitions
      * @memberof Emucharts

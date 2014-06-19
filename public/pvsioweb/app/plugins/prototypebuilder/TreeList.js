@@ -199,21 +199,47 @@ define(function (require, exports, module) {
             nodes.classed("selected", function (d) {
                 if (d.path === path) {
                     selectedData = d;
-                    
                     return true;
                 } else {
                     return false;
                 }
             });
-            //fire selected item changed event
-            fst.fire({type: "SelectedItemChanged", data: selectedData});
-            
-            setTimeout(function () {
-                d3.select(el).node().scrollTop = selectedData.y;
-            }, duration);
+            if (selectedData) {
+                //fire selected item changed event
+                fst.fire({type: "SelectedItemChanged", data: selectedData});
+
+                setTimeout(function () {
+                    d3.select(el).node().scrollTop = selectedData.y;
+                }, duration);
+            }
         }
     };
     
+    /** 
+     * given a selected node, this function selects the next in the hierarchy
+     * FIXME: implement this function! now we just select the parent node
+     */
+    TreeList.prototype.selectNext = function (nodePath, index) {
+        var fst = this;
+        var nodes = d3.select(el).selectAll(".node");
+        var parent = nodePath.substring(0, nodePath.lastIndexOf("/"));
+        var path = parent;
+        nodes.classed("selected", function (d) {
+            if (d.path === path) {
+                selectedData = d;
+                return true;
+            } else {
+                return false;
+            }
+        });
+        //fire selected item changed event
+        fst.fire({type: "SelectedItemChanged", data: selectedData});
+
+        setTimeout(function () {
+            d3.select(el).node().scrollTop = selectedData.y;
+        }, duration);
+    };
+
     TreeList.prototype.markDirty = function (path, sign) {
         d3.select(el).selectAll(".node")
             .filter(function (d) {
@@ -246,6 +272,18 @@ define(function (require, exports, module) {
                 fst.render(toRemove.parent);
             }
         }
+        // clear selected data
+        selectedData = null;
+    };
+    
+    TreeList.prototype.nodeExists = function (nodePath) {
+        var nodes = d3.select(el).selectAll(".node .label").filter(function (d) {
+            return d.path === nodePath;
+        });
+        if (!nodes.node()) {
+            return false;
+        }
+        return true;
     };
     
     TreeList.prototype.createNodeEditor = function (node, onEnter, onCancel) {
@@ -298,7 +336,7 @@ define(function (require, exports, module) {
             }
         };
     };
-    
+                
     TreeList.prototype.renameItem = function (item, newName) {
         // FIXME: it's note safe to use replace because the string to be replaced could be (part of) the name of subdirectories listed in the path
         item.path = item.path.replace(item.name, newName);

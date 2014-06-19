@@ -12,7 +12,7 @@
         <ul class="dropdown dropdown-vertical">
             <li class='toolbar'>
                 <hr>
-                <a href="#!Browse diagram" class="toolbar-tooltip" id="btn_toolbarBrowse">
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarBrowse">
                     <span title="Browse diagram"
                           class="glyphicon glyphicon-arrow-right" 
                           style="font-size: 1.2em 
@@ -23,23 +23,23 @@
                                  padding-left: 1px;">
                     </span></a>
                 <hr>
-                <a href="#!Zoom-in" class="toolbar-tooltip" id="btn_toolbarZoomIn">
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarZoomIn">
                     <span title="Zoom-in"
                           class="glyphicon glyphicon-zoom-in" 
                           style="font-size: 1.2em;">
                     </span></a>
-                <a href="#!Zoom-out" class="toolbar-tooltip" id="btn_toolbarZoomOut">
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarZoomOut">
                     <span title="Zoom-out"
                           class="glyphicon glyphicon-zoom-out" 
                           style="font-size: 1.2em;">
                     </span></a>
-                <a href="#!Zoom-reset" class="toolbar-tooltip" id="btn_toolbarZoomReset">
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarZoomReset">
                     <span title="Zoom-reset"
                           class="glyphicon glyphicon-fullscreen"
                           style="font-size: 1.2em;">
                     </span></a>
                 <hr>
-                <a href="#!Add states" class="toolbar-tooltip" id="btn_toolbarAddState">
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarAddState">
                     <span title="Add states"
                           class="glyphicon glyphicon-stop" 
                           style="font-size: 1.2em
@@ -49,17 +49,17 @@
                                  -o-transform: scale(1.4,1); /* Opera */
                                  -moz-transform: scale(1.4,1); /* Firefox */">
                     </span></a>
-                <a href="#!Add transitions" class="toolbar-tooltip" id="btn_toolbarAddTransition">
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarAddTransition">
                     <span title="Add transitions"
                           class="glyphicon glyphicon-new-window" 
                           style="font-size: 1.2em">
                     </span></a>
-                <a href="#!Rename states and transitions" class="toolbar-tooltip" id="btn_toolbarRename">
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarRename">
                     <span title="Rename states and transitions"
                           class="glyphicon glyphicon-font" 
                           style="font-size: 1.2em">
                     </span></a>
-                <a href="#!Delete states and transitions" class="toolbar-tooltip" id="btn_toolbarDelete">
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarDelete">
                     <span title="Delete states and transitions"
                           class="glyphicon glyphicon-fire" 
                           style="font-size: 1.2em">
@@ -72,61 +72,73 @@
 		<ul class="dropdown dropdown-horizontal">
             <li class="vdivider"><a href='#!' class="toolbar-tooltip">&nbsp;</a>
             </li>
-            <li class='active has-sub'><a href='#!'><span>EmuChart</span></a>
+            <li class='active has-sub' id="menuEmuchart"><a href='#!'><span>EmuChart</span></a>
                 <ul>
 					<li class="divider"></li>
-                    <li><a href='#!New chart' id="btn_menuNewChart"><span>New</span></a></li>
-					<li><a href='#!Open chart' id="btn_menuOpenChart"><span>Open...</span></a></li>
-					<li><a href='#!Close chart' id="btn_menuCloseChart"><span>Close</span></a></li>
+                    <li><a href='#!' id="btn_menuNewChart"><span>New</span></a></li>
+					<li><a href='#!' id="btn_menuOpenChart"><span>Open...</span></a></li>
+					<li><a href='#!' id="btn_menuCloseChart"><span>Close</span></a></li>
                     <li class="divider"></li>
-                    <li><a href='#!Save chart' id="btn_saveChart"><span>Save</span></a></li>
-                    <li><a href='#!Save as...' id="btn_saveChartAs"><span>Save as...</span></a></li>
+                    <li><a href='#!' id="btn_menuSaveChart"><span>Save</span></a></li>
+<!--                    <li><a href='#!Save as...' id="btn_saveChartAs"><span>Save as...</span></a></li>-->
 <!--                    <li><a href='#!' id="btn_saveAllCharts"><span>Save all</span></a></li>-->
                     <li class="divider"></li>
-                    <li><a href='#!Quit Emulink' id="btn_menuQuitEmulink"><span>Quit</span></a></li>
+                    <li><a href='#!' id="btn_menuQuitEmulink"><span>Quit</span></a></li>
                     <li class="divider"></li>
                 </ul>
             </li>
-            <li class='active has-sub'><a href='#!'><span>States</span></a>
+            <li class='active has-sub' id="menuStates"><a href='#!'><span>States</span></a>
 				<ul>
                     <li class="divider"></li>
-					<li><a href='#!New state' id="btn_menuNewState"><span>New state</span></a></li>
-					<li><a href='#!Rename state' id="btn_menuRenameState"><span>Rename state</span></a></li>
-					<li><a href='#!Delete state' id="btn_menuDeleteState"><span>Delete state</span></a></li>
+					<li><a href='#!' id="btn_menuNewState"><span>New state</span></a></li>
+					<li><a href='#!' id="btn_menuRenameState"><span>Rename state</span></a></li>
+					<li><a href='#!' id="btn_menuDeleteState"><span>Delete state</span></a></li>
                     <li class="divider"></li>
 				</ul>
 			</li>
-            <li class='active has-sub'><a href='#!'><span>Transitions</span></a>
+            <li class='active has-sub' id="menuTransitions"><a href='#!'><span>Transitions</span></a>
 				<ul>
                     <li class="divider"></li>
-					<li><a href='#!New transition' id="btn_menuNewTransition"><span>New transition</span></a></li>
-					<li><a href='#!Rename transition' id="btn_menuRenameTransition"><span>Rename transition</span></a></li>
-                    <li><a href='#!Delete transition' id="btn_menuDeleteTransition"><span>Delete transition</span></a></li>
+					<li><a href='#!' id="btn_menuNewTransition"><span>New transition</span></a></li>
+					<li><a href='#!' id="btn_menuRenameTransition"><span>Rename transition</span></a></li>
+                    <li><a href='#!' id="btn_menuDeleteTransition"><span>Delete transition</span></a></li>
                     <li class="divider"></li>
 				</ul>
 			</li>
-            <li class='active has-sub'><a href='#!'><span>Context</span></a>
+            <li class='active has-sub' id="menuContext"><a href='#!'><span>Context</span></a>
 				<ul>
                     <li class="divider"></li>
-                    <li><a href='#!New constant' id="btn_menuNewConstant"><span>New constant</span></a></li>
-					<li><a href='#!New state variable' id="btn_menuNewVariable"><span>New variable</span></a></li>
+					<li><a href='#!' id="btn_menuNewVariable"><span>New variable</span></a></li>
+                    <li><a href='#!' id="btn_menuNewConstant"><span>New constant</span></a></li>
                     <li class="divider"></li>
 				</ul>
 			</li>
-		    <li class='active has-sub'><a href='#!'><span>Zoom</span></a>
+            <li class='active has-sub' id="menuCodeGenenerators"><a href='#!'><span>Code Generators</span></a>
 				<ul>
                     <li class="divider"></li>
-					<li><a href='#!Zoom-in' id ="btn_menuZoomIn"><span>Zoom-in</span></a></li>
-					<li><a href='#!Zoom-out' id ="btn_menuZoomOut"><span>Zoom-out</span></a></li>
-					<li><a href='#!Reset zoom' id ="btn_menuZoomReset"><span>Reset zoom</span></a></li>
+                    <li><a href='#!' id="btn_menuPVSPrinter"><span>PVS Specification</span></a></li>
+					<li><a href='#!' id="btn_menuLustrePrinter" class="tobeimplemented"><span>Lustre Specification</span></a></li>
                     <li class="divider"></li>
+                    <li><a href='#!' id="btn_menuCPrinter" class="tobeimplemented"><span>C Code</span></a></li>
+                    <li><a href='#!' id="btn_menuCppPrinter" class="tobeimplemented"><span>C++ Code</span></a></li>
+                    <li><a href='#!' id="btn_menuJavaPrinter" class="tobeimplemented"><span>Java Code</span></a></li>
+                    <li class="divider"></li>
+				</ul>
+			</li>
+		    <li class='active has-sub' id="menuZoom"><a href='#!'><span>Zoom</span></a>
+				<ul>
+                    <li class="divider"></li>
+					<li><a href='#!' id ="btn_menuZoomIn"><span>Zoom-in</span></a></li>
+					<li><a href='#!' id ="btn_menuZoomOut"><span>Zoom-out</span></a></li>
+					<li><a href='#!' id ="btn_menuZoomReset"><span>Reset zoom</span></a></li>
+                    
 				</ul>
 		    </li>
 		    <li class='active has-sub'><a href='#!'><span>Help</span></a>
 				<ul>
                     <li class="divider"></li>
-					<li><a href='#!Online help'><span>Online help</span></a></li>
-					<li><a href='#!About'><span>About</span></a></li>
+					<li><a href='#!' class="tobeimplemented"><span>Online help</span></a></li>
+					<li><a href='#!' class="tobeimplemented"><span>About</span></a></li>
                     <li class="divider"></li>
 				</ul>
 		    </li>

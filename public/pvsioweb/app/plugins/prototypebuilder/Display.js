@@ -26,8 +26,13 @@ define(function (require, exports, module) {
     Display.prototype.constructor = Display;
     Display.prototype.parentClass = Widget.prototype;
     
-	Display.prototype.render = function (stateString) {
-		var state = StateParser.parse(stateString);
+    /**
+     * state is a JSON object -- the caller should use JSON.parse to transform strings into JSON objects
+     * using JSON.parse within this function affects performance, as callers may invoke render many times on the same state,
+     * e.g., when multiple display elements need to be rendered.
+     */
+	Display.prototype.render = function (state) {
+//		var state = StateParser.parse(stateString);
         var str = StateParser.resolve(state, this.displayKey());
         var dispVal = StateParser.evaluate(str);
         if (typeof dispVal === "string") {
@@ -47,6 +52,7 @@ define(function (require, exports, module) {
 			text.html(dispVal).style("left", x + "px").style("top", y + "px").style("position", "absolute")
 							  .style("width", w + "px").style("height", h + "px").style("color", "white")
 							  .style("font-size", (parseFloat(h) * 0.8) + "px");
+            
 		} else {
 //			h = h*1.5;
 			text.style("left", x + "px").style("top", y + "px").style("position", "absolute")

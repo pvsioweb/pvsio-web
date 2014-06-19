@@ -16,12 +16,15 @@ define(function (require, exports, module) {
 	    EditWidgetView            = require("pvsioweb/forms/editWidget"),
 		Button                    = require("pvsioweb/Button"),
         Display                    = require("pvsioweb/Display"),
-		NewWidgetView            = require("pvsioweb/forms/newWidget");
+		NewWidgetView            = require("pvsioweb/forms/newWidget"),
+        StateParser = require("util/PVSioStateParser");
 	var wm, mapCreator;
 	
    ///TODO this should be moved out of this file and promoted to a property, or a function parameter in createImageMap
 	function renderResponse(err, res) {
-        var state = res.data.join("");
+//        var state = res.data.join("");
+        var stateString = res.data[0];
+        var state = StateParser.parse(stateString);
 		//render displays
 		wm.getDisplayWidgets().forEach(function (w) {
 			w.render(state);

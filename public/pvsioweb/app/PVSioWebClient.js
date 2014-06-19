@@ -74,7 +74,7 @@ define(function (require, exports, module) {
 		@param {boolean} showContent Whether the default initial state of the panel is open (showContent == true) or closed (showContent == true or undefined)
         @returns {d3.selection} The div created
     */
-	PVSioWeb.prototype.createCollapsiblePanel = function (headerText, showContent) {
+	PVSioWeb.prototype.createCollapsiblePanel = function (headerText, showContent, onClickCB) {
 		var div = d3.select("#content").append("div").attr("class", "collapsible-panel-parent");
 		var header = div.append("div").classed("header", true);
 		var content = div.append("div").attr("class", "collapsible-panel");
@@ -93,6 +93,9 @@ define(function (require, exports, module) {
                     content.style("display", null);
                     d3.select(this).classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
                 }
+                if (onClickCB && typeof onClickCB === "function") {
+                    onClickCB();
+                }                
             });
 		
 		if (headerText) {

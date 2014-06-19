@@ -8,9 +8,9 @@
 define(function (require, exports, module) {
     "use strict";
     var eventDispatcher = require("util/eventDispatcher"),
-        WSManager				= require("websockets/pvs/WSManager"),
-        QuestionForm            = require("pvsioweb/forms/displayQuestion"),
-        TreeList                = require("./TreeList");
+        WSManager		= require("websockets/pvs/WSManager"),
+        QuestionForm    = require("pvsioweb/forms/displayQuestion"),
+        TreeList        = require("./TreeList");
     
     var elementId, project, ws = WSManager.getWebSocket(), fileCounter = 0, folderCounter = 0,
         unSavedFileName = "untitled_file", unSavedFolderName = "untitled_folder", treeList;
@@ -72,6 +72,10 @@ define(function (require, exports, module) {
             });
         }).addListener("Delete", function (event) {
             var path = event.data.path;
+            if (path === project.name()) {
+                alert("Cannot delete project root directory.");
+                return;
+            }
             QuestionForm.create({
                 header: "Confirm Delete",
                 question: "Are you sure you want to delete " + path + "?",
@@ -80,6 +84,7 @@ define(function (require, exports, module) {
                 //send request to remove file using the wsmanager
                 ws.send({type: "deleteFile", filePath: path}, function (err) {
                     if (!err) {
+                        treeList.selectNext(path);
                         treeList.removeItem(path);
                     } else {
                         //show error
@@ -92,8 +97,8 @@ define(function (require, exports, module) {
 
         //if there is a project add listener to changes to files etc
         if (project) {
+            var _this = this;
             project.addListener("SpecDirtyFlagChanged", function (event) {
-                console.log(event);
                 var file = event.file;
                 //set file as dirty
                 treeList.markDirty(file.path(), file.dirty());
@@ -109,6 +114,10 @@ define(function (require, exports, module) {
             });
         }
     }
+    
+    FileTreeView.prototype.fileExists = function (filepath) {
+        return treeList.nodeExists(filepath);
+    };
     
     FileTreeView.prototype.deleteItem = function (file) {
         var path = typeof file === "string" ? file : file.path();

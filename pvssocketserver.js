@@ -457,12 +457,13 @@ function run() {
                 });
             },
             "setMainFile": function (token, socket, socketid) {
-                changeProjectSetting(token.projectName, "mainPVSFile", token.fileName, function (res) {
-                    res.id = token.id;
-                    res.socketId = socketid;
-                    res.serverSent = new Date().getTime();
-                    processCallback(res, socket);
-                });
+                changeProjectSetting(token.projectName, "mainPVSFile", token.fileName)
+                    .then(function (res) {
+                        res.id = token.id;
+                        res.socketId = socketid;
+                        res.serverSent = new Date().getTime();
+                        processCallback(res, socket);
+                    });
             },
             "listProjects": function (token, socket, socketid) {
                 var result = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
@@ -518,7 +519,7 @@ function run() {
                 p = pvsioProcessMap[socketid];
                 //close the process if it exists and recreate it
                 if (p) {
-                    p.close();
+                    p.close('SIGTERM', true);
                     delete pvsioProcessMap[socketid];
                 }
                 //recreate the pvsio process
@@ -529,7 +530,7 @@ function run() {
                 p.workspaceDir(__dirname + root)
                     .start(token.data.fileName, function (token) {
                         token.socketId = socketid;
-                        processCallback(token, socket);
+//                        processCallback(token, socket); // this is not needed! the callback function is in sendCommand
                     },
                         function (res) {
                             res.id = token.id;

@@ -38,15 +38,13 @@ define(function (require, exports, module) {
     
     EmuchartsEditorModes.prototype.modeTooltip = function (mode) {
         if (mode === MODE.BROWSE) {
-            return "Click on states and transitions to select them."
-                    + "\n\nDrag mouse to move whole diagram or single states."
-                    + "\n\nRoll mouse wheel to zoom diagram";
+            return "Use the toolbar to create or edit states and transitions.";
         } else if (mode === MODE.ADD_TRANSITION) {
-            return "Drag mouse over states to create new transitions.";
+            return "Drag mouse between two states to create a new transition between the states.";
         } else if (mode === MODE.ADD_STATE) {
             return "Click on an empty area of the diagram to create a new state.";
         } else if (mode === MODE.RENAME) {
-            return "Click on states and transitions to rename them.";
+            return "Double click on states and transitions to rename them.";
         } else if (mode === MODE.DELETE) {
             return "Click on states and transitions to delete them.";
         } else { return "Error: unexpected editor mode -- please report a bug."; }
