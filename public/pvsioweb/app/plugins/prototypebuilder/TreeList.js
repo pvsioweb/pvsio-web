@@ -13,11 +13,10 @@ define(function (require, exports, module) {
         childIndent = 10,
         duration = 200,
         contextMenuItems = ["New File", "New Folder", "Rename", "Delete"],
-        selectedData,
-        cachedData;
+        selectedData;
     var globalId = 0;
-    var eventDispatcher = require("util/eventDispatcher"),
-        deepCopy = require("util/deepcopy");
+    var eventDispatcher = require("util/eventDispatcher");
+    
     /**
         Find the node with the give id
     */
@@ -59,7 +58,6 @@ define(function (require, exports, module) {
                 .append("li").attr("class", "menuitem")
                 .html(String);
             
-            cachedData = deepCopy(data, ["parent"]);
             menus.on("click", function (d) {
                 //we want to rename or delete the actually selected data but we need to add items to the selected data
                 //only if the selected item is a directory, if not a directory we want to add to the parent
