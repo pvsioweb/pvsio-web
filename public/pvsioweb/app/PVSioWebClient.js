@@ -5,8 +5,8 @@
  * @author Patrick Oladimeji
  * @date 4/19/13 17:23:31 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true*/
-/*global define, d3, require, $, brackets, _, window, MouseEvent, FormData, document, setTimeout, clearInterval, FileReader */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
+/*global define*/
 
 define(function (require, exports, module) {
     "use strict";

@@ -39,6 +39,7 @@ define(function (require, exports, module) {
     /////These are the api methods that the prototype builder plugin exposes
     PrototypeBuilder.prototype.getDependencies = function () { return []; };
     
+    ///FIXME this should have a callback or return a promise since it calls an async function "createDefaultProject"
     PrototypeBuilder.prototype.initialise = function () {
         editorContainer = pvsioWebClient.createCollapsiblePanel("PVS Editor", false, function () {
             editor.refresh();

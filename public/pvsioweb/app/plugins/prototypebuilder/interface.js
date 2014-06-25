@@ -10,13 +10,15 @@ define(function (require, exports, module) {
 	var WSManager = require("websockets/pvs/WSManager"),
         Emulink = require("plugins/emulink/Emulink"),
         GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
+        PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
 		Logger	= require("util/Logger"),
         Recorder = require("util/ActionRecorder"),
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
         Prompt  = require("pvsioweb/forms/displayPrompt"),
         Notification = require("pvsioweb/forms/displayNotification"),
         ProjectFile = require("project/ProjectFile"),
-        fs = require("util/fileHandler");
+        fs = require("util/fileHandler"),
+        PluginManager = require("plugins/PluginManager");
 	
     var template = require("text!pvsioweb/forms/maincontent.handlebars");
     
@@ -44,6 +46,7 @@ define(function (require, exports, module) {
         d3.selectAll("#record").style("display", "block");
     }
     
+	///FIXME need to distinguish between process started and process restarted
     function pvsProcessReady(err) {
         var pvsioStatus = d3.select("#lblPVSioStatus");
         pvsioStatus.select("span").remove();
@@ -89,7 +92,11 @@ define(function (require, exports, module) {
             ws.lastState("init(0)");
             if (project.mainPVSFile()) {
                 ws.startPVSProcess({fileName: project.mainPVSFile().name(),
-                                    projectName: project.name()}, pvsProcessReady);
+                                    projectName: project.name()}, function (err) {
+										pvsProcessReady(err);
+										//make projectManager bubble the process ready event
+										projectManager.fire({type: "PVSProcessReady", err: err});
+									});
             } else {
                 //close pvsio process for previous project
                 ws.closePVSProcess(function (err) {
@@ -369,17 +376,20 @@ define(function (require, exports, module) {
     });
     
     function createHtmlElements(data) {
-        data = data || {plugins: [Emulink.getInstance(), GraphBuilder.getInstance()].map(function (p) {
-            return {label: p.constructor.name, plugin: p};
-        })};
         return new MainView(data);
     }
 	module.exports = {
 		init: function (data) {
-            return createHtmlElements(data);
+            data = data || {plugins: [Emulink.getInstance(), GraphBuilder.getInstance()].map(function (p) {
+                return {label: p.constructor.name, plugin: p};
+            })};
+            PluginManager.getInstance().init();
+            if (this._view) { this.unload(); }
+            this._view = createHtmlElements(data);
+            return this._view;
         },
         unload: function () {
-            d3.select("div#content.center").remove();
+            this._view.remove();
         },
 		bindListeners: function (projectManager) {
 			bindListeners(projectManager);

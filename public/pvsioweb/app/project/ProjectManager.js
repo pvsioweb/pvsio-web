@@ -167,23 +167,24 @@ define(function (require, exports, module) {
      * @private
 	 */
 	function initFromJSON(obj) {
-		var p = new Project(obj.name), pf;
+		var p = new Project(obj.name), pf, mainFileName;
         if (obj.projectFiles) {
-            ///FIXME handle main pvs file, scripts and widgetDefinitions (maybe we dont need to)
+            ///FIXME handle scripts and widgetDefinitions (maybe we dont need to)
             obj.projectFiles.forEach(function (file) {
                 if (file && file.filePath && file.fileContent) {
                     pf = p.addProjectFile(file.filePath, file.fileContent).encoding(file.encoding);
                     if (file.filePath.indexOf(".pvsioweb") > 0) {
-                        var main = JSON.parse(file.fileContent).mainPVSFile;
-                        if (main && main !== "") {
-                            // FIXME: the file content is left undefined -- check if we ever use it!
-                            var newMainFile = new ProjectFile(main)//.content(fileContent)
-                                                .encoding("utf8");
-                            p.mainPVSFile(newMainFile);
-                        }
+                        mainFileName = JSON.parse(file.fileContent).mainPVSFile;
                     }
                 }
             });
+            //set the main pvs file
+            if (mainFileName) {
+                var file = p.getProjectFile(mainFileName);
+                if (file) {
+                    p.mainPVSFile(file);
+                }
+            }
         }
 		
 		return p._dirty(false);

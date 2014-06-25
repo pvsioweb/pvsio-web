@@ -4,7 +4,7 @@
  * @date Dec 3, 2012 : 4:42:55 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require,module, WebSocket*/
+/*global require*/
 require.config({
     baseUrl: 'pvsioweb/app',
     paths: {
@@ -19,4 +19,5 @@ require.config({
 
 require(["main"], function (main) {
     "use strict";
+	main.start();
 });

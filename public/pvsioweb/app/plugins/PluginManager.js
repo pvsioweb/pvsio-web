@@ -49,6 +49,9 @@ define(function (require, exports, module) {
         return enabledPlugins.indexOf(p) > -1 ? true : false;
     };
     
+    PluginManager.prototype.init = function () {
+        enabledPlugins = [];
+    };
     module.exports = {
         getInstance: function () {
             if (!instance) {
