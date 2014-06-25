@@ -11,7 +11,9 @@ define(function (require, exports, module) {
 	//var main = require("main");
 	var project  = require("test/Project");
 	var projectFile = require("test/ProjectFile");
-	
+	var ui = require("test/UI");
+    
+    ui.run();
 	project.run();
 	projectFile.run();
 });

@@ -4,11 +4,10 @@
  * @date 11/22/13 9:03:14 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent */
+/*global define*/
 define(function (require, exports, module) {
 	"use strict";
 	var d3 = require("d3/d3"),
-		eventDispatcher = require("util/eventDispatcher"),
         PVSioWebClient = require("PVSioWebClient");
 	
     var instance;
@@ -23,7 +22,7 @@ define(function (require, exports, module) {
         canvas;
     
     function init() {
-        canvas = PVSioWebClient.getInstance().createCollapsiblePanel("State Transitions Logger");
+        canvas = PVSioWebClient.getInstance().createCollapsiblePanel({headerText: "State Transitions Logger", owner: "GraphBuilder"});
         canvas.classed("graph-container", true);
         var svg = canvas.append("svg").attr("width", w).attr("height", h).append("g")
             .call(d3.behavior.zoom().scaleExtent([0.4, 10]).on("zoom", function () {

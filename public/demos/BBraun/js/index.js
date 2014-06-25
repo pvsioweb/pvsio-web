@@ -21,7 +21,7 @@ require(["cursorDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioWebClient"]
     var w = 228, h = 64;
 	var client = PVSioWebClient.getInstance();
     //create a collapsible panel using the pvsiowebclient instance
-    var imageHolder = client.createCollapsiblePanel("BBraun Space", true).style("position", "relative");
+    var imageHolder = client.createCollapsiblePanel({headerText: "BBraun Space", showContent: true}).style("position", "relative");
     //insert the html into the panel (note that this could have used templates or whatever)
     imageHolder.html('<img src="image.png" usemap="#prototypeMap"/>');
     //append a div that will contain the canvas element

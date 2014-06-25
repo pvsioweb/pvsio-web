@@ -264,7 +264,7 @@ define(function (require, exports, module) {
 	Emulink.prototype.createHtmlElements = function () {
         var _this = this;
 		var content = require("text!plugins/emulink/forms/maincontent.handlebars");
-        canvas = pvsioWebClient.createCollapsiblePanel("Emulink");
+        canvas = pvsioWebClient.createCollapsiblePanel({headerText: "Emulink", owner: "Emulink"});
         canvas = canvas.html(content);
 		var infoBox = document.getElementById("EmuchartsEditorMode");
 		if (infoBox) {

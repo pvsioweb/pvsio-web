@@ -74,15 +74,18 @@ define(function (require, exports, module) {
 		@param {boolean} showContent Whether the default initial state of the panel is open (showContent == true) or closed (showContent == true or undefined)
         @returns {d3.selection} The div created
     */
-	PVSioWeb.prototype.createCollapsiblePanel = function (headerText, showContent, onClickCB) {
+	PVSioWeb.prototype.createCollapsiblePanel = function (options) {
+		options = options || {};
+
 		var div = d3.select("#content").append("div").attr("class", "collapsible-panel-parent");
 		var header = div.append("div").classed("header", true);
 		var content = div.append("div").attr("class", "collapsible-panel");
 		
 		header.append("span")
 			.attr("class", function () {
-				if (showContent === true) { return "toggle-collapse glyphicon glyphicon-minus-sign"; }
-				return "toggle-collapse glyphicon glyphicon-plus-sign";
+				return options.showContent === true ?
+					"toggle-collapse glyphicon glyphicon-minus-sign" :
+						"toggle-collapse glyphicon glyphicon-plus-sign";
             })
 			.on("click", function () {
                 var d = d3.select(this);
@@ -93,15 +96,17 @@ define(function (require, exports, module) {
                     content.style("display", null);
                     d3.select(this).classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
                 }
-                if (onClickCB && typeof onClickCB === "function") {
-                    onClickCB();
+                if (options.onClick && typeof options.onClick === "function") {
+                    options.onClick();
                 }                
             });
-		
-		if (headerText) {
-			header.append("span").html(headerText).attr("class", "header");
+		if (options.owner) {
+			div.attr("plugin-owner", options.owner);
 		}
-		if (!showContent) { content.style("display", "none"); }
+		if (options.headerText) {
+			header.append("span").html(options.headerText).attr("class", "header");
+		}
+		if (!options.showContent) { content.style("display", "none"); }
 		return content;
 	};
     

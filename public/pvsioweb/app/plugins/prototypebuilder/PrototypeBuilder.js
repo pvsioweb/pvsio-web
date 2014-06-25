@@ -41,9 +41,9 @@ define(function (require, exports, module) {
     
     ///FIXME this should have a callback or return a promise since it calls an async function "createDefaultProject"
     PrototypeBuilder.prototype.initialise = function () {
-        editorContainer = pvsioWebClient.createCollapsiblePanel("PVS Editor", false, function () {
+        editorContainer = pvsioWebClient.createCollapsiblePanel({headerText: "PVS Editor", showContent: false, onClick: function () {
             editor.refresh();
-        });
+        }, owner: "PrototypeBuilder"});
         editorContainer.append("div").html(sourceCodeTemplate);
 
         // this enables autocompletion

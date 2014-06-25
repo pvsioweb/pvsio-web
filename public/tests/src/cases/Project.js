@@ -13,7 +13,7 @@ define(function (require, exports, module) {
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
         ProjectFile = require("project/ProjectFile"),
         baseProjectDir = "projects",
-        alarisProjectDir = baseProjectDir + "/AlarisPC";
+        alarisProject = "AlarisPC";
     
 	module.exports = {
 		run: function () {
@@ -31,7 +31,7 @@ define(function (require, exports, module) {
 					main.start();
 				});
                 
-				it("user interface is all loaded", function (done) {
+				it("user interface is loaded and there is connection to the websocket server and pvs process", function (done) {
 					var websocketStatusOK = d3.select("#lblWebSocketStatus span").classed("glyphicon-ok"),
 						pvsioStatusOK = d3.select("#lblPVSioStatus span").classed("glyphicon-ok");
 
@@ -62,7 +62,7 @@ define(function (require, exports, module) {
                     
                     it("should open project correctly", function (done) {
                         pm.openProject("AlarisPC", function (openedProject) {
-                            expect(pm.project().name()).toEqual(openedProject.name());
+                            expect(alarisProject).toEqual(openedProject.name());
                             done();
                         });
                     });
