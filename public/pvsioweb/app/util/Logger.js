@@ -4,7 +4,7 @@
  * @date 11/15/13 15:26:47 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent, document */
+/*global define, d3, document */
 define(function (require, exports, module) {
 	"use strict";
     /**

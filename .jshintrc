@@ -8,5 +8,5 @@
     "devel": true,
     "browser": true,
     "laxbreak": true,
-    "predef": ["Promise", "require"]
+    "globals": ["Promise", "require"]
 }
