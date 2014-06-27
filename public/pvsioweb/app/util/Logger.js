@@ -4,17 +4,16 @@
  * @date 11/15/13 15:26:47 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent, document */
+/*global define, d3, document */
 define(function (require, exports, module) {
 	"use strict";
-	
     /**
      * log the message
         @private
      */
     function log(msg) {
         console.log(msg);
-        d3.select("#console").insert('p', 'p').html(msg);
+        d3.select("#console").insert('p', 'p').html(typeof msg === "object" ? msg.toString() : msg);
     }
 
     /**
@@ -44,7 +43,7 @@ define(function (require, exports, module) {
         var c = document.getElementById('specification_log');
         c.innerHTML = msg + "<br>" + c.innerHTML;
     }
-
+    
 	module.exports = {
 		log: log,
 		console_log: console_log,

@@ -1,32 +1,63 @@
-<div id="content" class="center">
-		<div id="header">
+<div id="content" class="center prototypebuilder">
+		<div id="header" class="btn-group">
 			<a class="btn btn-default" id="newProject"><span class="glyphicon glyphicon-file"></span> New Project</a>
 			<a class="btn btn-default" id="openProject"><span class="glyphicon glyphicon-folder-open"></span> Open Project</a>
-			<a class="btn btn-default" id="saveProject"><span class="glyphicon glyphicon-hdd"></span> Save Project</a>
+			<a class="btn btn-default" id="btnSaveProject"><span class="glyphicon glyphicon-hdd"></span> Save Project</a>
 			<a class="btn btn-default" id="btnLoadPicture"><span class="glyphicon glyphicon-picture"></span> Change Picture</a>
-			<input type="file" class="hide" id="btnSelectPicture" name="selectPicture">
-			<span>    Project  </span>
-			<input type="text" placeholder="Untitled Project" id="txtProjectName" value="" class="input-Med" readonly="readonly">
+			<input type="file" class="hide" id="btnSelectPicture" name="selectPicture" accept="image/*">
+            
+            <div class="btn-group">
+                    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btnPlugins">
+                        Plugins <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        {{#each plugins}}
+                        <li>
+                            <label>&nbsp;<input type="checkbox" name="{{label}}" id="plugin_{{label}}">
+                            <span>{{label}}</span>
+                            </label>
+                        </li>
+                        {{/each}}
+                    </ul>
+            </div>
+			<div class="project-notifications">
+                <input type="text"
+                       placeholder="Untitled Project"
+                       id="txtProjectName"
+                       value=""
+                       readonly="readonly"
+                       disabled="true">
+                <div id="project-notification-area"></div>
+            </div>
 		</div>
 		<div id="body">
 			<div id="imageDiv">
+                <span id="record" class="glyphicon glyphicon-record"> Record</span>
+                <span id="play" class="glyphicon glyphicon-play"> Play</span>
 				<div id="imageDragAndDrop" class="dndcontainer">
 					<span class="center">Drag  user interface picture here or if you prefer, use the button below</span>
 					<br/>
 					<button class="btn btn-primary center" id='btnLoadPicture'> Load Picture</button>
 				</div>
-				<img src="pvsioweb/image/start.png" usemap="#prototypeMap" />
-				<div id='console'></div>
+				<img src="image/start.png" usemap="#prototypeMap" />
+				
 			</div>
+            <div id="rightPanel">
+                <div id='console'></div>
+                <!-- container for specification source code -->
+			    <div id="scripts"> 
+                    <ul class="list-group">
+    
+                    </ul>
+                </div>
+            </div>
 			<div id="controlsContainer">
 				<button id="btnBuilderView">Builder View</button>
 				<button id="btnSimulatorView">Simulator View</button>
                 <a id="lblWebSocketStatus" class="status right">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
                 <a id="lblPVSioStatus" class="status right">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
 			</div>
-	
-			<!-- container for specification source code -->
-			
+	                    
 			<div id='logsDiv'>
 				<div id='pvsio_commands_log_Container' class='pvsio-log-container'>
 					<h2>GUI frontend commands</h2>
@@ -40,7 +71,7 @@
 		</div>
 	
 	</div>
-	
 	<map name="prototypeMap" id="prototypeMap">
 	
 	</map>
+    <div id="audio"></div>

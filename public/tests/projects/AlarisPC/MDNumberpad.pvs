@@ -1,0 +1,123 @@
+MDNumberpad: THEORY
+ BEGIN IMPORTING constants 
+  
+  state: TYPE = [#
+    dispval       : float,
+    display       : { s: string | s`length <= MAIN_DISPLAY_SIZE + 1 },
+    dotEntered    : bool,
+    decimalDigits : { x: integer | x >= 0 },
+    rejectKeys    : bool,
+    programmedValue: float
+  #]
+
+  digitClicked(key: KEY_CODE)(st: state): state = 
+    LET tmp: float = dispval(st),
+
+        (tmp, st) =
+        if(dotEntered(st)) %{ 
+	then	if(decimalDigits(st) < MAX_DECIMAL_DIGITS) %{
+		then	if(NOT(tmp >= THRESHOLD_ONE_DECIMAL AND decimalDigits(st) = 0
+			      OR tmp >= THRESHOLD_TWO_DECIMALS AND decimalDigits(st) = 1)) 
+			then %{
+			      LET PPdecimalDigits = decimalDigits(st) + 1
+			       IN (tmp + key * pow10(-1 * PPdecimalDigits), st WITH [ decimalDigits := PPdecimalDigits])
+			%}
+			else (tmp, st) endif
+		%}
+		% else ignore digits
+		else (tmp, st) endif
+	%}
+	else %{ 
+	     (tmp * 10 + key, st) endif 
+	%}
+     IN
+	if(tmp >= 0 AND tmp < MAX_RATE) %{
+	then	LET st = st WITH [ dispval := tmp ]
+		 IN      st WITH [ display := snprintf(dispval(st), MAIN_DISPLAY_SIZE)(dotEntered(st), decimalDigits(st)) ]
+	%}
+	else %{ 
+		st WITH [ display := message(TOO_HIGH),
+		          rejectKeys := true ] endif
+	%}
+
+  dotClicked(st: state): state =
+	if(NOT rejectKeys(st) AND NOT dotEntered(st) AND dispval(st) < THRESHOLD_ONE_DECIMAL) %{
+	then st WITH [ dotEntered := true,
+		       display := strcat(display(st),".") ]
+	%}
+	% else ignore decimal digit
+	else st endif
+
+  okClicked(st: state): state =
+	if(NOT rejectKeys(st)) %{
+	then	if(dispval(st) >= MIN_RATE) %{
+		then	st WITH [ programmedValue := dispval(st),
+			   	  display := "Value accepted" ]
+		%}
+		else %{
+			st WITH [ display := message(OUT_OF_RANGE),
+			          rejectKeys := true ] endif
+		%}
+	else    st endif
+	%}
+
+  cancelClicked(st: state): state =
+	if(NOT rejectKeys(st)) %{
+	then st WITH [ dispval := 0,
+		       display := snprintf(dispval(st), MAIN_DISPLAY_SIZE)(FALSE, 0),
+		       dotEntered := false,
+		       decimalDigits := 0 ]
+	%}
+	else %{ // cancel error message and display last valid value
+	     st WITH [ display := snprintf(dispval(st), MAIN_DISPLAY_SIZE)(dotEntered(st), decimalDigits(st)) ] endif
+	%}
+
+
+  resetClicked(st: state): state = 
+   st WITH [
+    dispval := 0,
+	display := snprintf(0, MAIN_DISPLAY_SIZE)(FALSE,0),
+	dotEntered := false,
+	decimalDigits := 0,
+	rejectKeys := false,
+	programmedValue := 0 ]
+  
+
+  EXCEPTION(errType: int, key: int, val: unsigned_long_int)(st: state): state =
+	st WITH [ display := snprintf(errType + ":" + key + ":" + val),
+	          rejectKeys := true ]
+
+  processKey(key: KEY_CODE)(st: state): state =
+   if(programmedValue(st) = 0 OR key = KEY_RESET OR key = KEY_CANCEL) then
+    COND
+	 key = KEY_0 OR key = KEY_1 OR key = KEY_2 OR key = KEY_3 OR key = KEY_4
+	  or key = KEY_5 OR key = KEY_6 OR key = KEY_7 OR key = KEY_8 OR key = KEY_9
+               -> digitClicked(key)(st),
+
+         key = KEY_DOT 
+               -> dotClicked(st),
+
+	 key = KEY_OK  
+	       -> okClicked(st),
+	
+	 key = KEY_CANCEL
+	       -> cancelClicked(st),
+
+	 key = KEY_RESET
+               -> resetClicked(st),
+
+         ELSE % unrecognised key - call exception handler
+	       -> EXCEPTION(INVALID_KEY, key, dispval(st))(st)
+   ENDCOND
+    else st endif	
+
+   init_numberpad(x: real): state = (#
+   	dispval := x,
+	display := snprintf(x, MAIN_DISPLAY_SIZE)(FALSE,0),
+	dotEntered := false,
+	decimalDigits := 0,
+	rejectKeys := false,
+	programmedValue := 0
+   #)
+
+ END MDNumberpad

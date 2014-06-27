@@ -179,33 +179,25 @@
   {
    "type": "display",
    "id": "display_e0b89889-bf33-453a-ce07-446dc551e810",
-   "regex": "display:=(\\\"[\\w\\s._]+\\\")",
-   "predefinedRegex": "\n                            Numeric\n                            String\n                            Custom\n                        ",
-   "prefix": "display",
+   "displayKey": "display",
    "cursorName": ""
   },
   {
    "type": "display",
    "id": "display_19b324b6-b2de-4445-969b-4e10fdfdf6e3",
-   "regex": "programmedRate:=([0-9/.]+)",
-   "predefinedRegex": "[0-9/.]+",
-   "prefix": "programmedRate",
+   "displayKey": "programmedRate",
    "cursorName": ""
   },
   {
    "type": "display",
    "id": "display_0a477fe2-309f-40d0-c4f0-8eaf8c98d288",
-   "regex": "dispHigh:=([0-9/.]+)",
-   "predefinedRegex": "[0-9/.]+",
-   "prefix": "dispHigh",
+   "displayKey": "dispHigh",
    "cursorName": ""
   },
   {
    "type": "display",
    "id": "display_ad85831f-f97a-4ac4-ab5c-39d4020a2095",
-   "regex": "dispLow:=([0-9/.]+)",
-   "predefinedRegex": "[0-9/.]+",
-   "prefix": "dispLow",
+   "displayKey": "dispLow",
    "cursorName": ""
   },
   {
@@ -222,73 +214,55 @@
   {
    "type": "display",
    "id": "display_9aa2df29-b209-4f23-81fd-b51c906bdcc7",
-   "regex": "label0:=(\\\"[\\w\\s._]+\\\")",
-   "predefinedRegex": "\n                            Numeric\n                            String\n                            Custom\n                        ",
-   "prefix": "label0",
+   "displayKey": "label0",
    "cursorName": ""
   },
   {
    "type": "display",
    "id": "display_ef11279c-9742-40eb-9111-a453a2554750",
-   "regex": "label1:=(\\\"[\\w\\s._]+\\\")",
-   "predefinedRegex": "\n                                    Numeric\n                                    String\n                                    Custom\n                                ",
-   "prefix": "label1",
+   "displayKey": "label1",
    "cursorName": ""
   },
   {
    "type": "display",
    "id": "display_cad1e854-9fe8-4211-cacd-4d9f532bd6b2",
-   "regex": "label2:=(\\\"[\\w\\s._]+\\\")",
-   "predefinedRegex": "\n                                    Numeric\n                                    String\n                                    Custom\n                                ",
-   "prefix": "label2",
+   "displayKey": "label2",
    "cursorName": ""
   },
   {
    "type": "display",
    "id": "display_5f2ff394-246e-4ca6-8c6f-acfffd9b4653",
-   "regex": "label3:=(\\\"[\\w\\s._]+\\\")",
-   "predefinedRegex": "\n                                    Numeric\n                                    String\n                                    Custom\n                                ",
-   "prefix": "label3",
+   "displayKey": "label3",
    "cursorName": ""
   },
   {
    "type": "display",
    "id": "display_612d5d46-9d90-4f66-d290-89f07e68e3f6",
-   "regex": "displayError:=(\\\"[\\w\\s._]+\\\")",
-   "predefinedRegex": "\n                                    Numeric\n                                    String\n                                    Custom\n                                ",
-   "prefix": "displayError",
+   "displayKey": "displayError",
    "cursorName": ""
   },
   {
    "type": "display",
    "id": "display_9aaf0dc5-cba3-4740-ba2f-e21268a285a9",
-   "regex": "units:=(\\\"[\\w\\s._//]+\\\")",
-   "predefinedRegex": "\n                            Numeric\n                            String\n                            Custom\n                        ",
-   "prefix": "units",
+   "displayKey": "units",
    "cursorName": ""
   },
   {
    "type": "display",
    "id": "display_a336cc9d-c573-4684-d2d3-8b0e085bb82f",
-   "regex": "dispInfo:=(\\\"[\\w\\s._]+\\\")",
-   "predefinedRegex": "\n                                    Numeric\n                                    String\n                                    Custom\n                                ",
-   "prefix": "dispInfo",
+   "displayKey": "dispInfo",
    "cursorName": ""
   },
   {
    "type": "display",
    "id": "display_7e715eb2-79d1-4ffb-8343-7cb820d45b33",
-   "regex": "dispHIGH:=(\\\"[\\w\\s._:]+\\\")",
-   "predefinedRegex": "\n                            Numeric\n                            String\n                            Custom\n                        ",
-   "prefix": "dispHIGH",
+   "displayKey": "dispHIGH",
    "cursorName": ""
   },
   {
    "type": "display",
    "id": "display_1c064f0a-d534-4987-9f31-58ab6aad5348",
-   "regex": "dispLOW:=(\\\"[\\w\\s._:]+\\\")",
-   "predefinedRegex": "\n                                    Numeric\n                                    String\n                                    Custom\n                                ",
-   "prefix": "dispLOW",
+   "displayKey": "dispLOW",
    "cursorName": ""
   }
  ],
@@ -297,97 +271,97 @@
    "class": "button_44e10de2-1935-4245-8439-f3e24a8d90c0",
    "shape": "rect",
    "coords": "90.33332824707031,429.6666564941406,136.3333282470703,476.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_c0d9a7f0-98c6-4bd0-8340-4bb0983a1205",
    "shape": "rect",
    "coords": "406.33331298828125,446.6666564941406,476.33331298828125,487.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_869fb36d-8794-4c6c-b555-eb50d00939c1",
    "shape": "rect",
    "coords": "295.33331298828125,445.6666564941406,366.33331298828125,482.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_76896e50-261c-4006-f6ce-d87d8b30af08",
    "shape": "rect",
    "coords": "523.3333129882812,448.6666564941406,595.3333129882812,485.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_efdbbb1c-f143-4562-d429-10a90ef488f2",
    "shape": "rect",
    "coords": "626.3333129882812,449.6666564941406,690.3333129882812,488.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_59cf3d14-18d5-42c5-ec57-3b403aa33904",
    "shape": "rect",
    "coords": "646.3333129882812,309.6666564941406,694.3333129882812,349.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_99c01cef-0597-490a-f753-3dbc267e1eb0",
    "shape": "rect",
    "coords": "699.3333129882812,309.6666564941406,743.3333129882812,350.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_b3de0749-7e31-4a77-cce8-6368fa025063",
    "shape": "rect",
    "coords": "747.3333129882812,309.6666564941406,796.3333129882812,350.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_3f2b9b76-8fb5-4cac-ba6c-8148a7550fb6",
    "shape": "rect",
    "coords": "647.3333129882812,354.6666564941406,696.3333129882812,396.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_7ae30ab7-d64e-4227-fb48-77fbf190ff6d",
    "shape": "rect",
    "coords": "700.3333129882812,353.6666564941406,746.3333129882812,396.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_e0b04303-c88b-43df-dce3-8940eebc843a",
    "shape": "rect",
    "coords": "750.3333129882812,353.6666564941406,798.3333129882812,394.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_eec77b2f-9d8d-4666-891c-61a5ab226d30",
    "shape": "rect",
    "coords": "647.3333129882812,401.6666564941406,698.3333129882812,442.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_ced32367-3d10-4c3e-d2fa-2bfc86c6633d",
    "shape": "rect",
    "coords": "702.3333129882812,402.6666564941406,748.3333129882812,442.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_79676060-1202-42ce-dcc0-52455b4fdbd4",
    "shape": "rect",
    "coords": "751.3333129882812,400.6666564941406,799.3333129882812,443.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_a576d43d-0a96-49bf-8a9c-d8c3da29f9ed",
    "shape": "rect",
    "coords": "699.3333129882812,446.6666564941406,751.3333129882812,493.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "button_d52197a9-b8d9-4e6a-f9ce-bfced07784c2",
    "shape": "rect",
    "coords": "755.3333129882812,445.6666564941406,803.3333129882812,493.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "display_e0b89889-bf33-453a-ce07-446dc551e810",
@@ -417,7 +391,7 @@
    "class": "button_ad86b1f2-c0f9-4066-8f1c-192a1adb30d1",
    "shape": "rect",
    "coords": "178.6666717529297,442.6666564941406,255.6666717529297,483.6666564941406",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "display_9aa2df29-b209-4f23-81fd-b51c906bdcc7",
@@ -470,7 +444,7 @@
   {
    "class": "display_1c064f0a-d534-4987-9f31-58ab6aad5348",
    "shape": "rect",
-   "coords": "217.6666717529297,380.6666564941406,262.6666717529297,395.6666564941406",
+   "coords": "217,379,261,395",
    "href": null
   }
  ]

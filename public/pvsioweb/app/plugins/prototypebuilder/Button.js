@@ -10,7 +10,8 @@ define(function (require, exports, module) {
     "use strict";
     var Widget = require("./Widget"),
 		property = require("util/property"),
-		Timer	= require("util/Timer");
+		Timer	= require("util/Timer"),
+        Recorder    = require("util/ActionRecorder");
 	//define timer for sensing hold down actions on buttons
 	var btnTimer = new Timer(250), timerTickFunction = null;
 	//add event listener for timer's tick 
@@ -95,34 +96,44 @@ define(function (require, exports, module) {
 			widget = this,
 			f,
 			events;
-		area.on("mousedown", function () {
+        area.on("mousedown", function () {
 			f = widget.functionText();
 			events = widget.events();
 			//perform the click event if there is one
 			if (events && events.indexOf('click') > -1) {
+//                console.log("button clicked");
 				ws.sendGuiAction("click_" + f + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");", callback);
+                //record action 
+                Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "click", ts: new Date().getTime()});
 			}
 			
 			timerTickFunction = function () {
-				console.log("button pressed");
+//				console.log("button pressed");
 				if (events && events.indexOf('press/release') > -1) {
 					ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
+                    //record action
+                    Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
 				}
 			};
 			btnTimer.interval(widget.recallRate()).start();
 		}).on("mouseup", function () {
+//            console.log("button released");
 			if (btnTimer.getCurrentCount() > 0) {
 				var f = widget.functionText();
 				if (events && events.indexOf('press/release') > -1) {
 					ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
+                    Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "release", ts: new Date().getTime()});
 				}
 			}
 			mouseup(d3.event);
 		}).on("mouseout", function () {
+//            console.log("button released");
 			if (btnTimer.getCurrentCount() > 0) {
 				var f = widget.functionText();
 				if (events && events.indexOf('press/release') > -1) {
 					ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
+                    //add action
+                    Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "release", ts: new Date().getTime()});
 				}
 			}
 			mouseup(d3.event);

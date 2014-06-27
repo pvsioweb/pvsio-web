@@ -1,3 +1,7 @@
+.main-file a: after {
+    content: " [main]"
+}
+
 span.toggle-collapse {
 	display: inline-block;
 	width: 25px;
@@ -34,6 +38,14 @@ div.header {
 #graphicalEditor{
 	position:       relative;
 }
+
+#graphicalEditor.hidden {
+	display: none;
+}
+#graphicalEditor.block {
+	display: block;
+}
+
 
 #content{
 	width: 1130px;
@@ -80,8 +92,7 @@ div.downloader{
 }
 #header{
 	height: 50px;
-	padding: 15px;
-	padding-left: 0px;
+	padding: 15px 0 0 0;
 }
 .center{
 	margin-right: auto;
@@ -109,7 +120,6 @@ area{
 #imageDiv{
 	position: relative;
 	border: 1px solid black;
-	width: 910px;
 }
 #controlsContainer{
 	position: relative;
@@ -142,11 +152,13 @@ fileListItem.hide {
 	display: none;	
 }
 
+/*
 #pvsFiles ul {
     list-style-type: none;
     margin: 0;
 	padding:0;
 }
+*/
 .list-icon {
     display: inline-block;
     width: 14px;
@@ -158,6 +170,23 @@ fileListItem.hide {
     height: 400px;
    	position:relative;
 }
+#editor-notification-area {
+    float: right;
+    width: 350px;
+    height: 35px;
+    border: grey solid;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 10px;
+    padding: 6px 0 0 10px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
+#editor-notification-area p {
+    text-align: center;
+}
 
 #pvsFiles {
     position: absolute;
@@ -166,34 +195,20 @@ fileListItem.hide {
     height: 400px;
     border: 1px solid #ddd;
     right: 0px;
-	overflow-y: scroll;
-	font-size:12px;
+	overflow-y: auto;
+	font-size:15px;
+    padding: 0px;
+    color: #999;
   }
 
 #editor{
 	z-index: 30;
 	width: 900px;
 	height: 400px;
-	border: 1px solid black;
+	border: 1px solid #ddd;
     display: inline-block;
 }
 
-#pvsFiles .fileListItem {
-    position:relative;
-    padding: 3px 5px 3px 3px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-	overflow: hidden;
-}
-
-#pvsFiles.drag-over{
-    border:3px dashed #393;
-}
-#pvsFiles .file-label {
-    width: 140px;
-    display: inline-block;
-    overflow: hidden;
-}
 .fileListItem.dirty .list-icon-dirty{
     background-image:url(../bootstrap/img/glyphicons-halflings.png);
     background-position:-456px -96px;
@@ -237,17 +252,22 @@ fileListItem.hide {
 }
 /*** end source code section **/
 
-
 #console {
+    height: 50%;
+    width: 100%;
+    overflow-y: scroll;
+    color: white;
+}
+#rightPanel {
 	position: absolute;
-	top:0px;
+	top:70px;
 	right: -220px;
 	height: 100%;
 	width: 200px;
-	color: white;
 	background: #333;
-	padding: 10px;
+	padding: 0;
 	font: 10px Arial;
+    overflow: hidden;
 }
 
 #pvsio_commands_log {
@@ -327,7 +347,7 @@ intput:invalid, select:invalid{
 	border: 4px dashed teal;
 	height: 100%;
 	width: 100%;
-	z-index: 999999;
+	z-index: 191;
 }
 
 #specDragAndDrop.dndcontainer{
@@ -345,7 +365,7 @@ intput:invalid, select:invalid{
 }
 .detailsForm {
 	position: absolute;
-	z-index: 200;
+	z-index: 4;
 	background: white;
 	padding: 30px;
 	cursor: move;
@@ -364,6 +384,35 @@ div.detailsForm select, div.detailsForm textarea{
 	margin-top: 20px;
 }
 
+#header .project-notifications {
+    float: right;
+    width: 500px;
+    margin: 0 0 0 22px;
+}
+
+#header .project-notifications input {
+    margin-top: 4px;
+    width: 160px;
+    text-align: center;
+}
+
+#project-notification-area {
+    float: right;
+    width: 330px;
+    height: 34px;
+    font-size: 10px;
+    padding: 6px 0 0 10px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    white-space: nowrap;
+    border: grey solid;
+    border-radius: 5px;
+}
+
+#project-notification-area p {
+    text-align: center;
+}
+
 .tab-content {
 	margin-top: 20px;
 }
@@ -374,9 +423,76 @@ div.detailsForm select, div.detailsForm textarea{
 }
 
  .overlay .panel {
-    width: 500px;
+    width: 540px;
 }
 
 .panel-footer {
     min-height:50px;
+}
+
+#scripts {
+    height: 50%;
+    width: 100%;
+    right: 1px;
+    background: #eee;
+    overflow-y: scroll;
+    font-size: 12pt;
+}
+
+#scripts .scriptItem span.badge {
+    font-size: 10px;
+}
+
+#scripts .scriptItem {
+    cursor: pointer;
+    font-size: 10px;
+}
+#play {
+    position: absolute;
+    display: none;
+    top: 50px;
+    right: 5px;
+    -webkit-border-radius: 10px;
+    padding: 10px;
+    background: #444;
+    color: #26c95e;
+    cursor: pointer;
+    border: 1px solid white;
+}
+
+#record {
+    position: absolute;
+    display: none;
+    top: 5px;
+    right: 5px;
+    -webkit-border-radius: 10px;
+    padding: 10px;
+    background: #e00404;
+    color: white;
+    cursor: pointer;
+    border: 1px solid white;
+}
+
+.animation-halo {
+    position: absolute;
+    border: 3px solid orange;
+    background: rgb(33, 110, 209);
+    opacity: 0.4;
+}
+
+@keyframes fade {
+    from { opacity: 1.0; }
+    50% { opacity: 0.0; }
+    to { opacity: 1.0; }
+}
+
+.recording {
+    -webkit-animation:fade 3000ms infinite;
+}
+
+.btn-group > span {
+    position: absolute;
+    width: 712px;
+    padding-left: 216px;
+    padding-top: 8px;
 }

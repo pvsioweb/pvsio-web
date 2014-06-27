@@ -1,96 +1,152 @@
-<!-- container for graphical editor -->
-<div id="graphicalEditor">
+<!-- container for overlay page with Start button -->
+<div id="EmuchartLogo" class="Start">
+    <span class="center">Load a saved diagram, or create a new empty diagram with the buttons below</span>
+    <br/>
+    <button class="btn btn-primary" id="btnLoadEmuchart"> Load Emuchart </button>
+    <button class="btn btn-danger" id="btnNewEmuchart"> New Emuchart </button>
+</div>
 
-<!--
-	<div id="stateMachineToolbar" >
-		<button class="btn btn-danger" id="startEmulink"    > New Diagram </button>
-		<button class="btn" id ="zoom" disabled="true";> Zoom + </button>
-		<button class="btn" id ="zoom_" disabled="true"> Zoom -</button>
-		<button class="btn" id ="resetZoom" disabled="true"> Reset Zoom </button>
-		<button class="btn" id="specificationToDiagram"     > Generate Diagram from Specification </button>
-		<button class="btn btn-default" id="startSimulation"> Enable Animation</button>
-		<button class="btn" id="toPDF" disabled = "true" > Create PDF Report </button>
-		<a id="downloadPDF" href="" download="Emulink PDF Report" style="display: none;"> Download PDF Report</a>
-        
-	</div>
-    <div id="modifyPropertiesToolbar" >
-        <button id="button_state" disabled = "true"  > New State </button>
-        <button id="changeNameNode" disabled = "true"> Edit State Name</button> 
-        <button id="addFieldState"  disabled = "true"> Add Field</button> 
-        <button id="deleteNode"    disabled= "true"> Delete node </button>
-		<br><br>
-        <button id="button_transition" disabled = "true"> New Transition </button>
-        <button id="button_self_transition" disabled = "true"> New Self-Transition </button>
-        <button id="deleteEdge" disabled = "true" > Delete edge </button>
-        <button id="changeNameEdge" disabled = "true" > Edit Transition Name</button>
-        <button id="addCondition"  disabled = "true" > Add Condition</button>
-        <button id="addOperation" disabled = "true"  > Add Action</button>
-    </div><br>
--->
+<!-- container for graphical editor -->
+<div id="graphicalEditor" class="hidden">
+    <div id="EmuchartToolbar" >
+        <ul class="dropdown dropdown-vertical">
+            <li class='toolbar'>
+                <hr>
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarBrowse">
+                    <span title="Browse diagram"
+                          class="glyphicon glyphicon-arrow-right" 
+                          style="font-size: 1.2em 
+                                 -ms-transform:rotate(-120deg); /* IE 9 */
+                                 -moz-transform:rotate(-120deg); /* Firefox */
+                                 -webkit-transform:rotate(-120deg); /* Safari and Chrome */
+                                 -o-transform:rotate(-120deg); /* Opera */
+                                 padding-left: 1px;">
+                    </span></a>
+                <hr>
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarZoomIn">
+                    <span title="Zoom-in"
+                          class="glyphicon glyphicon-zoom-in" 
+                          style="font-size: 1.2em;">
+                    </span></a>
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarZoomOut">
+                    <span title="Zoom-out"
+                          class="glyphicon glyphicon-zoom-out" 
+                          style="font-size: 1.2em;">
+                    </span></a>
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarZoomReset">
+                    <span title="Zoom-reset"
+                          class="glyphicon glyphicon-fullscreen"
+                          style="font-size: 1.2em;">
+                    </span></a>
+                <hr>
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarAddState">
+                    <span title="Add states"
+                          class="glyphicon glyphicon-stop" 
+                          style="font-size: 1.2em
+                                 transform: scale(1.4,1);
+                                 -ms-transform: scale(1.4,1); /* IE 9 */
+                                 -webkit-transform: scale(1.4,1); /* Safari and Chrome */
+                                 -o-transform: scale(1.4,1); /* Opera */
+                                 -moz-transform: scale(1.4,1); /* Firefox */">
+                    </span></a>
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarAddTransition">
+                    <span title="Add transitions"
+                          class="glyphicon glyphicon-new-window" 
+                          style="font-size: 1.2em">
+                    </span></a>
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarRename">
+                    <span title="Rename states and transitions"
+                          class="glyphicon glyphicon-font" 
+                          style="font-size: 1.2em">
+                    </span></a>
+                <a href="#!" class="toolbar-tooltip" id="btn_toolbarDelete">
+                    <span title="Delete states and transitions"
+                          class="glyphicon glyphicon-fire" 
+                          style="font-size: 1.2em">
+                    </span></a>                
+                <hr>
+            </li>
+        </ul>
+    </div>
 	<div id="stateMachineMenu" >
 		<ul class="dropdown dropdown-horizontal">
-<!--			<li><a href='#!' id="newDiagram" class="active"><span>New Diagram</span></a></li> -->
-			<li class='active has-sub'><a href='#!'><span>States</span></a>
+            <li class="vdivider"><a href='#!' class="toolbar-tooltip">&nbsp;</a>
+            </li>
+            <li class='active has-sub' id="menuEmuchart"><a href='#!'><span>EmuChart</span></a>
+                <ul>
+					<li class="divider"></li>
+                    <li><a href='#!' id="btn_menuNewChart"><span>New</span></a></li>
+					<li><a href='#!' id="btn_menuOpenChart"><span>Open...</span></a></li>
+					<li><a href='#!' id="btn_menuCloseChart"><span>Close</span></a></li>
+                    <li class="divider"></li>
+                    <li><a href='#!' id="btn_menuSaveChart"><span>Save</span></a></li>
+<!--                    <li><a href='#!Save as...' id="btn_saveChartAs"><span>Save as...</span></a></li>-->
+<!--                    <li><a href='#!' id="btn_saveAllCharts"><span>Save all</span></a></li>-->
+                    <li class="divider"></li>
+                    <li><a href='#!' id="btn_menuQuitEmulink"><span>Quit</span></a></li>
+                    <li class="divider"></li>
+                </ul>
+            </li>
+            <li class='active has-sub' id="menuStates"><a href='#!'><span>States</span></a>
 				<ul>
-					<li><a href='#!' id="button_state"><span>New state</span></a></li>
-					<li><a href='#!' id="changeNameNode"><span>Rename selected state</span></a></li>
-					<li><a href='#!' id="deleteNode"><span>Delete selected state and the associated transitions</span></a></li>
+                    <li class="divider"></li>
+					<li><a href='#!' id="btn_menuNewState"><span>New state</span></a></li>
+					<li><a href='#!' id="btn_menuRenameState"><span>Rename state</span></a></li>
+					<li><a href='#!' id="btn_menuDeleteState"><span>Delete state</span></a></li>
+                    <li class="divider"></li>
 				</ul>
 			</li>
-			<li class='active has-sub'><a href='#!'><span>Transitions</span></a>
+            <li class='active has-sub' id="menuTransitions"><a href='#!'><span>Transitions</span></a>
 				<ul>
-					<li><a href='#!' id="button_transition"><span>New transition</span></a></li>
-					<li><a href='#!' id="button_self_transition"><span>New self-transition</span></a></li>
-					<!--				       <li><a href='#!'><span>New default transition</span></a></li> -->
-					<li><a href='#!' id="addCondition"><span>Add condition to selected transition</span></a></li>
-					<li><a href='#!' id="addOperation"><span>Add action to selected transition</span></a></li>
-					<!--				       <li><a href='#!'><span>New parameter</span></a></li> -->
-					<li><a href='#!' id="changeNameEdge"><span>Rename selected transition</span></a></li>
-					<!--				       <li><a href='#!'><span>Change action</span></a></li>
-					<li><a href='#!'><span>Change condition</span></a></li> -->
-					<li><a href='#!' id="deleteEdge"><span>Delete selected transition</span></a></li>
-					<!--				       <li><a href='#1'><span>Delete default transition</span></a></li>
-					<li><a href='#!'><span>Delete action</span></a></li>
-					<li class='last'><a href='#!'><span>Remove condition from selected transition</span></a></li>-->
+                    <li class="divider"></li>
+					<li><a href='#!' id="btn_menuNewTransition"><span>New transition</span></a></li>
+					<li><a href='#!' id="btn_menuRenameTransition"><span>Rename transition</span></a></li>
+                    <li><a href='#!' id="btn_menuDeleteTransition"><span>Delete transition</span></a></li>
+                    <li class="divider"></li>
 				</ul>
 			</li>
-			<li class='active has-sub'><a href='#!'><span>Constants</span></a>
+            <li class='active has-sub' id="menuContext"><a href='#!'><span>Context</span></a>
 				<ul>
-					<li><a href='#!'><span>New constant</span></a></li>
+                    <li class="divider"></li>
+					<li><a href='#!' id="btn_menuNewVariable"><span>New variable</span></a></li>
+                    <li><a href='#!' id="btn_menuNewConstant"><span>New constant</span></a></li>
+                    <li class="divider"></li>
 				</ul>
 			</li>
-			<li class='active has-sub'><a href='#!'><span>Variables</span></a>
+            <li class='active has-sub' id="menuCodeGenenerators"><a href='#!'><span>Code Generators</span></a>
 				<ul>
-					<li><a href='#!' id="button_add_field"><span>New state variable</span></a></li>
+                    <li class="divider"></li>
+                    <li><a href='#!' id="btn_menuPVSPrinter"><span>PVS Specification</span></a></li>
+					<li><a href='#!' id="btn_menuLustrePrinter" class="tobeimplemented"><span>Lustre Specification</span></a></li>
+                    <li class="divider"></li>
+                    <li><a href='#!' id="btn_menuCPrinter" class="tobeimplemented"><span>C Code</span></a></li>
+                    <li><a href='#!' id="btn_menuCppPrinter" class="tobeimplemented"><span>C++ Code</span></a></li>
+                    <li><a href='#!' id="btn_menuJavaPrinter" class="tobeimplemented"><span>Java Code</span></a></li>
+                    <li class="divider"></li>
 				</ul>
 			</li>
-		   <li class='active has-sub'><a href='#!'><span>Utilities</span></a>
+		    <li class='active has-sub' id="menuZoom"><a href='#!'><span>Zoom</span></a>
 				<ul>
-					<li><a href='#!' id="specificationToDiagram"><span>Generate diagram from specification</span></a></li>
-					<li><a href='#!' id="startSimulation"><span>Enable animation</span></a></li>
-					<!-- <li class='last'><a href='#!'><span>Create PDF report</span></a></li> -->
+                    <li class="divider"></li>
+					<li><a href='#!' id ="btn_menuZoomIn"><span>Zoom-in</span></a></li>
+					<li><a href='#!' id ="btn_menuZoomOut"><span>Zoom-out</span></a></li>
+					<li><a href='#!' id ="btn_menuZoomReset"><span>Reset zoom</span></a></li>
+                    
 				</ul>
-		   </li>
-		   <li class='active has-sub'><a href='#!'><span>Zoom</span></a>
+		    </li>
+		    <li class='active has-sub'><a href='#!'><span>Help</span></a>
 				<ul>
-					<li><a href='#!' id ="zoom"><span>Zoom+</span></a></li>
-					<li><a href='#!' id ="zoom_"><span>Zoom-</span></a></li>
-					<li class='last'><a href='#!' id ="resetZoom"><span>Reset zoom</span></a></li>
+                    <li class="divider"></li>
+					<li><a href='#!' class="tobeimplemented"><span>Online help</span></a></li>
+					<li><a href='#!' class="tobeimplemented"><span>About</span></a></li>
+                    <li class="divider"></li>
 				</ul>
-		   </li>
-		   <li class='active has-sub'><a href='#!'><span>Help</span></a>
-				<ul>
-					<li><a href='#!'><span>Online help</span></a></li>
-					<li><a href='#!'><span>Report an issue...</span></a></li>
-					<li><a href='#!'><span>About</span></a></li>
-				</ul>
-		   </li>
-
+		    </li>
 		</ul>
 	</div>
 	<div id="stateMachineInfoBar" >
 		<ul class="dropdown dropdown-horizontal">
-		   <li class='active'><a href='#!' id="infoBar"><span>Editor mode: browse diagram</span></a>
+		   <li class='active has-sub'><a href='#!' id="EmuchartsEditorMode"><span>Editor mode: browse diagram</span></a>
 		</ul>
 	</div>
 	<div id="ContainerStateMachine" ></div>
@@ -98,7 +154,5 @@
 		<!-- <textarea id="emulinkInfo" readonly> </textarea> -->
 		<textarea id="infoBox" readonly ></textarea>
 		<textarea id="infoBoxModifiable" readonly >This space is for the Advanced Diagram Editor (this plugin will be implemented soon!) </textarea>
-        <!-- <textarea id="warningDebug" readonly >Debug messages</textarea> -->
 	</div>
-</div>			
-
+</div>

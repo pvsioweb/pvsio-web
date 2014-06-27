@@ -3,10 +3,9 @@
   {
    "type": "display",
    "id": "Display1360333691427",
-   "regex": "display:=([0-9/.]+)",
-   "predefinedRegex": "[0-9/.]+",
-   "prefix": "display",
-   "cursorName": "cursor"
+   "displayKey": "display",
+   "cursorName": "c",
+   "auditoryFeedback": true
   },
   {
    "events": [
@@ -64,25 +63,25 @@
    "class": "Button1360333703845",
    "shape": "rect",
    "coords": "488.888916015625,29.888885498046875,534.873291015625,70.87326049804688",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "Button1360334003368",
    "shape": "rect",
    "coords": "493.888916015625,115,533.857666015625,157",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "Button1360334013028",
    "shape": "rect",
    "coords": "449.8888854980469,69.88888549804688,488.8576354980469,113.88888549804688",
-   "href": "#"
+   "href": "#!"
   },
   {
    "class": "Button1360334022698",
    "shape": "rect",
    "coords": "534.888916015625,73.88888549804688,571.873291015625,112.87326049804688",
-   "href": "#"
+   "href": "#!"
   }
  ]
 }

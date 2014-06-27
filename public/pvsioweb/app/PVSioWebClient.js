@@ -5,8 +5,8 @@
  * @author Patrick Oladimeji
  * @date 4/19/13 17:23:31 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true*/
-/*global define, d3, require, $, brackets, _, window, MouseEvent, FormData, document, setTimeout, clearInterval, FileReader */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
+/*global define*/
 
 define(function (require, exports, module) {
     "use strict";
@@ -17,7 +17,8 @@ define(function (require, exports, module) {
 		ws,
 		_port = 8082,
 		url = window.location.origin.indexOf("file") === 0 ?
-				("ws://localhost") : ("ws://" + window.location.hostname);
+				("ws://localhost") : ("ws://" + window.location.hostname),
+        instance;
 	
 	/**
 	 * Creates a new PVSioWeb client object. This object is an event emitter and emits the following events:
@@ -48,11 +49,11 @@ define(function (require, exports, module) {
     */
 	PVSioWeb.prototype.serverUrl = property.call(PVSioWeb.prototype, url);
 	/**
-        Initiate connection to the server
+        Initiate connection to the server.
+        Returns a promise object that resolves to the websocket connection when the connection opens
     */
 	PVSioWeb.prototype.connectToServer = function () {
-		ws.serverUrl(this.serverUrl()).port(this.port()).logon();
-		return this;
+		return ws.serverUrl(this.serverUrl()).port(this.port()).logon();
 	};
 	
     /**
@@ -67,44 +68,61 @@ define(function (require, exports, module) {
     */
 	PVSioWeb.prototype.getWebSocket = function () { return ws; };
 	
-	PVSioWeb.prototype.registerPlugin = function (plugin) {
-		if (plugin && typeof plugin === "function") {
-			return plugin(this);
-		}
-	};
-	
     /**
         Creates a collapsible panel on the client app
         @param {?string} headerText The title text to use in the panel header
 		@param {boolean} showContent Whether the default initial state of the panel is open (showContent == true) or closed (showContent == true or undefined)
         @returns {d3.selection} The div created
     */
-	PVSioWeb.prototype.createCollapsiblePanel = function (headerText, showContent) {
+	PVSioWeb.prototype.createCollapsiblePanel = function (options) {
+		options = options || {};
+
 		var div = d3.select("#content").append("div").attr("class", "collapsible-panel-parent");
 		var header = div.append("div").classed("header", true);
 		var content = div.append("div").attr("class", "collapsible-panel");
 		
 		header.append("span")
-			.attr("class", function() { 
-				if(showContent == true) { return "toggle-collapse glyphicon glyphicon-minus-sign"; }
-				return "toggle-collapse glyphicon glyphicon-plus-sign"; })
+			.attr("class", function () {
+				return options.showContent === true ?
+					"toggle-collapse glyphicon glyphicon-minus-sign" :
+						"toggle-collapse glyphicon glyphicon-plus-sign";
+            })
 			.on("click", function () {
-			var d = d3.select(this);
-			if (d.classed("glyphicon-minus-sign")) {
-				content.style("display", "none");
-				d3.select(this).classed("glyphicon-plus-sign", true).classed("glyphicon-minus-sign", false);
-			} else {
-				content.style("display", null);
-				d3.select(this).classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
-			}
-		});
-		
-		if (headerText) {
-			header.append("span").html(headerText).attr("class", "header");
+                var d = d3.select(this);
+                if (d.classed("glyphicon-minus-sign")) {
+                    content.style("display", "none");
+                    d3.select(this).classed("glyphicon-plus-sign", true).classed("glyphicon-minus-sign", false);
+                } else {
+                    content.style("display", null);
+                    d3.select(this).classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
+                }
+                if (options.onClick && typeof options.onClick === "function") {
+                    options.onClick();
+                }                
+            });
+		if (options.owner) {
+			div.attr("plugin-owner", options.owner);
 		}
-		if (showContent != true) { content.style("display", "none"); }
+		if (options.headerText) {
+			header.append("span").html(options.headerText).attr("class", "header");
+		}
+		if (!options.showContent) { content.style("display", "none"); }
 		return content;
 	};
+    
+    /**
+        Removes the collapsible panel with the given header text.
+        @param {d3.selection} container The div returned from a call to createCollapsiblePanel
+    */
+    PVSioWeb.prototype.removeCollapsiblePanel = function (container) {
+        if (container && !container.empty() && container.node()) {
+            var parent = d3.select(container.node().parentElement);
+            if (parent.classed("collapsible-panel-parent")) {
+                parent.remove();
+            }
+        }
+    };
+    
     /**
         Adds a stylesheet with the specified url to the page
      */
@@ -118,5 +136,12 @@ define(function (require, exports, module) {
         });
     };
 	
-	module.exports = PVSioWeb;
+	module.exports = {
+        getInstance: function () {
+            if (!instance) {
+                instance = new PVSioWeb();
+            }
+            return instance;
+        }
+    };
 });

@@ -5,11 +5,10 @@
  * @date 10/30/13 21:42:56 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent, _ */
+/*global define, _ */
 define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
-		property = require("util/property"),
         eventDispatcher = require("util/eventDispatcher"),
 		imageMapper             = require("imagemapper"),
 		WSManager				= require("websockets/pvs/WSManager"),
@@ -17,14 +16,18 @@ define(function (require, exports, module) {
 	    EditWidgetView            = require("pvsioweb/forms/editWidget"),
 		Button                    = require("pvsioweb/Button"),
         Display                    = require("pvsioweb/Display"),
-		NewWidgetView            = require("pvsioweb/forms/newWidget");
+		NewWidgetView            = require("pvsioweb/forms/newWidget"),
+        StateParser = require("util/PVSioStateParser");
 	var wm, mapCreator;
 	
    ///TODO this should be moved out of this file and promoted to a property, or a function parameter in createImageMap
 	function renderResponse(err, res) {
+//        var state = res.data.join("");
+        var stateString = res.data[0];
+        var state = StateParser.parse(stateString);
 		//render displays
 		wm.getDisplayWidgets().forEach(function (w) {
-			w.render(res.data);
+			w.render(state);
 		});
 	}
 	
@@ -68,7 +71,7 @@ define(function (require, exports, module) {
 		var wm = this;
         if (defs) {
             console.log(defs);
-            var key, w, widget, property;
+            var widget;
             _.each(defs.widgetMaps, function (w, key) {
                 w.type = w.type.toLowerCase();
                 widget = w.type === "button" ? new Button(key) : new Display(key);
@@ -96,7 +99,7 @@ define(function (require, exports, module) {
     };
 
 	WidgetManager.prototype.updateMapCreator = function (cb) {
-		var ws = WSManager.getWebSocket(), wm = this, event = {type: "WidgetModified"};
+		var wm = this, event = {type: "WidgetModified"};
         imageMapper({element: "#imageDiv img", parent: "#imageDiv", onReady: function (mc) {
             mapCreator = mc.on("create", function (e) {
                 var region = e.region;
@@ -230,7 +233,7 @@ define(function (require, exports, module) {
      */
     WidgetManager.prototype.getWidgetDefinitions = function () {
         var widgets = [], regionDefs = [];
-        _.each(this._widgets, function (widget, widgetId) {
+        _.each(this._widgets, function (widget) {
             widgets.push(widget.toJSON());
 			var a = widget.imageMap();
 			regionDefs.push({"class": a.attr("class"), shape: a.attr("shape"),
@@ -243,7 +246,7 @@ define(function (require, exports, module) {
 		Removes all the widgets on the interface
 	 */
     WidgetManager.prototype.clearWidgets = function () {
-		_.each(this._widgets, function (value, key) {
+		_.each(this._widgets, function (value) {
 			value.remove();//remove the widgets from the interface
 		});
 		this._widgets = {};

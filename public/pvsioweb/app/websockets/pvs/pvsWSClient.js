@@ -4,7 +4,7 @@
  * @date 6/4/13 21:58:31 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent */
+/*global define*/
 define(function (require, exports, module) {
     "use strict";
     var wsclient            = require("websockets/wsClient"),
@@ -41,11 +41,11 @@ define(function (require, exports, module) {
         */
         o.lastState = property.call(o, "init(0)");
         /**
-            Initiates a connection to the pvsioweb websocket server
+            Initiates a connection to the pvsioweb websocket server.
+            Returns a promise that resolves when the connection is opened
         */
         o.logon = function () {
-            wscBase.logon();
-            return o;
+            return wscBase.logon();
         };
         
         /**
@@ -63,7 +63,14 @@ define(function (require, exports, module) {
         o.startPVSProcess = function (data, cb) {
 			if (data && data.fileName) {
 		        var sourceFile = data.fileName.split(".pvs")[0];
-		        wscBase.send({type: "startProcess", data: {fileName: sourceFile, projectName: data.projectName, demoName: data.demoName}}, cb);
+		        wscBase.send({
+                    type: "startProcess",
+                    data: {
+                        fileName: sourceFile,
+                        projectName: data.projectName,
+                        demoName: data.demoName
+                    }
+                }, cb);
 			} else {
 				console.log("ERROR: Failed to load pvs file " + data.demoName + "/" + data.fileName);
 			}
@@ -94,22 +101,32 @@ define(function (require, exports, module) {
         };
         /**
             Gets the content of the file passed in the parameter
-            @param {string} fileName The file whose content is desired
+            @param {string} filePath The relative path (from the base project dir) to the file whose content is desired
             @param {callback} cb The function to invoke when content has been loaded. res parameter contains file content.
         */
-        o.getFile = function (fileName, cb) {
-            var token = {type: "readFile", fileName: fileName};
+        o.getFile = function (filePath, cb) {
+            var token = {type: "readFile", filePath: filePath};
             wscBase.send(token, cb);
             return o;
         };
         /**
             Writes the content passed using the specified fileName
-            @param {{fileName: string, fileContent: string}} data The details of the file to write
+            @param {{filePath: string, fileContent: string, projectName: string}} token The details of the file to write.
+                Note that file path is relative to the base project directory
             @param {callback} cb The callback to invoke with the result of the write operation.
         */
-        o.writeFile = function (data, cb) {
-            var token = {type: "writeFile", data: data};
+        o.writeFile = function (token, cb) {
+            token.type = "writeFile";
             wscBase.send(token, cb);
+            return o;
+        };
+        /**
+            creates a directory with the specified path.
+            @param {string} path the path to the directory to create. This path is relative to the base project directory
+            @param {callback} cb the callback function to invoke when the function returns from the server
+        */
+        o.writeDirectory = function (path, cb) {
+            wscBase.send({type: "writeDirectory", path: path}, cb);
             return o;
         };
         /**

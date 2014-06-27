@@ -26,7 +26,6 @@ define(function (require, exports, module) {
 	var writer;
     var hashTableContentEditor;
     var drawer;
-    var currentProject;
     var ws;
     var editor;
     var pm;
@@ -45,15 +44,12 @@ define(function (require, exports, module) {
  *  @returns void 
  *	      
  */
-function init(editor_, wsocket, curProj, projManager)
-{
+function init(editor_, wsocket, projManager) {
     ws = wsocket;
     drawer = require("plugins/emulink/stateMachine");
-    currentProject = curProj;
     editor = editor_;
-    pm = projManager;  
+    pm = projManager;
     writer = new WriterOnContent(editor_);
-    
 }
 
 /** 
@@ -73,20 +69,30 @@ function setTagsEdge(tagEdgeStart, tagEdgeEnd) { writer.setTagsEdge(tagEdgeStart
 function setTagsCond(tagCondStart, tagEdgeEnd) { writer.setTagsCond(tagCondStart, tagEdgeEnd); }
 function setTagsField(tagFieldStart, tagFieldEnd) {writer.setTagsField(tagFieldStart, tagFieldEnd);  }
 
+    
+
 /** 
- *  Create a new pvs specification   
- *
- *  @param nameTheory           - Name of the pvs theory which will be created    
- *
- *  @returns void 
- *	      
+ *  Creates a new PVS specification containing the annotations and code needed to specify Emucharts
+ *  @param theoryName           - Name of the PVS theory for the new file
+ *  @returns void
  */
-function newSpecification(nameTheory)
-{       
-        var fileHandlerEmulink = require("pvsioweb/../emulink/fileHandler/fileHandler");
-        fileHandlerEmulink.new_file(currentProject, editor, ws, nameTheory, editor.getValue(), pm);
-	    writer.createSkeletonSpecification(nameTheory);
-        
+function newEmuchartSpecification(theoryName) {
+    var skeleton = 
+            theoryName + ": THEORY \n  BEGIN\n\n"
+                + writer.tagStateNameStart + "\n  StateName: TYPE\n" + writer.tagStateNameEnd + "\n\n" 
+                + writer.tagStateStart + "\n  State: TYPE = [#\n    current_state: StateName, \n" 
+                + "    previous_state: StateName \n  #]\n" + writer.tagStateEnd + "\n\n" 
+                + "  %{\"_block\" : \"BlockStart\", \"_id\" : \"initial_state\"}\n" 
+                + "  initial_state: State \n" 
+                + "  %{\"_block\" : \"BlockEnd\", \"_id\" : \"initial_state\"}\n\n" 
+                + writer.createFuncTag(writer.tagFuncStart, "leave_state" ) + "\n" 
+                + "  leave_state(s: StateName)(st: State): State = st WITH [ previous_state := s ] \n" 
+                + writer.createFuncTag(writer.tagFuncEnd, "leave_state" ) + "\n" 
+                + writer.createFuncTag(writer.tagFuncStart, "enter_into" ) + "\n" 
+                + "  enter_into(s: StateName)(st:State): State = st WITH [ current_state := s ] \n" 
+                + writer.createFuncTag(writer.tagFuncEnd, "enter_into" ) +"\n\n" 
+                + " END " + theoryName;
+    return skeleton;
 }
 
 /** 
@@ -572,8 +578,8 @@ function WriterOnContent( editor)
     this.createPerTag = function(tagPer, namePer) { return tagPer.replace("*namePer*", namePer); }
     this.createCondTag = function(tagCond, nameCond, source, target) { return tagCond.replace("*nameCond*", nameCond).replace("*SRC*", "\""+source+"\"").replace("*TRT*","\""+target+"\""); }
     this.createEdgeTag = function(tagEdge, nameEdge) { return tagEdge.replace("*nameEdge*", nameEdge); }
-    this.createSkeletonSpecification = function(nameTheory)
-    {
+    
+    this.createSkeletonSpecification = function(nameTheory) {
         this.nameTheory = nameTheory.indexOf(".pvs") == -1 ? nameTheory : nameTheory.substring(0, nameTheory.indexOf(".pvs"));
         this.content = 
                    this.nameTheory + ": THEORY \n  BEGIN\n\n" +
@@ -601,6 +607,7 @@ function WriterOnContent( editor)
 	    this.editor.clearSelection();
 	    this.editor.moveCursorTo(0, 0);
     }
+        
     this.checkConsistenceOperation = function(operation)
     {
         var indexEqual;
@@ -1214,34 +1221,33 @@ function WriterOnContent( editor)
 /*************    Exported Function               ************************************************/
 
 module.exports = {
-        newSpecification : newSpecification,
-        addState : addState,
-        removeState : removeState,
-		addTransition : addTransition,
-        addSwitchCond : addSwitchCond,
-		addConditionInTransition : addConditionInTransition,
-		noFocus : noFocus,
-		focusOn : focusOn,
-		focusOnFun : focusOnFun,
-		changeStateName : changeStateName,
-        changeFunName : changeFunName, 
-        undo : undo,
-        redo : redo,
-        click : noFocus,
-        addFieldInState : addFieldInState,
-        addOperationInCondition: addOperationInCondition,
-        setTagsName : setTagsName,
-        setTagsState : setTagsState,
-        setTagsFunc : setTagsFunc,
-        setTagsPer : setTagsPer,
-        setTagsCond : setTagsCond,
-        setTagsEdge : setTagsEdge,
-        init : init,
-        setTagsField : setTagsField,
-        deleteCondition : deleteCondition,
-        deleteNode : removeState,
-        deleteTrans: deleteTrans
-
+    newEmuchartSpecification: newEmuchartSpecification,
+    addState: addState,
+    removeState: removeState,
+    addTransition: addTransition,
+    addSwitchCond: addSwitchCond,
+    addConditionInTransition: addConditionInTransition,
+    noFocus: noFocus,
+    focusOn: focusOn,
+    focusOnFun: focusOnFun,
+    changeStateName: changeStateName,
+    changeFunName: changeFunName, 
+    undo: undo,
+    redo: redo,
+    click: noFocus,
+    addFieldInState: addFieldInState,
+    addOperationInCondition: addOperationInCondition,
+    setTagsName: setTagsName,
+    setTagsState: setTagsState,
+    setTagsFunc: setTagsFunc,
+    setTagsPer: setTagsPer,
+    setTagsCond: setTagsCond,
+    setTagsEdge: setTagsEdge,
+    init: init,
+    setTagsField: setTagsField,
+    deleteCondition: deleteCondition,
+    deleteNode: removeState,
+    deleteTrans: deleteTrans
 };
 
 

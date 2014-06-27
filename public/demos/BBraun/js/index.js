@@ -15,10 +15,13 @@ require.config({
 
 require(["cursorDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioWebClient"], function (CursoredDisplay, GraphBuilder, PVSioWebClient) {
     "use strict";
+    
+    var d3 = require("d3/d3");
+    
     var w = 228, h = 64;
-	var client = new PVSioWebClient();
+	var client = PVSioWebClient.getInstance();
     //create a collapsible panel using the pvsiowebclient instance
-    var imageHolder = client.createCollapsiblePanel("BBraun Space", true).style("position", "relative");
+    var imageHolder = client.createCollapsiblePanel({headerText: "BBraun Space", showContent: true}).style("position", "relative");
     //insert the html into the panel (note that this could have used templates or whatever)
     imageHolder.html('<img src="image.png" usemap="#prototypeMap"/>');
     //append a div that will contain the canvas element
@@ -29,7 +32,8 @@ require(["cursorDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioWebClient"]
 	//instantiate the cursored display using the id of the element we just created
     var disp = new CursoredDisplay("display", w, h);
 	//register the graph builder plugin -- so we can visualise the interaction
-    var gb = client.registerPlugin(GraphBuilder);
+    var gb = GraphBuilder.getInstance();
+//    var gb = client.registerPlugin(GraphBuilder);
     
     /**
         parse the raw state string from pvsio process into key value pairs

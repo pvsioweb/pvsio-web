@@ -15,9 +15,12 @@ define(function (require, exports, module) {
 		d3.select(el).selectAll(inputSelectors).each(function () {
 			var el = d3.select(this);
 			if (el.attr("type") === "checkbox") {
-				//store as array if it is a checkbox
-				if (!res[el.attr("name")]) { res[el.attr("name")] = []; }
-				res[el.attr("name")].push(el.property("value"));
+                //only add checkboxes when they aer checked
+                if (this.checked) {
+                    //store as array if it is a checkbox
+                    if (!res[el.attr("name")]) { res[el.attr("name")] = []; }
+                    res[el.attr("name")].push(el.property("value"));
+                }
 			} else if (el.attr("type") === "file") {
 				res[el.attr("name")] =  el.property("files");
 			} else {

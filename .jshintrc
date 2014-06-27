@@ -1,0 +1,12 @@
+{
+    "undef": true,
+    "unused": true,
+    "eqeqeq": true,
+    "latedef": true,
+    "eqnull": true,
+    "notypeof": true,
+    "devel": true,
+    "browser": true,
+    "laxbreak": true,
+    "globals": ["Promise", "require"]
+}

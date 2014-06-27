@@ -17,13 +17,12 @@ You should have received a copy of the GNU General Public License along with Foo
  * @project JSLib
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, require, module, process */
+/*global require, module, process, __dirname */
 
-var childprocess = require("child_process"),
-	util = require("util"),
-	fs = require("fs");
+var util = require("util"),
+    path = require("path"),
+    logger = require("tracer").console();
 var procWrapper = require("./processwrapper");
-var spawn = childprocess.spawn;
 module.exports = function () {
     "use strict";
     var pvs = procWrapper();
@@ -31,12 +30,11 @@ module.exports = function () {
         output                              = [],
         readyString                         = "<PVSio>",
         wordsIgnored                        = ["", "==>", readyString],
-        restarting                          = false,
-        sourceCode,
+//        restarting                          = false,
         filename,
         processReady                        = false,
-        pvsio,
-        workspaceDir                        = process.cwd() + "/public/";
+        workspaceDir                        = __dirname + "/public/";
+    var _silentMode = false; // used to turn off log messages when restarting pvsio
 	/**
 	 * get or set the workspace dir. this is the base directory of the pvs source code
 	 * @param {String} dir
@@ -61,7 +59,9 @@ module.exports = function () {
 	function arrayToOutputString(lines) {
 		return lines.join("").replace(/,/g, ", ").replace(/\s+\:\=/g, ":=").replace(/\:\=\s+/g, ":=");
 	}
-	
+	/**
+        This function returns a function for processing stream data that is returned by the ouput stream of a process.
+    */
 	function processDataFunc() {
 		var res = [];
 		return function (data, cb) {
@@ -80,49 +80,64 @@ module.exports = function () {
 			return false;
 		};
 	}
+    
+    o.removeFile = function (filePath, cb) {
+        var np = path.normalize(filePath);
+        
+        if (np.indexOf(path.dirname(workspaceDir)) === 0) {
+            pvs.exec({command: "rm -rf \"" + np + "\"", callBack: cb});
+        } else {
+            var error = ("cannot delete a folder outside the context of the current project");
+            logger.error(error);
+            logger.error(util.format("path: %s, workspace: %s, normalised Path: %s", filePath, workspaceDir, np));
+            cb(error);
+        }
+    };
 	/**
-	 * starts the pvs process with the given sourcefile 
+	 * starts the pvs process with the given sourcefile, then registers a data processor with the processwrapper.
+     * The data processor function is used internally to match a command sent to the process with the corresponding
+     * callback. 
 	 * @param {String} filename source file to load with pvsio
-	 * @param {function({type:string, data:array})} callback function to call when any data is received  in the stdout
-	 * @param {function} callback to call when processis ready
+	 * @param {function} callback to call when processis ready or process exited
 	 */
-	o.start = function (file, callback, processReadyCallback) {
+	o.start = function (file, callback) {
 		filename = file;
         function onDataReceived(data) {
 			// this shows the original PVSio output
-			util.log(data);
-			var lines = data.split("\n").map(function (d) {
-				return d.trim();
-			});
-			var lastLine = lines[lines.length - 1];
-			//copy lines into the output list ignoring the exit string, the startoutput string '==>'
-			//and any blank lines
-			output = output.concat(lines.filter(function (d) {
-				return wordsIgnored.indexOf(d) < 0;
-			}));
+            console.log(data.trim());
+            if (!processReady) {
+                var lines = data.split("\n").map(function (d) {
+                    return d.trim();
+                });
+                var lastLine = lines[lines.length - 1];
+                //copy lines into the output list ignoring the exit string, the startoutput string '==>'
+                //and any blank lines
+                output = output.concat(lines.filter(function (d) {
+                    return wordsIgnored.indexOf(d) < 0;
+                }));
 			
-			if (processReady && lastLine.indexOf(readyString) > -1) {
-				var outString = arrayToOutputString(output);
-				//This is a hack to remove garbage collection messages from the output string before we send to the client
-				///TODO not sure if this works as intended
-				var croppedString = outString.substring(0, outString.indexOf("(#"));
-				outString = outString.substring(outString.indexOf("(#"));
-				callback({type: "pvsoutput", data: [outString]});
-				//clear the output
-				output  = [];
-			} else if (lastLine.indexOf(readyString) > -1) {
-				//last line of the output is the ready string
-				processReadyCallback({type: "processReady", data: output});
-				processReady = true;
-				output = [];
-				pvs.dataProcessor(processDataFunc());
-			}
+                if (lastLine.indexOf(readyString) > -1) {
+                    //last line of the output is the ready string
+                    callback({type: "processReady", data: output});
+                    processReady = true;
+                    pvs.dataProcessor(processDataFunc());
+                }
+            }
+            output = [];
 		}
 		
 		function onProcessExited(code) {
 			processReady = false;
-			var msg = "pvsio process exited with code " + code + ".\n" + output.join("");
-			util.log(msg);
+			var msg;
+            if (_silentMode) {
+                msg = "";
+            } else {
+                if (code) {
+                    msg = "pvsio process exited with code " + code + ".\n" + output.join("");
+                } else { msg = "pvsio process exited cleanly.\n" + output.join(""); }
+                logger.info(msg);
+            }
+            _silentMode = false;
 			callback({type: "processExited", data: msg, code: code});
 		}
 		
@@ -130,7 +145,9 @@ module.exports = function () {
 			onDataReceived: onDataReceived,
 			onProcessExited: onProcessExited});
 		
-		util.log("pvsio process started with file " + filename + "; process working directory is :" + o.workspaceDir());
+		logger.info("\n-------------------------------------\nPVSio process started with theory "
+                    + filename + "\n-------------------------------------");
+        logger.info("Process context is " + o.workspaceDir());
 		return o;
 	};
 	
@@ -140,7 +157,8 @@ module.exports = function () {
 	 * @param {string} command the command to send to pvsio
 	 */
 	o.sendCommand = function (command, callback) {
-		util.log("sending command " + command + " to process");
+//		logger.info("sending command " + command + " to process");
+        console.log(command);
 		pvs.sendCommand(command, callback);
 		return o;
 	};
@@ -149,7 +167,8 @@ module.exports = function () {
 	 * closes the pvsio process
      * @param {string} signal The signal to send to the kill process. Default is 'SIGTERM'
 	 */
-	o.close = function (signal) {
+	o.close = function (signal, silentMode) {
+        _silentMode = silentMode;
 		signal = signal || 'SIGTERM';
 		pvs.kill(signal);
 		return o;

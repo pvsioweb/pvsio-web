@@ -1,5 +1,12 @@
+#EmuchartToolbar {
+    float: left;
+    position: absolute;
+    margin-top: 8px;
+}
+
 #stateMachineMenu {
 	float: left;
+    margin-left: 0px;
 }
 #stateMachineInfoBar {
 	float: right;
@@ -21,6 +28,29 @@
     margin-top: 10px; 
 }
 
+
+#EmuchartLogo.hidden{
+    display: none;
+}
+
+#EmuchartLogo.Start{
+	background: white;
+	text-align: center;
+	position: relative;
+	height: 320px;
+	width: 100%;
+	z-index: 999999;
+}
+
+#EmuchartLogo.Start span{
+	display: block;
+	margin-top: 120px;
+	width: 400px;
+	font-size: 30px;
+	font-family: Times, serif;
+	line-height: 1.1;
+	text-align: center;
+}
 
 #button_state:hover	  {
 
@@ -195,4 +225,8 @@ ul#context-menu li {
  border:-style: dotted;
  font: 20px/24px cursive;    
  display:none;
+}
+
+#stateMachineMenu .tobeimplemented {
+  color: gray;
 }

@@ -9,7 +9,13 @@ public/uploads/*
 public/widgetDefinitions/*
 public/projects/*/pvsbin/*
 *.summary
-pvs-attachments
 node_modules/*
 doc/out
 doc/client
+v2.css
+public/pvsioweb/css/v2.less
+public/pvsioweb/lib/cm/mode/python/index.html
+public/pvsioweb/lib/cm/mode/python/python.js
+public/pvsioweb/lib/less-1.7.0.min.js
+public/V1.html
+test.js
