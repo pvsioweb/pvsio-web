@@ -45,7 +45,6 @@ To start the frontend: open a browser (Firefox 21 or greater, or Chrome), and ty
 
     http://localhost:8082/
 
-
 Demos
 -----
 Simulations created with PVSio-web can be watched in this youtube video: https://www.youtube.com/watch?v=T0QmUe0bwL8
@@ -53,14 +52,17 @@ Simulations created with PVSio-web can be watched in this youtube video: https:/
 All simulations examples demonstrated in the youtube video are included in the PVSio-web distribution as demo projects. To open these demo projects, start pvsio-web and click the "Open Projects" button of the pvsio-web front-end and select one of the saved projects from the list.
 
 
-
-Wiki
-----
-A more comprehensive guide about pvsio-web can be found at https://github.com/thehogfather/pvsio-web/wiki
-
-
 Uninstallation
 --------------
-To uninstall pvsio-web, use the following command
+To uninstall, delete the pvsio-web folder from your computer.
 
-    sudo npm uninstall pvsio-web -g
+##source code setup
+This project has the following setup:
+
+* src/
+	* client/ - the directory that holds client side code. This runs in the user's browser
+		* tests/ - the directory containing test scripts for the client side code
+	* server/ - the directory that holds server side code. Code here is run using nodejs and it manages communication between pvs process and the client's browser.
+		* public/ - this is where projects and demos are stored
+		* servertests/ - contains test scripts for server side code
+* start.sh - the script used to initiate the server.
