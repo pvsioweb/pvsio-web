@@ -1,30 +1,40 @@
 {
-    "name":"pvsio-web",
-    "author":"Patrick Oladimeji <patrick@dustygem.co.uk>",,
-	"contributors": [{"name": "Paolo Masci"}],
-    "description":"A javascript library to connect to and communicate with a pvsio process using websockets",
-    "version":"0.1",
-    "preferGlobal":"true",
-    "dependencies":{
-        "ws":"0.4.x",
-        "express": "~4.0.0",
-        "body-parser": "~1.0.0",
-        "tracer": "0.7.1",
-        "es6-promise": "0.1.x"
-    },
-	"devDependencies": {
-		"jasmine-node": "1.14.3"
-	},
-	"script": {
-		"test": "jasmine-node --verbose servertests",
-		"start": "node pvssocketserver.js"
-	},
-    "repository":{
-        "type":"git",
-        "url":"https://github.com/thehogfather/pvsio-web"
-    },
-    "license":"GPL3",
-    "engine":{
-        "node":">=0.8"
+  "name": "pvsio-web",
+  "author": "Patrick Oladimeji <patrick@dustygem.co.uk>",
+  "contributors": [
+    {
+      "name": "Paolo Masci"
     }
+  ],
+  "description": "A javascript library to connect to and communicate with a pvsio process using websockets",
+  "version": "0.1.0",
+  "preferGlobal": "true",
+  "dependencies": {
+    "ws": "0.4.x",
+    "express": "~4.0.0",
+    "body-parser": "~1.0.0",
+    "tracer": "0.7.1",
+    "es6-promise": "0.1.x"
+  },
+  "devDependencies": {
+    "jasmine-node": "1.14.3",
+    "grunt": "~0.4.5",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-nodeunit": "~0.4.1",
+    "grunt-contrib-uglify": "~0.5.0",
+    "grunt-contrib-requirejs": "^0.4.4",
+    "grunt-contrib-copy": "^0.5.0"
+  },
+  "script": {
+    "test": "jasmine-node --verbose servertests",
+    "start": "node pvssocketserver.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thehogfather/pvsio-web"
+  },
+  "license": "GPL3",
+  "engine": {
+    "node": ">=0.8"
+  }
 }

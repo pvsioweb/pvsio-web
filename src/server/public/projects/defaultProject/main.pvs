@@ -1,0 +1,4 @@
+main: THEORY
+ BEGIN
+   %-- Please type your PVS specification here!
+ END main
