@@ -30,7 +30,6 @@ module.exports = function () {
         output                              = [],
         readyString                         = "<PVSio>",
         wordsIgnored                        = ["", "==>", readyString],
-//        restarting                          = false,
         filename,
         processReady                        = false,
         workspaceDir                        = __dirname + "/public/";
@@ -104,7 +103,7 @@ module.exports = function () {
 		filename = file;
         function onDataReceived(data) {
 			// this shows the original PVSio output
-            console.log(data.trim());
+            logger.log(data.trim());
             if (!processReady) {
                 var lines = data.split("\n").map(function (d) {
                     return d.trim();
@@ -157,8 +156,7 @@ module.exports = function () {
 	 * @param {string} command the command to send to pvsio
 	 */
 	o.sendCommand = function (command, callback) {
-//		logger.info("sending command " + command + " to process");
-        console.log(command);
+        logger.info(command);
 		pvs.sendCommand(command, callback);
 		return o;
 	};
