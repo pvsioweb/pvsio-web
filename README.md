@@ -30,7 +30,7 @@ To install pvsio-web, create a directory on your computer, open a Terminal windo
 
     git clone https://github.com/thehogfather/pvsio-web.git
     cd pvsio-web
-    sudo npm install
+    npm install
 
 
 Running pvsio-web
