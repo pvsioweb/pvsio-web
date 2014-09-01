@@ -56,6 +56,16 @@ Uninstallation
 --------------
 To uninstall, delete the pvsio-web folder from your computer.
 
+Tests
+-----
+To test the client
+	run start.sh
+	navigate your browser to [http://localhost:8082/tests](http://localhost:8082/tests)
+	
+To test the server
+	run npm test
+	the above command is a shortcut for running jasmine-node --verbose src/server/servertests
+	
 ##source code setup
 This project has the following setup:
 

@@ -17,7 +17,7 @@
     "es6-promise": "0.1.x"
   },
   "devDependencies": {
-    "jasmine-node": "1.14.3",
+    "jasmine-node": "^1.14.3",
     "grunt": "~0.4.5",
     "grunt-contrib-jshint": "~0.10.0",
     "grunt-contrib-nodeunit": "~0.4.1",
@@ -25,9 +25,9 @@
     "grunt-contrib-requirejs": "^0.4.4",
     "grunt-contrib-copy": "^0.5.0"
   },
-  "script": {
-    "test": "jasmine-node --verbose servertests",
-    "start": "node pvssocketserver.js"
+  "scripts": {
+    "test": "jasmine-node --verbose src/server/servertests",
+    "start": "node src/server/pvssocketserver.js"
   },
   "repository": {
     "type": "git",
