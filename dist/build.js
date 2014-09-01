@@ -1,8 +1,7 @@
 ({
 	optimize: "none",
-	baseUrl: "../public/pvsioweb/app",
+	baseUrl: "../src/client/app",
  	paths: {
-        "ace": "../lib/ace",
         "d3": "../lib/d3",
         "pvsioweb": "prototypebuilder",
         "imagemapper": "../lib/imagemapper",
