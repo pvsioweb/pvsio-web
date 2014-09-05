@@ -41,6 +41,7 @@ module.exports = function () {
 	 */
 	o.workspaceDir = function (dir) {
 		if (dir) {
+			logger.log(dir);
 			dir = dir.substr(-1) !== "/" ? (dir + "/") : dir;
 			workspaceDir = dir;
             process.chdir(workspaceDir);
