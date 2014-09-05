@@ -12,7 +12,7 @@ var fs = require("fs"),
 	Promise                 = require("es6-promise").Promise,
 	logger                  = require("tracer").console(),
 	imageExts = [".jpg", ".jpeg", ".png"],
-	baseProjectDir          = __dirname + "/public/projects/";
+	baseProjectDir          = path.join(__dirname, "../../examples/projects/");
 
 var noop = function () {};
 function getFolderStructure(root) {

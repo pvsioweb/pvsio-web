@@ -32,7 +32,7 @@ module.exports = function () {
         wordsIgnored                        = ["", "==>", readyString],
         filename,
         processReady                        = false,
-        workspaceDir                        = __dirname + "/public/";
+        workspaceDir                        = path.join(__dirname, "../../examples/");
     var _silentMode = false; // used to turn off log messages when restarting pvsio
 	/**
 	 * get or set the workspace dir. this is the base directory of the pvs source code

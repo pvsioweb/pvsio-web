@@ -39,14 +39,15 @@ function run() {
         bodyParser              = require("body-parser"),
         webserver               = express(),
         procWrapper             = require("./processwrapper"),
-        uploadDir               = "/public/uploads",
         port                    = 8082,
         pvsioProcessMap         = {},//each client should get his own process
         httpServer              = http.createServer(webserver),
         Promise                 = require("es6-promise").Promise,
         logger                  = require("tracer").console(),
 		serverFuncs				= require("./serverFunctions"),
-        baseProjectDir          = __dirname + "/public/projects/";
+        baseProjectDir          = path.join(__dirname, "../../examples/projects/"),
+		baseDemosDir			= path.join(__dirname, "../../examples/demos/"),
+		clientDir				= path.join(__dirname, "../client");
     var p, clientid = 0, WebSocketServer = ws.Server;
 	var writeFile = serverFuncs.writeFile,
 		createProject = serverFuncs.createProject,
@@ -114,21 +115,10 @@ function run() {
 	
 	
     //create the express static server serve contents in the client directory and the demos directory
-    webserver.use(express.static(path.join(__dirname, "../client")));
-	webserver.use("/demos", express.static(path.join(__dirname, "public/demos")));
+    webserver.use(express.static(clientDir));
+	webserver.use("/demos", express.static(baseDemosDir));
 	//creating a pathname prefix for client so that demo css and scripts can be loaded from the client dir
-	webserver.use("/client", express.static(path.join(__dirname, "../client")));
-    webserver.use(bodyParser({ keepExtensions: true, uploadDir: __dirname + uploadDir}));
-
-    /**
-     * used to manage file upload process for pvsio-web
-     */
-    webserver.all("/upload", function (req, res) {
-        logger.debug(JSON.stringify(req.files));
-        var fileName = req.files.file.path.split("/").slice(-1).join("");
-        //should return a map of oldname to new name for the uploaded files
-        res.send({fileName: fileName});
-    });
+	webserver.use("/client", express.static(clientDir));
 
     function typeCheck(filePath, cb) {
         procWrapper().exec({
@@ -246,8 +236,8 @@ function run() {
             "startProcess": function (token, socket, socketid) {
                 logger.info("Calling start process for client... " + socketid);
 				var root = token.data.projectName ?
-                            "/public/projects/" + token.data.projectName
-                            : token.data.demoName ? "/public/demos/" + token.data.demoName : "";
+                            path.join(baseProjectDir, token.data.projectName)
+                            : token.data.demoName ? path.join(baseDemosDir, token.data.demoName) : "";
                 p = pvsioProcessMap[socketid];
                 //close the process if it exists and recreate it
                 if (p) {
@@ -259,7 +249,7 @@ function run() {
                 pvsioProcessMap[socketid] = p;
                 //set the workspace dir and start the pvs process with a callback for processing process ready and exit
                 //messages from the process
-                p.workspaceDir(__dirname + root)
+                p.workspaceDir(root)
                     .start(token.data.fileName,
                         function (res) {
                             res.id = token.id;

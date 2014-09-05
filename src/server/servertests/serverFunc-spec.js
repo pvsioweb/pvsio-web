@@ -79,7 +79,7 @@ describe("sever functions for manipulating file system and projects", function (
 			}, errLog);
 	});
 	
-	it("list projects returns a list of projects in public/projects directory", function (done) {
+	it("listProjects() returns a list of projects in public/projects directory", function (done) {
 		listProjects().then(function (projects) {
 			expect(projects).toContain("AlarisGP");
 			done();
