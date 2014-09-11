@@ -98,9 +98,9 @@ define(function (require, exports, module) {
         }
     };
 
-	WidgetManager.prototype.updateMapCreator = function (cb) {
+	WidgetManager.prototype.updateMapCreator = function (scale, cb) {
 		var wm = this, event = {type: "WidgetModified"};
-        imageMapper({element: "#imageDiv img", parent: "#imageDiv", onReady: function (mc) {
+        imageMapper({scale: scale, element: "#imageDiv img", parent: "#imageDiv", onReady: function (mc) {
             mapCreator = mc.on("create", function (e) {
                 var region = e.region;
                 region.on("dblclick", function () {

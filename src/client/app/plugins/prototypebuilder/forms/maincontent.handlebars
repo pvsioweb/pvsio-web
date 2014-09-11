@@ -1,4 +1,5 @@
 <div id="content" class="center prototypebuilder">
+	<div class="ljs-hcontent">
 		<div id="header" class="btn-group">
 			<a class="btn btn-default" id="newProject"><span class="glyphicon glyphicon-file"></span> New Project</a>
 			<a class="btn btn-default" id="openProject"><span class="glyphicon glyphicon-folder-open"></span> Open Project</a>
@@ -31,47 +32,46 @@
             </div>
 		</div>
 		<div id="body">
-			<div id="imageDiv">
-                <span id="record" class="glyphicon glyphicon-record"> Record</span>
-                <span id="play" class="glyphicon glyphicon-play"> Play</span>
-				<div id="imageDragAndDrop" class="dndcontainer">
-					<span class="center">Drag  user interface picture here or if you prefer, use the button below</span>
-					<br/>
-					<button class="btn btn-primary center" id='btnLoadPicture'> Load Picture</button>
-				</div>
-				<img src="image/start.png" usemap="#prototypeMap" />
+			<div class="ljs-left" id="builder-controls">
+				<div>
 				
+				</div>
 			</div>
-            <div id="rightPanel">
-                <div id='console'></div>
-                <!-- container for specification source code -->
-			    <div id="scripts"> 
-                    <ul class="list-group">
-    
-                    </ul>
-                </div>
-            </div>
+			<div class="ljs-hcontent">
+				<div id="imageDiv" class="center">
+					<span id="record" class="glyphicon glyphicon-record"> Record</span>
+					<span id="play" class="glyphicon glyphicon-play"> Play</span>
+					<div id="imageDragAndDrop" class="dndcontainer">
+						<span class="center">Drag  user interface picture here or if you prefer, use the button below</span>
+						<br/>
+						<button class="btn btn-primary center" id='btnLoadPicture'> Load Picture</button>
+					</div>
+					<img src="image/start.png" usemap="#prototypeMap" />
+
+				</div>
+			</div>
+			
+            
 			<div id="controlsContainer">
 				<button id="btnBuilderView">Builder View</button>
 				<button id="btnSimulatorView">Simulator View</button>
                 <a id="lblWebSocketStatus" class="status right">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
                 <a id="lblPVSioStatus" class="status right">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
 			</div>
-	                    
-			<div id='logsDiv'>
-				<div id='pvsio_commands_log_Container' class='pvsio-log-container'>
-					<h2>GUI frontend commands</h2>
-					<div id='pvsio_commands_log'></div>
-				</div>
-				<div id='pvsio_response_log_Container' class='pvsio-log-container'>
-					<h2>PVSio backend replies</h2>
-					<div id='pvsio_response_log'></div>
-				</div>
-			</div>	
 		</div>
-	
 	</div>
-	<map name="prototypeMap" id="prototypeMap">
+	<div id="rightPanel" class="ljs-right">
+			<div id='console'></div>
+			<!-- container for specification source code -->
+			<div id="scripts"> 
+				<ul class="list-group">
+
+				</ul>
+			</div>
+	</div>
 	
-	</map>
-    <div id="audio"></div>
+</div>
+<map name="prototypeMap" id="prototypeMap">
+	
+</map>
+<div id="audio"></div>

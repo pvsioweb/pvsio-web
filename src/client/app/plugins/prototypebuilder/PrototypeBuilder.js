@@ -4,7 +4,7 @@
  * @date 11/21/13 15:03:48 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define*/
+/*global define, layoutjs*/
 define(function (require, exports, module) {
 	"use strict";
 	var  CodeMirror             = require("cm/lib/codemirror"),
@@ -61,6 +61,8 @@ define(function (require, exports, module) {
         projectManager.createDefaultProject();
         d3.select("#project-notification-area").insert("p", "p").html("PVSio-web Ready!");
         d3.select("#editor-notification-area").insert("p", "p").html("PVS Editor Ready!");
+		//layout the sourcecode and files
+		layoutjs({el: "#sourcecode-editor-wrapper"});
     };
    
     PrototypeBuilder.prototype.unload = function () {

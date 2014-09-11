@@ -152,7 +152,7 @@
     function booya(config) {
         if (!config || !config.element) { throw new Error("element prpoerty of config must be set"); }
         config.parent = config.parent || "body";
-        
+        config.scale = config.scale || 1;
         //clear any previous svgs
         d3.select(config.parent + " svg").remove();
         var imageEl = d3.select(config.element), props, mapLayer,
@@ -162,7 +162,8 @@
         function initialiseSVGLayer() {
             mapLayer = d3.select(config.parent).style("position", "relative")
                 .append("svg").attr("width", props.width).attr("height", props.height).attr("class", "image-map-layer")
-                .style("position", "absolute").style("cursor", "crosshair").style("top", 0).style("left", 0);
+                .style("position", "absolute").style("cursor", "crosshair").style("top", 0).style("left", 0)
+				.append("g").attr("transform", "scale(" + config.scale + ")");
         }
         
         function getImageMapData() {
