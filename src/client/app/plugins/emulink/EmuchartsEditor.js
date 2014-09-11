@@ -944,6 +944,7 @@ define(function (require, exports, module) {
 	 */
     EmuchartsEditor.prototype.render = function () {
         this.renderTransitions();
+        this.renderInitialTransitions();
         return this.renderStates();
     };
 
@@ -1109,27 +1110,36 @@ define(function (require, exports, module) {
     EmuchartsEditor.prototype.delete_state = function (stateID) {
         var _this = this;
         var edges = [];
-        this.emucharts.edges.forEach(function (key) {
-            var edge = _this.emucharts.edges.get(key);
-            if ((edge.source && edge.source.id === stateID) ||
-                    (edge.target && edge.target.id === stateID)) {
-                edges.push(edge.id);
-            }
-        });
-        edges.forEach(function (edge) {
-            _this.emucharts.remove_edge(edge);
-        });
+        if (this.emucharts && this.emucharts.edges) {
+            this.emucharts.edges.forEach(function (key) {
+                var edge = _this.emucharts.edges.get(key);
+                if ((edge.source && edge.source.id === stateID) ||
+                        (edge.target && edge.target.id === stateID)) {
+                    edges.push(edge.id);
+                }
+            });
+            edges.forEach(function (edge) {
+                _this.emucharts.remove_edge(edge);
+            });
+        }
         var initial_edges = [];
-        this.emucharts.initial_edges.forEach(function (key) {
-            var initial_edge = _this.emucharts.initial_edges.get(key);
-            if (initial_edge.target && initial_edge.target.id === stateID) {
-                initial_edges.push(initial_edge.id);
-            }
-        });
-        initial_edges.forEach(function (initial_edge) {
-            _this.emucharts.remove_initial_edge(initial_edge);
-        });
-        this.emucharts.remove_node(stateID);
+        if (this.emucharts && this.emucharts.initial_edges) {
+            this.emucharts.initial_edges.forEach(function (key) {
+                var initial_edge = _this.emucharts.initial_edges.get(key);
+                if (initial_edge.target && initial_edge.target.id === stateID) {
+                    initial_edges.push(initial_edge.id);
+                }
+            });
+            initial_edges.forEach(function (initial_edge) {
+                _this.emucharts.remove_initial_edge(initial_edge);
+            });
+        }
+        
+        if (this.emucharts && this.emucharts.nodes) {
+            this.emucharts.remove_node(stateID);
+        }
+        
+        // refresh editor
         this.renderTransitions();
         this.renderInitialTransitions();
         return this.renderStates();

@@ -464,10 +464,10 @@ define(function (require, exports, module) {
             if (!emuchartsManager.empty_chart()) {
                 // we need to delete the current chart because we handle one chart at the moment
                 QuestionForm.create({
-                    header: "Warning: the current chart will be deleted.",
-                    question: "The current chart will be deleted -- Emulink currently handles one chart at a time). "
-                                + "Confirm Delete?",
-                    buttons: ["Cancel", "Delete and Create"]
+                    header: "Warning: unsaved changes will be discarded.",
+                    question: "Unsaved changes in the current chart will be discarded."
+                                + "Would you like continue?",
+                    buttons: ["Cancel", "Ok"]
                 }).on("ok", function (e, view) {
                     emuchartsManager.delete_chart();
                     newChart();
@@ -499,15 +499,14 @@ define(function (require, exports, module) {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
             // we need to delete the current chart because we handle one chart at the moment
             QuestionForm.create({
-                header: "Warning: the current chart will be deleted.",
-                question: "The current chart will be deleted -- Emulink currently handles one chart at a time). "
-                            + "Confirm Operation?",
-                buttons: ["Cancel", "Delete and Open"]
+                header: "Warning: unsaved changes will be discarded.",
+                question: "Unsaved changes in the current chart will be discarded."
+                            + "Would you like continue?",
+                buttons: ["Cancel", "Ok"]
             }).on("ok", function (e, view) {
-                resetToolbarColors();
-                view.remove();
                 emuchartsManager.delete_chart();
                 document.getElementById("btnLoadEmuchart").click();
+                view.remove();
             }).on("cancel", function (e, view) {
                 view.remove();
             });
@@ -539,7 +538,7 @@ define(function (require, exports, module) {
                 var content = JSON.stringify({
                     descriptor: {
                         file_type: "emdl",
-                        version: "1.0",
+                        version: "1.1",
                         description: "emucharts model",
                         chart_name: "emucharts",
                         pvs_file: "emucharts_th.pvs"
@@ -547,6 +546,7 @@ define(function (require, exports, module) {
                     chart: {
                         states: emuchartsManager.getStates(),
                         transitions: emuchartsManager.getTransitions(),
+                        initial_transitions: emuchartsManager.getInitialTransitions(),
                         constants: emuchartsManager.getConstants(),
                         variables: emuchartsManager.getVariables()
                     }

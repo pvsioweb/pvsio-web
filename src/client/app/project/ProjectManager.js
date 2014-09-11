@@ -268,6 +268,8 @@ define(function (require, exports, module) {
                         if (callback && typeof callback === "function") { callback(p); }
                     });
                 } else {
+                    // remove previous image, if any
+                    d3.select("#imageDiv img").attr("src", "").attr("height", "430").attr("width", "1128");
                     //show the image drag and drop div
                     d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
                     if (callback && typeof callback === "function") { callback(p); }
@@ -356,73 +358,98 @@ define(function (require, exports, module) {
         var project = new Project(data.projectName);
         var i, promises = [];
         
+        function finalise(folderStructure, previousProject, err) {
+            var image = project.getImage();
+            project.getProjectFiles().forEach(function (f) {
+                f.dirty(false);
+            });
+            //set the main pvs file
+            project.mainPVSFile(project.pvsFilesList()[0]);
+            WidgetManager.updateMapCreator();
+            pm.project(project);
+            pm.renderSourceFileList(folderStructure);
+            pvsFilesListView.selectItem(project.mainPVSFile() ||
+                                        project.pvsFilesList()[0] ||
+                                        project.name());
+            if (image) {
+                pm.updateImage(image, function () {
+                    //fire project changed event
+                    pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
+                    //invoke callback
+                    if (cb && typeof cb === "function") { cb(err, project); }
+                });
+            } else {
+                // remove previous image, if any
+                d3.select("#imageDiv img").attr("src", "").attr("height", "430").attr("width", "1128");
+                //fire project changed event
+                pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
+                //invoke callback
+                if (cb && typeof cb === "function") { cb(err, project); }
+            }
+        }
+        
         // load image, if any is specified in data
         if (data.prototypeImage && data.prototypeImage[0]) {
             fs.readLocalFileAsDataURL(data.prototypeImage[0])
                 .then(function (res) {
                     project.changeImage(project.name() + "/" + res.filePath, res.fileContent);
                 });
+        } else {
+            d3.select("#imageDiv img").attr("src", "").attr("height", "430").attr("width", "1128");
+            d3.select("#imageDiv svg").attr("height", "430").attr("width", "1128");
+            // show the draganddrop stuff
+            d3.select("#imageDragAndDrop.dndcontainer").style("display", "block");
         }
         
         //create promises for the pvs source files, if any is specified in data
         if (data.pvsSpec && data.pvsSpec.length > 0) {
             for (i = 0; i < data.pvsSpec.length; i++) {
-                if (data.pvsSpec[i].name !== undefined && data.pvsSpec[i].content !== undefined) {
-                    promises.push(data.pvsSpec[i].content);
-                } else {
-                    // FIXME: why are we trying to read pvsSpec if name is not specified?
-                    promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
+                if (data.pvsSpec[i].name !== undefined) {
+                    // FIXME: in what case do we use field content? this field is undefined when the user selects a file...
+                    if (data.pvsSpec[i].content !== undefined) {
+                        promises.push(data.pvsSpec[i].content);
+                    } else {
+                        promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
+                    }
                 }
             }
         } else {
             // create one file with the default content
             var emptySpec = {
-                filePath: defaultTheoryName + ".pvs",
+                fileName: defaultTheoryName + ".pvs",
                 fileContent: defaultTheoryName + emptyTheoryContent + defaultTheoryName
             };
             promises.push(emptySpec);
         }
 
-        var previousProject = project || pm.project(), image;
+        var previousProject = project || pm.project();
         Promise.all(promises)
             .then(function (pvsFiles) {
                 pvsFiles.forEach(function (spec) {
-                    project.addProjectFile(project.name() + "/" + spec.filePath, spec.fileContent);
+                    project.addProjectFile(project.name() + "/" + spec.fileName, spec.fileContent);
                 });
             }).then(function () {
-                project.saveNew(data.projectName, function (err, res, folderStructure) {
+                project.saveNew({ projectName: data.projectName,
+                                  overWrite  : false }, function (err, res, folderStructure) {
                     Logger.log({err: err, res: res});
-                    if (!err) {
-                        image = project.getImage();
-                        project.getProjectFiles().forEach(function (f) {
-                            f.dirty(false);
-                        });
-                        //set the main pvs file
-                        project.mainPVSFile(project.pvsFilesList()[0]);
-                        WidgetManager.updateMapCreator();
-                        pm.project(project);
-                        pm.renderSourceFileList(folderStructure);
-                        pvsFilesListView.selectItem(project.mainPVSFile() ||
-                                                    project.pvsFilesList()[0] ||
-                                                    project.name());
-                        if (image) {
-                            pm.updateImage(image, function () {
-                                //fire project changed event
-                                pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
+                    var overwrite = false;
+                    if (err && err.code === "EEXIST" &&
+                            confirm("Project " + data.projectName + " already exists. Overwrite the project?")) {
+                        project.saveNew({ projectName: data.projectName,
+                                         overWrite  : true }, function (err, res, folderStructure) {
+                            if (!err) {
+                                finalise(folderStructure, previousProject, err);
+                            } else {
+                                if (err) {
+                                    alert("Error while creating the project "
+                                          + data.projectName + " (Error code " + err.code + ")");
+                                }
                                 //invoke callback
                                 if (cb && typeof cb === "function") { cb(err, project); }
-                            });
-                        } else {
-                            //fire project changed event
-                            pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
-                            //invoke callback
-                            if (cb && typeof cb === "function") { cb(err, project); }
-                        }
+                            }
+                        });
                     } else {
-                        if (err.code === "EEXIST") {
-                            alert("Please choose a different name -- project "
-                                        + data.projectName + " already exists.");
-                        }
+                        finalise(folderStructure, previousProject, err);
                         //invoke callback
                         if (cb && typeof cb === "function") { cb(err, project); }
                     }
@@ -460,60 +487,35 @@ define(function (require, exports, module) {
 		/**
             saves a project including image, widget definitions and pvsfiles
         */
-        var name;
-        function _doSave() {
-            // update widgets
-            var newWidgetDef = JSON.stringify(WidgetManager.getWidgetDefinitions(), null, " ");
-            var widgetFile = project.getWidgetDefinitionFile();
-            widgetFile.content(newWidgetDef);
-            
-            // save files
-            project.save(function (err, p) {
+        var name = project.name();
+        if (name && name !== defaultProjectName && name.trim().length > 0) {
+            project.saveNew({ projectName: name,
+                              overWrite: true }, function (err, res) {
                 if (!err) {
-                    project = p;
-                    //repaint the list and sourcecode toolbar
+                    project = res;
+                    project.setProjectName(name);
                     project.pvsFilesList().forEach(function (f) { f.dirty(false); });
                     project._dirty(false);
+                    projectNameChanged({current: name});
+                    pvsFilesListView.renameProject(name);
                     pm.fire({type: "ProjectSaved", project: project});
                     var notification = "Project " + project.name() + " saved successfully!";
                     d3.select("#project-notification-area").insert("p", "p").html(notification);
                     Logger.log(notification);
                     if (typeof cb === "function") { cb(); }
+                } else {
+                    if (err.code === "EEXIST") {
+                        alert("Error: project not saved (project name \"" + name + "\" already exists, please use a different name.)");
+                    }
+                    if (typeof cb === "function") { cb(); }
                 }
             });
-        }
-        ///FIXME change this to a proper form dialog using html templates
-        if (project.name() === defaultProjectName) {
-            name = prompt("Your project has default name, please enter a new project name");
-            
-            if (name && name !== defaultProjectName && name.trim().length > 0) {
-                project.saveNew(name, function (err, res) {
-                    if (!err) {
-                        project = res;
-                        project.setProjectName(name);
-						project.pvsFilesList().forEach(function (f) { f.dirty(false); });
-						project._dirty(false);
-                        projectNameChanged({current: name});
-                        pvsFilesListView.renameProject(name);
-                        pm.fire({type: "ProjectSaved", project: project});
-                        var notification = "Project " + project.name() + " saved successfully!";
-                        d3.select("#project-notification-area").insert("p", "p").html(notification);
-                        Logger.log(notification);
-                        if (typeof cb === "function") { cb(); }
-                    } else {
-                        if (err.code === "EEXIST") {
-                            alert("Error: project not saved (project name \"" + name + "\" already exists, please use a different name.)");
-                        }
-                        if (typeof cb === "function") { cb(); }
-                    }
-                });
-            } else {
-                if (name) {
-                    alert("Error: project not saved (project name \"" + name + "\" is not a valid name.)");
-                }
-                if (typeof cb === "function") { cb(); }
+        } else {
+            if (name) {
+                alert("Error: project not saved (project name \"" + name + "\" is not a valid name.)");
             }
-        } else { _doSave(); }
+            if (typeof cb === "function") { cb(); }
+        }
 	};
 	
 	/**
@@ -585,7 +587,8 @@ define(function (require, exports, module) {
         var project = new Project(data.projectName);
         project.addProjectFile(data.pvsSpec[0], makeEmptyTheory(defaultTheoryName));
 
-        project.saveNew(data.projectName, function (err, res, folderStructure) {
+        project.saveNew({ projectName: data.projectName,
+                          overWrite: true }, function (err, res, folderStructure) {
             if (!err) {
                 //set the main pvs file
                 project.mainPVSFile(new ProjectFile(defaultFilePath));
