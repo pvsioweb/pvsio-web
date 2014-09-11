@@ -268,6 +268,8 @@ define(function (require, exports, module) {
                         if (callback && typeof callback === "function") { callback(p); }
                     });
                 } else {
+                    // remove previous image, if any
+                    d3.select("#imageDiv img").attr("src", "").attr("height", "430").attr("width", "1128");
                     //show the image drag and drop div
                     d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
                     if (callback && typeof callback === "function") { callback(p); }
@@ -354,6 +356,8 @@ define(function (require, exports, module) {
                     if (cb && typeof cb === "function") { cb(err, project); }
                 });
             } else {
+                // remove previous image, if any
+                d3.select("#imageDiv img").attr("src", "").attr("height", "430").attr("width", "1128");
                 //fire project changed event
                 pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
                 //invoke callback
@@ -460,61 +464,35 @@ define(function (require, exports, module) {
 		/**
             saves a project including image, widget definitions and pvsfiles
         */
-        var name;
-        function _doSave() {
-            // update widgets
-            var newWidgetDef = JSON.stringify(WidgetManager.getWidgetDefinitions(), null, " ");
-            var widgetFile = project.getWidgetDefinitionFile();
-            widgetFile.content(newWidgetDef);
-            
-            // save files
-            project.save(function (err, p) {
+        var name = project.name();
+        if (name && name !== defaultProjectName && name.trim().length > 0) {
+            project.saveNew({ projectName: name,
+                              overWrite: true }, function (err, res) {
                 if (!err) {
-                    project = p;
-                    //repaint the list and sourcecode toolbar
+                    project = res;
+                    project.setProjectName(name);
                     project.pvsFilesList().forEach(function (f) { f.dirty(false); });
                     project._dirty(false);
+                    projectNameChanged({current: name});
+                    pvsFilesListView.renameProject(name);
                     pm.fire({type: "ProjectSaved", project: project});
                     var notification = "Project " + project.name() + " saved successfully!";
                     d3.select("#project-notification-area").insert("p", "p").html(notification);
                     Logger.log(notification);
                     if (typeof cb === "function") { cb(); }
+                } else {
+                    if (err.code === "EEXIST") {
+                        alert("Error: project not saved (project name \"" + name + "\" already exists, please use a different name.)");
+                    }
+                    if (typeof cb === "function") { cb(); }
                 }
             });
-        }
-        ///FIXME change this to a proper form dialog using html templates
-        if (project.name() === defaultProjectName) {
-            name = prompt("The selected project name cannot be used as it is reserved for the default project. Please enter a different project name");
-            
-            if (name && name !== defaultProjectName && name.trim().length > 0) {
-                project.saveNew({ projectName: name,
-                                  overWrite: false }, function (err, res) {
-                    if (!err) {
-                        project = res;
-                        project.setProjectName(name);
-						project.pvsFilesList().forEach(function (f) { f.dirty(false); });
-						project._dirty(false);
-                        projectNameChanged({current: name});
-                        pvsFilesListView.renameProject(name);
-                        pm.fire({type: "ProjectSaved", project: project});
-                        var notification = "Project " + project.name() + " saved successfully!";
-                        d3.select("#project-notification-area").insert("p", "p").html(notification);
-                        Logger.log(notification);
-                        if (typeof cb === "function") { cb(); }
-                    } else {
-                        if (err.code === "EEXIST") {
-                            alert("Error: project not saved (project name \"" + name + "\" already exists, please use a different name.)");
-                        }
-                        if (typeof cb === "function") { cb(); }
-                    }
-                });
-            } else {
-                if (name) {
-                    alert("Error: project not saved (project name \"" + name + "\" is not a valid name.)");
-                }
-                if (typeof cb === "function") { cb(); }
+        } else {
+            if (name) {
+                alert("Error: project not saved (project name \"" + name + "\" is not a valid name.)");
             }
-        } else { _doSave(); }
+            if (typeof cb === "function") { cb(); }
+        }
 	};
 	
 	/**
