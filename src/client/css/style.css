@@ -369,6 +369,7 @@ div.detailsForm select, div.detailsForm textarea{
 	margin-top: 20px;
 	margin-bottom: 20px;
 	height: 430px;
+	background: #eee;
 }
 
 #header .project-notifications {
