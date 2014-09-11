@@ -342,8 +342,10 @@ define(function (require, exports, module) {
     };
     
 	///FIXME this should be a private function called from project.save
-	Project.prototype.saveNew = function (newName, cb) {
+	Project.prototype.saveNew = function (descriptor, cb) {
 		var _thisProject = this;
+        var newName = descriptor.projectName;
+        var overWriteFlag = descriptor.overWrite;
 		var ws = WSManager.getWebSocket();
         
         var files = this.getProjectFiles().map(function (f) {
@@ -352,7 +354,7 @@ define(function (require, exports, module) {
 		var token = { type: "createProject",
                       projectName: newName,
                       projectFiles: files,
-                      overWrite: newName  === "defaultProject" };
+                      overWrite: overWriteFlag };
         //FIXME: we are not saving empty folders -- do we want this behaviour?
 		if (this.mainPVSFile()) {
 			token.mainPVSFile = this.mainPVSFile().name();

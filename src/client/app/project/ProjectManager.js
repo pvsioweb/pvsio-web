@@ -333,6 +333,34 @@ define(function (require, exports, module) {
         var project = new Project(data.projectName);
         var i, promises = [];
         
+        function finalise(folderStructure, previousProject, err) {
+            var image = project.getImage();
+            project.getProjectFiles().forEach(function (f) {
+                f.dirty(false);
+            });
+            //set the main pvs file
+            project.mainPVSFile(project.pvsFilesList()[0]);
+            WidgetManager.updateMapCreator();
+            pm.project(project);
+            pm.renderSourceFileList(folderStructure);
+            pvsFilesListView.selectItem(project.mainPVSFile() ||
+                                        project.pvsFilesList()[0] ||
+                                        project.name());
+            if (image) {
+                pm.updateImage(image, function () {
+                    //fire project changed event
+                    pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
+                    //invoke callback
+                    if (cb && typeof cb === "function") { cb(err, project); }
+                });
+            } else {
+                //fire project changed event
+                pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
+                //invoke callback
+                if (cb && typeof cb === "function") { cb(err, project); }
+            }
+        }
+        
         // load image, if any is specified in data
         if (data.prototypeImage && data.prototypeImage[0]) {
             fs.readLocalFileAsDataURL(data.prototypeImage[0])
@@ -365,46 +393,34 @@ define(function (require, exports, module) {
             promises.push(emptySpec);
         }
 
-        var previousProject = project || pm.project(), image;
+        var previousProject = project || pm.project();
         Promise.all(promises)
             .then(function (pvsFiles) {
                 pvsFiles.forEach(function (spec) {
-                    project.addProjectFile(project.name() + "/" + spec.filePath, spec.fileContent);
+                    project.addProjectFile(project.name() + "/" + spec.fileName, spec.fileContent);
                 });
             }).then(function () {
-                project.saveNew(data.projectName, function (err, res, folderStructure) {
+                project.saveNew({ projectName: data.projectName,
+                                  overWrite  : false }, function (err, res, folderStructure) {
                     Logger.log({err: err, res: res});
-                    if (!err) {
-                        image = project.getImage();
-                        project.getProjectFiles().forEach(function (f) {
-                            f.dirty(false);
-                        });
-                        //set the main pvs file
-                        project.mainPVSFile(project.pvsFilesList()[0]);
-                        WidgetManager.updateMapCreator();
-                        pm.project(project);
-                        pm.renderSourceFileList(folderStructure);
-                        pvsFilesListView.selectItem(project.mainPVSFile() ||
-                                                    project.pvsFilesList()[0] ||
-                                                    project.name());
-                        if (image) {
-                            pm.updateImage(image, function () {
-                                //fire project changed event
-                                pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
+                    var overwrite = false;
+                    if (err && err.code === "EEXIST" &&
+                            confirm("Project " + data.projectName + " already exists. Overwrite the project?")) {
+                        project.saveNew({ projectName: data.projectName,
+                                         overWrite  : true }, function (err, res, folderStructure) {
+                            if (!err) {
+                                finalise(folderStructure, previousProject, err);
+                            } else {
+                                if (err) {
+                                    alert("Error while creating the project "
+                                          + data.projectName + " (Error code " + err.code + ")");
+                                }
                                 //invoke callback
                                 if (cb && typeof cb === "function") { cb(err, project); }
-                            });
-                        } else {
-                            //fire project changed event
-                            pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
-                            //invoke callback
-                            if (cb && typeof cb === "function") { cb(err, project); }
-                        }
+                            }
+                        });
                     } else {
-                        if (err.code === "EEXIST") {
-                            alert("Please choose a different name -- project "
-                                        + data.projectName + " already exists.");
-                        }
+                        finalise(folderStructure, previousProject, err);
                         //invoke callback
                         if (cb && typeof cb === "function") { cb(err, project); }
                     }
@@ -466,10 +482,11 @@ define(function (require, exports, module) {
         }
         ///FIXME change this to a proper form dialog using html templates
         if (project.name() === defaultProjectName) {
-            name = prompt("Your project has default name, please enter a new project name");
+            name = prompt("The selected project name cannot be used as it is reserved for the default project. Please enter a different project name");
             
             if (name && name !== defaultProjectName && name.trim().length > 0) {
-                project.saveNew(name, function (err, res) {
+                project.saveNew({ projectName: name,
+                                  overWrite: false }, function (err, res) {
                     if (!err) {
                         project = res;
                         project.setProjectName(name);
@@ -567,7 +584,8 @@ define(function (require, exports, module) {
         var project = new Project(data.projectName);
         project.addProjectFile(data.pvsSpec[0], makeEmptyTheory(defaultTheoryName));
 
-        project.saveNew(data.projectName, function (err, res, folderStructure) {
+        project.saveNew({ projectName: data.projectName,
+                          overWrite: true }, function (err, res, folderStructure) {
             if (!err) {
                 //set the main pvs file
                 project.mainPVSFile(new ProjectFile(defaultFilePath));
