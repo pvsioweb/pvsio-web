@@ -36,7 +36,6 @@ function run() {
         http                    = require("http"),
         fs                      = require("fs"),
         express                 = require("express"),
-        bodyParser              = require("body-parser"),
         webserver               = express(),
         procWrapper             = require("./processwrapper"),
         port                    = 8082,

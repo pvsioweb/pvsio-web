@@ -5,7 +5,7 @@
  */
 /*jshint unused: false*/
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
-/*global define, d3*/
+/*global define, d3, layoutjs, Promise*/
 
 define(function (require, exports, module) {
     "use strict";
@@ -54,8 +54,21 @@ define(function (require, exports, module) {
 							}
 						});
 					pb = PrototypeBuilder.getInstance();
-					pm.enablePlugin(pb);
-					ui.bindListeners(pb.getProjectManager());
+					return pm.enablePlugin(pb).then(function () {
+						var projectManager = pb.getProjectManager();
+						ui.bindListeners(pb.getProjectManager());
+						return new Promise(function (resolve, reject) {
+							// create and default initial empty project containing an empty file (main.pvs)
+							projectManager.createDefaultProject(function (err, res) {
+								d3.select("#project-notification-area").insert("p", "p").html("PVSio-web Ready!");
+								d3.select("#editor-notification-area").insert("p", "p").html("PVS Editor Ready!");
+								//layout the sourcecode and files
+								layoutjs({el: "#sourcecode-editor-wrapper"});
+								if (err) { reject(err); }
+								else { resolve(res); }
+							});
+						});
+					});
 				});
 		},
 		reset: function() {///This function is not tested

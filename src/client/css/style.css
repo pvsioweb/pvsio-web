@@ -331,7 +331,7 @@ intput:invalid, select:invalid{
 	position: absolute;
 	border: 4px dashed teal;
 	height: 430px;
-	width: 1128px;
+	width: 100%;
 	z-index: 191;
 }
 
@@ -367,6 +367,7 @@ div.detailsForm select, div.detailsForm textarea{
 }
 #body {
 	margin-top: 20px;
+	margin-bottom: 20px;
 	height: 430px;
 }
 

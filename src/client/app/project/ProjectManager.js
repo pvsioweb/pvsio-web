@@ -319,7 +319,7 @@ define(function (require, exports, module) {
 					adjustedHeight = scale * img.height;
 				}
 
-				d3.select("#body").style("height", (adjustedHeight) + "px");
+				d3.select("#body").style("height", (adjustedHeight + 50) + "px");
 
 				d3.select("#imageDiv").style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
 				d3.select("#imageDiv img").attr("src", img.src).attr("height", adjustedHeight).attr("width", adjustedWidth);
@@ -432,7 +432,7 @@ define(function (require, exports, module) {
                 project.saveNew({ projectName: data.projectName,
                                   overWrite  : false }, function (err, res, folderStructure) {
                     Logger.log({err: err, res: res});
-                    var overwrite = false;
+//                    var overwrite = false;
                     if (err && err.code === "EEXIST" &&
                             confirm("Project " + data.projectName + " already exists. Overwrite the project?")) {
                         project.saveNew({ projectName: data.projectName,
