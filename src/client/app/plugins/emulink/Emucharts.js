@@ -39,7 +39,7 @@ define(function (require, exports, module) {
 	 * Constructor
 	 * @memberof Emucharts
 	 */
-    function Emucharts(nodes, edges) {
+    function Emucharts(nodes, edges, initial_edges) {
         if (nodes) {
             this.nodes = nodes;
             nextNodeID = nodes.keys().length; // FIXME: this is fragile: we need to check the actual indexes
