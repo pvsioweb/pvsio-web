@@ -377,17 +377,19 @@ define(function (require, exports, module) {
         //create promises for the pvs source files, if any is specified in data
         if (data.pvsSpec && data.pvsSpec.length > 0) {
             for (i = 0; i < data.pvsSpec.length; i++) {
-                if (data.pvsSpec[i].name !== undefined && data.pvsSpec[i].content !== undefined) {
-                    promises.push(data.pvsSpec[i].content);
-                } else {
-                    // FIXME: why are we trying to read pvsSpec if name is not specified?
-                    promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
+                if (data.pvsSpec[i].name !== undefined) {
+                    // FIXME: in what case do we use field content? this field is undefined when the user selects a file...
+                    if (data.pvsSpec[i].content !== undefined) {
+                        promises.push(data.pvsSpec[i].content);
+                    } else {
+                        promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
+                    }
                 }
             }
         } else {
             // create one file with the default content
             var emptySpec = {
-                filePath: defaultTheoryName + ".pvs",
+                fileName: defaultTheoryName + ".pvs",
                 fileContent: defaultTheoryName + emptyTheoryContent + defaultTheoryName
             };
             promises.push(emptySpec);
