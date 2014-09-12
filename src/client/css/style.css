@@ -502,10 +502,17 @@ div.detailsForm select, div.detailsForm textarea{
 #projectTitle {
 	height: 50px;
 	width: 100%;
-	background: #5ab1e8;
+	background: #4088B6;
 	padding: 15px;
 	color: white;
 	font: 20px sans-serif;
+}
+#projectTitle a {
+	color: #f5eee5;
+}
+
+#projectTitle a:hover {
+	color: white;
 }
 
 #project-notifications {
@@ -515,4 +522,36 @@ div.detailsForm select, div.detailsForm textarea{
 	right: 0;
 	z-index: 2;
 	width: 200px;
+}
+
+.plugins-group .list-group-item {
+	border-radius: 0;
+}
+
+.panel.scrollable-dialog {
+	width: 700px;
+}
+
+.scrollable-dialog .panel-body {
+	max-height: 600px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.scrollable-dialog .thumbnail {
+	text-align: center;
+}
+
+.scrollable-dialog .thumbnail > .image {
+	height: 150px;
+	overflow: hidden;
+}
+
+.scrollable-dialog .thumbnail img {
+	max-height: 150px;
+	max-width: 100%;
+	overflow-y: hidden;
+}
+
+.caption button {
+	width: 100%;
 }

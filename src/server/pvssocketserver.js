@@ -116,6 +116,7 @@ function run() {
     //create the express static server serve contents in the client directory and the demos directory
     webserver.use(express.static(clientDir));
 	webserver.use("/demos", express.static(baseDemosDir));
+	webserver.use("/projects", express.static(baseProjectDir));
 	//creating a pathname prefix for client so that demo css and scripts can be loaded from the client dir
 	webserver.use("/client", express.static(clientDir));
 

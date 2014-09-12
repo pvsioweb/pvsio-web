@@ -1,35 +1,19 @@
 <div id="project-notifications">
-	<div class="alert alert-info" role="alert">
-		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-		<p class="message"></p>
-	</div>
+	
 </div>
 <div id="content" class="center prototypebuilder">
 	<div class="ljs-hcontent">
 		<div id="header" class="btn-group">
 			<div id="projectTitle">
 				<span id="txtProjectName"></span>
+				<div class="pull-right">
+					<a class="btn" id="newProject"><span class="glyphicon glyphicon-file"></span> New Project</a>
+					<a class="btn" id="openProject"><span class="glyphicon glyphicon-folder-open"></span> Open Project</a>
+					<a class="btn" id="btnLoadPicture"><span class="glyphicon glyphicon-picture"></span> Change Picture</a>
+					<input type="file" class="hide" id="btnSelectPicture" name="selectPicture" accept="image/*">
+					<a class="btn" id="btnSaveProject"><span class="glyphicon glyphicon-floppy-save"></span> Save Project</a>
+				</div>
 			</div>
-			<a class="btn btn-default" id="newProject"><span class="glyphicon glyphicon-file"></span> New Project</a>
-			<a class="btn btn-default" id="openProject"><span class="glyphicon glyphicon-folder-open"></span> Open Project</a>
-			<a class="btn btn-default" id="btnSaveProject"><span class="glyphicon glyphicon-hdd"></span> Save Project</a>
-			<a class="btn btn-default" id="btnLoadPicture"><span class="glyphicon glyphicon-picture"></span> Change Picture</a>
-			<input type="file" class="hide" id="btnSelectPicture" name="selectPicture" accept="image/*">
-            
-            <div class="btn-group">
-                    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btnPlugins">
-                        Plugins <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                        {{#each plugins}}
-                        <li>
-                            <label>&nbsp;<input type="checkbox" name="{{label}}" id="plugin_{{label}}">
-                            <span>{{label}}</span>
-                            </label>
-                        </li>
-                        {{/each}}
-                    </ul>
-            </div>
 		</div>
 		<div id="body">
 			<div class="ljs-left" id="builder-controls">
@@ -47,7 +31,6 @@
 						<button class="btn btn-primary center" id='btnLoadPicture'> Load Picture</button>
 					</div>
 					<img src="image/start.png" usemap="#prototypeMap" />
-
 				</div>
 				<div id="controlsContainer">
 					<button id="btnBuilderView">Builder View</button>
@@ -62,6 +45,17 @@
 		</div>
 	</div>
 	<div id="rightPanel" class="ljs-right">
+			<div class="plugins-group">
+				<div class="header">Plugins</div>
+				<ul>
+					{{#each plugins}}
+					<li class="list-group-item">
+						<input type="checkbox" name="{{label}}" id="plugin_{{label}}">
+						<span>{{label}}</span>
+					</li>
+					{{/each}}
+				</ul>
+			</div>
 			<div id='console'></div>
 			<!-- container for specification source code -->
 			<div id="scripts"> 
