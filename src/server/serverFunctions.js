@@ -12,7 +12,8 @@ var fs = require("fs"),
 	Promise                 = require("es6-promise").Promise,
 	logger                  = require("tracer").console(),
 	imageExts = [".jpg", ".jpeg", ".png"],
-	baseProjectDir          = path.join(__dirname, "../../examples/projects/");
+	baseProjectDir          = path.join(__dirname, "../../examples/projects/"),
+	filesFilter = [".pvs", ".tex"];
 
 var noop = function () {};
 function getFolderStructure(root) {
@@ -26,7 +27,7 @@ function getFolderStructure(root) {
             });
             if (file.children) {
                 file.children = file.children.filter(function (f) {
-                    return (f.isDirectory && f.name !== "pvsbin") || f.name.split(".").slice(-1).join("") === "pvs";
+                    return (f.isDirectory && f.name !== "pvsbin") || filesFilter.indexOf(path.extname(f.name)) > -1;
                 });
             }
             
