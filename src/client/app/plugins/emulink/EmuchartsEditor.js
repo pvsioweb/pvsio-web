@@ -114,6 +114,8 @@ define(function (require, exports, module) {
                 .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
             d3.select("#ContainerStateMachine svg").select("#Transitions")
                 .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
+            d3.select("#ContainerStateMachine svg").select("#InitialTransitions")
+                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
             d3.select("#ContainerStateMachine svg").select("#dragline")
                 .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + this.zoomLevel + ")");
         }
@@ -372,7 +374,7 @@ define(function (require, exports, module) {
                     // target in quadrant I
                     // for targets in quadrant I, round links draw convex arcs
                     // --> place the arrow on the left side of the target
-                    targetX -= targetWidth * 0.6;
+                    targetX -= targetWidth * 0.8;
                 } else if (dx < 0 && dy < 0) {
                     // target in quadrant II
                     // for targets in quadrant I, round links draw concave arcs
@@ -382,12 +384,12 @@ define(function (require, exports, module) {
                     // target in quadrant III
                     // for targets in quadrant IV, round links draw concave arcs
                     // --> place arrow end on the top-right corner of the target
-                    targetX += targetWidth * 0.6;
+                    targetX += targetWidth * 0.8;
                 } else if (dx >= 0 && dy >= 0) {
                     // target in quadrant IV
                     // for targets in quadrant IV, round links draw convex arcs
                     // --> place arrow end at the top-left corner of the target
-                    targetY -= targetHeight * 0.6;
+                    targetY -= targetHeight * 0.56;
                 }
                 return "m" + sourceX + ',' + sourceY + "A" + dist + "," +
                         dist + " 0 0,1 " + targetX + "," + targetY;
@@ -863,6 +865,7 @@ define(function (require, exports, module) {
                     //console.log("click");
                     if (!_this.dragged) {
                         if (editor_mode === MODE.DELETE() && mouseover.node) {
+                            mouseover.node = null;
                             _this.fire({
                                 type: "emuCharts_deleteState",
                                 node: node
