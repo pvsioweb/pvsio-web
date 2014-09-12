@@ -1,6 +1,15 @@
+<div id="project-notifications">
+	<div class="alert alert-info" role="alert">
+		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		<p class="message"></p>
+	</div>
+</div>
 <div id="content" class="center prototypebuilder">
 	<div class="ljs-hcontent">
 		<div id="header" class="btn-group">
+			<div id="projectTitle">
+				<span id="txtProjectName"></span>
+			</div>
 			<a class="btn btn-default" id="newProject"><span class="glyphicon glyphicon-file"></span> New Project</a>
 			<a class="btn btn-default" id="openProject"><span class="glyphicon glyphicon-folder-open"></span> Open Project</a>
 			<a class="btn btn-default" id="btnSaveProject"><span class="glyphicon glyphicon-hdd"></span> Save Project</a>
@@ -20,15 +29,6 @@
                         </li>
                         {{/each}}
                     </ul>
-            </div>
-			<div class="project-notifications">
-                <input type="text"
-                       placeholder="Untitled Project"
-                       id="txtProjectName"
-                       value=""
-                       readonly="readonly"
-                       disabled="true">
-                <div id="project-notification-area"></div>
             </div>
 		</div>
 		<div id="body">

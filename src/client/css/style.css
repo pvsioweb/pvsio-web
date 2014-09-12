@@ -96,8 +96,7 @@ div.downloader{
 	z-index: 2000000;
 }
 #header{
-	height: 50px;
-	padding: 15px 0 0 0;
+	width: 100%;
 }
 .center{
 	margin-right: auto;
@@ -490,7 +489,6 @@ div.detailsForm select, div.detailsForm textarea{
 
 #content > .ljs-hcontent {
 	width: 80%;
-	padding-left: 20px;
 }
 #body > .ljs-hcontent {
 	padding-left: 0;
@@ -498,4 +496,23 @@ div.detailsForm select, div.detailsForm textarea{
 }
 #builder-controls.ljs-left {
 	width: 20%;
+	background: white;
+}
+
+#projectTitle {
+	height: 50px;
+	width: 100%;
+	background: #5ab1e8;
+	padding: 15px;
+	color: white;
+	font: 20px sans-serif;
+}
+
+#project-notifications {
+	display: none;
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 2;
+	width: 200px;
 }

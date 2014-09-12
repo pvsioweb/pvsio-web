@@ -21,7 +21,8 @@ define(function (require, exports, module) {
         newProjectForm          = require("pvsioweb/forms/newProject"),
 		openProjectForm         = require("pvsioweb/forms/openProject"),
 		openFilesForm = require("pvsioweb/forms/openFiles"),
-		WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager();
+		WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager(),
+		NotificationManager = require("project/NotificationManager");
 
 	///	Used to change name of default files (i.e: default_name + counter ) 
 	var pvsFilesListView, _projectManager;
@@ -45,7 +46,7 @@ define(function (require, exports, module) {
 	function projectNameChanged(event) {
 		var name = event.current;
         document.title = "PVSio-Web -- " + name;
-        d3.select("#header #txtProjectName").property("value", name);
+        d3.select("#header #txtProjectName").html(name);
 	}
 
     function _editorChangedHandler(editor) {
@@ -500,7 +501,8 @@ define(function (require, exports, module) {
                     pvsFilesListView.renameProject(name);
                     pm.fire({type: "ProjectSaved", project: project});
                     var notification = "Project " + project.name() + " saved successfully!";
-                    d3.select("#project-notification-area").insert("p", "p").html(notification);
+					NotificationManager.show(notification);
+//                    d3.select("#project-notification-area").insert("p", "p").html(notification);
                     Logger.log(notification);
                     if (typeof cb === "function") { cb(); }
                 } else {

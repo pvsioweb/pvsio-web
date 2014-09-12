@@ -1,0 +1,19 @@
+/**
+ * Manages the display of notifications on projects
+ * @author Patrick Oladimeji
+ * @date 9/12/14 13:38:02 PM
+ */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*global define, require, d3, window */
+define(function (require, exports, module) {
+	"use strict";
+	var width = "500px";
+	module.exports = {
+		show: function (msg) {
+			var notifyDiv = d3.select("#project-notifications");
+			notifyDiv.select(".message").html(msg);
+			notifyDiv.style("width", 0).style("display", "block");
+			notifyDiv.transition().duration(300).style("width", width);
+		}
+	};
+});

@@ -104,7 +104,7 @@ define(function (require, exports, module) {
                     }
                 });
             }
-            project.addListener("SpecDirtyFlagChanged", function (event) {
+            project.addListener("DirtyFlagChanged", function (event) {
                 d3.select("#btnSaveFile").attr("disabled", null);
                 d3.select("#btnSaveAll").attr("disabled", null);
             });
@@ -114,7 +114,7 @@ define(function (require, exports, module) {
             updateEditorToolbarButtons(file, p);
         });
         
-		d3.select("#header #txtProjectName").property("value", "");
+		d3.select("#header #txtProjectName").html("");
 	
 		/**
 		 * Add event listener for toggling the prototyping layer and the interaction layer
