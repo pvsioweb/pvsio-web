@@ -27,6 +27,7 @@ define(function (require, exports, module) {
         QuestionForm         = require("pvsioweb/forms/displayQuestion"),
         EmuchartsPVSPrinter   = require("plugins/emulink/EmuchartsPVSPrinter"),
         EmuchartsLustrePrinter   = require("plugins/emulink/EmuchartsLustrePrinter"),
+        EmuchartsPIMPrinter   = require("plugins/emulink/EmuchartsPIMPrinter"),
         fs = require("util/fileHandler");
     
     var instance;
@@ -41,6 +42,7 @@ define(function (require, exports, module) {
     var MODE;
     var emuchartsPVSPrinter;
     var emuchartsLustrePrinter;
+    var emuchartsPIMPrinter;
     
 
     function resetToolbarColors() {
@@ -233,6 +235,7 @@ define(function (require, exports, module) {
     function Emulink() {
         emuchartsPVSPrinter = new EmuchartsPVSPrinter("emuchart_th");
         emuchartsLustrePrinter = new EmuchartsLustrePrinter("A");
+        emuchartsPIMPrinter = new EmuchartsPIMPrinter("emuchart_PIM");
         pvsioWebClient = PVSioWebClient.getInstance();
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
@@ -791,7 +794,7 @@ define(function (require, exports, module) {
             document.getElementById("menuCodeGenenerators").children[1].style.display = "block";
         });
         d3.select("#btn_menuPVSPrinter").on("click", function () {
-            document.getElementById("menuCodeGenenerators").children[1].style.display = "none";
+            //document.getElementById("menuCodeGenenerators").children[1].style.display = "none";
             var emucharts = {
                 name: "emucharts_th",
                 author: {
@@ -818,7 +821,48 @@ define(function (require, exports, module) {
                 if (!err) {
                     projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
                     projectManager.selectFile(emuchartsFile);
-                    notification = "PVS Printer output is file " + emuchartsFile.path();
+                    notification = "PVS model successfully generated in file " + emuchartsFile.path();
+                    alert(notification);
+                    Logger.log(notification);
+                } else {
+                    notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
+                    alert(notification);
+                    Logger.log(notification);
+                }
+            });
+            // select file
+            projectManager.selectFile(emuchartsFile);
+            var x = 0;
+        });
+        d3.select("#btn_menuPIMPrinter").on("click", function () {
+            var emucharts = {
+                name: "emucharts_PIM",
+                author: {
+                    name: "Paolo Masci",
+                    affiliation: "Queen Mary University of London, United Kingdom",
+                    contact: "http://www.eecs.qmul.ac.uk/~masci/"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: emuchartsManager.getVariables(),
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".tex",
+                                                                 emuchartsPIMPrinter.print(emucharts));
+            if (projectManager.fileExists(emuchartsFile)) {
+                // remove file from project
+                projectManager.project().removeFile(emuchartsFile);
+            }
+            // add file to project
+            projectManager.saveFiles([emuchartsFile], function (err) {
+                var notification = "";
+                if (!err) {
+                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
+                    projectManager.selectFile(emuchartsFile);
+                    notification = "PIM model successfully generated in file " + emuchartsFile.path();
+                    alert(notification);
                     Logger.log(notification);
                 } else {
                     notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
