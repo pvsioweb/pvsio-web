@@ -15,7 +15,7 @@ define(function (require, exports, module) {
         var f = d3.select("#functionText").property("value"),
 			str = "",
 			events = [];
-        d3.selectAll("input[type='checkbox'][name='events']").each(function () {
+        d3.selectAll("input[type='radio'][name='events']").each(function () {
             if (this.checked) {
                 events = events.concat(this.value.split("/"));
             }
@@ -42,7 +42,7 @@ define(function (require, exports, module) {
 			//update form
 			if (widget.type() === "button") {
 				widget.events().forEach(function (e) {
-					d3.select("input[type='checkbox'][value='" + e + "']").property("checked", true);
+					d3.select("input[type='radio'][value='" + e + "']").property("checked", true);
 				});
 			}
             if (widget.auditoryFeedback && widget.auditoryFeedback()) {
@@ -51,7 +51,7 @@ define(function (require, exports, module) {
 			return this;
 		},
 		events: {
-			"change input[type='checkbox'][name='events']": "eventsChanged",
+			"change input[type='radio'][name='events']": "eventsChanged",
 			"click #btnOk": "ok",
 			"click #btnCancel": "cancel",
 			"keyup #functionText": "eventsChanged"
@@ -61,7 +61,7 @@ define(function (require, exports, module) {
 		},
 		ok: function (event) {
 			var form = this.el;
-			if (FormUtils.validateForm(form, "input[type='checkbox'][name='events'], input[type='text'], textarea")) {
+			if (FormUtils.validateForm(form, "input[type='radio'][name='events'], input[type='text'], textarea")) {
 				var formdata = FormUtils.serializeForm(form, "input");
                 //add auditory feedback property manually
                 if (this.widget.auditoryFeedback && this.widget.auditoryFeedback()) {

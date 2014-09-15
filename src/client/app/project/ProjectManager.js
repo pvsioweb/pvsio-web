@@ -433,7 +433,6 @@ define(function (require, exports, module) {
                 project.saveNew({ projectName: data.projectName,
                                   overWrite  : false }, function (err, res, folderStructure) {
                     Logger.log({err: err, res: res});
-//                    var overwrite = false;
                     if (err && err.code === "EEXIST" &&
                             confirm("Project " + data.projectName + " already exists. Overwrite the project?")) {
                         project.saveNew({ projectName: data.projectName,

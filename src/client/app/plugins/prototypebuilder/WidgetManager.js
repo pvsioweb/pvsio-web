@@ -99,6 +99,7 @@ define(function (require, exports, module) {
     };
 
 	WidgetManager.prototype.updateMapCreator = function (scale, cb) {
+		scale = scale || 1;
 		var wm = this, event = {type: "WidgetModified"};
         imageMapper({scale: scale, element: "#imageDiv img", parent: "#imageDiv", onReady: function (mc) {
             mapCreator = mc.on("create", function (e) {

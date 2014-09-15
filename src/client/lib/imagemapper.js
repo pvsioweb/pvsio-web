@@ -40,7 +40,7 @@
     }
     
     function enableRegionDrag(region, dispatcher) {
-        var g = d3.select(region.node().parentNode), svg = d3.select(g.node().parentNode);
+        var g = d3.select(region.node().parentNode), svg = d3.select("svg.image-map-layer");
         region.on("mousedown", function () {
             var mdPos = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]}, rxStart = +region.attr("x"), ryStart = +region.attr("y");
             d3.event.stopPropagation();
@@ -66,7 +66,7 @@
     
     function enableRegionResize(region, dispatcher) {
         var g = d3.select(region.node().parentNode), corners = g.selectAll("rect.corner"),
-            svg = d3.select(g.node().parentNode);
+            svg = d3.select("svg.image-map-layer");
         corners.on("mousedown", function (d, i) {
             d3.event.preventDefault();
             d3.event.stopPropagation();
@@ -114,7 +114,7 @@
     
     function createRegion(svg, startPos, dispatcher) {
         svg.selectAll("g.selected").classed("selected", false);//clear previous selections
-        var g = svg.append("g").attr("class", "selected"), moved = false, moveRegionStarted = false;
+        var g = svg.select("g").append("g").attr("class", "selected"), moved = false, moveRegionStarted = false;
         var region = g.append("rect").attr("x", startPos.x).attr("y", startPos.y).attr("class", "region");
        
         var corners = g.selectAll("rect.corner").data(helperData).enter()
@@ -155,15 +155,16 @@
         config.scale = config.scale || 1;
         //clear any previous svgs
         d3.select(config.parent + " svg").remove();
-        var imageEl = d3.select(config.element), props, mapLayer,
+        var imageEl = d3.select(config.element), props, mapLayer, svg,
             ed = d3.dispatch("create", "remove", "resize", "move"), initTimer, _el_poll_count = 0;
         props = cr(imageEl);
         
         function initialiseSVGLayer() {
-            mapLayer = d3.select(config.parent).style("position", "relative")
+            svg = d3.select(config.parent).style("position", "relative")
                 .append("svg").attr("width", props.width).attr("height", props.height).attr("class", "image-map-layer")
-                .style("position", "absolute").style("cursor", "crosshair").style("top", 0).style("left", 0)
-				.append("g").attr("transform", "scale(" + config.scale + ")");
+                .style("position", "absolute").style("cursor", "crosshair").style("top", 0).style("left", 0);
+			
+			mapLayer = svg.append("g").attr("transform", "scale(" + config.scale + ")");
         }
         
         function getImageMapData() {
@@ -179,9 +180,9 @@
         }
         
         function restoreRectRegion(data) {
-            var r = createRegion(mapLayer, data, ed);
+            var r = createRegion(svg, data, ed);
             updateRegion(r, data);
-            mapLayer.on("mousemove", null)
+            svg.on("mousemove", null)
                 .on("mouseup", null);
             return r;
         }
@@ -206,9 +207,9 @@
                 console.log("Polled image element for size " + _el_poll_count + " times");
                 _el_poll_count = 0;
                 //create mousedown event for the layer for region creation
-                mapLayer.on("mousedown", function () {
+                svg.on("mousedown", function () {
                     var e = d3.event;
-                    createRegion(mapLayer, {x: d3.mouse(this)[0], y: d3.mouse(this)[1]}, ed);
+                    createRegion(svg, {x: d3.mouse(this)[0], y: d3.mouse(this)[1]}, ed);
                     e.preventDefault();
                 });
                 //initialisation complete
