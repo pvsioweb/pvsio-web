@@ -21,7 +21,8 @@ define(function (require, exports, module) {
         newProjectForm          = require("pvsioweb/forms/newProject"),
 		openProjectForm         = require("pvsioweb/forms/openProject"),
 		openFilesForm = require("pvsioweb/forms/openFiles"),
-		WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager();
+		WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager(),
+		NotificationManager = require("project/NotificationManager");
 
 	///	Used to change name of default files (i.e: default_name + counter ) 
 	var pvsFilesListView, _projectManager;
@@ -45,7 +46,7 @@ define(function (require, exports, module) {
 	function projectNameChanged(event) {
 		var name = event.current;
         document.title = "PVSio-Web -- " + name;
-        d3.select("#header #txtProjectName").property("value", name);
+        d3.select("#header #txtProjectName").html(name);
 	}
 
     function _editorChangedHandler(editor) {
@@ -248,9 +249,9 @@ define(function (require, exports, module) {
                 pm.editor().on("change", _editorChangedHandler);
                 // update image -- note that we need to wait the callback as image loading may take a little while in some cases
                 if (image) {
-                    pm.updateImage(image, function (res) {
+                    pm.updateImage(image, function (res, scale) {
                         if (res.type !== "error") {
-                            WidgetManager.updateMapCreator(function () {
+                            WidgetManager.updateMapCreator(scale, function () {
                                 try {
                                     var wd = JSON.parse(p.getWidgetDefinitionFile().content());
                                     WidgetManager.restoreWidgetDefinitions(wd);
@@ -304,13 +305,36 @@ define(function (require, exports, module) {
         var img = new Image();
         
         function imageLoadComplete(res) {
-            d3.select("#imageDiv img").attr("src", img.src).attr("height", img.height).attr("width", img.width);
-            d3.select("#imageDiv svg").attr("height", img.height).attr("width", img.width);
-            //hide the draganddrop stuff
-            d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+			//if the image width is more than the the containing element scale it down a little
+			var parent = d3.select("#body > .ljs-hcontent"),
+				scale = 1;
+			function resize() {
+				var pbox = parent.node().getBoundingClientRect(),
+					adjustedWidth = img.width,
+					adjustedHeight = img.height;
+				scale = 1;
+				
+				if (img.width > pbox.width) {
+					adjustedWidth = pbox.width;
+					scale = adjustedWidth / img.width;
+					adjustedHeight = scale * img.height;
+				}
+
+				d3.select("#body").style("height", (adjustedHeight + 50) + "px");
+
+				d3.select("#imageDiv").style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
+				d3.select("#imageDiv img").attr("src", img.src).attr("height", adjustedHeight).attr("width", adjustedWidth);
+				d3.select("#imageDiv svg").attr("height", img.height).attr("width", img.width);
+				d3.select("#imageDiv svg > g").attr("transform", "scale(" + scale + ")");
+				//hide the draganddrop stuff
+				d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+			}
+			resize();
             // invoke callback, if any
-            if (cb && typeof cb === "function") { cb(res); }
+            if (cb && typeof cb === "function") { cb(res, scale); }
+			parent.node().addEventListener("resize", resize);
         }
+		
         function imageLoadError(res) {
             alert("Failed to load picture " + img.name);
             if (cb && typeof cb === "function") { cb(res); }
@@ -409,7 +433,6 @@ define(function (require, exports, module) {
                 project.saveNew({ projectName: data.projectName,
                                   overWrite  : false }, function (err, res, folderStructure) {
                     Logger.log({err: err, res: res});
-                    var overwrite = false;
                     if (err && err.code === "EEXIST" &&
                             confirm("Project " + data.projectName + " already exists. Overwrite the project?")) {
                         project.saveNew({ projectName: data.projectName,
@@ -477,7 +500,8 @@ define(function (require, exports, module) {
                     pvsFilesListView.renameProject(name);
                     pm.fire({type: "ProjectSaved", project: project});
                     var notification = "Project " + project.name() + " saved successfully!";
-                    d3.select("#project-notification-area").insert("p", "p").html(notification);
+					NotificationManager.show(notification);
+//                    d3.select("#project-notification-area").insert("p", "p").html(notification);
                     Logger.log(notification);
                     if (typeof cb === "function") { cb(); }
                 } else {

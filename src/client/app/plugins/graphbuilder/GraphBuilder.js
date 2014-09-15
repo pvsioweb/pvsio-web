@@ -4,7 +4,7 @@
  * @date 11/22/13 9:03:14 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define*/
+/*global define, Promise*/
 define(function (require, exports, module) {
 	"use strict";
 	var d3 = require("d3/d3"),
@@ -134,11 +134,13 @@ define(function (require, exports, module) {
 					gb.reInitialise();
 				}
             });
+		return Promise.resolve(true);
     };
     
     GraphBuilder.prototype.unload = function () {
         clear();
         PVSioWebClient.getInstance().removeCollapsiblePanel(canvas);
+		return Promise.resolve(true);
     };
 	
     GraphBuilder.prototype.getDependencies = function () {

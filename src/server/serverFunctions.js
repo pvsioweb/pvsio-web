@@ -283,7 +283,20 @@ function listProjects() {
 					return stat(path.join(baseProjectDir, file))
 						.then(function (f) {
 							if (f.isDirectory()) {
-								return Promise.resolve(file);
+								return new Promise(function (resolve, reject) {
+									//get the image in the directory if any also dont return empty folders as projects
+									fs.readdir(path.join(baseProjectDir, file), function (err, files) {
+										if (err) {
+											reject(err);
+										} else {
+											var image = files.filter(function (f) {
+												return imageExts.indexOf(path.extname(f)) > -1;
+											})[0];
+											var result = files.length ? {name: file, image: image} : null;
+											resolve(result);
+										}
+									});
+								});								
 							} else { return Promise.resolve(null); }
 						});
 				})).then(function (files) {

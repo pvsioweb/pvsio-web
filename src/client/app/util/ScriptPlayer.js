@@ -10,10 +10,12 @@ define(function (require, exports, module) {
     var ws = require("websockets/pvs/WSManager").getWebSocket(),
         WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager(),
         ScriptItemView = require("pvsioweb/forms/ScriptItemView"),
+		StateParser = require("util/PVSioStateParser"),
         d3 = require("d3/d3");
 
     function render(stateString, display) {
-        display.render(stateString);
+		var state = StateParser.parse(stateString);
+        display.render(state);
     }
     
     function getButtonPos(id) {
@@ -71,7 +73,7 @@ define(function (require, exports, module) {
             ws.lastState(script.startState);
             //render the last state
             if (script.startState !== "init(0)") {
-                display.render(script.startState);
+				render(script.startState, display);
             }
             play(script.actions.map(function (d) {
                 return d;

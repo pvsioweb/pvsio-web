@@ -3,7 +3,7 @@
  * @author Patrick Oladimeji
  * @date Jan 5, 2013 : 6:42:35 AM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 /*global define, d3, require, $, Handlebars, Backbone, self*/
 define(function (require, exports, module) {
 	"use strict";
@@ -24,14 +24,14 @@ define(function (require, exports, module) {
 			return this;
 		},
 		events: {
-			"click #btnOk": "ok",
+			"click .caption button": "open",
 			"click #btnCancel": "cancel"
 		},
 		
-		ok: function (event) {
+		open: function (event) {
 			var form = this.el;
 			if (FormUtils.validateForm(form)) {
-				var formdata = FormUtils.serializeForm(form);
+				var formdata = {projectName: d3.select(event.currentTarget).attr("data-project")};
 				this.trigger("ok", {data: formdata, el: this.el, event: event}, this);
 			}
 		},

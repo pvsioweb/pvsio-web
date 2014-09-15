@@ -4,7 +4,7 @@
  * @date 5/3/14 15:46:27 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, _ */
+/*global define, Promise*/
 define(function (require, exports, module) {
     "use strict";
     var enabledPlugins;//contains instances of plugins
@@ -15,6 +15,11 @@ define(function (require, exports, module) {
         enabledPlugins = [];
     }
     
+	/**
+		Enables a plugin
+		@param {object} plugin the plugin to enable
+		@returns {Promise} a promise that resolves when the plugin has been enabled
+	*/
     PluginManager.prototype.enablePlugin = function (plugin) {
         var pm = this;
         if (enabledPlugins.indexOf(plugin) < 0) {
@@ -22,23 +27,38 @@ define(function (require, exports, module) {
             //initialise the plugin after loading and initialising any dependencies
             var dependencies = plugin.getDependencies();
             if (dependencies && dependencies.length) {
-                dependencies.filter(function (p) {
+				var depPromises = dependencies.filter(function (p) {
                     return !pm.isLoaded(p);
-                }).forEach(function (p) {
-                    pm.enablePlugin(p);
+                }).map(function (p) {
+					return pm.enablePlugin(p);
                 });
-            }
-            plugin.initialise();
-        }
+				return Promise.all(depPromises)
+					.then(function () {
+						return plugin.initialise();
+					});
+            } else {
+				return plugin.initialise();
+			}
+        } else {
+			//plugin is already enabled
+			return Promise.resolve(true);
+		}
     };
     
+	/**
+		Disables a plugin.
+		@param {object} plugin the plugin to disable
+		@returns {Promise} a promise that resolves when the plugin has been disabled
+	*/
     PluginManager.prototype.disablePlugin = function (plugin) {
         var index = enabledPlugins.indexOf(plugin);
         if (enabledPlugins.indexOf(plugin) > -1) {
             enabledPlugins.splice(index, 1);
             //
-            plugin.unload();
-        }
+            return plugin.unload();
+        } else {
+			return Promise.resolve(true);
+		}
     };
     
     PluginManager.prototype.getEnabledPlugins = function () {

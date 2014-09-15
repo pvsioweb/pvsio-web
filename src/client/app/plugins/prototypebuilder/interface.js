@@ -4,7 +4,7 @@
  * @date 11/15/13 16:29:55 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, $, Backbone, Handlebars, Promise */
+/*global define, d3, $, Backbone, Handlebars, Promise, layoutjs */
 define(function (require, exports, module) {
 	"use strict";
 	var WSManager = require("websockets/pvs/WSManager"),
@@ -91,12 +91,11 @@ define(function (require, exports, module) {
             var ws = WSManager.getWebSocket();
             ws.lastState("init(0)");
             if (project.mainPVSFile()) {
-                ws.startPVSProcess({fileName: project.mainPVSFile().name(),
-                                    projectName: project.name()}, function (err) {
-										pvsProcessReady(err);
-										//make projectManager bubble the process ready event
-										projectManager.fire({type: "PVSProcessReady", err: err});
-									});
+                ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()}, function (err) {
+					pvsProcessReady(err);
+					//make projectManager bubble the process ready event
+					projectManager.fire({type: "PVSProcessReady", err: err});
+				});
             } else {
                 //close pvsio process for previous project
                 ws.closePVSProcess(function (err) {
@@ -105,7 +104,7 @@ define(function (require, exports, module) {
                     }
                 });
             }
-            project.addListener("SpecDirtyFlagChanged", function (event) {
+            project.addListener("DirtyFlagChanged", function (event) {
                 d3.select("#btnSaveFile").attr("disabled", null);
                 d3.select("#btnSaveAll").attr("disabled", null);
             });
@@ -115,7 +114,7 @@ define(function (require, exports, module) {
             updateEditorToolbarButtons(file, p);
         });
         
-		d3.select("#header #txtProjectName").property("value", "");
+		d3.select("#header #txtProjectName").html("");
 	
 		/**
 		 * Add event listener for toggling the prototyping layer and the interaction layer
@@ -362,6 +361,7 @@ define(function (require, exports, module) {
 			var t = Handlebars.compile(template);
 			this.$el.html(t(data));
 			$("body").append(this.el);
+			layoutjs({el: "#content", useFullHeight: true});
 			return this;
 		},
 		events: {

@@ -4,7 +4,7 @@
  * @date 11/21/13 15:03:48 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define*/
+/*global define, layoutjs, Promise*/
 define(function (require, exports, module) {
 	"use strict";
 	var  CodeMirror             = require("cm/lib/codemirror"),
@@ -29,7 +29,7 @@ define(function (require, exports, module) {
         pvsioWebClient = PVSioWebClient.getInstance();
 		currentProject = new Project("");
         projectManager = new ProjectManager(currentProject);
-        projectManager.addListener("SelectedFileChanged", function (event) {
+        projectManager.addListener("SelectedFileChanged", function () {
             if (editor) {
                 editor.refresh();
             }
@@ -39,7 +39,9 @@ define(function (require, exports, module) {
     /////These are the api methods that the prototype builder plugin exposes
     PrototypeBuilder.prototype.getDependencies = function () { return []; };
     
-    ///FIXME this should have a callback or return a promise since it calls an async function "createDefaultProject"
+	/**
+		@returns {Promise} a promise that resolves when the prototype builder has been initialised
+	*/
     PrototypeBuilder.prototype.initialise = function () {
         editorContainer = pvsioWebClient.createCollapsiblePanel({headerText: "PVS Editor", showContent: false, onClick: function () {
             editor.refresh();
@@ -57,15 +59,13 @@ define(function (require, exports, module) {
         editor.setSize("100%", "100%");
         projectManager.editor(editor);
         projectManager.preparePageForImageUpload();
-        // create and default initial empty project containing an empty file (main.pvs)
-        projectManager.createDefaultProject();
-        d3.select("#project-notification-area").insert("p", "p").html("PVSio-web Ready!");
-        d3.select("#editor-notification-area").insert("p", "p").html("PVS Editor Ready!");
+		return Promise.resolve(true);
     };
    
     PrototypeBuilder.prototype.unload = function () {
         editor = null;
         pvsioWebClient.removeCollapsiblePanel(editorContainer);
+		return Promise.resolve(true);
     };
     PrototypeBuilder.prototype.getProjectManager = function () {
         return projectManager;
