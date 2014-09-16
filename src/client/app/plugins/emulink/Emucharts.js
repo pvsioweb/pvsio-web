@@ -223,6 +223,24 @@ define(function (require, exports, module) {
     };
     
     /**
+	 * Adds a new control point to an edge of the diagram
+     * @returns the new edge
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.set_controlPoint = function (edge, cp) {
+        if (!edge || !cp) { return false; }
+        var ed = this.edges.get(edge.id);
+        if (ed) {
+            ed.controlPoint = cp;
+            this.edges.set(edge.id, ed);
+            return true;
+        } else {
+            console.log("dbg: warning - control point associated to unknown edge");
+        }
+        return false;
+    };
+    
+    /**
 	 * Adds a new edge to the diagram
      * @returns the new edge
 	 * @memberof Emucharts
@@ -244,7 +262,8 @@ define(function (require, exports, module) {
                 id  : id, // nodes have unique IDs
                 name: edge.name || id,
                 source: source,
-                target: target
+                target: target,
+                controlPoint: edge.controlPoint
             };
         // add the new edge to the diagram
         this.edges.set(newEdge.id, newEdge);
@@ -261,7 +280,8 @@ define(function (require, exports, module) {
                 target: {
                     id: newEdge.target.id,
                     name: newEdge.target.name
-                }
+                },
+                controlPoint: edge.controlPoint
             }
         });
         return newEdge;
@@ -446,7 +466,7 @@ define(function (require, exports, module) {
     
     /**
 	 * Returns an array containing the current set of transitions
-     * Each transition is given as a 4-tuple { name, id, source, target }
+     * Each transition is given as a 5-tuple { name, id, source, target, controlPoint }
      * where source and target are pairs { name, id }
 	 * @memberof Emucharts
 	 */
@@ -465,6 +485,10 @@ define(function (require, exports, module) {
                 target: {
                     name: trans.target.name,
                     id: trans.target.id
+                },
+                controlPoint: {
+                    x: trans.controlPoint.x,
+                    y: trans.controlPoint.y
                 }
             });
         });

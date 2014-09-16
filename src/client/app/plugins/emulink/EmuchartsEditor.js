@@ -39,17 +39,21 @@ define(function (require, exports, module) {
     var mousedrag = { node: null, path: null };
     var drag_line; // drag line used when creating new transitions
     var sensitivity = { x: 8, y: 8 };
+    // mouseOverControlPoint holds an edge object when the mouse is over the control point of an edge
+    var mouseOverControlPoint = null;
     
     // editor modes
     var MODE = new EditorModeUtils();
     var editor_mode = MODE.BROWSE();
+    
+    var _this = null;
     
 	/**
 	 * Constructor
 	 * @memberof EmuchartsEditor
 	 */
     function EmuchartsEditor(emucharts) {
-        var _this = this;
+        _this = this;
         this.zoomLevel = 1;
         this.d3EventScale = d3.behavior.zoom().scale();
         this.d3EventTranslate = d3.behavior.zoom().translate();
@@ -133,13 +137,260 @@ define(function (require, exports, module) {
         this.zoomChart();
     };
     
+    
+	/**
+	 * Utility function to generate formatted labels for transitions
+     * @returns labels, as a formatted string
+	 * @memberof EmuchartsEditor
+	 */
+    function labelToString(label) {
+        var ans = "";
+        if (label.listConditions) {
+            label.listConditions.forEach(function (cond) { ans += cond + "; "; });
+            ans = " [ " + ans + " ] ";
+        }
+        if (label.listOfOperations) {
+            label.listOfOperations.forEach(function (item) { ans += item + "; "; });
+            ans = " { " + ans + " } ";
+        }
+        return ans;
+    }
+    
+    
+	/**
+	 * Utility function to draw edges between nodes
+	 * @memberof EmuchartsEditor
+	 */
+    var lineFunction = d3.svg.line()
+                         .x(function (d) { return d.x; })
+                         .y(function (d) { return d.y; })
+                         .interpolate("cardinal");
+    
+    
+	/**
+	 * Utility function to obtain control points for edges
+     * @params coordinates (x,y) of source and target node
+     * @returns vector of control points
+	 * @memberof EmuchartsEditor
+	 */
+    function getControlPoints(edge) {
+        var sourceX = edge.source.x;
+        var sourceY = edge.source.y;
+        var targetX = edge.target.x;
+        var targetY = edge.target.y;
+
+        var offset = 32;
+        var controlPoint1X = (edge.controlPoint) ? edge.controlPoint.x
+                            : (edge.source.id === edge.target.id) ? (targetX + sourceX) * 0.5 + offset
+                            : (targetX + sourceX) * 0.5 - offset;
+        var controlPoint1Y = (edge.controlPoint) ? edge.controlPoint.y
+                            : (edge.source.id === edge.target.id) ? (targetY + sourceY) * 0.5 + offset
+                            : (targetY + sourceY) * 0.5 - offset;
+
+        //var dx = edge.target.x - edge.source.x;
+        //var dy = edge.target.y - edge.source.y;
+        var dx = edge.target.x - controlPoint1X;
+        var dy = edge.target.y - controlPoint1Y;
+        if (dx !== 0 || dy !== 0) {
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            var sourceHeight = edge.source.height;
+            var targetWidth  = edge.target.name.length * fontSize;
+            var targetHeight = edge.target.height;
+
+            // to identify control points, we split the space into four Cartesian quadrants:
+            // the source node is at the center of the axes, and the target is in one of the quadrants
+            //  II  |  I
+            // -----s-----
+            // III  |  IV
+            // NOTE: SVG has the y axis inverted with respect to the Cartesian y axis
+            if (dx >= 0 && dy < 0) {
+                // target node is in quadrant I
+                // for targets in quadrant I, round links draw convex arcs
+                // --> place the arrow on the left side of the target
+                targetX -= targetWidth * 0.8;
+                if (!edge.controlPoint) {
+                    controlPoint1X = (targetX + sourceX) * 0.5 - offset;
+                }
+                if (edge.source.id === edge.target.id) {
+                    // move the first control point to quadrant II so that the self-edge looks round
+                    sourceY += targetHeight * 0.6;
+                }
+            } else if (dx < 0 && dy < 0) {
+                // target node is in quadrant II
+                // for targets in quadrant I, round links draw concave arcs
+                // --> place the arrow at the bottom-right corner of the target
+                targetY += targetHeight * 0.6;
+                if (!edge.controlPoint) {
+                    controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                }
+                if (edge.source.id === edge.target.id) {
+                    // move the first control point to quadrant III so that the self-edge looks round
+                    sourceX += targetWidth * 0.8;
+                }
+            } else if (dx < 0 && dy >= 0) {
+                // target node is in quadrant III
+                // for targets in quadrant IV, round links draw concave arcs
+                // --> place arrow end on the top-right corner of the target
+                targetX += targetWidth * 0.8;
+                if (!edge.controlPoint) {
+                    controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                    controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                }
+                if (edge.source.id === edge.target.id) {
+                    // move the first control point to quadrant IV so that the self-edge looks round
+                    sourceY -= targetHeight * 0.56;
+                }
+            } else if (dx >= 0 && dy >= 0) {
+                // target node is in quadrant IV
+                // for targets in quadrant IV, round links draw convex arcs
+                // --> place arrow end at the top-left corner of the target
+                targetY -= targetHeight * 0.56;
+                if (edge.source.id === edge.target.id) {
+                    // move the first control point to quadrant I so that the self-edge looks round
+                    sourceX -= targetWidth * 0.8;
+                }
+                if (!edge.controlPoint) {
+                    controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                }
+            }
+        }
+        return [{ "x": sourceX, "y": sourceY },
+                             { "x": controlPoint1X, "y": controlPoint1Y},
+                             { "x": targetX, "y": targetY }];
+    }
+    
+
+    /**
+	 * Utility function to refresh rendered transitions.
+     * @returns reference to the updated svg elements
+	 * @memberof EmuchartsEditor
+	 */
+    function refreshTransitions(transitions) {
+        var label;
+        var cpoints;
+        // refresh paths and labels
+        transitions.selectAll(".path").attr("d", function (edge) {
+            // fetch control point
+            var cp = getControlPoints(edge);
+            // refresh transition path
+            if (edge.target.x === edge.source.x && edge.target.y === edge.source.y) {
+                // this is a self-edge
+                // refresh transition label
+                label = d3.select(this.parentNode).select(".tlabel");
+                label.text(function (edge) {
+                    return edge.name + labelToString(edge);
+                });
+                // adjust text position
+                label.attr("x", function (edge) {
+                    if (edge.target.id === edge.source.id) {
+                        // self-edge
+                        return (edge.controlPoint) ?
+                                (edge.source.x < edge.controlPoint.x) ? edge.controlPoint.x + 8 : edge.controlPoint.x - 16
+                                : edge.source.x + 32;
+                    }
+                    // else do nothing -- textpath will take care of placing the text
+                    return "";
+                }).attr("y", function (edge) {
+                    if (edge.target.id === edge.source.id) {
+                        // self-edge
+                        return (edge.controlPoint) ?
+                                (edge.source.y < edge.controlPoint.y) ? edge.controlPoint.y + 8 : edge.controlPoint.y - 8
+                                : edge.source.y + 56;
+                    }
+                    // else do nothing -- textpath will take care of placing the text
+                    return "";
+                });
+                // refresh control points
+                cpoints = d3.select(this.parentNode).select(".cpoints");
+                // for now we use only the middle control point
+                cpoints.attr("cx", cp[1].x).attr("cy", cp[1].y);
+                // refresh path
+                return lineFunction(cp);
+                // redraw self-edge
+                //return "M" + (edge.source.x + edge.source.width / 2 - 8) + ',' +
+                //        (edge.source.y - edge.source.height / 2 - 2) + "q 64 -16 16 16";
+            } else {
+                // not a self-edge
+                // refresh transition label
+                label = d3.select(this.parentNode.lastChild.firstChild);
+                label.text(function (edge) {
+                    return edge.name + labelToString(edge);
+                });
+                // refresh control points
+                cpoints = d3.select(this.parentNode).select(".cpoints");
+                // for now we use only the middle control point
+                cpoints.attr("cx", cp[1].x).attr("cy", cp[1].y);
+                // refresh path
+                return lineFunction(cp);
+                // this is the old code to draw arcs between nodes
+                //return "m" + sourceX + ',' + sourceY + "A" + dist + "," +
+                //        dist + " 0 0,1 " + targetX + "," + targetY;*/
+                // this is the old code to draw straight lines between nodes
+                //return "m" + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
+            }
+        });
+        return transitions;
+    }
+        
+	/**
+	 * Utility function to refresh rendered initial transitions.
+     * @returns reference to the updated svg elements
+	 * @memberof EmuchartsEditor
+	 */
+    function refreshInitialTransitions(transitions) {
+        var label;
+        // refresh paths and labels
+        transitions.selectAll(".ipath").attr("d", function (edge) {
+            // refresh transition label
+            label = d3.select(this.parentNode).select(".itlabel");
+            label.text(function (edge) {
+                return edge.name + labelToString(edge);
+            });
+            // adjust text position
+            label.attr("x", function (edge) {
+                return (edge.controlPoint) ? edge.controlPoint.x : edge.target.x + 32;
+            }).attr("y", function (edge) {
+                return (edge.controlPoint) ? edge.controlPoint.y : edge.target.y - 32;
+            });
+            // refresh control points
+//            var cp = getControlPoints(edge);
+//            var cpoints = d3.select(this.parentNode).select(".cpoints");
+//            // for now we use only the middle control point
+//            cpoints.attr("cx", cp[1].x).attr("cy", cp[1].y);
+//            // refresh path
+//            return lineFunction(cp);
+            // adjust text position
+            label.attr("x", function (edge) {
+                return edge.target.x - 8;
+            }).attr("y", function (edge) {
+                return edge.target.y - 44;
+            });
+            // redraw self-edge
+            return "M" + (edge.target.x - edge.target.width / 2 - 10) + ',' +
+                    (edge.target.y - edge.target.width / 2 - 32) + "q 16 8 28 28";
+        });
+        return transitions;
+    }
+    
+    /**
+	 * Utility function for removing transitions from the SVG
+     * @returns reference to the updated svg elements
+	 * @memberof EmuchartsEditor
+	 */
+    function removeTransitions(exitedTransitions) {
+        return exitedTransitions
+                    .transition().duration(220)
+                    .style("stroke-width", stroke_width_large)
+                    .style("opacity", 0).remove();
+    }
+
 	/**
 	 * Utility function for creating an empty svg area and definitions
      * @returns reference to the transitions redrawn (svg element)
 	 * @memberof EmuchartsEditor
 	 */
     EmuchartsEditor.prototype.newSVG = function () {
-        var _this = this;
+        _this = this;
         
         // create svg area
         d3.select("#ContainerStateMachine")
@@ -213,9 +464,10 @@ define(function (require, exports, module) {
             } else { _this.SVGdragged = false; }
         };
         var mouseDown = function () {
-            if (editor_mode === MODE.ADD_TRANSITION()) {
-                // this is equivalent to drag start for default-initial transitions
-                // create an arrow from the selected node to the cursor position
+            if (mouseOverControlPoint === null &&
+                    editor_mode === MODE.ADD_TRANSITION()) {
+                    // this is equivalent to drag start for default-initial transitions
+                    // create an arrow from the selected node to the cursor position
                 var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
                 mousedrag.edge = { x: m[0], y: m[1] };
                 drag_line.classed("hidden", false)
@@ -243,39 +495,54 @@ define(function (require, exports, module) {
             _this.SVGdragged = false;
         };
         var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
-            if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.edge) {
-                var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
-                drag_line.attr("d", "M" + mousedrag.edge.x + "," + mousedrag.edge.y +
-                                "L" + m[0] + "," + m[1]);
-            } else if (editor_mode !== MODE.ADD_TRANSITION() && !mousedrag.node &&
-                    editor_mode !== MODE.DELETE() && editor_mode !== MODE.RENAME()) {
-//                _this.fire({
-//                    type: "emuCharts_d3ZoomTranslate",
-//                    scale: d3.event.scale,
-//                    translate: d3.event.translate,
-//                    preventCreation: true
-//                });
-                //--
-//                if (d3.event.scale < _this.d3EventScale) {
-//                    _this.zoomLevel = dec02(_this.zoomLevel, 0.5);
-//                    _this.d3EventScale = d3.event.scale;
-//                    console.log("new zoom level: " + _this.zoomLevel);
-//                } else if (d3.event.scale > _this.d3EventScale) {
-//                    _this.zoomLevel = inc02(_this.zoomLevel, 4);
-//                    _this.d3EventScale = d3.event.scale;
-//                    console.log("new zoom level: " + _this.zoomLevel);
-//                }
-//                console.log("translation: " + d3.event.translate);
-//                d3.select("#ContainerStateMachine svg").select("#States")
-//                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
-//                d3.select("#ContainerStateMachine svg").select("#Transitions")
-//                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
-//                d3.select("#ContainerStateMachine svg").select("#dragline")
-//                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
-                //--
-                if (Math.abs(d3.event.translate[0]) > sensitivity.x
-                        || Math.abs(d3.event.translate[1]) > sensitivity.y) {
-                    _this.SVGdragged = true;
+            var m = null;
+            if (mouseOverControlPoint !== null) {
+                var edge = mouseOverControlPoint;
+                // update selected control point
+                m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#Transitions").node());
+                var cp = { x: m[0], y: m[1] };
+                _this.emucharts.set_controlPoint(edge, cp);
+                var transitionID = edge.id;
+                var transitions = d3.select("#ContainerStateMachine")
+                                    .select("#Transitions").selectAll(".transition")
+                                    .filter(function (transition) { return transition.id === transitionID; });
+                // refresh transitions
+                return refreshTransitions(transitions);
+            } else {
+                if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.edge) {
+                    m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+                    drag_line.attr("d", "M" + mousedrag.edge.x + "," + mousedrag.edge.y +
+                                    "L" + m[0] + "," + m[1]);
+                } else if (editor_mode !== MODE.ADD_TRANSITION() && !mousedrag.node &&
+                        editor_mode !== MODE.DELETE() && editor_mode !== MODE.RENAME()) {
+    //                _this.fire({
+    //                    type: "emuCharts_d3ZoomTranslate",
+    //                    scale: d3.event.scale,
+    //                    translate: d3.event.translate,
+    //                    preventCreation: true
+    //                });
+                    //--
+    //                if (d3.event.scale < _this.d3EventScale) {
+    //                    _this.zoomLevel = dec02(_this.zoomLevel, 0.5);
+    //                    _this.d3EventScale = d3.event.scale;
+    //                    console.log("new zoom level: " + _this.zoomLevel);
+    //                } else if (d3.event.scale > _this.d3EventScale) {
+    //                    _this.zoomLevel = inc02(_this.zoomLevel, 4);
+    //                    _this.d3EventScale = d3.event.scale;
+    //                    console.log("new zoom level: " + _this.zoomLevel);
+    //                }
+    //                console.log("translation: " + d3.event.translate);
+    //                d3.select("#ContainerStateMachine svg").select("#States")
+    //                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
+    //                d3.select("#ContainerStateMachine svg").select("#Transitions")
+    //                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
+    //                d3.select("#ContainerStateMachine svg").select("#dragline")
+    //                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
+                    //--
+                    if (Math.abs(d3.event.translate[0]) > sensitivity.x
+                            || Math.abs(d3.event.translate[1]) > sensitivity.y) {
+                        _this.SVGdragged = true;
+                    }
                 }
             }
         });
@@ -289,162 +556,13 @@ define(function (require, exports, module) {
         // return reference to svg
         return d3.select("#ContainerStateMachine").select("svg");
     };
-
     
-	/**
-	 * Utility function to generate formatted labels for transitions
-     * @returns labels, as a formatted string
-	 * @memberof EmuchartsEditor
-	 */
-    function labelToString(label) {
-        var ans = "";
-        if (label.listConditions) {
-            label.listConditions.forEach(function (cond) { ans += cond + "; "; });
-            ans = " [ " + ans + " ] ";
-        }
-        if (label.listOfOperations) {
-            label.listOfOperations.forEach(function (item) { ans += item + "; "; });
-            ans = " { " + ans + " } ";
-        }
-        return ans;
-    }
-    
-	/**
-	 * Utility function to refresh rendered transitions.
-     * @returns reference to the updated svg elements
-	 * @memberof EmuchartsEditor
-	 */
-    function refreshTransitions(transitions) {
-        var label;
-        // refresh paths and labels
-        transitions.selectAll(".path").attr("d", function (edge) {
-            // refresh transition path
-            if (edge.target.x === edge.source.x && edge.target.y === edge.source.y) {
-                // this is a self-edge
-                // refresh transition label
-                label = d3.select(this.parentNode).select(".tlabel");
-                label.text(function (edge) {
-                    return edge.name + labelToString(edge);
-                });
-                // adjust text position
-                label.attr("x", function (edge) {
-                    if (edge.target.id === edge.source.id) {
-                        // self-edge
-                        return edge.source.x + 32;
-                    }
-                    // else do nothing -- textpath will take care of placing the text
-                    return "";
-                }).attr("y", function (edge) {
-                    if (edge.target.id === edge.source.id) {
-                        // self-edge
-                        return edge.source.y - 32;
-                    }
-                    // else do nothing -- textpath will take care of placing the text
-                    return "";
-                });
-                // redraw self-edge
-                return "M" + (edge.source.x + edge.source.width / 2 - 8) + ',' +
-                        (edge.source.y - edge.source.height / 2 - 2) + "q 64 -16 16 16";
-            } else {
-                // not a self-edge
-                // refresh transition label
-                label = d3.select(this.parentNode.lastChild.firstChild);
-                label.text(function (edge) {
-                    return edge.name + labelToString(edge);
-                });
-                // refresh path
-                var dx = edge.target.x - edge.source.x;
-                var dy = edge.target.y - edge.source.y;
-                var dist = Math.sqrt(dx * dx + dy * dy);
-                var sourceX = edge.source.x;
-                var sourceY = edge.source.y;
-                var targetX = edge.target.x;
-                var targetY = edge.target.y;
-                var sourceHeight = edge.source.height;
-                var targetWidth  = edge.target.name.length * fontSize;
-                var targetHeight = edge.target.height;
-
-                // to adjust the arrow pointing at the target, we reason using Cartesian quadrants:
-                // the source node is at the center of the axes, and the target is in one of the quadrants
-                //  II  |  I
-                // -----s-----
-                // III  |  IV
-                // NOTE: SVG has the y axis inverted with respect to the Cartesian y axis
-                if (dx >= 0 && dy < 0) {
-                    // target in quadrant I
-                    // for targets in quadrant I, round links draw convex arcs
-                    // --> place the arrow on the left side of the target
-                    targetX -= targetWidth * 0.8;
-                } else if (dx < 0 && dy < 0) {
-                    // target in quadrant II
-                    // for targets in quadrant I, round links draw concave arcs
-                    // --> place the arrow at the bottom-right corner of the target
-                    targetY += targetHeight * 0.6;
-                } else if (dx < 0 && dy >= 0) {
-                    // target in quadrant III
-                    // for targets in quadrant IV, round links draw concave arcs
-                    // --> place arrow end on the top-right corner of the target
-                    targetX += targetWidth * 0.8;
-                } else if (dx >= 0 && dy >= 0) {
-                    // target in quadrant IV
-                    // for targets in quadrant IV, round links draw convex arcs
-                    // --> place arrow end at the top-left corner of the target
-                    targetY -= targetHeight * 0.56;
-                }
-                return "m" + sourceX + ',' + sourceY + "A" + dist + "," +
-                        dist + " 0 0,1 " + targetX + "," + targetY;
-                // this other code draws straight lines
-                //return "m" + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
-            }
-        });
-        return transitions;
-    }
-        
-	/**
-	 * Utility function to refresh rendered initial transitions.
-     * @returns reference to the updated svg elements
-	 * @memberof EmuchartsEditor
-	 */
-    function refreshInitialTransitions(transitions) {
-        var label;
-        // refresh paths and labels
-        transitions.selectAll(".ipath").attr("d", function (edge) {
-            // refresh transition label
-            label = d3.select(this.parentNode).select(".itlabel");
-            label.text(function (edge) {
-                return edge.name + labelToString(edge);
-            });
-            // adjust text position
-            label.attr("x", function (edge) {
-                return edge.target.x - 8;
-            }).attr("y", function (edge) {
-                return edge.target.y - 44;
-            });
-            // redraw self-edge
-            return "M" + (edge.target.x - edge.target.width / 2 - 10) + ',' +
-                    (edge.target.y - edge.target.width / 2 - 32) + "q 16 8 28 28";
-        });
-        return transitions;
-    }
-    
-    /**
-	 * Utility function for removing transitions from the SVG
-     * @returns reference to the updated svg elements
-	 * @memberof EmuchartsEditor
-	 */
-    function removeTransitions(exitedTransitions) {
-        return exitedTransitions
-                    .transition().duration(220)
-                    .style("stroke-width", stroke_width_large)
-                    .style("opacity", 0).remove();
-    }
-
     /**
 	 * Utility function for drawing transitions
 	 * @memberof EmuchartsEditor
 	 */
     EmuchartsEditor.prototype.renderTransitions = function () {
-        var _this = this;
+        _this = this;
         var svg = d3.select("#ContainerStateMachine").select("svg");
         
         /**
@@ -474,6 +592,23 @@ define(function (require, exports, module) {
                 .style("stroke-width", stroke_width_large)
                 .style("markerUnits", "userSpaceOnUse")
                 .style("cursor", "pointer");
+            
+            // control points are used to adjust the shape of a path
+            var controlPoints = enteredTransitions.append("svg:circle").classed("cpoints", true)
+                .attr("id", function (edge) {return "cpoints_" + edge.id; })
+                .attr("cx", function (edge) {
+                    return getControlPoints(edge)[1].x;
+                })
+                .attr("cy", function (edge) {
+                    return getControlPoints(edge)[1].y;
+                })
+                .attr("fill", "#fff")
+                .style("stroke", "steelblue")
+                .style("stroke-width", "1.5px")
+                .attr("opacity", 0)
+                .attr("r", 10)
+                .style("cursor", "move");
+
 
             // labels are drawn using both text and textpath
             // the former is for self-edges, the latter for all other edges
@@ -529,9 +664,11 @@ define(function (require, exports, module) {
         };
         var mouseOver = function (edge) {
             d3.select(this.firstChild).style("stroke-width", stroke_width_highlighted);
+            d3.select(this.childNodes[2]).attr("opacity", 0.6);
         };
         var mouseOut = function (edge) {
             d3.select(this.firstChild).style("stroke-width", stroke_width_normal);
+            d3.select(this.childNodes[2]).attr("opacity", 0);
         };
         var mouseClick = function (edge) {
             // update mouse variables
@@ -573,6 +710,14 @@ define(function (require, exports, module) {
                 .on("mouseout", mouseOut)
                 .on("click", mouseClick)
                 .on("dblclick", mouseDoubleClick);
+            
+            enteredTransitions.selectAll(".cpoints")
+                .on("mousedown", function (d) {
+                    mouseOverControlPoint = d;
+                })
+                .on("mouseup", function (d) {
+                    mouseOverControlPoint = null;
+                });
         }
     };
     
@@ -581,7 +726,7 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     EmuchartsEditor.prototype.renderInitialTransitions = function () {
-        var _this = this;
+        _this = this;
         var svg = d3.select("#ContainerStateMachine").select("svg");
         
         /**
@@ -783,7 +928,7 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     EmuchartsEditor.prototype.renderStates = function () {
-        var _this = this;
+        _this = this;
         var svg = d3.select("#ContainerStateMachine").select("svg");
         
         // mouse event handlers
@@ -802,29 +947,46 @@ define(function (require, exports, module) {
             }
         };
         var dragNode = function (node) {
+            function computeControlPoint(edge) {
+                var dx1 = edge.target.x - edge.source.x;
+                var dy1 = edge.target.y - edge.source.y;
+                var dist1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+                var controlPoint = getControlPoints(edge)[1];
+                var dx2 = controlPoint.x - edge.source.x;
+                var dy2 = controlPoint.y - edge.source.y;
+                var dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+                var viscosity = (edge.target.id === edge.source.id) ? 1 : 0.8;
+                return (dist1 > dist2) ?
+                        { x: controlPoint.x + d3.event.dx * dist2 / dist1 * viscosity,
+                            y: controlPoint.y + d3.event.dy * dist2 / dist1 * viscosity}
+                        : { x: controlPoint.x + d3.event.dx * viscosity,
+                              y: controlPoint.y + d3.event.dy * viscosity };
+            }
+            
             if (editor_mode !== MODE.ADD_TRANSITION() && editor_mode !== MODE.DELETE() &&
                     editor_mode !== MODE.RENAME()) {
                 // update node position
-                node.x = trim(node.x + d3.event.dx, node.width, width - node.width);
-                node.y = trim(node.y + d3.event.dy, node.height / 2, height - node.height / 2);
+                node.x = node.x + d3.event.dx;
+                node.y = node.y + d3.event.dy;
                 d3.select(this).attr("transform",
                                      "translate(" + node.x + "," + node.y + ") scale(1.1) ");
                 // update all edges connected to this node
                 var updatedTransitions = d3.select("#ContainerStateMachine")
                         .select("#Transitions").selectAll(".transition")
                         .filter(function (edge) {
-                            var updated = false;
                             if (edge.source.id === node.id) {
                                 edge.source.x = node.x;
                                 edge.source.y = node.y;
-                                updated = true;
+                                edge.controlPoint = computeControlPoint(edge);
+                                return true;
                             }
                             if (edge.target.id === node.id) {
                                 edge.target.x = node.x;
                                 edge.target.y = node.y;
-                                updated = true;
+                                edge.controlPoint = computeControlPoint(edge);
+                                return true;
                             }
-                            return updated;
+                            return false;
                         });
                 refreshTransitions(updatedTransitions);
                 var updatedInitialTransitions = d3.select("#ContainerStateMachine")
@@ -1111,7 +1273,7 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     EmuchartsEditor.prototype.delete_state = function (stateID) {
-        var _this = this;
+        _this = this;
         var edges = [];
         if (this.emucharts && this.emucharts.edges) {
             this.emucharts.edges.forEach(function (key) {
@@ -1173,13 +1335,15 @@ define(function (require, exports, module) {
     EmuchartsEditor.prototype.add_transition = function (transitionName, from, to) {
         var source = this.emucharts.getState(from);
         var target = this.emucharts.getState(to);
-        if (source && target) {
-            // FIXME: need to adjust the position in the case svg is translated
-            this.emucharts.add_edge({
+        var edge = {
                 name: transitionName,
                 source: source,
                 target: target
-            });
+            };
+        var controlPoint = getControlPoints(edge);
+        if (source && target) {
+            // FIXME: need to adjust the position in the case svg is translated
+            this.emucharts.add_edge(edge);
             return this.renderTransitions();
         } else {
             // FIXME: improve interaction & feedback
@@ -1194,7 +1358,7 @@ define(function (require, exports, module) {
     EmuchartsEditor.prototype.add_initial_transition = function (transitionName, to) {
         var target = this.emucharts.getState(to);
         if (target) {
-            // FIXME: need to adjust the position in the case svg is translated
+            // FIXME: need to force one initial transition per state
             this.emucharts.add_initial_edge({
                 name: transitionName,
                 target: target
@@ -1227,7 +1391,7 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     EmuchartsEditor.prototype.delete_chart = function () {
-        var _this = this;
+        _this = this;
         if (this.emucharts.constants) {
             this.emucharts.constants.forEach(function (key) {
                 _this.emucharts.constants.remove(key);
