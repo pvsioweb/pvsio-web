@@ -486,10 +486,10 @@ define(function (require, exports, module) {
                     name: trans.target.name,
                     id: trans.target.id
                 },
-                controlPoint: {
+                controlPoint: (trans.controlPoint) ? {
                     x: trans.controlPoint.x,
                     y: trans.controlPoint.y
-                }
+                } : null
             });
         });
         return transitions;
