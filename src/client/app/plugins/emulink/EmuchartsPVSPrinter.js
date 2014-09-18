@@ -1,7 +1,6 @@
 /** @module EmuchartsPVSPrinter */
 /**
- * EmuchartsPVSPrinter provides functions to generate a pvs theory for emucharts
- * The printer knows only the theory name, all expressions within the theory are provided as function arguments
+ * EmuchartsPVSPrinter provides functions to generate PVS models from Emucharts
  * @author Paolo Masci
  * @date 27/05/14 9:38:13 AM
  */
@@ -203,7 +202,7 @@ define(function (require, exports, module) {
         if (initial_transitions && initial_transitions.length > 0) {
             ans += "  %-- initial state\n";
             ans += "  init(x: real): State = (#\n";
-            ans += "    current_state  := " + initial_transitions[0].target.name + "\n";
+            ans += "    current_state  := " + initial_transitions[0].target.name + ",\n";
             ans += "    previous_state := " + initial_transitions[0].target.name + "\n";
             var variables = emuchart.variables;
             if (variables) {

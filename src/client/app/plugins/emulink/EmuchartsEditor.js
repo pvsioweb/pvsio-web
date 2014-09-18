@@ -164,13 +164,19 @@ define(function (require, exports, module) {
     var lineFunction = d3.svg.line()
                          .x(function (d) { return d.x; })
                          .y(function (d) { return d.y; })
+                        //.interpolate("basic");
                          .interpolate("cardinal");
-    
+
+    var lineFunction_bundle = d3.svg.line()
+                         .x(function (d) { return d.x; })
+                         .y(function (d) { return d.y; })
+                         .interpolate("bundle");
+
     
 	/**
 	 * Utility function to obtain control points for edges
-     * @params coordinates (x,y) of source and target node
-     * @returns vector of control points
+     * @params edge
+     * @returns vector of control points (3 elements vector)
 	 * @memberof EmuchartsEditor
 	 */
     function getControlPoints(edge) {
@@ -255,10 +261,136 @@ define(function (require, exports, module) {
             }
         }
         return [{ "x": sourceX, "y": sourceY },
-                             { "x": controlPoint1X, "y": controlPoint1Y},
-                             { "x": targetX, "y": targetY }];
+                { "x": controlPoint1X, "y": controlPoint1Y},
+                { "x": targetX, "y": targetY }];
     }
     
+	/**
+	 * Utility function to obtain virtual control points for self-edges
+     * @params self-edge
+     * @returns vector of control points (5 elements vector)
+	 * @memberof EmuchartsEditor
+     * FIXME: return a structure rather than an array
+     *         & merge this function with the other function getControlPoints
+	 */
+    function getControlPoints_selfEdge(edge) {
+        var sourceX = edge.source.x;
+        var sourceY = edge.source.y;
+        var targetX = edge.target.x;
+        var targetY = edge.target.y;
+
+        var offset = 32;
+        var controlPoint1X = (edge.controlPoint) ? edge.controlPoint.x
+                            : (edge.source.id === edge.target.id) ? (targetX + sourceX) * 0.5 + offset
+                            : (targetX + sourceX) * 0.5 - offset;
+        var controlPoint1Y = (edge.controlPoint) ? edge.controlPoint.y
+                            : (edge.source.id === edge.target.id) ? (targetY + sourceY) * 0.5 + offset
+                            : (targetY + sourceY) * 0.5 - offset;
+
+        var extraControlPoints = [];
+        //var dx = edge.target.x - edge.source.x;
+        //var dy = edge.target.y - edge.source.y;
+        var dx = edge.target.x - controlPoint1X;
+        var dy = edge.target.y - controlPoint1Y;
+        var offsetX = (dx < 0) ? -dx : dx;
+        var offsetY = (dy < 0) ? -dy : dy;
+        offsetX = (offsetX > edge.target.width) ? offsetX : edge.target.width;
+        offsetY = (offsetY > edge.target.height) ? offsetY : edge.target.height;
+        if (dx !== 0 || dy !== 0) {
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            var sourceHeight = edge.source.height;
+            var targetWidth  = edge.target.name.length * fontSize;
+            var targetHeight = edge.target.height;
+
+            // to identify control points, we split the space into four Cartesian quadrants:
+            // the source node is at the center of the axes, and the target is in one of the quadrants
+            //  II  |  I
+            // -----s-----
+            // III  |  IV
+            // NOTE: SVG has the y axis inverted with respect to the Cartesian y axis
+            if (dx >= 0 && dy < 0) {
+                // target node is in quadrant I
+                console.log("Quadrant I");
+                // for targets in quadrant I, round links draw convex arcs
+                // --> place the arrow on the left side of the target
+                targetX -= targetWidth * 0.8;
+                if (!edge.controlPoint) {
+                    controlPoint1X = (targetX + sourceX) * 0.5 - offset;
+                }
+                // move the first control point to quadrant II
+                sourceY += targetHeight * 0.6;
+                // create extra control points to avoid stiffy curves
+                extraControlPoints[0] = { x: controlPoint1X + offsetX * 0.9,
+                                          y: (offsetY > edge.target.height) ?
+                                                controlPoint1Y - offsetY / 4
+                                                : controlPoint1Y + offsetY / 2 };
+                extraControlPoints[1] = { x: (offsetX > edge.target.width) ?
+                                                controlPoint1X - offsetX / 16
+                                                : controlPoint1X - offsetX / 4,
+                                          y: controlPoint1Y - offsetY / 2 };
+            } else if (dx < 0 && dy < 0) {
+                console.log("Quadrant II");
+                // target node is in quadrant II
+                // for targets in quadrant I, round links draw concave arcs
+                // --> place the arrow at the bottom-right corner of the target
+                targetY += targetHeight * 0.6;
+                if (!edge.controlPoint) {
+                    controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                }
+                // move the first control point to quadrant III
+                sourceX += targetWidth * 0.8;
+                // create extra control points to avoid stiffy curves
+                extraControlPoints[0] = { x: (offsetX > edge.target.width) ?
+                                                controlPoint1X + offsetX / 16
+                                                : controlPoint1X + offsetX / 4,
+                                          y: controlPoint1Y - offsetY / 2 };
+                extraControlPoints[1] = { x: controlPoint1X - offsetX * 0.6,
+                                          y: (offsetY > edge.target.height) ?
+                                                controlPoint1Y - offsetY / 16
+                                                : controlPoint1Y + offsetY / 2};
+            } else if (dx < 0 && dy >= 0) {
+                console.log("Quadrant III");
+                // target node is in quadrant III
+                // for targets in quadrant IV, round links draw concave arcs
+                // --> place arrow end on the top-right corner of the target
+                targetX += targetWidth * 0.8;
+                if (!edge.controlPoint) {
+                    controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                    controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                }
+                // move the first control point to quadrant IV
+                sourceY -= targetHeight * 0.56;
+                // create extra control points to avoid stiffy curves
+                extraControlPoints[0] = { x: controlPoint1X - offsetX / 2,
+                                          y: (offsetY > edge.target.height) ?
+                                                controlPoint1Y - offsetY / 16
+                                                : controlPoint1Y - offsetY / 2};
+                extraControlPoints[1] = { x: controlPoint1X + offsetX / 16, y: controlPoint1Y + offsetY / 2 };
+            } else if (dx >= 0 && dy >= 0) {
+                console.log("Quadrant IV");
+                // target node is in quadrant IV
+                // for targets in quadrant IV, round links draw convex arcs
+                // --> place arrow end at the top-left corner of the target
+                targetY -= targetHeight * 0.56;
+                // move the first control point to quadrant I so that the self-edge looks round
+                sourceX -= targetWidth * 0.8;
+                if (!edge.controlPoint) {
+                    controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                }
+                // create extra control points to avoid stiffy curves
+                extraControlPoints[0] = { x: controlPoint1X - offsetX / 16, y: controlPoint1Y + offsetY / 2};
+                extraControlPoints[1] = { x: controlPoint1X + offsetX / 2,
+                                          y: (offsetY > edge.target.height) ?
+                                                controlPoint1Y - offsetY / 4
+                                                : controlPoint1Y - offsetY / 2 };// controlPoint1Y + offsetY / 16 };
+            }
+        }
+        return [{ "x": sourceX, "y": sourceY },
+                { "x": extraControlPoints[0].x, "y": extraControlPoints[0].y },
+                { "x": controlPoint1X, "y": controlPoint1Y},
+                { "x": extraControlPoints[1].x, "y": extraControlPoints[1].y },
+                { "x": targetX, "y": targetY }];
+    }
 
     /**
 	 * Utility function to refresh rendered transitions.
@@ -266,14 +398,56 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     function refreshTransitions(transitions) {
+//        // Function virtualControlPoints that adds two virtual control points -- useful to make self-edges less stiffy in shape
+//        // @params vector of control points (3 vector elements)
+//        // @returns vector of control points (5 vector elements)
+//        function virtualControlPoints(edge) {
+//            var controlPoints = getControlPoints(edge);
+//            var dx = controlPoints[0].x - controlPoints[1].x;
+//            var dy = controlPoints[1].y - controlPoints[0].y;
+//            var offsetX = (dx < 0) ? -dx : dx;
+//            offsetX = (offsetX > edge.target.width) ? offsetX : edge.target.width;
+//            var offsetY = (dy < 0) ? -dy : dy;
+//            offsetY = (offsetY > edge.target.height) ? offsetY : edge.target.height;
+//    //        var dx2 = controlPoints[2].x - controlPoints[1].x;
+//    //        var dy2 = controlPoints[1].y - controlPoints[2].y;
+//            var vcp = [];
+//            vcp[0] = { x: controlPoints[0].x, y: controlPoints[0].y };
+//            vcp[2] = { x: controlPoints[1].x, y: controlPoints[1].y };
+//            vcp[4] = { x: controlPoints[2].x, y: controlPoints[2].y };
+//            if (dx >= 0 && dy >= 0) {
+//                console.log("Quadrant I");
+//                // node in quadrant I
+//                vcp[1] = { x: controlPoints[1].x + offsetX / 2, y: controlPoints[1].y - offsetY / 16 };
+//                vcp[3] = { x: controlPoints[1].x - offsetX / 4, y: controlPoints[1].y - offsetY / 2 };
+//            } else if (dx < 0 && dy >= 0) {
+//                console.log("Quadrant II");
+//                // node in quadrant II
+//                vcp[1] = { x: controlPoints[1].x + offsetX / 4, y: controlPoints[1].y - offsetY / 2 };
+//                vcp[3] = { x: controlPoints[1].x - offsetX / 2, y: controlPoints[1].y - offsetY / 16 };
+//            } else if (dx < 0 && dy < 0) {
+//                console.log("Quadrant III");
+//                // node in quadrant III
+//                vcp[1] = { x: controlPoints[1].x - offsetX / 2, y: controlPoints[1].y + offsetY / 16 };
+//                vcp[3] = { x: controlPoints[1].x + offsetX / 16, y: controlPoints[1].y + offsetY / 2 };
+//            } else {
+//                console.log("Quadrant IV");
+//                // node in quadrant IV
+//                vcp[1] = { x: controlPoints[1].x - offsetX / 16, y: controlPoints[1].y + offsetY / 2};
+//                vcp[3] = { x: controlPoints[1].x + offsetX / 2, y: controlPoints[1].y + offsetY / 16 };
+//            }
+//            return vcp;
+//        }
+
         var label;
         var cpoints;
         // refresh paths and labels
         transitions.selectAll(".path").attr("d", function (edge) {
             // fetch control point
-            var cp = getControlPoints(edge);
+            var cp = null;
             // refresh transition path
             if (edge.target.x === edge.source.x && edge.target.y === edge.source.y) {
+                cp = getControlPoints_selfEdge(edge);
                 // this is a self-edge
                 // refresh transition label
                 label = d3.select(this.parentNode).select(".tlabel");
@@ -302,8 +476,7 @@ define(function (require, exports, module) {
                 });
                 // refresh control points
                 cpoints = d3.select(this.parentNode).select(".cpoints");
-                // for now we use only the middle control point
-                cpoints.attr("cx", cp[1].x).attr("cy", cp[1].y);
+                cpoints.attr("cx", cp[2].x).attr("cy", cp[2].y);
                 // refresh path
                 return lineFunction(cp);
                 // redraw self-edge
@@ -311,6 +484,7 @@ define(function (require, exports, module) {
                 //        (edge.source.y - edge.source.height / 2 - 2) + "q 64 -16 16 16";
             } else {
                 // not a self-edge
+                cp = getControlPoints(edge);
                 // refresh transition label
                 label = d3.select(this.parentNode.lastChild.firstChild);
                 label.text(function (edge) {
@@ -409,6 +583,19 @@ define(function (require, exports, module) {
             .attr("d", "M4,0 L1,-3 L10,0 L1,3 L4,0")
             .attr("fill", "black");
         
+        var arrow = d3.select("#ContainerStateMachine").select("svg").select("defs")
+            // pointer for hiighlighed edges
+            .append("svg:marker")
+            .attr("id", "end-arrow-selected")
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 9)
+            .attr("markerWidth", 16)
+            .attr("markerHeight", 16)
+            .attr("orient", "auto")
+            .append("svg:path")
+            .attr("d", "M4,0 L1,-3 L10,0 L1,3 L4,0")
+            .attr("fill", "green");
+
         var bubble = d3.select("#ContainerStateMachine").select("svg").select("defs")
             // bubble for initial state
             .append("svg:marker")
@@ -663,11 +850,17 @@ define(function (require, exports, module) {
             return refreshTransitions(enteredTransitions);
         };
         var mouseOver = function (edge) {
-            d3.select(this.firstChild).style("stroke-width", stroke_width_highlighted);
+            d3.select(this.firstChild)
+                //.style("stroke-width", stroke_width_highlighted)
+                .style("stroke", "green")
+                .style("marker-end", "url(#end-arrow-selected)");
             d3.select(this.childNodes[2]).attr("opacity", 0.6);
         };
         var mouseOut = function (edge) {
-            d3.select(this.firstChild).style("stroke-width", stroke_width_normal);
+            d3.select(this.firstChild)
+                //.style("stroke-width", stroke_width_normal)
+                .style("stroke", "black")
+                .style("marker-end", "url(#end-arrow)");
             d3.select(this.childNodes[2]).attr("opacity", 0);
         };
         var mouseClick = function (edge) {
