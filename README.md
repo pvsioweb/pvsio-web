@@ -12,16 +12,16 @@ A live version of PVSio-web executed on a cloud server can be found at http://ww
 
 Prerequisites
 -------------
-### Prerequisite 1: PVS
+#### Prerequisite 1: PVS
 PVS (http://pvs.csl.sri.com/download.shtml) is required to run pvsio-web. Please download and install PVS before proceeding to installing pvsio-web.
 
-Once PVS is installed, please add the PVS executable files pvs, pvsio and proveit to your PATH. Alternatively you can create symbolic links to those files in /usr/bin. For instance, assuming that PVS is installed in /opt/pvs6.0/pvs, the following commands should be executed in a Terminal window to create the symbolic links:
+Once PVS is installed, please add the PVS executable files pvs, pvsio and proveit to your PATH. A way to do this is to create symbolic links to those files, and place the symbolic links in /usr/bin. For instance, if PVS is installed in /opt/pvs6.0/pvs, the following commands executed in a Terminal window create the required symbolic links (note that you need to specify absolute paths):
 
     sudo ln -s /opt/pvs6.0/pvs /usr/bin/pvs
     sudo ln -s /opt/pvs6.0/pvsio /usr/bin/pvsio
     sudo ln -s /opt/pvs6.0/proveit /usr/bin/proveit
 
-### Prerequisite 2: NodeJS
+#### Prerequisite 2: NodeJS
 NodeJS (http://nodejs.org/download/) is required to run pvsio-web. Please download and install NodeJS before proceeding to installing pvsio-web.
 
 Installation
