@@ -614,6 +614,25 @@ define(function (require, exports, module) {
             .attr("stroke", "white")
             .attr("stroke-width", "1");
         
+        var selected_bubble = d3.select("#ContainerStateMachine").select("svg").select("defs")
+            // bubble for initial state
+            .append("svg:marker")
+            .attr("id", "bubble-selected")
+            .attr("viewBox", "-5 -5 10 10")
+            .attr("refX", 6)
+            .attr("markerWidth", 16)
+            .attr("markerHeight", 16)
+            .attr("orient", "auto");
+        selected_bubble.append("svg:circle")
+            .attr("r", 4)
+            .attr("stroke", "green")
+            .attr("fill", "green");
+        selected_bubble.append("svg:circle")
+            .attr("r", 3.6)
+            .attr("stroke", "white")
+            .attr("fill", "green")
+            .attr("stroke-width", "1");
+
         d3.select("#ContainerStateMachine").select("svg").select("defs")
             // arrow for drag line
             .append("svg:marker")
@@ -639,16 +658,17 @@ define(function (require, exports, module) {
         
         var mouseClick = function () {
             if (!_this.SVGdragged) {
-                if (editor_mode === MODE.ADD_STATE() && !mouseover.node) {
+                if (editor_mode === MODE.ADD_STATE() && !mouseover.node && !mouseOverControlPoint) {
                     var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
                     _this.fire({
-                        type: "emuCharts_createState",
+                        type: "emuCharts_addState",
                         mouse: m,
                         mouseover: mouseover,
                         preventCreation: editor_mode !== MODE.ADD_STATE()
                     });
                 }
             } else { _this.SVGdragged = false; }
+            mouseOverControlPoint = null;
         };
         var mouseDown = function () {
             if (mouseOverControlPoint === null &&
@@ -784,9 +804,15 @@ define(function (require, exports, module) {
             var controlPoints = enteredTransitions.append("svg:circle").classed("cpoints", true)
                 .attr("id", function (edge) {return "cpoints_" + edge.id; })
                 .attr("cx", function (edge) {
+                    if (edge.source && edge.target && edge.source.id === edge.target.id) {
+                        return getControlPoints_selfEdge(edge)[3].x;
+                    }
                     return getControlPoints(edge)[1].x;
                 })
                 .attr("cy", function (edge) {
+                    if (edge.source && edge.target && edge.source.id === edge.target.id) {
+                        return getControlPoints_selfEdge(edge)[3].y;
+                    }
                     return getControlPoints(edge)[1].y;
                 })
                 .attr("fill", "#fff")
@@ -850,18 +876,26 @@ define(function (require, exports, module) {
             return refreshTransitions(enteredTransitions);
         };
         var mouseOver = function (edge) {
-            d3.select(this.firstChild)
-                //.style("stroke-width", stroke_width_highlighted)
-                .style("stroke", "green")
-                .style("marker-end", "url(#end-arrow-selected)");
-            d3.select(this.childNodes[2]).attr("opacity", 0.6);
+            if (!mouseOverControlPoint || mouseOverControlPoint.id === edge) {
+                d3.select(this.firstChild)
+                    //.style("stroke-width", stroke_width_highlighted)
+                    .style("stroke", "green")
+                    .style("marker-end", "url(#end-arrow-selected)");
+                d3.select(this.childNodes[2]).attr("opacity", 0.6);
+                d3.select(this.children[3]).style("fill", "green");
+                d3.select(this.children[4]).style("fill", "green");
+            }
         };
         var mouseOut = function (edge) {
-            d3.select(this.firstChild)
-                //.style("stroke-width", stroke_width_normal)
-                .style("stroke", "black")
-                .style("marker-end", "url(#end-arrow)");
-            d3.select(this.childNodes[2]).attr("opacity", 0);
+            if (!mouseOverControlPoint || mouseOverControlPoint.id === edge) {
+                d3.select(this.firstChild)
+                    //.style("stroke-width", stroke_width_normal)
+                    .style("stroke", "black")
+                    .style("marker-end", "url(#end-arrow)");
+                d3.select(this.childNodes[2]).attr("opacity", 0);
+                d3.select(this.children[3]).style("fill", "black");
+                d3.select(this.children[4]).style("fill", "black");
+            }
         };
         var mouseClick = function (edge) {
             // update mouse variables
@@ -906,10 +940,8 @@ define(function (require, exports, module) {
             
             enteredTransitions.selectAll(".cpoints")
                 .on("mousedown", function (d) {
+                    // note: variable mouseOverControlPoint will be reset by EmuchartsEditor.prototype.newSVG.mouseClick
                     mouseOverControlPoint = d;
-                })
-                .on("mouseup", function (d) {
-                    mouseOverControlPoint = null;
                 });
         }
     };
@@ -965,10 +997,21 @@ define(function (require, exports, module) {
             return refreshInitialTransitions(enteredTransitions);
         };
         var mouseOver = function (edge) {
-            d3.select(this.firstChild).style("stroke-width", stroke_width_highlighted);
+            d3.select(this.firstChild)
+                //.style("stroke-width", stroke_width_highlighted)
+                .style("stroke", "green")
+                .style("marker-start", "url(#bubble-selected)")
+                .style("marker-end", "url(#end-arrow-selected)");
+            d3.select(this.children[2]).style("fill", "green");
         };
         var mouseOut = function (edge) {
-            d3.select(this.firstChild).style("stroke-width", stroke_width_normal);
+            //d3.select(this.firstChild).style("stroke-width", stroke_width_normal);
+            d3.select(this.firstChild)
+                //.style("stroke-width", stroke_width_highlighted)
+                .style("stroke", "black")
+                .style("marker-start", "url(#bubble)")
+                .style("marker-end", "url(#end-arrow)");
+            d3.select(this.children[2]).style("fill", "black");
         };
         var mouseClick = function (edge) {
             // update mouse variables
@@ -1129,14 +1172,21 @@ define(function (require, exports, module) {
             // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
             d3.event.sourceEvent.stopPropagation();
             // update mouse variables
-            mousedrag.node = { x: node.x, y: node.y, id: node.id };
+            mousedrag.node = node;
             if (editor_mode === MODE.ADD_TRANSITION()) {
                 // create an arrow from the selected node to the cursor position
                 drag_line.classed("hidden", false)
                     .style("marker-end", "url(#drag-arrow)")
-                    .attr("d", "M" + mousedrag.node.x + "," + mousedrag.node.y +
-                                "L" + (mousedrag.node.x + d3.mouse(this)[0]) +
-                                "," + (mousedrag.node.y + d3.mouse(this)[1]));
+                    .attr("d", function (node) {
+                        var edge = { source: mousedrag.node, target: mousedrag.node };
+                        // refresh control points
+                        var cp = getControlPoints_selfEdge(edge);
+                        // refresh path
+                        return lineFunction(cp);
+                    });
+//                    .attr("d", "M" + mousedrag.node.x + "," + mousedrag.node.y +
+//                                "L" + (mousedrag.node.x + d3.mouse(this)[0]) +
+//                                "," + (mousedrag.node.y + d3.mouse(this)[1]));
             }
         };
         var dragNode = function (node) {
@@ -1196,16 +1246,24 @@ define(function (require, exports, module) {
                 refreshInitialTransitions(updatedInitialTransitions);
 
             } else if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.node) {
-                drag_line.attr("d", "M" + mousedrag.node.x + "," + mousedrag.node.y +
-                                "L" + (mousedrag.node.x + d3.mouse(this)[0]) +
-                                "," + (mousedrag.node.y + d3.mouse(this)[1]));
+                if (mousedrag.node && mouseover.node && mousedrag.node.id === mouseover.node.id) {
+                    drag_line.attr("d", function (node) {
+                        var edge = { source: mousedrag.node, target: mousedrag.node };
+                        // refresh control points
+                        var cp = getControlPoints_selfEdge(edge);
+                        // refresh path
+                        return lineFunction(cp);
+                    });
+                } else {
+                    drag_line.attr("d", "M" + mousedrag.node.x + "," + mousedrag.node.y +
+                                    "L" + (mousedrag.node.x + d3.mouse(this)[0]) +
+                                    "," + (mousedrag.node.y + d3.mouse(this)[1]));
+                }
             }
         };
         var dragEnd = function (node) {
             if (editor_mode === MODE.ADD_TRANSITION()) {
-                if (mousedrag.node && mouseover.node
-                        && (Math.abs(d3.mouse(this)[0]) > sensitivity.x
-                            || Math.abs(d3.mouse(this)[1]) > sensitivity.y)) {
+                if (mousedrag.node && mouseover.node) {
                     _this.fire({
                         type: "emuCharts_addTransition",
                         source: mousedrag.node,
@@ -1531,9 +1589,11 @@ define(function (require, exports, module) {
         var edge = {
                 name: transitionName,
                 source: source,
-                target: target
+                target: target,
+                controlPoint: null
             };
-        var controlPoint = getControlPoints(edge);
+        var controlPoints = getControlPoints(edge);
+        edge.controlPoint = controlPoints[1];
         if (source && target) {
             // FIXME: need to adjust the position in the case svg is translated
             this.emucharts.add_edge(edge);

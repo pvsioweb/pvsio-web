@@ -30,9 +30,9 @@ define(function (require, exports, module) {
         } else if (mode === MODE.ADD_STATE) {
             return "add states";
         } else if (mode === MODE.RENAME) {
-            return "rename states and transitions";
+            return "rename states/transitions";
         } else if (mode === MODE.DELETE) {
-            return "delete states and transitions";
+            return "delete states/transitions";
         } else { return "error: unknown mode"; }
     };
     

@@ -43,6 +43,7 @@ define(function (require, exports, module) {
     var emuchartsPVSPrinter;
     var emuchartsLustrePrinter;
     var emuchartsPIMPrinter;
+    var options = { autoinit: true };
     
 
     function resetToolbarColors() {
@@ -71,10 +72,14 @@ define(function (require, exports, module) {
 		}
 	}
 
-    function createState_handler(evt) {
-        var stateName = emuchartsManager.getFreshStateName();
+    function addState_handler(evt) {
+        var stateID = emuchartsManager.getFreshStateName();
         var position = { x: evt.mouse[0], y: evt.mouse[1] };
-        emuchartsManager.add_state(stateName, position);
+        emuchartsManager.add_state(stateID, position);
+        if (options.autoinit && emuchartsManager.getStates().length === 1) {
+            var newTransitionName = emuchartsManager.getFreshInitialTransitionName();
+            emuchartsManager.add_initial_transition(newTransitionName, stateID);
+        }
     }
     
     function deleteTransition_handler(event) {
@@ -240,7 +245,7 @@ define(function (require, exports, module) {
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
         emuchartsManager.addListener("emuCharts_editorModeChanged", modeChange_callback);
-        emuchartsManager.addListener("emuCharts_createState", createState_handler);
+        emuchartsManager.addListener("emuCharts_addState", addState_handler);
 //        emuchartsManager.addListener("emuCharts_d3ZoomTranslate", d3ZoomTranslate_handler);
         emuchartsManager.addListener("emuCharts_deleteTransition", deleteTransition_handler);
         emuchartsManager.addListener("emuCharts_deleteInitialTransition", deleteInitialTransition_handler);
