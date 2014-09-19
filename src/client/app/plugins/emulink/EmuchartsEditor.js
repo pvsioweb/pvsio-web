@@ -271,7 +271,8 @@ define(function (require, exports, module) {
      * @returns vector of control points (5 elements vector)
 	 * @memberof EmuchartsEditor
      * FIXME: return a structure rather than an array
-     *         & merge this function with the other function getControlPoints
+     * FIXME: merge this function with the other function getControlPoints
+     * FIXME: save extra control points so that the cpu time required for rendering is reduced
 	 */
     function getControlPoints_selfEdge(edge) {
         var sourceX = edge.source.x;
@@ -310,7 +311,7 @@ define(function (require, exports, module) {
             // NOTE: SVG has the y axis inverted with respect to the Cartesian y axis
             if (dx >= 0 && dy < 0) {
                 // target node is in quadrant I
-                console.log("Quadrant I");
+                //console.log("Quadrant I");
                 // for targets in quadrant I, round links draw convex arcs
                 // --> place the arrow on the left side of the target
                 targetX -= targetWidth * 0.8;
@@ -329,7 +330,7 @@ define(function (require, exports, module) {
                                                 : controlPoint1X - offsetX / 4,
                                           y: controlPoint1Y - offsetY / 2 };
             } else if (dx < 0 && dy < 0) {
-                console.log("Quadrant II");
+                //console.log("Quadrant II");
                 // target node is in quadrant II
                 // for targets in quadrant I, round links draw concave arcs
                 // --> place the arrow at the bottom-right corner of the target
@@ -349,7 +350,7 @@ define(function (require, exports, module) {
                                                 controlPoint1Y - offsetY / 16
                                                 : controlPoint1Y + offsetY / 2};
             } else if (dx < 0 && dy >= 0) {
-                console.log("Quadrant III");
+                //console.log("Quadrant III");
                 // target node is in quadrant III
                 // for targets in quadrant IV, round links draw concave arcs
                 // --> place arrow end on the top-right corner of the target
@@ -367,7 +368,7 @@ define(function (require, exports, module) {
                                                 : controlPoint1Y - offsetY / 2};
                 extraControlPoints[1] = { x: controlPoint1X + offsetX / 16, y: controlPoint1Y + offsetY / 2 };
             } else if (dx >= 0 && dy >= 0) {
-                console.log("Quadrant IV");
+                //console.log("Quadrant IV");
                 // target node is in quadrant IV
                 // for targets in quadrant IV, round links draw convex arcs
                 // --> place arrow end at the top-left corner of the target
@@ -398,47 +399,6 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     function refreshTransitions(transitions) {
-//        // Function virtualControlPoints that adds two virtual control points -- useful to make self-edges less stiffy in shape
-//        // @params vector of control points (3 vector elements)
-//        // @returns vector of control points (5 vector elements)
-//        function virtualControlPoints(edge) {
-//            var controlPoints = getControlPoints(edge);
-//            var dx = controlPoints[0].x - controlPoints[1].x;
-//            var dy = controlPoints[1].y - controlPoints[0].y;
-//            var offsetX = (dx < 0) ? -dx : dx;
-//            offsetX = (offsetX > edge.target.width) ? offsetX : edge.target.width;
-//            var offsetY = (dy < 0) ? -dy : dy;
-//            offsetY = (offsetY > edge.target.height) ? offsetY : edge.target.height;
-//    //        var dx2 = controlPoints[2].x - controlPoints[1].x;
-//    //        var dy2 = controlPoints[1].y - controlPoints[2].y;
-//            var vcp = [];
-//            vcp[0] = { x: controlPoints[0].x, y: controlPoints[0].y };
-//            vcp[2] = { x: controlPoints[1].x, y: controlPoints[1].y };
-//            vcp[4] = { x: controlPoints[2].x, y: controlPoints[2].y };
-//            if (dx >= 0 && dy >= 0) {
-//                console.log("Quadrant I");
-//                // node in quadrant I
-//                vcp[1] = { x: controlPoints[1].x + offsetX / 2, y: controlPoints[1].y - offsetY / 16 };
-//                vcp[3] = { x: controlPoints[1].x - offsetX / 4, y: controlPoints[1].y - offsetY / 2 };
-//            } else if (dx < 0 && dy >= 0) {
-//                console.log("Quadrant II");
-//                // node in quadrant II
-//                vcp[1] = { x: controlPoints[1].x + offsetX / 4, y: controlPoints[1].y - offsetY / 2 };
-//                vcp[3] = { x: controlPoints[1].x - offsetX / 2, y: controlPoints[1].y - offsetY / 16 };
-//            } else if (dx < 0 && dy < 0) {
-//                console.log("Quadrant III");
-//                // node in quadrant III
-//                vcp[1] = { x: controlPoints[1].x - offsetX / 2, y: controlPoints[1].y + offsetY / 16 };
-//                vcp[3] = { x: controlPoints[1].x + offsetX / 16, y: controlPoints[1].y + offsetY / 2 };
-//            } else {
-//                console.log("Quadrant IV");
-//                // node in quadrant IV
-//                vcp[1] = { x: controlPoints[1].x - offsetX / 16, y: controlPoints[1].y + offsetY / 2};
-//                vcp[3] = { x: controlPoints[1].x + offsetX / 2, y: controlPoints[1].y + offsetY / 16 };
-//            }
-//            return vcp;
-//        }
-
         var label;
         var cpoints;
         // refresh paths and labels
@@ -479,9 +439,6 @@ define(function (require, exports, module) {
                 cpoints.attr("cx", cp[2].x).attr("cy", cp[2].y);
                 // refresh path
                 return lineFunction(cp);
-                // redraw self-edge
-                //return "M" + (edge.source.x + edge.source.width / 2 - 8) + ',' +
-                //        (edge.source.y - edge.source.height / 2 - 2) + "q 64 -16 16 16";
             } else {
                 // not a self-edge
                 cp = getControlPoints(edge);
@@ -496,11 +453,6 @@ define(function (require, exports, module) {
                 cpoints.attr("cx", cp[1].x).attr("cy", cp[1].y);
                 // refresh path
                 return lineFunction(cp);
-                // this is the old code to draw arcs between nodes
-                //return "m" + sourceX + ',' + sourceY + "A" + dist + "," +
-                //        dist + " 0 0,1 " + targetX + "," + targetY;*/
-                // this is the old code to draw straight lines between nodes
-                //return "m" + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
             }
         });
         return transitions;
