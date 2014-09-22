@@ -621,6 +621,7 @@ define(function (require, exports, module) {
                 }
             } else { _this.SVGdragged = false; }
             mouseOverControlPoint = null;
+            //console.log("mouseClick");
         };
         var mouseDown = function () {
             if (mouseOverControlPoint === null &&
@@ -635,6 +636,7 @@ define(function (require, exports, module) {
                     .attr("d", "M" + m[0] + "," + m[1] +
                                 "L" + m[0] + "," + m[1]);
             }
+            //console.log("mouseDown");
         };
         var mouseUp = function () {
             if (editor_mode === MODE.ADD_TRANSITION()) {
@@ -652,30 +654,20 @@ define(function (require, exports, module) {
                 mousedrag.edge = null;
             }
             _this.SVGdragged = false;
+            //console.log("mouseUp");
         };
         var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
+            //console.log("Zoom");
             d3.event.sourceEvent.stopPropagation();
             var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
-            console.log("(" + m[0] + "," + m[1] + ")");
-            if (mouseOverControlPoint !== null) {
-                var edge = mouseOverControlPoint;
-                // update selected control point
-                var cp = { x: m[0], y: m[1] };
-                _this.emucharts.set_controlPoint(edge, cp);
-                var transitionID = edge.id;
-                var transitions = d3.select("#ContainerStateMachine")
-                                    .select("#Transitions").selectAll(".transition")
-                                    .filter(function (transition) { return transition.id === transitionID; });
-                // refresh transitions
-                return refreshTransitions(transitions);
-            } else {
-                if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.edge) {
-                    // initial transition
-                    drag_line.attr("d", "M" + mousedrag.edge.x + "," + mousedrag.edge.y +
-                                    "L" + m[0] + "," + m[1]);
-                } else if (editor_mode !== MODE.ADD_TRANSITION() && !mousedrag.node &&
-                        editor_mode !== MODE.DELETE() && editor_mode !== MODE.RENAME()) {
-                    console.log("Drag canvas");
+            //console.log("(" + m[0] + "," + m[1] + ")");
+            if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.edge) {
+                // initial transition
+                drag_line.attr("d", "M" + mousedrag.edge.x + "," + mousedrag.edge.y +
+                                "L" + m[0] + "," + m[1]);
+            } else if (editor_mode !== MODE.ADD_TRANSITION() && !mousedrag.node &&
+                    editor_mode !== MODE.DELETE() && editor_mode !== MODE.RENAME()) {
+                    //console.log("Drag canvas");
     //                _this.fire({
     //                    type: "emuCharts_d3ZoomTranslate",
     //                    scale: d3.event.scale,
@@ -693,19 +685,18 @@ define(function (require, exports, module) {
     //                    console.log("new zoom level: " + _this.zoomLevel);
     //                }
     //                console.log("translation: " + d3.event.translate);
-                    d3.select("#ContainerStateMachine svg").select("#States")
-                        .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
-                    d3.select("#ContainerStateMachine svg").select("#Transitions")
-                        .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
-                    d3.select("#ContainerStateMachine svg").select("#InitialTransitions")
-                        .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
-                    d3.select("#ContainerStateMachine svg").select("#dragline")
-                        .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
-                    //--
-                    if (Math.abs(d3.event.translate[0]) > sensitivity.x
-                            || Math.abs(d3.event.translate[1]) > sensitivity.y) {
-                        _this.SVGdragged = true;
-                    }
+                d3.select("#ContainerStateMachine svg").select("#States")
+                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
+                d3.select("#ContainerStateMachine svg").select("#Transitions")
+                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
+                d3.select("#ContainerStateMachine svg").select("#InitialTransitions")
+                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
+                d3.select("#ContainerStateMachine svg").select("#dragline")
+                    .attr("transform", "translate(" + d3.event.translate + ") scale(" + _this.zoomLevel + ")");
+                //--
+                if (Math.abs(d3.event.translate[0]) > sensitivity.x
+                        || Math.abs(d3.event.translate[1]) > sensitivity.y) {
+                    _this.SVGdragged = true;
                 }
             }
         });
@@ -832,6 +823,8 @@ define(function (require, exports, module) {
             return refreshTransitions(enteredTransitions);
         };
         var mouseOver = function (edge) {
+            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
+            d3.event.stopPropagation();
             if (!mouseOverControlPoint || mouseOverControlPoint.id === edge) {
                 d3.select(this.firstChild)
                     //.style("stroke-width", stroke_width_highlighted)
@@ -841,8 +834,11 @@ define(function (require, exports, module) {
                 d3.select(this.children[3]).style("fill", "green");
                 d3.select(this.children[4]).style("fill", "green");
             }
+            //console.log("Transitions.mouseOver");
         };
         var mouseOut = function (edge) {
+            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
+            d3.event.stopPropagation();
             if (!mouseOverControlPoint || mouseOverControlPoint.id === edge) {
                 d3.select(this.firstChild)
                     //.style("stroke-width", stroke_width_normal)
@@ -852,8 +848,11 @@ define(function (require, exports, module) {
                 d3.select(this.children[3]).style("fill", "black");
                 d3.select(this.children[4]).style("fill", "black");
             }
+            //console.log("Transitions.mouseOut");
         };
         var mouseClick = function (edge) {
+            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
+            d3.event.stopPropagation();
             // update mouse variables
             mousedown.edge = edge;
             if (editor_mode === MODE.RENAME()) {
@@ -867,13 +866,44 @@ define(function (require, exports, module) {
                     edge: edge
                 });
             }
+            //console.log("Transitions.mouseClick");
         };
         var mouseDoubleClick = function (edge) {
+            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
+            d3.event.stopPropagation();
             if (editor_mode !== MODE.DELETE()) {
                 _this.fire({
                     type: "emuCharts_renameTransition",
                     edge: edge
                 });
+            }
+            //console.log("Transitions.mouseDoubleClick");
+        };
+        var mouseDown = function (edge) {
+            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
+            d3.event.stopPropagation();
+            //console.log("Transitions.mouseDown");
+        };
+        var mouseUp = function (edge) {
+            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
+            d3.event.stopPropagation();
+            //console.log("Transitions.mouseUp");
+        };
+        var mouseMove = function (edge) {
+            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
+            d3.event.stopPropagation();
+            //console.log("Transitions.mouseMove");
+            if (mouseOverControlPoint) {
+                var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+                // update selected control point
+                var cp = { x: m[0], y: m[1] };
+                _this.emucharts.set_controlPoint(edge, cp);
+                var transitionID = edge.id;
+                var transitions = d3.select("#ContainerStateMachine")
+                                    .select("#Transitions").selectAll(".transition")
+                                    .filter(function (transition) { return transition.id === transitionID; });
+                // refresh transitions
+                return refreshTransitions(transitions);
             }
         };
         
@@ -891,13 +921,19 @@ define(function (require, exports, module) {
             enteredTransitions
                 .on("mouseover", mouseOver)
                 .on("mouseout", mouseOut)
+                .on("mousemove", mouseMove)
                 .on("click", mouseClick)
-                .on("dblclick", mouseDoubleClick);
+                .on("dblclick", mouseDoubleClick)
+                .on("mousedown", mouseDown)
+                .on("mouseup", mouseUp);
             
             enteredTransitions.selectAll(".cpoints")
                 .on("mousedown", function (d) {
-                    // note: variable mouseOverControlPoint will be reset by EmuchartsEditor.prototype.newSVG.mouseClick
+                    //console.log("mouseOverControlPoint");
                     mouseOverControlPoint = d;
+                }).on("mouseup", function (d) {
+                    //console.log("mouseLeavingControlPoint");
+                    mouseOverControlPoint = null;
                 });
         }
     };
@@ -1146,6 +1182,7 @@ define(function (require, exports, module) {
             }
         };
         var dragNode = function (node) {
+            //console.log("State.dragNode");
             function computeControlPoint(edge) {
                 var dx1 = edge.target.x - edge.source.x;
                 var dy1 = edge.target.y - edge.source.y;
