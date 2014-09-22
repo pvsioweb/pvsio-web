@@ -197,69 +197,53 @@ define(function (require, exports, module) {
         //var dy = edge.target.y - edge.source.y;
         var dx = edge.target.x - controlPoint1X;
         var dy = edge.target.y - controlPoint1Y;
-        if (dx !== 0 || dy !== 0) {
-            var dist = Math.sqrt(dx * dx + dy * dy);
-            var sourceHeight = edge.source.height;
-            var targetWidth  = edge.target.name.length * fontSize;
-            var targetHeight = edge.target.height;
 
-            // to identify control points, we split the space into four Cartesian quadrants:
-            // the source node is at the center of the axes, and the target is in one of the quadrants
-            //  II  |  I
-            // -----s-----
-            // III  |  IV
-            // NOTE: SVG has the y axis inverted with respect to the Cartesian y axis
-            if (dx >= 0 && dy < 0) {
-                // target node is in quadrant I
-                // for targets in quadrant I, round links draw convex arcs
-                // --> place the arrow on the left side of the target
-                targetX -= (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
-                if (!edge.controlPoint) {
-                    controlPoint1X = (targetX + sourceX) * 0.5 - offset;
-                }
-/*                if (edge.source.id === edge.target.id) {
-                    // move the first control point to quadrant II so that the self-edge looks round
-                    sourceY += targetHeight * 0.6;
-                }*/
-            } else if (dx < 0 && dy < 0) {
-                // target node is in quadrant II
-                // for targets in quadrant I, round links draw concave arcs
-                // --> place the arrow at the bottom-right corner of the target
-                targetY += targetHeight * 0.6;
-                if (!edge.controlPoint) {
-                    controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
-                }
-/*                if (edge.source.id === edge.target.id) {
-                    // move the first control point to quadrant III so that the self-edge looks round
-                    sourceX += targetWidth * 0.8;
-                }*/
-            } else if (dx < 0 && dy >= 0) {
-                // target node is in quadrant III
-                // for targets in quadrant IV, round links draw concave arcs
-                // --> place arrow end on the top-right corner of the target
-                targetX += (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
-                if (!edge.controlPoint) {
-                    controlPoint1X = (targetX + sourceX) * 0.5 + offset;
-                    controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
-                }
-/*                if (edge.source.id === edge.target.id) {
-                    // move the first control point to quadrant IV so that the self-edge looks round
-                    sourceY -= targetHeight * 0.56;
-                }*/
-            } else if (dx >= 0 && dy >= 0) {
-                // target node is in quadrant IV
-                // for targets in quadrant IV, round links draw convex arcs
-                // --> place arrow end at the top-left corner of the target
-                targetY -= targetHeight * 0.56;
-/*                if (edge.source.id === edge.target.id) {
-                    // move the first control point to quadrant I so that the self-edge looks round
-                    sourceX -= targetWidth * 0.8;
-                }*/
-                if (!edge.controlPoint) {
-                    controlPoint1X = (targetX + sourceX) * 0.5 + offset;
-                }
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var sourceHeight = edge.source.height;
+        var targetWidth  = edge.target.name.length * fontSize;
+        var targetHeight = edge.target.height;
+
+        // to identify control points, we split the space into four Cartesian quadrants:
+        // the source node is at the center of the axes, and the target is in one of the quadrants
+        //  II  |  I
+        // -----s-----
+        // III  |  IV
+        // NOTE: SVG has the y axis inverted with respect to the Cartesian y axis
+        if (dx >= 0 && dy < 0) {
+            // target node is in quadrant I
+            // for targets in quadrant I, round links draw convex arcs
+            // --> place the arrow on the left side of the target
+            targetX -= (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 - offset;
+            }
+        } else if (dx < 0 && dy < 0) {
+            // target node is in quadrant II
+            // for targets in quadrant I, round links draw concave arcs
+            // --> place the arrow at the bottom-right corner of the target
+            targetY += targetHeight * 0.6;
+            if (!edge.controlPoint) {
+                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+            }
+        } else if (dx < 0 && dy >= 0) {
+            // target node is in quadrant III
+            // for targets in quadrant IV, round links draw concave arcs
+            // --> place arrow end on the top-right corner of the target
+            targetX += (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+            }
+        } else if (dx >= 0 && dy >= 0) {
+            // target node is in quadrant IV
+            // for targets in quadrant IV, round links draw convex arcs
+            // --> place arrow end at the top-left corner of the target
+            targetY -= targetHeight * 0.56;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
             }
         }
+
         return [{ "x": sourceX, "y": sourceY },
                 { "x": controlPoint1X, "y": controlPoint1Y},
                 { "x": targetX, "y": targetY }];
@@ -280,13 +264,8 @@ define(function (require, exports, module) {
         var targetX = edge.target.x;
         var targetY = edge.target.y;
 
-        var offset = 32;
-        var controlPoint1X = (edge.controlPoint) ? edge.controlPoint.x
-                            : (edge.source.id === edge.target.id) ? (targetX + sourceX) * 0.5 + offset
-                            : (targetX + sourceX) * 0.5 - offset;
-        var controlPoint1Y = (edge.controlPoint) ? edge.controlPoint.y
-                            : (edge.source.id === edge.target.id) ? (targetY + sourceY) * 0.5 + offset
-                            : (targetY + sourceY) * 0.5 - offset;
+        var controlPoint1X = (edge.controlPoint) ? edge.controlPoint.x : targetX + edge.target.width;
+        var controlPoint1Y = (edge.controlPoint) ? edge.controlPoint.y : targetY + edge.target.height;
 
         var extraControlPoints = [];
         //var dx = edge.target.x - edge.source.x;
@@ -295,97 +274,95 @@ define(function (require, exports, module) {
         var dy = edge.target.y - controlPoint1Y;
         var offsetX = (dx < 0) ? -dx : dx;
         var offsetY = (dy < 0) ? -dy : dy;
-        offsetX = (offsetX > edge.target.width) ? offsetX : edge.target.width;
-        offsetY = (offsetY > edge.target.height) ? offsetY : edge.target.height;
-        if (dx !== 0 || dy !== 0) {
-            var dist = Math.sqrt(dx * dx + dy * dy);
-            var sourceHeight = edge.source.height;
-            var targetWidth  = edge.target.name.length * fontSize;
-            var targetHeight = edge.target.height;
+        offsetX = (offsetX > edge.target.width) ? offsetX : edge.target.width / 2;
+        offsetY = (offsetY > edge.target.height) ? offsetY : edge.target.height / 2;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var targetWidth  = edge.target.width;//name.length * fontSize;
+        var targetHeight = edge.target.height;
 
-            // to identify control points, we split the space into four Cartesian quadrants:
-            // the source node is at the center of the axes, and the target is in one of the quadrants
-            //  II  |  I
-            // -----s-----
-            // III  |  IV
-            // NOTE: SVG has the y axis inverted with respect to the Cartesian y axis
-            if (dx >= 0 && dy < 0) {
-                // target node is in quadrant I
-                //console.log("Quadrant I");
-                // for targets in quadrant I, round links draw convex arcs
-                // --> place the arrow on the left side of the target
-                targetX -= targetWidth * 0.8;
-                if (!edge.controlPoint) {
-                    controlPoint1X = (targetX + sourceX) * 0.5 - offset;
-                }
-                // move the first control point to quadrant II
-                sourceY += targetHeight * 0.6;
-                // create extra control points to avoid stiffy curves
-                extraControlPoints[0] = { x: controlPoint1X + offsetX * 0.9,
-                                          y: (offsetY > edge.target.height) ?
-                                                controlPoint1Y - offsetY / 4
-                                                : controlPoint1Y + offsetY / 2 };
-                extraControlPoints[1] = { x: (offsetX > edge.target.width) ?
-                                                controlPoint1X - offsetX / 16
-                                                : controlPoint1X - offsetX / 4,
-                                          y: controlPoint1Y - offsetY / 2 };
-            } else if (dx < 0 && dy < 0) {
-                //console.log("Quadrant II");
-                // target node is in quadrant II
-                // for targets in quadrant I, round links draw concave arcs
-                // --> place the arrow at the bottom-right corner of the target
-                targetY += targetHeight * 0.6;
-                if (!edge.controlPoint) {
-                    controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
-                }
-                // move the first control point to quadrant III
-                sourceX += targetWidth * 0.8;
-                // create extra control points to avoid stiffy curves
-                extraControlPoints[0] = { x: (offsetX > edge.target.width) ?
-                                                controlPoint1X + offsetX / 16
-                                                : controlPoint1X + offsetX / 4,
-                                          y: controlPoint1Y - offsetY / 2 };
-                extraControlPoints[1] = { x: controlPoint1X - offsetX * 0.6,
-                                          y: (offsetY > edge.target.height) ?
-                                                controlPoint1Y - offsetY / 16
-                                                : controlPoint1Y + offsetY / 2};
-            } else if (dx < 0 && dy >= 0) {
-                //console.log("Quadrant III");
-                // target node is in quadrant III
-                // for targets in quadrant IV, round links draw concave arcs
-                // --> place arrow end on the top-right corner of the target
-                targetX += targetWidth * 0.8;
-                if (!edge.controlPoint) {
-                    controlPoint1X = (targetX + sourceX) * 0.5 + offset;
-                    controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
-                }
-                // move the first control point to quadrant IV
-                sourceY -= targetHeight * 0.56;
-                // create extra control points to avoid stiffy curves
-                extraControlPoints[0] = { x: controlPoint1X - offsetX / 2,
-                                          y: (offsetY > edge.target.height) ?
-                                                controlPoint1Y - offsetY / 16
-                                                : controlPoint1Y - offsetY / 2};
-                extraControlPoints[1] = { x: controlPoint1X + offsetX / 16, y: controlPoint1Y + offsetY / 2 };
-            } else if (dx >= 0 && dy >= 0) {
-                //console.log("Quadrant IV");
-                // target node is in quadrant IV
-                // for targets in quadrant IV, round links draw convex arcs
-                // --> place arrow end at the top-left corner of the target
-                targetY -= targetHeight * 0.56;
-                // move the first control point to quadrant I so that the self-edge looks round
-                sourceX -= targetWidth * 0.8;
-                if (!edge.controlPoint) {
-                    controlPoint1X = (targetX + sourceX) * 0.5 + offset;
-                }
-                // create extra control points to avoid stiffy curves
-                extraControlPoints[0] = { x: controlPoint1X - offsetX / 16, y: controlPoint1Y + offsetY / 2};
-                extraControlPoints[1] = { x: controlPoint1X + offsetX / 2,
-                                          y: (offsetY > edge.target.height) ?
-                                                controlPoint1Y - offsetY / 4
-                                                : controlPoint1Y - offsetY / 2 };// controlPoint1Y + offsetY / 16 };
+        // to identify control points, we split the space into four Cartesian quadrants:
+        // the source node is at the center of the axes, and the target is in one of the quadrants
+        //  II  |  I
+        // -----s-----
+        // III  |  IV
+        // NOTE: SVG has the y axis inverted with respect to the Cartesian y axis
+        if (dx >= 0 && dy < 0) {
+            // target node is in quadrant I
+            //console.log("Quadrant I");
+            // for targets in quadrant I, round links draw convex arcs
+            // --> place the arrow on the left side of the target
+            targetX -= targetWidth * 0.8;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5;
             }
+            // move the first control point to quadrant II
+            sourceY += targetHeight * 0.6;
+            // create extra control points to avoid stiffy curves
+            extraControlPoints[0] = { x: controlPoint1X + offsetX * 0.9,
+                                      y: (offsetY > edge.target.height) ?
+                                            controlPoint1Y - offsetY / 4
+                                            : controlPoint1Y + offsetY };
+            extraControlPoints[1] = { x: (offsetX > edge.target.width) ?
+                                            controlPoint1X - offsetX / 16
+                                            : controlPoint1X - offsetX / 4,
+                                      y: controlPoint1Y - offsetY / 2 };
+        } else if (dx < 0 && dy < 0) {
+            //console.log("Quadrant II");
+            // target node is in quadrant II
+            // for targets in quadrant I, round links draw concave arcs
+            // --> place the arrow at the bottom-right corner of the target
+            targetY += targetHeight * 0.6;
+            if (!edge.controlPoint) {
+                controlPoint1Y = (targetY + sourceY) * 0.5;
+            }
+            // move the first control point to quadrant III
+            sourceX += targetWidth * 0.5;
+            // create extra control points to avoid stiffy curves
+            extraControlPoints[0] = { x: (offsetX > edge.target.width) ?
+                                            controlPoint1X + offsetX / 16
+                                            : controlPoint1X + offsetX / 4,
+                                      y: controlPoint1Y - offsetY / 2 };
+            extraControlPoints[1] = { x: controlPoint1X - offsetX * 0.6,
+                                      y: (offsetY > edge.target.height) ?
+                                            controlPoint1Y - offsetY / 16
+                                            : controlPoint1Y + offsetY / 2};
+        } else if (dx < 0 && dy >= 0) {
+            //console.log("Quadrant III");
+            // target node is in quadrant III
+            // for targets in quadrant IV, round links draw concave arcs
+            // --> place arrow end on the top-right corner of the target
+            targetX += targetWidth * 0.8;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5;
+                controlPoint1Y = (targetY + sourceY) * 0.5;
+            }
+            // move the first control point to quadrant IV
+            sourceY -= targetHeight * 0.56;
+            // create extra control points to avoid stiffy curves
+            extraControlPoints[0] = { x: controlPoint1X - offsetX / 2,
+                                      y: (offsetY > edge.target.height) ?
+                                            controlPoint1Y - offsetY / 16
+                                            : controlPoint1Y - offsetY / 2};
+            extraControlPoints[1] = { x: controlPoint1X + offsetX / 16, y: controlPoint1Y + offsetY / 2 };
+        } else if (dx >= 0 && dy >= 0) {
+            //console.log("Quadrant IV");
+            // target node is in quadrant IV
+            // for targets in quadrant IV, round links draw convex arcs
+            // --> place arrow end at the top-left corner of the target
+            targetY -= targetHeight * 0.56;
+            // move the first control point to quadrant I so that the self-edge looks round
+            sourceX -= targetWidth * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5;
+            }
+            // create extra control points to avoid stiffy curves
+            extraControlPoints[0] = { x: controlPoint1X - offsetX / 16, y: controlPoint1Y + offsetY / 2};
+            extraControlPoints[1] = { x: controlPoint1X + offsetX / 2,
+                                      y: (offsetY > edge.target.height) ?
+                                            controlPoint1Y - offsetY / 4
+                                            : controlPoint1Y - offsetY / 2 };// controlPoint1Y + offsetY / 16 };
         }
+
         return [{ "x": sourceX, "y": sourceY },
                 { "x": extraControlPoints[0].x, "y": extraControlPoints[0].y },
                 { "x": controlPoint1X, "y": controlPoint1Y},
@@ -620,7 +597,6 @@ define(function (require, exports, module) {
                     });
                 }
             } else { _this.SVGdragged = false; }
-            mouseOverControlPoint = null;
             //console.log("mouseClick");
         };
         var mouseDown = function () {
@@ -823,9 +799,8 @@ define(function (require, exports, module) {
             return refreshTransitions(enteredTransitions);
         };
         var mouseOver = function (edge) {
-            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
-            d3.event.stopPropagation();
-            if (!mouseOverControlPoint || mouseOverControlPoint.id === edge) {
+            if (mousedrag.edge === null && (!mouseOverControlPoint || mouseOverControlPoint.id === edge)) {
+                d3.event.stopPropagation();
                 d3.select(this.firstChild)
                     //.style("stroke-width", stroke_width_highlighted)
                     .style("stroke", "green")
@@ -837,9 +812,8 @@ define(function (require, exports, module) {
             //console.log("Transitions.mouseOver");
         };
         var mouseOut = function (edge) {
-            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
-            d3.event.stopPropagation();
             if (!mouseOverControlPoint || mouseOverControlPoint.id === edge) {
+                d3.event.stopPropagation();
                 d3.select(this.firstChild)
                     //.style("stroke-width", stroke_width_normal)
                     .style("stroke", "black")
@@ -890,15 +864,14 @@ define(function (require, exports, module) {
             //console.log("Transitions.mouseUp");
         };
         var mouseMove = function (edge) {
-            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
-            d3.event.stopPropagation();
             //console.log("Transitions.mouseMove");
             if (mouseOverControlPoint) {
+                d3.event.stopPropagation();
                 var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
                 // update selected control point
                 var cp = { x: m[0], y: m[1] };
-                _this.emucharts.set_controlPoint(edge, cp);
-                var transitionID = edge.id;
+                _this.emucharts.set_controlPoint(mouseOverControlPoint, cp);
+                var transitionID = mouseOverControlPoint.id;
                 var transitions = d3.select("#ContainerStateMachine")
                                     .select("#Transitions").selectAll(".transition")
                                     .filter(function (transition) { return transition.id === transitionID; });
@@ -1182,6 +1155,8 @@ define(function (require, exports, module) {
             }
         };
         var dragNode = function (node) {
+            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
+            d3.event.sourceEvent.stopPropagation();
             //console.log("State.dragNode");
             function computeControlPoint(edge) {
                 var dx1 = edge.target.x - edge.source.x;
@@ -1255,6 +1230,8 @@ define(function (require, exports, module) {
             }
         };
         var dragEnd = function (node) {
+            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
+            d3.event.sourceEvent.stopPropagation();
             if (editor_mode === MODE.ADD_TRANSITION()) {
                 if (mousedrag.node && mouseover.node) {
                     _this.fire({
@@ -1289,38 +1266,62 @@ define(function (require, exports, module) {
             mousedrag.node = null;
         };
         var mouseOver = function (node) {
-            // update mouse variables
-            mouseover.node = node;
-            // highlight node
-            this.setAttribute("transform", this.getAttribute("transform").replace("scale(1.0)", "scale(1.1)"));
-            if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.node) {
-                if (mousedrag.node.id !== node.id) {
-                    // change colour of drag arrow to give a cue that a mouse release will trigger the creation of a new transition between nodes
-                    drag_line.style("stroke", colors(node.id));
-                    d3.select("#drag-arrow path").style("fill", colors(node.id));
-                } else {
+            d3.event.stopPropagation();
+            if (mouseOverControlPoint === null) {
+                // update mouse variables
+                mouseover.node = node;
+                // highlight node
+                this.setAttribute("transform", this.getAttribute("transform").replace("scale(1.0)", "scale(1.1)"));
+                if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.node) {
+                    if (mousedrag.node.id !== node.id) {
+                        // change colour of drag arrow to give a cue that a mouse release will trigger the creation of a new transition between nodes
+                        drag_line.style("stroke", colors(node.id));
+                        d3.select("#drag-arrow path").style("fill", colors(node.id));
+                    } else {
+                        drag_line.style("stroke", "black");
+                        d3.select("#drag-arrow path").style("fill", "black");
+                    }
+                }
+            }
+        };
+        var mouseOut = function (node) {
+            d3.event.stopPropagation();
+            if (mouseOverControlPoint === null) {
+                // update mouse variables
+                mouseover.node = null;
+                // restore node size
+                this.setAttribute("transform", this.getAttribute("transform").replace("scale(1.1)", "scale(1.0)"));
+                if (editor_mode === MODE.ADD_TRANSITION()) {
+                    // change colour of drag arrow to the default (black)
                     drag_line.style("stroke", "black");
                     d3.select("#drag-arrow path").style("fill", "black");
                 }
             }
         };
-        var mouseOut = function (node) {
-            // update mouse variables
-            mouseover.node = null;
-            // restore node size
-            this.setAttribute("transform", this.getAttribute("transform").replace("scale(1.1)", "scale(1.0)"));
-            if (editor_mode === MODE.ADD_TRANSITION()) {
-                // change colour of drag arrow to the default (black)
-                drag_line.style("stroke", "black");
-                d3.select("#drag-arrow path").style("fill", "black");
-            }
-        };
         var mouseDoubleClick = function (node) {
+            d3.event.stopPropagation();
             if (editor_mode !== MODE.DELETE()) {
                 _this.fire({
                     type: "emuCharts_renameState",
                     node: node
                 });
+            }
+        };
+        var mouseMove = function (node) {
+            if (mouseOverControlPoint) {
+                d3.event.stopPropagation();
+                //console.log("mouseover control point");
+                var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+                // update selected control point
+                var cp = { x: m[0], y: m[1] };
+                //console.log("(" + m[0] + "," + m[1] + ")");
+                _this.emucharts.set_controlPoint(mouseOverControlPoint, cp);
+                var transitionID = mouseOverControlPoint.id;
+                var transitions = d3.select("#ContainerStateMachine")
+                                    .select("#Transitions").selectAll(".transition")
+                                    .filter(function (transition) { return transition.id === transitionID; });
+                // refresh transitions
+                return refreshTransitions(transitions);
             }
         };
 
@@ -1342,6 +1343,7 @@ define(function (require, exports, module) {
             enteredStates.call(drag)
                 .on("mouseover", mouseOver)
                 .on("mouseout", mouseOut)
+                .on("mousemove", mouseMove)
                 .on("dblclick", mouseDoubleClick);
         }
     };
