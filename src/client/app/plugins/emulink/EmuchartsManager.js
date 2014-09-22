@@ -268,7 +268,6 @@ define(function (require, exports, module) {
                 console.log("Error while parsing MUZ file (section ==Transitions== not found)");
                 return;
             }
-            MUZFile.fileContent = MUZFile.fileContent.substring(needle + 15);
             
             var transitions = [];
             stop = false;
