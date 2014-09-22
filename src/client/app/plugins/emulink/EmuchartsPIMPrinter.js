@@ -118,7 +118,7 @@ define(function (require, exports, module) {
         if (transitions && transitions.length > 0) {
             emuchart.transitions.forEach(function (transition) {
                 var t = parseTransition(transition);
-                ans += "\n\\begin{schema}{Transition" + t.from + t.to +"}";
+                ans += "\n\\begin{schema}{Transition" + t.from + t.to + "}";
                 ans += "\n  \\Delta PIMSystem" + "\\" + "\\";
                 ans += "\n  i? : Signal";
                 ans += "\n\\where";

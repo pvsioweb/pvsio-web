@@ -213,14 +213,14 @@ define(function (require, exports, module) {
                 // target node is in quadrant I
                 // for targets in quadrant I, round links draw convex arcs
                 // --> place the arrow on the left side of the target
-                targetX -= targetWidth * 0.8;
+                targetX -= (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
                 if (!edge.controlPoint) {
                     controlPoint1X = (targetX + sourceX) * 0.5 - offset;
                 }
-                if (edge.source.id === edge.target.id) {
+/*                if (edge.source.id === edge.target.id) {
                     // move the first control point to quadrant II so that the self-edge looks round
                     sourceY += targetHeight * 0.6;
-                }
+                }*/
             } else if (dx < 0 && dy < 0) {
                 // target node is in quadrant II
                 // for targets in quadrant I, round links draw concave arcs
@@ -229,32 +229,32 @@ define(function (require, exports, module) {
                 if (!edge.controlPoint) {
                     controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
                 }
-                if (edge.source.id === edge.target.id) {
+/*                if (edge.source.id === edge.target.id) {
                     // move the first control point to quadrant III so that the self-edge looks round
                     sourceX += targetWidth * 0.8;
-                }
+                }*/
             } else if (dx < 0 && dy >= 0) {
                 // target node is in quadrant III
                 // for targets in quadrant IV, round links draw concave arcs
                 // --> place arrow end on the top-right corner of the target
-                targetX += targetWidth * 0.8;
+                targetX += (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
                 if (!edge.controlPoint) {
                     controlPoint1X = (targetX + sourceX) * 0.5 + offset;
                     controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
                 }
-                if (edge.source.id === edge.target.id) {
+/*                if (edge.source.id === edge.target.id) {
                     // move the first control point to quadrant IV so that the self-edge looks round
                     sourceY -= targetHeight * 0.56;
-                }
+                }*/
             } else if (dx >= 0 && dy >= 0) {
                 // target node is in quadrant IV
                 // for targets in quadrant IV, round links draw convex arcs
                 // --> place arrow end at the top-left corner of the target
                 targetY -= targetHeight * 0.56;
-                if (edge.source.id === edge.target.id) {
+/*                if (edge.source.id === edge.target.id) {
                     // move the first control point to quadrant I so that the self-edge looks round
                     sourceX -= targetWidth * 0.8;
-                }
+                }*/
                 if (!edge.controlPoint) {
                     controlPoint1X = (targetX + sourceX) * 0.5 + offset;
                 }

@@ -123,7 +123,7 @@ define(function (require, exports, module) {
         // create a new node with a unique ID
         var id = "X" + newNodeID();
         var name = node.name || id;
-        var estimatedTextWidth = name.length * defaultValues.fontSize / 2;
+        var estimatedTextWidth = name.length * defaultValues.fontSize / 4;
         var width = (estimatedTextWidth < defaultValues.width) ? defaultValues.width : estimatedTextWidth;
         var newNode = {
                 id  : id, // nodes have unique IDs
