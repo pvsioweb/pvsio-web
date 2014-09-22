@@ -799,7 +799,7 @@ define(function (require, exports, module) {
             return refreshTransitions(enteredTransitions);
         };
         var mouseOver = function (edge) {
-            if (mousedrag.edge === null && (!mouseOverControlPoint || mouseOverControlPoint.id === edge)) {
+            if (!mousedrag.edge && (!mouseOverControlPoint || mouseOverControlPoint.id === edge)) {
                 d3.event.stopPropagation();
                 d3.select(this.firstChild)
                     //.style("stroke-width", stroke_width_highlighted)
@@ -1268,8 +1268,8 @@ define(function (require, exports, module) {
             mousedrag.node = null;
         };
         var mouseOver = function (node) {
-            d3.event.stopPropagation();
             if (mouseOverControlPoint === null) {
+                d3.event.stopPropagation();
                 // update mouse variables
                 mouseover.node = node;
                 // highlight node
@@ -1288,8 +1288,8 @@ define(function (require, exports, module) {
             }
         };
         var mouseOut = function (node) {
-            d3.event.stopPropagation();
             if (mouseOverControlPoint === null) {
+                d3.event.stopPropagation();
                 // update mouse variables
                 mouseover.node = null;
                 // restore node size
@@ -1303,8 +1303,8 @@ define(function (require, exports, module) {
             }
         };
         var mouseDoubleClick = function (node) {
-            d3.event.stopPropagation();
             if (editor_mode !== MODE.DELETE()) {
+                d3.event.stopPropagation();
                 _this.fire({
                     type: "emuCharts_renameState",
                     node: node
