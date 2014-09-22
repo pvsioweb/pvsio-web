@@ -1179,8 +1179,10 @@ define(function (require, exports, module) {
                 // update node position
                 node.x = node.x + d3.event.dx;
                 node.y = node.y + d3.event.dy;
+                d3.select(this).attr("stroke-width", 2);
                 d3.select(this).attr("transform",
-                                     "translate(" + node.x + "," + node.y + ") scale(1.1) ");
+                                     "translate(" + node.x + "," + node.y + ") scale(1.0) ");
+//                                     "translate(" + node.x + "," + node.y + ") scale(1.1) ");
                 // update all edges connected to this node
                 var updatedTransitions = d3.select("#ContainerStateMachine")
                         .select("#Transitions").selectAll(".transition")
@@ -1271,7 +1273,8 @@ define(function (require, exports, module) {
                 // update mouse variables
                 mouseover.node = node;
                 // highlight node
-                this.setAttribute("transform", this.getAttribute("transform").replace("scale(1.0)", "scale(1.1)"));
+                d3.select(this).attr("stroke-width", 2);
+//                this.setAttribute("transform", this.getAttribute("transform").replace("scale(1.0)", "scale(1.1)"));
                 if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.node) {
                     if (mousedrag.node.id !== node.id) {
                         // change colour of drag arrow to give a cue that a mouse release will trigger the creation of a new transition between nodes
@@ -1290,7 +1293,8 @@ define(function (require, exports, module) {
                 // update mouse variables
                 mouseover.node = null;
                 // restore node size
-                this.setAttribute("transform", this.getAttribute("transform").replace("scale(1.1)", "scale(1.0)"));
+                d3.select(this).attr("stroke-width", 1);
+//                this.setAttribute("transform", this.getAttribute("transform").replace("scale(1.1)", "scale(1.0)"));
                 if (editor_mode === MODE.ADD_TRANSITION()) {
                     // change colour of drag arrow to the default (black)
                     drag_line.style("stroke", "black");
