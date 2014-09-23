@@ -18,7 +18,8 @@ define(function (require, exports, module) {
         Notification = require("pvsioweb/forms/displayNotification"),
         ProjectFile = require("project/ProjectFile"),
         fs = require("util/fileHandler"),
-        PluginManager = require("plugins/PluginManager");
+        PluginManager = require("plugins/PluginManager"),
+		WidgetsListView =require("pvsioweb/forms/WidgetsListView");
 	
     var template = require("text!pvsioweb/forms/maincontent.handlebars");
     
@@ -29,7 +30,8 @@ define(function (require, exports, module) {
     function switchToBuilderView() {
         d3.select(".image-map-layer").style("opacity", 1).style("z-index", 190);
         d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
-        d3.select("#btnBuilderView").classed('selected', true);
+		d3.select("#controlsContainer .active").classed("active", false);
+        d3.select("#btnBuilderView").classed('active', true);
         d3.selectAll("div.display,#controlsContainer button").classed("builder", true);
         d3.selectAll("div.display,#controlsContainer button").classed("simulator", false);
         d3.selectAll("#record").style("display", "none");
@@ -40,6 +42,8 @@ define(function (require, exports, module) {
     function switchToSimulatorView() {
         d3.select(".image-map-layer").style("opacity", 0.1).style("z-index", -2);
         d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
+		d3.select("#controlsContainer .active").classed("active", false);
+        d3.select("#btnSimulatorView").classed('active', true);
         d3.select("#btnSimulatorView").classed('selected', true);
         d3.selectAll("div.display,#controlsContainer button").classed("simulator", true);
         d3.selectAll("div.display,#controlsContainer button").classed("builder", false);
@@ -95,6 +99,7 @@ define(function (require, exports, module) {
 					pvsProcessReady(err);
 					//make projectManager bubble the process ready event
 					projectManager.fire({type: "PVSProcessReady", err: err});
+					WidgetsListView.create();
 				});
             } else {
                 //close pvsio process for previous project
@@ -109,6 +114,7 @@ define(function (require, exports, module) {
                 d3.select("#btnSaveAll").attr("disabled", null);
             });
             switchToBuilderView();
+			
         }).addListener("SelectedFileChanged", function (event) {
             var p = projectManager.project(), file = p.getProjectFile(event.selectedItem.path);
             updateEditorToolbarButtons(file, p);

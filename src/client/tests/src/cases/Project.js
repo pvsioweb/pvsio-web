@@ -41,6 +41,13 @@ define(function (require, exports, module) {
 				});
 
 				describe("Project innards works fine", function () {
+					it("should open project correctly", function (done) {
+                        pm.openProject("AlarisPC", function (openedProject) {
+                            expect(alarisProject).toEqual(openedProject.name());
+                            done();
+                        });
+                    });
+					
 					it("default project is not dirty", function (done) {
 						expect(p._dirty()).toBeFalsy();
                         done();
@@ -58,15 +65,9 @@ define(function (require, exports, module) {
 						expect(p.name()).toEqual("defaultProject");
 						console.log(p.name());
                         done();
-					});
-                    
-                    it("should open project correctly", function (done) {
-                        pm.openProject("AlarisPC", function (openedProject) {
-                            expect(alarisProject).toEqual(openedProject.name());
-                            done();
-                        });
-                    });
+					});                   
 				});
+				
 			});
 		}
 	};

@@ -25,14 +25,7 @@ span.toggle-collapse {
 
 div.header {
 	padding: 5px;
-	border:1px solid black;
-}
-.collapsible-panel {
-	
-}
-
-#pvsSpecification{
-	position:       relative;
+	border:1px solid #4088B6;
 }
 
 #graphicalEditor{
@@ -50,6 +43,7 @@ div.header {
 	width: 100%;
 	height: 1000px;
 	position: relative;
+	min-width: 800px;
 }
 
 #content .ljs-resizer {
@@ -160,10 +154,12 @@ fileListItem.hide {
     height:14px;
     margin-right:5px;
 }
+/*
 #sourcecode-editor-wrapper{
-    height: 400px;
-   	position:relative;
+    //height: 400px;
+   //	position:relative;
 }
+*/
 #editor-notification-area {
     float: right;
     width: 350px;
@@ -201,45 +197,6 @@ fileListItem.hide {
 	border: 1px solid #ddd;
     display: inline-block;
 }
-
-.fileListItem.dirty .list-icon-dirty{
-    background-image:url(../bootstrap/img/glyphicons-halflings.png);
-    background-position:-456px -96px;
-}
-
-.fileListItem.selected.dirty .list-icon-dirty{
-    background-image:url(../bootstrap/img/glyphicons-halflings-white.png);
-    background-position:-456px -96px;
-}
-
-.fileListItem.main-file .list-icon-main{
-    background-position: -120px 0;
-    background-image:url(../bootstrap/img/glyphicons-halflings.png);
-}
-
-.fileListItem.main-file.selected .list-icon-main{
-    background-position: -120px 0;
-    background-image:url(../bootstrap/img/glyphicons-halflings-white.png);
-}
-.fileListItem.selected {
-    background: steelblue;
-    color: #ddd;
-    border: 1px solid #222;
-    border-right:1px solid #444;
-}
-
-#pvsFiles .fileListItem.selected .file-label:after {
-    content: "";
-    border-top: 14px solid #444;
-    border-left: 14px solid transparent;
-    display: inline-block;
-    position: absolute;
-    right: 0px;
-    top: 0px;
-    width: 0;
-    height: 0;
-    z-index: 20000;
-}
 #editorToolbar{
     padding: 10px;
 }
@@ -254,70 +211,12 @@ fileListItem.hide {
 }
 
 
-#pvsio_commands_log {
-	height:100px;
-	overflow: scroll;
-	color: lime;
-	background: black;
-	padding: 10px;
-}
-
-#btnSimulatorView{
-	left: 100px;
-}
-
 .clear-both{
 	clear:both;
 }
 
-.pvsio-log-container{
-	float:left;
-	width: 48%;	
-	border: 10px solid white;
-}
-
-.displayvalue{
-	color: white;	
-	line-height: 1;
-}
-
-#pvsio_response_log {
-	height:100px;
-	overflow: scroll;
-	color: lime;
-	background: black;
-	padding: 10px;
-}
-
-#prototypeImage {
-	padding: 0;
-	margin: 0;
-	cursor: crosshair;
-	background-repeat: no-repeat;
-}
-
 img {
 	z-index: -2;
-}
-
-.mark {
-	background: rgba(80, 80, 80, 0.2);
-	cursor: move;
-	border: 2px solid #555;
-	position: absolute;
-}
-
-.selected {
-	border: 3px solid orange;
-}
-
-.display{
-	z-index: 3;
-	text-align: center;
-}
-
-input[type=text]{
-	width: 250px;
 }
 
 intput:invalid, select:invalid{
@@ -329,7 +228,7 @@ intput:invalid, select:invalid{
 	text-align: center;
 	position: absolute;
 	border: 4px dashed teal;
-	height: 430px;
+	height: 380px;
 	width: 100%;
 	z-index: 191;
 }
@@ -347,17 +246,6 @@ intput:invalid, select:invalid{
 	line-height: 1.1;
 	text-align: center;
 }
-.detailsForm {
-	position: absolute;
-	z-index: 4;
-	background: white;
-	padding: 30px;
-	cursor: move;
-}
-
-div#logsDiv {
-    display: none;
-}
 
 /***bootstrap overrides ***/
 div#content select, div#content input, div#content textarea, div.detailsForm  input,
@@ -369,35 +257,6 @@ div.detailsForm select, div.detailsForm textarea{
 	margin-bottom: 20px;
 	height: 430px;
 	background: #eee;
-}
-
-#header .project-notifications {
-    float: right;
-    width: 500px;
-    margin: 0 0 0 22px;
-}
-
-#header .project-notifications input {
-    margin-top: 4px;
-    width: 160px;
-    text-align: center;
-}
-
-#project-notification-area {
-    float: right;
-    width: 330px;
-    height: 34px;
-    font-size: 10px;
-    padding: 6px 0 0 10px;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    white-space: nowrap;
-    border: grey solid;
-    border-radius: 5px;
-}
-
-#project-notification-area p {
-    text-align: center;
 }
 
 .tab-content {
@@ -493,6 +352,7 @@ div.detailsForm select, div.detailsForm textarea{
 #body > .ljs-hcontent {
 	padding-left: 0;
 	width: 80%;
+	background: white;
 }
 #builder-controls.ljs-left {
 	width: 20%;
@@ -554,4 +414,28 @@ div.detailsForm select, div.detailsForm textarea{
 
 .caption button {
 	width: 100%;
+}
+#widgetsList {
+	overflow-y: auto;
+	padding: 0;
+	margin: 0;
+	height: 100%;
+}
+#widgetsList li{
+	cursor: default;
+}
+
+#widgetsList li.selected {
+	background: #4088B6;
+	color: white;
+}
+
+.disable-text-select {
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+body {
+	min-width: 1200px;
 }
