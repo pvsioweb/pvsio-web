@@ -28,6 +28,7 @@ define(function (require, exports, module) {
         EmuchartsPVSPrinter   = require("plugins/emulink/EmuchartsPVSPrinter"),
         EmuchartsLustrePrinter   = require("plugins/emulink/EmuchartsLustrePrinter"),
         EmuchartsPIMPrinter   = require("plugins/emulink/EmuchartsPIMPrinter"),
+        EmuchartsCppPrinter   = require("plugins/emulink/EmuchartsCppPrinter"),
         fs = require("util/fileHandler");
     
     var instance;
@@ -43,6 +44,8 @@ define(function (require, exports, module) {
     var emuchartsPVSPrinter;
     var emuchartsLustrePrinter;
     var emuchartsPIMPrinter;
+    var emuchartsCppPrinter;
+    var options = { autoinit: true };
     
 
     function resetToolbarColors() {
@@ -71,10 +74,14 @@ define(function (require, exports, module) {
 		}
 	}
 
-    function createState_handler(evt) {
-        var stateName = emuchartsManager.getFreshStateName();
+    function addState_handler(evt) {
+        var stateID = emuchartsManager.getFreshStateName();
         var position = { x: evt.mouse[0], y: evt.mouse[1] };
-        emuchartsManager.add_state(stateName, position);
+        emuchartsManager.add_state(stateID, position);
+        if (options.autoinit && emuchartsManager.getStates().length === 1) {
+            var newTransitionName = emuchartsManager.getFreshInitialTransitionName();
+            emuchartsManager.add_initial_transition(newTransitionName, stateID);
+        }
     }
     
     function deleteTransition_handler(event) {
@@ -236,11 +243,12 @@ define(function (require, exports, module) {
         emuchartsPVSPrinter = new EmuchartsPVSPrinter("emuchart_th");
         emuchartsLustrePrinter = new EmuchartsLustrePrinter("A");
         emuchartsPIMPrinter = new EmuchartsPIMPrinter("emuchart_PIM");
+        emuchartsCppPrinter = new EmuchartsCppPrinter("emuchart_Cpp");
         pvsioWebClient = PVSioWebClient.getInstance();
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
         emuchartsManager.addListener("emuCharts_editorModeChanged", modeChange_callback);
-        emuchartsManager.addListener("emuCharts_createState", createState_handler);
+        emuchartsManager.addListener("emuCharts_addState", addState_handler);
 //        emuchartsManager.addListener("emuCharts_d3ZoomTranslate", d3ZoomTranslate_handler);
         emuchartsManager.addListener("emuCharts_deleteTransition", deleteTransition_handler);
         emuchartsManager.addListener("emuCharts_deleteInitialTransition", deleteInitialTransition_handler);
@@ -378,17 +386,57 @@ define(function (require, exports, module) {
         function openChart(callback) {
             var opt = {
                 header: "Open EmuChart file...",
-                extensions: ".emdl"
+                extensions: ".emdl,.muz"
             };
-            fs.openLocalFileAsJSON(function (err, res) {
+            fs.openLocalFileAsText(function (err, res) {
                 if (res) {
-                    emuchartsManager.importEmucharts(res);
+                    if (res.fileName.lastIndexOf(".emdl") === res.fileName.length - 5) {
+                        res.fileContent = JSON.parse(res.fileContent);
+                        emuchartsManager.importEmucharts(res);
+                        if (callback && typeof callback === "function") {
+                            callback(err, res);
+                        }
+                    } else {
+                        emuchartsManager.importPIMChart(res);
+                        if (callback && typeof callback === "function") {
+                            callback(err, res);
+                        }                    
+                    }
+                } else {
+                    console.log("Error while opening file (" + err + ")");
+                }
+            }, opt);
+        }
+//        function openChart(callback) {
+//            var opt = {
+//                header: "Open EmuChart file...",
+//                extensions: ".emdl"
+//            };
+//            fs.openLocalFileAsJSON(function (err, res) {
+//                if (res) {
+//                    emuchartsManager.importEmucharts(res);
+//                    if (callback && typeof callback === "function") {
+//                        callback(err, res);
+//                    }
+//                }
+//            }, opt);
+//        }
+        function importChart(callback) {
+            var opt = {
+                header: "Import Chart...",
+                extensions: ".muz"
+            };
+            // MUZ
+            fs.openLocalFileAsText(function (err, res) {
+                if (res) {
+                    emuchartsManager.importPIMChart(res);
                     if (callback && typeof callback === "function") {
                         callback(err, res);
                     }
                 }
             }, opt);
         }
+
         d3.select("#btnNewEmuchart").on("click", function () {
             d3.select("#EmuchartLogo").classed("hidden", true);
             d3.select("#graphicalEditor").classed("hidden", false);
@@ -408,6 +456,16 @@ define(function (require, exports, module) {
                 resetToolbarColors();
             });
 		});
+//        d3.select("#btnImportChart").on("click", function () {
+//            importChart(function f() {
+//                // set initial editor mode
+//                emuchartsManager.set_editor_mode(MODE.BROWSE());
+//                // render emuchart                        
+//                emuchartsManager.render();
+//                // make svg visible and reset colors
+//                resetToolbarColors();
+//            });
+//		});
         
         // toolbar
         d3.select("#btn_toolbarAddState").on("click", function () {
@@ -510,6 +568,30 @@ define(function (require, exports, module) {
                 emuchartsManager.delete_chart();
                 document.getElementById("btnLoadEmuchart").click();
                 view.remove();
+            }).on("cancel", function (e, view) {
+                view.remove();
+            });
+		});
+        d3.select("#btn_menuImportChart").on("click", function () {
+            document.getElementById("menuEmuchart").children[1].style.display = "none";
+            // we need to delete the current chart because we handle one chart at the moment
+            QuestionForm.create({
+                header: "Warning: unsaved changes will be discarded.",
+                question: "Unsaved changes in the current chart will be discarded."
+                            + "Would you like continue?",
+                buttons: ["Cancel", "Ok"]
+            }).on("ok", function (e, view) {
+                emuchartsManager.delete_chart();
+                //document.getElementById("btnImportChart").click();
+                view.remove();
+                importChart(function f() {
+                    // set initial editor mode
+                    emuchartsManager.set_editor_mode(MODE.BROWSE());
+                    // render emuchart                        
+                    emuchartsManager.render();
+                    // make svg visible and reset colors
+                    resetToolbarColors();
+                });
             }).on("cancel", function (e, view) {
                 view.remove();
             });
@@ -874,7 +956,47 @@ define(function (require, exports, module) {
             projectManager.selectFile(emuchartsFile);
             var x = 0;
         });
-        
+        d3.select("#btn_menuCppPrinter").on("click", function () {
+            //document.getElementById("menuCodeGenenerators").children[1].style.display = "none";
+            var emucharts = {
+                name: "emucharts",
+                author: {
+                    name: "Paolo Masci",
+                    affiliation: "Queen Mary University of London, United Kingdom",
+                    contact: "http://www.eecs.qmul.ac.uk/~masci/"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: emuchartsManager.getVariables(),
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".cpp",
+                                                                 emuchartsCppPrinter.print(emucharts));
+            if (projectManager.fileExists(emuchartsFile)) {
+                // remove file from project
+                projectManager.project().removeFile(emuchartsFile);
+            }
+            // add file to project
+            projectManager.saveFiles([emuchartsFile], function (err) {
+                var notification = "";
+                if (!err) {
+                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
+                    projectManager.selectFile(emuchartsFile);
+                    notification = "C++ class successfully generated in file " + emuchartsFile.path();
+                    alert(notification);
+                    Logger.log(notification);
+                } else {
+                    notification = "C++ Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
+                    alert(notification);
+                    Logger.log(notification);
+                }
+            });
+            // select file
+            projectManager.selectFile(emuchartsFile);
+            var x = 0;
+        });
         //-- Zoom menu -----------------------------------------------------------
         d3.select("#menuZoom").on("mouseover", function () {
             document.getElementById("menuZoom").children[1].style.display = "block";
