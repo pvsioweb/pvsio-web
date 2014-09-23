@@ -1,6 +1,6 @@
 /** @module EmuchartsLustrerinter */
 /**
- * EmuchartsPVSPrinter provides functions to generate a lustre spec for emucharts
+ * EmuchartsLustrePrinter provides functions to generate a Lustre model from emucharts
  * The printer knows only the theory name, all expressions within the theory are provided as function arguments
  * @author Paolo Masci
  * @date 27/05/14 9:38:13 AM

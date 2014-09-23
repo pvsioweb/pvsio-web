@@ -1,37 +1,37 @@
-/** @module EmuchartsPVSPrinter */
+/** @module EmuchartsCppPrinter */
 /**
- * EmuchartsPVSPrinter provides functions to generate PVS models from Emucharts
+ * EmuchartsCppPrinter provides functions to generate C++ code from Emucharts
  * @author Paolo Masci
- * @date 27/05/14 9:38:13 AM
+ * @date 2014/09/19 11:59:43 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3 */
 define(function (require, exports, module) {
 	"use strict";
     
-    var theory_name;
+    var class_name;
 
     
     /**
 	 * Constructor
 	 */
-    function EmuchartsPVSPrinter(name) {
-        theory_name = name;
+    function EmuchartsCppPrinter(name) {
+        class_name = name;
         return this;
     }
     
     /**
-     * Prints PVS definitions for Emuchart states
+     * Prints C++ definitions for Emuchart states
      */
-    EmuchartsPVSPrinter.prototype.print_states = function (emuchart) {
+    EmuchartsCppPrinter.prototype.print_states = function (emuchart) {
         var states = emuchart.states;
-        var ans = "  %-- machine states\n  MachineState: TYPE";
+        var ans = "  // machine states\n  enum MachineState";
         if (states && states.length > 0) {
-            ans += " = { ";
+            ans += " { ";
             states.forEach(function (state) {
                 ans += state.name + ", ";
             });
-            ans = ans.substr(0, ans.length - 2) + " }";
+            ans = ans.substr(0, ans.length - 2) + " };";
         }
         return ans + "\n";
     };
@@ -81,55 +81,6 @@ define(function (require, exports, module) {
         return ans;
     }
 
-    /**
-     * identifies state variables on the left-hand side of equalities/assignment
-     */
-    function indexOfStateVariableLF(v, expr) {
-        if (v && expr) {
-            var pos = expr.indexOf(v);
-            if (pos >= 0) {
-                // check that we are not accidentally parsing a substring of a longer var name
-                // if it's a genuine var name on the left-hand side of equalities/assignment, then
-                // the variable name is immediately preceeded by space or ; or ( 
-                // and immediately succeded by a comparison operator or space
-                var before = expr.substr(0, pos).trim();
-                var after  = expr.substr(pos + v.length + 1).trim();
-                if ((before === "" || before.indexOf(";") === before.length - 1
-                                    || before.indexOf("(") === before.length - 1)
-                        && (after === "" || after.indexOf(">") === 0
-                                || after.indexOf("=") === 0 || after.indexOf("<") === 0)) {
-                    // it's a variable
-                    return pos;
-                }
-            }
-        }
-        return -1;
-    }
-    
-    /**
-     * identifies state variables on the right-hand side of equalities/assignment
-     */
-    function indexOfStateVariableRT(v, expr) {
-        if (v && expr) {
-            var pos = expr.indexOf(v);
-            if (pos >= 0) {
-                // check that we are not accidentally parsing a substring of a longer var name
-                // if it's a genuine var name on the right-hand side of equalities/assignment,
-                // the variable name is immediately preceeded by space or ( 
-                // and immediately succeded by ) or arithmetic operators + * / -
-                var before = expr.substr(0, pos).trim();
-                var after  = expr.substr(pos + v.length + 1).trim();
-                if ((before === "" || before.indexOf("(") === before.length - 1)
-                        && (after.indexOf(")") === 0 || after.indexOf("+") === 0
-                                || after.indexOf("-") === 0 || after.indexOf("*") === 0
-                                || after.indexOf("/") === 0)) {
-                    // it's a variable
-                    return pos;
-                }
-            }
-        }
-        return -1;
-    }
 
     /**
      * Utility function for printing PVS definitions of transition actions
@@ -140,7 +91,7 @@ define(function (require, exports, module) {
         // state updates, i.e., in actions given in the form v := expr, 
         // where v is a state variable
         if (variables) {
-            variables.forEach(function (v) {
+/*            variables.forEach(function (v) {
                 var state_update = action.split(":=");
                 if (state_update.length === 2) {
                     // check for the presence of state variables 
@@ -151,7 +102,7 @@ define(function (require, exports, module) {
                     }
                     action = state_update[0].trim() + " := " + state_update[1].trim();
                 }
-            });
+            });*/
         }
         tmp += ",\n           new_st = new_st WITH [ " + action + " ]";
         return tmp;
@@ -196,14 +147,14 @@ define(function (require, exports, module) {
     /**
      * Prints PVS definitions for Emuchart initial transitions
      */
-    EmuchartsPVSPrinter.prototype.print_initial_transition = function (emuchart) {
+    EmuchartsCppPrinter.prototype.print_initial_transition = function (emuchart) {
         var initial_transitions = emuchart.initial_transitions;
         var ans = "";
         if (initial_transitions && initial_transitions.length > 0) {
-            ans += "  %-- initial state\n";
-            ans += "  init(x: real): State = (#\n";
-            ans += "    current_state  := " + initial_transitions[0].target.name + ",\n";
-            ans += "    previous_state := " + initial_transitions[0].target.name + "\n";
+            ans += "  // initial state\n";
+            ans += "  void init(x: real) {\n";
+            ans += "    current_state  = " + initial_transitions[0].target.name + ";\n";
+            ans += "    previous_state = " + initial_transitions[0].target.name + ";\n";
             var variables = emuchart.variables;
             if (variables) {
                 variables.forEach(function (variable) {
@@ -216,13 +167,13 @@ define(function (require, exports, module) {
                             pos = tmp.indexOf(";");
                             if (pos >= 0) {
                                 tmp = tmp.substr(0, pos).trim();
-                                ans += "    " + variable.name + " := " + tmp + "\n";
+                                ans += "    " + variable.name + " = " + tmp + ";\n";
                             }
                         }
                     }
                 });
             }
-            ans += "  #)\n";
+            ans += "  }\n";
         }
         return ans;
     };
@@ -230,10 +181,10 @@ define(function (require, exports, module) {
     /**
      * Prints PVS definitions for Emuchart transitions given in the form transition [condition] {actions}
      */
-    EmuchartsPVSPrinter.prototype.print_transitions = function (emuchart) {
+    EmuchartsCppPrinter.prototype.print_transitions = function (emuchart) {
         var transitions = emuchart.transitions;
         var variables = emuchart.variables;
-        var ans = "";
+        var ans = "";/*
         if (transitions && transitions.length > 0) {
             ans += print_utils();
             ans += "  %-- transition functions\n";
@@ -280,41 +231,41 @@ define(function (require, exports, module) {
                 }
                 ans += tmp + "\n\n";
             });
-        }
+        }*/
         return ans;
     };
 
     /**
      * Prints PVS definitions for Emuchart variables
      */
-    EmuchartsPVSPrinter.prototype.print_variables = function (emuchart) {
+    EmuchartsCppPrinter.prototype.print_variables = function (emuchart) {
         var variables = emuchart.variables;
-        var ans = "  %-- emuchart state\n  State: TYPE = [#\n" +
-                    "   current_state : MachineState,\n" +
-                    "   previous_state: MachineState";
+        var ans = "  // emuchart state\n  struct State {\n" +
+                    "   MachineState current_state;\n" +
+                    "   MachineState previous_state;\n";
         if (variables && variables.length > 0) {
             variables.forEach(function (v) {
-                ans += ",\n   " + v.name + ": " + v.type;
+                ans += "   " + v.type + ": " + v.name + ";\n";
             });
         }
-        ans += "\n  #]\n";
+        ans += "  };\n";
         return ans;
     };
 
     /**
      * Prints PVS definitions for Emuchart constants
      */
-    EmuchartsPVSPrinter.prototype.print_constants = function (emuchart) {
+    EmuchartsCppPrinter.prototype.print_constants = function (emuchart) {
         var constants = emuchart.constants;
         var ans = "";
         if (constants && constants.length > 0) {
-            ans += "  %-- constants\n";
+            ans += "  // constants\n";
             constants.forEach(function (c) {
-                ans += "  " + c.name + ": " + c.type;
+                ans += "  " + c.type + " " + c.name;
                 if (c.value) {
                     ans += " = " + c.value;
                 }
-                ans += "\n";
+                ans += ";\n";
             });
         }
         return ans;
@@ -323,22 +274,20 @@ define(function (require, exports, module) {
     /**
      * Prints PVS definitions for Emuchart constants
      */
-    EmuchartsPVSPrinter.prototype.print_importings = function (emuchart) {
+    EmuchartsCppPrinter.prototype.print_importings = function (emuchart) {
         var importings = emuchart.importings;
-        var ans = "";
+        var ans = "#include <iostream>\n";
         if (importings && importings.length > 0) {
-            ans += " IMPORTING ";
             importings.forEach(function (importing) {
-                ans += importing + ", ";
+                ans += "#include " + importing + "\n";
             });
-            ans = ans.substr(0, ans.length - 1) + "\n";
         }
         return ans;
     };
         
-    EmuchartsPVSPrinter.prototype.print_descriptor = function (emuchart) {
+    EmuchartsCppPrinter.prototype.print_descriptor = function (emuchart) {
         var ans = "% ---------------------------------------------------------------" +
-                    "\n%  Theory: " + emuchart.name;
+                    "\n%  Class: " + emuchart.name;
         if (emuchart.author) {
             ans += "\n%  Author: " + emuchart.author.name +
                     "\n%          " + emuchart.author.affiliation +
@@ -352,30 +301,30 @@ define(function (require, exports, module) {
         return ans;
     };
     
-    EmuchartsPVSPrinter.prototype.print_disclaimer = function () {
+    EmuchartsCppPrinter.prototype.print_disclaimer = function () {
         var ans = "\n% ---------------------------------------------------------------\n" +
-                    "%  PVS theory generated using PVSio-web PVSPrinter ver 0.1\n" +
+                    "%  C++ class generated using PVSio-web CppPrinter ver 0.1\n" +
                     "%  Tool freely available at http://www.pvsioweb.org" +
                     "\n% ---------------------------------------------------------------\n";
         return ans;
     };
     
     /**
-     * Prints the entire PVS theory
+     * Prints the entire C++ class
      */
-    EmuchartsPVSPrinter.prototype.print = function (emuchart) {
+    EmuchartsCppPrinter.prototype.print = function (emuchart) {
         var ans = this.print_descriptor(emuchart) + "\n";
-        ans += emuchart.name + ": THEORY\n BEGIN\n";
-        ans += this.print_importings(emuchart);
+        ans += this.print_importings(emuchart) + "\n";
+        ans += "class " + emuchart.name + " {\n";
         ans += this.print_constants(emuchart);
         ans += this.print_states(emuchart);
         ans += this.print_variables(emuchart);
         ans += this.print_initial_transition(emuchart);
         ans += this.print_transitions(emuchart);
-        ans += " END " + emuchart.name + "\n";
+        ans += "};\n";
         ans += this.print_disclaimer();
         return ans;
     };
     
-    module.exports = EmuchartsPVSPrinter;
+    module.exports = EmuchartsCppPrinter;
 });

@@ -12,21 +12,21 @@ A live version of PVSio-web executed on a cloud server can be found at http://ww
 
 Prerequisites
 -------------
-### Prerequisite 1: PVS
+#### Prerequisite 1: PVS
 PVS (http://pvs.csl.sri.com/download.shtml) is required to run pvsio-web. Please download and install PVS before proceeding to installing pvsio-web.
 
-Once PVS is installed, please add the PVS executable files pvs, pvsio and proveit to your PATH. Alternatively you can create symbolic links to those files in /usr/bin. For instance, assuming that PVS is installed in /opt/pvs6.0/pvs, the following commands should be executed in a Terminal window to create the symbolic links:
+Once PVS is installed, please add the PVS executable files pvs, pvsio and proveit to your PATH. A way to do this is to create symbolic links to those files, and place the symbolic links in /usr/bin. For instance, if PVS is installed in /opt/pvs6.0/pvs, the following commands executed in a Terminal window create the required symbolic links (note that you need to specify absolute paths):
 
     sudo ln -s /opt/pvs6.0/pvs /usr/bin/pvs
     sudo ln -s /opt/pvs6.0/pvsio /usr/bin/pvsio
     sudo ln -s /opt/pvs6.0/proveit /usr/bin/proveit
 
-### Prerequisite 2: NodeJS
+#### Prerequisite 2: NodeJS
 NodeJS (http://nodejs.org/download/) is required to run pvsio-web. Please download and install NodeJS before proceeding to installing pvsio-web.
 
 Installation
 ------------
-To install pvsio-web, create a directory on your computer, open a Terminal window in the created directory, and execute the following commands:
+To install pvsio-web, create a directory on your computer, open a Terminal window in the created directory, and execute the following commands from the created directory:
 
     git clone https://github.com/thehogfather/pvsio-web.git
     cd pvsio-web
@@ -45,36 +45,64 @@ To start the frontend: open a browser (Firefox 21 or greater, or Chrome), and ty
 
     http://localhost:8082/
 
-Demos
------
-Simulations created with PVSio-web can be watched in this youtube video: https://www.youtube.com/watch?v=T0QmUe0bwL8
+Updating pvsio-web
+------------------
+To update pvsio-web to the latest version, open a Terminal window, and execute the following command from the pvsio-web directory:
 
-All simulations examples demonstrated in the youtube video are included in the PVSio-web distribution as demo projects. To open these demo projects, start pvsio-web and click the "Open Projects" button of the pvsio-web front-end and select one of the saved projects from the list.
+	git pull
+
+Examples
+--------
+Realistic simulations created with PVSio-web can be watched in this youtube video: https://www.youtube.com/watch?v=T0QmUe0bwL8
+
+All simulation examples demonstrated in the youtube video are included in the PVSio-web distribution in examples/projects. To open these examples, start pvsio-web and click the "Open Projects" button of the pvsio-web frontend and select one of the examples from the list.
 
 
-Uninstallation
---------------
-To uninstall, delete the pvsio-web folder from your computer.
-
-Tests
------
-To test the client
-
-	run start.sh
-	navigate your browser to http://localhost:8082/tests
-	
-To test the server
-
-	run npm test
-	the above command is a shortcut for running jasmine-node --verbose src/server/servertests
-	
-##source code setup
+Directory structure
+-------------------
 This project has the following setup:
 
-* src/
-	* client/ - the directory that holds client side code. This runs in the user's browser
-		* tests/ - the directory containing test scripts for the client side code
-	* server/ - the directory that holds server side code. Code here is run using nodejs and it manages communication between pvs process and the client's browser.
-		* public/ - this is where projects and demos are stored
-		* servertests/ - contains test scripts for server side code
 * start.sh - the script used to initiate the server.
+* examples/ - this directory contains projects and demos
+* src/ - this directory contains the pvsio-web source code
+	* client/ - this directory contains the source code for the pvsio-web client. This code is executed in the user's browser
+	* server/ - this directory contains the source code for the pvsio-web server. This code is executed in the node.JS environment, and manages communication between pvs/pvsio and the client code.
+
+
+Nightly builds
+--------------
+To obtain the latest development versions of pvsio-web, you can clone our alpha and beta branches of the github repository.
+
+To clone the alpha branch, create a new directory (for example, pvsioweb-alpha), open a Terminal window, and execute the following commands from the created directory:
+
+    git clone https://github.com/thehogfather/pvsio-web.git -b alpha
+    cd pvsio-web
+    npm install
+
+To clone the alpha branch, create a new directory (for example, pvsioweb-beta), open a Terminal window, and execute the following commands from the created directory:
+
+    git clone https://github.com/thehogfather/pvsio-web.git -b beta
+    cd pvsio-web
+    npm install
+
+
+Testing the installation
+------------------------
+To test the client, start the pvsio-web backend by running the following command in a Terminal window (and leave the Terminal window open):
+	./start.sh
+	
+and type the following address in a browser window:
+
+	http://localhost:8082/tests
+	
+To test the server, run the following command in a Terminal window
+
+	run npm test
+	
+(Note: the command for testing the server is a shortcut for running jasmine-node --verbose src/server/servertests)
+
+
+Uninstallation :(
+--------------
+To uninstall, delete the pvsio-web folder from your computer.
+	

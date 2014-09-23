@@ -30,26 +30,26 @@ define(function (require, exports, module) {
     EmuchartsManager.prototype.installHandlers = function (editor) {
         var _this = this;
         editor.addListener("emuCharts_editorModeChanged", function (event) { _this.fire(event); });
-        editor.addListener("emuCharts_createState", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_addState", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_addTransition", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_addInitialTransition", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_constantAdded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_variableAdded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_deleteState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteInitialTransition", function (event) { _this.fire(event); });
-        editor.addListener("emuCharts_deleteState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_renameState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_renameTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_renameInitialTransition", function (event) { _this.fire(event); });
-        editor.addListener("emuCharts_addTransition", function (event) { _this.fire(event); });
-        editor.addListener("emuCharts_addInitialTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_stateAdded", function (event) { _this.fire(event); });
-        editor.addListener("emuCharts_stateRemoved", function (event) { _this.fire(event); });
-        editor.addListener("emuCharts_constantAdded", function (event) { _this.fire(event); });
-        editor.addListener("emuCharts_variableAdded", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_transitionAdded", function (event) { _this.fire(event); });
-        editor.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
-        editor.addListener("emuCharts_transitionRemoved", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_initialTransitionAdded", function (event) { _this.fire(event); });
-        editor.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_stateRemoved", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_transitionRemoved", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_initialTransitionRemoved", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_stateRenamed", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
     };
     
 	/**
@@ -170,6 +170,173 @@ define(function (require, exports, module) {
         } else { console.log("dbg: warning, undefined or null emuchart"); }
     };
 
+	/**
+	 * Imports the emuchart passed as argument.
+	 * @memberof EmuchartsManager
+     * FIXME: improve this function!
+	 */
+    EmuchartsManager.prototype.importPIMChart = function (MUZFile) {
+        var _this = this;
+        if (MUZFile && MUZFile.fileContent) {
+            // parse section ==Seq==
+            var needle = MUZFile.fileContent.indexOf("==Seq==");
+            if (needle < 0) {
+                console.log("Error while parsing MUZ file (section ==Seq== not found)");
+                return;
+            }
+            MUZFile.fileContent = MUZFile.fileContent.substring(needle + 7);
+            // first line is chart name
+            var txt = new RegExp("[\\n\\s][A-Za-z_0-9]+").exec(MUZFile.fileContent);
+            if (txt.length === 0) {
+                console.log("Error while parsing MUZ file (chart name not found)");
+                return;
+            }
+            var chartName = txt[0];
+            MUZFile.fileContent = MUZFile.fileContent.substring(chartName.length);
+            // second line is initial state
+            txt = new RegExp("[\\n\\s][A-Za-z_0-9]+").exec(MUZFile.fileContent);
+            if (txt.length === 0) {
+                console.log("Error while parsing MUZ file (initial state not found)");
+                return;
+            }
+            var initialTransition = {
+                id: "INIT_" + txt[0].trim(),
+                name: "INIT_" + txt[0].trim(),
+                target: { name: txt[0].trim(), id: txt[0].trim() }
+            };
+            MUZFile.fileContent = MUZFile.fileContent.substring(chartName.length);
+            
+            // parse section ==States==
+            needle = MUZFile.fileContent.indexOf("==States==");
+            if (needle < 0) {
+                console.log("Error while parsing MUZ file (section ==States== not found)");
+                return;
+            }
+            MUZFile.fileContent = MUZFile.fileContent.substring(needle + 10);
+            
+            var states = [];
+            var stop = false;
+            while (!stop) {
+                // each line contains state name and coordinates
+                txt = new RegExp("[\\n\\s][A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                if (txt.length === 0) {
+                    console.log("Error while parsing MUZ file (state names not found)");
+                    return;
+                }
+                var stateName = txt[0];
+                MUZFile.fileContent = MUZFile.fileContent.substring(stateName.length);
+                txt = new RegExp("[\\n\\s][0-9]+").exec(MUZFile.fileContent);
+                if (txt.length === 0) {
+                    console.log("Error while parsing MUZ file (position x not found for state " + stateName + ")");
+                    return;
+                }
+                needle = MUZFile.fileContent.indexOf("Atomic");
+                if (needle < 0) {
+                    console.log("Error while parsing MUZ file (Atomic keyword not found for state " + stateName + ")");
+                    return;
+                }
+                MUZFile.fileContent = MUZFile.fileContent.substring(needle + 6);
+                // note: we use just the first two coordinates to identify the center of the state; height and width are automatically computed by our graphical frontend
+                var x = txt[0];
+                MUZFile.fileContent = MUZFile.fileContent.substring(x.length);
+                txt = new RegExp("[\\n\\s][0-9]+").exec(MUZFile.fileContent);
+                if (txt.length === 0) {
+                    console.log("Error while parsing MUZ file (position y not found for state " + stateName + ")");
+                    return;
+                }
+                var y = txt[0];
+                MUZFile.fileContent = MUZFile.fileContent.substring(y.length);
+                
+                // add state to states array
+                states.push({ name: stateName.trim(),
+                              id: stateName.trim(),
+                              x: parseFloat(x),
+                              y: parseFloat(y),
+                              width: 50,
+                              height: 50 });
+
+                // remove the rest of the line & check for stop condition
+                MUZFile.fileContent = MUZFile.fileContent.substring(MUZFile.fileContent.indexOf("\n"));
+                if (MUZFile.fileContent.trim().indexOf("==Transitions==") === 0) {
+                    stop = true;
+                }
+            }
+            
+            // parse section ==Transitions==
+            needle = MUZFile.fileContent.indexOf("==Transitions==");
+            if (needle < 0) {
+                console.log("Error while parsing MUZ file (section ==Transitions== not found)");
+                return;
+            }
+            
+            var transitions = [];
+            stop = false;
+            while (!stop) {
+                // each line contains state names (from, to) and transition name
+                // parse source
+                txt = new RegExp("[\\n\\s][A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                if (txt.length === 0) {
+                    console.log("Error while parsing MUZ file (source state for transition not found)");
+                    return;
+                }
+                var source = txt[0];
+                MUZFile.fileContent = MUZFile.fileContent.substring(source.length);
+                // parse target
+                txt = new RegExp("[\\n\\s][A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                if (txt.length === 0) {
+                    console.log("Error while parsing MUZ file (target state for transition not found)");
+                    return;
+                }
+                var target = txt[0];
+                MUZFile.fileContent = MUZFile.fileContent.substring(target.length);
+                // parse transition name
+                txt = new RegExp("[\\n\\s][A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                if (txt.length === 0) {
+                    console.log("Error while parsing MUZ file (transition name not found)");
+                    return;
+                }
+                var transitionName = txt[0];
+                MUZFile.fileContent = MUZFile.fileContent.substring(transitionName.length);
+                
+                // add transition to transitions array
+                transitions.push({
+                    name: transitionName.trim(),
+                    id: transitionName.trim(),
+                    source: {
+                        name: source.trim(),
+                        id: source.trim()
+                    },
+                    target: {
+                        name: target.trim(),
+                        id: target.trim()
+                    }
+                });
+
+                // remove the rest of the line & check for stop condition
+                MUZFile.fileContent = MUZFile.fileContent.substring(MUZFile.fileContent.indexOf("\n"));
+                if (MUZFile.fileContent.trim().indexOf("==LocalVariables==") === 0) {
+                    stop = true;
+                }
+            }
+            var chart = {
+                descriptor: {
+                    file_type: "emdl",
+                    version: "1.1",
+                    description: "emucharts model",
+                    chart_name: chartName.trim()
+                },
+                chart: {
+                    states: states,
+                    transitions: transitions,
+                    initial_transitions: [ initialTransition ],
+                    constants: null,
+                    variables: null
+                }
+            };
+            this.importEmucharts({ fileName: chartName.trim(), fileContent: chart });
+        } else { console.log("dbg: warning, undefined or null MUZFile"); }
+    };
+    
     /**
 	 * Draws the diagrams stored in _emucharts.
 	 * @memberof EmuchartsManager
