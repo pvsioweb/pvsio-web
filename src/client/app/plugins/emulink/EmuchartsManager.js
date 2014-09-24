@@ -186,7 +186,7 @@ define(function (require, exports, module) {
             }
             MUZFile.fileContent = MUZFile.fileContent.substring(needle + 7);
             // first line is chart name
-            var txt = new RegExp("[\\n\\s][A-Za-z_0-9]+").exec(MUZFile.fileContent);
+            var txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
             if (txt.length === 0) {
                 console.log("Error while parsing MUZ file (chart name not found)");
                 return;
@@ -194,7 +194,7 @@ define(function (require, exports, module) {
             var chartName = txt[0];
             MUZFile.fileContent = MUZFile.fileContent.substring(chartName.length);
             // second line is initial state
-            txt = new RegExp("[\\n\\s][A-Za-z_0-9]+").exec(MUZFile.fileContent);
+            txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
             if (txt.length === 0) {
                 console.log("Error while parsing MUZ file (initial state not found)");
                 return;
@@ -218,14 +218,14 @@ define(function (require, exports, module) {
             var stop = false;
             while (!stop) {
                 // each line contains state name and coordinates
-                txt = new RegExp("[\\n\\s][A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (state names not found)");
                     return;
                 }
                 var stateName = txt[0];
                 MUZFile.fileContent = MUZFile.fileContent.substring(stateName.length);
-                txt = new RegExp("[\\n\\s][0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\n\\s]+[0-9]+").exec(MUZFile.fileContent);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (position x not found for state " + stateName + ")");
                     return;
@@ -239,7 +239,7 @@ define(function (require, exports, module) {
                 // note: we use just the first two coordinates to identify the center of the state; height and width are automatically computed by our graphical frontend
                 var x = txt[0];
                 MUZFile.fileContent = MUZFile.fileContent.substring(x.length);
-                txt = new RegExp("[\\n\\s][0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\n\\s]+[0-9]+").exec(MUZFile.fileContent);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (position y not found for state " + stateName + ")");
                     return;
@@ -268,13 +268,16 @@ define(function (require, exports, module) {
                 console.log("Error while parsing MUZ file (section ==Transitions== not found)");
                 return;
             }
+            MUZFile.fileContent = MUZFile.fileContent.substring(needle + 15);
+
             
             var transitions = [];
             stop = false;
+            var uniqueToken = 0;
             while (!stop) {
                 // each line contains state names (from, to) and transition name
                 // parse source
-                txt = new RegExp("[\\n\\s][A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (source state for transition not found)");
                     return;
@@ -282,7 +285,7 @@ define(function (require, exports, module) {
                 var source = txt[0];
                 MUZFile.fileContent = MUZFile.fileContent.substring(source.length);
                 // parse target
-                txt = new RegExp("[\\n\\s][A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (target state for transition not found)");
                     return;
@@ -290,7 +293,7 @@ define(function (require, exports, module) {
                 var target = txt[0];
                 MUZFile.fileContent = MUZFile.fileContent.substring(target.length);
                 // parse transition name
-                txt = new RegExp("[\\n\\s][A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (transition name not found)");
                     return;
@@ -301,7 +304,7 @@ define(function (require, exports, module) {
                 // add transition to transitions array
                 transitions.push({
                     name: transitionName.trim(),
-                    id: transitionName.trim(),
+                    id: transitionName.trim() + uniqueToken++,
                     source: {
                         name: source.trim(),
                         id: source.trim()
