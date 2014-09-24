@@ -185,7 +185,7 @@ define(function (require, exports, module) {
         var targetX = edge.target.x;
         var targetY = edge.target.y;
 
-        var offset = 32;
+        var offset = 0;
         var controlPoint1X = (edge.controlPoint) ? edge.controlPoint.x
                             : (edge.source.id === edge.target.id) ? (targetX + sourceX) * 0.5 + offset
                             : (targetX + sourceX) * 0.5 - offset;
