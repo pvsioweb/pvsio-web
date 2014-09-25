@@ -21,7 +21,7 @@ You should have received a copy of the GNU General Public License along with Foo
 
 var util = require("util"),
     path = require("path"),
-    logger = require("tracer").console();
+    logger = require("tracer").colorConsole();
 var procWrapper = require("./processwrapper");
 module.exports = function () {
     "use strict";
@@ -126,19 +126,23 @@ module.exports = function () {
             output = [];
 		}
 		
-		function onProcessExited(code) {
+		function onProcessExited(err) {
 			processReady = false;
 			var msg;
             if (_silentMode) {
                 msg = "";
             } else {
-                if (code) {
-                    msg = "pvsio process exited with code " + code + ".\n" + output.join("");
+                if (err) {
+                    if (err.code === "ENOENT") {
+                        msg = "\n\n\n---------------------------------------------------\n\n\nError: PVS executable files are not on your PATH.\nPlease add the PVS executable files (pvs, pvsio and proveit) to your PATH.\n\nA way to do this is to create symbolic links to those files, and place the symbolic links in /usr/bin. For instance, if PVS is installed in /opt/pvs6.0/pvs, the following commands executed in a Terminal window create the required symbolic links (note that you need to specify absolute paths):\n\nsudo ln -s /opt/pvs6.0/pvs /usr/bin/pvs\nsudo ln -s /opt/pvs6.0/pvsio /usr/bin/pvsio\nsudo ln -s /opt/pvs6.0/proveit /usr/bin/proveit\n\n\n---------------------------------------------------";
+                    } else {
+                        msg = "pvsio process exited with code " + err.code + ".\n" + output.join("");
+                    }
                 } else { msg = "pvsio process exited cleanly.\n" + output.join(""); }
-                logger.info(msg);
+                logger.error(msg);
             }
             _silentMode = false;
-			callback({type: "processExited", data: msg, code: code});
+			callback({type: "processExited", data: msg, code: err.code});
 		}
 		
         pvs.start({processName: "pvsio", args: [filename],
