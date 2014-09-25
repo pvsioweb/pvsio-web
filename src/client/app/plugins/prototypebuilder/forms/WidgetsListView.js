@@ -11,13 +11,13 @@ define(function (require, exports, module) {
 	var wlTemplate = require("text!./templates/widgetsList.handlebars");
 	
 	var WidgetsListView = Backbone.View.extend({
-		el: "#widgetsList",
 		initialize: function (data) {
 			this.render(data);
 		},
 		render: function (data) {
 			var template = Handlebars.compile(wlTemplate);
 			this.$el.html(template(data));
+			$("#widgetsList").html("").append(this.el);
 			return this;
 		},
 		events: {

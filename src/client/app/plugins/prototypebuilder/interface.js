@@ -9,6 +9,7 @@ define(function (require, exports, module) {
 	"use strict";
 	var WSManager = require("websockets/pvs/WSManager"),
         Emulink = require("plugins/emulink/Emulink"),
+		SafetyTest = require("plugins/safetyTest/SafetyTest"),
         GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
 		Logger	= require("util/Logger"),
@@ -386,7 +387,7 @@ define(function (require, exports, module) {
     }
 	module.exports = {
 		init: function (data) {
-            data = data || {plugins: [Emulink.getInstance(), GraphBuilder.getInstance()].map(function (p) {
+            data = data || {plugins: [Emulink.getInstance(), GraphBuilder.getInstance(), SafetyTest.getInstance()].map(function (p) {
                 return {label: p.constructor.name, plugin: p};
             })};
             PluginManager.getInstance().init();
