@@ -142,7 +142,7 @@ module.exports = function () {
                 logger.error(msg);
             }
             _silentMode = false;
-			callback({type: "processExited", data: msg, code: err.code});
+			callback({type: "processExited", data: msg, code: err});
 		}
 		
         pvs.start({processName: "pvsio", args: [filename],
