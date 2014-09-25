@@ -178,6 +178,7 @@ define(function (require, exports, module) {
      * @params edge
      * @returns vector of control points (3 elements vector)
 	 * @memberof EmuchartsEditor
+     * FIXME: reduce the computation overhead (e.g., lots of times we are dividing the same numbers by 2)
 	 */
     function getControlPoints(edge) {
         var sourceX = edge.source.x;
@@ -185,7 +186,7 @@ define(function (require, exports, module) {
         var targetX = edge.target.x;
         var targetY = edge.target.y;
 
-        var offset = 32;
+        var offset = 0;
         var controlPoint1X = (edge.controlPoint) ? edge.controlPoint.x
                             : (edge.source.id === edge.target.id) ? (targetX + sourceX) * 0.5 + offset
                             : (targetX + sourceX) * 0.5 - offset;
@@ -195,55 +196,160 @@ define(function (require, exports, module) {
 
         //var dx = edge.target.x - edge.source.x;
         //var dy = edge.target.y - edge.source.y;
-        var dx = edge.target.x - controlPoint1X;
-        var dy = edge.target.y - controlPoint1Y;
-
-        var dist = Math.sqrt(dx * dx + dy * dy);
+        var dx_target = controlPoint1X - edge.target.x;
+        var dy_target = controlPoint1Y - edge.target.y;
+        var dx_source = controlPoint1X - edge.source.x;
+        var dy_source = controlPoint1Y - edge.source.y;
+        
+        var sourceWidth = edge.source.name.length * fontSize;
         var sourceHeight = edge.source.height;
         var targetWidth  = edge.target.name.length * fontSize;
         var targetHeight = edge.target.height;
 
-        // to identify control points, we split the space into four Cartesian quadrants:
-        // the source node is at the center of the axes, and the target is in one of the quadrants
-        //  II  |  I
-        // -----s-----
-        // III  |  IV
         // NOTE: SVG has the y axis inverted with respect to the Cartesian y axis
-        if (dx >= 0 && dy < 0) {
-            // target node is in quadrant I
-            // for targets in quadrant I, round links draw convex arcs
-            // --> place the arrow on the left side of the target
-            targetX -= (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
+        if (dx_target >= targetWidth / 2 &&
+                dy_target >= -targetHeight / 2 &&
+                dy_target < targetHeight / 2) {
+            //console.log("I");
+            targetX += (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
             if (!edge.controlPoint) {
                 controlPoint1X = (targetX + sourceX) * 0.5 - offset;
             }
-        } else if (dx < 0 && dy < 0) {
-            // target node is in quadrant II
-            // for targets in quadrant I, round links draw concave arcs
-            // --> place the arrow at the bottom-right corner of the target
-            targetY += targetHeight * 0.6;
+        } else if (dx_target >= targetWidth / 2 &&
+                dy_target >= targetHeight / 2) {
+            //console.log("II");
+            targetY += targetHeight * 0.5;
+            targetX += targetWidth * 0.5;
             if (!edge.controlPoint) {
                 controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
             }
-        } else if (dx < 0 && dy >= 0) {
-            // target node is in quadrant III
-            // for targets in quadrant IV, round links draw concave arcs
-            // --> place arrow end on the top-right corner of the target
-            targetX += (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
+        } else if (dx_target < targetWidth / 2 &&
+                    dx_target >= -targetWidth / 2 &&
+                    dy_target >= targetHeight / 2) {
+            //console.log("III");
+            targetY += targetHeight * 0.5;
             if (!edge.controlPoint) {
                 controlPoint1X = (targetX + sourceX) * 0.5 + offset;
                 controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
             }
-        } else if (dx >= 0 && dy >= 0) {
-            // target node is in quadrant IV
-            // for targets in quadrant IV, round links draw convex arcs
-            // --> place arrow end at the top-left corner of the target
-            targetY -= targetHeight * 0.56;
+        } else if (dx_target < targetWidth / 2 &&
+                    dy_target >= targetHeight / 2) {
+            //console.log("IV");
+            targetX -= (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
+            targetY += sourceHeight * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+            }
+        } else if (dx_target < targetWidth / 2 &&
+                    dy_target < targetHeight / 2 &&
+                    dy_target >= -targetHeight / 2) {
+            //console.log("V");
+            targetX -= (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+            }
+        } else if (dx_target < -targetWidth / 2 &&
+                    dy_target < -targetHeight / 2) {
+            //console.log("VI");
+            targetX -= (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
+            targetY -= targetHeight * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+            }
+        } else if (dx_target < targetWidth / 2 &&
+                    dx_target >= -targetWidth / 2 &&
+                    dy_target < -targetHeight / 2) {
+            //console.log("VII");
+            targetY -= targetHeight * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+            }
+        } else if (dx_target >= targetWidth / 2 &&
+                    dy_target < -targetHeight / 2) {
+            //console.log("VIII");
+            targetY -= targetHeight * 0.5;
+            targetX += (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
             if (!edge.controlPoint) {
                 controlPoint1X = (targetX + sourceX) * 0.5 + offset;
             }
         }
 
+        //console.log("dx_source = " + dx_source + " dy_source = " + dy_source);
+        if (dx_source >= sourceWidth / 2 &&
+                dy_source >= -sourceHeight / 2 &&
+                dy_source < sourceHeight / 2) {
+            //console.log("I");
+            sourceX += (sourceWidth * 0.5 < 18) ? 18 : sourceWidth * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 - offset;
+            }
+        } else if (dx_source >= sourceWidth / 2 &&
+                dy_source >= sourceHeight / 2) {
+            //console.log("II");
+            sourceY += sourceHeight * 0.5;
+            sourceX += sourceWidth * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+            }
+        } else if (dx_source < sourceWidth / 2 &&
+                    dx_source >= -sourceWidth / 2 &&
+                    dy_source >= sourceHeight / 2) {
+            //console.log("III");
+            sourceY += sourceHeight * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+            }
+        } else if (dx_source < sourceWidth / 2 &&
+                    dy_source >= sourceHeight / 2) {
+            //console.log("IV");
+            sourceX -= (sourceWidth * 0.5 < 18) ? 18 : sourceWidth * 0.5;
+            sourceY += sourceHeight * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+            }
+        } else if (dx_source < sourceWidth / 2 &&
+                    dy_source < sourceHeight / 2 &&
+                    dy_source >= -sourceHeight / 2) {
+            //console.log("V");
+            sourceX -= (sourceWidth * 0.5 < 18) ? 18 : sourceWidth * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+            }
+        } else if (dx_source < -sourceWidth / 2 &&
+                    dy_source < -sourceHeight / 2) {
+            //console.log("VI");
+            sourceX -= (sourceWidth * 0.5 < 18) ? 18 : sourceWidth * 0.5;
+            sourceY -= sourceHeight * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+            }
+        } else if (dx_source < sourceWidth / 2 &&
+                    dx_source >= -sourceWidth / 2 &&
+                    dy_source < -sourceHeight / 2) {
+            //console.log("VII");
+            sourceY -= sourceHeight * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+            }
+        } else if (dx_source >= sourceWidth / 2 &&
+                    dy_source < -sourceHeight / 2) {
+            //console.log("VIII");
+            sourceY -= sourceHeight * 0.5;
+            sourceX += (sourceWidth * 0.5 < 18) ? 18 : sourceWidth * 0.5;
+            if (!edge.controlPoint) {
+                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+            }
+        }
+        
         return [{ "x": sourceX, "y": sourceY },
                 { "x": controlPoint1X, "y": controlPoint1Y},
                 { "x": targetX, "y": targetY }];
@@ -264,8 +370,9 @@ define(function (require, exports, module) {
         var targetX = edge.target.x;
         var targetY = edge.target.y;
 
-        var controlPoint1X = (edge.controlPoint) ? edge.controlPoint.x : targetX + edge.target.width;
-        var controlPoint1Y = (edge.controlPoint) ? edge.controlPoint.y : targetY + edge.target.height;
+        var controlPoint1X = (edge.controlPoint) ? edge.controlPoint.x : targetX + edge.target.name.length * fontSize;
+        var controlPoint1Y = (edge.controlPoint) ? edge.controlPoint.y : targetY + edge.target.height * 1.4;
+        edge.controlPoint = { x: controlPoint1X, y: controlPoint1Y };
 
         var extraControlPoints = [];
         //var dx = edge.target.x - edge.source.x;
@@ -276,8 +383,7 @@ define(function (require, exports, module) {
         var offsetY = (dy < 0) ? -dy : dy;
         offsetX = (offsetX > edge.target.width) ? offsetX : edge.target.width / 2;
         offsetY = (offsetY > edge.target.height) ? offsetY : edge.target.height / 2;
-        var dist = Math.sqrt(dx * dx + dy * dy);
-        var targetWidth  = edge.target.width;//name.length * fontSize;
+        var targetWidth  = edge.target.name.length * fontSize;
         var targetHeight = edge.target.height;
 
         // to identify control points, we split the space into four Cartesian quadrants:
@@ -294,15 +400,16 @@ define(function (require, exports, module) {
             targetX -= targetWidth * 0.8;
             if (!edge.controlPoint) {
                 controlPoint1X = (targetX + sourceX) * 0.5;
+                controlPoint1Y = (targetY + sourceY) * 0.5;
             }
             // move the first control point to quadrant II
             sourceY += targetHeight * 0.6;
             // create extra control points to avoid stiffy curves
-            extraControlPoints[0] = { x: controlPoint1X + offsetX * 0.9,
-                                      y: (offsetY > edge.target.height) ?
-                                            controlPoint1Y - offsetY / 4
-                                            : controlPoint1Y + offsetY };
-            extraControlPoints[1] = { x: (offsetX > edge.target.width) ?
+            extraControlPoints[0] = { x: controlPoint1X + offsetX / 2,
+                                      y: (offsetY > targetHeight) ?
+                                            controlPoint1Y + offsetY / 4
+                                            : controlPoint1Y + offsetY / 2 };
+            extraControlPoints[1] = { x: (offsetX > targetWidth) ?
                                             controlPoint1X - offsetX / 16
                                             : controlPoint1X - offsetX / 4,
                                       y: controlPoint1Y - offsetY / 2 };
@@ -316,7 +423,7 @@ define(function (require, exports, module) {
                 controlPoint1Y = (targetY + sourceY) * 0.5;
             }
             // move the first control point to quadrant III
-            sourceX += targetWidth * 0.5;
+            sourceX += targetWidth * 0.7;
             // create extra control points to avoid stiffy curves
             extraControlPoints[0] = { x: (offsetX > edge.target.width) ?
                                             controlPoint1X + offsetX / 16
@@ -351,7 +458,7 @@ define(function (require, exports, module) {
             // --> place arrow end at the top-left corner of the target
             targetY -= targetHeight * 0.56;
             // move the first control point to quadrant I so that the self-edge looks round
-            sourceX -= targetWidth * 0.5;
+            sourceX -= targetWidth * 0.7;
             if (!edge.controlPoint) {
                 controlPoint1X = (targetX + sourceX) * 0.5;
             }
@@ -383,53 +490,70 @@ define(function (require, exports, module) {
             // fetch control point
             var cp = null;
             // refresh transition path
-            if (edge.target.x === edge.source.x && edge.target.y === edge.source.y) {
-                cp = getControlPoints_selfEdge(edge);
-                // this is a self-edge
-                // refresh transition label
-                label = d3.select(this.parentNode).select(".tlabel");
-                label.text(function (edge) {
-                    return edge.name + labelToString(edge);
-                });
-                // adjust text position
-                label.attr("x", function (edge) {
-                    if (edge.target.id === edge.source.id) {
-                        // self-edge
-                        return (edge.controlPoint) ?
-                                (edge.source.x < edge.controlPoint.x) ? edge.controlPoint.x + 8 : edge.controlPoint.x - 16
-                                : edge.source.x + 32;
+            if (edge.target && edge.source) {
+                if (edge.target.id === edge.source.id) {
+                    cp = getControlPoints_selfEdge(edge);
+                    // this is a self-edge
+                    // refresh transition label
+                    label = d3.select(this.parentNode).select(".tlabel");
+                    label.text(function (edge) {
+                        return edge.name + labelToString(edge);
+                    });
+                    // adjust text position
+                    label.attr("x", function (edge) {
+                        if (edge.target.id === edge.source.id) {
+                            // self-edge
+                            return (edge.controlPoint) ?
+                                    (edge.source.x < edge.controlPoint.x) ? edge.controlPoint.x + 8 : edge.controlPoint.x - 16
+                                    : edge.source.x + 32;
+                        }
+                        // else do nothing -- textpath will take care of placing the text
+                        return "";
+                    }).attr("y", function (edge) {
+                        if (edge.target.id === edge.source.id) {
+                            // self-edge
+                            return (edge.controlPoint) ?
+                                    (edge.source.y < edge.controlPoint.y) ? edge.controlPoint.y + 8 : edge.controlPoint.y - 8
+                                    : edge.source.y + 56;
+                        }
+                        // else do nothing -- textpath will take care of placing the text
+                        return "";
+                    });
+                    // refresh control points
+                    cpoints = d3.select(this.parentNode).select(".cpoints");
+                    cpoints.attr("cx", cp[2].x).attr("cy", cp[2].y);
+                    // refresh path
+                    return lineFunction(cp);
+                } else {
+                    // not a self-edge
+                    cp = getControlPoints(edge);
+                    // refresh transition label
+                    label = d3.select(this.parentNode.lastChild.firstChild);
+                    label.text(function (edge) {
+                        return edge.name + labelToString(edge);
+                    });
+                    // refresh control points
+                    cpoints = d3.select(this.parentNode).select(".cpoints");
+                    // for now we use only the middle control point
+                    cpoints.attr("cx", cp[1].x).attr("cy", cp[1].y);
+                    // flip path if edge.source.x > edge.target.x
+                    if (edge.source.x >= edge.target.x) {
+                        var swap = cp[0];
+                        cp[0] = cp[2];
+                        cp[2] = swap;
+                        d3.select(this.parentNode).select(".path")
+                            .style("marker-end", "")
+                            .style("marker-start", "url(#end-arrow-rotated)");
+                    } else {
+                        if (d3.select(this).attr("style").indexOf("marker-start") >= 0) {
+                            d3.select(this.parentNode).select(".path")
+                                .style("marker-end", "url(#end-arrow)")
+                                .style("marker-start", "");
+                        }
                     }
-                    // else do nothing -- textpath will take care of placing the text
-                    return "";
-                }).attr("y", function (edge) {
-                    if (edge.target.id === edge.source.id) {
-                        // self-edge
-                        return (edge.controlPoint) ?
-                                (edge.source.y < edge.controlPoint.y) ? edge.controlPoint.y + 8 : edge.controlPoint.y - 8
-                                : edge.source.y + 56;
-                    }
-                    // else do nothing -- textpath will take care of placing the text
-                    return "";
-                });
-                // refresh control points
-                cpoints = d3.select(this.parentNode).select(".cpoints");
-                cpoints.attr("cx", cp[2].x).attr("cy", cp[2].y);
-                // refresh path
-                return lineFunction(cp);
-            } else {
-                // not a self-edge
-                cp = getControlPoints(edge);
-                // refresh transition label
-                label = d3.select(this.parentNode.lastChild.firstChild);
-                label.text(function (edge) {
-                    return edge.name + labelToString(edge);
-                });
-                // refresh control points
-                cpoints = d3.select(this.parentNode).select(".cpoints");
-                // for now we use only the middle control point
-                cpoints.attr("cx", cp[1].x).attr("cy", cp[1].y);
-                // refresh path
-                return lineFunction(cp);
+                    // refresh path
+                    return lineFunction(cp);
+                }
             }
         });
         return transitions;
@@ -455,20 +579,13 @@ define(function (require, exports, module) {
             }).attr("y", function (edge) {
                 return (edge.controlPoint) ? edge.controlPoint.y : edge.target.y - 32;
             });
-            // refresh control points
-//            var cp = getControlPoints(edge);
-//            var cpoints = d3.select(this.parentNode).select(".cpoints");
-//            // for now we use only the middle control point
-//            cpoints.attr("cx", cp[1].x).attr("cy", cp[1].y);
-//            // refresh path
-//            return lineFunction(cp);
             // adjust text position
             label.attr("x", function (edge) {
                 return edge.target.x - 8;
             }).attr("y", function (edge) {
                 return edge.target.y - 44;
             });
-            // redraw self-edge
+            // redraw edge
             return "M" + (edge.target.x - edge.target.width / 2 - 10) + ',' +
                     (edge.target.y - edge.target.width / 2 - 32) + "q 16 8 28 28";
         });
@@ -512,6 +629,30 @@ define(function (require, exports, module) {
             .attr("d", "M4,0 L1,-3 L10,0 L1,3 L4,0")
             .attr("fill", "black");
         
+        var arrow_rotated = d3.select("#ContainerStateMachine").select("svg").select("defs")
+            .append("svg:marker")
+            .attr("id", "end-arrow-rotated")
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 1)
+            .attr("markerWidth", 16)
+            .attr("markerHeight", 16)
+            .attr("orient", "auto")
+            .append("svg:path")
+            .attr("d", "M1,0 L10,-3 L6,0 L10,3 L1,0")
+            .attr("fill", "black");
+        
+        var arrow_rotated_selected = d3.select("#ContainerStateMachine").select("svg").select("defs")
+            .append("svg:marker")
+            .attr("id", "end-arrow-rotated-selected")
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 1)
+            .attr("markerWidth", 16)
+            .attr("markerHeight", 16)
+            .attr("orient", "auto")
+            .append("svg:path")
+            .attr("d", "M1,0 L10,-3 L6,0 L10,3 L1,0")
+            .attr("fill", "green");
+
         var arrow = d3.select("#ContainerStateMachine").select("svg").select("defs")
             // pointer for hiighlighed edges
             .append("svg:marker")
@@ -588,6 +729,7 @@ define(function (require, exports, module) {
         var mouseClick = function () {
             if (!_this.SVGdragged) {
                 if (editor_mode === MODE.ADD_STATE() && !mouseover.node && !mouseOverControlPoint) {
+                    d3.event.stopPropagation();
                     var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
                     _this.fire({
                         type: "emuCharts_addState",
@@ -596,16 +738,20 @@ define(function (require, exports, module) {
                         preventCreation: editor_mode !== MODE.ADD_STATE()
                     });
                 }
-            } else { _this.SVGdragged = false; }
+            }
+            _this.SVGdragged = false;
             //console.log("mouseClick");
         };
         var mouseDown = function () {
             if (mouseOverControlPoint === null &&
                     editor_mode === MODE.ADD_TRANSITION()) {
+                d3.event.stopPropagation();
                     // this is equivalent to drag start for default-initial transitions
                     // create an arrow from the selected node to the cursor position
                 var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
-                mousedrag.edge = { x: m[0], y: m[1] };
+                if (!mousedrag.edge) {
+                    mousedrag.edge = { x: m[0], y: m[1] };
+                }
                 drag_line.classed("hidden", false)
                     .style("marker-end", "url(#drag-arrow)")
                     .style("marker-start", "url(#bubble)")
@@ -628,8 +774,8 @@ define(function (require, exports, module) {
                     });
                 }
                 mousedrag.edge = null;
+                _this.SVGdragged = false;
             }
-            _this.SVGdragged = false;
             //console.log("mouseUp");
         };
         var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
@@ -728,13 +874,13 @@ define(function (require, exports, module) {
                 .attr("id", function (edge) {return "cpoints_" + edge.id; })
                 .attr("cx", function (edge) {
                     if (edge.source && edge.target && edge.source.id === edge.target.id) {
-                        return getControlPoints_selfEdge(edge)[3].x;
+                        return getControlPoints_selfEdge(edge)[2].x;
                     }
                     return getControlPoints(edge)[1].x;
                 })
                 .attr("cy", function (edge) {
                     if (edge.source && edge.target && edge.source.id === edge.target.id) {
-                        return getControlPoints_selfEdge(edge)[3].y;
+                        return getControlPoints_selfEdge(edge)[2].y;
                     }
                     return getControlPoints(edge)[1].y;
                 })
@@ -804,7 +950,16 @@ define(function (require, exports, module) {
                 d3.select(this.firstChild)
                     //.style("stroke-width", stroke_width_highlighted)
                     .style("stroke", "green")
-                    .style("marker-end", "url(#end-arrow-selected)");
+                    .style("marker-end", function (edge) {
+                        if (edge.source.x < edge.target.x) {
+                            return "url(#end-arrow-selected)";
+                        } else { return ""; }
+                    })
+                    .style("marker-start", function (edge) {
+                        if (edge.source.x < edge.target.x) {
+                            return "";
+                        } else { return "url(#end-arrow-rotated-selected)"; }
+                    });
                 d3.select(this.childNodes[2]).attr("opacity", 0.6);
                 d3.select(this.children[3]).style("fill", "green");
                 d3.select(this.children[4]).style("fill", "green");
@@ -817,7 +972,16 @@ define(function (require, exports, module) {
                 d3.select(this.firstChild)
                     //.style("stroke-width", stroke_width_normal)
                     .style("stroke", "black")
-                    .style("marker-end", "url(#end-arrow)");
+                    .style("marker-end", function (edge) {
+                        if (edge.source.x < edge.target.x) {
+                            return "url(#end-arrow)";
+                        } else { return ""; }
+                    })
+                    .style("marker-start", function (edge) {
+                        if (edge.source.x < edge.target.x) {
+                            return "";
+                        } else { return "url(#end-arrow-rotated)"; }
+                    });
                 d3.select(this.childNodes[2]).attr("opacity", 0);
                 d3.select(this.children[3]).style("fill", "black");
                 d3.select(this.children[4]).style("fill", "black");
@@ -1585,15 +1749,15 @@ define(function (require, exports, module) {
     EmuchartsEditor.prototype.add_transition = function (transitionName, from, to) {
         var source = this.emucharts.getState(from);
         var target = this.emucharts.getState(to);
-        var edge = {
-                name: transitionName,
-                source: source,
-                target: target,
-                controlPoint: null
-            };
-        var controlPoints = getControlPoints(edge);
-        edge.controlPoint = controlPoints[1];
         if (source && target) {
+            var edge = {
+                    name: transitionName,
+                    source: source,
+                    target: target,
+                    controlPoint: null
+                };
+            var controlPoints = (source.id === target.id) ? getControlPoints_selfEdge(edge) : getControlPoints(edge);
+            edge.controlPont = (source.id === target.id) ? controlPoints[2] : controlPoints[1];
             // FIXME: need to adjust the position in the case svg is translated
             this.emucharts.add_edge(edge);
             return this.renderTransitions();

@@ -20,6 +20,7 @@ You should have received a copy of the GNU General Public License along with Foo
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global require, process, module */
 var spawn = require("child_process").spawn,
+    logger = require("tracer").console(),
 	exec = require("child_process").exec;
 
 module.exports = function () {
@@ -41,26 +42,31 @@ module.exports = function () {
      */
     o.start = function (opt) {
         if (opt) {
-            proc = spawn(opt.processName, opt.args, {uid: process.getuid(), gid: process.getgid()});
-            
-            proc.stdout.setEncoding('utf8');
-            proc.stderr.setEncoding("utf8");
-			
-			proc.stdout.on("data", function (data) {
-				var f = o.dataProcessor();
-				//call any callback and forward the data to onDataReceived if it exists
-				if (f) {
-					if (f(data, cbQueue[0])) {
-						cbQueue.shift();
-					}
-				}
-				if (opt.onDataReceived) { opt.onDataReceived(data); }
-			});
-            if (opt.onErrorReceived) {
-                proc.stderr.on("data", opt.onErrorReceived);
-            }
-            if (opt.onProcessExited) {
-                proc.on('exit', opt.onProcessExited);
+            try {
+                proc = spawn(opt.processName, opt.args, {uid: process.getuid(), gid: process.getgid()});
+
+                proc.stdout.setEncoding('utf8');
+                proc.stderr.setEncoding("utf8");
+
+                proc.stdout.on("data", function (data) {
+                    var f = o.dataProcessor();
+                    //call any callback and forward the data to onDataReceived if it exists
+                    if (f) {
+                        if (f(data, cbQueue[0])) {
+                            cbQueue.shift();
+                        }
+                    }
+                    if (opt.onDataReceived) { opt.onDataReceived(data); }
+                });
+                if (opt.onErrorReceived) {
+                    proc.stderr.on("data", opt.onErrorReceived);
+                }
+                if (opt.onProcessExited) {
+                    proc.on('close', opt.onProcessExited);
+                    proc.on('error', opt.onProcessExited);
+                }
+            } catch (err) {
+                logger.log(err);
             }
         }
         return o;
