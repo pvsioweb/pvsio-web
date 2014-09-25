@@ -752,11 +752,21 @@ define(function (require, exports, module) {
         d3.select("#btn_menuRenameTransition").on("click", function () {
             document.getElementById("menuTransitions").children[1].style.display = "none";
             var transitions = emuchartsManager.getTransitions();
+            var initialTransitions = emuchartsManager.getInitialTransitions();
+            initialTransitions.forEach(function (it) {
+                transitions.push(it);
+            });
             var labels = [];
             transitions.forEach(function (transition) {
-                labels.push(transition.name + "  ("
-                            + transition.source.name + "->"
-                            + transition.target.name + ")");
+                if (transition.source) {
+                    labels.push(transition.name + "  ("
+                                + transition.source.name + "->"
+                                + transition.target.name + ")");
+                } else {
+                    labels.push(transition.name + "  ("
+                                + "INIT" + "->"
+                                + transition.target.name + ")");
+                }
             });
             displayRename.create({
                 header: "Please select transition and enter new label...",
@@ -768,6 +778,7 @@ define(function (require, exports, module) {
                 var t = e.data.options.get("currentLabel");
                 var transitionID = transitions[t].id;
                 emuchartsManager.rename_transition(transitionID, transitionLabel);
+                emuchartsManager.rename_initial_transition(transitionID, transitionLabel);
                 view.remove();
             }).on("cancel", function (e, view) {
                 // just remove rename window
@@ -777,11 +788,21 @@ define(function (require, exports, module) {
         d3.select("#btn_menuDeleteTransition").on("click", function () {
             document.getElementById("menuTransitions").children[1].style.display = "none";
             var transitions = emuchartsManager.getTransitions();
+            var initialTransitions = emuchartsManager.getInitialTransitions();
+            initialTransitions.forEach(function (it) {
+                transitions.push(it);
+            });
             var labels = [];
             transitions.forEach(function (transition) {
-                labels.push(transition.name + "  ("
-                            + transition.source.name + "->"
-                            + transition.target.name + ")");
+                if (transition.source) {
+                    labels.push(transition.name + "  ("
+                                + transition.source.name + "->"
+                                + transition.target.name + ")");
+                } else {
+                    labels.push(transition.name + "  ("
+                                + "INIT" + "->"
+                                + transition.target.name + ")");
+                }
             });
             displayDelete.create({
                 header: "Please select transition to be deleted...",
@@ -792,6 +813,7 @@ define(function (require, exports, module) {
                 var t = e.data.options.get("currentLabel");
                 var transitionID = transitions[t].id;
                 emuchartsManager.delete_transition(transitionID);
+                emuchartsManager.delete_initial_transition(transitionID);
                 view.remove();
             }).on("cancel", function (e, view) {
                 // just remove rename window
