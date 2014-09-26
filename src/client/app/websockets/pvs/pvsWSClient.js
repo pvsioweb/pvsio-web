@@ -10,6 +10,8 @@ define(function (require, exports, module) {
     var wsclient            = require("websockets/wsClient"),
         eventDispatcher     = require("util/eventDispatcher"),
         property            = require("util/property"),
+		Logger				= require("util/Logger"),
+		PVSioStateParser	= require("util/PVSioStateParser"),
         wsSingleton;
     
     function createWebSocket() {
@@ -85,7 +87,7 @@ define(function (require, exports, module) {
         o.closePVSProcess = function (cb) {
             wscBase.send({type: "closeProcess"}, cb);
         };
-        
+       
         /**
             Sends a user interface command to be executed by the pvsio process. This method fires a "GraphUpdate" event whenever there is a response from the server due to the callback
             @param {string} action The action to send to the process
@@ -95,8 +97,15 @@ define(function (require, exports, module) {
             wscBase.send({type: "sendCommand", data: {command: action}}, function (err, res) {
 				//do stuff to update the explored state graph and invoke the callback with the same parameters
 				wscBase.fire({type: "GraphUpdate", transition: action, target: res.data, source: o.lastState()});
-				//update the lastState 
-				o.lastState(res.data);
+				//update the lastState if it was a valid pvsio state
+				if (PVSioStateParser.isState(res.data)) {
+					o.lastState(res.data);
+				} else {
+					Logger.log("There might have been an attempt at invoking a non-existent pvs function " + action );
+					Logger.log(res.data);
+					//update res.data with previous valid state
+					res.data = o.lastState();
+				}
 				if (cb && typeof cb === "function") { cb(err, res); }
 			});
             wscBase.fire({type: "InputUpdated", data: action});

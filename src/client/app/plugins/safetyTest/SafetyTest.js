@@ -43,7 +43,7 @@ define(function (require, exports, module) {
 	*/
 	SafetyTest.prototype.appendResult = function (result) {
 		var html = Handlebars.compile(testRowTemplate)(result);
-		d3.select("#safetyTests table").append("tr").html(html);
+		d3.select("#safetyTests tbody").append("tr").html(html);
 	};
 	
 	SafetyTest.prototype.runTests = function () {
