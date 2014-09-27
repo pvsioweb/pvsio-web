@@ -21,6 +21,7 @@ define(function (require, exports, module) {
 			alertDiv.append("p").html(msg);
 			notifyDiv.style("width", 0).style("display", "block");
 			notifyDiv.transition().duration(300).style("width", width);
+			
 		}
 	};
 });
