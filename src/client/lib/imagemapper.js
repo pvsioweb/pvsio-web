@@ -9,6 +9,7 @@
     "use strict";
     var helperPos = ['tl', 'tr', 'br', 'bl'], hw = 5, cornerOffset = hw / 2,
         helperData = helperPos.map(function (d) {return {x: cornerOffset, y: cornerOffset, align: d}; });
+    var imageIsLoaded = false;
     /**
         get client rect for the given element
     */
@@ -215,7 +216,7 @@
         };
         
         //poll the imageEl until it has been loaded with a valid height and width property
-        initTimer = setInterval(function () {
+        initTimer = setTimeout(function () {
             if (props.height && props.width) {
                 initialiseSVGLayer();
                 clearInterval(initTimer);
@@ -235,6 +236,7 @@
             } else {
                 props = cr(imageEl);
                 _el_poll_count++;
+                initTimer();
             }
         }, 100);
        
