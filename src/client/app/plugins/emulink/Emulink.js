@@ -969,7 +969,6 @@ define(function (require, exports, module) {
             });
             // select file
             projectManager.selectFile(emuchartsFile);
-            var x = 0;
         });
         d3.select("#btn_menuPIMPrinter").on("click", function () {
             var emucharts = {
@@ -986,8 +985,8 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".tex",
-                                                                 emuchartsPIMPrinter.print(emucharts));
+            var pimModel = emuchartsPIMPrinter.print(emucharts);
+            var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".tex", pimModel);
             if (projectManager.fileExists(emuchartsFile)) {
                 // remove file from project
                 projectManager.project().removeFile(emuchartsFile);
@@ -1009,7 +1008,6 @@ define(function (require, exports, module) {
             });
             // select file
             projectManager.selectFile(emuchartsFile);
-            var x = 0;
         });
         d3.select("#btn_menuCppPrinter").on("click", function () {
             //document.getElementById("menuCodeGenenerators").children[1].style.display = "none";
@@ -1050,7 +1048,6 @@ define(function (require, exports, module) {
             });
             // select file
             projectManager.selectFile(emuchartsFile);
-            var x = 0;
         });
         //-- Zoom menu -----------------------------------------------------------
         d3.select("#menuZoom").on("mouseover", function () {

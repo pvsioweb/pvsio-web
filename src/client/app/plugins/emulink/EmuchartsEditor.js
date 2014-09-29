@@ -797,15 +797,16 @@ define(function (require, exports, module) {
         };
         var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
             //console.log("Zoom");
-            d3.event.sourceEvent.stopPropagation();
             var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
             //console.log("(" + m[0] + "," + m[1] + ")");
             if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.edge) {
+                d3.event.sourceEvent.stopPropagation();
                 // initial transition
                 drag_line.attr("d", "M" + mousedrag.edge.x + "," + mousedrag.edge.y +
                                 "L" + m[0] + "," + m[1]);
             } else if (editor_mode !== MODE.ADD_TRANSITION() && !mousedrag.node &&
                     editor_mode !== MODE.DELETE() && editor_mode !== MODE.RENAME()) {
+                d3.event.sourceEvent.stopPropagation();
                     //console.log("Drag canvas");
     //                _this.fire({
     //                    type: "emuCharts_d3ZoomTranslate",

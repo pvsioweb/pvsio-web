@@ -116,8 +116,12 @@ define(function (require, exports, module) {
                 }
                 if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
                     editor.off("change", _editorChangedHandler);
+                    editor.setOption("mode", "txt");
                     editor.setValue(pvsFile.content());
                     editor.markClean();
+                    if (pvsFile.path().indexOf(".pvs") === pvsFile.path().length - 4) {
+                        editor.setOption("mode", "pvs");
+                    }
                     editor.focus();
                     editor.on("change", _editorChangedHandler);
                 } else {
@@ -126,9 +130,13 @@ define(function (require, exports, module) {
                     ws.getFile(f, function (err, res) {
                         if (!err) {
                             editor.off("change", _editorChangedHandler);
+                            editor.setOption("mode", "txt")
                             pvsFile.content(res.fileContent).dirty(false);
                             editor.setValue(pvsFile.content());
                             editor.markClean();
+                            if (pvsFile.path().indexOf(".pvs") === pvsFile.path().length - 4) {
+                                editor.setOption("mode", "pvs");
+                            }
                             editor.focus();
                             editor.on("change", _editorChangedHandler);
                         } else {
