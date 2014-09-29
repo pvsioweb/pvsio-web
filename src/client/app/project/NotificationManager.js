@@ -7,7 +7,7 @@
 /*global define, require, d3, window */
 define(function (require, exports, module) {
 	"use strict";
-	var width = "500px";
+	var width = "376px";
 	var notifications = [];
 	module.exports = {
 		show: function (msg) {
@@ -21,6 +21,7 @@ define(function (require, exports, module) {
 			alertDiv.append("p").html(msg);
 			notifyDiv.style("width", 0).style("display", "block");
 			notifyDiv.transition().duration(300).style("width", width);
+			
 		}
 	};
 });

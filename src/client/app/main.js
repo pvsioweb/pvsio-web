@@ -14,6 +14,7 @@ define(function (require, exports, module) {
         ui             = require("plugins/prototypebuilder/interface"),
 		PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
         Emulink        = require("plugins/emulink/Emulink"),
+		SafetyTest		= require("plugins/safetyTest/SafetyTest"),
 		GraphBuilder   = require("plugins/graphbuilder/GraphBuilder"),
         PluginManager  = require("plugins/PluginManager");
 		
@@ -44,6 +45,9 @@ define(function (require, exports, module) {
 								break;
 							case "GraphBuilder":
 								plugin = GraphBuilder.getInstance();
+								break;
+							case "SafetyTest":
+								plugin = SafetyTest.getInstance();
 								break;
 							}
 

@@ -216,6 +216,19 @@ define(function (require, exports, module) {
 			return w.type() === "button";
 		});
 	};
+	
+	/**
+		Gets a list of all the widgets loaded on the page. The returned array contains all
+		widget types
+		@returns {Widget[]}
+		@memberof WidgetManager
+	*/
+	WidgetManager.prototype.getAllWidgets = function () {
+		var buttons = this.getButtonWidgets(),
+			displays = this.getDisplayWidgets();
+		return buttons.concat(displays);
+	};
+	
 	/**
 		Update  the location of the widget by updating the image map coords to the position given.
 		@param {Widget} widget The widget to update

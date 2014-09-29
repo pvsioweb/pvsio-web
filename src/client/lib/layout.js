@@ -132,6 +132,12 @@
 			};
 			parent.style.height = window.innerHeight + "px";
 		}
+		//fire resize events for the child containers
+		Array.prototype.forEach.call(children, function (c, i) {
+			var event = new Event("resize");
+			c.dispatchEvent(event);
+		});
+			
 	}
 	
 	window.layoutjs = layout;

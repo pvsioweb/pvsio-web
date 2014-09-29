@@ -290,7 +290,7 @@ function listProjects() {
 											reject(err);
 										} else {
 											var image = files.filter(function (f) {
-												return imageExts.indexOf(path.extname(f)) > -1;
+												return imageExts.indexOf(path.extname(f).toLowerCase()) > -1;
 											})[0];
 											var result = files.length ? {name: file, image: image} : null;
 											resolve(result);
