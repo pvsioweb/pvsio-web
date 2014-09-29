@@ -1,0 +1,9 @@
+<ul class="list-group">
+{{#each this}}
+	{{#if this.displayKey}}
+		<li class="list-group-item" widget-id={{id}}>{{type}}: <span>{{displayKey}}</span></li>
+	{{else}}
+		<li class="list-group-item" widget-id={{id}}>{{type}}: <span>{{functionText}}</span></li>
+	{{/if}}
+{{/each}}
+</ul>

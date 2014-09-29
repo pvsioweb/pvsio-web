@@ -1,5 +1,5 @@
 /**
- * 
+ * Utility library for creating image map regions for interactive prototyping
  * @author Patrick Oladimeji
  * @date 10/21/13 21:42:17 PM
  */
@@ -21,8 +21,18 @@
             h = parseFloat(el.attr("height"));
         return {x: x, y: y, height: h, width: w};
     }
-    
+    /**
+		utility function to check the scale of an svg g element
+	*/
+	function scale(svgel) {
+		var s = svgel.attr("transform");
+		if (s.indexOf("scale") > -1) {
+			return +(s.replace("scale", "").replace("(", "").replace(")", ""));
+		} else { return 1;}
+	}
+	
     function updateRegion(r, d) {
+		var svg = d3.select("svg.image-map-layer");
         d.width = isNaN(d.width) || d.width === null ? parseFloat(r.attr("width")) : d.width;
         d.height = isNaN(d.height) || d.height === null ? parseFloat(r.attr("height")) : d.height;
         
@@ -42,14 +52,17 @@
     function enableRegionDrag(region, dispatcher) {
         var g = d3.select(region.node().parentNode), svg = d3.select("svg.image-map-layer");
         region.on("mousedown", function () {
-            var mdPos = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]}, rxStart = +region.attr("x"), ryStart = +region.attr("y");
+			var _scale = scale(svg.select("g"));
+            var mdPos = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]},
+				rxStart = +region.attr("x"), ryStart = +region.attr("y");
+			console.log(mdPos, rxStart, ryStart);
             d3.event.stopPropagation();
             d3.event.preventDefault();
             //register mousemove for the svg when moused down on the region
             svg.on("mousemove.region", function () {
-                var e = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]};
+                var e = {x: d3.mouse(this)[0] / _scale, y: d3.mouse(this)[1] / _scale};
                 var delta = {x: (e.x - mdPos.x), y: (e.y - mdPos.y)};
-                updateRegion(region, {x: rxStart + delta.x, y: ryStart + delta.y});
+                updateRegion(region, {x: (rxStart + delta.x), y: (ryStart + delta.y)}, false);
             });
             
             region.on("mouseup", function () {
@@ -68,15 +81,17 @@
         var g = d3.select(region.node().parentNode), corners = g.selectAll("rect.corner"),
             svg = d3.select("svg.image-map-layer");
         corners.on("mousedown", function (d, i) {
+			var _scale = scale(svg.select("g"));
             d3.event.preventDefault();
             d3.event.stopPropagation();
             var mdPos = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]}, rx = +region.attr("x"),
-                ry = +region.attr("y"), rw = parseFloat(region.attr("width")), rh = parseFloat(region.attr("height"));
+                ry = +region.attr("y"), rw = parseFloat(region.attr("width")),
+				rh = parseFloat(region.attr("height"));
             var w, h, x, y;
             svg.on("mousemove.corner", function () {
                 d3.event.preventDefault();
                 d3.event.stopPropagation();
-                var mmPos = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]};
+                var mmPos = {x: d3.mouse(this)[0] / _scale, y: d3.mouse(this)[1] / _scale};
                 var dx = mmPos.x - mdPos.x, dy = mmPos.y - mdPos.y;
                 if (d.align === "tl") {
                     x = mmPos.x < (rx + rw) ? mmPos.x : (rx + rw);
@@ -100,7 +115,7 @@
                     h = rh + dy;
                 }
                 d3.select(this).attr("x", mmPos.x).attr("y", mmPos.y);
-                updateRegion(region, {x: x, y: y, width: w, height: h});
+                updateRegion(region, {x: x, y: y, width: w, height: h}, false);
             });
             
             d3.select(this).on("mouseup", function (d, i) {
@@ -116,20 +131,20 @@
         svg.selectAll("g.selected").classed("selected", false);//clear previous selections
         var g = svg.select("g").append("g").attr("class", "selected"), moved = false, moveRegionStarted = false;
         var region = g.append("rect").attr("x", startPos.x).attr("y", startPos.y).attr("class", "region");
-       
         var corners = g.selectAll("rect.corner").data(helperData).enter()
             .append("rect").attr("class", function (d) { return d.align + " corner"; })
             .attr("width", hw).attr("height", hw);
         
         function sortPoints(a, b) { return a.y === b.y ? a.x - b.x : a.y - b.y; }
 
+		var _scale = scale(svg.select("g"));
         svg.on("mousemove", function () {
             moved = true;
-            var e = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]};
+            var e = {x: d3.mouse(this)[0] / _scale, y: d3.mouse(this)[1] / _scale};
             //calculate the delta movement and update rect with and height
             var w = e.x - startPos.x, h = e.y - startPos.y, x = w < 0 ? startPos.x + w : startPos.x,
                 y = h < 0 ? startPos.y + h : startPos.y;
-            updateRegion(region, {x: x, y: y, height: h, width: w});
+            updateRegion(region, {x: x, y: y, height: h, width: w}, false);
             d3.event.stopPropagation();
             d3.event.preventDefault();
         }).on("mouseup", function () {
@@ -209,7 +224,8 @@
                 //create mousedown event for the layer for region creation
                 svg.on("mousedown", function () {
                     var e = d3.event;
-                    createRegion(svg, {x: d3.mouse(this)[0], y: d3.mouse(this)[1]}, ed);
+					var _scale = scale(svg.select("g"));
+                    createRegion(svg, {x: d3.mouse(this)[0] / _scale, y: d3.mouse(this)[1] / _scale}, ed);
                     e.preventDefault();
                 });
                 //initialisation complete

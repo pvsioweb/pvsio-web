@@ -25,6 +25,17 @@ define(function (require, exports, module) {
                    }, 200);
                 });
             }
+			
+			function rightclick(el) {
+				var element = d3.select(el).node();
+				var event = new Event("contextmenu");
+				element.dispatchEvent(event);
+				return new Promise(function (resolve) {
+					setTimeout(function () {
+						resolve(event);
+					}, 200);
+				});
+			}
             
             function dialogCanBeDismissed(btnTrigger, title) {
                 title = title || "dialog triggered by " + btnTrigger;
@@ -94,6 +105,14 @@ define(function (require, exports, module) {
 						});
                 });
             }
+			/**
+				used to toggle (expand/collapse) a collapsible panel
+			*/
+			function togglePanel(pluginName) {
+				var el = "div.collapsible-panel-parent[plugin-owner='" + pluginName + "'] span.toggle-collapse";
+				return click(el);
+			}
+			
             
             describe("User interface Elements", function () {               
 				beforeEach(function (done) {
@@ -121,8 +140,54 @@ define(function (require, exports, module) {
                 loadPlugin("Emulink");
                 unloadPlugin("Emulink");
                 loadPlugin("GraphBuilder");
-                unloadPlugin("GraphBuilder");         
+                unloadPlugin("GraphBuilder");				
             });
+			
+			describe("PVS Editor", function () {
+				beforeEach(function (done) {
+                    d3.select("div.overlay").remove();
+					pm = pb.getProjectManager();
+					pm.addListener("PVSProcessReady", function (e) {
+						console.log(e);
+						p = pm.project();
+						done();
+					});
+					main.start();
+				});
+				
+				it("can be expanded", function (done) {
+					var editorPanel = "div.collapsible-panel-parent[plugin-owner='PrototypeBuilder'] .collapsible-panel";
+					togglePanel("PrototypeBuilder")
+						.then(function () {
+							expect(d3.select(editorPanel).style("display")).toEqual("block");
+							done();
+						});
+				});
+				
+				it("can be expanded and collapsed", function (done) {
+					var editorPanel = "div.collapsible-panel-parent[plugin-owner='PrototypeBuilder'] .collapsible-panel";
+					togglePanel("PrototypeBuilder")
+						.then(function () {
+							togglePanel("PrototypeBuilder")
+								.then(function () {
+									expect(d3.select(editorPanel).style("display")).toEqual("none");
+									done();
+								});
+						});
+				});
+				
+				describe("Editor File Lists", function () {
+					it("has context menus", function (done) {
+						togglePanel("PrototypeBuilder").then(function () {
+							rightclick("#pvsFiles").then(function () {
+								expect(d3.select("div.contextmenu").empty()).toBeFalsy();
+								done();
+							});
+						});
+					});
+				});
+			});
+			
         }
     };
 });

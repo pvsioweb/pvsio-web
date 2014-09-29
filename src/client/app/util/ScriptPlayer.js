@@ -4,7 +4,7 @@
  * @date 3/24/14 17:51:31 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, setTimeout */
+/*global define, setTimeout, Promise */
 define(function (require, exports, module) {
     "use strict";
     var ws = require("websockets/pvs/WSManager").getWebSocket(),
@@ -57,7 +57,44 @@ define(function (require, exports, module) {
         }
     }
 
-    
+    function runTest(test) {
+		function sendPVSaction(action) {
+			return new Promise(function (resolve, reject) {
+				ws.sendGuiAction(action + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");", function (err, res) {
+					if (err) { reject(err); }
+					else {resolve(res); }
+				});
+			});
+		}
+		
+		ws.lastState(test.init);
+		var sequence = test.keySequence.map(function (k) {
+			return "click_" + k;	
+		}), lastResult;
+		
+		function verifySafety(state) {
+			var stateStr = state.data[0].toString();
+			var command = test.designIssue.replace("$", stateStr);
+			return new Promise(function (resolve, reject) {
+				ws.sendGuiAction(command, function (err, res) {
+					if (err) {
+						reject(err);
+					} else {resolve(res.data[0]);}
+				});
+			});
+		}
+		
+		function _runTest() {
+			var key = sequence.shift();
+			return key ? sendPVSaction(key).then(function (res) {
+				lastResult = res;
+				return _runTest();	
+			}): verifySafety(lastResult);
+		}
+		
+		return _runTest();
+	}
+	
     /**
         Adds the specified script to the list view
     */
@@ -83,6 +120,7 @@ define(function (require, exports, module) {
     module.exports = {
         play: play,
         addScriptToView: addScriptToView,
+		runTest: runTest,
         clearView: function () {
             d3.select("#scripts ul").html("");
         }

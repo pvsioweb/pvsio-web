@@ -201,6 +201,12 @@ define(function (require, exports, module) {
             return parseValue(state).value;
         },
         evaluate: evaluate,
-        resolve: resolve
+        resolve: resolve,
+		isState: function (str) {
+			if (Array.isArray(str)) {
+				str = str.join("");
+			}
+			return str.trim().indexOf("(#") === 0;	
+		}
     };
 });

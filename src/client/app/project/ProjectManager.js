@@ -201,7 +201,6 @@ define(function (require, exports, module) {
         ws.send({type: "listProjects"}, function (err, res) {
             if (!err) {
                 var projects = res.projects;
-                projects.unshift("");
                 openProjectForm.create(projects, function (d) {
                     return d;
                 }).on("ok", function (e, view) {
