@@ -282,7 +282,7 @@ function listProjects() {
 				Promise.all(files.map(function (file) {
 					return stat(path.join(baseProjectDir, file))
 						.then(function (f) {
-							if (f.isDirectory()) {
+							if (f.isDirectory() && file !== "defaultProject") {
 								return new Promise(function (resolve, reject) {
 									//get the image in the directory if any also dont return empty folders as projects
 									fs.readdir(path.join(baseProjectDir, file), function (err, files) {
