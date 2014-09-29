@@ -98,17 +98,17 @@ define(function (require, exports, module) {
         //if there is a project add listener to changes to files etc
         if (project) {
             var _this = this;
-            project.addListener("SpecDirtyFlagChanged", function (event) {
+            project.addListener("DirtyFlagChanged", function (event) {
                 var file = event.file;
                 //set file as dirty
                 treeList.markDirty(file.path(), file.dirty());
             }).addListener("ProjectMainSpecFileChanged", function () {
                //change the main file class
                 
-            }).addListener("SpecFileAdded", function (event) {
+            }).addListener("FileAdded", function (event) {
                 //add the new file to the tree list data
                 treeList.addItem({name: event.file.name(), path: event.file.path()});
-            }).addListener("SpecFileRemoved", function (event) {
+            }).addListener("FileRemoved", function (event) {
                 //delete the removed file from the tree list data
                 ftv.deleteItem(event.file);
             });

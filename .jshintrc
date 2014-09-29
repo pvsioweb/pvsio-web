@@ -1,6 +1,5 @@
 {
     "undef": true,
-    "unused": true,
     "eqeqeq": true,
     "latedef": true,
     "eqnull": true,

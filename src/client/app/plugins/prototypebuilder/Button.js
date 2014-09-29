@@ -101,23 +101,20 @@ define(function (require, exports, module) {
 			events = widget.events();
 			//perform the click event if there is one
 			if (events && events.indexOf('click') > -1) {
-//                console.log("button clicked");
 				ws.sendGuiAction("click_" + f + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");", callback);
                 //record action 
                 Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "click", ts: new Date().getTime()});
+			} else if (events && events.indexOf("press/release") > -1) {
+				ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
+				timerTickFunction = function () {
+					ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
+					//record action
+					Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
+				};
+				btnTimer.interval(widget.recallRate()).start();
 			}
 			
-			timerTickFunction = function () {
-//				console.log("button pressed");
-				if (events && events.indexOf('press/release') > -1) {
-					ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
-                    //record action
-                    Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
-				}
-			};
-			btnTimer.interval(widget.recallRate()).start();
 		}).on("mouseup", function () {
-//            console.log("button released");
 			if (btnTimer.getCurrentCount() > 0) {
 				var f = widget.functionText();
 				if (events && events.indexOf('press/release') > -1) {
@@ -127,7 +124,6 @@ define(function (require, exports, module) {
 			}
 			mouseup(d3.event);
 		}).on("mouseout", function () {
-//            console.log("button released");
 			if (btnTimer.getCurrentCount() > 0) {
 				var f = widget.functionText();
 				if (events && events.indexOf('press/release') > -1) {

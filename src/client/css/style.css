@@ -46,10 +46,15 @@ div.header {
 	display: block;
 }
 
-
 #content{
-	width: 1130px;
+	width: 100%;
+	height: 1000px;
 	position: relative;
+}
+
+#content .ljs-resizer {
+	background: #ddd;
+	width: 5px;
 }
 
 svg.image-map-layer{
@@ -91,8 +96,7 @@ div.downloader{
 	z-index: 2000000;
 }
 #header{
-	height: 50px;
-	padding: 15px 0 0 0;
+	width: 100%;
 }
 .center{
 	margin-right: auto;
@@ -119,12 +123,10 @@ area{
 
 #imageDiv{
 	position: relative;
-	border: 1px solid black;
 }
 #controlsContainer{
 	position: relative;
 	height: 50px;
-    width: 910px;
 }
 #controlsContainer button.selected{
 	top: -1px;
@@ -152,13 +154,6 @@ fileListItem.hide {
 	display: none;	
 }
 
-/*
-#pvsFiles ul {
-    list-style-type: none;
-    margin: 0;
-	padding:0;
-}
-*/
 .list-icon {
     display: inline-block;
     width: 14px;
@@ -166,7 +161,6 @@ fileListItem.hide {
     margin-right:5px;
 }
 #sourcecode-editor-wrapper{
-    width: 1130px;
     height: 400px;
    	position:relative;
 }
@@ -189,21 +183,20 @@ fileListItem.hide {
 }
 
 #pvsFiles {
-    position: absolute;
     display:inline-block;
-    width: 230px;
+    width: 20%;
     height: 400px;
     border: 1px solid #ddd;
     right: 0px;
 	overflow-y: auto;
 	font-size:15px;
-    padding: 0px;
+    padding-left: 5px;
     color: #999;
   }
 
 #editor{
 	z-index: 30;
-	width: 900px;
+	width: 80%;
 	height: 400px;
 	border: 1px solid #ddd;
     display: inline-block;
@@ -255,20 +248,11 @@ fileListItem.hide {
 #console {
     height: 50%;
     width: 100%;
-    overflow-y: scroll;
-    color: white;
+    overflow-y: auto;
+    font-size: 10px;
+	padding: 5px;
 }
-#rightPanel {
-	position: absolute;
-	top:70px;
-	right: -220px;
-	height: 100%;
-	width: 200px;
-	background: #333;
-	padding: 0;
-	font: 10px Arial;
-    overflow: hidden;
-}
+
 
 #pvsio_commands_log {
 	height:100px;
@@ -346,7 +330,7 @@ intput:invalid, select:invalid{
 	position: absolute;
 	border: 4px dashed teal;
 	height: 430px;
-	width: 1128px;
+	width: 100%;
 	z-index: 191;
 }
 
@@ -382,6 +366,9 @@ div.detailsForm select, div.detailsForm textarea{
 }
 #body {
 	margin-top: 20px;
+	margin-bottom: 20px;
+	height: 430px;
+	background: #eee;
 }
 
 #header .project-notifications {
@@ -433,9 +420,8 @@ div.detailsForm select, div.detailsForm textarea{
 #scripts {
     height: 50%;
     width: 100%;
-    right: 1px;
     background: #eee;
-    overflow-y: scroll;
+    overflow-y: auto;
     font-size: 12pt;
 }
 
@@ -495,4 +481,77 @@ div.detailsForm select, div.detailsForm textarea{
     width: 712px;
     padding-left: 216px;
     padding-top: 8px;
+}
+#rightPanel {
+	width: 20%;
+	padding-left: 5px;
+}
+
+#content > .ljs-hcontent {
+	width: 80%;
+}
+#body > .ljs-hcontent {
+	padding-left: 0;
+	width: 80%;
+}
+#builder-controls.ljs-left {
+	width: 20%;
+	background: white;
+}
+
+#projectTitle {
+	height: 50px;
+	width: 100%;
+	background: #4088B6;
+	padding: 15px;
+	color: white;
+	font: 20px sans-serif;
+}
+#projectTitle a {
+	color: #f5eee5;
+}
+
+#projectTitle a:hover {
+	color: white;
+}
+
+#project-notifications {
+	display: none;
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 2;
+	width: 200px;
+}
+
+.plugins-group .list-group-item {
+	border-radius: 0;
+}
+
+.panel.scrollable-dialog {
+	width: 700px;
+}
+
+.scrollable-dialog .panel-body {
+	max-height: 600px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.scrollable-dialog .thumbnail {
+	text-align: center;
+}
+
+.scrollable-dialog .thumbnail > .image {
+	height: 150px;
+	overflow: hidden;
+}
+
+.scrollable-dialog .thumbnail img {
+	max-height: 150px;
+	max-width: 100%;
+	overflow-y: hidden;
+}
+
+.caption button {
+	width: 100%;
 }

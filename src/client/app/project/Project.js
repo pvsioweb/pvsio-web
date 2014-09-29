@@ -169,12 +169,11 @@ define(function (require, exports, module) {
 	 * @param {!String} filePath The path of the file to add
 	 * @param {!String} fileContent The content of the file to add
      * @param {!string} encoding The encoding of the file to add
-     * @param {boolean} supressEvent Set true to supress the SpecFileAdded event or false otherwise
+     * @param {boolean} supressEvent Set true to supress the FileAdded event or false otherwise
 	 * @memberof Project
 	 */
     ///FIXME this function should throw an error if the filepath already exists?
     ///FIXME this function should take a projectFile as argument!
-    ///FIXME why are we changing the event type from DirtyFlagChanged to SpecDirtyFlagChanged?
     Project.prototype.addProjectFile = function (filePath, fileContent, encoding, suppressEvent) {
         encoding = encoding || "utf8";
         var p  = this, newFile = new ProjectFile(filePath)
@@ -182,15 +181,11 @@ define(function (require, exports, module) {
             .encoding(encoding);
         _projectFiles.push(newFile);
         if (!suppressEvent) {
-            if (newFile.isPVSFile()) {
-                p.fire({type: "SpecFileAdded", file: newFile});
-                //register event for the newspec and bubble up the dirty flag changed event from project
-                newFile.addListener("DirtyFlagChanged", function () {
-                    p.fire({type: "SpecDirtyFlagChanged", file: newFile});
-                });
-            } else {
-                p.fire({type: "ProjectFileAdded", file: newFile});
-            }
+			p.fire({type: "FileAdded", file: newFile});
+			//register event for the newspec and bubble up the dirty flag changed event from project
+			newFile.addListener("DirtyFlagChanged", function () {
+				p.fire({type: "DirtyFlagChanged", file: newFile});
+			});
         }
         return newFile;
     };
@@ -206,9 +201,7 @@ define(function (require, exports, module) {
         var deletedFile = _projectFiles.splice(fileIndex, 1);
         if (deletedFile && deletedFile[0]) {
             var f = deletedFile[0];
-            if (f.extension() === ".pvs") {
-                this.fire({ type: "SpecFileRemoved", file: f });
-            } else { this.fire({ type: "ProjectFileRemoved", file: f }); }
+			this.fire({ type: "FileRemoved", file: f });
             f.clearListeners();
             f = null;
         }

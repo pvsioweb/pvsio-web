@@ -60,13 +60,7 @@ define(function (require, exports, module) {
                 it(str, function (done) {
                     click("#openProject")
                         .then(function () {
-                            d3.selectAll("div.overlay select option").attr("selected", null)
-                                .each(function () {
-                                    if (d3.select(this).html() === projectName) {
-                                        d3.select(this).attr("selected", true);
-                                    }
-                                });
-                            click("div.overlay #btnOk")
+                            click("button[data-project='" + projectName + "']")
                                 .then(function () {
                                     expect(pm.project().name()).toEqual(projectName);
                                     done();
@@ -78,32 +72,26 @@ define(function (require, exports, module) {
             function loadPlugin(pluginName) {
                 var str = pluginName + " plugin adds a collapsible panel to the ui";
                 it(str, function (done) {
-                    click("#btnPlugins")
-                        .then(function () {
-                            click("input[name='" + pluginName + "']")
-                                .then(function () {
-                                 	var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginName + "']");
-                                    expect(pluginPanel.empty()).toBeFalsy();
-                                    done();
-                                });
-                        });
+					click("input[name='" + pluginName + "']")
+						.then(function () {
+							var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginName + "']");
+							expect(pluginPanel.empty()).toBeFalsy();
+							done();
+						});
                 });
             }
             
             function unloadPlugin(pluginName) {
                 var str = pluginName + " plugin can be unloaded from the ui";
                 it(str, function (done) {
-                    click("#btnPlugins")
-                        .then(function () {
-                            click("input[name='" + pluginName + "']")//to load
-                                .then(function () {//then unload
-                                    click("input[name='" + pluginName + "']").then(function () {
-                                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginName + "']");
-                                        expect(pluginPanel.empty()).toEqual(true);
-                                        done();
-                                    });
-                                });
-                        });
+					click("input[name='" + pluginName + "']")//to load
+						.then(function () {//then unload
+							click("input[name='" + pluginName + "']").then(function () {
+								var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginName + "']");
+								expect(pluginPanel.empty()).toEqual(true);
+								done();
+							});
+						});
                 });
             }
             

@@ -13,8 +13,8 @@ define(function (require, exports, module) {
 		inputSelectors = inputSelectors || defaultInputSelectors;
 		var res = {};
 		d3.select(el).selectAll(inputSelectors).each(function () {
-			var el = d3.select(this);
-			if (el.attr("type") === "checkbox") {
+			var el = d3.select(this), type = el.attr("type");
+			if (type === "checkbox" || type === "radio") {
                 //only add checkboxes when they aer checked
                 if (this.checked) {
                     //store as array if it is a checkbox

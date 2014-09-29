@@ -15,7 +15,7 @@ define(function (require, exports, module) {
         var f = d3.select("#functionText").property("value"),
 			str = "",
 			events = [];
-        d3.selectAll("input[type='checkbox'][name='events']").each(function () {
+        d3.selectAll("input[type='radio'][name='events']").each(function () {
             if (this.checked) {
                 events = events.concat(this.value.split("/"));
             }
@@ -43,7 +43,7 @@ define(function (require, exports, module) {
 			"click #btnCancel": "cancel",
 			"click #displayTab": "displayTabClicked",
 			"click #buttonTab": "buttonTabClicked",
-			"change input[type='checkbox'][name='events']": "eventsChanged",
+			"change input[type='radio'][name='events']": "eventsChanged",
 			"keyup #functionText": "eventsChanged"
 		},
 		eventsChanged: function (event) {
