@@ -611,10 +611,20 @@ define(function (require, exports, module) {
 	 */
     EmuchartsEditor.prototype.newSVG = function () {
         _this = this;
+
+        // create canvas to be used for exporting svg area as picture
+        d3.select("#ContainerStateMachineImage").append("canvas")
+            .attr("width", width).attr("height", height)
+            .attr("style", "display: none");
+        d3.select("#ContainerStateMachineImage").append("div")
+            .attr("id", "svgdataurl").attr("style", "display: none")
         
         // create svg area
         d3.select("#ContainerStateMachine")
             .append("svg")
+            .attr("version", 1.1)
+            .attr("xmlns", "http://www.w3.org/2000/svg")
+            //.attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
             .attr("width", width).attr("height", height)
             .style("background", "#fffcec")
             .append("svg:defs")
@@ -764,7 +774,10 @@ define(function (require, exports, module) {
             if (editor_mode === MODE.ADD_TRANSITION()) {
                 // this is equivalent to drag end
                 // remove drag line
-                drag_line.classed("hidden", true).style("marker-end", "").style("marker-start", "");
+                drag_line.classed("hidden", true)
+                         .style("marker-end", "")
+                         .style("marker-start", "")
+                         .attr("d", "M0,0L0,0");
                 if (mouseover.node && !mousedrag.node) {
                     // fire event
                     _this.fire({
@@ -1407,7 +1420,10 @@ define(function (require, exports, module) {
                     });
                 }
                 // hide drag arrow & reset mouse vars
-                drag_line.classed("hidden", true).style("marker-end", "");
+                drag_line.classed("hidden", true)
+                         .style("marker-end", "")
+                         .style("marker-start", "")
+                         .attr("d", "M0,0L0,0");
             } else {
                 if (mousedrag.node.x === node.x && mousedrag.node.y === node.y) {
                     // click event
