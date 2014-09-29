@@ -65,7 +65,7 @@
                 return state.tokenize(stream, state);
             }
             
-            if (/\d/.test(ch)) {
+            if (/\d|\./.test(ch)) {
                 stream.eatWhile(constantNumRegex);
                 return "number";
             }
