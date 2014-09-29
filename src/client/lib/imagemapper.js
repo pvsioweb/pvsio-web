@@ -29,7 +29,7 @@
 		var s = svgel.attr("transform");
 		if (s.indexOf("scale") > -1) {
 			return +(s.replace("scale", "").replace("(", "").replace(")", ""));
-		} else { return 1;}
+		} else { return 1; }
 	}
 	
     function updateRegion(r, d) {
@@ -55,7 +55,8 @@
         region.on("mousedown", function () {
 			var _scale = scale(svg.select("g"));
             var mdPos = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]},
-				rxStart = +region.attr("x"), ryStart = +region.attr("y");
+				rxStart = +region.attr("x"),
+                ryStart = +region.attr("y");
 			console.log(mdPos, rxStart, ryStart);
             d3.event.stopPropagation();
             d3.event.preventDefault();
@@ -215,8 +216,7 @@
             }
         };
         
-        //poll the imageEl until it has been loaded with a valid height and width property
-        initTimer = setTimeout(function () {
+        var loadImage = function () {
             if (props.height && props.width) {
                 initialiseSVGLayer();
                 clearInterval(initTimer);
@@ -225,7 +225,7 @@
                 //create mousedown event for the layer for region creation
                 svg.on("mousedown", function () {
                     var e = d3.event;
-					var _scale = scale(svg.select("g"));
+                    var _scale = scale(svg.select("g"));
                     createRegion(svg, {x: d3.mouse(this)[0] / _scale, y: d3.mouse(this)[1] / _scale}, ed);
                     e.preventDefault();
                 });
@@ -236,9 +236,14 @@
             } else {
                 props = cr(imageEl);
                 _el_poll_count++;
-                initTimer();
+                if (_el_poll_count < 200) {
+                    loadImage();
+                }
             }
-        }, 100);
+        };
+        
+        //poll the imageEl until it has been loaded with a valid height and width property
+        initTimer = setTimeout(loadImage, 100);
        
         d3.select("body").on("keydown", function () {
             var e = d3.event;
