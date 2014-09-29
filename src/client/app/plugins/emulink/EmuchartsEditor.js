@@ -178,7 +178,6 @@ define(function (require, exports, module) {
      * @params edge
      * @returns vector of control points (3 elements vector)
 	 * @memberof EmuchartsEditor
-     * FIXME: reduce the computation overhead (e.g., lots of times we are dividing the same numbers by 2)
 	 */
     function getControlPoints(edge) {
         var sourceX = edge.source.x;
@@ -205,101 +204,106 @@ define(function (require, exports, module) {
         var sourceHeight = edge.source.height;
         var targetWidth  = edge.target.name.length * fontSize;
         var targetHeight = edge.target.height;
+        var sourceWidth05 = sourceWidth / 2;
+        var sourceHeight05 = sourceHeight / 2;
+        var targetWidth05 = targetWidth / 2;
+        var targetHeight05 = targetHeight / 2;
+        
 
         // NOTE: SVG has the y axis inverted with respect to the Cartesian y axis
-        if (dx_target >= targetWidth / 2 &&
-                dy_target >= -targetHeight / 2 &&
-                dy_target < targetHeight / 2) {
+        if (dx_target >= targetWidth05 &&
+                dy_target >= -targetHeight05 &&
+                dy_target < targetHeight05) {
             //console.log("I");
-            targetX += (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
+            targetX += (targetWidth05 < 18) ? 18 : targetWidth05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5 - offset;
+                controlPoint1X = (targetX + sourceX) / 2 - offset;
             }
-        } else if (dx_target >= targetWidth / 2 &&
-                dy_target >= targetHeight / 2) {
+        } else if (dx_target >= targetWidth05 &&
+                dy_target >= targetHeight05) {
             //console.log("II");
-            targetY += targetHeight * 0.5;
-            targetX += targetWidth * 0.5;
+            targetY += targetHeight05;
+            targetX += targetWidth05;
             if (!edge.controlPoint) {
-                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                controlPoint1Y = (targetY + sourceY) / 2 + offset;
             }
-        } else if (dx_target < targetWidth / 2 &&
-                    dx_target >= -targetWidth / 2 &&
-                    dy_target >= targetHeight / 2) {
+        } else if (dx_target < targetWidth05 &&
+                    dx_target >= -targetWidth05 &&
+                    dy_target >= targetHeight05) {
             //console.log("III");
-            targetY += targetHeight * 0.5;
+            targetY += targetHeight05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
-                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                controlPoint1X = (targetX + sourceX) / 2 + offset;
+                controlPoint1Y = (targetY + sourceY) / 2 + offset;
             }
-        } else if (dx_target < targetWidth / 2 &&
+        } else if (dx_target < targetWidth05 &&
                     dy_target >= targetHeight / 2) {
             //console.log("IV");
-            targetX -= (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
-            targetY += sourceHeight * 0.5;
+            targetX -= (targetWidth05 < 18) ? 18 : targetWidth05;
+            targetY += sourceHeight05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
-                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                controlPoint1X = (targetX + sourceX) / 2 + offset;
+                controlPoint1Y = (targetY + sourceY) / 2 + offset;
             }
-        } else if (dx_target < targetWidth / 2 &&
-                    dy_target < targetHeight / 2 &&
-                    dy_target >= -targetHeight / 2) {
+        } else if (dx_target < targetWidth05 &&
+                    dy_target < targetHeight05 &&
+                    dy_target >= -targetHeight05) {
             //console.log("V");
-            targetX -= (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
+            targetX -= (targetWidth05 < 18) ? 18 : targetWidth05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
-                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                controlPoint1X = (targetX + sourceX) / 2 + offset;
+                controlPoint1Y = (targetY + sourceY) / 2 + offset;
             }
-        } else if (dx_target < -targetWidth / 2 &&
+        } else if (dx_target < -targetWidth05 &&
                     dy_target < -targetHeight / 2) {
             //console.log("VI");
-            targetX -= (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
-            targetY -= targetHeight * 0.5;
+            targetX -= (targetWidth05 < 18) ? 18 : targetWidth05;
+            targetY -= targetHeight05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
-                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                controlPoint1X = (targetX + sourceX) / 2 + offset;
+                controlPoint1Y = (targetY + sourceY) / 2 + offset;
             }
-        } else if (dx_target < targetWidth / 2 &&
-                    dx_target >= -targetWidth / 2 &&
-                    dy_target < -targetHeight / 2) {
+        } else if (dx_target < targetWidth05 &&
+                    dx_target >= -targetWidth05 &&
+                    dy_target < -targetHeight05) {
             //console.log("VII");
-            targetY -= targetHeight * 0.5;
+            targetY -= targetHeight05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
-                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                controlPoint1X = (targetX + sourceX) / 2 + offset;
+                controlPoint1Y = (targetY + sourceY) / 2 + offset;
             }
-        } else if (dx_target >= targetWidth / 2 &&
-                    dy_target < -targetHeight / 2) {
+        } else if (dx_target >= targetWidth05 &&
+                    dy_target < -targetHeight05) {
             //console.log("VIII");
-            targetY -= targetHeight * 0.5;
-            targetX += (targetWidth * 0.5 < 18) ? 18 : targetWidth * 0.5;
+            targetY -= targetHeight05;
+            targetX += (targetWidth05 < 18) ? 18 : targetWidth05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                controlPoint1X = (targetX + sourceX) / 2 + offset;
             }
         }
 
         //console.log("dx_source = " + dx_source + " dy_source = " + dy_source);
-        if (dx_source >= sourceWidth / 2 &&
-                dy_source >= -sourceHeight / 2 &&
-                dy_source < sourceHeight / 2) {
+        if (dx_source >= sourceWidth05 &&
+                dy_source >= -sourceHeight05 &&
+                dy_source < sourceHeight05) {
             //console.log("I");
-            sourceX += (sourceWidth * 0.5 < 18) ? 18 : sourceWidth * 0.5;
+            sourceX += (sourceWidth05 < 18) ? 18 : sourceWidth05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5 - offset;
+                controlPoint1X = (targetX + sourceX) / 2 - offset;
             }
-        } else if (dx_source >= sourceWidth / 2 &&
-                dy_source >= sourceHeight / 2) {
+        } else if (dx_source >= sourceWidth05 &&
+                dy_source >= sourceHeight05) {
             //console.log("II");
-            sourceY += sourceHeight * 0.5;
-            sourceX += sourceWidth * 0.5;
+            sourceY += sourceHeight05;
+            sourceX += sourceWidth05;
             if (!edge.controlPoint) {
-                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                controlPoint1Y = (targetY + sourceY) / 2 + offset;
             }
-        } else if (dx_source < sourceWidth / 2 &&
-                    dx_source >= -sourceWidth / 2 &&
-                    dy_source >= sourceHeight / 2) {
+        } else if (dx_source < sourceWidth05 &&
+                    dx_source >= -sourceWidth05 &&
+                    dy_source >= sourceHeight05) {
             //console.log("III");
-            sourceY += sourceHeight * 0.5;
+            sourceY += sourceHeight05;
             if (!edge.controlPoint) {
                 controlPoint1X = (targetX + sourceX) * 0.5 + offset;
                 controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
@@ -307,46 +311,46 @@ define(function (require, exports, module) {
         } else if (dx_source < sourceWidth / 2 &&
                     dy_source >= sourceHeight / 2) {
             //console.log("IV");
-            sourceX -= (sourceWidth * 0.5 < 18) ? 18 : sourceWidth * 0.5;
-            sourceY += sourceHeight * 0.5;
+            sourceX -= (sourceWidth05 < 18) ? 18 : sourceWidth05;
+            sourceY += sourceHeight05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
-                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                controlPoint1X = (targetX + sourceX) / 2 + offset;
+                controlPoint1Y = (targetY + sourceY) / 2 + offset;
             }
-        } else if (dx_source < sourceWidth / 2 &&
-                    dy_source < sourceHeight / 2 &&
-                    dy_source >= -sourceHeight / 2) {
+        } else if (dx_source < sourceWidth05 &&
+                    dy_source < sourceHeight05 &&
+                    dy_source >= -sourceHeight05) {
             //console.log("V");
-            sourceX -= (sourceWidth * 0.5 < 18) ? 18 : sourceWidth * 0.5;
+            sourceX -= (sourceWidth05 < 18) ? 18 : sourceWidth05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
-                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                controlPoint1X = (targetX + sourceX) / 2 + offset;
+                controlPoint1Y = (targetY + sourceY) / 2 + offset;
             }
-        } else if (dx_source < -sourceWidth / 2 &&
-                    dy_source < -sourceHeight / 2) {
+        } else if (dx_source < -sourceWidth05 &&
+                    dy_source < -sourceHeight05) {
             //console.log("VI");
-            sourceX -= (sourceWidth * 0.5 < 18) ? 18 : sourceWidth * 0.5;
-            sourceY -= sourceHeight * 0.5;
+            sourceX -= (sourceWidth05 < 18) ? 18 : sourceWidth05;
+            sourceY -= sourceHeight05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
-                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                controlPoint1X = (targetX + sourceX) / 2 + offset;
+                controlPoint1Y = (targetY + sourceY) / 2 + offset;
             }
-        } else if (dx_source < sourceWidth / 2 &&
-                    dx_source >= -sourceWidth / 2 &&
-                    dy_source < -sourceHeight / 2) {
+        } else if (dx_source < sourceWidth05 &&
+                    dx_source >= -sourceWidth05 &&
+                    dy_source < -sourceHeight05) {
             //console.log("VII");
-            sourceY -= sourceHeight * 0.5;
+            sourceY -= sourceHeight05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
-                controlPoint1Y = (targetY + sourceY) * 0.5 + offset;
+                controlPoint1X = (targetX + sourceX) / 2 + offset;
+                controlPoint1Y = (targetY + sourceY) / 2 + offset;
             }
-        } else if (dx_source >= sourceWidth / 2 &&
-                    dy_source < -sourceHeight / 2) {
+        } else if (dx_source >= sourceWidth05 &&
+                    dy_source < -sourceHeight05) {
             //console.log("VIII");
-            sourceY -= sourceHeight * 0.5;
-            sourceX += (sourceWidth * 0.5 < 18) ? 18 : sourceWidth * 0.5;
+            sourceY -= sourceHeight05;
+            sourceX += (sourceWidth05 < 18) ? 18 : sourceWidth05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5 + offset;
+                controlPoint1X = (targetX + sourceX) / 2 + offset;
             }
         }
         
@@ -617,7 +621,7 @@ define(function (require, exports, module) {
             .attr("width", width).attr("height", height)
             .attr("style", "display: none");
         d3.select("#ContainerStateMachineImage").append("div")
-            .attr("id", "svgdataurl").attr("style", "display: none")
+            .attr("id", "svgdataurl").attr("style", "display: none");
         
         // create svg area
         d3.select("#ContainerStateMachine")
