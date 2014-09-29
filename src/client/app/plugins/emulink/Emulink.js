@@ -275,7 +275,11 @@ define(function (require, exports, module) {
 	Emulink.prototype.createHtmlElements = function () {
         var _this = this;
 		var content = require("text!plugins/emulink/forms/maincontent.handlebars");
-        canvas = pvsioWebClient.createCollapsiblePanel({headerText: "Emulink", owner: "Emulink"});
+        canvas = pvsioWebClient.createCollapsiblePanel({
+            headerText: "Emulink",
+            showContent: true,
+            owner: "Emulink"
+        });
         canvas = canvas.html(content);
 		var infoBox = document.getElementById("EmuchartsEditorMode");
 		if (infoBox) {
@@ -646,6 +650,26 @@ define(function (require, exports, module) {
             }
         });
         d3.select("#btn_menuExportAsImage").on("click", function () {
+            var svg = d3.select("#ContainerStateMachine").select("svg")
+                        .attr("version", 1.1)
+                        .attr("xmlns", "http://www.w3.org/2000/svg")
+                        //.attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
+                        .style("background", "#ffffff")
+                        .node();
+            var SVGContent = (new window.XMLSerializer()).serializeToString(svg);
+            // this workaround is needed to define the xlink namespace -- d3 for some reason does not allow to define it but we need it to export the svg as an image
+            SVGContent = SVGContent.replace("xmlns=\"http://www.w3.org/2000/svg\"",
+                                            "xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"");
+            var imgsrc = "data:image/svg+xml;base64," + window.btoa(SVGContent);
+            var img = '<img src="' + imgsrc + '">';
+            d3.select("#svgdataurl").html(img);
+            var canvas = document.querySelector("canvas");
+            var context = canvas.getContext("2d");
+            var image = new Image();
+            
+            // restore background colour
+            d3.select("#ContainerStateMachine").select("svg").style("background", "#fffcec");
+            
             function imageLoadError(res) {
                 alert("Failed to export chart");
             }
@@ -659,22 +683,7 @@ define(function (require, exports, module) {
                 a.href = canvasdata;
                 a.click();
             }
-            var svg = d3.select("#ContainerStateMachine").select("svg")
-                        .attr("version", 1.1)
-                        .attr("xmlns", "http://www.w3.org/2000/svg")
-                        //.attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
-                        .style("background", "#ffffff")
-                        .node();
-            var SVGContent = (new XMLSerializer).serializeToString(svg);
-            // this workaround is needed to define the xlink namespace -- d3 for some reason does not allow to define it but we need it to export the svg as an image
-            SVGContent = SVGContent.replace("xmlns=\"http://www.w3.org/2000/svg\"",
-                                            "xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"")
-            var imgsrc = "data:image/svg+xml;base64," + window.btoa(SVGContent);
-            var img = '<img src="' + imgsrc + '">';
-            d3.select("#svgdataurl").html(img);
-            var canvas = document.querySelector("canvas");
-            var context = canvas.getContext("2d");
-            var image = new Image();
+
             image.onload = imageLoadComplete;
             image.onerror = imageLoadError;
             image.src = imgsrc;

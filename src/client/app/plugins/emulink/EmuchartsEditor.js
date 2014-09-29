@@ -16,6 +16,8 @@ define(function (require, exports, module) {
         Emucharts = require("plugins/emulink/Emucharts"),
         EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes");
     
+    var dbg = false;
+    
     // the emuchart data
     var emucharts;
     
@@ -70,7 +72,9 @@ define(function (require, exports, module) {
         this.emucharts.addListener("emuCharts_initialTransitionRemoved", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_stateRenamed", function (event) { _this.fire(event); });
         this.dragged = false;
-        this.SVGdragged = false;
+        this.SVGdragged = null;
+        this.dragRestorePoint = null;
+        this.doubleClicked = false;
         eventDispatcher(this);
     }
     
@@ -188,10 +192,10 @@ define(function (require, exports, module) {
         var offset = 0;
         var controlPoint1X = (edge.controlPoint) ? edge.controlPoint.x
                             : (edge.source.id === edge.target.id) ? (targetX + sourceX) * 0.5 + offset
-                            : (targetX + sourceX) * 0.5 - offset;
+                            : (targetX + sourceX) / 2 - offset;
         var controlPoint1Y = (edge.controlPoint) ? edge.controlPoint.y
                             : (edge.source.id === edge.target.id) ? (targetY + sourceY) * 0.5 + offset
-                            : (targetY + sourceY) * 0.5 - offset;
+                            : (targetY + sourceY) / 2 - offset;
 
         //var dx = edge.target.x - edge.source.x;
         //var dy = edge.target.y - edge.source.y;
@@ -389,6 +393,8 @@ define(function (require, exports, module) {
         offsetY = (offsetY > edge.target.height) ? offsetY : edge.target.height / 2;
         var targetWidth  = edge.target.name.length * fontSize;
         var targetHeight = edge.target.height;
+        var targetWidth05  = targetWidth / 2;
+        var targetHeight05 = targetHeight / 2;
 
         // to identify control points, we split the space into four Cartesian quadrants:
         // the source node is at the center of the axes, and the target is in one of the quadrants
@@ -401,13 +407,13 @@ define(function (require, exports, module) {
             //console.log("Quadrant I");
             // for targets in quadrant I, round links draw convex arcs
             // --> place the arrow on the left side of the target
-            targetX -= targetWidth * 0.8;
+            targetX -= (targetWidth05 < 20) ? 20 : targetWidth05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5;
-                controlPoint1Y = (targetY + sourceY) * 0.5;
+                controlPoint1X = (targetX + sourceX) / 2;
+                controlPoint1Y = (targetY + sourceY) / 2;
             }
             // move the first control point to quadrant II
-            sourceY += targetHeight * 0.6;
+            sourceY += targetHeight05;
             // create extra control points to avoid stiffy curves
             extraControlPoints[0] = { x: controlPoint1X + offsetX / 2,
                                       y: (offsetY > targetHeight) ?
@@ -422,19 +428,19 @@ define(function (require, exports, module) {
             // target node is in quadrant II
             // for targets in quadrant I, round links draw concave arcs
             // --> place the arrow at the bottom-right corner of the target
-            targetY += targetHeight * 0.6;
+            targetY += targetHeight05;
             if (!edge.controlPoint) {
-                controlPoint1Y = (targetY + sourceY) * 0.5;
+                controlPoint1Y = (targetY + sourceY) / 2;
             }
             // move the first control point to quadrant III
-            sourceX += targetWidth * 0.7;
+            sourceX += (targetWidth05 < 20) ? 20 : targetWidth05;
             // create extra control points to avoid stiffy curves
-            extraControlPoints[0] = { x: (offsetX > edge.target.width) ?
+            extraControlPoints[0] = { x: (offsetX > targetWidth) ?
                                             controlPoint1X + offsetX / 16
                                             : controlPoint1X + offsetX / 4,
                                       y: controlPoint1Y - offsetY / 2 };
             extraControlPoints[1] = { x: controlPoint1X - offsetX * 0.6,
-                                      y: (offsetY > edge.target.height) ?
+                                      y: (offsetY > targetHeight) ?
                                             controlPoint1Y - offsetY / 16
                                             : controlPoint1Y + offsetY / 2};
         } else if (dx < 0 && dy >= 0) {
@@ -442,34 +448,36 @@ define(function (require, exports, module) {
             // target node is in quadrant III
             // for targets in quadrant IV, round links draw concave arcs
             // --> place arrow end on the top-right corner of the target
-            targetX += targetWidth * 0.8;
+            targetX += (targetWidth05 < 20) ? 20 : targetWidth05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5;
-                controlPoint1Y = (targetY + sourceY) * 0.5;
+                controlPoint1X = (targetX + sourceX) / 2;
+                controlPoint1Y = (targetY + sourceY) / 2;
             }
             // move the first control point to quadrant IV
-            sourceY -= targetHeight * 0.56;
+            sourceY -= targetHeight05;
             // create extra control points to avoid stiffy curves
             extraControlPoints[0] = { x: controlPoint1X - offsetX / 2,
-                                      y: (offsetY > edge.target.height) ?
+                                      y: (offsetY > targetHeight) ?
                                             controlPoint1Y - offsetY / 16
                                             : controlPoint1Y - offsetY / 2};
-            extraControlPoints[1] = { x: controlPoint1X + offsetX / 16, y: controlPoint1Y + offsetY / 2 };
+            extraControlPoints[1] = { x: controlPoint1X + offsetX / 16,
+                                      y: controlPoint1Y + offsetY / 2 };
         } else if (dx >= 0 && dy >= 0) {
             //console.log("Quadrant IV");
             // target node is in quadrant IV
             // for targets in quadrant IV, round links draw convex arcs
             // --> place arrow end at the top-left corner of the target
-            targetY -= targetHeight * 0.56;
+            targetY -= targetHeight05;
             // move the first control point to quadrant I so that the self-edge looks round
-            sourceX -= targetWidth * 0.7;
+            sourceX -= (targetWidth05 < 20) ? 20 : targetWidth05;
             if (!edge.controlPoint) {
-                controlPoint1X = (targetX + sourceX) * 0.5;
+                controlPoint1X = (targetX + sourceX) / 2;
             }
             // create extra control points to avoid stiffy curves
-            extraControlPoints[0] = { x: controlPoint1X - offsetX / 16, y: controlPoint1Y + offsetY / 2};
+            extraControlPoints[0] = { x: controlPoint1X - offsetX / 16,
+                                      y: controlPoint1Y + offsetY / 2};
             extraControlPoints[1] = { x: controlPoint1X + offsetX / 2,
-                                      y: (offsetY > edge.target.height) ?
+                                      y: (offsetY > targetHeight) ?
                                             controlPoint1Y - offsetY / 4
                                             : controlPoint1Y - offsetY / 2 };// controlPoint1Y + offsetY / 16 };
         }
@@ -740,74 +748,25 @@ define(function (require, exports, module) {
         d3.select("#ContainerStateMachine").select("svg").append("svg:g").attr("id", "Transitions");
         d3.select("#ContainerStateMachine").select("svg").append("svg:g").attr("id", "States");
         
-        var mouseClick = function () {
-            if (!_this.SVGdragged) {
-                if (editor_mode === MODE.ADD_STATE() && !mouseover.node && !mouseOverControlPoint) {
-                    d3.event.stopPropagation();
-                    var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
-                    _this.fire({
-                        type: "emuCharts_addState",
-                        mouse: m,
-                        mouseover: mouseover,
-                        preventCreation: editor_mode !== MODE.ADD_STATE()
-                    });
-                }
-            }
-            _this.SVGdragged = false;
-            //console.log("mouseClick");
-        };
-        var mouseDown = function () {
-            if (mouseOverControlPoint === null &&
-                    editor_mode === MODE.ADD_TRANSITION()) {
-                d3.event.stopPropagation();
-                    // this is equivalent to drag start for default-initial transitions
-                    // create an arrow from the selected node to the cursor position
-                var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
-                if (!mousedrag.edge) {
-                    mousedrag.edge = { x: m[0], y: m[1] };
-                }
-                drag_line.classed("hidden", false)
-                    .style("marker-end", "url(#drag-arrow)")
-                    .style("marker-start", "url(#bubble)")
-                    .attr("d", "M" + m[0] + "," + m[1] +
-                                "L" + m[0] + "," + m[1]);
-            }
-            //console.log("mouseDown");
-        };
-        var mouseUp = function () {
-            if (editor_mode === MODE.ADD_TRANSITION()) {
-                // this is equivalent to drag end
-                // remove drag line
-                drag_line.classed("hidden", true)
-                         .style("marker-end", "")
-                         .style("marker-start", "")
-                         .attr("d", "M0,0L0,0");
-                if (mouseover.node && !mousedrag.node) {
-                    // fire event
-                    _this.fire({
-                        type: "emuCharts_addInitialTransition",
-                        source: null,
-                        target: mouseover.node
-                    });
-                }
-                mousedrag.edge = null;
-                _this.SVGdragged = false;
-            }
-            //console.log("mouseUp");
-        };
         var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
-            //console.log("Zoom");
-            var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+            if (dbg) {
+                console.log("Zoom");
+                console.log("d3.event.translate = " + d3.event.translate);
+            }
+            d3.event.sourceEvent.stopPropagation();
             //console.log("(" + m[0] + "," + m[1] + ")");
             if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.edge) {
-                d3.event.sourceEvent.stopPropagation();
+                var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
                 // initial transition
                 drag_line.attr("d", "M" + mousedrag.edge.x + "," + mousedrag.edge.y +
                                 "L" + m[0] + "," + m[1]);
+                if (_this.dragRestorePoint === null) {
+                    _this.dragRestorePoint = d3.event.translate;
+                    if (dbg) { console.log("Saving position on mousetranslate"); }
+                }
             } else if (editor_mode !== MODE.ADD_TRANSITION() && !mousedrag.node &&
                     editor_mode !== MODE.DELETE() && editor_mode !== MODE.RENAME()) {
                 d3.event.sourceEvent.stopPropagation();
-                    //console.log("Drag canvas");
     //                _this.fire({
     //                    type: "emuCharts_d3ZoomTranslate",
     //                    scale: d3.event.scale,
@@ -836,13 +795,81 @@ define(function (require, exports, module) {
                 //--
                 if (Math.abs(d3.event.translate[0]) > sensitivity.x
                         || Math.abs(d3.event.translate[1]) > sensitivity.y) {
-                    _this.SVGdragged = true;
+                    if (_this.SVGdragged === null) {
+                        _this.SVGdragged = d3.event.translate;
+                    }
+                    if (dbg) { console.log("Drag canvas"); }
                 }
             }
         });
+        var mouseUp = function () {
+            if (editor_mode === MODE.ADD_TRANSITION()) {
+                // this is equivalent to drag end
+                // remove drag line
+                drag_line.classed("hidden", true)
+                         .style("marker-end", "")
+                         .style("marker-start", "")
+                         .attr("d", "M0,0L0,0");
+                if (mouseover.node && !mousedrag.node) {
+                    // fire event
+                    _this.fire({
+                        type: "emuCharts_addInitialTransition",
+                        source: null,
+                        target: mouseover.node
+                    });
+                }
+                mousedrag.edge = null;
+            }
+            if (dbg) { console.log("mouseUp"); }
+        };
+        var mouseDown = function () {
+            if (_this.dragRestorePoint && zoom) {
+                zoom.translate(_this.dragRestorePoint);
+                _this.dragRestorePoint = null;
+                if (dbg) { console.log("zoom translate reset"); }
+            }
+            if (mouseOverControlPoint === null &&
+                    editor_mode === MODE.ADD_TRANSITION()) {
+                d3.event.stopPropagation();
+                    // this is equivalent to drag start for default-initial transitions
+                    // create an arrow from the selected node to the cursor position
+                var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+                if (!mousedrag.edge) {
+                    mousedrag.edge = { x: m[0], y: m[1] };
+                }
+                drag_line.classed("hidden", false)
+                    .style("marker-end", "url(#drag-arrow)")
+                    .style("marker-start", "url(#bubble)")
+                    .attr("d", "M" + m[0] + "," + m[1] +
+                                "L" + m[0] + "," + m[1]);
+            }
+            if (dbg) { console.log("mouseDown"); }
+        };
+        var mouseClick = function () {
+            if (_this.SVGdragged === null) {
+                if (editor_mode === MODE.ADD_STATE() && !mouseover.node && !mouseOverControlPoint) {
+                    d3.event.stopPropagation();
+                    var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+                    _this.fire({
+                        type: "emuCharts_addState",
+                        mouse: m,
+                        mouseover: mouseover,
+                        preventCreation: editor_mode !== MODE.ADD_STATE()
+                    });
+                }
+            }
+            _this.SVGdragged = null;
+            if (dbg) { console.log("mouseClick"); }
+        };
+        var mouseDoubleClick = function () {
+            d3.event.stopPropagation();
+            _this.doubleClicked = true;
+            if (dbg) { console.log("mouseDoubleClick"); }
+        };
         
         d3.select("#ContainerStateMachine svg")
             .on("click", mouseClick)
+            .on("dblclick", mouseDoubleClick)
             .on("mousedown", mouseDown)
             .on("mouseup", mouseUp)
             .call(zoom);
@@ -969,12 +996,15 @@ define(function (require, exports, module) {
                     //.style("stroke-width", stroke_width_highlighted)
                     .style("stroke", "green")
                     .style("marker-end", function (edge) {
-                        if (edge.source.x < edge.target.x) {
+                        if (edge.source.id === edge.target.id ||
+                                edge.source.x < edge.target.x) {
                             return "url(#end-arrow-selected)";
                         } else { return ""; }
                     })
                     .style("marker-start", function (edge) {
-                        if (edge.source.x < edge.target.x) {
+                        if (edge.source.id === edge.target.id) {
+                            return this.style.markerStart;
+                        } else if (edge.source.x < edge.target.x) {
                             return "";
                         } else { return "url(#end-arrow-rotated-selected)"; }
                     });
@@ -982,29 +1012,43 @@ define(function (require, exports, module) {
                 d3.select(this.children[3]).style("fill", "green");
                 d3.select(this.children[4]).style("fill", "green");
             }
-            //console.log("Transitions.mouseOver");
+            if (dbg) { console.log("Transitions.mouseOver"); }
         };
         var mouseOut = function (edge) {
-            if (!mouseOverControlPoint || mouseOverControlPoint.id === edge) {
+            if (!mouseOverControlPoint) {
                 d3.event.stopPropagation();
                 d3.select(this.firstChild)
                     //.style("stroke-width", stroke_width_normal)
                     .style("stroke", "black")
                     .style("marker-end", function (edge) {
-                        if (edge.source.x < edge.target.x) {
+                        if (edge.source.id === edge.target.id ||
+                                edge.source.x < edge.target.x) {
                             return "url(#end-arrow)";
                         } else { return ""; }
                     })
                     .style("marker-start", function (edge) {
-                        if (edge.source.x < edge.target.x) {
+                        if (edge.source.id === edge.target.id) {
+                            return this.style.markerStart;
+                        } else if (edge.source.x < edge.target.x) {
                             return "";
                         } else { return "url(#end-arrow-rotated)"; }
                     });
                 d3.select(this.childNodes[2]).attr("opacity", 0);
                 d3.select(this.children[3]).style("fill", "black");
                 d3.select(this.children[4]).style("fill", "black");
+            } else if (mouseOverControlPoint && mouseOverControlPoint.id === edge.id) {
+                var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+                // update selected control point
+                var cp = { x: m[0], y: m[1] };
+                _this.emucharts.set_controlPoint(mouseOverControlPoint, cp);
+                var transitionID = mouseOverControlPoint.id;
+                var transitions = d3.select("#ContainerStateMachine")
+                                    .select("#Transitions").selectAll(".transition")
+                                    .filter(function (transition) { return transition.id === transitionID; });
+                // refresh transitions
+                return refreshTransitions(transitions);
             }
-            //console.log("Transitions.mouseOut");
+            if (dbg) { console.log("Transitions.mouseOut"); }
         };
         var mouseClick = function (edge) {
             // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
@@ -1022,7 +1066,7 @@ define(function (require, exports, module) {
                     edge: edge
                 });
             }
-            //console.log("Transitions.mouseClick");
+            if (dbg) { console.log("Transitions.mouseClick"); }
         };
         var mouseDoubleClick = function (edge) {
             // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
@@ -1033,22 +1077,30 @@ define(function (require, exports, module) {
                     edge: edge
                 });
             }
-            //console.log("Transitions.mouseDoubleClick");
+            if (dbg) { console.log("Transitions.mouseDoubleClick"); }
         };
         var mouseDown = function (edge) {
             // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
             d3.event.stopPropagation();
-            //console.log("Transitions.mouseDown");
+            if (dbg) { console.log("Transitions.mouseDown"); }
         };
         var mouseUp = function (edge) {
             // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
             d3.event.stopPropagation();
-            //console.log("Transitions.mouseUp");
+            if (dbg) { console.log("Transitions.mouseUp"); }
         };
         var mouseMove = function (edge) {
-            //console.log("Transitions.mouseMove");
+            if (dbg) { console.log("Transitions.mouseMove"); }
+        };
+        var dragStart = function (node) {
+            if (dbg) { console.log("Transitions.dragStart"); }
+            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
+            d3.event.sourceEvent.stopPropagation();
+        };
+        var dragEdge = function (edge) {
             if (mouseOverControlPoint) {
-                d3.event.stopPropagation();
+                // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
+                d3.event.sourceEvent.stopPropagation();
                 var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
                 // update selected control point
                 var cp = { x: m[0], y: m[1] };
@@ -1060,7 +1112,14 @@ define(function (require, exports, module) {
                 // refresh transitions
                 return refreshTransitions(transitions);
             }
+            if (dbg) { console.log("Transitions.dragEdge"); }
         };
+        var dragEnd = function (node) {
+            if (dbg) { console.log("Transitions.dragEnd"); }
+            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
+            d3.event.sourceEvent.stopPropagation();
+        };
+
         
         
         if (!this.emucharts || !this.emucharts.getEdges()) { return; }
@@ -1073,7 +1132,13 @@ define(function (require, exports, module) {
                                     .data(edges, function (edge) { return edge.id; });
             var enteredTransitions = drawTransitions(transitions.enter());
             var exitedTransitions = removeTransitions(transitions.exit());
-            enteredTransitions
+            var drag = d3.behavior.drag().origin(function (edge) {
+                return edge;
+            });
+            drag.on("dragstart", dragStart)
+                .on("drag", dragEdge)
+                .on("dragend", dragEnd);
+            enteredTransitions.call(drag)
                 .on("mouseover", mouseOver)
                 .on("mouseout", mouseOut)
                 .on("mousemove", mouseMove)
@@ -1084,10 +1149,10 @@ define(function (require, exports, module) {
             
             enteredTransitions.selectAll(".cpoints")
                 .on("mousedown", function (d) {
-                    //console.log("mouseOverControlPoint");
+                    if (dbg) { console.log("mouseOverControlPoint"); }
                     mouseOverControlPoint = d;
                 }).on("mouseup", function (d) {
-                    //console.log("mouseLeavingControlPoint");
+                    if (dbg) { console.log("mouseLeavingControlPoint"); }
                     mouseOverControlPoint = null;
                 });
         }
@@ -1316,6 +1381,7 @@ define(function (require, exports, module) {
         
         // mouse event handlers
         var dragStart = function (node) {
+            if (dbg) { console.log("State.dragStart"); }
             // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
             d3.event.sourceEvent.stopPropagation();
             // update mouse variables
@@ -1339,7 +1405,7 @@ define(function (require, exports, module) {
         var dragNode = function (node) {
             // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
             d3.event.sourceEvent.stopPropagation();
-            //console.log("State.dragNode");
+            if (dbg) { console.log("State.dragNode"); }
             function computeControlPoint(edge) {
                 var dx1 = edge.target.x - edge.source.x;
                 var dy1 = edge.target.y - edge.source.y;
@@ -1414,6 +1480,7 @@ define(function (require, exports, module) {
             }
         };
         var dragEnd = function (node) {
+            if (dbg) { console.log("State.dragEnd"); }
             // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
             d3.event.sourceEvent.stopPropagation();
             if (editor_mode === MODE.ADD_TRANSITION()) {
@@ -1682,11 +1749,19 @@ define(function (require, exports, module) {
 	 */
     EmuchartsEditor.prototype.rename_state = function (stateID, newLabel) {
         this.emucharts.rename_node(stateID, newLabel);
+        // refresh states
         var states = d3.select("#ContainerStateMachine")
             .select("#States").selectAll(".state")
             .filter(function (state) { return state.id === stateID; });
-        // refresh states
         refreshStates(states);
+        // refresh all incoming and outgoing transitions of the renamed state
+        var transitions = d3.select("#ContainerStateMachine")
+            .select("#Transitions").selectAll(".transition")
+            .filter(function (transition) {
+                return (transition.target && transition.target.id === stateID) ||
+                        (transition.source && transition.source.id === stateID);
+            });
+        refreshTransitions(transitions);
     };
 
     /**
