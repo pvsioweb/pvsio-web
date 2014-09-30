@@ -44,11 +44,6 @@ define(function (require, exports, module) {
 			@type {d3.selection}
 		 */
 		this.imageMap = property.call(this);
-		/**
-			unscaled version of imageMap
-			@type {d3.selection}
-		 */
-        this.baseImageMap = property.call(this);
     }
     /**
 	 * Removes the widget from the interface
@@ -58,9 +53,6 @@ define(function (require, exports, module) {
 		d3.select(this.parentGroup()).remove();
 		if (this.imageMap()) {
 			this.imageMap().remove();
-		}
-		if (this.baseImageMap()) {
-			this.baseImageMap().remove();
 		}
     };
     /**
@@ -95,13 +87,6 @@ define(function (require, exports, module) {
 			.attr("coords", coords)
 			.attr("href", href);
 		widget.imageMap(area);
-        // this copy of the area maps is the unscaled version
-		var baseArea = d3.select("map#basePrototypeMap").append("area");
-		baseArea.attr("class", this.id())
-			.attr("shape", "rect")
-			.attr("coords", coords)
-			.attr("href", href);
-        widget.baseImageMap(baseArea);
 		return area;
 	};
 	

@@ -70,7 +70,6 @@ define(function (require, exports, module) {
     WidgetManager.prototype.restoreWidgetDefinitions = function (defs) {
 		var wm = this;
         if (defs) {
-            //console.log(defs);
             var widget;
             _.each(defs.widgetMaps, function (w, key) {
                 w.type = w.type.toLowerCase();
@@ -127,12 +126,12 @@ define(function (require, exports, module) {
                         d3.select(region.node().parentNode).remove();
                     });
             }).on("resize", function (e) {
-                wm.updateLocationAndSize(e.region.attr("id"), e.pos);
+                wm.updateLocationAndSize(e.region.attr("id"), e.pos, e.scale);
                 event.action = "resize";
                 event.widget = wm.getWidget(e.region.attr("id"));
                 wm.fire(event);
             }).on("move", function (e) {
-                wm.updateLocationAndSize(e.region.attr("id"), e.pos);
+                wm.updateLocationAndSize(e.region.attr("id"), e.pos, e.scale);
                 event.action = "move";
                 event.widget = wm.getWidget(e.region.attr("id"));
                 wm.fire(event);
@@ -233,11 +232,17 @@ define(function (require, exports, module) {
 		Update  the location of the widget by updating the image map coords to the position given.
 		@param {Widget} widget The widget to update
 		@param {{x: number, y: number, width: number, height: number}} pos The new position and size
+		@param {Number?} scale a scale factor for the pos value. If not supplied defaults to 1
 		@memberof WidgetManager
 	 */
-    WidgetManager.prototype.updateLocationAndSize = function (widget, pos) {
+    WidgetManager.prototype.updateLocationAndSize = function (widget, pos, scale) {
+		scale = scale || 1;
 		if (typeof widget === "string") { widget = this.getWidget(widget); }
         if (widget) {
+			pos.x *= scale;
+			pos.y *= scale;
+			pos.width *= scale;
+			pos.height *= scale;
             widget.updateLocationAndSize(pos);
         }
     };

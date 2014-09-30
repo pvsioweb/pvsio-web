@@ -69,7 +69,7 @@
             
             region.on("mouseup", function () {
                 svg.on("mousemove.region", null);
-                dispatcher.move({region: region, pos: pos(region)});
+                dispatcher.move({region: region, pos: pos(region), scale:_scale});
             });
             //higlight the region show it has been selected
             if (!d3.event.ctrlKey) {//remove previous selections if ctrl key wasnt pressed
@@ -117,14 +117,14 @@
                     h = rh + dy;
                 }
                 d3.select(this).attr("x", mmPos.x).attr("y", mmPos.y);
-                updateRegion(region, {x: x, y: y, width: w, height: h}, false);
+                updateRegion(region, {x: x, y: y, width: w, height: h});
             });
             
             d3.select(this).on("mouseup", function (d, i) {
                 svg.on("mousemove.corner", null);
                 //dispatch move event
                 dispatcher.resize({region: region, old: {x: rx, y: ry, width: rw, height: rh},
-                                pos: pos(region)});
+                                pos: pos(region), scale: _scale});
             });
         });
     }
@@ -146,14 +146,14 @@
             //calculate the delta movement and update rect with and height
             var w = e.x - startPos.x, h = e.y - startPos.y, x = w < 0 ? startPos.x + w : startPos.x,
                 y = h < 0 ? startPos.y + h : startPos.y;
-            updateRegion(region, {x: x, y: y, height: h, width: w}, false);
+            updateRegion(region, {x: x, y: y, height: h, width: w});
             d3.event.stopPropagation();
             d3.event.preventDefault();
         }).on("mouseup", function () {
             if (!moved) {
                 g.remove();
             } else {
-                dispatcher.create({region: region, pos: pos(region)});//dispatch create event
+                dispatcher.create({region: region, pos: pos(region), scale: _scale});//dispatch create event
             }
             svg.on("mousemove", null)
                 .on("mouseup", null);
