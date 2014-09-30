@@ -20,10 +20,109 @@ define(function (require, exports, module) {
         ProjectFile = require("project/ProjectFile"),
         fs = require("util/fileHandler"),
         PluginManager = require("plugins/PluginManager"),
-		WidgetsListView =require("pvsioweb/forms/WidgetsListView");
+		WidgetsListView = require("pvsioweb/forms/WidgetsListView");
 	
     var template = require("text!pvsioweb/forms/maincontent.handlebars");
     
+    // FIXME: this very same function is in ProjectManager
+    var scaleImageMap = function (scale) {
+        var areas = document.getElementById("basePrototypeMap").getElementsByTagName("area");
+        var scaledAreas = document.getElementById("prototypeMap").getElementsByTagName("area");
+        var n, m, coords = [];
+        for (n = 0; n < areas.length; n++) {
+            coords[n] = areas[n].coords.split(',');
+        }
+        for (n = 0; n < scaledAreas.length; n++) {
+            for (m = 0; m < coords[n].length; m++) {
+                coords[n][m] = parseFloat(coords[n][m]) * parseFloat(scale);
+            }
+            scaledAreas[n].coords = coords[n].join(",");
+            // display areas need to be updated explicitly, as they are stand-alone html elements
+            var cname = scaledAreas[n].getAttribute("class");
+            if (cname.indexOf("Display") === 0) {
+                // standard displays
+                var disp = document.getElementById(cname);
+                if (disp) {
+                    //console.log(cname);
+                    disp.setAttribute("x", coords[n][0]);
+                    disp.setAttribute("y", coords[n][1]);
+                    disp.setAttribute("width", coords[n][2] - coords[n][0]);
+                    disp.setAttribute("height", coords[n][3] - coords[n][1]);
+                    disp.setAttribute("font-size", (0.8 * (coords[n][3] - coords[n][1])) + "px");
+                }
+                // cursored displays
+                disp = document.getElementById(cname + "_displayWidget");
+                if (disp) {
+                    //console.log(cname + "_displayWidget");
+                    disp.setAttribute("x", coords[n][0]);
+                    disp.setAttribute("y", coords[n][1]);
+                    disp.setAttribute("width", coords[n][2] - coords[n][0]);
+                    disp.setAttribute("height", coords[n][3] - coords[n][1]);
+                    disp.setAttribute("font-size", (0.8 * (coords[n][3] - coords[n][1])) + "px");
+                    disp.style.cssText = "left: " + coords[n][0] + "px; " +
+                                         "top: " + coords[n][1] + "px; " +
+                                         "width: " + (coords[n][2] - coords[n][0]) + "px; " +
+                                         "height: " + (coords[n][3] - coords[n][1]) + "px; " +
+                                         "font-size: " + (0.8 * (coords[n][3] - coords[n][1])) + "px; " +
+                                         "position: absolute; color: white;";
+                    if (disp.firstChild && disp.firstChild.id === "display") {
+                        disp.firstChild.setAttribute("width", (coords[n][2] - coords[n][0]));
+                        disp.firstChild.setAttribute("height", (coords[n][3] - coords[n][1]));
+                    }
+                }
+            }
+        }
+        return areas;
+    };
+    var restoreScaleImageMap = function (scale) {
+        var areas = document.getElementById("basePrototypeMap").getElementsByTagName("area");
+        var scaledAreas = document.getElementById("prototypeMap").getElementsByTagName("area");
+        scale = parseFloat(scale);
+        var n, m, coords = [];
+        for (n = 0; n < areas.length; n++) {
+            coords[n] = areas[n].coords.split(',');
+        }
+        for (n = 0; n < areas.length; n++) {
+            for (m = 0; m < coords[n].length; m++) {
+                coords[n][m] = parseFloat(coords[n][m]);
+            }
+            areas[n].coords = coords[n].join(",");
+            // display areas need to be updated explicitly, as they are stand-alone html elements
+            var cname = areas[n].getAttribute("class");
+            if (cname.indexOf("Display") === 0) {
+                // standard displays
+                var disp = document.getElementById(cname);
+                if (disp) {
+                    disp.setAttribute("x", coords[n][0]);
+                    disp.setAttribute("y", coords[n][1]);
+                    disp.setAttribute("width", (coords[n][2] - coords[n][0]));
+                    disp.setAttribute("height", (coords[n][3] - coords[n][1]));
+                    disp.setAttribute("font-size", (0.8 * (coords[n][3] - coords[n][1])) + "px");
+                }
+                disp = document.getElementById(cname + "_displayWidget");
+                // cursored displays
+                disp = document.getElementById(cname + "_displayWidget");
+                if (disp) {
+                    disp.setAttribute("x", (coords[n][0] * scale));
+                    disp.setAttribute("y", (coords[n][1] * scale));
+                    disp.setAttribute("width", (coords[n][2] - coords[n][0]));
+                    disp.setAttribute("height", (coords[n][3] - coords[n][1]));
+                    disp.setAttribute("font-size", (0.8 * (coords[n][3] - coords[n][1])) + "px");
+                    disp.style.cssText = "left: " + coords[n][0] * scale + "px; " +
+                                         "top: " + coords[n][1] * scale + "px; " +
+                                         "width: " + (coords[n][2] - coords[n][0]) + "px; " +
+                                         "height: " + (coords[n][3] - coords[n][1]) + "px; " +
+                                         "font-size: " + (0.8 * scale * (coords[n][3] - coords[n][1])) + "px; " +
+                                         "position: absolute; color: white;";
+                    if (disp.firstChild && disp.firstChild.id === "display") {
+                        disp.firstChild.setAttribute("width", (coords[n][2] - coords[n][0]));
+                        disp.firstChild.setAttribute("height", (coords[n][3] - coords[n][1]));
+                    }
+                }
+            }
+        }
+        return areas;
+    };
 	/**
 	 * Switches the prototoyping layer to the builder layer
      * @private
@@ -36,6 +135,14 @@ define(function (require, exports, module) {
         d3.selectAll("div.display,#controlsContainer button").classed("builder", true);
         d3.selectAll("div.display,#controlsContainer button").classed("simulator", false);
         d3.selectAll("#record").style("display", "none");
+        // FIXME: we are updating the widgets again because otherwise the scale factor would translate them inappropriately
+        var simView = document.getElementById("btnSimulatorView").getAttribute("class");
+        var transform = d3.select("svg.image-map-layer").select("g");
+        if (simView && simView.indexOf("active") < 0 && transform.node()) {
+            // update widgets
+            var scale = transform.attr("transform").replace("scale(", "").replace(")", "");
+            restoreScaleImageMap(scale);
+        }
     }
 	/** Switches the prototyping layer to the simulator/testing layer 
         @private
@@ -44,11 +151,19 @@ define(function (require, exports, module) {
         d3.select(".image-map-layer").style("opacity", 0.1).style("z-index", -2);
         d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
 		d3.select("#controlsContainer .active").classed("active", false);
-        d3.select("#btnSimulatorView").classed('active', true);
-        d3.select("#btnSimulatorView").classed('selected', true);
+        d3.select("#btnSimulatorView").classed("active", true);
+        d3.select("#btnSimulatorView").classed("selected", true);
         d3.selectAll("div.display,#controlsContainer button").classed("simulator", true);
         d3.selectAll("div.display,#controlsContainer button").classed("builder", false);
         d3.selectAll("#record").style("display", "block");
+        // update widgets
+        var simView = document.getElementById("btnSimulatorView").getAttribute("class");
+        var transform = d3.select("svg.image-map-layer").select("g").attr("transform");
+        if (simView && simView.indexOf("active") >= 0 && transform) {
+            // update widgets
+            var scale = transform.replace("scale(", "").replace(")", "");
+            scaleImageMap(scale);
+        }
     }
     
 	///FIXME need to distinguish between process started and process restarted

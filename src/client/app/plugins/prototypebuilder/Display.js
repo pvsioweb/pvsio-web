@@ -46,7 +46,8 @@ define(function (require, exports, module) {
 		if (!text.empty()) {
 			text.remove();
 		}
-		text = d3.select("#imageDiv").append("div").attr("class", this.id() + " displayWidget");
+		text = d3.select("#imageDiv").append("div").attr("class", this.id() + " displayWidget")
+                 .attr("id", this.id() + "_displayWidget");
 		var cursoredDisplay = (this.cursorName()) ? true : false;
 		if (!cursoredDisplay) {
 			text.html(dispVal).style("left", x + "px").style("top", y + "px").style("position", "absolute")

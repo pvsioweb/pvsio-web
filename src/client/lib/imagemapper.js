@@ -236,8 +236,10 @@
             } else {
                 props = cr(imageEl);
                 _el_poll_count++;
-                if (_el_poll_count < 200) {
+                if (_el_poll_count < 20) {
                     loadImage();
+                } else {
+                    _el_poll_count = 0;
                 }
             }
         };

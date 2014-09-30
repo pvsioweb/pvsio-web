@@ -130,7 +130,7 @@ define(function (require, exports, module) {
                     ws.getFile(f, function (err, res) {
                         if (!err) {
                             editor.off("change", _editorChangedHandler);
-                            editor.setOption("mode", "txt")
+                            editor.setOption("mode", "txt");
                             pvsFile.content(res.fileContent).dirty(false);
                             editor.setValue(pvsFile.content());
                             editor.markClean();
@@ -303,6 +303,58 @@ define(function (require, exports, module) {
         });
 		
 	};
+    
+    ProjectManager.prototype.scaleImageMap = function (scale) {
+        var areas = document.getElementById("basePrototypeMap").getElementsByTagName("area");
+        var scaledAreas = document.getElementById("prototypeMap").getElementsByTagName("area");
+        var n, m, coords = [];
+        for (n = 0; n < areas.length; n++) {
+            coords[n] = areas[n].coords.split(',');
+        }
+        for (n = 0; n < scaledAreas.length; n++) {
+            for (m = 0; m < coords[n].length; m++) {
+                coords[n][m] = parseFloat(coords[n][m]) * parseFloat(scale);
+            }
+            scaledAreas[n].coords = coords[n].join(",");
+            // display areas need to be updated explicitly, as they are stand-alone html elements
+            var cname = scaledAreas[n].getAttribute("class");
+            if (cname.indexOf("Display") === 0) {
+                // standard displays
+                var disp = document.getElementById(cname);
+                if (disp) {
+                    //console.log(cname);
+                    disp.setAttribute("x", coords[n][0]);
+                    disp.setAttribute("y", coords[n][1]);
+                    disp.setAttribute("width", coords[n][2] - coords[n][0]);
+                    disp.setAttribute("height", coords[n][3] - coords[n][1]);
+                    disp.setAttribute("font-size", (0.8 * (coords[n][3] - coords[n][1])) + "px");
+                }
+                // cursored displays
+                disp = document.getElementById(cname + "_displayWidget");
+                if (disp) {
+                    //console.log(cname + "_displayWidget");
+                    disp.setAttribute("x", coords[n][0]);
+                    disp.setAttribute("y", coords[n][1]);
+                    disp.setAttribute("width", coords[n][2] - coords[n][0]);
+                    disp.setAttribute("height", coords[n][3] - coords[n][1]);
+                    disp.setAttribute("font-size", (0.8 * (coords[n][3] - coords[n][1])) + "px");
+                    disp.style.cssText = "left: " + coords[n][0] + "px; " +
+                                         "top: " + coords[n][1] + "px; " +
+                                         "width: " + (coords[n][2] - coords[n][0]) + "px; " +
+                                         "height: " + (coords[n][3] - coords[n][1]) + "px; " +
+                                         "font-size: " + (0.8 * (coords[n][3] - coords[n][1])) + "px; " +
+                                         "position: absolute; color: white;";
+                    if (disp.firstChild && disp.firstChild.id === "display") {
+                        disp.firstChild.setAttribute("width", (coords[n][2] - coords[n][0]));
+                        disp.firstChild.setAttribute("height", (coords[n][3] - coords[n][1]));
+                    }
+                }
+            }
+        }
+        return areas;
+    };
+
+    
 	/**
 	 * Updates the project image with in the prototype builder
 	 * @param {ProjectFile} image the ProjectFile representing the project image
@@ -310,6 +362,7 @@ define(function (require, exports, module) {
 	 */
 	ProjectManager.prototype.updateImage = function (image, cb) {
         var img = new Image();
+        var _this = this;
         
         function imageLoadComplete(res) {
 			//if the image width is more than the the containing element scale it down a little
@@ -326,15 +379,20 @@ define(function (require, exports, module) {
 					scale = adjustedWidth / img.width;
 					adjustedHeight = scale * img.height;
 				}
-
 				d3.select("#body").style("height", (adjustedHeight + 50) + "px");
-
 				d3.select("#imageDiv").style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
 				d3.select("#imageDiv img").attr("src", img.src).attr("height", adjustedHeight).attr("width", adjustedWidth);
 				d3.select("#imageDiv svg").attr("height", img.height).attr("width", img.width);
 				d3.select("#imageDiv svg > g").attr("transform", "scale(" + scale + ")");
 				//hide the draganddrop stuff
 				d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+                // update widgets
+                var simView = document.getElementById("btnSimulatorView").getAttribute("class");
+                if (simView && simView.indexOf("active") >= 0) {
+                    // update widgets
+                    _this.scaleImageMap(scale);
+                }
+                
 			}
 			resize();
             // invoke callback, if any

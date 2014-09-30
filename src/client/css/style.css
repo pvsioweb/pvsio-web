@@ -387,7 +387,7 @@ div.detailsForm select, div.detailsForm textarea{
 	position: absolute;
 	top: 0;
 	right: 0;
-	z-index: 2;
+	z-index: 1234;
 	width: 200px;
 }
 
