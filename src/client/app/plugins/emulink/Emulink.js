@@ -275,7 +275,11 @@ define(function (require, exports, module) {
 	Emulink.prototype.createHtmlElements = function () {
         var _this = this;
 		var content = require("text!plugins/emulink/forms/maincontent.handlebars");
-        canvas = pvsioWebClient.createCollapsiblePanel({headerText: "Emulink", owner: "Emulink"});
+        canvas = pvsioWebClient.createCollapsiblePanel({
+            headerText: "Emulink",
+            showContent: true,
+            owner: "Emulink"
+        });
         canvas = canvas.html(content);
 		var infoBox = document.getElementById("EmuchartsEditorMode");
 		if (infoBox) {
@@ -400,7 +404,7 @@ define(function (require, exports, module) {
                         emuchartsManager.importPIMChart(res);
                         if (callback && typeof callback === "function") {
                             callback(err, res);
-                        }                    
+                        }
                     }
                 } else {
                     console.log("Error while opening file (" + err + ")");
@@ -502,7 +506,6 @@ define(function (require, exports, module) {
         d3.select("#btn_toolbarZoomReset").on("click", function () {
             emuchartsManager.zoom_reset();
         });
-
 
 
         
@@ -645,6 +648,45 @@ define(function (require, exports, module) {
                     }
                 });
             }
+        });
+        d3.select("#btn_menuExportAsImage").on("click", function () {
+            var svg = d3.select("#ContainerStateMachine").select("svg")
+                        .attr("version", 1.1)
+                        .attr("xmlns", "http://www.w3.org/2000/svg")
+                        //.attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
+                        .style("background", "#ffffff")
+                        .node();
+            var SVGContent = (new window.XMLSerializer()).serializeToString(svg);
+            // this workaround is needed to define the xlink namespace -- d3 for some reason does not allow to define it but we need it to export the svg as an image
+            SVGContent = SVGContent.replace("xmlns=\"http://www.w3.org/2000/svg\"",
+                                            "xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"");
+            var imgsrc = "data:image/svg+xml;base64," + window.btoa(SVGContent);
+            var img = '<img src="' + imgsrc + '">';
+            d3.select("#svgdataurl").html(img);
+            var canvas = document.querySelector("canvas");
+            var context = canvas.getContext("2d");
+            var image = new Image();
+            
+            // restore background colour
+            d3.select("#ContainerStateMachine").select("svg").style("background", "#fffcec");
+            
+            function imageLoadError(res) {
+                alert("Failed to export chart");
+            }
+            function imageLoadComplete(res) {
+                context.drawImage(image, 0, 0);
+                var canvasdata = canvas.toDataURL("image/png");
+                var pngimg = '<img src="' + canvasdata + '">';
+                d3.select("#pngdataurl").html(pngimg);
+                var a = document.createElement("a");
+                a.download = "emuChart.png";
+                a.href = canvasdata;
+                a.click();
+            }
+
+            image.onload = imageLoadComplete;
+            image.onerror = imageLoadError;
+            image.src = imgsrc;
         });
         
         //-- States menu -----------------------------------------------------------
@@ -936,7 +978,6 @@ define(function (require, exports, module) {
             });
             // select file
             projectManager.selectFile(emuchartsFile);
-            var x = 0;
         });
         d3.select("#btn_menuPIMPrinter").on("click", function () {
             var emucharts = {
@@ -953,8 +994,8 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".tex",
-                                                                 emuchartsPIMPrinter.print(emucharts));
+            var pimModel = emuchartsPIMPrinter.print(emucharts);
+            var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".tex", pimModel);
             if (projectManager.fileExists(emuchartsFile)) {
                 // remove file from project
                 projectManager.project().removeFile(emuchartsFile);
@@ -976,7 +1017,6 @@ define(function (require, exports, module) {
             });
             // select file
             projectManager.selectFile(emuchartsFile);
-            var x = 0;
         });
         d3.select("#btn_menuCppPrinter").on("click", function () {
             //document.getElementById("menuCodeGenenerators").children[1].style.display = "none";
@@ -1017,7 +1057,6 @@ define(function (require, exports, module) {
             });
             // select file
             projectManager.selectFile(emuchartsFile);
-            var x = 0;
         });
         //-- Zoom menu -----------------------------------------------------------
         d3.select("#menuZoom").on("mouseover", function () {

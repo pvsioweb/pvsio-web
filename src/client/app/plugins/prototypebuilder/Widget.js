@@ -86,7 +86,6 @@ define(function (require, exports, module) {
 			.attr("shape", "rect")
 			.attr("coords", coords)
 			.attr("href", href);
-			
 		widget.imageMap(area);
 		return area;
 	};

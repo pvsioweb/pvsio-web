@@ -5,12 +5,14 @@
 }
 
 #stateMachineMenu {
+    position: absolute;
 	float: left;
     margin-left: 0px;
+    width: 700px;
 }
 #stateMachineInfoBar {
-	float: right;
-	padding-right: 194px;
+    position: absolute;
+    padding-left: 700px;
 }
 
 #ContainerStateMachine  {

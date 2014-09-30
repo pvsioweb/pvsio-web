@@ -70,7 +70,6 @@ define(function (require, exports, module) {
     WidgetManager.prototype.restoreWidgetDefinitions = function (defs) {
 		var wm = this;
         if (defs) {
-            console.log(defs);
             var widget;
             _.each(defs.widgetMaps, function (w, key) {
                 w.type = w.type.toLowerCase();

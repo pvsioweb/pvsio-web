@@ -43,14 +43,19 @@ define(function (require, exports, module) {
 		@returns {Promise} a promise that resolves when the prototype builder has been initialised
 	*/
     PrototypeBuilder.prototype.initialise = function () {
-        editorContainer = pvsioWebClient.createCollapsiblePanel({headerText: "PVS Editor", showContent: false, onClick: function () {
-            editor.refresh();
-        }, owner: "PrototypeBuilder"});
+        editorContainer = pvsioWebClient.createCollapsiblePanel({
+            headerText: "Model Editor",
+            showContent: false,
+            onClick: function () {
+                editor.refresh();
+            },
+            owner: "PrototypeBuilder"
+        });
         editorContainer.append("div").html(sourceCodeTemplate);
 
         // this enables autocompletion
         editor = new CodeMirror(d3.select("#editor").node(), {
-            mode: "pvs",
+            mode: "txt",
             lineNumbers: true,
             foldGutter: true,
             autofocus: true,
