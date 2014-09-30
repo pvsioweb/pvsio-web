@@ -67,7 +67,7 @@
             
             region.on("mouseup", function () {
                 svg.on("mousemove.region", null);
-                dispatcher.move({region: region, pos: pos(region)});
+                dispatcher.move({region: region, pos: pos(region), scale:_scale});
             });
             //higlight the region show it has been selected
             if (!d3.event.ctrlKey) {//remove previous selections if ctrl key wasnt pressed
@@ -122,7 +122,7 @@
                 svg.on("mousemove.corner", null);
                 //dispatch move event
                 dispatcher.resize({region: region, old: {x: rx, y: ry, width: rw, height: rh},
-                                pos: pos(region)});
+                                pos: pos(region), scale: _scale});
             });
         });
     }
@@ -151,7 +151,7 @@
             if (!moved) {
                 g.remove();
             } else {
-                dispatcher.create({region: region, pos: pos(region)});//dispatch create event
+                dispatcher.create({region: region, pos: pos(region), scale: _scale});//dispatch create event
             }
             svg.on("mousemove", null)
                 .on("mouseup", null);

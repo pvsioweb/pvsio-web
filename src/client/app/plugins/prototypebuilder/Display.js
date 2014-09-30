@@ -26,6 +26,9 @@ define(function (require, exports, module) {
     Display.prototype.constructor = Display;
     Display.prototype.parentClass = Widget.prototype;
     
+	function coordsToPos(coords) {
+		return {x: coords[0], y: coords[1], width: coords[2] - coords[0], height: coords[3] - coords[1]}; 	
+	}
     /**
      * state is a JSON object -- the caller should use JSON.parse to transform strings into JSON objects
      * using JSON.parse within this function affects performance, as callers may invoke render many times on the same state,
@@ -38,10 +41,11 @@ define(function (require, exports, module) {
         if (typeof dispVal === "string") {
             dispVal = dispVal.replace(new RegExp("\"", "g"), "");
         }
-		var y = this.element().attr("y"),
-			x = this.element().attr("x"),
-			w = this.element().attr("width"),
-			h = this.element().attr("height");
+		var pos = coordsToPos(this.imageMap().attr("coords").split(",").map(function (d) { return +d; }));
+		var y = pos.y,
+			x = pos.x,
+			w = pos.width,
+			h = pos.height;
 		var text = d3.select("div." + this.id());
 		if (!text.empty()) {
 			text.remove();
@@ -88,7 +92,7 @@ define(function (require, exports, module) {
 	*/
 	Display.prototype.updateLocationAndSize = function (pos) {
 		Display.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
-		d3.select("div." + this.id()).style("left", pos.x + "px").style("y", pos.y + "px")
+		d3.select("div." + this.id()).style("left", pos.x + "px").style("top", pos.y + "px")
 			.style("width", pos.width + "px").style("height", pos.height + "px");
 	};
     

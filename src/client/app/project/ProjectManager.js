@@ -327,6 +327,16 @@ define(function (require, exports, module) {
 				d3.select("#imageDiv svg > g").attr("transform", "scale(" + scale + ")");
 				//hide the draganddrop stuff
 				d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+				
+				//update widgets maps after resizing
+				function _getPos(el) {
+					return {x: el.attr("x"), y: el.attr("y"), height: el.attr("height"), width: el.attr("width")};	
+				}
+				var widgets = WidgetManager.getAllWidgets();
+				widgets.forEach(function (w) {
+					var pos = _getPos(w.element());
+					WidgetManager.updateLocationAndSize(w, pos, scale);
+				});
 			}
 			resize();
             // invoke callback, if any
