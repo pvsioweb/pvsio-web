@@ -115,22 +115,18 @@ define(function (require, exports, module) {
 			}
 			
 		}).on("mouseup", function () {
-			if (btnTimer.getCurrentCount() > 0) {
-				var f = widget.functionText();
-				if (events && events.indexOf('press/release') > -1) {
-					ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
-                    Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "release", ts: new Date().getTime()});
-				}
+			var f = widget.functionText();
+			if (events && events.indexOf('press/release') > -1) {
+				ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
+				Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "release", ts: new Date().getTime()});
 			}
 			mouseup(d3.event);
 		}).on("mouseout", function () {
-			if (btnTimer.getCurrentCount() > 0) {
-				var f = widget.functionText();
-				if (events && events.indexOf('press/release') > -1) {
-					ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
-                    //add action
-                    Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "release", ts: new Date().getTime()});
-				}
+			var f = widget.functionText();
+			if (events && events.indexOf('press/release') > -1) {
+				ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
+				//add action
+				Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "release", ts: new Date().getTime()});
 			}
 			mouseup(d3.event);
 		});
