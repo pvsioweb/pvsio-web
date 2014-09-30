@@ -305,6 +305,7 @@ define(function (require, exports, module) {
 	};
     
     ProjectManager.prototype.scaleImageMap = function (scale) {
+        console.log("scale=" + scale);
         var areas = document.getElementById("basePrototypeMap").getElementsByTagName("area");
         var scaledAreas = document.getElementById("prototypeMap").getElementsByTagName("area");
         var n, m, coords = [];
@@ -318,7 +319,7 @@ define(function (require, exports, module) {
             scaledAreas[n].coords = coords[n].join(",");
             // display areas need to be updated explicitly, as they are stand-alone html elements
             var cname = scaledAreas[n].getAttribute("class");
-            if (cname.indexOf("Display") === 0) {
+            if (cname.toLowerCase().indexOf("display") === 0) {
                 // standard displays
                 var disp = document.getElementById(cname);
                 if (disp) {

@@ -26,6 +26,7 @@ define(function (require, exports, module) {
     
     // FIXME: this very same function is in ProjectManager
     var scaleImageMap = function (scale) {
+        console.log("scale=" + scale);
         var areas = document.getElementById("basePrototypeMap").getElementsByTagName("area");
         var scaledAreas = document.getElementById("prototypeMap").getElementsByTagName("area");
         var n, m, coords = [];
@@ -39,7 +40,7 @@ define(function (require, exports, module) {
             scaledAreas[n].coords = coords[n].join(",");
             // display areas need to be updated explicitly, as they are stand-alone html elements
             var cname = scaledAreas[n].getAttribute("class");
-            if (cname.indexOf("Display") === 0) {
+            if (cname.toLowerCase().indexOf("display") === 0) {
                 // standard displays
                 var disp = document.getElementById(cname);
                 if (disp) {
@@ -99,7 +100,6 @@ define(function (require, exports, module) {
                     disp.setAttribute("height", (coords[n][3] - coords[n][1]));
                     disp.setAttribute("font-size", (0.8 * (coords[n][3] - coords[n][1])) + "px");
                 }
-                disp = document.getElementById(cname + "_displayWidget");
                 // cursored displays
                 disp = document.getElementById(cname + "_displayWidget");
                 if (disp) {
