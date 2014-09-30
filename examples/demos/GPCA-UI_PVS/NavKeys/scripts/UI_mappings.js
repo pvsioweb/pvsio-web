@@ -3,7 +3,7 @@ function getLastState() { return ws.lastState(); }
 function cb(err, res) {
 	if (res && !err) {
 		ws.lastState(res.data);
-		onOutPutUpdated(res);
+		onOutPutUpdated(err, res);
 	}
 }
 
