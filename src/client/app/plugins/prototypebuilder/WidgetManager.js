@@ -270,6 +270,21 @@ define(function (require, exports, module) {
 		});
 		this._widgets = {};
 	};
+	/**
+		update all the area maps attributed to all widgets on the project by the given scale factor
+		@param {Number} scale the scale to transform the maps by
+	*/
+	WidgetManager.prototype.scaleAreaMaps = function (scale) {
+		var _this = this;
+		var widgets = _this.getAllWidgets();
+		function _getPos(el) {
+			return {x: el.attr("x"), y: el.attr("y"), height: el.attr("height"), width: el.attr("width")};	
+		}
+		widgets.forEach(function (w) {
+			var pos = _getPos(w.element());
+			_this.updateLocationAndSize(w, pos, scale);
+		});
+	};
 	
     module.exports = {
 		/**
