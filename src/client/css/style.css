@@ -350,7 +350,7 @@ div.detailsForm select, div.detailsForm textarea{
     background: white;
 }
 
-#content > .ljs-hcontent {
+.content-body > .ljs-hcontent {
 	width: 80%;
 }
 #body > .ljs-hcontent {
@@ -441,4 +441,8 @@ div.detailsForm select, div.detailsForm textarea{
 
 body {
 	min-width: 1200px;
+}
+
+#content .ljs-hcontent.content-body {
+	width: 100%;
 }
