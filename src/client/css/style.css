@@ -257,8 +257,6 @@ div.detailsForm select, div.detailsForm textarea{
 	margin-bottom: 0px;
 }
 #body {
-	margin-top: 20px;
-	margin-bottom: 20px;
 	height: 430px;
 	background: #eee;
 }
@@ -366,13 +364,11 @@ div.detailsForm select, div.detailsForm textarea{
 }
 
 #projectTitle {
-	height: 50px;
 	width: 100%;
 	background: #4088B6;
 	padding: 15px;
 	color: white;
 	font: 20px sans-serif;
-    min-width: 940px;
 }
 #projectTitle a {
 	color: #f5eee5;
