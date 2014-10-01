@@ -110,10 +110,13 @@
 			return el.concat(" .").concat(a);
 		}).join(",");
 		
-		var children = document.querySelectorAll(childSelectors);
+		function getChildren() {
+			return document.querySelectorAll(childSelectors);	
+		}
+		
 		//layout each of the children
 		//if the child is aligned to the left it means it can be resized on the right
-		Array.prototype.forEach.call(children, function (c, i) {
+		Array.prototype.forEach.call(getChildren(), function (c, i) {
 			if (hasClass(c, right)) {
 				insertResizer(c, left);
 			} else if (hasClass(c, left)) {
@@ -129,16 +132,14 @@
 			parent = document.querySelector(el);
 			window.onresize = function (e) {
 				parent.style.height = window.innerHeight + "px";
+				//fire resize events for the child containers
+				Array.prototype.forEach.call(getChildren(), function (c, i) {
+					var event = new Event("resize");
+					c.dispatchEvent(event);
+				});
 			};
 			parent.style.height = window.innerHeight + "px";
 		}
-		//fire resize events for the child containers
-		Array.prototype.forEach.call(children, function (c, i) {
-			var event = new Event("resize");
-			c.dispatchEvent(event);
-		});
-			
 	}
-	
 	window.layoutjs = layout;
 }());

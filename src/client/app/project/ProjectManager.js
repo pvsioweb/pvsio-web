@@ -331,7 +331,7 @@ define(function (require, exports, module) {
 
 				d3.select("#imageDiv").style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
 				d3.select("#imageDiv img").attr("src", img.src).attr("height", adjustedHeight).attr("width", adjustedWidth);
-				d3.select("#imageDiv svg").attr("height", img.height).attr("width", img.width);
+				d3.select("#imageDiv svg").attr("height", adjustedHeight).attr("width", adjustedWidth);
 				d3.select("#imageDiv svg > g").attr("transform", "scale(" + scale + ")");
 				//hide the draganddrop stuff
 				d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
