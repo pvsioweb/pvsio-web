@@ -51,6 +51,7 @@ define(function (require, exports, module) {
 			text.remove();
 		}
 		text = d3.select("#imageDiv").append("div").attr("class", this.id() + " displayWidget");
+		///FIXME CursoredDisplay should be used as a standalone widget
 		var cursoredDisplay = (this.cursorName()) ? true : false;
 		if (!cursoredDisplay) {
 			text.html(dispVal).style("left", x + "px").style("top", y + "px").style("position", "absolute")
@@ -58,7 +59,6 @@ define(function (require, exports, module) {
 							  .style("font-size", (parseFloat(h) * 0.8) + "px");
             
 		} else {
-//			h = h*1.5;
 			text.style("left", x + "px").style("top", y + "px").style("position", "absolute")
 				.style("width", w + "px").style("height", h + "px").style("color", "white")
 				.append("canvas").attr("width", w).attr("height", h).attr("id", "display");
@@ -94,6 +94,11 @@ define(function (require, exports, module) {
 		Display.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
 		d3.select("div." + this.id()).style("left", pos.x + "px").style("top", pos.y + "px")
 			.style("width", pos.width + "px").style("height", pos.height + "px").style("font-size", (pos.height * 0.8) + "px");
+		///FIXME cursored display should be used as a standalone widget
+		var cursoredDisplay = (this.cursorName()) ? true : false;
+		if (cursoredDisplay) {
+			d3.select("div." + this.id() + " canvas#display").style("width", pos.width + "px").style("height", pos.height + "px");
+		}
 	};
     
     Display.prototype.updateWithProperties = function (props) {

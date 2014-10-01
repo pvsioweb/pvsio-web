@@ -251,12 +251,16 @@ define(function (require, exports, module) {
 	   @memberof WidgetManager
      */
     WidgetManager.prototype.getWidgetDefinitions = function () {
+		var scale = +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1;
         var widgets = [], regionDefs = [];
         _.each(this._widgets, function (widget) {
             widgets.push(widget.toJSON());
 			var a = widget.imageMap();
+			var scaledCoords = a.attr("coords").split(",").map(function (c) {
+				return +c / scale;
+			}).join(",");
 			regionDefs.push({"class": a.attr("class"), shape: a.attr("shape"),
-						coords: a.attr("coords"), href: a.attr("href")});
+						coords: scaledCoords, href: a.attr("href")});
         });
         return {widgetMaps: widgets, regionDefs: regionDefs};
     };

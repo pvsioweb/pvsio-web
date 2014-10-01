@@ -77,7 +77,7 @@ define(function (require, exports, module) {
 	PVSioWeb.prototype.createCollapsiblePanel = function (options) {
 		options = options || {};
 
-		var div = d3.select("#content .ljs-hcontent").append("div").attr("class", "collapsible-panel-parent");
+		var div = d3.select("#content .content-body .ljs-hcontent").append("div").attr("class", "collapsible-panel-parent");
 		var header = div.append("div").classed("header", true);
 		var content = div.append("div").attr("class", "collapsible-panel");
 		
