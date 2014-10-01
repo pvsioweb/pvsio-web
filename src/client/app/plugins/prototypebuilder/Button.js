@@ -110,6 +110,7 @@ define(function (require, exports, module) {
 				Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "release", ts: new Date().getTime()});
 			}
 			mouseup(d3.event);
+			area.on("mouseup", null);
 		};
         area.on("mousedown", function () {
 			f = widget.functionText();
@@ -128,9 +129,10 @@ define(function (require, exports, module) {
 				};
 				btnTimer.interval(widget.recallRate()).start();
 			}
+			//register mouseup/out events here
+			area.on("mouseup", onmouseup);
 			
-		}).on("mouseup", onmouseup)
-		.on("mouseout", onmouseup);
+		});
 		widget.imageMap(area);
 		return area;
 	};
