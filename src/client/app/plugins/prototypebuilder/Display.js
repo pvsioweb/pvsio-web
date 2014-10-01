@@ -93,7 +93,7 @@ define(function (require, exports, module) {
 	Display.prototype.updateLocationAndSize = function (pos) {
 		Display.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
 		d3.select("div." + this.id()).style("left", pos.x + "px").style("top", pos.y + "px")
-			.style("width", pos.width + "px").style("height", pos.height + "px");
+			.style("width", pos.width + "px").style("height", pos.height + "px").style("font-size", (pos.height * 0.8) + "px");
 	};
     
     Display.prototype.updateWithProperties = function (props) {

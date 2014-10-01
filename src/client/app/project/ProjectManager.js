@@ -262,6 +262,8 @@ define(function (require, exports, module) {
                                 try {
                                     var wd = JSON.parse(p.getWidgetDefinitionFile().content());
                                     WidgetManager.restoreWidgetDefinitions(wd);
+									//update the widget area map scales 
+									WidgetManager.scaleAreaMaps(scale);
                                 } catch (err) {
                                     Logger.log(err);
                                 }
@@ -337,14 +339,7 @@ define(function (require, exports, module) {
 				d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
 				
 				//update widgets maps after resizing
-				function _getPos(el) {
-					return {x: el.attr("x"), y: el.attr("y"), height: el.attr("height"), width: el.attr("width")};	
-				}
-				var widgets = WidgetManager.getAllWidgets();
-				widgets.forEach(function (w) {
-					var pos = _getPos(w.element());
-					WidgetManager.updateLocationAndSize(w, pos, scale);
-				});
+				WidgetManager.scaleAreaMaps(scale);
 			}
 			resize();
             // invoke callback, if any
