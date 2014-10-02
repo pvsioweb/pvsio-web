@@ -260,14 +260,16 @@ define(function (require, exports, module) {
                         if (res.type !== "error") {
                             WidgetManager.updateMapCreator(scale, function () {
                                 try {
-                                    var wd = JSON.parse(p.getWidgetDefinitionFile().content());
-                                    WidgetManager.restoreWidgetDefinitions(wd);
-									//update the widget area map scales 
-									WidgetManager.scaleAreaMaps(scale);
+									var wdStr = p.getWidgetDefinitionFile().content();
+									if (wdStr && wdStr !== "") {
+										var wd = JSON.parse(p.getWidgetDefinitionFile().content());
+										WidgetManager.restoreWidgetDefinitions(wd);
+										//update the widget area map scales 
+										WidgetManager.scaleAreaMaps(scale);
+									}
                                 } catch (err) {
                                     Logger.log(err);
                                 }
-                                
                             });
                             d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
                         } else {
