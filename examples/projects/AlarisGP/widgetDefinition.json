@@ -7,36 +7,33 @@
   },
   {
    "events": [
-    "click",
-    "press/release"
+    "click"
    ],
    "id": "Button1360329596458",
    "type": "button",
-   "recallRate": 250,
+   "recallRate": "250",
    "functionText": "UP",
-   "boundFunctions": "click_UP, press_UP, release_UP"
+   "boundFunctions": "click_UP"
   },
   {
    "events": [
-    "click",
-    "press/release"
+    "click"
    ],
    "id": "Button1360329611671",
    "type": "button",
-   "recallRate": 250,
+   "recallRate": "250",
    "functionText": "up",
-   "boundFunctions": "click_up, press_up, release_up"
+   "boundFunctions": "click_up"
   },
   {
    "events": [
-    "click",
-    "press/release"
+    "click"
    ],
    "id": "Button1360329650659",
    "type": "button",
-   "recallRate": 250,
+   "recallRate": "250",
    "functionText": "dn",
-   "boundFunctions": "click_dn, press_dn, release_dn"
+   "boundFunctions": "click_dn"
   },
   {
    "events": [
@@ -54,31 +51,31 @@
   {
    "class": "Display1360329548294",
    "shape": "rect",
-   "coords": "110.66665649414062,117.66665649414062,205.66665649414062,160.65103149414062",
+   "coords": "110.66665649414061,117.66665649414062,205.66665649414065,160.65103149414062",
    "href": null
   },
   {
    "class": "Button1360329596458",
    "shape": "rect",
-   "coords": "97.66665649414062,264.6666564941406,117.66665649414062,286.6510314941406",
+   "coords": "90.1492919921875,262.6666564941406,120.14929199218749,292.6510314941406",
    "href": "#!"
   },
   {
    "class": "Button1360329611671",
    "shape": "rect",
-   "coords": "124.66665649414062,265.6666564941406,142.65103149414062,284.6510314941406",
+   "coords": "124.66665649414062,262.6666564941406,152.65103149414062,290.6510314941406",
    "href": "#!"
   },
   {
    "class": "Button1360329650659",
    "shape": "rect",
-   "coords": "160.66665649414062,264.3333435058594,181.65103149414062,282.3177185058594",
+   "coords": "159.1492919921875,265.3333435058594,185.13366699218753,291.3177185058594",
    "href": "#!"
   },
   {
    "class": "Button1360329673407",
    "shape": "rect",
-   "coords": "186.6666717529297,265.6666564941406,207.6510467529297,287.6666564941406",
+   "coords": "187.6666717529297,265.6666564941406,215.65104675292966,291.6666564941406",
    "href": "#!"
   }
  ]

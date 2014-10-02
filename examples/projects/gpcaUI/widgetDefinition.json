@@ -9,47 +9,43 @@
   },
   {
    "events": [
-    "click",
-    "press/release"
+    "click"
    ],
    "id": "Button1360333703845",
    "type": "button",
-   "recallRate": 250,
+   "recallRate": "250",
    "functionText": "up",
-   "boundFunctions": "click_up, press_up, release_up"
+   "boundFunctions": "click_up"
   },
   {
    "events": [
-    "click",
-    "press/release"
+    "click"
    ],
    "id": "Button1360334003368",
    "type": "button",
    "recallRate": "250",
    "functionText": "dn",
-   "boundFunctions": "click_dn, press_dn, release_dn"
+   "boundFunctions": "click_dn"
   },
   {
    "events": [
-    "click",
-    "press/release"
+    "click"
    ],
    "id": "Button1360334013028",
    "type": "button",
    "recallRate": "250",
    "functionText": "lf",
-   "boundFunctions": "click_lf, press_lf, release_lf"
+   "boundFunctions": "click_lf"
   },
   {
    "events": [
-    "click",
-    "press/release"
+    "click"
    ],
    "id": "Button1360334022698",
    "type": "button",
    "recallRate": "250",
    "functionText": "rt",
-   "boundFunctions": "click_rt, press_rt, release_rt"
+   "boundFunctions": "click_rt"
   }
  ],
  "regionDefs": [
@@ -62,25 +58,25 @@
   {
    "class": "Button1360333703845",
    "shape": "rect",
-   "coords": "488.888916015625,29.888885498046875,534.873291015625,70.87326049804688",
+   "coords": "488.888916015625,29.888885498046875,539.0454827410484,71.91631870534087",
    "href": "#!"
   },
   {
    "class": "Button1360334003368",
    "shape": "rect",
-   "coords": "493.888916015625,115,533.857666015625,157",
+   "coords": "486.5876130111981,117.08611373487818,536.9868555178715,163.2583203282658",
    "href": "#!"
   },
   {
    "class": "Button1360334013028",
    "shape": "rect",
-   "coords": "449.8888854980469,69.88888549804688,488.8576354980469,113.88888549804688",
+   "coords": "445.3937557618749,69.88888549804688,486.44857788085943,122.23330433661768",
    "href": "#!"
   },
   {
    "class": "Button1360334022698",
    "shape": "rect",
-   "coords": "534.888916015625,73.88888549804688,571.873291015625,112.87326049804688",
+   "coords": "535.9320032327751,72.84584548235591,580.2177621371318,122.26074466760637",
    "href": "#!"
   }
  ]
