@@ -139,6 +139,7 @@ define(function (require, exports, module) {
                 e.regions.each(function () {
                     var w = wm.getWidget(d3.select(this).attr("id"));
                     if (w) {
+                        wm.removeWidget(w);
                         w.remove();
                     } else {
                         d3.select(this.parentNode).remove();
@@ -194,6 +195,7 @@ define(function (require, exports, module) {
     WidgetManager.prototype.removeWidget = function (widget) {
         widget.remove();
         delete this._widgets[widget.id()];
+        var x = 0;
     };
     /**
 		Gets a list of all the display widgets loaded on the page.
