@@ -6,14 +6,18 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3, require, $, brackets, document, PVSioWebClient */
 require.config({
-    baseUrl: "../../../../client/app",
+    baseUrl: "../../client/app",
     paths: {
         d3: "../lib/d3",
-        cursorDisplay: "widgets/CursoredDisplay"
+		"pvsioweb": "plugins/prototypebuilder",
+        "imagemapper": "../lib/imagemapper",
+        "text": "../lib/text",
+        "lib": "../lib",
+        "cm": "../lib/cm"
     }
 });
 
-require(["cursorDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioWebClient"], function (CursoredDisplay, GraphBuilder, PVSioWebClient) {
+require(["widgets/CursoredDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioWebClient"], function (CursoredDisplay, GraphBuilder, PVSioWebClient) {
     "use strict";
     
     var d3 = require("d3/d3");
@@ -21,7 +25,7 @@ require(["cursorDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioWebClient"]
     var w = 228, h = 64;
 	var client = PVSioWebClient.getInstance();
     //create a collapsible panel using the pvsiowebclient instance
-    var imageHolder = client.createCollapsiblePanel({headerText: "BBraun Space", showContent: true}).style("position", "relative");
+    var imageHolder = client.createCollapsiblePanel({parent: "#content", headerText: "BBraun Space", showContent: true}).style("position", "relative");
     //insert the html into the panel (note that this could have used templates or whatever)
     imageHolder.html('<img src="image.png" usemap="#prototypeMap"/>');
     //append a div that will contain the canvas element
