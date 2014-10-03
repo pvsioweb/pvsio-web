@@ -36,7 +36,7 @@ define(function (require, exports, module) {
     }
 
 	
-    function handleWidgetEdit(widget) {
+    function handleWidgetEdit(widget, wm) {
         if (widget) {
             var wEd = EditWidgetView.create(widget);
             wEd.on("ok", function (e, view) {
@@ -44,6 +44,8 @@ define(function (require, exports, module) {
                 widget.updateWithProperties(e.data);
                 //create an interactive image area only if there isnt one already
                 createImageMap(widget);
+                // fire event widget modified
+                wm.fire({type: "WidgetModified"});
             }).on("cancel", function (e, view) {
                 view.remove();
             });
@@ -91,7 +93,7 @@ define(function (require, exports, module) {
                 createImageMap(widget);
                 //set the font-size of the mark to be 80% of the height and the id of the mark
                 mark.on("dblclick", function () {
-                    handleWidgetEdit(wm.getWidget(mark.attr("id")));
+                    handleWidgetEdit(wm.getWidget(mark.attr("id")), wm);
                 });
             });
         }
@@ -104,7 +106,7 @@ define(function (require, exports, module) {
             mapCreator = mc.on("create", function (e) {
                 var region = e.region;
                 region.on("dblclick", function () {
-                    handleWidgetEdit(wm.getWidget(region.attr("id")));
+                    handleWidgetEdit(wm.getWidget(region.attr("id")), wm);
                 });
                 //pop up the widget edit dialog
                 NewWidgetView.create()
