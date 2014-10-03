@@ -244,30 +244,33 @@ define(function (require, exports, module) {
                 pm.project()._dirty(false);
                 
                 pm.fire({type: "ProjectChanged", current: p, previous: pm.project()});
-                pm.editor().off("change", _editorChangedHandler);
-                pm.editor().setValue("");
+ 
                 //list all pvsfiles
                 if (p.pvsFilesList()) {
                     pm.renderSourceFileList(res.project.folderStructure);
                     pvsFilesListView.selectItem(p.mainPVSFile() || p.pvsFilesList()[0]);
                     // clear dirty flags
                     p.pvsFilesList().forEach(function (f) { f.dirty(false); });
-                }
-                pm.editor().on("change", _editorChangedHandler);
+                } else {
+					//clear the editor from previous project
+					pm.editor().setValue("");
+				}
                 // update image -- note that we need to wait the callback as image loading may take a little while in some cases
                 if (image) {
                     pm.updateImage(image, function (res, scale) {
                         if (res.type !== "error") {
                             WidgetManager.updateMapCreator(scale, function () {
                                 try {
-                                    var wd = JSON.parse(p.getWidgetDefinitionFile().content());
-                                    WidgetManager.restoreWidgetDefinitions(wd);
-									//update the widget area map scales 
-									WidgetManager.scaleAreaMaps(scale);
+									var wdStr = p.getWidgetDefinitionFile().content();
+									if (wdStr && wdStr !== "") {
+										var wd = JSON.parse(p.getWidgetDefinitionFile().content());
+										WidgetManager.restoreWidgetDefinitions(wd);
+										//update the widget area map scales 
+										WidgetManager.scaleAreaMaps(scale);
+									}
                                 } catch (err) {
                                     Logger.log(err);
                                 }
-                                
                             });
                             d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
                         } else {

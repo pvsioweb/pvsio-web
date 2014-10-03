@@ -111,7 +111,7 @@ define(function (require, exports, module) {
         var wdpath = this.name() + "/widgetDefinition.json";
         var res = this.getProjectFile(wdpath);
         if (!res) {
-            res = this.addProjectFile(wdpath, "").type("widgetDefinition");
+            res = this.addProjectFile(wdpath, "{}").type("widgetDefinition");
         }
         return res;
     };
@@ -123,7 +123,7 @@ define(function (require, exports, module) {
         var scriptsPath = this.name() + "/scripts.json";
         var res = this.getProjectFile(scriptsPath);
         if (!res) {
-            res = this.addProjectFile(scriptsPath, "").type("scripts");
+            res = this.addProjectFile(scriptsPath, "[]").type("scripts");
         }
         return res;
     };
