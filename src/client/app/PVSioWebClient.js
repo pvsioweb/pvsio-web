@@ -70,14 +70,20 @@ define(function (require, exports, module) {
 	
     /**
         Creates a collapsible panel on the client app
-        @param {?string} headerText The title text to use in the panel header
-		@param {boolean} showContent Whether the default initial state of the panel is open (showContent == true) or closed (showContent == true or undefined)
+		@param {object} options 
+			{
+			headerText: string to display in panel header
+			owner: <string> the name of the plugin that owns the panel
+			onClick: function - handler to invoke when the panel is toggled
+			showContent: Whether the default initial state of the panel is open (showContent == true) or closed (showContent == true or undefined)
+			parent: the html element selector for the parent i.e., where the panel should be created
+			}
         @returns {d3.selection} The div created
     */
 	PVSioWeb.prototype.createCollapsiblePanel = function (options) {
 		options = options || {};
-
-		var div = d3.select("#content .content-body .ljs-hcontent").append("div").attr("class", "collapsible-panel-parent");
+		options.parent = options.parent || "#content .content-body .ljs-hcontent";
+		var div = d3.select(options.parent).append("div").attr("class", "collapsible-panel-parent");
 		var header = div.append("div").classed("header", true);
 		var content = div.append("div").attr("class", "collapsible-panel");
 		

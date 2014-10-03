@@ -6,22 +6,28 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3, require, $, brackets, document, PVSioWebClient */
 require.config({
-    baseUrl: "../../../../client/app",
+    baseUrl: "../../client/app",
     paths: {
         d3: "../lib/d3",
-        cursorDisplay: "widgets/CursoredDisplay"
+		"pvsioweb": "plugins/prototypebuilder",
+        "imagemapper": "../lib/imagemapper",
+        "text": "../lib/text",
+        "lib": "../lib",
+        "cm": "../lib/cm"
     }
 });
 
-require(["cursorDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioWebClient"], function (CursoredDisplay, GraphBuilder, PVSioWebClient) {
+var d3 = null;
+
+require(["widgets/CursoredDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioWebClient"], function (CursoredDisplay, GraphBuilder, PVSioWebClient) {
     "use strict";
     
-    var d3 = require("d3/d3");
+    d3 = require("d3/d3");
     
     var w = 228, h = 64;
 	var client = PVSioWebClient.getInstance();
     //create a collapsible panel using the pvsiowebclient instance
-    var imageHolder = client.createCollapsiblePanel({headerText: "BBraun Space", showContent: true}).style("position", "relative");
+    var imageHolder = client.createCollapsiblePanel({parent: "#content", headerText: "BBraun Space", showContent: true}).style("position", "relative");
     //insert the html into the panel (note that this could have used templates or whatever)
     imageHolder.html('<img src="image.png" usemap="#prototypeMap"/>');
     //append a div that will contain the canvas element
@@ -63,8 +69,12 @@ require(["cursorDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioWebClient"]
     function onMessageReceived(err, event) {
         if (!err) {
             client.getWebSocket().lastState(event.data);
-            var res = parseState(event.data.toString());
-            disp.renderNumber(evaluate(res.d).toString(), +res.c);
+            var res = event.data.toString();
+            // FIXME: event.type === commandResult when pvsio-web was not able to evaluate the expression (e.g., because of missing pvs function)
+            if (res.indexOf("(#") === 0) {
+                res = parseState(event.data.toString());
+                disp.renderNumber(evaluate(res.d).toString(), +res.c);
+            }
         } else { console.log(err); }
 	}
 	
@@ -83,6 +93,10 @@ require(["cursorDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioWebClient"]
     
     d3.select(".btnRight").on("click", function () {
 		client.getWebSocket().sendGuiAction("click_rt(" + client.getWebSocket().lastState() + ");", onMessageReceived);
+    });
+    
+    d3.select(".btnClear").on("click", function () {
+		client.getWebSocket().sendGuiAction("click_clear(" + client.getWebSocket().lastState() + ");", onMessageReceived);
     });
     
     //register event listener for websocket connection from the client
