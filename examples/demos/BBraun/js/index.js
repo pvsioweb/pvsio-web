@@ -17,10 +17,12 @@ require.config({
     }
 });
 
+var d3 = null;
+
 require(["widgets/CursoredDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioWebClient"], function (CursoredDisplay, GraphBuilder, PVSioWebClient) {
     "use strict";
     
-    var d3 = require("d3/d3");
+    d3 = require("d3/d3");
     
     var w = 228, h = 64;
 	var client = PVSioWebClient.getInstance();
@@ -67,8 +69,12 @@ require(["widgets/CursoredDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioW
     function onMessageReceived(err, event) {
         if (!err) {
             client.getWebSocket().lastState(event.data);
-            var res = parseState(event.data.toString());
-            disp.renderNumber(evaluate(res.d).toString(), +res.c);
+            var res = event.data.toString();
+            // FIXME: event.type === commandResult when pvsio-web was not able to evaluate the expression (e.g., because of missing pvs function)
+            if (res.indexOf("(#") === 0) {
+                res = parseState(event.data.toString());
+                disp.renderNumber(evaluate(res.d).toString(), +res.c);
+            }
         } else { console.log(err); }
 	}
 	
@@ -87,6 +93,10 @@ require(["widgets/CursoredDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioW
     
     d3.select(".btnRight").on("click", function () {
 		client.getWebSocket().sendGuiAction("click_rt(" + client.getWebSocket().lastState() + ");", onMessageReceived);
+    });
+    
+    d3.select(".btnClear").on("click", function () {
+		client.getWebSocket().sendGuiAction("click_clear(" + client.getWebSocket().lastState() + ");", onMessageReceived);
     });
     
     //register event listener for websocket connection from the client
