@@ -241,7 +241,11 @@ define(function (require, exports, module) {
                         f.path(newFilePath);
                     });
                 }
-            } else { console.log(err); }
+            } else {
+                err.oldPath = oldPath;
+                err.newPath = newPath;
+                console.log(err);
+            }
             if (cb && typeof cb === "function") { cb(err, res); }
         });
     };

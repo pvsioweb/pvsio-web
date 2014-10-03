@@ -89,7 +89,7 @@ function stat(fullPath) {
  @param {string?} fileEncoding the encoding to use for writing the file (defaults to utf8)
  @returns {Promise} a promise that resolves when file has been written or rejects when an error occurs
 */
-function writeFile(fullPath, fileContent, fileEncoding) {
+function writeFile(fullPath, fileContent, fileEncoding, opt) {
 	fileEncoding = fileEncoding || "utf8";
 	return new Promise(function (resolve, reject) {
 		if (typeof fullPath !== "string" || typeof fileContent !== "string") {
@@ -97,7 +97,8 @@ function writeFile(fullPath, fileContent, fileEncoding) {
 		} else {
 			var folder = fullPath.substring(0, fullPath.lastIndexOf(path.sep));
 			mkdirRecursive(folder, function (err) {
-				if (!err || err.code === "EEXIST") {
+				if ((!err || err.code === "EEXIST") &&
+                        (!fs.existsSync(fullPath) || opt !== undefined && opt.overWrite)) {
 					fs.writeFile(fullPath, fileContent, fileEncoding, function (err) {
 						if (err) {
 							reject(err);
@@ -106,6 +107,7 @@ function writeFile(fullPath, fileContent, fileEncoding) {
 						}
 					});
 				} else {
+                    logger.debug("Error: file " + fullPath + " already exists");
 					reject(err);
 				}
 
@@ -201,7 +203,7 @@ function createProject(opt, cb, p) {
 						logger.debug("Warning, deprecated filenames (project name not included in the filename)");
 						file.filePath = path.join(projectPath, file.filePath);
 					}
-					return writeFile(file.filePath, file.fileContent, file.encoding);
+					return writeFile(file.filePath, file.fileContent, file.encoding, { overWrite: true });
 				});
 
 				//exec promises and invoke callback function

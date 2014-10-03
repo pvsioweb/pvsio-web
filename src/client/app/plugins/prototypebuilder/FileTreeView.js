@@ -30,7 +30,20 @@ define(function (require, exports, module) {
             treeList.createNodeEditor(event.data, function (node, oldPath) {
                 var f = project.getProjectFile(oldPath);
                 if (event.data.isDirectory) {
-                    project.renameFolder(oldPath, node.path);
+                    project.renameFolder(oldPath, node.path, function (err, res) {
+                        if (err && err.code === "ENOTEMPTY") {
+                            // alert user
+                            alert("Error: the folder could not be renamed into " + err.newPath + " (another folder with the same name already exists). Please choose a different name");
+                            // revert to previous name
+                            var prevData = event.data;
+                            prevData.path = err.oldPath;
+                            prevData.name = err.oldPath.substring(err.oldPath.lastIndexOf("/") + 1);
+                            treeList.createNodeEditor(prevData);
+                            // and trigger on blur by toggling the selection
+                            //d3.select(this).node().focus();
+                            var x = treeList.blur();
+                        }
+                    });
                 } else { project.renameFile(f, node.name); }
             });
         }).addListener("New File", function (event) {
@@ -48,7 +61,17 @@ define(function (require, exports, module) {
                     if (!err) {
                         //add the spec file to the project and supress the event so we dont create multiple files
                         console.log(res);
-                    } else { console.log(err); }
+                    } else {
+                        console.log(err);
+                        if (err && err.code === "EEXIST") {
+                            // alert user
+                            alert("Error: file " + err.path +
+                                  " could not be created (another file with the same name already exists). Please choose a different name");
+                            // remove the created node from filetreeview
+                            var enteredItem = treeList.getSelectedItem();
+                            treeList.removeItemByID(enteredItem.id);
+                        }
+                    }
                 });
             }, function (node) {
                 treeList.removeItem(node.path);

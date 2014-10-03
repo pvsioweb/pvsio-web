@@ -213,6 +213,7 @@ define(function (require, exports, module) {
                 }, duration);
             }
         }
+        return this;
     };
     
     /** 
@@ -272,10 +273,25 @@ define(function (require, exports, module) {
                 fst.render(toRemove.parent);
             }
         }
-        // clear selected data
-        selectedData = null;
+        // clear selectedData by moving the selection to the root
+        this.selectItem(d3.select(el).select(".node").data()[0].path);
     };
     
+    TreeList.prototype.removeItemByID = function (id) {
+        var fst = this, toRemove = find(function (node) {
+            return node.id === id;
+        }, data);
+        if (toRemove) {
+            var index = toRemove.parent.children ? toRemove.parent.children.indexOf(toRemove) : -1;
+            if (index > -1) {
+                toRemove.parent.children.splice(index, 1);
+                fst.render(toRemove.parent);
+            }
+        }
+        // clear selectedData by moving the selection to the root
+        this.selectItem(d3.select(el).select(".node").data()[0].path);
+    };
+
     TreeList.prototype.nodeExists = function (nodePath) {
         var nodes = d3.select(el).selectAll(".node .label").filter(function (d) {
             return d.path === nodePath;
@@ -317,22 +333,22 @@ define(function (require, exports, module) {
         var input = d3.select(input_text.node()).node();
         input.focus();
         input.onblur = function () {
-            doCreate(this, input.value);
+            // NB: the first thing is to remove the onblur event handler, otherwhise the event will be triggered twice
             input_text.node().onblur = null;
+            doCreate(this, input.value);
         };
         input.onkeydown = function (event) {
             if (event.which === 13) { // enter key pressed
                 event.preventDefault();
-                doCreate(this, input.value);
                 input_text.node().onkeydown = null;
-                input_text.node().onblur = null;
+                input.onblur();
             } else if (event.which === 27) { // escape key pressed
+                input_text.node().onblur = null;
                 event.preventDefault();
                 if (onCancel && typeof onCancel === "function") {
                     onCancel(n, oldPath);
                 }
                 input_text.node().onkeydown = null;
-                input_text.node().onblur = null;
             }
         };
     };
@@ -353,6 +369,17 @@ define(function (require, exports, module) {
         d3.select(el).select(".label").text(newName);
     };
 
+    TreeList.prototype.blur = function() {
+        var n = this.getSelectedItem();
+        var this_node = d3.select(el).selectAll(".node").filter(function (d) {
+            return d === n;
+        });
+        if (this_node && this_node.length > 0) {
+            this_node.select(".label").html(n.name);
+        }
+        return this;
+    };
+    
     module.exports = TreeList;
 
 });
