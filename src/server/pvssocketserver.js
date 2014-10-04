@@ -49,6 +49,8 @@ function run() {
 		clientDir				= path.join(__dirname, "../client");
     var p, clientid = 0, WebSocketServer = ws.Server;
 	var writeFile = serverFuncs.writeFile,
+		stat = serverFuncs.stat,
+		renameFile = serverFuncs.renameFile,
 		createProject = serverFuncs.createProject,
 		openProject = serverFuncs.openProject,
 		listProjects = serverFuncs.listProjects;
@@ -133,15 +135,14 @@ function run() {
     function createClientFunctionMaps() {
         var map = {
             "renameFile": function (token, socket, socketid) {
-                var oldPath = path.join(baseProjectDir, token.oldPath);
-                var newPath = path.join(baseProjectDir, token.newPath);
-                fs.rename(oldPath, newPath, function (err) {
-                    if (err) {
-                        logger.debug("warning, error while renaming " + token.oldPath +
+				renameFile(token.oldPath, token.newPath).then(function () {
+					processCallback({id: token.id, socketId: socketid}, socket);
+				}, function (err) {
+					 logger.debug("warning, error while renaming " + token.oldPath +
                                     " into " + token.newPath + " (" + err + ")");
-                    }
-                    processCallback({id: token.id, socketId: socketid, err: err}, socket);
-                });
+					processCallback({id: token.id, socketId: socketid, 
+									 err: {oldPath: token.oldPath, newPath: token.newPath, message:err}}, socket);
+				});
             },
             "readDirectory": function (token, socket, socketid) {
                 fs.readdir(token.path, function (err, files) {
@@ -174,9 +175,17 @@ function run() {
                 });
             },
             "writeDirectory": function (token, socket, socketid) {
-                fs.mkdir(token.path, function (err) {
-                    processCallback({id: token.id, socketId: socketid, err: err}, socket);
-                });
+				token.path = path.join(baseProjectDir, token.path);
+				stat(token.path).then(function () {
+					//directory exists throw error
+					processCallback({id: token.id, socketId: socketid,
+									 err: {path: token.path, message: "Directory Exists"}}, socket);
+				}, function () {
+					fs.mkdir(token.path, function (err) {
+						processCallback({id: token.id, socketId: socketid, err: err}, socket);
+					});
+				});
+                
             },
             "setMainFile": function (token, socket, socketid) {
                 changeProjectSetting(token.projectName, "mainPVSFile", token.fileName)

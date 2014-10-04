@@ -104,7 +104,7 @@ define(function (require, exports, module) {
 		var ws = WSManager.getWebSocket();
 		pvsFilesListView = new FileTreeView("#pvsFiles", folderStructure, project);
 		
-		pvsFilesListView.addListener("SelectedFileChanged", function (event) {
+		pvsFilesListView.addListener("SelectedItemChanged", function (event) {
 			//fetch sourcecode for selected file and update editor
             if (event.selectedItem) {
                 if (event.selectedItem.isDirectory) {
@@ -114,7 +114,7 @@ define(function (require, exports, module) {
                         editor.setOption("readOnly", true);
                         editor.markClean();
                         editor.focus();
-                        editor.on("change", _editorChangedHandler);                    
+//                        editor.on("change", _editorChangedHandler);                    
                 } else {
                     var pvsFile = project.getProjectFile(event.selectedItem.path);
                     if (!pvsFile) {//load the pvsfile and add to the project 
@@ -129,7 +129,7 @@ define(function (require, exports, module) {
                         editor.setValue(pvsFile.content());
                         editor.setOption("readOnly", false);
                         editor.markClean();
-                        if (pvsFile.path().indexOf(".pvs") === pvsFile.path().length - 4) {
+                        if (pvsFile.isPVSFile()) {
                             editor.setOption("mode", "pvs");
                         }
                         editor.focus();
@@ -144,7 +144,7 @@ define(function (require, exports, module) {
                                 pvsFile.content(res.fileContent).dirty(false);
                                 editor.setValue(pvsFile.content());
                                 editor.markClean();
-                                if (pvsFile.path().indexOf(".pvs") === pvsFile.path().length - 4) {
+                                if (pvsFile.isPVSFile()) {
                                     editor.setOption("mode", "pvs");
                                 }
                                 editor.focus();

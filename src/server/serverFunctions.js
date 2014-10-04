@@ -89,6 +89,7 @@ function stat(fullPath) {
  @param {string?} fileEncoding the encoding to use for writing the file (defaults to utf8)
  @returns {Promise} a promise that resolves when file has been written or rejects when an error occurs
 */
+///TODO clean up these parameters - propose to make into one json object with the parameters as properties of the object
 function writeFile(fullPath, fileContent, fileEncoding, opt) {
 	fileEncoding = fileEncoding || "utf8";
 	return new Promise(function (resolve, reject) {
@@ -273,7 +274,7 @@ function openProject(projectName) {
 
 /**
  * Lists all the projects on the server by listing folder names in the projects directory
- * @return {Array<string>} A list of project names
+ * @return {Promise} a promise that resolves with a list of project names
  */
 function listProjects() {
 	return new Promise(function (resolve, reject) {
@@ -309,7 +310,35 @@ function listProjects() {
 	});
 }
 
+/**
+ 	renames the oldpath into the newPath
+	@returns {Promise} a promise that resolves with the new path name
+*/
+function renameFile(oldPath, newPath) {
+	oldPath = path.join(baseProjectDir, oldPath);
+	newPath = path.join(baseProjectDir, newPath);
+
+	return new Promise(function (resolve, reject) {
+		stat(newPath).then(function () {
+			reject("New path exists");
+		}, function () {
+			//file does not exist so ok to rename
+			fs.rename(oldPath, newPath, function (err) {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(newPath);
+				}
+			});
+		});
+	});
+	
+	
+	
+}
+
 module.exports = {
+	renameFile: renameFile,
 	getFolderStructure: getFolderStructure,
 	mkdirRecursive: mkdirRecursive,
 	stat: stat,

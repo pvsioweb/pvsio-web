@@ -311,14 +311,13 @@ define(function (require, exports, module) {
         });
                 
         // an input text element is temporarily appended to let the user type the label
-        nodes.select(".label").html("")
+        var inputText = nodes.select(".label").html("")
             .append("input").attr("class", "input_text")
             .attr("type", "text")
             .attr("placeholder", node.name)
             .attr("value", node.name);
         
-        var input_text = nodes.select(".input_text"),
-            oldPath = node.path;
+        var oldPath = node.path;
 
         function doCreate(elem, newLabel) {
             if (newLabel === "") { newLabel = node.name; }
@@ -338,26 +337,26 @@ define(function (require, exports, module) {
             }
         }
         
-        var label = d3.select(input_text.node().parentNode).node();
-        var input = d3.select(input_text.node()).node();
-        input.focus();
-        input.onblur = function () {
+//        var label = d3.select(input_text.node().parentNode).node();
+        var inputEl = inputText.node();
+        inputEl.focus();
+        inputEl.onblur = function () {
             // NB: the first thing is to remove the onblur event handler, otherwhise the event will be triggered twice
-            input_text.node().onblur = null;
-            doCreate(this, input.value);
+            inputEl.onblur = null;
+            doCreate(inputEl, inputEl.value);
         };
-        input.onkeydown = function (event) {
+        inputEl.onkeydown = function (event) {
             if (event.which === 13) { // enter key pressed
                 event.preventDefault();
-                input_text.node().onkeydown = null;
-                input.onblur();
+                inputEl.onkeydown = null;
+                inputEl.onblur();
             } else if (event.which === 27) { // escape key pressed
-                input_text.node().onblur = null;
+                inputEl.onblur = null;
                 event.preventDefault();
                 if (onCancel && typeof onCancel === "function") {
                     onCancel(n, oldPath);
                 }
-                input_text.node().onkeydown = null;
+                inputEl.onkeydown = null;
             }
         };
     };
@@ -376,7 +375,7 @@ define(function (require, exports, module) {
                     });
                 }
             }
-        };
+        }
         
         dataUpdateRecursive(item, item.name, newName);        
         // FIXME: it's note safe to use replace because the string to be replaced could be (part of) the name of subdirectories listed in the path. There must be a better way of doing this!
