@@ -422,10 +422,12 @@ define(function (require, exports, module) {
                     project.changeImage(project.name() + "/" + res.filePath, res.fileContent);
                 });
         } else {
-            d3.select("#imageDiv img").attr("src", "").attr("height", "430").attr("width", "1128");
-            d3.select("#imageDiv svg").attr("height", "430").attr("width", "1128");
+            d3.select("#imageDiv img").attr("src", "").attr("height", "0").attr("width", "0");
+            d3.select("#imageDiv svg").attr("height", "0").attr("width", "0");
+            d3.select("#imageDiv").attr("style", "");
+            d3.select("#body").attr("style", "height: 474px"); // 430 + 44
             // show the draganddrop stuff
-            d3.select("#imageDragAndDrop.dndcontainer").style("display", "block");
+            d3.select("#imageDragAndDrop.dndcontainer").style("display", "block").style("height", "430px");
         }
         
         //create promises for the pvs source files, if any is specified in data

@@ -284,7 +284,7 @@ function run() {
                 var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
                 token.filePath = path.join(baseProjectDir, token.filePath);
                 
-                writeFile(token.filePath, token.fileContent, token.encoding)
+                writeFile(token.filePath, token.fileContent, token.encoding, token.opt)
                     .then(function () {
                         processCallback(res, socket);
                     }, function (err) {

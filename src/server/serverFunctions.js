@@ -194,7 +194,7 @@ function createProject(opt, cb, p) {
 			if (!err) {
 				var promises = projectFiles.map(function (file) {
 					var ext = path.extname(file.filePath);
-					if (imageExts.indexOf(ext) > -1) {
+					if (imageExts.indexOf(ext.toLowerCase()) > -1) {
 						file.fileContent = file.fileContent.replace(/^data:image\/(\w+);base64,/, "");
 					}
 					if (file.filePath.indexOf(projectName) === 0) {

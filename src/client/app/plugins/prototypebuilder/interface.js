@@ -75,13 +75,13 @@ define(function (require, exports, module) {
 			}
 
 			//update status of file save button based on the selected file
-			if (pvsFile.dirty()) {
-				d3.select("#btnSaveFile").attr("disabled", null);
-                d3.select("#btnSaveAll").attr("disabled", null);
-			} else {
-				d3.select("#btnSaveFile").attr("disabled", true);
-                d3.select("#btnSaveAll").attr("disabled", true);
-			}
+//			if (pvsFile.dirty()) {
+//				d3.select("#btnSaveFile").attr("disabled", null);
+//                d3.select("#btnSaveAll").attr("disabled", null);
+//			} else {
+//				d3.select("#btnSaveFile").attr("disabled", true);
+//                d3.select("#btnSaveAll").attr("disabled", true);
+//			}
 		}
 	}
     
@@ -111,8 +111,8 @@ define(function (require, exports, module) {
                 });
             }
             project.addListener("DirtyFlagChanged", function (event) {
-                d3.select("#btnSaveFile").attr("disabled", null);
-                d3.select("#btnSaveAll").attr("disabled", null);
+//                d3.select("#btnSaveFile").attr("disabled", null);
+//                d3.select("#btnSaveAll").attr("disabled", null);
             });
             switchToBuilderView();
 			
@@ -174,6 +174,7 @@ define(function (require, exports, module) {
                         projectManager.openProject(projectName, function (project) {
                             var notification = "Project " + project.name() + " opened successfully!";
                             d3.select("#project-notification-area").insert("p", "p").html(notification);
+                            d3.select("#editor-notification-area").insert("p", "p").html(notification);
                             Logger.log(notification);
                         });
                     }
@@ -198,7 +199,10 @@ define(function (require, exports, module) {
 	
 		d3.select("#newProject").on("click", function () {
 			projectManager.newProject(function () {
-                Logger.log("new project created!");
+                var notification = "New project created!";
+                Logger.log(notification);
+                d3.select("#project-notification-area").insert("p", "p").html(notification);
+                d3.select("#editor-notification-area").insert("p", "p").html(notification);
             });
 		});
         
@@ -215,11 +219,11 @@ define(function (require, exports, module) {
 		//this function should be edited to only act on the selected file when multiple files are in use
 		d3.select("#btnTypeCheck").on("click", function () {
             function typecheck(pvsFile) {
-                var btn = d3.select("#btnTypeCheck").html("Typechecking ...").attr("disabled", true);
+                var btn = d3.select("#btnTypeCheck").html("Compiling...").attr("disabled", true);
                 var ws = WSManager.getWebSocket();
                 ws.send({type: "typeCheck", filePath: pvsFile.name()},
                      function (err, res) {
-                        btn.html("Typecheck").attr("disabled", null);
+                        btn.html("Compile").attr("disabled", null);
                         var msg = res.stdout;
                         if (!err) {
                             reloadPVSio();
@@ -228,13 +232,13 @@ define(function (require, exports, module) {
                             d3.select("#editor-notification-area").insert("p", "p").html(notification);
                             msg = msg.substring(msg.indexOf("Proof summary"), msg.length);
                             Notification.create({
-                                header: "Typecheck result",
+                                header: "Compilation result",
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         } else {
                             msg = msg.substring(msg.indexOf("Writing output to file"), msg.length);
                             Notification.create({
-                                header: "Typecheck error, please check the PVS output file for details.",
+                                header: "Compilation error, please check the PVS output file for details.",
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         }
@@ -278,8 +282,8 @@ define(function (require, exports, module) {
                 var notification = "";
                 projectManager.saveFiles([pvsFile], function (err) {
                     if (!err) {
-                        d3.select("#btnSaveFile").attr("disabled", true);
-                        d3.select("#btnSaveAll").attr("disabled", true);
+//                        d3.select("#btnSaveFile").attr("disabled", true);
+//                        d3.select("#btnSaveAll").attr("disabled", true);
                         notification = pvsFile + " saved successfully!";
                         d3.select("#editor-notification-area").insert("p", "p").html(notification);
                         Logger.log(notification);
@@ -299,8 +303,8 @@ define(function (require, exports, module) {
                 var notification = "";
                 projectManager.saveFiles(pvsFiles, function (err) {
                     if (!err) {
-                        d3.select("#btnSaveAll").attr("disabled", true);
-                        d3.select("#btnSaveFile").attr("disabled", true);
+//                        d3.select("#btnSaveAll").attr("disabled", true);
+//                        d3.select("#btnSaveFile").attr("disabled", true);
                         notification = pvsFiles + " saved successfully!";
                         d3.select("#editor-notification-area").insert("p", "p").html(notification);
                         Logger.log(notification);

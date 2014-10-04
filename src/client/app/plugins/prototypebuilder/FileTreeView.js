@@ -31,17 +31,27 @@ define(function (require, exports, module) {
                 var f = project.getProjectFile(oldPath);
                 if (event.data.isDirectory) {
                     project.renameFolder(oldPath, node.path, function (err, res) {
-                        if (err && err.code === "ENOTEMPTY") {
+                        if (err) {
                             // alert user
-                            alert("Error: the folder could not be renamed into " + err.newPath + " (another folder with the same name already exists). Please choose a different name");
+                            if (err.code === "ENOTEMPTY") {
+                                alert("Error: the folder could not be renamed into " + err.newPath + " (another folder with the same name already exists). Please choose a different name");
+                            } else { alert(err.code); }
                             // revert to previous name
                             var prevData = event.data;
                             prevData.path = err.oldPath;
                             prevData.name = err.oldPath.substring(err.oldPath.lastIndexOf("/") + 1);
                             treeList.createNodeEditor(prevData);
-                            // and trigger on blur by toggling the selection
-                            //d3.select(this).node().focus();
+                            // and trigger blur event to remove the overlay node used for renaming
                             var x = treeList.blur();
+                        } else {
+                            // we need to update the path of all children
+                            var projectFiles = project.getProjectFiles();
+                            if (projectFiles) {
+                                projectFiles.forEach(function (file) {
+                                    file.path(file.path().replace(oldPath, node.path));
+                                });
+                            }
+                            treeList.render(projectFiles);
                         }
                     });
                 } else { project.renameFile(f, node.name); }
@@ -109,6 +119,18 @@ define(function (require, exports, module) {
                     if (!err) {
                         treeList.selectNext(path);
                         treeList.removeItem(path);
+                        // we need to remove the file from pvsFileList too
+                        var projectFiles = project.getProjectFiles(); 
+                        var pf = projectFiles.filter(function (file) {
+                            return file.path() === path;
+                        });
+                        if (pf && pf.length === 1) {
+                            project.removeFile(pf);
+                        } else {
+                            if (pf.length > 1) {
+                                alert("Error: Something is wrong, more than one file selected for deletion.");
+                            } else { alert("Error: Something is wrong, a delete file command has been sent but the file to be deleted cannot be selected."); }
+                        }
                     } else {
                         //show error
                         console.log(err);

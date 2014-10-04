@@ -13,7 +13,8 @@ define(function (require, exports, module) {
         WidgetManager       = require("pvsioweb/WidgetManager").getWidgetManager(),
         ScriptPlayer        = require("util/ScriptPlayer"),
 		ProjectFile			= require("./ProjectFile"),
-        Logger              = require("util/Logger");
+        Logger              = require("util/Logger"),
+        NotificationManager = require("project/NotificationManager");
     
     var _projectFiles;
     
@@ -22,13 +23,17 @@ define(function (require, exports, module) {
     function saveFiles(files) {
         var ws = WSManager.getWebSocket();
         var promises =  files.map(function (f) {
-            var token = {filePath: f.path(), fileContent: f.content(), encoding: f.encoding() || "utf8"};
+            var token = { filePath: f.path(),
+                          fileContent: f.content(),
+                          encoding: f.encoding() || "utf8",
+                          opt: { overWrite: true } };
             return new Promise(function (resolve, reject) {
                 ws.writeFile(token, function (err, res) {
                     if (!err) {
                         resolve(res);
                     } else {
                         reject(err);
+                        if (err.code) { alert(err.code); }
                     }
                 });
             });
@@ -204,6 +209,9 @@ define(function (require, exports, module) {
 			this.fire({ type: "FileRemoved", file: f });
             f.clearListeners();
             f = null;
+            var notification = "File " + deletedFile[0].path() + " has been deleted.";
+            Logger.log(notification);
+            NotificationManager.show(notification);
         }
         return this;
 	};
@@ -295,7 +303,7 @@ define(function (require, exports, module) {
             }
         });
         
-		saveFiles(file, this)
+		saveFiles(file)
             .then(function () {
                 if (cb && typeof cb === "function") {
                     cb(null, _thisProject);

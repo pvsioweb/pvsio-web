@@ -322,6 +322,15 @@ define(function (require, exports, module) {
 
         function doCreate(elem, newLabel) {
             if (newLabel === "") { newLabel = node.name; }
+//            if (d3.select(el).select(".label").node().firstChild === elem) {
+//                // we are renaming the root node, i.e., the project name
+//                fst.renameRoot(newLabel);
+//                console.log("renaming project name");
+//            } else {
+//                d3.select(elem.parentNode).html(newLabel);
+//                fst.renameItem(n, newLabel);
+//                console.log("renaming file");
+//            }            
             d3.select(elem.parentNode).html(newLabel);
             fst.renameItem(n, newLabel);
             if (onEnter && typeof onEnter === "function") {
@@ -354,9 +363,25 @@ define(function (require, exports, module) {
     };
                 
     TreeList.prototype.renameItem = function (item, newName) {
-        // FIXME: it's note safe to use replace because the string to be replaced could be (part of) the name of subdirectories listed in the path
-        item.path = item.path.replace(item.name, newName);
-        item.name = newName;
+        // NB: this data update is not elegant but is needed for updating data of nodes corresponding to empty directories
+        //     (empty directories are not saved in the project, so their data cannot be updated using project.pvsFilesList())
+        //     to avoid this, we probably need to store info about (empty) directories in pvsFilesList
+        function dataUpdateRecursive(item, baseName, newName) {
+            if (item && baseName && newName) {
+                item.path = item.path.replace(baseName, newName);
+                item.name = item.name.replace(baseName, newName);
+                if(item.children) {
+                    item.children.forEach(function (child) {
+                        dataUpdateRecursive(child, baseName, newName);
+                    });
+                }
+            }
+        };
+        
+        dataUpdateRecursive(item, item.name, newName);        
+        // FIXME: it's note safe to use replace because the string to be replaced could be (part of) the name of subdirectories listed in the path. There must be a better way of doing this!
+//        item.path = item.path.replace(item.name, newName);
+//        item.name = newName;
     };
     
     TreeList.prototype.getSelectedItem = function () {
