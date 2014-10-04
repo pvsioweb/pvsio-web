@@ -16,6 +16,9 @@ define(function (require, exports, module) {
         d3.select("#console").insert('p', 'p').html(typeof msg === "object" ? msg.toString() : msg);
     }
 
+	function error(msg) {
+		console.error(msg);
+	}
     /**
      * dealing with logging input and output of pvs
      * @private
@@ -46,6 +49,7 @@ define(function (require, exports, module) {
     
 	module.exports = {
 		log: log,
+		error: error,
 		console_log: console_log,
 		pvsio_commands_log: pvsio_commands_log,
 		pvsio_response_log: pvsio_response_log,

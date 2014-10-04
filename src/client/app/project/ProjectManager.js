@@ -18,6 +18,7 @@ define(function (require, exports, module) {
 		fs	= require("util/fileHandler"),
         Logger = require("util/Logger"),
         ScriptPlayer = require("util/ScriptPlayer"),
+		displayPrompt = require("pvsioweb/forms/displayPrompt"),
         newProjectForm          = require("pvsioweb/forms/newProject"),
 		openProjectForm         = require("pvsioweb/forms/openProject"),
 		openFilesForm = require("pvsioweb/forms/openFiles"),
@@ -515,34 +516,54 @@ define(function (require, exports, module) {
 		/**
             saves a project including image, widget definitions and pvsfiles
         */
-        var name = project.name();
+        var name = project.name(), notification;
         if (name && name !== defaultProjectName && name.trim().length > 0) {
-            project.saveNew({ projectName: name,
-                              overWrite: true }, function (err, res) {
-                if (!err) {
+			project.save(function (err, res) {
+				if (!err) {
                     project = res;
-                    project.setProjectName(name);
-                    project.pvsFilesList().forEach(function (f) { f.dirty(false); });
-                    project._dirty(false);
-                    projectNameChanged({current: name});
-                    pvsFilesListView.renameProject(name);
                     pm.fire({type: "ProjectSaved", project: project});
-                    var notification = "Project " + project.name() + " saved successfully!";
+                    notification = "Project " + project.name() + " saved successfully!";
 					NotificationManager.show(notification);
-//                    d3.select("#project-notification-area").insert("p", "p").html(notification);
                     Logger.log(notification);
-                    if (typeof cb === "function") { cb(); }
                 } else {
-                    if (err.code === "EEXIST") {
-                        alert("Error: project not saved (project name \"" + name + "\" already exists, please use a different name.)");
-                    }
-                    if (typeof cb === "function") { cb(); }
+					notification = "There was an error saving the project: " + JSON.stringify(err);
+					NotificationManager.error(notification);
+					Logger.error(notification);
                 }
-            });
-        } else {
-            if (name) {
-                alert("Error: project not saved (project name \"" + name + "\" is not a valid name.)");
-            }
+				if (typeof cb === "function") { cb(); }
+			});
+        } else if (name === defaultProjectName) {
+			var prompt = displayPrompt.create({header: "Please change the name from " + name + " before saving", buttons: ["Cancel", "Save"]})
+				.on("save", function (event, view) {
+					var newProjectName = event.data.prompt.trim();
+					project.name(newProjectName);
+					project.updateFolderName(name, newProjectName);
+					
+					project.saveNew({projectName: newProjectName, overWrite: false}, function (err, res, folderStructure) {
+						if (err) {
+							notification = "There was an error saving the project: " + JSON.stringify(err);
+							NotificationManager.error(notification);
+							Logger.error(notification);
+						} else {
+							notification = "Project " + project.name() + " saved successfully!";
+							NotificationManager.show(notification);
+            				pm.renderSourceFileList(folderStructure);
+            				pvsFilesListView.selectItem(project.mainPVSFile() ||
+                                        project.pvsFilesList()[0] ||
+                                        project.name());
+						}
+						if (typeof cb === "function") { cb(); }
+					});
+					view.remove();
+				}).on("cancel", function (event, view) {
+					notification = "Error: project not saved. Please change the name from the  \"" + name + "\" is not a valid name.)";
+					NotificationManager.error(notification);
+					view.remove();
+					if (typeof cb === "function") { cb(); }
+				});
+		} else {
+            notification = "Error: project not saved (project name \"" + name + "\" is not a valid name.)";
+			NotificationManager.error(notification);
             if (typeof cb === "function") { cb(); }
         }
 	};
@@ -614,18 +635,18 @@ define(function (require, exports, module) {
         WidgetManager.clearWidgetAreas();
         ScriptPlayer.clearView();
         var project = new Project(data.projectName);
-        project.addProjectFile(data.pvsSpec[0], makeEmptyTheory(defaultTheoryName));
-
-        project.saveNew({ projectName: data.projectName,
+        var mainFile = project.addProjectFile(data.pvsSpec[0], makeEmptyTheory(defaultTheoryName));
+		//set the main pvs file
+        project.mainPVSFile(mainFile);
+       
+		project.saveNew({ projectName: data.projectName,
                           overWrite: true }, function (err, res, folderStructure) {
             if (!err) {
-                //set the main pvs file
-                project.mainPVSFile(new ProjectFile(defaultFilePath));
                 project._dirty(false);
                 WidgetManager.updateMapCreator();
                 pm.project(project);
                 pm.renderSourceFileList(folderStructure);
-                pvsFilesListView.selectItem(project.mainPVSFile() || project.pvsFilesList()[0]);
+                pvsFilesListView.selectItem(project.mainPVSFile());
                 //fire project changed event
                 pm.fire({type: "ProjectChanged", current: project});
             }

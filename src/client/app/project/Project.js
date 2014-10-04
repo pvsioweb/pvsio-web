@@ -225,6 +225,22 @@ define(function (require, exports, module) {
         this.name(newName);
     };
     
+	/**
+		Updates the name of a folder in the project. This updates all affected files and subfolders in the project
+		@param {string} folderPath the path to the folder whose name should be updated
+		@param {string} newFolderPath the new path to use for the folder
+	*/
+	Project.prototype.updateFolderName = function (folderPath, newFolderPath) {
+		var affectedFiles = this.getProjectFiles().filter(function (f) {
+			return f.path().indexOf(folderPath) === 0;
+		});
+		affectedFiles.forEach(function (f) {
+			var newPath = f.path().replace(folderPath, newFolderPath);
+			f.path(newPath);
+		});
+		return this;
+	};
+	
     /**
         Changes the name of a folder in the project directory to a new given name
         @param {string} oldPath the old path of the folder
@@ -239,17 +255,10 @@ define(function (require, exports, module) {
             if (!err) {
                 // check if we are renaming the project
                 if (oldPath === p.name()) {
-                    p.setProjectName(newPath);
-                } else {
-                    //no error so need to modify the paths for all the files affected by the renaming action
-                    var affectedFiles = p.getProjectFiles().filter(function (f) {
-                        return f.path().indexOf(oldPath) === 0;
-                    });
-                    affectedFiles.forEach(function (f) {
-                        var newFilePath = f.path().replace(oldPath, newPath);
-                        f.path(newFilePath);
-                    });
+                    p.name(newPath);
                 }
+				//update the paths of the affected files and folders in the project
+				p.updateFolderName(oldPath, newPath);
             } else {
                 err.oldPath = oldPath;
                 err.newPath = newPath;
@@ -328,7 +337,7 @@ define(function (require, exports, module) {
 			//project has already been created so save the widgets and the sourcecode if it has changed
             saveFiles(this.getProjectFiles().filter(function (f) { return f.dirty(); }))
                 .then(function () {
-                    _thisProject.dirty(false);
+                    _thisProject._dirty(false);
                     _thisProject.fire({type: "ProjectSaved", project: _thisProject});
                     if (cb && typeof cb === "function") { cb(null, _thisProject); }
                 }, function (err) {
