@@ -3,6 +3,7 @@
  * @author Patrick Oladimeji
  * @date 1/14/14 11:53:17 AM
  */
+/*jshint unused: true*/
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, unparam: true*/
 /*global define*/
 define(function (require, exports, module) {
@@ -44,7 +45,7 @@ define(function (require, exports, module) {
 									prevData.name = oldPath.substring(oldPath.lastIndexOf("/") + 1);
 									treeList.createNodeEditor(prevData);
 									// and trigger blur event to remove the overlay node used for renaming
-									var x = treeList.blur();
+									treeList.blur();
 								} else {
 									// we need to update the path of all children
 									var projectFiles = project.getProjectFiles();
@@ -60,9 +61,14 @@ define(function (require, exports, module) {
                  
                 } else {//renaming a file
 					project.renameFile(f, node.name, function (err, res) {
-						
+						if (err) {
+							alert(JSON.stringify(err));
+							var prevData = event.data;
+							prevData.path = oldPath;
+							prevData.name = oldPath.substring(oldPath.lastIndexOf("/") + 1);
+							treeList.createNodeEditor(prevData);
+						}
 					});
-				
 				}
             });
         }).addListener("New File", function (event) {
