@@ -201,18 +201,19 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
 	Project.prototype.removeFile = function (file) {
-        var fileIndex = _projectFiles.indexOf(file);
-        
-        var deletedFile = _projectFiles.splice(fileIndex, 1);
-        if (deletedFile && deletedFile[0]) {
-            var f = deletedFile[0];
-			this.fire({ type: "FileRemoved", file: f });
-            f.clearListeners();
-            f = null;
-            var notification = "File " + deletedFile[0].path() + " has been deleted.";
-            Logger.log(notification);
-            NotificationManager.show(notification);
-        }
+        var fileIndex = _projectFiles.indexOf(file[0]);
+        if (fileIndex >= 0) {
+            var deletedFile = _projectFiles.splice(fileIndex, 1);
+            if (deletedFile && deletedFile[0]) {
+                var f = deletedFile[0];
+                this.fire({ type: "FileRemoved", file: f });
+                f.clearListeners();
+                f = null;
+                var notification = "File " + deletedFile[0].path() + " has been deleted.";
+                Logger.log(notification);
+                NotificationManager.show(notification);
+            }
+        } else { alert("Error while deleting file (file not found in tree list view)"); }
         return this;
 	};
     
