@@ -76,6 +76,7 @@
                 svg.selectAll("g.selected").classed("selected", false);
             }
             g.classed("selected", true);
+			dispatcher.select({region: region, event: d3.event});
         });
     }
     
@@ -173,7 +174,7 @@
         //clear any previous svgs
         d3.select(config.parent + " svg").remove();
         var imageEl = d3.select(config.element), props, mapLayer, svg,
-            ed = d3.dispatch("create", "remove", "resize", "move"), initTimer, _el_poll_count = 0;
+            ed = d3.dispatch("create", "remove", "resize", "move", "select"), initTimer, _el_poll_count = 0;
         props = cr(imageEl);
         
         function initialiseSVGLayer() {

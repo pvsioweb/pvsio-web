@@ -8,53 +8,71 @@
 define(function (require, exports, module) {
 	"use strict";
 	var WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager();
-	var wlTemplate = require("text!./templates/widgetsList.handlebars");
-	
-	var WidgetsListView = Backbone.View.extend({
-		initialize: function (data) {
-			this.render(data);
-		},
-		render: function (data) {
-			var template = Handlebars.compile(wlTemplate);
-			this.$el.html(template(data));
-			$("#widgetsList").html("").append(this.el);
-			return this;
-		},
-		events: {
-			"click li": "widgetSelected",
-			"dblclick li": "showEditDialog"
-		},
-		showEditDialog: function (event) {
-			var selectedListItem = d3.select(event.currentTarget);
-			var widgetId = selectedListItem.attr("widget-id");
-			var dblclick = new Event("dblclick");
-			var widget = WidgetManager.getWidget(widgetId);
-			if (widget) {
-				widget.element().node().dispatchEvent(dblclick);	
-			}
-			event.preventDefault();
-			event.stopPropagation();
-			return false;
-		},
-		widgetSelected: function (event) {
-			var selectedListItem = d3.select(event.currentTarget);
-			var widgetId = selectedListItem.attr("widget-id");
-			var widget = d3.select("#" + widgetId).node();
-			if (!event.shiftKey) {
-				d3.selectAll("g.selected").classed("selected", false);
-				d3.selectAll("#widgetsList li").classed("selected", false);
-			}
-			d3.select(widget.parentNode).classed("selected", true);
-			selectedListItem.classed("selected", true);
-			event.preventDefault();
-			event.stopPropagation();
-			return false;
+	var itemTemplate = require("text!./templates/widgetListItem.handlebars");
+
+	function WidgetsListView (widgets) {
+		var el = d3.select("#widgetsList").append("ul");
+		
+		function update(data) {
+			var listItems = el.selectAll("li.list-group-item").data(data);
+			listItems.enter().append("li").attr("class", "list-group-item")
+				.attr("widget-id", function (w) {
+					return w.id();
+				})
+				.on("click", function (w) {
+					var event = d3.event;
+					if (!event.shiftKey) {
+						d3.selectAll("g.selected").classed("selected", false);
+						listItems.classed("selected", false);
+					}
+					d3.select(this).classed("selected", true);
+					d3.select(w.parentGroup()).classed("selected", true);
+					event.preventDefault();
+					event.stopPropagation();
+				}).on("dblclick", function (w) {
+					var event = d3.event;
+					var dblclick = new Event("dblclick");
+					w.element().node().dispatchEvent(dblclick);
+					event.preventDefault();
+					event.stopPropagation();
+				});
+			//update
+			listItems.html(function (widget, i) {
+				var template = Handlebars.compile(itemTemplate);
+				return template(widget.toJSON());
+			});
+			//remove
+			listItems.exit().remove();
 		}
-	});
+		
+		update(widgets);
+		
+		WidgetManager.addListener("WidgetModified", function (event) {
+			switch (event.action) {
+				case "create":
+					widgets.push(event.widget);
+					break;
+				case "remove":
+					var index = widgets.indexOf(event.widget);
+					if (index > -1) {
+						widgets.splice(index, 1);	
+					}
+					break;
+				default:
+					break;
+			}
+			update(widgets);
+		}).addListener("WidgetSelected", function (event) {
+			var e = new Event("click");
+			e.shiftKey = event.event.shiftKey;
+			el.select("li[widget-id='" + event.widget.id() + "']").node().dispatchEvent(e);
+		});
+	}
+	
 	
 	module.exports = {
 		create: function () {
-			var widgets = WidgetManager.getAllWidgets().map(function (w) { return w.toJSON(); });
+			var widgets = WidgetManager.getAllWidgets();
 			return new WidgetsListView(widgets);	
 		}
 	};

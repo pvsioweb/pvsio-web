@@ -149,7 +149,9 @@ define(function (require, exports, module) {
                 });
                 event.action = "remove";
                 wm.fire(event);
-            });
+            }).on("select", function (e) {
+				wm.fire({type: "WidgetSelected", widget: wm.getWidget(e.region.attr("id")), event: e.event});
+			});
             if (cb) { cb(); }
         }});
     };
