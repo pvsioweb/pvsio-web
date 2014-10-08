@@ -221,18 +221,20 @@ define(function (require, exports, module) {
             function typecheck(pvsFile) {
                 var btn = d3.select("#btnTypeCheck").html("Compiling...").attr("disabled", true);
                 var ws = WSManager.getWebSocket();
-                ws.send({type: "typeCheck", filePath: pvsFile.name()},
+                // note: to get the path right, we need to remove the initial part of the path (i.e., the project name)
+                var fp = pvsFile.path().substring(pvsFile.path().indexOf("/") + 1);  
+                ws.send({type: "typeCheck", filePath: fp},
                      function (err, res) {
                         btn.html("Compile").attr("disabled", null);
                         var msg = res.stdout;
                         if (!err) {
                             reloadPVSio();
                             var project = projectManager.project();
-                            var notification = "Project " + project.name() + " compiled successfully!";
+                            var notification = "File " + fp + " compiled successfully!";
                             d3.select("#editor-notification-area").insert("p", "p").html(notification);
                             msg = msg.substring(msg.indexOf("Proof summary"), msg.length);
                             Notification.create({
-                                header: "Compilation result",
+                                header: "Compilation result for file " + pvsFile.name(),
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         } else {
