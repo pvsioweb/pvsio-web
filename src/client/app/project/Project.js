@@ -165,7 +165,8 @@ define(function (require, exports, module) {
         if (oldImage) {
             this.removeFile(oldImage);
         }
-        this.addProjectFile(imagePath, imageData, "base64");
+        var newImage = this.addProjectFile(imagePath, imageData, "base64");
+		newImage.dirty(true);
 		return this;
 	};
        
@@ -201,7 +202,7 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
 	Project.prototype.removeFile = function (file) {
-        var fileIndex = _projectFiles.indexOf(file[0]);
+        var fileIndex = _projectFiles.indexOf(file);
         if (fileIndex >= 0) {
             var deletedFile = _projectFiles.splice(fileIndex, 1);
             if (deletedFile && deletedFile[0]) {
@@ -213,7 +214,10 @@ define(function (require, exports, module) {
                 Logger.log(notification);
                 NotificationManager.show(notification);
             }
-        } else { alert("Error while deleting file (file not found in tree list view)"); }
+        } else {
+			var m = "Error deleting file. File not found in project.";
+			NotificationManager.error(m);
+		}
         return this;
 	};
     

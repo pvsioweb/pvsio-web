@@ -147,11 +147,12 @@ define(function (require, exports, module) {
                             return file.path() === path;
                         });
                         if (pf && pf.length === 1) {
-                            project.removeFile(pf);
+                            project.removeFile(pf[0]);
                         } else {
                             if (pf.length > 1) {
                                 alert("Error: Something is wrong, more than one file selected for deletion.");
-                            } else { alert("Error: Something is wrong, a delete file command has been sent but the file to be deleted cannot be selected."); }
+                            } else { 
+								alert("Error: Something is wrong, a delete file command has been sent but the file to be deleted cannot be selected."); }
                         }
                     } else {
                         //show error

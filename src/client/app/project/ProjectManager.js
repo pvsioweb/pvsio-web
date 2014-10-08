@@ -384,7 +384,7 @@ define(function (require, exports, module) {
         WidgetManager.clearWidgetAreas();
         ScriptPlayer.clearView();
         var project = new Project(data.projectName);
-        var i, promises = [];
+        var i, promises = [], imageLoadPromise;
         
         function finalise(folderStructure, previousProject, err) {
             var image = project.getImage();
@@ -418,7 +418,7 @@ define(function (require, exports, module) {
         
         // load image, if any is specified in data
         if (data.prototypeImage && data.prototypeImage[0]) {
-            fs.readLocalFileAsDataURL(data.prototypeImage[0])
+            imageLoadPromise = fs.readLocalFileAsDataURL(data.prototypeImage[0])
                 .then(function (res) {
                     project.changeImage(project.name() + "/" + res.filePath, res.fileContent);
                 });
@@ -429,18 +429,14 @@ define(function (require, exports, module) {
             d3.select("#body").attr("style", "height: 474px"); // 430 + 44
             // show the draganddrop stuff
             d3.select("#imageDragAndDrop.dndcontainer").style("display", "block").style("height", "430px");
+			imageLoadPromise = Promise.resolve("no image");
         }
         
         //create promises for the pvs source files, if any is specified in data
         if (data.pvsSpec && data.pvsSpec.length > 0) {
             for (i = 0; i < data.pvsSpec.length; i++) {
-                if (data.pvsSpec[i].name !== undefined) {
-                    // FIXME: in what case do we use field content? this field is undefined when the user selects a file...
-                    if (data.pvsSpec[i].content !== undefined) {
-                        promises.push(data.pvsSpec[i].content);
-                    } else {
-                        promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
-                    }
+                if (data.pvsSpec[i].name !== undefined) {                    
+                	promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
                 }
             }
         } else {
@@ -449,41 +445,44 @@ define(function (require, exports, module) {
                 fileName: defaultTheoryName + ".pvs",
                 fileContent: defaultTheoryName + emptyTheoryContent + defaultTheoryName
             };
-            promises.push(emptySpec);
+            promises.push(Promise.resolve(emptySpec));
         }
 
         var previousProject = project || pm.project();
-        Promise.all(promises)
-            .then(function (pvsFiles) {
-                pvsFiles.forEach(function (spec) {
-                    project.addProjectFile(project.name() + "/" + spec.fileName, spec.fileContent);
-                });
-            }).then(function () {
-                project.saveNew({ projectName: data.projectName,
-                                  overWrite  : false }, function (err, res, folderStructure) {
-                    Logger.log({err: err, res: res});
-                    if (err && err.code === "EEXIST" &&
-                            confirm("Project " + data.projectName + " already exists. Overwrite the project?")) {
-                        project.saveNew({ projectName: data.projectName,
-                                         overWrite  : true }, function (err, res, folderStructure) {
-                            if (!err) {
-                                finalise(folderStructure, previousProject, err);
-                            } else {
-                                if (err) {
-                                    alert("Error while creating the project "
-                                          + data.projectName + " (Error code " + err.code + ")");
-                                }
-                                //invoke callback
-                                if (cb && typeof cb === "function") { cb(err, project); }
-                            }
-                        });
-                    } else {
-                        finalise(folderStructure, previousProject, err);
-                        //invoke callback
-                        if (cb && typeof cb === "function") { cb(err, project); }
-                    }
-                });
-            });
+		imageLoadPromise.then(function () {
+			 Promise.all(promises)
+				.then(function (pvsFiles) {
+					pvsFiles.forEach(function (spec) {
+						project.addProjectFile(project.name() + "/" + spec.fileName, spec.fileContent);
+					});
+				}).then(function () {
+					project.saveNew({ projectName: data.projectName,
+									  overWrite  : false }, function (err, res, folderStructure) {
+						Logger.log({err: err, res: res});
+						if (err && err.code === "EEXIST" &&
+								confirm("Project " + data.projectName + " already exists. Overwrite the project?")) {
+							project.saveNew({ projectName: data.projectName,
+											 overWrite  : true }, function (err, res, folderStructure) {
+								if (!err) {
+									finalise(folderStructure, previousProject, err);
+								} else {
+									if (err) {
+										alert("Error while creating the project "
+											  + data.projectName + " (Error code " + err.code + ")");
+									}
+									//invoke callback
+									if (cb && typeof cb === "function") { cb(err, project); }
+								}
+							});
+						} else {
+							finalise(folderStructure, previousProject, err);
+							//invoke callback
+							if (cb && typeof cb === "function") { cb(err, project); }
+						}
+					});
+				});
+		});
+       
     };
     
     
@@ -533,7 +532,8 @@ define(function (require, exports, module) {
 				if (typeof cb === "function") { cb(); }
 			});
         } else if (name === defaultProjectName) {
-			var prompt = displayPrompt.create({header: "Please change the name from " + name + " before saving", buttons: ["Cancel", "Save"]})
+			displayPrompt.create({header: "Please change the name from " + name + " before saving",
+								  buttons: ["Cancel", "Save"]})
 				.on("save", function (event, view) {
 					var newProjectName = event.data.prompt.trim();
 					project.name(newProjectName);

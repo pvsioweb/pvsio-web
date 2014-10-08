@@ -92,6 +92,11 @@ function stat(fullPath) {
 ///TODO clean up these parameters - propose to make into one json object with the parameters as properties of the object
 function writeFile(fullPath, fileContent, fileEncoding, opt) {
 	fileEncoding = fileEncoding || "utf8";
+	//remove prefixes from file content before saving images
+	var ext = path.extname(fullPath);
+	if (imageExts.indexOf(ext.toLowerCase()) > -1) {
+		fileContent = fileContent.replace(/^data:image\/(\w+);base64,/, "");
+	}
 	return new Promise(function (resolve, reject) {
 		if (typeof fullPath !== "string" || typeof fileContent !== "string") {
 			reject("Both fullPath and fileContent must be strings");
