@@ -11,7 +11,7 @@ define(function (require, exports, module) {
 	var itemTemplate = require("text!./templates/widgetListItem.handlebars");
 
 	function WidgetsListView (widgets) {
-		var el = d3.select("#widgetsList").append("ul");
+		var el = d3.select("#widgetsList").html("").append("ul");
 		
 		function update(data) {
 			var listItems = el.selectAll("li.list-group-item").data(data);
