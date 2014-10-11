@@ -161,12 +161,20 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
 	Project.prototype.changeImage = function (imagePath, imageData) {
-        var oldImage = this.getImage();
-        if (oldImage) {
-            this.removeFile(oldImage);
-        }
-        var newImage = this.addProjectFile(imagePath, imageData, "base64");
-		newImage.dirty(true);
+        var p = this, oldImage = p.getImage();
+        function addNew() {
+			var newImage = p.addProjectFile(imagePath, imageData, "base64");
+			newImage.dirty(true);
+		}
+		
+		if (oldImage) {
+            this.removeFile(oldImage)
+				.then(function (res) {
+					addNew();
+				});
+        } else {
+			addNew();
+		}
 		return this;
 	};
        
@@ -180,19 +188,29 @@ define(function (require, exports, module) {
 	 */
     ///FIXME this function should throw an error if the filepath already exists?
     ///FIXME this function should take a projectFile as argument!
-    Project.prototype.addProjectFile = function (filePath, fileContent, encoding, suppressEvent) {
-        encoding = encoding || "utf8";
-        var p  = this, newFile = new ProjectFile(filePath)
-            .content(fileContent)
-            .encoding(encoding);
-        _projectFiles.push(newFile);
-        if (!suppressEvent) {
+    //Project.prototype.addProjectFile = function (filePath, fileContent, encoding, suppressEvent) {
+	Project.prototype.addProjectFile = function (newFile, suppressEvent) {
+		var filePath, fileContent, encoding;
+		var p = this;
+		if (typeof arguments[0] === "string") {
+			filePath = arguments[0];
+			fileContent = arguments[1];
+			encoding = arguments[2] || "utf8";
+			suppressEvent = arguments[3];
+			newFile = new ProjectFile(filePath)
+				.content(fileContent)
+				.encoding(encoding);
+		}
+		_projectFiles.push(newFile);
+		//for now always suppress fileadded event for image files
+		suppressEvent = suppressEvent || newFile.isImage();
+        if (!suppressEvent ) {
 			p.fire({type: "FileAdded", file: newFile});
-			//register event for the newspec and bubble up the dirty flag changed event from project
-			newFile.addListener("DirtyFlagChanged", function () {
-				p.fire({type: "DirtyFlagChanged", file: newFile});
-			});
         }
+		//register event for the newspec and bubble up the dirty flag changed event from project
+		newFile.addListener("DirtyFlagChanged", function () {
+			p.fire({type: "DirtyFlagChanged", file: newFile});
+		});
         return newFile;
     };
 
@@ -202,23 +220,16 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
 	Project.prototype.removeFile = function (file) {
-        var fileIndex = _projectFiles.indexOf(file);
+        var fileIndex = _projectFiles.indexOf(file), notification;
         if (fileIndex >= 0) {
-            var deletedFile = _projectFiles.splice(fileIndex, 1);
-            if (deletedFile && deletedFile[0]) {
-                var f = deletedFile[0];
-                this.fire({ type: "FileRemoved", file: f });
-                f.clearListeners();
-                f = null;
-                var notification = "File " + deletedFile[0].path() + " has been deleted.";
-                Logger.log(notification);
-                NotificationManager.show(notification);
-            }
+            var deletedFile = _projectFiles.splice(fileIndex, 1)[0];
+			this.fire({ type: "FileRemoved", file: deletedFile});
+			return deletedFile;
         } else {
 			var m = "Error deleting file. File not found in project.";
 			NotificationManager.error(m);
+			return null;
 		}
-        return this;
 	};
     
     /**

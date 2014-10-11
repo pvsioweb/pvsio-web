@@ -320,30 +320,20 @@ define(function (require, exports, module) {
         var oldPath = node.path;
 
         function doCreate(elem, newLabel) {
-            if (newLabel === "") { newLabel = node.name; }
-//            if (d3.select(el).select(".label").node().firstChild === elem) {
-//                // we are renaming the root node, i.e., the project name
-//                fst.renameRoot(newLabel);
-//                console.log("renaming project name");
-//            } else {
-//                d3.select(elem.parentNode).html(newLabel);
-//                fst.renameItem(n, newLabel);
-//                console.log("renaming file");
-//            }            
+            if (newLabel === "") { newLabel = node.name; }           
             d3.select(elem.parentNode).html(newLabel);
             fst.renameItem(n, newLabel);
-            if (onEnter && typeof onEnter === "function") {
-                onEnter(n, oldPath);
-            }
-        }
-        
-//        var label = d3.select(input_text.node().parentNode).node();
+            
+        }        
         var inputEl = inputText.node();
         inputEl.focus();
         inputEl.onblur = function () {
             // NB: the first thing is to remove the onblur event handler, otherwhise the event will be triggered twice
             inputEl.onblur = null;
             doCreate(inputEl, inputEl.value);
+			if (onEnter && typeof onEnter === "function") {
+                onEnter(n, oldPath);
+            }
         };
         inputEl.onkeydown = function (event) {
             if (event.which === 13) { // enter key pressed
@@ -353,6 +343,7 @@ define(function (require, exports, module) {
             } else if (event.which === 27) { // escape key pressed
                 inputEl.onblur = null;
                 event.preventDefault();
+				doCreate(inputEl, node.name);
                 if (onCancel && typeof onCancel === "function") {
                     onCancel(n, oldPath);
                 }

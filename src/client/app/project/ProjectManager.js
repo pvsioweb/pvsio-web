@@ -96,6 +96,16 @@ define(function (require, exports, module) {
         };
 	}
 	/**
+		Returns a new project file with the specified theory name
+		@param {string} theoryName the name of the theory
+		@param {string} path the path to the file relative to the project root folder
+		@returns {ProjectFile} the newly created projectfile
+	*/
+	ProjectManager.prototype.newTheoryFile = function (theoryName, path) {
+		var content = makeEmptyTheory(theoryName);
+		return new ProjectFile(path, content).encoding("utf-8");
+	};
+	/**
 	 * Renders the list of pvs files in the project
 	 * @memberof ProjectManager
 	 */
@@ -103,18 +113,18 @@ define(function (require, exports, module) {
 		var pm = this;
 		var project = this.project(), editor = this.editor();
 		var ws = WSManager.getWebSocket();
-		pvsFilesListView = new FileTreeView("#pvsFiles", folderStructure, project);
+		pvsFilesListView = new FileTreeView("#pvsFiles", folderStructure, pm);
 		
 		pvsFilesListView.addListener("SelectedItemChanged", function (event) {
 			//fetch sourcecode for selected file and update editor
             if (event.selectedItem) {
                 if (event.selectedItem.isDirectory) {
-                        editor.off("change", _editorChangedHandler);
-                        editor.setOption("mode", "txt");
-                        editor.setValue("<< Please select a file to view/edit its content within the model editor. >>");
-                        editor.setOption("readOnly", true);
-                        editor.markClean();
-                        editor.focus();
+					editor.off("change", _editorChangedHandler);
+					editor.setOption("mode", "txt");
+					editor.setValue("<< Please select a file to view/edit its content within the model editor. >>");
+					editor.setOption("readOnly", true);
+					editor.markClean();
+					editor.focus();
 //                        editor.on("change", _editorChangedHandler);                    
                 } else {
                     var pvsFile = project.getProjectFile(event.selectedItem.path);
@@ -164,6 +174,7 @@ define(function (require, exports, module) {
 		
 		return pvsFilesListView;
 	};
+	
 	/**
 	 * Gets the file selected in the source files list view.
 	 * @returns {?ProjectFile} The project source file selected or null if no item was selected
@@ -325,6 +336,7 @@ define(function (require, exports, module) {
 	 * @param {ProjectFile} image the ProjectFile representing the project image
 	 * @memberof ProjectManager
 	 */
+	///TODO change this to use promise?
 	ProjectManager.prototype.updateImage = function (image, cb) {
         var img = new Image();
         
@@ -372,6 +384,111 @@ define(function (require, exports, module) {
         img.name = image.path();
         img.src = image.content();
     };
+	/**
+		Change the image in the current project to the one specified in the parameter
+		@param {string} imagePath
+		@param {string} imageData base64 encoded data
+		@returns {Promise} a promise that resolves when the image change process has completed
+	*/
+	ProjectManager.prototype.changeImage = function (imagePath, imageData) {
+		var pm = this, project = this.project();
+		var oldImage = project.getImage(),
+			newImage = new ProjectFile(imagePath, imageData).encoding("base64");
+		
+		if (oldImage) {
+			return pm.removeFile(oldImage)
+				.then(function () {
+					return pm.addFile(newImage);
+				});
+		} else {
+			return pm.addFile(newImage);	
+		}
+	};
+	/**
+		Removes the specified file from the list of project files
+		@param {ProjectFile} f the file to remove
+		@returns {Promise} a promise that resolves with the deleted file or an error
+	*/
+	ProjectManager.prototype.removeFile = function (f) {
+		var ws = WSManager.getWebSocket(), notification;
+		var project = this.project();
+		return new Promise(function (resolve, reject) {
+			ws.send({type: "deleteFile", filePath: f.path()}, function (err) {
+				if (!err) {
+					project.removeFile(f);
+					notification = "File " + f.path() + " has been deleted.";
+					Logger.log(notification);
+					NotificationManager.show(notification);
+					resolve(f);
+					f.clearListeners();
+				} else {
+					//show error
+					reject(err);
+					Logger.error(err);
+				}
+			});
+		});
+	};
+	/**
+		Adds the specified file to the list of project files
+		@param {ProjectFile} file the file to add
+		@param {bool} suppressEvent the parameter to flag whether or not to suppress the new file event
+		@returns {Promise} a promise that resolves with the file added
+	*/
+	ProjectManager.prototype.addFile = function (file, suppressEvent) {
+		var ws = WSManager.getWebSocket();
+		var project = this.project();
+		return new Promise(function (resolve, reject) {
+			ws.writeFile({filePath: file.path(), fileContent: file.content(), encoding: file.encoding()}, function (err, res) {
+				if (!err) {
+					//add the spec file to the project and supress the event so we dont create multiple files
+					console.log(res);
+					project.addProjectFile(file, suppressEvent);
+					resolve(file);
+				} else {
+					reject(err);
+				}
+			});
+		});
+	};
+	
+	/**
+		Adds a folder to the project directory at the specified path
+		@param {string} path the path of the new folders
+		@return {Promise} a promise that resolves when the directory has been successfully written to disk
+	*/
+	ProjectManager.prototype.addFolder = function (path) {
+		var ws = WSManager.getWebSocket();
+		return new Promise(function (resolve, reject) {
+			ws.writeDirectory(path, function (err, res) {
+				if (!err) {
+					resolve(res);
+				} else {//there was an error so revert the name
+					reject(err);
+				}
+			});
+		});
+	};
+	
+	
+	ProjectManager.prototype.removeFolder = function (path) {
+		var ws = WSManager.getWebSocket(), notification;
+		return new Promise(function (resolve, reject) {
+			ws.send({type: "deleteFile", filePath: path}, function (err) {
+				if (!err) {
+					notification = "Folder " + path + " has been deleted.";
+					Logger.log(notification);
+					NotificationManager.show(notification);
+					resolve(path);
+				} else {
+					//show error
+					reject(err);
+					Logger.error(err);
+				}
+			});
+		});
+	};
+	
 	/** 
 	 * Creates a new Project.
      * @param data contains the following fields: projectName (string), 
@@ -435,8 +552,8 @@ define(function (require, exports, module) {
         //create promises for the pvs source files, if any is specified in data
         if (data.pvsSpec && data.pvsSpec.length > 0) {
             for (i = 0; i < data.pvsSpec.length; i++) {
-                if (data.pvsSpec[i].name !== undefined) {                    
-                	promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
+                if (data.pvsSpec[i].name !== undefined) {
+					promises.push(fs.readLocalFileAsText(data.pvsSpec[i]));
                 }
             }
         } else {
@@ -450,7 +567,7 @@ define(function (require, exports, module) {
 
         var previousProject = project || pm.project();
 		imageLoadPromise.then(function () {
-			 Promise.all(promises)
+			Promise.all(promises)
 				.then(function (pvsFiles) {
 					pvsFiles.forEach(function (spec) {
 						project.addProjectFile(project.name() + "/" + spec.fileName, spec.fileContent);
@@ -484,7 +601,6 @@ define(function (require, exports, module) {
 		});
        
     };
-    
     
 	/** 
 	 * Creates a new Project -- interactive version: displays the new Project dialog and handles the response 
@@ -547,8 +663,8 @@ define(function (require, exports, module) {
 						} else {
 							notification = "Project " + project.name() + " saved successfully!";
 							NotificationManager.show(notification);
-            				pm.renderSourceFileList(folderStructure);
-            				pvsFilesListView.selectItem(project.mainPVSFile() ||
+							pm.renderSourceFileList(folderStructure);
+							pvsFilesListView.selectItem(project.mainPVSFile() ||
                                         project.pvsFilesList()[0] ||
                                         project.name());
 						}
@@ -556,7 +672,7 @@ define(function (require, exports, module) {
 					});
 					view.remove();
 				}).on("cancel", function (event, view) {
-					notification = "Error: project not saved. Please change the name from the  \"" + name + "\" is not a valid name.)";
+					notification = "Project save was cancelled. Please change the name from the  \"" + name + "\" is not a valid name.";
 					NotificationManager.error(notification);
 					view.remove();
 					if (typeof cb === "function") { cb(); }
@@ -599,6 +715,7 @@ define(function (require, exports, module) {
      * checks if file pf already exists in the project
      * returns true if pf exists, otherwise returns false
      */
+	///FIXME file existence should be checked in the project not the list view
     ProjectManager.prototype.fileExists = function (pf) {
         return pvsFilesListView.fileExists(pf.path());
     };
@@ -679,9 +796,11 @@ define(function (require, exports, module) {
             fs.readLocalFileAsDataURL(file)
                 .then(function (res) {
                     var p = pm.project();
-                    p.changeImage(p.name() + "/" + res.filePath, res.fileContent);
-                    pm.updateImage(p.getImage());
-                }, function (err) {
+                    pm.changeImage(p.name() + "/" + res.filePath, res.fileContent)
+					.then(function () {
+						pm.updateImage(p.getImage());
+					});
+                }).catch(function (err) {
                     Logger.log(err);
                 });
         }

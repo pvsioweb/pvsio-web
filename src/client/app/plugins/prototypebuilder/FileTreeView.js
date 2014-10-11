@@ -3,26 +3,27 @@
  * @author Patrick Oladimeji
  * @date 1/14/14 11:53:17 AM
  */
-/*jshint unused: true*/
+/*jshint unused: false*/
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, unparam: true*/
 /*global define*/
 define(function (require, exports, module) {
     "use strict";
     var eventDispatcher = require("util/eventDispatcher"),
-        WSManager		= require("websockets/pvs/WSManager"),
         QuestionForm    = require("pvsioweb/forms/displayQuestion"),
+		NotificationManager = require("project/NotificationManager"),
         TreeList        = require("./TreeList");
     
-    var elementId, project, ws = WSManager.getWebSocket(), fileCounter = 0, folderCounter = 0,
+    var elementId, project, projectManager, fileCounter = 0, folderCounter = 0,
         unSavedFileName = "untitled_file", unSavedFolderName = "untitled_folder", treeList;
     
 	///FIXME Sort out the use of alert dialogs to notify errors here --
 	///also are there client side checks we can do to prevent some errors
-    function FileTreeView(_elId, folderData, _project) {
+    function FileTreeView(_elId, folderData, _projectManager) {
         eventDispatcher(this);
         var ftv = this;
         elementId = _elId;
-        project = _project;
+        project = _projectManager.project();
+		projectManager = _projectManager;
     
         treeList = new TreeList(folderData, elementId);
         treeList.addListener("SelectedItemChanged", function (event) {
@@ -33,30 +34,30 @@ define(function (require, exports, module) {
                 var f = project.getProjectFile(oldPath);
                 if (event.data.isDirectory) {
 					if (oldPath !== node.path) {//we only want to rename folder if the name has actually been changed
-						   project.renameFolder(oldPath, node.path, function (err, res) {
-								if (err) {
-									// alert user
-									if (err.code === "ENOTEMPTY") {
-										alert("Error: the folder could not be renamed into " + err.newPath + " (another folder with the same name already exists). Please choose a different name");
-									} else { alert(err.code); }
-									// revert to previous name
-									var prevData = event.data;
-									prevData.path = oldPath;
-									prevData.name = oldPath.substring(oldPath.lastIndexOf("/") + 1);
-									treeList.createNodeEditor(prevData);
-									// and trigger blur event to remove the overlay node used for renaming
-									treeList.blur();
-								} else {
-									// we need to update the path of all children
-									var projectFiles = project.getProjectFiles();
-									if (projectFiles) {
-										projectFiles.forEach(function (file) {
-											file.path(file.path().replace(oldPath, node.path));
-										});
-									}
-									treeList.render(projectFiles);
+						project.renameFolder(oldPath, node.path, function (err, res) {
+							if (err) {
+								// alert user
+								if (err.code === "ENOTEMPTY") {
+									alert("Error: the folder could not be renamed into " + err.newPath + " (another folder with the same name already exists). Please choose a different name");
+								} else { alert(err.code); }
+								// revert to previous name
+								var prevData = event.data;
+								prevData.path = oldPath;
+								prevData.name = oldPath.substring(oldPath.lastIndexOf("/") + 1);
+								treeList.createNodeEditor(prevData);
+								// and trigger blur event to remove the overlay node used for renaming
+								treeList.blur();
+							} else {
+								// we need to update the path of all children
+								var projectFiles = project.getProjectFiles();
+								if (projectFiles) {
+									projectFiles.forEach(function (file) {
+										file.path(file.path().replace(oldPath, node.path));
+									});
 								}
-							});
+								treeList.render(projectFiles);
+							}
+						});
 					}
                  
                 } else {//renaming a file
@@ -78,26 +79,21 @@ define(function (require, exports, module) {
             var path = event.data.path + "/" + name;
             var newFileData = {name: name, path: path };
             newFileData = treeList.addItem(newFileData, event.data);
-            treeList.selectItem(newFileData.path);
+			
             treeList.createNodeEditor(newFileData, function (node, oldPath) {
-                var file = project.getProjectFile(oldPath);
-                file.path(node.path);
-                ws.writeFile({filePath: file.path(), fileContent: file.content()}, function (err, res) {
-                    if (!err) {
-                        //add the spec file to the project and supress the event so we dont create multiple files
-                        console.log(res);
-                    } else {
-                        console.log(err);
-                        if (err && err.code === "EEXIST") {
-                            // alert user
-                            alert("Error: file " + err.path +
-                                  " could not be created (another file with the same name already exists). Please choose a different name");
-                            // remove the created node from filetreeview
-                            var enteredItem = treeList.getSelectedItem();
-                            treeList.removeItemByID(enteredItem.id);
-                        }
-                    }
-                });
+				var file = projectManager.newTheoryFile(node.name, node.path);
+				projectManager.addFile(file, true)
+					.then(function () {
+						treeList.selectItem(node.path);
+					})
+					.catch(function (err) {
+						var message = "Error: file " + err.path +
+							" could not be created (another file with the same name already exists). Please choose a different name";
+						NotificationManager.error(message);
+						// remove the created node from filetreeview
+						var enteredItem = treeList.getSelectedItem();
+						treeList.removeItemByID(enteredItem.id);
+					});
             }, function (node) {
                 treeList.removeItem(node.path);
             });
@@ -110,23 +106,20 @@ define(function (require, exports, module) {
             newFolderData = treeList.addItem(newFolderData, event.data);
             treeList.selectItem(newFolderData.path);
             treeList.createNodeEditor(newFolderData, function (node) {
-                ws.writeDirectory(node.path, function (err, res) {
-                    if (!err) {
-                        console.log(res);
-                    } else {//there was an error so revert the name
-						console.log(err);
-						alert("Error: file " + err.path +
-                                  " could not be created (another file with the same name already exists). Please choose a different name");
+				projectManager.addFolder(node.path)
+					.catch(function (err) {
+						var message = "Error: file " + err.path +
+							" could not be created (another file with the same name already exists). Please choose a different name";
+						NotificationManager.error(message);
 						// remove the created node from filetreeview
 						var enteredItem = treeList.getSelectedItem();
 						treeList.removeItemByID(enteredItem.id);
-					}
-                });
+					});
             }, function (node) {
                 treeList.removeItem(node.path);
             });
         }).addListener("Delete", function (event) {
-            var path = event.data.path;
+            var path = event.data.path, isDirectory = event.data.isDirectory;
             if (path === project.name()) {
                 alert("Cannot delete project root directory.");
                 return;
@@ -136,36 +129,27 @@ define(function (require, exports, module) {
                 question: "Are you sure you want to delete " + path + "?",
                 buttons: ["Cancel", "Delete"]
             }).on("ok", function (e, view) {
-                //send request to remove file using the wsmanager
-                ws.send({type: "deleteFile", filePath: path}, function (err) {
-                    if (!err) {
-                        treeList.selectNext(path);
-                        treeList.removeItem(path);
-                        // we need to remove the file from pvsFileList too
-                        var projectFiles = project.getProjectFiles(); 
-                        var pf = projectFiles.filter(function (file) {
-                            return file.path() === path;
-                        });
-                        if (pf && pf.length === 1) {
-                            project.removeFile(pf[0]);
-                        } else {
-                            if (pf.length > 1) {
-                                alert("Error: Something is wrong, more than one file selected for deletion.");
-                            } else { 
-								alert("Error: Something is wrong, a delete file command has been sent but the file to be deleted cannot be selected."); }
-                        }
-                    } else {
-                        //show error
-                        console.log(err);
-                    }
-                });
+				if (isDirectory) {
+					projectManager.removeFolder(path)
+						.then(function () {
+							ftv.deleteItem(path);
+						});
+				} else {
+					//remove the file from the project
+					var pf = project.getProjectFile(path);
+					projectManager.removeFile(pf)
+						.then(function (f) {
+							console.log(f);
+						}, function (err) {
+							console.log(err);
+						});
+				}
                 view.remove();
             }).on("cancel", function (e, view) { view.remove(); });
         });
 
         //if there is a project add listener to changes to files etc
         if (project) {
-            var _this = this;
             project.addListener("DirtyFlagChanged", function (event) {
                 var file = event.file;
                 //set file as dirty
