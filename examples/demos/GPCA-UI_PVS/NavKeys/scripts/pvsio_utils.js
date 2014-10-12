@@ -343,7 +343,7 @@ var read_gpcaui_state = function (e) {
 
 	display = eval(display_field.exec(pvsio_response)[1]);
 	dispMode = dispMode_field.exec(pvsio_response)[1];
-	cursor = cursor_field.exec(pvsio_response)[1];
+	cursor = eval(cursor_field.exec(pvsio_response)[1]);
 	unit = unit_field.exec(pvsio_response)[1];
 
 	block_interaction = block_interaction_field.exec(pvsio_response)[1];
