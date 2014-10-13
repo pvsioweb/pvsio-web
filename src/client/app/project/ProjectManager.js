@@ -662,6 +662,11 @@ define(function (require, exports, module) {
             var file = d3.event.currentTarget.files[0];
             if (file && imageExts.indexOf(file.name.split(".").slice(-1).join("").toLowerCase()) > -1) {
                 _updateImage(file);
+                if (d3.select("#imageDiv svg").node() === null) {
+                    // we need to create the svg layer, as it's not there
+                    // this happens when a new project is created without selecting an image
+                    WidgetManager.updateMapCreator();
+                }
             }
         });
 
