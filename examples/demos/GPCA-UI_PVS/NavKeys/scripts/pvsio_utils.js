@@ -536,175 +536,216 @@ require.config({
 });
 
 var onOutPutUpdated = function(error, event){
-            console.style.display = "none";
-			read_gpcaui_state(event);
+    console.style.display = "none";
+    read_gpcaui_state(event);
 
-			// clear display
-			clear_display();
+    // clear display
+    clear_display();
 
-			// update power led
-			if(ctrl_state == "PowerOff") { powerLedOff(); }
-			else { powerLedOn(); }
+    // update power led
+    if(ctrl_state == "PowerOff") { powerLedOff(); }
+    else { powerLedOn(); }
 
-			// render content of displayFOUR
-			if(dispMode == "DrivenByControllerMode") {
-				if(primaryMsg != "Empty") {
-					// make the display opaque
-					make_visible("displayFOUR");
-					// render primary message in primary display
-					render_text(displayFOUR_primary, primaryMsg);
-				}
-				if(secondaryMsg != "Empty") {
-					// make the display opaque
-					make_visible("displayFOUR");
-					// render content if non-empty
-					render_text(displayFOUR_secondary, secondaryMsg);
-				}
-			}
+    // render content of displayFOUR
+    if(dispMode == "DrivenByControllerMode") {
+        if(primaryMsg != "Empty") {
+            // make the display opaque
+            make_visible("displayFOUR");
+            // render primary message in primary display
+            render_text(displayFOUR_primary, primaryMsg);
+        }
+        if(secondaryMsg != "Empty") {
+            // make the display opaque
+            make_visible("displayFOUR");
+            // render content if non-empty
+            render_text(displayFOUR_secondary, secondaryMsg);
+        }
+    }
 
-			// render content of displayTHREE
-			if((dispMode == "DataEntryModeVTBI" || dispMode == "DataEntryModeDoseRate") && block_interaction == "TRUE") {
-				// make the display opaque
-				make_visible("displayTHREE");
+    // render content of displayTHREE
+    if((dispMode == "DataEntryModeVTBI" || dispMode == "DataEntryModeDoseRate") && block_interaction == "TRUE") {
+        // make the display opaque
+        make_visible("displayTHREE");
 
-				// render information
-				render_text(displayTHREE_primary, dePrimaryMsg);
-				render_text(displayTHREE_secondary, deSecondaryMsg);
-			}
+        // render information
+        render_text(displayTHREE_primary, dePrimaryMsg);
+        render_text(displayTHREE_secondary, deSecondaryMsg);
+    }
 
-			// render content of displayTWO
-			if((dispMode == "DataEntryModeVTBI" || dispMode == "DataEntryModeDoseRate") && block_interaction == "FALSE") {
-				// make the display opaque
-				make_visible("displayTWO");
+    // render content of displayTWO
+    if((dispMode == "DataEntryModeVTBI" || dispMode == "DataEntryModeDoseRate") && block_interaction == "FALSE") {
+        // make the display opaque
+        make_visible("displayTWO");
 
-				// topline renders display mode
-				render_text(displayTWO_topline, ctrl_state);
+        // topline renders display mode
+        render_text(displayTWO_topline, ctrl_state);
 
-				// main display renders value; the cursor is rendered only in data entry mode
-				render_dataentry(displayTWO_primary, display);
+        // main display renders value; the cursor is rendered only in data entry mode
+        render_dataentry(displayTWO_primary, display);
 
-				if(dispMode == "DataEntryModeVTBI") {
-					render_limits(displayTWO_secondary, 
-							vtbiLowerHardLimit, vtbiUpperHardLimit, 
-							vtbiLowerSoftLimit, vtbiUpperSoftLimit, vtbiUnit);
-				}
-				else if(dispMode == "DataEntryModeDoseRate") {
-					render_limits(displayTWO_secondary, 
-							doseRateLowerHardLimit, doseRateUpperHardLimit, 
-							doseRateLowerSoftLimit, doseRateUpperSoftLimit, doseRateUnit);
-				}
+        if(dispMode == "DataEntryModeVTBI") {
+            render_limits(displayTWO_secondary, 
+                    vtbiLowerHardLimit, vtbiUpperHardLimit, 
+                    vtbiLowerSoftLimit, vtbiUpperSoftLimit, vtbiUnit);
+        }
+        else if(dispMode == "DataEntryModeDoseRate") {
+            render_limits(displayTWO_secondary, 
+                    doseRateLowerHardLimit, doseRateUpperHardLimit, 
+                    doseRateLowerSoftLimit, doseRateUpperSoftLimit, doseRateUnit);
+        }
 
-				// botline renders unit
-				render_text(displayTWO_botline, unit);
-			}
+        // botline renders unit
+        render_text(displayTWO_botline, unit);
+    }
 
-			// render content of displayONE
-			if(dispMode == "SettingsSummaryMode") {
-				// make the display opaque
-				make_visible("displayONE");
+    // render content of displayONE
+    if(dispMode == "SettingsSummaryMode") {
+        // make the display opaque
+        make_visible("displayONE");
 
-				// leave topline bank to avoid cluttering the display content
-				render_text(displayONE_topline, "");
+        // leave topline bank to avoid cluttering the display content
+        render_text(displayONE_topline, "");
 
-				var labels = "";
-				var settings = "";
+        var labels = "";
+        var settings = "";
 
-				// render settings in main display
-				labels = "VOLUME:&nbsp;<br/>DOSE rate:&nbsp;"
-				settings = vtbi_value + " " + vtbi_unit + "<br/>"
-		                         + doseRATE_value + " " + doseRATE_unit;
-				
-				render_text(displayONE_secondary, labels);
-				render_text(displayONE_primary, settings);
+        // render settings in main display
+        labels = "VOLUME:&nbsp;<br/>DOSE rate:&nbsp;"
+        settings = vtbi_value + " " + vtbi_unit + "<br/>"
+                         + doseRATE_value + " " + doseRATE_unit;
 
-				// render instruction in botline
-				render_text(displayONE_botline, secondaryMsg);
-			}
+        render_text(displayONE_secondary, labels);
+        render_text(displayONE_primary, settings);
 
-			if(dispMode == "DisplayVTBIMode" || dispMode == "DisplayDoseRATEMode" || dispMode == "DisplayDrugInfoMode") {
-				// make the display opaque
-				make_visible("displayONE");
+        // render instruction in botline
+        render_text(displayONE_botline, secondaryMsg);
+    }
 
-				var labels = "";
-				var settings = "";
+    if(dispMode == "DisplayVTBIMode" || dispMode == "DisplayDoseRATEMode" || dispMode == "DisplayDrugInfoMode") {
+        // make the display opaque
+        make_visible("displayONE");
 
-				if(dispMode == "DisplayVTBIMode") { 
-					displayONE_topline.innerHTML = "Value suggested by the drug library"; 
-					labels = "<br/>VOLUME:&nbsp;"
-					settings = "<br/>" + vtbiTypical + " " + vtbiUnit;
-				}
-				else if(dispMode == "DisplayDoseRATEMode"){ 
-					displayONE_topline.innerHTML = "Value suggested by the drug library"; 
-					labels = "<br/>DOSE rate:&nbsp;"
-					settings = "<br/>" + doseRateTypical + " " + doseRateUnit;
-				}
-				else if(dispMode == "DisplayDrugInfoMode") {
-					displayONE_topline.innerHTML = ""; 
-					labels = "The loaded drug is:&nbsp;"
-					settings = drugID; // todo: add concentration, amount, diluent
-				}
+        var labels = "";
+        var settings = "";
 
-				// render settings in main display
-				render_text(displayONE_secondary, labels);
-				render_text(displayONE_primary, settings);
+        if(dispMode == "DisplayVTBIMode") { 
+            displayONE_topline.innerHTML = "Value suggested by the drug library"; 
+            labels = "<br/>VOLUME:&nbsp;"
+            settings = "<br/>" + vtbiTypical + " " + vtbiUnit;
+        }
+        else if(dispMode == "DisplayDoseRATEMode"){ 
+            displayONE_topline.innerHTML = "Value suggested by the drug library"; 
+            labels = "<br/>DOSE rate:&nbsp;"
+            settings = "<br/>" + doseRateTypical + " " + doseRateUnit;
+        }
+        else if(dispMode == "DisplayDrugInfoMode") {
+            displayONE_topline.innerHTML = ""; 
+            labels = "The loaded drug is:&nbsp;"
+            settings = drugID; // todo: add concentration, amount, diluent
+        }
 
-				// render instruction in botline
-				render_text(displayONE_botline, secondaryMsg);
-			}
+        // render settings in main display
+        render_text(displayONE_secondary, labels);
+        render_text(displayONE_primary, settings);
 
-			if(dispMode == "InfusionNormalOperation" || dispMode == "BolusInProgress") {
-				// make the display opaque
-				make_visible("displayONE");
+        // render instruction in botline
+        render_text(displayONE_botline, secondaryMsg);
+    }
 
-				// topline renders display mode
-				if(dispMode == "InfusionNormalOperation") { render_text(displayONE_topline, ctrl_state); }
-				else if(dispMode == "BolusInProgress") { render_text(displayONE_topline, "Bolus in progress..."); }
+    if(dispMode == "InfusionNormalOperation" || dispMode == "BolusInProgress") {
+        // make the display opaque
+        make_visible("displayONE");
 
-				// main display renders value, unit, and message "<Volume infused:"
-				render_value(displayONE_primary, display, unit);
-				render_text(displayONE_secondary, "<br/>Volume infused:&nbsp;");
+        // topline renders display mode
+        if(dispMode == "InfusionNormalOperation") { render_text(displayONE_topline, ctrl_state); }
+        else if(dispMode == "BolusInProgress") { render_text(displayONE_topline, "Bolus in progress..."); }
 
-				// render instruction in botline
-				render_text(displayONE_botline, secondaryMsg);
-			}
+        // main display renders value, unit, and message "<Volume infused:"
+        render_value(displayONE_primary, display, unit);
+        render_text(displayONE_secondary, "<br/>Volume infused:&nbsp;");
 
-			// send a command to the controller every time the user interface registers an action from the user
-			if(GUI_ACTION == 1) { 
-				// run the controller
-				run_controller();
-				GUI_ACTION = 0;
-			}
-		};
-require(["scripts/gip.js", "websockets/pvs/pvsWSClient"], function(_g, pvsws){
-      var url = window.location.origin.indexOf("file") === 0 ?
-            "ws://localhost:8082" : ("ws://" + window.location.hostname + ":8082");
-		pvsws()
-		.lastState("GPCA_init(0)")
-		.serverUrl(url) 
-		.addListener('ConnectionOpened', function(e){
-			
-		}).addListener("ConnectionClosed", function(e){
-			console.style.display = "block";
-			log("Simulator back-end disconnected<br>Please type pvsio-web in a terminal to start the simulator back-end.");
-		}).addListener("InputUpdated", function(e){
-			pvsio_commands_log(JSON.stringify(e.data));
-		}).addListener("pvsoutput", function (e) {
-			ws.lastState(e.data);
-			//ws.value(e.data);
-			onOutPutUpdated(e);
-			console.style.display = "none";
-		}).logon()
-			.then(function (_ws) {
-				ws = _ws;
-				ws.startPVSProcess({fileName: "main.pvs", demoName: "../demos/GPCA-UI_PVS"}, function (e, event) {
-					ws.sendGuiAction("GPCA_init(0);", onOutPutUpdated);
-                    log("Starting GPCA simulation...");
-				});
-				console.innerHTML = "";
-				console.style.display = "block";
-				ControllerConsole.style.display = "none";
-				uiConsole.style.display = "none";
-				log("Loading GPCA model...");
-			});
+        // render instruction in botline
+        render_text(displayONE_botline, secondaryMsg);
+    }
+
+    // send a command to the controller every time the user interface registers an action from the user
+    if(GUI_ACTION == 1) { 
+        // run the controller
+        run_controller();
+        GUI_ACTION = 0;
+    }
+};
+
+require.config({
+    baseUrl: "../../../client/app",
+    paths: {
+        d3: "../../lib/d3",
+		"pvsioweb": "../plugins/prototypebuilder",
+        "imagemapper": "../../lib/imagemapper",
+        "text": "../../lib/text",
+        "lib": "../../lib",
+        "cm": "../../lib/cm"
+    }
+});
+
+require(["scripts/gip.js", "PVSioWebClient"], function(_g, PVSioWebClient){
+    
+    var client = PVSioWebClient.getInstance();
+    ws = client.getWebSocket();
+    
+    //register event listener for websocket connection from the client
+	client.addListener('WebSocketConnectionOpened', function (e) {
+        console.innerHTML = "";
+        console.style.display = "block";
+        ControllerConsole.style.display = "none";
+        uiConsole.style.display = "none";
+        log("Loading GPCA model...");
+		//start pvs process
+		client.getWebSocket().startPVSProcess({fileName: "main.pvs", demoName: "GPCA-UI_PVS"}, function (err, event) {
+            ws.sendGuiAction("GPCA_init(0);", onOutPutUpdated);
+            log("Starting GPCA simulation...");
+		});
+	}).addListener("WebSocketConnectionClosed", function (e) {
+		log("web socket closed");
+	}).addListener("processExited", function (e) {
+		var msg = "Warning!!!\r\nServer process exited. See console for details.";
+		log(msg);
+	});
+	
+	client.connectToServer();
+
+//    
+//    
+//      var url = window.location.origin.indexOf("file") === 0 ?
+//            "ws://localhost:8082" : ("ws://" + window.location.hostname + ":8082");
+//    
+//		pvsws()
+//		.lastState("GPCA_init(0)")
+//		.serverUrl(url) 
+//		.addListener('ConnectionOpened', function(e){
+//			
+//		}).addListener("ConnectionClosed", function(e){
+//			console.style.display = "block";
+//			log("Simulator back-end disconnected<br>Please type pvsio-web in a terminal to start the simulator back-end.");
+//		}).addListener("InputUpdated", function(e){
+//			pvsio_commands_log(JSON.stringify(e.data));
+//		}).addListener("pvsoutput", function (e) {
+//			ws.lastState(e.data);
+//			//ws.value(e.data);
+//			onOutPutUpdated(e);
+//			console.style.display = "none";
+//		}).logon()
+//			.then(function (_ws) {
+//				ws = _ws;
+//				ws.startPVSProcess({fileName: "main.pvs", demoName: "../demos/GPCA-UI_PVS"}, function (e, event) {
+//					ws.sendGuiAction("GPCA_init(0);", onOutPutUpdated);
+//                    log("Starting GPCA simulation...");
+//				});
+//				console.innerHTML = "";
+//				console.style.display = "block";
+//				ControllerConsole.style.display = "none";
+//				uiConsole.style.display = "none";
+//				log("Loading GPCA model...");
+//			});
 });
 
