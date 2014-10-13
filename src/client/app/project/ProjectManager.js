@@ -392,14 +392,14 @@ define(function (require, exports, module) {
             });
             //set the main pvs file
             project.mainPVSFile(project.pvsFilesList()[0]);
-            WidgetManager.updateMapCreator();
             pm.project(project);
             pm.renderSourceFileList(folderStructure);
             pvsFilesListView.selectItem(project.mainPVSFile() ||
                                         project.pvsFilesList()[0] ||
                                         project.name());
             if (image) {
-                pm.updateImage(image, function () {
+                pm.updateImage(image, function (res, scale) {
+                    WidgetManager.updateMapCreator();
                     //fire project changed event
                     pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
                     //invoke callback
