@@ -313,36 +313,39 @@ define(function (require, exports, module) {
 	 * @param {ProjectFile} image the ProjectFile representing the project image
 	 * @memberof ProjectManager
 	 */
+    var img;
 	ProjectManager.prototype.updateImage = function (image, cb) {
-        var img = new Image();
+        img = new Image();
         
         function imageLoadComplete(res) {
 			//if the image width is more than the the containing element scale it down a little
 			var parent = d3.select("#body > .ljs-hcontent"),
 				scale = 1;
 			function resize() {
-				var pbox = parent.node().getBoundingClientRect(),
-					adjustedWidth = img.width,
-					adjustedHeight = img.height;
-				scale = 1;
-				
-				if (img.width > pbox.width) {
-					adjustedWidth = pbox.width;
-					scale = adjustedWidth / img.width;
-					adjustedHeight = scale * img.height;
-				}
+                if(img) {
+                    var pbox = parent.node().getBoundingClientRect(),
+                        adjustedWidth = img.width,
+                        adjustedHeight = img.height;
+                    scale = 1;
 
-				d3.select("#body").style("height", (adjustedHeight + 50) + "px");
+                    if (img.width > pbox.width) {
+                        adjustedWidth = pbox.width;
+                        scale = adjustedWidth / img.width;
+                        adjustedHeight = scale * img.height;
+                    }
 
-				d3.select("#imageDiv").style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
-				d3.select("#imageDiv img").attr("src", img.src).attr("height", adjustedHeight).attr("width", adjustedWidth);
-				d3.select("#imageDiv svg").attr("height", adjustedHeight).attr("width", adjustedWidth);
-				d3.select("#imageDiv svg > g").attr("transform", "scale(" + scale + ")");
-				//hide the draganddrop stuff
-				d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
-				
-				//update widgets maps after resizing
-				WidgetManager.scaleAreaMaps(scale);
+                    d3.select("#body").style("height", (adjustedHeight + 50) + "px");
+
+                    d3.select("#imageDiv").style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
+                    d3.select("#imageDiv img").attr("src", img.src).attr("height", adjustedHeight).attr("width", adjustedWidth);
+                    d3.select("#imageDiv svg").attr("height", adjustedHeight).attr("width", adjustedWidth);
+                    d3.select("#imageDiv svg > g").attr("transform", "scale(" + scale + ")");
+                    //hide the draganddrop stuff
+                    d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+
+                    //update widgets maps after resizing
+                    WidgetManager.scaleAreaMaps(scale);
+                }
 			}
 			resize();
             // invoke callback, if any
@@ -396,6 +399,7 @@ define(function (require, exports, module) {
                 });
             } else {
                 // remove previous image, if any
+                img = null;
                 d3.select("#imageDiv img").attr("src", "").attr("height", "430").attr("width", "1128");
                 //fire project changed event
                 pm.fire({type: "ProjectChanged", current: project, previous: previousProject});
@@ -411,10 +415,12 @@ define(function (require, exports, module) {
                     project.changeImage(project.name() + "/" + res.filePath, res.fileContent);
                 });
         } else {
-            d3.select("#imageDiv img").attr("src", "").attr("height", "430").attr("width", "1128");
-            d3.select("#imageDiv svg").attr("height", "430").attr("width", "1128");
+            d3.select("#imageDiv img").attr("src", "").attr("height", "0").attr("width", "0");
+            d3.select("#imageDiv svg").attr("height", "0").attr("width", "0");
+            d3.select("#imageDiv").attr("style", "");
+            d3.select("#body").attr("style", "height: 480px"); // 430 + 44 + 6
             // show the draganddrop stuff
-            d3.select("#imageDragAndDrop.dndcontainer").style("display", "block");
+            d3.select("#imageDragAndDrop.dndcontainer").style("display", "block").style("height", "430px");
         }
         
         //create promises for the pvs source files, if any is specified in data
