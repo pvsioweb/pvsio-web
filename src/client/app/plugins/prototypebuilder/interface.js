@@ -215,26 +215,28 @@ define(function (require, exports, module) {
 		//this function should be edited to only act on the selected file when multiple files are in use
 		d3.select("#btnTypeCheck").on("click", function () {
             function typecheck(pvsFile) {
-                var btn = d3.select("#btnTypeCheck").html("Typechecking ...").attr("disabled", true);
+                var btn = d3.select("#btnTypeCheck").html("Compiling...").attr("disabled", true);
                 var ws = WSManager.getWebSocket();
-                ws.send({type: "typeCheck", filePath: pvsFile.name()},
+                // note: to get the path right, we need to remove the initial part of the path (i.e., the project name)
+                var fp = pvsFile.path().substring(pvsFile.path().indexOf("/") + 1);  
+                ws.send({type: "typeCheck", filePath: fp},
                      function (err, res) {
-                        btn.html("Typecheck").attr("disabled", null);
+                        btn.html("Compile").attr("disabled", null);
                         var msg = res.stdout;
                         if (!err) {
                             reloadPVSio();
                             var project = projectManager.project();
-                            var notification = "Project " + project.name() + " compiled successfully!";
+                            var notification = "File " + fp + " compiled successfully!";
                             d3.select("#editor-notification-area").insert("p", "p").html(notification);
                             msg = msg.substring(msg.indexOf("Proof summary"), msg.length);
                             Notification.create({
-                                header: "Typecheck result",
+                                header: "Compilation result for file " + pvsFile.name(),
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         } else {
                             msg = msg.substring(msg.indexOf("Writing output to file"), msg.length);
                             Notification.create({
-                                header: "Typecheck error, please check the PVS output file for details.",
+                                header: "Compilation error, please check the PVS output file for details.",
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         }
