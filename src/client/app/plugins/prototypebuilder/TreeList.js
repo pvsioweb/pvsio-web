@@ -213,6 +213,7 @@ define(function (require, exports, module) {
                 }, duration);
             }
         }
+        return this;
     };
     
     /** 
@@ -272,10 +273,25 @@ define(function (require, exports, module) {
                 fst.render(toRemove.parent);
             }
         }
-        // clear selected data
-        selectedData = null;
+        // clear selectedData by moving the selection to the root
+        this.selectItem(d3.select(el).select(".node").data()[0].path);
     };
     
+    TreeList.prototype.removeItemByID = function (id) {
+        var fst = this, toRemove = find(function (node) {
+            return node.id === id;
+        }, data);
+        if (toRemove) {
+            var index = toRemove.parent.children ? toRemove.parent.children.indexOf(toRemove) : -1;
+            if (index > -1) {
+                toRemove.parent.children.splice(index, 1);
+                fst.render(toRemove.parent);
+            }
+        }
+        // clear selectedData by moving the selection to the root
+        this.selectItem(d3.select(el).select(".node").data()[0].path);
+    };
+
     TreeList.prototype.nodeExists = function (nodePath) {
         var nodes = d3.select(el).selectAll(".node .label").filter(function (d) {
             return d.path === nodePath;
@@ -295,52 +311,67 @@ define(function (require, exports, module) {
         });
                 
         // an input text element is temporarily appended to let the user type the label
-        nodes.select(".label").html("")
+        var inputText = nodes.select(".label").html("")
             .append("input").attr("class", "input_text")
             .attr("type", "text")
             .attr("placeholder", node.name)
             .attr("value", node.name);
         
-        var input_text = nodes.select(".input_text"),
-            oldPath = node.path;
+        var oldPath = node.path;
 
         function doCreate(elem, newLabel) {
             if (newLabel === "") { newLabel = node.name; }
             d3.select(elem.parentNode).html(newLabel);
             fst.renameItem(n, newLabel);
-            if (onEnter && typeof onEnter === "function") {
+            
+        }        
+        var inputEl = inputText.node();
+        inputEl.focus();
+        inputEl.onblur = function () {
+            // NB: the first thing is to remove the onblur event handler, otherwhise the event will be triggered twice
+            inputEl.onblur = null;
+            doCreate(inputEl, inputEl.value);
+			if (onEnter && typeof onEnter === "function") {
                 onEnter(n, oldPath);
             }
-        }
-        
-        var label = d3.select(input_text.node().parentNode).node();
-        var input = d3.select(input_text.node()).node();
-        input.focus();
-        input.onblur = function () {
-            doCreate(this, input.value);
-            input_text.node().onblur = null;
         };
-        input.onkeydown = function (event) {
+        inputEl.onkeydown = function (event) {
             if (event.which === 13) { // enter key pressed
                 event.preventDefault();
-                doCreate(this, input.value);
-                input_text.node().onkeydown = null;
-                input_text.node().onblur = null;
+                inputEl.onkeydown = null;
+                inputEl.onblur();
             } else if (event.which === 27) { // escape key pressed
+                inputEl.onblur = null;
                 event.preventDefault();
+				doCreate(inputEl, node.name);
                 if (onCancel && typeof onCancel === "function") {
                     onCancel(n, oldPath);
                 }
-                input_text.node().onkeydown = null;
-                input_text.node().onblur = null;
+                inputEl.onkeydown = null;
             }
         };
     };
                 
     TreeList.prototype.renameItem = function (item, newName) {
-        // FIXME: it's note safe to use replace because the string to be replaced could be (part of) the name of subdirectories listed in the path
-        item.path = item.path.replace(item.name, newName);
-        item.name = newName;
+        // NB: this data update is not elegant but is needed for updating data of nodes corresponding to empty directories
+        //     (empty directories are not saved in the project, so their data cannot be updated using project.pvsFilesList())
+        //     to avoid this, we probably need to store info about (empty) directories in pvsFilesList
+        function dataUpdateRecursive(item, baseName, newName) {
+            if (item && baseName && newName) {
+                item.path = item.path.replace(baseName, newName);
+                item.name = item.name.replace(baseName, newName);
+                if(item.children) {
+                    item.children.forEach(function (child) {
+                        dataUpdateRecursive(child, baseName, newName);
+                    });
+                }
+            }
+        }
+        
+        dataUpdateRecursive(item, item.name, newName);        
+        // FIXME: it's note safe to use replace because the string to be replaced could be (part of) the name of subdirectories listed in the path. There must be a better way of doing this!
+//        item.path = item.path.replace(item.name, newName);
+//        item.name = newName;
     };
     
     TreeList.prototype.getSelectedItem = function () {
@@ -353,6 +384,17 @@ define(function (require, exports, module) {
         d3.select(el).select(".label").text(newName);
     };
 
+    TreeList.prototype.blur = function() {
+        var n = this.getSelectedItem();
+        var this_node = d3.select(el).selectAll(".node").filter(function (d) {
+            return d === n;
+        });
+        if (this_node && this_node.length > 0) {
+            this_node.select(".label").html(n.name);
+        }
+        return this;
+    };
+    
     module.exports = TreeList;
 
 });

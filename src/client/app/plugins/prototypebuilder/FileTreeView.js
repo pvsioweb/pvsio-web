@@ -30,8 +30,44 @@ define(function (require, exports, module) {
             treeList.createNodeEditor(event.data, function (node, oldPath) {
                 var f = project.getProjectFile(oldPath);
                 if (event.data.isDirectory) {
-                    project.renameFolder(oldPath, node.path);
-                } else { project.renameFile(f, node.name); }
+					if (oldPath !== node.path) {//we only want to rename folder if the name has actually been changed
+						project.renameFolder(oldPath, node.path, function (err, res) {
+							if (err) {
+								// alert user
+								if (err.code === "ENOTEMPTY") {
+									alert("Error: the folder could not be renamed into " + err.newPath + " (another folder with the same name already exists). Please choose a different name");
+								} else { alert(err.code); }
+								// revert to previous name
+								var prevData = event.data;
+								prevData.path = oldPath;
+								prevData.name = oldPath.substring(oldPath.lastIndexOf("/") + 1);
+								treeList.createNodeEditor(prevData);
+								// and trigger blur event to remove the overlay node used for renaming
+								treeList.blur();
+							} else {
+								// we need to update the path of all children
+								var projectFiles = project.getProjectFiles();
+								if (projectFiles) {
+									projectFiles.forEach(function (file) {
+										file.path(file.path().replace(oldPath, node.path));
+									});
+								}
+								treeList.render(projectFiles);
+							}
+						});
+					}
+                 
+                } else {//renaming a file
+					project.renameFile(f, node.name, function (err, res) {
+						if (err) {
+							alert(JSON.stringify(err));
+							var prevData = event.data;
+							prevData.path = oldPath;
+							prevData.name = oldPath.substring(oldPath.lastIndexOf("/") + 1);
+							treeList.createNodeEditor(prevData);
+						}
+					});
+				}
             });
         }).addListener("New File", function (event) {
             var name = (fileCounter === 0) ? unSavedFileName + ".pvs" : unSavedFileName + "_" + fileCounter + ".pvs";
