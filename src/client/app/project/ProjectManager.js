@@ -121,6 +121,8 @@ define(function (require, exports, module) {
                     editor.markClean();
                     if (pvsFile.path().indexOf(".pvs") === pvsFile.path().length - 4) {
                         editor.setOption("mode", "pvs");
+                    } else if (pvsFile.path().indexOf(".i") === pvsFile.path().length - 2) {
+                        editor.setOption("mode", "mal");
                     }
                     editor.focus();
                     editor.on("change", _editorChangedHandler);
@@ -136,6 +138,8 @@ define(function (require, exports, module) {
                             editor.markClean();
                             if (pvsFile.path().indexOf(".pvs") === pvsFile.path().length - 4) {
                                 editor.setOption("mode", "pvs");
+                            } else if (pvsFile.path().indexOf(".i") === pvsFile.path().length - 2) {
+                                editor.setOption("mode", "mal");
                             }
                             editor.focus();
                             editor.on("change", _editorChangedHandler);
