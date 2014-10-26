@@ -472,7 +472,11 @@ define(function (require, exports, module) {
 		});
 	};
 	
-	
+	/**
+		Removes the specified directory from the project directory
+		@param {string} path The path to the folder to remove
+		@return {Promise} a promise that resolves with the removed path
+	*/
 	ProjectManager.prototype.removeFolder = function (path) {
 		var ws = WSManager.getWebSocket(), notification;
 		return new Promise(function (resolve, reject) {
