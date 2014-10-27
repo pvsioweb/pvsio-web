@@ -105,48 +105,58 @@ define(function (require, exports, module) {
 		pvsFilesListView = new FileTreeView("#pvsFiles", folderStructure, project);
 		
 		pvsFilesListView.addListener("SelectedFileChanged", function (event) {
-			//fetch sourcecode for selected file and update editor
-            if (event.selectedItem && !event.selectedItem.isDirectory) {
-                var pvsFile = project.getProjectFile(event.selectedItem.path);
-                if (!pvsFile) {//load the pvsfile and add to the project 
-                    //since we are not passing a file content it will get loaded over websocket when requested
-                    //we supress the spec file added event because the file already exists in the file tree
-                    var theoryName = event.selectedItem.name.substr(0, event.selectedItem.name.indexOf(".pvs"));
-                    pvsFile = project.addProjectFile(event.selectedItem.path, makeEmptyTheory(theoryName), "utf8", true);
-                }
-                if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
-                    editor.off("change", _editorChangedHandler);
-                    editor.setOption("mode", "txt");
-                    editor.setValue(pvsFile.content());
-                    editor.markClean();
-                    if (pvsFile.path().indexOf(".pvs") === pvsFile.path().length - 4) {
-                        editor.setOption("mode", "pvs");
-                    } else if (pvsFile.path().indexOf(".i") === pvsFile.path().length - 2) {
-                        editor.setOption("mode", "mal");
-                    }
-                    editor.focus();
-                    editor.on("change", _editorChangedHandler);
+            if (event.selectedItem) {
+                if (event.selectedItem.isDirectory) {
+					editor.off("change", _editorChangedHandler);
+					editor.setOption("mode", "txt");
+					editor.setValue("<< Please select a file to view/edit its content within the model editor. >>");
+					editor.setOption("readOnly", true);
+					editor.markClean();
+					editor.focus();
+                    editor.on("change", _editorChangedHandler);                    
                 } else {
-                    //fetch file contents from server and set the value
-                    var f = pvsFile.path();
-                    ws.getFile(f, function (err, res) {
-                        if (!err) {
-                            editor.off("change", _editorChangedHandler);
-                            editor.setOption("mode", "txt");
-                            pvsFile.content(res.fileContent).dirty(false);
-                            editor.setValue(pvsFile.content());
-                            editor.markClean();
-                            if (pvsFile.path().indexOf(".pvs") === pvsFile.path().length - 4) {
-                                editor.setOption("mode", "pvs");
-                            } else if (pvsFile.path().indexOf(".i") === pvsFile.path().length - 2) {
-                                editor.setOption("mode", "mal");
-                            }
-                            editor.focus();
-                            editor.on("change", _editorChangedHandler);
-                        } else {
-                            Logger.log(err);
+                    //fetch sourcecode for selected file and update editor
+                    var pvsFile = project.getProjectFile(event.selectedItem.path);
+                    if (!pvsFile) {//load the pvsfile and add to the project 
+                        //since we are not passing a file content it will get loaded over websocket when requested
+                        //we supress the spec file added event because the file already exists in the file tree
+                        var theoryName = event.selectedItem.name.substr(0, event.selectedItem.name.indexOf(".pvs"));
+                        pvsFile = project.addProjectFile(event.selectedItem.path, makeEmptyTheory(theoryName), "utf8", true);
+                    }
+                    if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
+                        editor.off("change", _editorChangedHandler);
+                        editor.setOption("mode", "txt");
+                        editor.setValue(pvsFile.content());
+                        editor.markClean();
+                        if (pvsFile.path().indexOf(".pvs") === pvsFile.path().length - 4) {
+                            editor.setOption("mode", "pvs");
+                        } else if (pvsFile.path().indexOf(".i") === pvsFile.path().length - 2) {
+                            editor.setOption("mode", "mal");
                         }
-                    });
+                        editor.focus();
+                        editor.on("change", _editorChangedHandler);
+                    } else {
+                        //fetch file contents from server and set the value
+                        var f = pvsFile.path();
+                        ws.getFile(f, function (err, res) {
+                            if (!err) {
+                                editor.off("change", _editorChangedHandler);
+                                editor.setOption("mode", "txt");
+                                pvsFile.content(res.fileContent).dirty(false);
+                                editor.setValue(pvsFile.content());
+                                editor.markClean();
+                                if (pvsFile.path().indexOf(".pvs") === pvsFile.path().length - 4) {
+                                    editor.setOption("mode", "pvs");
+                                } else if (pvsFile.path().indexOf(".i") === pvsFile.path().length - 2) {
+                                    editor.setOption("mode", "mal");
+                                }
+                                editor.focus();
+                                editor.on("change", _editorChangedHandler);
+                            } else {
+                                Logger.log(err);
+                            }
+                        });
+                    }
                 }
             }
             //bubble the event
@@ -326,7 +336,7 @@ define(function (require, exports, module) {
 			var parent = d3.select("#body > .ljs-hcontent"),
 				scale = 1;
 			function resize() {
-                if(img) {
+                if (img) {
                     var pbox = parent.node().getBoundingClientRect(),
                         adjustedWidth = img.width,
                         adjustedHeight = img.height;
