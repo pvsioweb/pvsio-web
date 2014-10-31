@@ -127,6 +127,7 @@ define(function (require, exports, module) {
 					editor.focus();
 //                        editor.on("change", _editorChangedHandler);                    
                 } else {
+                    //fetch sourcecode for selected file and update editor
                     var pvsFile = project.getProjectFile(event.selectedItem.path);
                     if (!pvsFile) {//load the pvsfile and add to the project 
                         //since we are not passing a file content it will get loaded over websocket when requested
@@ -345,7 +346,7 @@ define(function (require, exports, module) {
 			var parent = d3.select("#body > .ljs-hcontent"),
 				scale = 1;
 			function resize() {
-                if(img) {
+                if (img) {
                     var pbox = parent.node().getBoundingClientRect(),
                         adjustedWidth = img.width,
                         adjustedHeight = img.height;

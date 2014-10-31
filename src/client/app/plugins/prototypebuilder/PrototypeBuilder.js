@@ -24,6 +24,7 @@ define(function (require, exports, module) {
     require("cm/addon/fold/foldgutter");
     require("cm/addon/fold/indentFold");
     require("cm/mode/pvs/pvs");
+    require("cm/mode/mal/mal");
     
 	function PrototypeBuilder() {
         pvsioWebClient = PVSioWebClient.getInstance();
