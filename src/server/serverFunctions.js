@@ -191,7 +191,7 @@ function createProject(opt, cb, p) {
 		fs.mkdir(projectPath, function (err) {
 			if (!err) {
 				var promises = projectFiles.map(function (file) {
-					var ext = path.extname(file.filePath);
+					var ext = path.extname(file.filePath).toLowerCase();
 					if (imageExts.indexOf(ext) > -1) {
 						file.fileContent = file.fileContent.replace(/^data:image\/(\w+);base64,/, "");
 					}
