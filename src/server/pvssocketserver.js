@@ -94,7 +94,7 @@ function run() {
                             props =  JSON.parse(res) || props;
                             props[key] = value;
                             //write the file back
-                            writeFile(file, JSON.stringify(props, null, " "))
+                            writeFile(file, JSON.stringify(props, null, " "), "utf8", { overWrite: true })
                                 .then(resolve, reject);
                         } else {//there was an error so reject the promise
                             reject(err);

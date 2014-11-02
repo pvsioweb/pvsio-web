@@ -68,7 +68,7 @@ define(function (require, exports, module) {
     function updateEditorToolbarButtons(pvsFile, currentProject) {
 		//update status of the set main file button based on the selected file
 		if (pvsFile) {
-			if (currentProject.mainPVSFile() && currentProject.mainPVSFile().name() === pvsFile.name()) {
+			if (currentProject.mainPVSFile() && currentProject.mainPVSFile().path() === pvsFile.path()) {
 				d3.select("#btnSetMainFile").attr("disabled", true);
 			} else {
 				d3.select("#btnSetMainFile").attr("disabled", null);
@@ -96,7 +96,9 @@ define(function (require, exports, module) {
             var ws = WSManager.getWebSocket();
             ws.lastState("init(0)");
             if (project.mainPVSFile()) {
-                ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()}, function (err) {
+                // the main file can be in a subfolder: we need to pass information about directories!
+                var mainFile = project.mainPVSFile().path().replace(project.name() + "/", "");
+                ws.startPVSProcess({fileName: mainFile, projectName: project.name()}, function (err) {
 					pvsProcessReady(err);
 					//make projectManager bubble the process ready event
 					projectManager.fire({type: "PVSProcessReady", err: err});
@@ -207,8 +209,9 @@ define(function (require, exports, module) {
             var project = projectManager.project(), ws = WSManager.getWebSocket();
             if (project && project.mainPVSFile()) {
                 ws.lastState("init(0)");
-                ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()},
-                              pvsProcessReady);
+                // the main file can be in a subfolder: we need to pass information about directories!
+                var mainFile = project.mainPVSFile().path().replace(project.name() + "/", "");
+                ws.startPVSProcess({fileName: mainFile, projectName: project.name()}, pvsProcessReady);
             }
         }
         //handle typecheck event
@@ -218,7 +221,7 @@ define(function (require, exports, module) {
                 var btn = d3.select("#btnTypeCheck").html("Compiling...").attr("disabled", true);
                 var ws = WSManager.getWebSocket();
                 // note: to get the path right, we need to remove the initial part of the path (i.e., the project name)
-                var fp = pvsFile.path().substring(pvsFile.path().indexOf("/") + 1);  
+                var fp = pvsFile.path().substring(pvsFile.path().indexOf("/") + 1);
                 ws.send({type: "typeCheck", filePath: fp},
                      function (err, res) {
                         btn.html("Compile").attr("disabled", null);
