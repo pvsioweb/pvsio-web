@@ -68,7 +68,7 @@ define(function (require, exports, module) {
     function updateEditorToolbarButtons(pvsFile, currentProject) {
 		//update status of the set main file button based on the selected file
 		if (pvsFile) {
-			if (currentProject.mainPVSFile() && currentProject.mainPVSFile().name() === pvsFile.name()) {
+			if (currentProject.mainPVSFile() && currentProject.mainPVSFile().path() === pvsFile.path()) {
 				d3.select("#btnSetMainFile").attr("disabled", true);
 			} else {
 				d3.select("#btnSetMainFile").attr("disabled", null);
