@@ -96,7 +96,9 @@ define(function (require, exports, module) {
             var ws = WSManager.getWebSocket();
             ws.lastState("init(0)");
             if (project.mainPVSFile()) {
-                ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()}, function (err) {
+                // the main file can be in a subfolder: we need to pass information about directories!
+                var mainFile = project.mainPVSFile().path().replace(project.name() + "/", "");
+                ws.startPVSProcess({fileName: mainFile, projectName: project.name()}, function (err) {
 					pvsProcessReady(err);
 					//make projectManager bubble the process ready event
 					projectManager.fire({type: "PVSProcessReady", err: err});
@@ -211,8 +213,9 @@ define(function (require, exports, module) {
             var project = projectManager.project(), ws = WSManager.getWebSocket();
             if (project && project.mainPVSFile()) {
                 ws.lastState("init(0)");
-                ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()},
-                              pvsProcessReady);
+                // the main file can be in a subfolder: we need to pass information about directories!
+                var mainFile = project.mainPVSFile().path().replace(project.name() + "/", "");                
+                ws.startPVSProcess({fileName: mainFile, projectName: project.name()}, pvsProcessReady);
             }
         }
         //handle typecheck event
