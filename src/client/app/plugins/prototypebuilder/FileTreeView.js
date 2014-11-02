@@ -48,13 +48,8 @@ define(function (require, exports, module) {
 								// and trigger blur event to remove the overlay node used for renaming
 								treeList.blur();
 							} else {
-								// we need to update the path of all children
+								// the path of all affected nodes is automatically updated in project.renameFolder
 								var projectFiles = project.getProjectFiles();
-								if (projectFiles) {
-									projectFiles.forEach(function (file) {
-										file.path(file.path().replace(oldPath, node.path));
-									});
-								}
 								treeList.render(projectFiles);
 							}
 						});
