@@ -37,9 +37,9 @@ define(function (require, exports, module) {
 						project.renameFolder(oldPath, node.path, function (err, res) {
 							if (err) {
 								// alert user
-								if (err.code === "ENOTEMPTY") {
+								if (err.message === "ENOTEMPTY") {
 									alert("Error: the folder could not be renamed into " + err.newPath + " (another folder with the same name already exists). Please choose a different name");
-								} else { alert(err.code); }
+								} else { alert(err.message); }
 								// revert to previous name
 								var prevData = event.data;
 								prevData.path = oldPath;

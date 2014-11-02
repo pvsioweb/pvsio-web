@@ -404,7 +404,7 @@ define(function (require, exports, module) {
 					return pm.addFile(newImage);
 				});
 		} else {
-			return pm.addFile(newImage);	
+			return pm.addFile(newImage);
 		}
 	};
 	/**
@@ -584,21 +584,26 @@ define(function (require, exports, module) {
 					project.saveNew({ projectName: data.projectName,
 									  overWrite  : false }, function (err, res, folderStructure) {
 						Logger.log({err: err, res: res});
-						if (err && err.code === "EEXIST" &&
-								confirm("Project " + data.projectName + " already exists. Overwrite the project?")) {
-							project.saveNew({ projectName: data.projectName,
-											 overWrite  : true }, function (err, res, folderStructure) {
-								if (!err) {
-									finalise(folderStructure, previousProject, err);
-								} else {
-									if (err) {
-										alert("Error while creating the project "
-											  + data.projectName + " (Error code " + err.code + ")");
-									}
-									//invoke callback
-									if (cb && typeof cb === "function") { cb(err, project); }
-								}
-							});
+						if (err) {
+                            if (err.code === "EEXIST") {
+                                if (confirm("Project " + data.projectName + " already exists. Overwrite the project?")) {
+                                    project.saveNew({ projectName: data.projectName,
+                                                     overWrite  : true }, function (err, res, folderStructure) {
+                                        if (!err) {
+                                            finalise(folderStructure, previousProject, err);
+                                        } else {
+                                            if (err) {
+                                                alert("Error while creating the project "
+                                                      + data.projectName + " (Error code " + err.code + ")");
+                                            }
+                                            //invoke callback
+                                            if (cb && typeof cb === "function") { cb(err, project); }
+                                        }
+                                    });
+                                } // else, do nothing
+                            } else {
+                                alert(err.code);
+                            }
 						} else {
 							finalise(folderStructure, previousProject, err);
 							//invoke callback
@@ -805,9 +810,9 @@ define(function (require, exports, module) {
                 .then(function (res) {
                     var p = pm.project();
                     pm.changeImage(p.name() + "/" + res.filePath, res.fileContent)
-					.then(function () {
-						pm.updateImage(p.getImage());
-					});
+					    .then(function () {
+                            pm.updateImage(p.getImage());
+                        });
                 }).catch(function (err) {
                     Logger.log(err);
                 });
