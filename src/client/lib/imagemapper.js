@@ -178,6 +178,7 @@
         props = cr(imageEl);
         
         function initialiseSVGLayer() {
+            props = cr(imageEl);
             svg = d3.select(config.parent).style("position", "relative")
                 .append("svg").attr("width", props.width).attr("height", props.height).attr("class", "image-map-layer")
                 .style("position", "absolute").style("cursor", "crosshair").style("top", 0).style("left", 0);
