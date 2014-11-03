@@ -51,6 +51,7 @@ define(function (require, exports, module) {
 		}
 		
 		update(widgets);
+        el.selectAll("li.list-group-item").classed("selected", false);
 		
 		WidgetManager.addListener("WidgetModified", function (event) {
 			switch (event.action) {
