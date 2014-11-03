@@ -314,7 +314,7 @@ define(function (require, exports, module) {
             }
         });
     };
-	/**
+    /**
 	 * Opens a form that allows a user to select a list of files.
 	 * Selected files are returned as a list parameter in the callback.
 	 * @returns {Promise} a Promise that resolves  the files that have been selected and confirmed by user
@@ -419,7 +419,7 @@ define(function (require, exports, module) {
 			ws.send({type: "deleteFile", filePath: f.path()}, function (err) {
 				if (!err) {
 					project.removeFile(f);
-					notification = "File " + f.path() + " has been deleted.";
+					notification = "File " + f.path() + " removed from project.";
 					Logger.log(notification);
 					NotificationManager.show(notification);
 					resolve(f);
@@ -445,11 +445,14 @@ define(function (require, exports, module) {
 			ws.writeFile({filePath: file.path(), fileContent: file.content(), encoding: file.encoding()}, function (err, res) {
 				if (!err) {
 					//add the spec file to the project and supress the event so we dont create multiple files
-					console.log(res);
+					var notification = "File " + file.path() + " added to project.";
+					Logger.log(notification);
+					NotificationManager.show(notification);
 					project.addProjectFile(file, suppressEvent);
 					resolve(file);
 				} else {
 					reject(err);
+                    Logger.error(err);
 				}
 			});
 		});
@@ -483,7 +486,7 @@ define(function (require, exports, module) {
 		return new Promise(function (resolve, reject) {
 			ws.send({type: "deleteFile", filePath: path}, function (err) {
 				if (!err) {
-					notification = "Folder " + path + " has been deleted.";
+					notification = "Folder " + path + " removed from project.";
 					Logger.log(notification);
 					NotificationManager.show(notification);
 					resolve(path);
@@ -685,7 +688,7 @@ define(function (require, exports, module) {
 					});
 					view.remove();
 				}).on("cancel", function (event, view) {
-					notification = "Project save was cancelled. Please change the name from the  \"" + name + "\" is not a valid name.";
+					notification = "Project save was cancelled.";
 					NotificationManager.error(notification);
 					view.remove();
 					if (typeof cb === "function") { cb(); }
