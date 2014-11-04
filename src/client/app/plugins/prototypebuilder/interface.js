@@ -45,16 +45,7 @@ define(function (require, exports, module) {
 			} else {
 				d3.select("#btnSetMainFile").attr("disabled", null);
 			}
-
-			//update status of file save button based on the selected file
-//			if (pvsFile.dirty()) {
-//				d3.select("#btnSaveFile").attr("disabled", null);
-//                d3.select("#btnSaveAll").attr("disabled", null);
-//			} else {
-//				d3.select("#btnSaveFile").attr("disabled", true);
-//                d3.select("#btnSaveAll").attr("disabled", true);
-//			}
-		}
+        }
 	}
     
 	function bindListeners(projectManager) {
@@ -83,12 +74,6 @@ define(function (require, exports, module) {
                     }
                 });
             }
-//            project.addListener("DirtyFlagChanged", function (event) {
-////                d3.select("#btnSaveFile").attr("disabled", null);
-////                d3.select("#btnSaveAll").attr("disabled", null);
-//            });
-            switchToBuilderView();
-			
         }).addListener("SelectedFileChanged", function (event) {
             var p = projectManager.project(), file = p.getProjectFile(event.selectedItem.path);
             updateEditorToolbarButtons(file, p);
@@ -216,8 +201,6 @@ define(function (require, exports, module) {
                 var notification = "";
                 projectManager.saveFiles([pvsFile], function (err) {
                     if (!err) {
-//                        d3.select("#btnSaveFile").attr("disabled", true);
-//                        d3.select("#btnSaveAll").attr("disabled", true);
                         notification = pvsFile + " saved successfully!";
                         d3.select("#editor-notification-area").insert("p", "p").html(notification);
                         Logger.log(notification);
@@ -229,27 +212,6 @@ define(function (require, exports, module) {
                 });
 			}
 		});
-
-//		d3.select("#btnSaveAll").on("click", function () {
-//			var project = projectManager.project();
-//			if (project) {
-//                var pvsFiles = project.pvsFilesList();
-//                var notification = "";
-//                projectManager.saveFiles(pvsFiles, function (err) {
-//                    if (!err) {
-////                        d3.select("#btnSaveAll").attr("disabled", true);
-////                        d3.select("#btnSaveFile").attr("disabled", true);
-//                        notification = pvsFiles + " saved successfully!";
-//                        d3.select("#editor-notification-area").insert("p", "p").html(notification);
-//                        Logger.log(notification);
-//                    } else {
-//                        notification = "Error while saving " + pvsFiles + " (" + err + ")";
-//                        Logger.log(notification);
-//                    }
-//                });
-//			}
-//		});
-
         d3.select("#btnImportFiles").on("click", function () {
             projectManager.openFiles()
                 .then(function (files) {
