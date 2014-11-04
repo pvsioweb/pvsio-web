@@ -115,7 +115,21 @@ define(function (require, exports, module) {
 		});
 	
 		d3.select("#btnSimulatorView").on("click", function () {
-			switchToSimulatorView();
+            var img = d3.select("#imageDiv img");
+            var msg = "";
+            if (!img || !img.attr("src") || img.attr("src") === "") {
+                msg = "Please load a user interface picture before switching to Simulator View.\n\n " +
+                        "This can be done from within the Builder View, using the \"Load Picture\" button.";
+                return alert(msg);
+            }
+            if (!projectManager.project().mainPVSFile()) {
+                msg = "Please set a Main File before switching to Simulator View.\n\n" +
+                        "This can be done using the Model Editor:\n" +
+                        "  (i) select a file from the file browser shown on the right panel of the Model Editor\n" +
+                        "  (ii) click on \"Set as Main File\" to set the selected file as Main File.";
+                return alert(msg);
+            }
+            switchToSimulatorView();
 		});
 	
         d3.select("#record").on("click", function () {

@@ -25,7 +25,10 @@ define(function (require, exports, module) {
                     return w.id();
                 }).classed("selected", true)
                 .text(function (widget, i) {
-                    var label = widget.type() + ": " + widget.displayKey();
+                    var label = widget.type() + ": ";
+                    if (widget.type() === "display") {
+                        label += widget.displayKey();
+                    } else { label += widget.functionText(); }
                     return label;
                 }).on("click", function (w) {
                     var event = d3.event;
@@ -48,6 +51,7 @@ define(function (require, exports, module) {
 		}
 		
 		update(widgets);
+        el.selectAll("li.list-group-item").classed("selected", false);
 		
 		WidgetManager.addListener("WidgetModified", function (event) {
 			switch (event.action) {

@@ -325,7 +325,7 @@ function renameFile(oldPath, newPath) {
 
 	return new Promise(function (resolve, reject) {
 		stat(newPath).then(function () {
-			reject("New path exists");
+			reject("ENOTEMPTY");
 		}, function () {
 			//file does not exist so ok to rename
 			fs.rename(oldPath, newPath, function (err) {

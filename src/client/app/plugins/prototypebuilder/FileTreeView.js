@@ -37,9 +37,9 @@ define(function (require, exports, module) {
 						project.renameFolder(oldPath, node.path, function (err, res) {
 							if (err) {
 								// alert user
-								if (err.code === "ENOTEMPTY") {
+								if (err.message === "ENOTEMPTY") {
 									alert("Error: the folder could not be renamed into " + err.newPath + " (another folder with the same name already exists). Please choose a different name");
-								} else { alert(err.code); }
+								} else { alert(err.message); }
 								// revert to previous name
 								var prevData = event.data;
 								prevData.path = oldPath;
@@ -48,13 +48,8 @@ define(function (require, exports, module) {
 								// and trigger blur event to remove the overlay node used for renaming
 								treeList.blur();
 							} else {
-								// we need to update the path of all children
+								// the path of all affected nodes is automatically updated in project.renameFolder
 								var projectFiles = project.getProjectFiles();
-								if (projectFiles) {
-									projectFiles.forEach(function (file) {
-										file.path(file.path().replace(oldPath, node.path));
-									});
-								}
 								treeList.render(projectFiles);
 							}
 						});
@@ -124,9 +119,11 @@ define(function (require, exports, module) {
                 alert("Cannot delete project root directory.");
                 return;
             }
+            var isMainFile = (project.mainPVSFile()) ? (path === project.mainPVSFile().path()) : false;
             QuestionForm.create({
                 header: "Confirm Delete",
-                question: "Are you sure you want to delete " + path + "?",
+                question: (isMainFile) ? (path + " is currently set as Main File for the project. Are you sure you want to delete it?")
+                                : ("Are you sure you want to delete " + path + "?"),
                 buttons: ["Cancel", "Delete"]
             }).on("ok", function (e, view) {
 				if (isDirectory) {
@@ -144,6 +141,10 @@ define(function (require, exports, module) {
 							console.log(err);
 						});
 				}
+                if (isMainFile) {
+                    project.mainPVSFile(null);
+                    d3.select("#btnSetMainFile").attr("disabled", false);
+                }
                 view.remove();
             }).on("cancel", function (e, view) { view.remove(); });
         });

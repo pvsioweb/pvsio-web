@@ -279,7 +279,7 @@ define(function (require, exports, module) {
             }
         });
     };
-	/**
+    /**
 	 * Opens a form that allows a user to select a list of files.
 	 * Selected files are returned as a list parameter in the callback.
 	 * @returns {Promise} a Promise that resolves  the files that have been selected and confirmed by user
@@ -368,7 +368,7 @@ define(function (require, exports, module) {
 					return pm.addFile(newImage);
 				});
 		} else {
-			return pm.addFile(newImage);	
+			return pm.addFile(newImage);
 		}
 	};
 	/**
@@ -383,7 +383,7 @@ define(function (require, exports, module) {
 			ws.send({type: "deleteFile", filePath: f.path()}, function (err) {
 				if (!err) {
 					project.removeFile(f);
-					notification = "File " + f.path() + " has been deleted.";
+					notification = "File " + f.path() + " removed from project.";
 					Logger.log(notification);
 					NotificationManager.show(notification);
 					resolve(f);
@@ -409,11 +409,14 @@ define(function (require, exports, module) {
 			ws.writeFile({filePath: file.path(), fileContent: file.content(), encoding: file.encoding()}, function (err, res) {
 				if (!err) {
 					//add the spec file to the project and supress the event so we dont create multiple files
-					console.log(res);
+					var notification = "File " + file.path() + " added to project.";
+					Logger.log(notification);
+					NotificationManager.show(notification);
 					project.addProjectFile(file, suppressEvent);
 					resolve(file);
 				} else {
 					reject(err);
+                    Logger.error(err);
 				}
 			});
 		});
@@ -447,7 +450,7 @@ define(function (require, exports, module) {
 		return new Promise(function (resolve, reject) {
 			ws.send({type: "deleteFile", filePath: path}, function (err) {
 				if (!err) {
-					notification = "Folder " + path + " has been deleted.";
+					notification = "Folder " + path + " removed from project.";
 					Logger.log(notification);
 					NotificationManager.show(notification);
 					resolve(path);
@@ -545,21 +548,26 @@ define(function (require, exports, module) {
 					project.saveNew({ projectName: data.projectName,
 									  overWrite  : false }, function (err, res, folderStructure) {
 						Logger.log({err: err, res: res});
-						if (err && err.code === "EEXIST" &&
-								confirm("Project " + data.projectName + " already exists. Overwrite the project?")) {
-							project.saveNew({ projectName: data.projectName,
-											 overWrite  : true }, function (err, res, folderStructure) {
-								if (!err) {
-									finalise(folderStructure, previousProject, err);
-								} else {
-									if (err) {
-										alert("Error while creating the project "
-											  + data.projectName + " (Error code " + err.code + ")");
-									}
-									//invoke callback
-									if (cb && typeof cb === "function") { cb(err, project); }
-								}
-							});
+						if (err) {
+                            if (err.code === "EEXIST") {
+                                if (confirm("Project " + data.projectName + " already exists. Overwrite the project?")) {
+                                    project.saveNew({ projectName: data.projectName,
+                                                     overWrite  : true }, function (err, res, folderStructure) {
+                                        if (!err) {
+                                            finalise(folderStructure, previousProject, err);
+                                        } else {
+                                            if (err) {
+                                                alert("Error while creating the project "
+                                                      + data.projectName + " (Error code " + err.code + ")");
+                                            }
+                                            //invoke callback
+                                            if (cb && typeof cb === "function") { cb(err, project); }
+                                        }
+                                    });
+                                } // else, do nothing
+                            } else {
+                                alert(err.code);
+                            }
 						} else {
 							finalise(folderStructure, previousProject, err);
 							//invoke callback
@@ -641,7 +649,7 @@ define(function (require, exports, module) {
 					});
 					view.remove();
 				}).on("cancel", function (event, view) {
-					notification = "Project save was cancelled. Please change the name from the  \"" + name + "\" is not a valid name.";
+					notification = "Project save was cancelled.";
 					NotificationManager.error(notification);
 					view.remove();
 					if (typeof cb === "function") { cb(); }
@@ -764,9 +772,9 @@ define(function (require, exports, module) {
                 .then(function (res) {
                     var p = pm.project();
                     pm.changeImage(p.name() + "/" + res.filePath, res.fileContent)
-					.then(function () {
-						pm.updateImage(p.getImage());
-					});
+					    .then(function () {
+                            pm.updateImage(p.getImage());
+                        });
                 }).catch(function (err) {
                     Logger.log(err);
                 });
