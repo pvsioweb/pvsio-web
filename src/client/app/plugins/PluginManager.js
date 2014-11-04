@@ -7,12 +7,14 @@
 /*global define, Promise*/
 define(function (require, exports, module) {
     "use strict";
+    var eventDispatcher = require("util/eventDispatcher");
     var enabledPlugins;//contains instances of plugins
     
     var instance;
     
     function PluginManager() {
         enabledPlugins = [];
+        eventDispatcher(this);
     }
     
 	/**
@@ -24,6 +26,7 @@ define(function (require, exports, module) {
         var pm = this;
         if (enabledPlugins.indexOf(plugin) < 0) {
             enabledPlugins.push(plugin);
+            instance.fire({type: "PluginEnabled", plugin: plugin});
             //initialise the plugin after loading and initialising any dependencies
             var dependencies = plugin.getDependencies();
             if (dependencies && dependencies.length) {
@@ -54,7 +57,7 @@ define(function (require, exports, module) {
         var index = enabledPlugins.indexOf(plugin);
         if (enabledPlugins.indexOf(plugin) > -1) {
             enabledPlugins.splice(index, 1);
-            //
+            instance.fire({type: "PluginDisabled", plugin: plugin});
             return plugin.unload();
         } else {
 			return Promise.resolve(true);

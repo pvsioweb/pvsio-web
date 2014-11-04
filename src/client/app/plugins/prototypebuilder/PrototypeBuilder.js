@@ -71,6 +71,7 @@ define(function (require, exports, module) {
     }
     
     function onProjectChanged() {
+        switchToBuilderView();
         updateImageAndLoadWidgets().then(function () {
             WidgetsListView.create();  
         }).catch(function (err) {
@@ -181,7 +182,6 @@ define(function (require, exports, module) {
         projectManager.preparePageForImageUpload();
         projectManager.addListener("ProjectChanged", onProjectChanged);
         bindListeners();
-        switchToBuilderView();
 		return updateImageAndLoadWidgets();
     };
    

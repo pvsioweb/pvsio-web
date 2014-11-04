@@ -76,8 +76,6 @@ define(function (require, exports, module) {
 						return new Promise(function (resolve, reject) {
 							// create and default initial empty project containing an empty file (main.pvs)
 							projectManager.createDefaultProject(function (err, res) {
-								d3.select("#project-notification-area").insert("p", "p").html("PVSio-web Ready!");
-								d3.select("#editor-notification-area").insert("p", "p").html("PVS Editor Ready!");
 								//layout the sourcecode and files
 								layoutjs({el: "#sourcecode-editor-wrapper"});
 								if (err) { reject(err); }

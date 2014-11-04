@@ -55,7 +55,7 @@ define(function (require, exports, module) {
 
 					it(" and " + alarisProject + " has at least one pvs file on init", function (done) {
 						expect(p.pvsFilesList()).not.toBeFalsy();
-						expect(p.pvsFilesList().length).toBeGreaterThan(1);
+						expect(p.pvsFilesList().length).toBeGreaterThan(0);
                         done();
 					});
 

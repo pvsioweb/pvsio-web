@@ -292,6 +292,11 @@ define(function (require, exports, module) {
                 return {label: p.constructor.name, plugin: p};
             })};
             PluginManager.getInstance().init();
+            PluginManager.getInstance().addListener("PluginEnabled", function (event) {
+                d3.select("#plugin_" + event.plugin.constructor.name).property("checked", true);
+            }).addListener("PluginDisabled", function (event) {
+                d3.select("#plugin_" + event.plugin.constructor.name).property("checked", false);
+            });
             if (this._view) { this.unload(); }
             this._view = createHtmlElements(data);
             return this._view;

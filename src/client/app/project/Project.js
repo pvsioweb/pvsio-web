@@ -431,7 +431,7 @@ define(function (require, exports, module) {
                 _thisProject.name(res.name);
 			}
             if (cb && typeof cb === "function") {
-                cb(err, _thisProject, res.folderStructure);
+                cb(err, _thisProject);
             }
 		});
 	};

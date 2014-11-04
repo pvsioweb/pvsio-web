@@ -63,6 +63,7 @@ function run() {
     function processCallback(tok, socket) {
         //called when any data is recieved from pvs process
         //if the type of the token is 'processExited' then send message to client if the socket is still open
+        tok.time.server.sent = new Date().getTime();
         if (tok.type === 'processExited') {
             if (socket.readyState === 1) {
                 socket.send(JSON.stringify(tok));
@@ -140,7 +141,7 @@ function run() {
 				}, function (err) {
 					 logger.debug("warning, error while renaming " + token.oldPath +
                                     " into " + token.newPath + " (" + err + ")");
-					processCallback({id: token.id, socketId: socketid, 
+					processCallback({id: token.id, socketId: socketid, time: token.time,
 									 err: {oldPath: token.oldPath, newPath: token.newPath, message:err}}, socket);
 				});
             },
@@ -165,12 +166,12 @@ function run() {
                                 var result = res.map(function (d, i) {
                                         return {name: files[i], isDirectory: d.isDirectory()};
                                     });
-                                processCallback({id: token.id, socketId: socketid, files: result, err: err}, socket);
+                                processCallback({id: token.id, socketId: socketid, files: result, err: err, time: token.time}, socket);
                             }, function (err) {
-                                processCallback({id: token.id, socketId: socketid, err: err}, socket);
+                                processCallback({id: token.id, socketId: socketid, err: err, time: token.time}, socket);
                             });
                     } else {
-                        processCallback({id: token.id, socketId: socketid, err: err}, socket);
+                        processCallback({id: token.id, socketId: socketid, err: err, time: token.time}, socket);
                     }
                 });
             },
@@ -178,11 +179,11 @@ function run() {
 				token.path = path.join(baseProjectDir, token.path);
 				stat(token.path).then(function () {
 					//directory exists throw error
-					processCallback({id: token.id, socketId: socketid,
+					processCallback({id: token.id, socketId: socketid, time: token.time,
 									 err: {path: token.path, message: "Directory Exists"}}, socket);
 				}, function () {
 					fs.mkdir(token.path, function (err) {
-						processCallback({id: token.id, socketId: socketid, err: err}, socket);
+						processCallback({id: token.id, socketId: socketid, err: err, time: token.time}, socket);
 					});
 				});
                 
@@ -192,12 +193,12 @@ function run() {
                     .then(function (res) {
                         res.id = token.id;
                         res.socketId = socketid;
-                        res.serverSent = new Date().getTime();
+                        res.time = token.time;
                         processCallback(res, socket);
                     });
             },
             "listProjects": function (token, socket, socketid) {
-                var result = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
+                var result = {id: token.id, socketId: socketid, time: token.time};
                 listProjects()
                     .then(function (projects) {
                         result.projects = projects;
@@ -208,7 +209,7 @@ function run() {
                     });
             },
             "openProject": function (token, socket, socketid) {
-                var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
+                var res = {id: token.id, socketId: socketid, time: token.time};
                 openProject(token.name)
                     .then(function (data) {
                         res.project = data;
@@ -224,21 +225,21 @@ function run() {
                 createProject(token, function (res) {
                     res.id = token.id;
                     res.socketId = socketid;
-                    res.serverSent = new Date().getTime();
+                    res.time = token.time;
                     processCallback(res, socket);
                 }, p);
                 
             },
             "typeCheck": function (token, socket, socketid) {
                 typeCheck(token.filePath, function (err, stdout, stderr) {
-                    var res = {id: token.id, err: err, stdout: stdout, stderr: stderr, socketId: socketid};
+                    var res = {id: token.id, err: err, stdout: stdout, stderr: stderr, socketId: socketid, time: token.time};
                     processCallback(res, socket);
                 });
             },
             "sendCommand": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 p.sendCommand(token.data.command, function (data) {
-                    var res = {id: token.id, data: [data], socketId: socketid, type: "commandResult", sent: token.sent};
+                    var res = {id: token.id, data: [data], socketId: socketid, type: "commandResult", time: token.time};
                     processCallback(res, socket);
                 });
             },
@@ -262,14 +263,14 @@ function run() {
                     .start(token.data.fileName,
                         function (res) {
                             res.id = token.id;
-                            res.serverSent = new Date().getTime();
                             res.socketId = socketid;
+                            res.time = token.time;
                             processCallback(res, socket);
                         });
             },
             "closeProcess": function (token, socket, socketid) {//closes pvs process
                 p = pvsioProcessMap[socketid];
-                var res = {id: token.id, socketId: socketid};
+                var res = {id: token.id, socketId: socketid, time: token.time};
                 if (p) {
                     p.close();
                     delete pvsioProcessMap[socketid];
@@ -284,13 +285,14 @@ function run() {
                 p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";
                 fs.readFile(token.filePath, encoding, function (err, content) {
-                    var res = err ? {err: err} : {id: token.id, serverSent: new Date().getTime(), fileContent: content, socketId: socketid};
+                    var res = err ? {err: err} : {id: token.id, fileContent: content, socketId: socketid};
+                    res.time = token.time;
                     processCallback(res, socket);
                 });
             },
             "writeFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
-                var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
+                var res = {id: token.id, socketId: socketid, time: token.time};
                 token.filePath = path.join(baseProjectDir, token.filePath);
                 
                 writeFile(token.filePath, token.fileContent, token.encoding, token.opt)
@@ -303,7 +305,7 @@ function run() {
             },
             "deleteFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
-                var res = {id: token.id, serverSent: new Date().getTime(), socketId: socketid};
+                var res = {id: token.id, socketId: socketid, time: token.time};
                 token.filePath = path.join(baseProjectDir, token.filePath);
                 p.removeFile(token.filePath, function (err) {
                     if (!err) {
@@ -325,6 +327,7 @@ function run() {
         var functionMaps = createClientFunctionMaps();
         socket.on("message", function (m) {
             var token = JSON.parse(m);
+            token.time.server = {received: new Date().getTime()};
             var f = functionMaps[token.type];
             if (f && typeof f === 'function') {
                 //call the function with token and socket as parameter

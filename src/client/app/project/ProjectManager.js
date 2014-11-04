@@ -110,10 +110,10 @@ define(function (require, exports, module) {
 	 * Renders the list of pvs files in the project
 	 * @memberof ProjectManager
 	 */
-	ProjectManager.prototype.renderSourceFileList = function (folderStructure) {
+	ProjectManager.prototype.renderSourceFileList = function () {
 		var pm = this;
 		var project = this.project(), editor = this.editor();
-        console.log(project.getFolderStructure());
+        var folderStructure = project.getFolderStructure();
         
 		var ws = WSManager.getWebSocket();
 		pvsFilesListView = new FileTreeView("#pvsFiles", folderStructure, pm);
@@ -406,7 +406,7 @@ define(function (require, exports, module) {
 		var ws = WSManager.getWebSocket();
 		var project = this.project();
 		return new Promise(function (resolve, reject) {
-			ws.writeFile({filePath: file.path(), fileContent: file.content(), encoding: file.encoding()}, function (err, res) {
+			ws.writeFile({filePath: file.path(), fileContent: file.content(), encoding: file.encoding()}, function (err) {
 				if (!err) {
 					//add the spec file to the project and supress the event so we dont create multiple files
 					var notification = "File " + file.path() + " added to project.";
@@ -477,7 +477,7 @@ define(function (require, exports, module) {
         var project = new Project(data.projectName);
         var i, promises = [], imageLoadPromise;
         
-        function finalise(folderStructure, previousProject, err) {
+        function finalise(previousProject, err) {
             var image = project.getImage();
             project.getProjectFiles().forEach(function (f) {
                 f.dirty(false);
@@ -546,15 +546,15 @@ define(function (require, exports, module) {
 					});
 				}).then(function () {
 					project.saveNew({ projectName: data.projectName,
-									  overWrite  : false }, function (err, res, folderStructure) {
+									  overWrite  : false }, function (err, res) {
 						Logger.log({err: err, res: res});
 						if (err) {
                             if (err.code === "EEXIST") {
                                 if (confirm("Project " + data.projectName + " already exists. Overwrite the project?")) {
                                     project.saveNew({ projectName: data.projectName,
-                                                     overWrite  : true }, function (err, res, folderStructure) {
+                                                     overWrite  : true }, function (err) {
                                         if (!err) {
-                                            finalise(folderStructure, previousProject, err);
+                                            finalise(previousProject, err);
                                         } else {
                                             if (err) {
                                                 alert("Error while creating the project "
@@ -569,7 +569,7 @@ define(function (require, exports, module) {
                                 alert(err.code);
                             }
 						} else {
-							finalise(folderStructure, previousProject, err);
+							finalise(previousProject, err);
 							//invoke callback
 							if (cb && typeof cb === "function") { cb(err, project); }
 						}
@@ -632,7 +632,7 @@ define(function (require, exports, module) {
 					project.name(newProjectName);
 					project.updateFolderName(name, newProjectName);
 					
-					project.saveNew({projectName: newProjectName, overWrite: false}, function (err, res, folderStructure) {
+					project.saveNew({projectName: newProjectName, overWrite: false}, function (err) {
 						if (err) {
 							notification = "There was an error saving the project: " + JSON.stringify(err);
 							NotificationManager.error(notification);
@@ -640,7 +640,7 @@ define(function (require, exports, module) {
 						} else {
 							notification = "Project " + project.name() + " saved successfully!";
 							NotificationManager.show(notification);
-							pm.renderSourceFileList(folderStructure);
+							pm.renderSourceFileList();
 							pvsFilesListView.selectItem(project.mainPVSFile() ||
                                         project.pvsFilesList()[0] ||
                                         project.name());
