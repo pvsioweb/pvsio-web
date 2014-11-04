@@ -143,7 +143,7 @@ define(function (require, exports, module) {
                 unloadPlugin("GraphBuilder");				
             });
 			
-			describe("PVS Editor", function () {
+			describe("Prototype Builder", function () {
 				beforeEach(function (done) {
                     d3.select("div.overlay").remove();
 					pm = pb.getProjectManager();

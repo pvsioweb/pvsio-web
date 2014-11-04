@@ -72,6 +72,7 @@ define(function (require, exports, module) {
 	function ProjectManager(project, editor) {
 		eventDispatcher(this);
 		_projectManager = this;
+        project = project || new Project("");
 		/**
             get or set the current {Project}
             @type {Project}
@@ -112,6 +113,8 @@ define(function (require, exports, module) {
 	ProjectManager.prototype.renderSourceFileList = function (folderStructure) {
 		var pm = this;
 		var project = this.project(), editor = this.editor();
+        console.log(project.getFolderStructure());
+        
 		var ws = WSManager.getWebSocket();
 		pvsFilesListView = new FileTreeView("#pvsFiles", folderStructure, pm);
 		
@@ -254,14 +257,13 @@ define(function (require, exports, module) {
 	ProjectManager.prototype.openProject = function (projectName, callback) {
 		var pm = this;
 		var ws = WSManager.getWebSocket();
+        callback = callback || noop;
         //open selected project
         ws.send({type: "openProject", name: projectName}, function (err, res) {
             if (!err) {
                 ScriptPlayer.clearView();
-                var p = initFromJSON(res.project),
-                    image = p.getImage();
-                WidgetManager.clearWidgetAreas();
-                d3.select("div#body").style("display", null);
+                var p = initFromJSON(res.project);
+               
                 pm.project(p);
                 // always set mainPVSfile because ProjectChanged will trigger an invocation of pvsio with that file
                 pm.project().mainPVSFile(pm.project().mainPVSFile() || pm.project().pvsFilesList()[0]);
@@ -269,48 +271,11 @@ define(function (require, exports, module) {
                 
                 pm.fire({type: "ProjectChanged", current: p, previous: pm.project()});
  
-                //list all pvsfiles
                 if (p.pvsFilesList()) {
-                    pm.renderSourceFileList(res.project.folderStructure);
-                    pvsFilesListView.selectItem(p.mainPVSFile() || p.pvsFilesList()[0]);
                     // clear dirty flags
                     p.pvsFilesList().forEach(function (f) { f.dirty(false); });
-                } else {
-					//clear the editor from previous project
-					pm.editor().setValue("");
-				}
-                // update image -- note that we need to wait the callback as image loading may take a little while in some cases
-                if (image) {
-                    pm.updateImage(image, function (res, scale) {
-                        if (res.type !== "error") {
-                            WidgetManager.updateMapCreator(scale, function () {
-                                try {
-									var wdStr = p.getWidgetDefinitionFile().content();
-									if (wdStr && wdStr !== "") {
-										var wd = JSON.parse(p.getWidgetDefinitionFile().content());
-										WidgetManager.restoreWidgetDefinitions(wd);
-										//update the widget area map scales 
-										WidgetManager.scaleAreaMaps(scale);
-									}
-                                } catch (err) {
-                                    Logger.log(err);
-                                }
-                            });
-                            d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
-                        } else {
-                            Logger.log(res);
-                            //show the image drag and drop div
-                            d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
-                        }
-                        if (callback && typeof callback === "function") { callback(p); }
-                    });
-                } else {
-                    // remove previous image, if any
-                    d3.select("#imageDiv img").attr("src", "").attr("height", "430").attr("width", "1128");
-                    //show the image drag and drop div
-                    d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
-                    if (callback && typeof callback === "function") { callback(p); }
                 }
+                callback(p);
             }
         });
     };
@@ -343,7 +308,7 @@ define(function (require, exports, module) {
         
         function imageLoadComplete(res) {
 			//if the image width is more than the the containing element scale it down a little
-			var parent = d3.select("#body > .ljs-hcontent"),
+			var parent = d3.select("#prototype-builder-container"),
 				scale = 1;
 			function resize() {
                 if (img) {
@@ -358,8 +323,6 @@ define(function (require, exports, module) {
                         adjustedHeight = scale * img.height;
                     }
 
-                    d3.select("#body").style("height", (adjustedHeight + 50) + "px");
-
                     d3.select("#imageDiv").style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
                     d3.select("#imageDiv img").attr("src", img.src).attr("height", adjustedHeight).attr("width", adjustedWidth);
                     d3.select("#imageDiv svg").attr("height", adjustedHeight).attr("width", adjustedWidth);
@@ -368,6 +331,7 @@ define(function (require, exports, module) {
                     d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
 
                     //update widgets maps after resizing
+                    d3.select("#builder-controls").style("height", (50 + adjustedHeight) + "px");
                     WidgetManager.scaleAreaMaps(scale);
                 }
 			}
@@ -518,10 +482,7 @@ define(function (require, exports, module) {
             //set the main pvs file
             project.mainPVSFile(project.pvsFilesList()[0]);
             pm.project(project);
-            pm.renderSourceFileList(folderStructure);
-            pvsFilesListView.selectItem(project.mainPVSFile() ||
-                                        project.pvsFilesList()[0] ||
-                                        project.name());
+           
             if (image) {
                 pm.updateImage(image, function (res, scale) {
 					WidgetManager.updateMapCreator(scale);
@@ -765,13 +726,11 @@ define(function (require, exports, module) {
         project.mainPVSFile(mainFile);
        
 		project.saveNew({ projectName: data.projectName,
-                          overWrite: true }, function (err, res, folderStructure) {
+                          overWrite: true }, function (err, res) {
             if (!err) {
                 project._dirty(false);
                 WidgetManager.updateMapCreator();
                 pm.project(project);
-                pm.renderSourceFileList(folderStructure);
-                pvsFilesListView.selectItem(project.mainPVSFile());
                 //fire project changed event
                 pm.fire({type: "ProjectChanged", current: project});
             }
@@ -846,7 +805,11 @@ define(function (require, exports, module) {
         };
     };
     
-	module.exports = ProjectManager;
+	module.exports = {
+        getInstance: function () {
+            return _projectManager || new ProjectManager();
+        }
+    };
 /**
  * @callback ProjectManager~onProjectSaved
  * @param {object} err This value is set if any error occurs during the save operation.

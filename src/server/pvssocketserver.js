@@ -238,7 +238,7 @@ function run() {
             "sendCommand": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 p.sendCommand(token.data.command, function (data) {
-                    var res = {id: token.id, data: [data], socketId: socketid, type: "commandResult"};
+                    var res = {id: token.id, data: [data], socketId: socketid, type: "commandResult", sent: token.sent};
                     processCallback(res, socket);
                 });
             },

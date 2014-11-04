@@ -13,6 +13,7 @@ define(function (require, exports, module) {
 		Logger         = require("util/Logger"),
         ui             = require("plugins/prototypebuilder/interface"),
 		PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
+        TextEditor = require("plugins/codeEditor/TextEditor"),
         Emulink        = require("plugins/emulink/Emulink"),
 		SafetyTest		= require("plugins/safetyTest/SafetyTest"),
 		GraphBuilder   = require("plugins/graphbuilder/GraphBuilder"),
@@ -49,7 +50,14 @@ define(function (require, exports, module) {
 							case "SafetyTest":
 								plugin = SafetyTest.getInstance();
 								break;
+                            case "TextEditor":
+                                plugin = TextEditor.getInstance();    
+                                break;
+                            case "PrototypeBuilder":
+                                plugin = PrototypeBuilder.getInstance();
+                                break;
 							}
+                        
 
 							if (event.target.checked) {
 								pm.enablePlugin(plugin);
@@ -58,7 +66,11 @@ define(function (require, exports, module) {
 							}
 						});
 					pb = PrototypeBuilder.getInstance();
-					return pm.enablePlugin(pb).then(function () {
+					return pm.enablePlugin(pb)
+                    .then(function () {
+                        return pm.enablePlugin(TextEditor.getInstance());    
+                    })
+                    .then(function () {
 						var projectManager = pb.getProjectManager();
 						ui.bindListeners(pb.getProjectManager());
 						return new Promise(function (resolve, reject) {

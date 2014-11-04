@@ -43,6 +43,8 @@ define(function (require, exports, module) {
                         var token = JSON.parse(event.data);
                         //if token has an id check if there is a function to be called in the registry
                         if (token.id && typeof callbackRegistry[token.id] === "function") {
+							var time = new Date().getTime() - token.sent;
+							console.log("Time to response -- " + (time));
                             var f = callbackRegistry[token.id];
                             delete callbackRegistry[token.id];
                             f.call(o, token.err, token);

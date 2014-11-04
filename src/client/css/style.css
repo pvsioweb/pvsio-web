@@ -231,7 +231,7 @@ intput:invalid, select:invalid{
 	text-align: center;
 	position: absolute;
 	border: 4px dashed teal;
-	height: 380px;
+	height: 100%;
 	width: 100%;
 	z-index: 191;
     min-width: 400px;
@@ -257,7 +257,6 @@ div.detailsForm select, div.detailsForm textarea{
 	margin-bottom: 0px;
 }
 #body {
-	height: 430px;
 	background: #eee;
 }
 
@@ -353,14 +352,16 @@ div.detailsForm select, div.detailsForm textarea{
 .content-body > .ljs-hcontent {
 	width: 80%;
 }
-#body > .ljs-hcontent {
+#body .ljs-hcontent {
 	padding-left: 0;
 	width: 80%;
 	background: white;
 }
+
 #builder-controls.ljs-left {
 	width: 20%;
 	background: white;
+    height: 480px;
 }
 
 #projectTitle {

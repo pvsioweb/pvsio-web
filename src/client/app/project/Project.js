@@ -139,7 +139,40 @@ define(function (require, exports, module) {
     Project.prototype.getProjectFiles = function () {
         return _projectFiles;
     };
-    
+    /**
+     Gets the folder structure of the project based on the list of files
+    */
+    Project.prototype.getFolderStructure = function () {
+        var projectName = this.name();
+        var structure = {path: projectName, name: projectName, isDirectory: true};
+        var tree = {};
+        var paths = _projectFiles.map(function (f) {
+            return f.path();
+        }).sort();
+        paths.forEach(function (path) {
+            var args = path.split("/"),
+                ptr = tree;
+            args.forEach(function (d) {
+                ptr[d] = ptr[d] || {name: d, children: {}};
+                ptr = ptr[d].children;
+            });
+        });
+        function getChildren(children, parentName) {
+            if (children && Object.keys(children).length) {
+                var res = Object.keys(children).map(function (key) {
+                    var child = children[key];
+                    child.path = parentName + "/" + child.name;
+                    child.children = getChildren(child.children, child.path);
+                    child.isDirectory = child.children !== undefined;
+                    return child;
+                });
+                return res;
+            }
+            return undefined;
+        }
+        structure.children = getChildren(tree[projectName].children, projectName);
+        return structure;
+    };
     /**
      * Gets the project file with the specified Name
      * @param {!String} filePath path to the spec file
@@ -187,12 +220,12 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
     ///FIXME this function should throw an error if the filepath already exists?
-    ///FIXME this function should take a projectFile as argument!
     //Project.prototype.addProjectFile = function (filePath, fileContent, encoding, suppressEvent) {
 	Project.prototype.addProjectFile = function (newFile, suppressEvent) {
 		var filePath, fileContent, encoding;
 		var p = this;
 		if (typeof arguments[0] === "string") {
+            console.log("Deprecated: addProjectFile(string, string, string, boolean) is deprecated use addProjectFile(ProjectFile, boolean) instead"); 
 			filePath = arguments[0];
 			fileContent = arguments[1];
 			encoding = arguments[2] || "utf8";
