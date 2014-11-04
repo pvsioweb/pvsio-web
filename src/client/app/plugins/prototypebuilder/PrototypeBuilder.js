@@ -23,6 +23,15 @@ define(function (require, exports, module) {
     require("cm/addon/fold/foldcode");
     require("cm/addon/fold/foldgutter");
     require("cm/addon/fold/indentFold");
+    require("cm/addon/hint/show-hint");
+    require("cm/addon/hint/pvs-hint");
+    require("cm/addon/edit/closebrackets");
+    require("cm/addon/edit/matchbrackets");
+    require("cm/addon/selection/active-line");
+    require("cm/addon/display/placeholder");
+    require("cm/addon/dialog/dialog");
+    require("cm/addon/search/searchcursor");
+    require("cm/addon/search/search");
     require("cm/mode/pvs/pvs");
     require("cm/mode/mal/mal");
     
@@ -60,8 +69,42 @@ define(function (require, exports, module) {
             lineNumbers: true,
             foldGutter: true,
             autofocus: true,
-            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter", "breakpoints"],
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            styleActiveLine: true,
+            placeholder: "The formal model goes here...",
+            extraKeys: {
+                "Ctrl-Space": "autocomplete",
+            }
         });
+        editor.on("gutterClick", function(cm, n) {
+            function makeMarker() {
+                var marker = document.createElement("div");
+                marker.style.position = "absolute";
+                marker.style.border = "2px solid steelblue";
+                marker.style.height = "16px";
+                return marker;
+            }            
+            console.log("line = " + n);
+            var info = cm.lineInfo(n);
+            cm.setGutterMarker(n, "breakpoints", info.gutterMarkers ? null : makeMarker());
+        });
+        var showHint = true;
+        editor.on("inputRead", function(cm) {
+            if (showHint) {
+                CodeMirror.showHint(cm, CodeMirror.hint.pvs, { completeSingle: false });
+            }
+        });
+        editor.on("keyup", function(cm, event) {    
+            var keyCode = event.keyCode || event.which;
+            // show hints only when typing words
+            if (keyCode < 65 || keyCode > 90) { // 65 = a, 90 = z
+                showHint = false;
+            } else {
+                showHint = true;
+            }
+        });        
         editor.setSize("100%", "100%");
         projectManager.editor(editor);
         projectManager.preparePageForImageUpload();

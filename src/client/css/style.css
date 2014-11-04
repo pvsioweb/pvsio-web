@@ -446,3 +446,5 @@ body {
 #content .ljs-hcontent.content-body {
 	width: 100%;
 }
+
+.CodeMirror pre.CodeMirror-placeholder { color: #999; }

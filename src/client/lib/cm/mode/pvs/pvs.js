@@ -77,8 +77,8 @@
             
             stream.eatWhile(/[\w\$_]/);
             var word = stream.current().toLowerCase();
-            if (storageType[word]) { return "builtin"; }
-            if (keywords[word] || preludeFunctionsAndConstants[word]) { return "keyword"; }
+            if (storageType[word] || preludeFunctionsAndConstants[word]) { return "builtin"; }
+            if (keywords[word]) { return "keyword"; }
             
             if (builtinConstants[word]) { return "atom"; }
             return "variable";

@@ -125,17 +125,17 @@ define(function (require, exports, module) {
 					editor.setOption("readOnly", true);
 					editor.markClean();
 					editor.focus();
-//                        editor.on("change", _editorChangedHandler);                    
+                    editor.on("change", _editorChangedHandler);       
                 } else {
                     //fetch sourcecode for selected file and update editor
                     var pvsFile = project.getProjectFile(event.selectedItem.path);
-                    if (!pvsFile) {//load the pvsfile and add to the project 
-                        //since we are not passing a file content it will get loaded over websocket when requested
-                        //we supress the spec file added event because the file already exists in the file tree
-                        var theoryName = event.selectedItem.name.substr(0, event.selectedItem.name.indexOf(".pvs"));
-                        pvsFile = project.addProjectFile(event.selectedItem.path, makeEmptyTheory(theoryName), "utf8", true);
-                    }
-                    if (pvsFile.content() !== undefined && pvsFile.content() !== null) {
+//                    if (!pvsFile) {//load the pvsfile and add to the project 
+//                        //since we are not passing a file content it will get loaded over websocket when requested
+//                        //we supress the spec file added event because the file already exists in the file tree
+//                        var theoryName = event.selectedItem.name.substr(0, event.selectedItem.name.indexOf(".pvs"));
+//                        pvsFile = project.addProjectFile(event.selectedItem.path, makeEmptyTheory(theoryName), "utf8", true);
+//                    }
+                    if (pvsFile && pvsFile.content() !== undefined && pvsFile.content() !== null) {
                         editor.off("change", _editorChangedHandler);
                         editor.setOption("mode", "txt");
                         editor.setValue(pvsFile.content());
