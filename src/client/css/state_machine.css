@@ -36,12 +36,11 @@
 }
 
 #EmuchartLogo.Start{
-	background: white;
 	text-align: center;
 	position: relative;
 	height: 320px;
 	width: 100%;
-	z-index: 999999;
+	z-index: 1234;
 }
 
 #EmuchartLogo.Start span{

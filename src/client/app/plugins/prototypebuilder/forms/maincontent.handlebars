@@ -11,8 +11,8 @@
 				<a class="btn" id="btnLoadPicture"><span class="glyphicon glyphicon-picture"></span> Change Picture</a>
 				<input type="file" class="hide" id="btnSelectPicture" name="selectPicture" accept="image/*">
 				<a class="btn" id="btnSaveProject"><span class="glyphicon glyphicon-floppy-save"></span> Save Project</a>
-				<a id="lblWebSocketStatus" class="btn status">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
-				<a id="lblPVSioStatus" class="btn status">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
+				<a id="lblWebSocketStatus" class="btn status" style="cursor:default">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
+				<a id="lblPVSioStatus" class="btn status" style="cursor:default">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
 
 			</div>
 		</div>
@@ -30,8 +30,8 @@
 				<ul>
 					{{#each plugins}}
 					<li class="list-group-item">
-						<input type="checkbox" name="{{label}}" id="plugin_{{label}}">
-						<span>{{label}}</span>
+						<input type="checkbox" name="{{label}}" id="plugin_{{label}}" style="cursor:pointer">
+						<label for="plugin_{{label}}" style="cursor:pointer">{{label}}</label>
 					</li>
 					{{/each}}
 				</ul>
