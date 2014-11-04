@@ -22,7 +22,6 @@ define(function (require, exports, module) {
 	
     var template = require("text!pvsioweb/forms/maincontent.handlebars");
     
-	
     
 	///FIXME need to distinguish between process started and process restarted
     function pvsProcessReady(err) {
@@ -41,7 +40,7 @@ define(function (require, exports, module) {
     function updateEditorToolbarButtons(pvsFile, currentProject) {
 		//update status of the set main file button based on the selected file
 		if (pvsFile) {
-			if (currentProject.mainPVSFile() && currentProject.mainPVSFile().name() === pvsFile.name()) {
+			if (currentProject.mainPVSFile() && currentProject.mainPVSFile().path() === pvsFile.path()) {
 				d3.select("#btnSetMainFile").attr("disabled", true);
 			} else {
 				d3.select("#btnSetMainFile").attr("disabled", null);
@@ -69,7 +68,9 @@ define(function (require, exports, module) {
             var ws = WSManager.getWebSocket();
             ws.lastState("init(0)");
             if (project.mainPVSFile()) {
-                ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()}, function (err) {
+                // the main file can be in a subfolder: we need to pass information about directories!
+                var mainFile = project.mainPVSFile().path().replace(project.name() + "/", "");
+                ws.startPVSProcess({fileName: mainFile, projectName: project.name()}, function (err) {
 					pvsProcessReady(err);
 					//make projectManager bubble the process ready event
 					projectManager.fire({type: "PVSProcessReady", err: err});
@@ -82,10 +83,11 @@ define(function (require, exports, module) {
                     }
                 });
             }
-            project.addListener("DirtyFlagChanged", function (event) {
-//                d3.select("#btnSaveFile").attr("disabled", null);
-//                d3.select("#btnSaveAll").attr("disabled", null);
-            });
+//            project.addListener("DirtyFlagChanged", function (event) {
+////                d3.select("#btnSaveFile").attr("disabled", null);
+////                d3.select("#btnSaveAll").attr("disabled", null);
+//            });
+            switchToBuilderView();
 			
         }).addListener("SelectedFileChanged", function (event) {
             var p = projectManager.project(), file = p.getProjectFile(event.selectedItem.path);
@@ -140,8 +142,9 @@ define(function (require, exports, module) {
             var project = projectManager.project(), ws = WSManager.getWebSocket();
             if (project && project.mainPVSFile()) {
                 ws.lastState("init(0)");
-                ws.startPVSProcess({fileName: project.mainPVSFile().name(), projectName: project.name()},
-                              pvsProcessReady);
+                // the main file can be in a subfolder: we need to pass information about directories!
+                var mainFile = project.mainPVSFile().path().replace(project.name() + "/", "");                
+                ws.startPVSProcess({fileName: mainFile, projectName: project.name()}, pvsProcessReady);
             }
         }
         //handle typecheck event
@@ -227,25 +230,25 @@ define(function (require, exports, module) {
 			}
 		});
 
-		d3.select("#btnSaveAll").on("click", function () {
-			var project = projectManager.project();
-			if (project) {
-                var pvsFiles = project.pvsFilesList();
-                var notification = "";
-                projectManager.saveFiles(pvsFiles, function (err) {
-                    if (!err) {
-//                        d3.select("#btnSaveAll").attr("disabled", true);
-//                        d3.select("#btnSaveFile").attr("disabled", true);
-                        notification = pvsFiles + " saved successfully!";
-                        d3.select("#editor-notification-area").insert("p", "p").html(notification);
-                        Logger.log(notification);
-                    } else {
-                        notification = "Error while saving " + pvsFiles + " (" + err + ")";
-                        Logger.log(notification);
-                    }
-                });
-			}
-		});
+//		d3.select("#btnSaveAll").on("click", function () {
+//			var project = projectManager.project();
+//			if (project) {
+//                var pvsFiles = project.pvsFilesList();
+//                var notification = "";
+//                projectManager.saveFiles(pvsFiles, function (err) {
+//                    if (!err) {
+////                        d3.select("#btnSaveAll").attr("disabled", true);
+////                        d3.select("#btnSaveFile").attr("disabled", true);
+//                        notification = pvsFiles + " saved successfully!";
+//                        d3.select("#editor-notification-area").insert("p", "p").html(notification);
+//                        Logger.log(notification);
+//                    } else {
+//                        notification = "Error while saving " + pvsFiles + " (" + err + ")";
+//                        Logger.log(notification);
+//                    }
+//                });
+//			}
+//		});
 
         d3.select("#btnImportFiles").on("click", function () {
             projectManager.openFiles()
