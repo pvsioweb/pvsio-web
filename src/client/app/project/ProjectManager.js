@@ -209,7 +209,7 @@ define(function (require, exports, module) {
             obj.projectFiles.forEach(function (file) {
                 if (file && file.filePath && file.fileContent) {
                     pf = p.addProjectFile(file.filePath, file.fileContent).encoding(file.encoding);
-                    if (file.filePath.indexOf(".pvsioweb") > 0) {
+                    if (file.filePath.indexOf("pvsioweb.json") > 0) {
                         mainFileName = JSON.parse(file.fileContent).mainPVSFile;
                     }
                 }

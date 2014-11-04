@@ -7,44 +7,43 @@
   },
   {
    "events": [
-    "click"
+    "press/release"
    ],
    "id": "Button1360329596458",
    "type": "button",
    "recallRate": "250",
    "functionText": "UP",
-   "boundFunctions": "click_UP"
+   "boundFunctions": "press_UP, release_UP"
   },
   {
    "events": [
-    "click"
+    "press/release"
    ],
    "id": "Button1360329611671",
    "type": "button",
    "recallRate": "250",
    "functionText": "up",
-   "boundFunctions": "click_up"
+   "boundFunctions": "press_up, release_up"
   },
   {
    "events": [
-    "click"
+    "press/release"
    ],
    "id": "Button1360329650659",
    "type": "button",
    "recallRate": "250",
    "functionText": "dn",
-   "boundFunctions": "click_dn"
+   "boundFunctions": "press_dn, release_dn"
   },
   {
    "events": [
-    "click",
     "press/release"
    ],
    "id": "Button1360329673407",
    "type": "button",
-   "recallRate": 250,
+   "recallRate": "250",
    "functionText": "DN",
-   "boundFunctions": "click_DN, press_DN, release_DN"
+   "boundFunctions": "press_DN, release_DN"
   }
  ],
  "regionDefs": [
@@ -69,7 +68,7 @@
   {
    "class": "Button1360329650659",
    "shape": "rect",
-   "coords": "159.1492919921875,265.3333435058594,185.13366699218753,291.3177185058594",
+   "coords": "159.1492919921875,266.3333435058594,185.13366699218753,292.3177185058594",
    "href": "#!"
   },
   {

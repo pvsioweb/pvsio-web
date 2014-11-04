@@ -81,7 +81,7 @@ function run() {
      * @returns {Promise} a promise that is resolved when the settings file has been written.
     */
     function changeProjectSetting(projectName, key, value) {
-        var file = path.join(baseProjectDir, projectName, "/.pvsioweb"),
+        var file = path.join(baseProjectDir, projectName, "/pvsioweb.json"),
             props = {};
         return new Promise(function (resolve, reject) {
             //if file does not exist, create it. Else read the property file and update just the key value specified
