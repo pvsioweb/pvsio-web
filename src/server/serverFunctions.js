@@ -13,32 +13,9 @@ var fs = require("fs"),
 	logger                  = require("tracer").console(),
 	imageExts = [".jpg", ".jpeg", ".png"],
 	baseProjectDir          = path.join(__dirname, "../../examples/projects/"),
-	filesFilter = [".pvs", ".tex"];
+	filesFilter = [".pvs", ".tex", ".txt", ".i", ".json"].concat(imageExts);
 
 var noop = function () {};
-function getFolderStructure(root) {
-        var s = fs.statSync(root);
-        var file = {path: root, name: root.substr(root.lastIndexOf("/") + 1)};
-        if (s.isDirectory()) {
-            var files = fs.readdirSync(root);
-            file.isDirectory = true;
-            file.children = files.map(function (f) {
-                return getFolderStructure(path.join(root, f));
-            });
-            if (file.children) {
-                file.children = file.children.filter(function (f) {
-                    return (f.isDirectory && f.name !== "pvsbin") || filesFilter.indexOf(path.extname(f.name)) > -1;
-                });
-            }
-            
-            file.path = file.path.replace(baseProjectDir, "");
-            return file;
-        
-        } else {
-            file.path = file.path.replace(baseProjectDir, "");
-            return file;
-        }
-    }
  /**
  * Recursively creates a directory structure while ensuring that any non-existent parent folders
  * are created as necessary. E.g., to create /temp/foo/foo/test in the directory /temp without a foo
@@ -126,10 +103,11 @@ function writeFile(fullPath, fileContent, fileEncoding, opt) {
 	Recursively reads the files in a directory using promises
 	@param {string} fullPath the path to the directory to read
 	@param {boolean} getContent a flag to set whehter or not to return the content of the file
+    @param {array} filter a list of extensions for files to get
 	@returns {Promise} a promise that resolves with an array of objects  for the files in the given directory.
-		The object may contain just filePath prooperties or may include fileContent if the getContent parameter was passed
+    The object may contain just filePath prooperties or may include fileContent if the getContent parameter was passed
 */
-function getFilesInDirectory(fullPath, getContent) {
+function getFilesInDirectory(fullPath, getContent, filter) {
         return stat(fullPath).then(function (f) {
             if (f.isDirectory()) {
                 return new Promise(function (resolve, reject) {
@@ -137,9 +115,11 @@ function getFilesInDirectory(fullPath, getContent) {
                         if (err) {
                             reject(err);
                         } else {
-                            var promises = files.map(function (name) {
+                            var promises = files.filter(function (f) {
+                                return filter.indexOf(path.extname(f).toLowerCase()) > -1;
+                            }).map(function (name) {
                                 var filePath = path.join(fullPath, name);
-                                return getFilesInDirectory(filePath, getContent);
+                                return getFilesInDirectory(filePath, getContent, filter);
                             });
 
                             Promise.all(promises)
@@ -219,8 +199,6 @@ function createProject(opt, cb, p) {
 							f.filePath = f.filePath.replace(projectPath, projectName);
 							return f;
 						});
-						// get project folder structure once all files have been wrtten
-						obj.folderStructure = getFolderStructure(projectPath);
 						// and make sure that the folder structure contains paths relative to baseProject
 						obj.name = projectName;
 						cb(obj);
@@ -265,13 +243,12 @@ function openProject(projectName) {
 
 	return new Promise(function (resolve, reject) {
 		//get filepaths and their contents
-		getFilesInDirectory(projectPath, true)
+		getFilesInDirectory(projectPath, true, filesFilter)
 			.then(function (files) {
 				res.projectFiles = files.map(function (f) {
 					f.filePath = f.filePath.replace(projectPath, projectName);
 					return f;
 				});
-				res.folderStructure = getFolderStructure(projectPath);
 				resolve(res);
 			}, reject);
 	});
@@ -344,7 +321,6 @@ function renameFile(oldPath, newPath) {
 
 module.exports = {
 	renameFile: renameFile,
-	getFolderStructure: getFolderStructure,
 	mkdirRecursive: mkdirRecursive,
 	stat: stat,
 	writeFile: writeFile,

@@ -13,9 +13,17 @@ define(function (require, exports, module) {
 	function WidgetsListView(widgets) {
 		var el = d3.select("#widgetsList").html("").append("ul");
 		
+        function labelFunction (widget) {
+            var label = widget.type() + ": ";
+            if (widget.type() === "display") {
+                label += widget.displayKey();
+            } else { label += widget.functionText(); }
+            return label;
+        }
+        
 		function update(data) {
-            var listItems = el.selectAll("li.list-group-item").data(data, function (data) {
-                return data.id();
+            var listItems = el.selectAll("li.list-group-item").data(data, function (widget) {
+                return widget.id();
             });
             var enteredItems = listItems.enter();
             var exitedItems = listItems.exit();
@@ -24,13 +32,8 @@ define(function (require, exports, module) {
                     d3.selectAll("#widgetsList ul li").classed("selected", false);
                     return w.id();
                 }).classed("selected", true)
-                .text(function (widget, i) {
-                    var label = widget.type() + ": ";
-                    if (widget.type() === "display") {
-                        label += widget.displayKey();
-                    } else { label += widget.functionText(); }
-                    return label;
-                }).on("click", function (w) {
+                .text(labelFunction)
+                .on("click", function (w) {
                     var event = d3.event;
                     if (!event.shiftKey) {
                         d3.selectAll("g.selected").classed("selected", false);
@@ -47,6 +50,7 @@ define(function (require, exports, module) {
                     event.preventDefault();
                     event.stopPropagation();
                 });
+            listItems.text(labelFunction);
             exitedItems.transition().duration(220).style("opacity", 0).remove();
 		}
 		

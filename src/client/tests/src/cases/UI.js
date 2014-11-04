@@ -143,7 +143,7 @@ define(function (require, exports, module) {
                 unloadPlugin("GraphBuilder");				
             });
 			
-			describe("PVS Editor", function () {
+			describe("Prototype Builder", function () {
 				beforeEach(function (done) {
                     d3.select("div.overlay").remove();
 					pm = pb.getProjectManager();
@@ -155,22 +155,22 @@ define(function (require, exports, module) {
 					main.start();
 				});
 				
-				it("can be expanded", function (done) {
+				it("can be collapsed", function (done) {
 					var editorPanel = "div.collapsible-panel-parent[plugin-owner='PrototypeBuilder'] .collapsible-panel";
 					togglePanel("PrototypeBuilder")
 						.then(function () {
-							expect(d3.select(editorPanel).style("display")).toEqual("block");
+							expect(d3.select(editorPanel).style("display")).toEqual("none");
 							done();
 						});
 				});
 				
-				it("can be expanded and collapsed", function (done) {
+				it("can be collapsed and expanded", function (done) {
 					var editorPanel = "div.collapsible-panel-parent[plugin-owner='PrototypeBuilder'] .collapsible-panel";
 					togglePanel("PrototypeBuilder")
 						.then(function () {
 							togglePanel("PrototypeBuilder")
 								.then(function () {
-									expect(d3.select(editorPanel).style("display")).toEqual("none");
+									expect(d3.select(editorPanel).style("display")).toEqual("block");
 									done();
 								});
 						});

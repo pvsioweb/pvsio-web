@@ -12,6 +12,7 @@ define(function (require, exports, module) {
         pvsWriter           = require("plugins/emulink/stateToPvsSpecificationWriter"),
         parserSpecification = require("plugins/emulink/parserSpecification"),
 		PrototypeBuilder	= require("plugins/prototypebuilder/PrototypeBuilder"),
+        ModelEditor         = require("plugins/codeEditor/TextEditor"),
 		Logger				= require("util/Logger"),
         Simulator           = require("plugins/emulink/simulator"),
         PVSioWebClient      = require("PVSioWebClient"),
@@ -1163,14 +1164,14 @@ define(function (require, exports, module) {
 
     
     Emulink.prototype.getDependencies = function () {
-        return [PrototypeBuilder.getInstance()];
+        return [PrototypeBuilder.getInstance(), ModelEditor.getInstance()];
     };
     
     Emulink.prototype.initialise = function () {
         //enable the plugin -- this should also enable any dependencies defined in getDependencies method
         var prototypeBuilder = PrototypeBuilder.getInstance();
         // create local references to PVS editor, websocket client, and project manager
-        editor = prototypeBuilder.getEditor();
+        editor = ModelEditor.getInstance().getEditor();
         ws = pvsioWebClient.getWebSocket();
         projectManager = prototypeBuilder.getProjectManager();
         
