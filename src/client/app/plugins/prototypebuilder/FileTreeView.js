@@ -168,10 +168,6 @@ define(function (require, exports, module) {
         }
     }
     
-    FileTreeView.prototype.fileExists = function (filepath) {
-        return treeList.nodeExists(filepath);
-    };
-    
     FileTreeView.prototype.deleteItem = function (file) {
         var path = typeof file === "string" ? file : file.path();
         treeList.removeItem(path);

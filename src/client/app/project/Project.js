@@ -185,6 +185,16 @@ define(function (require, exports, module) {
         })[0];
     };
     
+    /**
+        Checks if a file exists in the project 
+        @param {!String} filePath the path to the project file
+        @returns {boolean} true if the file with the specified path exists in the project or false otherwise
+        @memberof Project
+    */
+    Project.prototype.fileExists = function (filePath) {
+        var f = this.getProjectFile(filePath);
+        return f ? true : false;
+    };
     
     /**
 	 * Updates the project image. At the moment only one image is allowed in a project so we remove the old image

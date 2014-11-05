@@ -372,7 +372,7 @@ define(function (require, exports, module) {
 		}
 	};
 	/**
-		Removes the specified file from the list of project files
+		Removes the specified file from the list of project files and deletes the file from disk
 		@param {ProjectFile} f the file to remove
 		@returns {Promise} a promise that resolves with the deleted file or an error
 	*/
@@ -396,6 +396,20 @@ define(function (require, exports, module) {
 			});
 		});
 	};
+    /**
+        Removes the file with the specified path from the list of project files and deletes the file from disk
+        @param {!String} path the path to the file to remove
+        @returns {Promise} a promise that resolves with the deleted file or an error
+    */
+    ProjectManager.prototype.removeFileWithPath = function (path) {
+        var file = this.project().getProjectFile(path);
+        if (file) {
+            return this.removeFile(file);
+        } else {
+            return Promise.reject("File with the specified path '" + path + "' does not exist in the project");   
+        }
+    };
+    
 	/**
 		Adds the specified file to the list of project files
 		@param {ProjectFile} file the file to add
@@ -692,9 +706,8 @@ define(function (require, exports, module) {
      * checks if file pf already exists in the project
      * returns true if pf exists, otherwise returns false
      */
-	///FIXME file existence should be checked in the project not the list view
     ProjectManager.prototype.fileExists = function (pf) {
-        return pvsFilesListView.fileExists(pf.path());
+       return this.project().fileExists(pf.path());
     };
 
     /**

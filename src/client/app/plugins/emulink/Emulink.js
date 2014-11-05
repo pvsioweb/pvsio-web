@@ -979,7 +979,7 @@ define(function (require, exports, module) {
             
             if (projectManager.fileExists(emuchartsFile)) {
                 // remove file from project
-                projectManager.removeFile(emuchartsFile)
+                projectManager.removeFileWithPath(emuchartsFile.path())
                     .then(function (f) {
                         addFile(emuchartsFile);
                     }, function (err) {
