@@ -5,7 +5,7 @@
  */
 /*jshint unused: false*/
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, unparam: true*/
-/*global define*/
+/*global define, d3*/
 define(function (require, exports, module) {
     "use strict";
     var eventDispatcher = require("util/eventDispatcher"),
