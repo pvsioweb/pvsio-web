@@ -13,7 +13,7 @@ define(function (require, exports, module) {
         parserSpecification = require("plugins/emulink/parserSpecification"),
 		PrototypeBuilder	= require("plugins/prototypebuilder/PrototypeBuilder"),
         ProjectManager		= require("project/ProjectManager"),
-        ModelEditor         = require("plugins/codeEditor/TextEditor"),
+        ModelEditor         = require("plugins/modelEditor/ModelEditor"),
 		Logger				= require("util/Logger"),
         Simulator           = require("plugins/emulink/simulator"),
         PVSioWebClient      = require("PVSioWebClient"),
@@ -962,22 +962,33 @@ define(function (require, exports, module) {
             };
             var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".pvs",
                                                                  emuchartsPVSPrinter.print(emucharts));
+            var addFile = function (emuchartsFile) {
+                var notification = "";
+                projectManager.addFile(emuchartsFile)
+                    .then(function () {
+                        projectManager.selectFile(emuchartsFile);
+                        notification = "PVS model successfully generated in file " + emuchartsFile.path();
+                        alert(notification);
+                        Logger.log(notification);
+                    }).catch(function (err) {
+                        notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
+                        alert(notification);
+                        Logger.log(notification);
+                    });
+            };
+            
             if (projectManager.fileExists(emuchartsFile)) {
                 // remove file from project
-                projectManager.removeFile(emuchartsFile);
+                projectManager.removeFile(emuchartsFile)
+                    .then(function (f) {
+                        addFile(emuchartsFile);
+                    }, function (err) {
+                        console.log(err);
+                    });
+            } else {
+                addFile(emuchartsFile);
             }
-            // add file to project
-            projectManager.addFile(emuchartsFile)
-                .then(function () {
-                    projectManager.selectFile(emuchartsFile);
-                    notification = "PVS model successfully generated in file " + emuchartsFile.path();
-                    alert(notification);
-                    Logger.log(notification);
-                }).catch(function (err) {
-                    notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-                    alert(notification);
-                    Logger.log(notification);            
-                });
+            
 //            
 //            
 //            projectManager.saveFiles([emuchartsFile], function (err) {

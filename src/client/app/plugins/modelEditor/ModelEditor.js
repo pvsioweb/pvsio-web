@@ -41,7 +41,7 @@ define(function (require, exports, module) {
         projectManager.selectFile(project.mainPVSFile() || project.pvsFilesList()[0] || project.name());
     }
     
-	function TextEditor() {
+	function ModelEditor() {
         pvsioWebClient = PVSioWebClient.getInstance();
         projectManager = ProjectManager.getInstance();
         currentProject = projectManager.project();
@@ -53,19 +53,19 @@ define(function (require, exports, module) {
 	}
 	
     /////These are the api methods that the prototype builder plugin exposes
-    TextEditor.prototype.getDependencies = function () { return []; };
+    ModelEditor.prototype.getDependencies = function () { return []; };
     
 	/**
 		@returns {Promise} a promise that resolves when the prototype builder has been initialised
 	*/
-    TextEditor.prototype.initialise = function () {
+    ModelEditor.prototype.initialise = function () {
         editorContainer = pvsioWebClient.createCollapsiblePanel({
             headerText: "Model Editor",
             showContent: false,
             onClick: function () {
                 editor.refresh();
             },
-            owner: "TextEditor"
+            owner: "ModelEditor"
         });
         editorContainer.append("div").html(sourceCodeTemplate);
 
@@ -122,21 +122,21 @@ define(function (require, exports, module) {
 		return Promise.resolve(true);
     };
    
-    TextEditor.prototype.unload = function () {
+    ModelEditor.prototype.unload = function () {
         editor = null;
         projectManager.removeListener("ProjectChanged", onProjectChanged);
         pvsioWebClient.removeCollapsiblePanel(editorContainer);
 		return Promise.resolve(true);
     };
     
-    TextEditor.prototype.getEditor = function () {
+    ModelEditor.prototype.getEditor = function () {
         return editor;
     };
 	
     module.exports = {
         getInstance: function () {
             if (!instance) {
-                instance = new TextEditor();
+                instance = new ModelEditor();
             }
             return instance;
         }
