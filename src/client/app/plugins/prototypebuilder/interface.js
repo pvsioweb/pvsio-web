@@ -8,7 +8,7 @@
 define(function (require, exports, module) {
 	"use strict";
 	var WSManager = require("websockets/pvs/WSManager"),
-        ModelEditor = require("plugins/codeEditor/TextEditor"),
+        ModelEditor = require("plugins/modelEditor/ModelEditor"),
         Emulink = require("plugins/emulink/Emulink"),
 		SafetyTest = require("plugins/safetyTest/SafetyTest"),
         GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
