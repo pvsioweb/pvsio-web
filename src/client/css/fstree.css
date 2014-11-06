@@ -8,6 +8,7 @@ div.contextmenu {
     border: 1px solid #ccc;
     cursor:default;
     position: absolute;
+    z-index: 2345;
 }
 
 .contextmenu li {

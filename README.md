@@ -7,7 +7,7 @@ Simulations created with PVSio-web can be watched in this youtube video https://
 
 A live version of PVSio-web executed on a cloud server can be found at http://www.pvsioweb.org/
 
-![Screenshot](screenshot.jpg?raw=true)
+![Screenshot](screenshot.png?raw=true)
 
 
 Prerequisites

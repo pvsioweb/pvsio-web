@@ -320,7 +320,7 @@ define(function (require, exports, module) {
         var oldPath = node.path;
 
         function doCreate(elem, newLabel) {
-            if (newLabel === "") { newLabel = node.name; }
+            if (newLabel === "") { newLabel = node.name; }           
             d3.select(elem.parentNode).html(newLabel);
             fst.renameItem(n, newLabel);
             

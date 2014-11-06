@@ -39,6 +39,10 @@
 		}
 	}
 	
+	function ensureMin(size) {
+		return size < 30 ? 30 : size;
+	}
+	
 	function insertResizer(el, where) {
 		var resizer = document.createElement("div");
 		el.appendChild(resizer);
@@ -58,19 +62,19 @@
 			
 			var pbox = parent.getBoundingClientRect(),
 				elbox = el.getBoundingClientRect();
-			var width = e.clientX - elbox.left,
-				height = e.clientY - elbox.top;
+			var width = ensureMin(e.clientX - elbox.left),
+				height = ensureMin(e.clientY - elbox.top);
 			var percent = width * 100 / pbox.width;
 			if (where === right) {
 				el.style.width = percent + "%";
 				sibling.style.width = (100 - percent)  + "%";
 			} else if (where === left) {
-				width = elbox.right - e.clientX;
+				width = ensureMin(elbox.right - e.clientX);
 				percent = width * 100 / pbox.width;
 				el.style.width = percent + "%";
 				sibling.style.width = (100 - percent)  + "%";
 			} else if (where === top) {
-				height = elbox.bottom - e.clientY;
+				height = ensureMin(elbox.bottom - e.clientY);
 				percent = height * 100 / pbox.height;
 				el.style.height = percent + "%";
 				sibling.style.height = (100 - percent) + "%";
@@ -88,7 +92,7 @@
 		//sibling should be one
 		resizer.onmousedown = function (e) {
 			parent.addEventListener("mousemove", mousemove);
-			parent.onmouseup = function (e) {
+			document.body.onmouseup = function (e) {
 				parent.removeEventListener("mousemove", mousemove);
 				removeClass(parent, "ljs-resizing");
 				return false;

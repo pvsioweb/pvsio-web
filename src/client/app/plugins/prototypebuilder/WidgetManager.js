@@ -138,6 +138,7 @@ define(function (require, exports, module) {
                 event.widget = wm.getWidget(e.region.attr("id"));
                 wm.fire(event);
             }).on("remove", function (e) {
+                event.widget = wm.getWidget(e.regions.node().id);
                 e.regions.each(function () {
                     var w = wm.getWidget(d3.select(this).attr("id"));
                     if (w) {
@@ -149,7 +150,9 @@ define(function (require, exports, module) {
                 });
                 event.action = "remove";
                 wm.fire(event);
-            });
+            }).on("select", function (e) {
+				wm.fire({type: "WidgetSelected", widget: wm.getWidget(e.region.attr("id")), event: e.event});
+			});
             if (cb) { cb(); }
         }});
     };
@@ -286,7 +289,7 @@ define(function (require, exports, module) {
 		var _this = this;
 		var widgets = _this.getAllWidgets();
 		function _getPos(el) {
-			return {x: el.attr("x"), y: el.attr("y"), height: el.attr("height"), width: el.attr("width")};	
+			return {x: el.attr("x"), y: el.attr("y"), height: el.attr("height"), width: el.attr("width")};
 		}
 		widgets.forEach(function (w) {
 			var pos = _getPos(w.element());

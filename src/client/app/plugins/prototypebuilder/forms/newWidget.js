@@ -9,7 +9,8 @@ define(function (require, exports, module) {
 	"use strict";
 	var FormUtils					= require("./FormUtils"),
 		template					= require("text!./templates/createWidget.handlebars"),
-		d3							= require("d3/d3");
+        BaseDialog = require("pvsioweb/forms/BaseDialog"),
+        d3							= require("d3/d3");
 
 	function updateBoundFunctionsLabel() {
         var f = d3.select("#functionText").property("value"),
@@ -26,11 +27,7 @@ define(function (require, exports, module) {
         d3.select("#boundFunctions").text(str);
     }
 	
-	var NewWidgetView	= Backbone.View.extend({
-		initialize: function () {
-			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
-			this.render();
-		},
+	var NewWidgetView	= BaseDialog.extend({
 		render: function () {
 			var t = Handlebars.compile(template);
 			this.$el.html(t());

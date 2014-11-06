@@ -82,7 +82,7 @@ define(function (require, exports, module) {
     */
 	PVSioWeb.prototype.createCollapsiblePanel = function (options) {
 		options = options || {};
-		options.parent = options.parent || "#content .content-body .ljs-hcontent";
+		options.parent = options.parent || "#body";
 		var div = d3.select(options.parent).append("div").attr("class", "collapsible-panel-parent");
 		var header = div.append("div").classed("header", true);
 		var content = div.append("div").attr("class", "collapsible-panel");

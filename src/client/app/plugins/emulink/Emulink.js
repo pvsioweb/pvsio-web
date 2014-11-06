@@ -12,6 +12,8 @@ define(function (require, exports, module) {
         pvsWriter           = require("plugins/emulink/stateToPvsSpecificationWriter"),
         parserSpecification = require("plugins/emulink/parserSpecification"),
 		PrototypeBuilder	= require("plugins/prototypebuilder/PrototypeBuilder"),
+        ProjectManager		= require("project/ProjectManager"),
+        ModelEditor         = require("plugins/modelEditor/ModelEditor"),
 		Logger				= require("util/Logger"),
         Simulator           = require("plugins/emulink/simulator"),
         PVSioWebClient      = require("PVSioWebClient"),
@@ -1165,27 +1167,51 @@ define(function (require, exports, module) {
             };
             var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".pvs",
                                                                  emuchartsPVSPrinter.print(emucharts));
+            var addFile = function (emuchartsFile) {
+                var notification = "";
+                projectManager.addFile(emuchartsFile)
+                    .then(function () {
+                        projectManager.selectFile(emuchartsFile);
+                        notification = "PVS model successfully generated in file " + emuchartsFile.path();
+                        alert(notification);
+                        Logger.log(notification);
+                    }).catch(function (err) {
+                        notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
+                        alert(notification);
+                        Logger.log(notification);
+                    });
+            };
+            
             if (projectManager.fileExists(emuchartsFile)) {
                 // remove file from project
-                projectManager.project().removeFile(emuchartsFile);
+                projectManager.removeFileWithPath(emuchartsFile.path())
+                    .then(function (f) {
+                        addFile(emuchartsFile);
+                    }, function (err) {
+                        console.log(err);
+                    });
+            } else {
+                addFile(emuchartsFile);
             }
-            // add file to project
-            projectManager.saveFiles([emuchartsFile], function (err) {
-                var notification = "";
-                if (!err) {
-                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
-                    projectManager.selectFile(emuchartsFile);
-                    notification = "PVS model successfully generated in file " + emuchartsFile.path();
-                    alert(notification);
-                    Logger.log(notification);
-                } else {
-                    notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-                    alert(notification);
-                    Logger.log(notification);
-                }
-            });
-            // select file
-            projectManager.selectFile(emuchartsFile);
+            
+//            
+//            
+//            projectManager.saveFiles([emuchartsFile], function (err) {
+//                var notification = "";
+//                if (!err) {
+//                    projectManager.addFile(emuchartsFile);
+//                    projectManager.selectFile(emuchartsFile);
+//                    notification = "PVS model successfully generated in file " + emuchartsFile.path();
+//                    alert(notification);
+//                    Logger.log(notification);
+//                } else {
+//                    notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
+//                    alert(notification);
+//                    Logger.log(notification);
+//                }
+//            });
+//            // select file
+//            projectManager.selectFile(emuchartsFile);
         });
         d3.select("#btn_menuPIMPrinter").on("click", function () {
             var emucharts = {
@@ -1368,16 +1394,16 @@ define(function (require, exports, module) {
 
     
     Emulink.prototype.getDependencies = function () {
-        return [PrototypeBuilder.getInstance()];
+        return [PrototypeBuilder.getInstance(), ModelEditor.getInstance()];
     };
     
     Emulink.prototype.initialise = function () {
         //enable the plugin -- this should also enable any dependencies defined in getDependencies method
         var prototypeBuilder = PrototypeBuilder.getInstance();
         // create local references to PVS editor, websocket client, and project manager
-        editor = prototypeBuilder.getEditor();
+        editor = ModelEditor.getInstance().getEditor();
         ws = pvsioWebClient.getWebSocket();
-        projectManager = prototypeBuilder.getProjectManager();
+        projectManager = ProjectManager.getInstance();
         
         // add project manager listeners
 //        addProjectManagerListeners();

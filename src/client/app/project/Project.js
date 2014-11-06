@@ -13,7 +13,8 @@ define(function (require, exports, module) {
         WidgetManager       = require("pvsioweb/WidgetManager").getWidgetManager(),
         ScriptPlayer        = require("util/ScriptPlayer"),
 		ProjectFile			= require("./ProjectFile"),
-        Logger              = require("util/Logger");
+        Logger              = require("util/Logger"),
+        NotificationManager = require("project/NotificationManager");
     
     var _projectFiles;
     
@@ -22,13 +23,17 @@ define(function (require, exports, module) {
     function saveFiles(files) {
         var ws = WSManager.getWebSocket();
         var promises =  files.map(function (f) {
-            var token = {filePath: f.path(), fileContent: f.content(), encoding: f.encoding() || "utf8"};
+            var token = { filePath: f.path(),
+                          fileContent: f.content(),
+                          encoding: f.encoding() || "utf8",
+                          opt: { overWrite: true } };
             return new Promise(function (resolve, reject) {
                 ws.writeFile(token, function (err, res) {
                     if (!err) {
                         resolve(res);
                     } else {
                         reject(err);
+                        if (err.code) { alert(err.code); }
                     }
                 });
             });
@@ -134,7 +139,40 @@ define(function (require, exports, module) {
     Project.prototype.getProjectFiles = function () {
         return _projectFiles;
     };
-    
+    /**
+     Gets the folder structure of the project based on the list of files
+    */
+    Project.prototype.getFolderStructure = function () {
+        var projectName = this.name();
+        var structure = {path: projectName, name: projectName, isDirectory: true};
+        var tree = {};
+        var paths = _projectFiles.map(function (f) {
+            return f.path();
+        }).sort();
+        paths.forEach(function (path) {
+            var args = path.split("/"),
+                ptr = tree;
+            args.forEach(function (d) {
+                ptr[d] = ptr[d] || {name: d, children: {}};
+                ptr = ptr[d].children;
+            });
+        });
+        function getChildren(children, parentName) {
+            if (children && Object.keys(children).length) {
+                var res = Object.keys(children).map(function (key) {
+                    var child = children[key];
+                    child.path = parentName + "/" + child.name;
+                    child.children = getChildren(child.children, child.path);
+                    child.isDirectory = child.children !== undefined;
+                    return child;
+                });
+                return res;
+            }
+            return undefined;
+        }
+        structure.children = getChildren(tree[projectName].children, projectName);
+        return structure;
+    };
     /**
      * Gets the project file with the specified Name
      * @param {!String} filePath path to the spec file
@@ -147,6 +185,16 @@ define(function (require, exports, module) {
         })[0];
     };
     
+    /**
+        Checks if a file exists in the project 
+        @param {!String} filePath the path to the project file
+        @returns {boolean} true if the file with the specified path exists in the project or false otherwise
+        @memberof Project
+    */
+    Project.prototype.fileExists = function (filePath) {
+        var f = this.getProjectFile(filePath);
+        return f ? true : false;
+    };
     
     /**
 	 * Updates the project image. At the moment only one image is allowed in a project so we remove the old image
@@ -156,11 +204,20 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
 	Project.prototype.changeImage = function (imagePath, imageData) {
-        var oldImage = this.getImage();
-        if (oldImage) {
-            this.removeFile(oldImage);
-        }
-        this.addProjectFile(imagePath, imageData, "base64");
+        var p = this, oldImage = p.getImage();
+        function addNew() {
+			var newImage = p.addProjectFile(imagePath, imageData, "base64");
+			newImage.dirty(true);
+		}
+		
+		if (oldImage) {
+            this.removeFile(oldImage)
+				.then(function (res) {
+					addNew();
+				});
+        } else {
+			addNew();
+		}
 		return this;
 	};
        
@@ -173,20 +230,30 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
     ///FIXME this function should throw an error if the filepath already exists?
-    ///FIXME this function should take a projectFile as argument!
-    Project.prototype.addProjectFile = function (filePath, fileContent, encoding, suppressEvent) {
-        encoding = encoding || "utf8";
-        var p  = this, newFile = new ProjectFile(filePath)
-            .content(fileContent)
-            .encoding(encoding);
-        _projectFiles.push(newFile);
-        if (!suppressEvent) {
+    //Project.prototype.addProjectFile = function (filePath, fileContent, encoding, suppressEvent) {
+	Project.prototype.addProjectFile = function (newFile, suppressEvent) {
+		var filePath, fileContent, encoding;
+		var p = this;
+		if (typeof arguments[0] === "string") {
+            console.log("Deprecated: addProjectFile(string, string, string, boolean) is deprecated use addProjectFile(ProjectFile, boolean) instead"); 
+			filePath = arguments[0];
+			fileContent = arguments[1];
+			encoding = arguments[2] || "utf8";
+			suppressEvent = arguments[3];
+			newFile = new ProjectFile(filePath)
+				.content(fileContent)
+				.encoding(encoding);
+		}
+		_projectFiles.push(newFile);
+		//for now always suppress fileadded event for image files
+		suppressEvent = suppressEvent || newFile.isImage();
+        if (!suppressEvent ) {
 			p.fire({type: "FileAdded", file: newFile});
-			//register event for the newspec and bubble up the dirty flag changed event from project
-			newFile.addListener("DirtyFlagChanged", function () {
-				p.fire({type: "DirtyFlagChanged", file: newFile});
-			});
         }
+		//register event for the newspec and bubble up the dirty flag changed event from project
+		newFile.addListener("DirtyFlagChanged", function () {
+			p.fire({type: "DirtyFlagChanged", file: newFile});
+		});
         return newFile;
     };
 
@@ -196,16 +263,16 @@ define(function (require, exports, module) {
 	 * @memberof Project
 	 */
 	Project.prototype.removeFile = function (file) {
-        var fileIndex = _projectFiles.indexOf(file);
-        
-        var deletedFile = _projectFiles.splice(fileIndex, 1);
-        if (deletedFile && deletedFile[0]) {
-            var f = deletedFile[0];
-			this.fire({ type: "FileRemoved", file: f });
-            f.clearListeners();
-            f = null;
-        }
-        return this;
+        var fileIndex = _projectFiles.indexOf(file), notification;
+        if (fileIndex >= 0) {
+            var deletedFile = _projectFiles.splice(fileIndex, 1)[0];
+			this.fire({ type: "FileRemoved", file: deletedFile});
+			return deletedFile;
+        } else {
+			var m = "Error deleting file. File not found in project.";
+			NotificationManager.error(m);
+			return null;
+		}
 	};
     
     /**
@@ -304,7 +371,7 @@ define(function (require, exports, module) {
             }
         });
         
-		saveFiles(file, this)
+		saveFiles(file)
             .then(function () {
                 if (cb && typeof cb === "function") {
                     cb(null, _thisProject);
@@ -328,7 +395,7 @@ define(function (require, exports, module) {
 			//project has already been created so save the widgets and the sourcecode if it has changed
             saveFiles(this.getProjectFiles().filter(function (f) { return f.dirty(); }))
                 .then(function () {
-                    _thisProject.dirty(false);
+                    _thisProject._dirty(false);
                     _thisProject.fire({type: "ProjectSaved", project: _thisProject});
                     if (cb && typeof cb === "function") { cb(null, _thisProject); }
                 }, function (err) {
@@ -374,7 +441,7 @@ define(function (require, exports, module) {
                 _thisProject.name(res.name);
 			}
             if (cb && typeof cb === "function") {
-                cb(err, _thisProject, res.folderStructure);
+                cb(err, _thisProject);
             }
 		});
 	};

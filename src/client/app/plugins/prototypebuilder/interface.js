@@ -8,48 +8,20 @@
 define(function (require, exports, module) {
 	"use strict";
 	var WSManager = require("websockets/pvs/WSManager"),
+        ModelEditor = require("plugins/modelEditor/ModelEditor"),
         Emulink = require("plugins/emulink/Emulink"),
 		SafetyTest = require("plugins/safetyTest/SafetyTest"),
         GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
 		Logger	= require("util/Logger"),
-        Recorder = require("util/ActionRecorder"),
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
-        Prompt  = require("pvsioweb/forms/displayPrompt"),
         Notification = require("pvsioweb/forms/displayNotification"),
         ProjectFile = require("project/ProjectFile"),
         fs = require("util/fileHandler"),
-        PluginManager = require("plugins/PluginManager"),
-		WidgetsListView = require("pvsioweb/forms/WidgetsListView");
+        PluginManager = require("plugins/PluginManager");
 	
     var template = require("text!pvsioweb/forms/maincontent.handlebars");
     
-	/**
-	 * Switches the prototoyping layer to the builder layer
-     * @private
-	 */
-    function switchToBuilderView() {
-        d3.select(".image-map-layer").style("opacity", 1).style("z-index", 190);
-        d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
-		d3.select("#controlsContainer .active").classed("active", false);
-        d3.select("#btnBuilderView").classed('active', true);
-        d3.selectAll("div.display,#controlsContainer button").classed("builder", true);
-        d3.selectAll("div.display,#controlsContainer button").classed("simulator", false);
-        d3.selectAll("#record").style("display", "none");
-    }
-	/** Switches the prototyping layer to the simulator/testing layer 
-        @private
-    */
-    function switchToSimulatorView() {
-        d3.select(".image-map-layer").style("opacity", 0.1).style("z-index", -2);
-        d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
-		d3.select("#controlsContainer .active").classed("active", false);
-        d3.select("#btnSimulatorView").classed("active", true);
-        d3.select("#btnSimulatorView").classed("selected", true);
-        d3.selectAll("div.display,#controlsContainer button").classed("simulator", true);
-        d3.selectAll("div.display,#controlsContainer button").classed("builder", false);
-        d3.selectAll("#record").style("display", "block");
-    }
     
 	///FIXME need to distinguish between process started and process restarted
     function pvsProcessReady(err) {
@@ -73,16 +45,7 @@ define(function (require, exports, module) {
 			} else {
 				d3.select("#btnSetMainFile").attr("disabled", null);
 			}
-
-			//update status of file save button based on the selected file
-//			if (pvsFile.dirty()) {
-//				d3.select("#btnSaveFile").attr("disabled", null);
-//                //d3.select("#btnSaveAll").attr("disabled", null);
-//			} else {
-//				d3.select("#btnSaveFile").attr("disabled", true);
-//                //d3.select("#btnSaveAll").attr("disabled", true);
-//			}
-		}
+        }
 	}
     
 	function bindListeners(projectManager) {
@@ -102,7 +65,6 @@ define(function (require, exports, module) {
 					pvsProcessReady(err);
 					//make projectManager bubble the process ready event
 					projectManager.fire({type: "PVSProcessReady", err: err});
-					WidgetsListView.create();
 				});
             } else {
                 //close pvsio process for previous project
@@ -112,12 +74,6 @@ define(function (require, exports, module) {
                     }
                 });
             }
-//            project.addListener("DirtyFlagChanged", function (event) {
-//                d3.select("#btnSaveFile").attr("disabled", null);
-//                //d3.select("#btnSaveAll").attr("disabled", null);
-//            });
-            switchToBuilderView();
-			
         }).addListener("SelectedFileChanged", function (event) {
             var p = projectManager.project(), file = p.getProjectFile(event.selectedItem.path);
             updateEditorToolbarButtons(file, p);
@@ -125,45 +81,7 @@ define(function (require, exports, module) {
         
 		d3.select("#header #txtProjectName").html("");
 	
-		/**
-		 * Add event listener for toggling the prototyping layer and the interaction layer
-		 */
-		d3.select("#btnBuilderView").classed("selected", true).on("click", function () {
-			switchToBuilderView();
-		});
-	
-		d3.select("#btnSimulatorView").on("click", function () {
-			switchToSimulatorView();
-		});
-	
-        d3.select("#record").on("click", function () {
-            var label = d3.select(this).html().trim(), script;
-            if (label === "Record") {
-                d3.select(this).html(" Stop Recording").classed("recording", true);
-                Recorder.startRecording();
-                recStartState = WSManager.getWebSocket().lastState();
-                recStartTime = new Date().getTime();
-                scriptName = "Script_" + recStartTime;
-            } else {
-                d3.select(this).html(" Record").classed("recording", false);
-                actions = Recorder.stopRecording();
-                //do something with actions
-                Logger.log(actions);
-                //ask user to give name to script
-                Prompt.create({header: "Would you like to save this script?",
-                               message: "Please enter a name for your script",
-                               buttons: ["Delete", "Save"]})
-                    .on("save", function (e, view) {
-                        scriptName = e.data.prompt.trim() || scriptName;
-                        view.remove();
-                        script = {name: scriptName, actions: actions, startState: recStartState};
-                        //add the script to the project
-                        projectManager.project().addScript(script);
-                    }).on("delete", function (e, view) {
-                        view.remove();
-                    });
-            }
-        });
+		
         
 		d3.select("#btnSaveProject").on("click", function () {
 			projectManager.saveProject();
@@ -175,7 +93,6 @@ define(function (require, exports, module) {
                     if (!err) {
                         projectManager.openProject(projectName, function (project) {
                             var notification = "Project " + project.name() + " opened successfully!";
-                            d3.select("#project-notification-area").insert("p", "p").html(notification);
                             Logger.log(notification);
                         });
                     }
@@ -200,7 +117,8 @@ define(function (require, exports, module) {
 	
 		d3.select("#newProject").on("click", function () {
 			projectManager.newProject(function () {
-                Logger.log("new project created!");
+                var notification = "New project created!";
+                Logger.log(notification);
             });
 		});
         
@@ -210,7 +128,7 @@ define(function (require, exports, module) {
             if (project && project.mainPVSFile()) {
                 ws.lastState("init(0)");
                 // the main file can be in a subfolder: we need to pass information about directories!
-                var mainFile = project.mainPVSFile().path().replace(project.name() + "/", "");
+                var mainFile = project.mainPVSFile().path().replace(project.name() + "/", "");                
                 ws.startPVSProcess({fileName: mainFile, projectName: project.name()}, pvsProcessReady);
             }
         }
@@ -283,8 +201,6 @@ define(function (require, exports, module) {
                 var notification = "";
                 projectManager.saveFiles([pvsFile], function (err) {
                     if (!err) {
-//                        d3.select("#btnSaveFile").attr("disabled", true);
-                        //d3.select("#btnSaveAll").attr("disabled", true);
                         notification = pvsFile + " saved successfully!";
                         d3.select("#editor-notification-area").insert("p", "p").html(notification);
                         Logger.log(notification);
@@ -296,27 +212,6 @@ define(function (require, exports, module) {
                 });
 			}
 		});
-
-//		d3.select("#btnSaveAll").on("click", function () {
-//			var project = projectManager.project();
-//			if (project) {
-//                var pvsFiles = project.pvsFilesList();
-//                var notification = "";
-//                projectManager.saveFiles(pvsFiles, function (err) {
-//                    if (!err) {
-//                        //d3.select("#btnSaveAll").attr("disabled", true);
-//                        //d3.select("#btnSaveFile").attr("disabled", true);
-//                        notification = pvsFiles + " saved successfully!";
-//                        d3.select("#editor-notification-area").insert("p", "p").html(notification);
-//                        Logger.log(notification);
-//                    } else {
-//                        notification = "Error while saving " + pvsFiles + " (" + err + ")";
-//                        Logger.log(notification);
-//                    }
-//                });
-//			}
-//		});
-
         d3.select("#btnImportFiles").on("click", function () {
             projectManager.openFiles()
                 .then(function (files) {
@@ -392,10 +287,16 @@ define(function (require, exports, module) {
     }
 	module.exports = {
 		init: function (data) {
-            data = data || {plugins: [Emulink.getInstance(), GraphBuilder.getInstance(), SafetyTest.getInstance()].map(function (p) {
+            data = data || {plugins: [PrototypeBuilder.getInstance(), ModelEditor.getInstance(), 
+                                      Emulink.getInstance(), GraphBuilder.getInstance(), SafetyTest.getInstance()].map(function (p) {
                 return {label: p.constructor.name, plugin: p};
             })};
             PluginManager.getInstance().init();
+            PluginManager.getInstance().addListener("PluginEnabled", function (event) {
+                d3.select("#plugin_" + event.plugin.constructor.name).property("checked", true);
+            }).addListener("PluginDisabled", function (event) {
+                d3.select("#plugin_" + event.plugin.constructor.name).property("checked", false);
+            });
             if (this._view) { this.unload(); }
             this._view = createHtmlElements(data);
             return this._view;

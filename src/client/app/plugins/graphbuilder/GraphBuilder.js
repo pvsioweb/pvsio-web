@@ -121,7 +121,7 @@ define(function (require, exports, module) {
 	}
 	
     GraphBuilder.prototype.reInitialise = function () {
-        clear();
+        this.unload();
         init();
     };
     

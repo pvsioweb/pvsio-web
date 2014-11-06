@@ -227,22 +227,22 @@
     var winH = window.innerHeight || Math.max(document.body.offsetHeight, document.documentElement.offsetHeight);
     (completion.options.container || document.body).appendChild(hints);
     var box = hints.getBoundingClientRect(), overlapY = box.bottom - winH;
-    if (overlapY > 0) {
-      var height = box.bottom - box.top, curTop = box.top - (pos.bottom - pos.top);
-      if (curTop - height > 0) { // Fits above cursor
-        hints.style.top = (top = curTop - height) + "px";
-        below = false;
-      } else if (height > winH) {
-        hints.style.height = (winH - 5) + "px";
-        hints.style.top = (top = pos.bottom - box.top) + "px";
-        var cursor = cm.getCursor();
-        if (data.from.ch != cursor.ch) {
-          pos = cm.cursorCoords(cursor);
-          hints.style.left = (left = pos.left) + "px";
-          box = hints.getBoundingClientRect();
-        }
-      }
-    }
+//    if (overlapY > 0) {
+//      var height = box.bottom - box.top, curTop = box.top - (pos.bottom - pos.top);
+//      if (curTop - height > 0) { // Fits above cursor
+//        hints.style.top = (top = curTop - height) + "px";
+//        below = false;
+//      } else if (height > winH) {
+//        hints.style.height = (winH - 5) + "px";
+//        hints.style.top = (top = pos.bottom - box.top) + "px";
+//        var cursor = cm.getCursor();
+//        if (data.from.ch != cursor.ch) {
+//          pos = cm.cursorCoords(cursor);
+//          hints.style.left = (left = pos.left) + "px";
+//          box = hints.getBoundingClientRect();
+//        }
+//      }
+//    }
     var overlapX = box.left - winW;
     if (overlapX > 0) {
       if (box.right - box.left > winW) {

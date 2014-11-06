@@ -11,8 +11,8 @@
 				<a class="btn" id="btnLoadPicture"><span class="glyphicon glyphicon-picture"></span> Change Picture</a>
 				<input type="file" class="hide" id="btnSelectPicture" name="selectPicture" accept="image/*">
 				<a class="btn" id="btnSaveProject"><span class="glyphicon glyphicon-floppy-save"></span> Save Project</a>
-				<a id="lblWebSocketStatus" class="btn status">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
-				<a id="lblPVSioStatus" class="btn status">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
+				<a id="lblWebSocketStatus" class="btn status" style="cursor:default">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
+				<a id="lblPVSioStatus" class="btn status" style="cursor:default">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
 
 			</div>
 		</div>
@@ -21,29 +21,7 @@
 		<div class="ljs-hcontent">
 		
 			<div id="body">
-				<div class="ljs-left" id="builder-controls">
-					<div id="widgetsList" class="disable-text-select">
-
-					</div>
-				</div>
-				<div class="ljs-hcontent">
-					<div id="controlsContainer">
-						<ul class="nav nav-tabs" role="tablist">
-							<li id="btnBuilderView" class="active"><a href="#" >Builder View</a></li>
-							<li id="btnSimulatorView"><a href="#" >Simulator View</a></li>
-						</ul>
-					</div>
-					<div id="imageDiv" class="center">
-						<span id="record" class="glyphicon glyphicon-record"> Record</span>
-						<span id="play" class="glyphicon glyphicon-play"> Play</span>
-						<div id="imageDragAndDrop" class="dndcontainer">
-							<span class="center">Drag  user interface picture here or if you prefer, use the button below</span>
-							<br/>
-							<button class="btn btn-primary center" id='btnLoadPicture'> Load Picture</button>
-						</div>
-						<img src="" usemap="#prototypeMap" />
-					</div>				
-				</div>
+				
 			</div>
 		</div>
 		<div id="rightPanel" class="ljs-right">
@@ -52,8 +30,8 @@
 				<ul>
 					{{#each plugins}}
 					<li class="list-group-item">
-						<input type="checkbox" name="{{label}}" id="plugin_{{label}}">
-						<span>{{label}}</span>
+						<input type="checkbox" name="{{label}}" id="plugin_{{label}}" style="cursor:pointer">
+						<label for="plugin_{{label}}" style="cursor:pointer">{{label}}</label>
 					</li>
 					{{/each}}
 				</ul>

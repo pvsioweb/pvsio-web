@@ -96,21 +96,51 @@ define(function (require, exports, module) {
 			widget = this,
 			f,
 			events;
+        var press_events = 0;
+        
+        // this proxy function is used to create an interlocking mechanism to ensure that
+        // all press commands sent to pvsio are actually executed before executing a release command
+        var proxy = function (cb) {
+            if (typeof cb === "function") {
+                return function(err, res) {
+                    press_events--;
+                    if (press_events === 0) {
+                        return cb(err, res);
+                    }
+                }
+            }
+        };
 		var onmouseup = function () {
 			var f = widget.functionText();
-			if (events && events.indexOf('press/release') > -1) {
-				//if we've just clicked very quickly wait before sending the release action
-				if (btnTimer.getCurrentCount() === 0) {
-					setTimeout(function () {
-						ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
-					}, 100);
-				} else {
-					ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
-				}
-				Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "release", ts: new Date().getTime()});
-			}
-			mouseup(d3.event);
-			area.on("mouseup", null);
+            if (events && events.indexOf('press/release') > -1) {
+                if (press_events === 0) {
+                    ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
+                    Recorder.addAction({
+                        id: widget.id(),
+                        functionText: widget.functionText(),
+                        action: "release",
+                        ts: new Date().getTime()
+                    });
+                } else {
+                    console.log("Warning: button clicks are too fast!");
+                    ws.sendGuiAction("release_" + f + "(press_" + f + "(" +
+                                     ws.lastState().toString().replace(/,,/g, ',') + "));", callback);
+                    Recorder.addAction({
+                        id: widget.id(),
+                        functionText: widget.functionText(),
+                        action: "press",
+                        ts: new Date().getTime()
+                    });                    
+                    Recorder.addAction({
+                        id: widget.id(),
+                        functionText: widget.functionText(),
+                        action: "release",
+                        ts: new Date().getTime()
+                    });                    
+                }
+            }
+            mouseup(d3.event);
+            area.on("mouseup", null);
 		};
         area.on("mousedown", function () {
 			f = widget.functionText();
@@ -121,9 +151,12 @@ define(function (require, exports, module) {
                 //record action 
                 Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "click", ts: new Date().getTime()});
 			} else if (events && events.indexOf("press/release") > -1) {
-				ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
+                //cb = callback;
+				ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", proxy(callback));
+                press_events++;
 				timerTickFunction = function () {
-					ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
+                    press_events++;
+					ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", proxy(callback));
 					//record action
 					Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
 				};

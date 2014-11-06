@@ -13,6 +13,7 @@ define(function (require, exports, module) {
 		Logger         = require("util/Logger"),
         ui             = require("plugins/prototypebuilder/interface"),
 		PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
+        ModelEditor = require("plugins/modelEditor/ModelEditor"),
         Emulink        = require("plugins/emulink/Emulink"),
 		SafetyTest		= require("plugins/safetyTest/SafetyTest"),
 		GraphBuilder   = require("plugins/graphbuilder/GraphBuilder"),
@@ -49,7 +50,14 @@ define(function (require, exports, module) {
 							case "SafetyTest":
 								plugin = SafetyTest.getInstance();
 								break;
+                            case "ModelEditor":
+                                plugin = ModelEditor.getInstance();    
+                                break;
+                            case "PrototypeBuilder":
+                                plugin = PrototypeBuilder.getInstance();
+                                break;
 							}
+                        
 
 							if (event.target.checked) {
 								pm.enablePlugin(plugin);
@@ -58,14 +66,16 @@ define(function (require, exports, module) {
 							}
 						});
 					pb = PrototypeBuilder.getInstance();
-					return pm.enablePlugin(pb).then(function () {
+					return pm.enablePlugin(pb)
+                    .then(function () {
+                        return pm.enablePlugin(ModelEditor.getInstance());    
+                    })
+                    .then(function () {
 						var projectManager = pb.getProjectManager();
 						ui.bindListeners(pb.getProjectManager());
 						return new Promise(function (resolve, reject) {
 							// create and default initial empty project containing an empty file (main.pvs)
 							projectManager.createDefaultProject(function (err, res) {
-								d3.select("#project-notification-area").insert("p", "p").html("PVSio-web Ready!");
-								d3.select("#editor-notification-area").insert("p", "p").html("PVS Editor Ready!");
 								//layout the sourcecode and files
 								layoutjs({el: "#sourcecode-editor-wrapper"});
 								if (err) { reject(err); }
