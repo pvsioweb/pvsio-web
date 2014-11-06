@@ -401,6 +401,11 @@ div.detailsForm select, div.detailsForm textarea{
 	overflow-y: auto;
 	overflow-x: hidden;
 }
+
+.overlay .panel-heading {
+    cursor: move;
+    
+}
 .scrollable-dialog .thumbnail {
 	text-align: center;
 }

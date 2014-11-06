@@ -3,18 +3,15 @@
  * @author Patrick Oladimeji
  * @date Dec 29, 2013 : 23:23:48
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 /*global define, d3, require, $, Handlebars, Backbone, self*/
 define(function (require, exports, module) {
 	"use strict";
 	var d3						= require("d3/d3"),
+        BaseDialog              = require("pvsioweb/forms/BaseDialog"),
 		template				= require("text!./saveChanges.handlebars");
 	
-	var SaveProjectChangesView = Backbone.View.extend({
-		initialize: function (data) {
-			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
-			this.render(data);
-		},
+	var SaveProjectChangesView = BaseDialog.extend({
 		render: function (data) {
 			var t = Handlebars.compile(template);
 			this.$el.html(t(data));
