@@ -8,7 +8,7 @@
 define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
-        formTemplate = require("text!./templates/displayAddVariable.handlebars"),
+        formTemplate = require("text!./templates/displayEditVariable.handlebars"),
         FormUtils = require("./FormUtils");
     
     var AddVariableView = Backbone.View.extend({

@@ -1782,6 +1782,26 @@ define(function (require, exports, module) {
     };
     
     /**
+	 * Interface function for deleting a constant
+     * @param constantID is the unique constant identifier
+     * @returns true if constant removed successfully; otherwise returns false     
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.delete_constant = function (constantID) {
+        return this.emucharts.remove_constant(constantID);
+    };
+    
+    /**
+	 * Interface function for deleting a variable
+     * @param variableID is the unique variable identifier
+     * @returns true if variable removed successfully; otherwise returns false     
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.delete_variable = function (variableID) {
+        return this.emucharts.remove_variable(variableID);
+    };
+
+    /**
 	 * Interface function for adding transitions
 	 * @memberof EmuchartsEditor
 	 */
@@ -1839,6 +1859,22 @@ define(function (require, exports, module) {
 	 */
     EmuchartsEditor.prototype.add_variable = function (newVariable) {
         return this.emucharts.add_variable(newVariable);
+    };
+
+    /**
+	 * Interface function for editing constants
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.rename_constant = function (constantID, newData) {
+        return this.emucharts.rename_constant(constantID, newData);
+    };
+
+    /**
+	 * Interface function for editing state variables
+	 * @memberof EmuchartsEditor
+	 */
+    EmuchartsEditor.prototype.rename_variable = function (variableID, newData) {
+        return this.emucharts.rename_variable(variableID, newData);
     };
 
     /**

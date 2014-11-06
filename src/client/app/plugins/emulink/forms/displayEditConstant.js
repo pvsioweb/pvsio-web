@@ -8,10 +8,10 @@
 define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
-        formTemplate = require("text!./templates/displayAddVariable.handlebars"),
+        formTemplate = require("text!./templates/displayEditConstant.handlebars"),
         FormUtils = require("./FormUtils");
     
-    var AddVariableView = Backbone.View.extend({
+    var EditConstantView = Backbone.View.extend({
         initialize: function (data) {
             d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
             this.render(data);
@@ -21,7 +21,7 @@ define(function (require, exports, module) {
             var template = Handlebars.compile(formTemplate);
             this.$el.html(template(data));
             $("body").append(this.el);
-            d3.select(this.el).select("#newVariableName").node().focus();
+            d3.select(this.el).select("#newConstantName").node().focus();
             return this;
         },
         events: {
@@ -31,7 +31,7 @@ define(function (require, exports, module) {
 		right: function (event) {
 			var form = this.el;
 			if (FormUtils.validateForm(form)) {
-                var selectors = [ "newVariableName", "newVariableType", "newVariableScope" ];
+                var selectors = [ "newConstantName", "newConstantType", "newConstantValue" ];
 				var formdata = FormUtils.serializeForm(form, selectors);
 				this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
                              {data: formdata, el: this.el}, this);
@@ -50,7 +50,7 @@ define(function (require, exports, module) {
          * }
          */
         create: function (data) {
-            return new AddVariableView(data);
+            return new EditConstantView(data);
         }
     };
 });

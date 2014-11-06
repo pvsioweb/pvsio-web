@@ -33,7 +33,8 @@ define(function (require, exports, module) {
 			if (FormUtils.validateForm(form)) {
                 var selectors = [ "newConstantName", "newConstantType", "newConstantValue" ];
 				var formdata = FormUtils.serializeForm(form, selectors);
-				this.trigger(this._data.buttons[1].toLowerCase(), {data: formdata, el: this.el}, this);
+				this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
+                             {data: formdata, el: this.el}, this);
 			}
 		},
 		left: function (event) {

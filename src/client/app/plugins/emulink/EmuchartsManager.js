@@ -422,6 +422,26 @@ define(function (require, exports, module) {
     };
 
     /**
+	 * Interface function for deleting a constant
+     * @param constantID is the unique constant identifier
+     * @returns true if constant removed successfully; otherwise returns false     
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.delete_constant = function (constantID) {
+        return _selectedEditor.delete_constant(constantID);
+    };
+    
+    /**
+	 * Interface function for deleting a variable
+     * @param variableID is the unique variable identifier
+     * @returns true if variable removed successfully; otherwise returns false     
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.delete_variable = function (variableID) {
+        return _selectedEditor.delete_variable(variableID);
+    };
+
+    /**
 	 * Interface function for deleting initial transitions
 	 * @memberof EmuchartsManager
 	 */
@@ -530,6 +550,29 @@ define(function (require, exports, module) {
         return _selectedEditor.rename_state(stateID, newLabel);
     };
     
+    /**
+	 * Interface function for renaming (i.e., editing) a constant
+     * @param constantID is the unique constant identifier
+     * @param newData is a record containing fields { type: (string), name: (string), value: (string) }
+     *              (field value is optional)
+     * @returns true if variable renamed successfully; otherwise returns false
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.rename_constant = function (constantID, newData) {
+        return _selectedEditor.rename_constant(constantID, newData);
+    };
+
+    /**
+	 * Interface function for renaming (i.e., editing) a state variable
+     * @param variableID is the unique variable identifier
+     * @param newData is a record containing fields { type: (string), name: (string), scope: (string) }
+     * @returns true if variable renamed successfully; otherwise returns false
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.rename_variable = function (variableID, newData) {
+        return _selectedEditor.rename_variable(variableID, newData);
+    };
+
     /**
 	 * Interface function for adding constants
 	 * @memberof EmuchartsManager
