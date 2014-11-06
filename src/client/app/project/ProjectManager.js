@@ -373,12 +373,13 @@ define(function (require, exports, module) {
 	};
 	/**
 		Removes the specified file from the list of project files and deletes the file from disk
-		@param {ProjectFile} f the file to remove
+		@param {ProjectFile|string} f the file to remove or the path to the file to remove
 		@returns {Promise} a promise that resolves with the deleted file or an error
 	*/
 	ProjectManager.prototype.removeFile = function (f) {
 		var ws = WSManager.getWebSocket(), notification;
 		var project = this.project();
+        f = typeof f === "string" ? project.getProjectFile(f) : f;
 		return new Promise(function (resolve, reject) {
 			ws.send({type: "deleteFile", filePath: f.path()}, function (err) {
 				if (!err) {
@@ -703,11 +704,13 @@ define(function (require, exports, module) {
     
     	
     /**
-     * checks if file pf already exists in the project
+     * checks if a file with the same path as pf already exists in the project
+     * @param {ProjectFile|String} pf the path to a projectfile or the projectfile to check for existence
      * returns true if pf exists, otherwise returns false
      */
     ProjectManager.prototype.fileExists = function (pf) {
-       return this.project().fileExists(pf.path());
+        var path = typeof pf === "string" ? pf : pf.path();
+        return this.project().fileExists(path);
     };
 
     /**
