@@ -259,7 +259,9 @@ define(function (require, exports, module) {
 		var ws = WSManager.getWebSocket();
         callback = callback || noop;
         //open selected project
-        ws.send({type: "openProject", name: projectName}, function (err, res) {
+        ws.addListener("FileSystemUpdate", function (event) {
+            console.log(event);
+        }).send({type: "openProject", name: projectName}, function (err, res) {
             if (!err) {
                 ScriptPlayer.clearView();
                 var p = initFromJSON(res.project);

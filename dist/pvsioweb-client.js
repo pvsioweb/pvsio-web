@@ -624,6 +624,8 @@ define('websockets/wsClient',['require','exports','module','util/property','util
                         var token = JSON.parse(event.data);
                         //if token has an id check if there is a function to be called in the registry
                         if (token.id && typeof callbackRegistry[token.id] === "function") {
+							var time = new Date().getTime() - token.sent;
+							console.log("Time to response -- " + (time));
                             var f = callbackRegistry[token.id];
                             delete callbackRegistry[token.id];
                             f.call(o, token.err, token);
@@ -665,17 +667,290 @@ define('websockets/wsClient',['require','exports','module','util/property','util
     };
 });
 /**
+ * Handles logging functionality for the project
+ * @author Patrick Oladimeji
+ * @date 11/15/13 15:26:47 PM
+ */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*global define, d3, document */
+define('util/Logger',['require','exports','module'],function (require, exports, module) {
+	
+    /**
+     * log the message
+        @private
+     */
+    function log(msg) {
+        console.log(msg);
+        d3.select("#console").insert('p', 'p').html(typeof msg === "object" ? msg.toString() : msg);
+    }
+
+	function error(msg) {
+		console.error(msg);
+	}
+    /**
+     * dealing with logging input and output of pvs
+     * @private
+     */
+    function console_log(msg) {
+        console.log(msg);
+        var c = document.getElementById('console_log');
+        c.innerHTML = msg + "<br>" + c.innerHTML;
+    }
+
+    function pvsio_commands_log(msg) {
+        console.log(msg);
+        var c = document.getElementById('pvsio_commands_log');
+        c.innerHTML = msg + "<br>" + c.innerHTML;
+    }
+
+    function pvsio_response_log(msg) {
+        console.log(msg);
+        var c = document.getElementById('pvsio_response_log');
+        c.innerHTML = msg + "<br>" + c.innerHTML;
+    }
+
+    function specification_log(msg) {
+        console.log(msg);
+        var c = document.getElementById('specification_log');
+        c.innerHTML = msg + "<br>" + c.innerHTML;
+    }
+    
+	module.exports = {
+		log: log,
+		error: error,
+		console_log: console_log,
+		pvsio_commands_log: pvsio_commands_log,
+		pvsio_response_log: pvsio_response_log,
+		specification_log: specification_log
+	};
+});
+
+/**
+ * Parses pvsio output string into a json object of key-value pairs. All non-object values (i.e. values which are themselves key value pairs) are strings.
+ * @author Patrick Oladimeji
+ * @date 3/17/14 14:06:02 PM
+ */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*global define, d3, require, $, brackets, window, MouseEvent */
+
+define('util/PVSioStateParser',['require','exports','module'],function (require, exports, module) {
+    
+    var groups = {
+        "(#": "#)",
+        "(": ")",
+        "(:": ":)",
+        "#)": "(#",
+        ")": "(",
+        ":)": "):"
+    };
+    /**
+        Matches an alphabetic character
+    */
+    function alpha(c) {
+        return (/[a-z]/i).test(c);
+    }
+
+    /** matches a numeric character */
+    function num(d) {
+        return (/[0-9]/).test(d);
+    }
+
+    /** matches a space character */
+    function space(s) {
+        return (/\s/).test(s);
+    }
+
+    /** matches a comma */
+    function comma(c) {
+        return (/\,/).test(c);
+    }
+
+    /** matches a word character */
+    function wordChar(c) {
+        return (/[\w]/).test(c);
+    }
+
+    /**
+        evaluates a numeric string represented as a fraction. If the string is not a fraction, it converts the string to a number. If the argument is not a string, then the argument is returned unchanged.
+    */
+    function evaluate(str) {
+        if (typeof str === "string") {
+            var args = str.split("/");
+            if (args.length === 2 && !isNaN(+args[0]) && !isNaN(+args[1])) {
+                return +args[0] / +args[1];
+            }
+            if (!isNaN(+str)) { return +str; }
+        }
+        return str;
+    }
+
+    /**
+        Reads the given string from the specified start position until the specified condition returns false or
+        the end of the string is reached.
+        @param {string} str the string the read
+        @param {Number} start the index of the string where reading should start
+        @param {function<ch, prevCh>} condition a function to be called on each character read from the string. This function's second parameter is the previous character read. The function should return false to stop the read process.
+        @return {string, number} An object representing the word consumed by the read process and the last index of the character read before the condition returned false or the end of the string was reached.
+    */
+    function readUntil(str, start, cond) {
+        var i = start,
+            word = "";
+        for (i = start; i < str.length; i++) {
+            if (!cond(str[i], str[i - 1])) {
+                return {
+                    word: word,
+                    index: i
+                };
+            } else {
+                word = word.concat(str[i]);
+            }
+        }
+        return {
+            word: word,
+            index: i
+        };
+    }
+
+    function isclosebr(s) {
+        return s.indexOf(")") >= 0;
+    }
+
+    function isopenbr(s) {
+        return s.indexOf("(") >= 0;
+    }
+
+    function wordBeforeEqual(ch, prev) {
+        return (prev + ch) !== ":=";
+    }
+    /**
+        Resolves the chain of properties represented as a dot-separated string on the state provided
+    */
+    function resolve(state, property) {
+        var pChain = property.split(".");
+        var obj = state;
+        pChain.forEach(function (key, index) {
+            obj = obj[key];
+        });
+        return obj;
+    }
+
+    /**
+        Parses a string value representing PVSio function output and returns a JSON object representing the same information.
+        "(", and "(:" designate the beginning of a list and are thus converted to arrays. "(#" designate the beginning of a 
+        key-value pair
+    */
+    function parseValue(value) {
+        var res;
+        var token = readUntil(value, 0, space), br = "(", close, subValue, stack, subbr, index, val;
+        if (value[token.index] === "(") {
+            br = br.concat(value[token.index + 1]);
+            close = groups[br];
+            if (close) {
+                stack = [];
+                subValue = readUntil(value, token.index + 2, function (ch, prev) {
+                    subbr = prev + ch;
+                    if (!groups[subbr]) {
+                        if (isopenbr(subbr)) {
+                            subbr = "(";
+                        } else if (isclosebr(subbr)) {
+                            subbr = ")";
+                        }
+                    }
+                    //check if the current br is open or close (if open push on stack if close compare to the top of the stack
+                    if (isopenbr(subbr) && groups[subbr]) {
+                        stack.push(groups[subbr]);
+                    } else if (isclosebr(subbr) && subbr === stack[stack.length - 1]) {
+                        stack.pop();
+                    }
+                    return !(stack.length === 0 && prev.concat(ch) === close);
+                });
+                subValue.index = subValue.index + 1;
+                if (br === "(#") { //we are reading key-value pairs
+                    index = 0;
+                    res = {};
+                    //while we can still find a comma after parsing a value,
+                    //parse the key and recursively call parseValue to parse the value
+                    do {
+                        var key = readUntil(subValue.word, index + 1, wordBeforeEqual);
+                        key.word = key.word.trim();
+                        key.word = key.word.substr(0, key.word.length - 1); //removing spaces and last char ":"
+                        key.index = key.index + 1;
+                        val = parseValue(subValue.word.substring(key.index));
+                        res[key.word] = val.value;
+                        index = (val.index + key.index);
+                    } while (subValue.word[index] === ",");
+
+                    return {
+                        value: res,
+                        index: subValue.index
+                    };
+                } else if (br === "(:") { //we are reading a list
+                    res = [];
+                    index = 0;
+                    do {
+                        val = parseValue(subValue.word.substring(index));
+                        res.push(val.value);
+                        index += val.index;
+                    } while (subValue.word[index++] === ",");
+                    return {
+                        value: res,
+                        index: subValue.index
+                    };
+                }
+
+            } else {
+                //just an open bracket -- they usually signify a list of some sort
+                subValue = readUntil(value, token.index + 1, function (ch, prev) {
+                    return ch !== ")";
+                });
+                //parse the list as an array separated by commas and return it
+                res = subValue.word.split(",").map(function (d) {
+                    return d.trim();
+                });
+                return {
+                    value: res,
+                    index: subValue.index
+                };
+            }
+        } else {
+            token = readUntil(value, token.index, function (ch, prev) {
+                return wordChar(ch, prev) || num(ch) || (/[\/\.\-\"\'\s\_\:]/).test(ch);
+            });
+            return {
+                value: token.word,
+                index: token.index
+            };
+        }
+    }
+
+    module.exports = {
+        parse: function (state) {
+            return parseValue(state).value;
+        },
+        evaluate: evaluate,
+        resolve: resolve,
+		isState: function (str) {
+			if (Array.isArray(str)) {
+				str = str.join("");
+			}
+			return str.trim().indexOf("(#") === 0;	
+		}
+    };
+});
+/**
  * wrapper around the generic websocket client specifically for pvsio websocket functions
  * @author Patrick Oladimeji
  * @date 6/4/13 21:58:31 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, Promise*/
-define('websockets/pvs/pvsWSClient',['require','exports','module','websockets/wsClient','util/eventDispatcher','util/property'],function (require, exports, module) {
+define('websockets/pvs/pvsWSClient',['require','exports','module','websockets/wsClient','util/eventDispatcher','util/property','util/Logger','util/PVSioStateParser'],function (require, exports, module) {
     
     var wsclient            = require("websockets/wsClient"),
         eventDispatcher     = require("util/eventDispatcher"),
         property            = require("util/property"),
+		Logger				= require("util/Logger"),
+		PVSioStateParser	= require("util/PVSioStateParser"),
         wsSingleton;
     
     function createWebSocket() {
@@ -751,7 +1026,7 @@ define('websockets/pvs/pvsWSClient',['require','exports','module','websockets/ws
         o.closePVSProcess = function (cb) {
             wscBase.send({type: "closeProcess"}, cb);
         };
-        
+       
         /**
             Sends a user interface command to be executed by the pvsio process. This method fires a "GraphUpdate" event whenever there is a response from the server due to the callback
             @param {string} action The action to send to the process
@@ -761,8 +1036,15 @@ define('websockets/pvs/pvsWSClient',['require','exports','module','websockets/ws
             wscBase.send({type: "sendCommand", data: {command: action}}, function (err, res) {
 				//do stuff to update the explored state graph and invoke the callback with the same parameters
 				wscBase.fire({type: "GraphUpdate", transition: action, target: res.data, source: o.lastState()});
-				//update the lastState 
-				o.lastState(res.data);
+				//update the lastState if it was a valid pvsio state
+				if (PVSioStateParser.isState(res.data)) {
+					o.lastState(res.data);
+				} else {
+					Logger.log("There might have been an attempt at invoking a non-existent pvs function " + action );
+					Logger.log(res.data);
+					//update res.data with previous valid state
+					res.data = o.lastState();
+				}
 				if (cb && typeof cb === "function") { cb(err, res); }
 			});
             wscBase.fire({type: "InputUpdated", data: action});
@@ -10219,21 +10501,26 @@ define('PVSioWebClient',['require','exports','module','websockets/pvs/pvsWSClien
 	
     /**
         Creates a collapsible panel on the client app
-        @param {?string} headerText The title text to use in the panel header
-		@param {boolean} showContent Whether the default initial state of the panel is open (showContent == true) or closed (showContent == true or undefined)
+		@param {object} options 
+			{
+			headerText: string to display in panel header
+			owner: <string> the name of the plugin that owns the panel
+			onClick: function - handler to invoke when the panel is toggled
+			showContent: Whether the default initial state of the panel is open (showContent == true) or closed (showContent == true or undefined)
+			parent: the html element selector for the parent i.e., where the panel should be created
+			}
         @returns {d3.selection} The div created
     */
 	PVSioWeb.prototype.createCollapsiblePanel = function (options) {
 		options = options || {};
-
-		var div = d3.select("#content").append("div").attr("class", "collapsible-panel-parent");
+		options.parent = options.parent || "#content .content-body .ljs-hcontent";
+		var div = d3.select(options.parent).append("div").attr("class", "collapsible-panel-parent");
 		var header = div.append("div").classed("header", true);
 		var content = div.append("div").attr("class", "collapsible-panel");
 		
 		header.append("span")
 			.attr("class", function () {
-				return options.showContent === true ?
-					"toggle-collapse glyphicon glyphicon-minus-sign" :
+				return options.showContent === true ? "toggle-collapse glyphicon glyphicon-minus-sign" :
 						"toggle-collapse glyphicon glyphicon-plus-sign";
             })
 			.on("click", function () {
@@ -10247,7 +10534,7 @@ define('PVSioWebClient',['require','exports','module','websockets/pvs/pvsWSClien
                 }
                 if (options.onClick && typeof options.onClick === "function") {
                     options.onClick();
-                }                
+                }
             });
 		if (options.owner) {
 			div.attr("plugin-owner", options.owner);

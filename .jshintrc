@@ -7,5 +7,5 @@
     "devel": true,
     "browser": true,
     "laxbreak": true,
-    "globals": ["Promise", "require"]
+    "globals": ["require"]
 }

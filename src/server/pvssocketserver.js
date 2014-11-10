@@ -47,13 +47,14 @@ function run() {
         baseProjectDir          = path.join(__dirname, "../../examples/projects/"),
 		baseDemosDir			= path.join(__dirname, "../../examples/demos/"),
 		clientDir				= path.join(__dirname, "../client");
-    var p, clientid = 0, WebSocketServer = ws.Server;
+    var p, clientid = 0, WebSocketServer = ws.Server, projectFolderWatcher;
 	var writeFile = serverFuncs.writeFile,
 		stat = serverFuncs.stat,
 		renameFile = serverFuncs.renameFile,
 		createProject = serverFuncs.createProject,
 		openProject = serverFuncs.openProject,
-		listProjects = serverFuncs.listProjects;
+		listProjects = serverFuncs.listProjects,
+        readFile = serverFuncs.readFile;
 
     /**
      * Utility function that dispatches responses to websocket clients
@@ -130,6 +131,29 @@ function run() {
         });
     }
     
+    function registerFolderWatcher(folderPath, socket) {
+        if (projectFolderWatcher) {
+            projectFolderWatcher.close();   
+        }
+        logger.debug("watching .. " + folderPath);
+        projectFolderWatcher = fs.watch(folderPath, function (event, fileName) {
+            logger.debug(event);
+            logger.debug(fileName);
+            var token = {type: "FileSystemUpdate", event: event, fileName: fileName};
+            if (fileName) {
+                readFile(path.join(folderPath,fileName)).then(function (content) {
+                    token.fileContent = content;
+                    socket.send(JSON.stringify(token));
+                }).catch(function (err) {
+                    token.err = err;
+                    socket.send(JSON.stringify(token));
+                });
+            } else {
+                socket.send(JSON.stringify(token));
+            }
+        });
+    }
+
     /**
         get function maps for client sockets
     */
@@ -214,6 +238,7 @@ function run() {
                     .then(function (data) {
                         res.project = data;
                         processCallback(res, socket);
+                        registerFolderWatcher(path.join(baseProjectDir, token.name), socket);
                     }, function (err) {
                         res.err = err;
                         processCallback(res, socket);
