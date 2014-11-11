@@ -59,10 +59,14 @@ define(function (require, exports, module) {
     EmuchartsManager.prototype.newEmucharts = function (emuchartsName) {
         var _this = this;
         if (emuchartsName) {
-            // create a new empty map for nodes and edges
-            var chart = { nodes: d3.map(), edges: d3.map(), initial_edges: d3.map() };
-            // create an editor for the new chart
-            var emucharts = new Emucharts(chart.nodes, chart.edges, chart.initial_edges);
+            // create an editor for an empty chart
+            var emucharts = new Emucharts({
+                nodes: d3.map(),
+                edges: d3.map(),
+                initial_edges: d3.map(),
+                variables: d3.map(),
+                constants: d3.map()
+            });
             var newEmuchartsEditor = new EmuchartsEditor(emucharts);
             this.installHandlers(newEmuchartsEditor);
             _emuchartsEditors.set(name, newEmuchartsEditor);
@@ -128,17 +132,23 @@ define(function (require, exports, module) {
                         }
                         if (chart_reader.variables) {
                             chart_reader.variables.forEach(function (variable) {
-                                chart.variables.set(variable.name, variable);
+                                chart.variables.set(variable.id, variable);
                             });
                         }
                         if (chart_reader.constants) {
                             chart_reader.constants.forEach(function (constant) {
-                                chart.constants.set(constant.name, constant);
+                                chart.constants.set(constant.id, constant);
                             });
                         }
                         // associate an editor to the created emuchart
                         // FIXME: Improve the constructor and this importEmuchart function
-                        var emucharts = new Emucharts(chart.nodes, chart.edges, chart.initial_edges);
+                        var emucharts = new Emucharts({
+                            nodes:  chart.nodes,
+                            edges: chart.edges,
+                            initial_edges: chart.initial_edges,
+                            variables: chart.variables,
+                            constants: chart.constants
+                        });
                         var newEmuchartsEditor = new EmuchartsEditor(emucharts);
                         _this.installHandlers(newEmuchartsEditor);
                         _emuchartsEditors.set(emuchartsFile.fileContent.descriptor.chart_name, newEmuchartsEditor);
@@ -160,7 +170,11 @@ define(function (require, exports, module) {
                                 chart.initial_edges.set(initial_edge.id, initial_edge);
                             });
                         // associate an editor to the created emuchart
-                        var emucharts = new Emucharts(chart.nodes, chart.edges, chart.initial_edges);
+                        var emucharts = new Emucharts({
+                            nodes: chart.nodes,
+                            edges: chart.edges,
+                            initial_edges: chart.initial_edges
+                        });
                         var newEmuchartsEditor = new EmuchartsEditor(emucharts);
                         _this.installHandlers(newEmuchartsEditor);
                         _emuchartsEditors.set(name, newEmuchartsEditor);
@@ -422,6 +436,26 @@ define(function (require, exports, module) {
     };
 
     /**
+	 * Interface function for deleting a constant
+     * @param constantID is the unique constant identifier
+     * @returns true if constant removed successfully; otherwise returns false     
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.delete_constant = function (constantID) {
+        return _selectedEditor.delete_constant(constantID);
+    };
+    
+    /**
+	 * Interface function for deleting a variable
+     * @param variableID is the unique variable identifier
+     * @returns true if variable removed successfully; otherwise returns false     
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.delete_variable = function (variableID) {
+        return _selectedEditor.delete_variable(variableID);
+    };
+
+    /**
 	 * Interface function for deleting initial transitions
 	 * @memberof EmuchartsManager
 	 */
@@ -530,6 +564,29 @@ define(function (require, exports, module) {
         return _selectedEditor.rename_state(stateID, newLabel);
     };
     
+    /**
+	 * Interface function for renaming (i.e., editing) a constant
+     * @param constantID is the unique constant identifier
+     * @param newData is a record containing fields { type: (string), name: (string), value: (string) }
+     *              (field value is optional)
+     * @returns true if variable renamed successfully; otherwise returns false
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.rename_constant = function (constantID, newData) {
+        return _selectedEditor.rename_constant(constantID, newData);
+    };
+
+    /**
+	 * Interface function for renaming (i.e., editing) a state variable
+     * @param variableID is the unique variable identifier
+     * @param newData is a record containing fields { type: (string), name: (string), scope: (string) }
+     * @returns true if variable renamed successfully; otherwise returns false
+	 * @memberof EmuchartsManager
+	 */
+    EmuchartsManager.prototype.rename_variable = function (variableID, newData) {
+        return _selectedEditor.rename_variable(variableID, newData);
+    };
+
     /**
 	 * Interface function for adding constants
 	 * @memberof EmuchartsManager

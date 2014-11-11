@@ -32,6 +32,14 @@ define(function (require, exports, module) {
     var nextConstantID = 0, nextVariableID = 0;
     var newConstantID = function () { return ++nextConstantID; };
     var newVariableID = function () { return ++nextVariableID; };
+    var createVariableID = function (variable) {
+        var id = "VAR_" + variable.name + ":" + variable.type + "(" + variable.scope + ")";
+        return id;
+    };
+    var createConstantID = function (constant) {
+        var id = "CONST_" + constant.name + ":" + constant.type;
+        return id;
+    };
     var getFreshConstantID = function () { return nextConstantID + 1; };
     var getFreshVariableID = function () { return nextVariableID + 1; };
     
@@ -39,21 +47,29 @@ define(function (require, exports, module) {
 	 * Constructor
 	 * @memberof Emucharts
 	 */
-    function Emucharts(nodes, edges, initial_edges) {
-        if (nodes) {
-            this.nodes = nodes;
-            nextNodeID = nodes.keys().length; // FIXME: this is fragile: we need to check the actual indexes
+    function Emucharts(emuchart) {
+        if (emuchart) {
+            this.nodes = emuchart.nodes || d3.map();
+            if (emuchart.nodes) {
+                nextNodeID = emuchart.nodes.keys().length; // FIXME: this is fragile: we need to check the actual indexes
+            }
+            this.edges = emuchart.edges || d3.map();
+            if (emuchart.edges) {
+                nextEdgeID = emuchart.edges.keys().length; // FIXME: this is fragile: we need to check the actual indexes
+            }
+            this.initial_edges = emuchart.initial_edges || d3.map();
+            if (emuchart.initial_edges) {
+                nextInitialEdgeID = emuchart.edges.keys().length;  // FIXME: this is fragile: we need to check the actual indexes
+            }
+            this.constants = emuchart.constants || d3.map();
+            this.variables = emuchart.variables || d3.map();
+        } else {
+            this.nodes = d3.map();
+            this.edges = d3.map();
+            this.initial_edges = d3.map();
+            this.variables = d3.map();
+            this.constants = d3.map();
         }
-        if (edges) {
-            this.edges = edges;
-            nextEdgeID = edges.keys().length; // FIXME: this is fragile: we need to check the actual indexes
-        }
-        if (initial_edges) {
-            this.initial_edges = initial_edges;
-            nextInitialEdgeID = edges.keys().length;  // FIXME: this is fragile: we need to check the actual indexes
-        }
-        this.constants = d3.map();
-        this.variables = d3.map();
 		eventDispatcher(this);
         return this;
     }
@@ -531,16 +547,25 @@ define(function (require, exports, module) {
      * @memberof Emucharts
 	 */
     Emucharts.prototype.add_constant = function (constant) {
-        this.constants.set(
-            constant.name,
-            { type: constant.type, value: constant.value }
-        );
+        // we use name and type as ID so that we automatically avoid duplicated constants
+        // (those three fields together identify constants uniquely)
+        // note: value can be undefined
+        var id = createConstantID(constant);
+        var newConstant = {
+            id: id,
+            name: constant.name,
+            type: constant.type,
+            value: constant.value
+        };
+        this.constants.set(id, newConstant);
         // fire event
         this.fire({
             type: "emuCharts_constantAdded",
             constant: {
-                name: name,
-                constant: constant
+                id: id,
+                name: constant.name,
+                type: constant.type,
+                value: constant.value
             }
         });
     };
@@ -550,14 +575,148 @@ define(function (require, exports, module) {
      * @memberof Emucharts
 	 */
     Emucharts.prototype.add_variable = function (variable) {
-        this.variables.set(variable.name, variable);
+        // we use name type and scope as ID so that we automatically avoid duplicated variables
+        // (those three fields together identify variables uniquely)
+        var id = createVariableID(variable);
+        var newVariable = {
+            id: id,
+            name: variable.name,
+            type: variable.type,
+            scope: variable.scope
+        };
+        this.variables.set(id, newVariable);
         // fire event
         this.fire({
             type: "emuCharts_variableAdded",
-            variable: variable
+            variable: {
+                id: id,
+                name: variable.name,
+                type: variable.type,
+                scope: variable.scope
+            }
         });
     };
+    
+    /**
+	 * Interface function for removing a constant
+     * @param constantID is the unique constant identifier
+     * @returns true if constant removed successfully; otherwise returns false     
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.remove_constant = function (constantID) {
+        var rem = this.constants.get(constantID);
+        if (rem && this.constants.remove(constantID)) {
+            // fire event
+            this.fire({
+                type: "emuCharts_constantRemoved",
+                constant: rem
+            });
+            return true;
+        }
+        return false;
+    };
+    
+    /**
+	 * Interface function for removing a state variable
+     * @param variableID is the unique variable identifier
+     * @returns true if variable removed successfully; otherwise returns false     
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.remove_variable = function (variableID) {
+        var rem = this.variables.get(variableID);
+        if (rem && this.variables.remove(variableID)) {
+            // fire event
+            this.fire({
+                type: "emuCharts_variableRemoved",
+                variable: rem
+            });
+            return true;
+        }
+        return false;
+    };
 
+    /**
+	 * Interface function for renaming (i.e., editing) a constant
+     * @param constantID is the unique constant identifier
+     * @param newData is a record containing fields { type: (string), name: (string), value: (string) }
+     *              (field value is optional)
+     * @returns true if variable renamed successfully; otherwise returns false
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.rename_constant = function (constantID, newData) {
+        var _this = this;
+        if (!constantID || !this.constants || !this.constants.get(constantID)) { return false; }
+        // get the constant, delete it from the constants list, 
+        // rename fields, and put it back in the constants list
+        var theConstant = this.constants.get(constantID);
+        this.constants.remove(constantID);
+        var newConstant = {
+            type: newData.type || theConstant.type,
+            name: newData.name || theConstant.name,
+            value: newData.value || theConstant.value
+        };
+        // update constantID
+        var newConstantID = createConstantID(newConstant);
+        newConstant.id = newConstantID;
+        this.constants.set(newConstantID, newConstant);
+        this.fire({
+            type: "emuCharts_constantRenamed",
+            pre: {
+                id: theConstant.id,
+                type: theConstant.type,
+                name: theConstant.name,
+                value: theConstant.value
+            },
+            post: {
+                id: newConstant.id,
+                type: newConstant.type,
+                name: newConstant.name,
+                value: newConstant.value
+            }
+        });
+        return true;
+    };
+    
+    /**
+	 * Interface function for renaming (i.e., editing) a state variable
+     * @param variableID is the unique variable identifier
+     * @param newData is a record containing fields { type: (string), name: (string), scope: (string) }
+     * @returns true if variable renamed successfully; otherwise returns false
+	 * @memberof Emucharts
+	 */
+    Emucharts.prototype.rename_variable = function (variableID, newData) {
+        var _this = this;
+        if (!variableID || !this.variables || !this.variables.get(variableID)) { return false; }
+        // get the varable, delete it from the variables list, 
+        // rename fields, and put it back in the variables list
+        var theVariable = this.variables.get(variableID);
+        this.variables.remove(variableID);
+        var newVariable = {
+            type: newData.type || theVariable.type,
+            name: newData.name || theVariable.name,
+            scope: newData.scope || theVariable.scope
+        };
+        // update variableID
+        var newVariableID = createVariableID(newVariable);
+        newVariable.id = newVariableID;
+        this.variables.set(newVariableID, newVariable);
+        this.fire({
+            type: "emuCharts_variableRenamed",
+            pre: {
+                id: theVariable.id,
+                type: theVariable.type,
+                name: theVariable.name,
+                scope: theVariable.scope
+            },
+            post: {
+                id: newVariable.id,
+                type: newVariable.type,
+                name: newVariable.name,
+                scope: newVariable.scope
+            }
+        });
+        return true;
+    };
     
     /**
 	 * Returns an array containing the current set of constants
@@ -566,12 +725,13 @@ define(function (require, exports, module) {
     Emucharts.prototype.getConstants = function () {
         var _this = this;
         var ans = [];
-        this.constants.forEach(function (c) {
-            var def = _this.constants.get(c);
+        this.constants.forEach(function (key) {
+            var c = _this.constants.get(key);
             ans.push({
-                name: c,
-                type: def.type,
-                value: def.value
+                id: c.id,
+                name: c.name,
+                type: c.type,
+                value: c.value
             });
         });
         return ans;
@@ -584,13 +744,14 @@ define(function (require, exports, module) {
     Emucharts.prototype.getVariables = function (scope) {
         var _this = this;
         var ans = [];
-        this.variables.forEach(function (v) {
-            var variable = _this.variables.get(v);
-            if (!scope || variable.scope === scope) {
+        this.variables.forEach(function (key) {
+            var v = _this.variables.get(key);
+            if (!scope || scope === v.scope) {
                 ans.push({
-                    name: v,
-                    type: variable.type,
-                    scope: variable.scope
+                    id: v.id,
+                    name: v.name,
+                    type: v.type,
+                    scope: v.scope
                 });
             }
         });

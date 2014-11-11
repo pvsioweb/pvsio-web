@@ -139,7 +139,7 @@ define(function (require, exports, module) {
                 var btn = d3.select("#btnTypeCheck").html("Compiling...").attr("disabled", true);
                 var ws = WSManager.getWebSocket();
                 // note: to get the path right, we need to remove the initial part of the path (i.e., the project name)
-                var fp = pvsFile.path().substring(pvsFile.path().indexOf("/") + 1);  
+                var fp = pvsFile.path().substring(pvsFile.path().indexOf("/") + 1);
                 ws.send({type: "typeCheck", filePath: fp},
                      function (err, res) {
                         btn.html("Compile").attr("disabled", null);

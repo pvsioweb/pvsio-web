@@ -19,19 +19,23 @@ define(function (require, exports, module) {
         PVSioWebClient      = require("PVSioWebClient"),
         EditorModeUtils     = require("plugins/emulink/EmuchartsEditorModes"),
         EmuchartsManager    = require("plugins/emulink/EmuchartsManager"),
-        displayAddState     = require("plugins/emulink/forms/displayAddState"),
-        displayAddTransition = require("plugins/emulink/forms/displayAddTransition"),
-        displayRename        = require("plugins/emulink/forms/displayRename"),
-        displayDelete        = require("plugins/emulink/forms/displayDelete"),
-        displayAddExpression = require("plugins/emulink/forms/displayAddExpression"),
-        displayAddVariable = require("plugins/emulink/forms/displayAddVariable"),
-        displayAddConstant = require("plugins/emulink/forms/displayAddConstant"),
-        QuestionForm         = require("pvsioweb/forms/displayQuestion"),
-        EmuchartsPVSPrinter   = require("plugins/emulink/EmuchartsPVSPrinter"),
-        EmuchartsLustrePrinter   = require("plugins/emulink/EmuchartsLustrePrinter"),
-        EmuchartsPIMPrinter   = require("plugins/emulink/EmuchartsPIMPrinter"),
-        EmuchartsCppPrinter   = require("plugins/emulink/EmuchartsCppPrinter"),
-        EmuchartsMALPrinter   = require("plugins/emulink/EmuchartsMALPrinter"),
+        displayAddState        = require("plugins/emulink/forms/displayAddState"),
+        displayAddTransition   = require("plugins/emulink/forms/displayAddTransition"),
+        displayRename          = require("plugins/emulink/forms/displayRename"),
+        displayDelete          = require("plugins/emulink/forms/displayDelete"),
+        displayAddExpression   = require("plugins/emulink/forms/displayAddExpression"),
+        displayAddVariable     = require("plugins/emulink/forms/displayAddVariable"),
+        displayEditVariable    = require("plugins/emulink/forms/displayEditVariable"),
+        displaySelectVariable  = require("plugins/emulink/forms/displaySelectVariable"),
+        displayAddConstant     = require("plugins/emulink/forms/displayAddConstant"),
+        displayEditConstant    = require("plugins/emulink/forms/displayEditConstant"),
+        displaySelectConstant  = require("plugins/emulink/forms/displaySelectConstant"),
+        QuestionForm           = require("pvsioweb/forms/displayQuestion"),
+        EmuchartsPVSPrinter    = require("plugins/emulink/EmuchartsPVSPrinter"),
+        EmuchartsLustrePrinter = require("plugins/emulink/EmuchartsLustrePrinter"),
+        EmuchartsPIMPrinter    = require("plugins/emulink/EmuchartsPIMPrinter"),
+        EmuchartsCppPrinter    = require("plugins/emulink/EmuchartsCppPrinter"),
+        EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter"),
         fs = require("util/fileHandler");
     
     var instance;
@@ -888,7 +892,8 @@ define(function (require, exports, module) {
                 },
                 scopeOptions: scopeOptions,
                 buttons: ["Cancel", "Create variable"]
-            }).on("create variable", function (e, view) {
+            }).on("create_variable", function (e, view) {
+                console.log("add variable");
                 var newVariableName = e.data.labels.get("newVariableName");
                 var newVariableType = e.data.labels.get("newVariableType");
                 var newVariableScope = scopeOptions[e.data.options.get("newVariableScope")];
@@ -906,6 +911,108 @@ define(function (require, exports, module) {
                 view.remove();
             });
         });
+        d3.select("#btn_menuEditVariable").on("click", function () {
+            var editVariable = function (theVariable) {
+                var variableScopes = emuchartsManager.getVariableScopes();
+                var scopeOptions = [];
+                variableScopes.forEach(function (option) {
+                    if (option === theVariable.scope) {
+                        scopeOptions.push({ value: option, selected: true});
+                    } else {
+                        scopeOptions.push({ value: option, selected: false});
+                    }
+                });
+                displayEditVariable.create({
+                    header: "Editing variable " + theVariable.name,
+                    textLabel: {
+                        newVariableName: "Variable name",
+                        newVariableType: "Variable type",
+                        newVariableScope: "Variable scope"
+                    },
+                    placeholder: {
+                        newVariableName: theVariable.name,
+                        newVariableType: theVariable.type,
+                        newVariableScope: theVariable.scope
+                    },
+                    scopeOptions: scopeOptions,
+                    buttons: ["Cancel", "Ok"]
+                }).on("ok", function (e, view) {
+                    var newVariableName = e.data.labels.get("newVariableName");
+                    var newVariableType = e.data.labels.get("newVariableType");
+                    var newVariableScope = variableScopes[e.data.options.get("newVariableScope")];
+                    if (newVariableName && newVariableName.value !== ""
+                            && newVariableType && newVariableType.value !== "") {
+                        emuchartsManager.rename_variable(
+                            theVariable.id,
+                            {   name: newVariableName,
+                                type: newVariableType,
+                                scope: newVariableScope   }
+                        );
+                        view.remove();
+                    }
+                }).on("cancel", function (e, view) {
+                    // just remove window
+                    view.remove();
+                });
+            };
+
+            document.getElementById("menuContext").children[1].style.display = "none";
+            // step 1: ask to select the variable that needs to be edited
+            var stateVariables = emuchartsManager.getVariables();
+            var labels = [];
+            var variables = [];
+            stateVariables.forEach(function (variable) {
+                labels.push(variable.name + ": " + variable.type + " (" + variable.scope + ")");
+                variables.push(variable);
+            });
+            displaySelectVariable.create({
+                header: "Edit state variable",
+                message: "Please select a state variable",
+                variables: labels,
+                buttons: ["Cancel", "Select"]
+            }).on("select", function (e, view) {
+                if (variables.length > 0) {
+                    var v = e.data.options.get("selectedVariable");
+                    var theVariable = variables[v];
+                    view.remove();
+                    editVariable(theVariable);
+                }
+            }).on("cancel", function (e, view) {
+                // just remove window
+                view.remove();
+                return;
+            });
+        });
+
+        d3.select("#btn_menuDeleteVariable").on("click", function () {
+            document.getElementById("menuContext").children[1].style.display = "none";
+            // step 1: ask to select the variable that needs to be edited
+            var stateVariables = emuchartsManager.getVariables();
+            var labels = [];
+            var variables = [];
+            stateVariables.forEach(function (variable) {
+                labels.push(variable.name + ": " + variable.type + " (" + variable.scope + ")");
+                variables.push(variable);
+            });
+            displaySelectVariable.create({
+                header: "Delete state variable",
+                message: "Please select a state variable",
+                variables: labels,
+                buttons: ["Cancel", "Delete Variable"]
+            }).on("delete_variable", function (e, view) {
+                if (variables.length > 0) {
+                    var v = e.data.options.get("selectedVariable");
+                    var theVariable = variables[v];
+                    view.remove();
+                    emuchartsManager.delete_variable(theVariable.id);
+                }
+            }).on("cancel", function (e, view) {
+                // just remove window
+                view.remove();
+                return;
+            });
+        });
+        
         d3.select("#btn_menuNewConstant").on("click", function () {
             document.getElementById("menuContext").children[1].style.display = "none";
             displayAddConstant.create({
@@ -921,7 +1028,7 @@ define(function (require, exports, module) {
                     newConstantValue: "Value, e.g., 1200"
                 },
                 buttons: ["Cancel", "Create constant"]
-            }).on("create constant", function (e, view) {
+            }).on("create_constant", function (e, view) {
                 var newConstantName = e.data.labels.get("newConstantName");
                 var newConstantType = e.data.labels.get("newConstantType");
                 var newConstantValue = e.data.labels.get("newConstantValue");
@@ -937,6 +1044,104 @@ define(function (require, exports, module) {
             }).on("cancel", function (e, view) {
                 // just remove window
                 view.remove();
+            });
+        });
+
+        d3.select("#btn_menuEditConstant").on("click", function () {
+            var editConstant = function (theConstant) {
+                displayEditConstant.create({
+                    header: "Editing constant " + theConstant.name,
+                    textLabel: {
+                        newConstantName: "Constant name",
+                        newConstantType: "Constant type",
+                        newConstantValue: "Constant value"
+                    },
+                    placeholder: {
+                        newConstantName: theConstant.name,
+                        newConstantType: theConstant.type,
+                        newConstantValue: theConstant.value
+                    },
+                    buttons: ["Cancel", "Ok"]
+                }).on("ok", function (e, view) {
+                    var newConstantName = e.data.labels.get("newConstantName");
+                    var newConstantType = e.data.labels.get("newConstantType");
+                    var newConstantValue = e.data.labels.get("newConstantValue");
+                    if (newConstantName && newConstantName.value !== ""
+                            && newConstantType && newConstantType.value !== "") {
+                        emuchartsManager.rename_constant(
+                            theConstant.id,
+                            {   name: newConstantName,
+                                type: newConstantType,
+                                value: newConstantValue   }
+                        );
+                        view.remove();
+                    }
+                }).on("cancel", function (e, view) {
+                    // just remove window
+                    view.remove();
+                });
+            };
+
+            document.getElementById("menuContext").children[1].style.display = "none";
+            // step 1: ask to select the variable that needs to be edited
+            var constants = emuchartsManager.getConstants();
+            var labels = [];
+            constants.forEach(function (constant) {
+                var l = constant.name + ": " + constant.type;
+                if (constant.value) {
+                    l += " = " + constant.value;
+                }
+                labels.push(l);
+                constants.push(constant);
+            });
+            displaySelectConstant.create({
+                header: "Edit constant",
+                message: "Please select a constant",
+                constants: labels,
+                buttons: ["Cancel", "Select"]
+            }).on("select", function (e, view) {
+                if (constants.length > 0) {
+                    var c = e.data.options.get("selectedConstant");
+                    var theConstant = constants[c];
+                    view.remove();
+                    editConstant(theConstant);
+                }
+            }).on("cancel", function (e, view) {
+                // just remove window
+                view.remove();
+                return;
+            });
+        });
+        
+        d3.select("#btn_menuDeleteConstant").on("click", function () {
+            document.getElementById("menuContext").children[1].style.display = "none";
+            // step 1: ask to select the variable that needs to be edited
+            var constants = emuchartsManager.getConstants();
+            var labels = [];
+            constants.forEach(function (constant) {
+                var l = constant.name + ": " + constant.type;
+                if (constant.value) {
+                    l += " = " + constant.value;
+                }
+                labels.push(l);
+                constants.push(constant);
+            });
+            displaySelectConstant.create({
+                header: "Delete constant",
+                message: "Please select a constant",
+                constants: labels,
+                buttons: ["Cancel", "Delete Constant"]
+            }).on("delete_constant", function (e, view) {
+                if (constants.length > 0) {
+                    var c = e.data.options.get("selectedConstant");
+                    var theConstant = constants[c];
+                    view.remove();
+                    emuchartsManager.delete_constant(theConstant.id);
+                }
+            }).on("cancel", function (e, view) {
+                // just remove window
+                view.remove();
+                return;
             });
         });
         
@@ -960,53 +1165,43 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".pvs",
-                                                                 emuchartsPVSPrinter.print(emucharts));
-            var addFile = function (emuchartsFile) {
-                var notification = "";
-                projectManager.addFile(emuchartsFile)
-                    .then(function () {
-                        projectManager.selectFile(emuchartsFile);
-                        notification = "PVS model successfully generated in file " + emuchartsFile.path();
-                        alert(notification);
-                        Logger.log(notification);
-                    }).catch(function (err) {
-                        notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-                        alert(notification);
-                        Logger.log(notification);
-                    });
-            };
-            
-            if (projectManager.fileExists(emuchartsFile)) {
-                // remove file from project
-                projectManager.removeFile(emuchartsFile.path())
-                    .then(function (f) {
-                        addFile(emuchartsFile);
-                    }, function (err) {
-                        console.log(err);
-                    });
-            } else {
-                addFile(emuchartsFile);
+            var pvsModel = emuchartsPVSPrinter.print(emucharts);
+            console.log(pvsModel);
+            if (pvsModel.err) {
+                alert(pvsModel.err);
+                return;
             }
-            
-//            
-//            
-//            projectManager.saveFiles([emuchartsFile], function (err) {
-//                var notification = "";
-//                if (!err) {
-//                    projectManager.addFile(emuchartsFile);
-//                    projectManager.selectFile(emuchartsFile);
-//                    notification = "PVS model successfully generated in file " + emuchartsFile.path();
-//                    alert(notification);
-//                    Logger.log(notification);
-//                } else {
-//                    notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-//                    alert(notification);
-//                    Logger.log(notification);
-//                }
-//            });
-//            // select file
-//            projectManager.selectFile(emuchartsFile);
+            if (pvsModel.res) {
+                var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".pvs", pvsModel.res);
+                var addFile = function (emuchartsFile) {
+                    var notification = "";
+                    projectManager.addFile(emuchartsFile).then(
+                        function () {
+                            projectManager.selectFile(emuchartsFile);
+                            notification = "PVS model successfully generated in file " + emuchartsFile.path();
+                            alert(notification);
+                            Logger.log(notification);
+                        },
+                        function (err) {
+                            notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
+                            alert(notification);
+                            Logger.log(notification);
+                        }
+                    );
+                };
+
+                if (projectManager.fileExists(emuchartsFile)) {
+                    // remove file from project
+                    projectManager.removeFileWithPath(emuchartsFile.path())
+                        .then(function (f) {
+                            addFile(emuchartsFile);
+                        }, function (err) {
+                            console.log(err);
+                        });
+                } else {
+                    addFile(emuchartsFile);
+                }
+            }
         });
         d3.select("#btn_menuPIMPrinter").on("click", function () {
             var emucharts = {
