@@ -47,21 +47,29 @@ define(function (require, exports, module) {
 	 * Constructor
 	 * @memberof Emucharts
 	 */
-    function Emucharts(nodes, edges, initial_edges) {
-        if (nodes) {
-            this.nodes = nodes;
-            nextNodeID = nodes.keys().length; // FIXME: this is fragile: we need to check the actual indexes
+    function Emucharts(emuchart) {
+        if (emuchart) {
+            this.nodes = emuchart.nodes || d3.map();
+            if (emuchart.nodes) {
+                nextNodeID = emuchart.nodes.keys().length; // FIXME: this is fragile: we need to check the actual indexes
+            }
+            this.edges = emuchart.edges || d3.map();
+            if (emuchart.edges) {
+                nextEdgeID = emuchart.edges.keys().length; // FIXME: this is fragile: we need to check the actual indexes
+            }
+            this.initial_edges = emuchart.initial_edges || d3.map();
+            if (emuchart.initial_edges) {
+                nextInitialEdgeID = emuchart.edges.keys().length;  // FIXME: this is fragile: we need to check the actual indexes
+            }
+            this.constants = emuchart.constants || d3.map();
+            this.variables = emuchart.variables || d3.map();
+        } else {
+            this.nodes = d3.map();
+            this.edges = d3.map();
+            this.initial_edges = d3.map();
+            this.variables = d3.map();
+            this.constants = d3.map();
         }
-        if (edges) {
-            this.edges = edges;
-            nextEdgeID = edges.keys().length; // FIXME: this is fragile: we need to check the actual indexes
-        }
-        if (initial_edges) {
-            this.initial_edges = initial_edges;
-            nextInitialEdgeID = edges.keys().length;  // FIXME: this is fragile: we need to check the actual indexes
-        }
-        this.constants = d3.map();
-        this.variables = d3.map();
 		eventDispatcher(this);
         return this;
     }

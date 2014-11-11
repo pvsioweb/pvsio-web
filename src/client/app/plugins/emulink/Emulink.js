@@ -1165,53 +1165,43 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".pvs",
-                                                                 emuchartsPVSPrinter.print(emucharts));
-            var addFile = function (emuchartsFile) {
-                var notification = "";
-                projectManager.addFile(emuchartsFile)
-                    .then(function () {
-                        projectManager.selectFile(emuchartsFile);
-                        notification = "PVS model successfully generated in file " + emuchartsFile.path();
-                        alert(notification);
-                        Logger.log(notification);
-                    }).catch(function (err) {
-                        notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-                        alert(notification);
-                        Logger.log(notification);
-                    });
-            };
-            
-            if (projectManager.fileExists(emuchartsFile)) {
-                // remove file from project
-                projectManager.removeFileWithPath(emuchartsFile.path())
-                    .then(function (f) {
-                        addFile(emuchartsFile);
-                    }, function (err) {
-                        console.log(err);
-                    });
-            } else {
-                addFile(emuchartsFile);
+            var pvsModel = emuchartsPVSPrinter.print(emucharts);
+            console.log(pvsModel);
+            if (pvsModel.err) {
+                alert(pvsModel.err);
+                return;
             }
-            
-//            
-//            
-//            projectManager.saveFiles([emuchartsFile], function (err) {
-//                var notification = "";
-//                if (!err) {
-//                    projectManager.addFile(emuchartsFile);
-//                    projectManager.selectFile(emuchartsFile);
-//                    notification = "PVS model successfully generated in file " + emuchartsFile.path();
-//                    alert(notification);
-//                    Logger.log(notification);
-//                } else {
-//                    notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-//                    alert(notification);
-//                    Logger.log(notification);
-//                }
-//            });
-//            // select file
-//            projectManager.selectFile(emuchartsFile);
+            if (pvsModel.res) {
+                var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".pvs", pvsModel.res);
+                var addFile = function (emuchartsFile) {
+                    var notification = "";
+                    projectManager.addFile(emuchartsFile).then(
+                        function () {
+                            projectManager.selectFile(emuchartsFile);
+                            notification = "PVS model successfully generated in file " + emuchartsFile.path();
+                            alert(notification);
+                            Logger.log(notification);
+                        },
+                        function (err) {
+                            notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
+                            alert(notification);
+                            Logger.log(notification);
+                        }
+                    );
+                };
+
+                if (projectManager.fileExists(emuchartsFile)) {
+                    // remove file from project
+                    projectManager.removeFileWithPath(emuchartsFile.path())
+                        .then(function (f) {
+                            addFile(emuchartsFile);
+                        }, function (err) {
+                            console.log(err);
+                        });
+                } else {
+                    addFile(emuchartsFile);
+                }
+            }
         });
         d3.select("#btn_menuPIMPrinter").on("click", function () {
             var emucharts = {
