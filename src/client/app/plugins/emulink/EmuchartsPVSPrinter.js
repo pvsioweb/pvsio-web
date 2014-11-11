@@ -8,8 +8,15 @@
 /*global define, d3 */
 define(function (require, exports, module) {
 	"use strict";
+
+    var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
+    var EmuchartsParser_UnitTest = require("plugins/emulink/EmuchartsParser_UnitTest");
     
     var theory_name;
+    var parser;
+    
+    var parserUnitTest;
+    var unitTestEnabled = true;
 
     
     /**
@@ -17,6 +24,11 @@ define(function (require, exports, module) {
 	 */
     function EmuchartsPVSPrinter(name) {
         theory_name = name;
+        parser = new EmuchartsParser();
+        if (unitTestEnabled) {
+            parserUnitTest = new EmuchartsParser_UnitTest();
+            console.log(parserUnitTest.unitTest());
+        }
         return this;
     }
     
@@ -25,171 +37,50 @@ define(function (require, exports, module) {
      */
     EmuchartsPVSPrinter.prototype.print_states = function (emuchart) {
         var states = emuchart.states;
-        var ans = "  %-- machine states\n  MachineState: TYPE";
+        var ans = "\n  %-- machine states\n" +
+                    "  MachineState: TYPE";
         if (states && states.length > 0) {
-            ans += " = { ";
+            var tmp = [];
             states.forEach(function (state) {
-                ans += state.name + ", ";
+                tmp.push(state.name);
             });
-            ans = ans.substr(0, ans.length - 2) + " }";
+            ans += " = { " + tmp.join(", ") + " }";
         }
         return ans + "\n";
     };
     
-    /**
-     * Parser for identifying transition names for transitions given in the
-     * form name [ condition ] { actios }, where conditions and actions are optionals
-     */
-    function parseTransitionName(transition) {
-        var pos = transition.indexOf("[");
-        if (pos > 0) { return transition.substr(0, pos).trim(); }
-        pos = transition.indexOf("{");
-        if (pos > 0) { return transition.substr(0, pos).trim(); }
-        return transition.trim();
-    }
-    
-    /**
-     * Parser for transitions given in the form name [ condition ] { actios },
-     * where name is the transition name, and conditions and actions are optionals
-     */
-    function parseTransition(transition) {
-        var ans = {
-            name: "",
-            cond: "",
-            actions: [],
-            from: transition.source.name,
-            to: transition.target.name
-        };
-        var sqOpen = transition.name.indexOf("[");
-        var sqClose = transition.name.indexOf("]");
-        var curOpen = transition.name.indexOf("{");
-        var curClose = transition.name.indexOf("}");
-        ans.name = parseTransitionName(transition.name);
-        if (sqOpen >= 0 && sqClose > sqOpen) {
-            ans.cond = transition.name.substring(sqOpen + 1, sqClose).trim();
-        }
-        if (curOpen >= 0 && curClose > curOpen) {
-            var actions = transition.name.substring(curOpen + 1, curClose).split(";");
-            actions.forEach(function (action) {
-                var a = action.trim();
-                if (a !== "") {
-                    ans.actions.push(a);
-                }
-            });
-            
-        }
-        return ans;
-    }
-
-    /**
-     * identifies state variables on the left-hand side of equalities/assignment
-     */
-    function indexOfStateVariableLF(v, expr) {
-        if (v && expr) {
-            var pos = expr.indexOf(v);
-            if (pos >= 0) {
-                // check that we are not accidentally parsing a substring of a longer var name
-                // if it's a genuine var name on the left-hand side of equalities/assignment, then
-                // the variable name is immediately preceeded by space or ; or ( 
-                // and immediately succeded by a comparison operator or space
-                var before = expr.substr(0, pos).trim();
-                var after  = expr.substr(pos + v.length + 1).trim();
-                if ((before === "" || before.indexOf(";") === before.length - 1
-                                    || before.indexOf("(") === before.length - 1)
-                        && (after === "" || after.indexOf(">") === 0
-                                || after.indexOf("=") === 0 || after.indexOf("<") === 0)) {
-                    // it's a variable
-                    return pos;
-                }
-            }
-        }
-        return -1;
-    }
-    
-    /**
-     * identifies state variables on the right-hand side of equalities/assignment
-     */
-    function indexOfStateVariableRT(v, expr) {
-        if (v && expr) {
-            var pos = expr.indexOf(v);
-            if (pos >= 0) {
-                // check that we are not accidentally parsing a substring of a longer var name
-                // if it's a genuine var name on the right-hand side of equalities/assignment,
-                // the variable name is immediately preceeded by space or ( 
-                // and immediately succeded by ) or arithmetic operators + * / -
-                var before = expr.substr(0, pos).trim();
-                var after  = expr.substr(pos + v.length + 1).trim();
-                if ((before === "" || before.indexOf("(") === before.length - 1)
-                        && (after.indexOf(")") === 0 || after.indexOf("+") === 0
-                                || after.indexOf("-") === 0 || after.indexOf("*") === 0
-                                || after.indexOf("/") === 0)) {
-                    // it's a variable
-                    return pos;
-                }
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Utility function for printing PVS definitions of transition actions
-     */
-    function printAction(action, variables) {
-        var tmp = "";
-        // in this version of the tool we can identify state variables in
-        // state updates, i.e., in actions given in the form v := expr, 
-        // where v is a state variable
-        if (variables) {
-            variables.forEach(function (v) {
-                var state_update = action.split(":=");
-                if (state_update.length === 2) {
-                    // check for the presence of state variables 
-                    // on the right-hand side of the expression
-                    var pos = indexOfStateVariableRT(v.name, state_update[1]);
-                    if (pos >= 0) {
-                        state_update[1] = state_update[1].replace(v.name, v.name + "(st)");
-                    }
-                    action = state_update[0].trim() + " := " + state_update[1].trim();
-                }
-            });
-        }
-        tmp += ",\n           new_st = new_st WITH [ " + action + " ]";
-        return tmp;
-    }
-    
-        
-    /**
-     * Utility function for identifying and grouping together cases that make up the body of a transition
-     */
-    function parseCases(transitions) {
-        var transitionsSpec = d3.map();
-        transitions.forEach(function (transition) {
-            var t = parseTransition(transition);
-            // extract transition signature
-            var signature = t.name + "(" + "st: (per_" + t.name + ")): State";
-            // collect cases that will make up the body of the transition
-            var cases = transitionsSpec.has(signature) ?
-                         transitionsSpec.get(signature)
-                         : [];
-            cases.push({
-                cond: (t.cond === "") ? null : t.cond,
-                actions: t.actions,
-                from: t.from,
-                to: t.to
-            });
-            transitionsSpec.set(signature, cases);
-        });
-        return transitionsSpec;
-    }
 
     /**
      * Prints PVS definitions of utility functions used in Emuchart
      */
     function print_utils() {
-        var ans = "  %-- utility functions";
+        var ans = "\n  %-- utility functions";
         ans += "\n  enter_into(ms: MachineState)(st: State): State = st WITH [ current_state := ms ]";
         ans += "\n  leave_state(ms: MachineState)(st: State): State = st WITH [ previous_state := ms ]\n";
         return ans;
+    }
+    
+    /**
+     * This function converts the name of operators in expressions -- needed for && || == != !
+     */
+    function preProcessTerm(term) {
+        if (term) {
+            if (term.type === "binop") {
+                if (term.val === "&&") {
+                    term.val = "AND";
+                } else if (term.val === "||") {
+                    term.val = "OR";
+                } else if (term.val === "==") {
+                    term.val = "=";
+                } else if (term.val === "!=") {
+                    term.val = "/=";
+                }
+            } else if (term.type === "unaryop") {
+                if (term.val === "!") {
+                    term.val = "NOT";
+                }
+            }
+        }
     }
     
     
@@ -197,103 +88,265 @@ define(function (require, exports, module) {
      * Prints PVS definitions for Emuchart initial transitions
      */
     EmuchartsPVSPrinter.prototype.print_initial_transition = function (emuchart) {
-        var initial_transitions = emuchart.initial_transitions;
-        var ans = "";
-        if (initial_transitions && initial_transitions.length > 0) {
-            ans += "  %-- initial state\n";
-            ans += "  init(x: real): State = (#\n";
-            ans += "    current_state  := " + initial_transitions[0].target.name + ",\n";
-            ans += "    previous_state := " + initial_transitions[0].target.name + "\n";
-            var variables = emuchart.variables;
-            if (variables) {
-                variables.forEach(function (variable) {
-                    var pos = initial_transitions[0].name.indexOf(variable.name);
-                    if (pos >= 0) {
-                        var tmp = initial_transitions[0].name.substring(pos);
-                        pos = tmp.indexOf(":=");
-                        if (pos >= 0) {
-                            tmp = tmp.substring(pos + 2);
-                            pos = tmp.indexOf(";");
-                            if (pos >= 0) {
-                                tmp = tmp.substr(0, pos).trim();
-                                ans += "    " + variable.name + " := " + tmp + "\n";
+        function preProcess(term) {
+            return preProcessTerm(term);
+        }
+        
+        var ret = { err: null, res: null };
+
+        if (emuchart.initial_transitions && emuchart.initial_transitions.length > 0) {
+            var theTransition = {
+                identifier: "init", // the name is always init for the current version of PVSio-web
+                cond:    { type: "expression", val: [] },
+                actions: { type: "actions", val: [] },
+                to:      emuchart.initial_transitions[0].target.name
+            };
+            var ans = parser.parseTransition(emuchart.initial_transitions[0].name);
+            if (ans.res) {
+                if (ans.res.type === "transition") {
+                    theTransition = {
+                        identifier: "init", // the name is always init for the current version of PVSio-web
+                        cond:    ans.res.val.cond,
+                        actions: ans.res.val.actions,
+                        to:      emuchart.initial_transitions[0].target.name
+                    };
+                } else if (ans.res.type === "actions") {
+                    theTransition = {
+                        identifier: "init", // the name is always init for the current version of PVSio-web
+                        cond:    { type: "expression", val: [] },
+                        actions: ans.res,
+                        to:      emuchart.initial_transitions[0].target.name
+                    };
+                }
+            }
+            
+            var pvsFunction = {
+                identifier: "init",
+                signature:  "init(x: real): State",
+                cases: {
+                    st: [
+                        ("current_state := " + theTransition.to),
+                        ("previous_state := " + theTransition.to)
+                    ],
+                    letExpr: [],
+                    inExpr: [ ("st") ]
+                }
+            };
+            if (emuchart.variables && emuchart.variables.length) {
+                emuchart.variables.forEach(function (variable) {
+                    var initialisation = null;
+                    // look for the initialisation in the actions
+                    if (theTransition.actions.val.length) {
+                        theTransition.actions.val.forEach(function (action) {
+                            if (action.val.identifier.val === variable.name) {
+                                action.val.expression.val.forEach(function (term) {
+                                    initialisation = variable.name + " := " + term.val;
+                                });
                             }
+                        });
+                    }
+                    if (initialisation === null) {
+                        var msg = "Warning: initial value for variable " + variable.name +
+                                    " was not specified. Please check the generated PVS model, as it may fail to compile.";
+                        alert(msg);
+                        // set a default value -- try to check the type so that an appropriate value can be chosen
+                        if (variable.type.toLowerCase() === "bool") {
+                            initialisation = variable.name + " := false";
+                        } else {
+                            initialisation = variable.name + " := 0";
                         }
+                    }
+                    pvsFunction.cases.st.push(initialisation);
+                });
+            }
+    
+            if (theTransition.actions.val.length) {
+                theTransition.actions.val.forEach(function (action) {
+                    // actions involving variables have already been taken into account
+                    var isVariable = false;
+                    emuchart.variables.forEach(function (variable) {
+                        if (variable.name === action.val.identifier.val) {
+                            isVariable = true;
+                        }
+                    });
+                    if (isVariable === false) {
+                        var expr = "st = st WITH [ " + action.val.identifier.val + " := ";
+                        var tmp = [];
+                        action.val.expression.val.forEach(function (term) {
+                            preProcess(term);
+                            tmp.push(term.val);
+                        });
+                        expr += tmp.join(" ") + " ]";
+                        pvsFunction.cases.letExpr.push(expr);
                     }
                 });
             }
-            ans += "  #)\n";
+
+            var code = "\n  %-- initial state\n  ";
+            code += pvsFunction.signature + " =\n    ";
+            if (pvsFunction.cases.letExpr.length) {
+                code += "LET st = (# " + pvsFunction.cases.st.join(", ") + " #)";
+                code += ",\n    " + pvsFunction.cases.letExpr.join(",\n  ");
+                code += "\n    IN " + pvsFunction.cases.inExpr + "\n";
+            } else {
+                code += "(# " + pvsFunction.cases.st.join(", ") + " #)\n";
+            }
+
+            ret.res = code;
         }
-        return ans;
+        return ret;
     };
     
     /**
      * Prints PVS definitions for Emuchart transitions given in the form transition [condition] {actions}
      */
     EmuchartsPVSPrinter.prototype.print_transitions = function (emuchart) {
-        var transitions = emuchart.transitions;
-        var variables = emuchart.variables;
-        var ans = "";
-        if (transitions && transitions.length > 0) {
-            ans += print_utils();
-            ans += "  %-- transition functions\n";
-            var transitionsSpec = parseCases(transitions);
-            // for each transition, print the transition body made out of the identifies cases
-            transitionsSpec.forEach(function (signature) {
-                // generate permission
-                var tmp = "  per_" + signature.substr(0, signature.indexOf("(")) +
-                            "(st: State): bool";
-                var cases = transitionsSpec.get(signature);
-                if (cases && cases.length > 0) {
-                    tmp += " = ";
-                    var i = 0;
-                    for (i = 0; i < cases.length; i++) {
-                        tmp += "current_state(st) = " + cases[i].from;
-                        if (i < cases.length - 1) {
-                            tmp += " OR ";
-                        }
+        function isVariable(term) {
+            if (term.type === "identifier" && emuchart.variables) {
+                var i = 0;
+                while (i < emuchart.variables.length) {
+                    if (term.val === emuchart.variables[i].name) {
+                        return true;
                     }
+                    i++;
                 }
-                // generate transition
-                tmp += "\n  " + signature;
-                if (cases && cases.length > 0) {
-                    tmp += " =\n   COND";
-                    cases.forEach(function (cs) {
-                        // check if the condition uses state variables
-                        // -- if so, we need to add parameter (st)
-                        if (variables) {
-                            variables.forEach(function (v) {
-                                // for each state variable, add suffix (st)
-                                var pos = indexOfStateVariableLF(v.name, cs.cond);
-                                if (pos >= 0) { cs.cond = cs.cond.replace(v.name, v.name + "(st)").trim(); }
+            }
+            return false;
+        }
+        
+        function preProcess(term) {
+            return preProcessTerm(term);
+        }
+        
+        var ret = { err: null, res: null };
+        
+        if (emuchart.transitions && emuchart.transitions.length > 0) {
+            var transitions = [];
+            emuchart.transitions.forEach(function (t) {
+                var ans = parser.parseTransition(t.name);
+                                
+                if (!ans.err && ans.res && ans.res.type === "transition") {
+                    transitions.push({
+                        identifier: ans.res.val.identifier,
+                        cond:    ans.res.val.cond,
+                        actions: ans.res.val.actions,
+                        from: t.source.name,
+                        to:   t.target.name
+                    });
+                } else {
+                    ret.err = ans.err;
+                    console.log(ans.err);
+                    return ret;
+                }
+            });
+            var pvsFunctions = []; // this is an array of objects representing pvs functions
+            transitions.forEach(function (theTransition) {
+                // generate permission
+                var permissionFunction = {
+                    identifier: "per_" + theTransition.identifier.val,
+                    signature : "per_" + theTransition.identifier.val + "(st: State): bool",
+                    cases: [ ("current_state(st) = " + theTransition.from) ]
+                    // the body of the permission is given by the disjunction of the collected cases
+                };
+                transitions.forEach(function (transition) {
+                    // collect all transition conditions associated with the considered transition
+                    if (transition.identifier.val === theTransition.identifier.val &&
+                            transition.cond && transition.cond.type === "expression" &&
+                                transition.cond.val) {
+                        var tmp = [];
+                        transition.cond.val.forEach(function (term) {
+                            // identifiers of state variables need to be followed by (st)
+                            if (isVariable(term)) {
+                                tmp.push(term.val + "(st)");
+                            } else {
+                                preProcess(term);
+                                tmp.push(term.val);
+                            }
+                        });
+                        var expr = tmp.join(" ");
+                        permissionFunction.cases.push(expr);
+                    }
+                });
+                
+                // generate transition function
+                var transitionFunction = {
+                    identifier: theTransition.identifier.val,
+                    signature : theTransition.identifier.val + "(st: (" + permissionFunction.identifier + ")): State",
+                    cases: []
+                    // the body of the function is given by a COND-ENDCOND statement 
+                    // made up from the expressions collected in array cases
+                };
+                transitions.forEach(function (transition) {
+                    // each case depends on the state from which the transition starts, and the transition conditions
+                    // transitions with the same name can start from different states and have different conditions
+                    if (transition.identifier.val === theTransition.identifier.val) {
+                        // the final expression for pre is the conjunction of all expressions
+                        var cond = [ ("current_state(st) = " + transition.from) ];
+                        if (transition.cond && transition.cond.type === "expression" &&
+                                transition.cond.val && transition.cond.val.lenght > 0) {
+                            transition.cond.val.forEach(function (term) {
+                                // identifiers of state variables need to be followed by (st)
+                                if (isVariable(term)) {
+                                    cond.push(term.val + "(st)");
+                                } else {
+                                    cond.push(term.val);
+                                }
                             });
                         }
-                        tmp += "\n    current_state(st) = " + cs.from;
-                        if (cs.cond) { tmp += " AND " + cs.cond; }
-                        tmp += "\n    -> LET new_st = leave_state(" + cs.from + ")(st)";
-                        cs.actions.forEach(function (action) {
-                            tmp += printAction(action, variables);
-                        });
-                        tmp += "\n        IN enter_into(" + cs.to + ")(new_st),";
-                    });
-                    tmp = tmp.substr(0, tmp.length - 1) + "\n   ENDCOND";
-                }
-                ans += tmp + "\n\n";
+                        // the final expression for post is a LET-IN expression 
+                        // given by the sequence of collected statements separated by commas
+                        var letExpr = [ ("LET new_st = leave_state(" + transition.from + ")(st)") ];
+                        var inExpr = "";
+                        if (transition.actions && transition.actions.val &&
+                                transition.actions.val.length > 0) {
+                            transition.actions.val.forEach(function (action) {
+                                var expr = "new_st = new_st WITH [ " + action.val.identifier.val + " := ";
+                                var tmp = [];
+                                action.val.expression.val.forEach(function (term) {
+                                    if (isVariable(term)) {
+                                        tmp.push(term.val + "(st)");
+                                    } else { tmp.push(term.val); }
+                                });
+                                expr += tmp.join(" ") + " ]";
+                                letExpr.push(expr);
+                            });
+                            inExpr = "IN enter_into(" + transition.to + ")(new_st)";
+                        }
+                        transitionFunction.cases.push({ cond: cond, letExpr: letExpr, inExpr: inExpr });
+                    }
+                });
+
+                // store results
+                pvsFunctions.push({ per: permissionFunction, tran: transitionFunction });
             });
+            
+            var ans = print_utils();
+            ans += "\n  %-- transition functions\n";
+            pvsFunctions.forEach(function (f) {
+                ans += "  " + f.per.signature + " = " + f.per.cases.join(" OR ") + "\n";
+                ans += "  " + f.tran.signature + " =\n    COND\n    ";
+                f.tran.cases.forEach(function (c) {
+                    ans += c.cond.join(" AND ") + "\n     -> ";
+                    ans += c.letExpr.join(",\n            ") + "\n         ";
+                    ans += c.inExpr;
+                });
+                ans += "\n    ENDCOND";
+                var x = 0;
+            });
+            ret.res = ans;
         }
-        return ans;
+        return ret;
     };
 
     /**
      * Prints PVS definitions for Emuchart variables
      */
     EmuchartsPVSPrinter.prototype.print_variables = function (emuchart) {
-        var variables = emuchart.variables;
-        var ans = "  %-- emuchart state\n  State: TYPE = [#\n" +
+        var ans = "\n  %-- emuchart state\n  State: TYPE = [#\n" +
                     "   current_state : MachineState,\n" +
                     "   previous_state: MachineState";
-        if (variables && variables.length > 0) {
-            variables.forEach(function (v) {
+        if (emuchart.variables && emuchart.variables.length) {
+            emuchart.variables.forEach(function (v) {
                 ans += ",\n   " + v.name + ": " + v.type;
             });
         }
@@ -308,7 +361,7 @@ define(function (require, exports, module) {
         var constants = emuchart.constants;
         var ans = "";
         if (constants && constants.length > 0) {
-            ans += "  %-- constants\n";
+            ans += "\n  %-- constants\n";
             constants.forEach(function (c) {
                 ans += "  " + c.name + ": " + c.type;
                 if (c.value) {
@@ -364,17 +417,29 @@ define(function (require, exports, module) {
      * Prints the entire PVS theory
      */
     EmuchartsPVSPrinter.prototype.print = function (emuchart) {
+        var ret = { err: null, res: null };
+        var initialTransitions = this.print_initial_transition(emuchart);
+        var transitions = this.print_transitions(emuchart);
+        if (initialTransitions.err) {
+            ret.err.push(initialTransitions.err);
+        }
+        if (transitions.err) {
+            ret.err.push(initialTransitions.err);
+        }
+        
         var ans = this.print_descriptor(emuchart) + "\n";
         ans += emuchart.name + ": THEORY\n BEGIN\n";
         ans += this.print_importings(emuchart);
         ans += this.print_constants(emuchart);
         ans += this.print_states(emuchart);
         ans += this.print_variables(emuchart);
-        ans += this.print_initial_transition(emuchart);
-        ans += this.print_transitions(emuchart);
+        ans += initialTransitions.res;
+        ans += transitions.res;
         ans += " END " + emuchart.name + "\n";
         ans += this.print_disclaimer();
-        return ans;
+        ret.res = ans;
+        
+        return ret;
     };
     
     module.exports = EmuchartsPVSPrinter;

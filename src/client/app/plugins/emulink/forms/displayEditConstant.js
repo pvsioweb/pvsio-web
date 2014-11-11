@@ -8,16 +8,14 @@
 define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
-        formTemplate = require("text!./templates/displayAddConstant.handlebars"),
-        BaseDialog = require("pvsioweb/forms/BaseDialog"),
+        formTemplate = require("text!./templates/displayEditConstant.handlebars"),
         FormUtils = require("./FormUtils");
     
-    var AddConstantView = BaseDialog.extend({
+    var EditConstantView = Backbone.View.extend({
         initialize: function (data) {
             d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
             this.render(data);
             this._data = data;
-            this.focus();
         },
         render: function (data) {
             var template = Handlebars.compile(formTemplate);
@@ -28,8 +26,7 @@ define(function (require, exports, module) {
         },
         events: {
 			"click #btnRight": "right",
-			"click #btnLeft": "left",
-            "keydown .panel": "keypress"
+			"click #btnLeft": "left"
 		},
 		right: function (event) {
 			var form = this.el;
@@ -42,19 +39,7 @@ define(function (require, exports, module) {
 		},
 		left: function (event) {
 			this.trigger(this._data.buttons[0].toLowerCase(), {el: this.el}, this);
-		},
-        keypress: function (event) {
-            var form = this.el;
-            switch(event.which) {
-            case 13: //enter pressed
-                this.right(event);
-                break;
-            case 27: //esc pressed
-                this.left(event);
-                break;
-            default: break;
-            }
-        }
+		}
     });
     
     module.exports = {
@@ -65,7 +50,7 @@ define(function (require, exports, module) {
          * }
          */
         create: function (data) {
-            return new AddConstantView(data);
+            return new EditConstantView(data);
         }
     };
 });
