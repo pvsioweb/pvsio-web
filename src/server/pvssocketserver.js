@@ -125,7 +125,7 @@ function run() {
 
     function typeCheck(filePath, cb) {
         procWrapper().exec({
-            command: "proveit " + filePath,
+            command: "proveit -l -v " + filePath,
             callBack: cb
         });
     }
