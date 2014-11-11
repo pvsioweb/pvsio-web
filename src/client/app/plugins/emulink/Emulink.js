@@ -1165,6 +1165,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
+
             var pvsModel = emuchartsPVSPrinter.print(emucharts);
             console.log(pvsModel);
             if (pvsModel.err) {
