@@ -47,7 +47,8 @@ function run() {
         baseProjectDir          = path.join(__dirname, "../../examples/projects/"),
 		baseDemosDir			= path.join(__dirname, "../../examples/demos/"),
 		clientDir				= path.join(__dirname, "../client");
-    var p, clientid = 0, WebSocketServer = ws.Server, projectFolderWatcher;
+    var p, clientid = 0, WebSocketServer = ws.Server;
+    var fsWatchers = {};
 	var writeFile = serverFuncs.writeFile,
 		stat = serverFuncs.stat,
 		renameFile = serverFuncs.renameFile,
@@ -131,17 +132,29 @@ function run() {
         });
     }
     
-    function registerFolderWatcher(folderPath, socket) {
-        if (projectFolderWatcher) {
-            projectFolderWatcher.close();   
+    function unregisterFolderWatcher(folderPath) {
+        var watcher = fsWatchers[folderPath];
+        if (watcher) {
+            watcher.close();   
         }
+    }
+    
+    function unregisterFolderWatchers() {
+        Object.keys(fsWatchers).forEach(function (path) {
+            fsWatchers[path].close(); 
+        });
+        fsWatchers = {};
+    }
+    
+    function registerFolderWatcher(folderPath, socket) {
+        unregisterFolderWatcher(folderPath);
         logger.debug("watching .. " + folderPath);
-        projectFolderWatcher = fs.watch(folderPath, function (event, fileName) {
+        var watcher = fs.watch(folderPath, function (event, fileName) {
             logger.debug(event);
             logger.debug(fileName);
             var token = {type: "FileSystemUpdate", event: event, fileName: fileName};
             if (fileName) {
-                readFile(path.join(folderPath,fileName)).then(function (content) {
+                readFile(path.join(folderPath, fileName)).then(function (content) {
                     token.fileContent = content;
                     socket.send(JSON.stringify(token));
                 }).catch(function (err) {
@@ -152,6 +165,7 @@ function run() {
                 socket.send(JSON.stringify(token));
             }
         });
+        fsWatchers[folderPath] = watcher;
     }
 
     /**
@@ -207,6 +221,8 @@ function run() {
 									 err: {path: token.path, message: "Directory Exists"}}, socket);
 				}, function () {
 					fs.mkdir(token.path, function (err) {
+                        //when we create a directory we want to watch for changes on that directory
+                        registerFolderWatcher(token.path, socket);
 						processCallback({id: token.id, socketId: socketid, err: err, time: token.time}, socket);
 					});
 				});
@@ -237,8 +253,9 @@ function run() {
                 openProject(token.name)
                     .then(function (data) {
                         res.project = data;
-                        processCallback(res, socket);
+                        unregisterFolderWatchers();
                         registerFolderWatcher(path.join(baseProjectDir, token.name), socket);
+                        processCallback(res, socket);
                     }, function (err) {
                         res.err = err;
                         processCallback(res, socket);
@@ -251,6 +268,8 @@ function run() {
                     res.id = token.id;
                     res.socketId = socketid;
                     res.time = token.time;
+                    unregisterFolderWatchers();
+                    registerFolderWatcher(path.join(baseProjectDir, token.projectName), socket);
                     processCallback(res, socket);
                 }, p);
                 
@@ -338,6 +357,15 @@ function run() {
                     } else {
                         res.err = err;
                     }
+                    processCallback(res, socket);
+                });
+            },
+            "fileExists": function (token, socket, socketid) {
+                p = pvsioProcessMap[socketid];
+                var res = {id: token.id, socketId: socketid, time: token.time};
+                token.filePath = path.join(baseProjectDir, token.filePath);
+                fs.exists(token.filePath, function (exists) {
+                    res.exists = exists;
                     processCallback(res, socket);
                 });
             }

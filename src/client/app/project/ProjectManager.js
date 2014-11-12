@@ -95,6 +95,9 @@ define(function (require, exports, module) {
                 return "Are you sure you want to exit? All unsaved changed will be lost.";
             }
         };
+        WSManager.getWebSocket().addListener("FileSystemUpdate", function (event) {
+            console.log(event);
+        });
 	}
 	/**
 		Returns a new project file with the specified theory name
@@ -259,9 +262,7 @@ define(function (require, exports, module) {
 		var ws = WSManager.getWebSocket();
         callback = callback || noop;
         //open selected project
-        ws.addListener("FileSystemUpdate", function (event) {
-            console.log(event);
-        }).send({type: "openProject", name: projectName}, function (err, res) {
+        ws.send({type: "openProject", name: projectName}, function (err, res) {
             if (!err) {
                 ScriptPlayer.clearView();
                 var p = initFromJSON(res.project);
