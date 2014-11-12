@@ -827,7 +827,7 @@ define(function (require, exports, module) {
             _this.SVGdragged = null;
         };
         var mouseMove = function () {
-            var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+            var m = d3.mouse(d3.select("#ContainerStateMachine svg").node());
 //            console.log(m);
 //            console.log(event);
             d3.selectAll("#MouseOverlayIcon").style("display", function () {
