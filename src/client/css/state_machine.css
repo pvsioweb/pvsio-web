@@ -17,7 +17,7 @@
 
 #ContainerStateMachine  {
 	border:         2px solid;
-	background:     #fffcec;
+	background:     white;
  	width:          934px;
 	border-radius:  4px;
 	height:         844px;
@@ -28,6 +28,14 @@
 #stateMachineToolbar {
     margin-bottom: 10px;   
     margin-top: 10px; 
+}
+#MouseOverlay  {
+	/*border:         1px solid;*/
+ 	width:          20px;
+    height:         20px;
+    position:       absolute;
+    opacity:        0.9;
+	/*display:        none; */
 }
 
 

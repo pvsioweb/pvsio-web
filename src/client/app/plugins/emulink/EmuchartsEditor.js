@@ -633,7 +633,7 @@ define(function (require, exports, module) {
             .attr("xmlns", "http://www.w3.org/2000/svg")
             //.attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
             .attr("width", width).attr("height", height)
-            .style("background", "#fffcec")
+            .style("background", "white")
             .append("svg:defs")
             .append("svg:marker")
             .attr("id", "end-arrow")
@@ -826,11 +826,32 @@ define(function (require, exports, module) {
             }
             _this.SVGdragged = null;
         };
-        
+        var mouseMove = function () {
+            var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+//            console.log(m);
+//            console.log(event);
+            d3.selectAll("#MouseOverlayIcon").style("display", function () {
+                if ((this.getAttribute("placeholder") === "addStates" && editor_mode === MODE.ADD_STATE()) ||
+                        (this.getAttribute("placeholder") === "addTransitions" && editor_mode === MODE.ADD_TRANSITION()) ||
+                        (this.getAttribute("placeholder") === "rename" && editor_mode === MODE.RENAME()) ||
+                        (this.getAttribute("placeholder") === "delete" && editor_mode === MODE.DELETE())) {
+                    return "block";
+                }
+                return "none";
+            });
+            var style = "left: " + (m[0] + 20) + "px; top: " + (m[1] - 10) + "px;";
+            var mouseOverlay = d3.select("#MouseOverlay")
+                                    .attr("style", style);
+        };
+        var mouseOut = function () {
+            d3.selectAll("#MouseOverlayIcon").style("display", "none");
+        };
         d3.select("#ContainerStateMachine svg")
             .on("click", mouseClick)
             .on("mousedown", mouseDown)
             .on("mouseup", mouseUp)
+            .on("mousemove", mouseMove)
+            .on("mouseout", mouseOut)
             .call(zoom);
 
         // return reference to svg
