@@ -147,7 +147,7 @@ define(function (require, exports, module) {
                     }
                     if (initialisation === null) {
                         var msg = "Warning: initial value for variable " + variable.name +
-                                    " was not specified. Please check the generated PVS model, as it may fail to compile.";
+                                    " was not specified.";
                         alert(msg);
                         // set a default value -- try to check the type so that an appropriate value can be chosen
                         if (variable.type.toLowerCase() === "bool") {
@@ -219,6 +219,10 @@ define(function (require, exports, module) {
         }
         
         var ret = { err: null, res: null };
+        // multiple transitions can have the same identifier 
+        // (because the same transition can originate from different nodes)
+        // this keeps track of the transitions we've already processed -- needed to avoid duplicates
+        var done = d3.map();
         
         if (emuchart.transitions && emuchart.transitions.length > 0) {
             var transitions = [];
@@ -241,34 +245,19 @@ define(function (require, exports, module) {
             });
             var pvsFunctions = []; // this is an array of objects representing pvs functions
             transitions.forEach(function (theTransition) {
-                // generate permission
+                // first, check whether we have already processed the transition
+                // if not, add the transition identifier to the list of transitions already processed
+                if (done.get(theTransition.identifier.val)) { return; }
+                done.set(theTransition.identifier.val, true);
+                
+                // permission function
                 var permissionFunction = {
                     identifier: "per_" + theTransition.identifier.val,
                     signature : "per_" + theTransition.identifier.val + "(st: State): bool",
-                    cases: [ ("current_state(st) = " + theTransition.from) ]
+                    cases: []
                     // the body of the permission is given by the disjunction of the collected cases
                 };
-                transitions.forEach(function (transition) {
-                    // collect all transition conditions associated with the considered transition
-                    if (transition.identifier.val === theTransition.identifier.val &&
-                            transition.cond && transition.cond.type === "expression" &&
-                                transition.cond.val) {
-                        var tmp = [];
-                        transition.cond.val.forEach(function (term) {
-                            // identifiers of state variables need to be followed by (st)
-                            if (isVariable(term)) {
-                                tmp.push(term.val + "(st)");
-                            } else {
-                                preProcess(term);
-                                tmp.push(term.val);
-                            }
-                        });
-                        var expr = tmp.join(" ");
-                        permissionFunction.cases.push(expr);
-                    }
-                });
-                
-                // generate transition function
+                // transition function
                 var transitionFunction = {
                     identifier: theTransition.identifier.val,
                     signature : theTransition.identifier.val + "(st: (" + permissionFunction.identifier + ")): State",
@@ -276,22 +265,27 @@ define(function (require, exports, module) {
                     // the body of the function is given by a COND-ENDCOND statement 
                     // made up from the expressions collected in array cases
                 };
+                
+                // generate cases for permission function and transition function
                 transitions.forEach(function (transition) {
                     // each case depends on the state from which the transition starts, and the transition conditions
                     // transitions with the same name can start from different states and have different conditions
                     if (transition.identifier.val === theTransition.identifier.val) {
                         // the final expression for pre is the conjunction of all expressions
-                        var cond = [ ("current_state(st) = " + transition.from) ];
+                        var cond = [ ("(current_state(st) = " + transition.from + ")") ];
                         if (transition.cond && transition.cond.type === "expression" &&
-                                transition.cond.val && transition.cond.val.lenght > 0) {
+                                transition.cond.val && transition.cond.val.length > 0) {
+                            var tmp = [];
                             transition.cond.val.forEach(function (term) {
                                 // identifiers of state variables need to be followed by (st)
                                 if (isVariable(term)) {
-                                    cond.push(term.val + "(st)");
+                                    tmp.push(term.val + "(st)");
                                 } else {
-                                    cond.push(term.val);
+                                    preProcess(term);
+                                    tmp.push(term.val);
                                 }
                             });
+                            cond.push("(" + tmp.join(" ") + ")");
                         }
                         // the final expression for post is a LET-IN expression 
                         // given by the sequence of collected statements separated by commas
@@ -305,13 +299,18 @@ define(function (require, exports, module) {
                                 action.val.expression.val.forEach(function (term) {
                                     if (isVariable(term)) {
                                         tmp.push(term.val + "(st)");
-                                    } else { tmp.push(term.val); }
+                                    } else {
+                                        preProcess(term);
+                                        tmp.push(term.val);
+                                    }
                                 });
                                 expr += tmp.join(" ") + " ]";
                                 letExpr.push(expr);
                             });
                             inExpr = "IN enter_into(" + transition.to + ")(new_st)";
                         }
+                        
+                        permissionFunction.cases.push("(" + cond.join(" AND ") + ")");
                         transitionFunction.cases.push({ cond: cond, letExpr: letExpr, inExpr: inExpr });
                     }
                 });
@@ -324,14 +323,15 @@ define(function (require, exports, module) {
             ans += "\n  %-- transition functions\n";
             pvsFunctions.forEach(function (f) {
                 ans += "  " + f.per.signature + " = " + f.per.cases.join(" OR ") + "\n";
-                ans += "  " + f.tran.signature + " =\n    COND\n    ";
+                ans += "  " + f.tran.signature + " =\n    COND\n";
+                var tmp = [];
                 f.tran.cases.forEach(function (c) {
-                    ans += c.cond.join(" AND ") + "\n     -> ";
-                    ans += c.letExpr.join(",\n            ") + "\n         ";
-                    ans += c.inExpr;
+                    var expr = "    " + c.cond.join(" AND ") + "\n     -> ";
+                    expr += c.letExpr.join(",\n            ") + "\n         ";
+                    expr += c.inExpr;
+                    tmp.push(expr);
                 });
-                ans += "\n    ENDCOND";
-                var x = 0;
+                ans += tmp.join(",\n") + "\n    ENDCOND";
             });
             ret.res = ans;
         }
