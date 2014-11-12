@@ -454,19 +454,21 @@ define(function (require, exports, module) {
             d3.select("#EmuchartLogo").classed("hidden", true);
             d3.select("#graphicalEditor").classed("hidden", false);
             emuchartsManager.newEmucharts("emucharts.pvs");
-            // set initial editor mode
-            emuchartsManager.set_editor_mode(MODE.BROWSE());
             // render emuchart
             emuchartsManager.render();
+            // make svg visible and reset colors
+            resetToolbarColors();
+            // set initial editor mode
+            d3.select("#btn_toolbarBrowse").node().click();
         });
         d3.select("#btnLoadEmuchart").on("click", function () {
             openChart(function f() {
-                // set initial editor mode
-                emuchartsManager.set_editor_mode(MODE.BROWSE());
                 // render emuchart                        
                 emuchartsManager.render();
                 // make svg visible and reset colors
                 resetToolbarColors();
+                // set initial editor mode
+                d3.select("#btn_toolbarBrowse").node().click();
             });
 		});
 //        d3.select("#btnImportChart").on("click", function () {
@@ -545,6 +547,8 @@ define(function (require, exports, module) {
                     emuchartsManager.delete_chart();
                     newChart();
                     resetToolbarColors();
+                    // set initial editor mode
+                    d3.select("#btn_toolbarBrowse").node().click();
                     view.remove();
                 }).on("cancel", function (e, view) {
                     view.remove();
@@ -562,6 +566,8 @@ define(function (require, exports, module) {
                 }).on("ok", function (e, view) {
                     emuchartsManager.delete_chart();
                     resetToolbarColors();
+                    // set initial editor mode
+                    d3.select("#btn_toolbarBrowse").node().click();
                     view.remove();
                 }).on("cancel", function (e, view) {
                     view.remove();
@@ -597,12 +603,12 @@ define(function (require, exports, module) {
                 //document.getElementById("btnImportChart").click();
                 view.remove();
                 importChart(function f() {
-                    // set initial editor mode
-                    emuchartsManager.set_editor_mode(MODE.BROWSE());
                     // render emuchart                        
                     emuchartsManager.render();
                     // make svg visible and reset colors
                     resetToolbarColors();
+                    // set initial editor mode
+                    d3.select("#btn_toolbarBrowse").node().click();
                 });
             }).on("cancel", function (e, view) {
                 view.remove();
@@ -677,7 +683,7 @@ define(function (require, exports, module) {
             var image = new Image();
             
             // restore background colour
-            d3.select("#ContainerStateMachine").select("svg").style("background", "#fffcec");
+            d3.select("#ContainerStateMachine").select("svg").style("background", "white");
             
             function imageLoadError(res) {
                 alert("Failed to export chart");
