@@ -188,6 +188,8 @@ define(function (require, exports, module) {
             return (d.y - tree.nodeHeight()) + "px";
         }).style("opacity", 1);
         updatedNodes.selectAll(".line").style("left", function (d) { return d.x + "px"; });
+        //update any label names
+        updatedNodes.select("span.label").text(function (d) { return d.name; });
         //remove hidden nodes
         exitedNodes.remove();
     };
@@ -373,26 +375,18 @@ define(function (require, exports, module) {
         };
     };
                 
-    TreeList.prototype.renameItem = function (item, newName) {
-        // NB: this data update is not elegant but is needed for updating data of nodes corresponding to empty directories
-        //     (empty directories are not saved in the project, so their data cannot be updated using project.pvsFilesList())
-        //     to avoid this, we probably need to store info about (empty) directories in pvsFilesList
-        function dataUpdateRecursive(item, baseName, newName) {
-            if (item && baseName && newName) {
-                item.path = item.path.replace(baseName, newName);
-                item.name = item.name.replace(baseName, newName);
-                if(item.children) {
-                    item.children.forEach(function (child) {
-                        dataUpdateRecursive(child, baseName, newName);
-                    });
-                }
+    TreeList.prototype.renameItem = function (item, newName) {        
+        function updatePath(item, newName) {
+            item.path = item.parent ? (item.parent.path + "/" + newName) : newName;
+            item.name = newName;
+            if (item.children) {
+                item.children.forEach(function (c) {
+                    updatePath(c, c.name);
+                });
             }
         }
-        
-        dataUpdateRecursive(item, item.name, newName);        
-        // FIXME: it's note safe to use replace because the string to be replaced could be (part of) the name of subdirectories listed in the path. There must be a better way of doing this!
-//        item.path = item.path.replace(item.name, newName);
-//        item.name = newName;
+        updatePath(item, newName);
+        this.render(item);
     };
     
     TreeList.prototype.getSelectedItem = function () {
