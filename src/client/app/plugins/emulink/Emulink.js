@@ -655,13 +655,19 @@ define(function (require, exports, module) {
                     }
                 }, null, " ");
                 var pf = projectManager.createProjectFile(fileName, content);
-                projectManager.saveFiles([pf], function (err, res) {
-                    if (!err) {
+                projectManager.addFile(pf)
+                    .then(function (res) {
                         alert("File " + pf.path() + " saved successfully!");
-                    } else {
+                    }).catch(function (err) {
                         alert("Error while saving file " + pf.path() + " (" + err + ")");
-                    }
-                });
+                    });
+//                projectManager.saveFiles([pf], function (err, res) {
+//                    if (!err) {
+//                        alert("File " + pf.path() + " saved successfully!");
+//                    } else {
+//                        alert("Error while saving file " + pf.path() + " (" + err + ")");
+//                    }
+//                });
             }
         });
         d3.select("#btn_menuExportAsImage").on("click", function () {
@@ -1231,22 +1237,34 @@ define(function (require, exports, module) {
                 projectManager.project().removeFile(emuchartsFile);
             }
             // add file to project
-            projectManager.saveFiles([emuchartsFile], function (err) {
-                var notification = "";
-                if (!err) {
-                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
+            var notification = "";
+            projectManager.addFile(emuchartsFile)
+                .then(function (f) {
                     projectManager.selectFile(emuchartsFile);
                     notification = "PIM model successfully generated in file " + emuchartsFile.path();
                     alert(notification);
                     Logger.log(notification);
-                } else {
+                }).catch(function (err) {
                     notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
                     alert(notification);
                     Logger.log(notification);
-                }
-            });
+                });
+//            projectManager.saveFiles([emuchartsFile], function (err) {
+//                var notification = "";
+//                if (!err) {
+//                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
+//                    projectManager.selectFile(emuchartsFile);
+//                    notification = "PIM model successfully generated in file " + emuchartsFile.path();
+//                    alert(notification);
+//                    Logger.log(notification);
+//                } else {
+//                    notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
+//                    alert(notification);
+//                    Logger.log(notification);
+//                }
+//            });
             // select file
-            projectManager.selectFile(emuchartsFile);
+//            projectManager.selectFile(emuchartsFile);
         });
         d3.select("#btn_menuCppPrinter").on("click", function () {
             //document.getElementById("menuCodeGenenerators").children[1].style.display = "none";
@@ -1271,22 +1289,35 @@ define(function (require, exports, module) {
                 projectManager.project().removeFile(emuchartsFile);
             }
             // add file to project
-            projectManager.saveFiles([emuchartsFile], function (err) {
-                var notification = "";
-                if (!err) {
-                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
+            var notification = "";
+            projectManager.addFile(emuchartsFile)
+                .then(function (f) {
                     projectManager.selectFile(emuchartsFile);
                     notification = "C++ class successfully generated in file " + emuchartsFile.path();
                     alert(notification);
                     Logger.log(notification);
-                } else {
+                }).catch(function (err) {
                     notification = "C++ Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
                     alert(notification);
                     Logger.log(notification);
-                }
-            });
+                });
+            
+//            projectManager.saveFiles([emuchartsFile], function (err) {
+//                var notification = "";
+//                if (!err) {
+//                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
+//                    projectManager.selectFile(emuchartsFile);
+//                    notification = "C++ class successfully generated in file " + emuchartsFile.path();
+//                    alert(notification);
+//                    Logger.log(notification);
+//                } else {
+//                    notification = "C++ Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
+//                    alert(notification);
+//                    Logger.log(notification);
+//                }
+//            });
             // select file
-            projectManager.selectFile(emuchartsFile);
+//            projectManager.selectFile(emuchartsFile);
         });
         d3.select("#btn_menuMALPrinter").on("click", function () {
             var emucharts = {
@@ -1310,22 +1341,34 @@ define(function (require, exports, module) {
                 projectManager.project().removeFile(emuchartsFile);
             }
             // add file to project
-            projectManager.saveFiles([emuchartsFile], function (err) {
-                var notification = "";
-                if (!err) {
-                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
+            var notification = "";
+            projectManager.addFile(emuchartsFile)
+                .then(function (f) {
                     projectManager.selectFile(emuchartsFile);
                     notification = "MAL model successfully generated in file " + emuchartsFile.path();
                     alert(notification);
                     Logger.log(notification);
-                } else {
+                }).catch(function (err) {
                     notification = "MAL Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
                     alert(notification);
                     Logger.log(notification);
-                }
-            });
+                });
+//            projectManager.saveFiles([emuchartsFile], function (err) {
+//                var notification = "";
+//                if (!err) {
+//                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
+//                    projectManager.selectFile(emuchartsFile);
+//                    notification = "MAL model successfully generated in file " + emuchartsFile.path();
+//                    alert(notification);
+//                    Logger.log(notification);
+//                } else {
+//                    notification = "MAL Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
+//                    alert(notification);
+//                    Logger.log(notification);
+//                }
+//            });
             // select file
-            projectManager.selectFile(emuchartsFile);
+//            projectManager.selectFile(emuchartsFile);
         });
         //-- Zoom menu -----------------------------------------------------------
         d3.select("#menuZoom").on("mouseover", function () {

@@ -741,17 +741,17 @@ define(function (require, exports, module) {
 	};
 	
 	/**
-	 * Saves pvs files to disk, interactive version, asks to set project name if current project has default name
-	 * @param {ProjectFile} pvsFiles The spec files to save.
+	 * Saves project files to disk
+	 * @param {ProjectFile} files The  files to save.
 	 * @param {Project~onProjectSaved} cb The callback function to invoke when file has been saved
 	 * @memberof Project
 	 */
-	ProjectManager.prototype.saveFiles = function (pvsFiles, cb) {
-        if (pvsFiles) {
+	ProjectManager.prototype.saveFiles = function (files, cb) {
+        if (files) {
             var project = this.project();
-            project.saveFile(pvsFiles, function (err, res) {
+            project.saveFile(files, function (err, res) {
                 if (!err) {
-                    Logger.log(pvsFiles.map(function (f) {return f.path(); }).toString() + " saved.");
+                    Logger.log(files.map(function (f) {return f.path(); }).toString() + " saved.");
                 } else { Logger.log(err); }
                 if (typeof cb === "function") { cb(err, res); }
             });
