@@ -121,12 +121,11 @@ function writeFile(fullPath, fileContent, fileEncoding, opt) {
 /**
 	Recursively reads the files in a directory using promises
 	@param {string} fullPath the path to the directory to read
-	@param {boolean} getContent a flag to set whehter or not to return the content of the file
-    @param {array} filter a list of extensions for files to get. If filter is null, false or undefined then no filter will be applied so all files will be returned
+    @param {array} filter a list of extensions for files whose contents we wish to get. If filter is null, false or undefined then no content will be returned for any files
 	@returns {Promise} a promise that resolves with an array of objects  for the files in the given directory.
     The object may contain just filePath prooperties or may include fileContent if the getContent parameter was passed
 */
-function getFilesInDirectory(fullPath, getContent, filter) {
+function getFilesInDirectory(fullPath, filter) {
         return stat(fullPath).then(function (f) {
             if (f.isDirectory()) {
                 return new Promise(function (resolve, reject) {
@@ -134,11 +133,9 @@ function getFilesInDirectory(fullPath, getContent, filter) {
                         if (err) {
                             reject(err);
                         } else {
-                            var promises = files.filter(function (f) {
-                                return filter ? filter.indexOf(path.extname(f).toLowerCase()) > -1 : true;
-                            }).map(function (name) {
+                            var promises = files.map(function (name) {
                                 var filePath = path.join(fullPath, name);
-                                return getFilesInDirectory(filePath, getContent, filter);
+                                return getFilesInDirectory(filePath, filter);
                             });
 
                             Promise.all(promises)
@@ -157,22 +154,23 @@ function getFilesInDirectory(fullPath, getContent, filter) {
                     });
                 });
             } else {
-                if (!getContent) {
-                    return Promise.resolve({filePath: fullPath});
-                }
                 //resolve with the filename and content
                 return new Promise(function (resolve, reject) {
                     var ext = path.extname(fullPath),
                         isImage = imageExts.indexOf(ext.toLowerCase()) > -1;
                     var opt = {encoding: isImage ? "base64" : "utf8"};
-                    fs.readFile(fullPath, opt, function (err, data) {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve({filePath: fullPath, fileContent: isImage ?
-                                     ("data:image/" + ext.substr(1).toLowerCase() + ";base64," + data) : data, encoding: opt.encoding});
-                        }
-                    });
+                    if (filter && filter.indexOf(ext) > -1) {
+                        fs.readFile(fullPath, opt, function (err, data) {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve({filePath: fullPath, fileContent: isImage ?
+                                         ("data:image/" + ext.substr(1).toLowerCase() + ";base64," + data) : data, encoding: opt.encoding});
+                            }
+                        });
+                    } else {
+                        resolve({filePath: fullPath, encoding: opt.encoding});
+                    }
                 });
             }
         }, function (err) {
@@ -262,7 +260,7 @@ function openProject(projectName) {
 
 	return new Promise(function (resolve, reject) {
 		//get filepaths and their contents
-		getFilesInDirectory(projectPath, true, filesFilter)
+		getFilesInDirectory(projectPath, filesFilter)
 			.then(function (files) {
 				res.projectFiles = files.map(function (f) {
 					f.filePath = f.filePath.replace(projectPath, projectName);

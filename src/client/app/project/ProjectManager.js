@@ -60,7 +60,50 @@ define(function (require, exports, module) {
             }
         }
     }
-	
+	/**
+        Event listener for file system updates
+    */
+    function onFSUpdate(event) {
+        var f, project = _projectManager.project();
+        if (event.event === "delete") {
+            f = project.getProjectFile(event.filePath);
+            if (f) {
+                project.removeFile(f);
+            } else {
+                pvsFilesListView.getTreeList().removeItem(event.filePath);
+            }
+        } else if (event.event === "rename" && event.old) {
+            if (event.isDirectory) {
+                project.updateFolderName(event.old.filePath, event.filePath);
+            } else {
+                f = project.getProjectFile(event.old.filePath);
+                if (f) {
+                    f.path(event.filePath);
+                }
+            }
+            if (pvsFilesListView) {
+                var node = pvsFilesListView.getTreeList().findNode(function (d) {
+                    return d.path === event.old.filePath;
+                });
+                if (node) {
+                    pvsFilesListView.getTreeList().renameItem(node, event.fileName);   
+                }
+            }
+        } else if (event.event === "rename") { //file or folder added
+            if (event.isDirectory) {
+                var parentFolderName = event.filePath.replace("/" + event.fileName, "");
+                var parent = pvsFilesListView.getTreeList().findNode(function (d) {
+                    return d.path === parentFolderName;
+                });
+                var newFolder = {name: event.fileName, path: event.filePath, children: [], isDirectory: true};
+                pvsFilesListView.getTreeList().addItem(newFolder, parent);
+            } else if (!_projectManager.fileExists(event.filePath)) {
+                f = _projectManager.createProjectFile(event.filePath.replace(project.name() + "/", ""), null);
+                project.addProjectFile(f);
+            }
+        }
+    }
+    
 	/**
 	 * Creates a new instance of the ProjectManager. It currently adds a listview for the files loaded into the
 	 * project and keeps the list up to date whenever the project changes or the files within the project changes.
@@ -73,11 +116,20 @@ define(function (require, exports, module) {
 		eventDispatcher(this);
 		_projectManager = this;
         project = project || new Project("");
+            
+        function registerFSUpdateEvents() {
+            WSManager.getWebSocket().removeListener("FileSystemUpdate", onFSUpdate);
+            WSManager.getWebSocket().addListener("FileSystemUpdate", onFSUpdate);
+        }
+        
 		/**
             get or set the current {Project}
             @type {Project}
         */
 		this.project = property.call(this, project)
+            .addListener("PropertyChanged", function (e) {
+                registerFSUpdateEvents(e.fresh);
+            })
 			.addListener("ProjectNameChanged", projectNameChanged)
 			.addListener("PropertyChanged", function (e) {
 				e.fresh.addListener("ProjectMainSpecFileChanged", noop)
@@ -95,9 +147,7 @@ define(function (require, exports, module) {
                 return "Are you sure you want to exit? All unsaved changed will be lost.";
             }
         };
-        WSManager.getWebSocket().addListener("FileSystemUpdate", function (event) {
-            console.log(event);
-        });
+        registerFSUpdateEvents(project);
 	}
 	/**
 		Returns a new project file with the specified theory name
@@ -210,7 +260,7 @@ define(function (require, exports, module) {
         if (obj.projectFiles) {
             ///FIXME handle scripts and widgetDefinitions (maybe we dont need to)
             obj.projectFiles.forEach(function (file) {
-                if (file && file.filePath && file.fileContent) {
+                if (file && file.filePath) {
                     pf = p.addProjectFile(file.filePath, file.fileContent).encoding(file.encoding);
                     if (file.filePath.indexOf("pvsioweb.json") > 0) {
                         mainFileName = JSON.parse(file.fileContent).mainPVSFile;
@@ -382,7 +432,10 @@ define(function (require, exports, module) {
 	ProjectManager.prototype.removeFile = function (f) {
 		var ws = WSManager.getWebSocket(), notification;
 		var project = this.project();
-        f = typeof f === "string" ? project.getProjectFile(f) : f;
+        f = typeof f === "string" ? project.getProjectFile(f) : project.getProjectFile(f.path());
+        if (!f) {
+            return Promise.reject("File with the specified path '" + f.path() + "' does not exist");   
+        }
 		return new Promise(function (resolve, reject) {
 			ws.send({type: "deleteFile", filePath: f.path()}, function (err) {
 				if (!err) {

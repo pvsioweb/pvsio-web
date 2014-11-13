@@ -128,7 +128,7 @@ define(function (require, exports, module) {
             if (project && project.mainPVSFile()) {
                 ws.lastState("init(0)");
                 // the main file can be in a subfolder: we need to pass information about directories!
-                var mainFile = project.mainPVSFile().path().replace(project.name() + "/", "");                
+                var mainFile = project.mainPVSFile().path().replace(project.name() + "/", "");
                 ws.startPVSProcess({fileName: mainFile, projectName: project.name()}, pvsProcessReady);
             }
         }
@@ -155,11 +155,21 @@ define(function (require, exports, module) {
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         } else {
-                            msg = msg.substring(msg.indexOf("Writing output to file"), msg.length);
-                            Notification.create({
-                                header: "Compilation error, please check the PVS output file for details.",
-                                notification: msg.split("\n")
-                            }).on("ok", function (e, view) { view.remove(); });
+                            var logFile = fp.substring(0, fp.length - 4) + ".log";
+                            var header = "Compilation error";
+                            ws.getFile(logFile, function (err, res) {
+                                if (!err) {
+                                    msg = res.fileContent.substring(res.fileContent.indexOf("Parsing "));
+                                    msg = msg.replace("Parsing", "Error while parsing");
+                                } else {
+                                    msg = msg.substring(msg.indexOf("Writing output to file"));
+                                    header += ", please check the PVS output file for details.";
+                                }
+                                Notification.create({
+                                    header: header,
+                                    notification: msg.split("\n")
+                                }).on("ok", function (e, view) { view.remove(); });
+                            });
                         }
                     });
             }
@@ -287,7 +297,7 @@ define(function (require, exports, module) {
     }
 	module.exports = {
 		init: function (data) {
-            data = data || {plugins: [PrototypeBuilder.getInstance(), ModelEditor.getInstance(), 
+            data = data || {plugins: [PrototypeBuilder.getInstance(), ModelEditor.getInstance(),
                                       Emulink.getInstance(), GraphBuilder.getInstance(), SafetyTest.getInstance()].map(function (p) {
                 return {label: p.constructor.name, plugin: p};
             })};

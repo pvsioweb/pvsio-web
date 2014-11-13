@@ -48,15 +48,14 @@ function run() {
 		baseDemosDir			= path.join(__dirname, "../../examples/demos/"),
 		clientDir				= path.join(__dirname, "../client");
     var p, clientid = 0, WebSocketServer = ws.Server;
-    var fsWatchers = {};
+    var fsWatchers = {}, eventStream = [];
 	var writeFile = serverFuncs.writeFile,
 		stat = serverFuncs.stat,
 		renameFile = serverFuncs.renameFile,
 		createProject = serverFuncs.createProject,
 		openProject = serverFuncs.openProject,
-		listProjects = serverFuncs.listProjects,
-        readFile = serverFuncs.readFile;
-
+		listProjects = serverFuncs.listProjects;
+    
     /**
      * Utility function that dispatches responses to websocket clients
      * @param {{type:string, data}} token The token to send to the client
@@ -127,47 +126,117 @@ function run() {
 
     function typeCheck(filePath, cb) {
         procWrapper().exec({
-            command: "proveit " + filePath,
+            command: "proveit -l -v " + filePath,
             callBack: cb
+        });
+    }
+    
+    /**
+        Reads the contents of a directory.
+        @param {string} folderPath
+        @returns {Promise} a promise that resolves with a list of objects representing the files in the directory
+            each object contains {fileName: <string>, filePath: <string>, isDirectory: <boolean>}
+    */
+    function readDirectory(folderPath) {
+        return new Promise(function (resolve, reject) {
+            fs.readdir(folderPath, function (err, files) {
+                if (!err) {
+                    //get stat attributes for all the files using an async call
+                    var promises = files.map(function (f) {
+                        return new Promise(function (resolve, reject) {
+                            fs.stat(path.join(folderPath, f), function (err, res) {
+                                if (err) {
+                                    reject(err);
+                                } else {
+                                    resolve(res);
+                                }
+                            });
+                        });
+                    });
+
+                    Promise.all(promises)
+                        .then(function (res) {
+                            var result = res.map(function (d, i) {
+                                return {fileName: files[i], filePath: path.join(folderPath, files[i]), isDirectory: d.isDirectory()};
+                            });
+                            resolve(result);
+                        }, function (err) {
+                            reject(err);
+                        });
+                } else {
+                    reject(err);
+                }
+            });
         });
     }
     
     function unregisterFolderWatcher(folderPath) {
         var watcher = fsWatchers[folderPath];
         if (watcher) {
-            watcher.close();   
+            watcher.close();  
+            delete fsWatchers[folderPath];
         }
     }
     
     function unregisterFolderWatchers() {
         Object.keys(fsWatchers).forEach(function (path) {
-            fsWatchers[path].close(); 
+            unregisterFolderWatcher(path);
         });
         fsWatchers = {};
     }
     
+    /**
+        Register a watcher for the specified folder. Sends updates to the client using the socket.
+        @param {string} folderPath
+        @param {socket} socket
+    */
     function registerFolderWatcher(folderPath, socket) {
         unregisterFolderWatcher(folderPath);
         logger.debug("watching .. " + folderPath);
-        var watcher = fs.watch(folderPath, function (event, fileName) {
-            logger.debug(event);
-            logger.debug(fileName);
-            var token = {type: "FileSystemUpdate", event: event, fileName: fileName};
-            if (fileName) {
-                readFile(path.join(folderPath, fileName)).then(function (content) {
-                    token.fileContent = content;
-                    socket.send(JSON.stringify(token));
-                }).catch(function (err) {
-                    token.err = err;
-                    socket.send(JSON.stringify(token));
-                });
-            } else {
-                socket.send(JSON.stringify(token));
+        var watcher = fs.watch(folderPath, {persistent: false}, function (event, fileName) {
+            if (fileName && fileName !== ".DS_Store" && event === "rename") {
+                var fullPath = path.join(folderPath, fileName), tId;
+                var token = {type: "FileSystemUpdate", event: event, fileName: fileName,
+                             filePath: fullPath.replace(baseProjectDir, ""),
+                            time: {server: {}}};
+                stat(fullPath)
+                    .then(function (res) {
+                        if (res.isDirectory()) {
+                            registerFolderWatcher(fullPath, socket);
+                            token.isDirectory = true;
+                        }
+                        if (eventStream.length) {
+                            token.old = eventStream.pop();
+                            clearTimeout(tId);
+                            tId = null;
+                        }
+                        processCallback(token, socket);
+                    }).catch(function (err) {
+                        token.event = err.code === "ENOENT" ? "delete" : event;
+                        if (token.event === "delete") {
+                            unregisterFolderWatcher(fullPath);   
+                        }
+                        eventStream.push(token);
+                        tId = setTimeout(function () {
+                            if (tId && eventStream.length) {
+                                token = eventStream.pop();
+                                processCallback(token, socket);
+                            }
+                        }, 50);
+                    });
             }
         });
         fsWatchers[folderPath] = watcher;
+        //if the folder contains subdirectories, then watch changes to those as well
+        readDirectory(folderPath).then(function (files) {
+            files.filter(function (f) {
+                return f.isDirectory;
+            }).forEach(function (f) {
+                registerFolderWatcher(f.filePath, socket);
+            });
+        });
     }
-
+    
     /**
         get function maps for client sockets
     */
@@ -184,34 +253,16 @@ function run() {
 				});
             },
             "readDirectory": function (token, socket, socketid) {
-                fs.readdir(token.path, function (err, files) {
-                    if (!err) {
-                        //get stat attributes for all the files using an async call
-                        var promises = files.map(function (f) {
-                            return new Promise(function (resolve, reject) {
-                                fs.stat(f, function (err, res) {
-                                    if (err) {
-                                        reject(err);
-                                    } else {
-                                        resolve(res);
-                                    }
-                                });
-                            });
+                readDirectory(token.path)
+                    .then(function (files) {
+                        //send relative directories to the client
+                        files.forEach(function (f) {
+                            f.filePath = f.filePath.replace(baseProjectDir + "/", "");
                         });
-                        
-                        Promise.all(promises)
-                            .then(function (res) {
-                                var result = res.map(function (d, i) {
-                                        return {name: files[i], isDirectory: d.isDirectory()};
-                                    });
-                                processCallback({id: token.id, socketId: socketid, files: result, err: err, time: token.time}, socket);
-                            }, function (err) {
-                                processCallback({id: token.id, socketId: socketid, err: err, time: token.time}, socket);
-                            });
-                    } else {
+                        processCallback({id: token.id, socketId: socketid, files: files, err: err, time: token.time}, socket);
+                    }).catch(function (err) {
                         processCallback({id: token.id, socketId: socketid, err: err, time: token.time}, socket);
-                    }
-                });
+                    });
             },
             "writeDirectory": function (token, socket, socketid) {
 				token.path = path.join(baseProjectDir, token.path);
@@ -328,6 +379,7 @@ function run() {
             "readFile": function (token, socket, socketid) {
                 p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";
+                token.filePath = path.join(baseProjectDir, token.filePath);
                 fs.readFile(token.filePath, encoding, function (err, content) {
                     var res = err ? {err: err} : {id: token.id, fileContent: content, socketId: socketid};
                     res.time = token.time;

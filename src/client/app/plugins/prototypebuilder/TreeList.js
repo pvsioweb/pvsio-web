@@ -249,10 +249,21 @@ define(function (require, exports, module) {
     };
     
     /**
-        adds the data to the parent
+        Adds a new file item to the tree. 
+        @param {object} item the item to add. It should contain the following properties
+            !name: <string>
+            !path: <string>
+            ?isDirectory: <boolean>
+            ?children: <array>
+        @param {object} parent the parent node for the new item. If this is not specified, the parent is deduced from
+        the path of the item to be added.
+        @returns the new node item that was added
     */
     TreeList.prototype.addItem = function (item, parent) {
-        parent = parent || selectedData || data;
+        var parentFolderName = item.path.replace("/" + item.name, "");
+        parent = parent || find(function (d) {
+            return d.path === parentFolderName;
+        }, data) || selectedData || data;
         if (!parent.isDirectory) {
             parent = parent.parent;
         }
@@ -261,7 +272,10 @@ define(function (require, exports, module) {
         this.render(parent);
         return item;
     };
-    
+    /**
+        Removes the item at the specified path from the tree
+        @param {string} path
+    */
     TreeList.prototype.removeItem = function (path) {
         var fst = this, toRemove = find(function (node) {
             return node.path === path;
@@ -277,6 +291,10 @@ define(function (require, exports, module) {
         this.selectItem(d3.select(el).select(".node").data()[0].path);
     };
     
+    /**
+        Removes the item with the specified id from the tree
+        @param {string} id
+    */
     TreeList.prototype.removeItemByID = function (id) {
         var fst = this, toRemove = find(function (node) {
             return node.id === id;
@@ -393,6 +411,10 @@ define(function (require, exports, module) {
             this_node.select(".label").html(n.name);
         }
         return this;
+    };
+    
+    TreeList.prototype.findNode = function (f) {
+        return find(f, data);
     };
     
     module.exports = TreeList;

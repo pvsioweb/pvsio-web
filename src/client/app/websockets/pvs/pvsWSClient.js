@@ -160,6 +160,16 @@ define(function (require, exports, module) {
             wscBase.addListener(type, callback);
             return o;
         };
+        
+        o.removeListener = function (type, method) {
+            wscBase.removeListener(type, method);
+            return o;
+        };
+        
+        o.clearListeners = function () {
+            wscBase.clearListeners();
+            return o;
+        };
         return o;
     }
     
