@@ -771,8 +771,11 @@ define(function (require, exports, module) {
             } else if (editor_mode !== MODE.ADD_TRANSITION() && !mousedrag.node &&
                     editor_mode !== MODE.DELETE() && editor_mode !== MODE.RENAME()) {
                 d3.event.sourceEvent.stopPropagation();
-                _this.d3EventTranslate[0] += d3.event.sourceEvent.movementX * d3.behavior.zoom().scale();
-                _this.d3EventTranslate[1] += d3.event.sourceEvent.movementY * d3.behavior.zoom().scale();
+                var event = d3.event.sourceEvent;
+                var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+                var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+                _this.d3EventTranslate[0] += movementX * d3.behavior.zoom().scale();
+                _this.d3EventTranslate[1] += movementY * d3.behavior.zoom().scale();
                 d3.select("#ContainerStateMachine svg").select("#States")
                     .attr("transform", "translate(" + _this.d3EventTranslate +
                           ") scale(" + _this.d3EventScale + ")");
