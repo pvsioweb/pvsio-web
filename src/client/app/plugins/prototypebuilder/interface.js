@@ -155,7 +155,7 @@ define(function (require, exports, module) {
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         } else {
-                            var logFile = fp.substring(0, fp.length - 4) + ".log";
+                            var logFile = projectManager.project().name() + "/" + fp.substring(0, fp.length - 4) + ".log";
                             var header = "Compilation error";
                             ws.getFile(logFile, function (err, res) {
                                 if (!err) {
