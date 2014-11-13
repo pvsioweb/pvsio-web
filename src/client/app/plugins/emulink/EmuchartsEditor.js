@@ -25,7 +25,7 @@ define(function (require, exports, module) {
     var width  = 900;
     var height = 800;
     var colors = d3.scale.category10();
-    var fontSize = 12;
+    var fontSize = 10;
     var defaultWidth = 32;
     var defaultHeight = 32;
     
@@ -50,6 +50,12 @@ define(function (require, exports, module) {
     
     var _this = null;
     
+    function resetView() {
+        d3.select("#ContainerStateMachine svg").select("#InitialTransitions").attr("transform", "translate(0,0) scale(1)");
+        d3.select("#ContainerStateMachine svg").select("#Transitions").attr("transform", "translate(0,0) scale(1)");
+        d3.select("#ContainerStateMachine svg").select("#States").attr("transform", "translate(0,0) scale(1)");
+    }
+    
 	/**
 	 * Constructor
 	 * @memberof EmuchartsEditor
@@ -72,6 +78,7 @@ define(function (require, exports, module) {
         this.emucharts.addListener("emuCharts_stateRenamed", function (event) { _this.fire(event); });
         this.dragged = false;
         this.SVGdragged = null;
+        resetView();
         eventDispatcher(this);
     }
     
@@ -932,7 +939,7 @@ define(function (require, exports, module) {
             // the former is for self-edges, the latter for all other edges
             var text = enteredTransitions.append("svg:text").classed("tlabel", true)
                 .attr("id", function (d) { return "tlabel_" + d.id; })
-                .style("font", "12px sans-serif")
+                .style("font", (fontSize + "px sans-serif"))
                 .style("text-rendering", "optimizeLegibility")
                 .style("cursor", "pointer") // change cursor shape
                 .attr("x", function (edge) {
@@ -962,7 +969,7 @@ define(function (require, exports, module) {
 
             var textPath = enteredTransitions.append("svg:text").classed("tlabel", true)
                 .attr("id", function (edge) { return "tlabel_" + edge.id; })
-                .style("font", "12px sans-serif")
+                .style("font", (fontSize + "px sans-serif"))
                 .style("text-rendering", "optimizeLegibility")
                 .style("text-anchor", "middle")
                 .attr("dy", -4)
@@ -1175,7 +1182,7 @@ define(function (require, exports, module) {
             // the former is for self-edges, the latter for all other edges
             var text = enteredTransitions.append("svg:text").classed("itlabel", true)
                 .attr("id", function (d) { return "itlabel_" + d.id; })
-                .style("font", "12px sans-serif")
+                .style("font", (fontSize + "px sans-serif"))
                 .style("text-rendering", "optimizeLegibility")
                 .style("cursor", "pointer") // change cursor shape
                 .text(function (edge) {
@@ -1327,7 +1334,7 @@ define(function (require, exports, module) {
         var label = enteredStates.append("svg:text").classed("state_label", true)
             .attr("id", function (node) { return "label_" + node.id; })
             .attr("text-anchor", "middle")
-            .style("font", "12px sans-serif")
+            .style("font", (fontSize + "px sans-serif"))
             .style("text-rendering", "optimizeLegibility")
             .text(function (node) { return node.name; });
         
@@ -1916,7 +1923,7 @@ define(function (require, exports, module) {
     EmuchartsEditor.prototype.rename_variable = function (variableID, newData) {
         return this.emucharts.rename_variable(variableID, newData);
     };
-
+    
     /**
 	 * Interface function for deleting charts
 	 * @memberof EmuchartsEditor
@@ -1945,6 +1952,7 @@ define(function (require, exports, module) {
                 _this.delete_state(state.id);
             });
         }
+        return this;
     };
 
     /**

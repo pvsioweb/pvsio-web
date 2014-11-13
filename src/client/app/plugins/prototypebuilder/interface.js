@@ -163,7 +163,7 @@ define(function (require, exports, module) {
                                     msg = msg.replace("Parsing", "Error while parsing");
                                 } else {
                                     msg = msg.substring(msg.indexOf("Writing output to file"));
-                                    header += ", please check the PVS output file for details."
+                                    header += ", please check the PVS output file for details.";
                                 }
                                 Notification.create({
                                     header: header,

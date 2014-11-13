@@ -36,7 +36,8 @@ define(function (require, exports, module) {
         EmuchartsPIMPrinter    = require("plugins/emulink/EmuchartsPIMPrinter"),
         EmuchartsCppPrinter    = require("plugins/emulink/EmuchartsCppPrinter"),
         EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter"),
-        fs = require("util/fileHandler");
+        fs = require("util/fileHandler"),
+        displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
     
     var instance;
     var projectManager;
@@ -54,7 +55,17 @@ define(function (require, exports, module) {
     var emuchartsCppPrinter;
     var emuchartsMALPrinter;
     var options = { autoinit: true };
-    
+
+    var displayNotification = function (msg, title) {
+        title = title || "Notification";
+        displayNotificationView.create({
+            header: title,
+            message: msg,
+            buttons: ["Ok"]
+        }).on("ok", function (e, view) {
+            view.remove();
+        });
+    };
 
     function resetToolbarColors() {
         // make sure the svg is visible
@@ -657,9 +668,9 @@ define(function (require, exports, module) {
                 var pf = projectManager.createProjectFile(fileName, content);
                 projectManager.saveFiles([pf], function (err, res) {
                     if (!err) {
-                        alert("File " + pf.path() + " saved successfully!");
+                        displayNotification("File " + pf.path() + " saved successfully!");
                     } else {
-                        alert("Error while saving file " + pf.path() + " (" + err + ")");
+                        displayNotification("Error while saving file " + pf.path() + " (" + err + ")");
                     }
                 });
             }
@@ -686,7 +697,7 @@ define(function (require, exports, module) {
             d3.select("#ContainerStateMachine").select("svg").style("background", "white");
             
             function imageLoadError(res) {
-                alert("Failed to export chart");
+                displayNotification("Failed to export chart");
             }
             function imageLoadComplete(res) {
                 context.drawImage(image, 0, 0);
@@ -1174,7 +1185,7 @@ define(function (require, exports, module) {
             var pvsModel = emuchartsPVSPrinter.print(emucharts);
             console.log(pvsModel);
             if (pvsModel.err) {
-                alert(pvsModel.err);
+                console.log(pvsModel.err);
                 return;
             }
             if (pvsModel.res) {
@@ -1185,12 +1196,12 @@ define(function (require, exports, module) {
                         function () {
                             projectManager.selectFile(emuchartsFile);
                             notification = "PVS model successfully generated in file " + emuchartsFile.path();
-                            alert(notification);
+                            displayNotification(notification);
                             Logger.log(notification);
                         },
                         function (err) {
                             notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-                            alert(notification);
+                            displayNotification(notification);
                             Logger.log(notification);
                         }
                     );
@@ -1237,11 +1248,11 @@ define(function (require, exports, module) {
                     projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
                     projectManager.selectFile(emuchartsFile);
                     notification = "PIM model successfully generated in file " + emuchartsFile.path();
-                    alert(notification);
+                    displayNotification(notification);
                     Logger.log(notification);
                 } else {
                     notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-                    alert(notification);
+                    displayNotification(notification);
                     Logger.log(notification);
                 }
             });
@@ -1277,11 +1288,11 @@ define(function (require, exports, module) {
                     projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
                     projectManager.selectFile(emuchartsFile);
                     notification = "C++ class successfully generated in file " + emuchartsFile.path();
-                    alert(notification);
+                    displayNotification(notification);
                     Logger.log(notification);
                 } else {
                     notification = "C++ Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-                    alert(notification);
+                    displayNotification(notification);
                     Logger.log(notification);
                 }
             });
@@ -1316,11 +1327,11 @@ define(function (require, exports, module) {
                     projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
                     projectManager.selectFile(emuchartsFile);
                     notification = "MAL model successfully generated in file " + emuchartsFile.path();
-                    alert(notification);
+                    displayNotification(notification);
                     Logger.log(notification);
                 } else {
                     notification = "MAL Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-                    alert(notification);
+                    displayNotification(notification);
                     Logger.log(notification);
                 }
             });

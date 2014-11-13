@@ -45,7 +45,7 @@ define(function (require, exports, module) {
 
         // test 1
         txt = "inc [ display > display + 100 ] { display := display + s }";
-        summary += "\n\n[ test " + (++tot) + ": '" + txt + "' ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
         summary += ("\n  Parsing transition name... ");
@@ -105,27 +105,31 @@ define(function (require, exports, module) {
         
         
         // test 2
-        txt = "display <= (display + 100)";
-        summary += "\n\n[ test " + (++tot) + ": '" + txt + "' ]";
+        txt = "[ display <= (display + 100) ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
-        summary += "\n  Parsing expression... ";
-        if (ans.res && ans.res.type === "expression" &&
-                ans.res.val.length === 7 &&
-                ans.res.val[0].type === "identifier" &&
-                ans.res.val[0].val === "display" &&
-                ans.res.val[1].type === "binop" &&
-                ans.res.val[1].val === "<=" &&
-                ans.res.val[2].type === "par" &&
-                ans.res.val[2].val === "(" &&
-                ans.res.val[3].type === "identifier" &&
-                ans.res.val[3].val === "display" &&
-                ans.res.val[4].type === "binop" &&
-                ans.res.val[4].val === "+" &&
-                ans.res.val[5].type === "number" &&
-                ans.res.val[5].val === "100" &&
-                ans.res.val[6].type === "par" &&
-                ans.res.val[6].val === ")") {
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val &&
+                ans.res.val.identifier === "tick" &&
+                ans.res.val.actions === null &&
+                ans.res.val.cond && ans.res.val.cond.val &&
+                ans.res.val.cond.val.length === 7 &&
+                ans.res.val.cond.val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val === "display" &&
+                ans.res.val.cond.val[1].type === "binop" &&
+                ans.res.val.cond.val[1].val === "<=" &&
+                ans.res.val.cond.val[2].type === "par" &&
+                ans.res.val.cond.val[2].val === "(" &&
+                ans.res.val.cond.val[3].type === "identifier" &&
+                ans.res.val.cond.val[3].val === "display" &&
+                ans.res.val.cond.val[4].type === "binop" &&
+                ans.res.val.cond.val[4].val === "+" &&
+                ans.res.val.cond.val[5].type === "number" &&
+                ans.res.val.cond.val[5].val === "100" &&
+                ans.res.val.cond.val[6].type === "par" &&
+                ans.res.val.cond.val[6].val === ")") {
             summary += "[ok]";
             success++;
         } else {
@@ -136,39 +140,43 @@ define(function (require, exports, module) {
 
         
         // test 3
-        txt = "display := display + 100; step := step * 10;";
-        summary += "\n\n[ test " + (++tot) + ": '" + txt + "' ]";
+        txt = "{ display := display + 100; step := step * 10; }";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
-        summary += "\n  Parsing actions... ";
-        if (ans.res && ans.res.type === "actions" &&
-                ans.res.val.length === 2 &&
-                ans.res.val[0].type === "assignment" &&
-                ans.res.val[0].val.identifier.type === "identifier" &&
-                ans.res.val[0].val.identifier.val === "display" &&
-                ans.res.val[0].val.binop.type === "binop" &&
-                ans.res.val[0].val.binop.val === ":=" &&
-                ans.res.val[0].val.expression.type === "expression" &&
-                ans.res.val[0].val.expression.val.length === 3 &&
-                ans.res.val[0].val.expression.val[0].type === "identifier" &&
-                ans.res.val[0].val.expression.val[0].val === "display" &&
-                ans.res.val[0].val.expression.val[1].type === "binop" &&
-                ans.res.val[0].val.expression.val[1].val === "+" &&
-                ans.res.val[0].val.expression.val[2].type === "number" &&
-                ans.res.val[0].val.expression.val[2].val === "100" &&
-                ans.res.val[1].type === "assignment" &&
-                ans.res.val[1].val.identifier.type === "identifier" &&
-                ans.res.val[1].val.identifier.val === "step" &&
-                ans.res.val[1].val.binop.type === "binop" &&
-                ans.res.val[1].val.binop.val === ":=" &&
-                ans.res.val[1].val.expression.type === "expression" &&
-                ans.res.val[1].val.expression.val.length === 3 &&
-                ans.res.val[1].val.expression.val[0].type === "identifier" &&
-                ans.res.val[1].val.expression.val[0].val === "step" &&
-                ans.res.val[1].val.expression.val[1].type === "binop" &&
-                ans.res.val[1].val.expression.val[1].val === "*" &&
-                ans.res.val[1].val.expression.val[2].type === "number" &&
-                ans.res.val[1].val.expression.val[2].val === "10") {
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val &&
+                ans.res.val.actions &&
+                ans.res.val.actions.type === "actions" &&
+                ans.res.val.actions.val &&
+                ans.res.val.actions.val.length === 2 &&
+                ans.res.val.actions.val[0].type === "assignment" &&
+                ans.res.val.actions.val[0].val.identifier.type === "identifier" &&
+                ans.res.val.actions.val[0].val.identifier.val === "display" &&
+                ans.res.val.actions.val[0].val.binop.type === "binop" &&
+                ans.res.val.actions.val[0].val.binop.val === ":=" &&
+                ans.res.val.actions.val[0].val.expression.type === "expression" &&
+                ans.res.val.actions.val[0].val.expression.val.length === 3 &&
+                ans.res.val.actions.val[0].val.expression.val[0].type === "identifier" &&
+                ans.res.val.actions.val[0].val.expression.val[0].val === "display" &&
+                ans.res.val.actions.val[0].val.expression.val[1].type === "binop" &&
+                ans.res.val.actions.val[0].val.expression.val[1].val === "+" &&
+                ans.res.val.actions.val[0].val.expression.val[2].type === "number" &&
+                ans.res.val.actions.val[0].val.expression.val[2].val === "100" &&
+                ans.res.val.actions.val[1].type === "assignment" &&
+                ans.res.val.actions.val[1].val.identifier.type === "identifier" &&
+                ans.res.val.actions.val[1].val.identifier.val === "step" &&
+                ans.res.val.actions.val[1].val.binop.type === "binop" &&
+                ans.res.val.actions.val[1].val.binop.val === ":=" &&
+                ans.res.val.actions.val[1].val.expression.type === "expression" &&
+                ans.res.val.actions.val[1].val.expression.val.length === 3 &&
+                ans.res.val.actions.val[1].val.expression.val[0].type === "identifier" &&
+                ans.res.val.actions.val[1].val.expression.val[0].val === "step" &&
+                ans.res.val.actions.val[1].val.expression.val[1].type === "binop" &&
+                ans.res.val.actions.val[1].val.expression.val[1].val === "*" &&
+                ans.res.val.actions.val[1].val.expression.val[2].type === "number" &&
+                ans.res.val.actions.val[1].val.expression.val[2].val === "10") {
             summary += "[ok]";
             success++;
         } else {
@@ -178,33 +186,33 @@ define(function (require, exports, module) {
         }
         
         // test 4
-        txt = "display implies (display && -100 => 2.3)";
-        summary += "\n\n[ test " + (++tot) + ": '" + txt + "' ]";
+        txt = "[ display implies (display && -100 => 2.3) ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
-        summary += "\n  Parsing expression... ";
-        if (ans.res && ans.res.type === "expression" &&
-                ans.res.val.length === 10 &&
-                ans.res.val[0].type === "identifier" &&
-                ans.res.val[0].val === "display" &&
-                ans.res.val[1].type === "binop" &&
-                ans.res.val[1].val === "IMPLIES" &&
-                ans.res.val[2].type === "par" &&
-                ans.res.val[2].val === "(" &&
-                ans.res.val[3].type === "identifier" &&
-                ans.res.val[3].val === "display" &&
-                ans.res.val[4].type === "binop" &&
-                ans.res.val[4].val === "&&" &&
-                ans.res.val[5].type === "unaryop" &&
-                ans.res.val[5].val === "-" &&
-                ans.res.val[6].type === "number" &&
-                ans.res.val[6].val === "100" &&
-                ans.res.val[7].type === "binop" &&
-                ans.res.val[7].val === "=>" &&
-                ans.res.val[8].type === "number" &&
-                ans.res.val[8].val === "2.3" &&
-                ans.res.val[9].type === "par" &&
-                ans.res.val[9].val === ")") {
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.cond.val.length === 10 &&
+                ans.res.val.cond.val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val === "display" &&
+                ans.res.val.cond.val[1].type === "binop" &&
+                ans.res.val.cond.val[1].val === "IMPLIES" &&
+                ans.res.val.cond.val[2].type === "par" &&
+                ans.res.val.cond.val[2].val === "(" &&
+                ans.res.val.cond.val[3].type === "identifier" &&
+                ans.res.val.cond.val[3].val === "display" &&
+                ans.res.val.cond.val[4].type === "binop" &&
+                ans.res.val.cond.val[4].val === "&&" &&
+                ans.res.val.cond.val[5].type === "unaryop" &&
+                ans.res.val.cond.val[5].val === "-" &&
+                ans.res.val.cond.val[6].type === "number" &&
+                ans.res.val.cond.val[6].val === "100" &&
+                ans.res.val.cond.val[7].type === "binop" &&
+                ans.res.val.cond.val[7].val === "=>" &&
+                ans.res.val.cond.val[8].type === "number" &&
+                ans.res.val.cond.val[8].val === "2.3" &&
+                ans.res.val.cond.val[9].type === "par" &&
+                ans.res.val.cond.val[9].val === ")") {
             summary += "[ok]";
             success++;
         } else {
@@ -214,33 +222,33 @@ define(function (require, exports, module) {
         }
 
         // test 5
-        txt = "display != (display && -100 => 2.3)";
-        summary += "\n\n[ test " + (++tot) + ": '" + txt + "' ]";
+        txt = "[ display != (display && -100 => 2.3) ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
-        summary += "\n  Parsing expression... ";
-        if (ans.res && ans.res.type === "expression" &&
-                ans.res.val.length === 10 &&
-                ans.res.val[0].type === "identifier" &&
-                ans.res.val[0].val === "display" &&
-                ans.res.val[1].type === "binop" &&
-                ans.res.val[1].val === "!=" &&
-                ans.res.val[2].type === "par" &&
-                ans.res.val[2].val === "(" &&
-                ans.res.val[3].type === "identifier" &&
-                ans.res.val[3].val === "display" &&
-                ans.res.val[4].type === "binop" &&
-                ans.res.val[4].val === "&&" &&
-                ans.res.val[5].type === "unaryop" &&
-                ans.res.val[5].val === "-" &&
-                ans.res.val[6].type === "number" &&
-                ans.res.val[6].val === "100" &&
-                ans.res.val[7].type === "binop" &&
-                ans.res.val[7].val === "=>" &&
-                ans.res.val[8].type === "number" &&
-                ans.res.val[8].val === "2.3" &&
-                ans.res.val[9].type === "par" &&
-                ans.res.val[9].val === ")") {
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.cond.val.length === 10 &&
+                ans.res.val.cond.val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val === "display" &&
+                ans.res.val.cond.val[1].type === "binop" &&
+                ans.res.val.cond.val[1].val === "!=" &&
+                ans.res.val.cond.val[2].type === "par" &&
+                ans.res.val.cond.val[2].val === "(" &&
+                ans.res.val.cond.val[3].type === "identifier" &&
+                ans.res.val.cond.val[3].val === "display" &&
+                ans.res.val.cond.val[4].type === "binop" &&
+                ans.res.val.cond.val[4].val === "&&" &&
+                ans.res.val.cond.val[5].type === "unaryop" &&
+                ans.res.val.cond.val[5].val === "-" &&
+                ans.res.val.cond.val[6].type === "number" &&
+                ans.res.val.cond.val[6].val === "100" &&
+                ans.res.val.cond.val[7].type === "binop" &&
+                ans.res.val.cond.val[7].val === "=>" &&
+                ans.res.val.cond.val[8].type === "number" &&
+                ans.res.val.cond.val[8].val === "2.3" &&
+                ans.res.val.cond.val[9].type === "par" &&
+                ans.res.val.cond.val[9].val === ")") {
             summary += "[ok]";
             success++;
         } else {
@@ -250,23 +258,23 @@ define(function (require, exports, module) {
         }
 
         // test 6
-        txt = "not display == !display";
-        summary += "\n\n[ test " + (++tot) + ": '" + txt + "' ]";
+        txt = "[ not display == !display ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
-        summary += "\n  Parsing expression... ";
-        if (ans.res && ans.res.type === "expression" &&
-                ans.res.val.length === 5 &&
-                ans.res.val[0].type === "unaryop" &&
-                ans.res.val[0].val === "NOT" &&
-                ans.res.val[1].type === "identifier" &&
-                ans.res.val[1].val === "display" &&
-                ans.res.val[2].type === "binop" &&
-                ans.res.val[2].val === "==" &&
-                ans.res.val[3].type === "unaryop" &&
-                ans.res.val[3].val === "!" &&
-                ans.res.val[4].type === "identifier" &&
-                ans.res.val[4].val === "display") {
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.cond.val.length === 5 &&
+                ans.res.val.cond.val[0].type === "unaryop" &&
+                ans.res.val.cond.val[0].val === "NOT" &&
+                ans.res.val.cond.val[1].type === "identifier" &&
+                ans.res.val.cond.val[1].val === "display" &&
+                ans.res.val.cond.val[2].type === "binop" &&
+                ans.res.val.cond.val[2].val === "==" &&
+                ans.res.val.cond.val[3].type === "unaryop" &&
+                ans.res.val.cond.val[3].val === "!" &&
+                ans.res.val.cond.val[4].type === "identifier" &&
+                ans.res.val.cond.val[4].val === "display") {
             summary += "[ok]";
             success++;
         } else {
@@ -276,26 +284,26 @@ define(function (require, exports, module) {
         }
         
         // test 7
-        txt = "f(x) == !display";
-        summary += "\n\n[ test " + (++tot) + ": '" + txt + "' ]";
+        txt = "[ f(x) == !display ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
-        summary += "\n  Parsing expression... ";
-        if (ans.res && ans.res.type === "expression" &&
-                ans.res.val.length === 4 &&
-                ans.res.val[0].type === "function" &&
-                ans.res.val[0].val.identifier === "f" &&
-                ans.res.val[0].val.args.length === 1 &&
-                ans.res.val[0].val.args[0].type === "expression" &&
-                ans.res.val[0].val.args[0].val.length === 1 &&
-                ans.res.val[0].val.args[0].val[0].type === "identifier" &&
-                ans.res.val[0].val.args[0].val[0].val === "x" &&
-                ans.res.val[1].type === "binop" &&
-                ans.res.val[1].val === "==" &&
-                ans.res.val[2].type === "unaryop" &&
-                ans.res.val[2].val === "!" &&
-                ans.res.val[3].type === "identifier" &&
-                ans.res.val[3].val === "display") {
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.cond.val.length === 4 &&
+                ans.res.val.cond.val[0].type === "function" &&
+                ans.res.val.cond.val[0].val.identifier === "f" &&
+                ans.res.val.cond.val[0].val.args.length === 1 &&
+                ans.res.val.cond.val[0].val.args[0].type === "expression" &&
+                ans.res.val.cond.val[0].val.args[0].val.length === 1 &&
+                ans.res.val.cond.val[0].val.args[0].val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val.args[0].val[0].val === "x" &&
+                ans.res.val.cond.val[1].type === "binop" &&
+                ans.res.val.cond.val[1].val === "==" &&
+                ans.res.val.cond.val[2].type === "unaryop" &&
+                ans.res.val.cond.val[2].val === "!" &&
+                ans.res.val.cond.val[3].type === "identifier" &&
+                ans.res.val.cond.val[3].val === "display") {
             summary += "[ok]";
             success++;
         } else {
@@ -305,30 +313,30 @@ define(function (require, exports, module) {
         }
 
         // test 8
-        txt = "f(x,y) == !display";
-        summary += "\n\n[ test " + (++tot) + ": '" + txt + "' ]";
+        txt = "[ f(x,y) == !display ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
-        summary += "\n  Parsing expression... ";
-        if (ans.res && ans.res.type === "expression" &&
-                ans.res.val.length === 4 &&
-                ans.res.val[0].type === "function" &&
-                ans.res.val[0].val.identifier === "f" &&
-                ans.res.val[0].val.args.length === 2 &&
-                ans.res.val[0].val.args[0].type === "expression" &&
-                ans.res.val[0].val.args[0].val.length === 1 &&
-                ans.res.val[0].val.args[0].val[0].type === "identifier" &&
-                ans.res.val[0].val.args[0].val[0].val === "x" &&
-                ans.res.val[0].val.args[1].val.length === 1 &&
-                ans.res.val[0].val.args[1].type === "expression" &&
-                ans.res.val[0].val.args[1].val[0].type === "identifier" &&
-                ans.res.val[0].val.args[1].val[0].val === "y" &&
-                ans.res.val[1].type === "binop" &&
-                ans.res.val[1].val === "==" &&
-                ans.res.val[2].type === "unaryop" &&
-                ans.res.val[2].val === "!" &&
-                ans.res.val[3].type === "identifier" &&
-                ans.res.val[3].val === "display") {
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.cond.val.length === 4 &&
+                ans.res.val.cond.val[0].type === "function" &&
+                ans.res.val.cond.val[0].val.identifier === "f" &&
+                ans.res.val.cond.val[0].val.args.length === 2 &&
+                ans.res.val.cond.val[0].val.args[0].type === "expression" &&
+                ans.res.val.cond.val[0].val.args[0].val.length === 1 &&
+                ans.res.val.cond.val[0].val.args[0].val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val.args[0].val[0].val === "x" &&
+                ans.res.val.cond.val[0].val.args[1].val.length === 1 &&
+                ans.res.val.cond.val[0].val.args[1].type === "expression" &&
+                ans.res.val.cond.val[0].val.args[1].val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val.args[1].val[0].val === "y" &&
+                ans.res.val.cond.val[1].type === "binop" &&
+                ans.res.val.cond.val[1].val === "==" &&
+                ans.res.val.cond.val[2].type === "unaryop" &&
+                ans.res.val.cond.val[2].val === "!" &&
+                ans.res.val.cond.val[3].type === "identifier" &&
+                ans.res.val.cond.val[3].val === "display") {
             summary += "[ok]";
             success++;
         } else {
@@ -339,29 +347,29 @@ define(function (require, exports, module) {
 
         
         // test 9
-        txt = "f(x+y) == !display";
-        summary += "\n\n[ test " + (++tot) + ": '" + txt + "' ]";
+        txt = "[ f(x+y) == !display ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
-        summary += "\n  Parsing expression... ";
-        if (ans.res && ans.res.type === "expression" &&
-                ans.res.val.length === 4 &&
-                ans.res.val[0].type === "function" &&
-                ans.res.val[0].val.identifier === "f" &&
-                ans.res.val[0].val.args.length === 1 &&
-                ans.res.val[0].val.args[0].type === "expression" &&
-                ans.res.val[0].val.args[0].val[0].type === "identifier" &&
-                ans.res.val[0].val.args[0].val[0].val === "x" &&
-                ans.res.val[0].val.args[0].val[1].type === "binop" &&
-                ans.res.val[0].val.args[0].val[1].val === "+" &&
-                ans.res.val[0].val.args[0].val[2].type === "identifier" &&
-                ans.res.val[0].val.args[0].val[2].val === "y" &&
-                ans.res.val[1].type === "binop" &&
-                ans.res.val[1].val === "==" &&
-                ans.res.val[2].type === "unaryop" &&
-                ans.res.val[2].val === "!" &&
-                ans.res.val[3].type === "identifier" &&
-                ans.res.val[3].val === "display") {
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.cond.val.length === 4 &&
+                ans.res.val.cond.val[0].type === "function" &&
+                ans.res.val.cond.val[0].val.identifier === "f" &&
+                ans.res.val.cond.val[0].val.args.length === 1 &&
+                ans.res.val.cond.val[0].val.args[0].type === "expression" &&
+                ans.res.val.cond.val[0].val.args[0].val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val.args[0].val[0].val === "x" &&
+                ans.res.val.cond.val[0].val.args[0].val[1].type === "binop" &&
+                ans.res.val.cond.val[0].val.args[0].val[1].val === "+" &&
+                ans.res.val.cond.val[0].val.args[0].val[2].type === "identifier" &&
+                ans.res.val.cond.val[0].val.args[0].val[2].val === "y" &&
+                ans.res.val.cond.val[1].type === "binop" &&
+                ans.res.val.cond.val[1].val === "==" &&
+                ans.res.val.cond.val[2].type === "unaryop" &&
+                ans.res.val.cond.val[2].val === "!" &&
+                ans.res.val.cond.val[3].type === "identifier" &&
+                ans.res.val.cond.val[3].val === "display") {
             summary += "[ok]";
             success++;
         } else {
@@ -372,21 +380,21 @@ define(function (require, exports, module) {
 
         // test 10
         txt = "{ display := 0 }";
-        summary += "\n\n[ test " + (++tot) + ": '" + txt + "' ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
-        summary += "\n  Parsing expression... ";
-        if (ans.res && ans.res.type === "actions" &&
-                ans.res.val.length === 1 &&
-                ans.res.val[0].type === "assignment" &&
-                ans.res.val[0].val.identifier.type === "identifier" &&
-                ans.res.val[0].val.identifier.val === "display" &&
-                ans.res.val[0].val.binop.type === "binop" &&
-                ans.res.val[0].val.binop.val === ":=" &&
-                ans.res.val[0].val.expression.type === "expression" &&
-                ans.res.val[0].val.expression.val.length === 1 &&
-                ans.res.val[0].val.expression.val[0].type === "number" &&
-                ans.res.val[0].val.expression.val[0].val === "0") {
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.actions.val.length === 1 &&
+                ans.res.val.actions.val[0].type === "assignment" &&
+                ans.res.val.actions.val[0].val.identifier.type === "identifier" &&
+                ans.res.val.actions.val[0].val.identifier.val === "display" &&
+                ans.res.val.actions.val[0].val.binop.type === "binop" &&
+                ans.res.val.actions.val[0].val.binop.val === ":=" &&
+                ans.res.val.actions.val[0].val.expression.type === "expression" &&
+                ans.res.val.actions.val[0].val.expression.val.length === 1 &&
+                ans.res.val.actions.val[0].val.expression.val[0].type === "number" &&
+                ans.res.val.actions.val[0].val.expression.val[0].val === "0") {
             summary += "[ok]";
             success++;
         } else {
@@ -397,62 +405,29 @@ define(function (require, exports, module) {
 
         // test 11
         txt = "{ display := 0; step := 10 }";
-        summary += "\n\n[ test " + (++tot) + ": '" + txt + "' ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
-        summary += "\n  Parsing expression... ";
-        if (ans.res && ans.res.type === "actions" &&
-                ans.res.val.length === 2 &&
-                ans.res.val[0].type === "assignment" &&
-                ans.res.val[0].val.identifier.type === "identifier" &&
-                ans.res.val[0].val.identifier.val === "display" &&
-                ans.res.val[0].val.binop.type === "binop" &&
-                ans.res.val[0].val.binop.val === ":=" &&
-                ans.res.val[0].val.expression.type === "expression" &&
-                ans.res.val[0].val.expression.val.length === 1 &&
-                ans.res.val[0].val.expression.val[0].type === "number" &&
-                ans.res.val[0].val.expression.val[0].val === "0" &&
-                ans.res.val[1].val.identifier.type === "identifier" &&
-                ans.res.val[1].val.identifier.val === "step" &&
-                ans.res.val[1].val.binop.type === "binop" &&
-                ans.res.val[1].val.binop.val === ":=" &&
-                ans.res.val[1].val.expression.type === "expression" &&
-                ans.res.val[1].val.expression.val.length === 1 &&
-                ans.res.val[1].val.expression.val[0].type === "number" &&
-                ans.res.val[1].val.expression.val[0].val === "10") {
-            summary += "[ok]";
-            success++;
-        } else {
-            console.log(ans.err);
-            summary += "[FAIL]";
-            fail++;
-        }
-
-        // test 12
-        txt = "display := 0; step := 10 ";
-        summary += "\n\n[ test " + (++tot) + ": '" + txt + "' ]";
-        ans = parser.parseTransition(txt);
-        console.log(ans);
-        summary += "\n  Parsing expression... ";
-        if (ans.res && ans.res.type === "actions" &&
-                ans.res.val.length === 2 &&
-                ans.res.val[0].type === "assignment" &&
-                ans.res.val[0].val.identifier.type === "identifier" &&
-                ans.res.val[0].val.identifier.val === "display" &&
-                ans.res.val[0].val.binop.type === "binop" &&
-                ans.res.val[0].val.binop.val === ":=" &&
-                ans.res.val[0].val.expression.type === "expression" &&
-                ans.res.val[0].val.expression.val.length === 1 &&
-                ans.res.val[0].val.expression.val[0].type === "number" &&
-                ans.res.val[0].val.expression.val[0].val === "0" &&
-                ans.res.val[1].val.identifier.type === "identifier" &&
-                ans.res.val[1].val.identifier.val === "step" &&
-                ans.res.val[1].val.binop.type === "binop" &&
-                ans.res.val[1].val.binop.val === ":=" &&
-                ans.res.val[1].val.expression.type === "expression" &&
-                ans.res.val[1].val.expression.val.length === 1 &&
-                ans.res.val[1].val.expression.val[0].type === "number" &&
-                ans.res.val[1].val.expression.val[0].val === "10") {
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.actions.val.length === 2 &&
+                ans.res.val.actions.val[0].type === "assignment" &&
+                ans.res.val.actions.val[0].val.identifier.type === "identifier" &&
+                ans.res.val.actions.val[0].val.identifier.val === "display" &&
+                ans.res.val.actions.val[0].val.binop.type === "binop" &&
+                ans.res.val.actions.val[0].val.binop.val === ":=" &&
+                ans.res.val.actions.val[0].val.expression.type === "expression" &&
+                ans.res.val.actions.val[0].val.expression.val.length === 1 &&
+                ans.res.val.actions.val[0].val.expression.val[0].type === "number" &&
+                ans.res.val.actions.val[0].val.expression.val[0].val === "0" &&
+                ans.res.val.actions.val[1].val.identifier.type === "identifier" &&
+                ans.res.val.actions.val[1].val.identifier.val === "step" &&
+                ans.res.val.actions.val[1].val.binop.type === "binop" &&
+                ans.res.val.actions.val[1].val.binop.val === ":=" &&
+                ans.res.val.actions.val[1].val.expression.type === "expression" &&
+                ans.res.val.actions.val[1].val.expression.val.length === 1 &&
+                ans.res.val.actions.val[1].val.expression.val[0].type === "number" &&
+                ans.res.val.actions.val[1].val.expression.val[0].val === "10") {
             summary += "[ok]";
             success++;
         } else {
@@ -461,12 +436,12 @@ define(function (require, exports, module) {
             fail++;
         }
         
-        // test 13
+        // test 12
         txt = "click_off { isOn := false }";
-        summary += "\n\n[ test " + (++tot) + ": '" + txt + "' ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
-        summary += "\n  Parsing expression... ";
+        summary += "\n  Parsing transition... ";
         if (ans.res && ans.res.type === "transition" &&
                 ans.res.val.identifier.type === "identifier" &&
                 ans.res.val.identifier.val === "click_off" &&
@@ -488,6 +463,40 @@ define(function (require, exports, module) {
             success++;
         } else {
             console.log(ans.err);
+            summary += "[FAIL]";
+            fail++;
+        }
+
+        // test 13
+        txt = "click_off";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
+        ans = parser.parseTransition(txt);
+        console.log(ans);
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.identifier.type === "identifier" &&
+                ans.res.val.identifier.val === "click_off" &&
+                ans.res.val.identifier.type === "identifier") {
+            summary += "[ok]";
+            success++;
+        } else {
+            console.log(ans.err);
+            summary += "[FAIL]";
+            fail++;
+        }
+
+        // test 14
+        txt = "click_off :=";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
+        ans = parser.parseTransition(txt);
+        console.log(ans);
+        summary += "\n  Test with illegal transition... ";
+        if (!ans.res && ans.err) {
+            summary += "[ok]\nError message is:";
+            summary += "\n" + ans.err;
+            success++;
+        } else {
+            console.log("Error: parser does not report error for illegal transition expression");
             summary += "[FAIL]";
             fail++;
         }
