@@ -91,12 +91,14 @@ define(function (require, exports, module) {
             }
         } else if (event.event === "rename") { //file or folder added
             if (event.isDirectory) {
-                var parentFolderName = event.filePath.replace("/" + event.fileName, "");
-                var parent = pvsFilesListView.getTreeList().findNode(function (d) {
-                    return d.path === parentFolderName;
-                });
-                var newFolder = {name: event.fileName, path: event.filePath, children: [], isDirectory: true};
-                pvsFilesListView.getTreeList().addItem(newFolder, parent);
+                if (!pvsFilesListView.getTreeList().nodeExists(event.filePath)) {
+                    var parentFolderName = event.filePath.replace("/" + event.fileName, "");
+                    var parent = pvsFilesListView.getTreeList().findNode(function (d) {
+                        return d.path === parentFolderName;
+                    });
+                    var newFolder = {name: event.fileName, path: event.filePath, children: [], isDirectory: true};
+                    pvsFilesListView.getTreeList().addItem(newFolder, parent);
+                }
             } else if (!_projectManager.fileExists(event.filePath)) {
                 f = _projectManager.createProjectFile(event.filePath.replace(project.name() + "/", ""), null);
                 project.addProjectFile(f);

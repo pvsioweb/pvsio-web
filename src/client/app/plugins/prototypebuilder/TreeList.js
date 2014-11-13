@@ -286,9 +286,10 @@ define(function (require, exports, module) {
                 toRemove.parent.children.splice(index, 1);
                 fst.render(toRemove.parent);
             }
+            if (selectedData === toRemove && toRemove.parent) {
+                this.selectItem(toRemove.parent.path);   
+            }
         }
-        // clear selectedData by moving the selection to the root
-        this.selectItem(d3.select(el).select(".node").data()[0].path);
     };
     
     /**
@@ -305,9 +306,11 @@ define(function (require, exports, module) {
                 toRemove.parent.children.splice(index, 1);
                 fst.render(toRemove.parent);
             }
+            
+            if (selectedData === toRemove && toRemove.parent) {
+                this.selectItem(toRemove.parent.path);   
+            }
         }
-        // clear selectedData by moving the selection to the root
-        this.selectItem(d3.select(el).select(".node").data()[0].path);
     };
 
     TreeList.prototype.nodeExists = function (nodePath) {
