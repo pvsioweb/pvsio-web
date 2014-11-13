@@ -260,7 +260,7 @@ define(function (require, exports, module) {
 	 */
     function Emulink() {
         emuchartsPVSPrinter = new EmuchartsPVSPrinter("emuchart_th");
-        emuchartsLustrePrinter = new EmuchartsLustrePrinter("A");
+        emuchartsLustrePrinter = new EmuchartsLustrePrinter("emuchart_Lustre");
         emuchartsPIMPrinter = new EmuchartsPIMPrinter("emuchart_PIM");
         emuchartsCppPrinter = new EmuchartsCppPrinter("emuchart_Cpp");
         emuchartsMALPrinter = new EmuchartsMALPrinter("emuchart_MAL");
@@ -648,14 +648,14 @@ define(function (require, exports, module) {
         d3.select("#btn_menuSaveChart").on("click", function () {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
             if (!emuchartsManager.empty_chart()) {
-                var fileName = "emucharts.emdl";
+                var fileName = projectManager.project().name() + "_emucharts.emdl";
                 var content = JSON.stringify({
                     descriptor: {
                         file_type: "emdl",
                         version: "1.1",
                         description: "emucharts model",
-                        chart_name: "emucharts",
-                        pvs_file: "emucharts_th.pvs"
+                        chart_name: (projectManager.project().name() + "_emucharts"),
+                        pvs_file: (projectManager.project().name() + "_emucharts_th.pvs")
                     },
                     chart: {
                         states: emuchartsManager.getStates(),
@@ -1169,7 +1169,7 @@ define(function (require, exports, module) {
         d3.select("#btn_menuPVSPrinter").on("click", function () {
             //document.getElementById("menuCodeGenenerators").children[1].style.display = "none";
             var emucharts = {
-                name: "emucharts_th",
+                name: (projectManager.project().name() + "_emucharts_th"),
                 author: {
                     name: "Paolo Masci",
                     affiliation: "Queen Mary University of London, United Kingdom",

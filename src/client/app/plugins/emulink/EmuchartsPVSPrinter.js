@@ -57,6 +57,11 @@ define(function (require, exports, module) {
         return this;
     }
     
+    EmuchartsPVSPrinter.prototype.set_theory_name = function (name) {
+        theory_name = name;
+        return this;
+    };
+    
     /**
      * Prints PVS definitions for Emuchart states
      */
