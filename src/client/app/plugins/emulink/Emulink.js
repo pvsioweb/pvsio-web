@@ -463,10 +463,10 @@ define(function (require, exports, module) {
         });
         d3.select("#btnLoadEmuchart").on("click", function () {
             openChart(function f() {
-                // render emuchart                        
-                emuchartsManager.render();
                 // make svg visible and reset colors
                 resetToolbarColors();
+                // render emuchart                        
+                emuchartsManager.render();
                 // set initial editor mode
                 d3.select("#btn_toolbarBrowse").node().click();
             });

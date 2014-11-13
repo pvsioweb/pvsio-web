@@ -26,6 +26,8 @@ define(function (require, exports, module) {
     var height = 800;
     var colors = d3.scale.category10();
     var fontSize = 12;
+    var defaultWidth = 32;
+    var defaultHeight = 32;
     
     // constants for drawing transitions
     var stroke_width_large = "20px";
@@ -198,11 +200,15 @@ define(function (require, exports, module) {
         var dy_target = controlPoint1Y - edge.target.y;
         var dx_source = controlPoint1X - edge.source.x;
         var dy_source = controlPoint1Y - edge.source.y;
-        
-        var sourceWidth = edge.source.name.length * fontSize;
-        var sourceHeight = edge.source.height;
-        var targetWidth  = edge.target.name.length * fontSize;
-        var targetHeight = edge.target.height;
+
+        var targetWidth  = d3.select("#box_" + edge.target.id).attr("width");
+        var targetHeight = d3.select("#box_" + edge.target.id).attr("height");
+        var sourceWidth  = d3.select("#box_" + edge.source.id).attr("width");
+        var sourceHeight = d3.select("#box_" + edge.source.id).attr("height");
+//        var sourceWidth = edge.source.name.length * fontSize;
+//        var sourceHeight = edge.source.height;
+//        var targetWidth  = edge.target.name.length * fontSize;
+//        var targetHeight = edge.target.height;
         var sourceWidth05 = sourceWidth / 2;
         var sourceHeight05 = sourceHeight / 2;
         var targetWidth05 = targetWidth / 2;
@@ -386,8 +392,8 @@ define(function (require, exports, module) {
         var offsetY = (dy < 0) ? -dy : dy;
         offsetX = (offsetX > edge.target.width) ? offsetX : edge.target.width / 2;
         offsetY = (offsetY > edge.target.height) ? offsetY : edge.target.height / 2;
-        var targetWidth  = edge.target.name.length * fontSize;
-        var targetHeight = edge.target.height;
+        var targetWidth  = d3.select("#box_" + edge.target.id).attr("width");
+        var targetHeight = d3.select("#box_" + edge.target.id).attr("height");
         var targetWidth05  = targetWidth / 2;
         var targetHeight05 = targetHeight / 2;
 
@@ -490,6 +496,8 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     function refreshTransitions(transitions) {
+        transitions = transitions ||
+            d3.select("#ContainerStateMachine svg").select("#Transitions").selectAll(".transition");
         var label;
         var cpoints;
         // refresh paths and labels
@@ -572,6 +580,8 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     function refreshInitialTransitions(transitions) {
+        transitions = transitions ||
+            d3.select("#ContainerStateMachine svg").select("#Transitions").selectAll(".itransition");
         var label;
         // refresh paths and labels
         transitions.selectAll(".ipath").attr("d", function (edge) {
@@ -645,6 +655,7 @@ define(function (require, exports, module) {
             .append("svg:path")
             .attr("d", "M4,0 L1,-3 L10,0 L1,3 L4,0")
             .attr("fill", "black");
+
         
         var arrow_rotated = d3.select("#ContainerStateMachine").select("svg").select("defs")
             .append("svg:marker")
@@ -688,7 +699,7 @@ define(function (require, exports, module) {
             .append("svg:marker")
             .attr("id", "bubble")
             .attr("viewBox", "-5 -5 10 10")
-            .attr("refX", 6)
+            .attr("refX", -4)
             .attr("markerWidth", 16)
             .attr("markerHeight", 16)
             .attr("orient", "auto");
@@ -706,7 +717,7 @@ define(function (require, exports, module) {
             .append("svg:marker")
             .attr("id", "bubble-selected")
             .attr("viewBox", "-5 -5 10 10")
-            .attr("refX", 6)
+            .attr("refX", -4)
             .attr("markerWidth", 16)
             .attr("markerHeight", 16)
             .attr("orient", "auto");
@@ -921,7 +932,7 @@ define(function (require, exports, module) {
             // the former is for self-edges, the latter for all other edges
             var text = enteredTransitions.append("svg:text").classed("tlabel", true)
                 .attr("id", function (d) { return "tlabel_" + d.id; })
-                .style("font", "10px sans-serif")
+                .style("font", "12px sans-serif")
                 .style("text-rendering", "optimizeLegibility")
                 .style("cursor", "pointer") // change cursor shape
                 .attr("x", function (edge) {
@@ -951,9 +962,10 @@ define(function (require, exports, module) {
 
             var textPath = enteredTransitions.append("svg:text").classed("tlabel", true)
                 .attr("id", function (edge) { return "tlabel_" + edge.id; })
-                .style("font", "10px sans-serif")
+                .style("font", "12px sans-serif")
                 .style("text-rendering", "optimizeLegibility")
                 .style("text-anchor", "middle")
+                .attr("dy", -4)
                 .append("textPath")
                 .attr("xlink:href", function (edge) { return "#path_" + edge.id; })
                 .attr("startOffset", "50%")
@@ -1163,7 +1175,7 @@ define(function (require, exports, module) {
             // the former is for self-edges, the latter for all other edges
             var text = enteredTransitions.append("svg:text").classed("itlabel", true)
                 .attr("id", function (d) { return "itlabel_" + d.id; })
-                .style("font", "10px sans-serif")
+                .style("font", "12px sans-serif")
                 .style("text-rendering", "optimizeLegibility")
                 .style("cursor", "pointer") // change cursor shape
                 .text(function (edge) {
@@ -1232,30 +1244,31 @@ define(function (require, exports, module) {
         }
     };
     
+    function newBoxWidth(nodeID) {
+        return 18 + d3.select("#label_" + nodeID).node().getBoundingClientRect().width;
+    }
+        
     /**
 	 * Utility function to refresh rendered states.
      * @returns reference to the updated svg elements
 	 * @memberof EmuchartsEditor
 	 */
     function refreshStates(states) {
-        // refresh box size and position, if needed
-        states.select(".state_box").attr("width", function (node) {
-            var estimatedTextWidth = node.name.length * fontSize;
-            return (estimatedTextWidth > node.width) ? estimatedTextWidth : node.width;
-        }).attr("x", function (node) {
-            var estimatedTextWidth = node.name.length * fontSize;
-            return (estimatedTextWidth < 36) ? -18
-                    : -(node.name.length * fontSize) / 2;
-        });
-        // refresh move tool, if needed
-        states.select(".state_move").attr("x", function (node) {
-            var estimatedTextWidth = node.name.length * fontSize;
-            return (estimatedTextWidth < 36) ? 0
-                    : (node.name.length * fontSize) / 2 - 18;
-        });
+        states = states || d3.select("#ContainerStateMachine svg").select("#States").selectAll(".state");
+        
         // refresh labels
         states.select(".state_label").text(function (node) {
             return node.name;
+        });
+        // refresh box size and position, if needed
+        states.select(".state_box").attr("width", function (node) {
+            return newBoxWidth(node.id);
+        }).attr("x", function (node) {
+            return -(newBoxWidth(node.id) / 2);
+        });
+        // refresh move tool, if needed
+        states.select(".state_move").attr("x", function (node) {
+            return (newBoxWidth(node.id) / 2) - 18;
         });
         return states;
     }
@@ -1266,27 +1279,27 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     function drawStates(enteredStates) {
+        function nodeHeight(node) {
+            return node.height || defaultHeight;
+        }
+        function nodeWidth(node) {
+            return node.width || defaultWidth;
+        }
+        
+        
         enteredStates = enteredStates.append("svg:g").classed("state", true)
             .attr("id", function (node) { return node.id; })
             .attr("transform", function (node) {
-                return "translate(" + node.x + " " + node.y + ") scale(1.0)";
+                return "translate(" + node.x + ", " + node.y + ") scale(1.0)";
             });
         // draw states (selectAll will automatically iterate for all states)
         var state = enteredStates.append("svg:rect").classed("state_box", true)
             .attr("id", function (node) { return "box_" + node.id; })
-            .attr("width", function (node) {
-                // adjust node width if needed
-                var estimatedTextWidth = node.name.length * fontSize;
-                return (estimatedTextWidth > node.width) ? estimatedTextWidth : node.width;
-            })
-            .attr("height", function (node) { return node.height; })
+            .attr("width", function (node) { return nodeWidth(node); })
+            .attr("height", function (node) { return nodeWidth(node); })
             // translate x,y so that the box is centered there
-            .attr("x", function (node) {
-                var estimatedTextWidth = node.name.length * fontSize;
-                return (estimatedTextWidth < 36) ? -18
-                        : -(node.name.length * fontSize) / 2;
-            })
-            .attr("y", function (node) { return -node.width / 2; })
+            .attr("x", function (node) { return -(nodeWidth(node) / 2); })
+            .attr("y", function (node) { return -(nodeHeight(node) / 2); })
             .attr("rx", 6).attr("ry", 6) // draw rounded corners
             .style("opacity", "0.9") // make the node slightly transparent
             .style("cursor", "pointer") // change cursor shape on mouse over
@@ -1302,12 +1315,8 @@ define(function (require, exports, module) {
             .attr("id", function (node) { return "resize_" + node.id; })
             .attr("width", 20).attr("height", 20)
             // place the resize tool at the lower right corner of the box
-            .attr("x", function (node) { // FIXME: use symbolic names rather than embedded constants!
-                var estimatedTextWidth = node.name.length * fontSize;
-                return (estimatedTextWidth < 36) ? 0
-                        : (node.name.length * fontSize) / 2 - 18;
-            })
-            .attr("y", function (node) { return node.height / 2 - 18; })
+            .attr("x", function (node) { return nodeWidth(node) / 2 - 18; })
+            .attr("y", function (node) { return nodeHeight(node) / 2 - 18; })
             .attr("rx", 2).attr("ry", 2) // draw rouded corners
             .style("stroke", "gray") // set border colour
             .style("stroke-width", "2") // set border size
@@ -1321,6 +1330,7 @@ define(function (require, exports, module) {
             .style("font", "12px sans-serif")
             .style("text-rendering", "optimizeLegibility")
             .text(function (node) { return node.name; });
+        
         return enteredStates;
     }
     
@@ -1574,9 +1584,18 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsEditor
 	 */
     EmuchartsEditor.prototype.render = function () {
+        this.renderStates();
         this.renderTransitions();
         this.renderInitialTransitions();
-        return this.renderStates();
+        this.refresh();
+        return this;
+    };
+    
+    EmuchartsEditor.prototype.refresh = function () {
+        refreshStates();
+        refreshTransitions();
+        refreshInitialTransitions();
+        return this;
     };
 
     /**
