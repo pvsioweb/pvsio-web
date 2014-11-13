@@ -59,6 +59,25 @@ function stat(fullPath) {
 	});
 }
 /**
+    Reads the content of the file at the specified fullPath
+    @param {String} fullPath the full path to the file to read
+    @param {String} encoding the encoding of the file being read (default is utf8)
+    @returns {Promise} a promise that resolves with the content of the file
+*/
+function readFile(fullPath, encoding) {
+    encoding = encoding || "utf8";
+    return new Promise(function (resolve, reject) {
+        fs.readFile(fullPath, {encoding: encoding}, function (err, content) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(content);
+            }
+        });
+    });
+}
+
+/**
  Writes a file with the specified content to the specified path. If the parent folders of the specified path
  do not exist, they are created
  @param {string} fullPath the full path to the file
@@ -102,12 +121,11 @@ function writeFile(fullPath, fileContent, fileEncoding, opt) {
 /**
 	Recursively reads the files in a directory using promises
 	@param {string} fullPath the path to the directory to read
-	@param {boolean} getContent a flag to set whehter or not to return the content of the file
-    @param {array} filter a list of extensions for files to get
+    @param {array} filter a list of extensions for files whose contents we wish to get. If filter is null, false or undefined then no content will be returned for any files
 	@returns {Promise} a promise that resolves with an array of objects  for the files in the given directory.
     The object may contain just filePath prooperties or may include fileContent if the getContent parameter was passed
 */
-function getFilesInDirectory(fullPath, getContent, filter) {
+function getFilesInDirectory(fullPath, filter) {
         return stat(fullPath).then(function (f) {
             if (f.isDirectory()) {
                 return new Promise(function (resolve, reject) {
@@ -115,11 +133,9 @@ function getFilesInDirectory(fullPath, getContent, filter) {
                         if (err) {
                             reject(err);
                         } else {
-                            var promises = files.filter(function (f) {
-                                return filter.indexOf(path.extname(f).toLowerCase()) > -1;
-                            }).map(function (name) {
+                            var promises = files.map(function (name) {
                                 var filePath = path.join(fullPath, name);
-                                return getFilesInDirectory(filePath, getContent, filter);
+                                return getFilesInDirectory(filePath, filter);
                             });
 
                             Promise.all(promises)
@@ -138,22 +154,23 @@ function getFilesInDirectory(fullPath, getContent, filter) {
                     });
                 });
             } else {
-                if (!getContent) {
-                    return Promise.resolve({filePath: fullPath});
-                }
                 //resolve with the filename and content
                 return new Promise(function (resolve, reject) {
                     var ext = path.extname(fullPath),
                         isImage = imageExts.indexOf(ext.toLowerCase()) > -1;
                     var opt = {encoding: isImage ? "base64" : "utf8"};
-                    fs.readFile(fullPath, opt, function (err, data) {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve({filePath: fullPath, fileContent: isImage ?
-                                     ("data:image/" + ext.substr(1).toLowerCase() + ";base64," + data) : data, encoding: opt.encoding});
-                        }
-                    });
+                    if (filter && filter.indexOf(ext) > -1) {
+                        fs.readFile(fullPath, opt, function (err, data) {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve({filePath: fullPath, fileContent: isImage ?
+                                         ("data:image/" + ext.substr(1).toLowerCase() + ";base64," + data) : data, encoding: opt.encoding});
+                            }
+                        });
+                    } else {
+                        resolve({filePath: fullPath, encoding: opt.encoding});
+                    }
                 });
             }
         }, function (err) {
@@ -243,7 +260,7 @@ function openProject(projectName) {
 
 	return new Promise(function (resolve, reject) {
 		//get filepaths and their contents
-		getFilesInDirectory(projectPath, true, filesFilter)
+		getFilesInDirectory(projectPath, filesFilter)
 			.then(function (files) {
 				res.projectFiles = files.map(function (f) {
 					f.filePath = f.filePath.replace(projectPath, projectName);
@@ -314,15 +331,13 @@ function renameFile(oldPath, newPath) {
 			});
 		});
 	});
-	
-	
-	
 }
 
 module.exports = {
 	renameFile: renameFile,
 	mkdirRecursive: mkdirRecursive,
 	stat: stat,
+    readFile: readFile,
 	writeFile: writeFile,
 	getFilesInDirectory: getFilesInDirectory,
 	createProject: createProject,

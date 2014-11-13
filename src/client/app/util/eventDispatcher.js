@@ -71,6 +71,7 @@ define(function (require, exports, module) {
 				}//end for
 			}
 			//do nothing if this event type has no listeners
+            return this;
 		};
 		that.removeListener = removeListener;
 		

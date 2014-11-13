@@ -60,7 +60,52 @@ define(function (require, exports, module) {
             }
         }
     }
-	
+	/**
+        Event listener for file system updates
+    */
+    function onFSUpdate(event) {
+        var f, project = _projectManager.project();
+        if (event.event === "delete") {
+            f = project.getProjectFile(event.filePath);
+            if (f) {
+                project.removeFile(f);
+            } else {
+                pvsFilesListView.getTreeList().removeItem(event.filePath);
+            }
+        } else if (event.event === "rename" && event.old) {
+            if (event.isDirectory) {
+                project.updateFolderName(event.old.filePath, event.filePath);
+            } else {
+                f = project.getProjectFile(event.old.filePath);
+                if (f) {
+                    f.path(event.filePath);
+                }
+            }
+            if (pvsFilesListView) {
+                var node = pvsFilesListView.getTreeList().findNode(function (d) {
+                    return d.path === event.old.filePath;
+                });
+                if (node) {
+                    pvsFilesListView.getTreeList().renameItem(node, event.fileName);   
+                }
+            }
+        } else if (event.event === "rename") { //file or folder added
+            if (event.isDirectory) {
+                if (!pvsFilesListView.getTreeList().nodeExists(event.filePath)) {
+                    var parentFolderName = event.filePath.replace("/" + event.fileName, "");
+                    var parent = pvsFilesListView.getTreeList().findNode(function (d) {
+                        return d.path === parentFolderName;
+                    });
+                    var newFolder = {name: event.fileName, path: event.filePath, children: [], isDirectory: true};
+                    pvsFilesListView.getTreeList().addItem(newFolder, parent);
+                }
+            } else if (!_projectManager.fileExists(event.filePath)) {
+                f = _projectManager.createProjectFile(event.filePath.replace(project.name() + "/", ""), null);
+                project.addProjectFile(f);
+            }
+        }
+    }
+    
 	/**
 	 * Creates a new instance of the ProjectManager. It currently adds a listview for the files loaded into the
 	 * project and keeps the list up to date whenever the project changes or the files within the project changes.
@@ -73,11 +118,20 @@ define(function (require, exports, module) {
 		eventDispatcher(this);
 		_projectManager = this;
         project = project || new Project("");
+            
+        function registerFSUpdateEvents() {
+            WSManager.getWebSocket().removeListener("FileSystemUpdate", onFSUpdate);
+            WSManager.getWebSocket().addListener("FileSystemUpdate", onFSUpdate);
+        }
+        
 		/**
             get or set the current {Project}
             @type {Project}
         */
 		this.project = property.call(this, project)
+            .addListener("PropertyChanged", function (e) {
+                registerFSUpdateEvents(e.fresh);
+            })
 			.addListener("ProjectNameChanged", projectNameChanged)
 			.addListener("PropertyChanged", function (e) {
 				e.fresh.addListener("ProjectMainSpecFileChanged", noop)
@@ -95,6 +149,7 @@ define(function (require, exports, module) {
                 return "Are you sure you want to exit? All unsaved changed will be lost.";
             }
         };
+        registerFSUpdateEvents(project);
 	}
 	/**
 		Returns a new project file with the specified theory name
@@ -207,7 +262,7 @@ define(function (require, exports, module) {
         if (obj.projectFiles) {
             ///FIXME handle scripts and widgetDefinitions (maybe we dont need to)
             obj.projectFiles.forEach(function (file) {
-                if (file && file.filePath && file.fileContent) {
+                if (file && file.filePath) {
                     pf = p.addProjectFile(file.filePath, file.fileContent).encoding(file.encoding);
                     if (file.filePath.indexOf("pvsioweb.json") > 0) {
                         mainFileName = JSON.parse(file.fileContent).mainPVSFile;
@@ -373,12 +428,16 @@ define(function (require, exports, module) {
 	};
 	/**
 		Removes the specified file from the list of project files and deletes the file from disk
-		@param {ProjectFile} f the file to remove
+		@param {ProjectFile|string} f the file to remove or the path to the file to remove
 		@returns {Promise} a promise that resolves with the deleted file or an error
 	*/
 	ProjectManager.prototype.removeFile = function (f) {
 		var ws = WSManager.getWebSocket(), notification;
 		var project = this.project();
+        f = typeof f === "string" ? project.getProjectFile(f) : project.getProjectFile(f.path());
+        if (!f) {
+            return Promise.reject("File with the specified path '" + f.path() + "' does not exist");   
+        }
 		return new Promise(function (resolve, reject) {
 			ws.send({type: "deleteFile", filePath: f.path()}, function (err) {
 				if (!err) {
@@ -411,7 +470,8 @@ define(function (require, exports, module) {
     };
     
 	/**
-		Adds the specified file to the list of project files
+		Adds the specified file to the list of project files. If a file with exactly the same path exists 
+        in the project, an error is thrown. Newly added files are  written to the disk.
 		@param {ProjectFile} file the file to add
 		@param {bool} suppressEvent the parameter to flag whether or not to suppress the new file event
 		@returns {Promise} a promise that resolves with the file added
@@ -419,6 +479,11 @@ define(function (require, exports, module) {
 	ProjectManager.prototype.addFile = function (file, suppressEvent) {
 		var ws = WSManager.getWebSocket();
 		var project = this.project();
+        var existingFile = project.getProjectFile(file.path());
+        if (existingFile && file.content() !== existingFile.content()) {
+           throw new Error("Attempt to add a file with an existing path. '" +
+                            file.path() + "' already exists in the project");
+        }
 		return new Promise(function (resolve, reject) {
 			ws.writeFile({filePath: file.path(), fileContent: file.content(), encoding: file.encoding()}, function (err) {
 				if (!err) {
@@ -426,7 +491,11 @@ define(function (require, exports, module) {
 					var notification = "File " + file.path() + " added to project.";
 					Logger.log(notification);
 					NotificationManager.show(notification);
-					project.addProjectFile(file, suppressEvent);
+                    try {
+					   project.addProjectFile(file, suppressEvent);
+                    } catch (e) {
+                       Logger.error(e.toString()); 
+                    }
 					resolve(file);
 				} else {
 					reject(err);
@@ -676,17 +745,17 @@ define(function (require, exports, module) {
 	};
 	
 	/**
-	 * Saves pvs files to disk, interactive version, asks to set project name if current project has default name
-	 * @param {ProjectFile} pvsFiles The spec files to save.
+	 * Saves project files to disk
+	 * @param {ProjectFile} files The  files to save.
 	 * @param {Project~onProjectSaved} cb The callback function to invoke when file has been saved
 	 * @memberof Project
 	 */
-	ProjectManager.prototype.saveFiles = function (pvsFiles, cb) {
-        if (pvsFiles) {
+	ProjectManager.prototype.saveFiles = function (files, cb) {
+        if (files) {
             var project = this.project();
-            project.saveFile(pvsFiles, function (err, res) {
+            project.saveFile(files, function (err, res) {
                 if (!err) {
-                    Logger.log(pvsFiles.map(function (f) {return f.path(); }).toString() + " saved.");
+                    Logger.log(files.map(function (f) {return f.path(); }).toString() + " saved.");
                 } else { Logger.log(err); }
                 if (typeof cb === "function") { cb(err, res); }
             });
@@ -703,11 +772,13 @@ define(function (require, exports, module) {
     
     	
     /**
-     * checks if file pf already exists in the project
+     * checks if a file with the same path as pf already exists in the project
+     * @param {ProjectFile|String} pf the path to a projectfile or the projectfile to check for existence
      * returns true if pf exists, otherwise returns false
      */
     ProjectManager.prototype.fileExists = function (pf) {
-       return this.project().fileExists(pf.path());
+        var path = typeof pf === "string" ? pf : pf.path();
+        return this.project().fileExists(path);
     };
 
     /**

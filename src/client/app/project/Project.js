@@ -229,7 +229,6 @@ define(function (require, exports, module) {
      * @param {boolean} supressEvent Set true to supress the FileAdded event or false otherwise
 	 * @memberof Project
 	 */
-    ///FIXME this function should throw an error if the filepath already exists?
     //Project.prototype.addProjectFile = function (filePath, fileContent, encoding, suppressEvent) {
 	Project.prototype.addProjectFile = function (newFile, suppressEvent) {
 		var filePath, fileContent, encoding;
@@ -244,7 +243,12 @@ define(function (require, exports, module) {
 				.content(fileContent)
 				.encoding(encoding);
 		}
-		_projectFiles.push(newFile);
+        if (p.getProjectFile(newFile.path())) {
+            throw new Error("Attempt to add a file with an existing path. '" +
+                            newFile.path() + "' already exists in the project");
+        } else {
+            _projectFiles.push(newFile);
+        }
 		//for now always suppress fileadded event for image files
 		suppressEvent = suppressEvent || newFile.isImage();
         if (!suppressEvent ) {
