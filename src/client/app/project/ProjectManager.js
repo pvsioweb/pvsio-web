@@ -491,7 +491,11 @@ define(function (require, exports, module) {
 					var notification = "File " + file.path() + " added to project.";
 					Logger.log(notification);
 					NotificationManager.show(notification);
-					project.addProjectFile(file, suppressEvent);
+                    try {
+					   project.addProjectFile(file, suppressEvent);
+                    } catch (e) {
+                       Logger.error(e.toString()); 
+                    }
 					resolve(file);
 				} else {
 					reject(err);
