@@ -115,11 +115,12 @@ define(function (require, exports, module) {
                     ["\\/",                     "return '/'"],
                     ["-",                       "return '-'"],
                     ["(?!(?:(\\!\\=)))" + // filtering out !=
-                        "(\\!|NOT|not)",       "return 'NOT'"],
+                        "(\\!|NOT|not)",        "return 'NOT'"],
                     ["\\+",                     "return '+'"],
                     ["(\\!\\=)",                "return '!='"],
-                    [//"(?!(?:(\\=\\>)))" + // filtering out => (implication) -- this is needed only in the case we use = as comparison operator
-                        "(\\=\\=)",                "return '=='"],
+                    ["(?!(?:(\\=\\>|\\=\\=)))" + // filtering out implication and equality
+                         "(\\=)",               "return '='"],
+                    [    "(\\=\\=)",            "return '=='"],
                     ["(?!(?:(\\>\\=)))" + // filtering out >=
                         "(\\>)",   "return '>'"],
                     ["(\\>\\=)",                "return '>='"],
@@ -155,9 +156,7 @@ define(function (require, exports, module) {
             "start": "production",
             "bnf": {
                 "production": [
-                    ["transition", "return $transition"],
-                    ["actions",    "return $actions"],
-                    ["cond",       "return $cond"]
+                    ["transition",   "return $transition"]
                 ],
                 "transition": [
                     ["id [ cond ] { actions } ",
@@ -165,14 +164,19 @@ define(function (require, exports, module) {
                     ["id { actions } ",
                         "$$ = { type: 'transition', val: { identifier: $id, cond: null, actions: $actions }}"],
                     ["id [ cond ] ",
-                        "$$ = { type: 'transition', val: { identifier: $id, cond: $cond, actions: null }}"]
+                        "$$ = { type: 'transition', val: { identifier: $id, cond: $cond, actions: null }}"],
+                    ["id ",
+                        "$$ = { type: 'transition', val: { identifier: $id, cond: null, actions: null }}"],
+                    ["[ cond ] ",
+                        "$$ = { type: 'transition', val: { identifier: 'tick', cond: $cond, actions: null }}"],
+                    ["{ actions } ",
+                        "$$ = { type: 'transition', val: { identifier: 'tick', cond: null, actions: $actions }}"]
                 ],
                 "cond": [
                     ["expression", "$$ = $expression"]
                 ],
                 "actions": [
-                    ["a", "$$ = { type: 'actions', val: $a }"],
-                    ["{ a }", "$$ = { type: 'actions', val: $a }"]
+                    ["a", "$$ = { type: 'actions', val: $a }"]
                 ],
                 "a": [
                     ["assignment", "if (!Array.isArray($$)) { $$ = []; } $$.push($assignment)"],
@@ -247,7 +251,7 @@ define(function (require, exports, module) {
      *  - Number objects have type 'number' and the value is the string representation of the number.
      */
     EmuchartsParser.prototype.parseTransition = function (label) {
-        console.log("Parsing expression...");
+        console.log("Parsing expression " + label);
         var ans = { err: null, res: null };
         try {
             ans.res = this.parser.parse(label);

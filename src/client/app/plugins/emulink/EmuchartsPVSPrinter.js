@@ -11,19 +11,44 @@ define(function (require, exports, module) {
 
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var EmuchartsParser_UnitTest = require("plugins/emulink/EmuchartsParser_UnitTest");
+    var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
+    
     
     var theory_name;
     var parser;
     
     var parserUnitTest;
     var unitTestEnabled = true;
-
     
+    var predefined_variables = {
+        previous_state: { name: "previous_state", type: "MachineState" },
+        current_state:  { name: "current_state", type: "MachineState" }
+    };
+    
+    var automaticConstants;
+
+    var displayNotification = function (msg, title) {
+        title = title || "Notification";
+        displayNotificationView.create({
+            header: title,
+            message: msg,
+            buttons: ["Ok"]
+        }).on("ok", function (e, view) {
+            view.remove();
+        });
+    };
+    var displayError = function (msg) {
+        displayNotification(msg, "Compilation Error");
+    };
+    var displayWarning = function (msg) {
+        displayNotification(msg, "Warning");
+    };
     /**
 	 * Constructor
 	 */
     function EmuchartsPVSPrinter(name) {
         theory_name = name;
+        automaticConstants = [];
         parser = new EmuchartsParser();
         if (unitTestEnabled) {
             parserUnitTest = new EmuchartsParser_UnitTest();
@@ -55,8 +80,10 @@ define(function (require, exports, module) {
      */
     function print_utils() {
         var ans = "\n  %-- utility functions";
-        ans += "\n  enter_into(ms: MachineState)(st: State): State = st WITH [ current_state := ms ]";
-        ans += "\n  leave_state(ms: MachineState)(st: State): State = st WITH [ previous_state := ms ]\n";
+        ans += "\n  enter_into(ms: " + predefined_variables.current_state.type +
+                        ")(st: State): State = st WITH [ " + predefined_variables.current_state.name + " := ms ]";
+        ans += "\n  leave_state(ms: " + predefined_variables.previous_state.type +
+                        ")(st: State): State = st WITH [ " + predefined_variables.previous_state.name + " := ms ]\n";
         return ans;
     }
     
@@ -93,6 +120,7 @@ define(function (require, exports, module) {
         }
         
         var ret = { err: null, res: null };
+        emuchart.constants = emuchart.constants || [];
 
         if (emuchart.initial_transitions && emuchart.initial_transitions.length > 0) {
             var theTransition = {
@@ -125,8 +153,8 @@ define(function (require, exports, module) {
                 signature:  "init(x: real): State",
                 cases: {
                     st: [
-                        ("current_state := " + theTransition.to),
-                        ("previous_state := " + theTransition.to)
+                        (predefined_variables.current_state.name + " := " + theTransition.to),
+                        (predefined_variables.previous_state.name + " := " + theTransition.to)
                     ],
                     letExpr: [],
                     inExpr: [ ("st") ]
@@ -136,7 +164,8 @@ define(function (require, exports, module) {
                 emuchart.variables.forEach(function (variable) {
                     var initialisation = null;
                     // look for the initialisation in the actions
-                    if (theTransition.actions.val.length) {
+                    if (theTransition.actions && theTransition.actions.val &&
+                            theTransition.actions.val.length) {
                         theTransition.actions.val.forEach(function (action) {
                             if (action.val.identifier.val === variable.name) {
                                 action.val.expression.val.forEach(function (term) {
@@ -147,20 +176,39 @@ define(function (require, exports, module) {
                     }
                     if (initialisation === null) {
                         var msg = "Warning: initial value for variable " + variable.name +
+<<<<<<< HEAD
                                     " was not specified.";
                         alert(msg);
+=======
+                                    " of type " + variable.type + " was not specified.";
+>>>>>>> 98e42e4d4cbd6684ad05c94dcae28e7bf029cfe2
                         // set a default value -- try to check the type so that an appropriate value can be chosen
                         if (variable.type.toLowerCase() === "bool") {
                             initialisation = variable.name + " := false";
-                        } else {
+                        } else if (variable.type.toLowerCase() === "real" ||
+                                        variable.type.toLowerCase() === "int" ||
+                                        variable.type.toLowerCase() === "nat" ||
+                                        variable.type.toLowerCase() === "posnat" ||
+                                        variable.type.toLowerCase() === "posreal") {
                             initialisation = variable.name + " := 0";
+                            msg += "\nNumeric variable detected: setting value 0.";
+                        } else {
+                            var constant = "initial_" + variable.type;
+                            automaticConstants.push({
+                                name: constant,
+                                type: variable.type
+                            });
+                            initialisation = variable.name + " := " + constant;
+                            msg += "\nUsing symbolic constant " + constant;
                         }
+                        displayWarning(msg);
                     }
                     pvsFunction.cases.st.push(initialisation);
                 });
             }
     
-            if (theTransition.actions.val.length) {
+            if (theTransition.actions && theTransition.actions.val &&
+                    theTransition.actions.val.length) {
                 theTransition.actions.val.forEach(function (action) {
                     // actions involving variables have already been taken into account
                     var isVariable = false;
@@ -202,13 +250,18 @@ define(function (require, exports, module) {
      */
     EmuchartsPVSPrinter.prototype.print_transitions = function (emuchart) {
         function isVariable(term) {
-            if (term.type === "identifier" && emuchart.variables) {
-                var i = 0;
-                while (i < emuchart.variables.length) {
-                    if (term.val === emuchart.variables[i].name) {
-                        return true;
+            if (term.type === "identifier") {
+                if (term.val === predefined_variables.current_state.name ||
+                        term.val === predefined_variables.previous_state.name) {
+                    return true;
+                }
+                if (emuchart.variables) {
+                    var i = 0;
+                    for (i = 0; i < emuchart.variables.length; i++) {
+                        if (term.val === emuchart.variables[i].name) {
+                            return true;
+                        }
                     }
-                    i++;
                 }
             }
             return false;
@@ -238,7 +291,7 @@ define(function (require, exports, module) {
                         to:   t.target.name
                     });
                 } else {
-                    ret.err = ans.err;
+                    ret.err = t.name + "\n" + ans.err;
                     console.log(ans.err);
                     return ret;
                 }
@@ -307,8 +360,11 @@ define(function (require, exports, module) {
                                 expr += tmp.join(" ") + " ]";
                                 letExpr.push(expr);
                             });
-                            inExpr = "IN enter_into(" + transition.to + ")(new_st)";
                         }
+<<<<<<< HEAD
+=======
+                        inExpr = "IN enter_into(" + transition.to + ")(new_st)";
+>>>>>>> 98e42e4d4cbd6684ad05c94dcae28e7bf029cfe2
                         
                         permissionFunction.cases.push("(" + cond.join(" AND ") + ")");
                         transitionFunction.cases.push({ cond: cond, letExpr: letExpr, inExpr: inExpr });
@@ -331,7 +387,11 @@ define(function (require, exports, module) {
                     expr += c.inExpr;
                     tmp.push(expr);
                 });
+<<<<<<< HEAD
                 ans += tmp.join(",\n") + "\n    ENDCOND";
+=======
+                ans += tmp.join(",\n") + "\n    ENDCOND\n\n";
+>>>>>>> 98e42e4d4cbd6684ad05c94dcae28e7bf029cfe2
             });
             ret.res = ans;
         }
@@ -364,9 +424,15 @@ define(function (require, exports, module) {
             ans += "\n  %-- constants\n";
             constants.forEach(function (c) {
                 ans += "  " + c.name + ": " + c.type;
-                if (c.value) {
-                    ans += " = " + c.value;
-                }
+                if (c.value) { ans += " = " + c.value; }
+                ans += "\n";
+            });
+        }
+        if (automaticConstants.length > 0) {
+            ans += "\n  %-- constants generated by PVSPrinter\n";
+            automaticConstants.forEach(function (c) {
+                ans += "  " + c.name + ": " + c.type;
+                if (c.value) { ans += " = " + c.value; }
                 ans += "\n";
             });
         }
@@ -417,14 +483,14 @@ define(function (require, exports, module) {
      * Prints the entire PVS theory
      */
     EmuchartsPVSPrinter.prototype.print = function (emuchart) {
+        automaticConstants = [];
         var ret = { err: null, res: null };
         var initialTransitions = this.print_initial_transition(emuchart);
         var transitions = this.print_transitions(emuchart);
-        if (initialTransitions.err) {
-            ret.err.push(initialTransitions.err);
-        }
-        if (transitions.err) {
-            ret.err.push(initialTransitions.err);
+        if (initialTransitions.err || transitions.err) {
+            ret.err = initialTransitions.err || transitions.err;
+            displayError(ret.err);
+            return ret;
         }
         
         var ans = this.print_descriptor(emuchart) + "\n";

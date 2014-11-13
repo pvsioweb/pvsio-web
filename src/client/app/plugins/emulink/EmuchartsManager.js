@@ -360,7 +360,8 @@ define(function (require, exports, module) {
 	 * @memberof EmuchartsManager
 	 */
     EmuchartsManager.prototype.render = function () {
-        return _selectedEditor.render();
+        _selectedEditor.render();
+        return this;
     };
     
     /**
