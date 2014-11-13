@@ -64,6 +64,7 @@ function run() {
     function processCallback(tok, socket) {
         //called when any data is recieved from pvs process
         //if the type of the token is 'processExited' then send message to client if the socket is still open
+        tok.time  = tok.time || {server: {}};
         tok.time.server.sent = new Date().getTime();
         if (tok.type === 'processExited') {
             if (socket.readyState === 1) {
