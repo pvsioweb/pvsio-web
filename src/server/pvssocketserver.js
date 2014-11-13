@@ -244,7 +244,7 @@ function run() {
         var map = {
             "renameFile": function (token, socket, socketid) {
 				renameFile(token.oldPath, token.newPath).then(function () {
-					processCallback({id: token.id, socketId: socketid}, socket);
+					processCallback({id: token.id, socketId: socketid, time: token.time}, socket);
 				}, function (err) {
 					 logger.debug("warning, error while renaming " + token.oldPath +
                                     " into " + token.newPath + " (" + err + ")");
