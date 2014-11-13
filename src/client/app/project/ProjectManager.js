@@ -470,7 +470,8 @@ define(function (require, exports, module) {
     };
     
 	/**
-		Adds the specified file to the list of project files
+		Adds the specified file to the list of project files. If a file with exactly the same path exists 
+        in the project, an error is thrown. Newly added files are  written to the disk.
 		@param {ProjectFile} file the file to add
 		@param {bool} suppressEvent the parameter to flag whether or not to suppress the new file event
 		@returns {Promise} a promise that resolves with the file added
@@ -478,6 +479,11 @@ define(function (require, exports, module) {
 	ProjectManager.prototype.addFile = function (file, suppressEvent) {
 		var ws = WSManager.getWebSocket();
 		var project = this.project();
+        var existingFile = project.getProjectFile(file.path());
+        if (existingFile && file.content() !== existingFile.content()) {
+           throw new Error("Attempt to add a file with an existing path. '" +
+                            file.path() + "' already exists in the project");
+        }
 		return new Promise(function (resolve, reject) {
 			ws.writeFile({filePath: file.path(), fileContent: file.content(), encoding: file.encoding()}, function (err) {
 				if (!err) {
