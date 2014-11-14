@@ -23,8 +23,11 @@ define(function (require, exports, module) {
 		openProjectForm         = require("pvsioweb/forms/openProject"),
 		openFilesForm = require("pvsioweb/forms/openFiles"),
 		WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager(),
-		NotificationManager = require("project/NotificationManager");
+		NotificationManager = require("project/NotificationManager"),
+        ProjectManager_UnitTest = require("project/ProjectManager_UnitTest");
 
+    var unitTestEnabled = false;
+    
 	///	Used to change name of default files (i.e: default_name + counter ) 
 	var pvsFilesListView, _projectManager;
     var defaultTheoryName = "main";
@@ -155,6 +158,12 @@ define(function (require, exports, module) {
             }
         };
         registerFSUpdateEvents(project);
+
+        if (unitTestEnabled) {
+            var pmUnitTest = new ProjectManager_UnitTest(this);
+            console.log(pmUnitTest.unitTest());
+        }
+        return this;
 	}
 	/**
 		Returns a new project file with the specified theory name

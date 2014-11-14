@@ -156,10 +156,10 @@ function getFilesInDirectory(fullPath, filter) {
             } else {
                 //resolve with the filename and content
                 return new Promise(function (resolve, reject) {
-                    var ext = path.extname(fullPath),
-                        isImage = imageExts.indexOf(ext.toLowerCase()) > -1;
+                    var ext = path.extname(fullPath).toLowerCase(),
+                        isImage = imageExts.indexOf(ext) > -1;
                     var opt = {encoding: isImage ? "base64" : "utf8"};
-                    if (filter && filter.indexOf(ext) > -1) {
+                    // filters should be applied only on the client front-end
                         fs.readFile(fullPath, opt, function (err, data) {
                             if (err) {
                                 reject(err);
@@ -168,9 +168,9 @@ function getFilesInDirectory(fullPath, filter) {
                                          ("data:image/" + ext.substr(1).toLowerCase() + ";base64," + data) : data, encoding: opt.encoding});
                             }
                         });
-                    } else {
-                        resolve({filePath: fullPath, encoding: opt.encoding});
-                    }
+//                    } else {
+//                        resolve({filePath: fullPath, encoding: opt.encoding});
+//                    }
                 });
             }
         }, function (err) {

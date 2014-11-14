@@ -1399,48 +1399,6 @@ define(function (require, exports, module) {
         });
 
 	};
-    
-    function addProjectManagerListeners() {
-        projectManager.addListener("SelectedFileChanged", function (event) {
-            selectedFileChanged = event.selectedItemString;
-        });
-        projectManager.addListener("SelectedFileChanged", function (event) {
-            selectedFileChanged = event.selectedItemString;
-        });
-		projectManager.addListener("ProjectSaved", function (event) {
-            var project = event.project;
-            var gd = stateMachine.getGraphDefinition();
-            var data  = {"fileName": project.path()
-                         + "/graphDefinition.json", fileContent: gd};
-            ws.writeFile(data, function (err, res) {
-                if (!err) { console.log("Graph Saved");
-                    } else { console.log("ERROR SAVING JSON GRAPH", err); }
-            });
-        });
-        projectManager.addListener("ProjectChanged", function (event) {
-            var emulinkSvg = d3.select("#ContainerStateMachine").selectAll("svg");
-            //Checking if svg has been already created, if dirty we will clear it 
-            if (!emulinkSvg.empty()) {
-                emulinkSvg.remove();
-                stateMachine.clearSvg();
-            }
-            var project = event.current;
-            var fileToShow = project.mainPVSFile() || project.pvsFilesList()[0];
-            fileToShow = fileToShow.name();
-            var f = project.path() + "/" + "graphDefinition.json";
-            ws.getFile(f, function (err, res) {
-                if (!err) {
-                    var graphDefinitionObject = JSON.parse(res.fileContent);
-                    stateMachine.restoreGraph(graphDefinitionObject,
-                                              editor, ws, project,
-                                              fileToShow);
-				} else { ///TODO: show error loading file
-					console.log(JSON.stringify(err));
-                }
-            });
-        });
-        
-    }
 
     
     Emulink.prototype.getDependencies = function () {
@@ -1454,12 +1412,6 @@ define(function (require, exports, module) {
         editor = ModelEditor.getInstance().getEditor();
         ws = pvsioWebClient.getWebSocket();
         projectManager = ProjectManager.getInstance();
-        
-        // add project manager listeners
-//        addProjectManagerListeners();
-        // add state machine editor listener
-//        stateMachine.addListener("editormodechanged", modeChange_callback);
-        
         // create user interface elements
 		this.createHtmlElements();
     };

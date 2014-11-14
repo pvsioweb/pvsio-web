@@ -354,6 +354,7 @@ function run() {
             },
             "startProcess": function (token, socket, socketid) {
                 logger.info("Calling start process for client... " + socketid);
+                unregisterFolderWatchers();
 				var root = token.data.projectName ?
                             path.join(baseProjectDir, token.data.projectName)
                             : token.data.demoName ? path.join(baseDemosDir, token.data.demoName) : "";
