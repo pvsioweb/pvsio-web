@@ -93,7 +93,7 @@
   ],
   "initial_transitions": [
    {
-    "name": "display := 0; error := false",
+    "name": "{ display := 0; error := false; }",
     "id": "IT1",
     "target": {
      "name": "X1",
