@@ -112,7 +112,8 @@ define(function (require, exports, module) {
         summary += "\n  Parsing transition... ";
         if (ans.res && ans.res.type === "transition" &&
                 ans.res.val &&
-                ans.res.val.identifier === "tick" &&
+                ans.res.val.identifier.type === "identifier" &&
+                ans.res.val.identifier.val === "tick" &&
                 ans.res.val.actions === null &&
                 ans.res.val.cond && ans.res.val.cond.val &&
                 ans.res.val.cond.val.length === 7 &&
@@ -475,8 +476,7 @@ define(function (require, exports, module) {
         summary += "\n  Parsing transition... ";
         if (ans.res && ans.res.type === "transition" &&
                 ans.res.val.identifier.type === "identifier" &&
-                ans.res.val.identifier.val === "click_off" &&
-                ans.res.val.identifier.type === "identifier") {
+                ans.res.val.identifier.val === "click_off") {
             summary += "[ok]";
             success++;
         } else {
@@ -486,6 +486,23 @@ define(function (require, exports, module) {
         }
 
         // test 14
+        txt = "{ display := display + 1; }";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
+        ans = parser.parseTransition(txt);
+        console.log(ans);
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.identifier.type === "identifier" &&
+                ans.res.val.identifier.val === "tick") {
+            summary += "[ok]";
+            success++;
+        } else {
+            console.log(ans.err);
+            summary += "[FAIL]";
+            fail++;
+        }
+
+        // test 15
         txt = "click_off :=";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);

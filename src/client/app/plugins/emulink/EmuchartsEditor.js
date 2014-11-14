@@ -823,7 +823,7 @@ define(function (require, exports, module) {
                     if (_this.SVGdragged === null) {
                         _this.SVGdragged = [_this.d3EventTranslate[0], _this.d3EventTranslate[1]];
                     }
-                    if (dbg) { console.log("Drag canvas"); }
+//                    if (dbg) { console.log("Drag canvas"); }
                 }
             }
         });

@@ -168,9 +168,9 @@ define(function (require, exports, module) {
                     ["id ",
                         "$$ = { type: 'transition', val: { identifier: $id, cond: null, actions: null }}"],
                     ["[ cond ] ",
-                        "$$ = { type: 'transition', val: { identifier: 'tick', cond: $cond, actions: null }}"],
+                        "$$ = { type: 'transition', val: { identifier: { type: 'identifier', val: 'tick' }, cond: $cond, actions: null }}"],
                     ["{ actions } ",
-                        "$$ = { type: 'transition', val: { identifier: 'tick', cond: null, actions: $actions }}"]
+                        "$$ = { type: 'transition', val: { identifier: { type: 'identifier', val: 'tick' }, cond: null, actions: $actions }}"]
                 ],
                 "cond": [
                     ["expression", "$$ = $expression"]

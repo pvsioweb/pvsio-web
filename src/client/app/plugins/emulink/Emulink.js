@@ -27,6 +27,8 @@ define(function (require, exports, module) {
         displayAddVariable     = require("plugins/emulink/forms/displayAddVariable"),
         displayEditVariable    = require("plugins/emulink/forms/displayEditVariable"),
         displaySelectVariable  = require("plugins/emulink/forms/displaySelectVariable"),
+        displaySelectTransition  = require("plugins/emulink/forms/displaySelectTransition"),
+        displaySelectState     = require("plugins/emulink/forms/displaySelectState"),
         displayAddConstant     = require("plugins/emulink/forms/displayAddConstant"),
         displayEditConstant    = require("plugins/emulink/forms/displayEditConstant"),
         displaySelectConstant  = require("plugins/emulink/forms/displaySelectConstant"),
@@ -118,20 +120,17 @@ define(function (require, exports, module) {
         emuchartsManager.delete_state(stateID);
     }
 
-    function renameState_handler(event) {
-        var node = event.node;
-        // popup rename window
-        var labels = [];
-        labels.push(node.name + "  (id: " + node.id + ")");
+    // rename dialog window for states
+    function editState(s) {
         displayRename.create({
-            header: "Please enter new label...",
-            textLabel: "State",
-            currentLabels: labels, // this will show just one label, that of the node selected for renaming
+            header: "Renaming state " + s.name + "...",
+            required: true,
+            currentLabel: s.name, // this dialog will show just one state
             buttons: ["Cancel", "Rename"]
         }).on("rename", function (e, view) {
             var newLabel = e.data.labels.get("newLabel");
             if (newLabel && newLabel.value !== "") {
-                emuchartsManager.rename_state(node.id, newLabel);
+                emuchartsManager.rename_state(s.id, newLabel);
                 view.remove();
             }
         }).on("cancel", function (e, view) {
@@ -140,54 +139,51 @@ define(function (require, exports, module) {
         });
     }
     
-    function renameTransition_handler(event) {
-        var edge = event.edge;
-        // popup rename window
-        var oldName = edge.name;
-        var labels = [];
-        labels.push(edge.name + "  ("
-                    + edge.source.name + "->"
-                    + edge.target.name + ")");
+    function renameState_handler(event) {
+        editState(event.node);
+    }
+
+    // rename dialog window for transitions
+    function editTransition(t) {
         displayRename.create({
-            header: "Please enter new label...",
-            textLabel: "Transition",
-            currentLabels: labels,
+            header: "Renaming transition " + t.name + "...",
+            required: false,
+            currentLabel: t.name, // this dialog will show just one transition
             buttons: ["Cancel", "Rename"]
         }).on("rename", function (e, view) {
             var transitionLabel = e.data.labels.get("newLabel");
-            if (transitionLabel && transitionLabel.value !== "") {
-                emuchartsManager.rename_transition(edge.id, transitionLabel);
-                view.remove();
-            }
+            if (!transitionLabel) { transitionLabel = ""; }
+            emuchartsManager.rename_transition(t.id, transitionLabel);
+            view.remove();
         }).on("cancel", function (e, view) {
             // just remove rename window
             view.remove();
         });
     }
+    
+    function renameTransition_handler(event) {
+        editTransition(event.edge);
+    }
 
-    function renameInitialTransition_handler(event) {
-        var edge = event.edge;
-        // popup rename window
-        var oldName = edge.name;
-        var labels = [];
-        labels.push(edge.name + "  ("
-                    + "init ->"
-                    + edge.target.name + ")");
+    // rename dialog window for initial transitions
+    function editInitialTransition(t) {
         displayRename.create({
-            header: "Please enter new label...",
-            textLabel: "Transition",
-            currentLabels: labels,
+            header: "Renaming initial transition " + t.name + "...",
+            required: false,
+            currentLabel: t.name,
             buttons: ["Cancel", "Rename"]
         }).on("rename", function (e, view) {
             var transitionLabel = e.data.labels.get("newLabel");
-            if (transitionLabel && transitionLabel.value !== "") {
-                emuchartsManager.rename_initial_transition(edge.id, transitionLabel);
-                view.remove();
-            }
+            if (!transitionLabel) { transitionLabel = ""; }
+            emuchartsManager.rename_initial_transition(t.id, transitionLabel);
+            view.remove();
         }).on("cancel", function (e, view) {
             // just remove rename window
             view.remove();
         });
+    }
+    function renameInitialTransition_handler(event) {
+        editInitialTransition(event.edge);
     }
 
     function addTransition_handler(event) {
@@ -749,22 +745,22 @@ define(function (require, exports, module) {
             states.forEach(function (state) {
                 labels.push(state.name + "  (id: " + state.id + ")");
             });
-            displayRename.create({
-                header: "Please select state and enter new label...",
-                textLabel: "Select state",
-                currentLabels: labels,
-                buttons: ["Cancel", "Rename"]
-            }).on("rename", function (e, view) {
-                var stateLabel = e.data.labels.get("newLabel");
-                if (stateLabel && stateLabel.value !== "") {
-                    var s = e.data.options.get("currentLabel");
-                    var stateID = states[s].id;
-                    emuchartsManager.rename_state(stateID, stateLabel);
+            displaySelectState.create({
+                header: "Editing states...",
+                message: "Please select a state",
+                transitions: labels,
+                buttons: ["Cancel", "Select"]
+            }).on("select", function (e, view) {
+                if (states.length > 0) {
+                    var v = e.data.options.get("selectedState");
+                    var theState = states[v];
                     view.remove();
+                    editState(theState);
                 }
             }).on("cancel", function (e, view) {
-                // just remove rename window
+                // just remove window
                 view.remove();
+                return;
             });
         });
         d3.select("#btn_menuDeleteState").on("click", function () {
@@ -842,21 +838,26 @@ define(function (require, exports, module) {
                                 + transition.target.name + ")");
                 }
             });
-            displayRename.create({
-                header: "Please select transition and enter new label...",
-                textLabel: "Select transition",
-                currentLabels: labels,
-                buttons: ["Cancel", "Rename"]
-            }).on("rename", function (e, view) {
-                var transitionLabel = e.data.labels.get("newLabel");
-                var t = e.data.options.get("currentLabel");
-                var transitionID = transitions[t].id;
-                emuchartsManager.rename_transition(transitionID, transitionLabel);
-                emuchartsManager.rename_initial_transition(transitionID, transitionLabel);
-                view.remove();
+            displaySelectTransition.create({
+                header: "Editing transitions...",
+                message: "Please select a transition",
+                transitions: labels,
+                buttons: ["Cancel", "Select"]
+            }).on("select", function (e, view) {
+                if (transitions.length > 0) {
+                    var v = e.data.options.get("selectedTransition");
+                    var theTransition = transitions[v];
+                    view.remove();
+                    if (v < transitions.length) {
+                        editTransition(theTransition);
+                    } else {
+                        editInitialTransition(theTransition);
+                    }
+                }
             }).on("cancel", function (e, view) {
-                // just remove rename window
+                // just remove window
                 view.remove();
+                return;
             });
         });
         d3.select("#btn_menuDeleteTransition").on("click", function () {

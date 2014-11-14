@@ -134,23 +134,21 @@ define(function (require, exports, module) {
                 actions: { type: "actions", val: [] },
                 to:      emuchart.initial_transitions[0].target.name
             };
+            if (emuchart.initial_transitions[0].name === "") {
+                emuchart.initial_transitions[0].name = "init";
+            }
             var ans = parser.parseTransition(emuchart.initial_transitions[0].name);
-            if (ans.res) {
-                if (ans.res.type === "transition") {
-                    theTransition = {
-                        identifier: "init", // the name is always init for the current version of PVSio-web
-                        cond:    ans.res.val.cond,
-                        actions: ans.res.val.actions,
-                        to:      emuchart.initial_transitions[0].target.name
-                    };
-                } else if (ans.res.type === "actions") {
-                    theTransition = {
-                        identifier: "init", // the name is always init for the current version of PVSio-web
-                        cond:    { type: "expression", val: [] },
-                        actions: ans.res,
-                        to:      emuchart.initial_transitions[0].target.name
-                    };
-                }
+            if (!ans.err && ans.res && ans.res.type === "transition") {
+                theTransition = {
+                    identifier: ans.res.val.identifier || { type: "identifier", val: "init" },
+                    cond:    ans.res.val.cond,
+                    actions: ans.res.val.actions,
+                    to:   emuchart.initial_transitions[0].target.name
+                };
+            } else {
+                ret.err = "Initial transition " + emuchart.initial_transitions[0].name + "\n\n" + ans.err;
+                console.log(ans.err);
+                return ret;
             }
             
             var pvsFunction = {
@@ -185,13 +183,14 @@ define(function (require, exports, module) {
                         // set a default value -- try to check the type so that an appropriate value can be chosen
                         if (variable.type.toLowerCase() === "bool") {
                             initialisation = variable.name + " := false";
+                            msg += "\n\nBoolean variable detected: setting initial value to false";
                         } else if (variable.type.toLowerCase() === "real" ||
                                         variable.type.toLowerCase() === "int" ||
                                         variable.type.toLowerCase() === "nat" ||
                                         variable.type.toLowerCase() === "posnat" ||
                                         variable.type.toLowerCase() === "posreal") {
                             initialisation = variable.name + " := 0";
-                            msg += "\nNumeric variable detected: setting value 0.";
+                            msg += "\n\nNumeric variable detected: setting initial value to 0";
                         } else {
                             var constant = "initial_" + variable.type;
                             automaticConstants.push({
@@ -280,11 +279,12 @@ define(function (require, exports, module) {
         if (emuchart.transitions && emuchart.transitions.length > 0) {
             var transitions = [];
             emuchart.transitions.forEach(function (t) {
+                if (t.name === "") { t.name = "tick"; }
                 var ans = parser.parseTransition(t.name);
                                 
                 if (!ans.err && ans.res && ans.res.type === "transition") {
                     transitions.push({
-                        identifier: ans.res.val.identifier,
+                        identifier: ans.res.val.identifier || { type: "identifier", val: "tick" },
                         cond:    ans.res.val.cond,
                         actions: ans.res.val.actions,
                         from: t.source.name,
