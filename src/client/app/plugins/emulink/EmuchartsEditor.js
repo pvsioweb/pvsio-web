@@ -56,6 +56,25 @@ define(function (require, exports, module) {
         d3.select("#ContainerStateMachine svg").select("#States").attr("transform", "translate(0,0) scale(1)");
     }
     
+    var getMouseMovement = function (event) {
+        if (_this.mouseMovement.ready === false) {
+            _this.mouseMovement.previousScreen.x = event.screenX;
+            _this.mouseMovement.currentScreen.x = event.screenX;
+            _this.mouseMovement.previousScreen.y = event.screenY;
+            _this.mouseMovement.currentScreen.y = event.screenY;
+            _this.mouseMovement.ready = true;
+            return { x: 0, y: 0 };
+        }
+        _this.mouseMovement.previousScreen.x = _this.mouseMovement.currentScreen.x;
+        _this.mouseMovement.previousScreen.y = _this.mouseMovement.currentScreen.y;
+        _this.mouseMovement.currentScreen.x = event.screenX;
+        _this.mouseMovement.currentScreen.y = event.screenY;
+        return {
+            x: (_this.mouseMovement.currentScreen.x - _this.mouseMovement.previousScreen.x),
+            y: (_this.mouseMovement.currentScreen.y - _this.mouseMovement.previousScreen.y)
+        };
+    };
+    
 	/**
 	 * Constructor
 	 * @memberof EmuchartsEditor
@@ -64,6 +83,11 @@ define(function (require, exports, module) {
         _this = this;
         this.d3EventScale = 1;
         this.d3EventTranslate = [0, 0];
+        this.mouseMovement = {
+            ready: false,
+            previousScreen: { x: 0, y: 0 },
+            currentScreen: { x: 0, y: 0 }
+        };
         this.emucharts = emucharts || new Emucharts();
         this.emucharts.addListener("emuCharts_stateAdded", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_stateRemoved", function (event) { _this.fire(event); });
@@ -773,10 +797,17 @@ define(function (require, exports, module) {
                 d3.event.sourceEvent.stopPropagation();
                 var event = d3.event.sourceEvent;
                 if (event.type === "mousemove") {
-                    var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-                    var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
-                    _this.d3EventTranslate[0] += movementX * d3.behavior.zoom().scale();
-                    _this.d3EventTranslate[1] += movementY * d3.behavior.zoom().scale();
+//                    note: movementX and movementY are not supported by all browser, therefore we are not using them for now
+//                    console.log(getMouseMovement(event));
+//                    var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+//                    var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+//                    _this.d3EventTranslate[0] += movementX * d3.behavior.zoom().scale();
+//                    _this.d3EventTranslate[1] += movementY * d3.behavior.zoom().scale();
+//                    console.log([movementX, movementY]);
+                    var movement = getMouseMovement(event);
+//                    console.log(movement);
+                    _this.d3EventTranslate[0] += movement.x * d3.behavior.zoom().scale();
+                    _this.d3EventTranslate[1] += movement.y * d3.behavior.zoom().scale();
                     d3.select("#ContainerStateMachine svg").select("#States")
                         .attr("transform", "translate(" + _this.d3EventTranslate +
                               ") scale(" + _this.d3EventScale + ")");
@@ -814,6 +845,7 @@ define(function (require, exports, module) {
                 }
                 mousedrag.edge = null;
             }
+            _this.mouseMovement.ready = false;
         };
         var mouseDown = function () {
             if (mouseOverControlPoint === null &&
@@ -831,6 +863,7 @@ define(function (require, exports, module) {
                     .attr("d", "M" + m[0] + "," + m[1] +
                                 "L" + m[0] + "," + m[1]);
             }
+            _this.mouseMovement.ready = false;
         };
         var mouseClick = function () {
             if (editor_mode === MODE.ADD_STATE() && !mouseover.node && !mouseOverControlPoint) {
@@ -848,6 +881,7 @@ define(function (require, exports, module) {
                 }
             }
             _this.SVGdragged = null;
+            _this.mouseMovement.ready = false;
         };
         var mouseMove = function () {
             var m = d3.mouse(d3.select("#ContainerStateMachine svg").node());
@@ -868,6 +902,7 @@ define(function (require, exports, module) {
         };
         var mouseOut = function () {
             d3.selectAll("#MouseOverlayIcon").style("display", "none");
+            _this.mouseMovement.ready = false;
         };
         d3.select("#ContainerStateMachine svg")
             .on("click", mouseClick)
