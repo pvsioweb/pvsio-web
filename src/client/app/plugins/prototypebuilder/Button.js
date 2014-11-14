@@ -35,7 +35,7 @@ define(function (require, exports, module) {
     function Button(id) {
         Widget.call(this, id, "button");
 		/** get or set the events this button listens to. Can be from the set ['click', 'press/release'] */
-        this.events = property.call(this, []);
+        this.evts = property.call(this, []);
 		this.recallRate = property.call(this);
 		this.functionText = property.call(this);
 		this.imageMap = property.call(this);
@@ -52,7 +52,7 @@ define(function (require, exports, module) {
 	*/
 	Button.prototype.boundFunctions = function () {
 		var o = this;
-		var res = o.events().map(function (d) {
+		var res = o.evts().map(function (d) {
 			if (d.indexOf("/") > -1) {
 				return d.split("/").map(function (a) {
 					return a + "_" + o.functionText();
@@ -72,7 +72,7 @@ define(function (require, exports, module) {
 	*/
 	Button.prototype.toJSON = function () {
 		return {
-			events: this.events(),
+			evts: this.evts(),
 			id: this.id(),
 			type: this.type(),
 			recallRate: this.recallRate(),
@@ -95,7 +95,7 @@ define(function (require, exports, module) {
 		var area = Button.prototype.parentClass.createImageMap.apply(this, arguments),
 			widget = this,
 			f,
-			events;
+			evts;
         var press_events = 0;
         
         // this proxy function is used to create an interlocking mechanism to ensure that
@@ -112,7 +112,7 @@ define(function (require, exports, module) {
         };
 		var onmouseup = function () {
 			var f = widget.functionText();
-            if (events && events.indexOf('press/release') > -1) {
+            if (evts && evts.indexOf('press/release') > -1) {
                 if (press_events === 0) {
                     ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
                     Recorder.addAction({
@@ -144,13 +144,13 @@ define(function (require, exports, module) {
 		};
         area.on("mousedown", function () {
 			f = widget.functionText();
-			events = widget.events();
+			evts = widget.evts();
 			//perform the click event if there is one
-			if (events && events.indexOf('click') > -1) {
+			if (evts && evts.indexOf('click') > -1) {
 				ws.sendGuiAction("click_" + f + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");", callback);
                 //record action 
                 Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "click", ts: new Date().getTime()});
-			} else if (events && events.indexOf("press/release") > -1) {
+			} else if (evts && evts.indexOf("press/release") > -1) {
                 //cb = callback;
 				ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", proxy(callback));
                 press_events++;

@@ -38,7 +38,7 @@ define(function (require, exports, module) {
             
 			//update form
 			if (widget.type() === "button") {
-				widget.events().forEach(function (e) {
+				widget.evts().forEach(function (e) {
 					d3.select("input[type='radio'][value='" + e + "']").property("checked", true);
 				});
 			}
