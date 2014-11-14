@@ -55,7 +55,9 @@ define(function (require, exports, module) {
             var ul = div.append("ul").style("list-style", "none");
             
             var menus = ul.selectAll("li.menuitem").data(menuItems).enter()
-                .append("li").attr("class", "menuitem")
+                .append("li").attr("class", "menuitem").attr("id", function (d) {
+                    return d.toLowerCase().replace(/\s/g, "");  
+                })
                 .html(String);
             
             menus.on("click", function (d) {
@@ -346,7 +348,6 @@ define(function (require, exports, module) {
             if (newLabel === "") { newLabel = node.name; }           
             d3.select(elem.parentNode).html(newLabel);
             fst.renameItem(n, newLabel);
-            
         }        
         var inputEl = inputText.node();
         inputEl.focus();

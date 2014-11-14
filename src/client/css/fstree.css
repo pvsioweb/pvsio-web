@@ -48,9 +48,14 @@ div.contextmenu {
     color: white;
     position: relative;
     background: steelblue;
-    border: 1px solid #416d91;
 }
 
+.node.selected .line {
+    height: 100%;
+    background: steelblue;
+    border-left: none;
+    min-width: 100%;
+}
 .treelist .node .label {
     color: black;
     font-weight: normal;
