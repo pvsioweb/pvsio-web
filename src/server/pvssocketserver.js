@@ -178,6 +178,7 @@ function run() {
         if (watcher) {
             watcher.close();  
             delete fsWatchers[folderPath];
+            logger.debug("unregistered watcher for " + folderPath);
         }
     }
     
