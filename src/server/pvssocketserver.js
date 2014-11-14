@@ -55,7 +55,8 @@ function run() {
 		renameFile = serverFuncs.renameFile,
 		createProject = serverFuncs.createProject,
 		openProject = serverFuncs.openProject,
-		listProjects = serverFuncs.listProjects;
+		listProjects = serverFuncs.listProjects,
+        getFilesInDirectory = serverFuncs.getFilesInDirectory;
     
     /**
      * Utility function that dispatches responses to websocket clients
@@ -218,7 +219,16 @@ function run() {
                         }
                         if (token.isDirectory || FileFilters.indexOf(extension) > -1) {
                             setTimeout(function () {
-                                processCallback(token, socket);
+                                if (token.isDirectory) {
+                                    getFilesInDirectory(fullPath).then(function (files) {
+                                        token.subFiles = files;
+                                        processCallback(token, socket);
+                                    }).catch(function (err) {
+                                        processCallback(token, socket);
+                                    });
+                                } else {
+                                    processCallback(token, socket);
+                                }
                             }, notificationDelay);
                         }
                     }).catch(function (err) {
@@ -232,7 +242,16 @@ function run() {
                                 token = eventStream.pop();
                                 if (token.isDirectory || FileFilters.indexOf(extension) > -1) {
                                     setTimeout(function () {
-                                        processCallback(token, socket);
+                                        if (token.isDirectory) {
+                                            getFilesInDirectory(fullPath).then(function (files) {
+                                                token.subFiles = files;
+                                                processCallback(token, socket);
+                                            }).catch(function (err) {
+                                                processCallback(token, socket);
+                                            });
+                                        } else {
+                                            processCallback(token, socket);
+                                        }
                                     }, notificationDelay);
                                 }
                             }
@@ -354,7 +373,7 @@ function run() {
             },
             "startProcess": function (token, socket, socketid) {
                 logger.info("Calling start process for client... " + socketid);
-                unregisterFolderWatchers();
+//                unregisterFolderWatchers();
 				var root = token.data.projectName ?
                             path.join(baseProjectDir, token.data.projectName)
                             : token.data.demoName ? path.join(baseDemosDir, token.data.demoName) : "";
@@ -388,6 +407,7 @@ function run() {
                 } else {
                     res.type = "attempting to close undefined process";
                 }
+                unregisterFolderWatchers();
                 processCallback(res, socket);
                 
             },

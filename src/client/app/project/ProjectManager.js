@@ -111,6 +111,8 @@ define(function (require, exports, module) {
                 f = _projectManager.createProjectFile(event.filePath.replace(project.name() + "/", ""), null);
                 project.addProjectFile(f);
             }
+        } else {
+            console.log(event);
         }
     }
     
@@ -156,6 +158,7 @@ define(function (require, exports, module) {
             if (p && p._dirty()) {
                 return "Are you sure you want to exit? All unsaved changed will be lost.";
             }
+            WSManager.getWebSocket().closePVSProcess();
         };
         registerFSUpdateEvents(project);
 
