@@ -37,6 +37,13 @@ define(function (require, exports, module) {
 				});
 			}
             
+            function listViewContextMenu(el, menu) {
+                return rightclick(el).then(function () {
+                    click(".contextmenu" + menu).then(function () {
+                        
+                    });
+                });
+            }
             function dialogCanBeDismissed(btnTrigger, title) {
                 title = title || "dialog triggered by " + btnTrigger;
                 var str = title + " can be dismissed";

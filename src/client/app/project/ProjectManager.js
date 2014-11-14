@@ -86,7 +86,12 @@ define(function (require, exports, module) {
                     return d.path === event.old.filePath;
                 });
                 if (node) {
-                    pvsFilesListView.getTreeList().renameItem(node, event.fileName);   
+                    var tree = pvsFilesListView.getTreeList();
+                    tree.removeItem(node.path);
+                    node.path = event.filePath;
+                    node.name = event.fileName;
+                    tree.addItem(node);
+                    tree.renameItem(node, node.name);
                 }
             }
         } else if (event.event === "rename") { //file or folder added

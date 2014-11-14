@@ -273,6 +273,7 @@ define(function (require, exports, module) {
         }
         parent.children = parent.children || parent._children || [];
         parent.children.push(item);
+        item.parent = parent;
         this.render(parent);
         return item;
     };
@@ -293,6 +294,8 @@ define(function (require, exports, module) {
             if (selectedData === toRemove && toRemove.parent) {
                 this.selectItem(toRemove.parent.path);   
             }
+        } else {
+            console.log("Cannot find item at specified path " + path);   
         }
     };
     
