@@ -772,26 +772,28 @@ define(function (require, exports, module) {
                     editor_mode !== MODE.DELETE() && editor_mode !== MODE.RENAME()) {
                 d3.event.sourceEvent.stopPropagation();
                 var event = d3.event.sourceEvent;
-                var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-                var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
-                _this.d3EventTranslate[0] += movementX * d3.behavior.zoom().scale();
-                _this.d3EventTranslate[1] += movementY * d3.behavior.zoom().scale();
-                d3.select("#ContainerStateMachine svg").select("#States")
-                    .attr("transform", "translate(" + _this.d3EventTranslate +
-                          ") scale(" + _this.d3EventScale + ")");
-                d3.select("#ContainerStateMachine svg").select("#Transitions")
-                    .attr("transform", "translate(" + _this.d3EventTranslate +
-                          ") scale(" + _this.d3EventScale + ")");
-                d3.select("#ContainerStateMachine svg").select("#InitialTransitions")
-                    .attr("transform", "translate(" + _this.d3EventTranslate +
-                          ") scale(" + _this.d3EventScale + ")");
-                d3.select("#ContainerStateMachine svg").select("#dragline")
-                    .attr("transform", "translate(" + _this.d3EventTranslate +
-                          ") scale(" + _this.d3EventScale + ")");
-                if (_this.SVGdragged === null) {
-                    _this.SVGdragged = [_this.d3EventTranslate[0], _this.d3EventTranslate[1]];
+                if (event.type === "mousemove") {
+                    var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+                    var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+                    _this.d3EventTranslate[0] += movementX * d3.behavior.zoom().scale();
+                    _this.d3EventTranslate[1] += movementY * d3.behavior.zoom().scale();
+                    d3.select("#ContainerStateMachine svg").select("#States")
+                        .attr("transform", "translate(" + _this.d3EventTranslate +
+                              ") scale(" + _this.d3EventScale + ")");
+                    d3.select("#ContainerStateMachine svg").select("#Transitions")
+                        .attr("transform", "translate(" + _this.d3EventTranslate +
+                              ") scale(" + _this.d3EventScale + ")");
+                    d3.select("#ContainerStateMachine svg").select("#InitialTransitions")
+                        .attr("transform", "translate(" + _this.d3EventTranslate +
+                              ") scale(" + _this.d3EventScale + ")");
+                    d3.select("#ContainerStateMachine svg").select("#dragline")
+                        .attr("transform", "translate(" + _this.d3EventTranslate +
+                              ") scale(" + _this.d3EventScale + ")");
+                    if (_this.SVGdragged === null) {
+                        _this.SVGdragged = [_this.d3EventTranslate[0], _this.d3EventTranslate[1]];
+                    }
+                    if (dbg) { console.log("Drag canvas"); }
                 }
-                if (dbg) { console.log("Drag canvas"); }
             }
         });
         var mouseUp = function () {
