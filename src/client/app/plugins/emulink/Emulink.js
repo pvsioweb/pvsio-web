@@ -822,6 +822,7 @@ define(function (require, exports, module) {
         d3.select("#btn_menuRenameTransition").on("click", function () {
             document.getElementById("menuTransitions").children[1].style.display = "none";
             var transitions = emuchartsManager.getTransitions();
+            var nTransitions = transitions.length;
             var initialTransitions = emuchartsManager.getInitialTransitions();
             initialTransitions.forEach(function (it) {
                 transitions.push(it);
@@ -848,7 +849,7 @@ define(function (require, exports, module) {
                     var v = e.data.options.get("selectedTransition");
                     var theTransition = transitions[v];
                     view.remove();
-                    if (v < transitions.length) {
+                    if (v < nTransitions) {
                         editTransition(theTransition);
                     } else {
                         editInitialTransition(theTransition);
