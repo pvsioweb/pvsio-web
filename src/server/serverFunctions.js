@@ -12,7 +12,7 @@ var fs = require("fs"),
 	Promise                 = require("es6-promise").Promise,
 	logger                  = require("tracer").console(),
 	imageExts = [".jpg", ".jpeg", ".png"],
-	baseProjectDir          = path.join(__dirname, "../../examples/projects/"),
+ 	baseProjectDir          = path.join(__dirname, "../../examples/projects/"),
 	filesFilter = [".pvs", ".tex", ".txt", ".i", ".json"].concat(imageExts);
 
 var noop = function () {};

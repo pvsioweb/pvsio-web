@@ -38,6 +38,7 @@ function run() {
         express                 = require("express"),
         webserver               = express(),
         procWrapper             = require("./processwrapper"),
+        FileFilters             = require("./FileFilters"),
         port                    = 8082,
         pvsioProcessMap         = {},//each client should get his own process
         httpServer              = http.createServer(webserver),
@@ -192,9 +193,13 @@ function run() {
         @param {socket} socket
     */
     function registerFolderWatcher(folderPath, socket) {
+        var notificationDelay = 200;
         unregisterFolderWatcher(folderPath);
-        logger.debug("watching .. " + folderPath);
+        if (folderPath.indexOf("pvsbin") > -1) { return; }
+        
+        logger.debug("watching changes to .. " + folderPath);
         var watcher = fs.watch(folderPath, {persistent: false}, function (event, fileName) {
+            var extension = path.extname(fileName).toLowerCase();
             if (fileName && fileName !== ".DS_Store" && event === "rename") {
                 var fullPath = path.join(folderPath, fileName), tId;
                 var token = {type: "FileSystemUpdate", event: event, fileName: fileName,
@@ -211,7 +216,11 @@ function run() {
                             clearTimeout(tId);
                             tId = null;
                         }
-                        processCallback(token, socket);
+                        if (token.isDirectory || FileFilters.indexOf(extension) > -1) {
+                            setTimeout(function () {
+                                processCallback(token, socket);
+                            }, notificationDelay);
+                        }
                     }).catch(function (err) {
                         token.event = err.code === "ENOENT" ? "delete" : event;
                         if (token.event === "delete") {
@@ -221,7 +230,11 @@ function run() {
                         tId = setTimeout(function () {
                             if (tId && eventStream.length) {
                                 token = eventStream.pop();
-                                processCallback(token, socket);
+                                if (token.isDirectory || FileFilters.indexOf(extension) > -1) {
+                                    setTimeout(function () {
+                                        processCallback(token, socket);
+                                    }, notificationDelay);
+                                }
                             }
                         }, 50);
                     });
