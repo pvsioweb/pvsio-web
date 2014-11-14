@@ -17,7 +17,8 @@ define(function (require, exports, module) {
         NotificationManager = require("project/NotificationManager");
     
     var _projectFiles;
-    
+	var imageExts = [".jpg", ".jpeg", ".png"];
+    var filesFilter = [".pvs", ".tex", ".txt", ".i", ".json"].concat(imageExts);
     var propertyChangedEvent = "PropertyChanged";
     
     function saveFiles(files) {
@@ -140,13 +141,16 @@ define(function (require, exports, module) {
         return _projectFiles;
     };
     /**
-     Gets the folder structure of the project based on the list of files
+        Gets the folder structure of the project based on the list of files
+        This function shows files specified in filesFilter variable
     */
     Project.prototype.getFolderStructure = function () {
         var projectName = this.name();
         var structure = {path: projectName, name: projectName, isDirectory: true};
         var tree = {};
-        var paths = _projectFiles.map(function (f) {
+        var paths = _projectFiles.filter(function (f) {
+            return filesFilter.indexOf(f.extension().toLowerCase()) > -1;
+        }).map(function (f) {
             return f.path();
         }).sort();
         paths.forEach(function (path) {
