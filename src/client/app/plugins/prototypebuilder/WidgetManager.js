@@ -76,6 +76,10 @@ define(function (require, exports, module) {
             _.each(defs.widgetMaps, function (w, key) {
                 w.type = w.type.toLowerCase();
                 widget = w.type === "button" ? new Button(key) : new Display(key);
+                if (w.hasOwnProperty("events")) {
+                    w.evts = w.events;
+                    delete w.events;
+                }
                 widget.updateWithProperties(w);
                 wm.addWidget(widget);
             });
