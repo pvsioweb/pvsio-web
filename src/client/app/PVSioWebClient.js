@@ -90,12 +90,12 @@ define(function (require, exports, module) {
         header.on("click", function () {
             var icon = d3.select(this.firstChild);
             var label = d3.select(this.lastChild);
-            if (content.style().attr("style") === null) {
-                content.style("display", "none");
+            if (content.attr("style") === null) {
+                content.attr("style", "display: none");
                 label.node().textContent += " (click to expand)";
                 icon.classed("glyphicon-plus-sign", true).classed("glyphicon-minus-sign", false);
             } else {
-                content.style("display", null);
+                content.attr("style", null);
                 label.node().textContent = label.node().textContent.replace(" (click to expand)", "");
                 icon.classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
             }
