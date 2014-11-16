@@ -101,29 +101,14 @@ define(function (require, exports, module) {
             if (f) {
                 project.removeFile(f);
             } else {
-                pvsFilesListView.getTreeList().removeItem(event.filePath);
-            }
-        } else if (event.event === "rename" && event.old) {
-            if (event.isDirectory) {
-                project.updateFolderName(event.old.filePath, event.filePath);
-            } else {
-                f = project.getProjectFile(event.old.filePath);
-                if (f) {
-                    f.path(event.filePath);
-                }
-            }
-            if (pvsFilesListView) {
-                var node = pvsFilesListView.getTreeList().findNode(function (d) {
-                    return d.path === event.old.filePath;
+                var affectedFiles = project.getProjectFiles().filter(function (f) {
+                    return f.path().indexOf(event.filePath) === 0; 
                 });
-                if (node) {
-                    var tree = pvsFilesListView.getTreeList();
-                    tree.removeItem(node.path);
-                    node.path = event.filePath;
-                    node.name = event.fileName;
-                    tree.addItem(node);
-                    tree.renameItem(node, node.name);
-                }
+                
+                affectedFiles.forEach(function (f) {
+                    project.removeFile(f);
+                });
+                pvsFilesListView.getTreeList().removeItem(event.filePath);
             }
         } else if (event.event === "rename") { //file or folder added
             if (event.isDirectory) {
@@ -136,9 +121,14 @@ define(function (require, exports, module) {
                     });
                     var newFolder = {name: event.fileName, path: event.filePath, children: children, isDirectory: true};
                     pvsFilesListView.getTreeList().addItem(newFolder, parent);
+                    //add the projectfiles
+                    event.subFiles.forEach(function (f) {
+                        var pf = new ProjectFile(event.filePath + "/" + f.filePath);
+                        project.addProjectFile(pf, true);
+                    });
                 }
             } else if (!_projectManager.fileExists(event.filePath)) {
-                f = _projectManager.createProjectFile(event.filePath.replace(project.name() + "/", ""), null);
+                f = new ProjectFile(event.filePath);
                 project.addProjectFile(f);
             }
         } else {

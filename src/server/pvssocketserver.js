@@ -49,7 +49,7 @@ function run() {
 		baseDemosDir			= path.join(__dirname, "../../examples/demos/"),
 		clientDir				= path.join(__dirname, "../client");
     var p, clientid = 0, WebSocketServer = ws.Server;
-    var fsWatchers = {}, eventStream = [];
+    var fsWatchers = {};
 	var writeFile = serverFuncs.writeFile,
 		stat = serverFuncs.stat,
 		renameFile = serverFuncs.renameFile,
@@ -210,7 +210,7 @@ function run() {
         var watcher = fs.watch(folderPath, {persistent: false}, function (event, fileName) {
             var extension = path.extname(fileName).toLowerCase();
             if (fileName && fileName !== ".DS_Store" && event === "rename") {
-                var fullPath = path.join(folderPath, fileName), tId;
+                var fullPath = path.join(folderPath, fileName);
                 var token = {type: "FileSystemUpdate", event: event, fileName: fileName,
                              filePath: fullPath.replace(baseProjectDir, ""),
                             time: {server: {}}};
@@ -219,11 +219,6 @@ function run() {
                         if (res.isDirectory()) {
                             registerFolderWatcher(fullPath, socket);
                             token.isDirectory = true;
-                        }
-                        if (eventStream.length) {
-                            token.old = eventStream.pop();
-                            clearTimeout(tId);
-                            tId = null;
                         }
                         if (token.isDirectory || FileFilters.indexOf(extension) > -1) {
                             setTimeout(function () {
@@ -243,29 +238,11 @@ function run() {
                     }).catch(function (err) {
                         token.event = err.code === "ENOENT" ? "delete" : event;
                         if (token.event === "delete") {
-                            unregisterFolderWatcher(fullPath);   
-                        }
-                        eventStream.push(token);
-                        tId = setTimeout(function () {
-                            if (tId && eventStream.length) {
-                                token = eventStream.pop();
-                                if (token.isDirectory || FileFilters.indexOf(extension) > -1) {
-                                    setTimeout(function () {
-                                        if (token.isDirectory) {
-                                            getFilesInDirectory(fullPath).then(function (files) {
-                                                token.subFiles = files.map(toRelativePath(fullPath));
-                                                processCallback(token, socket);
-                                            }).catch(function (err) {
-                                                token.err = err;
-                                                processCallback(token, socket);
-                                            });
-                                        } else {
-                                            processCallback(token, socket);
-                                        }
-                                    }, notificationDelay);
-                                }
-                            }
-                        }, 50);
+                            setTimeout(function () {
+                                processCallback(token, socket);
+                            }, notificationDelay);
+                            unregisterFolderWatcher(fullPath);
+                        }                           
                     });
             }
         });
