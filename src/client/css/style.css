@@ -28,6 +28,12 @@ div.header {
 	border:1px solid #4088B6;
     background-color: white;
     cursor: pointer;
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;    
 }
 
 #graphicalEditor{
@@ -93,6 +99,12 @@ div.downloader{
 }
 #header{
 	width: 100%;
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;    
 }
 .center{
 	margin-right: auto;
@@ -357,6 +369,12 @@ div.detailsForm select, div.detailsForm textarea{
 
 .content-body > .ljs-hcontent {
 	width: 80%;
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;    
 }
 #body .ljs-hcontent {
 	padding-left: 0;
@@ -396,6 +414,12 @@ div.detailsForm select, div.detailsForm textarea{
 
 .plugins-group .list-group-item {
 	border-radius: 0;
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;    
 }
 
 .panel.scrollable-dialog {
