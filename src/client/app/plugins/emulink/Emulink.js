@@ -38,6 +38,7 @@ define(function (require, exports, module) {
         EmuchartsPIMPrinter    = require("plugins/emulink/EmuchartsPIMPrinter"),
         EmuchartsCppPrinter    = require("plugins/emulink/EmuchartsCppPrinter"),
         EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter"),
+        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         fs = require("util/fileHandler"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
     
@@ -119,11 +120,13 @@ define(function (require, exports, module) {
         var stateID = event.node.id;
         emuchartsManager.delete_state(stateID);
     }
+    
+    var maxLen = 48;
 
     // rename dialog window for states
     function editState(s) {
         displayRename.create({
-            header: "Renaming state " + s.name + "...",
+            header: "Renaming state " + s.name.substring(0, maxLen) + "...",
             required: true,
             currentLabel: s.name, // this dialog will show just one state
             buttons: ["Cancel", "Rename"]
@@ -146,7 +149,7 @@ define(function (require, exports, module) {
     // rename dialog window for transitions
     function editTransition(t) {
         displayRename.create({
-            header: "Renaming transition " + t.name + "...",
+            header: "Renaming transition " + t.name.substring(0, maxLen) + "...",
             required: false,
             currentLabel: t.name, // this dialog will show just one transition
             buttons: ["Cancel", "Rename"]
@@ -168,7 +171,7 @@ define(function (require, exports, module) {
     // rename dialog window for initial transitions
     function editInitialTransition(t) {
         displayRename.create({
-            header: "Renaming initial transition " + t.name + "...",
+            header: "Renaming initial transition " + t.name.substring(0, maxLen) + "...",
             required: false,
             currentLabel: t.name,
             buttons: ["Cancel", "Rename"]

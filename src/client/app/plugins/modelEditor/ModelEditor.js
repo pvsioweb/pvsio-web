@@ -74,14 +74,17 @@ define(function (require, exports, module) {
             mode: "txt",
             lineNumbers: true,
             foldGutter: true,
-            autofocus: true,
+            autofocus: false,
             gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter", "breakpoints"],
             autoCloseBrackets: true,
             matchBrackets: true,
-            styleActiveLine: true,
-            placeholder: "The formal model goes here...",
+            styleActiveLine: false,
+            placeholder: "Type the formal model here...",
             extraKeys: {
                 "Ctrl-Space": "autocomplete",
+                "Ctrl-S": function(instance) {
+                    d3.select("#editorToolbar").select("#btnSaveFile").node().click();
+                }
             }
         });
         editor.on("gutterClick", function(cm, n) {

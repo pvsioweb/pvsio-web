@@ -10,7 +10,9 @@ define(function (require, exports, module) {
     var d3 = require("d3/d3"),
         formTemplate = require("text!./templates/displayRename.handlebars"),
         BaseDialog = require("pvsioweb/forms/BaseDialog"),
-        FormUtils = require("./FormUtils");
+        FormUtils = require("./FormUtils"),
+        EmuchartsTextEditor = require("plugins/emulink/EmuchartsTextEditor");
+
     
     var DisplayRenameView = BaseDialog.extend({
         initialize: function (data) {
@@ -23,7 +25,20 @@ define(function (require, exports, module) {
             var template = Handlebars.compile(formTemplate);
             this.$el.html(template(data));
             $("body").append(this.el);
-            d3.select(this.el).select("#newLabel").node().focus();
+            var textArea = d3.select(this.el).select("#newLabel").node();
+            var size = {
+                width: textArea.getBoundingClientRect().width,
+                height: textArea.getBoundingClientRect().height
+            };
+            var editor = new EmuchartsTextEditor({
+                textArea: textArea,
+                size: size
+            });
+            if (d3.select(".overlay").select(".CodeMirror-code").select("pre").node()) {
+                d3.select(".overlay").select(".CodeMirror-code").select("pre").node().focus();
+            } else {
+                textArea.focus();
+            }
             return this;
         },
         events: {

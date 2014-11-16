@@ -35,7 +35,42 @@ define(function (require, exports, module) {
     "use strict";
 
     var Parser = require("lib/jison/jison");
-        
+
+    var lexerRules = [
+        { rule: ["\\s+",                    "/* skip whitespace */"], tokenType: "whitespace" },
+        { rule: ["(?!(?:IMPLIES|implies|AND|and|OR|or|NOT|not))" + // keywords shall not be used as identifiers
+                "([a-zA-Z][a-zA-Z0-9_]*)",  "return 'IDENTIFIER'"],   tokenType: "variable-2" },
+        { rule: ["[0-9]+(?:\\.[0-9]+)?\\b", "return 'NUMBER'"],       tokenType: "number" },
+        { rule: ["\\*",                     "return '*'"],            tokenType: "operator" },
+        { rule: ["\\/",                     "return '/'"],            tokenType: "operator" },
+        { rule: ["-",                       "return '-'"],            tokenType: "operator" },
+        { rule: ["(?!(?:(\\!\\=)))" + // filtering out !=
+                 "(\\!|NOT|not)",           "return 'NOT'"],          tokenType: "keyword" },
+        { rule: ["\\+",                     "return '+'"],            tokenType: "operator" },
+        { rule: ["(\\!\\=)",                "return '!='"],           tokenType: "operator" },
+        { rule: ["(?!(?:(\\=\\>|\\=\\=)))" + // filtering out implication and equality
+                 "(\\=)",                   "return '='"],            tokenType: "error" }, // invalid operator
+        { rule: [    "(\\=\\=)",            "return '=='"],           tokenType: "operator" },
+        { rule: ["(?!(?:(\\>\\=)))" + // filtering out >=
+                "(\\>)",   "return '>'"],                             tokenType: "operator" },
+        { rule: ["(\\>\\=)",                "return '>='"],           tokenType: "operator" },
+        { rule: ["(?!(?:(\\<\\=)))" + // filtering out <=
+                 "(\\<)",   "return '<'"],                            tokenType: "operator" },
+        { rule: ["(\\<\\=)",                "return '<='"],           tokenType: "operator" },
+        { rule: ["(IMPLIES|implies|(\\=\\>))", "return 'IMPLIES'"],   tokenType: "keyword" },
+        { rule: ["(AND|&&)",                "return 'AND'"],          tokenType: "keyword" },
+        { rule: ["(OR|\\|\\|)",             "return 'OR'"],           tokenType: "keyword" },
+        { rule: ["\\(",                     "return '('"],            tokenType: "operator" },
+        { rule: ["\\)",                     "return ')'"],            tokenType: "operator" },
+        { rule: ["\\[",                     "return '['"],            tokenType: "operator" },
+        { rule: ["\\]",                     "return ']'"],            tokenType: "operator" },
+        { rule: ["\\{",                     "return '{'"],            tokenType: "operator" },
+        { rule: ["\\}",                     "return '}'"],            tokenType: "operator" },
+        { rule: [":=",                      "return ':='"],           tokenType: "operator" },
+        { rule: [";",                       "return ';'"],            tokenType: "operator" },
+        { rule: [",",                       "return ','"],            tokenType: "operator" }
+    ];
+    
     var grammar = function () {
         function exprWithBinaryOp() {
             return " if (!Array.isArray($$)) { $$ = []; }" +
@@ -103,7 +138,7 @@ define(function (require, exports, module) {
                 ["term",           "$$ = [$term]"]
             ];
         }
-                
+                        
         return {
             "lex": {
                 "rules": [
@@ -221,14 +256,27 @@ define(function (require, exports, module) {
     
     /**
      * Interface function for obtaining the parser code
+     * @returns string representing the javascript code of the parser
      */
     EmuchartsParser.prototype.getParserCode = function () {
-        var parser = new EmuchartsParser();
+        //var parser = new EmuchartsParser();
         try {
-            return parser.parser.generate({moduleType: "js"});
+            return this.parser.generate({moduleType: "js"});
         } catch (e) { console.log(e); }
     };
 
+    /**
+     * Interface function for obtaining the rules used by the lexer
+     * @returns array of { regex: (string), type: (string) }
+     */
+    EmuchartsParser.prototype.getLexerRules = function () {
+        var ans = [];
+        lexerRules.forEach(function (r) {
+            ans.push({ regex: new RegExp(r.rule[0]), type: r.tokenType });
+        });
+        return ans;
+    };
+    
     /**
      * Interface function for parsing transition labels given in the form "name [ cond ] { actions }"
      * Any element of the label (name, [ cond ], { actions }) are optional,

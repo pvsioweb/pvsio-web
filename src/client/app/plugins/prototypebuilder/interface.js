@@ -220,7 +220,7 @@ define(function (require, exports, module) {
                         notification = err;
                         d3.select("#editor-notification-area").insert("p", "p").html(notification);
                         Logger.log(err);
-                        NotificationManager.show(notification);
+                        NotificationManager.error(notification);
                     }
                 });
 			}
