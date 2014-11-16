@@ -16,6 +16,7 @@ define(function (require, exports, module) {
 		Logger	= require("util/Logger"),
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
         Notification = require("pvsioweb/forms/displayNotification"),
+        NotificationManager = require("project/NotificationManager"),
         ProjectFile = require("project/ProjectFile"),
         fs = require("util/fileHandler"),
         PluginManager = require("plugins/PluginManager");
@@ -214,10 +215,12 @@ define(function (require, exports, module) {
                         notification = pvsFile + " saved successfully!";
                         d3.select("#editor-notification-area").insert("p", "p").html(notification);
                         Logger.log(notification);
+                        NotificationManager.show(notification);
                     } else {
                         notification = err;
                         d3.select("#editor-notification-area").insert("p", "p").html(notification);
                         Logger.log(err);
+                        NotificationManager.show(notification);
                     }
                 });
 			}

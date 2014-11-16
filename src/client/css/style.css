@@ -27,6 +27,7 @@ div.header {
 	padding: 5px;
 	border:1px solid #4088B6;
     background-color: white;
+    cursor: pointer;
 }
 
 #graphicalEditor{
@@ -202,6 +203,11 @@ fileListItem.hide {
 #editorToolbar{
     padding: 10px;
     min-width: 1024px;
+}
+#editor-search-bar {
+    height: 28px;
+    position: relative;
+    background-color: lightgray;
 }
 /*** end source code section **/
 
@@ -381,7 +387,7 @@ div.detailsForm select, div.detailsForm textarea{
 
 #project-notifications {
 	display: none;
-	position: absolute;
+	position: fixed;
 	top: 0;
 	right: 0;
 	z-index: 1234;
