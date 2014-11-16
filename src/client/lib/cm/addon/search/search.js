@@ -215,7 +215,11 @@
     }
 
     CodeMirror.commands.find = function (cm) {
-        clearSearch(cm);
+        if (cm.options.search) {
+            cm.state.query = cm.options.search;
+        } else {
+            clearSearch(cm);
+        }
         doSearch(cm);
     };
     CodeMirror.commands.findNext = doSearch;

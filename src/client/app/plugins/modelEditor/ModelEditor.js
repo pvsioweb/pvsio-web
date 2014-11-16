@@ -119,6 +119,7 @@ define(function (require, exports, module) {
         
         projectManager.addListener("ProjectChanged", onProjectChanged);
         document.getElementById("model-editor-search-input").addEventListener("click", function () {
+            editor.options.search = document.getElementById("model-editor-search-input").value;
             CodeMirror.commands.find(editor);
         });
         
