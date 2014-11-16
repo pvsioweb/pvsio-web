@@ -196,6 +196,13 @@ function run() {
     */
     function registerFolderWatcher(folderPath, socket) {
         var notificationDelay = 200;
+        function toRelativePath(parentDir) {
+            return function (d) {
+                d.filePath = d.filePath.replace(parentDir + "/", "");
+                return d;
+            };
+        }
+        
         unregisterFolderWatcher(folderPath);
         if (folderPath.indexOf("pvsbin") > -1) { return; }
         
@@ -222,9 +229,10 @@ function run() {
                             setTimeout(function () {
                                 if (token.isDirectory) {
                                     getFilesInDirectory(fullPath).then(function (files) {
-                                        token.subFiles = files;
+                                        token.subFiles = files.map(toRelativePath(fullPath));
                                         processCallback(token, socket);
                                     }).catch(function (err) {
+                                        token.err = err;
                                         processCallback(token, socket);
                                     });
                                 } else {
@@ -245,9 +253,10 @@ function run() {
                                     setTimeout(function () {
                                         if (token.isDirectory) {
                                             getFilesInDirectory(fullPath).then(function (files) {
-                                                token.subFiles = files;
+                                                token.subFiles = files.map(toRelativePath(fullPath));
                                                 processCallback(token, socket);
                                             }).catch(function (err) {
+                                                token.err = err;
                                                 processCallback(token, socket);
                                             });
                                         } else {

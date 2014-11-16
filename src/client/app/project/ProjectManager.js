@@ -63,6 +63,34 @@ define(function (require, exports, module) {
             }
         }
     }
+    
+    function getFolderChildren(files, parentPath) {
+        var tree = {};
+        files.forEach(function (f) {
+            var args = f.filePath.split("/");
+            var ptr = tree;
+            args.forEach(function (a) {
+                ptr[a] = ptr[a] || {name: a, children: {}};
+                ptr = ptr[a].children;
+                    
+            });
+        });
+        
+        function getChildren(children, parentPath) {
+            if (children && Object.keys(children).length) {
+                var res = Object.keys(children).map(function (key) {
+                    var child = children[key];
+                    child.path = parentPath + "/" + child.name;
+                    child.children = getChildren(child.children, child.path);
+                    child.isDirectory = child.children !== undefined;
+                    return child;
+                });
+                return res;
+            }
+            return undefined;
+        }
+        return getChildren(tree, parentPath);
+    }
 	/**
         Event listener for file system updates
     */
@@ -99,12 +127,14 @@ define(function (require, exports, module) {
             }
         } else if (event.event === "rename") { //file or folder added
             if (event.isDirectory) {
+                var children = getFolderChildren(event.subFiles, event.filePath);
+                console.log(children);
                 if (!pvsFilesListView.getTreeList().nodeExists(event.filePath)) {
                     var parentFolderName = event.filePath.replace("/" + event.fileName, "");
                     var parent = pvsFilesListView.getTreeList().findNode(function (d) {
                         return d.path === parentFolderName;
                     });
-                    var newFolder = {name: event.fileName, path: event.filePath, children: [], isDirectory: true};
+                    var newFolder = {name: event.fileName, path: event.filePath, children: children, isDirectory: true};
                     pvsFilesListView.getTreeList().addItem(newFolder, parent);
                 }
             } else if (!_projectManager.fileExists(event.filePath)) {
