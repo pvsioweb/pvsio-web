@@ -10,11 +10,13 @@
 						<div class="col-xs-6 col-md-4">
 							<div class="thumbnail">
 								<div class="image">
-									<img src="projects/{{this.name}}/{{this.image}}"/>
+									<img src="projects/{{this.name}}/{{this.image}}"
+                                         onclick="document.getElementById('{{this.name}}').click();"/
+                                         style="cursor:pointer;">
 								</div>
 								<div class="caption">
 									<h6>{{this.name}}</h6>
-									<button type="button" class="btn btn-primary" data-project="{{this.name}}">Open</button>
+									<button type="button" class="btn btn-primary" data-project="{{this.name}}" id="{{this.name}}">Open</button>
 								</div>
 							</div>
 							
