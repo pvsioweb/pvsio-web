@@ -173,7 +173,11 @@ define(function (require, exports, module) {
         pbContainer = pvsioWebClient.createCollapsiblePanel({
             headerText: "Prototype Builder",
             showContent: true,
-            onClick: function () {},
+            onClick: function () {
+                if (pbContainer.style("display") !== "none" && pbContainer.select("svg").empty()) {
+                    updateImageAndLoadWidgets();
+                }
+            },
             parent: "#body",
             owner: "PrototypeBuilder"
         });
