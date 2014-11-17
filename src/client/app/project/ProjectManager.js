@@ -102,7 +102,7 @@ define(function (require, exports, module) {
                 project.removeFile(f);
             } else {
                 var affectedFiles = project.getProjectFiles().filter(function (f) {
-                    return f.path().indexOf(event.filePath) === 0; 
+                    return f.path().indexOf(event.filePath) === 0;
                 });
                 
                 affectedFiles.forEach(function (f) {
@@ -220,7 +220,7 @@ define(function (require, exports, module) {
 					editor.setOption("readOnly", true);
 					editor.markClean();
 					editor.focus();
-                    editor.on("change", _editorChangedHandler);       
+                    editor.on("change", _editorChangedHandler);
                 } else {
                     //fetch sourcecode for selected file and update editor
                     var pvsFile = project.getProjectFile(event.selectedItem.path);
@@ -232,9 +232,15 @@ define(function (require, exports, module) {
 //                    }
                     if (pvsFile && pvsFile.content() !== undefined && pvsFile.content() !== null) {
                         editor.off("change", _editorChangedHandler);
+                        // save undo history of previous file
+                        if (event.selectedItem.previousData) {
+                            editor.saveHistory(project.getProjectFile(event.selectedItem.previousData.path));
+                        }
                         editor.setOption("mode", "txt");
                         editor.setValue(pvsFile.content());
                         editor.setOption("readOnly", false);
+                        // restore undo history of current file
+                        editor.restoreHistory(pvsFile);
                         editor.markClean();
                         if (pvsFile.isPVSFile()) {
                             editor.setOption("mode", "pvs");
@@ -247,6 +253,10 @@ define(function (require, exports, module) {
                         ws.getFile(f, function (err, res) {
                             if (!err) {
                                 editor.off("change", _editorChangedHandler);
+                                // save undo history of previous file
+                                if (event.selectedItem.previousData) {
+                                    editor.saveHistory(project.getProjectFile(event.selectedItem.previousData.path));
+                                }
                                 editor.setOption("mode", "txt");
                                 pvsFile.content(res.fileContent).dirty(false);
                                 editor.setValue(pvsFile.content());
@@ -473,7 +483,7 @@ define(function (require, exports, module) {
 		var project = this.project();
         f = typeof f === "string" ? project.getProjectFile(f) : project.getProjectFile(f.path());
         if (!f) {
-            return Promise.reject("File with the specified path '" + f.path() + "' does not exist");   
+            return Promise.reject("File with the specified path '" + f.path() + "' does not exist");
         }
 		return new Promise(function (resolve, reject) {
 			ws.send({type: "deleteFile", filePath: f.path()}, function (err) {
@@ -502,7 +512,7 @@ define(function (require, exports, module) {
         if (file) {
             return this.removeFile(file);
         } else {
-            return Promise.reject("File with the specified path '" + path + "' does not exist in the project");   
+            return Promise.reject("File with the specified path '" + path + "' does not exist in the project");
         }
     };
     
@@ -531,7 +541,7 @@ define(function (require, exports, module) {
                     try {
 					   project.addProjectFile(file, suppressEvent);
                     } catch (e) {
-                       Logger.error(e.toString()); 
+                       Logger.error(e.toString());
                     }
 					resolve(file);
 				} else {

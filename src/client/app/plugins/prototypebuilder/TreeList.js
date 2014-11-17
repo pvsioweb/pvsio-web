@@ -122,10 +122,12 @@ define(function (require, exports, module) {
 //                toggleChildren(d);
 //                fst.render(d);
                 if (selectedData !== d) {
+                    var pd = selectedData;
                     selectedData = d;
                     ul.selectAll("li.node").classed("selected", function (d) {
                         return selectedData === d;
                     });
+                    d.previousData = pd;
                     var event = {type: "SelectedItemChanged", data: d};
                     // clear all editable flags
                     ul.selectAll("li.node").select(".label").attr("contentEditable", false);
@@ -145,10 +147,12 @@ define(function (require, exports, module) {
             toggleChildren(d);
             fst.render(d);
             if (selectedData !== d) {
+                var pd = selectedData;
                 selectedData = d;
                 ul.selectAll("li.node").classed("selected", function (d) {
                     return selectedData === d;
                 });
+                s.previousData = pd;
                 var event = {type: "SelectedItemChanged", data: d};
                 // clear all editable flags
                 ul.selectAll("li.node").select(".label").attr("contentEditable", false);
@@ -200,6 +204,7 @@ define(function (require, exports, module) {
         var fst = this;
         if (!selectedData || selectedData.path !== path) {
             var nodes = d3.select(el).selectAll(".node");
+            var pd = selectedData;
             nodes.classed("selected", function (d) {
                 if (d.path === path) {
                     selectedData = d;
@@ -210,6 +215,7 @@ define(function (require, exports, module) {
             });
             if (selectedData) {
                 //fire selected item changed event
+                selectedData.previousData = pd;
                 fst.fire({type: "SelectedItemChanged", data: selectedData});
 
                 setTimeout(function () {
@@ -229,6 +235,7 @@ define(function (require, exports, module) {
         var nodes = d3.select(el).selectAll(".node");
         var parent = nodePath.substring(0, nodePath.lastIndexOf("/"));
         var path = parent;
+        var pd = selectedData;
         nodes.classed("selected", function (d) {
             if (d.path === path) {
                 selectedData = d;
@@ -238,6 +245,7 @@ define(function (require, exports, module) {
             }
         });
         //fire selected item changed event
+        selectedData.previousData = pd;
         fst.fire({type: "SelectedItemChanged", data: selectedData});
 
         setTimeout(function () {

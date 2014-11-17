@@ -19,6 +19,7 @@ define(function (require, exports, module) {
         editor,
         editorContainer,
         pvsioWebClient;
+    var undoHistory;
     
     require("cm/addon/fold/foldcode");
     require("cm/addon/fold/foldgutter");
@@ -41,6 +42,28 @@ define(function (require, exports, module) {
         projectManager.selectFile(project.mainPVSFile() || project.pvsFilesList()[0] || project.name());
     }
     
+    var saveHistory = function (projectFile) {
+        if (projectFile && !projectFile.isDirectory && projectFile.path()) {
+            undoHistory.set(projectFile.path(), editor.getHistory());
+            console.log("Undo history saved for file " + projectFile.path());
+            return true;
+        }
+        return false;
+    };
+
+    var restoreHistory = function (projectFile) {
+        if (projectFile && !projectFile.isDirectory && projectFile.path()) {
+            editor.clearHistory();
+            var history = undoHistory.get(projectFile.path());
+            if (history) {
+                editor.setHistory(history);
+                console.log("Undo history restored for file " + projectFile.path());
+                return true;
+            }
+        }
+        return false;
+    };
+    
 	function ModelEditor() {
         pvsioWebClient = PVSioWebClient.getInstance();
         projectManager = ProjectManager.getInstance();
@@ -50,6 +73,9 @@ define(function (require, exports, module) {
                 editor.refresh();
             }
         });
+        undoHistory = d3.map();
+        CodeMirror.defineExtension("saveHistory", saveHistory);
+        CodeMirror.defineExtension("restoreHistory", restoreHistory);
 	}
 	
     /////These are the api methods that the prototype builder plugin exposes
