@@ -27,6 +27,13 @@ div.header {
 	padding: 5px;
 	border:1px solid #4088B6;
     background-color: white;
+    cursor: pointer;
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;    
 }
 
 #graphicalEditor{
@@ -92,6 +99,12 @@ div.downloader{
 }
 #header{
 	width: 100%;
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;    
 }
 .center{
 	margin-right: auto;
@@ -202,6 +215,11 @@ fileListItem.hide {
 #editorToolbar{
     padding: 10px;
     min-width: 1024px;
+}
+#editor-search-bar {
+    height: 28px;
+    position: relative;
+    background-color: lightgray;
 }
 /*** end source code section **/
 
@@ -351,6 +369,12 @@ div.detailsForm select, div.detailsForm textarea{
 
 .content-body > .ljs-hcontent {
 	width: 80%;
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;    
 }
 #body .ljs-hcontent {
 	padding-left: 0;
@@ -381,7 +405,7 @@ div.detailsForm select, div.detailsForm textarea{
 
 #project-notifications {
 	display: none;
-	position: absolute;
+	position: fixed;
 	top: 0;
 	right: 0;
 	z-index: 1234;
@@ -390,6 +414,12 @@ div.detailsForm select, div.detailsForm textarea{
 
 .plugins-group .list-group-item {
 	border-radius: 0;
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;    
 }
 
 .panel.scrollable-dialog {

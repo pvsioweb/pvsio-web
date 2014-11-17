@@ -74,35 +74,38 @@ define(function (require, exports, module) {
             mode: "txt",
             lineNumbers: true,
             foldGutter: true,
-            autofocus: true,
+            autofocus: false,
             gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter", "breakpoints"],
             autoCloseBrackets: true,
             matchBrackets: true,
-            styleActiveLine: true,
-            placeholder: "The formal model goes here...",
+            styleActiveLine: false,
+            placeholder: "Type the formal model here...",
             extraKeys: {
                 "Ctrl-Space": "autocomplete",
+                "Ctrl-S": function (instance) {
+                    d3.select("#editorToolbar").select("#btnSaveFile").node().click();
+                }
             }
         });
-        editor.on("gutterClick", function(cm, n) {
+        editor.on("gutterClick", function (cm, n) {
             function makeMarker() {
                 var marker = document.createElement("div");
                 marker.style.position = "absolute";
                 marker.style.border = "2px solid steelblue";
                 marker.style.height = "16px";
                 return marker;
-            }            
+            }
             console.log("line = " + n);
             var info = cm.lineInfo(n);
             cm.setGutterMarker(n, "breakpoints", info.gutterMarkers ? null : makeMarker());
         });
         var showHint = true;
-        editor.on("inputRead", function(cm) {
+        editor.on("inputRead", function (cm) {
             if (showHint) {
                 CodeMirror.showHint(cm, CodeMirror.hint.pvs, { completeSingle: false, alignWithWord: true });
             }
         });
-        editor.on("keyup", function(cm, event) {    
+        editor.on("keyup", function (cm, event) {
             var keyCode = event.keyCode || event.which;
             // show hints only when typing words
             if (keyCode < 65 || keyCode > 90) { // 65 = a, 90 = z
@@ -110,11 +113,15 @@ define(function (require, exports, module) {
             } else {
                 showHint = true;
             }
-        });        
+        });
         editor.setSize("100%", "100%");
         projectManager.editor(editor);
         
         projectManager.addListener("ProjectChanged", onProjectChanged);
+        document.getElementById("model-editor-search-input").addEventListener("click", function () {
+            editor.options.search = document.getElementById("model-editor-search-input").value;
+            CodeMirror.commands.find(editor);
+        });
         
         if (projectManager.project().name() !== "") {
             projectManager.renderSourceFileList(projectManager.project().getFolderStructure());

@@ -87,23 +87,26 @@ define(function (require, exports, module) {
 		var header = div.append("div").classed("header", true);
 		var content = div.append("div").attr("class", "collapsible-panel");
 		
+        header.on("click", function () {
+            var icon = d3.select(this.firstChild);
+            var label = d3.select(this.lastChild);
+            if (content.attr("style") === null) {
+                content.attr("style", "display: none");
+                label.node().textContent += " (click to expand)";
+                icon.classed("glyphicon-plus-sign", true).classed("glyphicon-minus-sign", false);
+            } else {
+                content.attr("style", null);
+                label.node().textContent = label.node().textContent.replace(" (click to expand)", "");
+                icon.classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
+            }
+            if (options.onClick && typeof options.onClick === "function") {
+                options.onClick();
+            }
+        });
 		header.append("span")
 			.attr("class", function () {
 				return options.showContent === true ? "toggle-collapse glyphicon glyphicon-minus-sign" :
 						"toggle-collapse glyphicon glyphicon-plus-sign";
-            })
-			.on("click", function () {
-                var d = d3.select(this);
-                if (d.classed("glyphicon-minus-sign")) {
-                    content.style("display", "none");
-                    d3.select(this).classed("glyphicon-plus-sign", true).classed("glyphicon-minus-sign", false);
-                } else {
-                    content.style("display", null);
-                    d3.select(this).classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
-                }
-                if (options.onClick && typeof options.onClick === "function") {
-                    options.onClick();
-                }
             });
 		if (options.owner) {
 			div.attr("plugin-owner", options.owner);
@@ -111,7 +114,10 @@ define(function (require, exports, module) {
 		if (options.headerText) {
 			header.append("span").html(options.headerText).attr("class", "header");
 		}
-		if (!options.showContent) { content.style("display", "none"); }
+		if (!options.showContent) {
+            header.node().lastChild.textContent += " (click to expand)";
+            content.style("display", "none");
+        }
 		return content;
 	};
     
