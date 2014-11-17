@@ -419,7 +419,7 @@ define(function (require, exports, module) {
                         adjustedHeight = img.height;
                     scale = 1;
 
-                    if (img.width > pbox.width) {
+                    if (img.width > pbox.width && pbox.width > 0 && pbox.height > 0) {
                         adjustedWidth = pbox.width;
                         scale = adjustedWidth / img.width;
                         adjustedHeight = scale * img.height;
