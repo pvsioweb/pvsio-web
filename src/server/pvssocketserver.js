@@ -224,7 +224,9 @@ function run() {
                             setTimeout(function () {
                                 if (token.isDirectory) {
                                     getFilesInDirectory(fullPath).then(function (files) {
-                                        token.subFiles = files.map(toRelativePath(fullPath));
+                                        token.subFiles = files.filter(function (f) {
+                                            return FileFilters.indexOf(path.extname(f.filePath)) > -1;
+                                        }).map(toRelativePath(fullPath));
                                         processCallback(token, socket);
                                     }).catch(function (err) {
                                         token.err = err;
@@ -360,7 +362,6 @@ function run() {
             },
             "startProcess": function (token, socket, socketid) {
                 logger.info("Calling start process for client... " + socketid);
-//                unregisterFolderWatchers();
 				var root = token.data.projectName ?
                             path.join(baseProjectDir, token.data.projectName)
                             : token.data.demoName ? path.join(baseDemosDir, token.data.demoName) : "";
