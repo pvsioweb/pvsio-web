@@ -38,6 +38,7 @@ function run() {
         express                 = require("express"),
         webserver               = express(),
         procWrapper             = require("./processwrapper"),
+        FileFilters             = require("./FileFilters"),
         port                    = 8082,
         pvsioProcessMap         = {},//each client should get his own process
         httpServer              = http.createServer(webserver),
@@ -48,13 +49,14 @@ function run() {
 		baseDemosDir			= path.join(__dirname, "../../examples/demos/"),
 		clientDir				= path.join(__dirname, "../client");
     var p, clientid = 0, WebSocketServer = ws.Server;
-    var fsWatchers = {}, eventStream = [];
+    var fsWatchers = {};
 	var writeFile = serverFuncs.writeFile,
 		stat = serverFuncs.stat,
 		renameFile = serverFuncs.renameFile,
 		createProject = serverFuncs.createProject,
 		openProject = serverFuncs.openProject,
-		listProjects = serverFuncs.listProjects;
+		listProjects = serverFuncs.listProjects,
+        getFilesInDirectory = serverFuncs.getFilesInDirectory;
     
     /**
      * Utility function that dispatches responses to websocket clients
@@ -176,6 +178,7 @@ function run() {
         if (watcher) {
             watcher.close();  
             delete fsWatchers[folderPath];
+            logger.debug("unregistered watcher for " + folderPath);
         }
     }
     
@@ -192,11 +195,22 @@ function run() {
         @param {socket} socket
     */
     function registerFolderWatcher(folderPath, socket) {
+        var notificationDelay = 200;
+        function toRelativePath(parentDir) {
+            return function (d) {
+                d.filePath = d.filePath.replace(parentDir + "/", "");
+                return d;
+            };
+        }
+        
         unregisterFolderWatcher(folderPath);
-        logger.debug("watching .. " + folderPath);
+        if (folderPath.indexOf("pvsbin") > -1) { return; }
+        
+        logger.debug("watching changes to .. " + folderPath);
         var watcher = fs.watch(folderPath, {persistent: false}, function (event, fileName) {
+            var extension = path.extname(fileName).toLowerCase();
             if (fileName && fileName !== ".DS_Store" && event === "rename") {
-                var fullPath = path.join(folderPath, fileName), tId;
+                var fullPath = path.join(folderPath, fileName);
                 var token = {type: "FileSystemUpdate", event: event, fileName: fileName,
                              filePath: fullPath.replace(baseProjectDir, ""),
                             time: {server: {}}};
@@ -206,24 +220,31 @@ function run() {
                             registerFolderWatcher(fullPath, socket);
                             token.isDirectory = true;
                         }
-                        if (eventStream.length) {
-                            token.old = eventStream.pop();
-                            clearTimeout(tId);
-                            tId = null;
+                        if (token.isDirectory || FileFilters.indexOf(extension) > -1) {
+                            setTimeout(function () {
+                                if (token.isDirectory) {
+                                    getFilesInDirectory(fullPath).then(function (files) {
+                                        token.subFiles = files.filter(function (f) {
+                                            return FileFilters.indexOf(path.extname(f.filePath)) > -1;
+                                        }).map(toRelativePath(fullPath));
+                                        processCallback(token, socket);
+                                    }).catch(function (err) {
+                                        token.err = err;
+                                        processCallback(token, socket);
+                                    });
+                                } else {
+                                    processCallback(token, socket);
+                                }
+                            }, notificationDelay);
                         }
-                        processCallback(token, socket);
                     }).catch(function (err) {
                         token.event = err.code === "ENOENT" ? "delete" : event;
                         if (token.event === "delete") {
-                            unregisterFolderWatcher(fullPath);   
-                        }
-                        eventStream.push(token);
-                        tId = setTimeout(function () {
-                            if (tId && eventStream.length) {
-                                token = eventStream.pop();
+                            setTimeout(function () {
                                 processCallback(token, socket);
-                            }
-                        }, 50);
+                            }, notificationDelay);
+                            unregisterFolderWatcher(fullPath);
+                        }                           
                     });
             }
         });
@@ -341,7 +362,6 @@ function run() {
             },
             "startProcess": function (token, socket, socketid) {
                 logger.info("Calling start process for client... " + socketid);
-                unregisterFolderWatchers();
 				var root = token.data.projectName ?
                             path.join(baseProjectDir, token.data.projectName)
                             : token.data.demoName ? path.join(baseDemosDir, token.data.demoName) : "";
@@ -375,6 +395,7 @@ function run() {
                 } else {
                     res.type = "attempting to close undefined process";
                 }
+                unregisterFolderWatchers();
                 processCallback(res, socket);
                 
             },

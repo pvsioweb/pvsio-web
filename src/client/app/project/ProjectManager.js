@@ -63,6 +63,34 @@ define(function (require, exports, module) {
             }
         }
     }
+    
+    function getFolderChildren(files, parentPath) {
+        var tree = {};
+        files.forEach(function (f) {
+            var args = f.filePath.split("/");
+            var ptr = tree;
+            args.forEach(function (a) {
+                ptr[a] = ptr[a] || {name: a, children: {}};
+                ptr = ptr[a].children;
+                    
+            });
+        });
+        
+        function getChildren(children, parentPath) {
+            if (children && Object.keys(children).length) {
+                var res = Object.keys(children).map(function (key) {
+                    var child = children[key];
+                    child.path = parentPath + "/" + child.name;
+                    child.children = getChildren(child.children, child.path);
+                    child.isDirectory = child.children !== undefined;
+                    return child;
+                });
+                return res;
+            }
+            return undefined;
+        }
+        return getChildren(tree, parentPath);
+    }
 	/**
         Event listener for file system updates
     */
@@ -73,39 +101,38 @@ define(function (require, exports, module) {
             if (f) {
                 project.removeFile(f);
             } else {
-                pvsFilesListView.getTreeList().removeItem(event.filePath);
-            }
-        } else if (event.event === "rename" && event.old) {
-            if (event.isDirectory) {
-                project.updateFolderName(event.old.filePath, event.filePath);
-            } else {
-                f = project.getProjectFile(event.old.filePath);
-                if (f) {
-                    f.path(event.filePath);
-                }
-            }
-            if (pvsFilesListView) {
-                var node = pvsFilesListView.getTreeList().findNode(function (d) {
-                    return d.path === event.old.filePath;
+                var affectedFiles = project.getProjectFiles().filter(function (f) {
+                    return f.path().indexOf(event.filePath) === 0; 
                 });
-                if (node) {
-                    pvsFilesListView.getTreeList().renameItem(node, event.fileName);   
-                }
+                
+                affectedFiles.forEach(function (f) {
+                    project.removeFile(f);
+                });
+                pvsFilesListView.getTreeList().removeItem(event.filePath);
             }
         } else if (event.event === "rename") { //file or folder added
             if (event.isDirectory) {
+                var children = getFolderChildren(event.subFiles, event.filePath);
+                console.log(children);
                 if (!pvsFilesListView.getTreeList().nodeExists(event.filePath)) {
                     var parentFolderName = event.filePath.replace("/" + event.fileName, "");
                     var parent = pvsFilesListView.getTreeList().findNode(function (d) {
                         return d.path === parentFolderName;
                     });
-                    var newFolder = {name: event.fileName, path: event.filePath, children: [], isDirectory: true};
+                    var newFolder = {name: event.fileName, path: event.filePath, children: children, isDirectory: true};
                     pvsFilesListView.getTreeList().addItem(newFolder, parent);
+                    //add the projectfiles
+                    event.subFiles.forEach(function (f) {
+                        var pf = new ProjectFile(event.filePath + "/" + f.filePath);
+                        project.addProjectFile(pf, true);
+                    });
                 }
             } else if (!_projectManager.fileExists(event.filePath)) {
-                f = _projectManager.createProjectFile(event.filePath.replace(project.name() + "/", ""), null);
+                f = new ProjectFile(event.filePath);
                 project.addProjectFile(f);
             }
+        } else {
+            console.log(event);
         }
     }
     
@@ -151,6 +178,7 @@ define(function (require, exports, module) {
             if (p && p._dirty()) {
                 return "Are you sure you want to exit? All unsaved changed will be lost.";
             }
+            WSManager.getWebSocket().closePVSProcess();
         };
         registerFSUpdateEvents(project);
 
