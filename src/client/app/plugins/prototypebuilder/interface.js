@@ -175,8 +175,11 @@ define(function (require, exports, module) {
                     });
             }
             
-			var pvsFile = projectManager.getSelectedFile();
-			if (!pvsFile || pvsFile.dirty()) {
+            // if the pvsFile is not specified, we compile the main file
+            // note: this happens when a directory is selected
+			var pvsFile = projectManager.getSelectedFile() || projectManager.project().mainPVSFile();
+            if (!pvsFile) { return; }
+			if (pvsFile.dirty()) {
                 document.getElementById("btnSaveFile").click();
             }
             typecheck(pvsFile);
@@ -209,20 +212,22 @@ define(function (require, exports, module) {
 			var project = projectManager.project();
 			if (project) {
                 var pvsFile = projectManager.getSelectedFile();
-                var notification = "";
-                projectManager.saveFiles([pvsFile], function (err) {
-                    if (!err) {
-                        notification = pvsFile + " saved successfully!";
-                        d3.select("#editor-notification-area").insert("p", "p").html(notification);
-                        Logger.log(notification);
-                        NotificationManager.show(notification);
-                    } else {
-                        notification = err;
-                        d3.select("#editor-notification-area").insert("p", "p").html(notification);
-                        Logger.log(err);
-                        NotificationManager.error(notification);
-                    }
-                });
+                if (pvsFile) {
+                    var notification = "";
+                    projectManager.saveFiles([pvsFile], function (err) {
+                        if (!err) {
+                            notification = pvsFile + " saved successfully!";
+                            d3.select("#editor-notification-area").insert("p", "p").html(notification);
+                            Logger.log(notification);
+                            NotificationManager.show(notification);
+                        } else {
+                            notification = err;
+                            d3.select("#editor-notification-area").insert("p", "p").html(notification);
+                            Logger.log(err);
+                            NotificationManager.error(notification);
+                        }
+                    });
+                }
 			}
 		});
         d3.select("#btnImportFiles").on("click", function () {
