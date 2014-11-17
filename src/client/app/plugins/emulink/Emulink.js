@@ -708,11 +708,11 @@ define(function (require, exports, module) {
                 context.drawImage(image, 0, 0);
                 var canvasdata = canvas.toDataURL("image/png");
                 var pngimg = '<img src="' + canvasdata + '">';
-                d3.select("#pngdataurl").html(pngimg);
-                var a = document.createElement("a");
-                a.download = "emuChart.png";
-                a.href = canvasdata;
-                a.click();
+                
+                var a = d3.select("#pngdataurl");
+                a.node().download = projectManager.project().name() + "_emuChart.png";
+                a.node().href = canvasdata;
+                a.node().click();
             }
 
             image.onload = imageLoadComplete;
