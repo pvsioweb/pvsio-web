@@ -68,8 +68,17 @@ define(function (require, exports, module) {
         { rule: ["\\}",                     "return '}'"],            tokenType: "operator" },
         { rule: [":=",                      "return ':='"],           tokenType: "operator" },
         { rule: [";",                       "return ';'"],            tokenType: "operator" },
-        { rule: [",",                       "return ','"],            tokenType: "operator" }
+        { rule: [",",                       "return ','"],            tokenType: "operator" },
+        { rule: [".",                       "return '.'"],            tokenType: "operator" }
     ];
+    
+    function getRules() {
+        var ans = [];
+        lexerRules.forEach(function (lexerRule) {
+            ans.push(lexerRule.rule);
+        });
+        return ans;
+    }
     
     var grammar = function () {
         function exprWithBinaryOp() {
@@ -141,41 +150,7 @@ define(function (require, exports, module) {
                         
         return {
             "lex": {
-                "rules": [
-                    ["\\s+",                    "/* skip whitespace */"],
-                    ["(?!(?:IMPLIES|implies|AND|and|OR|or|NOT|not))" + // keywords shall not be used as identifiers
-                        "([a-zA-Z][a-zA-Z0-9_]*)", "return 'IDENTIFIER'"],
-                    ["[0-9]+(?:\\.[0-9]+)?\\b", "return 'NUMBER'"],
-                    ["\\*",                     "return '*'"],
-                    ["\\/",                     "return '/'"],
-                    ["-",                       "return '-'"],
-                    ["(?!(?:(\\!\\=)))" + // filtering out !=
-                        "(\\!|NOT|not)",        "return 'NOT'"],
-                    ["\\+",                     "return '+'"],
-                    ["(\\!\\=)",                "return '!='"],
-                    ["(?!(?:(\\=\\>|\\=\\=)))" + // filtering out implication and equality
-                         "(\\=)",               "return '='"],
-                    [    "(\\=\\=)",            "return '=='"],
-                    ["(?!(?:(\\>\\=)))" + // filtering out >=
-                        "(\\>)",   "return '>'"],
-                    ["(\\>\\=)",                "return '>='"],
-                    ["(?!(?:(\\<\\=)))" + // filtering out <=
-                        "(\\<)",   "return '<'"],
-                    ["(\\<\\=)",                "return '<='"],
-                    ["(IMPLIES|implies|(\\=\\>))",
-                        "return 'IMPLIES'"],
-                    ["(AND|&&)",                "return 'AND'"],
-                    ["(OR|\\|\\|)",             "return 'OR'"],
-                    ["\\(",                     "return '('"],
-                    ["\\)",                     "return ')'"],
-                    ["\\[",                     "return '['"],
-                    ["\\]",                     "return ']'"],
-                    ["\\{",                     "return '{'"],
-                    ["\\}",                     "return '}'"],
-                    [":=",                      "return ':='"],
-                    [";",                       "return ';'"],
-                    [",",                       "return ','"]
-                ]
+                "rules": getRules()
             },
 
             // the first field specified the associativity of the operator
@@ -223,7 +198,8 @@ define(function (require, exports, module) {
                 ],
                 "id": [
                     ["IDENTIFIER", "$$ = { type: 'identifier', val: $IDENTIFIER }"],
-                    ["IDENTIFIER ( args )", "$$ = { type: 'function', val: { identifier: $1, args: $args }}"]
+                    ["IDENTIFIER . id", "$$ = { type: 'identifier', val: $IDENTIFIER + '.' + $id.val }"],
+                    ["IDENTIFIER ( args )", "$$ = { type: 'function', val: { identifier: { type: 'identifier', val: $1}, args: $args }}"]
                 ],
                 "args": [
                     ["expression", "if (!Array.isArray($$)) { $$ = []; } $$.push($1)"],
@@ -245,12 +221,35 @@ define(function (require, exports, module) {
         };
     };
     
+    var dotGrammar = function () {
+        return {
+            "lex": {
+                "rules": getRules()
+            },
+            // the first field specified the associativity of the operator
+            "operators": [
+                ["left", "."] // left means left-to-right
+            ],
+            "start": "production",
+            "bnf": {
+                "production": [
+                    ["id",   "return $id"]
+                ],
+                "id": [
+                    ["IDENTIFIER", "$$ = { type: 'identifier', val: $IDENTIFIER }"],
+                    ["IDENTIFIER . id", "$$ = { type: 'selector', val: $IDENTIFIER, child: $id }"]
+                ]
+            }
+        };
+    };
+    
     /**
      * Constructor
      * @param grammar is a string defining the grammar for the parser
      */
     function EmuchartsParser() {
         this.parser = new Parser(grammar());
+        this.dotNotationParser = new Parser(dotGrammar());
         return this;
     }
     
@@ -309,6 +308,16 @@ define(function (require, exports, module) {
         return ans;
     };
 
+    EmuchartsParser.prototype.parseDotNotation = function (label) {
+        console.log("Parsing expression " + label);
+        var ans = { err: null, res: null };
+        try {
+            ans.res = this.dotNotationParser.parse(label);
+        } catch (e) {
+            ans.err = e.message;
+        }
+        return ans;
+    };
  
     module.exports = EmuchartsParser;
 });

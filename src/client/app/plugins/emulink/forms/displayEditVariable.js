@@ -31,7 +31,8 @@ define(function (require, exports, module) {
 		right: function (event) {
 			var form = this.el;
 			if (FormUtils.validateForm(form)) {
-                var selectors = [ "newVariableName", "newVariableType", "newVariableScope" ];
+                var selectors = [ "newVariableName", "newVariableType",
+                                  "newVariableValue", "newVariableScope" ];
 				var formdata = FormUtils.serializeForm(form, selectors);
 				this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
                              {data: formdata, el: this.el}, this);

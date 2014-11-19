@@ -293,7 +293,8 @@ define(function (require, exports, module) {
         if (ans.res && ans.res.type === "transition" &&
                 ans.res.val.cond.val.length === 4 &&
                 ans.res.val.cond.val[0].type === "function" &&
-                ans.res.val.cond.val[0].val.identifier === "f" &&
+                ans.res.val.cond.val[0].val.identifier.type === "identifier" &&
+                ans.res.val.cond.val[0].val.identifier.val === "f" &&
                 ans.res.val.cond.val[0].val.args.length === 1 &&
                 ans.res.val.cond.val[0].val.args[0].type === "expression" &&
                 ans.res.val.cond.val[0].val.args[0].val.length === 1 &&
@@ -322,7 +323,8 @@ define(function (require, exports, module) {
         if (ans.res && ans.res.type === "transition" &&
                 ans.res.val.cond.val.length === 4 &&
                 ans.res.val.cond.val[0].type === "function" &&
-                ans.res.val.cond.val[0].val.identifier === "f" &&
+                ans.res.val.cond.val[0].val.identifier.type === "identifier" &&
+                ans.res.val.cond.val[0].val.identifier.val === "f" &&
                 ans.res.val.cond.val[0].val.args.length === 2 &&
                 ans.res.val.cond.val[0].val.args[0].type === "expression" &&
                 ans.res.val.cond.val[0].val.args[0].val.length === 1 &&
@@ -356,7 +358,8 @@ define(function (require, exports, module) {
         if (ans.res && ans.res.type === "transition" &&
                 ans.res.val.cond.val.length === 4 &&
                 ans.res.val.cond.val[0].type === "function" &&
-                ans.res.val.cond.val[0].val.identifier === "f" &&
+                ans.res.val.cond.val[0].val.identifier.type === "identifier" &&
+                ans.res.val.cond.val[0].val.identifier.val === "f" &&
                 ans.res.val.cond.val[0].val.args.length === 1 &&
                 ans.res.val.cond.val[0].val.args[0].type === "expression" &&
                 ans.res.val.cond.val[0].val.args[0].val[0].type === "identifier" &&
@@ -518,6 +521,141 @@ define(function (require, exports, module) {
             fail++;
         }
         
+        // test 16
+        txt = "login [ S_state.correct == true ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
+        ans = parser.parseTransition(txt);
+        console.log(ans);
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.identifier.type === "identifier" &&
+                ans.res.val.identifier.val === "login" &&
+                ans.res.val.cond.type === "expression" &&
+                ans.res.val.cond.val &&
+                ans.res.val.cond.val.length === 3 &&
+                ans.res.val.cond.val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val === "S_state.correct" &&
+                ans.res.val.cond.val[1].type === "binop" &&
+                ans.res.val.cond.val[1].val === "==" &&
+                ans.res.val.cond.val[2].type === "identifier" &&
+                ans.res.val.cond.val[2].val === "true") {
+            summary += "[ok]";
+            success++;
+        } else {
+            console.log(ans.err);
+            summary += "[FAIL]";
+            fail++;
+        }
+        
+        // test 17
+        txt = "login [ S_state.d1.correct == true ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
+        ans = parser.parseTransition(txt);
+        console.log(ans);
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.identifier.type === "identifier" &&
+                ans.res.val.identifier.val === "login" &&
+                ans.res.val.cond.type === "expression" &&
+                ans.res.val.cond.val &&
+                ans.res.val.cond.val.length === 3 &&
+                ans.res.val.cond.val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val === "S_state.d1.correct" &&
+                ans.res.val.cond.val[1].type === "binop" &&
+                ans.res.val.cond.val[1].val === "==" &&
+                ans.res.val.cond.val[2].type === "identifier" &&
+                ans.res.val.cond.val[2].val === "true") {
+            summary += "[ok]";
+            success++;
+        } else {
+            console.log(ans.err);
+            summary += "[FAIL]";
+            fail++;
+        }
+
+        // test 18
+        txt = "login [ correct(S_state) == true ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
+        ans = parser.parseTransition(txt);
+        console.log(ans);
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.identifier.type === "identifier" &&
+                ans.res.val.identifier.val === "login" &&
+                ans.res.val.cond.type === "expression" &&
+                ans.res.val.cond.val &&
+                ans.res.val.cond.val.length === 3 &&
+                ans.res.val.cond.val[0].type === "function" &&
+                ans.res.val.cond.val[0].val.identifier.type === "identifier" &&
+                ans.res.val.cond.val[0].val.identifier.val === "correct" &&
+                ans.res.val.cond.val[0].val.args.length === 1 &&
+                ans.res.val.cond.val[0].val.args[0].type === "expression" &&
+                ans.res.val.cond.val[0].val.args[0].val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val.args[0].val[0].val === "S_state" &&
+                ans.res.val.cond.val[1].type === "binop" &&
+                ans.res.val.cond.val[1].val === "==" &&
+                ans.res.val.cond.val[2].type === "identifier" &&
+                ans.res.val.cond.val[2].val === "true") {
+            summary += "[ok]";
+            success++;
+        } else {
+            console.log(ans.err);
+            summary += "[FAIL]";
+            fail++;
+        }
+
+        // test 19
+        txt = "login [ correct(d1((S_state))) == true ]";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
+        ans = parser.parseTransition(txt);
+        console.log(ans);
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.identifier.type === "identifier" &&
+                ans.res.val.identifier.val === "login" &&
+                ans.res.val.cond.type === "expression" &&
+                ans.res.val.cond.val &&
+                ans.res.val.cond.val.length === 3 &&
+                ans.res.val.cond.val[0].type === "function" &&
+                ans.res.val.cond.val[0].val.identifier.type === "identifier" &&
+                ans.res.val.cond.val[0].val.identifier.val === "correct" &&
+                ans.res.val.cond.val[0].val.args.length === 1 &&
+                ans.res.val.cond.val[0].val.args[0].type === "expression" &&
+                ans.res.val.cond.val[0].val.args[0].val[0].type === "function" &&
+                ans.res.val.cond.val[0].val.args[0].val[0].val.identifier.type === "identifier" &&
+                ans.res.val.cond.val[0].val.args[0].val[0].val.identifier.val === "d1" &&
+                ans.res.val.cond.val[0].val.args[0].val[0].val.args.length === 1 &&
+                ans.res.val.cond.val[0].val.args[0].val[0].val.args[0].type === "expression" &&
+                ans.res.val.cond.val[0].val.args[0].val[0].val.args[0].val.length === 3 &&
+                ans.res.val.cond.val[0].val.args[0].val[0].val.args[0].val[0].val === "(" &&
+                ans.res.val.cond.val[0].val.args[0].val[0].val.args[0].val[1].val === "S_state" &&
+                ans.res.val.cond.val[0].val.args[0].val[0].val.args[0].val[2].val === ")" &&
+                ans.res.val.cond.val[1].type === "binop" &&
+                ans.res.val.cond.val[1].val === "==" &&
+                ans.res.val.cond.val[2].type === "identifier" &&
+                ans.res.val.cond.val[2].val === "true") {
+            summary += "[ok]";
+            success++;
+        } else {
+            console.log(ans.err);
+            summary += "[FAIL]";
+            fail++;
+        }
+        
+        // test 20
+        txt = "pump.device.screen.val";
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
+        ans = parser.parseDotNotation(txt);
+        console.log(ans);
+        summary += "\n  Parsing variable name... ";
+        if (ans.res && ans.res.type === "selector") {
+            summary += "[ok]";
+            success++;
+        } else {
+            console.log(ans.err);
+            summary += "[FAIL]";
+            fail++;
+        }
         summary += "\n\n--------------------------------------------------------";
         summary += "\n Success: " + success + "/" + tot;
         summary += "\n Fail   : " + fail + "/" + tot;

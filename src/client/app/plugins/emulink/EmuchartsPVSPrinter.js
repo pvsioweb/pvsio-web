@@ -26,6 +26,8 @@ define(function (require, exports, module) {
     };
     
     var automaticConstants;
+    var initialState;
+    var variables;
 
     var displayNotification = function (msg, title) {
         title = title || "Notification";
@@ -49,6 +51,8 @@ define(function (require, exports, module) {
     function EmuchartsPVSPrinter(name) {
         theory_name = name;
         automaticConstants = [];
+        initialState = [];
+        variables = {}; // each property represents a variable using a structured object whose properties reflect the structure specified using the dot notation. E.g., if a variable 'pump.display' is defined in emuchart, then variables = { pump: { display } }. If two or more emuchart variables have the same name, these will automatically be grouped together. E.g., if two variables 'pump.display' and 'pump.cursor' are defined in emuchart, variables = { pump: { display, cursor }}
         parser = new EmuchartsParser();
         if (unitTestEnabled) {
             parserUnitTest = new EmuchartsParser_UnitTest();
@@ -114,7 +118,7 @@ define(function (require, exports, module) {
             }
         }
     }
-    
+
     
     /**
      * Prints PVS definitions for Emuchart initial transitions
@@ -123,7 +127,37 @@ define(function (require, exports, module) {
         function preProcess(term) {
             return preProcessTerm(term);
         }
+        function isVariable(term) {
+            if (term.type === "identifier") {
+                if (term.val === predefined_variables.current_state.name ||
+                        term.val === predefined_variables.previous_state.name) {
+                    return true;
+                }
+                if (emuchart.variables) {
+                    var i = 0;
+                    for (i = 0; i < emuchart.variables.length; i++) {
+                        if (term.val === emuchart.variables[i].name) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        function printValue(term) {
+            if (isVariable(term)) {
+                if (term.val.indexOf(".") >= 0) {
+                    var v = term.val.split(".");
+                    v[0] += "(st)";
+                    term.val = v.join("`");
+                } else {
+                    term.val += "(st)";
+                }
+            }
+            return term.val;
+        }
         
+
         var ret = { err: null, res: null };
         emuchart.constants = emuchart.constants || [];
 
@@ -158,7 +192,7 @@ define(function (require, exports, module) {
                     st: [
                         (predefined_variables.current_state.name + " := " + theTransition.to),
                         (predefined_variables.previous_state.name + " := " + theTransition.to)
-                    ],
+                    ].concat(initialState),
                     letExpr: [],
                     inExpr: [ ("st") ]
                 }
@@ -177,32 +211,6 @@ define(function (require, exports, module) {
                             }
                         });
                     }
-                    if (initialisation === null) {
-                        var msg = "Warning: initial value for variable " + variable.name +
-                                    " of type " + variable.type + " was not specified.";
-                        // set a default value -- try to check the type so that an appropriate value can be chosen
-                        if (variable.type.toLowerCase() === "bool") {
-                            initialisation = variable.name + " := false";
-                            msg += "\n\nBoolean variable detected: setting initial value to false";
-                        } else if (variable.type.toLowerCase() === "real" ||
-                                        variable.type.toLowerCase() === "int" ||
-                                        variable.type.toLowerCase() === "nat" ||
-                                        variable.type.toLowerCase() === "posnat" ||
-                                        variable.type.toLowerCase() === "posreal") {
-                            initialisation = variable.name + " := 0";
-                            msg += "\n\nNumeric variable detected: setting initial value to 0";
-                        } else {
-                            var constant = "initial_" + variable.type;
-                            automaticConstants.push({
-                                name: constant,
-                                type: variable.type
-                            });
-                            initialisation = variable.name + " := " + constant;
-                            msg += "\nUsing symbolic constant " + constant;
-                        }
-                        displayWarning(msg);
-                    }
-                    pvsFunction.cases.st.push(initialisation);
                 });
             }
     
@@ -216,27 +224,45 @@ define(function (require, exports, module) {
                             isVariable = true;
                         }
                     });
-                    if (isVariable === false) {
-                        var expr = "st = st WITH [ " + action.val.identifier.val + " := ";
+                    if (isVariable) {
+                        var expr = "st = st WITH [ ";
+                        var brackets = [];
+                        if (action.val.identifier.val.indexOf(".") >= 0) {
+                            var v = action.val.identifier.val.split(".");
+                            var i = 0;
+                            for (i = 0; i < v.length; i++) {
+                                expr += v[i];
+                                if (i < v.length - 1) {
+                                    expr += " := " + v[i] + "(st) WITH [ ";
+                                    brackets.push("]");
+                                }
+                            }
+                        } else {
+                            expr += action.val.identifier.val;
+                        }
+                        expr += " := ";
                         var tmp = [];
                         action.val.expression.val.forEach(function (term) {
                             preProcess(term);
-                            tmp.push(term.val);
+                            tmp.push(printValue(term));
                         });
                         expr += tmp.join(" ") + " ]";
+                        brackets.forEach(function (bracket) {
+                            expr += "]";
+                        });
                         pvsFunction.cases.letExpr.push(expr);
                     }
                 });
             }
 
             var code = "\n  %-- initial state\n  ";
-            code += pvsFunction.signature + " =\n    ";
+            code += pvsFunction.signature;
             if (pvsFunction.cases.letExpr.length) {
-                code += "LET st = (# " + pvsFunction.cases.st.join(", ") + " #)";
-                code += ",\n    " + pvsFunction.cases.letExpr.join(",\n  ");
-                code += "\n    IN " + pvsFunction.cases.inExpr + "\n";
-            } else {
-                code += "(# " + pvsFunction.cases.st.join(", ") + " #)\n";
+                code += " = \n  LET st = (# " + pvsFunction.cases.st.join(",\n      ") + " #)";
+                code += ",\n     " + pvsFunction.cases.letExpr.join(",\n     ");
+                code += "\n    IN " + pvsFunction.cases.inExpr + "\n\n";
+            } else if (initialState && initialState !== "") {
+                code += " = (# " + pvsFunction.cases.st.join(",\n      ") + " #)\n";
             }
 
             ret.res = code;
@@ -268,6 +294,18 @@ define(function (require, exports, module) {
         
         function preProcess(term) {
             return preProcessTerm(term);
+        }
+        function printValue(term) {
+            if (isVariable(term)) {
+                if (term.val.indexOf(".") >= 0) {
+                    var v = term.val.split(".");
+                    v[0] += "(st)";
+                    term.val = v.join("`");
+                } else {
+                    term.val += "(st)";
+                }
+            }
+            return term.val;
         }
         
         var ret = { err: null, res: null };
@@ -331,8 +369,18 @@ define(function (require, exports, module) {
                             var tmp = [];
                             transition.cond.val.forEach(function (term) {
                                 // identifiers of state variables need to be followed by (st)
-                                if (isVariable(term)) {
-                                    tmp.push(term.val + "(st)");
+                                if (term.type === "identifier") {
+                                    preProcess(term);
+                                    if (isVariable(term)) {
+                                        if (term.val.indexOf(".") >= 0) {
+                                            var v = term.val.split(".");
+                                            v[0] += "(st)";
+                                            term.val = v.join("`");
+                                        } else {
+                                            term.val += "(st)";
+                                        }
+                                    }
+                                    tmp.push(term.val);
                                 } else {
                                     preProcess(term);
                                     tmp.push(term.val);
@@ -347,17 +395,31 @@ define(function (require, exports, module) {
                         if (transition.actions && transition.actions.val &&
                                 transition.actions.val.length > 0) {
                             transition.actions.val.forEach(function (action) {
-                                var expr = "new_st = new_st WITH [ " + action.val.identifier.val + " := ";
+                                var expr = "new_st = new_st WITH [ ";
+                                var brackets = [];
+                                if (action.val.identifier.val.indexOf(".") >= 0) {
+                                    var v = action.val.identifier.val.split(".");
+                                    var i = 0;
+                                    for (i = 0; i < v.length; i++) {
+                                        expr += v[i];
+                                        if (i < v.length - 1) {
+                                            expr += " := " + v[i] + "(st) WITH [ ";
+                                            brackets.push("]");
+                                        }
+                                    }
+                                } else {
+                                    expr += action.val.identifier.val;
+                                }
+                                expr += " := ";
                                 var tmp = [];
                                 action.val.expression.val.forEach(function (term) {
-                                    if (isVariable(term)) {
-                                        tmp.push(term.val + "(st)");
-                                    } else {
-                                        preProcess(term);
-                                        tmp.push(term.val);
-                                    }
+                                    preProcess(term);
+                                    tmp.push(printValue(term));
                                 });
                                 expr += tmp.join(" ") + " ]";
+                                brackets.forEach(function (bracket) {
+                                    expr += "]";
+                                });
                                 letExpr.push(expr);
                             });
                         }
@@ -390,20 +452,127 @@ define(function (require, exports, module) {
         }
         return ret;
     };
-
+    
     /**
      * Prints PVS definitions for Emuchart variables
      */
     EmuchartsPVSPrinter.prototype.print_variables = function (emuchart) {
-        var ans = "\n  %-- emuchart state\n  State: TYPE = [#\n" +
-                    "   current_state : MachineState,\n" +
-                    "   previous_state: MachineState";
-        if (emuchart.variables && emuchart.variables.length) {
-            emuchart.variables.forEach(function (v) {
-                ans += ",\n   " + v.name + ": " + v.type;
-            });
+        function print_aux(v, type) {
+            if (v && v.type === "identifier") {
+                return v.val + ": " + type;
+            } else if (v && v.type === "selector") {
+                return v.val + ": [# " + print_aux(v.child, type) + " #]";
+            }
+            return v;
         }
-        ans += "\n  #]\n";
+        function printSelector(v) {
+            if (v && v.type === "selector") {
+                if (v.child.type === "identifier") {
+                    return v.val;
+                }
+                return v.val + "." + printSelector(v.child);
+            }
+            return "";
+        }
+        function printIdentifier(v) {
+            if (v && v.type === "identifier") {
+                return v.val;
+            } else if (v && v.type === "selector") {
+                return printIdentifier(v.child);
+            }
+            return "";
+        }
+        function extend(st, v, type) {
+            if (v.type === "identifier") {
+                st.set(v.val, type);
+            } else if (v.type === "selector") {
+                var selector = printSelector(v);
+                var identifier = printIdentifier(v);
+                var children = st.get(selector) || [];
+                children.push({ identifier: identifier, type: type });
+                st.set(selector, children);
+            }
+        }
+        function printStateType(st) {
+            var keys = st.keys();
+            var tmp = [];
+            keys.forEach(function (key) {
+                var ans = key;
+                var x = st.get(key);
+                if (typeof x === "string") {
+                    ans += ": " + x;
+                } else if (typeof x === "object" && x.length) {
+                    ans += ": [# ";
+                    var tmp1 = [];
+                    x.forEach(function (name) {
+                        tmp1.push(name.identifier + ": " + name.type);
+                    });
+                    ans += tmp1.join(", ") + " #]";
+                }
+                tmp.push(ans);
+            });
+            return "[#\n   " + tmp.join(",\n   ") + "\n  #]";
+        }
+        function generateInitialStateAssignments(st, variables) {
+            var keys = st.keys();
+            var tmp = [];
+            keys.forEach(function (key) {
+                var ans = key;
+                var x = st.get(key);
+                if (typeof x === "string") {
+                    if (key !== "current_state" && key !== "previous_state") {
+                        var val = variables.get(key + "." + x);
+                        if (!val) {
+                            if (x.toLowerCase() === "bool" ||
+                                    x.toLowerCase() === "boolean") {
+                                val = "false";
+                            } else {
+                                val = 0;
+                            }
+                        }
+                        ans += ":= " + val;
+                        tmp.push(ans);
+                    }
+                } else if (typeof x === "object" && x.length) {
+                    ans += ":= (# ";
+                    var tmp1 = [];
+                    x.forEach(function (name) {
+                        var val = variables.get(key + "." + name) || 0;
+                        tmp1.push(name.identifier + ":= " + val);
+                    });
+                    ans += tmp1.join(", ") + " #)";
+                    tmp.push(ans);
+                }
+            });
+            return tmp;
+        }
+        
+        var ans = "\n  %-- emuchart state\n  State: TYPE";
+        if (emuchart.variables && emuchart.variables.length) {
+            var state = d3.map();
+            state.set("current_state", "MachineState");
+            state.set("previous_state", "MachineState");
+            emuchart.variables.forEach(function (v) {
+                var theVariable = parser.parseDotNotation(v.name);
+                if (theVariable.err) {
+                    console.log("Error while parsing variable " + v.name + "\n" + theVariable.err);
+                    return;
+                }
+                extend(state, theVariable.res, v.type);
+            });
+            console.log(state);
+            ans += " = " + printStateType(state);
+            console.log(ans);
+            var readVariables = function (ev) {
+                var ans = d3.map();
+                ev.forEach(function (v) {
+                    ans.set(v.name, v.val);
+                });
+                return ans;
+            };
+            initialState = generateInitialStateAssignments(state, readVariables(emuchart.variables));
+        }
+        ans += "\n";
         return ans;
     };
 
@@ -477,7 +646,16 @@ define(function (require, exports, module) {
      */
     EmuchartsPVSPrinter.prototype.print = function (emuchart) {
         automaticConstants = [];
+        initialState = [];
         var ret = { err: null, res: null };
+        
+        var ans = this.print_descriptor(emuchart) + "\n";
+        ans += emuchart.name + ": THEORY\n BEGIN\n";
+        ans += this.print_importings(emuchart);
+        ans += this.print_constants(emuchart);
+        ans += this.print_states(emuchart);
+        ans += this.print_variables(emuchart);
+        
         var initialTransitions = this.print_initial_transition(emuchart);
         var transitions = this.print_transitions(emuchart);
         if (initialTransitions.err || transitions.err) {
@@ -486,12 +664,6 @@ define(function (require, exports, module) {
             return ret;
         }
         
-        var ans = this.print_descriptor(emuchart) + "\n";
-        ans += emuchart.name + ": THEORY\n BEGIN\n";
-        ans += this.print_importings(emuchart);
-        ans += this.print_constants(emuchart);
-        ans += this.print_states(emuchart);
-        ans += this.print_variables(emuchart);
         ans += initialTransitions.res;
         ans += transitions.res;
         ans += " END " + emuchart.name + "\n";

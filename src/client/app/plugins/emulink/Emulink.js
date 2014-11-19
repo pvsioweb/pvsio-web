@@ -651,7 +651,7 @@ define(function (require, exports, module) {
                 var content = JSON.stringify({
                     descriptor: {
                         file_type: "emdl",
-                        version: "1.1",
+                        version: "1.2",
                         description: "emucharts model",
                         chart_name: (projectManager.project().name() + "_emucharts"),
                         pvs_file: (projectManager.project().name() + "_emucharts_th.pvs")
@@ -912,11 +912,13 @@ define(function (require, exports, module) {
                 textLabel: {
                     newVariableName: "Variable name",
                     newVariableType: "Variable type",
+                    newVariableValue: "Initial value",
                     newVariableScope: "Variable scope"
                 },
                 placeholder: {
                     newVariableName: "Name, e.g., display",
-                    newVariableType: "Type, e.g., real"
+                    newVariableType: "Type, e.g., real",
+                    newVariableValue: "Value, e.g., 0"
                 },
                 scopeOptions: scopeOptions,
                 buttons: ["Cancel", "Create variable"]
@@ -924,12 +926,15 @@ define(function (require, exports, module) {
                 console.log("add variable");
                 var newVariableName = e.data.labels.get("newVariableName");
                 var newVariableType = e.data.labels.get("newVariableType");
+                var newVariableValue = e.data.labels.get("newVariableValue");
                 var newVariableScope = scopeOptions[e.data.options.get("newVariableScope")];
-                if (newVariableName && newVariableName.value !== ""
-                        && newVariableType && newVariableType.value !== "") {
+                if (newVariableName && newVariableName.value !== "" &&
+                        newVariableType && newVariableType.value !== "" &&
+                        newVariableValue && newVariableValue.value !== "") {
                     emuchartsManager.add_variable({
                         name: newVariableName,
                         type: newVariableType,
+                        value: newVariableValue,
                         scope: newVariableScope
                     });
                     view.remove();
@@ -955,11 +960,13 @@ define(function (require, exports, module) {
                     textLabel: {
                         newVariableName: "Variable name",
                         newVariableType: "Variable type",
+                        newVariableValue: "Initial value",
                         newVariableScope: "Variable scope"
                     },
                     placeholder: {
                         newVariableName: theVariable.name,
                         newVariableType: theVariable.type,
+                        newVariableValue: theVariable.value,
                         newVariableScope: theVariable.scope
                     },
                     scopeOptions: scopeOptions,
@@ -967,13 +974,16 @@ define(function (require, exports, module) {
                 }).on("ok", function (e, view) {
                     var newVariableName = e.data.labels.get("newVariableName");
                     var newVariableType = e.data.labels.get("newVariableType");
+                    var newVariableValue = e.data.labels.get("newVariableValue");
                     var newVariableScope = variableScopes[e.data.options.get("newVariableScope")];
-                    if (newVariableName && newVariableName.value !== ""
-                            && newVariableType && newVariableType.value !== "") {
+                    if (newVariableName && newVariableName.value !== "" &&
+                            newVariableType && newVariableType.value !== "" &&
+                            newVariableValue && newVariableValue.value !== "") {
                         emuchartsManager.rename_variable(
                             theVariable.id,
                             {   name: newVariableName,
                                 type: newVariableType,
+                                value: newVariableValue,
                                 scope: newVariableScope   }
                         );
                         view.remove();

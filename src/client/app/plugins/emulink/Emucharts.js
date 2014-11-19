@@ -582,6 +582,7 @@ define(function (require, exports, module) {
             id: id,
             name: variable.name,
             type: variable.type,
+            value: variable.value,
             scope: variable.scope
         };
         this.variables.set(id, newVariable);
@@ -592,6 +593,7 @@ define(function (require, exports, module) {
                 id: id,
                 name: variable.name,
                 type: variable.type,
+                value: variable.value,
                 scope: variable.scope
             }
         });
@@ -694,6 +696,7 @@ define(function (require, exports, module) {
         var newVariable = {
             type: newData.type || theVariable.type,
             name: newData.name || theVariable.name,
+            value: newData.value || theVariable.value,
             scope: newData.scope || theVariable.scope
         };
         // update variableID
@@ -706,12 +709,14 @@ define(function (require, exports, module) {
                 id: theVariable.id,
                 type: theVariable.type,
                 name: theVariable.name,
+                value: theVariable.value,
                 scope: theVariable.scope
             },
             post: {
                 id: newVariable.id,
                 type: newVariable.type,
                 name: newVariable.name,
+                value: newVariable.value,
                 scope: newVariable.scope
             }
         });
@@ -751,6 +756,7 @@ define(function (require, exports, module) {
                     id: v.id,
                     name: v.name,
                     type: v.type,
+                    value: v.value,
                     scope: v.scope
                 });
             }

@@ -87,7 +87,7 @@ define(function (require, exports, module) {
                 // check if this is version 1.0
                 if (emuchartsFile.fileContent && emuchartsFile.fileContent.descriptor) {
                     var version = emuchartsFile.fileContent.descriptor.version;
-                    if (version === "1.1") {
+                    if (version === "1.1" || version === "1.2") {
                         var chart = { nodes: d3.map(), edges: d3.map(), initial_edges: d3.map(),
                                       variables: d3.map(), constants: d3.map() };
                         var chart_reader = emuchartsFile.fileContent.chart;

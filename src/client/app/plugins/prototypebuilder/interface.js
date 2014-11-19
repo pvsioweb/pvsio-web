@@ -152,7 +152,7 @@ define(function (require, exports, module) {
                             d3.select("#editor-notification-area").insert("p", "p").html(notification);
                             msg = msg.substring(msg.indexOf("Proof summary"), msg.length);
                             Notification.create({
-                                header: "Compilation result for file " + pvsFile.name(),
+                                header: pvsFile.name() + " compiled successfully! ",
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         } else {
