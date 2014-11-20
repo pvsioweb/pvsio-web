@@ -20,14 +20,15 @@ define(function (require, exports, module) {
     var parserUnitTest;
     var unitTestEnabled = true;
     
+    var pvsRecordTypePrinter = require("plugins/emulink/models/pvs/pvsRecordTypePrinter");
+    var pvsEnumeratedTypePrinter = require("plugins/emulink/models/pvs/pvsEnumeratedTypePrinter");
+    
     var predefined_variables = {
-        previous_state: { name: "previous_state", type: "MachineState" },
-        current_state:  { name: "current_state", type: "MachineState" }
+        previous_state: { name: "previous_state", type: "MachineState", value: null },
+        current_state: { name: "current_state", type: "MachineState", value: null }
     };
     
     var automaticConstants;
-    var initialState;
-    var variables;
 
     var displayNotification = function (msg, title) {
         title = title || "Notification";
@@ -51,13 +52,13 @@ define(function (require, exports, module) {
     function EmuchartsPVSPrinter(name) {
         theory_name = name;
         automaticConstants = [];
-        initialState = [];
-        variables = {}; // each property represents a variable using a structured object whose properties reflect the structure specified using the dot notation. E.g., if a variable 'pump.display' is defined in emuchart, then variables = { pump: { display } }. If two or more emuchart variables have the same name, these will automatically be grouped together. E.g., if two variables 'pump.display' and 'pump.cursor' are defined in emuchart, variables = { pump: { display, cursor }}
         parser = new EmuchartsParser();
         if (unitTestEnabled) {
             parserUnitTest = new EmuchartsParser_UnitTest();
             console.log(parserUnitTest.unitTest());
         }
+        pvsRecordTypePrinter = pvsRecordTypePrinter.create();
+        pvsEnumeratedTypePrinter = pvsEnumeratedTypePrinter.create();
         return this;
     }
     
@@ -70,17 +71,14 @@ define(function (require, exports, module) {
      * Prints PVS definitions for Emuchart states
      */
     EmuchartsPVSPrinter.prototype.print_states = function (emuchart) {
-        var states = emuchart.states;
-        var ans = "\n  %-- machine states\n" +
-                    "  MachineState: TYPE";
-        if (states && states.length > 0) {
-            var tmp = [];
-            states.forEach(function (state) {
-                tmp.push(state.name);
-            });
-            ans += " = { " + tmp.join(", ") + " }";
-        }
-        return ans + "\n";
+        var tmp = [];
+        emuchart.states.forEach(function (state) {
+            tmp.push(state.name);
+        });
+
+        var ans = "\n  %-- machine states\n";
+        ans += pvsEnumeratedTypePrinter.fromArray("MachineState", tmp);
+        return ans;
     };
     
 
@@ -189,10 +187,6 @@ define(function (require, exports, module) {
                 identifier: "init",
                 signature:  "init(x: real): State",
                 cases: {
-                    st: [
-                        (predefined_variables.current_state.name + " := " + theTransition.to),
-                        (predefined_variables.previous_state.name + " := " + theTransition.to)
-                    ].concat(initialState),
                     letExpr: [],
                     inExpr: [ ("st") ]
                 }
@@ -255,16 +249,32 @@ define(function (require, exports, module) {
                 });
             }
 
-            var code = "\n  %-- initial state\n  ";
+            var code = "  %-- initial state\n  ";
             code += pvsFunction.signature;
+            
+            //-------------------
+            var variables = [];
+            predefined_variables.current_state.value = theTransition.to;
+            predefined_variables.previous_state.value = theTransition.to;
+            variables.push(predefined_variables.current_state);
+            variables.push(predefined_variables.previous_state);
+            variables = variables.concat(emuchart.variables);
+            // todo: create the state variable when adding variables so that user has immediate feedback
+            var type = parser.createObjectFrom(variables, {
+                onNameConflict: function (name) {
+                    alert("Warning: name conflict for variable '" + name + "'.");
+                }
+            });
+            var rval = pvsRecordTypePrinter.printRecordValue(type);
+
             if (pvsFunction.cases.letExpr.length) {
-                code += " = \n  LET st = (# " + pvsFunction.cases.st.join(",\n      ") + " #)";
+                code += " = \n  LET st = " + rval;
                 code += ",\n     " + pvsFunction.cases.letExpr.join(",\n     ");
                 code += "\n    IN " + pvsFunction.cases.inExpr + "\n\n";
-            } else if (initialState && initialState !== "") {
-                code += " = (# " + pvsFunction.cases.st.join(",\n      ") + " #)\n";
+            } else {
+                code += " = " + rval;
             }
-
+            
             ret.res = code;
         }
         return ret;
@@ -453,126 +463,23 @@ define(function (require, exports, module) {
         return ret;
     };
     
+    
     /**
-     * Prints PVS definitions for Emuchart variables
+     * Prints the PVS definition for Emuchart variables
      */
     EmuchartsPVSPrinter.prototype.print_variables = function (emuchart) {
-        function print_aux(v, type) {
-            if (v && v.type === "identifier") {
-                return v.val + ": " + type;
-            } else if (v && v.type === "selector") {
-                return v.val + ": [# " + print_aux(v.child, type) + " #]";
+        var variables = [];
+        variables.push(predefined_variables.current_state);
+        variables.push(predefined_variables.previous_state);
+        variables = variables.concat(emuchart.variables);
+        // todo: create the state variable when adding variables so that user has immediate feedback
+        var type = parser.createObjectFrom(variables, {
+            onNameConflict: function (name) {
+                alert("Warning: name conflict for variable '" + name + "'.");
             }
-            return v;
-        }
-        function printSelector(v) {
-            if (v && v.type === "selector") {
-                if (v.child.type === "identifier") {
-                    return v.val;
-                }
-                return v.val + "." + printSelector(v.child);
-            }
-            return "";
-        }
-        function printIdentifier(v) {
-            if (v && v.type === "identifier") {
-                return v.val;
-            } else if (v && v.type === "selector") {
-                return printIdentifier(v.child);
-            }
-            return "";
-        }
-        function extend(st, v, type) {
-            if (v.type === "identifier") {
-                st.set(v.val, type);
-            } else if (v.type === "selector") {
-                var selector = printSelector(v);
-                var identifier = printIdentifier(v);
-                var children = st.get(selector) || [];
-                children.push({ identifier: identifier, type: type });
-                st.set(selector, children);
-            }
-        }
-        function printStateType(st) {
-            var keys = st.keys();
-            var tmp = [];
-            keys.forEach(function (key) {
-                var ans = key;
-                var x = st.get(key);
-                if (typeof x === "string") {
-                    ans += ": " + x;
-                } else if (typeof x === "object" && x.length) {
-                    ans += ": [# ";
-                    var tmp1 = [];
-                    x.forEach(function (name) {
-                        tmp1.push(name.identifier + ": " + name.type);
-                    });
-                    ans += tmp1.join(", ") + " #]";
-                }
-                tmp.push(ans);
-            });
-            return "[#\n   " + tmp.join(",\n   ") + "\n  #]";
-        }
-        function generateInitialStateAssignments(st, variables) {
-            var keys = st.keys();
-            var tmp = [];
-            keys.forEach(function (key) {
-                var ans = key;
-                var x = st.get(key);
-                if (typeof x === "string") {
-                    if (key !== "current_state" && key !== "previous_state") {
-                        var val = variables.get(key + "." + x);
-                        if (!val) {
-                            if (x.toLowerCase() === "bool" ||
-                                    x.toLowerCase() === "boolean") {
-                                val = "false";
-                            } else {
-                                val = 0;
-                            }
-                        }
-                        ans += ":= " + val;
-                        tmp.push(ans);
-                    }
-                } else if (typeof x === "object" && x.length) {
-                    ans += ":= (# ";
-                    var tmp1 = [];
-                    x.forEach(function (name) {
-                        var val = variables.get(key + "." + name) || 0;
-                        tmp1.push(name.identifier + ":= " + val);
-                    });
-                    ans += tmp1.join(", ") + " #)";
-                    tmp.push(ans);
-                }
-            });
-            return tmp;
-        }
-        
-        var ans = "\n  %-- emuchart state\n  State: TYPE";
-        if (emuchart.variables && emuchart.variables.length) {
-            var state = d3.map();
-            state.set("current_state", "MachineState");
-            state.set("previous_state", "MachineState");
-            emuchart.variables.forEach(function (v) {
-                var theVariable = parser.parseDotNotation(v.name);
-                if (theVariable.err) {
-                    console.log("Error while parsing variable " + v.name + "\n" + theVariable.err);
-                    return;
-                }
-                extend(state, theVariable.res, v.type);
-            });
-            console.log(state);
-            ans += " = " + printStateType(state);
-            console.log(ans);
-            var readVariables = function (ev) {
-                var ans = d3.map();
-                ev.forEach(function (v) {
-                    ans.set(v.name, v.val);
-                });
-                return ans;
-            };
-            initialState = generateInitialStateAssignments(state, readVariables(emuchart.variables));
-        }
-        ans += "\n";
+        });
+        var ans = "  %-- emuchart state\n";
+        ans += pvsRecordTypePrinter.printTypeDefinition("State", type);
         return ans;
     };
 
@@ -646,15 +553,14 @@ define(function (require, exports, module) {
      */
     EmuchartsPVSPrinter.prototype.print = function (emuchart) {
         automaticConstants = [];
-        initialState = [];
         var ret = { err: null, res: null };
         
         var ans = this.print_descriptor(emuchart) + "\n";
         ans += emuchart.name + ": THEORY\n BEGIN\n";
         ans += this.print_importings(emuchart);
         ans += this.print_constants(emuchart);
-        ans += this.print_states(emuchart);
-        ans += this.print_variables(emuchart);
+        ans += this.print_states(emuchart);    // -- done using handlebars library
+        ans += this.print_variables(emuchart); // -- done using handlebars library
         
         var initialTransitions = this.print_initial_transition(emuchart);
         var transitions = this.print_transitions(emuchart);

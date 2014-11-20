@@ -318,6 +318,65 @@ define(function (require, exports, module) {
         }
         return ans;
     };
+    
+    /**
+     * Creates an object whose property names reflect the names of the array passed as argument.
+     * Names can use the dot notation to create structured objects.
+     */
+    EmuchartsParser.prototype.createObjectFrom = function (names, opt) {
+        function extend(state, v) {
+            var path = v.name.split(".");
+            var i = 0, tmp = state;
+            for (i = 0; i < path.length; i++) {
+                if (i < path.length - 1) {
+                    if (tmp[path[i]] && tmp[path[i]].$type === "identifier") {
+                        if (opt.onNameConflict) {
+                            opt.onNameConflict(path[i]);
+                        }
+                    } else {
+                        if (!tmp[path[i]]) {
+                            tmp[path[i]] = {
+                                $type: "selector",
+                                $val: {
+                                    name: path[i]
+                                }
+                            };
+                        }
+                        tmp = tmp[path[i]];
+                    }
+                } else {
+                    if (tmp[path[i]] && tmp[path[i]].$type === "selector") {
+                        if (opt.onNameConflict) {
+                            opt.onNameConflict(path[i]);
+                        }
+                    } else {
+                        tmp[path[i]] = {
+                            $type: "identifier",
+                            $val: {
+                                name : path[i],
+                                type : v.type,
+                                value: v.value
+                            }
+                        };
+                    }
+                }
+            }
+        }
+        
+        var state = {};
+        if (names && names.length) {
+            names.forEach(function (v) {
+                var theVariable = {
+                    name : v.name,
+                    type : v.type,
+                    value: v.value
+                };
+                extend(state, theVariable);
+            });
+        }
+        
+        return state;
+    };
  
     module.exports = EmuchartsParser;
 });
