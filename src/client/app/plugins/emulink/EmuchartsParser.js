@@ -80,7 +80,7 @@ define(function (require, exports, module) {
         return ans;
     }
     
-    var grammar = function () {
+    var grammar = function (opt) {
         function exprWithBinaryOp() {
             return " if (!Array.isArray($$)) { $$ = []; }" +
                    " $$.push($1);" +
@@ -113,6 +113,23 @@ define(function (require, exports, module) {
                    "       expression: $3 " +
                    "    }" +
                    " };";
+        }
+        function getFunctionRule(opt) {
+            if (opt && opt.parseFunctions) {
+                return "$$ = { type: 'function', " +
+                       "val: { identifier: { type: 'identifier', val: $1}, args: $args }}";
+            }
+            return "$$ = { type: 'function', val: [] }; " +
+                   "$$.val.push({ type: 'identifier', val: $IDENTIFIER }); " +
+                   "$$.val.push({type: 'par', val: $2}); " +
+                   "var i = 0;" +
+                   "for (i = 0; i < $args.length; i++) {" +
+                   "    $$.val = $$.val.concat($args[i].val);" +
+                   "    if (i < $args.length - 1) {" +
+                   "        $$.val.push({ type: 'separator', val: ',' });" +
+                   "    }" +
+                   "}" +
+                   "$$.val.push({type: 'par', val: $4}); ";
         }
         // The order of rules in expressionBNF reflects the precedence of the operators (lowest precedence is at the top)
         // The considered precedence and associativity is that of the C++ language 
@@ -199,7 +216,7 @@ define(function (require, exports, module) {
                 "id": [
                     ["IDENTIFIER", "$$ = { type: 'identifier', val: $IDENTIFIER }"],
                     ["IDENTIFIER . id", "$$ = { type: 'identifier', val: $IDENTIFIER + '.' + $id.val }"],
-                    ["IDENTIFIER ( args )", "$$ = { type: 'function', val: { identifier: { type: 'identifier', val: $1}, args: $args }}"]
+                    ["IDENTIFIER ( args )", getFunctionRule(opt) ]
                 ],
                 "args": [
                     ["expression", "if (!Array.isArray($$)) { $$ = []; } $$.push($1)"],
@@ -248,9 +265,15 @@ define(function (require, exports, module) {
      * @param grammar is a string defining the grammar for the parser
      */
     function EmuchartsParser() {
-        this.parser = new Parser(grammar());
-        this.dotNotationParser = new Parser(dotGrammar());
-        return this;
+        try {
+            this.parser = new Parser(grammar());
+            this.dotNotationParser = new Parser(dotGrammar());
+            this.functionParser = new Parser(grammar({parseFunctions: true}));
+        } catch (e) {
+            console.log(e);
+        } finally {
+            return this;
+        }
     }
     
     /**
@@ -298,7 +321,7 @@ define(function (require, exports, module) {
      *  - Number objects have type 'number' and the value is the string representation of the number.
      */
     EmuchartsParser.prototype.parseTransition = function (label) {
-        console.log("Parsing expression " + label);
+        console.log("Parsing transition " + label);
         var ans = { err: null, res: null };
         try {
             ans.res = this.parser.parse(label);
@@ -319,19 +342,47 @@ define(function (require, exports, module) {
         return ans;
     };
     
+    EmuchartsParser.prototype.parseFunction = function (label) {
+        console.log("Parsing function " + label);
+        var ans = { err: null, res: null };
+        try {
+            ans.res = this.functionParser.parse(label);
+        } catch (e) {
+            ans.err = e.message;
+        }
+        return ans;
+    };
+    
     /**
-     * Creates an object whose property names reflect the names of the array passed as argument.
-     * Names can use the dot notation to create structured objects.
+     * Parses an array of variables and creates a typed object that merges the variables.
+     * Each variables is a structured object { name: (string), type: (string), value: (string) }
+     *   - name uses the dot notation to specify accessors and identifiers, e.g., pump.display
+     *   - type and value are optional. The fields will be null if unspecified
+     * Given two variables 'pump.display1' and 'pump.display2',
+     * the function returns ...
+     * Two names in the array are in conflict if one name is a substring of the other
+     * E.g. pump.display and pump.display.val
+     * When two names are in conflit, the function returns an error string (field err of the returned object)
+     *
+     * @param names is Array({ name: (string), type: (string), value: (string)})
+     *            Field name is mandatory. Fields type and value can be omitted.
+     * @param opt is a structure that contains functions to report notifications to the user. 
+     *            This parameter is optional. Currently, 'onNameConflict' is the only function
+     *            supported -- it renders feedback for errors when names are in conflict.
+     * @returns: { err: (string), res: Object }
+     *
      */
-    EmuchartsParser.prototype.createObjectFrom = function (names, opt) {
-        function extend(state, v) {
+    EmuchartsParser.prototype.parseVariables = function (variables, opt) {
+        function extend(ans, v) {
             var path = v.name.split(".");
-            var i = 0, tmp = state;
+            var i = 0, tmp = ans.res;
             for (i = 0; i < path.length; i++) {
                 if (i < path.length - 1) {
                     if (tmp[path[i]] && tmp[path[i]].$type === "identifier") {
                         if (opt.onNameConflict) {
                             opt.onNameConflict(path[i]);
+                            ans.err = "Name conflict for " + path[i];
+                            return;
                         }
                     } else {
                         if (!tmp[path[i]]) {
@@ -346,6 +397,8 @@ define(function (require, exports, module) {
                     if (tmp[path[i]] && tmp[path[i]].$type === "selector") {
                         if (opt.onNameConflict) {
                             opt.onNameConflict(path[i]);
+                            ans.err = "Name conflict for " + path[i];
+                            return;
                         }
                     } else {
                         tmp[path[i]] = {
@@ -360,91 +413,19 @@ define(function (require, exports, module) {
                 }
             }
         }
-        
-        var state = {};
-        if (names) {
-            if (typeof names === "string") {
-                extend(state, {
-                    name: names,
-                    type: null,
-                    value: null
+        var ans = { err: null, res: {} };
+        if (variables) {
+            variables.forEach(function (variable) {
+                console.log("Parsing dot notation " + variable);
+                extend(ans, {
+                    name : variable.name,
+                    type : variable.type,
+                    value: variable.value
                 });
-            } else {
-                names.forEach(function (v) {
-                    var theVariable = {
-                        name : v.name,
-                        type : v.type,
-                        value: v.value
-                    };
-                    extend(state, theVariable);
-                });
-            }
+            });
         }
         
-        return state;
-    };
- 
-    EmuchartsParser.prototype.createObjectFromOrig = function (names, opt) {
-        function extend(state, v) {
-            var path = v.name.split(".");
-            var i = 0, tmp = state;
-            for (i = 0; i < path.length; i++) {
-                if (i < path.length - 1) {
-                    if (tmp[path[i]] && tmp[path[i]].$type === "identifier") {
-                        if (opt.onNameConflict) {
-                            opt.onNameConflict(path[i]);
-                        }
-                    } else {
-                        if (!tmp[path[i]]) {
-                            tmp[path[i]] = {
-                                $type: "selector",
-                                $val: {
-                                    name: path[i]
-                                }
-                            };
-                        }
-                        tmp = tmp[path[i]];
-                    }
-                } else {
-                    if (tmp[path[i]] && tmp[path[i]].$type === "selector") {
-                        if (opt.onNameConflict) {
-                            opt.onNameConflict(path[i]);
-                        }
-                    } else {
-                        tmp[path[i]] = {
-                            $type: "identifier",
-                            $val: {
-                                name : path[i],
-                                type : v.type,
-                                value: v.value
-                            }
-                        };
-                    }
-                }
-            }
-        }
-        
-        var state = {};
-        if (names) {
-            if (typeof names === "string") {
-                extend(state, {
-                    name: names,
-                    type: null,
-                    value: null
-                });
-            } else {
-                names.forEach(function (v) {
-                    var theVariable = {
-                        name : v.name,
-                        type : v.type,
-                        value: v.value
-                    };
-                    extend(state, theVariable);
-                });
-            }
-        }
-        
-        return state;
+        return ans;
     };
     
     module.exports = EmuchartsParser;

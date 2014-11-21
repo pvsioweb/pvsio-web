@@ -102,6 +102,19 @@ define(function (require, exports, module) {
      * This function converts the name of operators in expressions -- needed for && || == != !
      */
     var preProcess = function (term) {
+        function printFunction(term) {
+            if (term.type === "identifier" || term.type === "par" ||
+                    term.type === "binop" || term.type === "separator") {
+                return term.val;
+            } else if (term.type === "function") {
+                var ans = "", i = 0;
+                for (i = 0; i < term.val.length; i++) {
+                    ans += printFunction(term.val[i]);
+                }
+                return ans;
+            }
+            return term;
+        }
         if (term) {
             if (term.type === "binop") {
                 if (term.val === "&&") {
@@ -117,6 +130,8 @@ define(function (require, exports, module) {
                 if (term.val === "!") {
                     term.val = "NOT";
                 }
+            } else if (term.type === "function") {
+                term.val = printFunction(term);
             }
         }
         return term;
@@ -183,9 +198,9 @@ define(function (require, exports, module) {
                         if (isVariable(term.val, emuchart)) {
                             term = pvsRecordTypePrinter.printRecordAccessor("st." + term.val);
                         } else {
-                            term = preProcess(term.val);
+                            term = preProcess(term);
                         }
-                        tmp.push(term);
+                        tmp.push(term.val);
                     });
                     var letExp = pvsOverrideExpressionPrinter.print({
                         name: "st." + action.val.identifier.val,
@@ -206,22 +221,24 @@ define(function (require, exports, module) {
             // so user has immediate feedback about issues with names
             // or alternatively popup a dialog, highlight the issues and
             // to let the user fix them
-            var type = parser.createObjectFrom(variables, {
+            var v = parser.parseVariables(variables, {
                 onNameConflict: function (name) {
                     alert("Warning: name conflict for variable '" + name + "'.");
                 }
             });
-            var rval = pvsRecordTypePrinter.printRecordValue(type);
-
-            if (pvsFunction.cases.letExpr.length) {
-                code += " = \n  LET st = " + rval;
-                code += ",\n     " + pvsFunction.cases.letExpr.join(",\n     ");
-                code += "\n    IN " + pvsFunction.cases.inExpr + "\n\n";
+            if (v.err) {
+                ret.err = v.err;
             } else {
-                code += " = " + rval;
+                var rval = pvsRecordTypePrinter.printRecordValue(v.res);
+                if (pvsFunction.cases.letExpr.length) {
+                    code += " = \n  LET st = " + rval;
+                    code += ",\n     " + pvsFunction.cases.letExpr.join(",\n     ");
+                    code += "\n    IN " + pvsFunction.cases.inExpr + "\n\n";
+                } else {
+                    code += " = " + rval;
+                }
+                ret.res = code;
             }
-            
-            ret.res = code;
         }
         return ret;
     };
@@ -415,15 +432,19 @@ define(function (require, exports, module) {
         variables.push(predefined_variables.previous_state);
         variables = variables.concat(emuchart.variables);
         // todo: create the state variable when adding variables so that user has immediate feedback
-        var type = parser.createObjectFrom(variables, {
+        var v = parser.parseVariables(variables, {
             onNameConflict: function (name) {
                 alert("Warning: name conflict for variable '" + name + "'.");
             }
         });
+        if (v.err) {
+            alert(v.err);
+            return v.err;
+        }
         var ans = "  %-- emuchart state\n";
         ans += pvsRecordTypePrinter.printTypeDefinition({
             name: "State",
-            value: type
+            value: v.res
         });
         return ans;
     };

@@ -293,19 +293,15 @@ define(function (require, exports, module) {
         if (ans.res && ans.res.type === "transition" &&
                 ans.res.val.cond.val.length === 4 &&
                 ans.res.val.cond.val[0].type === "function" &&
-                ans.res.val.cond.val[0].val.identifier.type === "identifier" &&
-                ans.res.val.cond.val[0].val.identifier.val === "f" &&
-                ans.res.val.cond.val[0].val.args.length === 1 &&
-                ans.res.val.cond.val[0].val.args[0].type === "expression" &&
-                ans.res.val.cond.val[0].val.args[0].val.length === 1 &&
-                ans.res.val.cond.val[0].val.args[0].val[0].type === "identifier" &&
-                ans.res.val.cond.val[0].val.args[0].val[0].val === "x" &&
-                ans.res.val.cond.val[1].type === "binop" &&
-                ans.res.val.cond.val[1].val === "==" &&
-                ans.res.val.cond.val[2].type === "unaryop" &&
-                ans.res.val.cond.val[2].val === "!" &&
-                ans.res.val.cond.val[3].type === "identifier" &&
-                ans.res.val.cond.val[3].val === "display") {
+                ans.res.val.cond.val[0].val.length === 4 &&
+                ans.res.val.cond.val[0].val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val[0].val === "f" &&
+                ans.res.val.cond.val[0].val[1].type === "par" &&
+                ans.res.val.cond.val[0].val[1].val === "(" &&
+                ans.res.val.cond.val[0].val[2].type === "identifier" &&
+                ans.res.val.cond.val[0].val[2].val === "x" &&
+                ans.res.val.cond.val[0].val[3].type === "par" &&
+                ans.res.val.cond.val[0].val[3].val === ")") {
             summary += "[ok]";
             success++;
         } else {
@@ -323,23 +319,19 @@ define(function (require, exports, module) {
         if (ans.res && ans.res.type === "transition" &&
                 ans.res.val.cond.val.length === 4 &&
                 ans.res.val.cond.val[0].type === "function" &&
-                ans.res.val.cond.val[0].val.identifier.type === "identifier" &&
-                ans.res.val.cond.val[0].val.identifier.val === "f" &&
-                ans.res.val.cond.val[0].val.args.length === 2 &&
-                ans.res.val.cond.val[0].val.args[0].type === "expression" &&
-                ans.res.val.cond.val[0].val.args[0].val.length === 1 &&
-                ans.res.val.cond.val[0].val.args[0].val[0].type === "identifier" &&
-                ans.res.val.cond.val[0].val.args[0].val[0].val === "x" &&
-                ans.res.val.cond.val[0].val.args[1].val.length === 1 &&
-                ans.res.val.cond.val[0].val.args[1].type === "expression" &&
-                ans.res.val.cond.val[0].val.args[1].val[0].type === "identifier" &&
-                ans.res.val.cond.val[0].val.args[1].val[0].val === "y" &&
-                ans.res.val.cond.val[1].type === "binop" &&
-                ans.res.val.cond.val[1].val === "==" &&
-                ans.res.val.cond.val[2].type === "unaryop" &&
-                ans.res.val.cond.val[2].val === "!" &&
-                ans.res.val.cond.val[3].type === "identifier" &&
-                ans.res.val.cond.val[3].val === "display") {
+                ans.res.val.cond.val[0].val.length === 6 &&
+                ans.res.val.cond.val[0].val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val[0].val === "f" &&
+                ans.res.val.cond.val[0].val[1].type === "par" &&
+                ans.res.val.cond.val[0].val[1].val === "(" &&
+                ans.res.val.cond.val[0].val[2].type === "identifier" &&
+                ans.res.val.cond.val[0].val[2].val === "x" &&
+                ans.res.val.cond.val[0].val[3].type === "separator" &&
+                ans.res.val.cond.val[0].val[3].val === "," &&
+                ans.res.val.cond.val[0].val[4].type === "identifier" &&
+                ans.res.val.cond.val[0].val[4].val === "y" &&
+                ans.res.val.cond.val[0].val[5].type === "par" &&
+                ans.res.val.cond.val[0].val[5].val === ")") {
             summary += "[ok]";
             success++;
         } else {
@@ -358,22 +350,19 @@ define(function (require, exports, module) {
         if (ans.res && ans.res.type === "transition" &&
                 ans.res.val.cond.val.length === 4 &&
                 ans.res.val.cond.val[0].type === "function" &&
-                ans.res.val.cond.val[0].val.identifier.type === "identifier" &&
-                ans.res.val.cond.val[0].val.identifier.val === "f" &&
-                ans.res.val.cond.val[0].val.args.length === 1 &&
-                ans.res.val.cond.val[0].val.args[0].type === "expression" &&
-                ans.res.val.cond.val[0].val.args[0].val[0].type === "identifier" &&
-                ans.res.val.cond.val[0].val.args[0].val[0].val === "x" &&
-                ans.res.val.cond.val[0].val.args[0].val[1].type === "binop" &&
-                ans.res.val.cond.val[0].val.args[0].val[1].val === "+" &&
-                ans.res.val.cond.val[0].val.args[0].val[2].type === "identifier" &&
-                ans.res.val.cond.val[0].val.args[0].val[2].val === "y" &&
-                ans.res.val.cond.val[1].type === "binop" &&
-                ans.res.val.cond.val[1].val === "==" &&
-                ans.res.val.cond.val[2].type === "unaryop" &&
-                ans.res.val.cond.val[2].val === "!" &&
-                ans.res.val.cond.val[3].type === "identifier" &&
-                ans.res.val.cond.val[3].val === "display") {
+                ans.res.val.cond.val[0].val.length === 6 &&
+                ans.res.val.cond.val[0].val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val[0].val === "f" &&
+                ans.res.val.cond.val[0].val[1].type === "par" &&
+                ans.res.val.cond.val[0].val[1].val === "(" &&
+                ans.res.val.cond.val[0].val[2].type === "identifier" &&
+                ans.res.val.cond.val[0].val[2].val === "x" &&
+                ans.res.val.cond.val[0].val[3].type === "binop" &&
+                ans.res.val.cond.val[0].val[3].val === "+" &&
+                ans.res.val.cond.val[0].val[4].type === "identifier" &&
+                ans.res.val.cond.val[0].val[4].val === "y" &&
+                ans.res.val.cond.val[0].val[5].type === "par" &&
+                ans.res.val.cond.val[0].val[5].val === ")") {
             summary += "[ok]";
             success++;
         } else {
@@ -586,16 +575,15 @@ define(function (require, exports, module) {
                 ans.res.val.cond.val &&
                 ans.res.val.cond.val.length === 3 &&
                 ans.res.val.cond.val[0].type === "function" &&
-                ans.res.val.cond.val[0].val.identifier.type === "identifier" &&
-                ans.res.val.cond.val[0].val.identifier.val === "correct" &&
-                ans.res.val.cond.val[0].val.args.length === 1 &&
-                ans.res.val.cond.val[0].val.args[0].type === "expression" &&
-                ans.res.val.cond.val[0].val.args[0].val[0].type === "identifier" &&
-                ans.res.val.cond.val[0].val.args[0].val[0].val === "S_state" &&
-                ans.res.val.cond.val[1].type === "binop" &&
-                ans.res.val.cond.val[1].val === "==" &&
-                ans.res.val.cond.val[2].type === "identifier" &&
-                ans.res.val.cond.val[2].val === "true") {
+                ans.res.val.cond.val[0].val.length === 4 &&
+                ans.res.val.cond.val[0].val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val[0].val === "correct" &&
+                ans.res.val.cond.val[0].val[1].type === "par" &&
+                ans.res.val.cond.val[0].val[1].val === "(" &&
+                ans.res.val.cond.val[0].val[2].type === "identifier" &&
+                ans.res.val.cond.val[0].val[2].val === "S_state" &&
+                ans.res.val.cond.val[0].val[3].type === "par" &&
+                ans.res.val.cond.val[0].val[3].val === ")") {
             summary += "[ok]";
             success++;
         } else {
@@ -617,23 +605,27 @@ define(function (require, exports, module) {
                 ans.res.val.cond.val &&
                 ans.res.val.cond.val.length === 3 &&
                 ans.res.val.cond.val[0].type === "function" &&
-                ans.res.val.cond.val[0].val.identifier.type === "identifier" &&
-                ans.res.val.cond.val[0].val.identifier.val === "correct" &&
-                ans.res.val.cond.val[0].val.args.length === 1 &&
-                ans.res.val.cond.val[0].val.args[0].type === "expression" &&
-                ans.res.val.cond.val[0].val.args[0].val[0].type === "function" &&
-                ans.res.val.cond.val[0].val.args[0].val[0].val.identifier.type === "identifier" &&
-                ans.res.val.cond.val[0].val.args[0].val[0].val.identifier.val === "d1" &&
-                ans.res.val.cond.val[0].val.args[0].val[0].val.args.length === 1 &&
-                ans.res.val.cond.val[0].val.args[0].val[0].val.args[0].type === "expression" &&
-                ans.res.val.cond.val[0].val.args[0].val[0].val.args[0].val.length === 3 &&
-                ans.res.val.cond.val[0].val.args[0].val[0].val.args[0].val[0].val === "(" &&
-                ans.res.val.cond.val[0].val.args[0].val[0].val.args[0].val[1].val === "S_state" &&
-                ans.res.val.cond.val[0].val.args[0].val[0].val.args[0].val[2].val === ")" &&
-                ans.res.val.cond.val[1].type === "binop" &&
-                ans.res.val.cond.val[1].val === "==" &&
-                ans.res.val.cond.val[2].type === "identifier" &&
-                ans.res.val.cond.val[2].val === "true") {
+                ans.res.val.cond.val[0].val.length === 4 &&
+                ans.res.val.cond.val[0].val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val[0].val === "correct" &&
+                ans.res.val.cond.val[0].val[1].type === "par" &&
+                ans.res.val.cond.val[0].val[1].val === "(" &&
+                ans.res.val.cond.val[0].val[2].type === "function" &&
+                ans.res.val.cond.val[0].val[2].val.length === 6 &&
+                ans.res.val.cond.val[0].val[2].val[0].type === "identifier" &&
+                ans.res.val.cond.val[0].val[2].val[0].val === "d1" &&
+                ans.res.val.cond.val[0].val[2].val[1].type === "par" &&
+                ans.res.val.cond.val[0].val[2].val[1].val === "(" &&
+                ans.res.val.cond.val[0].val[2].val[2].type === "par" &&
+                ans.res.val.cond.val[0].val[2].val[2].val === "(" &&
+                ans.res.val.cond.val[0].val[2].val[3].type === "identifier" &&
+                ans.res.val.cond.val[0].val[2].val[3].val === "S_state" &&
+                ans.res.val.cond.val[0].val[2].val[4].type === "par" &&
+                ans.res.val.cond.val[0].val[2].val[4].val === ")" &&
+                ans.res.val.cond.val[0].val[2].val[5].type === "par" &&
+                ans.res.val.cond.val[0].val[2].val[5].val === ")" &&
+                ans.res.val.cond.val[0].val[3].type === "par" &&
+                ans.res.val.cond.val[0].val[3].val === ")") {
             summary += "[ok]";
             success++;
         } else {
@@ -643,19 +635,62 @@ define(function (require, exports, module) {
         }
         
         // test 20
-        txt = "pump.device.screen.val";
-        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
-        ans = parser.parseDotNotation(txt);
+        txt = [ { name: "pump.device.screen.val" } ];
+        summary += "\n\nTest " + (++tot) + ": '" +
+                    JSON.stringify(txt).replace(new RegExp("\"", "g"), "") + "'";
+        ans = parser.parseVariables(txt);
         console.log(ans);
-        summary += "\n  Parsing variable name... ";
-        if (ans.res && ans.res.type === "selector") {
-            summary += "[ok]";
-            success++;
+        summary += "\n  Parsing variable names... ";
+        if (ans.res) {
+            if (ans.res.pump && ans.res.pump.$type === "selector" &&
+                    ans.res.pump.$children.device && ans.res.pump.$children.device.$type === "selector" &&
+                    ans.res.pump.$children.device.$children.screen &&
+                    ans.res.pump.$children.device.$children.screen.$type === "selector" &&
+                    ans.res.pump.$children.device.$children.screen.$children.val &&
+                    ans.res.pump.$children.device.$children.screen.$children.val.$type === "identifier" &&
+                    ans.res.pump.$children.device.$children.screen.$children.val.$val.name ===  "val") {
+                summary += "[ok]";
+                success++;
+            } else {
+                console.log(ans.err);
+                summary += "[FAIL]";
+                fail++;
+            }
+            console.log(JSON.stringify(ans.res, null, 2).replace(new RegExp("\"", "g"), ""));
         } else {
             console.log(ans.err);
             summary += "[FAIL]";
             fail++;
         }
+
+        // test 21
+        txt = [ { name: 'pump.device1' }, { name: 'pump.device2'} ];
+        summary += "\n\nTest " + (++tot) + ": '" +
+                    JSON.stringify(txt).replace(new RegExp("\"", "g"), "") + "'";
+        ans = parser.parseVariables(txt);
+        console.log(ans);
+        summary += "\n  Parsing variable names... ";
+        if (ans.res) {
+            if (ans.res.pump && ans.res.pump.$type === "selector" &&
+                    ans.res.pump.$children.device1 && ans.res.pump.$children.device1.$type === "identifier" &&
+                    ans.res.pump.$children.device1.$val.name === "device1" &&
+                    ans.res.pump.$children.device2 && ans.res.pump.$children.device2.$type === "identifier" &&
+                    ans.res.pump.$children.device2.$val.name === "device2") {
+                summary += "[ok]";
+                success++;
+            } else {
+                console.log(ans.err);
+                summary += "[FAIL]";
+                fail++;
+            }
+            console.log(JSON.stringify(ans.res, null, 2).replace(new RegExp("\"", "g"), ""));
+        } else {
+            console.log(ans.err);
+            summary += "[FAIL]";
+            fail++;
+        }
+        
+        
         summary += "\n\n--------------------------------------------------------";
         summary += "\n Success: " + success + "/" + tot;
         summary += "\n Fail   : " + fail + "/" + tot;
