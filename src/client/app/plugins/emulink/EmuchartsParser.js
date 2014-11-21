@@ -337,6 +337,67 @@ define(function (require, exports, module) {
                         if (!tmp[path[i]]) {
                             tmp[path[i]] = {
                                 $type: "selector",
+                                $children: { }
+                            };
+                        }
+                        tmp = tmp[path[i]].$children;
+                    }
+                } else {
+                    if (tmp[path[i]] && tmp[path[i]].$type === "selector") {
+                        if (opt.onNameConflict) {
+                            opt.onNameConflict(path[i]);
+                        }
+                    } else {
+                        tmp[path[i]] = {
+                            $type: "identifier",
+                            $val: {
+                                name : path[i],
+                                type : v.type,
+                                value: v.value
+                            }
+                        };
+                    }
+                }
+            }
+        }
+        
+        var state = {};
+        if (names) {
+            if (typeof names === "string") {
+                extend(state, {
+                    name: names,
+                    type: null,
+                    value: null
+                });
+            } else {
+                names.forEach(function (v) {
+                    var theVariable = {
+                        name : v.name,
+                        type : v.type,
+                        value: v.value
+                    };
+                    extend(state, theVariable);
+                });
+            }
+        }
+        
+        return state;
+    };
+ 
+    EmuchartsParser.prototype.createObjectFromOrig = function (names, opt) {
+        function extend(state, v) {
+            var path = v.name.split(".");
+            var i = 0, tmp = state;
+            for (i = 0; i < path.length; i++) {
+                if (i < path.length - 1) {
+                    if (tmp[path[i]] && tmp[path[i]].$type === "identifier") {
+                        if (opt.onNameConflict) {
+                            opt.onNameConflict(path[i]);
+                        }
+                    } else {
+                        if (!tmp[path[i]]) {
+                            tmp[path[i]] = {
+                                $type: "selector",
                                 $val: {
                                     name: path[i]
                                 }
@@ -364,19 +425,27 @@ define(function (require, exports, module) {
         }
         
         var state = {};
-        if (names && names.length) {
-            names.forEach(function (v) {
-                var theVariable = {
-                    name : v.name,
-                    type : v.type,
-                    value: v.value
-                };
-                extend(state, theVariable);
-            });
+        if (names) {
+            if (typeof names === "string") {
+                extend(state, {
+                    name: names,
+                    type: null,
+                    value: null
+                });
+            } else {
+                names.forEach(function (v) {
+                    var theVariable = {
+                        name : v.name,
+                        type : v.type,
+                        value: v.value
+                    };
+                    extend(state, theVariable);
+                });
+            }
         }
         
         return state;
     };
- 
+    
     module.exports = EmuchartsParser;
 });

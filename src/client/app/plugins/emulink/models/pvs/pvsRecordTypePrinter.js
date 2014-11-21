@@ -7,103 +7,18 @@
 define(function (require, exports, module) {
     "use strict";
     
-    var pvsRecordType, pvsRecordValue, pvsTypeDefinition;
+    var pvsRecord, pvsTypeDefinition, pvsAssignmentExpression, pvsFieldDeclaration;
     
     function PVSRecordPrinter() {
         /**
-         * Template pvsRecordValue expects context = [ ... ]
+         * Template pvsRecord expects context = [ ... ]
          */
-        Handlebars.registerHelper("pvsRecordType", function (context, options) {
+        Handlebars.registerHelper("pvsRecord", function (context, options) {
             if (!context) { return ""; }
-            
-            function print_aux(key, data) {
-                if (data.$type === "identifier") {
-                    return {
-                        init: data.$val.name + ": " + data.$val.type,
-                        separator: ","
-                    };
-                } else {
-                    // objects starting with $ are attributes characterising the parsed element (e.g., $type, $val)
-                    var children = Object.keys(data).filter(function (key) {
-                        return key.indexOf("$") !== 0;
-                    });
-                    var tmp = [];
-                    children.forEach(function (key) {
-                        tmp.push(print_aux(key, data[key]).init);
-                    });
-                    var type = tmp.join(", ");
-                    return {
-                        init: data.$val.name + ": " + "[# " + type + " #]",
-                        separator : ","
-                    };
-                }
-            }
-            var tmp = [];
-            var keys = Object.keys(context);
-            keys.forEach(function (key) {
-                tmp.push(print_aux(key, context[key]));
-            });
-            tmp[tmp.length - 1].separator = "";
-            
-            var ans = "";
-            tmp.forEach(function (data) {
-                ans += options.fn(data);
-            });
-            return ans;
+            return options.fn(context);
         });
-        pvsRecordType = Handlebars.compile(require("text!./templates/pvsRecordType.handlebars"));
-        /**
-         * Template pvsRecordValue expects context = [ ... ]
-         */
-        Handlebars.registerHelper("pvsRecordValue", function (context, options) {
-            if (!context) { return ""; }
-            function isBooleanType(name) {
-                return name.toLowerCase() === "bool" || name.toLowerCase() === "boolean";
-            }
-            function print_aux(key, data) {
-                if (data.$type === "identifier") {
-                    if (!data.$val.value) {
-                        console.log("Warning: initial value was not provided for variable " + data.$val.name);
-                        if (isBooleanType(data.$val.type)) {
-                            data.$val.value = "false";
-                        } else {
-                            data.$val.value = 0;
-                        }
-                    }
-                    return {
-                        assignment: data.$val.name + " := " + data.$val.value,
-                        separator: ","
-                    };
-                } else {
-                    // objects starting with $ are attributes characterising the parsed element (e.g., $type, $val)
-                    var children = Object.keys(data).filter(function (key) {
-                        return key.indexOf("$") !== 0;
-                    });
-                    var tmp = [];
-                    children.forEach(function (key) {
-                        tmp.push(print_aux(key, data[key]).assignment);
-                    });
-                    var value = tmp.join(", ");
-                    return {
-                        assignment: data.$val.name + " := " + "(# " + value + " #)",
-                        separator : ","
-                    };
-                }
-            }
-            var tmp = [];
-            var keys = Object.keys(context);
-            keys.forEach(function (key) {
-                tmp.push(print_aux(key, context[key]));
-            });
-            tmp[tmp.length - 1].separator = "";
-            
-            var ans = "";
-            tmp.forEach(function (data) {
-                ans += options.fn(data);
-            });
-            return ans;
-        });
-        pvsRecordValue = Handlebars.compile(require("text!./templates/pvsRecordValue.handlebars"));
+        pvsRecord =
+            Handlebars.compile(require("text!./templates/pvsRecord.handlebars"));
         /**
          * Template pvsTypeDefinition expects context = { name: (string), value: (string) }
          */
@@ -111,25 +26,121 @@ define(function (require, exports, module) {
             if (!context) { return ""; }
             return options.fn(context);
         });
-        pvsTypeDefinition = Handlebars.compile(require("text!./templates/pvsTypeDefinition.handlebars"));
+        pvsTypeDefinition =
+            Handlebars.compile(require("text!./templates/pvsTypeDefinition.handlebars"));
+        /**
+         * Template pvsAssignmentExpression expects context = [ ... ]
+         */
+        Handlebars.registerHelper("pvsAssignmentExpression", function (context, options) {
+            if (!context) { return ""; }
+            return options.fn(context);
+        });
+        pvsAssignmentExpression =
+            Handlebars.compile(require("text!./templates/pvsAssignmentExpression.handlebars"));
+        /**
+         * Template pvsFieldDeclaration expects context = [ ... ]
+         */
+        Handlebars.registerHelper("pvsFieldDeclaration", function (context, options) {
+            if (!context) { return ""; }
+            return options.fn(context);
+        });
+        pvsFieldDeclaration =
+            Handlebars.compile(require("text!./templates/pvsFieldDeclaration.handlebars"));
         return this;
     }
-    PVSRecordPrinter.prototype.printRecordValue = function (value) {
-        return pvsRecordValue({ record: value });
+    
+    function blanks(n) {
+        var ans = "";
+        if (n <= 0) { return ans; }
+        while (n-- > 0) {
+            ans += " ";
+        }
+        return ans;
+    }
+    var getValue = function (data) {
+        if (!data.value) {
+            console.log("Warning: value for " + data.name + " was undefined.");
+            if (data.type.toLowerCase() === "bool" ||
+                    data.type.toLowerCase() === "boolean") {
+                return "false";
+            }
+            return "0";
+        }
+        return data.value;
     };
-    PVSRecordPrinter.prototype.printRecordType = function (type) {
-        return pvsRecordType({ record: type });
+    var getType = function (data) {
+        return data.type;
     };
+    
+    var tabsize = 4;
+    function print_aux(data, f, g, opt) {
+        function record_rec(data, depth) {
+            depth++;
+            var keys = Object.keys(data);
+            if (keys.length === 0) { return ""; }
+            var ans = "", i = 0;
+            for (i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                if (data[key].$type === "identifier") {
+                    ans += f({
+                        data: {
+                            name: data[key].$val.name,
+                            value: (opt.isValue) ? getValue(data[key].$val) : getType(data[key].$val),
+                            separator: (i < keys.length - 1) ? "," : "",
+                            whitespace: (i < keys.length - 1) ? blanks(depth * tabsize) : ""
+                        }
+                    });
+                } else { // data[key].$type === "selector"
+                    ans += f({
+                        data: {
+                            name: key,
+                            value: record_rec(data[key].$children, depth),
+                            separator: (i < keys.length - 1) ? "," : "",
+                            whitespace: (i < keys.length - 1) ? blanks(depth * tabsize) : ""
+                        }
+                    });
+                }
+            }
+            ans = g({
+                data: {
+                    val: ans,
+                    DL: (opt.isValue) ? "(#" : "[#", // delimiter left
+                    DR: (opt.isValue) ? "#)" : "#]", // delimiter right
+                    newlineAfterDL: (depth === 1) ? true : false,
+                    newlineWithin: (depth === 1) ? true : false,
+                    //newlineBeforeDelimiterRight: (depth === 1) ? true : false,
+                    whiteSpace: (depth === 1) ? blanks(depth * tabsize) : " ",
+                    whiteSpaceBeforeDR: (depth === 1) ? blanks(tabsize / 2) : " "
+                }
+            });
+            return ans;
+        }
+        return record_rec(data, 0);
+    }
+
+    
+    PVSRecordPrinter.prototype.printRecordValue = function (data) {
+        return print_aux(data, pvsAssignmentExpression, pvsRecord, {isValue: true});
+    };
+    PVSRecordPrinter.prototype.printRecordType = function (data) {
+        return print_aux(data, pvsFieldDeclaration, pvsRecord, {isType: true});
+    };
+    PVSRecordPrinter.prototype.printRecordAccessor = function (name) {
+        return name.replace(new RegExp("\\.", "g"), "`");
+    };
+    
     /**
      * Translates an object state into a pvs record
-     * @param state = { type: { name: (string), value: (string) } }
+     * @param state = { type: { name: (string), val: (string) } }
      */
-    PVSRecordPrinter.prototype.printTypeDefinition = function (name, type) {
-        var t = type;
-        if (typeof type === "object") {
-            t = this.printRecordType(type);
-        }
-        return pvsTypeDefinition({ data: { name: name, type: t }});
+    PVSRecordPrinter.prototype.printTypeDefinition = function (data) {
+        return pvsTypeDefinition({
+            data: {
+                name: data.name,
+                type: (typeof data.value === "string") ? data.value
+                        : print_aux(data.value, pvsFieldDeclaration, pvsRecord, {isType: true})
+            }
+        });
     };
     
     module.exports = {

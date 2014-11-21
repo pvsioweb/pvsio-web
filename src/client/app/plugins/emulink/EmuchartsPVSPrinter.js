@@ -19,13 +19,16 @@ define(function (require, exports, module) {
     
     var parserUnitTest;
     var unitTestEnabled = true;
+    var initialMachineState = "initialMachineState";
+    var machineStateType = "MachineState";
     
     var pvsRecordTypePrinter = require("plugins/emulink/models/pvs/pvsRecordTypePrinter");
     var pvsEnumeratedTypePrinter = require("plugins/emulink/models/pvs/pvsEnumeratedTypePrinter");
+    var pvsOverrideExpressionPrinter = require("plugins/emulink/models/pvs/pvsOverrideExpressionPrinter");
     
     var predefined_variables = {
-        previous_state: { name: "previous_state", type: "MachineState", value: null },
-        current_state: { name: "current_state", type: "MachineState", value: null }
+        previous_state: { name: "previous_state", type: machineStateType, value: initialMachineState },
+        current_state: { name: "current_state", type: machineStateType, value: initialMachineState }
     };
     
     var automaticConstants;
@@ -59,6 +62,7 @@ define(function (require, exports, module) {
         }
         pvsRecordTypePrinter = pvsRecordTypePrinter.create();
         pvsEnumeratedTypePrinter = pvsEnumeratedTypePrinter.create();
+        pvsOverrideExpressionPrinter = pvsOverrideExpressionPrinter.create();
         return this;
     }
     
@@ -97,7 +101,7 @@ define(function (require, exports, module) {
     /**
      * This function converts the name of operators in expressions -- needed for && || == != !
      */
-    function preProcessTerm(term) {
+    var preProcess = function (term) {
         if (term) {
             if (term.type === "binop") {
                 if (term.val === "&&") {
@@ -115,6 +119,23 @@ define(function (require, exports, module) {
                 }
             }
         }
+        return term;
+    };
+    
+    function isVariable(name, emuchart) {
+        if (name === predefined_variables.current_state.name ||
+                name === predefined_variables.previous_state.name) {
+            return true;
+        }
+        if (emuchart.variables) {
+            var i = 0;
+            for (i = 0; i < emuchart.variables.length; i++) {
+                if (name === emuchart.variables[i].name) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     
@@ -122,144 +143,69 @@ define(function (require, exports, module) {
      * Prints PVS definitions for Emuchart initial transitions
      */
     EmuchartsPVSPrinter.prototype.print_initial_transition = function (emuchart) {
-        function preProcess(term) {
-            return preProcessTerm(term);
-        }
-        function isVariable(term) {
-            if (term.type === "identifier") {
-                if (term.val === predefined_variables.current_state.name ||
-                        term.val === predefined_variables.previous_state.name) {
-                    return true;
-                }
-                if (emuchart.variables) {
-                    var i = 0;
-                    for (i = 0; i < emuchart.variables.length; i++) {
-                        if (term.val === emuchart.variables[i].name) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-        function printValue(term) {
-            if (isVariable(term)) {
-                if (term.val.indexOf(".") >= 0) {
-                    var v = term.val.split(".");
-                    v[0] += "(st)";
-                    term.val = v.join("`");
-                } else {
-                    term.val += "(st)";
-                }
-            }
-            return term.val;
-        }
-        
-
         var ret = { err: null, res: null };
-        emuchart.constants = emuchart.constants || [];
-
         if (emuchart.initial_transitions && emuchart.initial_transitions.length > 0) {
-            var theTransition = {
-                identifier: "init", // the name is always init for the current version of PVSio-web
-                cond:    { type: "expression", val: [] },
-                actions: { type: "actions", val: [] },
-                to:      emuchart.initial_transitions[0].target.name
-            };
-            if (emuchart.initial_transitions[0].name === "") {
-                emuchart.initial_transitions[0].name = "init";
+            var initialTransition = emuchart.initial_transitions[0];
+            if (initialTransition.name === "") {
+                initialTransition.name = "init";
             }
-            var ans = parser.parseTransition(emuchart.initial_transitions[0].name);
-            if (!ans.err && ans.res && ans.res.type === "transition") {
-                theTransition = {
-                    identifier: ans.res.val.identifier || { type: "identifier", val: "init" },
-                    cond:    ans.res.val.cond,
-                    actions: ans.res.val.actions,
-                    to:   emuchart.initial_transitions[0].target.name
-                };
-            } else {
-                ret.err = "Initial transition " + emuchart.initial_transitions[0].name + "\n\n" + ans.err;
+            var ans = parser.parseTransition(initialTransition.name);
+            if (ans.err || ans.res.type !== "transition") {
+                ret.err = "Initial transition " + emuchart.initial_transitions[0].name + "\n\n";
+                if (ans.err) {
+                    ret.err += ans.err;
+                } else {
+                    ret.err += "Expecting type 'transition', got " + ans.res.type;
+                }
                 console.log(ans.err);
                 return ret;
             }
             
+            var theTransition = {
+                identifier: ans.res.val.identifier || { type: "identifier", val: "init" },
+                cond:    ans.res.val.cond || { type: "expression", val: [] },
+                actions: ans.res.val.actions || { type: "actions", val: [] },
+                to:   initialTransition.target.name || initialMachineState
+            };
             var pvsFunction = {
-                identifier: "init",
+                identifier: theTransition.identifier,
                 signature:  "init(x: real): State",
                 cases: {
                     letExpr: [],
                     inExpr: [ ("st") ]
                 }
             };
-            if (emuchart.variables && emuchart.variables.length) {
-                emuchart.variables.forEach(function (variable) {
-                    var initialisation = null;
-                    // look for the initialisation in the actions
-                    if (theTransition.actions && theTransition.actions.val &&
-                            theTransition.actions.val.length) {
-                        theTransition.actions.val.forEach(function (action) {
-                            if (action.val.identifier.val === variable.name) {
-                                action.val.expression.val.forEach(function (term) {
-                                    initialisation = variable.name + " := " + term.val;
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-    
-            if (theTransition.actions && theTransition.actions.val &&
-                    theTransition.actions.val.length) {
-                theTransition.actions.val.forEach(function (action) {
-                    // actions involving variables have already been taken into account
-                    var isVariable = false;
-                    emuchart.variables.forEach(function (variable) {
-                        if (variable.name === action.val.identifier.val) {
-                            isVariable = true;
-                        }
-                    });
-                    if (isVariable) {
-                        var expr = "st = st WITH [ ";
-                        var brackets = [];
-                        if (action.val.identifier.val.indexOf(".") >= 0) {
-                            var v = action.val.identifier.val.split(".");
-                            var i = 0;
-                            for (i = 0; i < v.length; i++) {
-                                expr += v[i];
-                                if (i < v.length - 1) {
-                                    expr += " := " + v[i] + "(st) WITH [ ";
-                                    brackets.push("]");
-                                }
-                            }
+            theTransition.actions.val.forEach(function (action) {
+                // actions involving variables have already been taken into account
+                if (isVariable(action.val.identifier.val, emuchart)) {
+                    var tmp = [];
+                    action.val.expression.val.forEach(function (term) {
+                        if (isVariable(term.val, emuchart)) {
+                            term = pvsRecordTypePrinter.printRecordAccessor("st." + term.val);
                         } else {
-                            expr += action.val.identifier.val;
+                            term = preProcess(term.val);
                         }
-                        expr += " := ";
-                        var tmp = [];
-                        action.val.expression.val.forEach(function (term) {
-                            preProcess(term);
-                            tmp.push(printValue(term));
-                        });
-                        expr += tmp.join(" ") + " ]";
-                        brackets.forEach(function (bracket) {
-                            expr += "]";
-                        });
-                        pvsFunction.cases.letExpr.push(expr);
-                    }
-                });
-            }
-
+                        tmp.push(term);
+                    });
+                    var letExp = pvsOverrideExpressionPrinter.print({
+                        name: "st." + action.val.identifier.val,
+                        override: tmp.join(" ")
+                    });
+                    pvsFunction.cases.letExpr.push(letExp);
+                }
+            });
             var code = "  %-- initial state\n  ";
             code += pvsFunction.signature;
-            
-            //-------------------
             var variables = [];
             predefined_variables.current_state.value = theTransition.to;
             predefined_variables.previous_state.value = theTransition.to;
             variables.push(predefined_variables.current_state);
             variables.push(predefined_variables.previous_state);
             variables = variables.concat(emuchart.variables);
-            // todo: create the state variable when adding variables so that user has immediate feedback
+            // FIXME: check for name conflicts when adding variables 
+            // so user has immediate feedback about issues with names
+            // or alternatively popup a dialog, highlight the issues and
+            // to let the user fix them
             var type = parser.createObjectFrom(variables, {
                 onNameConflict: function (name) {
                     alert("Warning: name conflict for variable '" + name + "'.");
@@ -300,10 +246,6 @@ define(function (require, exports, module) {
                 }
             }
             return false;
-        }
-        
-        function preProcess(term) {
-            return preProcessTerm(term);
         }
         function printValue(term) {
             if (isVariable(term)) {
@@ -381,7 +323,7 @@ define(function (require, exports, module) {
                                 // identifiers of state variables need to be followed by (st)
                                 if (term.type === "identifier") {
                                     preProcess(term);
-                                    if (isVariable(term)) {
+                                    if (isVariable(term, emuchart)) {
                                         if (term.val.indexOf(".") >= 0) {
                                             var v = term.val.split(".");
                                             v[0] += "(st)";
@@ -479,7 +421,10 @@ define(function (require, exports, module) {
             }
         });
         var ans = "  %-- emuchart state\n";
-        ans += pvsRecordTypePrinter.printTypeDefinition("State", type);
+        ans += pvsRecordTypePrinter.printTypeDefinition({
+            name: "State",
+            value: type
+        });
         return ans;
     };
 
