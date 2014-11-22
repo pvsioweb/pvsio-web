@@ -1,10 +1,49 @@
-/** @module EmuchartsParser */
 /**
- * EmuchartsParser is a parser for the Emucharts language
+ * @module EmuchartsParser
+ * @version 0.2
+ * @description
+ * EmuchartsParser is a parser for the Emucharts language.
+ * The main API of the parser is function parseTransition(label); it can be used to parse
+ * the label of an Emucharts transition.
  * The parser is dynamically generated from the Emuchart grammar using Jison http://zaach.github.io/
- * To update/change the parser, just change the grammar
  * @author Paolo Masci
  * @date 06/10/14 2:24:01 PM
+ *
+ * @example
+// Basic Emucharts printer module that uses EmuchartsParser.
+define(function (require, exports, module) {
+    "use strict";
+
+    var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
+    var parser;
+
+    function Printer(name) {
+        parser = new EmuchartsParser();
+        return this;
+    }
+
+    Printer.prototype.print_transition = function (label) {
+        if (!label || label === "") {
+            return { err: "Unexpected label", res: null };
+        }
+        var ans = parser.parseTransition(label);
+        if (ans.res) {
+            var theTransition = {
+                identifier: ans.res.val.identifier || { type: "identifier", val: "tick" },
+                cond:       ans.res.val.cond || { type: "expression", val: [] },
+                actions:    ans.res.val.actions || { type: "actions", val: [] }
+            };
+            // do something useful with the transition...
+        }
+        return ans;
+    }
+});
+ *
+ */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*global define, d3, require, $, brackets, window, _, Promise, document, FileReader*/
+
+/**
  *
  * Usage notes about Jison
  *   lex.rules defines the alphabet, i.e., the symbols known to the parser
@@ -13,72 +52,55 @@
  *   $1, $2, $3, etc... can be used in the production rules to obtain the value of the tokens specified in the rules
  *       alternatively, the name of the token preceded by $ can be used for the same purpose (i.e., the value
  *       or a token t is $t)
- *
- * Specification of the EmuchartsParser module: the object representing the parsed text 
- *      shall have the following characteristics:
- *  - Each object has a type and a value.
- *  - Identifier objects have type 'identifier' and the value is the string representation of the identifier.
- *  - Number objects have type 'number' and the value is the string representation of the number.
- *  - Arithmetic expression objects have type 'expression' and the value is an array of objects.
- *        Objects in the array range over the following types: number, identifier, parentheses, operators.
- *        Arithmetic operators have type 'binop' or 'unaryop', and the value is the string representation of the operator.
- *        Round parentheses have type 'par', and the value is the string representation of the parenthesis.
- *  - Assignment objects have type 'assignment' and the value is a record { identifier, binop, expression }.
- *  - Transition objects have type 'transition' and the value is a record { identifier, cond, actions }.
- *  - Transition condition objects are arithmetic expression.
- *  - Transition actions objects have type 'actions' and the value is an array of objects of type 'assignment'.
- *
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, _, Promise, document, FileReader*/
 define(function (require, exports, module) {
     "use strict";
 
     var Parser = require("lib/jison/jison");
 
     var lexerRules = [
-        { rule: ["\\s+",                    "/* skip whitespace */"], tokenType: "whitespace" },
+        { rule: ["\\s+",                    "/* skip whitespace */"], type: "whitespace" },
         { rule: ["(?!(?:IMPLIES|implies|AND|and|OR|or|NOT|not))" + // keywords shall not be used as identifiers
-                "([a-zA-Z][a-zA-Z0-9_]*)",  "return 'IDENTIFIER'"],   tokenType: "variable-2" },
-        { rule: ["[0-9]+(?:\\.[0-9]+)?\\b", "return 'NUMBER'"],       tokenType: "number" },
-        { rule: ["\\*",                     "return '*'"],            tokenType: "operator" },
-        { rule: ["\\/",                     "return '/'"],            tokenType: "operator" },
-        { rule: ["-",                       "return '-'"],            tokenType: "operator" },
+                "([a-zA-Z][a-zA-Z0-9_]*)",  "return 'IDENTIFIER'"],   type: "variable" },
+        { rule: ["[0-9]+(?:\\.[0-9]+)?\\b", "return 'NUMBER'"],       type: "number"  },
+        { rule: ["\\*",                     "return '*'"],            type: "builtin" },
+        { rule: ["\\/",                     "return '/'"],            type: "builtin" },
+        { rule: ["-",                       "return '-'"],            type: "builtin" },
         { rule: ["(?!(?:(\\!\\=)))" + // filtering out !=
-                 "(\\!|NOT|not)",           "return 'NOT'"],          tokenType: "keyword" },
-        { rule: ["\\+",                     "return '+'"],            tokenType: "operator" },
-        { rule: ["(\\!\\=)",                "return '!='"],           tokenType: "operator" },
+                 "(\\!|NOT|not)",           "return 'NOT'"],          type: "builtin" },
+        { rule: ["\\+",                     "return '+'"],            type: "builtin" },
+        { rule: ["(\\!\\=)",                "return '!='"],           type: "builtin" },
         { rule: ["(?!(?:(\\=\\>|\\=\\=)))" + // filtering out implication and equality
-                 "(\\=)",                   "return '='"],            tokenType: "error" }, // invalid operator
-        { rule: [    "(\\=\\=)",            "return '=='"],           tokenType: "operator" },
+                 "(\\=)",                   "return '='"],            type: "error"   }, // invalid operator
+        { rule: ["(\\=\\=)",                "return '=='"],           type: "builtin" },
         { rule: ["(?!(?:(\\>\\=)))" + // filtering out >=
-                "(\\>)",   "return '>'"],                             tokenType: "operator" },
-        { rule: ["(\\>\\=)",                "return '>='"],           tokenType: "operator" },
+                "(\\>)",   "return '>'"],                             type: "builtin" },
+        { rule: ["(\\>\\=)",                "return '>='"],           type: "builtin" },
         { rule: ["(?!(?:(\\<\\=)))" + // filtering out <=
-                 "(\\<)",   "return '<'"],                            tokenType: "operator" },
-        { rule: ["(\\<\\=)",                "return '<='"],           tokenType: "operator" },
-        { rule: ["(IMPLIES|implies|(\\=\\>))", "return 'IMPLIES'"],   tokenType: "keyword" },
-        { rule: ["(AND|&&)",                "return 'AND'"],          tokenType: "keyword" },
-        { rule: ["(OR|\\|\\|)",             "return 'OR'"],           tokenType: "keyword" },
-        { rule: ["\\(",                     "return '('"],            tokenType: "operator" },
-        { rule: ["\\)",                     "return ')'"],            tokenType: "operator" },
-        { rule: ["\\[",                     "return '['"],            tokenType: "operator" },
-        { rule: ["\\]",                     "return ']'"],            tokenType: "operator" },
-        { rule: ["\\{",                     "return '{'"],            tokenType: "operator" },
-        { rule: ["\\}",                     "return '}'"],            tokenType: "operator" },
-        { rule: [":=",                      "return ':='"],           tokenType: "operator" },
-        { rule: [";",                       "return ';'"],            tokenType: "operator" },
-        { rule: [",",                       "return ','"],            tokenType: "operator" },
-        { rule: [".",                       "return '.'"],            tokenType: "operator" }
+                 "(\\<)",   "return '<'"],                            type: "builtin" },
+        { rule: ["(\\<\\=)",                "return '<='"],           type: "builtin" },
+        { rule: ["(IMPLIES|implies|(\\=\\>))", "return 'IMPLIES'"],   type: "builtin" },
+        { rule: ["(AND|&&)",                "return 'AND'"],          type: "builtin" },
+        { rule: ["(OR|\\|\\|)",             "return 'OR'"],           type: "builtin" },
+        { rule: ["\\(",                     "return '('"],            type: "builtin" },
+        { rule: ["\\)",                     "return ')'"],            type: "builtin" },
+        { rule: ["\\[",                     "return '['"],            type: "builtin" },
+        { rule: ["\\]",                     "return ']'"],            type: "builtin" },
+        { rule: ["\\{",                     "return '{'"],            type: "builtin" },
+        { rule: ["\\}",                     "return '}'"],            type: "builtin" },
+        { rule: [":=",                      "return ':='"],           type: "builtin" },
+        { rule: [";",                       "return ';'"],            type: "builtin" },
+        { rule: [",",                       "return ','"],            type: "builtin" },
+        { rule: [".",                       "return '.'"],            type: "builtin" }
     ];
-    
-    function getRules() {
+
+    var lexerRule2Array = function () {
         var ans = [];
         lexerRules.forEach(function (lexerRule) {
             ans.push(lexerRule.rule);
         });
         return ans;
-    }
+    };
     
     var grammar = function (opt) {
         function exprWithBinaryOp() {
@@ -115,10 +137,6 @@ define(function (require, exports, module) {
                    " };";
         }
         function getFunctionRule(opt) {
-            if (opt && opt.parseFunctions) {
-                return "$$ = { type: 'function', " +
-                       "val: { identifier: { type: 'identifier', val: $1}, args: $args }}";
-            }
             return "$$ = { type: 'function', val: [] }; " +
                    "$$.val.push({ type: 'identifier', val: $IDENTIFIER }); " +
                    "$$.val.push({type: 'par', val: $2}); " +
@@ -131,6 +149,7 @@ define(function (require, exports, module) {
                    "}" +
                    "$$.val.push({type: 'par', val: $4}); ";
         }
+        
         // The order of rules in expressionBNF reflects the precedence of the operators (lowest precedence is at the top)
         // The considered precedence and associativity is that of the C++ language 
         // (see http://en.cppreference.com/w/cpp/language/operator_precedence)
@@ -152,7 +171,7 @@ define(function (require, exports, module) {
                 ["- e",            exprWithUnaryOp(), {"prec": "UMINUS"}],
                 ["NOT e",          exprWithUnaryOp()],
                 ["( e )",          exprWithParenthesis()],
-                ["term == e",       exprWithBinaryOp()], // comparison of equality of two terms
+                ["term == e",      exprWithBinaryOp()],  // comparison of equality of two terms
                 ["term != e",      exprWithBinaryOp()],  // comparison of inequality of two terms
                 ["term > e",       exprWithBinaryOp()],
                 ["term >= e",      exprWithBinaryOp()],
@@ -167,7 +186,7 @@ define(function (require, exports, module) {
                         
         return {
             "lex": {
-                "rules": getRules()
+                "rules": lexerRule2Array()
             },
 
             // the first field specified the associativity of the operator
@@ -187,17 +206,23 @@ define(function (require, exports, module) {
                 ],
                 "transition": [
                     ["id [ cond ] { actions } ",
-                        "$$ = { type: 'transition', val: { identifier: $id, cond: $cond, actions: $actions }}"],
+                        "$$ = { type: 'transition', " +
+                                "val: { identifier: $id, cond: $cond, actions: $actions }}"],
                     ["id { actions } ",
-                        "$$ = { type: 'transition', val: { identifier: $id, cond: null, actions: $actions }}"],
+                        "$$ = { type: 'transition', " +
+                                "val: { identifier: $id, cond: null, actions: $actions }}"],
                     ["id [ cond ] ",
-                        "$$ = { type: 'transition', val: { identifier: $id, cond: $cond, actions: null }}"],
+                        "$$ = { type: 'transition', " +
+                                "val: { identifier: $id, cond: $cond, actions: null }}"],
                     ["id ",
-                        "$$ = { type: 'transition', val: { identifier: $id, cond: null, actions: null }}"],
+                        "$$ = { type: 'transition', " +
+                                "val: { identifier: $id, cond: null, actions: null }}"],
                     ["[ cond ] ",
-                        "$$ = { type: 'transition', val: { identifier: { type: 'identifier', val: 'tick' }, cond: $cond, actions: null }}"],
+                        "$$ = { type: 'transition', " +
+                                "val: { identifier: { type: 'identifier', val: 'tick' }, cond: $cond, actions: null }}"],
                     ["{ actions } ",
-                        "$$ = { type: 'transition', val: { identifier: { type: 'identifier', val: 'tick' }, cond: null, actions: $actions }}"]
+                        "$$ = { type: 'transition', " +
+                                "val: { identifier: { type: 'identifier', val: 'tick' }, cond: null, actions: $actions }}"]
                 ],
                 "cond": [
                     ["expression", "$$ = $expression"]
@@ -206,9 +231,9 @@ define(function (require, exports, module) {
                     ["a", "$$ = { type: 'actions', val: $a }"]
                 ],
                 "a": [
-                    ["assignment", "if (!Array.isArray($$)) { $$ = []; } $$.push($assignment)"],
-                    ["assignment ;", "if (!Array.isArray($$)) { $$ = []; } $$.push($assignment)"],
-                    ["assignment ; a", "if (!Array.isArray($$)) { $$ = []; }; $$.push($1); $$ = $$.concat($3)"]
+                    ["assignment",     "if (!Array.isArray($$)) { $$ = []; } $$.push($assignment);"],
+                    ["assignment ;",   "if (!Array.isArray($$)) { $$ = []; } $$.push($assignment);"],
+                    ["assignment ; a", "if (!Array.isArray($$)) { $$ = []; } $$.push($1); $$ = $$.concat($3);"]
                 ],
                 "assignment": [
                     ["id := expression", assignmentExpr()]
@@ -219,9 +244,9 @@ define(function (require, exports, module) {
                     ["IDENTIFIER ( args )", getFunctionRule(opt) ]
                 ],
                 "args": [
-                    ["expression", "if (!Array.isArray($$)) { $$ = []; } $$.push($1)"],
-                    ["expression ,", "if (!Array.isArray($$)) { $$ = []; } $$.push($1)"],
-                    ["expression , args", "if (!Array.isArray($$)) { $$ = []; }; $$.push($1); $$ = $$.concat($3)"]
+                    ["expression",        "if (!Array.isArray($$)) { $$ = []; } $$.push($1);"],
+                    ["expression ,",      "if (!Array.isArray($$)) { $$ = []; } $$.push($1);"],
+                    ["expression , args", "if (!Array.isArray($$)) { $$ = []; }; $$.push($1); $$ = $$.concat($3);"]
                 ],
                 "number": [
                     ["NUMBER", "$$ = { type: 'number', val: $NUMBER }"]
@@ -237,38 +262,17 @@ define(function (require, exports, module) {
             }
         };
     };
-    
-    var dotGrammar = function () {
-        return {
-            "lex": {
-                "rules": getRules()
-            },
-            // the first field specified the associativity of the operator
-            "operators": [
-                ["left", "."] // left means left-to-right
-            ],
-            "start": "production",
-            "bnf": {
-                "production": [
-                    ["id",   "return $id"]
-                ],
-                "id": [
-                    ["IDENTIFIER", "$$ = { type: 'identifier', val: $IDENTIFIER }"],
-                    ["IDENTIFIER . id", "$$ = { type: 'selector', val: $IDENTIFIER, child: $id }"]
-                ]
-            }
-        };
-    };
-    
+        
     /**
-     * Constructor
-     * @param grammar is a string defining the grammar for the parser
+     * @function EmuchartsParser
+     * @memberof module:EmuchartsParser
+     * @instance
+     * @description Constructor
+     * @returns Object{Object({getParserCode, getLexerRules, parseTransition, parseVariables})}
      */
     function EmuchartsParser() {
         try {
             this.parser = new Parser(grammar());
-            this.dotNotationParser = new Parser(dotGrammar());
-            this.functionParser = new Parser(grammar({parseFunctions: true}));
         } catch (e) {
             console.log(e);
         } finally {
@@ -277,8 +281,12 @@ define(function (require, exports, module) {
     }
     
     /**
-     * Interface function for obtaining the parser code
-     * @returns string representing the javascript code of the parser
+     * @function getParserCode
+     * @memberof module:EmuchartsParser
+     * @instance     
+     * @description Returns the javascript code of the parser.
+     * @returns {String} 
+     *      The javascript code of the parser automatically generated using the Jison library and the lexer rules for Emucharts.
      */
     EmuchartsParser.prototype.getParserCode = function () {
         //var parser = new EmuchartsParser();
@@ -288,37 +296,177 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Interface function for obtaining the rules used by the lexer
-     * @returns array of { regex: (string), type: (string) }
+     * @function getLexerRules
+     * @memberof module:EmuchartsParser
+     * @instance     
+     * @description Returns the lexer rules for Emucharts.
+     * @returns Object{Array({ regex: (String), type: (String) })}
+     *      Property regex specifies a regular expression.
+     *      Property type describes the type of expression captured with the provided regex. The current set of classes are:
+     *      "builtin", "keyword", "operator", "variable", "number", "whitespace". The value of this property can be used as a basis to apply styles to text editors like code mirror.
      */
     EmuchartsParser.prototype.getLexerRules = function () {
         var ans = [];
         lexerRules.forEach(function (r) {
-            ans.push({ regex: new RegExp(r.rule[0]), type: r.tokenType });
+            ans.push({ regex: new RegExp(r.rule[0]), type: r.type });
         });
         return ans;
     };
     
     /**
-     * Interface function for parsing transition labels given in the form "name [ cond ] { actions }"
-     * Any element of the label (name, [ cond ], { actions }) are optional,
-     * i.e., we can pass any one or any two of them to parseTransition
-     * @param label is the label of the transition
-     * @returns { err, res };
-     * err is either null or a string reporting a parser error
-     * res is an object representing the parsed transition label. The returned object has the following characteristics:
-     *  - The object has a type and a value.
-     *  - Transition objects have type 'transition' and the value is a record { identifier, cond, actions }.
-     *  - Transition condition objects have type 'cond' and the value is an arithmetic expression.
-     *  - Transition actions objects have type 'actions' and the value is an array of objects of type 'assignment'.     
-     *  - Assignment objects have type 'assignment' and the value is a record { identifier, binop, expression }.
-     *  - Identifier objects have type 'identifier' and the value is the string representation of the identifier.
-     *  - Arithmetic expression objects have type 'expression' and the value is an array of objects.
-     *        Objects in the array range over the following types: number, identifier, parentheses, operators.
-     *        Arithmetic operators have type 'binop' or 'unaryop', and the value is the string representation of the operator.
-     *        Round parentheses have type 'par', and the value is the string representation of the parenthesis.
-     *  - Binary operators have type 'binop', and the value is the string representation of the operator.
-     *  - Number objects have type 'number' and the value is the string representation of the number.
+     * @function parseTransition
+     * @memberof module:EmuchartsParser
+     * @instance     
+     * @description Parses Emucharts transition labels.
+     * @param label {String} 
+     *    The label of an Emucharts transition.</br>
+     *    Emucharts transition labels are strings in the form "name  [ cond ] { actions }", where:
+     *      <li>"name" is the transition name, e.g., "click_up";</li>
+     *      <li>"[ cond ]" is the transition condition, e.g., "[ display < 100 ]";</li>
+     *      <li>"{ actions }" are the transition actions, e.g., "{ display := display + 1; }".</li>
+     *    If multiple actions are specified, they are performed in sequence, e.g., "{ display := display + 1; cursor := 0; }"
+     *    updates the display value and then sets the cursor position.
+     *    The transition name is mandatory; transition conditions and transition actions are optional.
+     * @returns Object{Object({ res: Object, err: String })}
+     * {<ul>
+     *     res: Object,</br>     
+     *     err: String</ul>}</br>
+     * <ul>
+     * <li>Property err is either null or a string reporting a parser error.</li>
+     * <li>Property res is a typed object representing the parsed transition elements.
+     * The typed objects produced for the parsed transition elements are as follows:
+     * <ul>
+     * <li><h6>Transition</h6>
+     * {<ul>
+     *     type: "transition",</br>
+     *     val: {<ul>
+     *             identifier: (Object of type "identifier"),</br>
+     *             cond: (Object of type "expression"),</br>
+     *             actions: (Object of type "action")</ul>}</ul>}</li>
+     * <li><h6>Condition</h6>
+     * {<ul>
+     *     type: "expression",</br>
+     *     val: (Array of objects of type "identifier"|"number"|"binop"|"unaryop"|"function"|"par")</ul>}</li>
+     * <li><h6>Expression</h6></br>
+     * {<ul>
+     *     type: "expression",</br>
+     *     val: (Array of objects of type "identifier"|"number"|"binop"|"unaryop"|"function"|"par")</ul>}</li>
+     * <li><h6>Action</h6>
+     * {<ul>
+     *     type: "action",</br>
+     *     val: (Array of objects of type "assignment")</ul>}</li>
+     * <li><h6>Assignment</h6>
+     * {<ul>
+     *     type: "assignment",</br>
+     *     val: {<ul>
+     *            identifier: (Object of type "identifier"),</br>
+     *            binop: (Object of type "binop"),</br>
+     *            expression: (Object of type "expression")</ul>}</ul>}</li>
+     * <li><h6>Identifier</h6>
+     * {<ul>
+     *     type: "identifier",</br>
+     *     val: {<ul>
+     *            type: "identifier",</br>
+     *            val: (String)</ul>}</ul>}</li>
+     * <li><h6>Binary operator</h6>
+     * {<ul>
+     *     type: "binop",</br>
+     *     val: (String)</ul>}</li>
+     * <li><h6>Unary operator</h6>
+     * {<ul>
+     *     type: "unaryop",</br>
+     *     val: (String)</ul>}</li>
+     * <li><h6>Number</h6>
+     * {<ul>
+     *     type: "number",</br>
+     *     val: (String)</ul>}</li>
+     * <li><h6>Function</h6>
+     * {<ul>
+     *     type: "function",</br>
+     *     val: (Array of objects of type "identifier"|"number"|"binop"|"unaryop"|"function"|"par").
+     *           <em>Note: the first array element is always an identifier, and it represents the function name.</em>)</ul>}</li>
+     * <li><h6>Parenthesis</h6>
+     * {<ul>
+     *     type: "par",</br>
+     *     val: (String)</ul>}</li></ul></ul>
+     *
+     * @example
+var label = "inc [ display > display + 100 ] { display := display + s }";
+var ans = parser.parseTransition(label);
+if (ans.res) {
+    console.log(JSON.stringify(ans.res, null, 2));
+    // the console output will be
+    //{
+    //  "type": "transition",
+    //  "val": {
+    //    "identifier": {
+    //      "type": "identifier",
+    //      "val": "inc"
+    //    },
+    //    "cond": {
+    //      "type": "expression",
+    //      "val": [
+    //        {
+    //          "type": "identifier",
+    //          "val": "display"
+    //        },
+    //        {
+    //          "type": "binop",
+    //          "val": ">"
+    //        },
+    //        {
+    //          "type": "identifier",
+    //          "val": "display"
+    //        },
+    //        {
+    //          "type": "binop",
+    //          "val": "+"
+    //        },
+    //        {
+    //          "type": "number",
+    //          "val": "100"
+    //        }
+    //      ]
+    //    },
+    //    "actions": {
+    //      "type": "actions",
+    //      "val": [
+    //        {
+    //          "type": "assignment",
+    //          "val": {
+    //            "identifier": {
+    //              "type": "identifier",
+    //              "val": "display"
+    //            },
+    //            "binop": {
+    //              "type": "binop",
+    //              "val": ":="
+    //            },
+    //            "expression": {
+    //              "type": "expression",
+    //              "val": [
+    //                {
+    //                  "type": "identifier",
+    //                  "val": "display"
+    //                },
+    //                {
+    //                  "type": "binop",
+    //                  "val": "+"
+    //                },
+    //                {
+    //                  "type": "identifier",
+    //                  "val": "s"
+    //                }
+    //              ]
+    //            }
+    //          }
+    //        }
+    //      ]
+    //    }
+    //  }
+    //}    
+}
+     
      */
     EmuchartsParser.prototype.parseTransition = function (label) {
         console.log("Parsing transition " + label);
@@ -331,46 +479,73 @@ define(function (require, exports, module) {
         return ans;
     };
 
-    EmuchartsParser.prototype.parseDotNotation = function (label) {
-        console.log("Parsing expression " + label);
-        var ans = { err: null, res: null };
-        try {
-            ans.res = this.dotNotationParser.parse(label);
-        } catch (e) {
-            ans.err = e.message;
-        }
-        return ans;
-    };
-    
-    EmuchartsParser.prototype.parseFunction = function (label) {
-        console.log("Parsing function " + label);
-        var ans = { err: null, res: null };
-        try {
-            ans.res = this.functionParser.parse(label);
-        } catch (e) {
-            ans.err = e.message;
-        }
-        return ans;
-    };
     
     /**
-     * Parses an array of variables and creates a typed object that merges the variables.
-     * Each variables is a structured object { name: (string), type: (string), value: (string) }
-     *   - name uses the dot notation to specify accessors and identifiers, e.g., pump.display
-     *   - type and value are optional. The fields will be null if unspecified
-     * Given two variables 'pump.display1' and 'pump.display2',
-     * the function returns ...
-     * Two names in the array are in conflict if one name is a substring of the other
-     * E.g. pump.display and pump.display.val
-     * When two names are in conflit, the function returns an error string (field err of the returned object)
+     * @function parseVariables
+     * @memberof module:EmuchartsParser
+     * @instance
+     * @description
+     *    Parses an array of Emuchart variables and creates a typed object.
      *
-     * @param names is Array({ name: (string), type: (string), value: (string)})
-     *            Field name is mandatory. Fields type and value can be omitted.
-     * @param opt is a structure that contains functions to report notifications to the user. 
-     *            This parameter is optional. Currently, 'onNameConflict' is the only function
-     *            supported -- it renders feedback for errors when names are in conflict.
-     * @returns: { err: (string), res: Object }
+     * @param {Array(Object)} variables Array of emuchart variables to be parsed. 
+     *            Each emuchart variable is a structured object
+     *            { name: (String), type: (String), value: (String) }.
+     *            Property name is mandatory, whilst the others are optional.
      *
+     * @returns Object{Object({ res: Object, err: String })}
+     * {<ul>
+     *     res: Object,</br>     
+     *     err: String</ul>}</br>
+     * <ul>
+     * <li>Property err is either null or a string reporting a parser error.</li>
+     * <li>Property res is a typed object representing the parsed variables.
+     * The typed objects produced by the function are:
+     * <ul>
+     * <li><h6>Selector</h6>
+     * {<ul>
+     *     type: "selector",</br>
+     *     children: (Array of typed objects)</ul>}</li>
+     * <li><h6>Variable</h6>
+     * {<ul>
+     *     type: "variable",</br>
+     *     val: {<ul>
+     *         name: (String),</br>
+     *         type: (String),</br>
+     *         value: (String)</ul>}</ul>}</ul></li>
+     *
+     * @memberof module:EmuchartsParser
+     *
+     * @example
+var variables = [ { name: 'pump.device1', type: 'A', value: 'initA' },
+                  { name: 'pump.device2', type: 'B', value: 'initB' } ];
+var ans = parser.parseVariables(variables);
+if (ans.res) {
+    console.log(JSON.stringify(ans.res, null, 2));
+    // the console output will be
+    //{
+    //  pump: {
+    //    type: selector,
+    //    children: {
+    //      device1: {
+    //        type: variable,
+    //        val: {
+    //          name: device1,
+    //          type: A,
+    //          value: initA
+    //        }
+    //      },
+    //      device2: {
+    //        type: variable,
+    //        val: {
+    //          name: device2,
+    //          type: B,
+    //          value: initB
+    //        }
+    //      }
+    //    }
+    //  }
+    //}
+}
      */
     EmuchartsParser.prototype.parseVariables = function (variables, opt) {
         function extend(ans, v) {
@@ -378,7 +553,7 @@ define(function (require, exports, module) {
             var i = 0, tmp = ans.res;
             for (i = 0; i < path.length; i++) {
                 if (i < path.length - 1) {
-                    if (tmp[path[i]] && tmp[path[i]].$type === "identifier") {
+                    if (tmp[path[i]] && tmp[path[i]].type === "variable") {
                         if (opt.onNameConflict) {
                             opt.onNameConflict(path[i]);
                             ans.err = "Name conflict for " + path[i];
@@ -387,14 +562,14 @@ define(function (require, exports, module) {
                     } else {
                         if (!tmp[path[i]]) {
                             tmp[path[i]] = {
-                                $type: "selector",
-                                $children: { }
+                                type: "selector",
+                                children: { }
                             };
                         }
-                        tmp = tmp[path[i]].$children;
+                        tmp = tmp[path[i]].children;
                     }
                 } else {
-                    if (tmp[path[i]] && tmp[path[i]].$type === "selector") {
+                    if (tmp[path[i]] && tmp[path[i]].type === "selector") {
                         if (opt.onNameConflict) {
                             opt.onNameConflict(path[i]);
                             ans.err = "Name conflict for " + path[i];
@@ -402,8 +577,8 @@ define(function (require, exports, module) {
                         }
                     } else {
                         tmp[path[i]] = {
-                            $type: "identifier",
-                            $val: {
+                            type: "variable",
+                            val: {
                                 name : path[i],
                                 type : v.type,
                                 value: v.value

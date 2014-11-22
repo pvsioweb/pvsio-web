@@ -102,6 +102,7 @@ define(function (require, exports, module) {
             fail++;
             failed = false;
         }
+        console.log(JSON.stringify(ans.res, null, 2));
         
         
         // test 2
@@ -642,13 +643,13 @@ define(function (require, exports, module) {
         console.log(ans);
         summary += "\n  Parsing variable names... ";
         if (ans.res) {
-            if (ans.res.pump && ans.res.pump.$type === "selector" &&
-                    ans.res.pump.$children.device && ans.res.pump.$children.device.$type === "selector" &&
-                    ans.res.pump.$children.device.$children.screen &&
-                    ans.res.pump.$children.device.$children.screen.$type === "selector" &&
-                    ans.res.pump.$children.device.$children.screen.$children.val &&
-                    ans.res.pump.$children.device.$children.screen.$children.val.$type === "identifier" &&
-                    ans.res.pump.$children.device.$children.screen.$children.val.$val.name ===  "val") {
+            if (ans.res.pump && ans.res.pump.type === "selector" &&
+                    ans.res.pump.children.device && ans.res.pump.children.device.type === "selector" &&
+                    ans.res.pump.children.device.children.screen &&
+                    ans.res.pump.children.device.children.screen.type === "selector" &&
+                    ans.res.pump.children.device.children.screen.children.val &&
+                    ans.res.pump.children.device.children.screen.children.val.type === "variable" &&
+                    ans.res.pump.children.device.children.screen.children.val.val.name ===  "val") {
                 summary += "[ok]";
                 success++;
             } else {
@@ -664,18 +665,19 @@ define(function (require, exports, module) {
         }
 
         // test 21
-        txt = [ { name: 'pump.device1' }, { name: 'pump.device2'} ];
+        txt = [ { name: 'pump.device1', type: 'A', value: 'initA' },
+                { name: 'pump.device2', type: 'B', value: 'initB'} ];
         summary += "\n\nTest " + (++tot) + ": '" +
                     JSON.stringify(txt).replace(new RegExp("\"", "g"), "") + "'";
         ans = parser.parseVariables(txt);
         console.log(ans);
         summary += "\n  Parsing variable names... ";
         if (ans.res) {
-            if (ans.res.pump && ans.res.pump.$type === "selector" &&
-                    ans.res.pump.$children.device1 && ans.res.pump.$children.device1.$type === "identifier" &&
-                    ans.res.pump.$children.device1.$val.name === "device1" &&
-                    ans.res.pump.$children.device2 && ans.res.pump.$children.device2.$type === "identifier" &&
-                    ans.res.pump.$children.device2.$val.name === "device2") {
+            if (ans.res.pump && ans.res.pump.type === "selector" &&
+                    ans.res.pump.children.device1 && ans.res.pump.children.device1.type === "variable" &&
+                    ans.res.pump.children.device1.val.name === "device1" &&
+                    ans.res.pump.children.device2 && ans.res.pump.children.device2.type === "variable" &&
+                    ans.res.pump.children.device2.val.name === "device2") {
                 summary += "[ok]";
                 success++;
             } else {
@@ -689,8 +691,7 @@ define(function (require, exports, module) {
             summary += "[FAIL]";
             fail++;
         }
-        
-        
+                
         summary += "\n\n--------------------------------------------------------";
         summary += "\n Success: " + success + "/" + tot;
         summary += "\n Fail   : " + fail + "/" + tot;

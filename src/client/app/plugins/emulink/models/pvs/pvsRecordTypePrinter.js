@@ -81,20 +81,20 @@ define(function (require, exports, module) {
             var ans = "", i = 0;
             for (i = 0; i < keys.length; i++) {
                 var key = keys[i];
-                if (data[key].$type === "identifier") {
+                if (data[key].type === "variable") {
                     ans += f({
                         data: {
-                            name: data[key].$val.name,
-                            value: (opt.isValue) ? getValue(data[key].$val) : getType(data[key].$val),
+                            name: data[key].val.name,
+                            value: (opt.isValue) ? getValue(data[key].val) : getType(data[key].val),
                             separator: (i < keys.length - 1) ? "," : "",
                             whitespace: (i < keys.length - 1) ? blanks(depth * tabsize) : ""
                         }
                     });
-                } else { // data[key].$type === "selector"
+                } else { // data[key].type === "selector"
                     ans += f({
                         data: {
                             name: key,
-                            value: record_rec(data[key].$children, depth),
+                            value: record_rec(data[key].children, depth),
                             separator: (i < keys.length - 1) ? "," : "",
                             whitespace: (i < keys.length - 1) ? blanks(depth * tabsize) : ""
                         }
