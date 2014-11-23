@@ -7,7 +7,7 @@
    "cursorName": "c"
   },
   {
-   "events": [
+   "evts": [
     "click"
    ],
    "id": "Button1360334897149",
@@ -17,18 +17,17 @@
    "boundFunctions": "click_up"
   },
   {
-   "events": [
-    "click",
-    "press/release"
+   "evts": [
+    "click"
    ],
    "id": "Button1360334906908",
    "type": "button",
-   "recallRate": 250,
+   "recallRate": "250",
    "functionText": "lf",
-   "boundFunctions": "click_lf, press_lf, release_lf"
+   "boundFunctions": "click_lf"
   },
   {
-   "events": [
+   "evts": [
     "click"
    ],
    "id": "Button1360334916663",
@@ -38,7 +37,7 @@
    "boundFunctions": "click_dn"
   },
   {
-   "events": [
+   "evts": [
     "click"
    ],
    "id": "Button1360334930041",
@@ -48,7 +47,7 @@
    "boundFunctions": "click_rt"
   },
   {
-   "events": [
+   "evts": [
     "click"
    ],
    "id": "button_2287dcc5-2e6f-4138-e837-2780c2c267e3",
@@ -68,7 +67,7 @@
   {
    "class": "Button1360334897149",
    "shape": "rect",
-   "coords": "381,245.6666717529297,417.98437499999994,280.6510467529297",
+   "coords": "381,245.6666717529297,417.9843749999997,280.6510467529297",
    "href": "#!"
   },
   {
@@ -80,7 +79,7 @@
   {
    "class": "Button1360334916663",
    "shape": "rect",
-   "coords": "381.33331298828125,294.6666564941406,416.31768798828125,330.6510314941406",
+   "coords": "381.33331298828125,294.6666564941406,416.3176879882814,330.6510314941406",
    "href": "#!"
   },
   {

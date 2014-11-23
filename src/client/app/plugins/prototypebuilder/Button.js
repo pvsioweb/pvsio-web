@@ -102,12 +102,12 @@ define(function (require, exports, module) {
         // all press commands sent to pvsio are actually executed before executing a release command
         var proxy = function (cb) {
             if (typeof cb === "function") {
-                return function(err, res) {
+                return function (err, res) {
                     press_events--;
                     if (press_events === 0) {
                         return cb(err, res);
                     }
-                }
+                };
             }
         };
 		var onmouseup = function () {
@@ -130,13 +130,13 @@ define(function (require, exports, module) {
                         functionText: widget.functionText(),
                         action: "press",
                         ts: new Date().getTime()
-                    });                    
+                    });
                     Recorder.addAction({
                         id: widget.id(),
                         functionText: widget.functionText(),
                         action: "release",
                         ts: new Date().getTime()
-                    });                    
+                    });
                 }
             }
             mouseup(d3.event);

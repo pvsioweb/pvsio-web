@@ -38,6 +38,10 @@ define(function (require, exports, module) {
             
 			//update form
 			if (widget.type() === "button") {
+                // by default, select click events
+                if (!widget.evts() || widget.evts().length === 0) {
+                    widget.evts = ["click"]
+                }
 				widget.evts().forEach(function (e) {
 					d3.select("input[type='radio'][value='" + e + "']").property("checked", true);
 				});
@@ -48,7 +52,7 @@ define(function (require, exports, module) {
 			return this;
 		},
 		events: {
-			"change input[type='radio'][name='events']": "eventsChanged",
+			"change input[type='radio'][name='evts']": "eventsChanged",
 			"click #btnOk": "ok",
 			"click #btnCancel": "cancel",
 			"keyup #functionText": "eventsChanged"
@@ -58,7 +62,7 @@ define(function (require, exports, module) {
 		},
 		ok: function (event) {
 			var form = this.el;
-			if (FormUtils.validateForm(form, "input[type='radio'][name='events'], input[type='text'], textarea")) {
+			if (FormUtils.validateForm(form, "input[type='radio'][name='evts'], input[type='text'], textarea")) {
 				var formdata = FormUtils.serializeForm(form, "input");
                 //add auditory feedback property manually
                 if (this.widget.auditoryFeedback && this.widget.auditoryFeedback()) {
