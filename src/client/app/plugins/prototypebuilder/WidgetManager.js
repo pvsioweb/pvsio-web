@@ -120,6 +120,10 @@ define(function (require, exports, module) {
                         var widget = e.data.type === "button" ? new Button(id) : new Display(id);
                         region.classed(widget.type(), true)
                             .attr("id", id);
+                        if (e.data.hasOwnProperty("events")) {
+                            e.data.evts = e.data.events;
+                            delete e.data.events;
+                        }                    
                         widget.updateWithProperties(e.data);
                         widget.element(region);
                         createImageMap(widget);

@@ -38,10 +38,6 @@ define(function (require, exports, module) {
             
 			//update form
 			if (widget.type() === "button") {
-                // by default, select click events
-                if (!widget.evts() || widget.evts().length === 0) {
-                    widget.evts = ["click"]
-                }
 				widget.evts().forEach(function (e) {
 					d3.select("input[type='radio'][value='" + e + "']").property("checked", true);
 				});
