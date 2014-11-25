@@ -98,6 +98,7 @@ div.downloader{
 	z-index: 2000000;
 }
 #header{
+    z-index: 3;
 	width: 100%;
    -webkit-touch-callout: none;
    -webkit-user-select: none;
@@ -365,6 +366,7 @@ div.detailsForm select, div.detailsForm textarea{
 	padding-left: 5px;
     z-index: 200;
     background: white;
+    overflow-y: hidden;
 }
 
 .content-body > .ljs-hcontent {
@@ -405,11 +407,10 @@ div.detailsForm select, div.detailsForm textarea{
 
 #project-notifications {
 	display: none;
-	position: fixed;
 	top: 0;
 	right: 0;
-	z-index: 1234;
-	width: 200px;
+	z-index: 1;
+	width: 100%;
 }
 
 .plugins-group .list-group-item {

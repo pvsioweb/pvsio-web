@@ -7,20 +7,38 @@
 /*global define, require, d3, window */
 define(function (require, exports, module) {
 	"use strict";
-	var width = "376px";
-	var notifications = [];
-	
+	var notifications = [], fadeDuration = 5000;
+	function _showSelfDestructingNotification() {
+        var notifyDiv = d3.select("#project-notifications"),
+            alertDiv = notifyDiv.select("div.alert");
+        var height = notifyDiv.node().getBoundingClientRect().height;
+		notifyDiv.style("margin-top", (-1 * height) + "px").style("display", "block");
+		notifyDiv.transition().duration(200).style("margin-top", "0px")
+            .each("end", function () {
+                notifyDiv.transition().delay(fadeDuration).duration(200).style("margin-top", (-1 * height) + "px")
+                    .each("start", function () {
+                        if (notifyDiv.node().getBoundingClientRect().height < 1) {
+                            notifyDiv.interrupt().transition();
+                        }
+                    })
+                    .each("end", function () {
+                        notifyDiv.style("display", "none");
+                        alertDiv.remove();
+                        notifyDiv.html("");
+                    });
+            });
+    }
+    
 	function show(msg) {
 		var date = new Date();
 		notifications.push({time: date, message: msg});
-		var notifyDiv = d3.select("#project-notifications");
+		var notifyDiv = d3.select("#project-notifications").style("display", "block");
 		var alertDiv = notifyDiv.append("div").attr("class", "alert alert-info").attr("role", "alert");
 		alertDiv.append("button").attr("type", "button")
 			.attr("class", "close").attr("data-dismiss", "alert")
 			.append("span").attr("aria-hidden", "true").html("&times;");
 		alertDiv.append("p").html(msg);
-		notifyDiv.style("width", 0).style("display", "block");
-		notifyDiv.transition().duration(300).style("width", width);
+        _showSelfDestructingNotification();
 	}
 	
 	function error(msg) {
@@ -32,8 +50,7 @@ define(function (require, exports, module) {
 			.attr("class", "close").attr("data-dismiss", "alert")
 			.append("span").attr("aria-hidden", "true").html("&times;");
 		alertDiv.append("p").html(msg);
-		notifyDiv.style("width", 0).style("display", "block");
-		notifyDiv.transition().duration(300).style("width", width);
+		_showSelfDestructingNotification();
 	}
 	
 	module.exports = {

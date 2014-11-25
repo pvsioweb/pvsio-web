@@ -400,7 +400,6 @@ function run() {
                 
             },
             "readFile": function (token, socket, socketid) {
-                p = pvsioProcessMap[socketid];
                 var encoding = token.encoding || "utf8";
                 token.filePath = path.join(baseProjectDir, token.filePath);
                 fs.readFile(token.filePath, encoding, function (err, content) {
@@ -410,7 +409,6 @@ function run() {
                 });
             },
             "writeFile": function (token, socket, socketid) {
-                p = pvsioProcessMap[socketid];
                 var res = {id: token.id, socketId: socketid, time: token.time};
                 token.filePath = path.join(baseProjectDir, token.filePath);
                 
@@ -436,7 +434,6 @@ function run() {
                 });
             },
             "fileExists": function (token, socket, socketid) {
-                p = pvsioProcessMap[socketid];
                 var res = {id: token.id, socketId: socketid, time: token.time};
                 token.filePath = path.join(baseProjectDir, token.filePath);
                 fs.exists(token.filePath, function (exists) {
