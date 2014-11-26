@@ -260,6 +260,7 @@ define(function (require, exports, module) {
                                 editor.setOption("mode", "txt");
                                 pvsFile.content(res.fileContent).dirty(false);
                                 editor.setValue(pvsFile.content());
+                                editor.setOption("readOnly", false);
                                 editor.markClean();
                                 if (pvsFile.isPVSFile()) {
                                     editor.setOption("mode", "pvs");
