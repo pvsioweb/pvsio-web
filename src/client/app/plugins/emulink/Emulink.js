@@ -38,6 +38,7 @@ define(function (require, exports, module) {
         EmuchartsPIMPrinter    = require("plugins/emulink/EmuchartsPIMPrinter"),
         EmuchartsCppPrinter    = require("plugins/emulink/EmuchartsCppPrinter"),
         EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter"),
+        EmuchartsMALPrinter2   = require("plugins/emulink/EmuchartsMALPrinter2"),
         EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         fs = require("util/fileHandler"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
@@ -57,6 +58,7 @@ define(function (require, exports, module) {
     var emuchartsPIMPrinter;
     var emuchartsCppPrinter;
     var emuchartsMALPrinter;
+    var emuchartsMALPrinter2;
     var options = { autoinit: true };
 
     var displayNotification = function (msg, title) {
@@ -263,6 +265,7 @@ define(function (require, exports, module) {
         emuchartsPIMPrinter = new EmuchartsPIMPrinter("emuchart_PIM");
         emuchartsCppPrinter = new EmuchartsCppPrinter("emuchart_Cpp");
         emuchartsMALPrinter = new EmuchartsMALPrinter("emuchart_MAL");
+        emuchartsMALPrinter2 = new EmuchartsMALPrinter2("emuchart_MAL");
         pvsioWebClient = PVSioWebClient.getInstance();
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
@@ -1362,6 +1365,57 @@ define(function (require, exports, module) {
             };
             var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".i",
                                                                  emuchartsMALPrinter.print(emucharts));
+            if (projectManager.fileExists(emuchartsFile)) {
+                // remove file from project
+                projectManager.project().removeFile(emuchartsFile);
+            }
+            // add file to project
+            var notification = "";
+            projectManager.addFile(emuchartsFile)
+                .then(function (f) {
+                    projectManager.selectFile(emuchartsFile);
+                    notification = "MAL model successfully generated in file " + emuchartsFile.path();
+                    displayNotification(notification);
+                    Logger.log(notification);
+                }).catch(function (err) {
+                    notification = "MAL Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
+                    displayNotification(notification);
+                    Logger.log(notification);
+                });
+//            projectManager.saveFiles([emuchartsFile], function (err) {
+//                var notification = "";
+//                if (!err) {
+//                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
+//                    projectManager.selectFile(emuchartsFile);
+//                    notification = "MAL model successfully generated in file " + emuchartsFile.path();
+//                    alert(notification);
+//                    Logger.log(notification);
+//                } else {
+//                    notification = "MAL Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
+//                    alert(notification);
+//                    Logger.log(notification);
+//                }
+//            });
+            // select file
+//            projectManager.selectFile(emuchartsFile);
+        });
+        d3.select("#btn_menuMALPrinter2").on("click", function () {
+            var emucharts = {
+                name: "emucharts",
+                author: {
+                    name: "Paolo Masci",
+                    affiliation: "Queen Mary University of London, United Kingdom",
+                    contact: "http://www.eecs.qmul.ac.uk/~masci/"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: emuchartsManager.getVariables(),
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".i",
+                                                                 emuchartsMALPrinter2.print(emucharts));
             if (projectManager.fileExists(emuchartsFile)) {
                 // remove file from project
                 projectManager.project().removeFile(emuchartsFile);
