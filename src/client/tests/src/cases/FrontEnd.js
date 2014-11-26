@@ -14,6 +14,7 @@ define(function (require, exports, module) {
 	var ui = require("test/UI");
     
     ui.run();
-	project.run();
-	projectFile.run();
+    project.run();
+    projectFile.run();
+	
 });

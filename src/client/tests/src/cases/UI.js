@@ -4,7 +4,7 @@
  * @date 6/25/14 20:07:07 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global d3, $, it, expect, define, describe, beforeEach, Promise*/
+/*global d3, $, it, expect, define, describe, beforeEach, afterAll, Promise*/
 define(function (require, exports, module) {
     "use strict";
     var main = require("main"),
@@ -37,13 +37,12 @@ define(function (require, exports, module) {
 				});
 			}
             
-            function listViewContextMenu(el, menu) {
-                return rightclick(el).then(function () {
-                    click(".contextmenu" + menu).then(function () {
-                        
-                    });
+            function listViewContextMenu(menu) {
+                return rightclick("#pvsFiles").then(function () {
+                   return click(".contextmenu " + menu);
                 });
             }
+            
             function dialogCanBeDismissed(btnTrigger, title) {
                 title = title || "dialog triggered by " + btnTrigger;
                 var str = title + " can be dismissed";
@@ -121,21 +120,21 @@ define(function (require, exports, module) {
 			}
 			
             
-            describe("User interface Elements", function () {               
-				beforeEach(function (done) {
+             describe("User interface Elements", function () {               
+                beforeEach(function (done) {
                     d3.select("div.overlay").remove();
-					pm = pb.getProjectManager();
-					pm.addListener("PVSProcessReady", function (e) {
-						console.log(e);
-						p = pm.project();
-						done();
-					});
-					main.start();
-				});
-                
+                    pm = pb.getProjectManager();
+                    pm.addListener("PVSProcessReady", function (e) {
+                        console.log(e);
+                        p = pm.project();
+                        done();
+                    });
+                    main.start();
+                });
+
                 pressingButtonOpensDialog("#openProject", "Open Project");
                 dialogCanBeDismissed("#openProject", "Open Project");
-            
+
                 pressingButtonOpensDialog("#newProject", "New Project");
                 dialogCanBeDismissed("#newProject", "New Project");
                 pressingButtonOpensDialog("#btnImportFiles", "Import PVS files into Project");
@@ -143,58 +142,101 @@ define(function (require, exports, module) {
                 openSampleProject("AlarisGP");
                 openSampleProject("AlarisPC_PumpModules");
                 openSampleProject("SmithsMedical_MedFusion3500");
-                
+
                 loadPlugin("Emulink");
                 unloadPlugin("Emulink");
                 loadPlugin("GraphBuilder");
                 unloadPlugin("GraphBuilder");				
             });
-			
-			describe("Prototype Builder", function () {
-				beforeEach(function (done) {
+
+            describe("Prototype Builder", function () {
+                beforeEach(function (done) {
                     d3.select("div.overlay").remove();
-					pm = pb.getProjectManager();
-					pm.addListener("PVSProcessReady", function (e) {
-						console.log(e);
-						p = pm.project();
-						done();
-					});
-					main.start();
-				});
-				
-				it("can be collapsed", function (done) {
-					var editorPanel = "div.collapsible-panel-parent[plugin-owner='PrototypeBuilder'] .collapsible-panel";
-					togglePanel("PrototypeBuilder")
-						.then(function () {
-							expect(d3.select(editorPanel).style("display")).toEqual("none");
-							done();
-						});
-				});
-				
-				it("can be collapsed and expanded", function (done) {
-					var editorPanel = "div.collapsible-panel-parent[plugin-owner='PrototypeBuilder'] .collapsible-panel";
-					togglePanel("PrototypeBuilder")
-						.then(function () {
-							togglePanel("PrototypeBuilder")
-								.then(function () {
-									expect(d3.select(editorPanel).style("display")).toEqual("block");
-									done();
-								});
-						});
-				});
-				
-				describe("Editor File Lists", function () {
-					it("has context menus", function (done) {
-						togglePanel("PrototypeBuilder").then(function () {
-							rightclick("#pvsFiles").then(function () {
-								expect(d3.select("div.contextmenu").empty()).toBeFalsy();
-								done();
-							});
-						});
-					});
-				});
-			});
-			
+                    pm = pb.getProjectManager();
+                    pm.addListener("PVSProcessReady", function (e) {
+                        console.log(e);
+                        p = pm.project();
+                        done();
+                    });
+                    main.start();
+                });
+
+                it("can be collapsed", function (done) {
+                    var editorPanel = "div.collapsible-panel-parent[plugin-owner='PrototypeBuilder'] .collapsible-panel";
+                    togglePanel("PrototypeBuilder")
+                        .then(function () {
+                            expect(d3.select(editorPanel).style("display")).toEqual("none");
+                            done();
+                        });
+                });
+
+                it("can be collapsed and expanded", function (done) {
+                    var editorPanel = "div.collapsible-panel-parent[plugin-owner='PrototypeBuilder'] .collapsible-panel";
+                    togglePanel("PrototypeBuilder")
+                        .then(function () {
+                            togglePanel("PrototypeBuilder")
+                                .then(function () {
+                                    expect(d3.select(editorPanel).style("display")).toEqual("block");
+                                    done();
+                                });
+                        });
+                });
+
+                describe("Editor File Lists", function () {
+                    it("has context menus", function (done) {
+                        togglePanel("PrototypeBuilder").then(function () {
+                            rightclick("#pvsFiles").then(function () {
+                                expect(d3.select("div.contextmenu").empty()).toBeFalsy();
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+
+            describe("FileSystem management in ListView", function () {
+                beforeEach(function (done) {
+                    d3.select("div.overlay").remove();
+                    pm = pb.getProjectManager();
+                    pm.addListener("PVSProcessReady", function (e) {
+                        console.log(e);
+                        p = pm.project();
+                        done();
+                    });
+                    main.start();
+                });
+
+                it("can add files to the project", function (done) {
+                    var filesLength = pm.project().getProjectFiles().length;
+                    click("div.collapsible-panel-parent[plugin-owner='ModelEditor'] .header").then(function () {
+                        listViewContextMenu("#newfile").then(function () {
+                            setTimeout(function () {
+                                expect(pm.project().getProjectFiles().length).toEqual(filesLength + 1);
+                                done();
+                            }, 500);
+                        });
+                    });
+                });
+                
+                it("can remove files from the project", function (done) {
+                    var filesLength = pm.project().getProjectFiles().length;
+                    click("div.collapsible-panel-parent[plugin-owner='ModelEditor'] .header").then(function () {
+                        listViewContextMenu("#newfile").then(function () {//add a new file
+                            click("#pvsFiles li:last-child").then(function () {//select the file
+                                listViewContextMenu("#delete").then(function () {//delete the file
+                                    click("div.overlay #btnOk").then(function () {
+                                         setTimeout(function () {
+                                            expect(pm.project().getProjectFiles().length).toEqual(filesLength);
+                                            done();
+                                        }, 500);
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+           
         }
     };
 });

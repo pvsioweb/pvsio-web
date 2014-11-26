@@ -41,6 +41,13 @@ define(function (require, exports, module) {
 				});
 
 				describe("Project innards works fine", function () {
+                    //describe opening a project
+					it("default project name after initialisation should contain 'default project'", function (done) {
+						expect(p.name()).toEqual("defaultProject");
+						console.log(p.name());
+                        done();
+					});          
+                    
 					it("should open project correctly", function (done) {
                         pm.openProject("AlarisPC", function (openedProject) {
                             expect(alarisProject).toEqual(openedProject.name());
@@ -59,13 +66,7 @@ define(function (require, exports, module) {
                         done();
 					});
 
-					//describe opening a project
-
-					it("default project name after initialisation should contain 'default project'", function (done) {
-						expect(p.name()).toEqual("defaultProject");
-						console.log(p.name());
-                        done();
-					});                   
+					         
 				});
 				
 			});

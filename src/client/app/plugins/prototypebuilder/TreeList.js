@@ -339,8 +339,12 @@ define(function (require, exports, module) {
     };
     
     TreeList.prototype.createNodeEditor = function (node, onEnter, onCancel) {
+        function nodeFinder(d) {
+            return function (t) { return t.path === d.path; };
+        }
+        selectedData = selectedData ? find(nodeFinder(selectedData), data) : selectedData;
         var fst = this,
-            n = find(function (t) { return t.path === node.path; }, data) || selectedData;
+            n = find(nodeFinder(node), data) || selectedData;
         
         var nodes = d3.select(el).selectAll(".node").filter(function (d) {
             return d === n;
