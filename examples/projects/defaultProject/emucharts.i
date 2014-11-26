@@ -12,27 +12,21 @@ defines
 types
  int = INT_MIN..INT_MAX
  nat = 0..INT_MAX
- MachineState = { X1, X2, X3 }
+ MachineState = { closed, opening, closing, open }
 
-interactor emucharts
+interactor main #emucharts
  attributes
   current_state: MachineState
   previous_state: MachineState
 
  actions
-  A
-  B
+  rcButton
+  opSensor
+  clSensor
 
- [] previous_state = X1 & current_state = X1
+ [] previous_state = closed & current_state = closed
 
- per(A) -> current_state = X1
- [A] -> previous_state' = X1 & current_state' = X2
-
- per(B) -> current_state = X2
- [B] -> previous_state' = X2 & current_state' = X3
-
-
-
+test
 
 # ---------------------------------------------------------------
 #  MAL model generated using PVSio-web MALPrinter2 ver 0.1

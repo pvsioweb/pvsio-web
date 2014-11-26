@@ -1,7 +1,7 @@
 /** @module EmuchartsMALPrinter */
 /**
  * EmuchartsMALPrinter provides functions to generate MAL models from Emucharts
- * @authors: Paolo Masci
+ * @authors: Paolo Masci, Rui Couto
  * @date 2014/22/10 11:00:21 AM
  *
  * Emuchart objects have the following structure:
@@ -54,13 +54,17 @@
 define(function (require, exports, module) {
 	"use strict";
     
+    var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
+    
     var model_name;
+    var parser;
     
     /**
 	 * Constructor
 	 */
     function EmuchartsMALPrinter(name) {
         model_name = name;
+        parser = new EmuchartsParser();
         return this;
     }
     
@@ -153,11 +157,17 @@ define(function (require, exports, module) {
      */
     EmuchartsMALPrinter.prototype.print_actions = function (emuchart) {
         var ans = " actions\n";
+        var actions = d3.set();
+        
         if (emuchart.transitions && emuchart.transitions.length > 0) {
             emuchart.transitions.forEach(function (t) {
                 var transition = parseTransition(t);
+                if (!actions.has(transition.name)) {
+                    ans += "  " + transition.name + "\n";
+                    actions.add(transition.name);
+                }
                 // first, generate the permission
-                ans += "  " + transition.name + "\n";
+                
             });
         }
         ans += "\n";
@@ -198,6 +208,7 @@ define(function (require, exports, module) {
      *                    from: (string), // source state label
      *                    to: (string) // target state label }
      */
+    /*
     EmuchartsMALPrinter.prototype.print_transitions = function (emuchart) {
         var ans = "";
         if (emuchart.transitions && emuchart.transitions.length > 0) {
@@ -232,8 +243,28 @@ define(function (require, exports, module) {
         }
         ans += "\n";
         return ans;
+    };*/
+    
+    EmuchartsMALPrinter.prototype.print_transitions = function (emuchart) {
+        var ans = "test";
+        
+        emuchart.transitions.forEach(function (mLabel) {
+            var label = mLabel.name;
+            if (!label || label === "") {
+                return { err: "Unexpected label", res: null };
+            }
+            var ans = parser.parseTransition(label);
+            if (ans.res) {
+                var theTransition = {
+                    identifier: ans.res.val.identifier || { type: "identifier", val: "tick" },
+                    cond:       ans.res.val.cond || { type: "expression", val: [] },
+                    actions:    ans.res.val.actions || { type: "actions", val: [] }
+                };
+                // do something useful with the transition...
+            }
+        });
+        return ans;
     };
-
     /**
      * Prints MAL attributes
      */
@@ -304,7 +335,8 @@ define(function (require, exports, module) {
         ans += this.print_constants(emuchart); // "defines" section
         ans += this.print_types(emuchart); // "types" section
         
-        ans += "interactor " + emuchart.name + "\n"; // the MAL interactor
+        //ans += "interactor " + emuchart.name + "\n"; // the MAL interactor
+        ans += "interactor main #" + emuchart.name + "\n";
         ans += this.print_attributes(emuchart); // MAL attributes
         ans += this.print_actions(emuchart);
         
