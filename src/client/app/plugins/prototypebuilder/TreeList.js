@@ -152,7 +152,7 @@ define(function (require, exports, module) {
                 ul.selectAll("li.node").classed("selected", function (d) {
                     return selectedData === d;
                 });
-                s.previousData = pd;
+                d.previousData = pd;
                 var event = {type: "SelectedItemChanged", data: d};
                 // clear all editable flags
                 ul.selectAll("li.node").select(".label").attr("contentEditable", false);
