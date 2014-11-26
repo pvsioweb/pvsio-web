@@ -60,9 +60,11 @@ define(function (require, exports, module) {
 
     var lexerRules = [
         { rule: ["\\s+",                    "/* skip whitespace */"], type: "whitespace" },
-        { rule: ["(?!(?:IMPLIES|implies|AND|and|OR|or|NOT|not))" + // keywords shall not be used as identifiers
+        { rule: ["(?!(?:IMPLIES|implies|AND|and|OR|or|NOT|not|TRUE|true|FALSE|false))"
+                 + // keywords shall not be used as identifiers
                 "([a-zA-Z][a-zA-Z0-9_]*)",  "return 'IDENTIFIER'"],   type: "variable" },
         { rule: ["[0-9]+(?:\\.[0-9]+)?\\b", "return 'NUMBER'"],       type: "number"  },
+        { rule: ["\"(.*?)\"",               "return 'STRING'"],       type: "string"  },
         { rule: ["\\*",                     "return '*'"],            type: "builtin" },
         { rule: ["\\/",                     "return '/'"],            type: "builtin" },
         { rule: ["-",                       "return '-'"],            type: "builtin" },
@@ -82,6 +84,8 @@ define(function (require, exports, module) {
         { rule: ["(IMPLIES|implies|(\\=\\>))", "return 'IMPLIES'"],   type: "builtin" },
         { rule: ["(AND|&&)",                "return 'AND'"],          type: "builtin" },
         { rule: ["(OR|\\|\\|)",             "return 'OR'"],           type: "builtin" },
+        { rule: ["(TRUE|true)",             "return 'TRUE'"],         type: "builtin" },
+        { rule: ["(FALSE|false)",           "return 'FALSE'"],        type: "builtin" },
         { rule: ["\\(",                     "return '('"],            type: "builtin" },
         { rule: ["\\)",                     "return ')'"],            type: "builtin" },
         { rule: ["\\[",                     "return '['"],            type: "builtin" },
@@ -91,7 +95,8 @@ define(function (require, exports, module) {
         { rule: [":=",                      "return ':='"],           type: "builtin" },
         { rule: [";",                       "return ';'"],            type: "builtin" },
         { rule: [",",                       "return ','"],            type: "builtin" },
-        { rule: [".",                       "return '.'"],            type: "builtin" }
+        { rule: [".",                       "return '.'"],            type: "builtin" },
+        { rule: ['"',                       "return '\"'"],           type: "builtin" }
     ];
 
     var lexerRule2Array = function () {
@@ -251,9 +256,18 @@ define(function (require, exports, module) {
                 "number": [
                     ["NUMBER", "$$ = { type: 'number', val: $NUMBER }"]
                 ],
+                "string": [
+                    ["STRING", "$$ = { type: 'constant', val: $STRING }"]
+                ],
+                "true_false": [
+                    ["TRUE", "$$ = { type: 'constant', val: $TRUE }"],
+                    ["FALSE", "$$ = { type: 'constant', val: $FALSE }"]
+                ],
                 "term": [
                     ["number", "$$ = $number"],
-                    ["id", "$$ = $id"]
+                    ["id", "$$ = $id"],
+                    ["string", "$$ = $string"],
+                    ["true_false", "$$ = $true_false"]
                 ],
                 "expression":  [
                     ["e",   "$$ = { type: 'expression', val: $e }"]
@@ -591,7 +605,7 @@ if (ans.res) {
         var ans = { err: null, res: {} };
         if (variables) {
             variables.forEach(function (variable) {
-                console.log("Parsing dot notation " + variable);
+                console.log("Parsing variable " + JSON.stringify(variable));
                 extend(ans, {
                     name : variable.name,
                     type : variable.type,

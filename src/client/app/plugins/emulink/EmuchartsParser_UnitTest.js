@@ -451,7 +451,7 @@ define(function (require, exports, module) {
                 ans.res.val.actions.val[0].val.binop.val === ":=" &&
                 ans.res.val.actions.val[0].val.expression.type === "expression" &&
                 ans.res.val.actions.val[0].val.expression.val.length === 1 &&
-                ans.res.val.actions.val[0].val.expression.val[0].type === "identifier" &&
+                ans.res.val.actions.val[0].val.expression.val[0].type === "constant" &&
                 ans.res.val.actions.val[0].val.expression.val[0].val === "false") {
             summary += "[ok]";
             success++;
@@ -527,7 +527,7 @@ define(function (require, exports, module) {
                 ans.res.val.cond.val[0].val === "S_state.correct" &&
                 ans.res.val.cond.val[1].type === "binop" &&
                 ans.res.val.cond.val[1].val === "==" &&
-                ans.res.val.cond.val[2].type === "identifier" &&
+                ans.res.val.cond.val[2].type === "constant" &&
                 ans.res.val.cond.val[2].val === "true") {
             summary += "[ok]";
             success++;
@@ -553,7 +553,7 @@ define(function (require, exports, module) {
                 ans.res.val.cond.val[0].val === "S_state.d1.correct" &&
                 ans.res.val.cond.val[1].type === "binop" &&
                 ans.res.val.cond.val[1].val === "==" &&
-                ans.res.val.cond.val[2].type === "identifier" &&
+                ans.res.val.cond.val[2].type === "constant" &&
                 ans.res.val.cond.val[2].val === "true") {
             summary += "[ok]";
             success++;
@@ -692,6 +692,66 @@ define(function (require, exports, module) {
             fail++;
         }
                 
+        // test 21
+        txt = [ { name: 'children.val', type: 'A', value: 'initA' },
+                { name: 'children.type', type: 'B', value: 'initB'} ];
+        summary += "\n\nTest " + (++tot) + ": '" +
+                    JSON.stringify(txt).replace(new RegExp("\"", "g"), "") + "'";
+        ans = parser.parseVariables(txt);
+        console.log(ans);
+        summary += "\n  Parsing variable names... ";
+        if (ans.res) {
+            if (ans.res.children && ans.res.children.type === "selector" &&
+                    ans.res.children.children.val && ans.res.children.children.val.type === "variable" &&
+                    ans.res.children.children.val.val.name === "val" &&
+                    ans.res.children.children.type && ans.res.children.children.type.type === "variable" &&
+                    ans.res.children.children.type.val.name === "type") {
+                summary += "[ok]";
+                success++;
+            } else {
+                console.log(ans.err);
+                summary += "[FAIL]";
+                fail++;
+            }
+            console.log(JSON.stringify(ans.res, null, 2).replace(new RegExp("\"", "g"), ""));
+        } else {
+            console.log(ans.err);
+            summary += "[FAIL]";
+            fail++;
+        }
+
+        // test 22
+        txt = 'click_off { display := "On" }';
+        summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
+        ans = parser.parseTransition(txt);
+        console.log(ans);
+        summary += "\n  Parsing transition... ";
+        if (ans.res && ans.res.type === "transition" &&
+                ans.res.val.identifier.type === "identifier" &&
+                ans.res.val.identifier.val === "click_off" &&
+                ans.res.val.identifier.type === "identifier" &&
+                ans.res.val.actions &&
+                ans.res.val.actions.type === "actions" &&
+                ans.res.val.actions.val &&
+                ans.res.val.actions.val.length === 1 &&
+                ans.res.val.actions.val[0].type === "assignment" &&
+                ans.res.val.actions.val[0].val.identifier.type === "identifier" &&
+                ans.res.val.actions.val[0].val.identifier.val === "display" &&
+                ans.res.val.actions.val[0].val.binop.type === "binop" &&
+                ans.res.val.actions.val[0].val.binop.val === ":=" &&
+                ans.res.val.actions.val[0].val.expression.type === "expression" &&
+                ans.res.val.actions.val[0].val.expression.val.length === 1 &&
+                ans.res.val.actions.val[0].val.expression.val[0].type === "constant" &&
+                ans.res.val.actions.val[0].val.expression.val[0].val === '"On"') {
+            summary += "[ok]";
+            success++;
+        } else {
+            console.log(ans.err);
+            summary += "[FAIL]";
+            fail++;
+        }
+
+        
         summary += "\n\n--------------------------------------------------------";
         summary += "\n Success: " + success + "/" + tot;
         summary += "\n Fail   : " + fail + "/" + tot;
@@ -699,5 +759,6 @@ define(function (require, exports, module) {
         return summary;
     };
    
+    
     module.exports = EmuchartsParser_UnitTest;
 });
