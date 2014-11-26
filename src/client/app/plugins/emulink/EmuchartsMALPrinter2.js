@@ -208,7 +208,7 @@ define(function (require, exports, module) {
      *                    from: (string), // source state label
      *                    to: (string) // target state label }
      */
-    /*
+    /* 
     EmuchartsMALPrinter.prototype.print_transitions = function (emuchart) {
         var ans = "";
         if (emuchart.transitions && emuchart.transitions.length > 0) {
@@ -243,28 +243,62 @@ define(function (require, exports, module) {
         }
         ans += "\n";
         return ans;
-    };*/
+    };
+    */
     
     EmuchartsMALPrinter.prototype.print_transitions = function (emuchart) {
-        var ans = "test";
+        var res = "";
+        var actions = d3.map();
         
         emuchart.transitions.forEach(function (mLabel) {
             var label = mLabel.name;
+            var from = mLabel.source.name;
+            var to = mLabel.target.name;
+            res += "# " + from + "--> " + to + "\n";
+            
             if (!label || label === "") {
                 return { err: "Unexpected label", res: null };
             }
             var ans = parser.parseTransition(label);
+            //res += JSON.stringify(ans) + "\n";
             if (ans.res) {
-                var theTransition = {
+                var transition = {
                     identifier: ans.res.val.identifier || { type: "identifier", val: "tick" },
                     cond:       ans.res.val.cond || { type: "expression", val: [] },
                     actions:    ans.res.val.actions || { type: "actions", val: [] }
                 };
-                // do something useful with the transition...
+                
+                //TODO
+                //MAP: action -> ( state -> (state, condition))
+                //eg.:
+                //rcButton +- closed -> opening
+                //         L- stopped +-> opening, memory=opening
+                //                    L-> closing, memory=closing
+                
+                //console.log("adding " + transition.identifier.val);
+                actions.set(transition.identifier.val, "");
+                res += JSON.stringify(transition) + "\n";
+                
+                //actions.set();
+                
             }
         });
-        return ans;
+        res+="result:\n";
+        actions.forEach(function (e) {
+            res += e + "\n";
+        });
+        
+        //res += actions.keys + "\n";
+        /*
+        actions.keys.forEach(function(e) {
+            res += e+"\n";
+        });*/
+        
+        
+        
+        return res;
     };
+    
     /**
      * Prints MAL attributes
      */
