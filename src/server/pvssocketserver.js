@@ -68,11 +68,7 @@ function run() {
         //if the type of the token is 'processExited' then send message to client if the socket is still open
         tok.time  = tok.time || {server: {}};
         tok.time.server.sent = new Date().getTime();
-        if (tok.type === 'processExited') {
-            if (socket.readyState === 1) {
-                socket.send(JSON.stringify(tok));
-            }
-        } else {//send the message normally
+        if (socket && socket.readyState === 1) {
             socket.send(JSON.stringify(tok));
         }
     }
