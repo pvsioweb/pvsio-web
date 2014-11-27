@@ -30,33 +30,32 @@ memory: {opening, closing, open, closed, stopped}
 
  [] previous_state = closed & current_state = closed
 
-# closed--> opening
-{"identifier":{"type":"identifier","val":"rcButton"},"cond":{"type":"expression","val":[]},"actions":{"type":"actions","val":[]}}
-# opening--> open
-{"identifier":{"type":"identifier","val":"opSensor"},"cond":{"type":"expression","val":[]},"actions":{"type":"actions","val":[]}}
-# open--> closing
-{"identifier":{"type":"identifier","val":"rcButton"},"cond":{"type":"expression","val":[]},"actions":{"type":"actions","val":[]}}
-# closing--> closed
-{"identifier":{"type":"identifier","val":"clSensor"},"cond":{"type":"expression","val":[]},"actions":{"type":"actions","val":[]}}
-# closing--> stopped
-{"identifier":{"type":"identifier","val":"rcButton"},"cond":{"type":"expression","val":[]},"actions":{"type":"actions","val":[{"type":"assignment","val":{"identifier":{"type":"identifier","val":"memory"},"binop":{"type":"binop","val":":="},"expression":{"type":"expression","val":[{"type":"identifier","val":"opening"}]}}}]}}
-# closing--> opening
-{"identifier":{"type":"identifier","val":"sfSensor"},"cond":{"type":"expression","val":[]},"actions":{"type":"actions","val":[]}}
-# stopped--> opening
-{"identifier":{"type":"identifier","val":"rcButton"},"cond":{"type":"expression","val":[{"type":"identifier","val":"memory"},{"type":"binop","val":"=="},{"type":"identifier","val":"opening"}]},"actions":{"type":"actions","val":[]}}
-# stopped--> closing
-{"identifier":{"type":"identifier","val":"rcButton"},"cond":{"type":"expression","val":[{"type":"identifier","val":"memory"},{"type":"binop","val":"=="},{"type":"identifier","val":"closing"}]},"actions":{"type":"actions","val":[]}}
-# opening--> stopped
-{"identifier":{"type":"identifier","val":"rcSensor"},"cond":{"type":"expression","val":[]},"actions":{"type":"actions","val":[{"type":"assignment","val":{"identifier":{"type":"identifier","val":"memory"},"binop":{"type":"binop","val":":="},"expression":{"type":"expression","val":[{"type":"identifier","val":"closing"}]}}}]}}
-# closed--> opening
-{"identifier":{"type":"identifier","val":"click_on"},"cond":{"type":"expression","val":[{"type":"identifier","val":"display"},{"type":"binop","val":"=="},{"type":"number","val":"100"}]},"actions":{"type":"actions","val":[{"type":"assignment","val":{"identifier":{"type":"identifier","val":"display"},"binop":{"type":"binop","val":":="},"expression":{"type":"expression","val":[{"type":"identifier","val":"display"},{"type":"binop","val":"+"},{"type":"number","val":"1"}]}}}]}}
-result:
-rcButton
-opSensor
-clSensor
-sfSensor
-rcSensor
-click_on
++rcButton
+ +stopped
+  +opening
+   +memory=opening
+  +closing
+   +memory=closing
++opSensor
+ +opening
+  +open
+   +
++clSensor
+ +closing
+  +closed
+   +
++sfSensor
+ +closing
+  +opening
+   +
++rcSensor
+ +opening
+  +stopped
+   +
++click_on
+ +closed
+  +opening
+   +display=100
 
 
 # ---------------------------------------------------------------

@@ -249,13 +249,12 @@ define(function (require, exports, module) {
     EmuchartsMALPrinter.prototype.print_transitions = function (emuchart) {
         var res = "";
         var actions = d3.map();
-        
+        console.log("PROCESS START:");
         emuchart.transitions.forEach(function (mLabel) {
             var label = mLabel.name;
             var from = mLabel.source.name;
             var to = mLabel.target.name;
-            res += "# " + from + "--> " + to + "\n";
-            
+                        
             if (!label || label === "") {
                 return { err: "Unexpected label", res: null };
             }
@@ -267,35 +266,64 @@ define(function (require, exports, module) {
                     cond:       ans.res.val.cond || { type: "expression", val: [] },
                     actions:    ans.res.val.actions || { type: "actions", val: [] }
                 };
+                var action = transition.identifier.val;
                 
-                //TODO
-                //MAP: action -> ( state -> (state, condition))
-                //eg.:
-                //rcButton +- closed -> opening
-                //         L- stopped +-> opening, memory=opening
-                //                    L-> closing, memory=closing
                 
-                //console.log("adding " + transition.identifier.val);
-                actions.set(transition.identifier.val, "");
-                res += JSON.stringify(transition) + "\n";
+                var cond = "";
+                if (transition.cond.val.length > 0) {
+                    cond += transition.cond.val[0].val;
+                    cond += transition.cond.val[1].val === "==" ? "=" : transition.cond.val[1].val;
+                    cond += transition.cond.val[2].val;
+                }
                 
-                //actions.set();
+                //Create pair (to, condition) -- Transition
+                console.log("Transition: " + from + "," + to);
+                var mtransition = d3.map();
+                mtransition.set(to, cond);
                 
+                //Create pair (from, [<Transition>]) --Condition
+                console.log("Value: (transition), " + cond);
+                var mval = d3.map();
+                var a = [];
+                console.log("Checking" + from);
+                if (actions.get(action) !== undefined && actions.get(action).has(from)) {
+                    console.log("*Existing " + from);
+                    a = actions.get(action).get(from);
+                }
+                a.push(mtransition);
+                console.log("pushing" + mtransition);
+                mval.set(from, a);
+                
+                //creating pair (action, <Condition>)
+                console.log("Action: " + action + ", (value)");
+                actions.set(action, mval);
             }
         });
-        res+="result:\n";
-        actions.forEach(function (e) {
-            res += e + "\n";
-        });
-        
-        //res += actions.keys + "\n";
+        //actions contains set (action, (from, [(to, condition)]))
+        //
+        //rcButton - stopped -> opening, memory=opening
+        //                   -> closing, memory=closing
+        //opSensor - opening -> open, ""
+        //click_on - closed  -> opening, display=100
+        //
         /*
-        actions.keys.forEach(function(e) {
-            res += e+"\n";
+        actions.keys().forEach(function (taction) { //action name
+            res += "+" + taction + "\n";
+            // mval             | mtransition
+            actions.get(taction).keys().forEach(function (mtra) { // [mtransition]
+                res += " +" + mtra + "\n";
+                actions.get(taction).get(mtra).forEach(function (v) {
+                    v.forEach(function (nv) {
+                        res += "  +" + nv + "\n";
+                        res += "   +" + v.get(nv) + "\n";
+                    });
+                    
+                });
+                
+                
+            });
         });*/
-        
-        
-        
+                
         return res;
     };
     
