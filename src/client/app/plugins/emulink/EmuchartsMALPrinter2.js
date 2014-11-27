@@ -266,8 +266,23 @@ define(function (require, exports, module) {
                     cond:       ans.res.val.cond || { type: "expression", val: [] },
                     actions:    ans.res.val.actions || { type: "actions", val: [] }
                 };
+                                
                 var action = transition.identifier.val;
                 
+                var effect = "";
+                if (transition.actions.val.length > 0) {
+                    effect += transition.actions.val[0].val.identifier.val;
+                    effect += transition.actions.val[0].val.binop.val;
+                    //effect += JSON.stringify(transition.actions.val[0].val.expression.val)+"\n";
+                    transition.actions.val[0].val.expression.val.forEach(function (v) {
+                        effect +=v.val;
+                    });
+                    /*
+                
+                    effect += transition.actions.val[0].val.identifier.val;
+                    effect += transition.actions.val[0].val.binop.val === ":=" ? "'=" : transition.cond.val[1].val;
+                    effect += transition.actions.val[0].val.expression.val;*/
+                }
                 
                 var cond = "";
                 if (transition.cond.val.length > 0) {
@@ -279,7 +294,10 @@ define(function (require, exports, module) {
                 //Create pair (to, condition) -- Transition
                 console.log("Transition: " + from + "," + to);
                 var mtransition = d3.map();
-                mtransition.set(to, cond);
+                var ce = [];
+                ce.push(cond);
+                ce.push(effect);
+                mtransition.set(to, ce);
                 
                 //Create pair (from, [<Transition>]) --Condition
                 console.log("Value: (transition), " + cond);
@@ -323,6 +341,41 @@ define(function (require, exports, module) {
                 
             });
         });*/
+        
+        actions.keys().forEach(function (taction) { //action name
+            var trAction = taction;
+            //res += "+" + taction + "\n";
+            // mval             | mtransition
+            actions.get(taction).keys().forEach(function (mtra) { // [mtransition]
+                var trFrom = mtra;
+                //res += " +" + mtra + "\n";
+                actions.get(taction).get(mtra).forEach(function (v) {
+                    v.forEach(function (nv) {
+                        var trDest = nv;
+                        var trCond = v.get(nv)[0];
+                        var trEff = v.get(nv)[1];
+                        //res += "  +" + nv + "\n";
+                        //res += "   +" + v.get(nv) + "\n";
+                        res += "(current_state=" + trFrom + ")";
+                        if (trCond !== "") {
+                            res += " & (" + trCond + ")";
+                        }
+                        res += " -> [" + taction + "] (current_state'=" + trDest + ")";
+                        if (trEff !== "") {
+                            res += " & (" + trEff + ")";
+                        }
+                        
+                        
+                        res += "\n";
+                    });
+                    
+                });
+                
+                
+            });
+        });
+        
+        
                 
         return res;
     };

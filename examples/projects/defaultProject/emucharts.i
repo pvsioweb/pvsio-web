@@ -30,32 +30,13 @@ memory: {opening, closing, open, closed, stopped}
 
  [] previous_state = closed & current_state = closed
 
-+rcButton
- +stopped
-  +opening
-   +memory=opening
-  +closing
-   +memory=closing
-+opSensor
- +opening
-  +open
-   +
-+clSensor
- +closing
-  +closed
-   +
-+sfSensor
- +closing
-  +opening
-   +
-+rcSensor
- +opening
-  +stopped
-   +
-+click_on
- +closed
-  +opening
-   +display=100
+(current_state=stopped) & (memory=opening) -> [rcButton] (current_state'=opening)
+(current_state=stopped) & (memory=closing) -> [rcButton] (current_state'=closing)
+(current_state=opening) -> [opSensor] (current_state'=open)
+(current_state=closing) -> [clSensor] (current_state'=closed)
+(current_state=closing) -> [sfSensor] (current_state'=opening)
+(current_state=opening) -> [rcSensor] (current_state'=stopped) & (memory:=closing)
+(current_state=closed) & (display=100) -> [click_on] (current_state'=opening) & (display:=display+1)
 
 
 # ---------------------------------------------------------------
