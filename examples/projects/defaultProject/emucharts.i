@@ -18,7 +18,7 @@ interactor main #emucharts
  attributes
   current_state: MachineState
   previous_state: MachineState
-memory: {opening, closing, open, closed, stopped}
+  memory: {opening, closing, open, closed, stopped}
 
  actions
   rcButton
@@ -28,15 +28,31 @@ memory: {opening, closing, open, closed, stopped}
   rcSensor
   click_on
 
- [] previous_state = closed & current_state = closed
+ axioms
+  [] previous_state = closed & current_state = closed
 
-(current_state=stopped) & (memory=opening) -> [rcButton] (current_state'=opening)
-(current_state=stopped) & (memory=closing) -> [rcButton] (current_state'=closing)
-(current_state=opening) -> [opSensor] (current_state'=open)
-(current_state=closing) -> [clSensor] (current_state'=closed)
-(current_state=closing) -> [sfSensor] (current_state'=opening)
-(current_state=opening) -> [rcSensor] (current_state'=stopped) & (memory:=closing)
-(current_state=closed) & (display=100) -> [click_on] (current_state'=opening) & (display:=display+1)
+  (current_state=closed) -> [rcButton] (current_state'=opening)
+  (current_state=open) -> [rcButton] (current_state'=closing)
+  (current_state=closing) -> [rcButton] (current_state'=stopped) & (memory'=opening)
+  (current_state=stopped) & (memory=opening) -> [rcButton] (current_state'=opening)
+  (current_state=stopped) & (memory=closing) -> [rcButton] (current_state'=closing)
+  per(rcButton) -> ( current_state = closed) | ( current_state = open) | ( current_state = closing) | ( current_state = stopped) 
+
+  (current_state=opening) -> [opSensor] (current_state'=open)
+  per(opSensor) -> ( current_state = opening) 
+
+  (current_state=closing) -> [clSensor] (current_state'=closed)
+  per(clSensor) -> ( current_state = closing) 
+
+  (current_state=closing) -> [sfSensor] (current_state'=opening)
+  per(sfSensor) -> ( current_state = closing) 
+
+  (current_state=opening) -> [rcSensor] (current_state'=stopped) & (memory'=closing)
+  per(rcSensor) -> ( current_state = opening) 
+
+  (current_state=closed) & (display=100) -> [click_on] (current_state'=opening) & (display'=display+1)
+  per(click_on) -> ( current_state = closed) 
+
 
 
 # ---------------------------------------------------------------

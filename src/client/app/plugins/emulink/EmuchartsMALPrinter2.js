@@ -135,8 +135,6 @@ define(function (require, exports, module) {
         return ans;
     }
 
-
-
     /**
      * Prints MAL axioms
      */
@@ -183,11 +181,11 @@ define(function (require, exports, module) {
      *                    to: (string) // target state label }
      */
     EmuchartsMALPrinter.prototype.print_initial_transition = function (emuchart) {
-        var ans = "";
+        var ans = " axioms\n";
         if (emuchart.initial_transitions && emuchart.initial_transitions.length > 0) {
             emuchart.initial_transitions.forEach(function (t) {
                 var transition = parseTransition(t);
-                ans += " [] ";
+                ans += "  [] ";
                 ans += "previous_state = " + transition.to + " & ";
                 ans += "current_state = " + transition.to;
                 transition.actions.forEach(function (action) {
@@ -208,82 +206,43 @@ define(function (require, exports, module) {
      *                    from: (string), // source state label
      *                    to: (string) // target state label }
      */
-    /* 
-    EmuchartsMALPrinter.prototype.print_transitions = function (emuchart) {
-        var ans = "";
-        if (emuchart.transitions && emuchart.transitions.length > 0) {
-            var visitedTransitions = d3.map();
-            emuchart.transitions.forEach(function (t) {
-                var transition = parseTransition(t);
-                if (visitedTransitions.has(transition.name) === false) {
-                    visitedTransitions.set(transition.name, true);
-                    // first, print the permission
-                    ans += " per(" + transition.name + ") ->";
-                    ans += " current_state = " + transition.from;
-                    
-                    // second, print the transition conditions, if any
-                    var trans;
-                    emuchart.transitions.forEach(function (t) {
-                        trans = parseTransition(t);
-                        if (trans.name === transition.name && trans.cond && trans.cond !== "") {
-                            ans += " & " + trans.cond;
-                        }
-                    });
-                    // third, print the transition name
-                    ans += "\n [" + transition.name + "]";
-                    ans += " -> previous_state' = " + transition.from;
-                    ans += " & current_state' = " + transition.to;
-                    // finally, print the transition body
-                    transition.actions.forEach(function (action) {
-                        ans += " & " + action;
-                    });
-                    ans += "\n\n";
-                }
-            });
-        }
-        ans += "\n";
-        return ans;
-    };
-    */
-    
     EmuchartsMALPrinter.prototype.print_transitions = function (emuchart) {
         var res = "";
         var actions = d3.map();
-        console.log("PROCESS START:");
         emuchart.transitions.forEach(function (mLabel) {
             var label = mLabel.name;
             var from = mLabel.source.name;
             var to = mLabel.target.name;
-                        
+            
             if (!label || label === "") {
                 return { err: "Unexpected label", res: null };
             }
             var ans = parser.parseTransition(label);
-            //res += JSON.stringify(ans) + "\n";
             if (ans.res) {
                 var transition = {
                     identifier: ans.res.val.identifier || { type: "identifier", val: "tick" },
                     cond:       ans.res.val.cond || { type: "expression", val: [] },
                     actions:    ans.res.val.actions || { type: "actions", val: [] }
                 };
-                                
+                
+                //The transition "Action"
                 var action = transition.identifier.val;
                 
+                //The transiton "Effect"
                 var effect = "";
                 if (transition.actions.val.length > 0) {
                     effect += transition.actions.val[0].val.identifier.val;
-                    effect += transition.actions.val[0].val.binop.val;
-                    //effect += JSON.stringify(transition.actions.val[0].val.expression.val)+"\n";
+                    var bo = transition.actions.val[0].val.binop.val;
+                    if (bo === ":=") {
+                        bo = "'=";
+                    }
+                    effect += bo;
                     transition.actions.val[0].val.expression.val.forEach(function (v) {
-                        effect +=v.val;
+                        effect += v.val;
                     });
-                    /*
-                
-                    effect += transition.actions.val[0].val.identifier.val;
-                    effect += transition.actions.val[0].val.binop.val === ":=" ? "'=" : transition.cond.val[1].val;
-                    effect += transition.actions.val[0].val.expression.val;*/
                 }
                 
+                //The transition "Condition"
                 var cond = "";
                 if (transition.cond.val.length > 0) {
                     cond += transition.cond.val[0].val;
@@ -291,30 +250,50 @@ define(function (require, exports, module) {
                     cond += transition.cond.val[2].val;
                 }
                 
-                //Create pair (to, condition) -- Transition
-                console.log("Transition: " + from + "," + to);
+                //Create pair (dest, [condition,effect]) -- Transition
                 var mtransition = d3.map();
                 var ce = [];
                 ce.push(cond);
                 ce.push(effect);
                 mtransition.set(to, ce);
                 
+                
                 //Create pair (from, [<Transition>]) --Condition
-                console.log("Value: (transition), " + cond);
                 var mval = d3.map();
                 var a = [];
-                console.log("Checking" + from);
-                if (actions.get(action) !== undefined && actions.get(action).has(from)) {
-                    console.log("*Existing " + from);
-                    a = actions.get(action).get(from);
+                if (actions.get(action) !== undefined) {
+                    var maa = actions.get(action);
+                    maa.forEach(function (e) {
+                        if (e.get(from) !== undefined) {
+                            a = e.get(from);
+                        }
+                    });
                 }
                 a.push(mtransition);
-                console.log("pushing" + mtransition);
                 mval.set(from, a);
                 
                 //creating pair (action, <Condition>)
-                console.log("Action: " + action + ", (value)");
-                actions.set(action, mval);
+                var aa = [];
+                if (actions.get(action) !== undefined) {
+                    var i;
+                    var del = false;
+                    for (i = 0; i < actions.get(action).length; i++) {
+                        console.log("-checking [" + i + "] if " + actions.get(action)[i].keys()[0] + " == " + from);
+                        if (actions.get(action)[i].keys()[0] === from) {
+                            del = true;
+                            break;
+                        }
+                    }
+                    if (del) {
+                        console.log("-- has equal! removing entry on " + i);
+                        actions.get(action).splice(i, 1);
+                        console.log("Result: " + JSON.stringify(actions.get(action)));
+                    }
+                    aa = actions.get(action);
+                    
+                }
+                aa.push(mval);
+                actions.set(action, aa);
             }
         });
         //actions contains set (action, (from, [(to, condition)]))
@@ -324,59 +303,44 @@ define(function (require, exports, module) {
         //opSensor - opening -> open, ""
         //click_on - closed  -> opening, display=100
         //
-        /*
-        actions.keys().forEach(function (taction) { //action name
-            res += "+" + taction + "\n";
-            // mval             | mtransition
-            actions.get(taction).keys().forEach(function (mtra) { // [mtransition]
-                res += " +" + mtra + "\n";
-                actions.get(taction).get(mtra).forEach(function (v) {
-                    v.forEach(function (nv) {
-                        res += "  +" + nv + "\n";
-                        res += "   +" + v.get(nv) + "\n";
-                    });
-                    
-                });
-                
-                
-            });
-        });*/
         
-        actions.keys().forEach(function (taction) { //action name
+        //stopped is repeated: rcButton has 2 stopped
+        console.debug(actions);
+        
+        actions.keys().forEach(function (taction) { //taction - action
             var trAction = taction;
-            //res += "+" + taction + "\n";
-            // mval             | mtransition
-            actions.get(taction).keys().forEach(function (mtra) { // [mtransition]
-                var trFrom = mtra;
-                //res += " +" + mtra + "\n";
-                actions.get(taction).get(mtra).forEach(function (v) {
-                    v.forEach(function (nv) {
-                        var trDest = nv;
-                        var trCond = v.get(nv)[0];
-                        var trEff = v.get(nv)[1];
-                        //res += "  +" + nv + "\n";
-                        //res += "   +" + v.get(nv) + "\n";
-                        res += "(current_state=" + trFrom + ")";
-                        if (trCond !== "") {
-                            res += " & (" + trCond + ")";
-                        }
-                        res += " -> [" + taction + "] (current_state'=" + trDest + ")";
-                        if (trEff !== "") {
-                            res += " & (" + trEff + ")";
-                        }
-                        
-                        
-                        res += "\n";
+            var trPerms = "";
+            actions.get(taction).forEach(function (a) { //a - (from, [(dest, [cond, eff])])
+                //res += "++" + a + "\n";
+                a.forEach(function (tfrom) { //tfrom - from
+                    var trFrom = tfrom;
+                    a.get(tfrom).forEach(function (c) { //c - (dest, [cond, eff])
+                        c.forEach(function (tdest) {//tdest - dest
+                            var trDest = tdest;
+                            var trCond = c.get(tdest)[0];
+                            var trEff = c.get(tdest)[1];
+                            
+                            res += "  (current_state=" + trFrom + ")";
+                            if (trCond !== "") {
+                                res += " & (" + trCond + ")";
+                            }
+                            res += " -> [" + trAction + "] (current_state'=" + trDest + ")";
+                            if (trEff !== "") {
+                                res += " & (" + trEff + ")";
+                            }
+                            res += "\n";
+                        });
                     });
                     
                 });
-                
-                
+                var trFrom = a;
+                trPerms += "( current_state = " + trFrom.keys()[0] + ") | ";
             });
+            //TODO: per()
+            if (trPerms !== "") {
+                res += "  per(" + trAction + ") -> " + trPerms.substring(0, trPerms.length - 2) + "\n\n";
+            }
         });
-        
-        
-                
         return res;
     };
     
@@ -389,7 +353,7 @@ define(function (require, exports, module) {
         ans += "  previous_state: MachineState\n";
         if (emuchart.variables && emuchart.variables.length > 0) {
             emuchart.variables.forEach(function (v) {
-                ans += v.name + ": " + v.type + "\n";
+                ans += "  " + v.name + ": " + v.type + "\n";
             });
         }
         ans += "\n";
