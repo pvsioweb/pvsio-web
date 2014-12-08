@@ -6,7 +6,7 @@
 */
 var ws;
 
-var console = document.getElementById('console');
+var console_demo = document.getElementById('console_demo');
 var ControllerConsole = document.getElementById('GIP-Controller_console');
 var uiConsole = document.getElementById('GIP-UI_console');
 
@@ -231,13 +231,13 @@ var render_dataentry = function (display, val) {
 
 function log(msg) {
     "use strict";
-//	console.log(msg);
-	console.innerHTML = "[ " + (new Date()).toTimeString() + " ] " + msg + "<br><br>" + console.innerHTML;
+//	console_demo.log(msg);
+	console_demo.innerHTML = "[ " + (new Date()).toTimeString() + " ] " + msg + "<br><br>" + console_demo.innerHTML;
 }
 
-//function console_log(msg){
-//	console.log(msg);
-//	var c = document.getElementById('console_log');
+//function console_demo_log(msg){
+//	console_demo.log(msg);
+//	var c = document.getElementById('console_demo_log');
 //	c.innerHTML = "[ " + (new Date()).toTimeString() + " ] " + msg + "<br><br>" + c.innerHTML;
 //}
 
@@ -536,7 +536,7 @@ require.config({
 });
 
 var onOutPutUpdated = function(error, event){
-    console.style.display = "none";
+    console_demo.style.display = "none";
     read_gpcaui_state(event);
 
     // clear display
@@ -695,8 +695,8 @@ require(["scripts/gip.js", "PVSioWebClient"], function(_g, PVSioWebClient){
     
     //register event listener for websocket connection from the client
 	client.addListener('WebSocketConnectionOpened', function (e) {
-        console.innerHTML = "";
-        console.style.display = "block";
+        console_demo.innerHTML = "";
+        console_demo.style.display = "block";
         ControllerConsole.style.display = "none";
         uiConsole.style.display = "none";
         log("Loading GPCA model...");
