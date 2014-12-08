@@ -324,6 +324,17 @@ define(function (require, exports, module) {
                     p.mainPVSFile(file);
                 }
             }
+            //load scripts if any
+            var scriptsFile = p.getRecordedScripts();
+            var scripts = JSON.parse(scriptsFile.content());
+            if (scripts.length === 0) {
+                ScriptPlayer.clearView();
+            } else {
+                scripts.forEach(function (s) {
+                    ScriptPlayer.addScriptToView(s);
+                });
+            }
+            
         }
 		
 		return p._dirty(false);

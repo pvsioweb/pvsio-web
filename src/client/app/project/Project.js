@@ -466,7 +466,7 @@ define(function (require, exports, module) {
         }
         scriptJson.push(script);
         ScriptPlayer.addScriptToView(script);
-        scriptFile.content(JSON.stringify(scriptJson, null, " "));
+        scriptFile.content(JSON.stringify(scriptJson, null, " ")).dirty(true);
         this._dirty(true);
     };
     /**

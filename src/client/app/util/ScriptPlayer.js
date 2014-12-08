@@ -11,7 +11,7 @@ define(function (require, exports, module) {
         WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager(),
         ScriptItemView = require("pvsioweb/forms/ScriptItemView"),
 		StateParser = require("util/PVSioStateParser"),
-        d3 = require("d3/d3");
+        d3 = require("d3/d3"), playing = false;
 
     function render(stateString, display) {
 		var state = StateParser.parse(stateString);
@@ -34,27 +34,40 @@ define(function (require, exports, module) {
             .style("width", (pos.x2 - pos.x1) + "px").style("height", (pos.y2 - pos.y1) + "px")
             .style("border-top-left-radius", brad).style("border-top-right-radius", brad)
             .style("border-bottom-left-radius", brad).style("border-bottom-right-radius", brad);
-        
     }
     
-    function play(actions, display) {
+    /**
+        recursively call play until all actions have been triggered. The next action in the list
+        is called only after a sucessful callback from the server process.
+        @param Array<object> actions the list of actions to play
+        @param Widget display the display widget where we wish to render the result
+        @param Number originalLength the initial length of the actions array (used to calculate the percentage of actions played
+        @param HTMLElement el the element that was clicked
+    */
+    function play(actions, display, originalLength, el) {
         var action = actions.shift();
         var pos = getButtonPos(action.id);
         halo(pos);
         var command = action.action + "_" + action.functionText + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");";
+        var percentDone = (originalLength - actions.length) * 100 / originalLength;
+        d3.select(el).select(".timeLine").style("width", percentDone + "%");
         ws.sendGuiAction(command, function (err, res) {
             var stateString = res.data.join("");
             render(stateString, display);
+            if (actions.length && playing) {
+                var interval = actions[0].ts - action.ts;
+                setTimeout(function () {
+                    play(actions, display, originalLength, el);
+                }, interval);
+            } else {
+                //remove the halo at the end of the actions playback
+                d3.select(".animation-halo").remove();
+                d3.select(el).select(".timeLine").style("width", "100%");
+                d3.select(el).select(".scriptItem").classed("glypicon-play", true).classed("glyphicon-stop", false);
+                playing = false;
+            }
         });
-        if (actions.length) {
-            var interval = actions[0].ts - action.ts;
-            setTimeout(function () {
-                play(actions, display);
-            }, interval);
-        } else {
-            //remove the halo at the end of the actions playback
-            d3.select(".animation-halo").remove();
-        }
+        
     }
 
     function runTest(test) {
@@ -99,6 +112,7 @@ define(function (require, exports, module) {
         Adds the specified script to the list view
     */
     function addScriptToView(script) {
+        d3.select("#emptyPlaceholder").remove();
         var actions = script.actions,
             startState = script.startState;
         var time = actions[actions.length - 1].ts - actions[0].ts;
@@ -106,23 +120,32 @@ define(function (require, exports, module) {
         script.startState = Array.isArray(startState) ? startState.join("") : startState;
 
         ScriptItemView.create(script).on("scriptClicked", function () {
-            var display = WidgetManager.getDisplayWidgets()[0];
-            ws.lastState(script.startState);
-            //render the last state
-            if (script.startState !== "init(0)") {
-				render(script.startState, display);
+            if (!playing) {
+                playing = true;
+                d3.select(this.el).select(".scriptItem").classed("glypicon-play", false).classed("glyphicon-stop", true);
+                var display = WidgetManager.getDisplayWidgets()[0];
+                ws.lastState(script.startState);
+                //render the last state
+                if (script.startState !== "init(0)") {
+                    render(script.startState, display);
+                }
+                play(script.actions.map(function (d) {
+                    return d;
+                }), display, script.actions.length, this.el);
+            } else {
+                playing = false;
             }
-            play(script.actions.map(function (d) {
-                return d;
-            }), display);
         });
     }
+    
     module.exports = {
         play: play,
         addScriptToView: addScriptToView,
 		runTest: runTest,
         clearView: function () {
-            d3.select("#scripts ul").html("");
+            d3.select("#scripts ul").html("")
+                .append("li").attr("id", "emptyPlaceholder").html("No Scripts")
+                .style("text-align", "center").style("padding", "20px").style("font-size", "0.8em");
         }
     };
 });
