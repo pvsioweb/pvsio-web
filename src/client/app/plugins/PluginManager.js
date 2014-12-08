@@ -74,6 +74,7 @@ define(function (require, exports, module) {
     
     PluginManager.prototype.init = function () {
         enabledPlugins = [];
+        return this;
     };
     module.exports = {
         getInstance: function () {

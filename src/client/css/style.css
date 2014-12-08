@@ -494,3 +494,11 @@ body {
     height: 5px;
     background: #4088B6;
 }
+
+#autoSaver {
+    position: absolute;
+    top: 0px;
+    right: 30px;
+    font-size: 14px;
+}
+

@@ -17,6 +17,7 @@ define(function (require, exports, module) {
         Emulink        = require("plugins/emulink/Emulink"),
 		SafetyTest		= require("plugins/safetyTest/SafetyTest"),
 		GraphBuilder   = require("plugins/graphbuilder/GraphBuilder"),
+        ProjectAutoSaver = require("plugins/autoSaver/ProjectAutoSaver"),
         PluginManager  = require("plugins/PluginManager");
 		
 	var client = PVSioWebClient.getInstance(), pb, pm = PluginManager.getInstance();
@@ -67,22 +68,24 @@ define(function (require, exports, module) {
 						});
 					pb = PrototypeBuilder.getInstance();
 					return pm.enablePlugin(pb)
-                    .then(function () {
-                        return pm.enablePlugin(ModelEditor.getInstance());    
-                    })
-                    .then(function () {
-						var projectManager = pb.getProjectManager();
-						ui.bindListeners(pb.getProjectManager());
-						return new Promise(function (resolve, reject) {
-							// create and default initial empty project containing an empty file (main.pvs)
-							projectManager.createDefaultProject(function (err, res) {
-								//layout the sourcecode and files
-								layoutjs({el: "#sourcecode-editor-wrapper"});
-								if (err) { reject(err); }
-								else { resolve(res); }
-							});
-						});
-					});
+                        .then(function () {
+                            return pm.enablePlugin(ModelEditor.getInstance());    
+                        })
+                        .then(function () {
+                            var projectManager = pb.getProjectManager();
+                            ui.bindListeners(pb.getProjectManager());
+                            return new Promise(function (resolve, reject) {
+                                // create and default initial empty project containing an empty file (main.pvs)
+                                projectManager.createDefaultProject(function (err, res) {
+                                    //layout the sourcecode and files
+                                    layoutjs({el: "#sourcecode-editor-wrapper"});
+                                    //enable autosave plugin
+                                    pm.enablePlugin(ProjectAutoSaver.getInstance());
+                                    if (err) { reject(err); }
+                                    else { resolve(res); }
+                                });
+                            });
+                        });
 				});
 		},
 		reset: function() {///This function is not tested
