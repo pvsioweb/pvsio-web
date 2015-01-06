@@ -532,8 +532,16 @@ div.detailsForm select, div.detailsForm textarea{
 }
 
 #widgetsList li.selected {
-	background: #4088B6;
+	background: rgb(8, 88, 154);
 	color: white;
+}
+#widgetsList li:hover {
+    color: white;
+    background: black;
+}
+#widgetsList li.selected:hover {
+    color: white;
+    background: rgb(8, 88, 154);
 }
 
 .disable-text-select {
