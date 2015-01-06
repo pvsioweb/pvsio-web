@@ -153,6 +153,7 @@ define(function (require, exports, module) {
 			} else if (evts && evts.indexOf("press/release") > -1) {
                 //cb = callback;
 				ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", proxy(callback));
+                Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
                 press_events++;
 				timerTickFunction = function () {
                     press_events++;

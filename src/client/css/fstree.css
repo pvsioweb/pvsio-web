@@ -49,16 +49,27 @@ div.contextmenu {
     position: relative;
     background: steelblue;
 }
-
 .node.selected .line {
     height: 100%;
     background: steelblue;
     border-left: none;
     min-width: 100%;
 }
+.node.selected:hover .line {
+    background: rgb(8, 88, 154);
+}
 .treelist .node .label {
     color: black;
     font-weight: normal;
+}
+.treelist .node:hover .label {
+    color: whitesmoke;
+}
+.treelist .node:hover span {
+    color: white;
+}
+.treelist .node:hover {
+    background-color: grey;
 }
 .treelist .node.selected .label {
     color: white;
@@ -67,11 +78,18 @@ div.contextmenu {
 .node span {
     margin-right: 5px;
 }
-
 .node .chevron {
     font-size: 10px;
+    width: 24px;
+    text-align: center;
+    border-radius: 4px;
+}
+.node .chevron:hover{
+    background-color: black;
 }
 
+/*
 .node .line {
     position: absolute;
 }
+*/

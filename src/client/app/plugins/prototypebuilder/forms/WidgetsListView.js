@@ -13,7 +13,7 @@ define(function (require, exports, module) {
 	function WidgetsListView(widgets) {
 		var el = d3.select("#widgetsList").html("").append("ul");
 		
-        function labelFunction (widget) {
+        function labelFunction(widget) {
             var label = widget.type() + ": ";
             if (widget.type() === "display") {
                 label += widget.displayKey();
@@ -40,6 +40,7 @@ define(function (require, exports, module) {
                         d3.selectAll("#widgetsList ul li").classed("selected", false);
                     }
                     d3.select(this).classed("selected", true);
+                    d3.select(this).node().style.backgroundColor = "rgb(8, 88, 154)";
                     d3.select(w.parentGroup()).classed("selected", true);
                     event.preventDefault();
                     event.stopPropagation();
@@ -49,6 +50,17 @@ define(function (require, exports, module) {
                     w.element().node().dispatchEvent(dblclick);
                     event.preventDefault();
                     event.stopPropagation();
+                }).on("mouseover", function () {
+                    if (d3.select(this).attr("class").indexOf("selected") >= 0) {
+                        d3.select(this).node().style.backgroundColor = "rgb(8, 88, 154)";
+                        d3.select(this).node().style.color = "white";
+                    } else {
+                        d3.select(this).node().style.backgroundColor = "black";
+                        d3.select(this).node().style.color = "white";
+                    }
+                }).on("mouseout", function () {
+                    d3.select(this).node().style.backgroundColor = "";
+                    d3.select(this).node().style.color = "";
                 });
             listItems.text(labelFunction);
             exitedItems.transition().duration(220).style("opacity", 0).remove();

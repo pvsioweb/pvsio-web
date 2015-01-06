@@ -3,7 +3,7 @@
  * @author Patrick Oladimeji
  * @date 4/27/14 15:54:08 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true */
 /*global define, d3 */
 define(function (require, exports, module) {
     "use strict";
@@ -13,9 +13,12 @@ define(function (require, exports, module) {
         childIndent = 10,
         duration = 200,
         contextMenuItems = ["New File", "New Folder", "Rename", "Delete"],
+        fst,
         selectedData;
     var globalId = 0;
     var eventDispatcher = require("util/eventDispatcher");
+    var treeHeight;
+    var parentHeight;
     
     /**
         Find the node with the give id
@@ -39,26 +42,20 @@ define(function (require, exports, module) {
         return null;
     }
     
-    function TreeList(d, _el) {
-        eventDispatcher(this);
-        var fst = this;
-        data = d;
-        el = _el || "body";
-      
-        this.render(data);
-        
+    //create custom context menu for the list item
+    var installContextMenuHandlers = function () {
         function createMenu(menuItems, sourceEvent, selectedData) {
-            var div = d3.select("body").append("div").attr("class", "contextmenu")
+            var div = d3.select("body").append("div").attr("type", "context").attr("class", "contextmenu")
                 .style("position", "absolute")
                 .style("top", sourceEvent.pageY + "px")
-                .style("left", sourceEvent.pageX + "px");
+                .style("left", sourceEvent.pageX + "px")
+                .style("opacity", "0.98");
             var ul = div.append("ul").style("list-style", "none");
             
             var menus = ul.selectAll("li.menuitem").data(menuItems).enter()
                 .append("li").attr("class", "menuitem").attr("id", function (d) {
-                    return d.toLowerCase().replace(/\s/g, "");  
-                })
-                .html(String);
+                    return d.toLowerCase().replace(/\s/g, "");
+                }).html(String);
             
             menus.on("click", function (d) {
                 //we want to rename or delete the actually selected data but we need to add items to the selected data
@@ -72,22 +69,54 @@ define(function (require, exports, module) {
             });
         }
         
-        //create custom context menu for the list item
-        d3.select(el).node().oncontextmenu = function (event) {
-            event.preventDefault();
-            d3.select("div.contextmenu").remove();
-            createMenu(contextMenuItems, event, selectedData);
-            return false;
-        };
-        //create event to clear any context menu items
-        document.onclick = function () {
-            d3.select("div.contextmenu").remove();
-        };
+        if (el && d3.select(el) && d3.select(el).node()) {
+            if (!d3.select(el).node().oncontextmenu) {
+                d3.select(el).node().oncontextmenu = function (event) {
+                    event.preventDefault();
+                    event.cancelBubble = true;
+                    if (event.stopPropagation) {
+                        event.stopPropagation();
+                    }
+                    d3.select("div.contextmenu").remove();
+                    createMenu(contextMenuItems, event, selectedData);
+                    return false;
+                };
+            }
+            //Note: we can't use document.onclick to remove the menu because it does not have a nice behaviour in Firefox
+            //(the context menu disappears as soon as the right mouse button is released)
+            //document.onclick = function () {
+            //  d3.select("div.contextmenu").remove();
+            //};    
+            if (!document.getElementById("pvsFiles").onclick) {
+                document.getElementById("pvsFiles").onclick = function () {
+                    d3.select("div.contextmenu").remove();
+                };
+            }
+            if (!document.getElementById("editor").onclick) {
+                document.getElementById("editor").onclick = function () {
+                    d3.select("div.contextmenu").remove();
+                };
+            }
+            if (!document.getElementById("editorToolbar").onclick) {
+                document.getElementById("editorToolbar").onclick = function () {
+                    d3.select("div.contextmenu").remove();
+                };
+            }
+        }
+    };
+    
+    function TreeList(d, _el) {
+        fst = this;
+        eventDispatcher(this);
+        data = d;
+        el = _el || "body";
+        selectedData = selectedData || d;
+        parentHeight = 380;
+        treeHeight = parentHeight;
+        this.render(data);
     }
     
-    TreeList.prototype.render =   function (parent, noAnimation) {
-        var fst = this;
-        
+    TreeList.prototype.render = function (parent, noAnimation) {
         function toggleChildren(d) {
             if (d.children) {
                 d._children = d.children;
@@ -104,7 +133,11 @@ define(function (require, exports, module) {
         if (ul.empty()) {
             ul = d3.select(el).append("ul");
         }
-        ul.attr("class", "treelist").style("position", "relative")
+        treeHeight = nodes.length * tree.nodeHeight();
+        
+        ul.attr("class", "treelist").attr("id", "file_browser")
+            .style("height",  treeHeight + "px")
+            .style("position", "relative")
             .style("list-style", "none");
 
         var nodeEls = ul.selectAll("li.node").data(nodes, function (d) {
@@ -118,9 +151,7 @@ define(function (require, exports, module) {
             .style("top", parent.y + "px")
             .style("opacity", 0)
             .style("height", tree.nodeHeight() + "px")
-            .on("click", function (d) {
-//                toggleChildren(d);
-//                fst.render(d);
+            .on("mousedown", function (d) {
                 if (selectedData !== d) {
                     var pd = selectedData;
                     selectedData = d;
@@ -134,6 +165,10 @@ define(function (require, exports, module) {
                     console.log(event);
                     fst.fire(event);
                 }
+            })
+            .on("dblclick", function (d) {
+                toggleChildren(d);
+                fst.render(d);
             });
 
         var listWrap = enteredNodes.append("div").classed("line", true);
@@ -142,6 +177,10 @@ define(function (require, exports, module) {
             var icon = d.children ? " glyphicon-chevron-down"
                 : d._children ? "glyphicon-chevron-right" : "";
             return "chevron glyphicon " + icon;
+        }).style("height", function (d) {
+            return (d.isDirectory && (d.children || d._children)) ? "90%" : "0%";
+        }).style("padding", function (d) {
+            return (d.isDirectory && (d.children || d._children)) ? "6px 0px 6px 0px" : "0px";
         });
         chevron.on("click", function (d) {
             toggleChildren(d);
@@ -172,11 +211,15 @@ define(function (require, exports, module) {
         listWrap.append("span").attr("class", "label")
             .html(function (d) { return d.name; });
 
-        //update chevron direction
+        //update chevron direction and style
         nodeEls.select("span.chevron").attr("class", function (d) {
             var icon = d.children ? " glyphicon-chevron-down"
                 : d._children ? "glyphicon-chevron-right" : "";
             return "chevron glyphicon " + icon;
+        }).style("height", function (d) {
+            return (d.isDirectory && (d.children || d._children)) ? "90%" : "0%";
+        }).style("padding", function (d) {
+            return (d.isDirectory && (d.children || d._children)) ? "6px 0px 6px 0px" : "0px";
         });
         //update list class
         nodeEls.attr("class", function (d, i) {
@@ -185,7 +228,7 @@ define(function (require, exports, module) {
                 c = c.concat(" selected");
             }
             return c;
-        });
+        }).style("display", "inline-block");
 
         if (!noAnimation) {
             updatedNodes = updatedNodes.transition().duration(duration);
@@ -193,15 +236,32 @@ define(function (require, exports, module) {
         updatedNodes.style("top", function (d) {
             return (d.y - tree.nodeHeight()) + "px";
         }).style("opacity", 1);
-        updatedNodes.selectAll(".line").style("left", function (d) { return d.x + "px"; });
+        updatedNodes.selectAll(".line").style("padding-left", function (d) {
+            var padding_left = (d.path) ? ((d.path.split("/").length - 1) * childIndent) : 0;
+            return padding_left + "px";
+        });
         //update any label names
         updatedNodes.select("span.label").text(function (d) { return d.name; });
         //remove hidden nodes
         exitedNodes.remove();
+        //update resizer height
+        var resizer = (document.getElementById("pvsFiles")) ? document.getElementById("pvsFiles").lastChild : null;
+        if (nodes && resizer) {
+            var height = (treeHeight > parentHeight) ? treeHeight : parentHeight;
+            d3.select(document.getElementById("pvsFiles").lastChild).attr("style", "height:" + height + "px");
+        }
+        // install handlers for context menu
+        installContextMenuHandlers();
     };
        
+    TreeList.prototype.refreshSelectedItem = function () {
+        if (selectedData) {
+            //fire selected item changed event
+            fst.fire({type: "SelectedItemChanged", data: selectedData});
+        }
+    };
+    
     TreeList.prototype.selectItem = function (path) {
-        var fst = this;
         if (!selectedData || selectedData.path !== path) {
             var nodes = d3.select(el).selectAll(".node");
             var pd = selectedData;
@@ -221,9 +281,10 @@ define(function (require, exports, module) {
                 setTimeout(function () {
                     d3.select(el).node().scrollTop = selectedData.y;
                 }, duration);
+                return true;
             }
         }
-        return this;
+        return false;
     };
     
     /** 
@@ -231,7 +292,6 @@ define(function (require, exports, module) {
      * FIXME: implement this function! now we just select the parent node
      */
     TreeList.prototype.selectNext = function (nodePath, index) {
-        var fst = this;
         var nodes = d3.select(el).selectAll(".node");
         var parent = nodePath.substring(0, nodePath.lastIndexOf("/"));
         var path = parent;
@@ -272,17 +332,32 @@ define(function (require, exports, module) {
         @returns the new node item that was added
     */
     TreeList.prototype.addItem = function (item, parent) {
-        var parentFolderName = item.path.replace("/" + item.name, "");
-        parent = parent || find(function (d) {
-            return d.path === parentFolderName;
-        }, data) || selectedData || data;
-        if (!parent.isDirectory) {
-            parent = parent.parent;
+        if (item.path === item.name) { // it's the root folder, just render it to refresh the view
+            this.render(item);
+        } else {
+            var parentFolderName = item.path.replace("/" + item.name, "");
+            parent = parent || find(function (d) {
+                return d.path === parentFolderName;
+            }, data);// || selectedData || data;
+            if (!parent) {
+                var ancestorPath = parentFolderName.substring(0, parentFolderName.lastIndexOf("/"));
+                var ancestorName = parentFolderName.replace(ancestorPath + "/", "");
+                parent = this.addItem({name: ancestorName, path: parentFolderName, children: [], isDirectory: true});
+            }
+            if (!parent.isDirectory) {
+                parent = parent.parent;
+            }
+            parent.children = parent.children || parent._children || [];
+            // this is a sanity check --- path must be unique, otherwise we have duplicated elements.
+            var duplicate = parent.children.filter(function (elem) { return elem.path === item.path; });
+            if (duplicate.length === 0) {
+                parent.children.push(item);
+                item.parent = parent;
+                this.render(parent);
+            } else {
+                console.log("Warning: attempt to add an existing element in TreeList (" + item.path + ")");
+            }
         }
-        parent.children = parent.children || parent._children || [];
-        parent.children.push(item);
-        item.parent = parent;
-        this.render(parent);
         return item;
     };
     /**
@@ -290,7 +365,7 @@ define(function (require, exports, module) {
         @param {string} path
     */
     TreeList.prototype.removeItem = function (path) {
-        var fst = this, toRemove = find(function (node) {
+        var toRemove = find(function (node) {
             return node.path === path;
         }, data);
         if (toRemove) {
@@ -300,10 +375,10 @@ define(function (require, exports, module) {
                 fst.render(toRemove.parent);
             }
             if (selectedData === toRemove && toRemove.parent) {
-                this.selectItem(toRemove.parent.path);   
+                this.selectItem(toRemove.parent.path);
             }
         } else {
-            console.log("Cannot find item at specified path " + path);   
+            console.log("(TreeList.RemoveItem) Warning: cannot find " + path + " in TreeView.");
         }
     };
     
@@ -312,7 +387,7 @@ define(function (require, exports, module) {
         @param {string} id
     */
     TreeList.prototype.removeItemByID = function (id) {
-        var fst = this, toRemove = find(function (node) {
+        var toRemove = find(function (node) {
             return node.id === id;
         }, data);
         if (toRemove) {
@@ -323,7 +398,7 @@ define(function (require, exports, module) {
             }
             
             if (selectedData === toRemove && toRemove.parent) {
-                this.selectItem(toRemove.parent.path);   
+                this.selectItem(toRemove.parent.path);
             }
         }
     };
@@ -343,8 +418,7 @@ define(function (require, exports, module) {
             return function (t) { return t.path === d.path; };
         }
         selectedData = selectedData ? find(nodeFinder(selectedData), data) : selectedData;
-        var fst = this,
-            n = find(nodeFinder(node), data) || selectedData;
+        var n = find(nodeFinder(node), data) || selectedData;
         
         var nodes = d3.select(el).selectAll(".node").filter(function (d) {
             return d === n;
@@ -360,10 +434,10 @@ define(function (require, exports, module) {
         var oldPath = node.path;
 
         function doCreate(elem, newLabel) {
-            if (newLabel === "") { newLabel = node.name; }           
+            if (newLabel === "") { newLabel = node.name; }
             d3.select(elem.parentNode).html(newLabel);
             fst.renameItem(n, newLabel);
-        }        
+        }
         var inputEl = inputText.node();
         inputEl.focus();
         inputEl.onblur = function () {
@@ -391,7 +465,7 @@ define(function (require, exports, module) {
         };
     };
                 
-    TreeList.prototype.renameItem = function (item, newName) {        
+    TreeList.prototype.renameItem = function (item, newName) {
         function updatePath(item, newName) {
             item.path = item.parent ? (item.parent.path + "/" + newName) : newName;
             item.name = newName;
@@ -415,7 +489,7 @@ define(function (require, exports, module) {
         d3.select(el).select(".label").text(newName);
     };
 
-    TreeList.prototype.blur = function() {
+    TreeList.prototype.blur = function () {
         var n = this.getSelectedItem();
         var this_node = d3.select(el).selectAll(".node").filter(function (d) {
             return d === n;

@@ -10,7 +10,7 @@ define(function (require, exports, module) {
 	var d3 = require("d3/d3"),
         PVSioWebClient = require("PVSioWebClient"),
 		PluginManager = require("plugins/PluginManager").getInstance(),
-		PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder");
+		ProjectManager = require("project/ProjectManager");
 	
     var instance;
     var ws,
@@ -128,7 +128,7 @@ define(function (require, exports, module) {
     GraphBuilder.prototype.initialise = function () {
         var gb = this;
         init();
-        PrototypeBuilder.getInstance().getProjectManager()
+        ProjectManager.getInstance()
             .addListener("ProjectChanged", function (event) {
 				if (PluginManager.isLoaded(gb)) {
 					gb.reInitialise();

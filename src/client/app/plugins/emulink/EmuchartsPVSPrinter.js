@@ -18,7 +18,7 @@ define(function (require, exports, module) {
     var parser;
     
     var parserUnitTest;
-    var unitTestEnabled = true;
+    var unitTestEnabled = false;
     var initialMachineState = "initialMachineState";
     var machineStateType = "MachineState";
     

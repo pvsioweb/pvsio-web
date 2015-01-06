@@ -11,7 +11,7 @@ define(function (require, exports, module) {
     var Project = require("project/Project"),
 		main = require("main"),
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
-        ProjectFile = require("project/ProjectFile"),
+        Descriptor = require("project/Descriptor"),
         baseProjectDir = "projects",
         alarisProject = "AlarisPC";
     
@@ -46,10 +46,10 @@ define(function (require, exports, module) {
 						expect(p.name()).toEqual("defaultProject");
 						console.log(p.name());
                         done();
-					});          
+					});
                     
 					it("should open project correctly", function (done) {
-                        pm.openProject("AlarisPC", function (openedProject) {
+                        pm.openProject("AlarisPC", function (err, openedProject) {
                             expect(alarisProject).toEqual(openedProject.name());
                             done();
                         });

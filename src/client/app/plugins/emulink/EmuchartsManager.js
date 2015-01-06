@@ -81,16 +81,16 @@ define(function (require, exports, module) {
 	 */
     EmuchartsManager.prototype.importEmucharts = function (emuchartsFile) {
         var _this = this;
-        if (emuchartsFile && emuchartsFile.fileContent) {
-            var keys = Object.keys(emuchartsFile.fileContent);
+        if (emuchartsFile && emuchartsFile.content) {
+            var keys = Object.keys(emuchartsFile.content);
             if (keys) {
                 // check if this is version 1.0
-                if (emuchartsFile.fileContent && emuchartsFile.fileContent.descriptor) {
-                    var version = emuchartsFile.fileContent.descriptor.version;
+                if (emuchartsFile.content && emuchartsFile.content.descriptor) {
+                    var version = emuchartsFile.content.descriptor.version;
                     if (version === "1.1" || version === "1.2") {
                         var chart = { nodes: d3.map(), edges: d3.map(), initial_edges: d3.map(),
                                       variables: d3.map(), constants: d3.map() };
-                        var chart_reader = emuchartsFile.fileContent.chart;
+                        var chart_reader = emuchartsFile.content.chart;
                         if (chart_reader.states) {
                             chart_reader.states.forEach(function (node) {
                                 chart.nodes.set(node.id, node);
@@ -151,7 +151,7 @@ define(function (require, exports, module) {
                         });
                         var newEmuchartsEditor = new EmuchartsEditor(emucharts);
                         _this.installHandlers(newEmuchartsEditor);
-                        _emuchartsEditors.set(emuchartsFile.fileContent.descriptor.chart_name, newEmuchartsEditor);
+                        _emuchartsEditors.set(emuchartsFile.content.descriptor.chart_name, newEmuchartsEditor);
                         _selectedEditor = newEmuchartsEditor;
                     } else {
                         alert("Error while importing emuchart file: unsupported file version " + version);
@@ -161,11 +161,11 @@ define(function (require, exports, module) {
                     // create a map for each chart
                     keys.forEach(function (name) {
                         var chart = { nodes: d3.map(), edges: d3.map(), initial_edges: d3.map() };
-                        emuchartsFile.fileContent[name].nodes
+                        emuchartsFile.content[name].nodes
                             .forEach(function (node) { chart.nodes.set(node.id, node); });
-                        emuchartsFile.fileContent[name].edges
+                        emuchartsFile.content[name].edges
                             .forEach(function (edge) { chart.edges.set(edge.id, edge); });
-                        emuchartsFile.fileContent[name].initial_edges
+                        emuchartsFile.content[name].initial_edges
                             .forEach(function (initial_edge) {
                                 chart.initial_edges.set(initial_edge.id, initial_edge);
                             });
@@ -192,24 +192,24 @@ define(function (require, exports, module) {
 	 */
     EmuchartsManager.prototype.importPIMChart = function (MUZFile) {
         var _this = this;
-        if (MUZFile && MUZFile.fileContent) {
+        if (MUZFile && MUZFile.content) {
             // parse section ==Seq==
-            var needle = MUZFile.fileContent.indexOf("==Seq==");
+            var needle = MUZFile.content.indexOf("==Seq==");
             if (needle < 0) {
                 console.log("Error while parsing MUZ file (section ==Seq== not found)");
                 return;
             }
-            MUZFile.fileContent = MUZFile.fileContent.substring(needle + 7);
+            MUZFile.content = MUZFile.content.substring(needle + 7);
             // first line is chart name
-            var txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
+            var txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.content);
             if (txt.length === 0) {
                 console.log("Error while parsing MUZ file (chart name not found)");
                 return;
             }
             var chartName = txt[0];
-            MUZFile.fileContent = MUZFile.fileContent.substring(chartName.length);
+            MUZFile.content = MUZFile.content.substring(chartName.length);
             // second line is initial state
-            txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
+            txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.content);
             if (txt.length === 0) {
                 console.log("Error while parsing MUZ file (initial state not found)");
                 return;
@@ -219,48 +219,48 @@ define(function (require, exports, module) {
                 name: "INIT_" + txt[0].trim(),
                 target: { name: txt[0].trim(), id: txt[0].trim() }
             };
-            MUZFile.fileContent = MUZFile.fileContent.substring(chartName.length);
+            MUZFile.content = MUZFile.content.substring(chartName.length);
             
             // parse section ==States==
-            needle = MUZFile.fileContent.indexOf("==States==");
+            needle = MUZFile.content.indexOf("==States==");
             if (needle < 0) {
                 console.log("Error while parsing MUZ file (section ==States== not found)");
                 return;
             }
-            MUZFile.fileContent = MUZFile.fileContent.substring(needle + 10);
+            MUZFile.content = MUZFile.content.substring(needle + 10);
             
             var states = [];
             var stop = false;
             while (!stop) {
                 // each line contains state name and coordinates
-                txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.content);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (state names not found)");
                     return;
                 }
                 var stateName = txt[0];
-                MUZFile.fileContent = MUZFile.fileContent.substring(stateName.length);
-                txt = new RegExp("[\\n\\s]+[0-9]+").exec(MUZFile.fileContent);
+                MUZFile.content = MUZFile.content.substring(stateName.length);
+                txt = new RegExp("[\\n\\s]+[0-9]+").exec(MUZFile.content);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (position x not found for state " + stateName + ")");
                     return;
                 }
-                needle = MUZFile.fileContent.indexOf("Atomic");
+                needle = MUZFile.content.indexOf("Atomic");
                 if (needle < 0) {
                     console.log("Error while parsing MUZ file (Atomic keyword not found for state " + stateName + ")");
                     return;
                 }
-                MUZFile.fileContent = MUZFile.fileContent.substring(needle + 6);
+                MUZFile.content = MUZFile.content.substring(needle + 6);
                 // note: we use just the first two coordinates to identify the center of the state; height and width are automatically computed by our graphical frontend
                 var x = txt[0];
-                MUZFile.fileContent = MUZFile.fileContent.substring(x.length);
-                txt = new RegExp("[\\n\\s]+[0-9]+").exec(MUZFile.fileContent);
+                MUZFile.content = MUZFile.content.substring(x.length);
+                txt = new RegExp("[\\n\\s]+[0-9]+").exec(MUZFile.content);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (position y not found for state " + stateName + ")");
                     return;
                 }
                 var y = txt[0];
-                MUZFile.fileContent = MUZFile.fileContent.substring(y.length);
+                MUZFile.content = MUZFile.content.substring(y.length);
                 
                 // add state to states array
                 states.push({ name: stateName.trim(),
@@ -271,19 +271,19 @@ define(function (require, exports, module) {
                               height: 50 });
 
                 // remove the rest of the line & check for stop condition
-                MUZFile.fileContent = MUZFile.fileContent.substring(MUZFile.fileContent.indexOf("\n"));
-                if (MUZFile.fileContent.trim().indexOf("==Transitions==") === 0) {
+                MUZFile.content = MUZFile.content.substring(MUZFile.content.indexOf("\n"));
+                if (MUZFile.content.trim().indexOf("==Transitions==") === 0) {
                     stop = true;
                 }
             }
             
             // parse section ==Transitions==
-            needle = MUZFile.fileContent.indexOf("==Transitions==");
+            needle = MUZFile.content.indexOf("==Transitions==");
             if (needle < 0) {
                 console.log("Error while parsing MUZ file (section ==Transitions== not found)");
                 return;
             }
-            MUZFile.fileContent = MUZFile.fileContent.substring(needle + 15);
+            MUZFile.content = MUZFile.content.substring(needle + 15);
 
             
             var transitions = [];
@@ -292,29 +292,29 @@ define(function (require, exports, module) {
             while (!stop) {
                 // each line contains state names (from, to) and transition name
                 // parse source
-                txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.content);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (source state for transition not found)");
                     return;
                 }
                 var source = txt[0];
-                MUZFile.fileContent = MUZFile.fileContent.substring(source.length);
+                MUZFile.content = MUZFile.content.substring(source.length);
                 // parse target
-                txt = new RegExp("[\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\s]+[A-Za-z_0-9]+").exec(MUZFile.content);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (target state for transition not found)");
                     return;
                 }
                 var target = txt[0];
-                MUZFile.fileContent = MUZFile.fileContent.substring(target.length);
+                MUZFile.content = MUZFile.content.substring(target.length);
                 // parse transition name
-                txt = new RegExp("[\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\s]+[A-Za-z_0-9]+").exec(MUZFile.content);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (transition name not found)");
                     return;
                 }
                 var transitionName = txt[0];
-                MUZFile.fileContent = MUZFile.fileContent.substring(transitionName.length);
+                MUZFile.content = MUZFile.content.substring(transitionName.length);
                 
                 // add transition to transitions array
                 transitions.push({
@@ -331,8 +331,8 @@ define(function (require, exports, module) {
                 });
 
                 // remove the rest of the line & check for stop condition
-                MUZFile.fileContent = MUZFile.fileContent.substring(MUZFile.fileContent.indexOf("\n"));
-                if (MUZFile.fileContent.trim().indexOf("==LocalVariables==") === 0) {
+                MUZFile.content = MUZFile.content.substring(MUZFile.content.indexOf("\n"));
+                if (MUZFile.content.trim().indexOf("==LocalVariables==") === 0) {
                     stop = true;
                 }
             }
@@ -351,7 +351,7 @@ define(function (require, exports, module) {
                     variables: null
                 }
             };
-            this.importEmucharts({ fileName: chartName.trim(), fileContent: chart });
+            this.importEmucharts({ name: chartName.trim(), content: chart });
         } else { console.log("dbg: warning, undefined or null MUZFile"); }
     };
     

@@ -24,7 +24,7 @@ You should have received a copy of the GNU General Public License along with Foo
  *
  */
 /*jshint unused: true, undef: true*/
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, undef: true, node: true */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, undef: true, node: true, es5:true */
 /*global __dirname*/
 
 function run() {
@@ -48,28 +48,54 @@ function run() {
         baseProjectDir          = path.join(__dirname, "../../examples/projects/"),
 		baseDemosDir			= path.join(__dirname, "../../examples/demos/"),
 		clientDir				= path.join(__dirname, "../client");
-    var p, clientid = 0, WebSocketServer = ws.Server;
+    var clientid = 0, WebSocketServer = ws.Server;
     var fsWatchers = {};
 	var writeFile = serverFuncs.writeFile,
 		stat = serverFuncs.stat,
 		renameFile = serverFuncs.renameFile,
-		createProject = serverFuncs.createProject,
+        mkdirRecursive = serverFuncs.mkdirRecursive,
 		openProject = serverFuncs.openProject,
 		listProjects = serverFuncs.listProjects,
-        getFilesInDirectory = serverFuncs.getFilesInDirectory;
+        getFolderTree = serverFuncs.getFolderTree,
+        readFile = serverFuncs.readFile;
     
     /**
      * Utility function that dispatches responses to websocket clients
      * @param {{type:string, data}} token The token to send to the client
      * @param {Socket} socket The websocket to use to send the token
      */
-    function processCallback(tok, socket) {
+    function processCallback(token, socket) {
         //called when any data is recieved from pvs process
         //if the type of the token is 'processExited' then send message to client if the socket is still open
-        tok.time  = tok.time || {server: {}};
-        tok.time.server.sent = new Date().getTime();
+        token.time  = token.time || {server: {}};
+        token.time.server.sent = new Date().getTime();
+
+        //always send relative directories to the client
+        if (token.name && token.name.indexOf(baseProjectDir) === 0) {
+            token.name = token.name.replace(baseProjectDir, "");
+        }
+        if (token.path && token.path.indexOf(baseProjectDir) === 0) {
+            token.path = token.path.replace(baseProjectDir, "");
+        }
+        if (token.files) {
+            token.files.forEach(function (f) {
+                if (f.path && f.path.indexOf(baseProjectDir) === 0) {
+                    f.path = f.path.replace(baseProjectDir, "");
+                }
+            });
+        }
+        if (token.err) {
+            if (token.err.path) {
+                token.err.path = token.err.path.replace(new RegExp(baseProjectDir, "g"), "");
+            }
+            if (token.err.message) {
+                token.err.message = token.err.message.replace(new RegExp(baseProjectDir, "g"), "");
+            }
+        }
+        
+        
         if (socket && socket.readyState === 1) {
-            socket.send(JSON.stringify(tok));
+            socket.send(JSON.stringify(token));
         }
     }
 
@@ -123,9 +149,9 @@ function run() {
 	//creating a pathname prefix for client so that demo css and scripts can be loaded from the client dir
 	webserver.use("/client", express.static(clientDir));
 
-    function typeCheck(filePath, cb) {
+    function typeCheck(file, cb) {
         procWrapper().exec({
-            command: "proveit -l -v " + filePath,
+            command: "proveit -l -v " + file,
             callBack: cb
         });
     }
@@ -134,7 +160,7 @@ function run() {
         Reads the contents of a directory.
         @param {string} folderPath
         @returns {Promise} a promise that resolves with a list of objects representing the files in the directory
-            each object contains {fileName: <string>, filePath: <string>, isDirectory: <boolean>}
+            each object contains {name: <String>, path: <String>, isDirectory: <boolean>}
     */
     function readDirectory(folderPath) {
         return new Promise(function (resolve, reject) {
@@ -156,7 +182,7 @@ function run() {
                     Promise.all(promises)
                         .then(function (res) {
                             var result = res.map(function (d, i) {
-                                return {fileName: files[i], filePath: path.join(folderPath, files[i]), isDirectory: d.isDirectory()};
+                                return {name: files[i], path: path.join(folderPath, files[i]), isDirectory: d.isDirectory()};
                             });
                             resolve(result);
                         }, function (err) {
@@ -172,9 +198,9 @@ function run() {
     function unregisterFolderWatcher(folderPath) {
         var watcher = fsWatchers[folderPath];
         if (watcher) {
-            watcher.close();  
+            watcher.close();
             delete fsWatchers[folderPath];
-            logger.debug("unregistered watcher for " + folderPath);
+//            logger.debug("unregistered watcher for " + folderPath);
         }
     }
     
@@ -184,6 +210,14 @@ function run() {
         });
         fsWatchers = {};
     }
+    function toRelativePath() {
+        return function (d) {
+            if (d.path && d.path.indexOf(baseProjectDir) === 0) {
+                d.path = d.path.replace(baseProjectDir, "");
+            }
+            return d;
+        };
+    }
     
     /**
         Register a watcher for the specified folder. Sends updates to the client using the socket.
@@ -191,114 +225,135 @@ function run() {
         @param {socket} socket
     */
     function registerFolderWatcher(folderPath, socket) {
-        var notificationDelay = 200;
-        function toRelativePath(parentDir) {
-            return function (d) {
-                d.filePath = d.filePath.replace(parentDir + "/", "");
-                return d;
-            };
+        // this initial check helps us to prevent the server from crashing 
+        // when the function is erroneously invoked with wrong arguments
+        if (!folderPath || !socket) {
+            console.log("(FolderWatcher) Warning: incorrect folderPath or socket (folderPath: " +
+                            JSON.stringify(folderPath) + ", socket: " + JSON.stringify(socket) + ")");
+            return;
         }
+        var notificationDelay = 200;
         
         unregisterFolderWatcher(folderPath);
         if (folderPath.indexOf("pvsbin") > -1) { return; }
         
-        logger.debug("watching changes to .. " + folderPath);
-        var watcher = fs.watch(folderPath, {persistent: false}, function (event, fileName) {
-            var extension = path.extname(fileName).toLowerCase();
-            if (fileName && fileName !== ".DS_Store" && event === "rename") {
-                var fullPath = path.join(folderPath, fileName);
-                var token = {type: "FileSystemUpdate", event: event, fileName: fileName,
-                             filePath: fullPath.replace(baseProjectDir, ""),
-                            time: {server: {}}};
-                stat(fullPath)
-                    .then(function (res) {
-                        if (res.isDirectory()) {
-                            registerFolderWatcher(fullPath, socket);
-                            token.isDirectory = true;
-                        }
-                        if (token.isDirectory || FileFilters.indexOf(extension) > -1) {
-                            setTimeout(function () {
-                                if (token.isDirectory) {
-                                    getFilesInDirectory(fullPath).then(function (files) {
-                                        token.subFiles = files.filter(function (f) {
-                                            return FileFilters.indexOf(path.extname(f.filePath)) > -1;
-                                        }).map(toRelativePath(fullPath));
+        var watch = function (folder) {
+//            logger.debug("watching changes to .. " + folder);
+            return fs.watch(folder, {persistent: false}, function (event, name) {
+                var extension = path.extname(name).toLowerCase();
+                if (name && name !== ".DS_Store" && event === "rename") {
+                    var fullPath = path.join(folder, name);
+                    var token = {
+                        type: "FileSystemUpdate",
+                        name: name,
+                        path: fullPath,
+                        event: event,
+                        time: {server: {}}
+                    };
+                    stat(fullPath)
+                        .then(function (res) {
+                            if (res.isDirectory()) {
+                                registerFolderWatcher(fullPath, socket);
+                                token.isDirectory = true;
+                            }
+                            if (token.isDirectory || FileFilters.indexOf(extension) > -1) {
+                                setTimeout(function () {
+                                    if (token.isDirectory) {
+                                        getFolderTree(fullPath).then(function (data) {
+                                            token.subFiles = data.filter(function (f) {
+                                                return (!f.isDirectory) &&
+                                                    FileFilters.indexOf(path.extname(f.path).toLowerCase()) > -1;
+                                            }).map(toRelativePath(fullPath));
+                                            token.subFolders = data.filter(function (f) {
+                                                return f.isDirectory;
+                                            }).map(toRelativePath(fullPath));
+                                            processCallback(token, socket);
+                                        }).catch(function (err) {
+                                            token.err = err;
+                                            processCallback(token, socket);
+                                        });
+                                    } else {
                                         processCallback(token, socket);
-                                    }).catch(function (err) {
-                                        token.err = err;
-                                        processCallback(token, socket);
-                                    });
-                                } else {
+                                    }
+                                }, notificationDelay);
+                            }
+                        }).catch(function (err) {
+                            token.event = (err.code === "ENOENT") ? "delete" : event;
+                            if (token.event === "delete") {
+                                setTimeout(function () {
                                     processCallback(token, socket);
-                                }
-                            }, notificationDelay);
-                        }
-                    }).catch(function (err) {
-                        token.event = err.code === "ENOENT" ? "delete" : event;
-                        if (token.event === "delete") {
-                            setTimeout(function () {
-                                processCallback(token, socket);
-                            }, notificationDelay);
-                            unregisterFolderWatcher(fullPath);
-                        }                           
-                    });
-            }
-        });
-        fsWatchers[folderPath] = watcher;
-        //if the folder contains subdirectories, then watch changes to those as well
-        readDirectory(folderPath).then(function (files) {
-            files.filter(function (f) {
-                return f.isDirectory;
-            }).forEach(function (f) {
-                registerFolderWatcher(f.filePath, socket);
+                                }, notificationDelay);
+                                unregisterFolderWatcher(fullPath);
+                            }
+                        });
+                }
+            });
+        };
+        try {
+            fsWatchers[folderPath] = watch(folderPath);
+            // watch the sub-directories too
+            getFolderTree(folderPath).then(function (data) {
+                var subFolders = data.filter(function (f) {
+                    return f.isDirectory;
+                });
+                // watch all subfolders
+                subFolders.forEach(function (subFolder) {
+                    if (!fsWatchers[subFolder.path]) {
+                        fsWatchers[subFolder.path] = watch(subFolder.path);
+                    }
+                });
+            });
+        } catch (err) {
+            logger.error(err);
+        }
+    }
+    
+    function readFolderContent(token, socket) {
+        return new Promise(function (resolve, reject) {
+            var res = {
+                type: "FileSystemUpdate",
+                event: "refresh",
+                name: token.path,
+                path: token.path,
+                isDirectory: true,
+                time: {server: {}}
+            };
+            getFolderTree(token.path).then(function (data) {
+                res.subFiles = data.filter(function (f) {
+                    return (!f.isDirectory) &&
+                        FileFilters.indexOf(path.extname(f.path).toLowerCase()) > -1;
+                }).map(toRelativePath(token.path));
+                res.subFolders = data.filter(function (f) {
+                    return f.isDirectory;
+                }).map(toRelativePath(token.path));
+                processCallback(res, socket);
+                resolve(token.path);
+            }).catch(function (err) {
+                token.err = {
+                    code: err.code,
+                    message: err.message,
+                    path: err.path
+                };
+                token.type += "_error";
+                processCallback(token, socket);
+                reject(err);
             });
         });
     }
+    
     
     /**
         get function maps for client sockets
     */
     function createClientFunctionMaps() {
+        var initProcessMap = function (socketid) {
+            pvsioProcessMap[socketid] = pvsioProcessMap[socketid] || pvsio();
+//            logger.debug(socketid);
+        };
         var map = {
-            "renameFile": function (token, socket, socketid) {
-				renameFile(token.oldPath, token.newPath).then(function () {
-					processCallback({id: token.id, socketId: socketid, time: token.time}, socket);
-				}, function (err) {
-					 logger.debug("warning, error while renaming " + token.oldPath +
-                                    " into " + token.newPath + " (" + err + ")");
-					processCallback({id: token.id, socketId: socketid, time: token.time,
-									 err: {oldPath: token.oldPath, newPath: token.newPath, message:err}}, socket);
-				});
-            },
-            "readDirectory": function (token, socket, socketid) {
-                readDirectory(token.path)
-                    .then(function (files) {
-                        //send relative directories to the client
-                        files.forEach(function (f) {
-                            f.filePath = f.filePath.replace(baseProjectDir + "/", "");
-                        });
-                        processCallback({id: token.id, socketId: socketid, files: files, err: err, time: token.time}, socket);
-                    }).catch(function (err) {
-                        processCallback({id: token.id, socketId: socketid, err: err, time: token.time}, socket);
-                    });
-            },
-            "writeDirectory": function (token, socket, socketid) {
-				token.path = path.join(baseProjectDir, token.path);
-				stat(token.path).then(function () {
-					//directory exists throw error
-					processCallback({id: token.id, socketId: socketid, time: token.time,
-									 err: {path: token.path, message: "Directory Exists"}}, socket);
-				}, function () {
-					fs.mkdir(token.path, function (err) {
-                        //when we create a directory we want to watch for changes on that directory
-                        registerFolderWatcher(token.path, socket);
-						processCallback({id: token.id, socketId: socketid, err: err, time: token.time}, socket);
-					});
-				});
-                
-            },
             "setMainFile": function (token, socket, socketid) {
-                changeProjectSetting(token.projectName, "mainPVSFile", token.fileName)
+                initProcessMap(socketid);
+                changeProjectSetting(token.projectName, "mainPVSFile", token.name)
                     .then(function (res) {
                         res.id = token.id;
                         res.socketId = socketid;
@@ -306,89 +361,137 @@ function run() {
                         processCallback(res, socket);
                     });
             },
+            "changeProjectSetting": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                if (token.key && token.value) {
+                    changeProjectSetting(token.projectName, token.key, token.value)
+                        .then(function (res) {
+                            res.type = token.type;
+                            res.id = token.id;
+                            res.socketId = socketid;
+                            res.time = token.time;
+                            processCallback(res, socket);
+                        });
+                } else {
+                    var res = {
+                        type: token.type + "_error",
+                        id: token.id,
+                        socketId: socketid,
+                        time: token.time
+                    };
+                    res.err = {
+                        message: "Invalid token " + JSON.stringify(token),
+                        code: "ENOENT",
+                        path: token.projectName
+                    };
+                    processCallback(res, socket);
+                }
+            },
             "listProjects": function (token, socket, socketid) {
-                var result = {id: token.id, socketId: socketid, time: token.time};
+                initProcessMap(socketid);
+                var result = {
+                    type: token.type,
+                    id: token.id,
+                    socketId: socketid,
+                    time: token.time
+                };
                 listProjects()
                     .then(function (projects) {
                         result.projects = projects;
                         processCallback(result, socket);
-                    }, function (err) {
+                    }).catch(function (err) {
+                        result.type = token.type + "_error";
                         result.err = err;
                         processCallback(result, socket);
                     });
             },
             "openProject": function (token, socket, socketid) {
-                var res = {id: token.id, socketId: socketid, time: token.time};
+                initProcessMap(socketid);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time
+                };
                 openProject(token.name)
                     .then(function (data) {
                         res.project = data;
                         unregisterFolderWatchers();
                         registerFolderWatcher(path.join(baseProjectDir, token.name), socket);
                         processCallback(res, socket);
-                    }, function (err) {
+                    }).catch(function (err) {
+                        res.type = token.type + "_error";
                         res.err = err;
                         processCallback(res, socket);
                     });
             },
-            "createProject": function (token, socket, socketid) {
-                p = pvsioProcessMap[socketid] || pvsio();
-                pvsioProcessMap[socketid] = p;
-                createProject(token, function (res) {
-                    res.id = token.id;
-                    res.socketId = socketid;
-                    res.time = token.time;
-                    unregisterFolderWatchers();
-                    registerFolderWatcher(path.join(baseProjectDir, token.projectName), socket);
-                    processCallback(res, socket);
-                }, p);
-                
-            },
             "typeCheck": function (token, socket, socketid) {
-                typeCheck(token.filePath, function (err, stdout, stderr) {
-                    var res = {id: token.id, err: err, stdout: stdout, stderr: stderr, socketId: socketid, time: token.time};
+                initProcessMap(socketid);
+                typeCheck(path.join(baseProjectDir, token.path), function (err, stdout, stderr) {
+                    var res = {
+                        id: token.id,
+                        type: token.type,
+                        err: err,
+                        stdout: stdout,
+                        stderr: stderr,
+                        socketId: socketid,
+                        time: token.time
+                    };
                     processCallback(res, socket);
                 });
             },
             "sendCommand": function (token, socket, socketid) {
-                p = pvsioProcessMap[socketid];
-                p.sendCommand(token.data.command, function (data) {
-                    var res = {id: token.id, data: [data], socketId: socketid, type: "commandResult", time: token.time};
+                initProcessMap(socketid);
+                pvsioProcessMap[socketid].sendCommand(token.data.command, function (data) {
+                    var res = {
+                        id: token.id,
+                        data: [data],
+                        socketId: socketid,
+                        type: "commandResult",
+                        time: token.time
+                    };
                     processCallback(res, socket);
                 });
             },
             "startProcess": function (token, socket, socketid) {
+                initProcessMap(socketid);
                 logger.info("Calling start process for client... " + socketid);
 				var root = token.data.projectName ?
                             path.join(baseProjectDir, token.data.projectName)
                             : token.data.demoName ? path.join(baseDemosDir, token.data.demoName) : "";
-                p = pvsioProcessMap[socketid];
                 //close the process if it exists and recreate it
-                if (p) {
-                    p.close('SIGTERM', true);
+                if (pvsioProcessMap[socketid]) {
+                    pvsioProcessMap[socketid].close('SIGTERM', true);
                     delete pvsioProcessMap[socketid];
                 }
                 //recreate the pvsio process
-                p = pvsio();
-                pvsioProcessMap[socketid] = p;
+                pvsioProcessMap[socketid] = pvsio();
                 //set the workspace dir and start the pvs process with a callback for processing process ready and exit
                 //messages from the process
-                p.workspaceDir(root)
-                    .start(token.data.fileName,
+                pvsioProcessMap[socketid].workspaceDir(root)
+                    .start(token.data.name,
                         function (res) {
                             res.id = token.id;
+                            res.type = token.type;
                             res.socketId = socketid;
                             res.time = token.time;
                             processCallback(res, socket);
                         });
             },
             "closeProcess": function (token, socket, socketid) {//closes pvs process
-                p = pvsioProcessMap[socketid];
-                var res = {id: token.id, socketId: socketid, time: token.time};
-                if (p) {
-                    p.close();
+                initProcessMap(socketid);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time
+                };
+                if (pvsioProcessMap[socketid]) {
+                    pvsioProcessMap[socketid].close();
                     delete pvsioProcessMap[socketid];
                     res.message = "process closed";
                 } else {
+                    res.type = token.type + "_error";
                     res.type = "attempting to close undefined process";
                 }
                 unregisterFolderWatchers();
@@ -396,46 +499,312 @@ function run() {
                 
             },
             "readFile": function (token, socket, socketid) {
+                initProcessMap(socketid);
                 var encoding = token.encoding || "utf8";
-                token.filePath = path.join(baseProjectDir, token.filePath);
-                fs.readFile(token.filePath, encoding, function (err, content) {
-                    var res = err ? {err: err} : {id: token.id, fileContent: content, socketId: socketid};
-                    res.time = token.time;
-                    processCallback(res, socket);
-                });
+                token.path = path.join(baseProjectDir, token.path);
+                readFile(token.path, encoding)
+                    .then(function (content) {
+                        var res = {
+                            id: token.id,
+                            type: token.type,
+                            content: content,
+                            name: token.name,
+                            path: token.path,
+                            socketId: socketid,
+                            time: token.time
+                        };
+                        processCallback(res, socket);
+                    }).catch(function (err) {
+                        var tokenErr = {
+                            type: token.type + "_error",
+                            id: token.id,
+                            socketId: socketid,
+                            name: token.name,
+                            path: token.path,
+                            err: {
+                                code: err.code,
+                                message: err.message,
+                                path: err.path
+                            },
+                            time: token.time
+                        };
+                        processCallback(tokenErr, socket);
+                    });
             },
             "writeFile": function (token, socket, socketid) {
-                var res = {id: token.id, socketId: socketid, time: token.time};
-                token.filePath = path.join(baseProjectDir, token.filePath);
+                initProcessMap(socketid);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time,
+                    name: token.name,
+                    path: token.path
+                };
+                token.path = path.join(baseProjectDir, token.path);
                 
-                writeFile(token.filePath, token.fileContent, token.encoding, token.opt)
+                writeFile(token.path, token.content, token.encoding, token.opt)
                     .then(function () {
                         processCallback(res, socket);
                     }, function (err) {
-                        res.err = err;
+                        res.type = token.type + "_error";
+                        res.err = {
+                            code: err.code,
+                            message: err.message,
+                            path: err.path
+                        };
                         processCallback(res, socket);
                     });
             },
             "deleteFile": function (token, socket, socketid) {
-                p = pvsioProcessMap[socketid];
-                var res = {id: token.id, socketId: socketid, time: token.time};
-                token.filePath = path.join(baseProjectDir, token.filePath);
-                p.removeFile(token.filePath, function (err) {
-                    if (!err) {
-                        res.type = "fileDeleted";
-                    } else {
-                        res.err = err;
-                    }
+                initProcessMap(socketid);
+                token.path = path.join(baseProjectDir, token.path);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time,
+                    name: token.name,
+                    path: token.path
+                };
+                try {
+                    pvsioProcessMap[socketid].removeFile(token.path, function (err) {
+                        if (!err) {
+                            res.type = token.type;
+                        } else {
+                            res.type = token.type + "_error";
+                            res.err = {
+                                code: err.code,
+                                message: err.message,
+                                path: err.path
+                            };
+                        }
+                        processCallback(res, socket);
+                    });
+                } catch (err) {
+                    res.type = token.type + "_error";
+                    res.err = err.message;
                     processCallback(res, socket);
-                });
+                }
+            },
+            "renameFile": function (token, socket, socketid) {
+                initProcessMap(socketid);
+				renameFile(token.oldPath, token.newPath).then(function (res) {
+					processCallback({
+                        type: token.type,
+                        id: token.id,
+                        socketId: socketid,
+                        time: token.time
+                    }, socket);
+				}).catch(function (err) {
+                    var msg = "Error while renaming " + token.oldPath + " into " + token.newPath;
+                    if (err === "ENOTEMPTY") {
+                        msg += " (file with same name already exists)";
+                    } else { msg += " (" + err + ")"; }
+				    logger.warn(msg);
+					processCallback({
+                        type: token.type + "_error",
+                        id: token.id,
+                        socketId: socketid,
+                        time: token.time,
+						err: {
+                            oldPath: token.oldPath,
+                            newPath: token.newPath,
+                            message: err.message,
+                            code: err.code,
+                            path: err.path
+                        }
+                    }, socket);
+				});
             },
             "fileExists": function (token, socket, socketid) {
-                var res = {id: token.id, socketId: socketid, time: token.time};
-                token.filePath = path.join(baseProjectDir, token.filePath);
-                fs.exists(token.filePath, function (exists) {
+                initProcessMap(socketid);
+                token.path = path.join(baseProjectDir, token.path);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time,
+                    name: token.name,
+                    path: token.path
+                };
+                fs.exists(token.path, function (exists) {
                     res.exists = exists;
                     processCallback(res, socket);
                 });
+            },
+            "readDirectory": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                readDirectory(token.path)
+                    .then(function (files) {
+                        processCallback({
+                            id: token.id,
+                            type: token.type,
+                            socketId: socketid,
+                            files: files,
+                            time: token.time
+                        }, socket);
+                    }).catch(function (err) {
+                        processCallback({
+                            type: token.type + "_error",
+                            id: token.id,
+                            socketId: socketid,
+                            err: err,
+                            time: token.time
+                        }, socket);
+                    });
+            },
+            "writeDirectory": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                if (token && token.path) {
+                    token.path = path.join(baseProjectDir, token.path);
+                    stat(token.path).then(
+                        function (res) {
+                            //directory exists: refresh content and send message EEXIST to client
+                            // Note: we refresh the content because this is an existing folder 
+                            // that is visible to the client (the client might not have info about it)
+                            unregisterFolderWatcher(token.path, socket);
+                            readFolderContent(token, socket).then(function (res) {
+                                registerFolderWatcher(token.path, socket);
+                            }).catch(function (err) {
+                                console.log(err);
+                            });
+                            processCallback({
+                                id: token.id,
+                                type: token.type + "_error",
+                                socketId: socketid,
+                                time: token.time,
+                                err: {
+                                    path: token.path,
+                                    message: "Directory Exists",
+                                    code: "EEXIST"
+                                }
+                            }, socket);
+                        },
+                        function (err) {
+                            if (err.code === "ENOENT") {
+                                // create the directory
+                                mkdirRecursive(token.path, function (err) {
+                                    if (!err) {
+                                        // and watch its content
+                                        var callBackToken = {
+                                            id: token.id,
+                                            type: token.type,
+                                            path: token.path,
+                                            socketId: socketid,
+                                            err: err,
+                                            time: token.time
+                                        };
+                                        registerFolderWatcher(callBackToken.path, socket);
+                                        processCallback(callBackToken, socket);
+                                    } else {
+                                        processCallback({
+                                            id: token.id,
+                                            type: token.type + "_error",
+                                            socketId: socketid,
+                                            time: token.time,
+                                            err: {
+                                                path: err.path,
+                                                message: err.message,
+                                                code: err.code
+                                            }
+                                        }, socket);
+                                    }
+                                });
+                            }
+                        }
+                    ).catch(function (err) {
+                        processCallback({
+                            id: token.id,
+                            type: token.type + "_error",
+                            socketId: socketid,
+                            time: token.time,
+                            err: {
+                                path: err.path,
+                                message: err.message,
+                                code: err.code
+                            }
+                        }, socket);
+                    });
+                } else {
+                    processCallback({
+                        type: token.type + "_error",
+                        id: token.id,
+                        socketId: socketid,
+                        err: {
+                            message: "Write directory error: property 'path' is undefined.",
+                            code: "ENOENT",
+                            path: token.path
+                        },
+                        time: token.time
+                    }, socket);
+                }
+                
+            },
+            "deleteDirectory": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time
+                };
+                try {
+                    token.path = path.join(baseProjectDir, token.path);
+                    res.path = token.path;
+                    pvsioProcessMap[socketid].removeFile(token.path, function (err) {
+                        if (!err) {
+                            res.type = token.type;
+                        } else {
+                            res.type = token.type + "_error";
+                            res.err = {
+                                code: err.code,
+                                message: err.message,
+                                path: err.path
+                            };
+                        }
+                        processCallback(res, socket);
+                    });
+                } catch (err) {
+                    res.type = token.type + "_error";
+                    res.err = err.message;
+                    processCallback(res, socket);
+                }
+            },
+            "renameProject": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                var oldProjectPath = path.join(baseProjectDir, token.oldPath);
+                var newProjectPath = path.join(baseProjectDir, token.newPath);
+                unregisterFolderWatcher(oldProjectPath, socket);
+				renameFile(token.oldPath, token.newPath).then(function (res) {
+                    registerFolderWatcher(newProjectPath, socket);
+					processCallback({
+                        type: token.type,
+                        id: token.id,
+                        socketId: socketid,
+                        time: token.time
+                    }, socket);
+				}).catch(function (err) {
+                    registerFolderWatcher(oldProjectPath, socket);
+                    var msg = "Error while renaming " + token.oldPath + " into " + token.newPath;
+                    if (err === "ENOTEMPTY") {
+                        msg += " (directory with same name already exists)";
+                    } else { msg += " (" + err + ")"; }
+				    logger.warn(msg);
+					processCallback({
+                        type: token.type + "_error",
+                        id: token.id,
+                        socketId: socketid,
+                        time: token.time,
+						err: {
+                            oldPath: token.oldPath,
+                            newPath: token.newPath,
+                            message: err.message,
+                            code: err.code,
+                            path: err.path
+                        }
+                    }, socket);
+				});
             }
         };
 
@@ -446,15 +815,20 @@ function run() {
     wsServer.on("connection", function (socket) {
         var socketid =  clientid++;
         var functionMaps = createClientFunctionMaps();
+        logger.info("opening websocket client " + socketid);
         socket.on("message", function (m) {
-            var token = JSON.parse(m);
-            token.time.server = {received: new Date().getTime()};
-            var f = functionMaps[token.type];
-            if (f && typeof f === 'function') {
-                //call the function with token and socket as parameter
-                f(token, socket, socketid);
-            } else {
-                logger.warn("f is something unexpected -- I expected a function but got type " + typeof f);
+            try {
+                var token = JSON.parse(m);
+                token.time.server = {received: new Date().getTime()};
+                var f = functionMaps[token.type];
+                if (f && typeof f === 'function') {
+                    //call the function with token and socket as parameter
+                    f(token, socket, socketid);
+                } else {
+                    logger.warn("f is something unexpected -- I expected a function but got type " + typeof f);
+                }
+            } catch (error) {
+                logger.warn("Unexpected error while processing token " + JSON.stringify(m));
             }
         });
 
@@ -469,10 +843,19 @@ function run() {
     });
 
     wsServer.on("error", function (err) {
-        logger.error(JSON.stringify(err));
+        if (err.code === "EADDRINUSE") {
+            console.log("\nError: Another instance of the PVSio-web server is already running.\nPlease shut down the other PVSio-web server instance before starting a new instance.");
+        } else {
+            logger.error(JSON.stringify(err));
+        }
+        console.log("----------------------------------------------");
     });
 
-    httpServer.listen(port);
-    logger.info("http server started .." + "now listening on port " + port);
+    httpServer.listen(port, function () {
+        console.log("PVSio-web server ready!");
+        console.log("----------------------------------------------");
+    });
+    logger.info(""); // this is used to print date and time in the console
+    console.log("----------------------------------------------\nStarting up PVSio-web server on port " + port + "...");
 }
 run();

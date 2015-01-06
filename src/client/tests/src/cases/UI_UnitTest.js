@@ -8,13 +8,14 @@
 define(function (require, exports, module) {
     "use strict";
     var main = require("main"),
-        PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder");
+        ProjectManager			= require("project/ProjectManager");
+//        PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder");
     
     
     module.exports = {
         run: function () {
-             var pb = PrototypeBuilder.getInstance(),
-					pm = pb.getProjectManager(),
+             var //pb = PrototypeBuilder.getInstance(),
+					pm = ProjectManager.getInstance(),
 					p;
             
             function click(elid) {
@@ -123,7 +124,7 @@ define(function (require, exports, module) {
              describe("User interface Elements", function () {               
                 beforeEach(function (done) {
                     d3.select("div.overlay").remove();
-                    pm = pb.getProjectManager();
+                    pm = ProjectManager.getInstance();
                     pm.addListener("PVSProcessReady", function (e) {
                         console.log(e);
                         p = pm.project();
@@ -152,7 +153,7 @@ define(function (require, exports, module) {
             describe("Prototype Builder", function () {
                 beforeEach(function (done) {
                     d3.select("div.overlay").remove();
-                    pm = pb.getProjectManager();
+                    pm = ProjectManager.getInstance();
                     pm.addListener("PVSProcessReady", function (e) {
                         console.log(e);
                         p = pm.project();
@@ -197,7 +198,7 @@ define(function (require, exports, module) {
             describe("FileSystem management in ListView", function () {
                 beforeEach(function (done) {
                     d3.select("div.overlay").remove();
-                    pm = pb.getProjectManager();
+                    pm = ProjectManager.getInstance();
                     pm.addListener("PVSProcessReady", function (e) {
                         console.log(e);
                         p = pm.project();
@@ -207,11 +208,11 @@ define(function (require, exports, module) {
                 });
 
                 it("can add files to the project", function (done) {
-                    var filesLength = pm.project().getProjectFiles().length;
+                    var filesLength = pm.project().getDescriptors().length;
                     click("div.collapsible-panel-parent[plugin-owner='ModelEditor'] .header").then(function () {
                         listViewContextMenu("#newfile").then(function () {
                             setTimeout(function () {
-                                expect(pm.project().getProjectFiles().length).toEqual(filesLength + 1);
+                                expect(pm.project().getDescriptors().length).toEqual(filesLength + 1);
                                 done();
                             }, 500);
                         });
@@ -219,14 +220,14 @@ define(function (require, exports, module) {
                 });
                 
                 it("can remove files from the project", function (done) {
-                    var filesLength = pm.project().getProjectFiles().length;
+                    var filesLength = pm.project().getDescriptors().length;
                     click("div.collapsible-panel-parent[plugin-owner='ModelEditor'] .header").then(function () {
                         listViewContextMenu("#newfile").then(function () {//add a new file
                             click("#pvsFiles li:last-child").then(function () {//select the file
                                 listViewContextMenu("#delete").then(function () {//delete the file
                                     click("div.overlay #btnOk").then(function () {
                                          setTimeout(function () {
-                                            expect(pm.project().getProjectFiles().length).toEqual(filesLength);
+                                            expect(pm.project().getDescriptors().length).toEqual(filesLength);
                                             done();
                                         }, 500);
                                     });

@@ -22,10 +22,11 @@ var writeFile = serverFuncs.writeFile,
 	listProjects = serverFuncs.listProjects;
 
 var testid = new Date().getTime(),
-	errLog = function (err) {console.log(err); };
+	errLog = function (err) { "use strict"; console.log(err); };
 describe("sever functions for manipulating file system and projects", function () {
+    "use strict";
 	it("Testing stat function :this file exists and it is a file", function () {
-		stat(path.join(__dirname , "serverFunc-spec.js"))
+		stat(path.join(__dirname, "serverFunc-spec.js"))
 			.then(function (f) {
 				expect(f).toBeDefined();
 				expect(f.isDirectory()).toEqual(false);
@@ -40,10 +41,10 @@ describe("sever functions for manipulating file system and projects", function (
 	it("write file works", function (done) {
 		writeFile(path.join(__dirname, "test.txt"), "hello")
 			.then(function (res) {
-				stat(res.filePath).then(function (f) {
+				stat(res.path).then(function (f) {
 					expect(f).toBeDefined();
 					expect(f.isFile()).toEqual(true);
-					fs.unlink(res.filePath, function () {
+					fs.unlink(res.path, function () {
 						done();
 					});
 				}, errLog);
@@ -68,7 +69,7 @@ describe("sever functions for manipulating file system and projects", function (
 	it("writing a file with specified nested folders (e.g., goo/foo/test.txt works", function (done) {
 		writeFile(path.join(__dirname, "__testingfolder_one/two/three/test.txt"), "hello")
 			.then(function (res) {
-				stat(res.filePath).then(function (f) {
+				stat(res.path).then(function (f) {
 					expect(f).toBeDefined();
 					expect(f.isFile()).toEqual(true);
 					exec("rm -r " + path.join(__dirname, "__testingfolder_one"), function (err) {
@@ -91,8 +92,8 @@ describe("sever functions for manipulating file system and projects", function (
 			expect(project).toBeDefined();
 			expect(project.name).toEqual("AlarisGP");
 			expect(project.folderStructure).toBeDefined();
-			expect(project.projectFiles).toBeDefined();
-			expect(project.projectFiles.length > 0).toEqual(true);
+			expect(project.descriptors).toBeDefined();
+			expect(project.descriptors.length > 0).toEqual(true);
 			done();
 		});
 	});
@@ -101,9 +102,9 @@ describe("sever functions for manipulating file system and projects", function (
 		var projectName = "AlarisGP_" + testid;
 		openProject("AlarisGP").then(function (project) {
 			var data = {projectName: projectName,
-						projectFiles: project.projectFiles};
-			data.projectFiles.forEach(function (d) {
-				d.filePath = d.filePath.replace("AlarisGP", projectName);
+						descriptors: project.descriptors};
+			data.descriptors.forEach(function (d) {
+				d.path = d.path.replace("AlarisGP", projectName);
 			});
 			createProject(data, function (project) {
 				if (project.err) {console.log(project.err); }
@@ -111,11 +112,11 @@ describe("sever functions for manipulating file system and projects", function (
 				//open the created project
 				openProject(projectName).then(function (project) {
 					expect(project.name).toEqual(projectName);
-					expect(project.projectFiles).toBeDefined();
+					expect(project.descriptors).toBeDefined();
 					expect(project.folderStructure).toBeDefined();
 					//remove the folder
 					exec("rm -r " + path.join(__dirname, "../", "public/projects", projectName), function (err) {
-						if (err) {console.log(err);}
+						if (err) { console.log(err); }
 						done();
 					});
 				});

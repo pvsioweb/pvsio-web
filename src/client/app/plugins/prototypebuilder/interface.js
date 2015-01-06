@@ -3,7 +3,7 @@
  * @author Patrick Oladimeji
  * @date 11/15/13 16:29:55 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
 /*global define, d3, $, Backbone, Handlebars, Promise, layoutjs */
 define(function (require, exports, module) {
 	"use strict";
@@ -17,7 +17,7 @@ define(function (require, exports, module) {
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
         Notification = require("pvsioweb/forms/displayNotification"),
         NotificationManager = require("project/NotificationManager"),
-        ProjectFile = require("project/ProjectFile"),
+        Descriptor = require("project/Descriptor"),
         fs = require("util/fileHandler"),
         PluginManager = require("plugins/PluginManager");
 	
@@ -41,7 +41,7 @@ define(function (require, exports, module) {
     function updateEditorToolbarButtons(pvsFile, currentProject) {
 		//update status of the set main file button based on the selected file
 		if (pvsFile) {
-			if (currentProject.mainPVSFile() && currentProject.mainPVSFile().path() === pvsFile.path()) {
+			if (currentProject.mainPVSFile() && currentProject.mainPVSFile().path === pvsFile.path) {
 				d3.select("#btnSetMainFile").attr("disabled", true);
 			} else {
 				d3.select("#btnSetMainFile").attr("disabled", null);
@@ -61,64 +61,73 @@ define(function (require, exports, module) {
             ws.lastState("init(0)");
             if (project.mainPVSFile()) {
                 // the main file can be in a subfolder: we need to pass information about directories!
-                var mainFile = project.mainPVSFile().path().replace(project.name() + "/", "");
-                ws.startPVSProcess({fileName: mainFile, projectName: project.name()}, function (err) {
+                var mainFile = project.mainPVSFile().path.replace(project.name() + "/", "");
+                ws.startPVSProcess({name: mainFile, projectName: project.name()}, function (err) {
 					pvsProcessReady(err);
 					//make projectManager bubble the process ready event
 					projectManager.fire({type: "PVSProcessReady", err: err});
 				});
-            } else {
-                //close pvsio process for previous project
-                ws.closePVSProcess(function (err) {
-                    if (!err) {
-                        pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
-                    }
-                });
-            }
+            } //else {
+                // don't close the process just because the main file is not defined,
+                // closing the process creates issues with fs file watcher -- the project folder is not monitored anymore
+//                //close pvsio process for previous project
+//                ws.closePVSProcess(function (err) {
+//                    if (!err) {
+//                        pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
+//                    }
+//                });
+//            }
         }).addListener("SelectedFileChanged", function (event) {
-            var p = projectManager.project(), file = p.getProjectFile(event.selectedItem.path);
+            var p = projectManager.project(), file = p.getDescriptor(event.selectedItem.path);
             updateEditorToolbarButtons(file, p);
         });
         
 		d3.select("#header #txtProjectName").html("");
-	
-		
-        
+
 		d3.select("#btnSaveProject").on("click", function () {
 			projectManager.saveProject();
 		});
 	
+		d3.select("#btnSaveProjectAs").on("click", function () {
+            var name = projectManager.project().name() + "_" + (new Date().getFullYear()) + "." +
+                            (new Date().getMonth() + 1) + "." + (new Date().getDate());
+			projectManager.saveProjectDialog(name);
+		});
+        
 		d3.select("#openProject").on("click", function () {
-            function _doOpenProject() {
-                projectManager.selectProject(function (err, projectName) {
-                    if (!err) {
-                        projectManager.openProject(projectName, function (project) {
-                            var notification = "Project " + project.name() + " opened successfully!";
-                            Logger.log(notification);
-                        });
+            function openProject() {
+                projectManager.openProjectDialog().then(function (project) {
+                    var notification = "Project " + project.name() + " opened successfully!";
+                    Logger.log(notification);
+                }).catch(function (err) {
+                    if (err && err.error) {
+                        NotificationManager.error(err.error);
+                    } else {
+                        Logger.log(JSON.stringify(err));
                     }
                 });
             }
-            
             var currentProject = projectManager.project();
             if (currentProject && currentProject._dirty()) {
                 //show save project dialog for the current project
                 SaveProjectChanges.create(currentProject)
                     .on("yes", function (e, view) {
                         view.remove();
-                        projectManager.saveProject(currentProject, _doOpenProject);
+                        projectManager.saveProject().then(function (res) {
+                            openProject();
+                        }).catch(function (err) { alert(err); });
                     }).on("no", function (e, view) {
                         view.remove();
-                        _doOpenProject();
+                        openProject();
                     });
             } else {
-                _doOpenProject();
+                openProject();
             }
 		});
 	
 		d3.select("#newProject").on("click", function () {
-			projectManager.newProject(function () {
-                var notification = "New project created!";
+			projectManager.createProjectDialog().then(function (res) {
+                var notification = "Project " + res.project().name() + "created!";
                 Logger.log(notification);
             });
 		});
@@ -129,8 +138,8 @@ define(function (require, exports, module) {
             if (project && project.mainPVSFile()) {
                 ws.lastState("init(0)");
                 // the main file can be in a subfolder: we need to pass information about directories!
-                var mainFile = project.mainPVSFile().path().replace(project.name() + "/", "");
-                ws.startPVSProcess({fileName: mainFile, projectName: project.name()}, pvsProcessReady);
+                var mainFile = project.mainPVSFile().path.replace(project.name() + "/", "");
+                ws.startPVSProcess({name: mainFile, projectName: project.name()}, pvsProcessReady);
             }
         }
         //handle typecheck event
@@ -139,9 +148,8 @@ define(function (require, exports, module) {
             function typecheck(pvsFile) {
                 var btn = d3.select("#btnTypeCheck").html("Compiling...").attr("disabled", true);
                 var ws = WSManager.getWebSocket();
-                // note: to get the path right, we need to remove the initial part of the path (i.e., the project name)
-                var fp = pvsFile.path().substring(pvsFile.path().indexOf("/") + 1);
-                ws.send({type: "typeCheck", filePath: fp},
+                var fp = pvsFile.path;
+                ws.send({type: "typeCheck", path: fp},
                      function (err, res) {
                         btn.html("Compile").attr("disabled", null);
                         var msg = res.stdout;
@@ -149,10 +157,9 @@ define(function (require, exports, module) {
                             reloadPVSio();
                             var project = projectManager.project();
                             var notification = "File " + fp + " compiled successfully!";
-                            d3.select("#editor-notification-area").insert("p", "p").html(notification);
                             msg = msg.substring(msg.indexOf("Proof summary"), msg.length);
                             Notification.create({
-                                header: pvsFile.name() + " compiled successfully! ",
+                                header: pvsFile.name + " compiled successfully! ",
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         } else {
@@ -160,7 +167,7 @@ define(function (require, exports, module) {
                             var header = "Compilation error";
                             ws.getFile(logFile, function (err, res) {
                                 if (!err) {
-                                    msg = res.fileContent.substring(res.fileContent.indexOf("Parsing "));
+                                    msg = res.content.substring(res.content.indexOf("Parsing "));
                                     msg = msg.replace("Parsing", "Error while parsing");
                                 } else {
                                     msg = msg.substring(msg.indexOf("Writing output to file"));
@@ -189,20 +196,19 @@ define(function (require, exports, module) {
 			var pvsFile = projectManager.getSelectedFile(), project = projectManager.project();
 			if (pvsFile) {
 				var ws = WSManager.getWebSocket();
-				ws.send({type: "setMainFile", projectName: project.name(), fileName: pvsFile.path()}, function (err) {
+				ws.send({type: "setMainFile", projectName: project.name(), name: pvsFile.path}, function (err) {
 					//if there was no error update the main file else alert user
                     if (!err) {
                         // set main file
                         project.mainPVSFile(pvsFile);
                         // disable button
                         d3.select("#btnSetMainFile").attr("disabled", true);
-                        var notification = pvsFile.path() + " is now the Main file";
-                        d3.select("#editor-notification-area").insert("p", "p").html(notification);
-                        Logger.log(notification);
+                        var notification = pvsFile.path + " is now the Main file";
+                        NotificationManager.show(notification);
                         // reload pvsio
                         reloadPVSio();
                     } else {
-                        Logger.log(err);
+                        NotificationManager.err(err);
                     }
 				});
 			}
@@ -211,70 +217,38 @@ define(function (require, exports, module) {
 		d3.select("#btnSaveFile").on("click", function () {
 			var project = projectManager.project();
 			if (project) {
-                var pvsFile = projectManager.getSelectedFile();
-                if (pvsFile) {
-                    var notification = "";
-                    projectManager.saveFiles([pvsFile], function (err) {
-                        if (!err) {
-                            notification = pvsFile + " saved successfully!";
-                            d3.select("#editor-notification-area").insert("p", "p").html(notification);
-                            Logger.log(notification);
-                            NotificationManager.show(notification);
-                        } else {
-                            notification = err;
-                            d3.select("#editor-notification-area").insert("p", "p").html(notification);
-                            Logger.log(err);
-                            NotificationManager.error(notification);
-                        }
+                var descriptor = projectManager.getSelectedFile();
+                if (descriptor) {
+                    descriptor.content = ModelEditor.getInstance().getEditor().doc.getValue();
+                    descriptor.dirty(false);
+                    projectManager.project().saveFiles([descriptor], { overWrite: true }).then(function (res) {
+                        var notification = descriptor.name + " saved successfully!";
+                        NotificationManager.show(notification);
+                    }).catch(function (err) {
+                        NotificationManager.error(err);
                     });
                 }
 			}
 		});
         d3.select("#btnImportFiles").on("click", function () {
-            projectManager.openFiles()
-                .then(function (files) {
-                    var promises = [], i;
-                    for (i = 0; i < files.length; i++) {
-                        promises.push(fs.readLocalFileAsText(files[i]));
+            return new Promise(function (resolve, reject) {
+                projectManager.readLocalFileDialog().then(function (files) {
+                    var promises = [];
+                    function getImportFolderName() {
+                        var selectedData = projectManager.getSelectedData();
+                        return (selectedData.isDirectory) ? selectedData.path
+                                : selectedData.path.split("/").slice(0, -1).join("/");
                     }
-                    Promise.all(promises)
-                        .then(function (contents) {
-                            var nImported = 0;
-                            var nSkipped = 0;
-                            var notification = "";
-                            contents.forEach(function (f) {
-                                var selectedFile = projectManager.getSelectedFile();
-                                var selectedItem = projectManager.getSelectedItem();
-                                // handle the special case where the project is empty -- the project home is the selected file
-                                var pathPrefix = (selectedFile) ?
-                                                    selectedFile.path().substr(0, selectedFile.path().lastIndexOf("/"))
-                                                    : selectedItem;
-                                var path = pathPrefix + "/" + f.fileName;
-                                var pf = new ProjectFile(path, f.fileContent);
-                                if (!projectManager.fileExists(pf)) {
-                                    nImported++;
-                                    projectManager.saveFiles([pf], function (err) {
-                                        if (!err) {
-                                            projectManager.project().addProjectFile(pf.path(), f.fileContent);
-                                            projectManager.selectFile(pf);
-                                            notification = pf.path() + " added to project successfully!";
-                                            Logger.log(notification);
-                                        } else {
-                                            notification = "file " + pf.path() + " not imported (" + err + ")";
-                                            alert("file " + pf.path() + " not imported (file already exists in project)");
-                                            Logger.log(notification);
-                                        }
-                                    });
-                                } else {
-                                    notification = "file " + pf.path() + " not imported (file already exists in project)";
-                                    nSkipped++;
-                                    alert("file " + pf.path() + " not imported (file already exists in project)");
-                                }
-                            });
-                            notification = nImported + " files imported successfully, " + nSkipped + " skipped.";
-                            d3.select("#editor-notification-area").insert("p", "p").html(notification);
-                        }, function (err) { Logger.log("error reading files " + err); });
-                });
+                    var importFolder = getImportFolderName();
+                    files.forEach(function (file) {
+                        file.path = importFolder + "/" + file.path;
+                        promises.push(projectManager.writeFileDialog(file.path, file.content, { encoding: file.encoding }));
+                    });
+                    Promise.all(promises).then(function (res) {
+                        resolve(res);
+                    }).catch(function (err) { reject(err); });
+                }).catch(function (err) { reject(err); });
+            });
         });
 	}
 	
