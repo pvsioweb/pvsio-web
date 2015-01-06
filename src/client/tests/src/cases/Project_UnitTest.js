@@ -23,52 +23,47 @@ define(function (require, exports, module) {
 					p;
 				beforeEach(function (done) {
 					pm = pb.getProjectManager();
-					pm.addListener("PVSProcessReady", function (e) {
-						console.log(e);
-						p = pm.project();
-						done();
-					});
-					main.start();
+					main.start().then(function () {
+                        p = pm.project();
+                        done();
+                    });
 				});
                 
-				it("user interface is loaded and there is connection to the websocket server and pvs process", function (done) {
-					var websocketStatusOK = d3.select("#lblWebSocketStatus span").classed("glyphicon-ok"),
-						pvsioStatusOK = d3.select("#lblPVSioStatus span").classed("glyphicon-ok");
-
-					expect(pvsioStatusOK).toEqual(true);
+				it("user interface is loaded and there is connection to the websocket server", function (done) {
+					var websocketStatusOK = d3.select("#lblWebSocketStatus span").classed("glyphicon-ok");
 					expect(websocketStatusOK).toEqual(true);
                     done();
 				});
+                
+                it("default project name after initialisation should contain 'default project'", function (done) {
+                    expect(p.name()).toEqual("defaultProject");
+                    console.log(p.name());
+                    done();
+                });
 
+                it("default project is not dirty", function (done) {
+                    expect(p._dirty()).toBeFalsy();
+                    done();
+                });
+                
 				describe("Project innards works fine", function () {
                     //describe opening a project
-					it("default project name after initialisation should contain 'default project'", function (done) {
-						expect(p.name()).toEqual("defaultProject");
-						console.log(p.name());
-                        done();
-					});
-                    
-					it("should open project correctly", function (done) {
-                        pm.openProject("AlarisPC", function (err, openedProject) {
-                            expect(alarisProject).toEqual(openedProject.name());
+					beforeEach(function (done) {
+                        pm.openProject("AlarisPC").then(function (project) {
+                            p = project;
                             done();
                         });
                     });
+                    
+					it("sample project should open project correctly", function () {
+                        expect(alarisProject).toEqual(p.name());
+                    });
 					
-					it("default project is not dirty", function (done) {
-						expect(p._dirty()).toBeFalsy();
-                        done();
-					});
-
-					it(" and " + alarisProject + " has at least one pvs file on init", function (done) {
+					it(" and " + alarisProject + " has at least one pvs file on init", function () {
 						expect(p.pvsFilesList()).not.toBeFalsy();
 						expect(p.pvsFilesList().length).toBeGreaterThan(0);
-                        done();
 					});
-
-					         
 				});
-				
 			});
 		}
 	};

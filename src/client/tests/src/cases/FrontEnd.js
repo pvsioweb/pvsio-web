@@ -15,8 +15,8 @@ define(function (require, exports, module) {
     
     var ProjectManager_UnitTest = require("test/ProjectManager_UnitTest").getInstance();
     ProjectManager_UnitTest.run();
-//    ui.run();
-//    project.run();
-//    projectFile.run();
+    UI_UnitTest.run();
+    Project_UnitTest.run();
+    Descriptor_UnitTest.run();
 	
 });
