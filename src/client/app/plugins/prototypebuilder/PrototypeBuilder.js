@@ -38,54 +38,58 @@ define(function (require, exports, module) {
 	}
     
 	/**
-	 * Updates the project image with in the prototype builder
+	 * @function renderImage
+     * @description Updates the project image with in the prototype builder
 	 * @param image {Descriptor} Descriptor of the prototype picture.
-	 * @memberof ProjectManager
+     * @returns {Promise(real)} A Promise that resolves to a real value that specifies the scale of the rendered image
+	 * @memberof module:ProjectManager
+     * @private
 	 */
-	var renderImage = function (image, cb) {
-        function imageLoadComplete(res) {
-			//if the image width is more than the the containing element scale it down a little
-			var parent = d3.select("#prototype-builder-container"),
-				scale = 1;
-			function resize() {
-                if (img) {
-                    var pbox = parent.node().getBoundingClientRect(),
-                        adjustedWidth = img.width,
-                        adjustedHeight = img.height;
+	var renderImage = function (image) {
+        return new Promise(function (resolve, reject) {
+            function imageLoadComplete(res) {
+                //if the image width is more than the the containing element scale it down a little
+                var parent = d3.select("#prototype-builder-container"),
                     scale = 1;
+                function resize() {
+                    if (img) {
+                        var pbox = parent.node().getBoundingClientRect(),
+                            adjustedWidth = img.width,
+                            adjustedHeight = img.height;
+                        scale = 1;
 
-                    if (img.width > pbox.width && pbox.width > 0 && pbox.height > 0) {
-                        adjustedWidth = pbox.width;
-                        scale = adjustedWidth / img.width;
-                        adjustedHeight = scale * img.height;
+                        if (img.width > pbox.width && pbox.width > 0 && pbox.height > 0) {
+                            adjustedWidth = pbox.width;
+                            scale = adjustedWidth / img.width;
+                            adjustedHeight = scale * img.height;
+                        }
+
+                        d3.select("#imageDiv").style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
+                        d3.select("#imageDiv img").attr("src", img.src).attr("height", adjustedHeight).attr("width", adjustedWidth);
+                        d3.select("#imageDiv svg").attr("height", adjustedHeight).attr("width", adjustedWidth);
+                        d3.select("#imageDiv svg > g").attr("transform", "scale(" + scale + ")");
+                        //hide the draganddrop stuff
+                        d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+
+                        //update widgets maps after resizing
+                        d3.select("#builder-controls").style("height", (50 + adjustedHeight) + "px");
+                        WidgetManager.scaleAreaMaps(scale);
                     }
-
-                    d3.select("#imageDiv").style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
-                    d3.select("#imageDiv img").attr("src", img.src).attr("height", adjustedHeight).attr("width", adjustedWidth);
-                    d3.select("#imageDiv svg").attr("height", adjustedHeight).attr("width", adjustedWidth);
-                    d3.select("#imageDiv svg > g").attr("transform", "scale(" + scale + ")");
-                    //hide the draganddrop stuff
-                    d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
-
-                    //update widgets maps after resizing
-                    d3.select("#builder-controls").style("height", (50 + adjustedHeight) + "px");
-                    WidgetManager.scaleAreaMaps(scale);
                 }
-			}
-			resize();
-            // invoke callback, if any
-            if (cb && typeof cb === "function") { cb(res, scale); }
-			parent.node().addEventListener("resize", resize);
-        }
-        
-        img = new Image();
-        img.onload = imageLoadComplete;
-        img.onerror = function (res) {
-            alert("Failed to load picture " + image.name);
-            if (cb && typeof cb === "function") { cb(res); }
-        };
-        img.name = image.path;
-        img.src = image.content;
+                resize();
+                parent.node().addEventListener("resize", resize);
+                resolve(scale);
+            }
+
+            img = new Image();
+            img.onload = imageLoadComplete;
+            img.onerror = function (res) {
+                alert("Failed to load picture " + image.name);
+                reject(res);
+            };
+            img.name = image.path;
+            img.src = image.content;
+        });
     };
 	
     function updateImageAndLoadWidgets() {
@@ -112,25 +116,23 @@ define(function (require, exports, module) {
         }
         function showImage() {
             return new Promise(function (resolve, reject) {
-                renderImage(image, function (res, scale) {
-                    if (res.type !== "error") {
-                        WidgetManager.updateMapCreator(scale, function () {
-                            var wdStr = p.getWidgetDefinitionFile().content;
-                            if (wdStr && wdStr !== "") {
-                                var wd = JSON.parse(p.getWidgetDefinitionFile().content);
-                                WidgetManager.restoreWidgetDefinitions(wd);
-                                //update the widget area map scales 
-                                WidgetManager.scaleAreaMaps(scale);
-                            }
-                            resolve();
-                        });
-                        d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
-                    } else {
-                        Logger.log(res);
-                        //show the image drag and drop div
-                        d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
-                        reject(res);
-                    }
+                renderImage(image).then(function (scale) {
+                    WidgetManager.updateMapCreator(scale, function () {
+                        var wdStr = p.getWidgetDefinitionFile().content;
+                        if (wdStr && wdStr !== "") {
+                            var wd = JSON.parse(p.getWidgetDefinitionFile().content);
+                            WidgetManager.restoreWidgetDefinitions(wd);
+                            //update the widget area map scales 
+                            WidgetManager.scaleAreaMaps(scale);
+                        }
+                        resolve();
+                    });
+                    d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+                }).catch(function (err) {
+                    Logger.log(err);
+                    //show the image drag and drop div
+                    d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
+                    reject(err);
                 });
             });
         }
@@ -297,13 +299,13 @@ define(function (require, exports, module) {
                 });
             }
             if (oldImage) {
-                pm.deleteFile(oldImage.path).then(function (res) {
-                    pm.writeFile(newImage.path, newImage.content, { encoding: "base64", overWrite: true });
+                pm.project().removeFile(oldImage.path).then(function (res) {
+                    pm.project().addFile(newImage.path, newImage.content, { encoding: "base64", overWrite: true });
                 }).then(function (res) {
                     done();
                 }).catch(function (err) { console.log(err); reject(err); });
             } else {
-                pm.writeFile(newImage.path, newImage.content, { encoding: "base64", overWrite: true }).then(function (res) {
+                pm.project().addFile(newImage.path, newImage.content, { encoding: "base64", overWrite: true }).then(function (res) {
                     done();
                 }).catch(function (err) { console.log(err); reject(err); });
             }
@@ -333,11 +335,12 @@ define(function (require, exports, module) {
         function _updateImage(file) {
             return new Promise(function (resolve, reject) {
                 fs.readLocalFile(file).then(function (res) {
-                    _prototypeBuilder.changeImage(res.name, res.content);
-                }).then(function () {
-                    renderImage(projectManager.project().getImage());
-                }).then(function () {
-                    resolve();
+                    _prototypeBuilder.changeImage(res.name, res.content).then(function (res) {
+                        renderImage(res).then(function (res) {
+                            projectManager.project().getImage();
+                            resolve(res);
+                        });
+                    });
                 }).catch(function (err) { reject(err); });
             });
         }
