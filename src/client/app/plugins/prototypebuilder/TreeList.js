@@ -84,24 +84,27 @@ define(function (require, exports, module) {
             }
             //Note: we can't use document.onclick to remove the menu because it does not have a nice behaviour in Firefox
             //(the context menu disappears as soon as the right mouse button is released)
-            //document.onclick = function () {
-            //  d3.select("div.contextmenu").remove();
-            //};    
-            if (!document.getElementById("pvsFiles").onclick) {
-                document.getElementById("pvsFiles").onclick = function () {
-                    d3.select("div.contextmenu").remove();
-                };
-            }
-            if (!document.getElementById("editor").onclick) {
-                document.getElementById("editor").onclick = function () {
-                    d3.select("div.contextmenu").remove();
-                };
-            }
-            if (!document.getElementById("editorToolbar").onclick) {
-                document.getElementById("editorToolbar").onclick = function () {
-                    d3.select("div.contextmenu").remove();
-                };
-            }
+            document.onclick = function (e) {
+                var ctxmenu = d3.select("div.contextmenu");
+                if (e.target !== ctxmenu.node() && e.button !== 2) {
+                    ctxmenu.remove();
+                }
+            };
+//            if (!document.getElementById("pvsFiles").onclick) {
+//                document.getElementById("pvsFiles").onclick = function () {
+//                    d3.select("div.contextmenu").remove();
+//                };
+//            }
+//            if (!document.getElementById("editor").onclick) {
+//                document.getElementById("editor").onclick = function () {
+//                    d3.select("div.contextmenu").remove();
+//                };
+//            }
+//            if (!document.getElementById("editorToolbar").onclick) {
+//                document.getElementById("editorToolbar").onclick = function () {
+//                    d3.select("div.contextmenu").remove();
+//                };
+//            }
         }
     };
     
@@ -125,6 +128,9 @@ define(function (require, exports, module) {
                 d.children = d._children;
                 d._children = null;
             }
+        }
+        function paddingLeft(d) {
+            return (d.path) ? ((d.path.split("/").length - 1) * childIndent) : 0;
         }
         
         var tree = d3.layout.treelist().childIndent(childIndent).nodeHeight(listHeight);
@@ -228,7 +234,7 @@ define(function (require, exports, module) {
                 c = c.concat(" selected");
             }
             return c;
-        }).style("display", "inline-block");
+        }).style("display", "block");
 
         if (!noAnimation) {
             updatedNodes = updatedNodes.transition().duration(duration);
@@ -237,21 +243,29 @@ define(function (require, exports, module) {
             return (d.y - tree.nodeHeight()) + "px";
         }).style("opacity", 1);
         updatedNodes.selectAll(".line").style("padding-left", function (d) {
-            var padding_left = (d.path) ? ((d.path.split("/").length - 1) * childIndent) : 0;
-            return padding_left + "px";
+            return paddingLeft(d) + "px";
         });
         //update any label names
         updatedNodes.select("span.label").text(function (d) { return d.name; });
         //remove hidden nodes
         exitedNodes.remove();
-        //update resizer height
-        var resizer = (document.getElementById("pvsFiles")) ? document.getElementById("pvsFiles").lastChild : null;
-        if (nodes && resizer) {
-            var height = (treeHeight > parentHeight) ? treeHeight : parentHeight;
-            d3.select(document.getElementById("pvsFiles").lastChild).attr("style", "height:" + height + "px");
-        }
+// doesn't seem to be need for this anymore (p.o)       //update resizer height
+//        var resizer = (document.getElementById("pvsFiles")) ? document.getElementById("pvsFiles").lastChild : null;
+//        if (nodes && resizer) {
+//            var height = (treeHeight > parentHeight) ? treeHeight : parentHeight;
+////            d3.select(document.getElementById("pvsFiles").lastChild).attr("style", "height:" + height + "px");
+//        }
         // install handlers for context menu
         installContextMenuHandlers();
+        //update width  of ul element so that selected list item spans full width of the ul even when
+        //they overflow on the x-axis
+        var max = 0;
+        nodeEls.each(function (d) {
+            var width = d3.select(this).select(".line").node().getBoundingClientRect().width
+                + paddingLeft(d);
+            if (width > max) { max = width; }
+        });
+        ul.style("width", max + "px");
     };
        
     TreeList.prototype.refreshSelectedItem = function () {

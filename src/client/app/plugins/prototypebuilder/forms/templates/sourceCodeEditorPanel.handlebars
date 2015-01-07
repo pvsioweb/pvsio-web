@@ -1,50 +1,30 @@
 <div id='pvsSpecification'>
-	<div id="editorToolbar">
-        <script>
-            function highlight(el) {
-                var c = document.getElementById(el);
-                c.style.backgroundColor = "black";
-                c.style.color = "white";
-            }
-            function resetStyle(el) {
-                var c = document.getElementById(el);
-                c.style.backgroundColor = "";
-                c.style.color = "";
-            }
-        </script>        
+	<div id="editorToolbar"> 
 		<button class="btn btn-primary"
-                id="btnTypeCheck"
-                onmouseover="highlight('btnTypeCheck')"
-                onmouseout="resetStyle('btnTypeCheck')">Compile</button>
+                id="btnTypeCheck">Compile</button>
 <!--
 		<button class="btn" id="new_file">New File</button>
 -->
 		<button class="btn btn-default"
-                id="btnImportFiles"
-                onmouseover="highlight('btnImportFiles')"
-                onmouseout="resetStyle('btnImportFiles')">Import Files</button>
+                id="btnImportFiles">Import Files</button>
 		<button class="btn btn-default"
-                id="btnSetMainFile"
-                onmouseover="highlight('btnSetMainFile')"
-                onmouseout="resetStyle('btnSetMainFile')"><i class="icon-star"></i> Set As Main File</button>
+                id="btnSetMainFile"><i class="icon-star"></i> Set As Main File</button>
 		<button class="btn btn-default"
-                id="btnSaveFile"
-                onmouseover="highlight('btnSaveFile')"
-                onmouseout="resetStyle('btnSaveFile')">Save Selected File</button>
+                id="btnSaveFile">Save Selected File</button>
 <!--		<button class="btn" id="btnSaveAll">Save All Files</button>
 <!--		<button class="btn btn-warning" id="btnTypeCheck">TypeCheck</button>  -->
 <!--        <div id="editor-notification-area" style="display:none"></div>-->
     <div id="editor-search-bar" style="height:34px; float:right;">
         <button class="btn btn-default"
                 style="padding:2px 4px 2px 4px; margin: 4px 0 0 4px;"
-                id="btnSearchPrev"
-                onmouseover="highlight('btnSearchPrev')"
-                onmouseout="resetStyle('btnSearchPrev')"><span class="glyphicon glyphicon-arrow-left"></span></button>
+                id="btnSearchPrev">
+            <span class="glyphicon glyphicon-arrow-left"></span>
+        </button>
         <button class="btn btn-default"
                 id="btnSearchNext"
-                style="padding:2px 4px 2px 4px; margin-top:4px;"
-                onmouseover="highlight('btnSearchNext')"
-                onmouseout="resetStyle('btnSearchNext')"><span class="glyphicon glyphicon-arrow-right"></span></button>
+                style="padding:2px 4px 2px 4px; margin-top:4px;">
+            <span class="glyphicon glyphicon-arrow-right"></span>
+        </button>
         <input id="model-editor-search-input"
                type="search"
                results="8" size="54"
@@ -54,19 +34,13 @@
                style="margin:4px; float:right;">
     </div>
 	</div>
-	<div style="display: list-item;">
-<!--
-		<div id="specDragAndDrop" class="dndcontainer">
-			<span class="center">Drag PVS file here or if you prefer, use the button below</span>
-			<br/>
-			<a class="btn btn-primary center" id='btnLoadSpec'><i class="icon-file-white"></i>Load Spec</a>
-			<input type="file" class="hide" id="btnSelectSpec" name="selectSpec">
-		</div>
--->
+	<div id="model-editor-container">
         <div id="sourcecode-editor-wrapper" class="ljs-hcontent">
-            <div id="editor" style="min-height:400px; max-height:400px; overflow:hidden;"></div>
+            <div id="editor"></div>
             <div id="imageViewer" style="display:none"><img></div>
         </div>
-        <div id="pvsFiles" class="ljs-right" style="height:400px;"></div>
+        <div class="ljs-right">
+            <div id="pvsFiles"></div>
+        </div>
 	</div>
 </div>

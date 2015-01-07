@@ -88,8 +88,6 @@ div.contextmenu {
     background-color: black;
 }
 
-/*
 .node .line {
-    position: absolute;
+    display: inline-block;
 }
-*/

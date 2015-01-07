@@ -68,12 +68,12 @@ define(function (require, exports, module) {
                         });
 					var prototypeBuilder = PrototypeBuilder.getInstance();
 					pluginManager.enablePlugin(prototypeBuilder).then(function () {
-                        pluginManager.enablePlugin(ModelEditor.getInstance());
+                        return pluginManager.enablePlugin(ModelEditor.getInstance());
                     }).then(function () {
                         var projectManager = ProjectManager.getInstance();
                         ui.bindListeners(projectManager);
                         projectManager.createDefaultProject().then(function (res) {
-                            layoutjs({el: "#sourcecode-editor-wrapper"});
+                            layoutjs({el: "#model-editor-container"});
                             //enable autosave plugin
                             pluginManager.enablePlugin(ProjectAutoSaver.getInstance());
                             resolve(res);
