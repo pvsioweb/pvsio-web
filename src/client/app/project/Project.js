@@ -148,10 +148,10 @@ define(function (require, exports, module) {
      * @instance
      */
     Project.prototype.getWidgetDefinitionFile = function () {
-        var wdpath = _this.name() + "/" + Constants.widgetDefinitionsFile;
-        var res = _this.getDescriptor(wdpath);
+        var wdPath = _this.name() + "/" + Constants.widgetDefinitionsFile;
+        var res = _this.getDescriptor(wdPath);
         if (!res) {
-            res = new Descriptor(scriptsPath, "{}");
+            res = new Descriptor(wdPath, "{}");
             _this.addDescriptor(res);
         }
         return res;

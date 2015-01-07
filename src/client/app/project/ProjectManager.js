@@ -280,7 +280,7 @@ define(function (require, exports, module) {
      * @instance
      */
     ProjectManager.prototype.renderFileTreeView = function () {
-        renderSourceFileList();    
+        renderSourceFileList();
     };
     
 	/**
