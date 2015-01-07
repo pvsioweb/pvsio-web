@@ -1,7 +1,7 @@
 /**
  * @module Descriptor
- * @desc Module representing a file in  a project
- * @author Patrick Oladimeji
+ * @desc Descriptor for files and directories included in PVSio-web projects.
+ * @author Patrick Oladimeji, Paolo Masci
  * @date 11/15/13 10:19:27 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
@@ -130,8 +130,8 @@ define(function (require, exports, module) {
     /**
      * @function save
      * @description Saves the file descriptor on disk.
-     * @param opt {Object {overWrite: bool}} Options for the save function: 
-     *             overWrite (bool) defines whether the project can be overwritten.
+	 * @param opt {?Object} Options
+     *        <li>overWrite {bool} Defines whether the project can be overwritten. Default: false.</li>
      * @returns {Promise(Descriptor)} A Promise that resolves to the saved content.
      * @memberof module:Descriptor
      * @instance

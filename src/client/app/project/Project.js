@@ -106,8 +106,7 @@ define(function (require, exports, module) {
      * @function saveFiles
      * @description Saves on disk the file descriptors passed as parameter.
      * @param descriptor {Array(Descriptor)} Array of file descriptor whose content needs to be saved on disk.
-	 * @param opt {Object {overWrite: bool}} Options for the save function: overWrite (bool) defines whether the project can be overwritten.
-
+	 * @param opt {Object} Options for the save function: overWrite (bool) defines whether the project can be overwritten.
      * @returns {Promise(Array(Descriptor))} A Promise that resolves to an array with the file decriptors saved on disk by the function.
      * @memberof module:Project
      * @instance
@@ -372,9 +371,9 @@ define(function (require, exports, module) {
      *           <li> encoding, a function that returns a String representing the file encoding. 
      *                Text files must have encoding "utf8". Image files must have encoding "base64".
      *                If unspecified, encoding "utf8" is used.</li>
-     * @param opt {Object({overWrite: bool})} Function options: existing files are ovewritten when
-     *          overWrite is true. If overWrite is false or undefined and the file exists,
-     *          the function returns an error { type: "EEXIST", msg: String}
+     * @param opt {Object} Function options: overWrite, defines whether existing files shall be ovewritten when.
+     *                     If overWrite is false or undefined and the file exists, the function returns an error
+     *                     { type: "EEXIST", msg: String}
      * @returns {Promise(Descriptor)} A Promise that resolves to the descriptor passed as argument
      * @memberof module:Project
      * @instance
