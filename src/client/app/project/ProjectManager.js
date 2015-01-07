@@ -280,7 +280,7 @@ define(function (require, exports, module) {
      * @instance
      */
     ProjectManager.prototype.renderFileTreeView = function () {
-        renderSourceFileList();    
+        renderSourceFileList();
     };
     
 	/**
@@ -1157,7 +1157,9 @@ define(function (require, exports, module) {
                     promises.push(
                         new Promise(function (resolve, reject) {
                             descriptor.getContent().then(function (res) {
-                                _projectManager.writeFile(path, descriptor.content, opt).then(function (res) {
+                                var options = opt || {};
+                                options.encoding = descriptor.encoding;
+                                _projectManager.writeFile(path, descriptor.content, options).then(function (res) {
                                     resolve(res);
                                 }).catch(function (err) { reject(err); });
                             }).catch(function (err) { reject(err); });
