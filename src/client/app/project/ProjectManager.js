@@ -274,7 +274,7 @@ define(function (require, exports, module) {
 	}
     
     /**
-     * @function <a name="renderFileTreeView">ProjectManager</a>
+     * @function <a name="renderFileTreeView">renderFileTreeView</a>
      * @description refreshes the fileTreeView
      * @memberof module:ProjectManager
      * @instance
