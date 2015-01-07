@@ -37,7 +37,9 @@ define(function (require, exports, module) {
 				});
 
 				it("has a toString method", function () {
-					expect(f.toString()).toEqual(spec);
+                    var obj = JSON.parse(f.toString());
+					expect(obj.path).toEqual(spec);
+                    expect(obj.encoding).toEqual("utf8");
 				});
 			});
 		}

@@ -175,6 +175,10 @@ define(function (require, exports, module) {
                         addFail(JSON.stringify(err));
                         reject(err);
                     });
+                    //automate accepting the dialog
+                    setTimeout(function () {
+                        d3.select("div.overlay #btnOk").node().click();
+                    }, 10);
                 }).catch(function (err) {
                     addFail(JSON.stringify(err));
                     reject(err);

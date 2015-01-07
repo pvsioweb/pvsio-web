@@ -274,7 +274,8 @@ define(function (require, exports, module) {
         });
         
         onSelectedFileChanged({ selectedItem: projectManager.getSelectedData() });
-        
+        //render the file tree view
+        projectManager.renderFileTreeView();
 		return Promise.resolve(true);
     };
    

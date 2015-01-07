@@ -273,6 +273,16 @@ define(function (require, exports, module) {
         return this;
 	}
     
+    /**
+     * @function <a name="renderFileTreeView">ProjectManager</a>
+     * @description refreshes the fileTreeView
+     * @memberof module:ProjectManager
+     * @instance
+     */
+    ProjectManager.prototype.renderFileTreeView = function () {
+        renderSourceFileList();    
+    };
+    
 	/**
      * @function <hr><a name="writeFile">writeFile</a>
      * @description Writes a file to disk.

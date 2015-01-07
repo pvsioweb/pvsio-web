@@ -37,6 +37,8 @@ function run() {
         fs                      = require("fs"),
         express                 = require("express"),
         webserver               = express(),
+        open                    = require("open"),
+        util                    = require("util"),
         procWrapper             = require("./processwrapper"),
         FileFilters             = require("./FileFilters"),
         port                    = 8082,
@@ -854,6 +856,7 @@ function run() {
     httpServer.listen(port, function () {
         console.log("PVSio-web server ready!");
         console.log("----------------------------------------------");
+        open(util.format("http://localhost:%s", port.toString()));
     });
     logger.info(""); // this is used to print date and time in the console
     console.log("----------------------------------------------\nStarting up PVSio-web server on port " + port + "...");
