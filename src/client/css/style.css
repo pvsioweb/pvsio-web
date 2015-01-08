@@ -131,6 +131,11 @@ div.downloader{
    -ms-user-select: none;
    user-select: none;    
 }
+
+#header .btn:hover, li.plugin-box:hover {
+    background: black;
+    color: white;
+}
 .center{
 	margin-right: auto;
 	margin-left: auto;
@@ -412,7 +417,7 @@ div.detailsForm select, div.detailsForm textarea{
 .recording {
     -webkit-animation:fade 3000ms infinite;
 }
-
+///
 .btn-group > span {
     position: absolute;
     width: 712px;
@@ -735,4 +740,11 @@ fadeIn
     width: 20%;
 /*    overflow-x: auto;*/
     background: white;
+}
+
+.timeLine {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+	background: rgb(8, 88, 154);
 }

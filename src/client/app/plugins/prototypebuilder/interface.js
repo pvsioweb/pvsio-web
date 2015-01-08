@@ -264,10 +264,14 @@ define(function (require, exports, module) {
 			return this;
 		},
 		events: {
-            "change input[type='checkbox']": "checkboxClicked"
+            "change input[type='checkbox']": "checkboxClicked",
+            "click .plugin-box": "pluginClicked"
 		},
         checkboxClicked: function (event) {
             this.trigger("pluginToggled", event);
+        },
+        pluginClicked: function (event) {
+            d3.select(event.target).select("input[type='checkbox']").node().click();
         },
 		scriptClicked: function (event) {
             this.trigger("scriptClicked", $(event.target).attr("name"));

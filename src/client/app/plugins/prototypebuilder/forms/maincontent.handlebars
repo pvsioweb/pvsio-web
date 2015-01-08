@@ -1,51 +1,26 @@
 
 <div id="content" class="center prototypebuilder">
-    <script>
-        function highlight(el) {
-            var c = document.getElementById(el);
-            c.style.backgroundColor = "black";
-            c.style.color = "white";
-        }
-        function resetStyle(el) {
-            var c = document.getElementById(el);
-            c.style.backgroundColor = "";
-            c.style.color = "";
-        }
-    </script>
 	<div id="header" class="btn-group">
 		<div id="projectTitle">
 			<div class="btn txtProjectName"><span id="txtProjectName"></span></div>
 			<div class="pull-right">
 				<a class="btn"
-                   id="newProject"
-                   onmouseover="highlight('newProject')"
-                   onmouseout="resetStyle('newProject')">
-                    <span class="glyphicon glyphicon-file"></span> New Project</a>
+                   id="newProject"><span class="glyphicon glyphicon-file"></span> New Project</a>
 				<a class="btn"
-                   id="openProject"
-                   onmouseover="highlight('openProject')"
-                   onmouseout="resetStyle('openProject')">                   
+                   id="openProject">                 
                     <span class="glyphicon glyphicon-folder-open"></span> Open Project</a>
 <!--
                 <a class="btn"
-                   id="btnEditStoryboard"
-                   onmouseover="highlight('btnEditStoryboard')"
-                   onmouseout="resetStyle('btnEditStoryboard')">                   
+                   id="btnEditStoryboard">                   
                     <span class="glyphicon glyphicon-film"></span> Edit Storyboard</a>
 -->
 				<input type="file" class="hide" id="btnSelectPicture" name="selectPicture" accept="image/*">
 				<a class="btn"
-                   id="btnSaveProject"
-                   onmouseover="highlight('btnSaveProject')"
-                   onmouseout="resetStyle('btnSaveProject')"><span class="glyphicon glyphicon-floppy-save"></span> Save Project</a>
+                   id="btnSaveProject"><span class="glyphicon glyphicon-floppy-save"></span> Save Project</a>
 				<a class="btn"
-                   id="btnSaveProjectAs"
-                   onmouseover="highlight('btnSaveProjectAs')"
-                   onmouseout="resetStyle('btnSaveProjectAs')"><span class="glyphicon glyphicon-floppy-disk"></span> Save As...</a>
+                   id="btnSaveProjectAs"><span class="glyphicon glyphicon-floppy-disk"></span> Save As...</a>
 				<a class="btn"
-                   id="btnLoadPicture"
-                   onmouseover="highlight('btnLoadPicture')"
-                   onmouseout="resetStyle('btnLoadPicture')">                   
+                   id="btnLoadPicture">                   
                     <span class="glyphicon glyphicon-picture"></span> Change Picture</a>
                 <div class="pull-right" style="width: 260px;">
                     <a id="lblWebSocketStatus" class="btn status" style="cursor:default">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
@@ -64,29 +39,15 @@
 		</div>
 		<div id="rightPanel" class="ljs-right">
 			<div id="plugins-group" class="plugins-group">
-                <script>
-                    function selectPlugin(plugin) {
-                        var p = document.getElementById(plugin);
-                        p.click();
-                    }                    
-                </script>
 				<div class="plugins">PVSio-web Tools</div>
 				<ul>
 					{{#each plugins}}
-					<li class="list-group-item"
-                        id="pluginBox_{{label}}"
-                        onmouseover="highlight('pluginBox_{{label}}')"
-                        onmouseout="resetStyle('pluginBox_{{label}}')"
-                        onclick="selectPlugin('plugin_{{label}}')"
-                        style="cursor: pointer">
+					<li class="list-group-item plugin-box"
+                        id="pluginBox_{{label}}">
 						<input type="checkbox"
                                name="{{label}}"
-                               id="plugin_{{label}}"
-                               style="cursor:pointer"
-                               onclick="selectPlugin('plugin_{{label}}')">
-						<label for="plugin_{{label}}"
-                               style="cursor:pointer"
-                               onclick="selectPlugin('plugin_{{label}}')">{{label}}</label>
+                               id="plugin_{{label}}">
+						<label for="plugin_{{label}}">{{label}}</label>
 					</li>
 					{{/each}}
 				</ul>
