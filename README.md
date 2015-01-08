@@ -11,8 +11,9 @@ Live version
 A realistic prototype created using PVSio-web can be found at the following link:
 http://pvsioweb.herokuapp.com/demos/BBraun
 
-The full PVSio-web application with limited features is also available at http://pvsioweb.herokuapp.com/ 
-(please note that the web server has limited processing power so its response time might not be optimal; also, note that the file system is read-only, so you will not be able to save new prototypes)
+A live version of the full PVSio-web tool is available at http://pvsioweb.herokuapp.com/
+
+Please note that the web server where the tool is installed has limited processing power and network bandwidth so its response time might not be optimal.
 
 ![Screenshot](screenshot.png?raw=true)
 
