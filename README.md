@@ -8,8 +8,9 @@ Simulations created with PVSio-web can be watched in this youtube video https://
 Live version
 ------------
 
-A realistic prototype created using PVSio-web can be found at the following link:
-http://pvsioweb.herokuapp.com/demos/BBraun
+Realistic prototypes created using PVSio-web can be found at the following links:
+* http://pvsioweb.herokuapp.com/demos/BBraun (Commercial infusion pump prototype)
+* http://pvsioweb.herokuapp.com/demos/GPCA-UI_PVS/NavKeys/ (GIP pump prototype)
 
 The full PVSio-web application with limited features is also available at http://pvsioweb.herokuapp.com/ 
 (please note that the web server has limited processing power so its response time might not be optimal; also, note that the file system is read-only, so you will not be able to save new prototypes)
@@ -56,11 +57,12 @@ Updating pvsio-web
 ------------------
 To update pvsio-web to the latest version, open a Terminal window, and execute the following command from the pvsio-web directory:
 
-	git pull
+    git pull
 
 Examples
 --------
-Realistic simulations created with PVSio-web can be watched in this youtube video: https://www.youtube.com/watch?v=T0QmUe0bwL8
+Realistic simulations created with PVSio-web can be watched in this youtube video:
+* https://www.youtube.com/watch?v=T0QmUe0bwL8
 
 All simulation examples demonstrated in the youtube video are included in the PVSio-web distribution in examples/projects. To open these examples, start pvsio-web and click the "Open Projects" button of the pvsio-web frontend and select one of the examples from the list.
 
