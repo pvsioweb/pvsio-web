@@ -5,7 +5,7 @@ PVSio-web is a new graphical tool to prototype and analyse user interface softwa
 
 Simulations created with PVSio-web can be watched in this youtube video https://www.youtube.com/watch?v=T0QmUe0bwL8
 
-A live version of PVSio-web executed on a cloud server can be found at http://www.pvsioweb.org/
+A live version of PVSio-web executed on a cloud server can be found at http://pvsioweb.herokuapp.com/ (please be patient when interacting with this live version, the web server has limited processing power)
 
 ![Screenshot](screenshot.png?raw=true)
 
