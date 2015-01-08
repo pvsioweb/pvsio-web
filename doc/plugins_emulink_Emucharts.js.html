@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: plugins/emulink/Emucharts.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: plugins/emulink/Emucharts.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @module Emucharts
  * @version 1.0
  * @description
@@ -141,16 +169,16 @@ define(function (require, exports, module) {
 	 * @function add_node
      * @description Adds a new node (i.e., a new state) to the emucharts diagram.
      * @param node {Object} The characteristics of the node:
-     *           <li> name (String): the name of the node. This property is optional. If omitted, the node identifier automatically assigned by this function will be used as node name.</li>
-     *           <li> x (real): node position (x coordinate). This property is optional. If omitted, the node will be placed in a default position.</li>
-     *           <li> y (real): node position (y coordinate). This property is optional. If omitted, the node will be placed in a default position.</li>
+     *           &lt;li> name (String): the name of the node. This property is optional. If omitted, the node identifier automatically assigned by this function will be used as node name.&lt;/li>
+     *           &lt;li> x (real): node position (x coordinate). This property is optional. If omitted, the node will be placed in a default position.&lt;/li>
+     *           &lt;li> y (real): node position (y coordinate). This property is optional. If omitted, the node will be placed in a default position.&lt;/li>
      * @returns {Object} Descriptor fo the created node. Nodes descriptors have the following properties:
-     *           <li> id (String): the unique identifier of the node.</li>
-     *           <li> name (String): the name of the node.</li>
-     *           <li> x (real): node position (x coordinate).</li>
-     *           <li> y (real): node position (y coordinate).</li>
-     *           <li> width (real): node width.</li>
-     *           <li> height (real): node height.</li>
+     *           &lt;li> id (String): the unique identifier of the node.&lt;/li>
+     *           &lt;li> name (String): the name of the node.&lt;/li>
+     *           &lt;li> x (real): node position (x coordinate).&lt;/li>
+     *           &lt;li> y (real): node position (y coordinate).&lt;/li>
+     *           &lt;li> width (real): node width.&lt;/li>
+     *           &lt;li> height (real): node height.&lt;/li>
 	 * @memberof module:Emucharts
      * @instance
 	 */
@@ -160,7 +188,7 @@ define(function (require, exports, module) {
         var id = "X" + newNodeID();
         var name = node.name || id;
         var estimatedTextWidth = name.length * defaultValues.fontSize / 4;
-        var width = (estimatedTextWidth < defaultValues.width) ? defaultValues.width : estimatedTextWidth;
+        var width = (estimatedTextWidth &lt; defaultValues.width) ? defaultValues.width : estimatedTextWidth;
         var newNode = {
                 id  : id, // nodes have unique IDs
                 name: name,
@@ -192,7 +220,7 @@ define(function (require, exports, module) {
 	 */
     Emucharts.prototype.remove_node = function (node) {
         var rem = this.nodes.get(node);
-        if (rem && this.nodes.remove(node)) {
+        if (rem &amp;&amp; this.nodes.remove(node)) {
             // fire event
             this.fire({
                 type: "emuCharts_stateRemoved",
@@ -296,16 +324,16 @@ define(function (require, exports, module) {
      * @function add_edge
 	 * @description Adds a new edge to the diagram
      * @param edge {Object} The characteristics of the edge:
-     *           <li> target (String): the identifier of the target node where the edge enters into. This property is mandatory.
-     *           <li> source (String): the identifier of the source node where the edge originates from. This property is mandatory. FIXME: check why we are accepting edges with undefined source.
-     *           <li> name (String): the name of the edge. This property is optional. If omitted, the edge identifier automatically assigned by this function will be used as edge name.</li>
-     *           <li> controlPoint (Object): the control point of the edge.</li>
+     *           &lt;li> target (String): the identifier of the target node where the edge enters into. This property is mandatory.
+     *           &lt;li> source (String): the identifier of the source node where the edge originates from. This property is mandatory. FIXME: check why we are accepting edges with undefined source.
+     *           &lt;li> name (String): the name of the edge. This property is optional. If omitted, the edge identifier automatically assigned by this function will be used as edge name.&lt;/li>
+     *           &lt;li> controlPoint (Object): the control point of the edge.&lt;/li>
      * @returns {Object} Descriptor fo the created edge. Edge descriptors have the following properties:
-     *           <li> id (String): the unique identifier of the node.</li>
-     *           <li> name (String): the name of the node.</li>
-     *           <li> source (Object): the source node.</li>
-     *           <li> target (Object): the target node.</li>
-     *           <li> controlPoint (Object): the control point.</li>
+     *           &lt;li> id (String): the unique identifier of the node.&lt;/li>
+     *           &lt;li> name (String): the name of the node.&lt;/li>
+     *           &lt;li> source (Object): the source node.&lt;/li>
+     *           &lt;li> target (Object): the target node.&lt;/li>
+     *           &lt;li> controlPoint (Object): the control point.&lt;/li>
 	 * @memberof module:Emucharts
      * @instance
 	 */
@@ -355,13 +383,13 @@ define(function (require, exports, module) {
      * @function add_initial_edge
 	 * @description Adds a new initial edge to the diagram. Initial edges originate from an implicit source node (which need not to be specified).
      * @param edge {Object} The characteristics of the edge:
-     *           <li> target (String): the identifier of the target node where the edge enters into. This property is mandatory.
-     *           <li> name (String): the name of the edge. This property is optional. If omitted, the edge identifier automatically assigned by this function will be used as edge name.</li>
+     *           &lt;li> target (String): the identifier of the target node where the edge enters into. This property is mandatory.
+     *           &lt;li> name (String): the name of the edge. This property is optional. If omitted, the edge identifier automatically assigned by this function will be used as edge name.&lt;/li>
      * @returns {Object} Descriptor fo the created edge. Edge descriptors have the following properties:
-     *           <li> id (String): the unique identifier of the node.</li>
-     *           <li> name (String): the name of the node.</li>
-     *           <li> source (Object): the source node.</li>
-     *           <li> target (Object): the target node.</li>
+     *           &lt;li> id (String): the unique identifier of the node.&lt;/li>
+     *           &lt;li> name (String): the name of the node.&lt;/li>
+     *           &lt;li> source (Object): the source node.&lt;/li>
+     *           &lt;li> target (Object): the target node.&lt;/li>
 	 * @memberof module:Emucharts
      * @instance
 	 */
@@ -408,7 +436,7 @@ define(function (require, exports, module) {
 	 */
     Emucharts.prototype.remove_edge = function (edge) {
         var rem = this.edges.get(edge);
-        if (rem && this.edges.remove(edge)) {
+        if (rem &amp;&amp; this.edges.remove(edge)) {
             // fire event
             this.fire({
                 type: "emuCharts_transitionRemoved",
@@ -440,7 +468,7 @@ define(function (require, exports, module) {
 	 */
     Emucharts.prototype.remove_initial_edge = function (initial_edge) {
         var rem = this.initial_edges.get(initial_edge);
-        if (rem && this.initial_edges.remove(initial_edge)) {
+        if (rem &amp;&amp; this.initial_edges.remove(initial_edge)) {
             // fire event
             this.fire({
                 type: "emuCharts_initialTransitionRemoved",
@@ -680,7 +708,7 @@ define(function (require, exports, module) {
 	 */
     Emucharts.prototype.remove_constant = function (constantID) {
         var rem = this.constants.get(constantID);
-        if (rem && this.constants.remove(constantID)) {
+        if (rem &amp;&amp; this.constants.remove(constantID)) {
             // fire event
             this.fire({
                 type: "emuCharts_constantRemoved",
@@ -701,7 +729,7 @@ define(function (require, exports, module) {
 	 */
     Emucharts.prototype.remove_variable = function (variableID) {
         var rem = this.variables.get(variableID);
-        if (rem && this.variables.remove(variableID)) {
+        if (rem &amp;&amp; this.variables.remove(variableID)) {
             // fire event
             this.fire({
                 type: "emuCharts_variableRemoved",
@@ -717,9 +745,9 @@ define(function (require, exports, module) {
 	 * @description Interface function for renaming (i.e., editing) a constant
      * @param constantID {String} A unique identifier for the constant.
      * @param newData {Object} Constants data, an object containing the following fields
-     *           <li> type (String): the constant type (e.g., "real"). This field is mandatory.</li>
-     *           <li> name (String): the constant name (e.g., "max"). This field is mandatory.</li>
-     *           <li> value (String): the constant value (e.g., "5"). This field is optional.</li>
+     *           &lt;li> type (String): the constant type (e.g., "real"). This field is mandatory.&lt;/li>
+     *           &lt;li> name (String): the constant name (e.g., "max"). This field is mandatory.&lt;/li>
+     *           &lt;li> value (String): the constant value (e.g., "5"). This field is optional.&lt;/li>
      * @returns {Boolean} true if the constant was renamed successfully; otherwise returns false.
 	 * @memberof module:Emucharts
      * @instance
@@ -902,8 +930,30 @@ define(function (require, exports, module) {
      * @instance
 	 */
     Emucharts.prototype.empty = function () {
-        return this.nodes.empty() && this.edges.empty();
+        return this.nodes.empty() &amp;&amp; this.edges.empty();
     };
 
     module.exports = Emucharts;
-});
+});</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Descriptor.html">Descriptor</a></li><li><a href="module-Emucharts.html">Emucharts</a></li><li><a href="module-NotificationManager.html">NotificationManager</a></li><li><a href="module-Project.html">Project</a></li><li><a href="module-ProjectManager.html">ProjectManager</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a> on Wed Jan 07 2015 22:53:31 GMT-0000 (GMT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: project/Project.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: project/Project.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @module Project
  * @description Specifies files and functionalities of a PVSio-web project.
  * @version 1.0
@@ -174,7 +202,7 @@ define(function (require, exports, module) {
     /**
      * @function getDescriptors
      * @description Gets the list of all file descriptors stored in the project.
-     * @returns {Array<Descriptor>} a list of project files in the project
+     * @returns {Array&lt;Descriptor>} a list of project files in the project
      * @memberof module:Project
      * @instance     
      */
@@ -184,7 +212,7 @@ define(function (require, exports, module) {
     /**
      * @function getFolderStructure
      * @description Gets the folder structure of the project based on the list of file descriptors stored in the project._this function shows only file types specified in FilesFilter.
-     * @returns {Object<{path: String, name: String, isDirectory: bool, children: Array<Object>}>}
+     * @returns {Object&lt;{path: String, name: String, isDirectory: bool, children: Array&lt;Object>}>}
      * @memberof module:Project
      * @instance     
     */
@@ -206,7 +234,7 @@ define(function (require, exports, module) {
             });
         });
         function getChildren(children, parentName) {
-            if (children && Object.keys(children).length) {
+            if (children &amp;&amp; Object.keys(children).length) {
                 var res = Object.keys(children).map(function (key) {
                     var child = children[key];
                     child.path = parentName + "/" + child.name;
@@ -247,7 +275,7 @@ define(function (require, exports, module) {
     */
     Project.prototype.fileExists = function (descriptor) {
         return new Promise(function (resolve, reject) {
-            if (descriptor && (typeof descriptor === "string" ||
+            if (descriptor &amp;&amp; (typeof descriptor === "string" ||
                         typeof descriptor.path === "function")) {
                 var path = (typeof descriptor === "string") ? descriptor : descriptor.path;
                 WSManager.getWebSocket().send({
@@ -282,7 +310,7 @@ define(function (require, exports, module) {
      * @instance
     */
     Project.prototype.fileDescriptorExists = function (descriptor) {
-        if (descriptor && (typeof descriptor === "string" ||
+        if (descriptor &amp;&amp; (typeof descriptor === "string" ||
                             typeof descriptor.path === "function")) {
             var path = (typeof descriptor === "string") ? descriptor : descriptor.path;
             return (this.getDescriptor(descriptor)) ? true : false;
@@ -363,14 +391,14 @@ define(function (require, exports, module) {
      * @function addFile
      * @description Creates the specified file within the project folder.
      * @param file {Descriptor} The file to be added. Descriptor has the following properties:
-     *           <li> path, a function that returns a String representing the file path. 
+     *           &lt;li> path, a function that returns a String representing the file path. 
      *                The path is relative to the current project folder. 
-     *                This property is mandatory, and the filename must be valid. </li>
-     *           <li> content, a function that returns a String representing the content of the file.
-     *                This property is mandatory.</li>
-     *           <li> encoding, a function that returns a String representing the file encoding. 
+     *                This property is mandatory, and the filename must be valid. &lt;/li>
+     *           &lt;li> content, a function that returns a String representing the content of the file.
+     *                This property is mandatory.&lt;/li>
+     *           &lt;li> encoding, a function that returns a String representing the file encoding. 
      *                Text files must have encoding "utf8". Image files must have encoding "base64".
-     *                If unspecified, encoding "utf8" is used.</li>
+     *                If unspecified, encoding "utf8" is used.&lt;/li>
      * @param opt {Object} Function options: overWrite, defines whether existing files shall be ovewritten when.
      *                     If overWrite is false or undefined and the file exists, the function returns an error
      *                     { type: "EEXIST", msg: String}
@@ -432,7 +460,7 @@ define(function (require, exports, module) {
                 });
             }
             var promises = [], i = 0;
-            for (i = 0; i < fileList.length; i++) {
+            for (i = 0; i &lt; fileList.length; i++) {
                 promises.push(fs.readLocalFile(fileList[i]));
             }
             return Promise.all(promises).then(function (res) {
@@ -448,25 +476,25 @@ define(function (require, exports, module) {
      * @function refreshDescriptor
      * @description Reloads property content of the descriptor if the property is non-null.
      * @param file {Descriptor} The refreshed file descriptor. File descriptors have the following properties:
-     *           <li> path, a function that returns a String representing the file path. 
+     *           &lt;li> path, a function that returns a String representing the file path. 
      *                The path is relative to the current project folder. 
-     *                This property is mandatory, and the filename must be valid. </li>
-     *           <li> content, a function that returns a String representing the content of the file.
-     *                This property is mandatory.</li>
-     *           <li> encoding, a function that returns a String representing the file encoding. 
+     *                This property is mandatory, and the filename must be valid. &lt;/li>
+     *           &lt;li> content, a function that returns a String representing the content of the file.
+     *                This property is mandatory.&lt;/li>
+     *           &lt;li> encoding, a function that returns a String representing the file encoding. 
      *                Text files must have encoding "utf8". Image files must have encoding "base64".
-     *                If unspecified, encoding "utf8" is used.</li>
+     *                If unspecified, encoding "utf8" is used.&lt;/li>
      * @returns {Promise(Descriptor)} A Promise that resolves to the descriptor passed as argument
      * @memberof module:Project
      * @instance
      */
     Project.prototype.refreshDescriptor = function (descriptor) {
-        if (descriptor && descriptor.path) {
+        if (descriptor &amp;&amp; descriptor.path) {
             var f = _this.getDescriptors().filter(function (d) {
                 return d.path === descriptor.path;
             });
             // refresh content only if the content was already loaded
-            if (f.length > 0 && f[0].content) {
+            if (f.length > 0 &amp;&amp; f[0].content) {
                 return new Promise(function (resolve, reject) {
                     f[0].loadContent().then(function (content) {
                         f[0].content = content;
@@ -621,7 +649,7 @@ define(function (require, exports, module) {
             } else {
                 Logger.log(err);
             }
-            if (cb && typeof cb === "function") {
+            if (cb &amp;&amp; typeof cb === "function") {
                 cb(err, res);
             }
         });
@@ -651,7 +679,7 @@ define(function (require, exports, module) {
             } else {
                 Logger.log(err);
             }
-            if (cb && typeof cb === "function") {
+            if (cb &amp;&amp; typeof cb === "function") {
                 cb(err, _this);
             }
         });
@@ -679,7 +707,7 @@ define(function (require, exports, module) {
             } else {
                 Logger.log(err);
             }
-            if (cb && typeof cb === "function") {
+            if (cb &amp;&amp; typeof cb === "function") {
                 cb(err, res);
             }
         });
@@ -752,11 +780,11 @@ define(function (require, exports, module) {
                 ///FIXME handle scripts and widgetDefinitions (maybe we dont need to)
                 var imageDescriptors = [];
                 descriptors.forEach(function (file) {
-                    if (file && file.path && file.name) {
+                    if (file &amp;&amp; file.path &amp;&amp; file.name) {
 //                        pf = p.addDescriptor(file);
                         _this.addDescriptor(file);
                         if (file.encoding === "base64") { imageDescriptors.push(file); }
-                        if (file.name === "pvsioweb.json" && file.content) {
+                        if (file.name === "pvsioweb.json" &amp;&amp; file.content) {
                             mainFileName = JSON.parse(file.content).mainPVSFile;
                             fileVersion = JSON.parse(file.content).version;
                             prototypeImage = JSON.parse(file.content).prototypeImage;
@@ -812,3 +840,26 @@ define(function (require, exports, module) {
 	 * @param {Project} project The saved project
 	 */
 });
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Descriptor.html">Descriptor</a></li><li><a href="module-Emucharts.html">Emucharts</a></li><li><a href="module-NotificationManager.html">NotificationManager</a></li><li><a href="module-Project.html">Project</a></li><li><a href="module-ProjectManager.html">ProjectManager</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a> on Wed Jan 07 2015 22:53:31 GMT-0000 (GMT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

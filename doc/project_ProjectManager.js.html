@@ -1,19 +1,47 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: project/ProjectManager.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: project/ProjectManager.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @module ProjectManager
  * @version 1.0
  * @description
  * Project Manager is responsible for operations on projects (e.g., create, remove, open).
  * Currently, it embeds the PVSio-web file browser, so the module includes APIs for files/directories,
- * and selection of elements within the PVSio-web file browser.<br/>
+ * and selection of elements within the PVSio-web file browser.&lt;br/>
  * This module can be used for the following purposes:
- *   <ul><li>Listen to events such as "ProjectChanged", "SelectedFileChanged"</li>
- *   <li>Open/Create/Delete/Rename projects</li>
- *   <li>Get an instance of the current project</li>
- *   <li>Perform operations across projects (e.g., copy files across projects)</li></ul>
+ *   &lt;ul>&lt;li>Listen to events such as "ProjectChanged", "SelectedFileChanged"&lt;/li>
+ *   &lt;li>Open/Create/Delete/Rename projects&lt;/li>
+ *   &lt;li>Get an instance of the current project&lt;/li>
+ *   &lt;li>Perform operations across projects (e.g., copy files across projects)&lt;/li>&lt;/ul>
  * @author Patrick Oladimeji, Paolo Masci
  * @date 11/15/13 9:49:03 AM
  *
- * @example <caption>Typical use of ProjectManager APIs within a PVSio-web plugin module.</caption>
+ * @example &lt;caption>Typical use of ProjectManager APIs within a PVSio-web plugin module.&lt;/caption>
  * // Example module that uses ProjectManager.
  * define(function (require, exports, module) {
  *     "use strict";
@@ -90,7 +118,7 @@ define(function (require, exports, module) {
                 });
             });
             function getChildren(children, parentPath) {
-                if (children && Object.keys(children).length) {
+                if (children &amp;&amp; Object.keys(children).length) {
                     var res = Object.keys(children).map(function (key) {
                         var child = children[key];
                         child.path = parentPath + "/" + child.name;
@@ -122,7 +150,7 @@ define(function (require, exports, module) {
                 pvsFilesListView.deleteItem(event.path);
             }
         } else if (event.event === "rename") { //file or folder added
-            if (event.isDirectory && event.name !== "pvsbin") {
+            if (event.isDirectory &amp;&amp; event.name !== "pvsbin") {
                 children = getFolderChildren(event.subFiles, event.path);
                 if (!pvsFilesListView.getTreeList().nodeExists(event.path)) {
                     parentFolderName = event.path.split("/").slice(0, -1).join("/");
@@ -171,7 +199,7 @@ define(function (require, exports, module) {
                 }
             }
         } else if (event.event === "refresh") { //file or folder added
-            if (event.isDirectory && event.name !== "pvsbin") {
+            if (event.isDirectory &amp;&amp; event.name !== "pvsbin") {
                 children = getFolderChildren(event.subFiles, event.path);
                 parentFolderName = event.path.replace(event.name, "");
                 parent = pvsFilesListView.getTreeList().findNode(function (d) {
@@ -231,9 +259,9 @@ define(function (require, exports, module) {
 	}
     
 	/**
-	 * @function <a name="ProjectManager">ProjectManager</a>
+	 * @function &lt;a name="ProjectManager">ProjectManager&lt;/a>
      * @description Constructor. This function is private to the module.
-     *              To get a ProjectManager instance, please use <a href="#getInstance">getInstance</a>.
+     *              To get a ProjectManager instance, please use &lt;a href="#getInstance">getInstance&lt;/a>.
 	 * @param project {Project} The PVSio-web project that shall be managed.
      *        The current implementation of ProjectManager is able to manage one project at a time.
      * @memberof module:ProjectManager
@@ -255,7 +283,7 @@ define(function (require, exports, module) {
         });
 		window.onbeforeunload =  function () {
             var p = _projectManager.project();
-            if (p && p._dirty()) { return "Are you sure you want to exit? All unsaved changed will be lost."; }
+            if (p &amp;&amp; p._dirty()) { return "Are you sure you want to exit? All unsaved changed will be lost."; }
             WSManager.getWebSocket().closePVSProcess();
         };
         renderSourceFileList();
@@ -263,7 +291,7 @@ define(function (require, exports, module) {
         eventDispatcher(this);
         document.onkeydown = function (event) {
             // key 83 is 's'
-            if (event.ctrlKey && (event.keyCode === 83 || event.which === 83)) {
+            if (event.ctrlKey &amp;&amp; (event.keyCode === 83 || event.which === 83)) {
                 event.preventDefault();
                 event.stopPropagation();
                 _projectManager.saveProject();
@@ -274,7 +302,7 @@ define(function (require, exports, module) {
 	}
     
     /**
-     * @function <a name="renderFileTreeView">renderFileTreeView</a>
+     * @function &lt;a name="renderFileTreeView">renderFileTreeView&lt;/a>
      * @description refreshes the fileTreeView
      * @memberof module:ProjectManager
      * @instance
@@ -284,7 +312,7 @@ define(function (require, exports, module) {
     };
     
 	/**
-     * @function <hr><a name="writeFile">writeFile</a>
+     * @function &lt;hr>&lt;a name="writeFile">writeFile&lt;/a>
      * @description Writes a file to disk.
      * @param path {!String} The path of the file that shall be written.
      *              The provided file path is used as a relative path from the project folder
@@ -292,21 +320,21 @@ define(function (require, exports, module) {
      *              This parameter is mandatory: it must be a valid non-null String.
      * @param content {?String} The content of the file. If null, the empty String "" will be used as file content.
 	 * @param opt {?Object} Options
-     *        <li>overWrite {bool} Enables file overwrite. If overWrite is false and a file with the same name
-     *            exists, then the function returns an error code "EEXIST". Default: false.</li>
-     *        <li>encoding {String} Defines the file encoding: "utf8" for text files; "base64" for images. Default: "utf8"</li>
-     *        <li>silentMode {bool} Disables showing notifications up front within the PVSio-web user interface. Default: false.</li>
+     *        &lt;li>overWrite {bool} Enables file overwrite. If overWrite is false and a file with the same name
+     *            exists, then the function returns an error code "EEXIST". Default: false.&lt;/li>
+     *        &lt;li>encoding {String} Defines the file encoding: "utf8" for text files; "base64" for images. Default: "utf8"&lt;/li>
+     *        &lt;li>silentMode {bool} Disables showing notifications up front within the PVSio-web user interface. Default: false.&lt;/li>
      * @returns {Promise(Descriptor)} A Promise that resolves to the descriptor of the file added.
-     *           The main properties of file descriptors are (see <a href="#!">Descriptor</a>):
-     *           <li> path {String} The file path. </li>
-     *           <li> content {String} The content of the file.</li>
-     *           <li> encoding {String} The file encoding.
-     *                Text files have encoding "utf8". Image files have encoding "base64".</li>     
+     *           The main properties of file descriptors are (see &lt;a href="#!">Descriptor&lt;/a>):
+     *           &lt;li> path {String} The file path. &lt;/li>
+     *           &lt;li> content {String} The content of the file.&lt;/li>
+     *           &lt;li> encoding {String} The file encoding.
+     *                Text files have encoding "utf8". Image files have encoding "base64".&lt;/li>     
      * @memberof module:ProjectManager
      * @instance
      *
      *
-     * @example <caption>Example 1: Using writeFile to add file main.pvs into directory test.</caption>
+     * @example &lt;caption>Example 1: Using writeFile to add file main.pvs into directory test.&lt;/caption>
      * // pm is the ProjectManager instance
      * pm.writeFile("test/main.pvs", "%-- this is a text file", { overWrite: false }).then(function (res) {
      *     //file successfully written to disk, do something...
@@ -340,7 +368,7 @@ define(function (require, exports, module) {
                 WSManager.getWebSocket().writeFile(token, function (err, res) {
                     if (err || res.path !== token.path) { return reject(err); }
                     var notification = "File " + res.path + " correctly written to disk";
-                    if (opt && opt.silentMode) {
+                    if (opt &amp;&amp; opt.silentMode) {
                         Logger.log(notification);
                     } else {
                         NotificationManager.show(notification);
@@ -353,8 +381,8 @@ define(function (require, exports, module) {
 	};
     
 	/**
-     * @function <hr><a name="writeFileDialog">writeFileDialog</a>
-     * @description Writes a file to disk. This function is a variant of <a href="writeFile">writeFile</a>
+     * @function &lt;hr>&lt;a name="writeFileDialog">writeFileDialog&lt;/a>
+     * @description Writes a file to disk. This function is a variant of &lt;a href="writeFile">writeFile&lt;/a>
      *              designed to show a confirmation dialog before overwriting files.
      * @param path {!String} The path of the file that shall be written.
      *              The provided file path will be used as a relative path from the project folder
@@ -362,16 +390,16 @@ define(function (require, exports, module) {
      *              This parameter is mandatory: it must be a valid non-null String.
      * @param content {?String} The content of the file. If null, the empty String "" will be used as file content.
 	 * @param opt {?Object} Options
-     *        <li>overWrite {bool} Enables file overwrite. This option is handled by the function 
-     *            so that directories are not overwritten without explicit confirmation form the user.</li>
-     *        <li>encoding {String} Defines the file encoding: "utf8" for text files; "base64" for images. Default: "utf8"</li>
-     *        <li>silentMode {bool} Disables up front notifications in the PVSio-web user interface. Default: false.</li>
+     *        &lt;li>overWrite {bool} Enables file overwrite. This option is handled by the function 
+     *            so that directories are not overwritten without explicit confirmation form the user.&lt;/li>
+     *        &lt;li>encoding {String} Defines the file encoding: "utf8" for text files; "base64" for images. Default: "utf8"&lt;/li>
+     *        &lt;li>silentMode {bool} Disables up front notifications in the PVSio-web user interface. Default: false.&lt;/li>
      * @returns {Promise(Descriptor)} A Promise that resolves to the descriptor of the file added.
-     *           The main properties of file descriptors are (see <a href="#!">Descriptor</a>):
-     *           <li> path {String} The file path. </li>
-     *           <li> content {String} The content of the file.</li>
-     *           <li> encoding {String} The file encoding.
-     *                Text files have encoding "utf8". Image files have encoding "base64".</li>     
+     *           The main properties of file descriptors are (see &lt;a href="#!">Descriptor&lt;/a>):
+     *           &lt;li> path {String} The file path. &lt;/li>
+     *           &lt;li> content {String} The content of the file.&lt;/li>
+     *           &lt;li> encoding {String} The file encoding.
+     *                Text files have encoding "utf8". Image files have encoding "base64".&lt;/li>     
      * @memberof module:ProjectManager
      * @instance
      *
@@ -412,7 +440,7 @@ define(function (require, exports, module) {
 
 	
 	/**
-     * @function <hr><a name="readFile">readFile</a>
+     * @function &lt;hr>&lt;a name="readFile">readFile&lt;/a>
      * @description Reads the content of a file from disk.
      * @param path {!String} The path of the file that shall be read.
      *              The provided file path is used as a relative path from the project folder
@@ -421,7 +449,7 @@ define(function (require, exports, module) {
      * @memberof module:ProjectManager
      * @instance
      *
-     * @example <caption>Using readFile to read the content of file main.pvs stored in directory test.</caption>
+     * @example &lt;caption>Using readFile to read the content of file main.pvs stored in directory test.&lt;/caption>
      * // pm is the ProjectManager instance
      * pm.readFile("test/main.pvs").then(function (res) {
      *     // res.content is the file content
@@ -459,14 +487,14 @@ define(function (require, exports, module) {
     };
     
 	/**
-     * @function <hr><a name="readLocalFile">readLocalFile</a>
+     * @function &lt;hr>&lt;a name="readLocalFile">readLocalFile&lt;/a>
      * @description Reads the content of a local file stored on the client.
      * @param fileList {!FileList} The list of local files that shall be read.
      * @returns {Promise(Array(Descriptor))} A Promise that resolves to an Array of file descriptors.
      * @memberof module:ProjectManager
      * @instance
      *
-     * @example <caption>Using readFile to read the content of file main.pvs stored in directory test.</caption>
+     * @example &lt;caption>Using readFile to read the content of file main.pvs stored in directory test.&lt;/caption>
      * // pm is the ProjectManager instance
      * pm.readFile("test/main.pvs").then(function (res) {
      *     // res.content is the file content
@@ -483,8 +511,8 @@ define(function (require, exports, module) {
      * @description Opens a dialog that allows users to select local files that shall be imported in the project.
 	 * @returns {Promise(FileList)} a Promise that resolves a FileList object with the files selected by the user.
      *           Each file in the FileList has the following properties:
-     *           <li>name (String): the name of the file</li>
-     *           <li>type (String): the MIME type of the file. For images, the MIME type starts with 'image/'</li>
+     *           &lt;li>name (String): the name of the file&lt;/li>
+     *           &lt;li>type (String): the MIME type of the file. For images, the MIME type starts with 'image/'&lt;/li>
 	 * @memberof module:ProjectManager
      * @instance
 	 */
@@ -498,7 +526,7 @@ define(function (require, exports, module) {
                 });
             } else {
                 var promises = [], i = 0;
-                for (i = 0; i < fileList.length; i++) {
+                for (i = 0; i &lt; fileList.length; i++) {
                     promises.push(fs.readLocalFile(fileList[i]));
                 }
                 return Promise.all(promises).then(function (res) {
@@ -531,7 +559,7 @@ define(function (require, exports, module) {
 
 
 	/**
-     * @function <hr><a name="deleteFile">deleteFile</a>
+     * @function &lt;hr>&lt;a name="deleteFile">deleteFile&lt;/a>
      * @description Deletes a file from disk.
      * @param path {!String} The path of the file that shall be deleted.
      *              The provided file path is used as a relative path from the project folder
@@ -540,7 +568,7 @@ define(function (require, exports, module) {
      * @memberof module:ProjectManager
      * @instance
      *
-     * @example <caption>Using deleteFile to delete file test/main.pvs</caption>
+     * @example &lt;caption>Using deleteFile to delete file test/main.pvs&lt;/caption>
      * // pm is the ProjectManager instance
      * pm.deleteFile("test/main.pvs").then(function (res) {
      *     // res is the name of the deleted file
@@ -580,8 +608,8 @@ define(function (require, exports, module) {
 	};
     
 	/**
-     * @function <hr><a name="deleteFileDialog">deleteFileDialog</a>
-     * @description Deletes a file from disk. This function is a variant of <a href="#deleteFile">deleteFile</a>
+     * @function &lt;hr>&lt;a name="deleteFileDialog">deleteFileDialog&lt;/a>
+     * @description Deletes a file from disk. This function is a variant of &lt;a href="#deleteFile">deleteFile&lt;/a>
      *              designed to show a confirmation dialog before deleting files.
      * @param path {!String} The path of the file that shall be deleted.
      *              The provided file path is used as a relative path from the project folder
@@ -609,7 +637,7 @@ define(function (require, exports, module) {
     };
 
     /**
-	 * @function <hr><a name="rmDir">rmDir</a>
+	 * @function &lt;hr>&lt;a name="rmDir">rmDir&lt;/a>
      * @description Deletes a directory.
      * @param path {!String} Path of the folder that shall be deleted.
      *              The provided file path is used as a relative path from the project folder
@@ -643,8 +671,8 @@ define(function (require, exports, module) {
     };
 
     /**
-	 * @function <hr><a name="rmDirDialog">rmDirDialog</a>
-     * @description Deletes a directory. This is a variant of <a href="#rmDir">rmDir</a> designed
+	 * @function &lt;hr>&lt;a name="rmDirDialog">rmDirDialog&lt;/a>
+     * @description Deletes a directory. This is a variant of &lt;a href="#rmDir">rmDir&lt;/a> designed
      *              to show a dialog to ask confirmation before deleting directories.
      * @param path {!String} Path of the folder that shall be deleted.
      *              The provided file path is used as a relative path from the project folder
@@ -679,13 +707,13 @@ define(function (require, exports, module) {
     };
     
     /**
-	 * @function <hr><a name="mkDir">mkDir</a>
+	 * @function &lt;hr>&lt;a name="mkDir">mkDir&lt;/a>
      * @description Creates a directory.
      * @param path {!String} Path of the folder that shall be created.
      *              The provided file path is used as a relative path from the project folder
      *              of the PVSio-web installation (i.e., pvsio-web/examples/projects/).
 	 * @param opt {?Object} Options
-     *        <li>overWrite {bool} Enables overwriting of the directory. Default: false.</li>
+     *        &lt;li>overWrite {bool} Enables overwriting of the directory. Default: false.&lt;/li>
 	 * @return {Promise(Descriptor)} A Promise that resolves to a folder descriptor.
      * @memberof module:ProjectManager
      * @instance
@@ -734,15 +762,15 @@ define(function (require, exports, module) {
     };
     
     /**
-	 * @function <hr><a name="mkDirDialog">mkDirDialog</a>
-     * @description Creates a directory. This is a variant of <a href="#mkDir">mkDir</a> designed
+	 * @function &lt;hr>&lt;a name="mkDirDialog">mkDirDialog&lt;/a>
+     * @description Creates a directory. This is a variant of &lt;a href="#mkDir">mkDir&lt;/a> designed
      *              to show a dialog to ask confirmation before overwriting directories.
      * @param path {!String} Path of the folder that shall be created.
      *              The provided file path is used as a relative path from the project folder
      *              of the PVSio-web installation (i.e., pvsio-web/examples/projects/).
 	 * @param opt {?Object} Options
-     *        <li>overWrite {bool} Enables overwrite. This option is handled by the function 
-     *            so that directories are not overwritten without explicit confirmation form the user.</li>
+     *        &lt;li>overWrite {bool} Enables overwrite. This option is handled by the function 
+     *            so that directories are not overwritten without explicit confirmation form the user.&lt;/li>
 	 * @return {Promise(Descriptor)} A Promise that resolves to a folder descriptor.
      * @memberof module:ProjectManager
      * @instance
@@ -775,7 +803,7 @@ define(function (require, exports, module) {
 
     
 	/**
-     * @function <hr><a name="getSelectedData">getSelectedData</a>
+     * @function &lt;hr>&lt;a name="getSelectedData">getSelectedData&lt;/a>
      * @description Gets the descriptor of the file or directory currently selected within the PVSio-web file browser.
 	 * @returns {Descriptor} Returns the descriptor of the file that is currently selected within the PVSio-web file browser.
      * @memberof module:ProjectManager
@@ -790,11 +818,11 @@ define(function (require, exports, module) {
 	};
     
 	/**
-     * @function <hr><a name="getSelectedFile">getSelectedFile</a>
+     * @function &lt;hr>&lt;a name="getSelectedFile">getSelectedFile&lt;/a>
 	 * @description Get the descriptor of the file currently selected within the PVSio-web file browser.
 	 * @returns {Descriptor} Returns the descriptor of the file that is currently selected within the PVSio-web file browser.
      *          The function returns null if the selected item is a folder.
-     *          This function is a variant of <a href="#getSelectedData">getSelectedData</a>
+     *          This function is a variant of &lt;a href="#getSelectedData">getSelectedData&lt;/a>
 	 * @memberof module:ProjectManager
      * @instance
 	 */
@@ -806,11 +834,11 @@ define(function (require, exports, module) {
      * @function selectFile
      * @description Selects the file specified as argument
      * @param file {String|Descriptor} The file that shall be selected.
-     *        <li>If the file is specified as a String, then file is a path relative 
-     *        to the current project (and the name of the current project folder is included in the path).</li>
-     *        <li>If the file is specified as a file descriptor (Descriptor), then the file descriptor
+     *        &lt;li>If the file is specified as a String, then file is a path relative 
+     *        to the current project (and the name of the current project folder is included in the path).&lt;/li>
+     *        &lt;li>If the file is specified as a file descriptor (Descriptor), then the file descriptor
      *        shall be one of those stored in the current project. These descriptors can be retrieved
-     *        using ProjectManager.getFileDescriptors().</li>
+     *        using ProjectManager.getFileDescriptors().&lt;/li>
      * @returns {bool} true if the file was successfully selected, false otherwise
      * @memberof module:ProjectManager
      * @instance
@@ -829,7 +857,7 @@ define(function (require, exports, module) {
     //     These are the main APIs of ProjectManager
     //----------------------------------------------------------------------------------------
 	/**
-     * @function <a name="fireProjectChanged">fireProjectChanged</a>
+     * @function &lt;a name="fireProjectChanged">fireProjectChanged&lt;/a>
 	 * @description Fires "ProjectChanged" event, and contextually refreshes the PVSio-web browser user interface.
      * @private
 	 */
@@ -841,7 +869,7 @@ define(function (require, exports, module) {
     }
 
     /**
-     * @function <hr><a name="openProject">openProject</a>
+     * @function &lt;hr>&lt;a name="openProject">openProject&lt;/a>
      * @description Load a project from disk.
      * @param projectName The name of the project that shall be opened.
      * @returns {Promise(Project)} A Promise that resolves to the descriptor of the project loaded from disk.
@@ -850,7 +878,7 @@ define(function (require, exports, module) {
      */
 	ProjectManager.prototype.openProject = function (projectName) {
         return new Promise(function (resolve, reject) {
-            if (projectName && typeof projectName === "string" && projectName !== "") {
+            if (projectName &amp;&amp; typeof projectName === "string" &amp;&amp; projectName !== "") {
                 WSManager.getWebSocket().send({type: "openProject", name: projectName}, function (err, res) {
                     if (!err) {
                         var descriptors = []; // file descriptors
@@ -881,8 +909,8 @@ define(function (require, exports, module) {
     };
     
     /**
-     * @function <hr><a name="openProjectDialog">openProjectDialog</a>
-     * @description Load a project from disk. This is a variant of <a href="#openProject">openProject</a>
+     * @function &lt;hr>&lt;a name="openProjectDialog">openProjectDialog&lt;/a>
+     * @description Load a project from disk. This is a variant of &lt;a href="#openProject">openProject&lt;/a>
      *              designed to show a dialog that shows the list of available projects 
      *              and allows the user to select which project shall be opened.
      * @returns {Promise(Project)} A Promise that resolves to the descriptor of the project loaded from disk.
@@ -923,17 +951,17 @@ define(function (require, exports, module) {
      * @function createProject
 	 * @description Creates a new Project, that is a new directory in folder "examples/projects"
      * @param data {Object} Object with the following properties
-     *    <li> projectName is a String defining the project name. This property is mandatory.</li>
-     *    <li> prototypeImage is a FileList object specifying the prototype image. This property is optional and can be left unspecified.</li>
-     *    <li> pvsSpec is a FileList object specifying the path of a txt file containing a model.  This property is optional and can be left unspecified.</li>
-     *    <li> overWrite is a boolean that indicates whether the directory shall be overwritten with the new content in the case the directory already exists. If overWrite is false and the directory exists, then createProject will reject the request. This property is optional and can be left unspecified. Default is false.</li>
-     *    <li> silentMode is a boolean than can be used to hide notifications.  This property is optional and can be left unspecified. Default is false. </li>
+     *    &lt;li> projectName is a String defining the project name. This property is mandatory.&lt;/li>
+     *    &lt;li> prototypeImage is a FileList object specifying the prototype image. This property is optional and can be left unspecified.&lt;/li>
+     *    &lt;li> pvsSpec is a FileList object specifying the path of a txt file containing a model.  This property is optional and can be left unspecified.&lt;/li>
+     *    &lt;li> overWrite is a boolean that indicates whether the directory shall be overwritten with the new content in the case the directory already exists. If overWrite is false and the directory exists, then createProject will reject the request. This property is optional and can be left unspecified. Default is false.&lt;/li>
+     *    &lt;li> silentMode is a boolean than can be used to hide notifications.  This property is optional and can be left unspecified. Default is false. &lt;/li>
      * FIXME: the type of prototypeImage and pvsSpec should be changed into Descriptors. This way both local files and remote files can be passed as function arguments.
      * @returns {Promise(Project)} A Promise that resolves to the descriptor of the created project
      *    The descriptor has the following format:
-     *    <li> projectName is a String defining the project name. </li>
-     *    <li> prototypeImage is an Array of Strings; each string is the path of an image filename ?? </li>
-     *    <li> pvsSpec is an Array of Strings; each string is the path of a txt file containing a model.</li>
+     *    &lt;li> projectName is a String defining the project name. &lt;/li>
+     *    &lt;li> prototypeImage is an Array of Strings; each string is the path of an image filename ?? &lt;/li>
+     *    &lt;li> pvsSpec is an Array of Strings; each string is the path of a txt file containing a model.&lt;/li>
      * @memberof ProjectManager
      * @instance
      */
@@ -957,7 +985,7 @@ define(function (require, exports, module) {
                 project.importLocalFiles(data.pvsSpec).then(function (res) {
                     if (res) { descriptors = res; }
                     return project.importLocalFiles(data.prototypeImage).then(function (res) {
-                        if (res && res.length > 0) {
+                        if (res &amp;&amp; res.length > 0) {
                             descriptors = descriptors.concat(res);
                             descriptors.push(
                                 project.addDescriptor(
@@ -986,9 +1014,9 @@ define(function (require, exports, module) {
 	 * @description Shows a dialog that allows users to enter the details of a new project.
      * @returns {Promise(Project)} A Promise that resolves to the descriptor of the created project.
      *    The descriptor has the following format:
-     *    <li> projectName is a String defining the project name. </li>
-     *    <li> prototypeImage is an Array of Strings; each string is the path of an image filename ?? </li>
-     *    <li> pvsSpec is an Array of Strings; each string is the path of a txt file containing a model.</li>
+     *    &lt;li> projectName is a String defining the project name. &lt;/li>
+     *    &lt;li> prototypeImage is an Array of Strings; each string is the path of an image filename ?? &lt;/li>
+     *    &lt;li> pvsSpec is an Array of Strings; each string is the path of a txt file containing a model.&lt;/li>
      * @memberof module:ProjectManager
      * @instance
      */
@@ -1033,7 +1061,7 @@ define(function (require, exports, module) {
     };
     
 	/**
-	 * @function <a name="saveProject">saveProject</a>
+	 * @function &lt;a name="saveProject">saveProject&lt;/a>
      * @description Saves the current project on disk.
 	 * @returns {Promise(Project)} A Promise that resolves to the saved project.
 	 * @memberof module:ProjectManager
@@ -1055,16 +1083,16 @@ define(function (require, exports, module) {
 	};
 	    
     /** 
-     * @function <a name="saveProjectDialog">saveProjectDialog</a>
-	 * @description This function is a variant of <a href="#saveProject">saveProject</a>
+     * @function &lt;a name="saveProjectDialog">saveProjectDialog&lt;/a>
+	 * @description This function is a variant of &lt;a href="#saveProject">saveProject&lt;/a>
      *              that shows a dialog that allows users to enter the details of the project that shall be saved.
      * @param projectName {?String} Default name for the project. If this parameter is non-null, 
      *                             the name is shown in the dialog presented to the user.
      * @returns {Promise(Project)} A Promise that resolves to the descriptor of the saved project.
      *    The descriptor has the following format:
-     *    <li> projectName is a String defining the project name. </li>
-     *    <li> prototypeImage is an Array of Strings; each string is the path of an image filename ?? </li>
-     *    <li> pvsSpec is an Array of Strings; each string is the path of a txt file containing a model.</li>
+     *    &lt;li> projectName is a String defining the project name. &lt;/li>
+     *    &lt;li> prototypeImage is an Array of Strings; each string is the path of an image filename ?? &lt;/li>
+     *    &lt;li> pvsSpec is an Array of Strings; each string is the path of a txt file containing a model.&lt;/li>
      * @memberof module:ProjectManager
      * @instance
      */
@@ -1136,7 +1164,7 @@ define(function (require, exports, module) {
     };
 
 	/**
-	 * @function <a name="backupProject">backupProject</a>
+	 * @function &lt;a name="backupProject">backupProject&lt;/a>
      * @description Creates a backup copy of the project files. The file content used for the backup 
      *              always reflects the current content shown in the PVSio-web user interface, that is
      *              even unsaved changed are saved.
@@ -1174,7 +1202,7 @@ define(function (require, exports, module) {
 	};
 
     /**
-	 * @function <hr><a name="deleteProject">deleteProject</a>
+	 * @function &lt;hr>&lt;a name="deleteProject">deleteProject&lt;/a>
      * @description Deletes a project: its directory and all its files.
      * @param projectName {!String} Name of the project that shall be deleted.
      *              The provided name is relative to the project folder (pvsio-web/examples/projects/).
@@ -1187,8 +1215,8 @@ define(function (require, exports, module) {
     };
 
     /**
-	 * @function <hr><a name="deleteProjectDialog">deleteProjectDialog</a>
-     * @description Deletes a project: its directory and all its files. This is a variant of <a href="#rmDir">rmDir</a> designed
+	 * @function &lt;hr>&lt;a name="deleteProjectDialog">deleteProjectDialog&lt;/a>
+     * @description Deletes a project: its directory and all its files. This is a variant of &lt;a href="#rmDir">rmDir&lt;/a> designed
      *              to show a dialog to ask confirmation before deleting the project.
      * @param projectName {!String} Name of the project that shall be deleted.
      *              The provided name is relative to the project folder pvsio-web/examples/projects/.
@@ -1251,7 +1279,7 @@ define(function (require, exports, module) {
 		cb = cb || noop;
 		var project = _projectManager.project(),
             ws = WSManager.getWebSocket();
-		if (project && project.mainPVSFile()) {
+		if (project &amp;&amp; project.mainPVSFile()) {
 			ws.lastState("init(0)");
 			ws.startPVSProcess({
                 name: project.mainPVSFile().name,
@@ -1264,7 +1292,7 @@ define(function (require, exports, module) {
 	/** 
      * @function createDefaultProject
 	 * @description Creates a new default Project and its folder on disk.
-     *              This is a variant of <a href="#createProject">createProject</a>: the project name is pre-defined, and the content of the project folder is restored (i.e., all files are loaded in to the project) if the project folder already exists.
+     *              This is a variant of &lt;a href="#createProject">createProject&lt;/a>: the project name is pre-defined, and the content of the project folder is restored (i.e., all files are loaded in to the project) if the project folder already exists.
      * @returns {Promise(Project)} Promise that resolves to the created project.
      * @memberof module:ProjectManager
      * @instance
@@ -1297,21 +1325,21 @@ define(function (require, exports, module) {
     };
      
 	/**
-     * @function <hr><a name="newFileDescriptor">newFileDescriptor</a>
+     * @function &lt;hr>&lt;a name="newFileDescriptor">newFileDescriptor&lt;/a>
 	 * @description Creates a new file descriptor.
 	 * @param data {Object({name: String, content: String,
      *              encoding: String, opt: {Object}})}.
-     *    <li> name (String) represent the name of the file.
+     *    &lt;li> name (String) represent the name of the file.
      *         The file name can be prefixed with a path.
-     *         This property is mandatory.</li>
-     *    <li> content (String) represents the content of the file.
-     *         This property is optional.</li>
-     *    <li> encoding (String) specified the file encoding (utf8 or base64).
-     *         This property is optional. If unspecified, encoding utf8 is used.</li>
+     *         This property is mandatory.&lt;/li>
+     *    &lt;li> content (String) represents the content of the file.
+     *         This property is optional.&lt;/li>
+     *    &lt;li> encoding (String) specified the file encoding (utf8 or base64).
+     *         This property is optional. If unspecified, encoding utf8 is used.&lt;/li>
      * @returns {Descriptor} The created file descriptor. The file descriptor has the following properties:
-     *    <li>path {String} The path of the file</li>
-     *    <li>content {String} The content of the file</li>
-     *    <li>encoding: {String} The encoding of the file</li>
+     *    &lt;li>path {String} The path of the file&lt;/li>
+     *    &lt;li>content {String} The content of the file&lt;/li>
+     *    &lt;li>encoding: {String} The encoding of the file&lt;/li>
      * Note: the returned descriptor is null when an error occurs in the creation of the file descriptor.
 	 * @memberof module:ProjectManager
      * @instance
@@ -1330,15 +1358,15 @@ define(function (require, exports, module) {
 
     
 	/**
-	 * @function <hr><a name="getInstance">getInstance</a>
+	 * @function &lt;hr>&lt;a name="getInstance">getInstance&lt;/a>
      * @description Get a ProjectManager instance. The current implementation uses one instance all the time.
 	 * @param project {Project} The PVSio-web project that shall be managed.
      *        The current implementation of Project Manager manages one project at a time.
      * @returns {ProjectManager} Get the active ProjectManager instance. The instance can fire the following events:
-     *     <ul><li>"ProjectChanged"</li>
-     *     <li>"ProjectSaved"</li>
-     *     <li>"SelectedFileChanged"</li>
-     *     <li>"WidgetsFileChanged"</li></ul>
+     *     &lt;ul>&lt;li>"ProjectChanged"&lt;/li>
+     *     &lt;li>"ProjectSaved"&lt;/li>
+     *     &lt;li>"SelectedFileChanged"&lt;/li>
+     *     &lt;li>"WidgetsFileChanged"&lt;/li>&lt;/ul>
      * @memberof module:ProjectManager
      * @instance
 	 */
@@ -1363,3 +1391,26 @@ define(function (require, exports, module) {
  * @param {object} data This contains the console output when a pvsprocess starts
  */
 });
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Descriptor.html">Descriptor</a></li><li><a href="module-Emucharts.html">Emucharts</a></li><li><a href="module-NotificationManager.html">NotificationManager</a></li><li><a href="module-Project.html">Project</a></li><li><a href="module-ProjectManager.html">ProjectManager</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a> on Wed Jan 07 2015 23:03:31 GMT-0000 (GMT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
