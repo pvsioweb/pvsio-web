@@ -18,28 +18,33 @@ The full PVSio-web application with limited features is also available at http:/
 ![Screenshot](screenshot.png?raw=true)
 
 
-Prerequisites
--------------
-#### Prerequisite 1: PVS
-PVS (http://pvs.csl.sri.com/download.shtml) is required to run pvsio-web. Please download and install PVS before proceeding to installing pvsio-web.
+Installation
+------------
+To install pvsio-web, first you need to install PVS and NodeJS, and the clone the PVSio-web github repository. This can be done as follows.
 
-Once PVS is installed, please add the PVS executable files pvs, pvsio and proveit to your PATH. A way to do this is to create symbolic links to those files, and place the symbolic links in /usr/bin. For instance, if PVS is installed in /opt/pvs6.0/pvs, the following commands executed in a Terminal window create the required symbolic links (note that you need to specify absolute paths):
+#### Step 1: Install PVS and add PVS executables to your PATH
+PVS is required to run PVSio-web. The tool can be downloaded from http://pvs.csl.sri.com/download.shtml Installation instructions are on the aforementioned website.
+
+Once PVS is installed, please add the following PVS executable files to your PATH: pvs, pvsio and proveit. A simple way to do this is to create symbolic links to those files, and place the symbolic links in /usr/bin. For instance, if PVS is installed in /opt/pvs6.0/pvs, the following commands executed in a Terminal window create the required symbolic links:
 
     sudo ln -s /opt/pvs6.0/pvs /usr/bin/pvs
     sudo ln -s /opt/pvs6.0/pvsio /usr/bin/pvsio
     sudo ln -s /opt/pvs6.0/proveit /usr/bin/proveit
 
-#### Prerequisite 2: NodeJS
-NodeJS (http://nodejs.org/download/) is required to run pvsio-web. Please download and install NodeJS before proceeding to installing pvsio-web.
+Please note that the ln command requires a full path.
 
-Installation
-------------
-To install pvsio-web, create a directory on your computer, open a Terminal window in the created directory, and execute the following commands from the created directory:
+#### Step 2: Install NodeJS
+NodeJS is required to run PVSio-web. Please download and install NodeJS from http://nodejs.org/download/
+Installation instructions are on the aforementioned website.
+
+#### Step 3: Clone the PVSio-web repository
+Create a directory where you would like to install PVSio-web on your local computer. Open a Terminal window in the created directory, and use 'git' to clone the PVSio-web repository:
 
     git clone https://github.com/thehogfather/pvsio-web.git
     cd pvsio-web
     npm install
 
+PVSio-web is now installed on your local computer!
 
 Running pvsio-web
 -----------------
