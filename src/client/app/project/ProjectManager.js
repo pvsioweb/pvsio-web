@@ -54,6 +54,7 @@ define(function (require, exports, module) {
 		fs                    = require("util/fileHandler"),
         Logger                = require("util/Logger"),
 		displayPrompt         = require("pvsioweb/forms/displayPrompt"),
+        displayQuestion       = require("pvsioweb/forms/displayQuestion"),
         CreateProjectView     = require("project/forms/CreateProjectView"),
         SaveProjectView       = require("project/forms/SaveProjectView"),
 		openProjectForm       = require("pvsioweb/forms/openProject"),
@@ -391,19 +392,37 @@ define(function (require, exports, module) {
                     resolve(res);
                 }).catch(function (err) {
                     if (err.code === "EEXIST") {
-                        var overWrite = confirm("File " + path + " already exists. Overwrite file?");
-                        if (overWrite) {
-                            opt.overWrite = true;
-                            _projectManager.writeFile(path, content, opt).then(function (res) {
-                                resolve(res);
-                            }).catch(function (err) { console.log(err); reject(err); });
-                        } else {
-                            reject({
-                                code: "CANCELED_BY_USER",
-                                message: "Operation cancelled by the user",
-                                path: path
+                        var data = {header: "Confirm Dialog",
+                                    question: "File " + path + " already exists. Overwrite file?",
+                                   buttons: ["Cancel", "OK"]};
+                        displayQuestion.create(data)
+                            .on("ok", function (e, view) {
+                                opt.overWrite = true;
+                                _projectManager.writeFile(path, content, opt).then(function (res) {
+                                    resolve(res);
+                                }).catch(function (err) { console.log(err); reject(err); });
+                                view.remove();
+                            }).on("cancel", function (e, view) {
+                                reject({
+                                    code: "CANCELED_BY_USER",
+                                    message: "Operation cancelled by the user",
+                                    path: path
+                                });
+                                view.remove();
                             });
-                        }
+//                        var overWrite = confirm("File " + path + " already exists. Overwrite file?");
+//                        if (overWrite) {
+//                            opt.overWrite = true;
+//                            _projectManager.writeFile(path, content, opt).then(function (res) {
+//                                resolve(res);
+//                            }).catch(function (err) { console.log(err); reject(err); });
+//                        } else {
+//                            reject({
+//                                code: "CANCELED_BY_USER",
+//                                message: "Operation cancelled by the user",
+//                                path: path
+//                            });
+//                        }
                     }
                 });
             }
@@ -593,18 +612,32 @@ define(function (require, exports, module) {
 	 */
     ProjectManager.prototype.deleteFileDialog = function (path, content, opt) {
         return new Promise(function (resolve, reject) {
-            var ans = confirm("Delete file " + path + "?");
-            if (ans) {
-                _projectManager.deleteFile(path, content, opt).then(function (res) {
-                    resolve(res);
-                }).catch(function (err) { reject(err); });
-            } else {
-                reject({
-                    code: "CANCELED_BY_USER",
-                    message: "Operation cancelled by the user",
-                    path: path
+            displayQuestion.create({question: "Delete file " + path + "?"})
+                .on("ok", function (e, view) {
+                    _projectManager.deleteFile(path, content, opt).then(function (res) {
+                        resolve(res);
+                    }).catch(function (err) { reject(err); });
+                    view.remove();
+                }).on("cancel", function (e, view) {
+                    reject({
+                        code: "CANCELED_BY_USER",
+                        message: "Operation cancelled by the user",
+                        path: path
+                    });
+                    view.remove();
                 });
-            }
+//            var ans = confirm("Delete file " + path + "?");
+//            if (ans) {
+//                _projectManager.deleteFile(path, content, opt).then(function (res) {
+//                    resolve(res);
+//                }).catch(function (err) { reject(err); });
+//            } else {
+//                reject({
+//                    code: "CANCELED_BY_USER",
+//                    message: "Operation cancelled by the user",
+//                    path: path
+//                });
+//            }
         });
     };
 
@@ -656,18 +689,32 @@ define(function (require, exports, module) {
     ProjectManager.prototype.rmDirDialog = function (path) {
         return new Promise(function (resolve, reject) {
             if (path) {
-                var ans = confirm("Delete directory " + path + "?");
-                if (ans) {
-                    _projectManager.rmDir(path).then(function (res) {
-                        resolve(res);
-                    }).catch(function (err) { reject(err); });
-                } else {
-                    reject({
-                        code: "CANCELED_BY_USER",
-                        message: "Operation cancelled by the user",
-                        path: path
+                displayQuestion.create({question: "Delete directory " + path + "?"})
+                    .on("ok", function (e, view) {
+                        _projectManager.rmDir(path).then(function (res) {
+                            resolve(res);
+                        }).catch(function (err) { reject(err); });
+                        view.remove();
+                    }).on("cancel", function (e, view) {
+                        reject({
+                            code: "CANCELED_BY_USER",
+                            message: "Operation cancelled by the user",
+                            path: path
+                        });
+                        view.remove();
                     });
-                }
+//                var ans = confirm("Delete directory " + path + "?");
+//                if (ans) {
+//                    _projectManager.rmDir(path).then(function (res) {
+//                        resolve(res);
+//                    }).catch(function (err) { reject(err); });
+//                } else {
+//                    reject({
+//                        code: "CANCELED_BY_USER",
+//                        message: "Operation cancelled by the user",
+//                        path: path
+//                    });
+//                }
             } else {
                 reject({
                     code: "INVALID_PATH",
@@ -754,13 +801,24 @@ define(function (require, exports, module) {
                 opt.overWrite = false;
                 return _projectManager.mkDir(path, opt).catch(function (err) {
                     if (err.code === "EEXIST") {
-                        var overWrite = confirm("Directory " + path + " already exists. Overwrite directory?");
-                        if (overWrite) {
-                            opt.overWrite = true;
-                            _projectManager.mkDir(path, opt).then(function (res) {
-                                resolve(res);
-                            }).catch(function (err) { console.log(err); reject(err); });
-                        }
+                        var data = {question: "Directory " + path + " already exists. Overwrite directory?"};
+                        displayQuestion.create(data)
+                            .on("ok", function (e, view) {
+                                opt.overWrite = true;
+                                _projectManager.mkDir(path, opt).then(function (res) {
+                                    resolve(res);
+                                }).catch(function (err) { console.log(err); reject(err); });
+                                view.remove();
+                            }).on("cancel", function (e, view) {
+                                view.remove();
+                            });
+//                        var overWrite = confirm("Directory " + path + " already exists. Overwrite directory?");
+//                        if (overWrite) {
+//                            opt.overWrite = true;
+//                            _projectManager.mkDir(path, opt).then(function (res) {
+//                                resolve(res);
+//                            }).catch(function (err) { console.log(err); reject(err); });
+//                        }
                     }
                 });
             } else {
@@ -1008,19 +1066,34 @@ define(function (require, exports, module) {
                     });
                 }).on("ok", function (e, formView) {
                     if (projects.indexOf(e.data.projectName) >= 0) {
-                        e.data.overWrite = confirm("Project " + e.data.projectName +
-                                                " already exists. Overwrite project?");
-                        if (e.data.overWrite) {
-                            _projectManager.createProject(e.data).then(function (res) {
-                                resolve(res);
-                            }).catch(function (err) { reject(err); });
-                            formView.remove();
-                        } else {
-                            reject({
-                                code: "CANCELED_BY_USER",
-                                message: "Operation cancelled by the user"
+                        displayQuestion({question: "Project " + e.data.projectName +
+                                                " already exists. Overwrite project?"})
+                            .on("ok", function (e, view) {
+                                e.data.overWrite = true;
+                                _projectManager.createProject(e.data).then(function (res) {
+                                    resolve(res);
+                                }).catch(function (err) { reject(err); });
+                                view.remove();
+                                formView.remove();
+                            }).on("cancel", function (e, view) {
+                                reject({
+                                    code: "CANCELED_BY_USER",
+                                    message: "Operation cancelled by the user"
+                                });
                             });
-                        }
+//                        e.data.overWrite = confirm("Project " + e.data.projectName +
+//                                                " already exists. Overwrite project?");
+//                        if (e.data.overWrite) {
+//                            _projectManager.createProject(e.data).then(function (res) {
+//                                resolve(res);
+//                            }).catch(function (err) { reject(err); });
+//                            formView.remove();
+//                        } else {
+//                            reject({
+//                                code: "CANCELED_BY_USER",
+//                                message: "Operation cancelled by the user"
+//                            });
+//                        }
                     } else {
                         formView.remove();
                         return _projectManager.createProject(e.data).then(function (res) {
@@ -1113,19 +1186,34 @@ define(function (require, exports, module) {
                     });
                 }).on("ok", function (e, formView) {
                     if (projects.indexOf(e.data.projectName) >= 0) {
-                        e.data.overWrite = confirm("Project " + e.data.projectName +
-                                                " already exists. Overwrite project?");
-                        if (e.data.overWrite) {
-                            // remove existing folder, save project and then rename folder
-                            _projectManager.rmDir(e.data.projectName).then(function (res) {
-                                saveProject(e.data.projectName);
-                            }).catch(function (err) { reject(err); });
-                        } else {
-                            reject({
-                                code: "EEXISTS",
-                                message: "Cannot save: project " + e.data.projectName + " already exists."
+                        displayQuestion.create({question: "Project " + e.data.projectName +
+                                                " already exists. Overwrite project?"})
+                            .on("ok", function (e, view) {
+                                e.data.overWrite = true;
+                                // remove existing folder, save project and then rename folder
+                                _projectManager.rmDir(e.data.projectName).then(function (res) {
+                                    saveProject(e.data.projectName);
+                                }).catch(function (err) { reject(err); });
+                                view.remove();
+                            }).on("cancel", function (e, view) {
+                                reject({
+                                    code: "EEXISTS",
+                                    message: "Cannot save: project " + e.data.projectName + " already exists."
+                                });
                             });
-                        }
+//                        e.data.overWrite = confirm("Project " + e.data.projectName +
+//                                                " already exists. Overwrite project?");
+//                        if (e.data.overWrite) {
+//                            // remove existing folder, save project and then rename folder
+//                            _projectManager.rmDir(e.data.projectName).then(function (res) {
+//                                saveProject(e.data.projectName);
+//                            }).catch(function (err) { reject(err); });
+//                        } else {
+//                            reject({
+//                                code: "EEXISTS",
+//                                message: "Cannot save: project " + e.data.projectName + " already exists."
+//                            });
+//                        }
                     } else {
                         saveProject(e.data.projectName);
                     }

@@ -18,10 +18,11 @@
     "ws": "0.4.x"
   },
   "devDependencies": {
-    "jasmine-node": "~1.14.3"
+    "jasmine-node": "~1.14.3",
+    "open": "0.0.5"
   },
   "scripts": {
-    "test": "jasmine-node --verbose src/server/servertests",
+    "test": "jasmine-node --verbose src/server/servertests; node client-test.js",
     "start": "node src/server/pvssocketserver.js"
   },
   "repository": {

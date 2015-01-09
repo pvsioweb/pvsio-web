@@ -69,7 +69,7 @@
             
             region.on("mouseup", function () {
                 svg.on("mousemove.region", null);
-                dispatcher.move({region: region, pos: pos(region), scale:_scale});
+                dispatcher.move({region: region, pos: pos(region), scale: _scale});
             });
             //higlight the region show it has been selected
             if (!d3.event.ctrlKey) {//remove previous selections if ctrl key wasnt pressed

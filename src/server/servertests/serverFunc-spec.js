@@ -52,7 +52,7 @@ describe("sever functions for manipulating file system and projects", function (
 	});
 	it("mkdirRecursive function works", function (done) {
 		var baseDir = path.join(__dirname, "__" + new Date().getTime() + "_folder");
-		var testDir = path.join(baseDir, "foo", "bar");
+		var testDir = path.join(baseDir, "foo", "bar", "bar");
 		mkdirRecursive(testDir, function (err) {
 			if (err) {console.log(err); }
 			stat(testDir).then(function (f) {
@@ -80,9 +80,12 @@ describe("sever functions for manipulating file system and projects", function (
 			}, errLog);
 	});
 	
-	it("listProjects() returns a list of projects in public/projects directory", function (done) {
+	it("listProjects() returns a list of projects in public/projects directory, each having a name property", function (done) {
 		listProjects().then(function (projects) {
-			expect(projects).toContain("AlarisGP");
+			expect(projects.length).toBeGreaterThan(0);
+            expect(projects.every(function (p) {
+                return p.name;
+            })).toBeTruthy();
 			done();
 		});
 	});
@@ -91,36 +94,34 @@ describe("sever functions for manipulating file system and projects", function (
 		openProject("AlarisGP").then(function (project) {
 			expect(project).toBeDefined();
 			expect(project.name).toEqual("AlarisGP");
-			expect(project.folderStructure).toBeDefined();
 			expect(project.descriptors).toBeDefined();
 			expect(project.descriptors.length > 0).toEqual(true);
 			done();
 		});
 	});
 	
-	it("createProject works as expected", function (done) {
-		var projectName = "AlarisGP_" + testid;
-		openProject("AlarisGP").then(function (project) {
-			var data = {projectName: projectName,
-						descriptors: project.descriptors};
-			data.descriptors.forEach(function (d) {
-				d.path = d.path.replace("AlarisGP", projectName);
-			});
-			createProject(data, function (project) {
-				if (project.err) {console.log(project.err); }
-				console.log(project.name);
-				//open the created project
-				openProject(projectName).then(function (project) {
-					expect(project.name).toEqual(projectName);
-					expect(project.descriptors).toBeDefined();
-					expect(project.folderStructure).toBeDefined();
-					//remove the folder
-					exec("rm -r " + path.join(__dirname, "../", "public/projects", projectName), function (err) {
-						if (err) { console.log(err); }
-						done();
-					});
-				});
-			}, p);
-		}, errLog);
-	});
+    it("deleting files work", function (done) {
+        var dir = path.join(__dirname, "__testingfolder_one");
+        mkdirRecursive(dir, function (err) {
+            if (err) {
+                expect(err).toBeFalsy();
+                done();
+            } else {
+                p.removeFile(dir, function (err) {
+                    if (err) {
+                        expect(err).toBeFalsy();
+                        done();
+                    } else {
+                        stat(dir).then(function (f) {
+                            expect(f).toBeUndefined();
+                            done();
+                        }).catch(function (err) {
+                            expect(err.errno).toEqual(34);
+                            done();
+                        });
+                    }
+                });
+            }
+        });
+    });
 });
