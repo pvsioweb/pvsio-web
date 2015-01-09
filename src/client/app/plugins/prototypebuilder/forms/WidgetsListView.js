@@ -75,7 +75,9 @@ define(function (require, exports, module) {
 		}).addListener("WidgetSelected", function (event) {
 			var e = new Event("click");
 			e.shiftKey = event.event.shiftKey;
-			el.select("li[widget-id='" + event.widget.id() + "']").node().dispatchEvent(e);
+            var node = el.select("li[widget-id='" + event.widget.id() + "']").node();
+			node.dispatchEvent(e);
+            node.scrollIntoView();
 		});
 	}
 	
