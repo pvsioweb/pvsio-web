@@ -2,19 +2,31 @@
 <div id="content" class="center prototypebuilder">
 	<div id="header" class="btn-group">
 		<div id="projectTitle">
-			<span id="txtProjectName"></span>
+			<div class="btn txtProjectName"><span id="txtProjectName"></span></div>
 			<div class="pull-right">
-				<a class="btn" id="newProject"><span class="glyphicon glyphicon-file"></span> New Project</a>
-				<a class="btn" id="openProject"><span class="glyphicon glyphicon-folder-open"></span> Open Project</a>
-				<a class="btn" id="btnLoadPicture"><span class="glyphicon glyphicon-picture"></span> Change Picture</a>
+				<a class="btn"
+                   id="newProject"><span class="glyphicon glyphicon-file"></span> New Project</a>
+				<a class="btn"
+                   id="openProject">                 
+                    <span class="glyphicon glyphicon-folder-open"></span> Open Project</a>
+<!--
+                <a class="btn"
+                   id="btnEditStoryboard">                   
+                    <span class="glyphicon glyphicon-film"></span> Edit Storyboard</a>
+-->
 				<input type="file" class="hide" id="btnSelectPicture" name="selectPicture" accept="image/*">
-				<a class="btn" id="btnSaveProject"><span class="glyphicon glyphicon-floppy-save"></span> Save Project</a>
-				<a id="lblWebSocketStatus" class="btn status" style="cursor:default">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
-				<a id="lblPVSioStatus" class="btn status" style="cursor:default">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
-
-			</div>
-            <div id="autoSaver" class="pull-right">
-            
+				<a class="btn"
+                   id="btnSaveProject"><span class="glyphicon glyphicon-floppy-save"></span> Save Project</a>
+				<a class="btn"
+                   id="btnSaveProjectAs"><span class="glyphicon glyphicon-floppy-disk"></span> Save As...</a>
+				<a class="btn"
+                   id="btnLoadPicture">                   
+                    <span class="glyphicon glyphicon-picture"></span> Change Picture</a>
+                <div class="pull-right" style="width: 260px;">
+                    <a id="lblWebSocketStatus" class="btn status" style="cursor:default">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
+                    <a id="lblPVSioStatus" class="btn status" style="cursor:default">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
+                    <div id="autoSaver" class="pull-right"></div>
+                </div>
             </div>
 		</div>
 	</div>
@@ -26,33 +38,60 @@
 			</div>
 		</div>
 		<div id="rightPanel" class="ljs-right">
-            <div id="project-notifications">
-	
-            </div>
-			<div class="plugins-group">
-				<div class="header">Plugins</div>
+			<div id="plugins-group" class="plugins-group">
+				<div class="plugins">PVSio-web Tools</div>
 				<ul>
 					{{#each plugins}}
-					<li class="list-group-item">
-						<input type="checkbox" name="{{label}}" id="plugin_{{label}}" style="cursor:pointer">
-						<label for="plugin_{{label}}" style="cursor:pointer">{{label}}</label>
+					<li class="list-group-item plugin-box"
+                        id="pluginBox_{{label}}">
+						<input type="checkbox"
+                               name="{{label}}"
+                               id="plugin_{{label}}">
+						<label for="plugin_{{label}}">{{label}}</label>
 					</li>
 					{{/each}}
 				</ul>
 			</div>
-			<div>
-                <div id="scripts">
-                    <div class="header">Scripts</div>
-					<ul class="list-group">
-
-					</ul>
-				</div>
-				<div id='console'>
-                    <div class="header">Console</div>
+            <div class="expandable-panel">
+                <script>
+                    function toggle(elem, label) {
+                        var text = document.getElementById(elem + "-label");
+                        var c = document.getElementById(elem);
+                        if (c.style.display === "none") {
+                            c.style.display = "block";
+                            text.textContent = label;
+                        } else {
+                            c.style.display = "none";
+                            text.textContent = label + " (click to expand)";
+                        }
+                    }
+                </script>
+                <div class="expandable-panel-separator" style="height:4px; background-color: gray;"></div>
+                <div class="expandable-panel-heading" onclick="toggle('scripts', 'Interactions recorder')">
+                    <span id="scripts-label">Interactions recorder (click to expand)</span>
                 </div>
-				<!-- container for specification source code -->
-				
-			</div>
+                <div id="scripts" style="display:none">
+                    <div id="scripts-toolbar">
+                        <span id="btnRecord" class="glyphicon">&bull;</span>
+                        <span id="btnStop" class="glyphicon glyphicon-stop"></span>
+<!--
+                        <span id="btnFastbackward" class="glyphicon glyphicon-circle-arrow-left"></span>
+                        <span id="btnPlay" class="glyphicon glyphicon-play-circle"></span>
+                        <span id="btnFastforward" class="glyphicon glyphicon-circle-arrow-right"></span>
+                        <span id="btnRepeat" class="glyphicon glyphicon-repeat"></span>
+-->
+                    </div>
+                    <ul class="list-group"></ul>
+                </div>
+                    
+                <div class="expandable-panel-separator" style="height:4px; background-color: gray;"></div>
+                <div class="expandable-panel-heading" onclick="toggle('console', 'PVSio-web console')">
+                    <span id="console-label">PVSio-web console (click to expand)</span>
+                </div>
+                <div id="console" style="display:none"><p>Log start...</p></div>
+                <div class="expandable-panel-separator" style="height:4px; background-color: gray;"></div>
+            </div>
+            <div id="project-notifications"></div>
 		</div>
 	</div>
 	

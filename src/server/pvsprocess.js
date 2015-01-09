@@ -81,15 +81,15 @@ module.exports = function () {
 		};
 	}
     
-    o.removeFile = function (filePath, cb) {
-        var np = path.normalize(filePath);
+    o.removeFile = function (file, cb) {
+        var np = path.normalize(file);
         
         if (np.indexOf(path.dirname(workspaceDir)) === 0) {
             pvs.exec({command: "rm -rf \"" + np + "\"", callBack: cb});
         } else {
             var error = ("cannot delete a folder outside the context of the current project");
             logger.error(error);
-            logger.error(util.format("path: %s, workspace: %s, normalised Path: %s", filePath, workspaceDir, np));
+            logger.error(util.format("path: %s, workspace: %s, normalised Path: %s", file, workspaceDir, np));
             cb(error);
         }
     };

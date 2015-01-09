@@ -4,25 +4,23 @@
  * @date 6/25/14 20:07:07 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global d3, $, it, expect, define, describe, beforeEach, afterAll, Promise*/
+/*global d3, $, it, expect, define, describe, beforeEach, afterAll, Promise, Event*/
 define(function (require, exports, module) {
     "use strict";
     var main = require("main"),
-        PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder");
-    
+        ProjectManager			= require("project/ProjectManager");    
     
     module.exports = {
         run: function () {
-             var pb = PrototypeBuilder.getInstance(),
-					pm = pb.getProjectManager(),
-					p;
+            var pm = ProjectManager.getInstance(),
+                p;
             
             function click(elid) {
                 d3.select(elid).node().click();
-                return new Promise(function  (resolve) {
-                   setTimeout(function() {
-                       resolve(elid);
-                   }, 200);
+                return new Promise(function (resolve) {
+                    setTimeout(function () {
+                        resolve(elid);
+                    }, 200);
                 });
             }
 			
@@ -39,7 +37,7 @@ define(function (require, exports, module) {
             
             function listViewContextMenu(menu) {
                 return rightclick("#pvsFiles").then(function () {
-                   return click(".contextmenu " + menu);
+                    return click(".contextmenu " + menu);
                 });
             }
             
@@ -68,6 +66,9 @@ define(function (require, exports, module) {
                             var dialogTitle = $("div.overlay .panel-heading").html();
                             expect(dialogTitle).toEqual(title);
                             done();
+                        }).catch(function (err) {
+                            expect(false).tobeTruthy();
+                            done();
                         });
                 });
             }
@@ -82,6 +83,9 @@ define(function (require, exports, module) {
                                     expect(pm.project().name()).toEqual(projectName);
                                     done();
                                 });
+                        }).catch(function (err) {
+                            expect(false).tobeTruthy();
+                            done();
                         });
                 });
             }
@@ -120,16 +124,14 @@ define(function (require, exports, module) {
 			}
 			
             
-             describe("User interface Elements", function () {               
+            describe("User interface Elements", function () {
                 beforeEach(function (done) {
                     d3.select("div.overlay").remove();
-                    pm = pb.getProjectManager();
-                    pm.addListener("PVSProcessReady", function (e) {
-                        console.log(e);
+                    pm = ProjectManager.getInstance();
+                    main.start().then(function () {
                         p = pm.project();
                         done();
                     });
-                    main.start();
                 });
 
                 pressingButtonOpensDialog("#openProject", "Open Project");
@@ -137,8 +139,8 @@ define(function (require, exports, module) {
 
                 pressingButtonOpensDialog("#newProject", "New Project");
                 dialogCanBeDismissed("#newProject", "New Project");
-                pressingButtonOpensDialog("#btnImportFiles", "Import PVS files into Project");
-                dialogCanBeDismissed("#btnImportFiles", "Import PVS files into Project");
+                pressingButtonOpensDialog("#btnImportFiles", "Import files into Project");
+                dialogCanBeDismissed("#btnImportFiles", "Import files into Project");
                 openSampleProject("AlarisGP");
                 openSampleProject("AlarisPC_PumpModules");
                 openSampleProject("SmithsMedical_MedFusion3500");
@@ -146,19 +148,17 @@ define(function (require, exports, module) {
                 loadPlugin("Emulink");
                 unloadPlugin("Emulink");
                 loadPlugin("GraphBuilder");
-                unloadPlugin("GraphBuilder");				
+                unloadPlugin("GraphBuilder");
             });
 
             describe("Prototype Builder", function () {
                 beforeEach(function (done) {
                     d3.select("div.overlay").remove();
-                    pm = pb.getProjectManager();
-                    pm.addListener("PVSProcessReady", function (e) {
-                        console.log(e);
+                    pm = ProjectManager.getInstance();
+                    main.start().then(function () {
                         p = pm.project();
                         done();
                     });
-                    main.start();
                 });
 
                 it("can be collapsed", function (done) {
@@ -197,38 +197,36 @@ define(function (require, exports, module) {
             describe("FileSystem management in ListView", function () {
                 beforeEach(function (done) {
                     d3.select("div.overlay").remove();
-                    pm = pb.getProjectManager();
-                    pm.addListener("PVSProcessReady", function (e) {
-                        console.log(e);
+                    pm = ProjectManager.getInstance();
+                    main.start().then(function () {
                         p = pm.project();
-                        done();
+                        setTimeout(done, 0);//using a timeout to push this to the end of the event queue so any files are added and project is ready before performing tests
                     });
-                    main.start();
                 });
 
                 it("can add files to the project", function (done) {
-                    var filesLength = pm.project().getProjectFiles().length;
+                    var filesLength = pm.project().getDescriptors().length;
                     click("div.collapsible-panel-parent[plugin-owner='ModelEditor'] .header").then(function () {
                         listViewContextMenu("#newfile").then(function () {
                             setTimeout(function () {
-                                expect(pm.project().getProjectFiles().length).toEqual(filesLength + 1);
+                                expect(pm.project().getDescriptors().length).toEqual(filesLength + 1);
                                 done();
-                            }, 500);
+                            }, 300);
                         });
                     });
                 });
                 
                 it("can remove files from the project", function (done) {
-                    var filesLength = pm.project().getProjectFiles().length;
+                    var filesLength = pm.project().getDescriptors().length;
                     click("div.collapsible-panel-parent[plugin-owner='ModelEditor'] .header").then(function () {
                         listViewContextMenu("#newfile").then(function () {//add a new file
                             click("#pvsFiles li:last-child").then(function () {//select the file
                                 listViewContextMenu("#delete").then(function () {//delete the file
                                     click("div.overlay #btnOk").then(function () {
-                                         setTimeout(function () {
-                                            expect(pm.project().getProjectFiles().length).toEqual(filesLength);
+                                        setTimeout(function () {
+                                            expect(pm.project().getDescriptors().length).toEqual(filesLength);
                                             done();
-                                        }, 500);
+                                        }, 300);
                                     });
                                 });
                             });

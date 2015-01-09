@@ -3,15 +3,16 @@
  * @author Patrick Oladimeji
  * @date 12/8/14 10:51:56 AM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, require, brackets, window */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
+/*global define, require, brackets, window, d3 */
 define(function (require, exports, module) {
     "use strict";
     var instance, saveTimer, countdownTimer;
     var ProjectManager = require("project/ProjectManager"),
-        Timer   = require("util/Timer");
+        Timer          = require("util/Timer"),
+        Constants      = require("util/Constants");
     
-    var saveInterval = 2 * 60 * 1000;
+    var saveInterval = 60 * 1000; // 1 min interval
     
     function ProjectAutoSaver() {
         saveTimer = new Timer(saveInterval);
@@ -46,17 +47,23 @@ define(function (require, exports, module) {
         saveTimer.addListener("TimerTicked", function (e) {
             saveTimer.stop();
             countdownTimer.reset();
-            d3.select("#autoSaver").html("Saving ...");
-            ProjectManager.getInstance().project().save(function (err) {
+            var pm = ProjectManager.getInstance();
+            var autosaveName = Constants.autosavePath + "/" + pm.project().name() +
+                            "_autosave_" + (new Date().getFullYear()) + "." +
+                            ("0" + (new Date().getMonth() + 1)).slice(-2) + "." +
+                            ("0" + (new Date().getDate())).slice(-2) + "." +
+                            ("0" + (new Date().getHours())).slice(-2) + "h";
+//            d3.select("#autoSaver").html("Saving backup copy in " + autosaveName + "...");
+            pm.backupProject(autosaveName, { overWrite: true, silentMode: true }).then(function (res) {
                 saveTimer.reset().start();
                 countdownTimer.start();
-            });
+            }).catch(function (err) { console.log(err); });
         }).start();
         countdownTimer.addListener("TimerTicked", function (e) {
             var timeToNextSave = saveInterval - (e.currentCount * 1000);
             timeToNextSave /= 1000;
             var time = toTimeString(timeToNextSave);
-            d3.select("#autoSaver").html("Project will auto-save in " + time);
+//            d3.select("#autoSaver").html("Project will auto-save in " + time);
         }).start();
     };
     

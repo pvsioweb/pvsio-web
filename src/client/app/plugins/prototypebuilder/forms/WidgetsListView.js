@@ -13,7 +13,7 @@ define(function (require, exports, module) {
 	function WidgetsListView(widgets) {
 		var el = d3.select("#widgetsList").html("").append("ul");
 		
-        function labelFunction (widget) {
+        function labelFunction(widget) {
             var label = widget.type() + ": ";
             if (widget.type() === "display") {
                 label += widget.displayKey();
@@ -75,7 +75,9 @@ define(function (require, exports, module) {
 		}).addListener("WidgetSelected", function (event) {
 			var e = new Event("click");
 			e.shiftKey = event.event.shiftKey;
-			el.select("li[widget-id='" + event.widget.id() + "']").node().dispatchEvent(e);
+            var node = el.select("li[widget-id='" + event.widget.id() + "']").node();
+			node.dispatchEvent(e);
+            node.scrollIntoView();
 		});
 	}
 	

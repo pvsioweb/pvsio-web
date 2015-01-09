@@ -8,12 +8,13 @@
 define(function (require, exports, module) {
 	"use strict";
 	var	PrototypeBuilder	= require("plugins/prototypebuilder/PrototypeBuilder"),
-		PVSioWebClient = require("PVSioWebClient"),
-		SampleTests = require("plugins/safetyTest/SampleTest"),
-		template = require("text!plugins/safetyTest/templates/safetytest.handlebars"),
-		testRowTemplate = require("text!plugins/safetyTest/templates/testrow.handlebars"),
-		ScriptPlayer = require("util/ScriptPlayer"),
-		StateParser = require("util/PVSioStateParser");
+        ProjectManager      = require("project/ProjectManager"),
+		PVSioWebClient      = require("PVSioWebClient"),
+		SampleTests         = require("plugins/safetyTest/SampleTest"),
+		template            = require("text!plugins/safetyTest/templates/safetytest.handlebars"),
+		testRowTemplate     = require("text!plugins/safetyTest/templates/testrow.handlebars"),
+		ScriptPlayer        = require("util/ScriptPlayer"),
+		StateParser         = require("util/PVSioStateParser");
 	
 	var canvas, instance;
 
@@ -23,7 +24,10 @@ define(function (require, exports, module) {
 	
 	SafetyTest.prototype.initialise = function () {
 		var that = this;
-		canvas = PVSioWebClient.getInstance().createCollapsiblePanel({headerText: "Safety Test", owner: "SafetyTest"});
+		canvas = PVSioWebClient.getInstance().createCollapsiblePanel({
+            headerText: "Safety Test",
+            owner: "SafetyTest"
+        });
 		var html = Handlebars.compile(template)(SampleTests);
 		
 		canvas.html(html);
@@ -48,7 +52,7 @@ define(function (require, exports, module) {
 	
 	SafetyTest.prototype.runTests = function () {
 		var that = this;
-		var pm = PrototypeBuilder.getInstance().getProjectManager();
+		var pm = ProjectManager.getInstance();
 		var project = pm.project();
 		var testCases = SampleTests.slice(0);
 		
@@ -63,14 +67,14 @@ define(function (require, exports, module) {
 					}
 				});
 			} else {
-				return Promise.resolve("done");	
+				return Promise.resolve("done");
 			}
 		}
 		
 		if (project.name() !== "defaultProject") {
 			return test();
-		} else {
-			
+//		} else {
+//			
 		}
 	};
 	

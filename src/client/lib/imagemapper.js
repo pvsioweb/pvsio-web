@@ -200,6 +200,7 @@
         
         function restoreRectRegion(data) {
             var r = createRegion(svg, data, ed);
+            d3.select(r.node().parentNode).classed("selected", false);
             updateRegion(r, data);
             svg.on("mousemove", null)
                 .on("mouseup", null);

@@ -144,8 +144,8 @@ define(function (require, exports, module) {
 		runTest: runTest,
         clearView: function () {
             d3.select("#scripts ul").html("")
-                .append("li").attr("id", "emptyPlaceholder").html("No Scripts")
-                .style("text-align", "center").style("padding", "20px").style("font-size", "0.8em");
+                .append("li").attr("id", "emptyPlaceholder").html("Please use the record button above to record interactions with the user interface prototype.")
+                .style("text-align", "center").style("padding", "20px").style("font-size", "0.8em").style("white-space", "normal");
         }
     };
 });

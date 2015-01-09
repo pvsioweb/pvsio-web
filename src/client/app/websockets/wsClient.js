@@ -22,10 +22,12 @@ define(function (require, exports, module) {
          * returns a promise that resolves when the connection has been opened
          */
         o.logon = function () {
-            if (!ws) {
-				var wsUrl = o.url();
-				if (o.port()) { wsUrl = wsUrl + ":" + o.port(); }
-                return new Promise(function (resolve, reject) {
+            return new Promise(function (resolve, reject) {
+                if (ws) {
+                    resolve(ws);
+                } else {
+                    var wsUrl = o.url();
+                    if (o.port()) { wsUrl = wsUrl + ":" + o.port(); }
                     ws = new WebSocket(wsUrl);
                     ws.onopen = function (event) {
                         o.fire({type: events.ConnectionOpened, event: event});
@@ -43,8 +45,8 @@ define(function (require, exports, module) {
                         var token = JSON.parse(event.data);
                         //if token has an id check if there is a function to be called in the registry
                         if (token.id && typeof callbackRegistry[token.id] === "function") {
-							var time = new Date().getTime() - token.time.client.sent;
-							console.log("Time to response for " + token.type + "  " + (time));
+                            var time = new Date().getTime() - token.time.client.sent;
+                            console.log("Time to response for " + token.type + "  " + (time));
                             var f = callbackRegistry[token.id];
                             delete callbackRegistry[token.id];
                             f.call(o, token.err, token);
@@ -52,11 +54,8 @@ define(function (require, exports, module) {
                             o.fire(token);
                         }
                     };
-                });
-               
-            } else {
-                return Promise.resolve(ws);
-            }
+                }
+            });
         };
         /**
          * sends a message and register a callback to invoke when the message response is received from the server.
@@ -79,6 +78,7 @@ define(function (require, exports, module) {
         o.close = function () {
             if (ws) {
                 ws.close();
+                console.log("Client closes websocket connection...");
             }
         };
         

@@ -122,7 +122,7 @@ define(function (require, exports, module) {
 	};
     
     /**
-        Removes the collapsible panel with the given header text.
+        Removes the collapsible specified in the parameter.
         @param {d3.selection} container The div returned from a call to createCollapsiblePanel
     */
     PVSioWeb.prototype.removeCollapsiblePanel = function (container) {

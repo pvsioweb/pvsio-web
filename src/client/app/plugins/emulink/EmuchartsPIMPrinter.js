@@ -164,7 +164,7 @@ define(function (require, exports, module) {
         ans += this.print_state_schema(emuchart);
         ans += this.print_operation_schema(emuchart);
         ans += this.print_disclaimer();
-        return ans;
+        return { res: ans };
     };
     
     module.exports = EmuchartsPIMPrinter;
