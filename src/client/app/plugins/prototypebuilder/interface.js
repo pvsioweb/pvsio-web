@@ -271,7 +271,9 @@ define(function (require, exports, module) {
             this.trigger("pluginToggled", event);
         },
         pluginClicked: function (event) {
-            d3.select(event.target).select("input[type='checkbox']").node().click();
+            if (event.target.tagName.toLowerCase() === "li") {
+                d3.select(event.target).select("input[type='checkbox']").node().click();
+            }
         },
 		scriptClicked: function (event) {
             this.trigger("scriptClicked", $(event.target).attr("name"));

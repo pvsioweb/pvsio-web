@@ -400,6 +400,7 @@ define(function (require, exports, module) {
         preparePageForImageUpload();
         projectManager.addListener("ProjectChanged", onProjectChanged);
         projectManager.addListener("WidgetsFileChanged", onProjectChanged);
+        WidgetsListView.create();
         bindListeners();
 		return updateImageAndLoadWidgets();
     };
