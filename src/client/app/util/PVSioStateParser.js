@@ -44,7 +44,8 @@ define(function (require, exports, module) {
     }
 
     /**
-        evaluates a numeric string represented as a fraction. If the string is not a fraction, it converts the string to a number. If the argument is not a string, then the argument is returned unchanged.
+        Evaluates a numeric string represented as a fraction. If the string is not a fraction, 
+        it converts the string to a number. If the argument is not a string, then the argument is returned unchanged.
     */
     function evaluate(str) {
         if (typeof str === "string") {
@@ -97,13 +98,18 @@ define(function (require, exports, module) {
     }
     /**
         Resolves the chain of properties represented as a dot-separated string on the state provided
+        @param {object} state a JSON object representing the state returned by the PVS spec
+        @param {string} property a string representing a property or a chain of properties to read from the state
+        @return {object|string|number} the value at the specified property
     */
     function resolve(state, property) {
         var pChain = property.split(".");
-        var obj = state;
-        pChain.forEach(function (key, index) {
+        var obj = state, i = 0, key;
+    
+        while (i < pChain.length && obj) {
+            key = pChain[i++];
             obj = obj[key];
-        });
+        }
         return obj;
     }
 
