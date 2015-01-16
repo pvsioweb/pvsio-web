@@ -173,7 +173,13 @@ define(function (require, exports, module) {
                 wm.fire(event);
             }).on("select", function (e) {
 				wm.fire({type: "WidgetSelected", widget: wm.getWidget(e.region.attr("id")), event: e.event});
-			});
+			}).on("clearselection", function (e) {
+                var widgets = [];
+                e.regions.each(function () {
+                    widgets.push(wm.getWidget(d3.select(this).attr("id")));
+                });
+                wm.fire({type: "WidgetSelectionCleared", widgets: widgets, event: e.event});
+            });
             if (cb) { cb(); }
         }});
     };

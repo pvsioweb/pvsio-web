@@ -3,7 +3,7 @@
  * @author Patrick Oladimeji
  * @date 3/17/14 14:06:02 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, white:true */
 /*global define, d3, require, $, brackets, window, MouseEvent */
 
 define(function (require, exports, module) {
@@ -176,7 +176,6 @@ define(function (require, exports, module) {
                         index: subValue.index
                     };
                 }
-
             } else {
                 //just an open bracket -- they usually signify a list of some sort
                 subValue = readUntil(value, token.index + 1, function (ch, prev) {
@@ -212,7 +211,7 @@ define(function (require, exports, module) {
 			if (Array.isArray(str)) {
 				str = str.join("");
 			}
-			return str.trim().indexOf("(#") === 0;	
+			return str.trim().indexOf("(#") === 0;
 		}
     };
 });

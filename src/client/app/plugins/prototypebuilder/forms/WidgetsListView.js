@@ -35,9 +35,13 @@ define(function (require, exports, module) {
                 .text(labelFunction)
                 .on("click", function (w) {
                     var event = d3.event;
-                    if (!event.shiftKey) {
+                    if (!event.shiftKey && !d3.select(this).classed("selected")) {
                         d3.selectAll("g.selected").classed("selected", false);
                         d3.selectAll("#widgetsList ul li").classed("selected", false);
+                    } else if (d3.select(w.parentGroup()).classed("selected")) {
+                        d3.selectAll(".subselected").classed("subselected", false);
+                        d3.select(this).classed("subselected", true);
+                        d3.select(w.parentGroup()).classed("subselected", true);
                     }
                     d3.select(this).classed("selected", true);
                     d3.select(w.parentGroup()).classed("selected", true);
@@ -77,8 +81,9 @@ define(function (require, exports, module) {
 			e.shiftKey = event.event.shiftKey;
             var node = el.select("li[widget-id='" + event.widget.id() + "']").node();
 			node.dispatchEvent(e);
-            node.scrollIntoView();
-		});
+		}).addListener("WidgetSelectionCleared", function (event) {
+            d3.selectAll("#widgetsList ul li").classed("selected", false);
+        });
 	}
 	
 	
