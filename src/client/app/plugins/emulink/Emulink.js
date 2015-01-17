@@ -647,14 +647,13 @@ define(function (require, exports, module) {
         d3.select("#btn_menuSaveChart").on("click", function () {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
             if (!emuchartsManager.empty_chart()) {
-                var name = projectManager.project().name() + "_emucharts.emdl";
+                var name = "emucharts_" + projectManager.project().name() + ".emdl";
                 var content = JSON.stringify({
                     descriptor: {
                         file_type: "emdl",
-                        version: "1.2",
+                        version: "1.3",
                         description: "emucharts model",
-                        chart_name: (projectManager.project().name() + "_emucharts"),
-                        pvs_file: (projectManager.project().name() + "_emucharts_th.pvs")
+                        chart_name: ("emucharts_" + projectManager.project().name())
                     },
                     chart: {
                         states: emuchartsManager.getStates(),
@@ -1319,6 +1318,24 @@ define(function (require, exports, module) {
         return [PrototypeBuilder.getInstance(), ModelEditor.getInstance()];
     };
     
+    function onProjectChanged(event) {
+        // try to open the default emuchart file associated with the project
+        var defaultEmuchartFilePath = event.current + "/" + "emucharts_" + event.current + ".emdl";
+        projectManager.readFile(defaultEmuchartFilePath).then(function (res) {
+            res.content = JSON.parse(res.content);
+            emuchartsManager.importEmucharts(res);
+            // make svg visible and reset colors
+            resetToolbarColors();
+            // render emuchart                        
+            emuchartsManager.render();
+            // set initial editor mode
+            d3.select("#btn_toolbarBrowse").node().click();
+        }).catch(function (err) {
+            // if the default emuchart file is not in the project, then just clear the current diagram
+            d3.select("#btnNewEmuchart").node().click();
+        });
+    }
+    
     Emulink.prototype.initialise = function () {
         //enable the plugin -- this should also enable any dependencies defined in getDependencies method
         var prototypeBuilder = PrototypeBuilder.getInstance();
@@ -1326,8 +1343,12 @@ define(function (require, exports, module) {
         editor = ModelEditor.getInstance().getEditor();
         ws = pvsioWebClient.getWebSocket();
         projectManager = ProjectManager.getInstance();
+        // listen to ProjectChanged events so that we can update the editor when a new project is opened
+        projectManager.addListener("ProjectChanged", onProjectChanged);
         // create user interface elements
 		this.createHtmlElements();
+        // try to load default emuchart for the current project
+        onProjectChanged({current: projectManager.project().name()});
         return Promise.resolve(true);
     };
     

@@ -10,7 +10,7 @@ define(function (require, exports, module) {
 
     var instance = null,
         imageExts = [".jpg", ".jpeg", ".png"],
-        filesFilter = [".pvs", ".tex", ".txt", ".i", ".json"].concat(imageExts);
+        filesFilter = [".pvs", ".tex", ".txt", ".i", ".json", ".emdl"].concat(imageExts);
     
     function MIME() { return this; }
     
@@ -30,7 +30,7 @@ define(function (require, exports, module) {
     };
     
     MIME.prototype.getFilesFilter = function () {
-        return filesFilter.concat(imageExts);
+        return filesFilter;
     };
 
     module.exports = {
