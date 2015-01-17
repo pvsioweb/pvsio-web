@@ -237,7 +237,7 @@ function run() {
         var notificationDelay = 200;
         
         unregisterFolderWatcher(folderPath);
-//        if (folderPath.indexOf("pvsbin") > -1) { return; }
+        if (folderPath.indexOf("pvsbin") > -1) { return; }
         
         var watch = function (folder) {
 //            logger.debug("watching changes to .. " + folder);
