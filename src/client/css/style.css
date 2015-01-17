@@ -465,15 +465,16 @@ div.detailsForm select, div.detailsForm textarea{
     font-size: large;
     cursor:default;
     padding-bottom: 1px;
-    min-height: 54px;
+    min-height: 52px;
     padding-top: 14px;    
 }
 #projectTitle div.btn.txtProjectName:hover{
+    background: rgb(8, 88, 154);
     color: white;
 }
 #projectTitle a {
 	color: #f5eee5;
-    min-height: 54px;
+    min-height: 52px;
     padding-top: 16px;
 }
 #projectTitle a:hover {
@@ -497,6 +498,14 @@ div.detailsForm select, div.detailsForm textarea{
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    cursor: pointer;
+}
+
+.plugins-group .list-group-item input {
+    cursor: pointer;
+}
+.plugins-group .list-group-item label {
+    cursor: pointer;
 }
 
 .panel.scrollable-dialog {
