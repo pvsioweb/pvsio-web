@@ -243,7 +243,7 @@ function run() {
 //            logger.debug("watching changes to .. " + folder);
             return fs.watch(folder, {persistent: false}, function (event, name) {
                 var extension = path.extname(name).toLowerCase();
-                if (name && name !== ".DS_Store" && event === "rename") {
+                if (name && name !== ".DS_Store" && (event === "rename" || event === "change")) {
                     var fullPath = path.join(folder, name);
                     var token = {
                         type: "FileSystemUpdate",

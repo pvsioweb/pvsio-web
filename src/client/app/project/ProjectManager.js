@@ -122,7 +122,7 @@ define(function (require, exports, module) {
                 // remove the folder from the PVSio-web file browser
                 pvsFilesListView.deleteItem(event.path);
             }
-        } else if (event.event === "rename") { //file or folder added
+        } else if (event.event === "rename" || event.event === "change") { //file or folder added
             if (event.isDirectory && event.name !== "pvsbin") {
                 children = getFolderChildren(event.subFiles, event.path);
                 if (!pvsFilesListView.getTreeList().nodeExists(event.path)) {
