@@ -57,6 +57,7 @@
             var mdPos = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]},
 				rxStart = +region.attr("x"),
                 ryStart = +region.attr("y");
+            region.attr("startx", rxStart).attr("starty", ryStart);
             //cache the start pos in each element
             d3.selectAll("g.selected .region").attr("startx", function () {
                 return d3.select(this).attr("x");
