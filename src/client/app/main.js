@@ -79,6 +79,11 @@ define(function (require, exports, module) {
                             layoutjs({el: "#model-editor-container"});
                             //enable autosave plugin
                             pluginManager.enablePlugin(ProjectAutoSaver.getInstance());
+                            //hide pvsio-web loading screen and make the tool visible
+                            setTimeout(function () {
+                                d3.select("#PVSio-web-logo").style("display", "none");
+                                d3.select("#content").style("display", "block");
+                            }, 2400);
                             resolve(res);
                         }).catch(function (err) { reject(err); });
                     }).catch(function (err) { reject(err); });
