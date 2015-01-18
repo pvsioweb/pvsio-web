@@ -145,9 +145,15 @@ module.exports = function () {
 			callback({type: "processExited", data: msg, code: err});
 		}
 		
-        pvs.start({processName: "pvsio", args: [filename],
-			onDataReceived: onDataReceived,
-			onProcessExited: onProcessExited});
+		if (process.env.PORT) { // this is for the PVSio-web version installed on the heroku cloud
+		    pvs.start({processName: "/app/pvs6.0/pvsio", args: [filename],
+				onDataReceived: onDataReceived,
+				onProcessExited: onProcessExited});
+		} else {
+		    pvs.start({processName: "pvsio", args: [filename],
+				onDataReceived: onDataReceived,
+				onProcessExited: onProcessExited});
+		}
 		
 		logger.info("\n-------------------------------------\nPVSio process started with theory "
                     + filename + "\n-------------------------------------");
