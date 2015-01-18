@@ -15,7 +15,7 @@ define(function (require, exports, module) {
 		d3						= require("d3/d3"),
 		property				= require("util/property"),
 		ws,
-		_port = 8082,
+		_port = window.location.origin.indexOf("pvsioweb.herokuapp.com") >= 0 ? 0 : 8082,
 		url = window.location.origin.indexOf("file") === 0 ?
 				("ws://localhost") : ("ws://" + window.location.hostname),
         instance;
@@ -53,7 +53,11 @@ define(function (require, exports, module) {
         Returns a promise object that resolves to the websocket connection when the connection opens
     */
 	PVSioWeb.prototype.connectToServer = function () {
-		return ws.serverUrl(this.serverUrl()).port(this.port()).logon();
+        if (this.port()) {
+            return ws.serverUrl(this.serverUrl()).port(this.port()).logon();
+        } else {
+            return ws.serverUrl(this.serverUrl()).logon();
+        }
 	};
 	
     /**
