@@ -39,32 +39,34 @@ define(function (require, exports, module) {
     }
     
     ProjectAutoSaver.prototype.initialise = function () {
-        ProjectManager.getInstance().addListener("ProjectSaved", function (e) {
-            reset();
-        }).addListener("ProjectChanged", function (e) {
-            reset();
-        });
-        saveTimer.addListener("TimerTicked", function (e) {
-            saveTimer.stop();
-            countdownTimer.reset();
-            var pm = ProjectManager.getInstance();
-            var autosaveName = Constants.autosavePath + "/" + pm.project().name() +
-                            "_autosave_" + (new Date().getFullYear()) + "." +
-                            ("0" + (new Date().getMonth() + 1)).slice(-2) + "." +
-                            ("0" + (new Date().getDate())).slice(-2) + "." +
-                            ("0" + (new Date().getHours())).slice(-2) + "h";
-//            d3.select("#autoSaver").html("Saving backup copy in " + autosaveName + "...");
-            pm.backupProject(autosaveName, { overWrite: true, silentMode: true }).then(function (res) {
-                saveTimer.reset().start();
-                countdownTimer.start();
-            }).catch(function (err) { console.log(err); });
-        }).start();
-        countdownTimer.addListener("TimerTicked", function (e) {
-            var timeToNextSave = saveInterval - (e.currentCount * 1000);
-            timeToNextSave /= 1000;
-            var time = toTimeString(timeToNextSave);
-//            d3.select("#autoSaver").html("Project will auto-save in " + time);
-        }).start();
+        if (saveInterval > 0) {
+            ProjectManager.getInstance().addListener("ProjectSaved", function (e) {
+                reset();
+            }).addListener("ProjectChanged", function (e) {
+                reset();
+            });
+            saveTimer.addListener("TimerTicked", function (e) {
+                saveTimer.stop();
+                countdownTimer.reset();
+                var pm = ProjectManager.getInstance();
+                var autosaveName = Constants.autosavePath + "/" + pm.project().name() +
+                                "_autosave_" + (new Date().getFullYear()) + "." +
+                                ("0" + (new Date().getMonth() + 1)).slice(-2) + "." +
+                                ("0" + (new Date().getDate())).slice(-2) + "." +
+                                ("0" + (new Date().getHours())).slice(-2) + "h";
+    //            d3.select("#autoSaver").html("Saving backup copy in " + autosaveName + "...");
+                pm.backupProject(autosaveName, { overWrite: true, silentMode: true }).then(function (res) {
+                    saveTimer.reset().start();
+                    countdownTimer.start();
+                }).catch(function (err) { console.log(err); });
+            }).start();
+            countdownTimer.addListener("TimerTicked", function (e) {
+                var timeToNextSave = saveInterval - (e.currentCount * 1000);
+                timeToNextSave /= 1000;
+                var time = toTimeString(timeToNextSave);
+    //            d3.select("#autoSaver").html("Project will auto-save in " + time);
+            }).start();
+        }
     };
     
     ProjectAutoSaver.prototype.unload = function () {
