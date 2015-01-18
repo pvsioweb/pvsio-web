@@ -206,8 +206,8 @@ define(function (require, exports, module) {
             return new Promise(function (resolve, reject) {
                 txt = "backupProject()";
                 summary += "\n\n Test " + (++cTest) + ": '" + txt + "'";
-                pm.openProject("unit_test/saveTest").then(function (res) {
-                    pm.backupProject().then(function (res) {
+                pm.openProject("AlarisPC_PumpModules").then(function (res) {
+                    pm.backupProject("unit_test/autosave/AlarisPC_PumpModules_backup_test").then(function (res) {
                         addSuccess(res + " backup copy created successfully\n" + res);
                         resolve(res);
                     }).catch(function (err) {

@@ -20,6 +20,8 @@ define(function (require, exports, module) {
         property        = require("util/property"),
         ScriptPlayer    = require("util/ScriptPlayer"),
         fs              = require("util/fileHandler"),
+        NotificationManager = require("project/NotificationManager"),
+        SaveProjectChanges = require("project/forms/SaveProjectChanges"),
         Descriptor      = require("project/Descriptor");
 	var instance;
     var currentProject,
@@ -76,8 +78,10 @@ define(function (require, exports, module) {
                         WidgetManager.scaleAreaMaps(scale);
                     }
                 }
-                resize();
-                parent.node().addEventListener("resize", resize);
+                if (parent.node()) {
+                    resize();
+                    parent.node().addEventListener("resize", resize);
+                }
                 resolve(scale);
             }
 
@@ -199,7 +203,6 @@ define(function (require, exports, module) {
 		d3.select("#btnBuilderView").classed("selected", true).on("click", function () {
 			switchToBuilderView();
 		});
-	
 		d3.select("#btnSimulatorView").on("click", function () {
             var img = d3.select("#imageDiv img");
             var msg = "";
@@ -217,6 +220,97 @@ define(function (require, exports, module) {
             }
             switchToSimulatorView();
 		});
+		d3.select("#btnSaveProject").on("click", function () {
+			projectManager.saveProject();
+		});
+	
+		d3.select("#btnSaveProjectAs").on("click", function () {
+            var name = projectManager.project().name() + "_" + (new Date().getFullYear()) + "." +
+                            (new Date().getMonth() + 1) + "." + (new Date().getDate());
+			projectManager.saveProjectDialog(name);
+		});
+		d3.select("#openProject").on("click", function () {
+            function openProject() {
+                projectManager.openProjectDialog().then(function (project) {
+                    var notification = "Project " + project.name() + " opened successfully!";
+                    Logger.log(notification);
+                }).catch(function (err) {
+                    if (err && err.error) {
+                        NotificationManager.error(err.error);
+                    } else {
+                        Logger.log(JSON.stringify(err));
+                    }
+                });
+            }
+            var currentProject = projectManager.project();
+            if (currentProject && currentProject._dirty()) {
+                //show save project dialog for the current project
+                SaveProjectChanges.create(currentProject)
+                    .on("yes", function (e, view) {
+                        view.remove();
+                        projectManager.saveProject().then(function (res) {
+                            openProject();
+                        }).catch(function (err) { alert(err); });
+                    }).on("no", function (e, view) {
+                        view.remove();
+                        openProject();
+                    });
+            } else {
+                openProject();
+            }
+		});
+		d3.select("#newProject").on("click", function () {
+			projectManager.createProjectDialog().then(function (res) {
+                var notification = "Project " + res.project().name() + "created!";
+                Logger.log(notification);
+            });
+		});
+        projectManager.addListener("ProjectChanged", function (event) {
+            function pvsProcessReady(err) {
+                var pvsioStatus = d3.select("#lblPVSioStatus");
+                pvsioStatus.select("span").remove();
+                if (!err) {
+                    var msg = "PVSio process ready!";
+                    Logger.log(msg);
+                    pvsioStatus.append("span").attr("class", "glyphicon glyphicon-ok");
+                } else {
+                    Logger.log(err);
+                    pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
+                }
+            }
+            var pvsioStatus = d3.select("#lblPVSioStatus");
+            pvsioStatus.select("span").remove();
+            var project = event.current;
+            var ws = WSManager.getWebSocket();
+            ws.lastState("init(0)");
+            if (project.mainPVSFile()) {
+                // the main file can be in a subfolder: we need to pass information about directories!
+                var mainFile = project.mainPVSFile().path.replace(project.name() + "/", "");
+                ws.startPVSProcess({name: mainFile, projectName: project.name()}, function (err) {
+					pvsProcessReady(err);
+					//make projectManager bubble the process ready event
+					projectManager.fire({type: "PVSProcessReady", err: err});
+				});
+            } //else {
+                // don't close the process just because the main file is not defined,
+                // closing the process creates issues with fs file watcher -- the project folder is not monitored anymore
+//                //close pvsio process for previous project
+//                ws.closePVSProcess(function (err) {
+//                    if (!err) {
+//                        pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
+//                    }
+//                });
+//            }
+        }).addListener("SelectedFileChanged", function (event) {
+            var desc = projectManager.project().getDescriptor(event.selectedItem.path);
+            if (desc) {
+                if (projectManager.project().mainPVSFile() && projectManager.project().mainPVSFile().path === desc.path) {
+                    d3.select("#btnSetMainFile").attr("disabled", true);
+                } else {
+                    d3.select("#btnSetMainFile").attr("disabled", null);
+                }
+            }
+        });
 	
         d3.select("#btnRecord").on("click", function () {
             if (!d3.select("#btnRecord").attr("active")) {
@@ -402,6 +496,7 @@ define(function (require, exports, module) {
         projectManager.addListener("WidgetsFileChanged", onProjectChanged);
         WidgetsListView.create();
         bindListeners();
+        d3.select("#header #txtProjectName").html(projectManager.project().name());
 		return updateImageAndLoadWidgets();
     };
    

@@ -3,12 +3,12 @@
  * @author Patrick Oladimeji
  * @date 6/25/14 20:07:07 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global d3, $, it, expect, define, describe, beforeEach, afterAll, Promise, Event*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
+/*global d3, $, it, expect, define, describe, beforeEach, afterAll, spyOn, Promise, Event*/
 define(function (require, exports, module) {
     "use strict";
     var main = require("main"),
-        ProjectManager			= require("project/ProjectManager");    
+        ProjectManager			= require("project/ProjectManager");
     
     module.exports = {
         run: function () {
@@ -128,7 +128,7 @@ define(function (require, exports, module) {
                 beforeEach(function (done) {
                     d3.select("div.overlay").remove();
                     pm = ProjectManager.getInstance();
-                    main.start().then(function () {
+                    main.start({noSplash: true}).then(function () {
                         p = pm.project();
                         done();
                     });
@@ -155,7 +155,7 @@ define(function (require, exports, module) {
                 beforeEach(function (done) {
                     d3.select("div.overlay").remove();
                     pm = ProjectManager.getInstance();
-                    main.start().then(function () {
+                    main.start({noSplash: true}).then(function () {
                         p = pm.project();
                         done();
                     });
@@ -198,8 +198,7 @@ define(function (require, exports, module) {
                 beforeEach(function (done) {
                     d3.select("div.overlay").remove();
                     pm = ProjectManager.getInstance();
-                    main.start().then(function () {
-                        p = pm.project();
+                    main.start({noSplash: true}).then(function () {
                         setTimeout(done, 0);//using a timeout to push this to the end of the event queue so any files are added and project is ready before performing tests
                     });
                 });
@@ -210,6 +209,8 @@ define(function (require, exports, module) {
                         listViewContextMenu("#newfile").then(function () {
                             setTimeout(function () {
                                 expect(pm.project().getDescriptors().length).toEqual(filesLength + 1);
+                                var desc = pm.project().getDescriptors()[pm.project().getDescriptors().length - 1];
+                                expect(desc.path.indexOf(pm.project().name()) === 0).toBeTruthy();
                                 done();
                             }, 300);
                         });
@@ -226,7 +227,7 @@ define(function (require, exports, module) {
                                         setTimeout(function () {
                                             expect(pm.project().getDescriptors().length).toEqual(filesLength);
                                             done();
-                                        }, 300);
+                                        }, 2400);
                                     });
                                 });
                             });

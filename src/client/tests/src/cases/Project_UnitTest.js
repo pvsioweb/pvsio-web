@@ -13,18 +13,16 @@ define(function (require, exports, module) {
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
         Descriptor = require("project/Descriptor"),
         baseProjectDir = "projects",
-        alarisProject = "AlarisPC";
+        sampleProject = "BBraunPerfusor";
     
 	module.exports = {
 		run: function () {
 			describe("Project", function () {
 				var pb = PrototypeBuilder.getInstance(),
-					pm = pb.getProjectManager(),
-					p;
+					pm = pb.getProjectManager();
 				beforeEach(function (done) {
 					pm = pb.getProjectManager();
-					main.start().then(function () {
-                        p = pm.project();
+					main.start({noSplash: true}).then(function () {
                         done();
                     });
 				});
@@ -36,32 +34,31 @@ define(function (require, exports, module) {
 				});
                 
                 it("default project name after initialisation should contain 'default project'", function (done) {
-                    expect(p.name()).toEqual("defaultProject");
-                    console.log(p.name());
+                    expect(pm.project().name()).toEqual("defaultProject");
+                    console.log(pm.project().name());
                     done();
                 });
 
                 it("default project is not dirty", function (done) {
-                    expect(p._dirty()).toBeFalsy();
+                    expect(pm.project()._dirty()).toBeFalsy();
                     done();
                 });
                 
 				describe("Project innards works fine", function () {
                     //describe opening a project
 					beforeEach(function (done) {
-                        pm.openProject("AlarisPC").then(function (project) {
-                            p = project;
+                        pm.openProject(sampleProject).then(function (project) {
                             done();
                         });
                     });
                     
 					it("sample project should open project correctly", function () {
-                        expect(alarisProject).toEqual(p.name());
+                        expect(sampleProject).toEqual(pm.project().name());
                     });
 					
-					it(" and " + alarisProject + " has at least one pvs file on init", function () {
-						expect(p.pvsFilesList()).not.toBeFalsy();
-						expect(p.pvsFilesList().length).toBeGreaterThan(0);
+					it(" and " + sampleProject + " has at least one pvs file on init", function () {
+						expect(pm.project().pvsFilesList()).not.toBeFalsy();
+						expect(pm.project().pvsFilesList().length).toBeGreaterThan(0);
 					});
 				});
 			});

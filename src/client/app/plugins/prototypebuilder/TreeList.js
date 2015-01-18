@@ -293,7 +293,9 @@ define(function (require, exports, module) {
                 fst.fire({type: "SelectedItemChanged", data: selectedData});
 
                 setTimeout(function () {
-                    d3.select(el).node().scrollTop = selectedData.y;
+                    if (d3.select(el).node()) {
+                        d3.select(el).node().scrollTop = selectedData.y;
+                    }
                 }, duration);
                 return true;
             }

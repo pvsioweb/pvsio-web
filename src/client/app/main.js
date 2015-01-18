@@ -22,7 +22,10 @@ define(function (require, exports, module) {
         PluginManager  = require("plugins/PluginManager"),
         Constants      = require("util/Constants");
 		
-	var client = PVSioWebClient.getInstance(), pluginManager = PluginManager.getInstance();
+	var client = PVSioWebClient.getInstance(),
+        pluginManager = PluginManager.getInstance(),
+        splashTimeout = null;
+    
 	//register event listeners
 	client.addListener('WebSocketConnectionOpened', function (e) {
 		Logger.log("connection to pvsio server established");
@@ -40,8 +43,10 @@ define(function (require, exports, module) {
 	});
 	
 	module.exports = {
-		start: function () {
+		start: function (opt) {
+            clearTimeout(splashTimeout);
 			return new Promise(function (resolve, reject) {
+                var projectManager = ProjectManager.getInstance();
                 client.connectToServer().then(function (ws) {
 					ui.init()
 						.on("pluginToggled", function (event) {
@@ -69,22 +74,26 @@ define(function (require, exports, module) {
                                 pluginManager.disablePlugin(plugin);
                             }
                         });
-					var prototypeBuilder = PrototypeBuilder.getInstance();
-					pluginManager.enablePlugin(prototypeBuilder).then(function () {
-                        return pluginManager.enablePlugin(ModelEditor.getInstance());
-                    }).then(function () {
-                        var projectManager = ProjectManager.getInstance();
-                        ui.bindListeners(projectManager);
-                        projectManager.createDefaultProject().then(function (res) {
-                            layoutjs({el: "#model-editor-container"});
-                            //enable autosave plugin
-                            pluginManager.enablePlugin(ProjectAutoSaver.getInstance());
-                            //hide pvsio-web loading screen and make the tool visible
-                            setTimeout(function () {
-                                d3.select("#PVSio-web-logo").style("display", "none");
-                                d3.select("#content").style("display", "block");
-                            }, 2400);
-                            resolve(res);
+                    layoutjs({el: "#model-editor-container"});
+                    //enable autosave plugin
+                    pluginManager.enablePlugin(ProjectAutoSaver.getInstance());
+                    //enable Prototype Builder and Model Editor
+                    pluginManager.enablePlugin(PrototypeBuilder.getInstance()).then(function () {
+                        pluginManager.enablePlugin(ModelEditor.getInstance()).then(function () {
+                            projectManager.createDefaultProject().then(function (res) {
+                                //hide pvsio-web loading screen and make the tool visible
+                                if (opt && opt.noSplash) {
+                                    d3.select("#PVSio-web-logo").style("display", "none");
+                                    d3.select("#content").style("display", "block");
+                                    resolve(res);
+                                } else {
+                                    splashTimeout = setTimeout(function () {
+                                        d3.select("#PVSio-web-logo").style("display", "none");
+                                        d3.select("#content").style("display", "block");
+                                        resolve(res);
+                                    }, 2400);
+                                }
+                            }).catch(function (err) { reject(err); });
                         }).catch(function (err) { reject(err); });
                     }).catch(function (err) { reject(err); });
 				}).catch(function (err) { reject(err); });
