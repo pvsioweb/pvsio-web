@@ -37,7 +37,9 @@ define(function (require, exports, module) {
                         reject(event);
                     };
                     ws.onclose = function (event) {
+                        ws = undefined;
                         o.fire({type: events.ConnectionClosed, event: event});
+                        reject(event);
                     };
                     //when a message is received, look for the callback for that message id in the callbackRegistry
                     //if no callback exists then broadcast the event using the token type string
@@ -78,6 +80,7 @@ define(function (require, exports, module) {
         o.close = function () {
             if (ws) {
                 ws.close();
+                ws = undefined;
                 console.log("Client closes websocket connection...");
             }
         };

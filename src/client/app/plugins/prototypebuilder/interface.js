@@ -3,7 +3,7 @@
  * @author Patrick Oladimeji
  * @date 11/15/13 16:29:55 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true*/
 /*global define, d3, $, Backbone, Handlebars, Promise, layoutjs */
 define(function (require, exports, module) {
 	"use strict";
@@ -19,24 +19,121 @@ define(function (require, exports, module) {
         NotificationManager = require("project/NotificationManager"),
         Descriptor = require("project/Descriptor"),
         fs = require("util/fileHandler"),
-        PluginManager = require("plugins/PluginManager");
+        PluginManager = require("plugins/PluginManager"),
+        PVSioWeb = require("PVSioWebClient").getInstance(),
+        ProjectManager = require("project/ProjectManager"),
+        displayQuestion = require("pvsioweb/forms/displayQuestion");
 	
     var template = require("text!pvsioweb/forms/maincontent.handlebars");
-    
-    
-	///FIXME need to distinguish between process started and process restarted
-    function pvsProcessReady(err) {
-        var pvsioStatus = d3.select("#lblPVSioStatus");
-        pvsioStatus.select("span").remove();
-        if (!err) {
-            var msg = "PVSio process ready!";
-            Logger.log(msg);
-            pvsioStatus.append("span").attr("class", "glyphicon glyphicon-ok");
-        } else {
-            Logger.log(err);
-            pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
+    /**
+     * @private
+     * Shows a prompt to the user signalling that the connection to the server has broken.
+     * Also starts a polling timer to check if the server is back up and running. The dialog
+     * is automatically dismissed when the server is restarted.
+     */
+    function reconnectToServer() {
+        var timerid,
+            q,
+            data = {
+                header: "Reconnect to server",
+                question: "Uh-oh  the server seems to be down :(. Restart it by running ./start.sh" +
+                    " from the pvsio-web installation directory. Once you have restarted the server this message will go away",
+                buttons: ["Dismiss", "Reconnect"]
+            };
+        
+        function retry() {
+            if (!PVSioWeb.isWebSocketConnected()) {
+                ProjectManager.getInstance().reconnectToServer()
+                    .then(function () {
+                        q.remove();
+                        clearTimeout(timerid);
+                    }).catch(function () {
+                        timerid = setTimeout(retry, 1000);
+                    });
+            } else {
+                q.remove();
+            }
+        }
+        //dont create a new question form if one already exists
+        if (d3.select(".overlay").empty()) {
+            q = displayQuestion.create(data).on("reconnect", function (e, view) {
+                if (!PVSioWeb.isWebSocketConnected()) {
+                    ProjectManager.getInstance().reconnectToServer()
+                        .then(function () {
+                            view.remove();
+                            clearTimeout(timerid);
+                        }).catch(function (err) {
+                            view.remove();
+                        });
+                } else {
+                    view.remove();
+                }
+            }).on("dismiss", function (e, view) {
+                view.remove();
+            });
+            //create a timer to poll the connection to the server
+            //this automatically dismisses the dialog after successful reconnection
+            timerid = setTimeout(retry, 1000);
         }
     }
+    
+    /**
+     * @private
+     * Called when the pvs process has been disconnected. It sets the appropriate UI markers
+     * that signifies that the process is disconnected.
+     * @param {object|string} err The error message or object returned from the server signifying why the process disconnected
+     */
+    function pvsProcessDisconnected(err) {
+        var pvsioStatus = d3.select("#lblPVSioStatus");
+        pvsioStatus.select("span").remove();
+        Logger.log(err);
+        pvsioStatus.classed("disconnected", true)
+            .append("span").attr("class", "glyphicon glyphicon-warning-sign");
+        //style("background", "red");
+        PVSioWeb.isPVSProcessConnected(false);
+    }
+    /**
+     * @private
+     * Called when the pvs process has been connected. It sets the appropriate UI markers
+     * that signifies that the process is connected and ready.
+     */
+    function pvsProcessReady() {
+        var pvsioStatus = d3.select("#lblPVSioStatus");
+        pvsioStatus.select("span").remove();
+        var msg = "PVSio process ready!";
+        Logger.log(msg);
+        pvsioStatus.append("span").attr("class", "glyphicon glyphicon-ok");
+        PVSioWeb.isPVSProcessConnected(true);
+    }
+    /**
+     * @private
+     * Called when the websocket connection to the server has been established. It sets the appropriate UI markers
+     * that signifies that the websocket connection is active.
+     */
+    function webSocketConnected() {
+        var el = d3.select("#lblWebSocketStatus");
+        Logger.log("connection to pvsio server established");
+		d3.select("#btnCompile").attr("disabled", null);
+        el.classed("disconnected", false)
+            .select("span").attr("class", "glyphicon glyphicon-ok");//style("background", "rgb(8, 88, 154)");
+        PVSioWeb.isWebSocketConnected(true);
+    }
+    /**
+     * @private
+     * Called when the websocket connection to the server has been disconnected. It sets the appropriate UI markers
+     * that signifies that the connection is disconnected. It also triggers the disconnection of the pvs process since
+     * connection to the pvs process  depends on connection to the server.
+     */
+    function webSocketDisconnected() {
+        var el = d3.select("#lblWebSocketStatus");
+        Logger.log("connection to pvsio server closed");
+		d3.select("#btnCompile").attr("disabled", true);
+        el.classed("disconnected", true)
+            .select("span").attr("class", "glyphicon glyphicon-warning-sign");//.style("background", "red");
+        PVSioWeb.isWebSocketConnected(false);
+        pvsProcessDisconnected("Websocket connection closed");
+    }
+    
 
     function updateEditorToolbarButtons(pvsFile, currentProject) {
 		//update status of the set main file button based on the selected file
@@ -63,23 +160,21 @@ define(function (require, exports, module) {
                 // the main file can be in a subfolder: we need to pass information about directories!
                 var mainFile = project.mainPVSFile().path.replace(project.name() + "/", "");
                 ws.startPVSProcess({name: mainFile, projectName: project.name()}, function (err) {
-					pvsProcessReady(err);
 					//make projectManager bubble the process ready event
-					projectManager.fire({type: "PVSProcessReady", err: err});
+                    if (!err) {
+                        projectManager.fire({type: "PVSProcessReady"});
+                    } else {
+                        projectManager.fire({type: "PVSProcessDisconnected"});
+                    }
 				});
-            } //else {
-                // don't close the process just because the main file is not defined,
-                // closing the process creates issues with fs file watcher -- the project folder is not monitored anymore
-//                //close pvsio process for previous project
-//                ws.closePVSProcess(function (err) {
-//                    if (!err) {
-//                        pvsioStatus.append("span").attr("class", "glyphicon glyphicon-warning-sign");
-//                    }
-//                });
-//            }
+            }
         }).addListener("SelectedFileChanged", function (event) {
             var p = projectManager.project(), file = p.getDescriptor(event.selectedItem.path);
             updateEditorToolbarButtons(file, p);
+        }).addListener("PVSProcessReady", function (event) {
+            pvsProcessReady();
+        }).addListener("PVSProcessDisconnected", function (event) {
+            pvsProcessDisconnected();
         });
         
 		d3.select("#header #txtProjectName").html("");
@@ -139,7 +234,14 @@ define(function (require, exports, module) {
                 ws.lastState("init(0)");
                 // the main file can be in a subfolder: we need to pass information about directories!
                 var mainFile = project.mainPVSFile().path.replace(project.name() + "/", "");
-                ws.startPVSProcess({name: mainFile, projectName: project.name()}, pvsProcessReady);
+                ws.startPVSProcess({name: mainFile, projectName: project.name()}, function (err) {
+					//make projectManager bubble the process ready event
+                    if (!err) {
+                        projectManager.fire({type: "PVSProcessReady"});
+                    } else {
+                        projectManager.fire({type: "PVSProcessDisconnected"});
+                    }
+				});
             }
         }
         //handle typecheck event
@@ -283,6 +385,8 @@ define(function (require, exports, module) {
     function createHtmlElements(data) {
         return new MainView(data);
     }
+    
+    
 	module.exports = {
 		init: function (data) {
             data = data || {plugins: [PrototypeBuilder.getInstance(), ModelEditor.getInstance(),
@@ -304,6 +408,21 @@ define(function (require, exports, module) {
         },
 		bindListeners: function (projectManager) {
 			bindListeners(projectManager);
-		}
+		},
+        webSocketConnected: function () {
+            webSocketConnected();
+        },
+        webSocketDisconnected: function () {
+            webSocketDisconnected();
+        },
+        pvsProcessConnected: function () {
+            pvsProcessReady();
+        },
+        pvsProcessDisconnected: function (reason) {
+            pvsProcessDisconnected(reason);
+        },
+        reconnectToServer: function () {
+            reconnectToServer();
+        }
 	};
 });

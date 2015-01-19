@@ -775,6 +775,10 @@ fadeIn
 	background: rgb(8, 88, 154);
 }
 
+#projectTitle .btn.disconnected {
+    background: red;
+}
+
 .PVSio-web-logo {
     width: 100%;
     height: 100%;

@@ -6,7 +6,7 @@
  * @date 4/19/13 17:23:31 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
-/*global define*/
+/*global define, Promise*/
 
 define(function (require, exports, module) {
     "use strict";
@@ -32,15 +32,25 @@ define(function (require, exports, module) {
 		ws = pvsws()
 			.serverUrl(url)
 			.addListener('ConnectionOpened', function (e) {
-				_pvsioweb.fire((e.type = "WebSocketConnectionOpened"));
+                e.type = "WebSocketConnectionOpened";
+				_pvsioweb.isWebSocketConnected(true).fire(e);
 			}).addListener("ConnectionClosed", function (e) {
-				_pvsioweb.fire((e.type = "WebSocketConnectionClosed"));
+                e.type = "WebSocketConnectionClosed";
+				_pvsioweb.isWebSocketConnected(false).fire(e);
 			}).addListener("pvsoutput", function (e) {
 				_pvsioweb.fire(e);
 			}).addListener("processExited", function (e) {
-				_pvsioweb.fire(e);
+				_pvsioweb.isPVSProcessConnected(false).fire(e);
 			});
 	}
+    /**
+     Get or set whether the client is connected to the server websocket
+    */
+    PVSioWeb.prototype.isWebSocketConnected = property.call(PVSioWeb.prototype, false);
+    /**
+        Get or set whether the client is connected to the server pvsprocess
+    */
+    PVSioWeb.prototype.isPVSProcessConnected = property.call(PVSioWeb.prototype, false);
     /**get or set the port for the server connection */
 	PVSioWeb.prototype.port = property.call(PVSioWeb.prototype, _port);
 	
@@ -53,6 +63,9 @@ define(function (require, exports, module) {
         Returns a promise object that resolves to the websocket connection when the connection opens
     */
 	PVSioWeb.prototype.connectToServer = function () {
+        if (this.isWebSocketConnected()) {
+            return Promise.resolve(this.getWebSocket());
+        }
 		return ws.serverUrl(this.serverUrl()).port(this.port()).logon();
 	};
 	

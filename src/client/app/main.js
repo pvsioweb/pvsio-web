@@ -20,23 +20,19 @@ define(function (require, exports, module) {
 		GraphBuilder   = require("plugins/graphbuilder/GraphBuilder"),
         ProjectAutoSaver = require("plugins/autoSaver/ProjectAutoSaver"),
         PluginManager  = require("plugins/PluginManager"),
-        Constants      = require("util/Constants");
+        Constants      = require("util/Constants"),
+        displayQuestion = require("pvsioweb/forms/displayQuestion");
 		
 	var client = PVSioWebClient.getInstance(), pluginManager = PluginManager.getInstance();
+        
 	//register event listeners
 	client.addListener('WebSocketConnectionOpened', function (e) {
-		Logger.log("connection to pvsio server established");
-		d3.select("#btnCompile").attr("disabled", null);
-		d3.select("#lblWebSocketStatus").select("span").attr("class", "glyphicon glyphicon-ok");
-        d3.select("#lblWebSocketStatus").style("background", "rgb(8, 88, 154)");
+        ui.webSocketConnected();
 	}).addListener("WebSocketConnectionClosed", function (e) {
-		Logger.log("connection to pvsio server closed");
-		d3.select("#btnCompile").attr("disabled", true);
-		d3.select("#lblWebSocketStatus").select("span").attr("class", "glyphicon glyphicon-warning-sign");
-        d3.select("#lblWebSocketStatus").style("background", "red");
+        ui.webSocketDisconnected();
+        ui.reconnectToServer();
 	}).addListener("processExited", function (e) {
-		d3.select("#lblPVSioStatus").select("span").attr("class", "glyphicon glyphicon-warning-sign");
-        d3.select("#lblWebSocketStatus").style("background", "red");
+        ui.pvsProcessDisconnected();
 	});
 	
 	module.exports = {

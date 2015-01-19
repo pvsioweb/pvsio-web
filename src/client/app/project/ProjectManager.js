@@ -63,7 +63,8 @@ define(function (require, exports, module) {
 		NotificationManager   = require("project/NotificationManager"),
         Storyboard            = require("pvsioweb/Storyboard"),
         Constants             = require("util/Constants"),
-        MIME                  = require("util/MIME");
+        MIME                  = require("util/MIME"),
+        PVSioWebClient        = require("PVSioWebClient").getInstance();
     
 	var pvsFilesListView; // This is the PVSio-web file browser instance ** TODO: create a separate module **
     var _projectManager; // Project Manager instance ("this" pointer)
@@ -275,6 +276,34 @@ define(function (require, exports, module) {
 	}
     
     /**
+     * @function <a name="reconnectToServer">reconnectToServer</a>
+     * @description Reestablishes connection to the server without reloading the client.
+     * This ensures that unsaved changes are not lost e.g., after server crashes
+     * @returns {Promise} a Promise that is settled when the connection to the server has been 
+     * reestablished or an error occurs
+     * @memberof module:ProjectManager
+     * @instance
+     */
+    ProjectManager.prototype.reconnectToServer = function () {
+        var project = this.project();
+        function startPVSProcess(ws) {
+            var mainFile = project.mainPVSFile().path.replace(project.name() + "/", "");
+            return new Promise(function (resolve, reject) {
+                ws.startPVSProcess({name: mainFile, projectName: project.name()}, function (err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        _projectManager.fire({type: "PVSProcessReady"});
+                        resolve(true);
+                    }
+                });
+            });
+        }
+        return PVSioWebClient.connectToServer()
+            .then(startPVSProcess);
+    };
+    
+    /**
      * @function <a name="renderFileTreeView">renderFileTreeView</a>
      * @description refreshes the fileTreeView
      * @memberof module:ProjectManager
@@ -410,19 +439,6 @@ define(function (require, exports, module) {
                                 });
                                 view.remove();
                             });
-//                        var overWrite = confirm("File " + path + " already exists. Overwrite file?");
-//                        if (overWrite) {
-//                            opt.overWrite = true;
-//                            _projectManager.writeFile(path, content, opt).then(function (res) {
-//                                resolve(res);
-//                            }).catch(function (err) { console.log(err); reject(err); });
-//                        } else {
-//                            reject({
-//                                code: "CANCELED_BY_USER",
-//                                message: "Operation cancelled by the user",
-//                                path: path
-//                            });
-//                        }
                     }
                 });
             }
@@ -626,18 +642,6 @@ define(function (require, exports, module) {
                     });
                     view.remove();
                 });
-//            var ans = confirm("Delete file " + path + "?");
-//            if (ans) {
-//                _projectManager.deleteFile(path, content, opt).then(function (res) {
-//                    resolve(res);
-//                }).catch(function (err) { reject(err); });
-//            } else {
-//                reject({
-//                    code: "CANCELED_BY_USER",
-//                    message: "Operation cancelled by the user",
-//                    path: path
-//                });
-//            }
         });
     };
 
@@ -703,18 +707,6 @@ define(function (require, exports, module) {
                         });
                         view.remove();
                     });
-//                var ans = confirm("Delete directory " + path + "?");
-//                if (ans) {
-//                    _projectManager.rmDir(path).then(function (res) {
-//                        resolve(res);
-//                    }).catch(function (err) { reject(err); });
-//                } else {
-//                    reject({
-//                        code: "CANCELED_BY_USER",
-//                        message: "Operation cancelled by the user",
-//                        path: path
-//                    });
-//                }
             } else {
                 reject({
                     code: "INVALID_PATH",
@@ -812,13 +804,6 @@ define(function (require, exports, module) {
                             }).on("cancel", function (e, view) {
                                 view.remove();
                             });
-//                        var overWrite = confirm("Directory " + path + " already exists. Overwrite directory?");
-//                        if (overWrite) {
-//                            opt.overWrite = true;
-//                            _projectManager.mkDir(path, opt).then(function (res) {
-//                                resolve(res);
-//                            }).catch(function (err) { console.log(err); reject(err); });
-//                        }
                     }
                 });
             } else {
@@ -1081,19 +1066,6 @@ define(function (require, exports, module) {
                                     message: "Operation cancelled by the user"
                                 });
                             });
-//                        e.data.overWrite = confirm("Project " + e.data.projectName +
-//                                                " already exists. Overwrite project?");
-//                        if (e.data.overWrite) {
-//                            _projectManager.createProject(e.data).then(function (res) {
-//                                resolve(res);
-//                            }).catch(function (err) { reject(err); });
-//                            formView.remove();
-//                        } else {
-//                            reject({
-//                                code: "CANCELED_BY_USER",
-//                                message: "Operation cancelled by the user"
-//                            });
-//                        }
                     } else {
                         formView.remove();
                         return _projectManager.createProject(e.data).then(function (res) {
@@ -1201,19 +1173,6 @@ define(function (require, exports, module) {
                                     message: "Cannot save: project " + e.data.projectName + " already exists."
                                 });
                             });
-//                        e.data.overWrite = confirm("Project " + e.data.projectName +
-//                                                " already exists. Overwrite project?");
-//                        if (e.data.overWrite) {
-//                            // remove existing folder, save project and then rename folder
-//                            _projectManager.rmDir(e.data.projectName).then(function (res) {
-//                                saveProject(e.data.projectName);
-//                            }).catch(function (err) { reject(err); });
-//                        } else {
-//                            reject({
-//                                code: "EEXISTS",
-//                                message: "Cannot save: project " + e.data.projectName + " already exists."
-//                            });
-//                        }
                     } else {
                         saveProject(e.data.projectName);
                     }
