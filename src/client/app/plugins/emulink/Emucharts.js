@@ -13,10 +13,6 @@
 define(function (require, exports, module) {
 	"use strict";
     
-    var nodes = d3.map(),
-        edges = d3.map(),
-        initial_edges = d3.map();
-    
     var constants, // d3.map()
         variables; // d3.map()
 	var eventDispatcher = require("util/eventDispatcher");

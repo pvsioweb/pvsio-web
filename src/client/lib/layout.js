@@ -144,7 +144,7 @@
 					c.dispatchEvent(event);
 				});
 			};
-			parent.style.height = window.innerHeight + "px";
+			parent.style.minHeight = window.innerHeight + "px";
 		}
 	}
 	window.layoutjs = layout;
