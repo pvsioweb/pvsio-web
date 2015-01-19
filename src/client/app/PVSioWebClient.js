@@ -15,7 +15,7 @@ define(function (require, exports, module) {
 		d3						= require("d3/d3"),
 		property				= require("util/property"),
 		ws,
-		_port = 8082,
+		_port = window.location.origin.indexOf("pvsioweb.herokuapp.com") >= 0 ? 0 : 8082,
 		url = window.location.origin.indexOf("file") === 0 ?
 				("ws://localhost") : ("ws://" + window.location.hostname),
         instance;
@@ -63,10 +63,14 @@ define(function (require, exports, module) {
         Returns a promise object that resolves to the websocket connection when the connection opens
     */
 	PVSioWeb.prototype.connectToServer = function () {
-        if (this.isWebSocketConnected()) {
-            return Promise.resolve(this.getWebSocket());
+		if (this.isWebSocketConnected()) {
+			return Promise.resolve(this.getWebSocket());
+		}
+        if (this.port()) {
+            return ws.serverUrl(this.serverUrl()).port(this.port()).logon();
+        } else {
+            return ws.serverUrl(this.serverUrl()).logon();
         }
-		return ws.serverUrl(this.serverUrl()).port(this.port()).logon();
 	};
 	
     /**
@@ -100,22 +104,24 @@ define(function (require, exports, module) {
 		var header = div.append("div").classed("header", true);
 		var content = div.append("div").attr("class", "collapsible-panel");
 		
-        header.on("click", function () {
-            var icon = d3.select(this.firstChild);
-            var label = d3.select(this.lastChild);
-            if (content.attr("style") === null) {
-                content.attr("style", "display: none");
-                label.node().textContent += " (click to expand)";
-                icon.classed("glyphicon-plus-sign", true).classed("glyphicon-minus-sign", false);
-            } else {
-                content.attr("style", null);
-                label.node().textContent = label.node().textContent.replace(" (click to expand)", "");
-                icon.classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
-            }
-            if (options.onClick && typeof options.onClick === "function") {
-                options.onClick();
-            }
-        });
+        if (!options.isDemo) {
+            header.on("click", function () {
+                var icon = d3.select(this.firstChild);
+                var label = d3.select(this.lastChild);
+                if (content.attr("style") === null) {
+                    content.attr("style", "display: none");
+                    label.node().textContent += " (click to expand)";
+                    icon.classed("glyphicon-plus-sign", true).classed("glyphicon-minus-sign", false);
+                } else {
+                    content.attr("style", null);
+                    label.node().textContent = label.node().textContent.replace(" (click to expand)", "");
+                    icon.classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
+                }
+                if (options.onClick && typeof options.onClick === "function") {
+                    options.onClick();
+                }
+            });
+        }
 		header.append("span")
 			.attr("class", function () {
 				return options.showContent === true ? "toggle-collapse glyphicon glyphicon-minus-sign" :
@@ -127,7 +133,7 @@ define(function (require, exports, module) {
 		if (options.headerText) {
 			header.append("span").html(options.headerText).attr("class", "header");
 		}
-		if (!options.showContent) {
+		if (!options.showContent && !options.isDemo) {
             header.node().lastChild.textContent += " (click to expand)";
             content.style("display", "none");
         }

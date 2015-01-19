@@ -20,6 +20,8 @@ define(function (require, exports, module) {
         property        = require("util/property"),
         ScriptPlayer    = require("util/ScriptPlayer"),
         fs              = require("util/fileHandler"),
+        NotificationManager = require("project/NotificationManager"),
+        SaveProjectChanges = require("project/forms/SaveProjectChanges"),
         Descriptor      = require("project/Descriptor");
 	var instance;
     var currentProject,
@@ -76,8 +78,10 @@ define(function (require, exports, module) {
                         WidgetManager.scaleAreaMaps(scale);
                     }
                 }
-                resize();
-                parent.node().addEventListener("resize", resize);
+                if (parent.node()) {
+                    resize();
+                    parent.node().addEventListener("resize", resize);
+                }
                 resolve(scale);
             }
 
@@ -164,6 +168,24 @@ define(function (require, exports, module) {
         d3.selectAll("div.display,#controlsContainer button").classed("simulator", false);
     }
     function onProjectChanged(event) {
+        var pvsioStatus = d3.select("#lblPVSioStatus");
+        pvsioStatus.select("span").remove();
+        var project = event.current;
+        var ws = WSManager.getWebSocket();
+        ws.lastState("init(0)");
+        if (project.mainPVSFile()) {
+            // the main file can be in a subfolder: we need to pass information about directories!
+            var mainFile = project.mainPVSFile().path.replace(project.name() + "/", "");
+            ws.startPVSProcess({name: mainFile, projectName: project.name()}, function (err) {
+                //make projectManager bubble the process ready event
+                if (!err) {
+                    projectManager.fire({type: "PVSProcessReady"});
+                } else {
+                    projectManager.fire({type: "PVSProcessDisconnected", err: err});
+                }
+            });
+        }
+        
         document.title = "PVSio-Web -- " + event.current;
         d3.select("#header #txtProjectName").html(event.current);
         switchToBuilderView();
@@ -177,6 +199,17 @@ define(function (require, exports, module) {
         updateImageAndLoadWidgets().then(function (res) {
             WidgetsListView.create();
         }).catch(function (err) { Logger.error(err); });
+    }
+    
+    function onSelectedFileChanged(event) {
+        var desc = projectManager.project().getDescriptor(event.selectedItem.path);
+        if (desc) {
+            if (projectManager.project().mainPVSFile() && projectManager.project().mainPVSFile().path === desc.path) {
+                d3.select("#btnSetMainFile").attr("disabled", true);
+            } else {
+                d3.select("#btnSetMainFile").attr("disabled", null);
+            }
+        }
     }
 	/** Switches the prototyping layer to the simulator/testing layer 
         @private
@@ -199,7 +232,6 @@ define(function (require, exports, module) {
 		d3.select("#btnBuilderView").classed("selected", true).on("click", function () {
 			switchToBuilderView();
 		});
-	
 		d3.select("#btnSimulatorView").on("click", function () {
             var img = d3.select("#imageDiv img");
             var msg = "";
@@ -216,6 +248,51 @@ define(function (require, exports, module) {
                 return alert(msg);
             }
             switchToSimulatorView();
+		});
+		d3.select("#btnSaveProject").on("click", function () {
+			projectManager.saveProject();
+		});
+	
+		d3.select("#btnSaveProjectAs").on("click", function () {
+            var name = projectManager.project().name() + "_" + (new Date().getFullYear()) + "." +
+                            (new Date().getMonth() + 1) + "." + (new Date().getDate());
+			projectManager.saveProjectDialog(name);
+		});
+		d3.select("#openProject").on("click", function () {
+            function openProject() {
+                projectManager.openProjectDialog().then(function (project) {
+                    var notification = "Project " + project.name() + " opened successfully!";
+                    Logger.log(notification);
+                }).catch(function (err) {
+                    if (err && err.error) {
+                        NotificationManager.error(err.error);
+                    } else {
+                        Logger.log(JSON.stringify(err));
+                    }
+                });
+            }
+            var currentProject = projectManager.project();
+            if (currentProject && currentProject._dirty()) {
+                //show save project dialog for the current project
+                SaveProjectChanges.create(currentProject)
+                    .on("yes", function (e, view) {
+                        view.remove();
+                        projectManager.saveProject().then(function (res) {
+                            openProject();
+                        }).catch(function (err) { alert(err); });
+                    }).on("no", function (e, view) {
+                        view.remove();
+                        openProject();
+                    });
+            } else {
+                openProject();
+            }
+		});
+		d3.select("#newProject").on("click", function () {
+			projectManager.createProjectDialog().then(function (res) {
+                var notification = "Project " + res.project().name() + "created!";
+                Logger.log(notification);
+            });
 		});
 	
         d3.select("#btnRecord").on("click", function () {
@@ -311,9 +388,7 @@ define(function (require, exports, module) {
             }
         });
 	};
-    
-        
-	    
+    	    
     /**
      * @function preparePageForUmageUpload
      * @description ...
@@ -400,8 +475,10 @@ define(function (require, exports, module) {
         preparePageForImageUpload();
         projectManager.addListener("ProjectChanged", onProjectChanged);
         projectManager.addListener("WidgetsFileChanged", onProjectChanged);
+        projectManager.addListener("SelectedFileChanged", onSelectedFileChanged);
         WidgetsListView.create();
         bindListeners();
+        d3.select("#header #txtProjectName").html(projectManager.project().name());
 		return updateImageAndLoadWidgets();
     };
    
@@ -409,6 +486,7 @@ define(function (require, exports, module) {
         pvsioWebClient.removeCollapsiblePanel(pbContainer);
         projectManager.removeListener("ProjectChanged", onProjectChanged);
         projectManager.removeListener("WidgetsFileChanged", onProjectChanged);
+        projectManager.removeListener("SelectedFileChanged", onSelectedFileChanged);
 		return Promise.resolve(true);
     };
     

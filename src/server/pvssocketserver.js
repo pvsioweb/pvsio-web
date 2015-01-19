@@ -41,7 +41,7 @@ function run() {
         util                    = require("util"),
         procWrapper             = require("./processwrapper"),
         FileFilters             = require("./FileFilters"),
-        port                    = 8082,
+        port                    = process.env.PORT || 8082,
         pvsioProcessMap         = {},//each client should get his own process
         httpServer              = http.createServer(webserver),
         Promise                 = require("es6-promise").Promise,
@@ -152,10 +152,17 @@ function run() {
 	webserver.use("/client", express.static(clientDir));
 
     function typeCheck(file, cb) {
-        procWrapper().exec({
-            command: "proveit -l -v " + file,
-            callBack: cb
-        });
+		if (process.env.PORT) { // this is for the PVSio-web version installed on the heroku cloud
+		    procWrapper().exec({
+		        command: "/app/pvs6.0/proveit -T -l -v " + file,
+		        callBack: cb
+		    });
+		} else {
+		    procWrapper().exec({
+		        command: "proveit -l -v " + file,
+		        callBack: cb
+		    });
+		}
     }
     
     /**

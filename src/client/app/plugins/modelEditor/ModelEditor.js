@@ -8,12 +8,15 @@
 /*global define, Promise*/
 define(function (require, exports, module) {
 	"use strict";
-	var  CodeMirror             = require("cm/lib/codemirror"),
-        PVSioWebClient          = require("PVSioWebClient"),
-        d3                      = require("d3/d3"),
-		ProjectManager			= require("project/ProjectManager"),
-		sourceCodeTemplate		= require("text!pvsioweb/forms/templates/sourceCodeEditorPanel.handlebars"),
-        Logger                  = require("util/Logger");
+	var CodeMirror          = require("cm/lib/codemirror"),
+        PVSioWebClient      = require("PVSioWebClient"),
+        d3                  = require("d3/d3"),
+		ProjectManager		= require("project/ProjectManager"),
+		sourceCodeTemplate	= require("text!pvsioweb/forms/templates/sourceCodeEditorPanel.handlebars"),
+        Logger              = require("util/Logger"),
+        NotificationManager = require("project/NotificationManager"),
+        Notification = require("pvsioweb/forms/displayNotification"),
+        WSManager           = require("websockets/pvs/WSManager");
 	var instance;
     var currentProject,
         projectManager,
@@ -169,6 +172,133 @@ define(function (require, exports, module) {
     /////These are the api methods that the prototype builder plugin exposes
     ModelEditor.prototype.getDependencies = function () { return []; };
     
+    function bindListeners(projectManager) {
+        d3.select("#btnImportFiles").on("click", function () {
+            return new Promise(function (resolve, reject) {
+                projectManager.readLocalFileDialog().then(function (files) {
+                    var promises = [];
+                    function getImportFolderName() {
+                        var selectedData = projectManager.getSelectedData();
+                        return (selectedData.isDirectory) ? selectedData.path
+                                : selectedData.path.split("/").slice(0, -1).join("/");
+                    }
+                    var importFolder = getImportFolderName();
+                    files.forEach(function (file) {
+                        file.path = importFolder + "/" + file.path;
+                        promises.push(projectManager.writeFileDialog(file.path, file.content, { encoding: file.encoding }));
+                    });
+                    Promise.all(promises).then(function (res) {
+                        resolve(res);
+                    }).catch(function (err) { reject(err); });
+                }).catch(function (err) { reject(err); });
+            });
+        });
+		d3.select("#btnSaveFile").on("click", function () {
+			var project = projectManager.project();
+			if (project) {
+                var descriptor = projectManager.getSelectedFile();
+                if (descriptor) {
+                    descriptor.content = instance.getEditor().doc.getValue();
+                    descriptor.dirty(false);
+                    projectManager.project().saveFiles([descriptor], { overWrite: true }).then(function (res) {
+                        var notification = descriptor.name + " saved successfully!";
+                        NotificationManager.show(notification);
+                    }).catch(function (err) {
+                        NotificationManager.error(err);
+                    });
+                }
+			}
+		});
+        
+        function reloadPVSio() {
+            //compilation is emulated by restarting the pvsioweb process on the server
+            var project = projectManager.project(), ws = WSManager.getWebSocket();
+            if (project && project.mainPVSFile()) {
+                ws.lastState("init(0)");
+                // the main file can be in a subfolder: we need to pass information about directories!
+                var mainFile = project.mainPVSFile().path.replace(project.name() + "/", "");
+                ws.startPVSProcess({name: mainFile, projectName: project.name()}, function (err) {
+					//make projectManager bubble the process ready event
+                    if (!err) {
+                        projectManager.fire({type: "PVSProcessReady"});
+                    } else {
+                        projectManager.fire({type: "PVSProcessDisconnected", err: err});
+                    }
+				});
+            }
+        }
+        //handle typecheck event
+		//this function should be edited to only act on the selected file when multiple files are in use
+		d3.select("#btnTypeCheck").on("click", function () {
+            function typecheck(pvsFile) {
+                var btn = d3.select("#btnTypeCheck").html("Compiling...").attr("disabled", true);
+                var ws = WSManager.getWebSocket();
+                var fp = pvsFile.path;
+                ws.send({type: "typeCheck", path: fp},
+                     function (err, res) {
+                        btn.html("Compile").attr("disabled", null);
+                        var msg = res.stdout;
+                        if (!err) {
+                            reloadPVSio();
+                            var project = projectManager.project();
+                            var notification = "File " + fp + " compiled successfully!";
+                            msg = msg.substring(msg.indexOf("Proof summary"), msg.length);
+                            Notification.create({
+                                header: pvsFile.name + " compiled successfully! ",
+                                notification: msg.split("\n")
+                            }).on("ok", function (e, view) { view.remove(); });
+                        } else {
+                            var logFile = projectManager.project().name() + "/" + fp.substring(0, fp.length - 4) + ".log";
+                            var header = "Compilation error";
+                            ws.getFile(logFile, function (err, res) {
+                                if (!err) {
+                                    msg = res.content.substring(res.content.indexOf("Parsing "));
+                                    msg = msg.replace("Parsing", "Error while parsing");
+                                } else {
+                                    msg = msg.substring(msg.indexOf("Writing output to file"));
+                                    header += ", please check the PVS output file for details.";
+                                }
+                                Notification.create({
+                                    header: header,
+                                    notification: msg.split("\n")
+                                }).on("ok", function (e, view) { view.remove(); });
+                            });
+                        }
+                    });
+            }
+            
+            // if the pvsFile is not specified, we compile the main file
+            // note: this happens when a directory is selected
+			var pvsFile = projectManager.getSelectedFile() || projectManager.project().mainPVSFile();
+            if (!pvsFile) { return; }
+			if (pvsFile.dirty()) {
+                document.getElementById("btnSaveFile").click();
+            }
+            typecheck(pvsFile);
+		});
+		d3.select("#btnSetMainFile").on("click", function () {
+			var pvsFile = projectManager.getSelectedFile(), project = projectManager.project();
+			if (pvsFile) {
+				var ws = WSManager.getWebSocket();
+				ws.send({type: "setMainFile", projectName: project.name(), name: pvsFile.path}, function (err) {
+					//if there was no error update the main file else alert user
+                    if (!err) {
+                        // set main file
+                        project.mainPVSFile(pvsFile);
+                        // disable button
+                        d3.select("#btnSetMainFile").attr("disabled", true);
+                        var notification = pvsFile.path + " is now the Main file";
+                        NotificationManager.show(notification);
+                        // reload pvsio
+                        reloadPVSio();
+                    } else {
+                        NotificationManager.err(err);
+                    }
+				});
+			}
+		});
+    }
+    
 	/**
 		@returns {Promise} a promise that resolves when the prototype builder has been initialised
 	*/
@@ -274,8 +404,10 @@ define(function (require, exports, module) {
         });
         
         onSelectedFileChanged({ selectedItem: projectManager.getSelectedData() });
-        //render the file tree view
+        // render the file tree view
         projectManager.renderFileTreeView();
+        // bind listeners for buttons in the toolbar
+        bindListeners(projectManager);
 		return Promise.resolve(true);
     };
    

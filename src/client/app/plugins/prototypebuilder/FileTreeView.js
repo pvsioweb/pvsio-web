@@ -171,7 +171,7 @@ define(function (require, exports, module) {
                 question: (isMainFile) ? (path + " is currently set as Main File for the project. Are you sure you want to delete it?")
                                 : ("Are you sure you want to delete " + path + "?"),
                 buttons: ["Cancel", "Delete"]
-            }).on("ok", function (e, view) {
+            }).on("delete", function (e, view) {
 				if (isDirectory) {
 					projectManager.rmDir(path)
                         .catch(function (err) { console.log(err); });

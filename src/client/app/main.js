@@ -23,8 +23,10 @@ define(function (require, exports, module) {
         Constants      = require("util/Constants"),
         displayQuestion = require("pvsioweb/forms/displayQuestion");
 		
-	var client = PVSioWebClient.getInstance(), pluginManager = PluginManager.getInstance();
-        
+	var client = PVSioWebClient.getInstance(),
+        pluginManager = PluginManager.getInstance(),
+        splashTimeout = null;
+    
 	//register event listeners
 	client.addListener('WebSocketConnectionOpened', function (e) {
         ui.webSocketConnected();
@@ -34,56 +36,94 @@ define(function (require, exports, module) {
 	}).addListener("processExited", function (e) {
         ui.pvsProcessDisconnected();
 	});
-	
+    ProjectManager.getInstance().addListener("PVSProcessReady", function (event) {
+        ui.pvsProcessConnected();
+    }).addListener("PVSProcessDisconnected", function (event) {
+        ui.pvsProcessDisconnected();
+    });
+    
+    
+    function enablePlugin(plugin) {
+        return function () {
+            return pluginManager.enablePlugin(plugin);
+        };
+    }
+    
+    function createDefaultProject() {
+        return function () {
+            return ProjectManager.getInstance().createDefaultProject();
+        };
+    }
+    
+    function showInterface(opt) {
+        return function (res) {
+            return new Promise(function (resolve, reject) {
+                layoutjs({el: "#model-editor-container"});
+                //hide pvsio-web loading screen and make the tool visible
+                if (opt && opt.noSplash) {
+                    d3.select("#PVSio-web-logo").style("display", "none");
+                    d3.select("#content").classed("offscreen", false);
+                    resolve(res);
+                } else {
+                    splashTimeout = setTimeout(function () {
+                        d3.select("#PVSio-web-logo").style("display", "none");
+                        d3.select("#content").classed("offscreen", false);
+                        resolve(res);
+                    }, 2400);
+                }
+            });
+        };
+    }
+    
+    function registerPluginEvents() {
+        return function (ws) {
+            ui.init()
+                .on("pluginToggled", function (event) {
+                    var plugin;
+                    switch (event.target.getAttribute("name")) {
+                    case "Emulink":
+                        plugin = Emulink.getInstance();
+                        break;
+                    case "GraphBuilder":
+                        plugin = GraphBuilder.getInstance();
+                        break;
+                    case "SafetyTest":
+                        plugin = SafetyTest.getInstance();
+                        break;
+                    case "ModelEditor":
+                        plugin = ModelEditor.getInstance();
+                        break;
+                    case "PrototypeBuilder":
+                        plugin = PrototypeBuilder.getInstance();
+                        break;
+                    }
+                    if (event.target.checked) {
+                        pluginManager.enablePlugin(plugin);
+                    } else {
+                        pluginManager.disablePlugin(plugin);
+                    }
+                });
+            return Promise.resolve(true);
+        };
+    }
+    
 	module.exports = {
-		start: function () {
+		start: function (opt) {
+            clearTimeout(splashTimeout);
 			return new Promise(function (resolve, reject) {
-                client.connectToServer().then(function (ws) {
-					ui.init()
-						.on("pluginToggled", function (event) {
-							var plugin;
-							switch (event.target.getAttribute("name")) {
-							case "Emulink":
-                                plugin = Emulink.getInstance();
-                                break;
-							case "GraphBuilder":
-                                plugin = GraphBuilder.getInstance();
-                                break;
-							case "SafetyTest":
-                                plugin = SafetyTest.getInstance();
-                                break;
-                            case "ModelEditor":
-                                plugin = ModelEditor.getInstance();
-                                break;
-                            case "PrototypeBuilder":
-                                plugin = PrototypeBuilder.getInstance();
-                                break;
-							}
-							if (event.target.checked) {
-                                pluginManager.enablePlugin(plugin);
-                            } else {
-                                pluginManager.disablePlugin(plugin);
-                            }
-                        });
-					var prototypeBuilder = PrototypeBuilder.getInstance();
-					pluginManager.enablePlugin(prototypeBuilder).then(function () {
-                        return pluginManager.enablePlugin(ModelEditor.getInstance());
-                    }).then(function () {
-                        var projectManager = ProjectManager.getInstance();
-                        ui.bindListeners(projectManager);
-                        projectManager.createDefaultProject().then(function (res) {
-                            layoutjs({el: "#model-editor-container"});
-                            //enable autosave plugin
-                            pluginManager.enablePlugin(ProjectAutoSaver.getInstance());
-                            //hide pvsio-web loading screen and make the tool visible
-                            setTimeout(function () {
-                                d3.select("#PVSio-web-logo").style("display", "none");
-                                d3.select("#content").style("display", "block");
-                            }, 2400);
-                            resolve(res);
-                        }).catch(function (err) { reject(err); });
-                    }).catch(function (err) { reject(err); });
-				}).catch(function (err) { reject(err); });
+                client.connectToServer()
+                    .then(registerPluginEvents())
+                    .then(enablePlugin(ProjectAutoSaver.getInstance()))
+                    .then(enablePlugin(PrototypeBuilder.getInstance()))
+                    .then(enablePlugin(ModelEditor.getInstance()))
+                    .then(createDefaultProject())
+                    .then(showInterface(opt))
+                    .then(function (res) {
+                        resolve(res);
+                    }).catch(function (err) {
+                        console.log(err);
+                        reject(err);
+                    });
             });
 		},
 		reset: function () {///This function is not tested

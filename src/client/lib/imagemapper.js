@@ -261,6 +261,8 @@
                     loadImage();
                 } else {
                     _el_poll_count = 0;
+                    res.error = { code: "SVG_LOAD_IMAGE_FAIL", message: "Failed to load image in SVG" };
+                    config.onReady(res);
                 }
             }
         };

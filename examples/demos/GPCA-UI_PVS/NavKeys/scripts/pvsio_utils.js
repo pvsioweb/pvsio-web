@@ -701,7 +701,7 @@ require(["scripts/gip.js", "PVSioWebClient"], function(_g, PVSioWebClient){
         uiConsole.style.display = "none";
         log("Loading GPCA model...");
 		//start pvs process
-		client.getWebSocket().startPVSProcess({fileName: "main.pvs", demoName: "GPCA-UI_PVS"}, function (err, event) {
+		client.getWebSocket().startPVSProcess({name: "main.pvs", demoName: "GPCA-UI_PVS"}, function (err, event) {
             ws.sendGuiAction("GPCA_init(0);", onOutPutUpdated);
             log("Starting GPCA simulation...");
 		});

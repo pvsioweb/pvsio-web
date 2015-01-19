@@ -60,14 +60,14 @@ define(function (require, exports, module) {
         },
         ok: function (event) {
 			var form = this.el,
-                btnName = this._data.buttons ? this._data.buttons[1].toLowerCase() : "ok";
+                btnName = this._data && this._data.buttons ? this._data.buttons[1].toLowerCase() : "ok";
 			if (FormUtils.validateForm(form)) {
 				var formdata = FormUtils.serializeForm(form);
 				this.trigger(btnName, {data: formdata, el: this.el, event: event}, this);
 			}
 		},
 		cancel: function (event) {
-            var btnName = this._data.buttons ? this._data.buttons[0].toLowerCase() : "cancel";
+            var btnName = this._data && this._data.buttons ? this._data.buttons[0].toLowerCase() : "cancel";
 
 			this.trigger(btnName, {el: this.el, event: event}, this);
 		}
