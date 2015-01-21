@@ -14,105 +14,133 @@ define(function (require, exports, module) {
         run: function () {
             var pm = ProjectManager.getInstance(),
                 p;
+            function wait(milliseconds) {
+                return function () {
+                    return new Promise(function (resolve, reject) {
+                        setTimeout(function () {
+                            resolve("time up");
+                        }, milliseconds);
+                    });
+                };
+            }
             
             function click(elid) {
-                d3.select(elid).node().click();
-                return new Promise(function (resolve) {
-                    setTimeout(function () {
-                        resolve(elid);
-                    }, 200);
-                });
+                return function () {
+                    var el = d3.select(elid).node();
+                    return new Promise(function (resolve, reject) {
+                        if (el) {
+                            el.click();
+                            setTimeout(function () {
+                                resolve(elid);
+                            }, 200);
+                        } else {
+                            reject(elid + " does not exist in the dom");
+                        }
+                    });
+                };
             }
 			
 			function rightclick(el) {
-				var element = d3.select(el).node();
-				var event = new Event("contextmenu");
-				element.dispatchEvent(event);
-				return new Promise(function (resolve) {
-					setTimeout(function () {
-						resolve(event);
-					}, 200);
-				});
+                return function () {
+                    var element = d3.select(el).node();
+                    var event = new Event("contextmenu");
+                    element.dispatchEvent(event);
+                    return new Promise(function (resolve) {
+                        setTimeout(function () {
+                            resolve(event);
+                        }, 200);
+                    });
+                };
 			}
+            /**
+                Utility function to select context menu item (i.e., right click menu) on an element
+                @param {string} el html element selector (e.g., class, tag or id) for the element
+                    recieving the right click
+                @param {string} menu the html element selector for the menu item to select
+                @returns {Promise} a promise that is settled when the context menu item has been clicked
+            */
+            function listViewContextMenu(el, menu) {
+                return function () {
+                    el = el || "#pvsFiles";
+                    return rightclick(el)()
+                        .then(click(".contextmenu " + menu));
+                };
+            }
             
-            function listViewContextMenu(menu) {
-                return rightclick("#pvsFiles").then(function () {
-                    return click(".contextmenu " + menu);
-                });
+            function expectError(done) {
+                return function (err) {
+                    expect(err).toBeFalsy();
+                    done();
+                };
             }
             
             function dialogCanBeDismissed(btnTrigger, title) {
                 title = title || "dialog triggered by " + btnTrigger;
-                var str = title + " can be dismissed";
+                var str = title + " can be dismissed",
+                    clickbutton = click(btnTrigger);
                 it(str, function (done) {
-                    click(btnTrigger)
+                    clickbutton()
+                        .then(click("div.overlay #btnCancel"))
                         .then(function () {
-                            click("div.overlay #btnCancel")
-                                .then(function () {
-                                    //expect overlay to have disappeared after clicking cancel
-                                    expect($("div.overlay").length).toEqual(0);
-                                    done();
-                                });
-                        });
+                            //expect overlay to have disappeared after clicking cancel
+                            expect($("div.overlay").length).toEqual(0);
+                            done();
+                        }).catch(expectError(done));
                 });
             }
             
             function pressingButtonOpensDialog(btnTrigger, title) {
                 title = title || "dialog triggered by " + btnTrigger;
                 var str = title + " is opened by clicking " + btnTrigger;
+                var clickbutton = click(btnTrigger);
                 it(str, function (done) {
-                    click(btnTrigger)
+                    clickbutton()
                         .then(function () {
                             var dialogTitle = $("div.overlay .panel-heading").html();
                             expect(dialogTitle).toEqual(title);
                             done();
-                        }).catch(function (err) {
-                            expect(false).tobeTruthy();
-                            done();
-                        });
+                        }).catch(expectError(done));
                 });
             }
             
             function openSampleProject(projectName) {
-                var str = projectName + " project opens successfully";
+                var str = projectName + " project opens successfully",
+                    clickOpenProject = click("#openProject"),
+                    clickProject = click("button[data-project='" + projectName + "']");
                 it(str, function (done) {
-                    click("#openProject")
+                    clickOpenProject()
+                        .then(clickProject)
                         .then(function () {
-                            click("button[data-project='" + projectName + "']")
-                                .then(function () {
-                                    expect(pm.project().name()).toEqual(projectName);
-                                    done();
-                                });
-                        }).catch(function (err) {
-                            expect(false).tobeTruthy();
+                            expect(pm.project().name()).toEqual(projectName);
                             done();
-                        });
+                        }).catch(expectError(done));
                 });
             }
             
             function loadPlugin(pluginName) {
-                var str = pluginName + " plugin adds a collapsible panel to the ui";
+                var str = pluginName + " plugin adds a collapsible panel to the ui",
+                    clickPlugin = click("input[name='" + pluginName + "']");
                 it(str, function (done) {
-					click("input[name='" + pluginName + "']")
+					clickPlugin()
 						.then(function () {
 							var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginName + "']");
 							expect(pluginPanel.empty()).toBeFalsy();
 							done();
-						});
+						}).catch(expectError(done));
                 });
             }
             
             function unloadPlugin(pluginName) {
-                var str = pluginName + " plugin can be unloaded from the ui";
+                var str = pluginName + " plugin can be unloaded from the ui",
+                    clickPlugin = click("input[name='" + pluginName + "']");
                 it(str, function (done) {
-					click("input[name='" + pluginName + "']")//to load
-						.then(function () {//then unload
-							click("input[name='" + pluginName + "']").then(function () {
-								var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginName + "']");
-								expect(pluginPanel.empty()).toEqual(true);
-								done();
-							});
-						});
+					clickPlugin()//to load
+						.then(clickPlugin)
+                        .then(function () {
+                            var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginName + "']");
+                            expect(pluginPanel.empty()).toEqual(true);
+                            done();
+                        }).catch(expectError(done));
                 });
             }
 			/**
@@ -158,38 +186,36 @@ define(function (require, exports, module) {
                     main.start({noSplash: true}).then(function () {
                         p = pm.project();
                         done();
-                    });
+                    }).catch(expectError(done));
                 });
 
                 it("can be collapsed", function (done) {
                     var editorPanel = "div.collapsible-panel-parent[plugin-owner='PrototypeBuilder'] .collapsible-panel";
-                    togglePanel("PrototypeBuilder")
+                    togglePanel("PrototypeBuilder")()
                         .then(function () {
                             expect(d3.select(editorPanel).style("display")).toEqual("none");
                             done();
-                        });
+                        }).catch(expectError(done));
                 });
 
                 it("can be collapsed and expanded", function (done) {
                     var editorPanel = "div.collapsible-panel-parent[plugin-owner='PrototypeBuilder'] .collapsible-panel";
-                    togglePanel("PrototypeBuilder")
+                    togglePanel("PrototypeBuilder")()
+                        .then(togglePanel("PrototypeBuilder"))
                         .then(function () {
-                            togglePanel("PrototypeBuilder")
-                                .then(function () {
-                                    expect(d3.select(editorPanel).style("display")).toEqual("block");
-                                    done();
-                                });
-                        });
+                            expect(d3.select(editorPanel).style("display")).toEqual("block");
+                            done();
+                        }).catch(expectError(done));
                 });
 
                 describe("Editor File Lists", function () {
                     it("has context menus", function (done) {
-                        togglePanel("PrototypeBuilder").then(function () {
-                            rightclick("#pvsFiles").then(function () {
+                        togglePanel("PrototypeBuilder")()
+                            .then(rightclick("#pvsFiles"))
+                            .then(function () {
                                 expect(d3.select("div.contextmenu").empty()).toBeFalsy();
                                 done();
-                            });
-                        });
+                            }).catch(expectError(done));
                     });
                 });
             });
@@ -205,34 +231,31 @@ define(function (require, exports, module) {
 
                 it("can add files to the project", function (done) {
                     var filesLength = pm.project().getDescriptors().length;
-                    click("div.collapsible-panel-parent[plugin-owner='ModelEditor'] .header").then(function () {
-                        listViewContextMenu("#newfile").then(function () {
+                    click("div.collapsible-panel-parent[plugin-owner='ModelEditor'] .header")()
+                        .then(listViewContextMenu("#pvsFiles", "#newfile"))
+                        .then(function () {
                             setTimeout(function () {
                                 expect(pm.project().getDescriptors().length).toEqual(filesLength + 1);
                                 var desc = pm.project().getDescriptors()[pm.project().getDescriptors().length - 1];
                                 expect(desc.path.indexOf(pm.project().name()) === 0).toBeTruthy();
                                 done();
                             }, 300);
-                        });
-                    });
+                        }).catch(expectError(done));
                 });
                 
                 it("can remove files from the project", function (done) {
                     var filesLength = pm.project().getDescriptors().length;
-                    click("div.collapsible-panel-parent[plugin-owner='ModelEditor'] .header").then(function () {
-                        listViewContextMenu("#newfile").then(function () {//add a new file
-                            click("#pvsFiles li:last-child").then(function () {//select the file
-                                listViewContextMenu("#delete").then(function () {//delete the file
-                                    click("div.overlay #btnOk").then(function () {
-                                        setTimeout(function () {
-                                            expect(pm.project().getDescriptors().length).toEqual(filesLength);
-                                            done();
-                                        }, 2400);
-                                    });
-                                });
-                            });
-                        });
-                    });
+                    click("div.collapsible-panel-parent[plugin-owner='ModelEditor'] .header")()
+                        .then(listViewContextMenu("#pvsFiles", "#newfile"))
+                        .then(click("#pvsFiles li:last-child"))
+                        .then(listViewContextMenu("#pvsFiles", "#delete"))
+                        .then(click("div.overlay #btnOk"))
+                        .then(function () {
+                            setTimeout(function () {
+                                expect(pm.project().getDescriptors().length).toEqual(filesLength);
+                                done();
+                            }, 500);
+                        }).catch(expectError(done));
                 });
             });
            
