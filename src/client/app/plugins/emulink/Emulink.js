@@ -1280,7 +1280,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsPIMPrinter.print(emucharts);
+            var model = emuchartsMALPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
