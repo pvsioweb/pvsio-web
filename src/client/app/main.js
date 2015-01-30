@@ -25,14 +25,16 @@ define(function (require, exports, module) {
 		
 	var client = PVSioWebClient.getInstance(),
         pluginManager = PluginManager.getInstance(),
-        splashTimeout = null;
+        splashTimeout = null,
+        reconnectOptions = (window.location.origin.indexOf("pvsioweb.herokuapp.com") >= 0 ||
+                   window.location.origin.indexOf("pvsioweb.org") >= 0) ? { silentMode: true} : null;
     
 	//register event listeners
 	client.addListener('WebSocketConnectionOpened', function (e) {
         ui.webSocketConnected();
 	}).addListener("WebSocketConnectionClosed", function (e) {
         ui.webSocketDisconnected();
-        ui.reconnectToServer();
+        ui.reconnectToServer(reconnectOptions);
 	}).addListener("processExited", function (e) {
         ui.pvsProcessDisconnected();
 	});

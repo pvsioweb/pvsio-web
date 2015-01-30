@@ -863,7 +863,17 @@ function run() {
     httpServer.listen(port, function () {
         console.log("PVSio-web server ready!");
         console.log("----------------------------------------------");
-        open(util.format("http://localhost:%s", port.toString()));
+        var restart = false;
+        if (process.argv) {
+            process.argv.forEach(function (val, index, array) {
+                if (val.toLowerCase() === "restart") {
+                    restart = true;
+                }
+            });
+        }
+        if (!restart) {
+            open(util.format("http://localhost:%s", port.toString()));
+        }
     });
     logger.info(""); // this is used to print date and time in the console
     console.log("----------------------------------------------\nStarting up PVSio-web server on port " + port + "...");

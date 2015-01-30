@@ -337,6 +337,9 @@ define(function (require, exports, module) {
                     });
             }
         });
+		d3.select("#btnReconnect").on("click", function () {
+			projectManager.reconnectToServer();
+		});
     }
     
     /////These are the api methods that the prototype builder plugin exposes

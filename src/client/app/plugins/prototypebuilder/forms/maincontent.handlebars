@@ -35,9 +35,18 @@
                     <a class="btn"
                        id="btnLoadPicture">                   
                         <span class="glyphicon glyphicon-picture"></span> Change Picture</a>
-                    <div class="pull-right" style="width: 260px;">
+                    <div class="pull-right" style="min-width: 260px; display:inline-flex;">
+<!--
                         <a id="lblWebSocketStatus" class="btn status">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
                         <a id="lblPVSioStatus" class="btn status">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
+-->
+                        <a id="btnReconnect" class="btn" style="display:none;">Try to reconnect to WebServer <span class="glyphicon glyphicon-random"></span></a>
+                        <a id="lblWebSocketStatus" class="btn status"
+                           style="background:rgb(8, 88, 154); color:white; cursor:default;">
+                            WebServer <span class="glyphicon glyphicon-ok"></span></a>
+                        <a id="logo" class="btn status"
+                           style="background:rgb(8, 88, 154); color:white; cursor:default;">
+                            <span>PVSio-web 2.0</span></a>
                         <div id="autoSaver" class="pull-right"></div>
                     </div>
                 </div>

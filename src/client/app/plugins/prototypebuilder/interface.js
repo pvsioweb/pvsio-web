@@ -30,50 +30,57 @@ define(function (require, exports, module) {
      * Shows a prompt to the user signalling that the connection to the server has broken.
      * Also starts a polling timer to check if the server is back up and running. The dialog
      * is automatically dismissed when the server is restarted.
+     * @param opt {Object} Function options: silentMode (Boolean) enables silent reconnection to the server, i.e., does not show any dialog.
      */
-    function reconnectToServer() {
+    function reconnectToServer(opt) {
         var timerid,
             q,
             data = {
                 header: "Reconnect to server",
-                question: "Uh-oh  the server seems to be down :(. Restart it by running ./start.sh" +
-                    " from the pvsio-web installation directory. Once you have restarted the server this message will go away",
+                question: ["The WebServer went offline... " +
+                           "Please restart the WebServer by running ./restart.sh from the pvsio-web folder."],
                 buttons: ["Dismiss", "Reconnect"]
             };
         
         function retry() {
+            function removeDialog() {
+                if (q) { q.remove(); }
+            }
             if (!PVSioWeb.isWebSocketConnected()) {
                 ProjectManager.getInstance().reconnectToServer()
                     .then(function () {
-                        q.remove();
+                        removeDialog();
                         clearTimeout(timerid);
                     }).catch(function () {
                         timerid = setTimeout(retry, 1000);
                     });
             } else {
-                q.remove();
+                removeDialog();
             }
         }
         //dont create a new question form if one already exists
         if (d3.select(".overlay").empty()) {
-            q = displayQuestion.create(data).on("reconnect", function (e, view) {
-                if (!PVSioWeb.isWebSocketConnected()) {
-                    ProjectManager.getInstance().reconnectToServer()
-                        .then(function () {
-                            view.remove();
-                            clearTimeout(timerid);
-                        }).catch(function (err) {
-                            view.remove();
-                        });
-                } else {
+            if (!opt || (opt && !opt.silentMode)) {
+                q = displayQuestion.create(data).on("reconnect", function (e, view) {
+                    if (!PVSioWeb.isWebSocketConnected()) {
+                        ProjectManager.getInstance().reconnectToServer()
+                            .then(function () {
+                                view.remove();
+                                clearTimeout(timerid);
+                            }).catch(function (err) {
+                                view.remove();
+                            });
+                    } else {
+                        view.remove();
+                    }
+                }).on("dismiss", function (e, view) {
                     view.remove();
-                }
-            }).on("dismiss", function (e, view) {
-                view.remove();
-            });
-            //create a timer to poll the connection to the server
-            //this automatically dismisses the dialog after successful reconnection
-            timerid = setTimeout(retry, 1000);
+                });
+            }
+            // I'm disabling this timer because otherwise the dialog cannot be dismissed
+//            //create a timer to poll the connection to the server
+//            //this automatically dismisses the dialog after successful reconnection
+//            timerid = setTimeout(retry, 1000);
         }
     }
     
@@ -188,9 +195,11 @@ define(function (require, exports, module) {
             this._view.remove();
         },
         webSocketConnected: function () {
+            d3.select("#btnReconnect").style("display", "none");
             webSocketConnected();
         },
         webSocketDisconnected: function () {
+            d3.select("#btnReconnect").style("display", "block");
             webSocketDisconnected();
         },
         pvsProcessConnected: function () {

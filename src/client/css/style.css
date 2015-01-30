@@ -484,6 +484,14 @@ div.detailsForm select, div.detailsForm textarea{
 #projectTitle a:hover {
 	color: white;
 }
+#projectTitle a#btnReconnect {
+    background: lawngreen;
+	color: black;
+}
+#projectTitle a#btnReconnect:hover {
+    background: black;
+    color: white;
+}
 
 #project-notifications {
 	display: none;
