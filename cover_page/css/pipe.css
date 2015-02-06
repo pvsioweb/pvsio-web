@@ -1,0 +1,192 @@
+*, *:before, *:after {
+  -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+ }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+#content-wrap .container {
+    width: 800px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+#featured-videos {
+    font-size: 11pt;
+}
+
+body {
+  background: #1d1d1d;
+  color: #dddddd;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 12pt;
+  line-height: 200%;
+  font-family: "source-sans-pro", sans-serif;
+  font-style: normal;
+  margin: 0;
+}
+
+body a {
+    font-weight: bold;
+    color: #a3bceb
+}
+
+ul {
+  margin: 0px;
+  padding: 0px;
+}
+
+
+#nav {
+  background-color: rgb(8, 88, 154);
+  padding-top: 22px;
+  text-align: center;
+}
+
+#nav ul {
+  width: 330px;
+  margin: 0 auto;
+}
+
+#nav ul:after, #footer .foot-nav:after {
+  content: ' ';
+  display: block;
+  width: 0;
+  height: 0;
+  clear: both;
+}
+
+#nav ul li {
+  position: relative;
+  background-color: rgb(8, 88, 154);
+  display: block;
+  float: left;
+  font-size: 12px;
+  line-height: 12px;
+  padding-bottom: 20px;
+}
+
+#nav ul li.active:after {
+  top: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  border-color: rgba(3, 3, 0, 0);
+  border-top-color: rgb(8, 88, 154);
+  border-width: 15px;
+  margin-left: -15px;
+}
+
+#nav ul li a {
+  padding: 0 12px;
+  font-weight: normal;
+  border-left: 1px solid rgba(109,109,109,.4);
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #cccccc;
+}
+
+#nav ul li.active a {
+  color: white;
+}
+
+#nav ul li:first-child {
+  padding-bottom: 12px;
+}
+
+#nav ul li:first-child a {
+  border-left: none;
+}
+
+#intro {
+  width: 800px;
+  margin: 0 auto;
+  text-align: justify;
+  color: #d2d8ba;
+    padding: 30px 0;
+}
+
+#downloads {
+    padding: 30px 0;
+}
+
+#downloads .button {
+  font-style: normal;
+  font-weight: 400;
+  text-transform: uppercase;
+    font-family: "din-condensed-web",Arial,sans-serif;
+  font-size: 18px;
+  line-height: 18px;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+
+  -webkit-transition: .2s all ease-in-out;
+  -moz-transition: .2s all ease-in-out;
+  transition: .2s all ease-in-out;
+
+  display: inline-block;
+  color: #1b1b1b;
+  background-color: rgba(153,153,153,.7);
+  width: 500px;
+}
+
+#downloads .button:hover {
+  text-decoration: none;
+  background-color: rgba(153,153,153,1);
+}
+
+#intro #docsbutton {
+  clear: left;
+}
+
+#downloads .live {
+    background-color: rgb(8, 88, 154);
+    color: white;
+    display: block;
+    margin: 0px auto;
+    font-style: normal;
+    text-align: center;
+    padding-top: 12px;
+    padding-bottom: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#downloads .download {
+    background-color: green;
+    color: white;
+    display: block;
+    margin: 0px auto;
+    font-style: normal;
+    text-align: center;
+    margin-top: 0px;
+    padding-top: 12px;
+    padding-bottom: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.even {
+    background: #2f2f2f;
+}
+
+.odd {
+    background: #222;  
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+}
+
+#content-wrap {
+    padding-bottom: 50px;
+   
+}
+

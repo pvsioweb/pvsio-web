@@ -4,8 +4,8 @@
  * @author Patrick Oladimeji
  * @date 10/31/13 11:26:16 AM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true */
+/*global define, d3, require, $, brackets, window, MouseEvent, Promise*/
 define(function (require, exports, module) {
     "use strict";
     var Widget = require("./Widget"),
@@ -14,6 +14,7 @@ define(function (require, exports, module) {
         Recorder    = require("util/ActionRecorder");
 	//define timer for sensing hold down actions on buttons
 	var btnTimer = new Timer(250), timerTickFunction = null;
+    var buttonActions = Promise.resolve();//This is a ptr to a sequence of promises that handle button action messages to the server
 	//add event listener for timer's tick 
 	btnTimer.addListener('TimerTicked', function () {
 		if (timerTickFunction) {
@@ -91,53 +92,53 @@ define(function (require, exports, module) {
 	 * @returns {d3.selection} The image map area created
 	   @memberof Button
 	 */
-	Button.prototype.createImageMap = function (ws, callback) {
-		var area = Button.prototype.parentClass.createImageMap.apply(this, arguments),
+    Button.prototype.createImageMap = function (ws, callback) {
+        function getGUIActionPromise(action, cb) {
+            return new Promise(function (resolve, reject) {
+                ws.sendGuiAction(action, function (err, res) {
+                    if (err) {
+                        cb(err);
+                        reject(err);
+                    } else {
+                        cb(err, res);
+                        resolve(res);
+                    }
+                });
+            });
+        }
+        
+        /**
+            Queue the next gui action onto the promise chain. This ensures that actions are
+            executed on the server in the same order as they are sent on the client
+            @param {string} action the concatenation of button action and function name to call in pvs on the server
+                e.g., "click_bigUP"
+        */
+        function queueGUIAction(action) {
+            buttonActions = buttonActions.then(function (res) {
+                var guiAction = action + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");";
+                var guiActionPromise = getGUIActionPromise(guiAction, callback);
+                return guiActionPromise;
+            }).catch(function (err) {
+                console.log(err);
+            });
+            return buttonActions;
+        }
+        
+        var area = Button.prototype.parentClass.createImageMap.apply(this, arguments),
 			widget = this,
 			f,
 			evts;
-        var press_events = 0;
         
-        // this proxy function is used to create an interlocking mechanism to ensure that
-        // all press commands sent to pvsio are actually executed before executing a release command
-        var proxy = function (cb) {
-            if (typeof cb === "function") {
-                return function (err, res) {
-                    press_events--;
-                    if (press_events === 0) {
-                        return cb(err, res);
-                    }
-                };
-            }
-        };
-		var onmouseup = function () {
+        var onmouseup = function () {
 			var f = widget.functionText();
             if (evts && evts.indexOf('press/release') > -1) {
-                if (press_events === 0) {
-                    ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
-                    Recorder.addAction({
-                        id: widget.id(),
-                        functionText: widget.functionText(),
-                        action: "release",
-                        ts: new Date().getTime()
-                    });
-                } else {
-                    console.log("Warning: button clicks are too fast!");
-                    ws.sendGuiAction("release_" + f + "(press_" + f + "(" +
-                                     ws.lastState().toString().replace(/,,/g, ',') + "));", callback);
-                    Recorder.addAction({
-                        id: widget.id(),
-                        functionText: widget.functionText(),
-                        action: "press",
-                        ts: new Date().getTime()
-                    });
-                    Recorder.addAction({
-                        id: widget.id(),
-                        functionText: widget.functionText(),
-                        action: "release",
-                        ts: new Date().getTime()
-                    });
-                }
+                queueGUIAction("release_" + f);
+                Recorder.addAction({
+                    id: widget.id(),
+                    functionText: widget.functionText(),
+                    action: "release",
+                    ts: new Date().getTime()
+                });
             }
             mouseup(d3.event);
             area.on("mouseup", null);
@@ -147,16 +148,15 @@ define(function (require, exports, module) {
 			evts = widget.evts();
 			//perform the click event if there is one
 			if (evts && evts.indexOf('click') > -1) {
-				ws.sendGuiAction("click_" + f + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");", callback);
+                queueGUIAction("click_" + f);
                 //record action 
                 Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "click", ts: new Date().getTime()});
 			} else if (evts && evts.indexOf("press/release") > -1) {
-                //cb = callback;
-				ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", proxy(callback));
-                press_events++;
+                queueGUIAction("press_" + f);
+                Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
+               
 				timerTickFunction = function () {
-                    press_events++;
-					ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", proxy(callback));
+                    queueGUIAction("press_" + f);
 					//record action
 					Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
 				};
@@ -168,7 +168,87 @@ define(function (require, exports, module) {
 		});
 		widget.imageMap(area);
 		return area;
-	};
+    };
+    
+//	Button.prototype.createImageMap = function (ws, callback) {
+//		var area = Button.prototype.parentClass.createImageMap.apply(this, arguments),
+//			widget = this,
+//			f,
+//			evts;
+//        var press_events = 0;
+//        
+//        // this proxy function is used to create an interlocking mechanism to ensure that
+//        // all press commands sent to pvsio are actually executed before executing a release command
+//        var proxy = function (cb) {
+//            if (typeof cb === "function") {
+//                return function (err, res) {
+//                    press_events--;
+//                    if (press_events === 0) {
+//                        return cb(err, res);
+//                    }
+//                };
+//            }
+//        };
+//		var onmouseup = function () {
+//			var f = widget.functionText();
+//            if (evts && evts.indexOf('press/release') > -1) {
+//                if (press_events === 0) {
+//                    ws.sendGuiAction("release_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", callback);
+//                    Recorder.addAction({
+//                        id: widget.id(),
+//                        functionText: widget.functionText(),
+//                        action: "release",
+//                        ts: new Date().getTime()
+//                    });
+//                } else {
+//                    console.log("Warning: button clicks are too fast!");
+//                    ws.sendGuiAction("release_" + f + "(press_" + f + "(" +
+//                                     ws.lastState().toString().replace(/,,/g, ',') + "));", callback);
+//                    Recorder.addAction({
+//                        id: widget.id(),
+//                        functionText: widget.functionText(),
+//                        action: "press",
+//                        ts: new Date().getTime()
+//                    });
+//                    Recorder.addAction({
+//                        id: widget.id(),
+//                        functionText: widget.functionText(),
+//                        action: "release",
+//                        ts: new Date().getTime()
+//                    });
+//                }
+//            }
+//            mouseup(d3.event);
+//            area.on("mouseup", null);
+//		};
+//        area.on("mousedown", function () {
+//			f = widget.functionText();
+//			evts = widget.evts();
+//			//perform the click event if there is one
+//			if (evts && evts.indexOf('click') > -1) {
+//				ws.sendGuiAction("click_" + f + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");", callback);
+//                //record action 
+//                Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "click", ts: new Date().getTime()});
+//			} else if (evts && evts.indexOf("press/release") > -1) {
+//                //cb = callback;
+//				ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", proxy(callback));
+//                Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
+//                press_events++;
+//				timerTickFunction = function () {
+//                    press_events++;
+//					ws.sendGuiAction("press_" + f + "(" + ws.lastState().toString().replace(/,,/g, ',') + ");", proxy(callback));
+//					//record action
+//					Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
+//				};
+//				btnTimer.interval(widget.recallRate()).start();
+//			}
+//			//register mouseup/out events here
+//			area.on("mouseup", onmouseup);
+//			
+//		});
+//		widget.imageMap(area);
+//		return area;
+//	};
 	
 	module.exports = Button;
 });

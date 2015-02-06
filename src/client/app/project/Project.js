@@ -1,9 +1,11 @@
-/**@module Project
- * Represents a pvsio web project
- * @author Patrick Oladimeji
+/**
+ * @module Project
+ * @description Specifies files and functionalities of a PVSio-web project.
+ * @version 1.0
+ * @author Patrick Oladimeji, Paolo Masci
  * @date 6/20/13 9:45:59 AM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true */
 /*global define, Promise*/
 define(function (require, exports, module) {
     "use strict";
@@ -12,146 +14,188 @@ define(function (require, exports, module) {
         WSManager           = require("websockets/pvs/WSManager"),
         WidgetManager       = require("pvsioweb/WidgetManager").getWidgetManager(),
         ScriptPlayer        = require("util/ScriptPlayer"),
-		ProjectFile			= require("./ProjectFile"),
+		Descriptor			= require("./Descriptor"),
         Logger              = require("util/Logger"),
+        MIME                = require("util/MIME"),
+		fs                  = require("util/fileHandler"),
+        Constants           = require("util/Constants"),
         NotificationManager = require("project/NotificationManager");
     
-    var _projectFiles;
-	var imageExts = [".jpg", ".jpeg", ".png"];
-    var filesFilter = [".pvs", ".tex", ".txt", ".i", ".json"].concat(imageExts);
+    var _descriptors;
+    var _this;
     var propertyChangedEvent = "PropertyChanged";
     
-    function saveFiles(files) {
-        var ws = WSManager.getWebSocket();
-        var promises =  files.map(function (f) {
-            var token = { filePath: f.path(),
-                          fileContent: f.content(),
-                          encoding: f.encoding() || "utf8",
-                          opt: { overWrite: true } };
-            return new Promise(function (resolve, reject) {
-                ws.writeFile(token, function (err, res) {
-                    if (!err) {
-                        resolve(res);
-                    } else {
-                        reject(err);
-                        if (err.code) { alert(err.code); }
-                    }
-                });
-            });
-        });
-       
-        return new Promise(function (resolve, reject) {
-            Promise.all(promises).then(function (res) {
-                res.forEach(function (response, index) {
-                    if (!response.err) {
-                        files[index].dirty(false);
-                    }
-                });
-                resolve(res);
-            }, reject);
-        });
-    }
+    
 
 	/**
-	 * Creates a new project
-	 * @constructor
-	 * @param {string} name The name of the project
-	 * @this Project
+	 * @function Project
+     * @description Constructor: creates a new PVSio-web project.
+	 * @param name {String} The PVSio-web project name.
+     * @memberof module:Project
+     * @instance
+	 * @returns {Project}
 	 */
     function Project(name) {
-        _projectFiles = [];
+        _this = this;
+        _descriptors = [];
 		/**
 		 * get or set if the project is dirty
 		 * @private
 		 * @type {bolean}
 		 */
-        this._dirty = property.call(this, false);
+        _this._dirty = property.call(this, false);
 		
-		/** get or set the name of the project
-			@type {String}
-		*/
-        this.name = property.call(this, name);
 		/** 
-			get or set the main PVS file for the project
-			@type {ProjectFile}
-		*/
-        this.mainPVSFile = property.call(this);
+         * get or set the name of the project
+         * @type {String}
+		 */
+        _this.name = property.call(this, name);
+		/** 
+         * get or set the main PVS file for the project
+	     * @type {Descriptor}
+		 */
+        _this.mainPVSFile = property.call(this);
         
-        var project = this;
+		/** 
+         * get or set the prototype image for the project
+	     * @type {Descriptor}
+		 */
+        _this.prototypeImage = null;
+
+		/** 
+         * get or set the file version
+	     * @type {String}
+		 */
+        _this.fileVersion = property.call(this);
+        
+        eventDispatcher(_this);
+        
         //add event listeners
-        this.name.addListener(propertyChangedEvent, function (event) {
-            project._dirty(true);
-            project.fire({type: "ProjectNameChanged", previous: event.old, current: event.fresh});
+        _this.name.addListener(propertyChangedEvent, function (event) {
+            _this._dirty(true);
+//            _this.fire({type: "ProjectNameChanged", previous: event.old, current: event.fresh});
         });
-        
-        this.mainPVSFile.addListener(propertyChangedEvent, function (event) {
-            project._dirty(true);
-            project.fire({type: "ProjectMainSpecFileChanged", previous: event.old, current: event.fresh});
+        _this.mainPVSFile.addListener(propertyChangedEvent, function (event) {
+            _this._dirty(true);
+            _this.fire({type: "ProjectMainSpecFileChanged", previous: event.old, current: event.fresh});
         });
-        
-        eventDispatcher(this);
-        
         //listen for widget manager event for widget modification
         WidgetManager.clearListeners()
             .addListener("WidgetModified", function () {
-                project._dirty(true);
+                _this._dirty(true);
                 var newWDStr = JSON.stringify(WidgetManager.getWidgetDefinitions(), null, " ");
                 //get the widget definitions and update the widgetDefinition file
-                project.getWidgetDefinitionFile().content(newWDStr).dirty(true);
+                var wdf = _this.getWidgetDefinitionFile();
+                wdf.content = newWDStr;
+                wdf.dirty(true);
+            }).addListener("StoryboardWidgetModified", function (data) {
+                var filenames = Object.keys(data.widget.images);
+                filenames.forEach(function (key) {
+                    var imagePath = _this.name() + "/" + key;
+                    _this.fileExists(imagePath).then(function (res) {
+                        if (res === false) {
+                            var imageData = data.widget.images[key].imageData;
+                            _this.addFile(imagePath, imageData, { encoding: "base64" });
+                        }
+                    });
+                });
             });
     }
+    
     /**
-     * Gets the image file for the project
-     * @returns {ProjectFile} a project file representing the image
+     * @function saveFiles
+     * @description Saves on disk the file descriptors passed as parameter.
+     * @param descriptor {Array(Descriptor)} Array of file descriptor whose content needs to be saved on disk.
+	 * @param opt {Object} Options for the save function: overWrite (bool) defines whether the project can be overwritten.
+     * @returns {Promise(Array(Descriptor))} A Promise that resolves to an array with the file decriptors saved on disk by the function.
+     * @memberof module:Project
+     * @instance
+     */
+    Project.prototype.saveFiles = function (descriptors, opt) {
+        return new Promise(function (resolve, reject) {
+            var promises = [];
+            if (descriptors) {
+                descriptors.forEach(function (descriptor) {
+                    promises.push(new Promise(function (resolve, reject) {
+                        descriptor.save(opt).then(function (res) {
+                            resolve(res);
+                        }).catch(function (err) { reject(err); });
+                    }));
+                });
+            }
+            Promise.all(promises).then(function (res) {
+                resolve(_this);
+            }).catch(function (err) { reject(err); });
+        });
+    };
+    
+    /**
+     * @function getImage
+     * @description Gets the image file for the project
+     * @returns {Descriptor} A project file descriptor specifying the prototype image defined in the project.
+     * @memberof module:Project
+     * @instance
      */
     Project.prototype.getImage = function () {
-        return _projectFiles.filter(function (f) {
-            return f.isImage();
-        })[0];
+        return _this.prototypeImage;
     };
     /**
-     * Gets the file in the project files list whose content is the definitions of widgets on the display
-     * @returns {ProjectFile} the project file that represents the widget definitions on the project image
+     * @function getWidgetDefinitionFile
+     * @description Gets the file in the project files list whose content is the definitions of widgets on the display
+     * @returns {Descriptor} A project file descriptor specifying the input/output widgets defined in the project.
+     * @memberof module:Project
+     * @instance
      */
     Project.prototype.getWidgetDefinitionFile = function () {
-        var wdpath = this.name() + "/widgetDefinition.json";
-        var res = this.getProjectFile(wdpath);
+        var wdPath = _this.name() + "/" + Constants.widgetDefinitionsFile;
+        var res = _this.getDescriptor(wdPath);
         if (!res) {
-            res = this.addProjectFile(wdpath, "{}").type("widgetDefinition");
+            res = new Descriptor(wdPath, "{}");
+            _this.addDescriptor(res);
         }
         return res;
     };
     /**
-     * Gets the project file that represents the sequence of play scripts created for this project
-     * @return {ProjectFile} the project file representing a sequence of recording user actions
+     * @function getRecordedScripts
+     * @description Gets the project file that represents the sequence of play scripts created for the project.
+     * @returns {Descriptor} the project file representing a sequence of recording user actions
+     * @memberof module:Project
+     * @instance
      */
     Project.prototype.getRecordedScripts = function () {
-        var scriptsPath = this.name() + "/scripts.json";
-        var res = this.getProjectFile(scriptsPath);
+        var scriptsPath = _this.name() + "/" + Constants.scriptFile;
+        var res = _this.getDescriptor(scriptsPath);
         if (!res) {
-            res = this.addProjectFile(scriptsPath, "[]").type("scripts");
+            res = new Descriptor(scriptsPath, "[]");
+            _this.addDescriptor(res);
         }
         return res;
     };
     /**
-     * Gets the list of all the files attributed to the project
-     * @returns {array<ProjectFile>} a list of project files in the project
+     * @function getDescriptors
+     * @description Gets the list of all file descriptors stored in the project.
+     * @returns {Array<Descriptor>} a list of project files in the project
+     * @memberof module:Project
+     * @instance     
      */
-    Project.prototype.getProjectFiles = function () {
-        return _projectFiles;
+    Project.prototype.getDescriptors = function () {
+        return _descriptors;
     };
     /**
-        Gets the folder structure of the project based on the list of files
-        This function shows files specified in filesFilter variable
+     * @function getFolderStructure
+     * @description Gets the folder structure of the project based on the list of file descriptors stored in the project._this function shows only file types specified in FilesFilter.
+     * @returns {Object<{path: String, name: String, isDirectory: bool, children: Array<Object>}>}
+     * @memberof module:Project
+     * @instance     
     */
     Project.prototype.getFolderStructure = function () {
-        var projectName = this.name();
+        var projectName = _this.name();
         var structure = {path: projectName, name: projectName, isDirectory: true};
         var tree = {};
-        var paths = _projectFiles.filter(function (f) {
-            return filesFilter.indexOf(f.extension().toLowerCase()) > -1;
+        var paths = _descriptors.filter(function (f) {
+            return MIME.getInstance().getFilesFilter().indexOf(f.extension.toLowerCase()) > -1;
         }).map(function (f) {
-            return f.path();
+            return f.path;
         }).sort();
         paths.forEach(function (path) {
             var args = path.split("/"),
@@ -174,308 +218,590 @@ define(function (require, exports, module) {
             }
             return undefined;
         }
-        structure.children = getChildren(tree[projectName].children, projectName);
+        if (tree[projectName]) {
+            structure.children = getChildren(tree[projectName].children, projectName);
+        }
         return structure;
     };
     /**
-     * Gets the project file with the specified Name
-     * @param {!String} filePath path to the spec file
-     * @returns {ProjectFile}
-     * @memeberof Project
+     * @function getDescriptor
+     * @description Gets the project file descriptor for the specified file.
+     * @param path {String} File path of the file. The path is relative to the project folder.
+     * @returns {Descriptor}
+     * @memberof module:Project
+     * @instance     
      */
-    Project.prototype.getProjectFile = function (filePath) {
-        return _projectFiles.filter(function (f) {
-            return f.path() === filePath;
+    Project.prototype.getDescriptor = function (path) {
+        return _descriptors.filter(function (f) {
+            return f.path === path;
         })[0];
     };
     
     /**
-        Checks if a file exists in the project 
-        @param {!String} filePath the path to the project file
-        @returns {boolean} true if the file with the specified path exists in the project or false otherwise
-        @memberof Project
+     * @function fileExists
+     * @description Checks if the file path passed as argument is stored on disk.
+     * @param descriptor {Descriptor|String} The file descriptor whose existence shall be checked within the project.
+     * @returns {Promise(bool)} The function returns a Promise that resolves to true if the file exists on disk, false otherwise.
+     * @memberof module:Project
+     * @instance
     */
-    Project.prototype.fileExists = function (filePath) {
-        var f = this.getProjectFile(filePath);
-        return f ? true : false;
+    Project.prototype.fileExists = function (descriptor) {
+        return new Promise(function (resolve, reject) {
+            if (descriptor && (typeof descriptor === "string" ||
+                        typeof descriptor.path === "function")) {
+                var path = (typeof descriptor === "string") ? descriptor : descriptor.path;
+                WSManager.getWebSocket().send({
+                    type: "fileExists",
+                    path: descriptor
+                }, function (err, res) {
+                    if (res) {
+                        console.log(res);
+                        resolve(res);
+                    } else {
+                        console.log(res);
+                        reject(err);
+                    }
+                });
+            } else {
+                reject({
+                    code: "INVALID_PATH",
+                    message: "Invalid path",
+                    path: descriptor
+                });
+            }
+        });
     };
     
     /**
-	 * Updates the project image. At the moment only one image is allowed in a project so we remove the old image
-     * before adding the new one.
-	 * @param {!String} imageName The fileName for the new image
-	 * @param {!String} imageData The base64 string or url path for the image
-	 * @memberof Project
-	 */
-	Project.prototype.changeImage = function (imagePath, imageData) {
-        var p = this, oldImage = p.getImage();
-        function addNew() {
-			var newImage = p.addProjectFile(imagePath, imageData, "base64");
-			newImage.dirty(true);
-		}
-		
-		if (oldImage) {
-            this.removeFile(oldImage)
-				.then(function (res) {
-					addNew();
-				});
-        } else {
-			addNew();
-		}
-		return this;
-	};
+     * @function fileDescriptorExists
+     * @description Checks if the file descriptor for the filepath passed as argument exists in the project.
+     * @param descriptor {Descriptor|String} The file descriptor that shall be checked.
+     *        Descriptors path is always relative to the folder of the current project.
+     * @returns {Promise(bool)} The function returns true if the file descriptor is stored in the project, false otherwise.
+     * @memberof module:Project
+     * @instance
+    */
+    Project.prototype.fileDescriptorExists = function (descriptor) {
+        if (descriptor && (typeof descriptor === "string" ||
+                            typeof descriptor.path === "function")) {
+            var path = (typeof descriptor === "string") ? descriptor : descriptor.path;
+            return (this.getDescriptor(descriptor)) ? true : false;
+        }
+        return false;
+    };
+    
        
     /**
-	 * Adds a new generic project file to the project
-	 * @param {!String} filePath The path of the file to add
-	 * @param {!String} fileContent The content of the file to add
-     * @param {!string} encoding The encoding of the file to add
-     * @param {boolean} supressEvent Set true to supress the FileAdded event or false otherwise
-	 * @memberof Project
+     * @function addDescriptor
+	 * @description Adds a file descriptor to the current project.
+	 * @param newFile {Descriptor} The project file descriptor of the file.
+     * @param suppressEvent {boolean} Flag for suppressing "FileAdded" events fired by the function.
+	 * @memberof module:Project
+     * @instance
 	 */
-    //Project.prototype.addProjectFile = function (filePath, fileContent, encoding, suppressEvent) {
-	Project.prototype.addProjectFile = function (newFile, suppressEvent) {
-		var filePath, fileContent, encoding;
-		var p = this;
+    //Project.prototype.addDescriptor = function (path, content, encoding, suppressEvent) {
+	Project.prototype.addDescriptor = function (newFile, suppressEvent) {
+		var path, content, encoding;
 		if (typeof arguments[0] === "string") {
-            console.log("Deprecated: addProjectFile(string, string, string, boolean) is deprecated use addProjectFile(ProjectFile, boolean) instead"); 
-			filePath = arguments[0];
-			fileContent = arguments[1];
+            console.log("Deprecated: addDescriptor(string, string, string, boolean) is deprecated use addDescriptor(Descriptor, boolean) instead");
+			path = arguments[0];
+			content = arguments[1];
 			encoding = arguments[2] || "utf8";
 			suppressEvent = arguments[3];
-			newFile = new ProjectFile(filePath)
-				.content(fileContent)
-				.encoding(encoding);
+			newFile = new Descriptor(path, content, { encoding: encoding });
 		}
-        if (p.getProjectFile(newFile.path())) {
-            throw new Error("Attempt to add a file with an existing path. '" +
-                            newFile.path() + "' already exists in the project");
-        } else {
-            _projectFiles.push(newFile);
+        if (!_this.getDescriptor(newFile.path)) {
+            _descriptors.push(newFile);
+//        } else {
+//            console.log("Warning: Attempt to add a file with an existing path. '" +
+//                            newFile.path + "' already exists in the project");
         }
-		//for now always suppress fileadded event for image files
+		// suppress notifications for image files --- the image will change in the UI, and that's enough feedback
 		suppressEvent = suppressEvent || newFile.isImage();
-        if (!suppressEvent ) {
-			p.fire({type: "FileAdded", file: newFile});
+        if (!suppressEvent) {
+			_this.fire({type: "FileAdded", file: newFile});
         }
 		//register event for the newspec and bubble up the dirty flag changed event from project
 		newFile.addListener("DirtyFlagChanged", function () {
-			p.fire({type: "DirtyFlagChanged", file: newFile});
+			_this.fire({type: "DirtyFlagChanged", file: newFile});
 		});
         return newFile;
     };
-
+    
 	/**
-	 * Removes the specified file from the list of project files.
-	 * @param {!ProjectFile} file The file to remove.
-	 * @memberof Project
+     * @function addFolder
+     * @description Creates the specified folder within the project folder.
+     * @param dirPath {String} The path of the folder. The Project folder is used as base path.
+     * @param opt {Object} Options: silentMode (bool) switches off messages from NotificationManager when true.
+     * @returns {Promise} A Promise that resolves to the folder added.
+     * @memberof module:Project
+     * @instance
 	 */
-	Project.prototype.removeFile = function (file) {
-        var fileIndex = _projectFiles.indexOf(file), notification;
+    Project.prototype.addFolder = function (folderPath, opt) {
+		return new Promise(function (resolve, reject) {
+            var path = _this.name() + folderPath;
+			WSManager.getWebSocket().writeDirectory(path, function (err, res) {
+				if (err) {
+                    var msg = "Folder " + err.path + " could not be created in project " +
+                                _this.name() + JSON.stringify(err);
+                    if (!opt || !opt.silentMode) {
+                        NotificationManager.error(msg);
+                    } else { Logger.log(msg); }
+                    reject(err);
+                } else {
+                    var notification = "Folder " + res.path + " successfully added to project " + _this.name();
+                    if (!opt || !opt.silentMode) {
+                        NotificationManager.show(notification);
+                    } else { Logger.log(notification); }
+                    return resolve(new Descriptor(res.path, null, { isDirectory: true }));
+                }
+			});
+		});
+    };
+    
+    /**
+     * @function addFile
+     * @description Creates the specified file within the project folder.
+     * @param file {Descriptor} The file to be added. Descriptor has the following properties:
+     *           <li> path, a function that returns a String representing the file path. 
+     *                The path is relative to the current project folder. 
+     *                This property is mandatory, and the filename must be valid. </li>
+     *           <li> content, a function that returns a String representing the content of the file.
+     *                This property is mandatory.</li>
+     *           <li> encoding, a function that returns a String representing the file encoding. 
+     *                Text files must have encoding "utf8". Image files must have encoding "base64".
+     *                If unspecified, encoding "utf8" is used.</li>
+     * @param opt {Object} Function options: overWrite, defines whether existing files shall be ovewritten when.
+     *                     If overWrite is false or undefined and the file exists, the function returns an error
+     *                     { type: "EEXIST", msg: String}
+     * @returns {Promise(Descriptor)} A Promise that resolves to the descriptor passed as argument
+     * @memberof module:Project
+     * @instance
+     */
+    Project.prototype.addFile = function (name, content, opt) {
+        if (!name) {
+            return new Promise(function (resolve, reject) {
+                reject({ type: "ERROR", msg: "Incorrect file name " + name});
+            });
+        }
+        var token = {
+            path: _this.name() + "/" + name,
+            name: name.split("/").slice(-1).join(""),
+            content: content || "",
+            encoding: (opt) ? (opt.encoding || "utf8") : "utf8",
+            opt: opt
+        };
+        return new Promise(function (resolve, reject) {
+            WSManager.getWebSocket().writeFile(token, function (err, res) {
+                if (err) { return reject(err); }
+                var notification = "File " + token.path + " added to project " + _this.name();
+                NotificationManager.show(notification);
+                resolve(new Descriptor(token.path, token.content, { encoding: token.encoding }));
+            });
+        });
+    };
+    
+    Project.prototype.addFileDialog = function (name, content, opt) {
+        return _this.addFile(name, content, opt).catch(function (err) {
+            if (err.code === "EEXIST") {
+                var overWrite = confirm("File " + name + " already exists. Overwrite file?");
+                if (overWrite) {
+                    opt = opt || {};
+                    opt.overWrite = true;
+                    return _this.addFile(name, content, opt);
+                }
+            }
+        });
+    };
+    
+    Project.prototype.importLocalFiles = function (fileList) {
+        return new Promise(function (resolve, reject) {
+            if (!fileList) { return resolve([]); }
+            function addLocalFilesToProject(files) {
+                return new Promise(function (resolve, reject) {
+                    var promises = [];
+                    files.forEach(function (file) {
+                        var opt = {
+                            encoding: file.encoding
+                        };
+                        promises.push(_this.addFileDialog(file.name, file.content, opt));
+                    });
+                    return Promise.all(promises).then(function (res) {
+                        resolve(res);
+                    });
+                });
+            }
+            var promises = [], i = 0;
+            for (i = 0; i < fileList.length; i++) {
+                promises.push(fs.readLocalFile(fileList[i]));
+            }
+            return Promise.all(promises).then(function (res) {
+                addLocalFilesToProject(res).then(function (res) {
+                    resolve(res);
+                });
+            });
+        });
+    };
+
+    
+	/**
+     * @function refreshDescriptor
+     * @description Reloads property content of the descriptor if the property is non-null.
+     * @param file {Descriptor} The refreshed file descriptor. File descriptors have the following properties:
+     *           <li> path, a function that returns a String representing the file path. 
+     *                The path is relative to the current project folder. 
+     *                This property is mandatory, and the filename must be valid. </li>
+     *           <li> content, a function that returns a String representing the content of the file.
+     *                This property is mandatory.</li>
+     *           <li> encoding, a function that returns a String representing the file encoding. 
+     *                Text files must have encoding "utf8". Image files must have encoding "base64".
+     *                If unspecified, encoding "utf8" is used.</li>
+     * @returns {Promise(Descriptor)} A Promise that resolves to the descriptor passed as argument
+     * @memberof module:Project
+     * @instance
+     */
+    Project.prototype.refreshDescriptor = function (descriptor) {
+        if (descriptor && descriptor.path) {
+            var f = _this.getDescriptors().filter(function (d) {
+                return d.path === descriptor.path;
+            });
+            // refresh content only if the content was already loaded
+            if (f.length > 0 && f[0].content) {
+                return new Promise(function (resolve, reject) {
+                    f[0].loadContent().then(function (content) {
+                        f[0].content = content;
+                        resolve(f[0]);
+                    }).catch(function (err) {
+                        reject(err);
+                    });
+                });
+            }
+            return new Promise(function (resolve, reject) {
+                resolve(descriptor);
+            });
+        } else {
+            return new Promise(function (resolve, reject) {
+                reject({ type: "ERROR", msg: "Incorrect file descriptor " + JSON.stringify(descriptor)});
+            });
+        }
+    };
+    
+	/**
+	 * @function removeFile
+     * @description ...
+     * ...
+	 * @memberof module:Project
+     * @instance
+	 */
+	Project.prototype.removeFile = function (name) {
+        if (!name) {
+            return new Promise(function (resolve, reject) {
+                reject({ type: "ERROR", msg: "Incorrect file name " + name});
+            });
+        }
+        var token = {
+            name: name.split("/").slice(-1).join(""),
+            path: _this.name() + "/" + name
+        };
+        return new Promise(function (resolve, reject) {
+            WSManager.getWebSocket().deleteFile(token, function (err) {
+                if (!err) {
+                    // note: file system watcher will take care of populating file tree view
+                    var notification = "File " + name + " removed from project.";
+                    NotificationManager.show(notification);
+                    // f.clearListeners(); --TODO: check if this is actually needed
+                    resolve(name);
+                } else {
+                    // reject with error
+                    reject(err);
+                    NotificationManager.error(err);
+                }
+            });
+        });
+	};
+    
+	/**
+     * @function removeFolder
+     * @description Removes (that is, deletes) the specified folder from the project folder.
+     * @param folderPath {String} The path to the folder that shall be removed. 
+     *        The path is relative to the folder of the current project.
+     * @returns {Promise(String)} A Promise that resolves to a string specifying the removed folder path.
+     * @memberof module:Project
+     * @instance
+	 */
+    Project.prototype.removeFolder = function (path) {
+		return new Promise(function (resolve, reject) {
+			WSManager.getWebSocket().deleteDirectory(path, function (err) {
+				if (!err) {
+					var notification = "Folder " + path + " removed from project.";
+					NotificationManager.show(notification);
+					resolve(path);
+				} else {
+					//show error
+                    NotificationManager.error(err);
+					reject(err);
+				}
+			});
+		});
+    };
+    
+	/**
+     * @function removeDescriptor
+	 * @description Removes the specified file descriptor from the project.
+	 * @param file {Descriptor} The file descriptor that shall be removed.
+	 * @memberof module:Project
+     * @instance
+	 */
+	Project.prototype.removeDescriptor = function (file) {
+        var fileIndex = _descriptors.indexOf(file), notification;
         if (fileIndex >= 0) {
-            var deletedFile = _projectFiles.splice(fileIndex, 1)[0];
+            var deletedFile = _descriptors.splice(fileIndex, 1)[0];
 			this.fire({ type: "FileRemoved", file: deletedFile});
 			return deletedFile;
         } else {
-			var m = "Error deleting file. File not found in project.";
-			NotificationManager.error(m);
+			NotificationManager.error("Error deleting file. File not found in project.");
 			return null;
 		}
 	};
-    
+
     /**
-        Sets the project name
-        @param {string} newPath the new project name
-    */
-    Project.prototype.setProjectName = function (newName) {
-        this.name(newName);
+     * @function setProjectName
+     * @description Sets the project name.
+     * @param projectName {String} The project name.
+     * @memberof module:Project
+     * @instance
+     */
+    Project.prototype.setProjectName = function (projectName) {
+        _this.name(projectName);
     };
     
 	/**
-		Updates the name of a folder in the project. This updates all affected files and subfolders in the project
-		@param {string} folderPath the path to the folder whose name should be updated
-		@param {string} newFolderPath the new path to use for the folder
-	*/
-	Project.prototype.updateFolderName = function (folderPath, newFolderPath) {
-		var affectedFiles = this.getProjectFiles().filter(function (f) {
-			return f.path().indexOf(folderPath) === 0;
-		});
-		affectedFiles.forEach(function (f) {
-			var newPath = f.path().replace(folderPath, newFolderPath);
-			f.path(newPath);
-		});
-		return this;
+     * @function updateDescriptorsPath
+     * @description Updates the path specified in a folder descriptor. 
+     *              The function updates all descriptors of files and folder contained
+     *              in the folder associated with the descriptor.
+	 * @param folderPath {String} The path to the folder whose descriptor should be updated.
+     * @param newFolderPath {String} The new path that shall be used for the folder descriptor.
+	 */
+	var updateDescriptorsPath = function (folderPath, newFolderPath) {
+        var descriptors = _this.getDescriptors();
+        if (descriptors) {
+            var affectedFiles = _this.getDescriptors().filter(function (f) {
+                return f.path.indexOf(folderPath) === 0;
+            });
+            affectedFiles.forEach(function (f) {
+                f.path = f.path.replace(folderPath, newFolderPath);
+            });
+        }
+		return _this;
 	};
 	
     /**
-        Changes the name of a folder in the project directory to a new given name
-        @param {string} oldPath the old path of the folder
-        @param {string} newPath the new path of the folder
-        @param {function} cb a call back function to invoke when the server function has returned
-        This function should ensure that only folders within the project can be changed
+     * @function renameFolder
+     * @description Renames a directory in the project folder.
+     * @param oldPath {String} The current path of the folder.
+     * @param newPath {String} The new path of the folder.
+     * @param cb {function} Call back function to invoke when the server function has returned
+     * @memberof module:Project
+     * @instance
     */
     Project.prototype.renameFolder = function (oldPath, newPath, cb) {
-        var p = this;
-        var ws = WSManager.getWebSocket();
-        ws.send({type: "renameFile", oldPath: oldPath, newPath: newPath}, function (err, res) {
+        WSManager.getWebSocket().send({
+            type: "renameFile", // files and folders are treated the same way on the server
+            oldPath: oldPath,
+            newPath: newPath
+        }, function (err, res) {
             if (!err) {
                 // check if we are renaming the project
-                if (oldPath === p.name()) {
-                    p.name(newPath);
+                if (oldPath === _this.name()) {
+                    _this.name(newPath);
                 }
-				//update the paths of the affected files and folders in the project
-				p.updateFolderName(oldPath, newPath);
+				//update the paths of descriptors saved in the project
+				updateDescriptorsPath(oldPath, newPath);
             } else {
-                err.oldPath = oldPath;
-                err.newPath = newPath;
-                console.log(err);
+                Logger.log(err);
             }
-            if (cb && typeof cb === "function") { cb(err, res); }
+            if (cb && typeof cb === "function") {
+                cb(err, res);
+            }
         });
     };
+    
+    /**
+     * @function renameProject
+     * @description Changes the project name.
+     * @param newName {String} The new project name.
+     * @param cb {function} Call back function to invoke when the server function has returned. The second argument of the callback is the renamed project.
+     * @memberof module:Project
+     * @instance
+    */
+    Project.prototype.renameProject = function (newName, cb) {
+        var oldName = _this.name();
+        WSManager.getWebSocket().send({
+            type: "renameProject",
+            oldPath: oldName,
+            newPath: newName
+        }, function (err, res) {
+            if (!err) {
+				//update the paths of descriptors saved in the project
+				updateDescriptorsPath(oldName, newName);
+                // update the project name and the dirty flag
+                _this.name(newName);
+                _this._dirty(false);
+            } else {
+                Logger.log(err);
+            }
+            if (cb && typeof cb === "function") {
+                cb(err, _this);
+            }
+        });
+    };
+    
+
 	/**
-	 * Rename a given file and saves it on disk
-	 * @param {!ProjectFile} file The file to rename
-	 * @param {!string} newName The new name to give the file
-	 * @memberof Project
+     * @function renameFile
+	 * @description Renames a file stored in the project folder.
+	 * @param file {Descriptor} The file that shall be renamed.
+	 * @param newName {String} The new name that shall be given to the file.
+	 * @memberof module:Project
+     * @instance
 	 */
 	Project.prototype.renameFile = function (file, newName, cb) {
-        var p = this;
         var ws = WSManager.getWebSocket();
-        var baseDir = file.path().substring(0, file.path().lastIndexOf("/")),
+        var baseDir = file.path.substring(0, file.path.lastIndexOf("/")),
             newPath = baseDir + "/" + newName,
-            oldPath = file.path();
-        ws.send({type: "renameFile", oldPath: oldPath,
-                 newPath: newPath}, function (err, res) {
+            oldPath = file.path;
+        ws.send({type: "renameFile", oldPath: oldPath, newPath: newPath}, function (err, res) {
             if (!err) {
-                file.path(newPath);
-                p.fire({type: "SpecFileRenamed", file: file});
+                file.path = newPath;
+                _this.fire({type: "SpecFileRenamed", file: file});
                 Logger.log("File " + oldPath + " has been renamed to " + newPath);
             } else {
                 Logger.log(err);
             }
-            if (cb && typeof cb === "function") {cb(err, res); }
+            if (cb && typeof cb === "function") {
+                cb(err, res);
+            }
         });
 	};
 
-	/**
-	 * Saves the file to disk.
-	 * @param {ProjectFile} file The file tosave.
-	 * @param {Project~onProjectSaved} cb The callback function to invoke when file has been saved
-	 * @memberof Project
-	 */
-	Project.prototype.saveFile = function (file, cb) {
-		if (!Array.isArray(file)) {
-			file = [file];
-		}
-		var _thisProject = this;
-        
-        // here we make sure that the file names are relative to this project
-        file.forEach(function (file) {
-            var p = file.path();
-            var prefix = _thisProject.name() + "/";
-            if (p.indexOf(prefix) !== 0) {
-                file.path(prefix + p);
-            }
-        });
-        
-		saveFiles(file)
-            .then(function () {
-                if (cb && typeof cb === "function") {
-                    cb(null, _thisProject);
-                }
-            }, function (err) {
-                if (cb && typeof cb === "function") {
-                    cb(err);
-                }
-            });
-		return this;
-	};
+
     /**
-	 * Saves all the changes made to the project to disk
-	 * @param {Project~onProjectSaved} cb The function to invoke when project has been saved.
-	 * @memberof Project
+	 * @function save
+     * @description Saves all project files to disk.
+	 * @memberof module:Project
+     * @instance
 	 */
-	Project.prototype.save = function (cb) {
-		var _thisProject = this;
-		//do save
-		if (this.name() && this.name().trim().length > 0) {
-			//project has already been created so save the widgets and the sourcecode if it has changed
-            saveFiles(this.getProjectFiles().filter(function (f) { return f.dirty(); }))
-                .then(function () {
-                    _thisProject._dirty(false);
-                    _thisProject.fire({type: "ProjectSaved", project: _thisProject});
-                    if (cb && typeof cb === "function") { cb(null, _thisProject); }
-                }, function (err) {
-                    if (cb && typeof cb === "function") { cb(err); }
-                });
-		}
-		return this;
+	Project.prototype.saveProject = function () {
+        return new Promise(function (resolve, reject) {
+            _this.saveFiles(_this.getDescriptors(), { overWrite: true }).then(function (res) {
+                _this._dirty(false);
+                resolve(_this);
+            }).catch(function (err) { reject(err); });
+        });
 	};
     
     /**
     * Returns a list of project files that are pvs files
     */
     Project.prototype.pvsFilesList = function () {
-        return _projectFiles.filter(function (f) {
+        return _descriptors.filter(function (f) {
             return f.isPVSFile();
         });
     };
     
-	///FIXME this should be a private function called from project.save
-	Project.prototype.saveNew = function (descriptor, cb) {
-		var _thisProject = this;
-        var newName = descriptor.projectName;
-        var overWriteFlag = descriptor.overWrite;
-		var ws = WSManager.getWebSocket();
-        
-        var files = this.getProjectFiles().map(function (f) {
-            return {filePath: f.path().replace(_thisProject.name(), newName), fileContent: f.content(), encoding: f.encoding()};
-        });
-		var token = { type: "createProject",
-                      projectName: newName,
-                      projectFiles: files,
-                      overWrite: overWriteFlag };
-        //FIXME: we are not saving empty folders -- do we want this behaviour?
-		if (this.mainPVSFile()) {
-			token.mainPVSFile = this.mainPVSFile().name();
-		}
 
-		ws.send(token, function (err, res) {
-			if (!err) {
-                _thisProject.getProjectFiles().forEach(function (f) {
-                    f.dirty(false);
-                });
-                _thisProject.name(res.name);
-			}
-            if (cb && typeof cb === "function") {
-                cb(err, _thisProject);
-            }
-		});
-	};
     
     /**
         Adds a script to the project
     */
     Project.prototype.addScript = function (script) {
-        var scriptFile = this.getRecordedScripts(), scriptJson;
-        if (!scriptFile.content() || scriptFile.content().trim().length === 0) {
+        var scriptFile = _this.getRecordedScripts(), scriptJson;
+        if (!scriptFile.content || scriptFile.content.trim().length === 0) {
             scriptJson = [];
         } else {
-            scriptJson = JSON.parse(scriptFile.content());
+            scriptJson = JSON.parse(scriptFile.content);
         }
         scriptJson.push(script);
         ScriptPlayer.addScriptToView(script);
-        scriptFile.content(JSON.stringify(scriptJson, null, " "));
-        this._dirty(true);
+        scriptFile.content = JSON.stringify(scriptJson, null, " ");
+		scriptFile.dirty(true);
+        _this._dirty(true);
     };
     /**
      * Overrides toString() method for Project
      * @returns {string} project name
      */
     Project.prototype.toString = function () {
-        return this.name();
+        return _this.name();
     };
+    
+    /**
+	 * @function initFromJSON
+     * @description Initialises the project with the file descriptors passed as argument.
+	 * @param descriptors {Array(Descriptors)} File descriptors that shall be added to the project.
+	 * @return {Project}
+     * @memberof module:Project
+     * @instance
+	 */
+	Project.prototype.initFromJSON = function (descriptors) {
+        if (descriptors) {
+            var name = _this.name();
+            var pf, mainFileName, prototypeImage, fileVersion;
+            if (descriptors) {
+                ///FIXME handle scripts and widgetDefinitions (maybe we dont need to)
+                var imageDescriptors = [];
+                descriptors.forEach(function (file) {
+                    if (file && file.path && file.name) {
+//                        pf = p.addDescriptor(file);
+                        _this.addDescriptor(file);
+                        if (file.encoding === "base64") { imageDescriptors.push(file); }
+                        if (file.name === "pvsioweb.json" && file.content) {
+                            mainFileName = JSON.parse(file.content).mainPVSFile;
+                            fileVersion = JSON.parse(file.content).version;
+                            prototypeImage = JSON.parse(file.content).prototypeImage;
+                        }
+                    }
+                });
+                if (fileVersion) {
+                    // set the main pvs file descriptor
+                    if (mainFileName) {
+                        var main = _this.getDescriptor(name + "/" + mainFileName);
+                        if (main) { _this.mainPVSFile(main); }
+                    }
+                    // set the prototype image descriptor
+                    if (prototypeImage) {
+                        var image = _this.getDescriptor(name + "/" + prototypeImage);
+                        if (image) { _this.prototypeImage = image; }
+                    }
+                } else { // this code is for backwards compatibility
+                    if (mainFileName) {
+                        var mainX = _this.getDescriptor(name + "/" + mainFileName);
+                        if (mainX) {
+                            _this.mainPVSFile(mainX);
+                        } else if (_this.pvsFilesList()[0]) {
+                            _this.mainPVSFile(_this.pvsFilesList()[0]);
+                        }
+                    } else if (_this.pvsFilesList()[0]) {
+                        _this.mainPVSFile(_this.pvsFilesList()[0]);
+                    }
+                    // set the prototype image descriptor
+                    if (prototypeImage) {
+                        var imageX = _this.getDescriptor(name + "/" + prototypeImage);
+                        if (imageX) {
+                            _this.prototypeImage = imageX;
+                        } else if (imageDescriptors.length > 0) { // this is for backwards compatibility with old projects
+                            _this.prototypeImage = imageDescriptors[0];
+                        }
+                    } else if (imageDescriptors.length > 0) { // this is for backwards compatibility with old projects
+                        _this.prototypeImage = imageDescriptors[0];
+                    }
+                }
+            }
+        }
+        return _this;
+	};
+
     
     module.exports = Project;
     

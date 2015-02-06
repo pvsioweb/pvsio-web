@@ -21,6 +21,9 @@ g.selected .region {
     stroke: yellow;   
 }
 
+g.selected.subselected .region {
+    stroke-width: 2.5px;   
+}
 .region {
     fill: rgba(35, 101, 32, 0.2);
     stroke: rgba(35, 101, 32, 0.7);

@@ -81,15 +81,15 @@ module.exports = function () {
 		};
 	}
     
-    o.removeFile = function (filePath, cb) {
-        var np = path.normalize(filePath);
+    o.removeFile = function (file, cb) {
+        var np = path.normalize(file);
         
         if (np.indexOf(path.dirname(workspaceDir)) === 0) {
             pvs.exec({command: "rm -rf \"" + np + "\"", callBack: cb});
         } else {
             var error = ("cannot delete a folder outside the context of the current project");
             logger.error(error);
-            logger.error(util.format("path: %s, workspace: %s, normalised Path: %s", filePath, workspaceDir, np));
+            logger.error(util.format("path: %s, workspace: %s, normalised Path: %s", file, workspaceDir, np));
             cb(error);
         }
     };
@@ -145,9 +145,15 @@ module.exports = function () {
 			callback({type: "processExited", data: msg, code: err});
 		}
 		
-        pvs.start({processName: "pvsio", args: [filename],
-			onDataReceived: onDataReceived,
-			onProcessExited: onProcessExited});
+		if (process.env.PORT) { // this is for the PVSio-web version installed on the heroku cloud
+		    pvs.start({processName: "/app/pvs6.0/pvsio", args: [filename],
+				onDataReceived: onDataReceived,
+				onProcessExited: onProcessExited});
+		} else {
+		    pvs.start({processName: "pvsio", args: [filename],
+				onDataReceived: onDataReceived,
+				onProcessExited: onProcessExited});
+		}
 		
 		logger.info("\n-------------------------------------\nPVSio process started with theory "
                     + filename + "\n-------------------------------------");

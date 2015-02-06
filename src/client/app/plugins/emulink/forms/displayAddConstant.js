@@ -45,14 +45,15 @@ define(function (require, exports, module) {
 		},
         keypress: function (event) {
             var form = this.el;
-            switch(event.which) {
+            switch (event.which) {
             case 13: //enter pressed
                 this.right(event);
                 break;
             case 27: //esc pressed
                 this.left(event);
                 break;
-            default: break;
+            default:
+                break;
             }
         }
     });
