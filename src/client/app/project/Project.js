@@ -746,7 +746,7 @@ define(function (require, exports, module) {
 	 */
 	Project.prototype.initFromJSON = function (descriptors) {
         if (descriptors) {
-            var name = _this.name;
+            var name = _this.name();
             var pf, mainFileName, prototypeImage, fileVersion;
             if (descriptors) {
                 ///FIXME handle scripts and widgetDefinitions (maybe we dont need to)

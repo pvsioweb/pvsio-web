@@ -93,7 +93,7 @@ To clone the alpha branch, create a new directory (for example, pvsioweb-alpha),
     cd pvsio-web
     npm install
 
-To clone the alpha branch, create a new directory (for example, pvsioweb-beta), open a Terminal window, and execute the following commands from the created directory:
+To clone the beta branch, create a new directory (for example, pvsioweb-beta), open a Terminal window, and execute the following commands from the created directory:
 
     git clone https://github.com/thehogfather/pvsio-web.git -b beta
     cd pvsio-web
