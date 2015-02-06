@@ -4,8 +4,8 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>PVSio-Web Interactive Prototype Builder</title>
-        <link href="lib/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
-        <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<!--
+      
         <link href="css/style.css" type="text/css" rel="stylesheet">
         <link href="css/image-mapper.css" type="text/css" rel="stylesheet">
         <link href="css/state_machine.css" type="text/css" rel="stylesheet">
@@ -19,8 +19,10 @@
         <link href="lib/cm/addon/fold/foldgutter.css" rel="stylesheet" type="text/css"/>
         <link href="lib/cm/addon/hint/show-hint.css" rel="stylesheet" type="text/css">
         <link href="lib/cm/addon/dialog/dialog.css" rel="stylesheet" type="text/css"/>
-    <link rel="stylesheet" href="css/pipe.css">
-
+-->
+        <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+        <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link rel="stylesheet" href="css/pipe.css">
     </head>
 <body>
     <div id="coverpage">
@@ -41,16 +43,25 @@
                 <div style="text-align:center;padding:0px;">or</div>
                 <a class="button download" href="https://github.com/thehogfather/pvsio-web" target="_blank">Download and Install PVSio-web</a>
             </div>
-            <hr>
+<!--            <hr>-->
         </div>
 
-        <div id="content-wrap" style="text-align:center;">
-            <div id="content">            
-                <h2>Featured videos</h2>
-                <a href="http://youtu.be/T0QmUe0bwL8?t=1m8s"><img src="youtube-thumb.png" width="262"></a>
-                <h3>Design issues in medical user interfaces.</h3>
-                <p style="width:420px;min-width:420px;margin:auto;"><a href="http://www.eecs.qmul.ac.uk/~masci/" target="_blank">Paolo Masci</a>, Queen Mary University of London, has used PVSio-web to create this video for hospitals, device manufacturers, and regulators to raise awareness about general user interface software issues.</p>
+        <div id="content-wrap" >
+            <div class="container center-block" id="featured-videos">
+                <h3>Featured videos</h3>
+                <div class="row">            
+                    <div class="col-md-3">
+                        <a href="http://youtu.be/T0QmUe0bwL8?t=1m8s"><img src="youtube-thumb.png" width="185"></a>
+                    </div>
+                    <div class="col-md-9">
+                        <h4>Design issues in medical user interfaces.</h4>
+                        <p>
+                            <a href="http://www.eecs.qmul.ac.uk/~masci/" target="_blank">Paolo Masci</a>, Queen Mary University of London, has used PVSio-web to create this video for hospitals, device manufacturers, and regulators to raise awareness about general user interface software issues.
+                        </p>
+                    </div>
+                </div>
             </div>
+            
         </div>
     </div>
 </body>
