@@ -30,22 +30,12 @@ hr {
   color: #80bd01;
 }
 
-#content-wrap .container {
-    width: 800px;
-    margin-right: auto;
-    margin-left: auto;
-}
-
-#featured-videos {
-    font-size: 11pt;
-}
-
 body {
   background: #1d1d1d;
-  color: #dddddd;
+  color: #333333;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 12pt;
+  font-size: 17px;
   line-height: 200%;
   font-family: "source-sans-pro", sans-serif;
   font-style: normal;
@@ -221,7 +211,7 @@ h3 a {
 }
 
 #intro {
-  width: 800px;
+  width: 90%;
   margin: 0 auto;
   text-align: justify;
   color: #d2d8ba;
@@ -349,9 +339,6 @@ h3 a {
 
 #content-wrap {
   padding-bottom: 50px;
-  border-top: 2px solid black;
-    border-bottom: 2px solid black;
-    background: #2f2f2f;
 }
 
 /* .blog #content-wrap, .blog #content-wrap #content #column1 {
@@ -547,7 +534,6 @@ h3 a {
   padding-right: 30px;
 }
 
-/*
 .row {
   padding-top: 10px;
   padding-bottom: 10px;
@@ -572,7 +558,6 @@ h3 a {
 .row h2.localized { background-position: left -414px; }
 .row h2.irc { background-position: left -626px; }
 .row h2.installers { background-position: left -522px; }
-*/
 
 .block {
   width: 215px;
