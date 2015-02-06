@@ -1,5 +1,5 @@
 /**
- * Test cases for ProjectFile module
+ * Test cases for Descriptor module
  * @author Patrick Oladimeji
  * @date 6/24/14 15:59:43 PM
  */
@@ -8,16 +8,16 @@
 /*global define, describe, beforeEach, afterEach, expect, it*/
 define(function (require, exports, module) {
     "use strict";
-    var ProjectFile = require("project/ProjectFile");
+    var Descriptor = require("project/Descriptor");
     
 	module.exports = {
 		run: function () {
-			describe("ProjectFile", function () {
+			describe("Descriptor", function () {
 				var f, spec = "Documents/main.pvs", image = "Documents/image.png",
 					specname = "main.pvs", imagename = "image.png";
 
 				beforeEach(function () {
-					f = new ProjectFile(spec, "");
+					f = new Descriptor(spec, "");
 				});
 
 				afterEach(function () {
@@ -25,10 +25,10 @@ define(function (require, exports, module) {
 				});
 
 				it("has a .pvs extension", function () {
-					expect(f.extension()).toEqual(".pvs");
+					expect(f.extension).toEqual(".pvs");
 				});
 				it("has the correct name", function () {
-					expect(f.name()).toEqual(specname);
+					expect(f.name).toEqual(specname);
 				});
 
 				it("spec is not an image", function () {
@@ -37,7 +37,9 @@ define(function (require, exports, module) {
 				});
 
 				it("has a toString method", function () {
-					expect(f.toString()).toEqual(spec);
+                    var obj = JSON.parse(f.toString());
+					expect(obj.path).toEqual(spec);
+                    expect(obj.encoding).toEqual("utf8");
 				});
 			});
 		}

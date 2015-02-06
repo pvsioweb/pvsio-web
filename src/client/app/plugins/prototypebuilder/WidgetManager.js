@@ -4,8 +4,8 @@
  * @author Patrick Oladimeji
  * @date 10/30/13 21:42:56 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, _ */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true */
+/*global define, _, Promise */
 define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
@@ -13,11 +13,12 @@ define(function (require, exports, module) {
 		imageMapper             = require("imagemapper"),
 		WSManager				= require("websockets/pvs/WSManager"),
         uidGenerator            = require("util/uuidGenerator"),
-	    EditWidgetView            = require("pvsioweb/forms/editWidget"),
-		Button                    = require("pvsioweb/Button"),
-        Display                    = require("pvsioweb/Display"),
-		NewWidgetView            = require("pvsioweb/forms/newWidget"),
-        StateParser = require("util/PVSioStateParser");
+	    EditWidgetView          = require("pvsioweb/forms/editWidget"),
+		Button                  = require("pvsioweb/Button"),
+        Display                 = require("pvsioweb/Display"),
+        Storyboard              = require("pvsioweb/Storyboard"),
+		NewWidgetView           = require("pvsioweb/forms/newWidget"),
+        StateParser             = require("util/PVSioStateParser");
 	var wm, mapCreator;
 	
    ///TODO this should be moved out of this file and promoted to a property, or a function parameter in createImageMap
@@ -25,7 +26,11 @@ define(function (require, exports, module) {
 //        var state = res.data.join("");
         var stateString = res.data[0];
         var state = StateParser.parse(stateString);
-		//render displays
+		//render storyboard
+		wm.getStoryboardWidgets().forEach(function (w) {
+			w.render(state);
+		});
+		//render displays        
 		wm.getDisplayWidgets().forEach(function (w) {
 			w.render(state);
 		});
@@ -75,7 +80,13 @@ define(function (require, exports, module) {
             var widget;
             _.each(defs.widgetMaps, function (w, key) {
                 w.type = w.type.toLowerCase();
-                widget = w.type === "button" ? new Button(key) : new Display(key);
+                if (w.type === "button") {
+                    widget = new Button(key);
+                } else if (w.type === "display") {
+                    widget = new Display(key);
+                } else if (w.type === "storyboard") {
+                    widget = new Storyboard(key);
+                }
                 if (w.hasOwnProperty("events")) {
                     w.evts = w.events;
                     delete w.events;
@@ -85,21 +96,23 @@ define(function (require, exports, module) {
             });
 
             //create div
-            defs.regionDefs.forEach(function (d) {
-                widget = wm.getWidget(d["class"]);
-                var coords = d.coords.split(",").map(function (d) {
-                    return parseFloat(d);
+            if (defs.regionDefs) {
+                defs.regionDefs.forEach(function (d) {
+                    widget = wm.getWidget(d["class"]);
+                    var coords = d.coords.split(",").map(function (d) {
+                        return parseFloat(d);
+                    });
+                    var h = coords[3] - coords[1], w = coords[2] - coords[0], x = coords[0], y = coords[1];
+                    var mark = mapCreator.restoreRectRegion({x: x, y: y, width: w, height: h});
+                    mark.attr("id", widget.id()).classed(widget.type(), true);
+                    widget.element(mark);
+                    createImageMap(widget);
+                    //set the font-size of the mark to be 80% of the height and the id of the mark
+                    mark.on("dblclick", function () {
+                        handleWidgetEdit(wm.getWidget(mark.attr("id")), wm);
+                    });
                 });
-                var h = coords[3] - coords[1], w = coords[2] - coords[0], x = coords[0], y = coords[1];
-                var mark = mapCreator.restoreRectRegion({x: x, y: y, width: w, height: h});
-                mark.attr("id", widget.id()).classed(widget.type(), true);
-                widget.element(mark);
-                createImageMap(widget);
-                //set the font-size of the mark to be 80% of the height and the id of the mark
-                mark.on("dblclick", function () {
-                    handleWidgetEdit(wm.getWidget(mark.attr("id")), wm);
-                });
-            });
+            }
         }
     };
 
@@ -123,7 +136,7 @@ define(function (require, exports, module) {
                         if (e.data.hasOwnProperty("events")) {
                             e.data.evts = e.data.events;
                             delete e.data.events;
-                        }                    
+                        }
                         widget.updateWithProperties(e.data);
                         widget.element(region);
                         createImageMap(widget);
@@ -160,7 +173,13 @@ define(function (require, exports, module) {
                 wm.fire(event);
             }).on("select", function (e) {
 				wm.fire({type: "WidgetSelected", widget: wm.getWidget(e.region.attr("id")), event: e.event});
-			});
+			}).on("clearselection", function (e) {
+                var widgets = [];
+                e.regions.each(function () {
+                    widgets.push(wm.getWidget(d3.select(this).attr("id")));
+                });
+                wm.fire({type: "WidgetSelectionCleared", widgets: widgets, event: e.event});
+            });
             if (cb) { cb(); }
         }});
     };
@@ -230,6 +249,16 @@ define(function (require, exports, module) {
 			return w.type() === "button";
 		});
 	};
+    /**
+		Gets a list of storyboard widgets
+		@returns {Storyboard}
+		@memberof WidgetManager
+	 */
+	WidgetManager.prototype.getStoryboardWidgets = function () {
+		return _.filter(this._widgets, function (w) {
+			return w.type() === "storyboard";
+		});
+	};
 	
 	/**
 		Gets a list of all the widgets loaded on the page. The returned array contains all
@@ -238,9 +267,9 @@ define(function (require, exports, module) {
 		@memberof WidgetManager
 	*/
 	WidgetManager.prototype.getAllWidgets = function () {
-		var buttons = this.getButtonWidgets(),
-			displays = this.getDisplayWidgets();
-		return buttons.concat(displays);
+		return this.getDisplayWidgets()
+                    .concat(this.getButtonWidgets())
+                    .concat(this.getStoryboardWidgets());
 	};
 	
 	/**
@@ -266,16 +295,19 @@ define(function (require, exports, module) {
 	   @memberof WidgetManager
      */
     WidgetManager.prototype.getWidgetDefinitions = function () {
-		var scale = +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1;
+		var scale = (d3.select("svg > g").node()) ?
+                        +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
         var widgets = [], regionDefs = [];
         _.each(this._widgets, function (widget) {
             widgets.push(widget.toJSON());
 			var a = widget.imageMap();
-			var scaledCoords = a.attr("coords").split(",").map(function (c) {
-				return +c / scale;
-			}).join(",");
-			regionDefs.push({"class": a.attr("class"), shape: a.attr("shape"),
-						coords: scaledCoords, href: a.attr("href")});
+            if (a) {
+                var scaledCoords = a.attr("coords").split(",").map(function (c) {
+                    return +c / scale;
+                }).join(",");
+                regionDefs.push({"class": a.attr("class"), shape: a.attr("shape"),
+                            coords: scaledCoords, href: a.attr("href")});
+            }
         });
         return {widgetMaps: widgets, regionDefs: regionDefs};
     };
@@ -304,7 +336,47 @@ define(function (require, exports, module) {
 			_this.updateLocationAndSize(w, pos, scale);
 		});
 	};
-	
+
+    /**
+     * @function addStoryboardImages
+     * @memberof WidgetManager
+     * @param descriptors {Array(Object)} Array of image descriptors. Each image descriptor has the following properties: 
+     *        <li> type: (String), defines the MIME type of the image. The string starts with "image/", e.g., "image/jpeg" </li>
+     *        <li> imagePath: (String), defines the path of the image. The path is relative to the current project folder </li>
+     * @returns {Promise(Array({image}))}
+     */
+	WidgetManager.prototype.addStoryboardImages = function (descriptors) {
+        var _this = this;
+        var storyboard = this.getStoryboardWidgets() || new Storyboard();
+        return new Promise(function (resolve, reject) {
+            storyboard.addImages(descriptors).then(function (images) {
+                _this.addWidget(storyboard);
+                _this.fire({type: "WidgetModified"});
+                resolve(images);
+            }).catch(function (err) {
+                reject(err);
+            });
+        });
+	};
+    
+    /**
+     * @function displayEditStoryboardDialog
+     * @memberof WidgetManager
+     */
+	WidgetManager.prototype.displayEditStoryboardDialog = function () {
+        var _this = this;
+        var w = this.getStoryboardWidgets() || [];
+        if (w.length === 0) {
+            w.push(new Storyboard());
+            w[0].addListener("EditStoryboardComplete", function (data) {
+                _this.addWidget(data.widget); // this overwrites the widget
+                _this.fire({type: "WidgetModified"}); // this marks the widget file as dirty
+                _this.fire({type: "StoryboardWidgetModified", widget: data.widget}); // this will trigger an event listener in Project that creates a directory with the storyboard image files
+            });
+        }
+        w[0].displayEditStoryboardDialog();
+	};
+    
     module.exports = {
 		/**
 		 * Returns a singleton instance of the WidgetManager

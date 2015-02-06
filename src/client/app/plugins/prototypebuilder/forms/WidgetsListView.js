@@ -13,7 +13,7 @@ define(function (require, exports, module) {
 	function WidgetsListView(widgets) {
 		var el = d3.select("#widgetsList").html("").append("ul");
 		
-        function labelFunction (widget) {
+        function labelFunction(widget) {
             var label = widget.type() + ": ";
             if (widget.type() === "display") {
                 label += widget.displayKey();
@@ -35,9 +35,13 @@ define(function (require, exports, module) {
                 .text(labelFunction)
                 .on("click", function (w) {
                     var event = d3.event;
-                    if (!event.shiftKey) {
+                    if (!event.shiftKey && !d3.select(this).classed("selected")) {
                         d3.selectAll("g.selected").classed("selected", false);
                         d3.selectAll("#widgetsList ul li").classed("selected", false);
+                    } else if (d3.select(w.parentGroup()).classed("selected")) {
+                        d3.selectAll(".subselected").classed("subselected", false);
+                        d3.select(this).classed("subselected", true);
+                        d3.select(w.parentGroup()).classed("subselected", true);
                     }
                     d3.select(this).classed("selected", true);
                     d3.select(w.parentGroup()).classed("selected", true);
@@ -75,8 +79,11 @@ define(function (require, exports, module) {
 		}).addListener("WidgetSelected", function (event) {
 			var e = new Event("click");
 			e.shiftKey = event.event.shiftKey;
-			el.select("li[widget-id='" + event.widget.id() + "']").node().dispatchEvent(e);
-		});
+            var node = el.select("li[widget-id='" + event.widget.id() + "']").node();
+			node.dispatchEvent(e);
+		}).addListener("WidgetSelectionCleared", function (event) {
+            d3.selectAll("#widgetsList ul li").classed("selected", false);
+        });
 	}
 	
 	

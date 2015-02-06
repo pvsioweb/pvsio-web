@@ -57,24 +57,37 @@
             var mdPos = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]},
 				rxStart = +region.attr("x"),
                 ryStart = +region.attr("y");
-			console.log(mdPos, rxStart, ryStart);
+            region.attr("startx", rxStart).attr("starty", ryStart);
+            //cache the start pos in each element
+            d3.selectAll("g.selected .region").attr("startx", function () {
+                return d3.select(this).attr("x");
+            }).attr("starty", function () {
+                return d3.select(this).attr("y");
+            });
             d3.event.stopPropagation();
             d3.event.preventDefault();
             //register mousemove for the svg when moused down on the region
             svg.on("mousemove.region", function () {
                 var e = {x: d3.mouse(this)[0] / _scale, y: d3.mouse(this)[1] / _scale};
                 var delta = {x: (e.x - mdPos.x), y: (e.y - mdPos.y)};
-                updateRegion(region, {x: (rxStart + delta.x), y: (ryStart + delta.y)}, false);
+                d3.selectAll("g.selected .region").each(function (d) {
+                    var r = d3.select(this);
+                    updateRegion(r, {x: (+r.attr("startx") + delta.x), y: (+r.attr("starty") + delta.y)}, false);
+                });
             });
             
             region.on("mouseup", function () {
                 svg.on("mousemove.region", null);
-                dispatcher.move({region: region, pos: pos(region), scale:_scale});
+                dispatcher.move({region: region, pos: pos(region), scale: _scale});
             });
-            //higlight the region show it has been selected
-            if (!d3.event.ctrlKey) {//remove previous selections if ctrl key wasnt pressed
+            //remove previous selections if shift key wasnt pressed and we are not selecting a previously selected region
+            if (!d3.event.shiftKey && !g.classed("selected")) {
                 svg.selectAll("g.selected").classed("selected", false);
+            } else if (g.classed("selected")) {
+                svg.selectAll("g.subselected").classed("subselected", false);
+                g.classed("subselected", true);
             }
+            //higlight the region show it has been selected
             g.classed("selected", true);
 			dispatcher.select({region: region, event: d3.event});
         });
@@ -131,7 +144,12 @@
     }
     
     function createRegion(svg, startPos, dispatcher) {
-        svg.selectAll("g.selected").classed("selected", false);//clear previous selections
+        var currentSelections = svg.selectAll("g.selected");
+        //clear previous selections
+        if (!currentSelections.empty()) {
+            dispatcher.clearselection({regions: currentSelections});
+            currentSelections.classed("selected", false);
+        }
         var g = svg.select("g").append("g").attr("class", "selected"), moved = false, moveRegionStarted = false;
         var region = g.append("rect").attr("x", startPos.x).attr("y", startPos.y).attr("class", "region");
         var corners = g.selectAll("rect.corner").data(helperData).enter()
@@ -174,7 +192,7 @@
         //clear any previous svgs
         d3.select(config.parent + " svg").remove();
         var imageEl = d3.select(config.element), props, mapLayer, svg,
-            ed = d3.dispatch("create", "remove", "resize", "move", "select"), initTimer, _el_poll_count = 0;
+            ed = d3.dispatch("create", "remove", "resize", "move", "select", "clearselection"), initTimer, _el_poll_count = 0;
         props = cr(imageEl);
         
         function initialiseSVGLayer() {
@@ -200,6 +218,7 @@
         
         function restoreRectRegion(data) {
             var r = createRegion(svg, data, ed);
+            d3.select(r.node().parentNode).classed("selected", false);
             updateRegion(r, data);
             svg.on("mousemove", null)
                 .on("mouseup", null);
@@ -242,6 +261,8 @@
                     loadImage();
                 } else {
                     _el_poll_count = 0;
+                    res.error = { code: "SVG_LOAD_IMAGE_FAIL", message: "Failed to load image in SVG" };
+                    config.onReady(res);
                 }
             }
         };

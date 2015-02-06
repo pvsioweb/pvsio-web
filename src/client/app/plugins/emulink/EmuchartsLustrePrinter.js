@@ -106,7 +106,7 @@ define(function (require, exports, module) {
         ans += this.print_local_variables(emuchart);
         ans += this.print_transitions(emuchart);
         ans += this.print_disclaimer();
-        return ans;
+        return { res: ans };
     };
     
     module.exports = EmuchartsLustrePrinter;

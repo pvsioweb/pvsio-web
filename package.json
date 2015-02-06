@@ -10,17 +10,19 @@
   "version": "0.1.1",
   "preferGlobal": "true",
   "dependencies": {
-    "ws": "0.4.x",
-    "express": "~4.0.0",
     "body-parser": "~1.0.0",
+    "es6-promise": "0.1.x",
+    "express": "~4.0.0",
+    "open": "0.0.5",
     "tracer": "0.7.1",
-    "es6-promise": "0.1.x"
+    "ws": "0.4.x"
   },
   "devDependencies": {
-    "jasmine-node": "~1.14.3"
+    "jasmine-node": "~1.14.3",
+    "open": "0.0.5"
   },
   "scripts": {
-    "test": "jasmine-node --verbose src/server/servertests",
+    "test": "jasmine-node --verbose src/server/servertests; node client-test.js",
     "start": "node src/server/pvssocketserver.js"
   },
   "repository": {

@@ -111,9 +111,7 @@ and type the following address in a browser window:
 	
 To test the server, run the following command in a Terminal window
 
-	run npm test
-	
-(Note: the command for testing the server is a shortcut for running jasmine-node --verbose src/server/servertests)
+	npm test
 
 
 Uninstallation :(

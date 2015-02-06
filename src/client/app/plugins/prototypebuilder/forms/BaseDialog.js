@@ -17,11 +17,12 @@ define(function (require, exports, module) {
         initialize: function (data) {
 			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
 			this.render(data);
+            this._data = data;
             this.focus();
 		},
         events: {
             "keydown .panel": "keypress",
-            "mousedown .panel-heading": "moveDialog",
+            "mousedown .panel-heading": "moveDialog"
         },
         focus: function () {
             d3.select(this.el).select(".panel").attr("tabindex", 1).node().focus();
@@ -46,25 +47,29 @@ define(function (require, exports, module) {
         },
         keypress: function (event) {
             var form = this.el;
-            switch(event.which) {
+            switch (event.which) {
             case 13: //enter pressed
                 this.ok(event);
                 break;
             case 27: //esc pressed
                 this.cancel(event);
                 break;
-            default: break;
+            default:
+                break;
             }
         },
         ok: function (event) {
-			var form = this.el;
+			var form = this.el,
+                btnName = this._data && this._data.buttons ? this._data.buttons[1].toLowerCase() : "ok";
 			if (FormUtils.validateForm(form)) {
 				var formdata = FormUtils.serializeForm(form);
-				this.trigger("ok", {data: formdata, el: this.el, event: event}, this);
+				this.trigger(btnName, {data: formdata, el: this.el, event: event}, this);
 			}
 		},
 		cancel: function (event) {
-			this.trigger("cancel", {el: this.el, event: event}, this);
+            var btnName = this._data && this._data.buttons ? this._data.buttons[0].toLowerCase() : "cancel";
+
+			this.trigger(btnName, {el: this.el, event: event}, this);
 		}
     });
     

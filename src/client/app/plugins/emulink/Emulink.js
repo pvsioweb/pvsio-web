@@ -3,7 +3,7 @@
  * @author Paolo Masci
  * @date 25/05/14 6:39:02 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true */
 /*global define, d3, require, $, brackets, window, document, Promise */
 define(function (require, exports, module) {
 	"use strict";
@@ -295,9 +295,9 @@ define(function (require, exports, module) {
         var _this = this;
 		var content = require("text!plugins/emulink/forms/maincontent.handlebars");
         canvas = pvsioWebClient.createCollapsiblePanel({
-            headerText: "Emulink",
+            headerText: "EmuCharts Editor",
             showContent: true,
-            owner: "Emulink"
+            owner: "EmuCharts Editor"
         });
         canvas = canvas.html(content);
 		var infoBox = document.getElementById("EmuchartsEditorMode");
@@ -413,8 +413,8 @@ define(function (require, exports, module) {
             };
             fs.openLocalFileAsText(function (err, res) {
                 if (res) {
-                    if (res.fileName.lastIndexOf(".emdl") === res.fileName.length - 5) {
-                        res.fileContent = JSON.parse(res.fileContent);
+                    if (res.name.lastIndexOf(".emdl") === res.name.length - 5) {
+                        res.content = JSON.parse(res.content);
                         emuchartsManager.importEmucharts(res);
                         if (callback && typeof callback === "function") {
                             callback(err, res);
@@ -647,14 +647,13 @@ define(function (require, exports, module) {
         d3.select("#btn_menuSaveChart").on("click", function () {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
             if (!emuchartsManager.empty_chart()) {
-                var fileName = projectManager.project().name() + "_emucharts.emdl";
+                var name = "emucharts_" + projectManager.project().name() + ".emdl";
                 var content = JSON.stringify({
                     descriptor: {
                         file_type: "emdl",
-                        version: "1.2",
+                        version: "1.3",
                         description: "emucharts model",
-                        chart_name: (projectManager.project().name() + "_emucharts"),
-                        pvs_file: (projectManager.project().name() + "_emucharts_th.pvs")
+                        chart_name: ("emucharts_" + projectManager.project().name())
                     },
                     chart: {
                         states: emuchartsManager.getStates(),
@@ -664,20 +663,12 @@ define(function (require, exports, module) {
                         variables: emuchartsManager.getVariables()
                     }
                 }, null, " ");
-                var pf = projectManager.createProjectFile(fileName, content);
-                projectManager.addFile(pf)
-                    .then(function (res) {
-                        displayNotification("File " + pf.path() + " saved successfully!");
-                    }).catch(function (err) {
-                        displayNotification("Error while saving file " + pf.path() + " (" + err + ")");
-                    });
-//                projectManager.saveFiles([pf], function (err, res) {
-//                    if (!err) {
-//                        alert("File " + pf.path() + " saved successfully!");
-//                    } else {
-//                        alert("Error while saving file " + pf.path() + " (" + err + ")");
-//                    }
-//                });
+                projectManager.project().addFile(name, content, { overWrite: true }).then(function (res) {
+                    displayNotification("File " + name + " saved successfully!");
+                }).catch(function (err) {
+                    displayNotification("Error while saving file " +
+                                          name + " (" + JSON.stringify(err) + ")");
+                });
             }
         });
         d3.select("#btn_menuExportAsImage").on("click", function () {
@@ -1188,9 +1179,8 @@ define(function (require, exports, module) {
             document.getElementById("menuCodeGenenerators").children[1].style.display = "block";
         });
         d3.select("#btn_menuPVSPrinter").on("click", function () {
-            //document.getElementById("menuCodeGenenerators").children[1].style.display = "none";
             var emucharts = {
-                name: (projectManager.project().name() + "_emucharts_th"),
+                name: ("emucharts_" + projectManager.project().name() + "_th"),
                 author: {
                     name: "Paolo Masci",
                     affiliation: "Queen Mary University of London, United Kingdom",
@@ -1203,51 +1193,27 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var pvsModel = emuchartsPVSPrinter.print(emucharts);
-            console.log(pvsModel);
-            if (pvsModel.err) {
-                console.log(pvsModel.err);
+            var model = emuchartsPVSPrinter.print(emucharts);
+            console.log(model);
+            if (model.err) {
+                console.log(model.err);
                 return;
             }
-            if (pvsModel.res) {
-                var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".pvs", pvsModel.res);
-                var addFile = function (emuchartsFile) {
-                    var notification = "";
-                    projectManager.addFile(emuchartsFile).then(
-                        function () {
-                            projectManager.selectFile(emuchartsFile);
-                            notification = "PVS model successfully generated in file " + emuchartsFile.path();
-                            displayNotification(notification);
-                            Logger.log(notification);
-                        },
-                        function (err) {
-                            notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-                            displayNotification(notification);
-                            Logger.log(notification);
-                        }
-                    );
-                };
-
-                if (projectManager.fileExists(emuchartsFile)) {
-                    // remove file from project
-                    projectManager.removeFileWithPath(emuchartsFile.path())
-                        .then(function (f) {
-                            addFile(emuchartsFile);
-                        }, function (err) {
-                            console.log(err);
-                        });
-                } else {
-                    addFile(emuchartsFile);
-                }
+            if (model.res) {
+                var name = emucharts.name + ".pvs";
+                var content = model.res;
+                return projectManager.project().addFile(name, content, { overWrite: true });
+            } else {
+                console.log("Warning, PVS model is undefined.");
             }
         });
         d3.select("#btn_menuPIMPrinter").on("click", function () {
             var emucharts = {
-                name: "emucharts_PIM",
+                name: ("emucharts_" + projectManager.project().name() + "_PIM"),
                 author: {
-                    name: "Paolo Masci",
-                    affiliation: "Queen Mary University of London, United Kingdom",
-                    contact: "http://www.eecs.qmul.ac.uk/~masci/"
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
@@ -1256,50 +1222,27 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var pimModel = emuchartsPIMPrinter.print(emucharts);
-            var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".tex", pimModel);
-            if (projectManager.fileExists(emuchartsFile)) {
-                // remove file from project
-                projectManager.project().removeFile(emuchartsFile);
+            var model = emuchartsPIMPrinter.print(emucharts);
+            console.log(model);
+            if (model.err) {
+                console.log(model.err);
+                return;
             }
-            // add file to project
-            var notification = "";
-            projectManager.addFile(emuchartsFile)
-                .then(function (f) {
-                    projectManager.selectFile(emuchartsFile);
-                    notification = "PIM model successfully generated in file " + emuchartsFile.path();
-                    displayNotification(notification);
-                    Logger.log(notification);
-                }).catch(function (err) {
-                    notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-                    displayNotification(notification);
-                    Logger.log(notification);
-                });
-//            projectManager.saveFiles([emuchartsFile], function (err) {
-//                var notification = "";
-//                if (!err) {
-//                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
-//                    projectManager.selectFile(emuchartsFile);
-//                    notification = "PIM model successfully generated in file " + emuchartsFile.path();
-//                    alert(notification);
-//                    Logger.log(notification);
-//                } else {
-//                    notification = "PVS Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-//                    alert(notification);
-//                    Logger.log(notification);
-//                }
-//            });
-            // select file
-//            projectManager.selectFile(emuchartsFile);
+            if (model.res) {
+                var name = emucharts.name + ".tex";
+                var content = model.res;
+                return projectManager.project().addFile(name, content, { overWrite: true });
+            } else {
+                console.log("Warning, PIM model is undefined.");
+            }
         });
         d3.select("#btn_menuCppPrinter").on("click", function () {
-            //document.getElementById("menuCodeGenenerators").children[1].style.display = "none";
             var emucharts = {
-                name: "emucharts",
+                name: ("emucharts_" + projectManager.project().name()),
                 author: {
-                    name: "Paolo Masci",
-                    affiliation: "Queen Mary University of London, United Kingdom",
-                    contact: "http://www.eecs.qmul.ac.uk/~masci/"
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
@@ -1308,50 +1251,27 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".cpp",
-                                                                 emuchartsCppPrinter.print(emucharts));
-            if (projectManager.fileExists(emuchartsFile)) {
-                // remove file from project
-                projectManager.project().removeFile(emuchartsFile);
+            var model = emuchartsPIMPrinter.print(emucharts);
+            console.log(model);
+            if (model.err) {
+                console.log(model.err);
+                return;
             }
-            // add file to project
-            var notification = "";
-            projectManager.addFile(emuchartsFile)
-                .then(function (f) {
-                    projectManager.selectFile(emuchartsFile);
-                    notification = "C++ class successfully generated in file " + emuchartsFile.path();
-                    displayNotification(notification);
-                    Logger.log(notification);
-                }).catch(function (err) {
-                    notification = "C++ Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-                    displayNotification(notification);
-                    Logger.log(notification);
-                });
-            
-//            projectManager.saveFiles([emuchartsFile], function (err) {
-//                var notification = "";
-//                if (!err) {
-//                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
-//                    projectManager.selectFile(emuchartsFile);
-//                    notification = "C++ class successfully generated in file " + emuchartsFile.path();
-//                    alert(notification);
-//                    Logger.log(notification);
-//                } else {
-//                    notification = "C++ Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-//                    alert(notification);
-//                    Logger.log(notification);
-//                }
-//            });
-            // select file
-//            projectManager.selectFile(emuchartsFile);
+            if (model.res) {
+                var name = emucharts.name + ".cpp";
+                var content = model.res;
+                return projectManager.project().addFile(name, content, { overWrite: true });
+            } else {
+                console.log("Warning, C++ model is undefined.");
+            }
         });
         d3.select("#btn_menuMALPrinter").on("click", function () {
             var emucharts = {
-                name: "emucharts",
+                name: ("emucharts_" + projectManager.project().name() + "_MAL"),
                 author: {
-                    name: "Paolo Masci",
-                    affiliation: "Queen Mary University of London, United Kingdom",
-                    contact: "http://www.eecs.qmul.ac.uk/~masci/"
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
@@ -1360,41 +1280,19 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var emuchartsFile = projectManager.createProjectFile(emucharts.name + ".i",
-                                                                 emuchartsMALPrinter.print(emucharts));
-            if (projectManager.fileExists(emuchartsFile)) {
-                // remove file from project
-                projectManager.project().removeFile(emuchartsFile);
+            var model = emuchartsMALPrinter.print(emucharts);
+            console.log(model);
+            if (model.err) {
+                console.log(model.err);
+                return;
             }
-            // add file to project
-            var notification = "";
-            projectManager.addFile(emuchartsFile)
-                .then(function (f) {
-                    projectManager.selectFile(emuchartsFile);
-                    notification = "MAL model successfully generated in file " + emuchartsFile.path();
-                    displayNotification(notification);
-                    Logger.log(notification);
-                }).catch(function (err) {
-                    notification = "MAL Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-                    displayNotification(notification);
-                    Logger.log(notification);
-                });
-//            projectManager.saveFiles([emuchartsFile], function (err) {
-//                var notification = "";
-//                if (!err) {
-//                    projectManager.project().addProjectFile(emuchartsFile.path(), emuchartsFile.content());
-//                    projectManager.selectFile(emuchartsFile);
-//                    notification = "MAL model successfully generated in file " + emuchartsFile.path();
-//                    alert(notification);
-//                    Logger.log(notification);
-//                } else {
-//                    notification = "MAL Printer could not print into file " + emuchartsFile.path() + " (" + err + ")";
-//                    alert(notification);
-//                    Logger.log(notification);
-//                }
-//            });
-            // select file
-//            projectManager.selectFile(emuchartsFile);
+            if (model.res) {
+                var name = emucharts.name + ".i";
+                var content = model.res;
+                return projectManager.project().addFile(name, content, { overWrite: true });
+            } else {
+                console.log("Warning, MAL model is undefined.");
+            }
         });
         //-- Zoom menu -----------------------------------------------------------
         d3.select("#menuZoom").on("mouseover", function () {
@@ -1420,6 +1318,24 @@ define(function (require, exports, module) {
         return [PrototypeBuilder.getInstance(), ModelEditor.getInstance()];
     };
     
+    function onProjectChanged(event) {
+        // try to open the default emuchart file associated with the project
+        var defaultEmuchartFilePath = event.current + "/" + "emucharts_" + event.current + ".emdl";
+        projectManager.readFile(defaultEmuchartFilePath).then(function (res) {
+            res.content = JSON.parse(res.content);
+            emuchartsManager.importEmucharts(res);
+            // make svg visible and reset colors
+            resetToolbarColors();
+            // render emuchart                        
+            emuchartsManager.render();
+            // set initial editor mode
+            d3.select("#btn_toolbarBrowse").node().click();
+        }).catch(function (err) {
+            // if the default emuchart file is not in the project, then just clear the current diagram
+            d3.select("#btnNewEmuchart").node().click();
+        });
+    }
+    
     Emulink.prototype.initialise = function () {
         //enable the plugin -- this should also enable any dependencies defined in getDependencies method
         var prototypeBuilder = PrototypeBuilder.getInstance();
@@ -1427,8 +1343,13 @@ define(function (require, exports, module) {
         editor = ModelEditor.getInstance().getEditor();
         ws = pvsioWebClient.getWebSocket();
         projectManager = ProjectManager.getInstance();
+        // listen to ProjectChanged events so that we can update the editor when a new project is opened
+        projectManager.addListener("ProjectChanged", onProjectChanged);
         // create user interface elements
 		this.createHtmlElements();
+        // try to load default emuchart for the current project
+        onProjectChanged({current: projectManager.project().name()});
+        return Promise.resolve(true);
     };
     
     Emulink.prototype.unload = function () {

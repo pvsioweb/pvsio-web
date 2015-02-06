@@ -17,17 +17,20 @@ require.config({
     }
 });
 
-var d3 = null;
-
 require(["widgets/CursoredDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioWebClient"], function (CursoredDisplay, GraphBuilder, PVSioWebClient) {
     "use strict";
     
-    d3 = require("d3/d3");
+    var d3 = require("d3/d3");
     
     var w = 228, h = 64;
 	var client = PVSioWebClient.getInstance();
     //create a collapsible panel using the pvsiowebclient instance
-    var imageHolder = client.createCollapsiblePanel({parent: "#content", headerText: "BBraun Space", showContent: true}).style("position", "relative");
+    var imageHolder = client.createCollapsiblePanel({
+        parent: "#content",
+        headerText: "Simulation of the data entry system of a medical infusion pump. Please use the navigation keys of the medical device to interact with the device (greyed out keys are disabled keys).",
+        showContent: true,
+        isDemo: true
+    }).style("position", "relative");
     //insert the html into the panel (note that this could have used templates or whatever)
     imageHolder.html('<img src="image.png" usemap="#prototypeMap"/>');
     //append a div that will contain the canvas element
@@ -103,7 +106,7 @@ require(["widgets/CursoredDisplay", "plugins/graphbuilder/GraphBuilder", "PVSioW
 	client.addListener('WebSocketConnectionOpened', function (e) {
 		console.log("web socket connected");
 		//start pvs process
-		client.getWebSocket().startPVSProcess({fileName: "bbraun_space.pvs", demoName: "BBraun/pvs"}, function (err, event) {
+		client.getWebSocket().startPVSProcess({name: "bbraun_space.pvs", demoName: "BBraun/pvs"}, function (err, event) {
 			d3.selectAll("button").style("display", null);
 		});
 	}).addListener("WebSocketConnectionClosed", function (e) {

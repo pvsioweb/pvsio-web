@@ -9,11 +9,14 @@
 define(function (require, exports, module) {
     "use strict";
 	//var main = require("main");
-	var project  = require("test/Project");
-	var projectFile = require("test/ProjectFile");
-	var ui = require("test/UI");
+	var Project_UnitTest  = require("test/Project_UnitTest");
+	var Descriptor_UnitTest = require("test/Descriptor_UnitTest");
+	var UI_UnitTest = require("test/UI_UnitTest");
     
-    ui.run();
-	project.run();
-	projectFile.run();
+    var ProjectManager_UnitTest = require("test/ProjectManager_UnitTest").getInstance();
+    ProjectManager_UnitTest.run();
+    UI_UnitTest.run();
+    Project_UnitTest.run();
+    Descriptor_UnitTest.run();
+	
 });

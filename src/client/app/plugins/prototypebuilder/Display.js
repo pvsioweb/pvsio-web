@@ -35,7 +35,6 @@ define(function (require, exports, module) {
      * e.g., when multiple display elements need to be rendered.
      */
 	Display.prototype.render = function (state) {
-//		var state = StateParser.parse(stateString);
         var str = StateParser.resolve(state, this.displayKey());
         var dispVal = StateParser.evaluate(str);
         if (typeof dispVal === "string") {

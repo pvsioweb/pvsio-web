@@ -18,6 +18,7 @@ define(function (require, exports, module) {
     function addAction(action) {
         if (isRecording) {
             actions.push(action);
+            console.log(action);
         }
     }
     
