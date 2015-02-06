@@ -40,7 +40,7 @@ define(function (require, exports, module) {
         foldGutter: true,
         autofocus: false,
         gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-        autoCloseBrackets: true,
+        autoCloseBrackets: false,
         matchBrackets: true,
         styleActiveLine: false,
         placeholder: "Type your Emucharts code here...",

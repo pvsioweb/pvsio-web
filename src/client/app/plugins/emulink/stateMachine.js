@@ -1508,10 +1508,7 @@ define(function (require, exports, module) {
 
         // initi PVS writer that translates Emuchart elements into PVS code
         initPVSWriter();
-        
-        // create a new PVS file "emuchart.pvs" containing the annotated PVS code for specifying Emucharts
-        projectManager.createProjectFile("emuchart.pvs", pvsWriter.newEmuchartSpecification("emuchart"));
-        
+                
         // start interactive emulink GUI
         emulink();
     };

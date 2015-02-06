@@ -40,7 +40,7 @@
 	}
 	
 	function ensureMin(size) {
-		return size < 30 ? 30 : size;
+		return size < 6 ? 6 : size;
 	}
 	
 	function insertResizer(el, where) {
@@ -91,12 +91,14 @@
 		
 		//sibling should be one
 		resizer.onmousedown = function (e) {
-			parent.addEventListener("mousemove", mousemove);
-			document.body.onmouseup = function (e) {
+            function unregister(e) {
 				parent.removeEventListener("mousemove", mousemove);
 				removeClass(parent, "ljs-resizing");
 				return false;
-			};
+            }
+			parent.addEventListener("mousemove", mousemove);
+			document.body.onmouseup = unregister;
+			document.body.onmouseleave = unregister;
 			return false;
 		};
 	}
@@ -115,7 +117,7 @@
 		}).join(",");
 		
 		function getChildren() {
-			return document.querySelectorAll(childSelectors);	
+			return document.querySelectorAll(childSelectors);
 		}
 		
 		//layout each of the children
@@ -142,7 +144,7 @@
 					c.dispatchEvent(event);
 				});
 			};
-			parent.style.height = window.innerHeight + "px";
+			parent.style.minHeight = window.innerHeight + "px";
 		}
 	}
 	window.layoutjs = layout;

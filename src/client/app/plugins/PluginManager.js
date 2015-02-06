@@ -3,7 +3,7 @@
  * @author Patrick Oladimeji
  * @date 5/3/14 15:46:27 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true */
 /*global define, Promise*/
 define(function (require, exports, module) {
     "use strict";
@@ -24,28 +24,33 @@ define(function (require, exports, module) {
 	*/
     PluginManager.prototype.enablePlugin = function (plugin) {
         var pm = this;
-        if (enabledPlugins.indexOf(plugin) < 0) {
-            enabledPlugins.push(plugin);
-            instance.fire({type: "PluginEnabled", plugin: plugin});
-            //initialise the plugin after loading and initialising any dependencies
-            var dependencies = plugin.getDependencies();
-            if (dependencies && dependencies.length) {
-				var depPromises = dependencies.filter(function (p) {
-                    return !pm.isLoaded(p);
-                }).map(function (p) {
-					return pm.enablePlugin(p);
-                });
-				return Promise.all(depPromises)
-					.then(function () {
-						return plugin.initialise();
-					});
+        return new Promise(function (resolve, reject) {
+            if (enabledPlugins.indexOf(plugin) < 0) {
+                enabledPlugins.push(plugin);
+                instance.fire({type: "PluginEnabled", plugin: plugin});
+                //initialise the plugin after loading and initialising any dependencies
+                var dependencies = plugin.getDependencies();
+                if (dependencies && dependencies.length) {
+                    var depPromises = dependencies.filter(function (p) {
+                        return !pm.isLoaded(p);
+                    }).map(function (p) {
+                        return pm.enablePlugin(p);
+                    });
+                    return Promise.all(depPromises).then(function () {
+                        plugin.initialise().then(function (res) {
+                            resolve(res);
+                        }).catch(function (err) { reject(err); });
+                    }).catch(function (err) { reject(err); });
+                } else {
+                    plugin.initialise().then(function (res) {
+                        resolve(res);
+                    }).catch(function (err) { reject(err); });
+                }
             } else {
-				return plugin.initialise();
-			}
-        } else {
-			//plugin is already enabled
-			return Promise.resolve(true);
-		}
+                //plugin is already enabled
+                resolve(true);
+            }
+        });
     };
     
 	/**
@@ -54,14 +59,18 @@ define(function (require, exports, module) {
 		@returns {Promise} a promise that resolves when the plugin has been disabled
 	*/
     PluginManager.prototype.disablePlugin = function (plugin) {
-        var index = enabledPlugins.indexOf(plugin);
-        if (enabledPlugins.indexOf(plugin) > -1) {
-            enabledPlugins.splice(index, 1);
-            instance.fire({type: "PluginDisabled", plugin: plugin});
-            return plugin.unload();
-        } else {
-			return Promise.resolve(true);
-		}
+        return new Promise(function (resolve, reject) {
+            var index = enabledPlugins.indexOf(plugin);
+            if (enabledPlugins.indexOf(plugin) > -1) {
+                enabledPlugins.splice(index, 1);
+                instance.fire({type: "PluginDisabled", plugin: plugin});
+                return plugin.unload().then(function (res) {
+                    resolve(res);
+                }).catch(function (err) { reject(err); });
+            } else {
+                return resolve(true);
+            }
+        });
     };
     
     PluginManager.prototype.getEnabledPlugins = function () {
@@ -74,6 +83,7 @@ define(function (require, exports, module) {
     
     PluginManager.prototype.init = function () {
         enabledPlugins = [];
+        return this;
     };
     module.exports = {
         getInstance: function () {

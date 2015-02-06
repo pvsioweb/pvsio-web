@@ -33,8 +33,8 @@ define(function (require, exports, module) {
 			}
 		},
         keypress: function (event) {//override base keypress so that enter doesnt trigger ok
-            switch(event.which) {
-            case 27: 
+            switch (event.which) {
+            case 27:
                 this.cancel(event);
                 break;
             }

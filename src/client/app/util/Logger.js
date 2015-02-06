@@ -8,16 +8,27 @@
 define(function (require, exports, module) {
 	"use strict";
     /**
-     * log the message
+     * log the message -- newest messages are at the top
         @private
      */
     function log(msg) {
         console.log(msg);
-        d3.select("#console").insert('p', 'p').html(typeof msg === "object" ? msg.toString() : msg);
+        try {
+            d3.select("#console").insert('p', 'p').html(typeof msg === "object" ? JSON.stringify(msg) : msg);
+        } catch (err) {
+            d3.select("#console").insert('p', 'p').html(err);
+        }
     }
 
 	function error(msg) {
-		console.error(msg);
+		console.log(msg);
+        try {
+            d3.select("#console").insert('p', 'p').style("color", "red")
+                .html(typeof msg === "object" ? JSON.stringify(msg) : msg);
+        } catch (err) {
+            d3.select("#console").insert('p', 'p').style("color", "red")
+                .html(err);
+        }
 	}
     /**
      * dealing with logging input and output of pvs
