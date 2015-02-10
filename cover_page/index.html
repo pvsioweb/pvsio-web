@@ -1,38 +1,74 @@
 <!DOCTYPE HTML>
 <html>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<title>PVSio-Web Interactive Prototype Builder</title>
-		<link rel="stylesheet" href="css/pipe.css">
-	</head>
-	<body>
-	<div id="coverpage">
-		<div id="nav">
-			<div class="version">PVSio-web 2.0</div>
-			<ul>
-			<li class="active"><a href="./index_files/index.html">Home</a></li>
-			<li><a href="https://github.com/thehogfather/pvsio-web" target="_blank">Downloads</a></li>
-			<li><a href="#!">Docs</a></li>
-			<li><a href="#!">About</a></li>
-			</ul>
-		</div>
-		<div id="intro">
-			<p>PVSio-web is a graphical environment that transforms the animation capabilities of the standard PVS theorem proving system with a sophisticated graphical front-end allowing interactive (human-computer) systems modelling and prototyping. Using PVSio-web, one can generate and evaluate realistic interactive prototypes from formal models. PVSio-web has been successfully used over the last two years for analysing commercial medical devices, and has been used to create training material for device developers and device users. For safety-critical medical device design, PVSio-web has been used with formal methods experts and with non-technical end users, including doctors and nurses.</p>
-			<div class="buttons">
-				<a class="button live" href="http://www.pvsioweb.org/pvsioweb.html" target="_self" alt="Start PVSio-web">Run PVSio-web from our Web Server</a>
-				<div style="text-align:center;padding:0px;">or</div>
-				<a class="button download" href="https://github.com/thehogfather/pvsio-web" target="_blank">Download and Install PVSio-web</a>
-			</div>
-			<hr>
-        	</div>
-		<div id="content-wrap" style="text-align:center;">
-			<div id="content">            
-				<h2>Featured videos</h2>
-				<a href="http://youtu.be/T0QmUe0bwL8?t=1m8s"><img src="youtube-thumb.png" width="262"></a>
-				<h3>Design issues in medical user interfaces.</h3>
-				<p style="width:420px;min-width:420px;margin:auto;"><a href="http://www.eecs.qmul.ac.uk/~masci/" target="_blank">Paolo Masci</a>, Queen Mary University of London, has used PVSio-web to create this video for hospitals, device manufacturers, and regulators to raise awareness about general user interface software issues.</p>
-			</div>
-		</div>
-	</div>
-	</body>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>PVSio-Web Interactive Prototype Builder</title>
+<!--
+      
+        <link href="css/style.css" type="text/css" rel="stylesheet">
+        <link href="css/image-mapper.css" type="text/css" rel="stylesheet">
+        <link href="css/state_machine.css" type="text/css" rel="stylesheet">
+        <link href="css/graph.css" type="text/css" rel="stylesheet">
+        <link href="app/plugins/graphbuilder/graph.css" type="text/css" rel="stylesheet">
+        <link href="css/dropdown_menu/dropdown.css" media="screen" rel="stylesheet" type="text/css" />
+        <link href="css/dropdown_menu/themes/nvidia.com/default.advanced.css" media="screen" rel="stylesheet" type="text/css" />
+        <link href="css/fstree.css" rel="stylesheet" type="text/css"/>
+		<link href="css/layoutjs.css" rel="stylesheet" type="text/css"/>
+        <link href="lib/cm/lib/codemirror.css" rel="stylesheet" type="text/css"/>
+        <link href="lib/cm/addon/fold/foldgutter.css" rel="stylesheet" type="text/css"/>
+        <link href="lib/cm/addon/hint/show-hint.css" rel="stylesheet" type="text/css">
+        <link href="lib/cm/addon/dialog/dialog.css" rel="stylesheet" type="text/css"/>
+-->
+        <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+        <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link rel="stylesheet" href="css/pipe.css">
+    </head>
+<body>
+    <div id="coverpage" class="even">
+        <div id="nav">
+          <h1 class="version">PVSio-web 2.0</h1>
+          <ul>
+            <li class="active"><a href="./index_files/index.html">Home</a></li>
+            <li><a href="https://github.com/thehogfather/pvsio-web" target="_blank">Downloads</a></li>
+            <li><a href="#!">Docs</a></li>
+            <li><a href="#!">About</a></li>
+          </ul>
+        </div>
+
+        <div id="intro">
+            <p>PVSio-web is a graphical environment that transforms the animation capabilities of the standard PVS theorem proving system with a sophisticated graphical front-end allowing interactive (human-computer) systems modelling and prototyping. Using PVSio-web, one can generate and evaluate realistic interactive prototypes from formal models. PVSio-web has been successfully used over the last two years for analysing commercial medical devices, and has been used to create training material for device developers and device users. For safety-critical medical device design, PVSio-web has been used with formal methods experts and with non-technical end users, including doctors and nurses.</p>
+            
+        </div>
+        <div id="downloads" class="odd">
+            <div class="buttons">
+                <a class="button live" href="http://www.pvsioweb.org/pvsioweb.html" target="_self" alt="Start PVSio-web">Run PVSio-web from our Web Server</a>
+                <div style="text-align:center;padding:0px;">or</div>
+                <a class="button download" href="https://github.com/thehogfather/pvsio-web" target="_blank">Download and Install PVSio-web</a>
+            </div>
+        </div>
+        <div id="content-wrap"  class="even">
+            <div class="container center-block" id="featured-videos">
+                <h3>Featured videos</h3>
+                <div class="row">            
+                    <div class="col-md-3">
+                        <a href="http://youtu.be/T0QmUe0bwL8?t=1m8s"><img src="youtube-thumb.png" width="185"></a>
+                    </div>
+                    <div class="col-md-9">
+                        <h4>Design issues in medical user interfaces.</h4>
+                        <p>
+                            <a href="http://www.eecs.qmul.ac.uk/~masci/" target="_blank">Paolo Masci</a>, Queen Mary University of London, has used PVSio-web to create this video for hospitals, device manufacturers, and regulators to raise awareness about general user interface software issues.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        
+        <div id="about">
+        
+        </div>
+    </div>
+</body>
 </html>

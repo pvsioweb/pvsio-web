@@ -7,7 +7,7 @@
     }
   ],
   "description": "A javascript library to connect to and communicate with a pvsio process using websockets",
-  "version": "0.1.1",
+  "version": "2.0.0",
   "preferGlobal": "true",
   "dependencies": {
     "body-parser": "~1.0.0",

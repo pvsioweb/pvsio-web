@@ -117,27 +117,29 @@ define(function (require, exports, module) {
                 });
             }
             
-            function loadPlugin(pluginName) {
+            function loadPlugin(pluginName, pluginPanelHeader) {
+                pluginPanelHeader = pluginPanelHeader || pluginName;
                 var str = pluginName + " plugin adds a collapsible panel to the ui",
                     clickPlugin = click("input[name='" + pluginName + "']");
                 it(str, function (done) {
 					clickPlugin()
 						.then(function () {
-							var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginName + "']");
+							var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginPanelHeader + "']");
 							expect(pluginPanel.empty()).toBeFalsy();
 							done();
 						}).catch(expectError(done));
                 });
             }
             
-            function unloadPlugin(pluginName) {
+            function unloadPlugin(pluginName, pluginPanelHeader) {
+                pluginPanelHeader = pluginPanelHeader || pluginName;
                 var str = pluginName + " plugin can be unloaded from the ui",
                     clickPlugin = click("input[name='" + pluginName + "']");
                 it(str, function (done) {
 					clickPlugin()//to load
 						.then(clickPlugin)
                         .then(function () {
-                            var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginName + "']");
+                            var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginPanelHeader + "']");
                             expect(pluginPanel.empty()).toEqual(true);
                             done();
                         }).catch(expectError(done));
@@ -173,8 +175,8 @@ define(function (require, exports, module) {
                 openSampleProject("AlarisPC_PumpModules");
                 openSampleProject("SmithsMedical_MedFusion3500");
 
-                loadPlugin("Emulink");
-                unloadPlugin("Emulink");
+                loadPlugin("Emulink", "EmuCharts Editor");
+                unloadPlugin("Emulink", "EmuCharts Editor");
                 loadPlugin("GraphBuilder");
                 unloadPlugin("GraphBuilder");
             });
