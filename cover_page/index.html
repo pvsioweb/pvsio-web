@@ -4,50 +4,62 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>PVSio-Web Interactive Prototype Builder</title>
-<!--
-      
-        <link href="css/style.css" type="text/css" rel="stylesheet">
-        <link href="css/image-mapper.css" type="text/css" rel="stylesheet">
-        <link href="css/state_machine.css" type="text/css" rel="stylesheet">
-        <link href="css/graph.css" type="text/css" rel="stylesheet">
-        <link href="app/plugins/graphbuilder/graph.css" type="text/css" rel="stylesheet">
-        <link href="css/dropdown_menu/dropdown.css" media="screen" rel="stylesheet" type="text/css" />
-        <link href="css/dropdown_menu/themes/nvidia.com/default.advanced.css" media="screen" rel="stylesheet" type="text/css" />
-        <link href="css/fstree.css" rel="stylesheet" type="text/css"/>
-		<link href="css/layoutjs.css" rel="stylesheet" type="text/css"/>
-        <link href="lib/cm/lib/codemirror.css" rel="stylesheet" type="text/css"/>
-        <link href="lib/cm/addon/fold/foldgutter.css" rel="stylesheet" type="text/css"/>
-        <link href="lib/cm/addon/hint/show-hint.css" rel="stylesheet" type="text/css">
-        <link href="lib/cm/addon/dialog/dialog.css" rel="stylesheet" type="text/css"/>
--->
         <link href="css/bootstrap-theme.min.css" rel="stylesheet">
         <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
         <link rel="stylesheet" href="css/pipe.css">
     </head>
 <body>
-    <div id="coverpage" class="even">
+    <a class="forkme" href="https://github.com/thehogfather/pvsio-web"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+    <div id="coverpage">
         <div id="nav">
-          <h1 class="version">PVSio-web 2.0</h1>
-          <ul>
-            <li class="active"><a href="./index_files/index.html">Home</a></li>
+         
+          <ul class="container">
+            <li class="active"><a href="index.html">Home</a></li>
             <li><a href="https://github.com/thehogfather/pvsio-web" target="_blank">Downloads</a></li>
-            <li><a href="#!">Docs</a></li>
-            <li><a href="#!">About</a></li>
+            <li><a href="#publications">Publications</a></li>
+            <li><a href="#!apidocs">API docs</a></li>
+            <li><a href="#intro">About</a></li>
           </ul>
+            <div class="container tagline">
+                <span class="version">PVSio-web 2.0: </span><span>Easily create interactive prototypes of your formal specifications.</span>
+
+            </div>
+        </div>
+        
+        <div class="screenshots">
+            <p>
+                <a class="btn btn-lg btn-outline-inverse" href="http://www.pvsioweb.org/pvsioweb.html" target="_self" alt="Start PVSio-web">Run PVSio-web from our Web Server</a>
+
+            </p>
         </div>
 
         <div id="intro">
-            <p>PVSio-web is a graphical environment that transforms the animation capabilities of the standard PVS theorem proving system with a sophisticated graphical front-end allowing interactive (human-computer) systems modelling and prototyping. Using PVSio-web, one can generate and evaluate realistic interactive prototypes from formal models. PVSio-web has been successfully used over the last two years for analysing commercial medical devices, and has been used to create training material for device developers and device users. For safety-critical medical device design, PVSio-web has been used with formal methods experts and with non-technical end users, including doctors and nurses.</p>
+            <div class="container center-block">
+                <h3>About</h3>
+                <p>PVSio-web is a graphical environment that transforms the animation capabilities of the standard PVS theorem proving system with a sophisticated graphical front-end allowing interactive (human-computer) systems modelling and prototyping. Using PVSio-web, one can generate and evaluate realistic interactive prototypes from formal models. PVSio-web has been successfully used over the last two years for analysing commercial medical devices, and has been used to create training material for device developers and device users. For safety-critical medical device design, PVSio-web has been used with formal methods experts and with non-technical end users, including doctors and nurses.</p>
+            </div>
             
-        </div>
-        <div id="downloads" class="odd">
-            <div class="buttons">
-                <a class="button live" href="http://www.pvsioweb.org/pvsioweb.html" target="_self" alt="Start PVSio-web">Run PVSio-web from our Web Server</a>
-                <div style="text-align:center;padding:0px;">or</div>
-                <a class="button download" href="https://github.com/thehogfather/pvsio-web" target="_blank">Download and Install PVSio-web</a>
+            
+        </div>        
+        <div id="publications">
+            <div class="container center-block">
+                <h3>Publications</h3>
+                <ol>
+                    <li>
+                        <span class="title">Tool demo: Using PVSio-web to demonstrate software issues in medical user interfaces.</span><span class="authors">Paolo Masci, Patrick Oladimeji, Paul Curzon and Harold Thimbleby</span><span class="inproc">In 4th International Symposium on Foundations of Healthcare Information Engineering and Systems (FHIES2014).  </span><span class="place">Washington DC, USA, 2014</span> <a class="pdf" href="http://www.eecs.qmul.ac.uk/~masci/works/masci-FHIES14.pdf">[PDF]</a>
+                    </li>
+                    <li>
+                        <span class="title">Combining PVSio with Stateflow.</span><span class="authors">Paolo Masci, Yi Zhang, Paul Jones, Patrick Oladimeji, Enrico D’Urso, Cinzia Bernardeschi, Paul Curzon and Harold Thimbleby</span><span class="inproc">In 6th NASA Formal Methods Symposium (NFM2014). </span><span class="place">Houston, TX, 2014</span> <a class="pdf" href="http://www.chi-med.ac.uk/researchers/downloadandcount.php?PPnum=PP204">[PDF]</a>
+                    </li>
+                    <li>
+                        <span class="title">PVSio-web: a tool for rapid prototyping device user interfaces in PVS.</span><span class="authors">Patrick Oladimeji, Paolo Masci, Paul Curzon and Harold Thimbleby</span><span class="inproc">Proceedings of the 5th International Workshop on Formal Methods for Interactive Systems (FMIS 2013). </span><span class="place">London, UK, 2013</span> <a href="http://www.chi-med.ac.uk/researchers/downloadandcount.php?PPnum=PP112">[PDF]</a>
+                    </li>
+                    
+                </ol>
             </div>
         </div>
-        <div id="content-wrap"  class="even">
+        
+        <div id="content-wrap">
             <div class="container center-block" id="featured-videos">
                 <h3>Featured videos</h3>
                 <div class="row">            
@@ -64,9 +76,11 @@
             </div>
             
         </div>
-        
-        
-        <div id="about">
+        <div id="footer">
+            <div class="container center-block">
+                <p>Licenced under <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>.</p>
+                <p>Would you like to collaborate? Contact <a href="mailto:p.m.masci@qmul.ac.uk">Paolo Masci</a> or <a href="mailto:p.oladimeji@swansea.ac.uk">Patrick Oladimeji</a>.</p>
+            </div>
         
         </div>
     </div>
