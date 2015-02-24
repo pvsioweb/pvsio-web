@@ -145,7 +145,7 @@ ul {
     overflow: hidden;
     position: relative;
     height: 400px;
-    background: url(../screenshot.png) no-repeat 50% 25%;
+    background: url(../screenshot.png) 50% ;
     border-top: 1px solid black;
 }
 
@@ -170,8 +170,7 @@ ul {
     z-index: 2;
 }
 
-.screenshots p {
-  width: 50%;
+.screenshots p, .run p {
     height: 100%;
     text-align: center;
     margin: 0px auto;
@@ -185,12 +184,27 @@ ul {
     font-style: bold;
 }
 
+.container.run a {
+    width: 340px;
+     background: #f08519;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 1);
+    color: white;
+    font-style: bold;
+    margin: 30px 20px 0px auto;
+    display: inline-block;
+}
+
+.run a.download {
+    background: #215d9a;
+}
+
 .screenshots a:hover {
     font-weight: bolder;
     color: white;
 }
 .version {
     font-size: 30px;
+    display: block;
 }
 
 .tagline {
