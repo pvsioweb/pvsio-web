@@ -73,8 +73,8 @@ define(function (require, exports, module) {
         { rule: ["\\+",                     "return '+'"],            type: "builtin" },
         { rule: ["(\\!\\=)",                "return '!='"],           type: "builtin" },
         { rule: ["(?!(?:(\\=\\>|\\=\\=)))" + // filtering out implication and equality
-                 "(\\=)",                   "return '='"],            type: "error"   }, // invalid operator
-        { rule: ["(\\=\\=)",                "return '=='"],           type: "builtin" },
+                 "(\\=)",                   "return '='"],            type: "builtin" }, 
+        { rule: ["(\\=\\=)",                "return '=='"],           type: "error"   }, // invalid operator
         { rule: ["(?!(?:(\\>\\=)))" + // filtering out >=
                 "(\\>)",   "return '>'"],                             type: "builtin" },
         { rule: ["(\\>\\=)",                "return '>='"],           type: "builtin" },
@@ -176,7 +176,7 @@ define(function (require, exports, module) {
                 ["- e",            exprWithUnaryOp(), {"prec": "UMINUS"}],
                 ["NOT e",          exprWithUnaryOp()],
                 ["( e )",          exprWithParenthesis()],
-                ["term == e",      exprWithBinaryOp()],  // comparison of equality of two terms
+                ["term = e",       exprWithBinaryOp()],  // comparison of equality of two terms
                 ["term != e",      exprWithBinaryOp()],  // comparison of inequality of two terms
                 ["term > e",       exprWithBinaryOp()],
                 ["term >= e",      exprWithBinaryOp()],
@@ -197,7 +197,7 @@ define(function (require, exports, module) {
             // the first field specified the associativity of the operator
             "operators": [
                 ["left", "+", "-", "*", "/"], // left means left-to-right
-                ["left", "==", "!=", ">", "<", "<="],
+                ["left", "=", "!=", ">", "<", "<="],
                 ["left", "IMPLIES", "AND", "OR"],
                 ["right", ":="],
                 ["right", ";", ","],
