@@ -178,7 +178,12 @@ define(function (require, exports, module) {
             };
             var vdmFunction = {
                 identifier: theTransition.identifier,
-                signature:  "init s == s = mk_State"
+                signature:  "init s == s = mk_State",
+                cases: {
+                    letExpr: [],
+                    inExpr: [ ("st") ]
+                }
+
             };
             theTransition.actions.val.forEach(function (action) {
                 // actions involving variables have already been taken into account
@@ -337,7 +342,7 @@ define(function (require, exports, module) {
                         if (transition.actions && transition.actions.val &&
                                 transition.actions.val.length > 0) {
                             transition.actions.val.forEach(function (action) {
-                                var expr = "new_s = mu(new_s, ";
+                                var expr = " new_s = mu(new_s, ";
                                 var brackets = [];
                                 if (action.val.identifier.val.indexOf(".") >= 0) {
                                     var v = action.val.identifier.val.split(".");
@@ -384,7 +389,7 @@ define(function (require, exports, module) {
             ans += "\n  -- transition functions";
             vdmFunctions.forEach(function (f) {
                 ans += "\n  " + f.per.signature;
-                ans += "\n  " + f.per.identifier + "(s) == " + f.per.cases + ";";
+                ans += "\n  " + f.per.identifier + "(s) == " + f.per.cases.join(" or ") + ";";
                 //--
                 ans += "\n  " + f.tran.signature;
                 ans += "\n  " + f.tran.identifier + "(s) ==";
@@ -398,12 +403,12 @@ define(function (require, exports, module) {
                 });
                 ans += tmp.join("\nelseif ") + "\n";
                 ans += "    " + "else s" + "\n";
-                ans += "  " + "pre " + f.per.identifier + "(s)\n";
+                ans += "  " + "pre " + f.per.identifier + "(s);\n";
             });
             ans += "\noperations";
             vdmFunctions.forEach(function (f) {
                 ans += "\n  " + "transition_" + f.tran.identifier + ": State ==> State";
-                ans += "\n  " + "transition_" + f.tran.identifier + "(s) == " + f.tran.identifier + "(s)\n";
+                ans += "\n  " + "transition_" + f.tran.identifier + "(s) == " + f.tran.identifier + "(s);\n";
             });
             ret.res = ans;
         }
