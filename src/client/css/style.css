@@ -457,7 +457,9 @@ div.detailsForm select, div.detailsForm textarea{
 
 #projectTitle {
 	width: 100%;
-	background: rgb(8, 88, 154);
+	background-color: rgb(8, 88, 154);
+    background-image: url("toolbar.png");
+    background-repeat: no-repeat;
 	padding: 0px;
 	color: white;
 	font: 20px sans-serif;
@@ -472,11 +474,11 @@ div.detailsForm select, div.detailsForm textarea{
     padding-top: 14px;    
 }
 #projectTitle div.btn.txtProjectName:hover{
-    background: rgb(8, 88, 154);
+    background-color: transparent;
     color: white;
 }
 #projectTitle a {
-    background: rgb(8, 88, 154);
+    background-color: rgb(8, 88, 154);
 	color: #f5eee5;
     min-height: 52px;
     padding-top: 16px;
