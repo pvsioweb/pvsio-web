@@ -1,0 +1,6 @@
+main: THEORY 
+ BEGIN IMPORTING emucharts_MedtronicMinimed530G_th
+ 
+ init(x: real): State = turn_on(emucharts_MedtronicMinimed530G_th.init(x))
+
+END main
