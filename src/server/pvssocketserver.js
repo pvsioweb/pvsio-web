@@ -360,6 +360,10 @@ function run() {
 //            logger.debug(socketid);
         };
         var map = {
+            "keepAlive": function (token, socket, socketid) {
+                // do nothing
+                // console.log("Receiving keepAlive message...");
+            },
             "setMainFile": function (token, socket, socketid) {
                 initProcessMap(socketid);
                 changeProjectSetting(token.projectName, "mainPVSFile", token.name)

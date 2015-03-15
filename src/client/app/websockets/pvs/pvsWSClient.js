@@ -12,7 +12,8 @@ define(function (require, exports, module) {
         property            = require("util/property"),
 		Logger				= require("util/Logger"),
 		PVSioStateParser	= require("util/PVSioStateParser"),
-        wsSingleton;
+        wsSingleton,
+        keepAlive = true;
     
     function createWebSocket() {
         var wscBase = wsclient();
@@ -48,9 +49,15 @@ define(function (require, exports, module) {
         */
         o.logon = function () {
             return new Promise(function (resolve, reject) {
-                wscBase.logon()
-                    .then(function (res) { resolve(o); })
-                    .catch(function (err) { console.log(err); reject(err); });
+                wscBase.logon().then(function (res) {
+                    if (keepAlive) {
+                        setInterval(function () {
+                            wscBase.send({ type: "keepAlive" });
+                            // console.log("Sending keepalive message...");
+                        }, 6000);
+                    }
+                    resolve(o);
+                }).catch(function (err) { console.log(err); reject(err); });
             });
         };
         
