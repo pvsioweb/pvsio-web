@@ -20,7 +20,7 @@ emucharts_MedtronicMinimed530G_th: THEORY
 
   %-- initial state
   init(x: real): State = (#
-    current_state := off,
+    current_state := on,
     previous_state := off,
     display := 0
   #)
