@@ -463,6 +463,7 @@ div.detailsForm select, div.detailsForm textarea{
 	font: 20px sans-serif;
     opacity: 0.96;
     display: inline-flex;
+    display: -webkit-flex;
 }
 #projectTitle div.btn.txtProjectName {
     font-size: large;
