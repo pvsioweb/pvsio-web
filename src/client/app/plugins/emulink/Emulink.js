@@ -38,6 +38,7 @@ define(function (require, exports, module) {
         EmuchartsPIMPrinter    = require("plugins/emulink/EmuchartsPIMPrinter"),
         EmuchartsCppPrinter    = require("plugins/emulink/EmuchartsCppPrinter"),
         EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter"),
+        EmuchartsVDMPrinter    = require("plugins/emulink/EmuchartsVDMPrinter"),
         EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         fs = require("util/fileHandler"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
@@ -57,6 +58,7 @@ define(function (require, exports, module) {
     var emuchartsPIMPrinter;
     var emuchartsCppPrinter;
     var emuchartsMALPrinter;
+    var emuchartsVDMPrinter;
     var options = { autoinit: true };
 
     var displayNotification = function (msg, title) {
@@ -263,6 +265,7 @@ define(function (require, exports, module) {
         emuchartsPIMPrinter = new EmuchartsPIMPrinter("emuchart_PIM");
         emuchartsCppPrinter = new EmuchartsCppPrinter("emuchart_Cpp");
         emuchartsMALPrinter = new EmuchartsMALPrinter("emuchart_MAL");
+        emuchartsVDMPrinter = new EmuchartsVDMPrinter("emuchart_VDM");
         pvsioWebClient = PVSioWebClient.getInstance();
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
@@ -1292,6 +1295,35 @@ define(function (require, exports, module) {
                 return projectManager.project().addFile(name, content, { overWrite: true });
             } else {
                 console.log("Warning, MAL model is undefined.");
+            }
+        });
+        d3.select("#btn_menuVDMPrinter").on("click", function () {
+            var emucharts = {
+                name: ("emucharts_" + projectManager.project().name() + "_VDM"),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: emuchartsManager.getVariables(),
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            var model = emuchartsVDMPrinter.print(emucharts);
+            console.log(model);
+            if (model.err) {
+                console.log(model.err);
+                return;
+            }
+            if (model.res) {
+                var name = emucharts.name + ".vdmsl";
+                var content = model.res;
+                return projectManager.project().addFile(name, content, { overWrite: true });
+            } else {
+                console.log("Warning, VDM model is undefined.");
             }
         });
         //-- Zoom menu -----------------------------------------------------------

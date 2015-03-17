@@ -63,14 +63,16 @@ define(function (require, exports, module) {
          * sends a message and register a callback to invoke when the message response is received from the server.
          */
         o.send = function (token, cb) {
-            var id = uuid();
-            if (token && token.type) {
-                token.id = token.id || id;
-                token.time = {client: {sent: new Date().getTime()}};
-                callbackRegistry[id] = cb;
-                ws.send(JSON.stringify(token));
-            } else {
-                console.log("Token is undefined");
+            if (ws) {
+                var id = uuid();
+                if (token && token.type) {
+                    token.id = token.id || id;
+                    token.time = {client: {sent: new Date().getTime()}};
+                    callbackRegistry[id] = cb;
+                    ws.send(JSON.stringify(token));
+                } else {
+                    console.log("Token is undefined");
+                }
             }
             return o;
         };

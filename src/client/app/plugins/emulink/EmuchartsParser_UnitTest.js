@@ -260,7 +260,7 @@ define(function (require, exports, module) {
         }
 
         // test 6
-        txt = "[ not display == !display ]";
+        txt = "[ not display = !display ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
@@ -272,7 +272,7 @@ define(function (require, exports, module) {
                 ans.res.val.cond.val[1].type === "identifier" &&
                 ans.res.val.cond.val[1].val === "display" &&
                 ans.res.val.cond.val[2].type === "binop" &&
-                ans.res.val.cond.val[2].val === "==" &&
+                ans.res.val.cond.val[2].val === "=" &&
                 ans.res.val.cond.val[3].type === "unaryop" &&
                 ans.res.val.cond.val[3].val === "!" &&
                 ans.res.val.cond.val[4].type === "identifier" &&
@@ -286,7 +286,7 @@ define(function (require, exports, module) {
         }
         
         // test 7
-        txt = "[ f(x) == !display ]";
+        txt = "[ f(x) = !display ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
@@ -312,7 +312,7 @@ define(function (require, exports, module) {
         }
 
         // test 8
-        txt = "[ f(x,y) == !display ]";
+        txt = "[ f(x,y) = !display ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
@@ -343,7 +343,7 @@ define(function (require, exports, module) {
 
         
         // test 9
-        txt = "[ f(x+y) == !display ]";
+        txt = "[ f(x+y) = !display ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
@@ -512,7 +512,7 @@ define(function (require, exports, module) {
         }
         
         // test 16
-        txt = "login [ S_state.correct == true ]";
+        txt = "login [ S_state.correct = true ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
@@ -526,7 +526,7 @@ define(function (require, exports, module) {
                 ans.res.val.cond.val[0].type === "identifier" &&
                 ans.res.val.cond.val[0].val === "S_state.correct" &&
                 ans.res.val.cond.val[1].type === "binop" &&
-                ans.res.val.cond.val[1].val === "==" &&
+                ans.res.val.cond.val[1].val === "=" &&
                 ans.res.val.cond.val[2].type === "constant" &&
                 ans.res.val.cond.val[2].val === "true") {
             summary += "[ok]";
@@ -538,7 +538,7 @@ define(function (require, exports, module) {
         }
         
         // test 17
-        txt = "login [ S_state.d1.correct == true ]";
+        txt = "login [ S_state.d1.correct = true ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
@@ -552,7 +552,7 @@ define(function (require, exports, module) {
                 ans.res.val.cond.val[0].type === "identifier" &&
                 ans.res.val.cond.val[0].val === "S_state.d1.correct" &&
                 ans.res.val.cond.val[1].type === "binop" &&
-                ans.res.val.cond.val[1].val === "==" &&
+                ans.res.val.cond.val[1].val === "=" &&
                 ans.res.val.cond.val[2].type === "constant" &&
                 ans.res.val.cond.val[2].val === "true") {
             summary += "[ok]";
@@ -564,7 +564,7 @@ define(function (require, exports, module) {
         }
 
         // test 18
-        txt = "login [ correct(S_state) == true ]";
+        txt = "login [ correct(S_state) = true ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
@@ -594,7 +594,7 @@ define(function (require, exports, module) {
         }
 
         // test 19
-        txt = "login [ correct(d1((S_state))) == true ]";
+        txt = "login [ correct(d1((S_state))) = true ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
         ans = parser.parseTransition(txt);
         console.log(ans);
