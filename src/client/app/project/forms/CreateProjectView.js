@@ -34,7 +34,7 @@ define(function (require, exports, module) {
             "click #btnChooseSpec": "chooseSpec"
 		},
         chooseImage: function (event) {
-            new RemoteFileBrowser(imageFilter, true).open("")
+            new RemoteFileBrowser(imageFilter).open("")
                 .then(function (files) {
                     var paths = files.map(function (f) {
                         return f.path;
@@ -43,7 +43,7 @@ define(function (require, exports, module) {
                 });
         },
         chooseSpec: function (event) {
-            new RemoteFileBrowser(null, true).open("")
+            new RemoteFileBrowser(null).open("")
                 .then(function (files) {
                     var paths = files.map(function (f) {
                         return f.path;

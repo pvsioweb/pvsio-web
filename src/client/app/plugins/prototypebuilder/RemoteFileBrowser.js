@@ -1,5 +1,19 @@
 /**
+ * @module RemoteFileBrowser
+ * @version 1.0
+ * @description
  * Allows readonly access to the file system.
+ 
+    var RemoteFileBrowser = require("plugins/prototypebuilder/RemoteFileBrowser");
+    //create a new RemoteFileBrowser instance and open the default projects directory
+    //you can pass in a directory relative to the projects directory to open a different directory
+    new RemoteFileBrowser(null).open("")
+        .then(function (files) {
+            var paths = files.map(function (f) {
+                return f.path;
+            }).join(",");
+            console.log(paths);
+        });
  * @author Patrick Oladimeji
  * @date 3/17/15 22:30:00 PM
  */
@@ -36,10 +50,12 @@ define(function (require, exports, module) {
         }
 	});
 	
-    
-    function RemoteFileBrowser(filterFunc, selectMutliple) {
+    /**
+        Constructs a new instance of the RemoteFileBrowser
+        @param {function} filterFunc a function to filter which file should be shown in the browser if null, then all files are shown
+    */
+    function RemoteFileBrowser(filterFunc) {
         rfb = this;
-        this.selectMultiple = selectMutliple;
         this.filterFunc = filterFunc || function (d) { return true; };
     }
     
@@ -72,6 +88,8 @@ define(function (require, exports, module) {
     
     /**
      Opens a dialog to browse a remote directory.
+     @param {string} path the path relative to the project directory whose content should be shown in the browser
+     @returns {Promise} a Promise that settled (with an array containing selected files/folders [{path: <string>}]) when the user presses the ok or cancel button on the dialog
     */
     RemoteFileBrowser.prototype.open = function (path) {
         var view = new OpenFilesView({baseDirectory: path});
