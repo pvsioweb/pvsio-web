@@ -164,6 +164,26 @@ function run() {
 		    });
 		}
     }
+    /**
+        Creates a function that updates the path of the parameter object such that it is relative to the
+        basePath specified
+    */
+    function toRelativePath(basePath) {
+        basePath = basePath || baseProjectDir;
+        return function (d) {
+            if (d.path && d.path.indexOf(basePath) === 0) {
+                d.path = d.path.replace(basePath, "");
+            }
+            return d;
+        };
+    }
+    /**
+        utility function for check if a path is absolute
+        ///TODO replace with path.isAbsolute once we upgrade node version to 0.12+
+    */
+    function isAbsolute(thepath) {
+        return thepath.trim().indexOf(path.sep) === 0;
+    }
     
     /**
         Reads the contents of a directory.
@@ -218,14 +238,6 @@ function run() {
             unregisterFolderWatcher(path);
         });
         fsWatchers = {};
-    }
-    function toRelativePath() {
-        return function (d) {
-            if (d.path && d.path.indexOf(baseProjectDir) === 0) {
-                d.path = d.path.replace(baseProjectDir, "");
-            }
-            return d;
-        };
     }
     
     /**
@@ -520,6 +532,7 @@ function run() {
                         var res = {
                             id: token.id,
                             type: token.type,
+                            encoding: encoding,
                             content: content,
                             name: token.name,
                             path: token.path,
@@ -648,7 +661,8 @@ function run() {
             },
             "readDirectory": function (token, socket, socketid) {
                 initProcessMap(socketid);
-                readDirectory(token.path)
+                var absPath = isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
+                readDirectory(absPath)
                     .then(function (files) {
                         processCallback({
                             id: token.id,
@@ -662,7 +676,7 @@ function run() {
                             type: token.type + "_error",
                             id: token.id,
                             socketId: socketid,
-                            err: err,
+                            err: err.toString(),
                             time: token.time
                         }, socket);
                     });
@@ -841,6 +855,7 @@ function run() {
                     logger.warn("f is something unexpected -- I expected a function but got type " + typeof f);
                 }
             } catch (error) {
+                logger.error(error.message);
                 logger.warn("Unexpected error while processing token " + JSON.stringify(m));
             }
         });

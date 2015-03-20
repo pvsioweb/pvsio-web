@@ -23,6 +23,7 @@ define(function (require, exports, module) {
         NotificationManager = require("project/NotificationManager"),
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
         Descriptor      = require("project/Descriptor");
+    
 	var instance;
     var currentProject,
         projectManager,

@@ -110,7 +110,7 @@ define(function (require, exports, module) {
             if (_this.content) {
                 resolve(_this.content);
             } else {
-                _this.encoding = (_this.isImage(_this.name)) ? "base64" : "utf8";
+                _this.encoding = (_this.isImage()) ? "base64" : "utf8";
                 var token = {
                     path: _this.path,
                     encoding: _this.encoding

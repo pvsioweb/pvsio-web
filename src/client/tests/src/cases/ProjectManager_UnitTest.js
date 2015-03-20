@@ -6,7 +6,7 @@
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true*/
-/*global jasmine, define, describe, beforeEach, afterEach, expect, it, Promise, d3*/
+/*global jasmine, define, describe, beforeEach, afterEach, expect, it, Promise, d3, beforeAll, afterAll*/
 define(function (require, exports, module) {
     "use strict";
     
@@ -1048,6 +1048,19 @@ define(function (require, exports, module) {
 
 	function runAllTests() {
         describe("ProjectManager - Unit Test", function () {
+            beforeAll(function (done) {
+                d3.select("div.overlay").remove();
+                main.start({noSplash: true}).then(function () {
+                    pm.mkDir("unit_test", {overWrite: true});
+                    done();
+                });
+            });
+            
+            afterAll(function (done) {
+                pm.rmDir("unit_test");
+                done();
+            });
+            
             describe("Starting up PVSio-web...", function () {
                 it("Initialising main...", function (done) {
                     main.start().then(function (res) {

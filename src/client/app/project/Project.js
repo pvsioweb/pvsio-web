@@ -443,6 +443,45 @@ define(function (require, exports, module) {
         });
     };
 
+    /**
+        Imports remote files into the current project.
+        @param {Array<string>} paths a list of paths to files to import.
+            The paths should be relative to the projects folder directory
+    */
+    Project.prototype.importRemoteFiles = function (paths) {
+        var imageExts = [".jpg", ".png", ".gif"];
+        return new Promise(function (resolve, reject) {
+            if (!paths) { return resolve([]); }
+            
+            function addFilesToProject(files) {
+                var promises = files.map(function (file) {
+                    return _this.addFileDialog(file.name, file.content, {encoding: file.encoding});
+                });
+                
+                return Promise.all(promises);
+            }
+            
+            var promises  = paths.map(function (d) {
+                var ext = d.substr(d.lastIndexOf(".")).toLowerCase();
+                var encoding = imageExts.indexOf(ext) > -1 ? "base64" : "utf8";
+                return new Promise(function (resolve, reject) {
+                    WSManager.getWebSocket().readFile({path: d, encoding: encoding}, function (err, res) {
+                        if (err) {
+                            reject(err);
+                        } else { resolve(res); }
+                    });
+                });
+            });
+            
+            Promise.all(promises).then(function (files) {
+                return addFilesToProject(files);
+            }).then(function (res) {
+                resolve(res);
+            }).catch(function (err) {
+                reject(err);
+            });
+        });
+    };
     
 	/**
      * @function refreshDescriptor
@@ -749,7 +788,6 @@ define(function (require, exports, module) {
             var name = _this.name();
             var pf, mainFileName, prototypeImage, fileVersion;
             if (descriptors) {
-                ///FIXME handle scripts and widgetDefinitions (maybe we dont need to)
                 var imageDescriptors = [];
                 descriptors.forEach(function (file) {
                     if (file && file.path && file.name) {

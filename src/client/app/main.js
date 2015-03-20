@@ -22,7 +22,7 @@ define(function (require, exports, module) {
         PluginManager  = require("plugins/PluginManager"),
         Constants      = require("util/Constants"),
         displayQuestion = require("pvsioweb/forms/displayQuestion");
-		
+    		
 	var client = PVSioWebClient.getInstance(),
         pluginManager = PluginManager.getInstance(),
         splashTimeout = null,

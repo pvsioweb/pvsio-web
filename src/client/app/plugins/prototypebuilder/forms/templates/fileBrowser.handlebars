@@ -1,0 +1,20 @@
+<div class="form-center">
+    <div class="panel panel-info center dialog shadow">
+        <div class="panel-heading">Open file (non absolute paths are relative to projects directory)</div>
+        <form class="center form-horizontal" onsubmit="return false" role="form">
+            <div class="input-group">
+                <span class="input-group-addon" id="basic-addon2">Base directory</span>
+                <input id="baseDirectory" type="text" class="form-control" placeholder="base directory" value="{{baseDirectory}}" aria-describedby="basic-addon2">
+            </div>
+            <div class="center">
+                <div id="file-browser">
+                    
+                </div>
+            </div>
+            <div class="panel-footer">
+                <button type="button" class="btn btn-danger left" id="btnCancel">Cancel</button>
+                <button type="submit" class="btn btn-success right" id="btnOk">OK</button>
+            </div>
+        </form>
+    </div>
+</div>

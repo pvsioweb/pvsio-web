@@ -895,3 +895,21 @@ fadeOut
     0%, 40%, 100% { transform: scaleY(0.4); }
     20% { transform: scaleY(1.0); }
 }
+
+#file-browser {
+    height: 500px;
+    overflow-y: auto;
+    width: 100%;
+}
+
+#file-browser ul {
+    width: 100% !important;   
+}
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}

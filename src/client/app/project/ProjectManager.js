@@ -803,6 +803,7 @@ define(function (require, exports, module) {
                                 view.remove();
                             }).on("cancel", function (e, view) {
                                 view.remove();
+                                reject();
                             });
                     }
                 });
@@ -997,9 +998,9 @@ define(function (require, exports, module) {
             var descriptors = [];
             var project = new Project(data.projectName);
             return _projectManager.mkDir(data.projectName, opt).then(function (res) {
-                project.importLocalFiles(data.pvsSpec).then(function (res) {
+                project.importRemoteFiles(data.pvsSpec && data.pvsSpec.split(",")).then(function (res) {
                     if (res) { descriptors = res; }
-                    return project.importLocalFiles(data.prototypeImage).then(function (res) {
+                    return project.importRemoteFiles(data.prototypeImage && data.prototypeImage.split(",")).then(function (res) {
                         if (res && res.length > 0) {
                             descriptors = descriptors.concat(res);
                             descriptors.push(
@@ -1051,7 +1052,7 @@ define(function (require, exports, module) {
                     });
                 }).on("ok", function (e, formView) {
                     if (projects.indexOf(e.data.projectName) >= 0) {
-                        displayQuestion({question: "Project " + e.data.projectName +
+                        displayQuestion.create({question: "Project " + e.data.projectName +
                                                 " already exists. Overwrite project?"})
                             .on("ok", function (e, view) {
                                 e.data.overWrite = true;
