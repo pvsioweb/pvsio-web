@@ -13,7 +13,7 @@ specs.SFunctionName = 'websocket_serverLCT';        % S-function name
 specs.OutputFcnSpec = 'uint32 y1 = WebsocketServer(double u1, double u2, uint32 y2[1], uint32 y3[1])';
 % NOTE: libwebsockets must be in your included LIB-files
 % e.g., in ubuntu linux, the default library path is /usr/local/lib
-specs.HostLibFiles = {'libwebsockets.dylib'};
+specs.HostLibFiles = {'libwebsockets.so'};
 specs.TerminateFcnSpec = 'close_websocket()';
 
 % specs.SampleTime = 1;
