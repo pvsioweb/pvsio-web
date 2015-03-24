@@ -1,0 +1,160 @@
+%implements s231_b0_6gbhj_Update "C"
+
+%function Update(block, system) Output
+%assign tlcUpdateFcnOfS169B5 = OpaqueTLCBlockFcn("Update", 169, 5, 2, 6)
+%assign tlcUpdateFcnOfS169B9 = OpaqueTLCBlockFcn("Update", 169, 9, 2, 6)
+%assign tlcUpdateFcnOfS169B13 = OpaqueTLCBlockFcn("Update", 169, 13, 2, 6)
+%assign tlcUpdateFcnOfS169B17 = OpaqueTLCBlockFcn("Update", 169, 17, 2, 6)
+%assign tlcUpdateFcnOfS169B21 = OpaqueTLCBlockFcn("Update", 169, 21, 2, 6)
+%assign tlcUpdateFcnOfS169B25 = OpaqueTLCBlockFcn("Update", 169, 25, 2, 6)
+%assign tlcUpdateFcnOfS169B29 = OpaqueTLCBlockFcn("Update", 169, 29, 2, 6)
+%assign tlcUpdateFcnOfS169B33 = OpaqueTLCBlockFcn("Update", 169, 33, 2, 6)
+%assign tlcUpdateFcnOfS169B37 = OpaqueTLCBlockFcn("Update", 169, 37, 2, 6)
+%assign tlcUpdateFcnOfS169B41 = OpaqueTLCBlockFcn("Update", 169, 41, 2, 6)
+%assign tlcUpdateFcnOfS169B45 = OpaqueTLCBlockFcn("Update", 169, 45, 2, 6)
+%assign tlcUpdateFcnOfS169B49 = OpaqueTLCBlockFcn("Update", 169, 49, 2, 6)
+%assign tlcUpdateFcnOfS169B53 = OpaqueTLCBlockFcn("Update", 169, 53, 2, 6)
+%assign tlcUpdateFcnOfS169B59 = OpaqueTLCBlockFcn("Update", 169, 59, 2, 6)
+%assign tlcUpdateFcnOfS169B62 = OpaqueTLCBlockFcn("Update", 169, 62, 2, 6)
+%assign tlcUpdateFcnOfS169B66 = OpaqueTLCBlockFcn("Update", 169, 66, 2, 6)
+%assign tlcUpdateFcnOfS169B70 = OpaqueTLCBlockFcn("Update", 169, 70, 2, 6)
+%assign tlcUpdateFcnOfS169B74 = OpaqueTLCBlockFcn("Update", 169, 74, 2, 6)
+%assign tlcUpdateFcnOfS169B78 = OpaqueTLCBlockFcn("Update", 169, 78, 2, 6)
+%assign tlcUpdateFcnOfS169B82 = OpaqueTLCBlockFcn("Update", 169, 82, 2, 6)
+%assign tlcUpdateFcnOfS169B86 = OpaqueTLCBlockFcn("Update", 169, 86, 2, 6)
+%assign tlcUpdateFcnOfS169B90 = OpaqueTLCBlockFcn("Update", 169, 90, 2, 6)
+%assign tlcUpdateFcnOfS169B94 = OpaqueTLCBlockFcn("Update", 169, 94, 2, 6)
+%assign tlcUpdateFcnOfS169B98 = OpaqueTLCBlockFcn("Update", 169, 98, 2, 6)
+%assign tlcUpdateFcnOfS169B102 = OpaqueTLCBlockFcn("Update", 169, 102, 2, 6)
+%assign tlcUpdateFcnOfS169B106 = OpaqueTLCBlockFcn("Update", 169, 106, 2, 6)
+%assign tlcUpdateFcnOfS169B110 = OpaqueTLCBlockFcn("Update", 169, 110, 2, 6)
+%assign tlcUpdateFcnOfS169B114 = OpaqueTLCBlockFcn("Update", 169, 114, 2, 6)
+%assign tlcUpdateFcnOfS169B118 = OpaqueTLCBlockFcn("Update", 169, 118, 2, 6)
+%assign tlcUpdateFcnOfS169B122 = OpaqueTLCBlockFcn("Update", 169, 122, 2, 6)
+%assign tlcUpdateFcnOfS169B126 = OpaqueTLCBlockFcn("Update", 169, 126, 2, 6)
+%assign tlcUpdateFcnOfS169B133 = OpaqueTLCBlockFcn("Update", 169, 133, 2, 6)
+%assign tlcUpdateFcnOfS169B143 = OpaqueTLCBlockFcn("Update", 169, 143, 2, 6)
+%assign tlcUpdateFcnOfS169B153 = OpaqueTLCBlockFcn("Update", 169, 153, 2, 6)
+%assign tlcUpdateFcnOfS169B163 = OpaqueTLCBlockFcn("Update", 169, 163, 2, 6)
+%assign tlcUpdateFcnOfS169B182 = OpaqueTLCBlockFcn("Update", 169, 182, 2, 6)
+%assign tlcUpdateFcnOfS169B191 = OpaqueTLCBlockFcn("Update", 169, 191, 2, 6)
+%assign tlcUpdateFcnOfS169B197 = OpaqueTLCBlockFcn("Update", 169, 197, 2, 6)
+%assign tlcUpdateFcnOfS169B198 = OpaqueTLCBlockFcn("Update", 169, 198, 2, 6)
+%assign tlcUpdateFcnOfS169B199 = OpaqueTLCBlockFcn("Update", 169, 199, 2, 6)
+%assign tlcUpdateFcnOfS169B200 = OpaqueTLCBlockFcn("Update", 169, 200, 2, 6)
+%assign tlcUpdateFcnOfS169B201 = OpaqueTLCBlockFcn("Update", 169, 201, 2, 6)
+%assign tlcUpdateFcnOfS169B202 = OpaqueTLCBlockFcn("Update", 169, 202, 2, 6)
+%assign tlcUpdateFcnOfS169B203 = OpaqueTLCBlockFcn("Update", 169, 203, 2, 6)
+%assign tlcUpdateFcnOfS169B204 = OpaqueTLCBlockFcn("Update", 169, 204, 2, 6)
+%assign tlcUpdateFcnOfS169B205 = OpaqueTLCBlockFcn("Update", 169, 205, 2, 6)
+%assign tlcUpdateFcnOfS169B265 = OpaqueTLCBlockFcn("Update", 169, 265, 2, 6)
+%assign tlcUpdateFcnOfS169B278 = OpaqueTLCBlockFcn("Update", 169, 278, 2, 6)
+%assign tlcUpdateFcnOfS169B289 = OpaqueTLCBlockFcn("Update", 169, 289, 2, 6)
+%assign tlcUpdateFcnOfS169B313 = OpaqueTLCBlockFcn("Update", 169, 313, 2, 6)
+%assign tlcUpdateFcnOfS169B314 = OpaqueTLCBlockFcn("Update", 169, 314, 2, 6)
+%assign tlcUpdateFcnOfS169B315 = OpaqueTLCBlockFcn("Update", 169, 315, 2, 6)
+%assign tlcUpdateFcnOfS169B316 = OpaqueTLCBlockFcn("Update", 169, 316, 2, 6)
+%assign tlcUpdateFcnOfS169B317 = OpaqueTLCBlockFcn("Update", 169, 317, 2, 6)
+%assign tlcUpdateFcnOfS169B318 = OpaqueTLCBlockFcn("Update", 169, 318, 2, 6)
+%assign tlcUpdateFcnOfS169B319 = OpaqueTLCBlockFcn("Update", 169, 319, 2, 6)
+%assign tlcUpdateFcnOfS169B320 = OpaqueTLCBlockFcn("Update", 169, 320, 2, 6)
+%assign tlcUpdateFcnOfS169B321 = OpaqueTLCBlockFcn("Update", 169, 321, 2, 6)
+%assign tlcUpdateFcnOfS169B322 = OpaqueTLCBlockFcn("Update", 169, 322, 2, 6)
+%assign tlcUpdateFcnOfS169B323 = OpaqueTLCBlockFcn("Update", 169, 323, 2, 6)
+%assign tlcUpdateFcnOfS169B324 = OpaqueTLCBlockFcn("Update", 169, 324, 2, 6)
+%assign tlcUpdateFcnOfS169B325 = OpaqueTLCBlockFcn("Update", 169, 325, 2, 6)
+%assign tlcUpdateFcnOfS169B326 = OpaqueTLCBlockFcn("Update", 169, 326, 2, 6)
+%assign tlcUpdateFcnOfS169B327 = OpaqueTLCBlockFcn("Update", 169, 327, 2, 6)
+%assign tlcUpdateFcnOfS169B328 = OpaqueTLCBlockFcn("Update", 169, 328, 2, 6)
+%assign tlcUpdateFcnOfS169B329 = OpaqueTLCBlockFcn("Update", 169, 329, 2, 6)
+%assign tlcUpdateFcnOfS169B330 = OpaqueTLCBlockFcn("Update", 169, 330, 2, 6)
+%<SLibCG_TrackDW(169)>\
+%<SLibCG_TrackBlockIO(169)>\
+%<tlcUpdateFcnOfS169B5>\
+if (%<(SLibCGIRIsSampleHit(1, 169))>) {
+    /* Update for UnitDelay: '<Root>/Unit Delay' */
+    heart_model_DWork.UnitDelay_DSTATE = heart_model_B.ex3;
+    /* Update for UnitDelay: '<Root>/Unit Delay1' */
+    heart_model_DWork.UnitDelay1_DSTATE = heart_model_B.ex3_i;
+}
+%<tlcUpdateFcnOfS169B9>\
+%<tlcUpdateFcnOfS169B13>\
+%<tlcUpdateFcnOfS169B17>\
+%<tlcUpdateFcnOfS169B21>\
+%<tlcUpdateFcnOfS169B25>\
+%<tlcUpdateFcnOfS169B29>\
+%<tlcUpdateFcnOfS169B33>\
+%<tlcUpdateFcnOfS169B37>\
+%<tlcUpdateFcnOfS169B41>\
+%<tlcUpdateFcnOfS169B45>\
+%<tlcUpdateFcnOfS169B49>\
+%<tlcUpdateFcnOfS169B53>\
+if (%<(SLibCGIRIsSampleHit(1, 169))>) {
+    /* Update for UnitDelay: '<S108>/Delay Input1' */
+    heart_model_DWork.DelayInput1_DSTATE = heart_model_B.MultiportSwitch;
+}
+%<tlcUpdateFcnOfS169B59>\
+%<tlcUpdateFcnOfS169B62>\
+%<tlcUpdateFcnOfS169B66>\
+%<tlcUpdateFcnOfS169B70>\
+%<tlcUpdateFcnOfS169B74>\
+%<tlcUpdateFcnOfS169B78>\
+%<tlcUpdateFcnOfS169B82>\
+%<tlcUpdateFcnOfS169B86>\
+%<tlcUpdateFcnOfS169B90>\
+%<tlcUpdateFcnOfS169B94>\
+%<tlcUpdateFcnOfS169B98>\
+%<tlcUpdateFcnOfS169B102>\
+%<tlcUpdateFcnOfS169B106>\
+%<tlcUpdateFcnOfS169B110>\
+%<tlcUpdateFcnOfS169B114>\
+%<tlcUpdateFcnOfS169B118>\
+%<tlcUpdateFcnOfS169B122>\
+%<tlcUpdateFcnOfS169B126>\
+if (%<(SLibCGIRIsSampleHit(1, 169))>) {
+    /* Update for UnitDelay: '<S110>/Delay Input1' */
+    heart_model_DWork.DelayInput1_DSTATE_m = heart_model_B.MultiportSwitch1;
+}
+%<tlcUpdateFcnOfS169B133>\
+%<tlcUpdateFcnOfS169B143>\
+%<tlcUpdateFcnOfS169B153>\
+%<tlcUpdateFcnOfS169B163>\
+%<tlcUpdateFcnOfS169B182>\
+%<tlcUpdateFcnOfS169B191>\
+%<tlcUpdateFcnOfS169B197>\
+%<tlcUpdateFcnOfS169B198>\
+%<tlcUpdateFcnOfS169B199>\
+%<tlcUpdateFcnOfS169B200>\
+%<tlcUpdateFcnOfS169B201>\
+%<tlcUpdateFcnOfS169B202>\
+%<tlcUpdateFcnOfS169B203>\
+%<tlcUpdateFcnOfS169B204>\
+%<tlcUpdateFcnOfS169B205>\
+%<tlcUpdateFcnOfS169B265>\
+%<tlcUpdateFcnOfS169B278>\
+%<tlcUpdateFcnOfS169B289>\
+%<tlcUpdateFcnOfS169B313>\
+%<tlcUpdateFcnOfS169B314>\
+%<tlcUpdateFcnOfS169B315>\
+%<tlcUpdateFcnOfS169B316>\
+%<tlcUpdateFcnOfS169B317>\
+%<tlcUpdateFcnOfS169B318>\
+%<tlcUpdateFcnOfS169B319>\
+%<tlcUpdateFcnOfS169B320>\
+%<tlcUpdateFcnOfS169B321>\
+%<tlcUpdateFcnOfS169B322>\
+%<tlcUpdateFcnOfS169B323>\
+%<tlcUpdateFcnOfS169B324>\
+%<tlcUpdateFcnOfS169B325>\
+%<tlcUpdateFcnOfS169B326>\
+%<tlcUpdateFcnOfS169B327>\
+%<tlcUpdateFcnOfS169B328>\
+%<tlcUpdateFcnOfS169B329>\
+%<tlcUpdateFcnOfS169B330>\
+%assign fcnProtoType = ""
+%openfile fcnProtoType
+static void Update(\
+%assign comma = ""
+%closefile fcnProtoType
+%<SLibCG_SetFcnProtoType(2, 6, fcnProtoType)>
+%endfunction

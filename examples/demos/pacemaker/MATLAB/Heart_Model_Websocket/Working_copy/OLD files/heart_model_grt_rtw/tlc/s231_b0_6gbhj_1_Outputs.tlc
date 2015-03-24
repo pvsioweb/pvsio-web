@@ -1,0 +1,90 @@
+%implements s231_b0_6gbhj_1_Outputs "C"
+
+%function Outputs(block, system) Output
+%<SLibCG_TrackDW(1)>\
+%<SLibCG_TrackZCEvent(1)>\
+%<SLibCG_TrackBlockIO(1)>\
+/* Chart: '<S10>/Hybrid set' incorporates:
+ *  TriggerPort: '<S24>/ input events '
+ */
+if (%<(LibIsMajorTimeStep())>) {
+    zcEvent[0] = %<(SLibCG_SE(SLibCGIRZCFcn("ANY_ZERO_CROSSING", "localZCE->Hybridset_Trig_ZCE[0]", "rtu_0", 0)))>;
+    zcEvent[1] = %<(SLibCG_SE(SLibCGIRZCFcn("ANY_ZERO_CROSSING", "localZCE->Hybridset_Trig_ZCE[1]", "rtu_1", 0)))>;
+    zcEvent[2] = %<(SLibCG_SE(SLibCGIRZCFcn("ANY_ZERO_CROSSING", "localZCE->Hybridset_Trig_ZCE[2]", "rtu_2", 0)))>;
+    zcEvent[3] = %<(SLibCG_SE(SLibCGIRZCFcn("ANY_ZERO_CROSSING", "localZCE->Hybridset_Trig_ZCE[3]", "rtu_3", 0)))>;
+    zcEvent[4] = %<(SLibCG_SE(SLibCGIRZCFcn("ANY_ZERO_CROSSING", "localZCE->Hybridset_Trig_ZCE[4]", "rtu_3", 0)))>;
+    tmp = FALSE;
+    for (i = 0; i < 5; i++) {
+        tmp = (tmp || (zcEvent[i] != NO_ZCEVENT));
+    }
+    if (tmp) {
+        for (i = 0; i < 5; i++) {
+            rtb_inputevents_n[i] = (int8_T)(int32_T)zcEvent[i];
+        }
+        /* Gateway: Heart Model/ATRIUM/Bach (8)/Hybrid set */
+        i = 0;
+        if (rtb_inputevents_n[0U] != 0) {
+            i = 1;
+            /* Event: '<S24>:56' */
+            localDW->sfEvent = heart_model_event_event1;
+            %<(SLibCGCallSubFcn(block, 1, 2, 0))>;
+        }
+        if (rtb_inputevents_n[1U] != 0) {
+            i = 1;
+            /* Event: '<S24>:54' */
+            localDW->sfEvent = heart_model_event_event2;
+            %<(SLibCGCallSubFcn(block, 1, 2, 1))>;
+        }
+        if (rtb_inputevents_n[2U] != 0) {
+            i = 1;
+            /* Event: '<S24>:55' */
+            localDW->sfEvent = heart_model_event_event3;
+            %<(SLibCGCallSubFcn(block, 1, 2, 2))>;
+        }
+        if (rtb_inputevents_n[3U] == 1) {
+            i = 1;
+            /* Event: '<S24>:60' */
+            localDW->sfEvent = heart_model_event_pstim;
+            %<(SLibCGCallSubFcn(block, 1, 2, 3))>;
+        }
+        if (rtb_inputevents_n[4U] == -1) {
+            i = 1;
+            /* Event: '<S24>:61' */
+            localDW->sfEvent = heart_model_event_endpstim;
+            %<(SLibCGCallSubFcn(block, 1, 2, 4))>;
+        }
+        if ((i != 0) && (localDW->resetEventCounter > 0U)) {
+            localB->reset = !localB->reset;
+            localDW->resetEventCounter--;
+        }
+    }
+}
+%assign fcnProtoType = ""
+%openfile fcnProtoType
+static void heart_model_Hybridset(\
+%assign comma = ""
+%<comma>real_T rtu_0\
+%assign comma = ", "
+%<comma>real_T rtu_1\
+%assign comma = ", "
+%<comma>real_T rtu_2\
+%assign comma = ", "
+%<comma>real_T rtu_3\
+%assign comma = ", "
+%if SLibCG_ArgAccessed(1, 2, 4)
+%<comma>real_T rtu_v\
+%assign comma = ", "
+%endif
+%closefile fcnProtoType
+%<SLibCG_SetFcnProtoType(1, 2, fcnProtoType)>
+
+%assign localVarDecl = ""
+%openfile localVarDecl
+ZCEventType zcEvent[5];
+int8_T rtb_inputevents_n[5];
+int32_T i;
+boolean_T tmp;
+
+%closefile localVarDecl
+%<LibSetSystemField(system, "CachedOutputLocalVars", localVarDecl)>
+%endfunction

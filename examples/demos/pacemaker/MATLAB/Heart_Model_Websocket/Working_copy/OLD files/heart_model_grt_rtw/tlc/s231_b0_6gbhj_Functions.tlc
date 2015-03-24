@@ -1,0 +1,1504 @@
+%implements s231_b0_6gbhj_Functions "C"
+
+%function heart_chartstep_c10_heart_model_Fcn0(block) void
+%assign fcnBuff = ""
+%openfile fcnBuff
+%<SLibCG_TrackDW(169)>\
+%<SLibCG_TrackContStates(169)>\
+%<SLibCG_TrackBlockIO(169)>\
+/* During: Heart Model/ATRIUM/CT_a (21)/Hybrid set */
+if (heart_model_DWork.is_active_c10_heart_model == 0) {
+    /* Entry: Heart Model/ATRIUM/CT_a (21)/Hybrid set */
+    heart_model_DWork.is_active_c10_heart_model = 1U;
+    /* Entry Internal: Heart Model/ATRIUM/CT_a (21)/Hybrid set */
+    /* Transition: '<S42>:59' */
+    heart_model_DWork.is_c10_heart_model = heart_model_IN_resting_j;
+    /* Entry 'resting': '<S42>:1' */
+    heart_model_B.q_g = 1.0;
+} else {
+    switch (heart_model_DWork.is_c10_heart_model) {
+      case heart_model_IN_plateau_h:
+        /* During 'plateau': '<S42>:16' */
+        if (heart_model_DWork.sfEvent_i == heart_model_event_event1_g) {
+            /* Transition: '<S42>:19' */
+            heart_model_B.vreset_o = heart_model_X.Integrator_CSTATE_i;
+            /* Event: '<S42>:20' */
+            heart_model_DWork.resetEventCounter_j++;
+            heart_model_DWork.is_c10_heart_model = heart_model_IN_resting_j;
+            /* Entry 'resting': '<S42>:1' */
+            heart_model_B.q_g = 1.0;
+        }
+        break;
+      case heart_model_IN_resting_j:
+        /* During 'resting': '<S42>:1' */
+        if (heart_model_DWork.sfEvent_i == heart_model_event_pstim_e) {
+            /* Transition: '<S42>:64' */
+            heart_model_B.vreset_o = heart_model_X.Integrator_CSTATE_i;
+            heart_model_DWork.vn_d = heart_model_X.Integrator_CSTATE_i;
+            /* Event: '<S42>:20' */
+            heart_model_DWork.resetEventCounter_j++;
+            heart_model_DWork.is_c10_heart_model = heart_model_IN_stimulated_e;
+            /* Entry 'stimulated': '<S42>:4' */
+            heart_model_B.q_g = 2.0;
+        } else {
+            if (heart_model_DWork.sfEvent_i == heart_model_event_event2_e) {
+                /* Transition: '<S42>:83' */
+                heart_model_B.vreset_o = heart_model_X.Integrator_CSTATE_i;
+                /* Event: '<S42>:20' */
+                heart_model_DWork.resetEventCounter_j++;
+                heart_model_DWork.is_c10_heart_model = heart_model_IN_upstroke_b;
+                /* Entry 'upstroke': '<S42>:11' */
+                heart_model_B.q_g = 3.0;
+            }
+        }
+        break;
+      case heart_model_IN_stimulated_e:
+        /* During 'stimulated': '<S42>:4' */
+        if (heart_model_DWork.sfEvent_i == heart_model_event_endpstim_p) {
+            /* Transition: '<S42>:77' */
+            heart_model_B.vreset_o = heart_model_X.Integrator_CSTATE_i;
+            /* Event: '<S42>:20' */
+            heart_model_DWork.resetEventCounter_j++;
+            heart_model_DWork.is_c10_heart_model = heart_model_IN_resting_j;
+            /* Entry 'resting': '<S42>:1' */
+            heart_model_B.q_g = 1.0;
+        } else {
+            if (heart_model_DWork.sfEvent_i == heart_model_event_event2_e) {
+                /* Transition: '<S42>:14' */
+                heart_model_B.vreset_o = heart_model_X.Integrator_CSTATE_i;
+                /* Event: '<S42>:20' */
+                heart_model_DWork.resetEventCounter_j++;
+                heart_model_DWork.is_c10_heart_model = heart_model_IN_upstroke_b;
+                /* Entry 'upstroke': '<S42>:11' */
+                heart_model_B.q_g = 3.0;
+            }
+        }
+        break;
+      default:
+        /* During 'upstroke': '<S42>:11' */
+        if (heart_model_DWork.sfEvent_i == heart_model_event_event3_b) {
+            /* Transition: '<S42>:33' */
+            heart_model_B.vreset_o = heart_model_X.Integrator_CSTATE_i;
+            /* Event: '<S42>:20' */
+            heart_model_DWork.resetEventCounter_j++;
+            heart_model_DWork.is_c10_heart_model = heart_model_IN_plateau_h;
+            /* Entry 'plateau': '<S42>:16' */
+            heart_model_B.q_g = 4.0;
+            heart_model_B.vno_c = heart_model_DWork.vn_d;
+        }
+        break;
+    }
+}
+%closefile fcnBuff
+%assign fcnProtoType = ""
+%openfile fcnProtoType
+static void heart_chartstep_c10_heart_model(\
+%assign comma = ""
+%closefile fcnProtoType
+%<SLibCG_SetFcnProtoType(2, 0, fcnProtoType)>
+%return fcnBuff
+%endfunction
+
+%function rt_powd_snf_Fcn1(block) void
+%assign fcnBuff = ""
+%openfile fcnBuff
+if (rtIsNaN(u0) || rtIsNaN(u1)) {
+    y = %<LibGetMathConstant(LibRealNonFinite("nan"), FcnGetDataTypeIdFromName("double"))>;
+} else {
+    tmp = fabs(u0);
+    tmp_0 = fabs(u1);
+    if (rtIsInf(u1)) {
+        if (tmp == 1.0) {
+            y = %<LibGetMathConstant(LibRealNonFinite("nan"), FcnGetDataTypeIdFromName("double"))>;
+        } else if (tmp > 1.0) {
+            if (u1 > 0.0) {
+                y = %<LibGetMathConstant(LibRealNonFinite("inf"), FcnGetDataTypeIdFromName("double"))>;
+            } else {
+                y = 0.0;
+            }
+        } else if (u1 > 0.0) {
+            y = 0.0;
+        } else {
+            y = %<LibGetMathConstant(LibRealNonFinite("inf"), FcnGetDataTypeIdFromName("double"))>;
+        }
+    } else if (tmp_0 == 0.0) {
+        y = 1.0;
+    } else if (tmp_0 == 1.0) {
+        if (u1 > 0.0) {
+            y = u0;
+        } else {
+            y = 1.0 / u0;
+        }
+    } else if (u1 == 2.0) {
+        y = u0 * u0;
+    } else if ((u1 == 0.5) && (u0 >= 0.0)) {
+        y = sqrt(u0);
+    } else if ((u0 < 0.0) && (u1 > floor(u1))) {
+        y = %<LibGetMathConstant(LibRealNonFinite("nan"), FcnGetDataTypeIdFromName("double"))>;
+    } else {
+        y = pow(u0, u1);
+    }
+}
+return y;
+%closefile fcnBuff
+%assign fcnProtoType = ""
+%openfile fcnProtoType
+extern real_T rt_powd_snf(\
+%assign comma = ""
+%<comma>real_T u0\
+%assign comma = ", "
+%<comma>real_T u1\
+%assign comma = ", "
+%closefile fcnProtoType
+%<SLibCG_SetFcnProtoType(2, 1, fcnProtoType)>
+%openfile localVarsBuf
+real_T y;
+real_T tmp;
+real_T tmp_0;
+%closefile localVarsBuf
+%return localVarsBuf + fcnBuff
+%endfunction
+
+%function heart_chartstep_c32_heart_model_Fcn2(block) void
+%assign fcnBuff = ""
+%openfile fcnBuff
+%<SLibCG_TrackDW(169)>\
+%<SLibCG_TrackContStates(169)>\
+%<SLibCG_TrackBlockIO(169)>\
+/* During: Heart Model/SA (1)/Hybrid set */
+if (heart_model_DWork.is_active_c32_heart_model == 0) {
+    /* Entry: Heart Model/SA (1)/Hybrid set */
+    heart_model_DWork.is_active_c32_heart_model = 1U;
+    /* Entry Internal: Heart Model/SA (1)/Hybrid set */
+    /* Transition: '<S115>:59' */
+    heart_model_DWork.is_c32_heart_model = heart_model_IN_resting_j;
+    /* Entry 'resting': '<S115>:1' */
+    heart_model_B.q = 1.0;
+} else {
+    switch (heart_model_DWork.is_c32_heart_model) {
+      case heart_model_IN_plateau_h:
+        /* During 'plateau': '<S115>:16' */
+        if (heart_model_DWork.sfEvent == heart_model_event_event1_g) {
+            /* Transition: '<S115>:19' */
+            heart_model_B.vreset = heart_model_X.Integrator_CSTATE_o;
+            /* Event: '<S115>:20' */
+            heart_model_DWork.resetEventCounter++;
+            heart_model_DWork.is_c32_heart_model = heart_model_IN_resting_j;
+            /* Entry 'resting': '<S115>:1' */
+            heart_model_B.q = 1.0;
+        }
+        break;
+      case heart_model_IN_resting_j:
+        /* During 'resting': '<S115>:1' */
+        if (heart_model_DWork.sfEvent == heart_model_event_stim) {
+            /* Transition: '<S115>:64' */
+            heart_model_B.vreset = heart_model_X.Integrator_CSTATE_o;
+            heart_model_DWork.vn = heart_model_X.Integrator_CSTATE_o;
+            /* Event: '<S115>:20' */
+            heart_model_DWork.resetEventCounter++;
+            heart_model_DWork.is_c32_heart_model = heart_model_IN_stimulated_e;
+            /* Entry 'stimulated': '<S115>:4' */
+            heart_model_B.q = 2.0;
+        }
+        break;
+      case heart_model_IN_stimulated_e:
+        /* During 'stimulated': '<S115>:4' */
+        if (heart_model_DWork.sfEvent == heart_model_event_event2_e) {
+            /* Transition: '<S115>:14' */
+            heart_model_B.vreset = heart_model_X.Integrator_CSTATE_o;
+            /* Event: '<S115>:20' */
+            heart_model_DWork.resetEventCounter++;
+            heart_model_DWork.is_c32_heart_model = heart_model_IN_upstroke_b;
+            /* Entry 'upstroke': '<S115>:11' */
+            heart_model_B.q = 3.0;
+        } else {
+            if (heart_model_DWork.sfEvent == heart_model_event_endstim) {
+                /* Transition: '<S115>:77' */
+                heart_model_B.vreset = heart_model_X.Integrator_CSTATE_o;
+                /* Event: '<S115>:20' */
+                heart_model_DWork.resetEventCounter++;
+                heart_model_DWork.is_c32_heart_model = heart_model_IN_resting_j;
+                /* Entry 'resting': '<S115>:1' */
+                heart_model_B.q = 1.0;
+            }
+        }
+        break;
+      default:
+        /* During 'upstroke': '<S115>:11' */
+        if (heart_model_DWork.sfEvent == heart_model_event_event3_b) {
+            /* Transition: '<S115>:33' */
+            heart_model_B.vreset = heart_model_X.Integrator_CSTATE_o;
+            /* Event: '<S115>:20' */
+            heart_model_DWork.resetEventCounter++;
+            heart_model_DWork.is_c32_heart_model = heart_model_IN_plateau_h;
+            /* Entry 'plateau': '<S115>:16' */
+            heart_model_B.q = 4.0;
+            heart_model_B.vno = heart_model_DWork.vn;
+        }
+        break;
+    }
+}
+%closefile fcnBuff
+%assign fcnProtoType = ""
+%openfile fcnProtoType
+static void heart_chartstep_c32_heart_model(\
+%assign comma = ""
+%closefile fcnProtoType
+%<SLibCG_SetFcnProtoType(2, 2, fcnProtoType)>
+%return fcnBuff
+%endfunction
+
+%function Outputs_Fcn5Call10Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call10Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call11Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call11Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_b\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call12Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call12Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_h\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call13Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call13Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_g\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call14Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call14Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_a\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call15Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call15Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_j\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call16Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call16Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_m\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call17Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call17Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_ji\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call18Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call18Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_p\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call19Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call19Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_gu\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call20Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call20Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_a2\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call21Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call21Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_d\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call22Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call22Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_b2\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call23Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call23Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_n\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call24Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call24Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_o\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call25Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call25Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_i\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call26Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call26Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_gt\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call27Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call27Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_dm\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call28Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call28Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_k\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call29Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call29Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_kh\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call30Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call30Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_j3\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call31Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call31Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_f\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call32Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call32Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_ix\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call33Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call33Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_ny\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call34Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call34Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_c\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call35Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call35Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_fm\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call36Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call36Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_or\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call37Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call37Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_on\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call38Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call38Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_cd\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call39Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call39Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_nm\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call40Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call40Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_og\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call41Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call41Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_bn\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call42Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call42Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_k1\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call43Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call43Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call44Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call44Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_b\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call45Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call45Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_h\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call46Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call46Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_g\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call47Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call47Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_a\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call48Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call48Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_j\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call49Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call49Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_m\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call50Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call50Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_ji\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call51Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call51Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_p\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call52Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call52Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_gu\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call53Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call53Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_a2\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call54Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call54Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_d\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call55Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call55Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_b2\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call56Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call56Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_n\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call57Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call57Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_o\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call58Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call58Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_i\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call59Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call59Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_gt\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call60Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call60Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_dm\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call61Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call61Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_k\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call62Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call62Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_kh\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call63Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call63Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_j3\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call64Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call64Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_f\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call65Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call65Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_ix\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call66Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call66Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_ny\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call67Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call67Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_c\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call68Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call68Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_fm\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call69Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call69Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_or\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call70Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call70Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_on\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call71Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call71Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_cd\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call72Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call72Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_nm\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call73Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call73Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_og\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call74Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call74Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_bn\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call75Arg0(block) void
+%<SLibCGIRAccessLocalVar(508, 0)> %% rtb_MathFunction
+
+%assign argBuff = ""
+%openfile argBuff
+-rtb_MathFunction\
+%closefile argBuff
+%return argBuff
+%endfunction
+
+%function Outputs_Fcn5Call75Arg1(block) void
+
+%assign argBuff = ""
+%openfile argBuff
+heart_model_P.Constant2_Value_k1\
+%closefile argBuff
+%return argBuff
+%endfunction
+

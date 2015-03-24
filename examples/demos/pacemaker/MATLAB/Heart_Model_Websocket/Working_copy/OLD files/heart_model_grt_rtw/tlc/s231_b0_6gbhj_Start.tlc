@@ -1,0 +1,254 @@
+%implements s231_b0_6gbhj_Start "C"
+
+%function Start(block, system) Output
+%assign tlcStartFcnOfS169B0 = OpaqueTLCBlockFcn("Start", 169, 0, 2, 3)
+%assign tlcStartFcnOfS169B5 = OpaqueTLCBlockFcn("Start", 169, 5, 2, 3)
+%assign tlcStartFcnOfS169B7 = OpaqueTLCBlockFcn("Start", 169, 7, 2, 3)
+%assign tlcStartFcnOfS169B9 = OpaqueTLCBlockFcn("Start", 169, 9, 2, 3)
+%assign tlcStartFcnOfS169B13 = OpaqueTLCBlockFcn("Start", 169, 13, 2, 3)
+%assign tlcStartFcnOfS169B17 = OpaqueTLCBlockFcn("Start", 169, 17, 2, 3)
+%assign tlcStartFcnOfS169B21 = OpaqueTLCBlockFcn("Start", 169, 21, 2, 3)
+%assign tlcStartFcnOfS169B25 = OpaqueTLCBlockFcn("Start", 169, 25, 2, 3)
+%assign tlcStartFcnOfS169B29 = OpaqueTLCBlockFcn("Start", 169, 29, 2, 3)
+%assign tlcStartFcnOfS169B33 = OpaqueTLCBlockFcn("Start", 169, 33, 2, 3)
+%assign tlcStartFcnOfS169B37 = OpaqueTLCBlockFcn("Start", 169, 37, 2, 3)
+%assign tlcStartFcnOfS169B41 = OpaqueTLCBlockFcn("Start", 169, 41, 2, 3)
+%assign tlcStartFcnOfS169B45 = OpaqueTLCBlockFcn("Start", 169, 45, 2, 3)
+%assign tlcStartFcnOfS169B49 = OpaqueTLCBlockFcn("Start", 169, 49, 2, 3)
+%assign tlcStartFcnOfS169B53 = OpaqueTLCBlockFcn("Start", 169, 53, 2, 3)
+%assign tlcStartFcnOfS169B59 = OpaqueTLCBlockFcn("Start", 169, 59, 2, 3)
+%assign tlcStartFcnOfS169B62 = OpaqueTLCBlockFcn("Start", 169, 62, 2, 3)
+%assign tlcStartFcnOfS169B66 = OpaqueTLCBlockFcn("Start", 169, 66, 2, 3)
+%assign tlcStartFcnOfS169B70 = OpaqueTLCBlockFcn("Start", 169, 70, 2, 3)
+%assign tlcStartFcnOfS169B74 = OpaqueTLCBlockFcn("Start", 169, 74, 2, 3)
+%assign tlcStartFcnOfS169B78 = OpaqueTLCBlockFcn("Start", 169, 78, 2, 3)
+%assign tlcStartFcnOfS169B82 = OpaqueTLCBlockFcn("Start", 169, 82, 2, 3)
+%assign tlcStartFcnOfS169B86 = OpaqueTLCBlockFcn("Start", 169, 86, 2, 3)
+%assign tlcStartFcnOfS169B90 = OpaqueTLCBlockFcn("Start", 169, 90, 2, 3)
+%assign tlcStartFcnOfS169B94 = OpaqueTLCBlockFcn("Start", 169, 94, 2, 3)
+%assign tlcStartFcnOfS169B98 = OpaqueTLCBlockFcn("Start", 169, 98, 2, 3)
+%assign tlcStartFcnOfS169B102 = OpaqueTLCBlockFcn("Start", 169, 102, 2, 3)
+%assign tlcStartFcnOfS169B106 = OpaqueTLCBlockFcn("Start", 169, 106, 2, 3)
+%assign tlcStartFcnOfS169B110 = OpaqueTLCBlockFcn("Start", 169, 110, 2, 3)
+%assign tlcStartFcnOfS169B114 = OpaqueTLCBlockFcn("Start", 169, 114, 2, 3)
+%assign tlcStartFcnOfS169B118 = OpaqueTLCBlockFcn("Start", 169, 118, 2, 3)
+%assign tlcStartFcnOfS169B122 = OpaqueTLCBlockFcn("Start", 169, 122, 2, 3)
+%assign tlcStartFcnOfS169B126 = OpaqueTLCBlockFcn("Start", 169, 126, 2, 3)
+%assign tlcStartFcnOfS169B128 = OpaqueTLCBlockFcn("Start", 169, 128, 2, 3)
+%assign tlcStartFcnOfS169B133 = OpaqueTLCBlockFcn("Start", 169, 133, 2, 3)
+%assign tlcStartFcnOfS169B143 = OpaqueTLCBlockFcn("Start", 169, 143, 2, 3)
+%assign tlcStartFcnOfS169B153 = OpaqueTLCBlockFcn("Start", 169, 153, 2, 3)
+%assign tlcStartFcnOfS169B163 = OpaqueTLCBlockFcn("Start", 169, 163, 2, 3)
+%assign tlcStartFcnOfS169B182 = OpaqueTLCBlockFcn("Start", 169, 182, 2, 3)
+%assign tlcStartFcnOfS169B191 = OpaqueTLCBlockFcn("Start", 169, 191, 2, 3)
+%assign tlcStartFcnOfS169B197 = OpaqueTLCBlockFcn("Start", 169, 197, 2, 3)
+%assign tlcStartFcnOfS169B198 = OpaqueTLCBlockFcn("Start", 169, 198, 2, 3)
+%assign tlcStartFcnOfS169B199 = OpaqueTLCBlockFcn("Start", 169, 199, 2, 3)
+%assign tlcStartFcnOfS169B200 = OpaqueTLCBlockFcn("Start", 169, 200, 2, 3)
+%assign tlcStartFcnOfS169B201 = OpaqueTLCBlockFcn("Start", 169, 201, 2, 3)
+%assign tlcStartFcnOfS169B202 = OpaqueTLCBlockFcn("Start", 169, 202, 2, 3)
+%assign tlcStartFcnOfS169B203 = OpaqueTLCBlockFcn("Start", 169, 203, 2, 3)
+%assign tlcStartFcnOfS169B204 = OpaqueTLCBlockFcn("Start", 169, 204, 2, 3)
+%assign tlcStartFcnOfS169B205 = OpaqueTLCBlockFcn("Start", 169, 205, 2, 3)
+%assign tlcStartFcnOfS169B265 = OpaqueTLCBlockFcn("Start", 169, 265, 2, 3)
+%assign tlcStartFcnOfS169B278 = OpaqueTLCBlockFcn("Start", 169, 278, 2, 3)
+%assign tlcStartFcnOfS169B289 = OpaqueTLCBlockFcn("Start", 169, 289, 2, 3)
+%assign tlcStartFcnOfS169B313 = OpaqueTLCBlockFcn("Start", 169, 313, 2, 3)
+%assign tlcStartFcnOfS169B314 = OpaqueTLCBlockFcn("Start", 169, 314, 2, 3)
+%assign tlcStartFcnOfS169B315 = OpaqueTLCBlockFcn("Start", 169, 315, 2, 3)
+%assign tlcStartFcnOfS169B316 = OpaqueTLCBlockFcn("Start", 169, 316, 2, 3)
+%assign tlcStartFcnOfS169B317 = OpaqueTLCBlockFcn("Start", 169, 317, 2, 3)
+%assign tlcStartFcnOfS169B318 = OpaqueTLCBlockFcn("Start", 169, 318, 2, 3)
+%assign tlcStartFcnOfS169B319 = OpaqueTLCBlockFcn("Start", 169, 319, 2, 3)
+%assign tlcStartFcnOfS169B320 = OpaqueTLCBlockFcn("Start", 169, 320, 2, 3)
+%assign tlcStartFcnOfS169B321 = OpaqueTLCBlockFcn("Start", 169, 321, 2, 3)
+%assign tlcStartFcnOfS169B322 = OpaqueTLCBlockFcn("Start", 169, 322, 2, 3)
+%assign tlcStartFcnOfS169B323 = OpaqueTLCBlockFcn("Start", 169, 323, 2, 3)
+%assign tlcStartFcnOfS169B324 = OpaqueTLCBlockFcn("Start", 169, 324, 2, 3)
+%assign tlcStartFcnOfS169B325 = OpaqueTLCBlockFcn("Start", 169, 325, 2, 3)
+%assign tlcStartFcnOfS169B326 = OpaqueTLCBlockFcn("Start", 169, 326, 2, 3)
+%assign tlcStartFcnOfS169B327 = OpaqueTLCBlockFcn("Start", 169, 327, 2, 3)
+%assign tlcStartFcnOfS169B328 = OpaqueTLCBlockFcn("Start", 169, 328, 2, 3)
+%assign tlcStartFcnOfS169B329 = OpaqueTLCBlockFcn("Start", 169, 329, 2, 3)
+%assign tlcStartFcnOfS169B330 = OpaqueTLCBlockFcn("Start", 169, 330, 2, 3)
+%<SLibCG_TrackDW(169)>\
+%<SLibCG_TrackParam(169)>\
+%<SLibCG_TrackBlockIO(169)>\
+%<tlcStartFcnOfS169B0>\
+/* Start for InitialCondition: '<S37>/IC' */
+heart_model_B.IC = heart_model_P.IC_Value;
+heart_model_DWork.IC_FirstOutputTime = TRUE;
+%<tlcStartFcnOfS169B5>\
+/* Start for DiscretePulseGenerator: '<Root>/tick' */
+heart_model_DWork.clockTickCounter = 0;
+%<tlcStartFcnOfS169B7>\
+/* Start for InitialCondition: '<S73>/IC' */
+heart_model_B.IC_p = heart_model_P.IC_Value_b;
+heart_model_DWork.IC_FirstOutputTime_n = TRUE;
+%<tlcStartFcnOfS169B9>\
+/* Start for InitialCondition: '<S25>/IC' */
+heart_model_B.IC_b = heart_model_P.IC_Value_d;
+heart_model_DWork.IC_FirstOutputTime_j = TRUE;
+%<tlcStartFcnOfS169B13>\
+/* Start for InitialCondition: '<S67>/IC' */
+heart_model_B.IC_j = heart_model_P.IC_Value_j;
+heart_model_DWork.IC_FirstOutputTime_b = TRUE;
+%<tlcStartFcnOfS169B17>\
+/* Start for InitialCondition: '<S61>/IC' */
+heart_model_B.IC_g = heart_model_P.IC_Value_bj;
+heart_model_DWork.IC_FirstOutputTime_g = TRUE;
+%<tlcStartFcnOfS169B21>\
+/* Start for InitialCondition: '<S43>/IC' */
+heart_model_B.IC_pz = heart_model_P.IC_Value_k;
+heart_model_DWork.IC_FirstOutputTime_a = TRUE;
+%<tlcStartFcnOfS169B25>\
+/* Start for InitialCondition: '<S85>/IC' */
+heart_model_B.IC_i = heart_model_P.IC_Value_bjp;
+heart_model_DWork.IC_FirstOutputTime_d = TRUE;
+%<tlcStartFcnOfS169B29>\
+/* Start for InitialCondition: '<S79>/IC' */
+heart_model_B.IC_a = heart_model_P.IC_Value_f;
+heart_model_DWork.IC_FirstOutputTime_nl = TRUE;
+%<tlcStartFcnOfS169B33>\
+/* Start for InitialCondition: '<S31>/IC' */
+heart_model_B.IC_pi = heart_model_P.IC_Value_l;
+heart_model_DWork.IC_FirstOutputTime_bn = TRUE;
+%<tlcStartFcnOfS169B37>\
+/* Start for InitialCondition: '<S97>/IC' */
+heart_model_B.IC_l = heart_model_P.IC_Value_i;
+heart_model_DWork.IC_FirstOutputTime_h = TRUE;
+%<tlcStartFcnOfS169B41>\
+/* Start for InitialCondition: '<S91>/IC' */
+heart_model_B.IC_lq = heart_model_P.IC_Value_p;
+heart_model_DWork.IC_FirstOutputTime_ge = TRUE;
+%<tlcStartFcnOfS169B45>\
+/* Start for InitialCondition: '<S49>/IC' */
+heart_model_B.IC_h = heart_model_P.IC_Value_lw;
+heart_model_DWork.IC_FirstOutputTime_bb = TRUE;
+%<tlcStartFcnOfS169B49>\
+/* Start for InitialCondition: '<S55>/IC' */
+heart_model_B.IC_c = heart_model_P.IC_Value_n;
+heart_model_DWork.IC_FirstOutputTime_o = TRUE;
+%<tlcStartFcnOfS169B53>\
+/* Start for InitialCondition: '<S158>/IC' */
+heart_model_B.IC_f = heart_model_P.IC_Value_g;
+heart_model_DWork.IC_FirstOutputTime_l = TRUE;
+%<tlcStartFcnOfS169B59>\
+/* Start for InitialCondition: '<S152>/IC' */
+heart_model_B.IC_m = heart_model_P.IC_Value_a;
+heart_model_DWork.IC_FirstOutputTime_a5 = TRUE;
+%<tlcStartFcnOfS169B62>\
+/* Start for InitialCondition: '<S146>/IC' */
+heart_model_B.IC_pn = heart_model_P.IC_Value_c;
+heart_model_DWork.IC_FirstOutputTime_k = TRUE;
+%<tlcStartFcnOfS169B66>\
+/* Start for InitialCondition: '<S200>/IC' */
+heart_model_B.IC_mo = heart_model_P.IC_Value_bt;
+heart_model_DWork.IC_FirstOutputTime_g0 = TRUE;
+%<tlcStartFcnOfS169B70>\
+/* Start for InitialCondition: '<S194>/IC' */
+heart_model_B.IC_gq = heart_model_P.IC_Value_o;
+heart_model_DWork.IC_FirstOutputTime_m = TRUE;
+%<tlcStartFcnOfS169B74>\
+/* Start for InitialCondition: '<S170>/IC' */
+heart_model_B.IC_pn0 = heart_model_P.IC_Value_m;
+heart_model_DWork.IC_FirstOutputTime_e = TRUE;
+%<tlcStartFcnOfS169B78>\
+/* Start for InitialCondition: '<S164>/IC' */
+heart_model_B.IC_gn = heart_model_P.IC_Value_kk;
+heart_model_DWork.IC_FirstOutputTime_i = TRUE;
+%<tlcStartFcnOfS169B82>\
+/* Start for InitialCondition: '<S212>/IC' */
+heart_model_B.IC_d = heart_model_P.IC_Value_oa;
+heart_model_DWork.IC_FirstOutputTime_gp = TRUE;
+%<tlcStartFcnOfS169B86>\
+/* Start for InitialCondition: '<S182>/IC' */
+heart_model_B.IC_n = heart_model_P.IC_Value_iv;
+heart_model_DWork.IC_FirstOutputTime_jh = TRUE;
+%<tlcStartFcnOfS169B90>\
+/* Start for InitialCondition: '<S218>/IC' */
+heart_model_B.IC_e = heart_model_P.IC_Value_e;
+heart_model_DWork.IC_FirstOutputTime_c = TRUE;
+%<tlcStartFcnOfS169B94>\
+/* Start for InitialCondition: '<S206>/IC' */
+heart_model_B.IC_k = heart_model_P.IC_Value_cd;
+heart_model_DWork.IC_FirstOutputTime_lr = TRUE;
+%<tlcStartFcnOfS169B98>\
+/* Start for InitialCondition: '<S188>/IC' */
+heart_model_B.IC_dw = heart_model_P.IC_Value_mm;
+heart_model_DWork.IC_FirstOutputTime_f = TRUE;
+%<tlcStartFcnOfS169B102>\
+/* Start for InitialCondition: '<S176>/IC' */
+heart_model_B.IC_lqt = heart_model_P.IC_Value_oy;
+heart_model_DWork.IC_FirstOutputTime_oo = TRUE;
+%<tlcStartFcnOfS169B106>\
+/* Start for InitialCondition: '<S242>/IC' */
+heart_model_B.IC_gi = heart_model_P.IC_Value_gx;
+heart_model_DWork.IC_FirstOutputTime_ot = TRUE;
+%<tlcStartFcnOfS169B110>\
+/* Start for InitialCondition: '<S236>/IC' */
+heart_model_B.IC_p2 = heart_model_P.IC_Value_bi;
+heart_model_DWork.IC_FirstOutputTime_il = TRUE;
+%<tlcStartFcnOfS169B114>\
+/* Start for InitialCondition: '<S230>/IC' */
+heart_model_B.IC_bp = heart_model_P.IC_Value_cj;
+heart_model_DWork.IC_FirstOutputTime_gee = TRUE;
+%<tlcStartFcnOfS169B118>\
+/* Start for InitialCondition: '<S224>/IC' */
+heart_model_B.IC_gz = heart_model_P.IC_Value_fm;
+heart_model_DWork.IC_FirstOutputTime_ou = TRUE;
+%<tlcStartFcnOfS169B122>\
+/* Start for InitialCondition: '<S140>/IC' */
+heart_model_B.IC_k1 = heart_model_P.IC_Value_n4;
+heart_model_DWork.IC_FirstOutputTime_gr = TRUE;
+%<tlcStartFcnOfS169B126>\
+%<tlcStartFcnOfS169B128>\
+%<tlcStartFcnOfS169B133>\
+%<tlcStartFcnOfS169B143>\
+%<tlcStartFcnOfS169B153>\
+%<tlcStartFcnOfS169B163>\
+%<tlcStartFcnOfS169B182>\
+%<tlcStartFcnOfS169B191>\
+%<tlcStartFcnOfS169B197>\
+%<tlcStartFcnOfS169B198>\
+%<tlcStartFcnOfS169B199>\
+%<tlcStartFcnOfS169B200>\
+%<tlcStartFcnOfS169B201>\
+%<tlcStartFcnOfS169B202>\
+%<tlcStartFcnOfS169B203>\
+%<tlcStartFcnOfS169B204>\
+%<tlcStartFcnOfS169B205>\
+/* Start for InitialCondition: '<S103>/IC' */
+heart_model_B.IC_o = heart_model_P.IC_Value_jb;
+heart_model_DWork.IC_FirstOutputTime_l3 = TRUE;
+%<tlcStartFcnOfS169B265>\
+/* Start for InitialCondition: '<S116>/IC' */
+heart_model_B.IC_p1 = heart_model_P.IC_Value_ma;
+heart_model_DWork.IC_FirstOutputTime_jhd = TRUE;
+%<tlcStartFcnOfS169B278>\
+%<tlcStartFcnOfS169B289>\
+%<tlcStartFcnOfS169B313>\
+%<tlcStartFcnOfS169B314>\
+%<tlcStartFcnOfS169B315>\
+%<tlcStartFcnOfS169B316>\
+%<tlcStartFcnOfS169B317>\
+%<tlcStartFcnOfS169B318>\
+%<tlcStartFcnOfS169B319>\
+%<tlcStartFcnOfS169B320>\
+%<tlcStartFcnOfS169B321>\
+%<tlcStartFcnOfS169B322>\
+%<tlcStartFcnOfS169B323>\
+%<tlcStartFcnOfS169B324>\
+%<tlcStartFcnOfS169B325>\
+%<tlcStartFcnOfS169B326>\
+%<tlcStartFcnOfS169B327>\
+%<tlcStartFcnOfS169B328>\
+%<tlcStartFcnOfS169B329>\
+%<tlcStartFcnOfS169B330>\
+%assign fcnProtoType = ""
+%openfile fcnProtoType
+static void Start(\
+%assign comma = ""
+%closefile fcnProtoType
+%<SLibCG_SetFcnProtoType(2, 3, fcnProtoType)>
+%endfunction

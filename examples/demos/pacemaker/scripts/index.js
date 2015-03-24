@@ -226,7 +226,7 @@ require([
          * If websocket is supported by the browser
          */
         if (window.hasOwnProperty('WebSocket')) {
-            var location = document.getElementById('ControllerAddress').value + ':2318';
+            var location = document.getElementById('ControllerAddress').value + ':2317';
             logOnDiv('Trying to estrablish connection with controller at ' + location, 'orchestrator');
             simulink_websocket = new WebSocket('ws://' + location, 'pacemaker');
             /*

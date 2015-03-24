@@ -1,0 +1,235 @@
+%implements s231_b0_6gbhj_InitializeConditions "C"
+
+%function InitializeConditions(block, system) Output
+%assign tlcInitializeConditionsFcnOfS169B5 = OpaqueTLCBlockFcn("InitializeConditions", 169, 5, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B9 = OpaqueTLCBlockFcn("InitializeConditions", 169, 9, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B13 = OpaqueTLCBlockFcn("InitializeConditions", 169, 13, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B17 = OpaqueTLCBlockFcn("InitializeConditions", 169, 17, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B21 = OpaqueTLCBlockFcn("InitializeConditions", 169, 21, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B25 = OpaqueTLCBlockFcn("InitializeConditions", 169, 25, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B29 = OpaqueTLCBlockFcn("InitializeConditions", 169, 29, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B33 = OpaqueTLCBlockFcn("InitializeConditions", 169, 33, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B37 = OpaqueTLCBlockFcn("InitializeConditions", 169, 37, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B41 = OpaqueTLCBlockFcn("InitializeConditions", 169, 41, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B45 = OpaqueTLCBlockFcn("InitializeConditions", 169, 45, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B49 = OpaqueTLCBlockFcn("InitializeConditions", 169, 49, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B53 = OpaqueTLCBlockFcn("InitializeConditions", 169, 53, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B59 = OpaqueTLCBlockFcn("InitializeConditions", 169, 59, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B62 = OpaqueTLCBlockFcn("InitializeConditions", 169, 62, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B66 = OpaqueTLCBlockFcn("InitializeConditions", 169, 66, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B70 = OpaqueTLCBlockFcn("InitializeConditions", 169, 70, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B74 = OpaqueTLCBlockFcn("InitializeConditions", 169, 74, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B78 = OpaqueTLCBlockFcn("InitializeConditions", 169, 78, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B82 = OpaqueTLCBlockFcn("InitializeConditions", 169, 82, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B86 = OpaqueTLCBlockFcn("InitializeConditions", 169, 86, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B90 = OpaqueTLCBlockFcn("InitializeConditions", 169, 90, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B94 = OpaqueTLCBlockFcn("InitializeConditions", 169, 94, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B98 = OpaqueTLCBlockFcn("InitializeConditions", 169, 98, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B102 = OpaqueTLCBlockFcn("InitializeConditions", 169, 102, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B106 = OpaqueTLCBlockFcn("InitializeConditions", 169, 106, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B110 = OpaqueTLCBlockFcn("InitializeConditions", 169, 110, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B114 = OpaqueTLCBlockFcn("InitializeConditions", 169, 114, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B118 = OpaqueTLCBlockFcn("InitializeConditions", 169, 118, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B122 = OpaqueTLCBlockFcn("InitializeConditions", 169, 122, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B126 = OpaqueTLCBlockFcn("InitializeConditions", 169, 126, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B265 = OpaqueTLCBlockFcn("InitializeConditions", 169, 265, 2, 4)
+%assign tlcInitializeConditionsFcnOfS169B278 = OpaqueTLCBlockFcn("InitializeConditions", 169, 278, 2, 4)
+%<SLibCG_TrackDW(169)>\
+%<SLibCG_TrackParam(169)>\
+%<SLibCG_TrackBlockIO(169)>\
+%<SLibInsertAsyncTaskInitializeCode(system)>
+%<SLibWriteMachineInitialize()>
+/* InitializeConditions for Chart: '<S12>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 2, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S12>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 2, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B5>\
+/* InitializeConditions for Chart: '<S18>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 8, 2, 0, 2, 169)>\
+/* InitializeConditions for UnitDelay: '<Root>/Unit Delay' */
+heart_model_DWork.UnitDelay_DSTATE = heart_model_P.UnitDelay_X0;
+/* InitializeConditions for UnitDelay: '<Root>/Unit Delay1' */
+heart_model_DWork.UnitDelay1_DSTATE = heart_model_P.UnitDelay1_X0;
+/* InitializeConditions for Chart: '<S18>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 7, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B9>\
+/* InitializeConditions for Chart: '<S10>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 0, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S10>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 0, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B13>\
+/* InitializeConditions for Chart: '<S17>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 7, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S17>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 6, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B17>\
+/* InitializeConditions for Chart: '<S16>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 6, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S16>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 5, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B21>\
+/* InitializeConditions for Chart: '<S13>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 3, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S13>/Hybrid set' */
+heart_model_DWork.is_active_c10_heart_model = 0U;
+heart_model_DWork.is_c10_heart_model = 0U;
+heart_model_DWork.vn_d = 0.0;
+heart_model_B.q_g = 1.0;
+heart_model_B.vreset_o = 0.0;
+heart_model_B.vno_c = 0.0;
+heart_model_DWork.resetEventCounter_j = 0U;
+heart_model_B.reset_j = FALSE;
+%<tlcInitializeConditionsFcnOfS169B25>\
+/* InitializeConditions for Chart: '<S20>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 10, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S20>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 9, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B29>\
+/* InitializeConditions for Chart: '<S19>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 9, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S19>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 8, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B33>\
+/* InitializeConditions for Chart: '<S11>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 1, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S11>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 1, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B37>\
+/* InitializeConditions for Chart: '<S22>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 12, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S22>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 11, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B41>\
+/* InitializeConditions for Chart: '<S21>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 11, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S21>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 10, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B45>\
+/* InitializeConditions for Chart: '<S14>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 4, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S14>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 3, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B49>\
+/* InitializeConditions for Chart: '<S15>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 5, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S15>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 4, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B53>\
+/* InitializeConditions for UnitDelay: '<S108>/Delay Input1' */
+heart_model_DWork.DelayInput1_DSTATE = heart_model_P.DelayInput1_X0;
+/* InitializeConditions for Chart: '<S123>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 18, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S123>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 16, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B59>\
+/* InitializeConditions for Chart: '<S122>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 17, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S122>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 15, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B62>\
+/* InitializeConditions for Chart: '<S121>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 16, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S121>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 14, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B66>\
+/* InitializeConditions for Chart: '<S130>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 25, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S130>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 23, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B70>\
+/* InitializeConditions for Chart: '<S129>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 24, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S129>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 22, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B74>\
+/* InitializeConditions for Chart: '<S125>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 20, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S125>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 18, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B78>\
+/* InitializeConditions for Chart: '<S124>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 19, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S124>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 17, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B82>\
+/* InitializeConditions for Chart: '<S132>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 27, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S132>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 25, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B86>\
+/* InitializeConditions for Chart: '<S127>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 22, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S127>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 20, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B90>\
+/* InitializeConditions for Chart: '<S133>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 28, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S133>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 26, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B94>\
+/* InitializeConditions for Chart: '<S131>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 26, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S131>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 24, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B98>\
+/* InitializeConditions for Chart: '<S128>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 23, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S128>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 21, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B102>\
+/* InitializeConditions for Chart: '<S126>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 21, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S126>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 19, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B106>\
+/* InitializeConditions for Chart: '<S137>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 32, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S137>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 30, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B110>\
+/* InitializeConditions for Chart: '<S136>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 31, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S136>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 29, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B114>\
+/* InitializeConditions for Chart: '<S135>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 30, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S135>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 28, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B118>\
+/* InitializeConditions for Chart: '<S134>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 29, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S134>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 27, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B122>\
+/* InitializeConditions for Chart: '<S120>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 15, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S120>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 13, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B126>\
+/* InitializeConditions for UnitDelay: '<S110>/Delay Input1' */
+heart_model_DWork.DelayInput1_DSTATE_m = heart_model_P.DelayInput1_X0_g;
+/* InitializeConditions for Chart: '<S4>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 13, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S4>/Hybrid set' */
+%<SLibCGIRGenReusableSysCall("heart_model_Hybridset_Init", [], 1, 12, 2, 0, 2, 169)>\
+%<tlcInitializeConditionsFcnOfS169B265>\
+/* InitializeConditions for Chart: '<S8>/Event generator' */
+%<SLibCGIRGenReusableSysCall("heart_model_Eventgenerator_Init", [], 0, 14, 2, 0, 2, 169)>\
+/* InitializeConditions for Chart: '<S8>/Hybrid set' */
+heart_model_DWork.is_active_c32_heart_model = 0U;
+heart_model_DWork.is_c32_heart_model = 0U;
+heart_model_DWork.vn = 0.0;
+heart_model_B.q = 1.0;
+heart_model_B.vreset = 0.0;
+heart_model_B.vno = 0.0;
+heart_model_DWork.resetEventCounter = 0U;
+heart_model_B.reset = FALSE;
+%<tlcInitializeConditionsFcnOfS169B278>\
+%assign fcnProtoType = ""
+%openfile fcnProtoType
+static void InitializeConditions(\
+%assign comma = ""
+%closefile fcnProtoType
+%<SLibCG_SetFcnProtoType(2, 4, fcnProtoType)>
+%endfunction

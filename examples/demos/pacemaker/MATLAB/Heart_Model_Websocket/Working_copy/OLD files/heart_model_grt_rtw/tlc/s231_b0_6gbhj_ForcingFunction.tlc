@@ -1,0 +1,76 @@
+%implements s231_b0_6gbhj_ForcingFunction "C"
+
+%function ForcingFunction(block, system) Output
+%assign tlcForcingFunctionFcnOfS169B5 = OpaqueTLCBlockFcn("ForcingFunction", 169, 5, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B9 = OpaqueTLCBlockFcn("ForcingFunction", 169, 9, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B13 = OpaqueTLCBlockFcn("ForcingFunction", 169, 13, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B17 = OpaqueTLCBlockFcn("ForcingFunction", 169, 17, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B21 = OpaqueTLCBlockFcn("ForcingFunction", 169, 21, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B25 = OpaqueTLCBlockFcn("ForcingFunction", 169, 25, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B29 = OpaqueTLCBlockFcn("ForcingFunction", 169, 29, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B33 = OpaqueTLCBlockFcn("ForcingFunction", 169, 33, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B37 = OpaqueTLCBlockFcn("ForcingFunction", 169, 37, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B41 = OpaqueTLCBlockFcn("ForcingFunction", 169, 41, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B45 = OpaqueTLCBlockFcn("ForcingFunction", 169, 45, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B49 = OpaqueTLCBlockFcn("ForcingFunction", 169, 49, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B53 = OpaqueTLCBlockFcn("ForcingFunction", 169, 53, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B59 = OpaqueTLCBlockFcn("ForcingFunction", 169, 59, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B62 = OpaqueTLCBlockFcn("ForcingFunction", 169, 62, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B66 = OpaqueTLCBlockFcn("ForcingFunction", 169, 66, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B70 = OpaqueTLCBlockFcn("ForcingFunction", 169, 70, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B74 = OpaqueTLCBlockFcn("ForcingFunction", 169, 74, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B78 = OpaqueTLCBlockFcn("ForcingFunction", 169, 78, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B82 = OpaqueTLCBlockFcn("ForcingFunction", 169, 82, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B86 = OpaqueTLCBlockFcn("ForcingFunction", 169, 86, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B90 = OpaqueTLCBlockFcn("ForcingFunction", 169, 90, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B94 = OpaqueTLCBlockFcn("ForcingFunction", 169, 94, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B98 = OpaqueTLCBlockFcn("ForcingFunction", 169, 98, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B102 = OpaqueTLCBlockFcn("ForcingFunction", 169, 102, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B106 = OpaqueTLCBlockFcn("ForcingFunction", 169, 106, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B110 = OpaqueTLCBlockFcn("ForcingFunction", 169, 110, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B114 = OpaqueTLCBlockFcn("ForcingFunction", 169, 114, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B118 = OpaqueTLCBlockFcn("ForcingFunction", 169, 118, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B122 = OpaqueTLCBlockFcn("ForcingFunction", 169, 122, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B126 = OpaqueTLCBlockFcn("ForcingFunction", 169, 126, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B265 = OpaqueTLCBlockFcn("ForcingFunction", 169, 265, 2, 8)
+%assign tlcForcingFunctionFcnOfS169B278 = OpaqueTLCBlockFcn("ForcingFunction", 169, 278, 2, 8)
+%<tlcForcingFunctionFcnOfS169B5>\
+%<tlcForcingFunctionFcnOfS169B9>\
+%<tlcForcingFunctionFcnOfS169B13>\
+%<tlcForcingFunctionFcnOfS169B17>\
+%<tlcForcingFunctionFcnOfS169B21>\
+%<tlcForcingFunctionFcnOfS169B25>\
+%<tlcForcingFunctionFcnOfS169B29>\
+%<tlcForcingFunctionFcnOfS169B33>\
+%<tlcForcingFunctionFcnOfS169B37>\
+%<tlcForcingFunctionFcnOfS169B41>\
+%<tlcForcingFunctionFcnOfS169B45>\
+%<tlcForcingFunctionFcnOfS169B49>\
+%<tlcForcingFunctionFcnOfS169B53>\
+%<tlcForcingFunctionFcnOfS169B59>\
+%<tlcForcingFunctionFcnOfS169B62>\
+%<tlcForcingFunctionFcnOfS169B66>\
+%<tlcForcingFunctionFcnOfS169B70>\
+%<tlcForcingFunctionFcnOfS169B74>\
+%<tlcForcingFunctionFcnOfS169B78>\
+%<tlcForcingFunctionFcnOfS169B82>\
+%<tlcForcingFunctionFcnOfS169B86>\
+%<tlcForcingFunctionFcnOfS169B90>\
+%<tlcForcingFunctionFcnOfS169B94>\
+%<tlcForcingFunctionFcnOfS169B98>\
+%<tlcForcingFunctionFcnOfS169B102>\
+%<tlcForcingFunctionFcnOfS169B106>\
+%<tlcForcingFunctionFcnOfS169B110>\
+%<tlcForcingFunctionFcnOfS169B114>\
+%<tlcForcingFunctionFcnOfS169B118>\
+%<tlcForcingFunctionFcnOfS169B122>\
+%<tlcForcingFunctionFcnOfS169B126>\
+%<tlcForcingFunctionFcnOfS169B265>\
+%<tlcForcingFunctionFcnOfS169B278>\
+%assign fcnProtoType = ""
+%openfile fcnProtoType
+static void ForcingFunction(\
+%assign comma = ""
+%closefile fcnProtoType
+%<SLibCG_SetFcnProtoType(2, 8, fcnProtoType)>
+%endfunction

@@ -1,0 +1,20 @@
+%implements s231_b0_6gbhj_ModuleConstants "C"
+
+%function ModuleConstants(block) Output
+
+
+/* Named constants for Chart: '<S13>/Hybrid set' */
+#define heart_model_IN_plateau_h ((uint8_T)1U)
+#define heart_model_IN_resting_j ((uint8_T)2U)
+#define heart_model_IN_stimulated_e ((uint8_T)3U)
+#define heart_model_IN_upstroke_b ((uint8_T)4U)
+#define heart_model_event_endpstim_p (5)
+#define heart_model_event_event1_g (0)
+#define heart_model_event_event2_e (2)
+#define heart_model_event_event3_b (3)
+#define heart_model_event_pstim_e (4)
+
+/* Named constants for Chart: '<S8>/Hybrid set' */
+#define heart_model_event_endstim (5)
+#define heart_model_event_stim (4)
+%endfunction

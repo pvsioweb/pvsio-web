@@ -25,20 +25,6 @@ enum libwebsocket_callback_reasons callback_reason;
 void* callback_in;
 struct libwebsocket* callback_wsi;
 
-//struct PACEMAKER_INPUT  pacemaker_input = { 0, 0, 0 };
-//struct PACEMAKER_OUTPUT pacemaker_output = { 0, 0 };
-
-//struct PACEMAKER {
-//    /* Input */
-//    double Aget;
-//    double Vget;
-//
-//    /* Output */
-//    int SA;
-//    int AP;
-//    int VP;
-//} pacemaker = { 0, 0, 0, 0, 0 };
-
 
 int force_exit = 0;
 
@@ -136,10 +122,8 @@ int lastIndexOf (char* base, char* str) {
 int parseState(char* state, char* field) {
     int offset = indexOf(state, field);
     char* fld = state + offset;
-    //    lwsl_notice("Field offset %d: \n",offset);
     char keys[] = "1234567890";
     int ans = (int)strtol(fld + strcspn(fld, keys), NULL, 10);
-    //    lwsl_notice("Field %s: %i\n",field, ans);
     return ans;
 }
 
@@ -244,7 +228,6 @@ int WebsocketServer(
         lwsl_notice("\n\n~~~~~~ RETURNING PORT ~~~~~~\n\n");
         return port;
     }
-//    *enable = FALSE;
     
     /* Keep the websocket live */
     if(!force_exit) {
@@ -295,7 +278,6 @@ int WebsocketServer(
                     /* PACING */
                     
                     lwsl_notice("Forwarding pacemaker signals to the heart: %s\n", (char*) callback_in);
-                    //                        pacemaker.SA = (pacemaker.SA + 1) % 2;
                     *AP = parseState((char*) callback_in, "AP");
                     *VP = parseState((char*) callback_in, "VP");
                     lwsl_notice("Signals forwarded -> AP := %i, VP := %i\n\n", *AP, *VP);
@@ -339,7 +321,7 @@ int WebsocketServer(
             }
         }
         /* Restarting the service */
-  //      *enable = TRUE;
+
     }
     else {
         close_websocket();
@@ -350,31 +332,31 @@ int WebsocketServer(
 }
 
 
-/* main function, for testing purposes */
-//int main(void) {
-//    const int max_attempts = 10;
-//    int i = 0;
-//    while(i < max_attempts && websocket_open == FALSE) {
-//        port = initial_port;
-//        websocket_open = open_websocket();
-//        initial_port++; /* change port so that a new port can be tried at the next attempt */
-//        i++;
-//    }
-//    
-//    lwsl_notice("Websocket server started!\n");
-//    
-//    signal(SIGINT, close_websocket);
-//    
-//    /* infinite loop, to end this server send SIGTERM. (CTRL+C) */
-//    while (!force_exit) {
-//        
-//        int a = 7;
-//        int b = 8;
-//        WebsocketServer(1,5,6,&a,&b,0);
-//        
-//    }
-//    
-//    close_websocket();
-//    return 0;
-//}
+/* main function, for testing purposes
+int main(void) {
+   const int max_attempts = 10;
+   int i = 0;
+   while(i < max_attempts && websocket_open == FALSE) {
+       port = initial_port;
+       websocket_open = open_websocket();
+       initial_port++; 
+       i++;
+   }
+   
+   lwsl_notice("Websocket server started!\n");
+   
+   signal(SIGINT, close_websocket);
+   
+   while (!force_exit) {
+       
+       int a = 7;
+       int b = 8;
+       WebsocketServer(1,5,6,&a,&b,0);
+       
+   }
+   
+   close_websocket();
+   return 0;
+}
+*/
 
