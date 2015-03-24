@@ -1,8 +1,0 @@
-%implements s231_b0_6gbhj_0_ModuleConstants "C"
-
-%function ModuleConstants(block) Output
-
-
-/* Named constants for Chart: '<S10>/Event generator' */
-#define heart_model_IN_state ((uint8_T)1U)
-%endfunction
