@@ -92,7 +92,7 @@ require([
     };
 
     /**
-     * @function logme
+     * @function logOnDiv
      * @description Utility function, sends messages to different div elements in the html page
      * @memberof module:Pacemaker-Simulink
      */
