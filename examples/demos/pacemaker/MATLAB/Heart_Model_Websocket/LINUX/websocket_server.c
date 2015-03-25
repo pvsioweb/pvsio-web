@@ -28,9 +28,9 @@ struct libwebsocket* callback_wsi;
 
 int force_exit = 0;
 
-const int MAX_CMD_LEN = 128;
-const int MAX_DIGITS = 8;
-const int MAX_LEN = 1024;
+#define MAX_CMD_LEN 128
+#define MAX_DIGITS 8
+#define MAX_LEN 1024
 
 
 /**
