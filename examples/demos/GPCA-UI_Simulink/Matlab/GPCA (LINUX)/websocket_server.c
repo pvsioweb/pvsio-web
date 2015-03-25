@@ -23,6 +23,10 @@ int initial_port = 2317;
 #define SUCCESS 1
 #define FAIL    0
 
+#define MAX_CMD_LEN 128
+#define MAX_DIGITS 8
+#define MAX_LEN 1024
+
 int websocket_open = FALSE;
 struct libwebsocket_context *context;
 
@@ -100,9 +104,6 @@ int WebsocketServer(/* input variables */
 }
 
 
-const int MAX_CMD_LEN = 128;
-const int MAX_DIGITS = 8;
-const int MAX_LEN = 1024;
 
 char controllerState[49][128] = {
     "CTRL_NULL",
