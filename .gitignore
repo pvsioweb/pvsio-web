@@ -7,8 +7,8 @@
 *.prf
 public/uploads/*
 public/widgetDefinitions/*
-example/projects/*/pvsbin/*
-example/projects/autosave
+examples/projects/*/pvsbin/*
+examples/projects/autosave
 *.summary
 node_modules/*
 doc/out
