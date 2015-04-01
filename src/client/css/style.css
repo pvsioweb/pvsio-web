@@ -834,6 +834,18 @@ fadeOut
     animation: fadeOut;
 }
 
+.demo-splash {
+    width: 100%;
+    opacity: 0.8;
+    float:left;
+    position: absolute;
+    z-index: 99999;
+    margin-top: 120px;
+    margin-left: auto;
+    -webkit-animation: fadeOut;
+    animation: fadeOut;
+}
+
 .loader {
     width: 600px;
     height: 400px;
@@ -912,4 +924,14 @@ fadeOut
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.dbg {
+    overflow: scroll;
+    color: lime;
+    background: black;
+    padding-left: 4px;
+    padding-top: 4px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: small;
 }
