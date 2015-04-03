@@ -401,14 +401,15 @@ define(function (require, exports, module) {
                     expr += " " + c.inExpr;
                     tmp.push(expr);
                 });
-                ans += tmp.join("\nelseif ") + "\n";
+                ans += tmp.join("\n    elseif ") + "\n";
                 ans += "    " + "else s" + "\n";
                 ans += "  " + "pre " + f.per.identifier + "(s);\n";
             });
             ans += "\noperations";
             vdmFunctions.forEach(function (f) {
-                ans += "\n  " + "transition_" + f.tran.identifier + ": State ==> State";
-                ans += "\n  " + "transition_" + f.tran.identifier + "(s) == " + f.tran.identifier + "(s);\n";
+                ans += "\n  " + "transition_" + f.tran.identifier + ": () ==> ()";
+                ans += "\n  " + "transition_" + f.tran.identifier + "() == State := " + f.tran.identifier + "(State)";
+                ans += "\n  " + "pre pre_" + f.tran.identifier + "(State);\n";
             });
             ret.res = ans;
         }
@@ -515,7 +516,7 @@ define(function (require, exports, module) {
         var ret = { err: null, res: null };
         
         var ans = this.print_descriptor(emuchart);
-        ans += "\\begin{vdm_al}\nmodule " + emuchart.name;
+        ans += "\nmodule " + emuchart.name + "\nexports all";
         ans += this.print_importings(emuchart);
         ans += "\n\ndefinitions\n\n";
         ans += this.print_constants(emuchart);
@@ -532,7 +533,7 @@ define(function (require, exports, module) {
         
         ans += initialTransitions.res;
         ans += transitions.res || "";
-        ans += "\nend " + emuchart.name + "\n\\end{vdm_al}";
+        ans += "\nend " + emuchart.name + "\n";
         ans += this.print_disclaimer();
         ret.res = ans;
         
