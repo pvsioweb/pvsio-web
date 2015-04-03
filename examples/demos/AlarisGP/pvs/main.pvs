@@ -1,6 +1,6 @@
 main: THEORY
  BEGIN
-  maxinfuse: nat = 999
+  maxinfuse: nat = 1200
   maxrate  : nat = maxinfuse
   infusemin: posreal = 0.1
   timeout  : nat = 200 % must be less than maxtime
