@@ -16,7 +16,7 @@ define(function (require, exports, module) {
     
     MIME.prototype.isHiddenFile = function (filename) {
         return (filename) ? filename.split("/").slice(-1)[0].indexOf(".") === 0 : false;
-    }
+    };
     
     MIME.prototype.isImage = function (filename) {
         if (filename && typeof filename === "string") {
@@ -33,12 +33,12 @@ define(function (require, exports, module) {
         if (filename && typeof filename === "string") {
             var ext = filename.split(".").slice(-1);
             if (ext && ext.length > 0) {
-                return ext[0].toLowerCase() === ".pvs";
+                return ext[0].toLowerCase() === "pvs";
             }
             return false;
         }
-        return false;    
-    }
+        return false;
+    };
     
     MIME.prototype.getImageExts = function () {
         return imageExts;

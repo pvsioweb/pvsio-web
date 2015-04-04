@@ -27,28 +27,32 @@ define(function (require, exports, module) {
     var template = require("text!pvsioweb/forms/templates/fileBrowser.handlebars"),
         BaseDialog = require("pvsioweb/forms/BaseDialog"),
         FormUtils = require("pvsioweb/forms/FormUtils");
-        
-    var timerId, rfb;
-
-    var OpenFilesView = BaseDialog.extend({
-        render: function (data) {
-            var t = Handlebars.compile(template);
-            this.$el.html(t(data));
-            $("body").append(this.el);
-            return this;
-        },
-        events: {
-            "click #btnOk": "ok",
-            "click #btnCancel": "cancel",
+		
+    var timer, rfb;
+    
+	var OpenFilesView = BaseDialog.extend({
+		render: function (data) {
+			var t = Handlebars.compile(template);
+			this.$el.html(t(data));
+			$("body").append(this.el);
+			return this;
+		},
+		events: {
+			"click #btnOk": "ok",
+			"click #btnCancel": "cancel",
             "input #baseDirectory": "onTextChanged",
+            "input #currentPath": "onEdit",
             "click #btnHome": "selectHome",
             "click #btnEdit": "enableEdit"
         },
         onTextChanged: function (event) {
-            clearTimeout(timerId);
-            timerId = setTimeout(function () {
+            clearTimeout(timer);
+            timer = setTimeout(function () {
                 rfb.rebaseDirectory($("#baseDirectory").val());
             }, 100);
+        },
+        onEdit: function (event) {
+            //TODO
         },
         selectHome: function (event) {
             rfb.rebaseDirectory("~");
@@ -72,6 +76,7 @@ define(function (require, exports, module) {
     */
     function RemoteFileBrowser(filterFunc) {
         rfb = this;
+        timer = null;
         this.filterFunc = filterFunc || function (d) { return true; };
     }
 
@@ -132,9 +137,11 @@ define(function (require, exports, module) {
             });
         return new Promise(function (resolve, reject) {
             view.on("cancel", function (event, view) {
+                clearTimeout(timer);
                 view.remove();
                 reject();
             }).on("ok", function (event, view) {
+                clearTimeout(timer);
                 var selectedFiles = self._treeList.getSelectedItems();
                 resolve(selectedFiles);
                 view.remove();
