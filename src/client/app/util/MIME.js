@@ -14,6 +14,10 @@ define(function (require, exports, module) {
     
     function MIME() { return this; }
     
+    MIME.prototype.isHiddenFile = function (filename) {
+        return (filename) ? filename.split("/").slice(-1)[0].indexOf(".") === 0 : false;
+    }
+    
     MIME.prototype.isImage = function (filename) {
         if (filename && typeof filename === "string") {
             var ext = filename.split(".").slice(-1);
@@ -24,6 +28,17 @@ define(function (require, exports, module) {
         }
         return false;
     };
+    
+    MIME.prototype.isPVS = function (filename) {
+        if (filename && typeof filename === "string") {
+            var ext = filename.split(".").slice(-1);
+            if (ext && ext.length > 0) {
+                return ext[0].toLowerCase() === ".pvs";
+            }
+            return false;
+        }
+        return false;    
+    }
     
     MIME.prototype.getImageExts = function () {
         return imageExts;

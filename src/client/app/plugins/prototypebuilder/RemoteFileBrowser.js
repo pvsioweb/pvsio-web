@@ -1,6 +1,6 @@
 /**
  * @module RemoteFileBrowser
- * @version 1.0
+ * @version 1.1
  * @description
  * Allows readonly access to the file system.
  
@@ -14,7 +14,7 @@
             }).join(",");
             console.log(paths);
         });
- * @author Patrick Oladimeji
+ * @author Patrick Oladimeji, Paolo Masci
  * @date 3/17/15 22:30:00 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
@@ -40,13 +40,29 @@ define(function (require, exports, module) {
 		events: {
 			"click #btnOk": "ok",
 			"click #btnCancel": "cancel",
-            "input #baseDirectory": "onTextChanged"
+            "input #baseDirectory": "onTextChanged",
+            "click #btnHome": "selectHome",
+            "click #btnEdit": "enableEdit"
 		},
         onTextChanged: function (event) {
             clearTimeout(timerId);
             timerId = setTimeout(function () {
                 rfb.rebaseDirectory($("#baseDirectory").val());
             }, 100);
+        },
+        selectHome: function (event) {
+            rfb.rebaseDirectory("/home");
+            rfb._treeList.selectItem("/home");
+        },
+        enableEdit: function (event) {
+            if (document.getElementById("currentPath").readOnly) {
+                document.getElementById("btnEdit").style.backgroundColor = "white";
+                document.getElementById("currentPath").readOnly = false;
+                document.getElementById("currentPath").focus();
+            } else {
+                document.getElementById("btnEdit").style.backgroundColor = "";
+                document.getElementById("currentPath").readOnly = true;
+            }
         }
 	});
 	
@@ -91,8 +107,10 @@ define(function (require, exports, module) {
      @param {string} path the path relative to the project directory whose content should be shown in the browser
      @returns {Promise} a Promise that settled (with an array containing selected files/folders [{path: <string>}]) when the user presses the ok or cancel button on the dialog
     */
-    RemoteFileBrowser.prototype.open = function (path) {
-        var view = new OpenFilesView({baseDirectory: path});
+    RemoteFileBrowser.prototype.open = function (path, opt) {
+        path = path || "/home/";
+        opt = opt || {};
+        var view = new OpenFilesView({baseDirectory: path, title: (opt.title || "Open file")});
         var self = this;
         getRemoteDirectory(path)
             .then(function (files) {
@@ -100,6 +118,7 @@ define(function (require, exports, module) {
                 self._treeList = new TreeList(data, "#file-browser", true);
                 self._treeList.addListener("SelectedItemChanged", function (event) {
                     var data = event.data;
+                    document.getElementById("currentPath").value = data.path;
                     if (data.isDirectory && !data.children && !data._children) {
                         getRemoteDirectory(data.path)
                             .then(function (files) {

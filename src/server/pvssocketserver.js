@@ -526,7 +526,7 @@ function run() {
             "readFile": function (token, socket, socketid) {
                 initProcessMap(socketid);
                 var encoding = token.encoding || "utf8";
-                token.path = path.join(baseProjectDir, token.path);
+                token.path = isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
                 readFile(token.path, encoding)
                     .then(function (content) {
                         var res = {

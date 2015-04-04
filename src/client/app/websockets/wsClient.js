@@ -49,6 +49,9 @@ define(function (require, exports, module) {
                         if (token.id && typeof callbackRegistry[token.id] === "function") {
                             var time = new Date().getTime() - token.time.client.sent;
                             console.log("Time to response for " + token.type + "  " + (time));
+                            if (token.type.indexOf("_error") >= 0) {
+                                console.error(token); // errors should always be reported in the browser console
+                            }
                             var f = callbackRegistry[token.id];
                             delete callbackRegistry[token.id];
                             f.call(o, token.err, token);

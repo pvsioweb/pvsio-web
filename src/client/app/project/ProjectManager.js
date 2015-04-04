@@ -1044,7 +1044,8 @@ define(function (require, exports, module) {
                 res.projects.forEach(function (project) {
                     projects.push(project.name);
                 });
-                CreateProjectView.create().on("cancel", function (e, formView) {
+                var defaultName = "prototype-" + new Date().toISOString().replace(/:|-/g, "-").split(".")[0];
+                CreateProjectView.create({ projectName: defaultName }).on("cancel", function (e, formView) {
                     formView.remove();
                     reject({
                         code: "CANCELED_BY_USER",

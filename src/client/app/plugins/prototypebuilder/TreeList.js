@@ -269,13 +269,16 @@ define(function (require, exports, module) {
             if (selectedData) {
                 //fire selected item changed event
                 selectedData.previousData = pd;
+                //update _selectedData
+                this._selectedData = selectedData;
+                //fire selected item changed event
                 this.fire({type: "SelectedItemChanged", data: selectedData});
 
-                setTimeout(function () {
-                    if (d3.select(el).node()) {
-                        d3.select(el).node().scrollTop = selectedData.y;
-                    }
-                }, duration);
+//                setTimeout(function () {
+//                    if (d3.select(el).node()) {
+//                        d3.select(el).node().scrollTop = selectedData.y;
+//                    }
+//                }, duration);
                 return true;
             }
         }

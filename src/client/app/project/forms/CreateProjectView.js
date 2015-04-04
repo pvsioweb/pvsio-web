@@ -11,19 +11,22 @@ define(function (require, exports, module) {
 		createProjectTemplate = require("text!./templates/createProject.handlebars"),
         BaseDialog  = require("pvsioweb/forms/BaseDialog"),
 		FormUtils   = require("pvsioweb/forms/FormUtils"),
+        MIME        = require("util/MIME"),
         RemoteFileBrowser = require("pvsioweb/RemoteFileBrowser");
     
     function imageFilter(d) {
-        var imageExts = ['.jpg', '.png', '.gif'];
-        var ext = d.path.substring(d.path.lastIndexOf("."));
-        return d.isDirectory || imageExts.indexOf(ext.toLowerCase()) > -1;
+        var mime = MIME.getInstance();
+        return !mime.isHiddenFile(d.path) && (d.isDirectory || mime.isImage(d.path));
+    }
+    function pvsFilter(d) {
+        var mime = MIME.getInstance();
+        return !mime.isHiddenFile(d.path) && (d.isDirectory || mime.isPVS(d.path));
     }
     
-    
 	var CreateProjectView = BaseDialog.extend({
-		render: function () {
+		render: function (data) {
 			var template = Handlebars.compile(createProjectTemplate);
-			this.$el.html(template());
+			this.$el.html(template(data));
 			$("body").append(this.el);
 			return this;
 		},
@@ -34,7 +37,8 @@ define(function (require, exports, module) {
             "click #btnChooseSpec": "chooseSpec"
 		},
         chooseImage: function (event) {
-            new RemoteFileBrowser(imageFilter).open("")
+            new RemoteFileBrowser(imageFilter)
+                .open("/home", { title: "Select a picture" })
                 .then(function (files) {
                     var paths = files.map(function (f) {
                         return f.path;
@@ -43,7 +47,8 @@ define(function (require, exports, module) {
                 });
         },
         chooseSpec: function (event) {
-            new RemoteFileBrowser(null).open("")
+            new RemoteFileBrowser(pvsFilter)
+                .open("/home", { title: "Select .pvs files (use shift key to select multiple files)" })
                 .then(function (files) {
                     var paths = files.map(function (f) {
                         return f.path;
@@ -54,8 +59,8 @@ define(function (require, exports, module) {
 	});
 	
 	module.exports = {
-		create: function () {
-			return new CreateProjectView();
+		create: function (data) {
+			return new CreateProjectView(data);
 		}
 	};
 });

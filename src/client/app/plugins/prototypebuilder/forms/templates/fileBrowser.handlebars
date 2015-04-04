@@ -1,10 +1,31 @@
 <div class="form-center">
-    <div class="panel panel-info center dialog shadow">
-        <div class="panel-heading">Open file (non absolute paths are relative to projects directory)</div>
+    <div class="panel panel-info center dialog shadow" style="width:640px">
+        <div class="panel-heading">{{title}}</div>
         <form class="center form-horizontal" onsubmit="return false" role="form">
             <div class="input-group">
-                <span class="input-group-addon" id="basic-addon2">Base directory</span>
-                <input id="baseDirectory" type="text" class="form-control" placeholder="base directory" value="{{baseDirectory}}" aria-describedby="basic-addon2">
+                <span class="input-group-addon" id="basic-addon2" style="display:none">Base Directory</span>
+                <input id="baseDirectory"
+                       type="text"
+                       class="form-control"
+                       placeholder="Please enter an absolute path..."
+                       value="{{baseDirectory}}"
+                       aria-describedby="basic-addon2"
+                       style="display:none">
+                <span class="input-group-addon" id="btnHome" style="cursor:pointer;">
+                    <button><span class="glyphicon glyphicon-home" alt="Home folder"></span></button>
+                </span>
+                <span class="input-group-addon" id="btnEdit" style="cursor:pointer;">
+                    <button><span class="glyphicon glyphicon-pencil" alt="Browse manually"></span></button>
+                </span>
+                <input id="currentPath"
+                       type="text"
+                       class="form-control"
+                       placeholder="Please enter an absolute path..."
+                       value="{{baseDirectory}}"
+                       style="min-height:36px"
+                       readonly
+                       autofocus
+                       alt="Path of the selected element">
             </div>
             <div class="center">
                 <div id="file-browser">
