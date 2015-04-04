@@ -14,7 +14,10 @@
         get client rect for the given element
     */
     function cr(el) {
-        return el.node().getBoundingClientRect();
+        return {
+            height: el.node().getBoundingClientRect().height || el.node().height,
+            width: el.node().getBoundingClientRect(). width || el.node().width
+        };
     }
     
     function pos(el) {
