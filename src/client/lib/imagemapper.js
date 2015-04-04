@@ -16,7 +16,7 @@
     function cr(el) {
         return {
             height: el.node().getBoundingClientRect().height || el.node().height,
-            width: el.node().getBoundingClientRect(). width || el.node().width
+            width: el.node().getBoundingClientRect().width || el.node().width
         };
     }
     
