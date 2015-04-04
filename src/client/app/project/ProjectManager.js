@@ -64,7 +64,8 @@ define(function (require, exports, module) {
         Storyboard            = require("pvsioweb/Storyboard"),
         Constants             = require("util/Constants"),
         MIME                  = require("util/MIME"),
-        PVSioWebClient        = require("PVSioWebClient").getInstance();
+        PVSioWebClient        = require("PVSioWebClient").getInstance(),
+        RemoteFileBrowser     = require("pvsioweb/RemoteFileBrowser");
     
 	var pvsFilesListView; // This is the PVSio-web file browser instance ** TODO: create a separate module **
     var _projectManager; // Project Manager instance ("this" pointer)
@@ -494,6 +495,51 @@ define(function (require, exports, module) {
     };
     
 	/**
+     * @function <hr><a name="readFileDialog">readFileDialog</a>
+     * @description Reads the content of a file from disk. This function is a variant of 
+     *              <a href="readFile">readFile</a> designed to show a file browser
+     *              for selecting the file.
+     * @returns {Promise(Descriptor)} A Promise that resolves to a file descriptor.
+     * @memberof module:ProjectManager
+     * @instance
+     *
+     * @example <caption>Using readFileDialog to open the file browser.</caption>
+     * // pm is the ProjectManager instance
+     * pm.readFileDialog().then(function (res) {
+     *     // res.content is the file content
+     *     var content = res.content;
+     *     //...
+     * }).catch(function (err) {
+     *     //file could not be read...
+     *     console.log(err);
+     * });
+     *
+	 */
+    ProjectManager.prototype.readFileDialog = function (opt) {
+        return new Promise(function (resolve, reject) {
+            opt = opt || {};
+            opt.filter = opt.filter ||
+                ((opt.encoding === "base64") ? MIME.getInstance().imageFilter : MIME.getInstance().modelFilter);
+            new RemoteFileBrowser(opt.filter)
+                .open("/home", { title: opt.title || "Select files (use shift key to select multiple files)" })
+                .then(function (files) {
+                    var paths = files.map(function (f) {
+                        return f.path;
+                    });
+                    var promises = [];
+                    paths.forEach(function (path) {
+                        promises.push(_projectManager.readFile(path, opt));
+                    });
+                    return Promise.all(promises).then(function (res) {
+                        resolve(res);
+                    });
+                }).catch(function (err) {
+                    reject(err);
+                });
+        });
+    };
+
+    /**
      * @function <hr><a name="readLocalFile">readLocalFile</a>
      * @description Reads the content of a local file stored on the client.
      * @param fileList {!FileList} The list of local files that shall be read.

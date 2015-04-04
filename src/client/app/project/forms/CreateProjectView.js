@@ -37,6 +37,10 @@ define(function (require, exports, module) {
             "click #btnChooseSpec": "chooseSpec"
 		},
         chooseImage: function (event) {
+//            ProjectManager.getInstance().readFileDialog({encoding: "base64", title: "Select a picture"}).then(function (res) {
+//                // here we can use res.content to show a preview of the image
+//                resolve(res);
+//            }).catch(function (err) { reject(err); });
             new RemoteFileBrowser(imageFilter)
                 .open("/home", { title: "Select a picture" })
                 .then(function (files) {

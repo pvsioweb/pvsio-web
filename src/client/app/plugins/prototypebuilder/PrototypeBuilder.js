@@ -22,7 +22,8 @@ define(function (require, exports, module) {
         fs              = require("util/fileHandler"),
         NotificationManager = require("project/NotificationManager"),
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
-        Descriptor      = require("project/Descriptor");
+        Descriptor      = require("project/Descriptor"),
+        CreateProjectView = require("project/forms/CreateProjectView");
     
 	var instance;
     var currentProject,
@@ -405,7 +406,25 @@ define(function (require, exports, module) {
         
         // add listener for upload button
         d3.selectAll("#btnLoadPicture").on("click", function () {
-            d3.select("#btnSelectPicture").node().click();
+            return new Promise(function (resolve, reject) {
+                if (PVSioWebClient.getInstance().serverOnLocalhost()) {
+                    projectManager.readFileDialog({encoding: "base64", title: "Select a picture"}).then(function (descriptors) {
+                        _prototypeBuilder.changeImage(descriptors[0].name, descriptors[0].content).then(function (res) {
+                            renderImage(res).then(function (res) {
+                                if (d3.select("#imageDiv svg").node() === null) {
+                                    // we need to create the svg layer, as it's not there
+                                    // this happens when a new project is created without selecting an image
+                                    WidgetManager.updateMapCreator();
+                                }
+                                resolve(res);
+                            });
+                        });
+                    }).catch(function (err) { reject(err); });
+                } else {
+                    d3.select("#btnSelectPicture").node().click();
+                    resolve();
+                }
+            });
         });
         d3.selectAll("#btnEditStoryboard").on("click", function () {
             WidgetManager.displayEditStoryboardDialog();
@@ -416,7 +435,7 @@ define(function (require, exports, module) {
                 fs.readLocalFile(file).then(function (res) {
                     _prototypeBuilder.changeImage(res.name, res.content).then(function (res) {
                         renderImage(res).then(function (res) {
-                            projectManager.project().getImage();
+//                            projectManager.project().getImage();
                             resolve(res);
                         });
                     });
@@ -434,7 +453,6 @@ define(function (require, exports, module) {
                         WidgetManager.updateMapCreator();
                     }
                 });
-                                        
             }
         });
 

@@ -567,7 +567,7 @@ function run() {
                     name: token.name,
                     path: token.path
                 };
-                token.path = path.join(baseProjectDir, token.path);
+                token.path = isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
                 
                 writeFile(token.path, token.content, token.encoding, token.opt)
                     .then(function () {

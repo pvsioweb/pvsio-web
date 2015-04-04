@@ -10,7 +10,7 @@ define(function (require, exports, module) {
 
     var instance = null,
         imageExts = [".jpg", ".jpeg", ".png"],
-        filesFilter = [".pvs", ".tex", ".txt", ".i", ".json", ".emdl", ".vdmsl"].concat(imageExts);
+        modelFiles = [".pvs", ".tex", ".txt", ".i", ".json", ".emdl", ".vdmsl"];
     
     function MIME() { return this; }
     
@@ -29,6 +29,17 @@ define(function (require, exports, module) {
         return false;
     };
     
+    MIME.prototype.isModel = function (filename) {
+        if (filename && typeof filename === "string") {
+            var ext = filename.split(".").slice(-1);
+            if (ext && ext.length > 0) {
+                return modelFiles.indexOf("." + ext[0].toLowerCase()) > -1;
+            }
+            return false;
+        }
+        return false;
+    };
+    
     MIME.prototype.isPVS = function (filename) {
         if (filename && typeof filename === "string") {
             var ext = filename.split(".").slice(-1);
@@ -40,12 +51,24 @@ define(function (require, exports, module) {
         return false;
     };
     
+    MIME.prototype.imageFilter = function (d) {
+        return (instance.isHiddenFile(d.path) === false) && (d.isDirectory || instance.isImage(d.path));
+    };
+    
+    MIME.prototype.modelFilter = function (d) {
+        return (instance.isHiddenFile(d.path) === false) && (d.isDirectory || instance.isModel(d.path));
+    };
+
+    MIME.prototype.pvsFilter = function (d) {
+        return (instance.isHiddenFile(d.path) === false) && (d.isDirectory || instance.isPVS(d.path));
+    };
+    
     MIME.prototype.getImageExts = function () {
         return imageExts;
     };
     
     MIME.prototype.getFilesFilter = function () {
-        return filesFilter;
+        return modelFiles.concat(imageExts);
     };
 
     module.exports = {

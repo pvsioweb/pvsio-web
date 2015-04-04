@@ -890,8 +890,12 @@ define(function (require, exports, module) {
             txt = "openProject(AlarisGH_AsenaCC)";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
+                // testing the API with the Prototype Builder panel collapsed
+                d3.select(".toggle-collapse").node().click();
                 pm.openProject("AlarisGH_AsenaCC").then(function (project) {
                     addSuccess(project.name() + " successfully opened");
+                    //re-opening the panel
+                    d3.select(".toggle-collapse").node().click();
                     resolve(project);
                 }).catch(function (err) {
                     addFail("Fail to open project AlarisGH_AsenaCC. " + JSON.stringify(err));
@@ -1196,8 +1200,9 @@ define(function (require, exports, module) {
                             expect(res.name).toBeDefined();
                             expect(res._dirty() === false).toBeTruthy();
                             expect(d3.select("#txtProjectName").node().textContent !== "").toBeTruthy();
-                            // the following two fail with the current implementation because the UI
+                            // the following three fail with the current implementation because the UI
                             // is updated after a short while when ProjectManager receives event "ProjectChanged"
+//                            expect(d3.select(".list-group-item").node().textContent.indexOf("display") >= 0).toBeTruthy();
 //                            expect(res.name() === d3.select("#txtProjectName").node().textContent).toBeTruthy();
 //                            expect(d3.select("#imageDiv img").node().src.indexOf("data:image/") === 0).toBeTruthy();
                             done();

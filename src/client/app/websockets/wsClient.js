@@ -14,7 +14,7 @@ define(function (require, exports, module) {
         events      = require("websockets/events");
     
     module.exports = function () {
-        var o = eventDispatcher({}), ws, callbackRegistry = {};
+        var o = eventDispatcher({}), ws, callbackRegistry = {}, dbg = false;
         o.url = property.call(o, "ws://localhost");
 		o.port = property.call(o);
         /**
@@ -49,7 +49,7 @@ define(function (require, exports, module) {
                         if (token.id && typeof callbackRegistry[token.id] === "function") {
                             var time = new Date().getTime() - token.time.client.sent;
                             console.log("Time to response for " + token.type + "  " + (time));
-                            if (token.type.indexOf("_error") >= 0) {
+                            if (token.type.indexOf("_error") >= 0 && dbg) {
                                 console.error(token); // errors should always be reported in the browser console
                             }
                             var f = callbackRegistry[token.id];

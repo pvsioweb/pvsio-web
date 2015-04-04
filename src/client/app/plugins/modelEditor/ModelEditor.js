@@ -15,8 +15,10 @@ define(function (require, exports, module) {
 		sourceCodeTemplate	= require("text!pvsioweb/forms/templates/sourceCodeEditorPanel.handlebars"),
         Logger              = require("util/Logger"),
         NotificationManager = require("project/NotificationManager"),
-        Notification = require("pvsioweb/forms/displayNotification"),
-        WSManager           = require("websockets/pvs/WSManager");
+        Notification        = require("pvsioweb/forms/displayNotification"),
+        WSManager           = require("websockets/pvs/WSManager"),
+        CreateProjectView   = require("project/forms/CreateProjectView"),
+        MIME                = require("util/MIME");
 	var instance;
     var currentProject,
         projectManager,
@@ -175,7 +177,7 @@ define(function (require, exports, module) {
     function bindListeners(projectManager) {
         d3.select("#btnImportFiles").on("click", function () {
             return new Promise(function (resolve, reject) {
-                projectManager.readLocalFileDialog().then(function (files) {
+                function writeFiles(files) {
                     var promises = [];
                     function getImportFolderName() {
                         var selectedData = projectManager.getSelectedData();
@@ -184,13 +186,24 @@ define(function (require, exports, module) {
                     }
                     var importFolder = getImportFolderName();
                     files.forEach(function (file) {
+                        // FIXME: directories are discarded when using absolute paths. Can we do better?
+                        if (file.path.indexOf("/") === 0) { file.path = file.name; }
                         file.path = importFolder + "/" + file.path;
                         promises.push(projectManager.writeFileDialog(file.path, file.content, { encoding: file.encoding }));
                     });
                     Promise.all(promises).then(function (res) {
                         resolve(res);
                     }).catch(function (err) { reject(err); });
-                }).catch(function (err) { reject(err); });
+                }
+                if (PVSioWebClient.getInstance().serverOnLocalhost()) {
+                    projectManager.readFileDialog({title: "Import files into Project"}).then(function (res) {
+                        writeFiles(res);
+                    }).catch(function (err) { reject(err); });
+                } else {
+                    projectManager.readLocalFileDialog().then(function (res) {
+                        writeFiles(res);
+                    }).catch(function (err) { reject(err); });
+                }
             });
         });
 		d3.select("#btnSaveFile").on("click", function () {
