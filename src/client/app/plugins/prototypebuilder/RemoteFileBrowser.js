@@ -3,7 +3,7 @@
  * @version 1.1
  * @description
  * Allows readonly access to the file system.
- 
+
     var RemoteFileBrowser = require("plugins/prototypebuilder/RemoteFileBrowser");
     //create a new RemoteFileBrowser instance and open the default projects directory
     //you can pass in a directory relative to the projects directory to open a different directory
@@ -44,7 +44,7 @@ define(function (require, exports, module) {
             "input #currentPath": "onEdit",
             "click #btnHome": "selectHome",
             "click #btnEdit": "enableEdit"
-		},
+        },
         onTextChanged: function (event) {
             clearTimeout(timer);
             timer = setTimeout(function () {
@@ -55,8 +55,8 @@ define(function (require, exports, module) {
             //TODO
         },
         selectHome: function (event) {
-            rfb.rebaseDirectory("/home");
-            rfb._treeList.selectItem("/home");
+            rfb.rebaseDirectory("~");
+            rfb._treeList.selectItem("~");
         },
         enableEdit: function (event) {
             if (document.getElementById("currentPath").readOnly) {
@@ -68,8 +68,8 @@ define(function (require, exports, module) {
                 document.getElementById("currentPath").readOnly = true;
             }
         }
-	});
-	
+    });
+    
     /**
         Constructs a new instance of the RemoteFileBrowser
         @param {function} filterFunc a function to filter which file should be shown in the browser if null, then all files are shown
@@ -79,9 +79,9 @@ define(function (require, exports, module) {
         timer = null;
         this.filterFunc = filterFunc || function (d) { return true; };
     }
-    
+
     RemoteFileBrowser.prototype._treeList = null;
-    
+
     function getRemoteDirectory(path) {
         var ws = WSManager.getWebSocket();
         return new Promise(function (resolve, reject) {
@@ -94,7 +94,7 @@ define(function (require, exports, module) {
             });
         });
     }
-    
+
     RemoteFileBrowser.prototype.rebaseDirectory = function (path) {
         var self = this;
         getRemoteDirectory(path)
@@ -106,14 +106,14 @@ define(function (require, exports, module) {
                 self._treeList.data = [];
             });
     };
-    
+
     /**
      Opens a dialog to browse a remote directory.
      @param {string} path the path relative to the project directory whose content should be shown in the browser
      @returns {Promise} a Promise that settled (with an array containing selected files/folders [{path: <string>}]) when the user presses the ok or cancel button on the dialog
     */
     RemoteFileBrowser.prototype.open = function (path, opt) {
-        path = path || "/home/";
+        path = path || "~";
         opt = opt || {};
         var view = new OpenFilesView({baseDirectory: path, title: (opt.title || "Open file")});
         var self = this;
@@ -148,7 +148,7 @@ define(function (require, exports, module) {
             });
         });
     };
-    
-    
+
+
     module.exports = RemoteFileBrowser;
 });
