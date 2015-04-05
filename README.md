@@ -9,8 +9,9 @@ Live version
 ------------
 
 Realistic prototypes created using PVSio-web can be found at the following links:
-* http://www.pvsioweb.org/demos/BBraun (Commercial infusion pump prototype)
-* http://www.pvsioweb.org/demos/GPCA-UI_PVS/NavKeys/ (GIP pump prototype)
+* http://www.pvsioweb.org/demos/AlarisGP (Commercial infusion pump prototype - full model)
+* http://www.pvsioweb.org/demos/BBraun   (Commercial infusion pump prototype - data entry system only)
+* http://www.pvsioweb.org/demos/GPCA-UI_PVS/NavKeys/ (FDA's Generic Infusion Pump prototype - full model)
 
 The full PVSio-web tool with limited features is also available at http://www.pvsioweb.org 
 (please note that the web server has limited processing power so its response time might not be optimal; also, note that the file system is read-only, so you will not be able to save new prototypes or compile new models using this live version).
