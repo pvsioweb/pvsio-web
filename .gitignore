@@ -4,7 +4,7 @@
 .pvscontext
 .settings
 .DS_Store
-*.prf
+*.bin
 public/uploads/*
 public/widgetDefinitions/*
 examples/projects/*/pvsbin/*
