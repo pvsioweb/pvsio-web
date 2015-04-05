@@ -37,7 +37,7 @@ define(function (require, exports, module) {
         EmuchartsLustrePrinter = require("plugins/emulink/EmuchartsLustrePrinter"),
         EmuchartsPIMPrinter    = require("plugins/emulink/EmuchartsPIMPrinter"),
         EmuchartsCppPrinter    = require("plugins/emulink/EmuchartsCppPrinter"),
-        EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter"),
+        EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter2"),
         EmuchartsVDMPrinter    = require("plugins/emulink/EmuchartsVDMPrinter"),
         EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         fs = require("util/fileHandler"),
