@@ -7,16 +7,16 @@
 /*global define, $, Handlebars, Backbone, self*/
 define(function (require, exports, module) {
 	"use strict";
-	var d3						= require("d3/d3"),
-		template				= require("text!./templates/openFiles.handlebars"),
+	var d3         = require("d3/d3"),
+		template   = require("text!./templates/openFiles.handlebars"),
         BaseDialog = require("pvsioweb/forms/BaseDialog"),
-	   FormUtils				= require("./FormUtils");
+	    FormUtils  = require("./FormUtils");
 	
 	
 	var OpenFilesView = BaseDialog.extend({
-		render: function () {
+		render: function (opt) {
 			var t = Handlebars.compile(template);
-			this.$el.html(t());
+			this.$el.html(t(opt));
 			$("body").append(this.el);
 			return this;
 		},
@@ -27,9 +27,13 @@ define(function (require, exports, module) {
 	});
 	
 	module.exports = {
-		create: function (options, labelFunc) {
+		create: function (opt, labelFunc) {
 			labelFunc = labelFunc || function (d) { return d.label; };
-			return new OpenFilesView();
+            opt = opt || {};
+            opt.accept = (opt.extensions && typeof opt.extensions === "object")
+                            ? opt.extensions.join(",") : ".pvs";
+            opt.title = opt.title || "Import files into Project";
+			return new OpenFilesView(opt);
 		}
 	};
 });

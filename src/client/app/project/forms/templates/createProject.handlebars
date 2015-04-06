@@ -23,11 +23,20 @@
                     <label class="control-label col-sm-4" for="prototypeImage">User Interface Picture</label>
                     <div class="col-sm-8">
                         <div class="input-group">
+                            <input type="file"
+                                   id="localPrototypeImage"
+                                   name="localPrototypeImage"
+                                   class="form-control"
+                                   placeholder="Please select a prototype image..."
+                                   accept="image/*"
+                                   style="display:none"
+                                   value=""/>
                             <input type="text"
                                    id="prototypeImage"
                                    name="prototypeImage"
                                    class="form-control"
                                    placeholder="Please select a prototype image..."
+                                   readonly
                                    value=""/>
                             <span class="input-group-addon" id="btnChooseImage" style="cursor:pointer;">Select</span>
                         </div>
@@ -37,11 +46,22 @@
                     <label class="control-label col-sm-4" for="pvsSpec">PVS Files</label>
                     <div class="col-sm-8">
                          <div class="input-group">
+                             <input type="file"
+                                    id="localPVSSpec"
+                                    name="localPVSSpec"
+                                    multiple="true"
+                                    class="form-control"
+                                    placeholder="Please select PVS model files..."
+                                    accept=".pvs"
+                                    style="display:none"
+                                    value=""/>
                              <input type="text"
                                     id="pvsSpec"
                                     name="pvsSpec"
+                                    multiple="true"
                                     class="form-control"
                                     placeholder="Please select PVS model files..."
+                                    readonly
                                     value=""/>
                             <span class="input-group-addon" id="btnChooseSpec" style="cursor:pointer;">Select</span>
                         </div>

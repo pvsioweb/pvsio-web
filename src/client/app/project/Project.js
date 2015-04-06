@@ -193,7 +193,7 @@ define(function (require, exports, module) {
         var structure = {path: projectName, name: projectName, isDirectory: true};
         var tree = {};
         var paths = _descriptors.filter(function (f) {
-            return MIME.getInstance().getFilesFilter().indexOf(f.extension.toLowerCase()) > -1;
+            return MIME.getInstance().getFileExts().indexOf(f.extension.toLowerCase()) > -1;
         }).map(function (f) {
             return f.path;
         }).sort();
@@ -310,6 +310,12 @@ define(function (require, exports, module) {
 			suppressEvent = arguments[3];
 			newFile = new Descriptor(path, content, { encoding: encoding });
 		}
+        // sanity check -- descriptors can be added to the current project only
+        if (newFile.path.startsWith(_this.name()) === false) {
+            var tmp = newFile.path.split("/").filter(function (e) { return e !== ""; });
+            tmp = [_this.name()].concat(tmp);
+            newFile.path = tmp.join("/");
+        }
         if (!_this.getDescriptor(newFile.path)) {
             _descriptors.push(newFile);
 //        } else {
@@ -444,11 +450,15 @@ define(function (require, exports, module) {
     };
 
     /**
-        Imports remote files into the current project.
-        @param {Array<string>} paths a list of paths to files to import.
-            The paths should be relative to the projects folder directory
+     * @function importRemoteFiles
+     * @description Imports remote files into the current project.
+     * @param {String} A comma-separated list of paths.
+     *                 Paths can be either absolute (i.e., they start with "/") or relative to the projects folder
+     * @memberof module:Project
+     * @instance
     */
     Project.prototype.importRemoteFiles = function (paths) {
+        paths = paths.split(",");
         var imageExts = [".jpg", ".png", ".gif"];
         return new Promise(function (resolve, reject) {
             if (!paths) { return resolve([]); }
@@ -457,7 +467,6 @@ define(function (require, exports, module) {
                 var promises = files.map(function (file) {
                     return _this.addFileDialog(file.name, file.content, {encoding: file.encoding});
                 });
-                
                 return Promise.all(promises);
             }
             

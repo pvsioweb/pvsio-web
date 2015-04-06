@@ -10,7 +10,8 @@ define(function (require, exports, module) {
 
     var instance = null,
         imageExts = [".jpg", ".jpeg", ".png"],
-        modelFiles = [".pvs", ".tex", ".txt", ".i", ".json", ".emdl", ".vdmsl"];
+        modelExts = [".pvs", ".tex", ".i", ".emdl", ".vdmsl", ".muz"],
+        otherExts = [".txt", ".json"];
     
     function MIME() { return this; }
     
@@ -18,37 +19,35 @@ define(function (require, exports, module) {
         return (filename) ? filename.split("/").slice(-1)[0].indexOf(".") === 0 : false;
     };
     
-    MIME.prototype.isImage = function (filename) {
+    function checkExt(filename, legalExts) {
         if (filename && typeof filename === "string") {
             var ext = filename.split(".").slice(-1);
             if (ext && ext.length > 0) {
-                return imageExts.indexOf("." + ext[0].toLowerCase()) > -1;
+                return legalExts.indexOf("." + ext[0].toLowerCase()) > -1;
             }
             return false;
         }
         return false;
+    }
+
+    MIME.prototype.isImage = function (filename) {
+        return checkExt(filename, imageExts);
     };
     
     MIME.prototype.isModel = function (filename) {
-        if (filename && typeof filename === "string") {
-            var ext = filename.split(".").slice(-1);
-            if (ext && ext.length > 0) {
-                return modelFiles.indexOf("." + ext[0].toLowerCase()) > -1;
-            }
-            return false;
-        }
-        return false;
+        return checkExt(filename, modelExts);
     };
     
     MIME.prototype.isPVS = function (filename) {
-        if (filename && typeof filename === "string") {
-            var ext = filename.split(".").slice(-1);
-            if (ext && ext.length > 0) {
-                return ext[0].toLowerCase() === "pvs";
-            }
-            return false;
-        }
-        return false;
+        return checkExt(filename, [".pvs"]);
+    };
+    
+    MIME.prototype.isEmucharts = function (filename) {
+        return checkExt(filename, [".emdl"]);
+    };
+    
+    MIME.prototype.isPIM = function (filename) {
+        return checkExt(filename, [".muz"]);
     };
     
     MIME.prototype.imageFilter = function (d) {
@@ -62,13 +61,23 @@ define(function (require, exports, module) {
     MIME.prototype.pvsFilter = function (d) {
         return (instance.isHiddenFile(d.path) === false) && (d.isDirectory || instance.isPVS(d.path));
     };
+
+    MIME.prototype.filter = function (exts) {
+        return function (descriptor) {
+            return (instance.isHiddenFile(descriptor.path) === false) && (descriptor.isDirectory || checkExt(descriptor.path, exts));
+        };
+    };
     
     MIME.prototype.getImageExts = function () {
         return imageExts;
     };
     
-    MIME.prototype.getFilesFilter = function () {
-        return modelFiles.concat(imageExts);
+    MIME.prototype.getModelExts = function () {
+        return modelExts;
+    };
+    
+    MIME.prototype.getFileExts = function () {
+        return modelExts.concat(imageExts).concat(otherExts);
     };
 
     module.exports = {

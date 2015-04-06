@@ -3,8 +3,8 @@
  * @author Patrick Oladimeji, Paolo Masci
  * @date Jan 3, 2013 : 12:56:03 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
-/*global define, require, Handlebars, $*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true*/
+/*global define, require, Handlebars, $, Promise*/
 define(function (require, exports, module) {
     "use strict";
     var d3			= require("d3/d3"),
@@ -12,7 +12,8 @@ define(function (require, exports, module) {
         BaseDialog  = require("pvsioweb/forms/BaseDialog"),
         FormUtils   = require("pvsioweb/forms/FormUtils"),
         MIME        = require("util/MIME"),
-        RemoteFileBrowser = require("pvsioweb/RemoteFileBrowser");
+        RemoteFileBrowser = require("pvsioweb/RemoteFileBrowser"),
+        PVSioWebClient        = require("PVSioWebClient").getInstance();
 
     function imageFilter(d) {
         var mime = MIME.getInstance();
@@ -21,6 +22,36 @@ define(function (require, exports, module) {
     function pvsFilter(d) {
         var mime = MIME.getInstance();
         return !mime.isHiddenFile(d.path) && (d.isDirectory || mime.isPVS(d.path));
+    }
+    function choose(_title, _encoding) {
+        function fileList2Array(fl) {
+            var ans = [], i = 0;
+            for (i = 0; fl && i < fl.length; i++) { ans[i] = fl[i].name; }
+            return ans;
+        }
+        var el_remote = (_encoding === "base64") ? "#prototypeImage" : "#pvsSpec";
+        if (PVSioWebClient.serverOnLocalhost()) {
+            require("project/ProjectManager").getInstance().readFileDialog({
+                encoding: _encoding,
+                title: _title
+            }).then(function (res) {
+                // TODO: here we can use res.content to show a preview of the image
+                var paths = res.map(function (f) {
+                    return f.path;
+                }).join(",");// NB: avoid any space here between file names, otherwhise the path is not re-constructed correctly. FIXME: We need to think of a more robust implementation!
+                $(el_remote).val(paths);
+            });
+        } else {
+            var el_local = (_encoding === "base64") ? "#localPrototypeImage" : "#localPVSSpec";
+            d3.select(el_local).on("change", function () {
+                var paths = fileList2Array(d3.select(el_local).node().files);
+                $(el_remote).val("");
+                if (paths) {
+                    $(el_remote).val(paths.join(", "));
+                }
+            });
+            d3.select(el_local).node().click();
+        }
     }
 
     var CreateProjectView = BaseDialog.extend({
@@ -36,29 +67,11 @@ define(function (require, exports, module) {
             "click #btnChooseImage": "chooseImage",
             "click #btnChooseSpec": "chooseSpec"
         },
-        chooseImage: function (event) {
-//            ProjectManager.getInstance().readFileDialog({encoding: "base64", title: "Select a picture"}).then(function (res) {
-//                // here we can use res.content to show a preview of the image
-//                resolve(res);
-//            }).catch(function (err) { reject(err); });
-            new RemoteFileBrowser(imageFilter)
-                .open("~", { title: "Select a picture" })
-                .then(function (files) {
-                    var paths = files.map(function (f) {
-                        return f.path;
-                    }).join(",");
-                    $("#prototypeImage").val(paths);
-                });
+        chooseImage: function () {
+            choose("Please select a prototype image...", "base64");
         },
-        chooseSpec: function (event) {
-            new RemoteFileBrowser(pvsFilter)
-                .open("~", { title: "Select .pvs files (use shift key to select multiple files)" })
-                .then(function (files) {
-                    var paths = files.map(function (f) {
-                        return f.path;
-                    }).join(",");
-                    $("#pvsSpec").val(paths);
-                });
+        chooseSpec: function () {
+            choose("Please select PVS model files...");
         }
     });
     

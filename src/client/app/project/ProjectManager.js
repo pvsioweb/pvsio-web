@@ -521,7 +521,7 @@ define(function (require, exports, module) {
             opt.filter = opt.filter ||
                 ((opt.encoding === "base64") ? MIME.getInstance().imageFilter : MIME.getInstance().modelFilter);
             new RemoteFileBrowser(opt.filter)
-                .open("/home", { title: opt.title || "Select files (use shift key to select multiple files)" })
+                .open("~", { title: opt.title || "Select files (use shift key to select multiple files)" })
                 .then(function (files) {
                     var paths = files.map(function (f) {
                         return f.path;
@@ -592,9 +592,12 @@ define(function (require, exports, module) {
             }
         });
     };
-	ProjectManager.prototype.readLocalFileDialog = function () {
+	ProjectManager.prototype.readLocalFileDialog = function (opt) {
+        opt = opt || {};
+        opt.extensions = opt.extensions ||
+            ((opt.encoding === "base64") ? MIME.getInstance().getImageExts() : MIME.getInstance().getModelExts());
         return new Promise(function (resolve, reject) {
-            openFilesForm.create().on("cancel", function (e, view) {
+            openFilesForm.create(opt).on("cancel", function (e, view) {
                 view.remove();
                 reject({
                     code: "CANCELED_BY_USER",
@@ -1029,6 +1032,20 @@ define(function (require, exports, module) {
      */
     ProjectManager.prototype.createProject = function (data) {
         return new Promise(function (resolve, reject) {
+            var nCalls = 0, success = true;
+            function finalise(p) {
+                nCalls++;
+                var previous = _projectManager.project();
+                p.project.initFromJSON(p.descriptors);
+                _projectManager.project(p.project);
+                // fire ProjectChanged event
+                var evt = { type: "ProjectChanged", current: p.project, previous: previous };
+                fireProjectChanged(evt);
+                success = success && data.success;
+                if (nCalls === 2) {
+                    resolve(p.project);
+                }
+            }
             // sanity check
             if (!data || !data.projectName) {
                 return reject({
@@ -1044,9 +1061,14 @@ define(function (require, exports, module) {
             var descriptors = [];
             var project = new Project(data.projectName);
             return _projectManager.mkDir(data.projectName, opt).then(function (res) {
-                project.importRemoteFiles(data.pvsSpec && data.pvsSpec.split(",")).then(function (res) {
-                    if (res) { descriptors = res; }
-                    return project.importRemoteFiles(data.prototypeImage && data.prototypeImage.split(",")).then(function (res) {
+                if (PVSioWebClient.serverOnLocalhost()) {
+                    project.importRemoteFiles(data.pvsSpec).then(function (res) {
+                        if (res) { descriptors = descriptors.concat(res); }
+                        finalise({ project: project, descriptors: descriptors, success: true });
+                    }).catch(function (err) {
+                        finalise({ project: project, descriptors: descriptors, success: false });
+                    });
+                    project.importRemoteFiles(data.prototypeImage).then(function (res) {
                         if (res && res.length > 0) {
                             descriptors = descriptors.concat(res);
                             descriptors.push(
@@ -1058,15 +1080,30 @@ define(function (require, exports, module) {
                                 )
                             );
                         }
-                        var previous = _projectManager.project();
-                        project.initFromJSON(descriptors);
-                        _projectManager.project(project);
-                        // fire ProjectChanged event
-                        var evt = { type: "ProjectChanged", current: project, previous: previous };
-                        fireProjectChanged(evt);
-                        resolve(project);
-                    }).catch(function (err) { reject(err); });
-                }).catch(function (err) { reject(err); });
+                        finalise({ project: project, descriptors: descriptors, success: true });
+                    }).catch(function (err) {
+                        finalise({ project: project, descriptors: descriptors, success: false });
+                    });
+                } else {
+                    project.importLocalFiles(data.localPVSSpec).then(function (res) {
+                        if (res) { descriptors = res; }
+                        return project.importLocalFiles(data.localPrototypeImage).then(function (res) {
+                            if (res && res.length > 0) {
+                                descriptors = descriptors.concat(res);
+                                descriptors.push(
+                                    project.addDescriptor(
+                                        new Descriptor(
+                                            "pvsioweb.json",
+                                            JSON.stringify({ prototypeImage: res[0].name })
+                                        )
+                                    )
+                                );
+                            }
+                            finalise(project, descriptors);
+                            resolve(project);
+                        }).catch(function (err) { finalise(project, descriptors); console.log(err); reject(err); });
+                    }).catch(function (err) { finalise(project, descriptors); console.log(err); reject(err); });
+                }
             }).catch(function (err) { reject(err); });
         });
     };
@@ -1090,7 +1127,7 @@ define(function (require, exports, module) {
                 res.projects.forEach(function (project) {
                     projects.push(project.name);
                 });
-                var defaultName = "prototype-" + new Date().toISOString().replace(/:|-/g, "-").split(".")[0];
+                var defaultName = "prototype-" + new Date().toISOString().split("T")[0];
                 CreateProjectView.create({ projectName: defaultName }).on("cancel", function (e, formView) {
                     formView.remove();
                     reject({
@@ -1101,14 +1138,14 @@ define(function (require, exports, module) {
                     if (projects.indexOf(e.data.projectName) >= 0) {
                         displayQuestion.create({question: "Project " + e.data.projectName +
                                                 " already exists. Overwrite project?"})
-                            .on("ok", function (e, view) {
+                            .on("ok", function (ans, view) {
                                 e.data.overWrite = true;
                                 _projectManager.createProject(e.data).then(function (res) {
                                     resolve(res);
                                 }).catch(function (err) { reject(err); });
                                 view.remove();
                                 formView.remove();
-                            }).on("cancel", function (e, view) {
+                            }).on("cancel", function (ans, view) {
                                 reject({
                                     code: "CANCELED_BY_USER",
                                     message: "Operation cancelled by the user"

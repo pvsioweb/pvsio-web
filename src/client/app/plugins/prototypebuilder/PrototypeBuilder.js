@@ -22,8 +22,7 @@ define(function (require, exports, module) {
         fs              = require("util/fileHandler"),
         NotificationManager = require("project/NotificationManager"),
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
-        Descriptor      = require("project/Descriptor"),
-        CreateProjectView = require("project/forms/CreateProjectView");
+        Descriptor      = require("project/Descriptor");
     
 	var instance;
     var currentProject,
@@ -496,7 +495,7 @@ define(function (require, exports, module) {
         layoutjs({el: "#body"});
         preparePageForImageUpload();
         projectManager.addListener("ProjectChanged", onProjectChanged);
-        projectManager.addListener("WidgetsFileChanged", onProjectChanged);
+        projectManager.addListener("WidgetsFileChanged", onWidgetsFileChanged);
         projectManager.addListener("SelectedFileChanged", onSelectedFileChanged);
         WidgetsListView.create();
         bindListeners();
@@ -507,7 +506,7 @@ define(function (require, exports, module) {
     PrototypeBuilder.prototype.unload = function () {
         pvsioWebClient.removeCollapsiblePanel(pbContainer);
         projectManager.removeListener("ProjectChanged", onProjectChanged);
-        projectManager.removeListener("WidgetsFileChanged", onProjectChanged);
+        projectManager.removeListener("WidgetsFileChanged", onWidgetsFileChanged);
         projectManager.removeListener("SelectedFileChanged", onSelectedFileChanged);
 		return Promise.resolve(true);
     };
