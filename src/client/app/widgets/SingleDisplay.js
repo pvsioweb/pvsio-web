@@ -45,8 +45,12 @@ define(function (require, exports, module) {
 		this.font = [this.height, "px ", (opt.font || "sans-serif")];
 		this.smallFont = (this.height * 0.8) + "px " + (opt.font || "sans-serif");
         this.align = opt.align || "center";
-		black = (opt.inverted) ? '#fff' : "#000";
-		white = (opt.inverted) ? "#000" : '#fff';
+		if (opt.backgroundColor) {
+            black = opt.backgroundColor;
+        } else { black = (opt.inverted) ? '#fff' : "#000"; }
+		if (opt.fontColor) {
+            white = opt.fontColor;
+        } else { white = (opt.inverted) ? "#000" : '#fff'; }
 		this.textBaseline = "middle";
 		this.div = d3.select("#" + this.parent)
                         .append("div").style("position", "absolute")
@@ -70,9 +74,9 @@ define(function (require, exports, module) {
         }
         function renderln(data, opt) {
             opt = opt || {};
-            data.context.fillStyle = (opt.inverted) ? white : black;
+            data.context.fillStyle = opt.backgroundColor || (opt.inverted) ? white : black;
             data.context.fillRect(0, 0, data.width, data.height);
-            data.context.fillStyle = (opt.inverted) ? black : white;
+            data.context.fillStyle = opt.fontColor || (opt.inverted) ? black : white;
             if (data.align === "left") {
                 data.context.textAlign = "start";
                 data.context.fillText(data.txt, 0, data.height / 2);
@@ -90,7 +94,7 @@ define(function (require, exports, module) {
 		context.textBaseline = this.textBaseline;
         var align = opt.align || this.align;
         context.font = this.font.join("");
-        renderln({ txt: txt, context: context, align: align, height: this.height, width: this.width });
+        renderln({ txt: txt, context: context, align: align, height: this.height, width: this.width }, opt);
         this.reveal();
         return this;
     };
