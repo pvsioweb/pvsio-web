@@ -50,12 +50,10 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
                                  { parent: "prototype", font: "Times", fontColor: "red", backgroundColor: "black" });
     var spo2_max = new SingleDisplay("spo2_max",
                                  { top: 68, left: 214, height: 8, width: 20 },
-                                 { parent: "prototype", fontColor: "red", backgroundColor: "black",
-                                   align: "left" });
+                                 { parent: "prototype", align: "left" });
     var spo2_min = new SingleDisplay("spo2_min",
                                  { top: 76, left: 214, height: 8, width: 20 },
-                                 { parent: "prototype", fontColor: "red", backgroundColor: "black",
-                                   align: "left" });
+                                 { parent: "prototype", align: "left" });
 
     function evaluate_spo2(str) {
         var v = +str;
@@ -71,12 +69,12 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
             var args = str.split("/");
             v = +args[0] / +args[1];
         }
-        return v.toFixed(1).toString();
+        return (v < 0) ? "--" : v.toFixed(1).toString();
     }
     function render_spo2(res) {
         if (res.isOn === "TRUE") {
             spo2.render(evaluate_spo2(res.spo2));
-            spo2_label.render(res.spo2_label.replace(/\"/g, ""));
+            spo2_label.render("%" + res.spo2_label.replace(/\"/g, ""));
             spo2_max.render(evaluate_spo2range(res.spo2_max));
             spo2_min.render(evaluate_spo2range(res.spo2_min));
         } else {

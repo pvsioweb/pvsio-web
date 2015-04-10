@@ -11,9 +11,9 @@ main: THEORY
 
   init(x: real): state = (#
     spo2 := 0,
-    spo2_max := 17,
-    spo2_min := 7,
-    spo2_label := "SpHb g/dL",
+    spo2_max := -1,
+    spo2_min := 88,
+    spo2_label := "SpO2",
     isOn := false
   #)
 
