@@ -1,0 +1,34 @@
+main: THEORY
+ BEGIN
+
+  state: TYPE = [#
+    spo2: real,
+    spo2_max: real,
+    spo2_min: real,
+    spo2_label: string,
+    isOn: bool
+  #]
+
+  init(x: real): state = (#
+    spo2 := 0,
+    spo2_max := 17,
+    spo2_min := 7,
+    spo2_label := "SpHb g/dL",
+    isOn := false
+  #)
+
+  per_on(st: state): bool = true
+  on(st: state): state = st WITH [ isOn := NOT isOn(st) ]
+  click_btn_on(st: state): state =
+    COND
+      per_on(st) -> on(st),
+      ELSE -> st
+    ENDCOND
+
+  set_spo2(x: real)(st: state): state = 
+    COND
+      per_on(st) -> st WITH [ spo2 := x ],
+      ELSE -> st
+    ENDCOND
+
+ END main
