@@ -2,7 +2,7 @@
  * @module SingleDisplay
  * @version 2.0
  * @description Renders a basic digital display.
- *              This module provide APIs for rendering multi-line menus, and to change the look and feel of 
+ *              This module provide APIs for rendering multi-line menus, and to change the look and feel of
  *              the rendered text, including: cursors, background color, font, size, alignment.
  * @author Paolo Masci, Patrick Oladimeji
  * @date Apr 1, 2015
@@ -11,48 +11,48 @@
  * // Example module that uses SingleDisplay.
  * define(function (require, exports, module) {
  *     "use strict";
- * 
+ *
  * });
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, document */
+/*global define, document */
 
 define(function (require, exports, module) {
     "use strict";
-    
+
     var d3 = require("d3/d3");
     var black, white;
-    
-	/**
-	 * @function <a name="SingleDisplay">SingleDisplay</a>
+
+    /**
+     * @function <a name="SingleDisplay">SingleDisplay</a>
      * @description Constructor.
-	 * @param id {String} The ID of the HTML element where the display will be rendered.
-     * @param coords {Object} The four coordinates (x1,y1,x2,y2) of the display, specifying 
+     * @param id {String} The ID of the HTML element where the display will be rendered.
+     * @param coords {Object} The four coordinates (x1,y1,x2,y2) of the display, specifying
      *        the left, top, right, bottom corner of the rectangle (for shape="rect")
      * @param opt {Object}
      * @memberof module:SingleDisplay
      * @instance
-	 */
-	function SingleDisplay(id, coords, opt) {
+     */
+    function SingleDisplay(id, coords, opt) {
         opt = opt || {};
         this.id = id;
         this.parent = opt.parent || "body";
         this.top = coords.top || 0;
         this.left = coords.left || 0;
-		this.width = coords.width || 200;
-		this.height = coords.height || 80;
-		this.font = [this.height, "px ", (opt.font || "sans-serif")];
-		this.smallFont = (this.height * 0.8) + "px " + (opt.font || "sans-serif");
+        this.width = coords.width || 200;
+        this.height = coords.height || 80;
+        this.font = [this.height, "px ", (opt.font || "sans-serif")];
+        this.smallFont = (this.height * 0.8) + "px " + (opt.font || "sans-serif");
         this.align = opt.align || "center";
-		if (opt.backgroundColor) {
+        if (opt.backgroundColor) {
             black = opt.backgroundColor;
         } else { black = (opt.inverted) ? '#fff' : "#000"; }
-		if (opt.fontColor) {
+        if (opt.fontColor) {
             white = opt.fontColor;
         } else { white = (opt.inverted) ? "#000" : '#fff'; }
-		this.textBaseline = "middle";
-		this.div = d3.select("#" + this.parent)
+        this.textBaseline = "middle";
+        this.div = d3.select("#" + this.parent)
                         .append("div").style("position", "absolute")
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")
@@ -64,7 +64,7 @@ define(function (require, exports, module) {
                         .style("vertical-align", "top");
         return this;
     }
-    
+
     SingleDisplay.prototype.render = function (txt, opt) {
         function clearContext(context, width, height) {
             context.save();
@@ -91,14 +91,14 @@ define(function (require, exports, module) {
         opt = opt || {};
         var context = document.getElementById(this.id + "_canvas").getContext("2d");
         clearContext(context, this.width, this.height);
-		context.textBaseline = this.textBaseline;
+        context.textBaseline = this.textBaseline;
         var align = opt.align || this.align;
         context.font = this.font.join("");
         renderln({ txt: txt, context: context, align: align, height: this.height, width: this.width }, opt);
         this.reveal();
         return this;
     };
-    
+
     SingleDisplay.prototype.renderMultiline = function (txt, opt) {
         function clearContext(context, width, height) {
             context.save();
@@ -126,7 +126,7 @@ define(function (require, exports, module) {
         opt = opt || {};
         var context = document.getElementById(this.id + "_canvas").getContext("2d");
         clearContext(context, this.width, this.height);
-		context.textBaseline = this.textBaseline;
+        context.textBaseline = this.textBaseline;
         var align = opt.align || this.align;
         if (typeof txt === "object" && txt.length) {
             var fontsize = opt.menuFontSize || (this.height / txt.length);
@@ -149,7 +149,7 @@ define(function (require, exports, module) {
         this.reveal();
         return this;
     };
-    
+
     SingleDisplay.prototype.hide = function () {
         this.div.style("display", "none");
         return this;
@@ -159,7 +159,7 @@ define(function (require, exports, module) {
         this.div.style("display", "block");
         return this;
     };
-    
+
 //    SingleDisplay.prototype.move = function (data) {
 //        data = data || {};
 //        if (data.top) {
@@ -177,12 +177,12 @@ define(function (require, exports, module) {
 //        width = w || width;
 //        return this;
 //    };
-//    
+//
 //    SingleDisplay.prototype.setHeight = function (h) {
 //        height = h || height;
 //        return this;
 //    };
-//    
+//
 //    SingleDisplay.prototype.setFont = function (f) {
 //        if (f) {
 //            this.font = f;
@@ -196,6 +196,6 @@ define(function (require, exports, module) {
 //        }
 //        return this;
 //    };
-    
+
     module.exports = SingleDisplay;
 });

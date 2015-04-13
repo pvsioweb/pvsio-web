@@ -6,30 +6,27 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, Promise, FileReader*/
 define(function (require, exports, module) {
-	"use strict";
-	var WSManager = require("websockets/pvs/WSManager"),
-		ws = WSManager.getWebSocket(),
-        openFilesForm = require("pvsioweb/forms/openFiles"),
-        openJSON = require("util/forms/openTextFile");
+    "use strict";
+    var openJSON = require("util/forms/openTextFile");
 
-	
+
     /**
-	 *
-	 */
-	function createFileLoadFunction(file, onFileLoaded) {
+     *
+     */
+    function createFileLoadFunction(file, onFileLoaded) {
         return function (cb) {
             var fr = new FileReader();
             fr.onload = function (event) {
                 var content = event.target.result;
-				if (onFileLoaded && typeof onFileLoaded === "function") {
-					onFileLoaded(file, content);
-				}
-				if (cb && typeof cb === "function") { cb(); }
+                if (onFileLoaded && typeof onFileLoaded === "function") {
+                    onFileLoaded(file, content);
+                }
+                if (cb && typeof cb === "function") { cb(); }
             };
             fr.readAsText(file);
         };
     }
-    
+
     function readLocalFileAsImage(file) {
         return new Promise(function (resolve, reject) {
             var fr = new FileReader();
@@ -44,8 +41,8 @@ define(function (require, exports, module) {
         });
     }
 
-	
-	function readLocalFileAsText(file) {
+
+    function readLocalFileAsText(file) {
         return new Promise(function (resolve, reject) {
             var fr = new FileReader();
             fr.onload = function (event) {
@@ -58,8 +55,8 @@ define(function (require, exports, module) {
             fr.readAsText(file);
         });
     }
-    
-	function readLocalFile(file) {
+
+    function readLocalFile(file) {
         if (file) {
             if (file.type && file.type.indexOf("image/") === 0) {
                 return readLocalFileAsImage(file);
@@ -68,17 +65,17 @@ define(function (require, exports, module) {
         }
         return Promise.reject();
     }
-    
-    
-	/**
-	 * Opens text files and returns JSON objects
+
+
+    /**
+     * Opens text files and returns JSON objects
      * @param callback is the callback function invoked when the files are open
-	 * @param opt is a descriptor containing { query, fileExt }, 
+     * @param opt is a descriptor containing { query, fileExt },
      * where query is the title of the created open window, and FileExt specifies the file extensions (e.g., ".txt,.json")
-	 * @returns { name, content }, where filename is a string, and content is a JSON object
-	 * @memberof fileHandler
-	 */
-	function openLocalFileAsJSON(callback, opt) {
+     * @returns { name, content }, where filename is a string, and content is a JSON object
+     * @memberof fileHandler
+     */
+    function openLocalFileAsJSON(callback, opt) {
         if (!callback || typeof callback !== "function") { return; }
         openJSON.create({
             header: opt.header || "Open JSON file...",
@@ -103,18 +100,18 @@ define(function (require, exports, module) {
                 fr.readAsText(file);
             }
         });
-	}
-        
+    }
 
-	/**
-	 * Opens text files
+
+    /**
+     * Opens text files
      * @param callback is the callback function invoked when the files are open
-	 * @param opt is a descriptor containing { query, fileExt }, 
+     * @param opt is a descriptor containing { query, fileExt },
      * where query is the title of the created open window, and FileExt specifies the file extensions (e.g., ".txt,.json")
-	 * @returns { name, content }, where name and content are strings
-	 * @memberof fileHandler
-	 */
-	function openLocalFileAsText(callback, opt) {
+     * @returns { name, content }, where name and content are strings
+     * @memberof fileHandler
+     */
+    function openLocalFileAsText(callback, opt) {
         if (!callback || typeof callback !== "function") { return; }
         openJSON.create({
             header: opt.header || "Open text file...",
@@ -139,16 +136,16 @@ define(function (require, exports, module) {
                 fr.readAsText(file);
             }
         });
-	}
+    }
 
-	
-	/************* Exported Function ************************************************/
+
+    /************* Exported Function ************************************************/
     // openXXX return pairs { name, content }
     // readXXX return a Promise
-	module.exports = {
+    module.exports = {
         openLocalFileAsJSON: openLocalFileAsJSON, // content is a JSON object
         openLocalFileAsText: openLocalFileAsText, // content is a string
-		createFileLoadFunction: createFileLoadFunction,
+        createFileLoadFunction: createFileLoadFunction,
         readLocalFile: readLocalFile
-	};
+    };
 });

@@ -5,69 +5,68 @@
  * @date Mar 13, 2012
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, document */
+/*global define, document */
 
 define(function (require, exports, module) {
     "use strict";
-	module.exports = function (el, width, height, opt) {
+    module.exports = function (el, width, height, opt) {
         opt = opt || {};
-		width = width || 200;
-		height = height || 80;
-		var font = (height * 0.5) + "px " + (opt.font || "sans-serif"),
-			smallFont = (height * 0.4) + "px " + (opt.font || "sans-serif"),
-			align = opt.align || "center",
-			black = (opt.inverted) ? '#fff' : "#000",
-			white = (opt.inverted) ? "#000" : '#fff',
-			textBaseline = "middle";
+        width = width || 200;
+        height = height || 80;
+        var font = (height * 0.5) + "px " + (opt.font || "sans-serif"),
+            smallFont = (height * 0.4) + "px " + (opt.font || "sans-serif"),
+            align = opt.align || "center",
+            black = (opt.inverted) ? '#fff' : "#000",
+            white = (opt.inverted) ? "#000" : '#fff',
+            textBaseline = "middle";
 
-		function fontheight(font) {
-			var r = font.match(/\d+/g)[0];
-			return parseFloat(r);
-		}
+        function fontheight(font) {
+            var r = font.match(/\d+/g)[0];
+            return parseFloat(r);
+        }
 
-		function decRadius() {
-			return fontheight(smallFont) / 8;
-		}
+        function decRadius() {
+            return fontheight(smallFont) / 8;
+        }
 
-		var context = document.getElementById(el).getContext("2d");
-		context.font = font;
-		context.align = align;
-		context.fillStyle = black;
-		context.textBaseline = textBaseline;
-		/**
-		 * clears the canvas context to prepare for drawing
-		 */
-		function clearContext() {
-			context.save();
-			context.fillStyle = black;
-			context.fillRect(0, 0, width, height);
-			context.restore();
-		}
+        var context = document.getElementById(el).getContext("2d");
+        context.font = font;
+        context.align = align;
+        context.fillStyle = black;
+        context.textBaseline = textBaseline;
+        /**
+         * clears the canvas context to prepare for drawing
+         */
+        function clearContext() {
+            context.save();
+            context.fillStyle = black;
+            context.fillRect(0, 0, width, height);
+            context.restore();
+        }
 
-		function drawCircle(context, x, y, r, fillStyle) {
-			context.save();
-			context.fillStyle = fillStyle;
-			context.beginPath();
-			context.arc(x, y, r, 0, Math.PI * 2, true);
-			context.closePath();
-			context.stroke();
-			context.fill();
-			context.restore();
-		}
-        
-		return {
-			renderNumber: function (numstr, cursorpos) {
-				clearContext();
-				var decimalIndex = numstr.indexOf('.');
-				var th = 28,
-					x,
+        function drawCircle(context, x, y, r, fillStyle) {
+            context.save();
+            context.fillStyle = fillStyle;
+            context.beginPath();
+            context.arc(x, y, r, 0, Math.PI * 2, true);
+            context.closePath();
+            context.stroke();
+            context.fill();
+            context.restore();
+        }
+
+        return {
+            renderNumber: function (numstr, cursorpos) {
+                clearContext();
+                var th = 28,
+                    x,
                     y,
-					pad = 2;
-				var centerx = width / 2,
-					centery = height / 2,
-					txtmeasure;
-				var frac = numstr.split(".")[1],
-					whole = numstr.split(".")[0];
+                    pad = 2;
+                var centerx = width / 2,
+                    centery = height / 2,
+                    txtmeasure;
+                var frac = numstr.split(".")[1],
+                    whole = numstr.split(".")[0];
                 //pad the string if necessary
                 var i;
                 if (cursorpos >= whole.length - 1) {
@@ -80,33 +79,33 @@ define(function (require, exports, module) {
                         frac = frac.concat("0");
                     }
                 }
-				if (frac !== undefined && frac.length > 0) {
-					drawCircle(context, centerx, centery, decRadius(), white);
-                    
-					x = centerx + pad + decRadius();
-					context.textAlign = "left";
-					context.fillStyle = white;
-					context.font = smallFont;
-					th = fontheight(context.font);
+                if (frac !== undefined && frac.length > 0) {
+                    drawCircle(context, centerx, centery, decRadius(), white);
+
+                    x = centerx + pad + decRadius();
+                    context.textAlign = "left";
+                    context.fillStyle = white;
+                    context.font = smallFont;
+                    th = fontheight(context.font);
                     y = centery + (th * 0.5);
-					//draw the fraction bit
-					frac.split("").forEach(function (d, index) {
-						if (cursorpos === (index + 1) * -1) {
-							context.save();
-							//draw a cursor and then the number
-							txtmeasure = context.measureText(d);
-							context.fillRect(x, y - th, txtmeasure.width, th);
-							context.fillStyle = black;
-							context.fillText(d, x, centery);
-							x += txtmeasure.width + pad;
-							context.restore();
-						} else {
-							txtmeasure = context.measureText(d);
-							context.fillText(d, x, centery);
-							x += txtmeasure.width + pad;
-						}
-					});
-				}
+                    //draw the fraction bit
+                    frac.split("").forEach(function (d, index) {
+                        if (cursorpos === (index + 1) * -1) {
+                            context.save();
+                            //draw a cursor and then the number
+                            txtmeasure = context.measureText(d);
+                            context.fillRect(x, y - th, txtmeasure.width, th);
+                            context.fillStyle = black;
+                            context.fillText(d, x, centery);
+                            x += txtmeasure.width + pad;
+                            context.restore();
+                        } else {
+                            txtmeasure = context.measureText(d);
+                            context.fillText(d, x, centery);
+                            x += txtmeasure.width + pad;
+                        }
+                    });
+                }
                 context.font = font;
                 context.textAlign = "right";
                 context.fillStyle = white;
@@ -131,17 +130,14 @@ define(function (require, exports, module) {
                         x -= (txtmeasure.width + pad);
                     }
                 });
-				return this;
-			},
-			renderText: function (txt) {
-				clearContext();
-				var th = 28,
-					x,
-                    y,
-					pad = 2;
-				var centerx = width / 2,
-					centery = height / 2,
-					txtmeasure = context.measureText(txt);
+                return this;
+            },
+            renderText: function (txt) {
+                clearContext();
+                var pad = 2,
+                    centerx = width / 2,
+                    centery = height / 2,
+                    txtmeasure = context.measureText(txt);
                 context.font = font;
                 context.fillStyle = white;
                 context.textAlign = align;
@@ -152,38 +148,38 @@ define(function (require, exports, module) {
                 } else {
                     context.fillText(txt, width - txtmeasure.width + pad, centery);
                 }
-				return this;
-			},
-			width: function (w) {
-				if (w !== undefined) {
-					width = w;
-					return this;
-				}
-				return width;
-			},
-			height: function (h) {
-				if (h !== undefined) {
-					height = h;
-					return this;
-				}
-				return height;
-			},
-			font: function (f) {
-				if (f) {
-					font = f;
-					return this;
-				}
-				return font;
-			},
-			smallfont: function (f) {
-				if (f) {
-					smallFont = f;
-					return this;
-				}
-				return smallFont;
-			}
+                return this;
+            },
+            width: function (w) {
+                if (w !== undefined) {
+                    width = w;
+                    return this;
+                }
+                return width;
+            },
+            height: function (h) {
+                if (h !== undefined) {
+                    height = h;
+                    return this;
+                }
+                return height;
+            },
+            font: function (f) {
+                if (f) {
+                    font = f;
+                    return this;
+                }
+                return font;
+            },
+            smallfont: function (f) {
+                if (f) {
+                    smallFont = f;
+                    return this;
+                }
+                return smallFont;
+            }
 
-		};
+        };
 
-	};
+    };
 });

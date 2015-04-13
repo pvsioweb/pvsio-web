@@ -8,27 +8,25 @@
 define(function (require, exports, module) {
     "use strict";
     var Widget       = require("./Widget"),
-        property     = require("util/property"),
         uidGenerator = require("util/uuidGenerator"),
         fs	         = require("util/fileHandler"),
-        Descriptor  = require("project/Descriptor"),
         displayEditStoryboard = require("pvsioweb/forms/displayEditStoryboard"),
         eventDispatcher = require("util/eventDispatcher"),
         StateParser  = require("util/PVSioStateParser");
-	
+
     function Storyboard(id) {
         id = id || "storyboard";// + "_" + uidGenerator();
         Widget.call(this, id, "storyboard");
         this.storyboardKey = "screen";
-		this.images = {}; // key = image path, value = unique string
+        this.images = {}; // key = image path, value = unique string
         eventDispatcher(this);
     }
-    
+
     Storyboard.prototype = Object.create(Widget.prototype);
     Storyboard.prototype.constructor = Storyboard;
     Storyboard.prototype.parentClass = Widget.prototype;
-    
-	Storyboard.prototype.render = function (state) {
+
+    Storyboard.prototype.render = function (state) {
         var imageName = StateParser.resolve(state, this.storyboardKey);
         if (imageName) {
             var image = this.images[imageName];
@@ -40,7 +38,7 @@ define(function (require, exports, module) {
             }
         }
     };
-    
+
     /**
      * @function addImages
      * @memberof Storyboard
@@ -53,7 +51,7 @@ define(function (require, exports, module) {
      */
     Storyboard.prototype.addImages = function (descriptors) {
         var _this = this;
-        
+
         function loadImage(desc) {
             try {
                 return fs.readLocalFile(desc)
@@ -75,7 +73,7 @@ define(function (require, exports, module) {
                 //return err;
             }
         }
-        
+
         var loadImagesPromise = [];
         if (descriptors && descriptors.length) {
             descriptors.forEach(function (desc) {
@@ -88,11 +86,11 @@ define(function (require, exports, module) {
         }
         return Promise.all(loadImagesPromise);
     };
-    
+
     Storyboard.prototype.getImages = function () {
         return this.images || [];
     };
-        
+
     Storyboard.prototype.toJSON = function () {
         var images = [];
         if (this.images) {
@@ -105,19 +103,19 @@ define(function (require, exports, module) {
                 });
             });
         }
-		return {
-			type: this.type(),
-			id: this.id(),
-			storyboardKey: this.storyboardKey,
+        return {
+            type: this.type(),
+            id: this.id(),
+            storyboardKey: this.storyboardKey,
             images: images
-		};
-	};
-	
-	Storyboard.prototype.remove = function () {
-	};
-    
-    
-    
+        };
+    };
+
+    Storyboard.prototype.remove = function () {
+    };
+
+
+
     /**
      * @function displayEditStoryboardDialog
      * @memberof Storyboard
@@ -161,6 +159,6 @@ define(function (require, exports, module) {
             d3.select("#btnSelectMultiplePictures").node().click();
         });
     };
-		
+
     module.exports = Storyboard;
 });

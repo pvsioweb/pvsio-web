@@ -3,17 +3,16 @@
  * @author Patrick Oladimeji, Paolo Masci
  * @date 6/26/14 11:29:07 AM
  */
-/*jshint unused: true, undef: true*/
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 /*global require, module, __dirname*/
 
 var fs = require("fs"),
-	path = require("path"),
-	Promise                 = require("es6-promise").Promise,
-	logger                  = require("tracer").console(),
-	imageExts = [".jpg", ".jpeg", ".png"],
+    path = require("path"),
+    Promise                 = require("es6-promise").Promise,
+    logger                  = require("tracer").console(),
+    imageExts = [".jpg", ".jpeg", ".png"],
     baseProjectDir          = path.join(__dirname, "../../examples/projects/"),
-	filesFilter = [".pvs", ".tex", ".txt", ".i", ".json"].concat(imageExts);
+    filesFilter = [".pvs", ".tex", ".txt", ".i", ".json"].concat(imageExts);
 
 var noop = function () { "use strict"; };
  /**
@@ -25,23 +24,23 @@ var noop = function () { "use strict"; };
  */
 function mkdirRecursive(dirPath, cb) {
     "use strict";
-	cb = cb || noop;
-	fs.mkdir(dirPath, function (error) {
-		if (error && error.errno === 34) {
-			// the callback will be invoked only by the first instance of mkdirRecursive
-			var parentDirectory = dirPath.substr(0, dirPath.lastIndexOf("/"));
-			mkdirRecursive(parentDirectory, function (err) {
-				if (!err) {
-					fs.mkdir(dirPath, cb);
-				} else {
-					cb(err);
-				}
-			});
-		} else {
-			// if the path has been created successfully, just invoke the callback function (if any)
-			cb(error);
-		}
-	});
+    cb = cb || noop;
+    fs.mkdir(dirPath, function (error) {
+        if (error && error.errno === 34) {
+            // the callback will be invoked only by the first instance of mkdirRecursive
+            var parentDirectory = dirPath.substr(0, dirPath.lastIndexOf("/"));
+            mkdirRecursive(parentDirectory, function (err) {
+                if (!err) {
+                    fs.mkdir(dirPath, cb);
+                } else {
+                    cb(err);
+                }
+            });
+        } else {
+            // if the path has been created successfully, just invoke the callback function (if any)
+            cb(error);
+        }
+    });
 }
 /**
  * Get the stat for the file in the specified path
@@ -50,15 +49,15 @@ function mkdirRecursive(dirPath, cb) {
  */
 function stat(fullPath) {
     "use strict";
-	return new Promise(function (resolve, reject) {
-		fs.stat(fullPath, function (err, res) {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(res);
-			}
-		});
-	});
+    return new Promise(function (resolve, reject) {
+        fs.stat(fullPath, function (err, res) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(res);
+            }
+        });
+    });
 }
 /**
     Reads the content of the file at the specified fullPath
@@ -96,36 +95,36 @@ function readFile(fullPath, encoding) {
 ///TODO clean up these parameters - propose to make into one json object with the parameters as properties of the object
 function writeFile(fullPath, content, fileEncoding, opt) {
     "use strict";
-	fileEncoding = fileEncoding || "utf8";
-	//remove prefixes from file content before saving images
-	var ext = path.extname(fullPath);
-	if (content && imageExts.indexOf(ext.toLowerCase()) > -1) {
-		content = content.replace(/^data:image\/(\w+);base64,/, "");
-	}
-	return new Promise(function (resolve, reject) {
-		if (typeof fullPath !== "string") {
+    fileEncoding = fileEncoding || "utf8";
+    //remove prefixes from file content before saving images
+    var ext = path.extname(fullPath);
+    if (content && imageExts.indexOf(ext.toLowerCase()) > -1) {
+        content = content.replace(/^data:image\/(\w+);base64,/, "");
+    }
+    return new Promise(function (resolve, reject) {
+        if (typeof fullPath !== "string") {
             reject({ type: "writeFile_error", path: fullPath, err: "Incorrect path (" + fullPath + ")"});
         } else if (typeof content !== "string") {
-			reject({ type: "writeFile_error", path: fullPath, err: "Incorrect file content (" + content + ")"});
-		} else {
-			var folder = fullPath.substring(0, fullPath.lastIndexOf(path.sep));
-			mkdirRecursive(folder, function (err) {
-				if ((!err || err.code === "EEXIST") &&
+            reject({ type: "writeFile_error", path: fullPath, err: "Incorrect file content (" + content + ")"});
+        } else {
+            var folder = fullPath.substring(0, fullPath.lastIndexOf(path.sep));
+            mkdirRecursive(folder, function (err) {
+                if ((!err || err.code === "EEXIST") &&
                         (!fs.existsSync(fullPath) || (opt && opt.overWrite))) {
-					fs.writeFile(fullPath, content, fileEncoding, function (err) {
-						if (err) {
-							reject(err);
-						} else {
-							resolve({path: fullPath, content: content, encoding: fileEncoding});
-						}
-					});
-				} else {
-					reject(err);
-				}
-			});
+                    fs.writeFile(fullPath, content, fileEncoding, function (err) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve({path: fullPath, content: content, encoding: fileEncoding});
+                        }
+                    });
+                } else {
+                    reject(err);
+                }
+            });
 
-		}
-	});
+        }
+    });
 }
 
 //-- this function is implemented in pvsprocess, as the nodejs implementation (unlink) is unsatisfactory
@@ -136,10 +135,10 @@ function writeFile(fullPath, content, fileEncoding, opt) {
 //}
 
 /**
-	Recursively reads the files in a directory using promises
-	@param {string} fullPath the path to the directory to read
+    Recursively reads the files in a directory using promises
+    @param {string} fullPath the path to the directory to read
     @param {array} filter a list of extensions for files whose contents we wish to get. If filter is null, false or undefined then no content will be returned for any files
-	@returns {Promise} a promise that resolves with an array of objects  for the files in the given directory.
+    @returns {Promise} a promise that resolves with an array of objects  for the files in the given directory.
     The object may contain just path property or may include content if the getContent parameter was passed
 */
 function getFolderTree(fullPath, filter) {
@@ -166,7 +165,7 @@ function getFolderTree(fullPath, filter) {
                                         return a;
                                     }
                                 }, []);
-                                // we need to include the directory as well, 
+                                // we need to include the directory as well,
                                 // otherwise the client will not see the directory it if it's empty
                                 flattened.push({path: fullPath, isDirectory: true});
                                 resolve(flattened);
@@ -208,27 +207,27 @@ function getFolderTree(fullPath, filter) {
 
 /**
 * open a project with the specified projectName
-* @param {string} projectName the name of the project to open 
+* @param {string} projectName the name of the project to open
 * @returns {Promise} a promise that resolves with data for the opened project
 */
 function openProject(projectName) {
     "use strict";
-	logger.debug("Opening project " + projectName + " ...");
-	var projectPath = path.join(baseProjectDir, projectName),
-		res = { name: projectName };
+    logger.debug("Opening project " + projectName + " ...");
+    var projectPath = path.join(baseProjectDir, projectName),
+        res = { name: projectName };
 
-	return new Promise(function (resolve, reject) {
-		//get filepaths and their contents
-		getFolderTree(projectPath, filesFilter)
-			.then(function (files) {
-				res.descriptors = files.filter(function (f) { return !f.isDirectory; }).map(function (f) {
+    return new Promise(function (resolve, reject) {
+        //get filepaths and their contents
+        getFolderTree(projectPath, filesFilter)
+            .then(function (files) {
+                res.descriptors = files.filter(function (f) { return !f.isDirectory; }).map(function (f) {
                     f.name = f.path.split("/").slice(-1).join("");
-					f.path = f.path.replace(projectPath, projectName);
-					return f;
-				});
-				resolve(res);
-			}).catch(reject);
-	});
+                    f.path = f.path.replace(projectPath, projectName);
+                    return f;
+                });
+                resolve(res);
+            }).catch(reject);
+    });
 }
 
 /**
@@ -237,53 +236,53 @@ function openProject(projectName) {
  */
 function listProjects() {
     "use strict";
-	return new Promise(function (resolve, reject) {
-		fs.readdir(baseProjectDir, function (err, files) {
-			if (err) {
-				reject(err);
-			} else {
-				Promise.all(files.map(function (file) {
-					return stat(path.join(baseProjectDir, file))
-						.then(function (f) {
-							if (f.isDirectory()) {
-								return new Promise(function (resolve, reject) {
-									//get the image in the directory if any
-									fs.readdir(path.join(baseProjectDir, file), function (err, files) {
-										if (err) {
+    return new Promise(function (resolve, reject) {
+        fs.readdir(baseProjectDir, function (err, files) {
+            if (err) {
+                reject(err);
+            } else {
+                Promise.all(files.map(function (file) {
+                    return stat(path.join(baseProjectDir, file))
+                        .then(function (f) {
+                            if (f.isDirectory()) {
+                                return new Promise(function (resolve, reject) {
+                                    //get the image in the directory if any
+                                    fs.readdir(path.join(baseProjectDir, file), function (err, files) {
+                                        if (err) {
 //											reject(err); // we send all directories, also those that are empty.
                                             resolve({name: file, image: null});
-										} else {
-											var image = files.filter(function (f) {
-												return imageExts.indexOf(path.extname(f).toLowerCase()) > -1;
-											})[0];
-											var result = files.length ? {name: file, image: image} : {name: file, image: null};
-											resolve(result);
-										}
-									});
-								});
-							} else { return Promise.resolve(null); }
-						}).catch(reject);
-				})).then(function (files) {
-					resolve(files.filter(function (f) { return f; }));
-				}).catch(reject);
-			}
-		});
-	});
+                                        } else {
+                                            var image = files.filter(function (f) {
+                                                return imageExts.indexOf(path.extname(f).toLowerCase()) > -1;
+                                            })[0];
+                                            var result = files.length ? {name: file, image: image} : {name: file, image: null};
+                                            resolve(result);
+                                        }
+                                    });
+                                });
+                            } else { return Promise.resolve(null); }
+                        }).catch(reject);
+                })).then(function (files) {
+                    resolve(files.filter(function (f) { return f; }));
+                }).catch(reject);
+            }
+        });
+    });
 }
 
 /**
     renames the oldpath into the newPath
-	@returns {Promise} a promise that resolves with the new path name
+    @returns {Promise} a promise that resolves with the new path name
 */
 function renameFile(oldPath, newPath) {
     "use strict";
-	oldPath = path.join(baseProjectDir, oldPath);
-	newPath = path.join(baseProjectDir, newPath);
+    oldPath = path.join(baseProjectDir, oldPath);
+    newPath = path.join(baseProjectDir, newPath);
 
-	return new Promise(function (resolve, reject) {
-		stat(newPath).then(function (res) {
-			reject("ENOTEMPTY");
-		}).catch(function (err) {
+    return new Promise(function (resolve, reject) {
+        stat(newPath).then(function (res) {
+            reject("ENOTEMPTY");
+        }).catch(function (err) {
             if (err && err.code === "ENOENT") {
                 //file does not exist so ok to rename
                 fs.rename(oldPath, newPath, function (err) {
@@ -296,17 +295,17 @@ function renameFile(oldPath, newPath) {
             } else {
                 reject(err);
             }
-		});
-	});
+        });
+    });
 }
 
 module.exports = {
-	renameFile: renameFile,
-	mkdirRecursive: mkdirRecursive,
-	stat: stat,
+    renameFile: renameFile,
+    mkdirRecursive: mkdirRecursive,
+    stat: stat,
     readFile: readFile,
-	writeFile: writeFile,
-	getFolderTree: getFolderTree,
-	openProject: openProject,
-	listProjects: listProjects
+    writeFile: writeFile,
+    getFolderTree: getFolderTree,
+    openProject: openProject,
+    listProjects: listProjects
 };

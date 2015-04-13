@@ -17,29 +17,27 @@
  * @author Patrick Oladimeji, Paolo Masci
  * @date 3/17/15 22:30:00 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true */
-/*global define, require, brackets, Promise, Handlebars, $ */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
+/*global define, Promise, Handlebars, $ */
 define(function (require, exports, module) {
     "use strict";
     var TreeList = require("./TreeList"),
         WSManager = require("websockets/pvs/WSManager");
 
     var template = require("text!pvsioweb/forms/templates/fileBrowser.handlebars"),
-        BaseDialog = require("pvsioweb/forms/BaseDialog"),
-        FormUtils = require("pvsioweb/forms/FormUtils");
-		
+        BaseDialog = require("pvsioweb/forms/BaseDialog");
     var timer, rfb;
-    
-	var OpenFilesView = BaseDialog.extend({
-		render: function (data) {
-			var t = Handlebars.compile(template);
-			this.$el.html(t(data));
-			$("body").append(this.el);
-			return this;
-		},
-		events: {
-			"click #btnOk": "ok",
-			"click #btnCancel": "cancel",
+
+    var OpenFilesView = BaseDialog.extend({
+        render: function (data) {
+            var t = Handlebars.compile(template);
+            this.$el.html(t(data));
+            $("body").append(this.el);
+            return this;
+        },
+        events: {
+            "click #btnOk": "ok",
+            "click #btnCancel": "cancel",
             "input #baseDirectory": "onTextChanged",
             "input #currentPath": "onEdit",
             "click #btnHome": "selectHome",
@@ -69,7 +67,7 @@ define(function (require, exports, module) {
             }
         }
     });
-    
+
     /**
         Constructs a new instance of the RemoteFileBrowser
         @param {function} filterFunc a function to filter which file should be shown in the browser if null, then all files are shown

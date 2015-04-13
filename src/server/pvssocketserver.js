@@ -23,8 +23,8 @@ You should have received a copy of the GNU General Public License along with Foo
  * @date 28 Jul 2012 21:52:31
  *
  */
-/*jshint unused: true, undef: true*/
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, undef: true, node: true, es5:true */
+/*jshint undef: true*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, undef: true, node: true*/
 /*global __dirname*/
 
 function run() {
@@ -142,8 +142,8 @@ function run() {
         logger.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
         next();
     });
-    
-    
+
+
     //create the express static server serve contents in the client directory and the demos directory
     webserver.use(express.static(clientDir));
     webserver.use("/demos", express.static(baseDemosDir));

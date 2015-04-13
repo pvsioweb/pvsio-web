@@ -1,54 +1,52 @@
 /**
- * 
+ *
  * @author Patrick Oladimeji
  * @date 11/21/13 15:03:48 PM
  */
-/*jshint unused: true */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 /*global define, Promise, layoutjs, d3*/
 define(function (require, exports, module) {
-	"use strict";
-	var PVSioWebClient  = require("PVSioWebClient"),
+    "use strict";
+    var PVSioWebClient  = require("PVSioWebClient"),
         WSManager       = require("websockets/pvs/WSManager"),
-		ProjectManager	= require("project/ProjectManager"),
+        ProjectManager	= require("project/ProjectManager"),
         WidgetManager   = require("pvsioweb/WidgetManager").getWidgetManager(),
         Logger          = require("util/Logger"),
         Recorder        = require("util/ActionRecorder"),
         Prompt          = require("pvsioweb/forms/displayPrompt"),
         WidgetsListView = require("pvsioweb/forms/WidgetsListView"),
         template		= require("text!pvsioweb/forms/templates/prototypeBuilderPanel.handlebars"),
-        property        = require("util/property"),
         ScriptPlayer    = require("util/ScriptPlayer"),
         fs              = require("util/fileHandler"),
         NotificationManager = require("project/NotificationManager"),
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
         Descriptor      = require("project/Descriptor");
-    
-	var instance;
+
+    var instance;
     var currentProject,
         projectManager,
         pbContainer,
         pvsioWebClient;
     var img; // this is the prototype image displayed in the PVSio-web user interface
     var _prototypeBuilder;
-    
-	function PrototypeBuilder() {
+
+    function PrototypeBuilder() {
         pvsioWebClient = PVSioWebClient.getInstance();
         projectManager = ProjectManager.getInstance();
         currentProject = projectManager.project();
         img = null;
         _prototypeBuilder = this;
-	}
-    
-	/**
-	 * @function renderImage
+    }
+
+    /**
+     * @function renderImage
      * @description Updates the project image with in the prototype builder
-	 * @param image {Descriptor} Descriptor of the prototype picture.
+     * @param image {Descriptor} Descriptor of the prototype picture.
      * @returns {Promise(real)} A Promise that resolves to a real value that specifies the scale of the rendered image
-	 * @memberof module:ProjectManager
+     * @memberof module:ProjectManager
      * @private
-	 */
-	var renderImage = function (image) {
+     */
+    var renderImage = function (image) {
         return new Promise(function (resolve, reject) {
             function imageLoadComplete(res) {
                 //if the image width is more than the the containing element scale it down a little
@@ -96,7 +94,7 @@ define(function (require, exports, module) {
             img.src = image.content;
         });
     };
-	
+
     function updateImageAndLoadWidgets() {
         var p = projectManager.project();
         var image = p.getImage();
@@ -107,7 +105,7 @@ define(function (require, exports, module) {
             d3.select("#imageDiv img").attr("src", "").attr("height", "430").attr("width", "1128");
             d3.select("#imageDiv svg").attr("height", "0").attr("width", "0");
             d3.select("#imageDiv").attr("style", "");
-            d3.select("#body").attr("style", "height: 480px"); // 430 + 44 + 6            
+            d3.select("#body").attr("style", "height: 480px"); // 430 + 44 + 6
             //show the image drag and drop div
             d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
             return Promise.resolve();
@@ -127,7 +125,7 @@ define(function (require, exports, module) {
                         if (wdStr && wdStr !== "") {
                             var wd = JSON.parse(p.getWidgetDefinitionFile().content);
                             WidgetManager.restoreWidgetDefinitions(wd);
-                            //update the widget area map scales 
+                            //update the widget area map scales
                             WidgetManager.scaleAreaMaps(scale);
                         }
                         resolve();
@@ -154,16 +152,16 @@ define(function (require, exports, module) {
             });
         });
     }
-    
-    
+
+
     /**
-	 * Switches the prototoyping layer to the builder layer
+     * Switches the prototoyping layer to the builder layer
      * @private
-	 */
+     */
     function switchToBuilderView() {
         d3.select(".image-map-layer").style("opacity", 1).style("z-index", 190);
         d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
-		d3.select("#controlsContainer .active").classed("active", false);
+        d3.select("#controlsContainer .active").classed("active", false);
         d3.select("#btnBuilderView").classed('active', true);
         d3.selectAll("div.display,#controlsContainer button").classed("builder", true);
         d3.selectAll("div.display,#controlsContainer button").classed("simulator", false);
@@ -186,7 +184,7 @@ define(function (require, exports, module) {
                 }
             });
         }
-        
+
         document.title = "PVSio-Web -- " + event.current;
         d3.select("#header #txtProjectName").html(event.current);
         switchToBuilderView();
@@ -201,7 +199,7 @@ define(function (require, exports, module) {
             WidgetsListView.create();
         }).catch(function (err) { Logger.error(err); });
     }
-    
+
     function onSelectedFileChanged(event) {
         var desc = projectManager.project().getDescriptor(event.selectedItem.path);
         if (desc) {
@@ -212,28 +210,28 @@ define(function (require, exports, module) {
             }
         }
     }
-	/** Switches the prototyping layer to the simulator/testing layer 
+    /** Switches the prototyping layer to the simulator/testing layer
         @private
     */
     function switchToSimulatorView() {
         d3.select(".image-map-layer").style("opacity", 0.1).style("z-index", -2);
         d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
-		d3.select("#controlsContainer .active").classed("active", false);
+        d3.select("#controlsContainer .active").classed("active", false);
         d3.select("#btnSimulatorView").classed("active", true);
         d3.select("#btnSimulatorView").classed("selected", true);
         d3.selectAll("div.display,#controlsContainer button").classed("simulator", true);
         d3.selectAll("div.display,#controlsContainer button").classed("builder", false);
     }
-    
+
     function bindListeners() {
         var actions, recStartState, recStartTime, scriptName;
         /**
-		 * Add event listener for toggling the prototyping layer and the interaction layer
-		 */
-		d3.select("#btnBuilderView").classed("selected", true).on("click", function () {
-			switchToBuilderView();
-		});
-		d3.select("#btnSimulatorView").on("click", function () {
+         * Add event listener for toggling the prototyping layer and the interaction layer
+         */
+        d3.select("#btnBuilderView").classed("selected", true).on("click", function () {
+            switchToBuilderView();
+        });
+        d3.select("#btnSimulatorView").on("click", function () {
             var img = d3.select("#imageDiv img");
             var msg = "";
             if (!img || !img.attr("src") || img.attr("src") === "") {
@@ -249,17 +247,17 @@ define(function (require, exports, module) {
                 return alert(msg);
             }
             switchToSimulatorView();
-		});
-		d3.select("#btnSaveProject").on("click", function () {
-			projectManager.saveProject();
-		});
-	
-		d3.select("#btnSaveProjectAs").on("click", function () {
+        });
+        d3.select("#btnSaveProject").on("click", function () {
+            projectManager.saveProject();
+        });
+
+        d3.select("#btnSaveProjectAs").on("click", function () {
             var name = projectManager.project().name() + "_" + (new Date().getFullYear()) + "." +
                             (new Date().getMonth() + 1) + "." + (new Date().getDate());
-			projectManager.saveProjectDialog(name);
-		});
-		d3.select("#openProject").on("click", function () {
+            projectManager.saveProjectDialog(name);
+        });
+        d3.select("#openProject").on("click", function () {
             function openProject() {
                 projectManager.openProjectDialog().then(function (project) {
                     var notification = "Project " + project.name() + " opened successfully!";
@@ -288,14 +286,14 @@ define(function (require, exports, module) {
             } else {
                 openProject();
             }
-		});
-		d3.select("#newProject").on("click", function () {
-			projectManager.createProjectDialog().then(function (res) {
+        });
+        d3.select("#newProject").on("click", function () {
+            projectManager.createProjectDialog().then(function (res) {
                 var notification = "Project " + res.project().name() + "created!";
                 Logger.log(notification);
             });
-		});
-	
+        });
+
         d3.select("#btnRecord").on("click", function () {
             if (!d3.select("#btnRecord").attr("active")) {
                 d3.select("#btnRecord")
@@ -338,22 +336,22 @@ define(function (require, exports, module) {
                     });
             }
         });
-		d3.select("#btnReconnect").on("click", function () {
-			projectManager.reconnectToServer();
-		});
+        d3.select("#btnReconnect").on("click", function () {
+            projectManager.reconnectToServer();
+        });
     }
-    
+
     /////These are the api methods that the prototype builder plugin exposes
     PrototypeBuilder.prototype.getDependencies = function () { return []; };
-    
 
-	/**
-		Change the image in the current project to the one specified in the parameter
-		@param {string} imagePath
-		@param {string} imageData base64 encoded data
-		@returns {Promise} a promise that resolves when the image change process has completed
-	*/
-	PrototypeBuilder.prototype.changeImage = function (imagePath, imageData) {
+
+    /**
+        Change the image in the current project to the one specified in the parameter
+        @param {string} imagePath
+        @param {string} imageData base64 encoded data
+        @returns {Promise} a promise that resolves when the image change process has completed
+    */
+    PrototypeBuilder.prototype.changeImage = function (imagePath, imageData) {
         return new Promise(function (resolve, reject) {
             var pm = projectManager, project = projectManager.project();
             var oldImage = project.getImage(),
@@ -391,8 +389,8 @@ define(function (require, exports, module) {
                 }).catch(function (err) { console.log(err); reject(err); });
             }
         });
-	};
-    	    
+    };
+
     /**
      * @function preparePageForUmageUpload
      * @description ...
@@ -400,9 +398,9 @@ define(function (require, exports, module) {
      * @instance
      */
     var preparePageForImageUpload = function () {
-        // FIXME: dont rely on extensions, use a "type" field in the Descriptor 
+        // FIXME: dont rely on extensions, use a "type" field in the Descriptor
         // to specify whether the file is an image or a text file
-        
+
         // add listener for upload button
         d3.selectAll("#btnLoadPicture").on("click", function () {
             return new Promise(function (resolve, reject) {
@@ -428,7 +426,7 @@ define(function (require, exports, module) {
         d3.selectAll("#btnEditStoryboard").on("click", function () {
             WidgetManager.displayEditStoryboardDialog();
         });
-        
+
         function _updateImage(file) {
             return new Promise(function (resolve, reject) {
                 fs.readLocalFile(file).then(function (res) {
@@ -475,10 +473,10 @@ define(function (require, exports, module) {
             return false;
         };
     };
-    
-	/**
-		@returns {Promise} a promise that resolves when the prototype builder has been initialised
-	*/
+
+    /**
+        @returns {Promise} a promise that resolves when the prototype builder has been initialised
+    */
     PrototypeBuilder.prototype.initialise = function () {
         pbContainer = pvsioWebClient.createCollapsiblePanel({
             headerText: "Prototype Builder",
@@ -500,17 +498,17 @@ define(function (require, exports, module) {
         WidgetsListView.create();
         bindListeners();
         d3.select("#header #txtProjectName").html(projectManager.project().name());
-		return updateImageAndLoadWidgets();
+        return updateImageAndLoadWidgets();
     };
-   
+
     PrototypeBuilder.prototype.unload = function () {
         pvsioWebClient.removeCollapsiblePanel(pbContainer);
         projectManager.removeListener("ProjectChanged", onProjectChanged);
         projectManager.removeListener("WidgetsFileChanged", onWidgetsFileChanged);
         projectManager.removeListener("SelectedFileChanged", onSelectedFileChanged);
-		return Promise.resolve(true);
+        return Promise.resolve(true);
     };
-    
+
     /**
         Gets an instance of the project manager
         @deprecated use ProjectManager.getInstance()
@@ -519,7 +517,7 @@ define(function (require, exports, module) {
         console.log("deprecated call to PrototypeBuilder.getProjectManager() use ProjectManager.getInstance() instead");
         return projectManager;
     };
-    
+
     module.exports = {
         getInstance: function () {
             if (!instance) {
