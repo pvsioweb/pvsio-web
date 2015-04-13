@@ -48,5 +48,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-requirejs");
     grunt.loadNpmTasks("grunt-contrib-copy");
     grunt.loadNpmTasks("grunt-contrib-jshint");
-    grunt.registerTask("default", ["requirejs", "copy"]);
+    grunt.registerTask("test", ["jshint:all"]);
+    grunt.registerTask("default", ["test"]);
 };

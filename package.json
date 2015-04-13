@@ -23,7 +23,8 @@
     "open": "0.0.5"
   },
   "scripts": {
-    "test": "jasmine-node --verbose src/server/servertests; node client-test.js",
+    "test": "grunt test",
+    "local-test": "jasmine-node --verbose src/server/servertests; node client-test.js",
     "start": "node src/server/pvssocketserver.js"
   },
   "repository": {
