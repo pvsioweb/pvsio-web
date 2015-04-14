@@ -27,27 +27,30 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
     //create a collapsible panel using the pvsiowebclient instance
     var imageHolder = client.createCollapsiblePanel({
         parent: "#content",
-        headerText: "Simulation of Masimo Radical 7 PulseOx.",
+        headerText: "Simulation of Masimo Radical 7 PulseOximeter",
         showContent: true,
         isDemo: true
     }).style("position", "relative");
     //insert the html into the panel (note that this could have used templates or whatever)
     imageHolder.html('<img src="radical-7.png" usemap="#prototypeMap"/>').attr("id", "prototype");
     
-    var content = imageHolder.append("div").style("position", "absolute").style("top", "0px").style("left", "600px")
-					.style("height", "460px").style("width", "400px").attr("class", "dbg");
-        
+    var content = imageHolder.append("div").style("position", "absolute").style("top", "20px").style("left", "600px")
+					.style("height", "186px").style("width", "400px").attr("class", "dbg");
+    
     //append a div that will contain the canvas elements
-
-    var w = 120, h = 20;
+    var tick = null;
+    var start_tick = null, stop_tick = null;
 
     //spo2
     var spo2 = new SingleDisplay("spo2",
                                  { top: 54, left: 164, height: 36, width: 50 },
-                                 { parent: "prototype", font: "Times", fontColor: "red", backgroundColor: "black" });
+                                 { parent: "prototype", font: "Times" });
     var spo2_label = new SingleDisplay("spo2_label",
                                  { top: 86, left: 164, height: 10, width: 50 },
-                                 { parent: "prototype", font: "Times", fontColor: "red", backgroundColor: "black" });
+                                 { parent: "prototype", font: "Times" });
+    var spo2_alarm = new SingleDisplay("spo2_alarm",
+                                 { top: 48, left: 214, height: 12, width: 12 },
+                                 { parent: "prototype", align: "left", fontColor: "red" });
     var spo2_max = new SingleDisplay("spo2_max",
                                  { top: 68, left: 214, height: 8, width: 20 },
                                  { parent: "prototype", align: "left" });
@@ -71,17 +74,35 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
         }
         return (v < 0) ? "--" : v.toFixed(1).toString();
     }
+    
+    
     function render_spo2(res) {
         if (res.isOn === "TRUE") {
             spo2.render(evaluate_spo2(res.spo2));
             spo2_label.render("%" + res.spo2_label.replace(/\"/g, ""));
             spo2_max.render(evaluate_spo2range(res.spo2_max));
             spo2_min.render(evaluate_spo2range(res.spo2_min));
+            start_tick();
         } else {
             spo2.hide();
             spo2_label.hide();
             spo2_max.hide();
             spo2_min.hide();
+            stop_tick();
+        }
+    }
+    
+    function render_alarms(res) {
+        if (res.isOn === "TRUE") {
+            if (res.spo2_alarm === "off") {
+                spo2_alarm.hide();
+            } else if (res.spo2_alarm === "alarm") {
+                spo2_alarm.renderGlyphicon("glyphicon-bell");
+            } else if (res.spo2_alarm === "mute") {
+                spo2_alarm.renderGlyphicon("glyphicon-mute");
+            }
+        } else {
+            spo2_alarm.hide();
         }
     }
     
@@ -98,20 +119,53 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
         if (!err) {
             client.getWebSocket().lastState(event.data);
             var dbg = prettyprintState(event.data.toString());
-            d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
+            d3.select(".dbg").node().innerHTML = new Date() + "<br>" +
+                dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
             var res = event.data.toString();
             if (res.indexOf("(#") === 0) {
                 res = stateParser.parse(event.data.toString());
 				if (res) {
                     render_spo2(res);
+                    render_alarms(res);
                 }
             }
         } else { console.log(err); }
 	}
+    
+    
+    //--- tick function -------------------
+    start_tick = function () {
+        if (!tick) {
+            tick = setInterval(function () {
+                client.getWebSocket()
+                        .sendGuiAction("tick(" + client.getWebSocket().lastState() + ");", onMessageReceived);
+            }, 2000);
+        }
+    };
+    
+    stop_tick = function () {
+        if (tick) {
+            clearInterval(tick);
+            tick = null;
+        }
+    };
+    
     	
     d3.select(".btn_on").on("click", function () {
+        stop_tick();
 		client.getWebSocket()
             .sendGuiAction("click_btn_on(" + client.getWebSocket().lastState() + ");", onMessageReceived);
+        start_tick();
+    });
+    
+    d3.select("#submit_spo2_sensor_data").on("click", function () {
+        var data = d3.select("#spo2_sensor_data").node().value;
+        if (data) {
+            stop_tick();
+            client.getWebSocket()
+                .sendGuiAction("spo2_sensor_data(" + data + ")(" + client.getWebSocket().lastState() + ");", onMessageReceived);
+            start_tick();
+        }
     });
     
     // TODO: need to understand how to use Buttons

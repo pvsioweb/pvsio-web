@@ -21,7 +21,16 @@
         </style>
     </head>
     <body>
-        <div id="content" class="content" style="display:none;"></div>
+        <div id="content" class="content" style="display:none;">
+        <div id="spo2sensor" style="padding: 10px 28px 10px 28px; border: aqua; border-style: solid;">
+            Simulation of the SPO2 Sensor:
+            <input type="text"
+                   id="spo2_sensor_data"
+                   name="spo2reading"
+                   placeholder="Please enter a new SPO2 reading..."
+                   size="44">
+            <input type="submit" id="submit_spo2_sensor_data" value="Submit new SPO2 reading">
+        </div>
         <div id="splash" class="demo-splash">
             <div class="loader">
                 <div class="version">Masimo Radical 7 Demo</div>

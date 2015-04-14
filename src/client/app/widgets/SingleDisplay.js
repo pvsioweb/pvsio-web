@@ -58,6 +58,10 @@ define(function (require, exports, module) {
                         .style("width", this.width + "px").style("height", this.height + "px")
                         .style("margin", 0).style("padding", 0)
                         .style("display", "block").attr("id", id).attr("class", id);
+        this.div.append("span").attr("id", id + "_span").attr("class", id + "_span")
+                        .attr("width", this.width).attr("height", this.height)
+                        .style("margin", 0).style("padding", 0)
+                        .style("vertical-align", "top");
         this.div.append("canvas").attr("id", id + "_canvas").attr("class", id + "_canvas")
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0)
@@ -95,6 +99,21 @@ define(function (require, exports, module) {
         var align = opt.align || this.align;
         context.font = this.font.join("");
         renderln({ txt: txt, context: context, align: align, height: this.height, width: this.width }, opt);
+        this.reveal();
+        return this;
+    };
+    
+    SingleDisplay.prototype.renderGlyphicon = function (icon, opt) {
+        function clearContext(context, width, height) {
+            context.save();
+            context.fillStyle = black;
+            context.fillRect(0, 0, width, height);
+            context.restore();
+        }
+        opt = opt || {};
+        var span = document.getElementById(this.id + "_span");
+        span.setAttribute("class", "glyphicon " + icon);
+        span.style.color = opt.fontColor || this.fontColor || white;
         this.reveal();
         return this;
     };
