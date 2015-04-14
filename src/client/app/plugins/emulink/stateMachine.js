@@ -15,7 +15,7 @@
 /**
  * @module StateMachine
  */
-/*jshint -W040, -W083, unused:false*/
+/*jshint -W040, -W083, unused:false, -W117*/
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global XMLSerializer*/
 
