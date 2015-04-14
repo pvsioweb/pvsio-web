@@ -187,7 +187,7 @@ function getFolderTree(fullPath, filter) {
                         } else {
                             resolve({
                                 path: fullPath,
-                                content: isImage ? ("data:image/" + ext.substr(1).toLowerCase() + ";base64," + data) : data,
+                                content: isImage(fullPath) ? ("data:image/" + ext.substr(1).toLowerCase() + ";base64," + data) : data,
                                 encoding: opt.encoding
                             });
                         }
