@@ -85,6 +85,16 @@ function readFile(fullPath, encoding) {
 }
 
 /**
+ * Checks whether or not a path points to an image
+ * @param   {String} fullPath The full path to the file
+ * @returns {boolean} true if the path points to a recognised image
+ */
+function isImage(fullPath) {
+    var ext = path.extname(fullPath).toLowerCase();
+    return imageExts.indexOf(ext) > -1;
+}
+
+/**
  Writes a file with the specified content to the specified path. If the parent folders of the specified path
  do not exist, they are created
  @param {string} fullPath the full path to the file
@@ -97,8 +107,7 @@ function writeFile(fullPath, content, fileEncoding, opt) {
     "use strict";
     fileEncoding = fileEncoding || "utf8";
     //remove prefixes from file content before saving images
-    var ext = path.extname(fullPath);
-    if (content && imageExts.indexOf(ext.toLowerCase()) > -1) {
+    if (content && isImage(fullPath)) {
         content = content.replace(/^data:image\/(\w+);base64,/, "");
     }
     return new Promise(function (resolve, reject) {
@@ -126,13 +135,6 @@ function writeFile(fullPath, content, fileEncoding, opt) {
         }
     });
 }
-
-//-- this function is implemented in pvsprocess, as the nodejs implementation (unlink) is unsatisfactory
-//function deleteFile(path, cb) {
-//    "use strict";
-//    var np = path.normalize(path);
-//    fs.unlink(np, cb);
-//}
 
 /**
     Recursively reads the files in a directory using promises
@@ -176,9 +178,8 @@ function getFolderTree(fullPath, filter) {
         } else {
             //resolve with filename and content only for model files and images (they are listed in filter)
             return new Promise(function (resolve, reject) {
-                var ext = path.extname(fullPath).toLowerCase(),
-                    isImage = imageExts.indexOf(ext) > -1;
-                var opt = {encoding: isImage ? "base64" : "utf8"};
+                var ext = path.extname(fullPath).toLowerCase();
+                var opt = {encoding: isImage(fullPath) ? "base64" : "utf8"};
                 if (filter && filter.indexOf(ext) > -1) {
                     fs.readFile(fullPath, opt, function (err, data) {
                         if (err) {
@@ -253,7 +254,7 @@ function listProjects() {
                                             resolve({name: file, image: null});
                                         } else {
                                             var image = files.filter(function (f) {
-                                                return imageExts.indexOf(path.extname(f).toLowerCase()) > -1;
+                                                return isImage(f);
                                             })[0];
                                             var result = files.length ? {name: file, image: image} : {name: file, image: null};
                                             resolve(result);
@@ -307,5 +308,6 @@ module.exports = {
     writeFile: writeFile,
     getFolderTree: getFolderTree,
     openProject: openProject,
-    listProjects: listProjects
+    listProjects: listProjects,
+    isImage: isImage
 };

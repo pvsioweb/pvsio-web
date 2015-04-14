@@ -21,11 +21,11 @@
 /*global define, Promise, Handlebars, $ */
 define(function (require, exports, module) {
     "use strict";
-    var TreeList = require("./TreeList"),
-        WSManager = require("websockets/pvs/WSManager");
-
-    var template = require("text!pvsioweb/forms/templates/fileBrowser.handlebars"),
-        BaseDialog = require("pvsioweb/forms/BaseDialog");
+    var TreeList        = require("./TreeList"),
+        WSManager       = require("websockets/pvs/WSManager"),
+        template        = require("text!pvsioweb/forms/templates/fileBrowser.handlebars"),
+        BaseDialog      = require("pvsioweb/forms/BaseDialog"),
+        MIME            = require("util/MIME").getInstance();
     var timer, rfb;
 
     var OpenFilesView = BaseDialog.extend({
@@ -80,6 +80,16 @@ define(function (require, exports, module) {
 
     RemoteFileBrowser.prototype._treeList = null;
 
+    /**
+     * Utility function to sort the list of files returned by the remote file browser
+     * @param   {String}   a first argument
+     * @param   {String}   b second argument of the sort
+     * @returns {number} -1 if a < b, 0 if a === b and 1 if a > b
+     */
+    function fileSort(a, b) {
+        return a.path.toLowerCase() < b.path.toLowerCase() ? -1 : a.path.toLowerCase() === b.path.toLowerCase() ? 0 : 1;
+    }
+
     function getRemoteDirectory(path) {
         var ws = WSManager.getWebSocket();
         return new Promise(function (resolve, reject) {
@@ -87,7 +97,7 @@ define(function (require, exports, module) {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(res.files.filter(rfb.filterFunc));
+                    resolve(res.files.filter(rfb.filterFunc).sort(fileSort));
                 }
             });
         });
@@ -111,6 +121,22 @@ define(function (require, exports, module) {
      @returns {Promise} a Promise that settled (with an array containing selected files/folders [{path: <string>}]) when the user presses the ok or cancel button on the dialog
     */
     RemoteFileBrowser.prototype.open = function (path, opt) {
+        var KB = 1000, MB = KB * KB, GB = KB * MB;
+        var result;
+        function toUserFriendlySize(sizeInBytes) {
+            if (sizeInBytes < KB) {
+                return {value: sizeInBytes, unit: "B"};
+            } else if (sizeInBytes < MB) {
+                result = {value: sizeInBytes / KB, unit: "KB"};
+            } else if (sizeInBytes < GB ) {
+                result = {value: sizeInBytes / MB, unit: "MB"};
+            } else {
+                result = {value: sizeInBytes / GB, unit: "GB"};
+            }
+            result.value = result.value.toFixed(0);
+            return result;
+        }
+
         path = path || "~";
         opt = opt || {};
         var view = new OpenFilesView({baseDirectory: path, title: (opt.title || "Open file")});
@@ -120,8 +146,21 @@ define(function (require, exports, module) {
                 var data = {name: path, path: path, children: files, isDirectory: true};
                 self._treeList = new TreeList(data, "#file-browser", true);
                 self._treeList.addListener("SelectedItemChanged", function (event) {
-                    var data = event.data;
+                    var data = event.data,
+                        size = data.stats ? toUserFriendlySize(data.stats.size) : "";
                     document.getElementById("currentPath").value = data.path;
+                    d3.select("#file-name").html(data.path);
+                    d3.select("#file-size").html(size.value);
+                    d3.select("#file-size-unit").html(size.unit);
+                    d3.select("#file-last-modified").html(new Date(data.stats.modified).toString());
+                    //if the file is an image retrieve a preview
+                    if (MIME.isImage(data.path)) {
+                        WSManager.getWebSocket().readFile({path: data.path, encoding: "base64"}, function (err, res) {
+                            if (!err) {
+                                d3.select("#image-preview").attr("src", res.content);
+                            }
+                        });
+                    }
                     if (data.isDirectory && !data.children && !data._children) {
                         getRemoteDirectory(data.path)
                             .then(function (files) {

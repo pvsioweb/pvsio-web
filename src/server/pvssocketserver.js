@@ -202,7 +202,13 @@ function run() {
                                 if (err) {
                                     reject(err);
                                 } else {
-                                    resolve(res);
+                                     var fileStats = {
+                                        created: res.birthtime,
+                                        modified: res.mtime,
+                                        size: res.size,
+                                        isDirectory: res.isDirectory()
+                                    };
+                                    resolve(fileStats);
                                 }
                             });
                         });
@@ -211,7 +217,12 @@ function run() {
                     Promise.all(promises)
                         .then(function (res) {
                             var result = res.map(function (d, i) {
-                                return {name: files[i], path: path.join(folderPath, files[i]), isDirectory: d.isDirectory()};
+                                return {
+                                    name: files[i],
+                                    path: path.join(folderPath, files[i]),
+                                    isDirectory: d.isDirectory,
+                                    stats: d
+                                };
                             });
                             resolve(result);
                         }, function (err) {
