@@ -3,25 +3,25 @@
  * @author Patrick Oladimeji
  * @date 5/3/14 15:46:27 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 /*global define, Promise*/
 define(function (require, exports, module) {
     "use strict";
     var eventDispatcher = require("util/eventDispatcher");
     var enabledPlugins;//contains instances of plugins
-    
+
     var instance;
-    
+
     function PluginManager() {
         enabledPlugins = [];
         eventDispatcher(this);
     }
-    
-	/**
-		Enables a plugin
-		@param {object} plugin the plugin to enable
-		@returns {Promise} a promise that resolves when the plugin has been enabled
-	*/
+
+    /**
+        Enables a plugin
+        @param {object} plugin the plugin to enable
+        @returns {Promise} a promise that resolves when the plugin has been enabled
+    */
     PluginManager.prototype.enablePlugin = function (plugin) {
         var pm = this;
         return new Promise(function (resolve, reject) {
@@ -52,12 +52,12 @@ define(function (require, exports, module) {
             }
         });
     };
-    
-	/**
-		Disables a plugin.
-		@param {object} plugin the plugin to disable
-		@returns {Promise} a promise that resolves when the plugin has been disabled
-	*/
+
+    /**
+        Disables a plugin.
+        @param {object} plugin the plugin to disable
+        @returns {Promise} a promise that resolves when the plugin has been disabled
+    */
     PluginManager.prototype.disablePlugin = function (plugin) {
         return new Promise(function (resolve, reject) {
             var index = enabledPlugins.indexOf(plugin);
@@ -72,15 +72,15 @@ define(function (require, exports, module) {
             }
         });
     };
-    
+
     PluginManager.prototype.getEnabledPlugins = function () {
         return enabledPlugins;
     };
-    
+
     PluginManager.prototype.isLoaded = function (p) {
         return enabledPlugins.indexOf(p) > -1 ? true : false;
     };
-    
+
     PluginManager.prototype.init = function () {
         enabledPlugins = [];
         return this;

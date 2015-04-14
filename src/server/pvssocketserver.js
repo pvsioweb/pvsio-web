@@ -23,8 +23,8 @@ You should have received a copy of the GNU General Public License along with Foo
  * @date 28 Jul 2012 21:52:31
  *
  */
-/*jshint unused: true, undef: true*/
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, undef: true, node: true, es5:true */
+/*jshint undef: true*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, undef: true, node: true*/
 /*global __dirname*/
 
 function run() {
@@ -142,8 +142,8 @@ function run() {
         logger.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
         next();
     });
-    
-    
+
+
     //create the express static server serve contents in the client directory and the demos directory
     webserver.use(express.static(clientDir));
     webserver.use("/demos", express.static(baseDemosDir));
@@ -202,7 +202,13 @@ function run() {
                                 if (err) {
                                     reject(err);
                                 } else {
-                                    resolve(res);
+                                     var fileStats = {
+                                        created: res.birthtime,
+                                        modified: res.mtime,
+                                        size: res.size,
+                                        isDirectory: res.isDirectory()
+                                    };
+                                    resolve(fileStats);
                                 }
                             });
                         });
@@ -211,7 +217,12 @@ function run() {
                     Promise.all(promises)
                         .then(function (res) {
                             var result = res.map(function (d, i) {
-                                return {name: files[i], path: path.join(folderPath, files[i]), isDirectory: d.isDirectory()};
+                                return {
+                                    name: files[i],
+                                    path: path.join(folderPath, files[i]),
+                                    isDirectory: d.isDirectory,
+                                    stats: d
+                                };
                             });
                             resolve(result);
                         }, function (err) {

@@ -7,19 +7,18 @@
  * @date 11/6/14 9:10:56 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, require, brackets, Backbone, self*/
 define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
         FormUtils = require("pvsioweb/forms/FormUtils");
-    
+
     var BaseDialog = Backbone.View.extend({
         initialize: function (data) {
-			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
-			this.render(data);
+            d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
+            this.render(data);
             this._data = data;
             this.focus();
-		},
+        },
         events: {
             "keydown .panel": "keypress",
             "mousedown .panel-heading": "moveDialog"
@@ -39,14 +38,13 @@ define(function (require, exports, module) {
                     .style("left", (startx + e.clientX - mx) + "px")
                     .style("position", "absolute");
             }
-            
+
             d3.select("body").on("mousemove.dialogdrag", mousemove);
             d3.select(parent).select(".panel-heading").on("mouseup", function () {
                 d3.select("body").on("mousemove.dialogdrag", null);
             });
         },
         keypress: function (event) {
-            var form = this.el;
             switch (event.which) {
             case 13: //enter pressed
                 this.ok(event);
@@ -59,22 +57,22 @@ define(function (require, exports, module) {
             }
         },
         ok: function (event) {
-			var form = this.el,
+            var form = this.el,
                 btnName = this._data && this._data.buttons ? this._data.buttons[1].toLowerCase() : "ok";
-			if (FormUtils.validateForm(form)) {
-				var formdata = FormUtils.serializeForm(form);
-				this.trigger(btnName, {data: formdata, el: this.el, event: event}, this);
-			}
-		},
-		cancel: function (event) {
+            if (FormUtils.validateForm(form)) {
+                var formdata = FormUtils.serializeForm(form);
+                this.trigger(btnName, {data: formdata, el: this.el, event: event}, this);
+            }
+        },
+        cancel: function (event) {
             var btnName = this._data && this._data.buttons ? this._data.buttons[0].toLowerCase() : "cancel";
 
-			this.trigger(btnName, {el: this.el, event: event}, this);
-		}
+            this.trigger(btnName, {el: this.el, event: event}, this);
+        }
     });
-    
+
     var baseExtend = BaseDialog.extend;
-    
+
     BaseDialog.extend = function (data) {
         if (data && data.events) {
             Object.keys(data.events).forEach(function (e) {
@@ -84,6 +82,6 @@ define(function (require, exports, module) {
         }
         return baseExtend.call(BaseDialog, data);
     };
-    
+
     module.exports = BaseDialog;
 });

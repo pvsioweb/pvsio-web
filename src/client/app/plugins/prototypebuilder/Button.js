@@ -4,94 +4,93 @@
  * @author Patrick Oladimeji
  * @date 10/31/13 11:26:16 AM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true */
-/*global define, d3, require, $, brackets, window, MouseEvent, Promise*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 define(function (require, exports, module) {
     "use strict";
     var Widget = require("./Widget"),
-		property = require("util/property"),
-		Timer	= require("util/Timer"),
+        property = require("util/property"),
+        Timer	= require("util/Timer"),
         Recorder    = require("util/ActionRecorder");
-	//define timer for sensing hold down actions on buttons
-	var btnTimer = new Timer(250), timerTickFunction = null;
+    //define timer for sensing hold down actions on buttons
+    var btnTimer = new Timer(250), timerTickFunction = null;
     var buttonActions = Promise.resolve();//This is a ptr to a sequence of promises that handle button action messages to the server
-	//add event listener for timer's tick 
-	btnTimer.addListener('TimerTicked', function () {
-		if (timerTickFunction) {
-			timerTickFunction();
-		}
-	});
-	
-	function mouseup(e) {
-		btnTimer.reset();
-	}
-	
-	
-	/**
-	 Creates a new Button with the specified id.
-	 @constructor
-	 @param {string} id The id for the widget's html element
-	 @this Button
-	 */
+    //add event listener for timer's tick
+    btnTimer.addListener('TimerTicked', function () {
+        if (timerTickFunction) {
+            timerTickFunction();
+        }
+    });
+
+    function mouseup(e) {
+        btnTimer.reset();
+    }
+
+
+    /**
+     Creates a new Button with the specified id.
+     @constructor
+     @param {string} id The id for the widget's html element
+     @this Button
+     */
     function Button(id) {
         Widget.call(this, id, "button");
-		/** get or set the events this button listens to. Can be from the set ['click', 'press/release'] */
+        /** get or set the events this button listens to. Can be from the set ['click', 'press/release'] */
         this.evts = property.call(this, []);
-		this.recallRate = property.call(this);
-		this.functionText = property.call(this);
-		this.imageMap = property.call(this);
+        this.recallRate = property.call(this);
+        this.functionText = property.call(this);
+        this.imageMap = property.call(this);
     }
-    
+
     Button.prototype = Object.create(Widget.prototype);
     Button.prototype.constructor = Button;
     Button.prototype.parentClass = Widget.prototype;
-	/**
-		Gets a comma separated string representing the functions that will be called in the
-		pvs spec when interating with this button.
-		@returns {string}
-		@memberof Button
-	*/
-	Button.prototype.boundFunctions = function () {
-		var o = this;
-		var res = o.evts().map(function (d) {
-			if (d.indexOf("/") > -1) {
-				return d.split("/").map(function (a) {
-					return a + "_" + o.functionText();
-				}).join(", ");
-				
-			} else {
-				return d + "_" + o.functionText();
-			}
-		}).join(", ");
-		return res;
-	};
-	
-	/**
-		Returns a JSON object representation of this Button.
-		@returns {object}
-		@memberof Button
-	*/
-	Button.prototype.toJSON = function () {
-		return {
-			evts: this.evts(),
-			id: this.id(),
-			type: this.type(),
-			recallRate: this.recallRate(),
-			functionText: this.functionText(),
-			boundFunctions: this.boundFunctions()
-		};
-	};
-	
-	/**
-	 * @override
-	 * Create and image map area for this button and bind functions in the button's events property with appropriate
-	 * calls to function in the pvs specification. Whenever a response is returned from the pvs function call, the callback
-	 * function is invoked.
-	 * @param {!pvsWSClient} ws A websocket client to use for sending gui actions to the server process
-	 * @param {function} callback A callback function to invoke when the pvs function call on the server process is returned
-	 * @returns {d3.selection} The image map area created
-	   @memberof Button
-	 */
+    /**
+        Gets a comma separated string representing the functions that will be called in the
+        pvs spec when interating with this button.
+        @returns {string}
+        @memberof Button
+    */
+    Button.prototype.boundFunctions = function () {
+        var o = this;
+        var res = o.evts().map(function (d) {
+            if (d.indexOf("/") > -1) {
+                return d.split("/").map(function (a) {
+                    return a + "_" + o.functionText();
+                }).join(", ");
+
+            } else {
+                return d + "_" + o.functionText();
+            }
+        }).join(", ");
+        return res;
+    };
+
+    /**
+        Returns a JSON object representation of this Button.
+        @returns {object}
+        @memberof Button
+    */
+    Button.prototype.toJSON = function () {
+        return {
+            evts: this.evts(),
+            id: this.id(),
+            type: this.type(),
+            recallRate: this.recallRate(),
+            functionText: this.functionText(),
+            boundFunctions: this.boundFunctions()
+        };
+    };
+
+    /**
+     * @override
+     * Create and image map area for this button and bind functions in the button's events property with appropriate
+     * calls to function in the pvs specification. Whenever a response is returned from the pvs function call, the callback
+     * function is invoked.
+     * @param {!pvsWSClient} ws A websocket client to use for sending gui actions to the server process
+     * @param {function} callback A callback function to invoke when the pvs function call on the server process is returned
+     * @returns {d3.selection} The image map area created
+       @memberof Button
+     */
     Button.prototype.createImageMap = function (ws, callback) {
         function getGUIActionPromise(action, cb) {
             return new Promise(function (resolve, reject) {
@@ -106,7 +105,7 @@ define(function (require, exports, module) {
                 });
             });
         }
-        
+
         /**
             Queue the next gui action onto the promise chain. This ensures that actions are
             executed on the server in the same order as they are sent on the client
@@ -123,14 +122,14 @@ define(function (require, exports, module) {
             });
             return buttonActions;
         }
-        
+
         var area = Button.prototype.parentClass.createImageMap.apply(this, arguments),
-			widget = this,
-			f,
-			evts;
-        
+            widget = this,
+            f,
+            evts;
+
         var onmouseup = function () {
-			var f = widget.functionText();
+            var f = widget.functionText();
             if (evts && evts.indexOf('press/release') > -1) {
                 queueGUIAction("release_" + f);
                 Recorder.addAction({
@@ -142,41 +141,41 @@ define(function (require, exports, module) {
             }
             mouseup(d3.event);
             area.on("mouseup", null);
-		};
+        };
         area.on("mousedown", function () {
-			f = widget.functionText();
-			evts = widget.evts();
-			//perform the click event if there is one
-			if (evts && evts.indexOf('click') > -1) {
+            f = widget.functionText();
+            evts = widget.evts();
+            //perform the click event if there is one
+            if (evts && evts.indexOf('click') > -1) {
                 queueGUIAction("click_" + f);
-                //record action 
+                //record action
                 Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "click", ts: new Date().getTime()});
-			} else if (evts && evts.indexOf("press/release") > -1) {
+            } else if (evts && evts.indexOf("press/release") > -1) {
                 queueGUIAction("press_" + f);
                 Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
-               
-				timerTickFunction = function () {
+
+                timerTickFunction = function () {
                     queueGUIAction("press_" + f);
-					//record action
-					Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
-				};
-				btnTimer.interval(widget.recallRate()).start();
-			}
-			//register mouseup/out events here
-			area.on("mouseup", onmouseup);
-			
-		});
-		widget.imageMap(area);
-		return area;
+                    //record action
+                    Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
+                };
+                btnTimer.interval(widget.recallRate()).start();
+            }
+            //register mouseup/out events here
+            area.on("mouseup", onmouseup);
+
+        });
+        widget.imageMap(area);
+        return area;
     };
-    
+
 //	Button.prototype.createImageMap = function (ws, callback) {
 //		var area = Button.prototype.parentClass.createImageMap.apply(this, arguments),
 //			widget = this,
 //			f,
 //			evts;
 //        var press_events = 0;
-//        
+//
 //        // this proxy function is used to create an interlocking mechanism to ensure that
 //        // all press commands sent to pvsio are actually executed before executing a release command
 //        var proxy = function (cb) {
@@ -227,7 +226,7 @@ define(function (require, exports, module) {
 //			//perform the click event if there is one
 //			if (evts && evts.indexOf('click') > -1) {
 //				ws.sendGuiAction("click_" + f + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");", callback);
-//                //record action 
+//                //record action
 //                Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "click", ts: new Date().getTime()});
 //			} else if (evts && evts.indexOf("press/release") > -1) {
 //                //cb = callback;
@@ -244,11 +243,11 @@ define(function (require, exports, module) {
 //			}
 //			//register mouseup/out events here
 //			area.on("mouseup", onmouseup);
-//			
+//
 //		});
 //		widget.imageMap(area);
 //		return area;
 //	};
-	
-	module.exports = Button;
+
+    module.exports = Button;
 });

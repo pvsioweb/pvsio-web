@@ -4,10 +4,10 @@
  * @date 6/4/13 15:35:54 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent */
+/*global define*/
 define(function (require, exports, module) {
     "use strict";
-    
+
     module.exports = function () {
         var d = new Date().getTime();
         var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {

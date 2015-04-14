@@ -1,7 +1,7 @@
-PVSio-web
+PVSio-web [![Build Status](https://travis-ci.org/thehogfather/pvsio-web.svg?branch=alpha)](https://travis-ci.org/thehogfather/pvsio-web)
 =========
 
-PVSio-web is a new graphical tool to prototype and analyse user interface software. It provides the typical functionalities of an animation environment that allows designers to load and simulate realistic user interfaces. Underneath, it uses SRI's state-of-the-art theorem prover PVS for analysis, and the pvsio component as a basis for simulation. 
+PVSio-web is a new graphical tool to prototype and analyse user interface software. It provides the typical functionalities of an animation environment that allows designers to load and simulate realistic user interfaces. Underneath, it uses SRI's state-of-the-art theorem prover PVS for analysis, and the pvsio component as a basis for simulation.
 
 Simulations created with PVSio-web can be watched in this youtube video https://www.youtube.com/watch?v=T0QmUe0bwL8
 
@@ -13,7 +13,7 @@ Realistic prototypes created using PVSio-web can be found at the following links
 * http://www.pvsioweb.org/demos/BBraun   (Commercial infusion pump prototype - data entry system only)
 * http://www.pvsioweb.org/demos/GPCA-UI_PVS/NavKeys/ (FDA's Generic Infusion Pump prototype - full model)
 
-The full PVSio-web tool with limited features is also available at http://www.pvsioweb.org 
+The full PVSio-web tool with limited features is also available at http://www.pvsioweb.org
 (please note that the web server has limited processing power so its response time might not be optimal; also, note that the file system is read-only, so you will not be able to save new prototypes or compile new models using this live version).
 
 ![Screenshot](screenshot.png?raw=true)
@@ -80,8 +80,8 @@ This project has the following setup:
 * start.sh - the script used to initiate the server.
 * examples/ - this directory contains projects and demos
 * src/ - this directory contains the pvsio-web source code
-	* client/ - this directory contains the source code for the pvsio-web client. This code is executed in the user's browser
-	* server/ - this directory contains the source code for the pvsio-web server. This code is executed in the node.JS environment, and manages communication between pvs/pvsio and the client code.
+    * client/ - this directory contains the source code for the pvsio-web client. This code is executed in the user's browser
+    * server/ - this directory contains the source code for the pvsio-web server. This code is executed in the node.JS environment, and manages communication between pvs/pvsio and the client code.
 
 
 Nightly builds
@@ -104,18 +104,18 @@ To clone the beta branch, create a new directory (for example, pvsioweb-beta), o
 Testing the installation
 ------------------------
 To test the client, start the pvsio-web backend by running the following command in a Terminal window (and leave the Terminal window open):
-	./start.sh
-	
+    ./start.sh
+    
 and type the following address in a browser window:
 
-	http://localhost:8082/tests
-	
+    http://localhost:8082/tests
+    
 To test the server, run the following command in a Terminal window
 
-	npm test
+    npm test
 
 
 Uninstallation :(
 --------------
 To uninstall, delete the pvsio-web folder from your computer.
-	
+    

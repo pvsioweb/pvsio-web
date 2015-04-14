@@ -4,14 +4,11 @@
  * @date 5/5/14 16:29:00 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, Backbone, Handlebars, self */
 define(function (require, exports, module) {
     "use strict";
-    var d3 = require("d3/d3"),
-        formTemplate = require("text!./templates/displayNotification.handlebars"),
-        BaseDialog = require("pvsioweb/forms/BaseDialog"),
-        FormUtils = require("./FormUtils");
-    
+    var formTemplate = require("text!./templates/displayNotification.handlebars"),
+        BaseDialog = require("pvsioweb/forms/BaseDialog");
+
     var NotificationView = BaseDialog.extend({
         render: function (data) {
             var template = Handlebars.compile(formTemplate);
@@ -20,10 +17,10 @@ define(function (require, exports, module) {
             return this;
         },
         events: {
-			"click #btnOk": "ok"
-		}
+            "click #btnOk": "ok"
+        }
     });
-    
+
     module.exports = {
         /**
          * creates a new form view to display questions. Renders two buttons for

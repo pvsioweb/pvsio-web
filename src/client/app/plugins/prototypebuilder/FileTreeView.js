@@ -4,27 +4,27 @@
  * @date 1/14/14 11:53:17 AM
  */
 /*jshint unused: false*/
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, unparam: true, es5:true*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, unparam: true*/
 /*global define, d3, Promise*/
 define(function (require, exports, module) {
     "use strict";
     var eventDispatcher = require("util/eventDispatcher"),
         QuestionForm    = require("pvsioweb/forms/displayQuestion"),
-		NotificationManager = require("project/NotificationManager"),
+        NotificationManager = require("project/NotificationManager"),
         TreeList        = require("./TreeList");
-    
+
     var elementId, project, projectManager, folderCounter = 0,
         unSavedFileName = "untitled_file", unSavedFolderName = "untitled_folder", treeList;
-    
-	///FIXME Sort out the use of alert dialogs to notify errors here --
-	///also are there client side checks we can do to prevent some errors
+
+    ///FIXME Sort out the use of alert dialogs to notify errors here --
+    ///also are there client side checks we can do to prevent some errors
     function FileTreeView(_elId, folderData, _projectManager) {
         eventDispatcher(this);
         var ftv = this;
         elementId = _elId;
         project = _projectManager.project();
-		projectManager = _projectManager;
-        
+        projectManager = _projectManager;
+
         //add listeners to project changes
         if (project) {
             project.addListener("DirtyFlagChanged", function (event) {
@@ -32,7 +32,7 @@ define(function (require, exports, module) {
                 treeList.markDirty(event.file.path, event.file.dirty());
 //            }).addListener("ProjectMainSpecFileChanged", function () {
 //               //change the main file class
-//                
+//
             }).addListener("FileAdded", function (event) {
                 //add the new file to the tree list data
                 treeList.addItem({
@@ -45,7 +45,7 @@ define(function (require, exports, module) {
                 ftv.deleteItem(event.file);
             });
         }
-    
+
         treeList = new TreeList(folderData, elementId);
         treeList.addListener("SelectedItemChanged", function (event) {
             var e = {type: event.type, selectedItem: event.data};
@@ -54,44 +54,44 @@ define(function (require, exports, module) {
             treeList.createNodeEditor(event.data, function (node, oldPath) {
                 var f = project.getDescriptor(oldPath);
                 if (event.data.isDirectory) {
-					if (oldPath !== node.path) {//we only want to rename folder if the name has actually been changed
-						project.renameFolder(oldPath, node.path, function (err, res) {
-							if (err) {
-								// alert user
-								if (err.message === "ENOTEMPTY") {
-									alert("Error: the folder could not be renamed into " +
+                    if (oldPath !== node.path) {//we only want to rename folder if the name has actually been changed
+                        project.renameFolder(oldPath, node.path, function (err, res) {
+                            if (err) {
+                                // alert user
+                                if (err.message === "ENOTEMPTY") {
+                                    alert("Error: the folder could not be renamed into " +
                                           err.newPath + " (another folder with the same name already exists)." +
                                           " Please choose a different name");
-								} else { alert(err.message); }
-								// revert to previous name
-								var prevData = event.data;
-								prevData.path = oldPath;
-								prevData.name = oldPath.substring(oldPath.lastIndexOf("/") + 1);
-								treeList.createNodeEditor(prevData);
-								// and trigger blur event to remove the overlay node used for renaming
-								treeList.blur();
-							} else {
-								// the path of all affected nodes is automatically updated in project.renameFolder
-								treeList.render(project.getDescriptors());
-							}
-						});
-					}
-                 
+                                } else { alert(err.message); }
+                                // revert to previous name
+                                var prevData = event.data;
+                                prevData.path = oldPath;
+                                prevData.name = oldPath.substring(oldPath.lastIndexOf("/") + 1);
+                                treeList.createNodeEditor(prevData);
+                                // and trigger blur event to remove the overlay node used for renaming
+                                treeList.blur();
+                            } else {
+                                // the path of all affected nodes is automatically updated in project.renameFolder
+                                treeList.render(project.getDescriptors());
+                            }
+                        });
+                    }
+
                 } else {//renaming a file
-					project.renameFile(f, node.name, function (err, res) {
-						if (err) {
-							alert(JSON.stringify(err));
-							var prevData = event.data;
-							prevData.path = oldPath;
-							prevData.name = oldPath.substring(oldPath.lastIndexOf("/") + 1);
-							treeList.createNodeEditor(prevData);
-						}
-					});
-				}
+                    project.renameFile(f, node.name, function (err, res) {
+                        if (err) {
+                            alert(JSON.stringify(err));
+                            var prevData = event.data;
+                            prevData.path = oldPath;
+                            prevData.name = oldPath.substring(oldPath.lastIndexOf("/") + 1);
+                            treeList.createNodeEditor(prevData);
+                        }
+                    });
+                }
             });
         }).addListener("New File", function (event) {
             // files or folders might be filtered out in the PVSio-web file browser
-            // so to choose a name for the new file or folder we can't rely on the 
+            // so to choose a name for the new file or folder we can't rely on the
             // list of files and folders shown in the file browser -- we directly try
             // to create the file or folder, and change its name until we succeed
             var nameObj = { uid : 0, name: unSavedFileName, ext: ".pvs" };
@@ -172,13 +172,13 @@ define(function (require, exports, module) {
                                 : ("Are you sure you want to delete " + path + "?"),
                 buttons: ["Cancel", "Delete"]
             }).on("delete", function (e, view) {
-				if (isDirectory) {
-					projectManager.rmDir(path)
+                if (isDirectory) {
+                    projectManager.rmDir(path)
                         .catch(function (err) { console.log(err); });
-				} else {
-					projectManager.deleteFile(path)
+                } else {
+                    projectManager.deleteFile(path)
                         .catch(function (err) { console.log(err); });
-				}
+                }
                 if (isMainFile) {
                     project.mainPVSFile(null);
                     d3.select("#btnSetMainFile").attr("disabled", false);
@@ -187,12 +187,12 @@ define(function (require, exports, module) {
             }).on("cancel", function (e, view) { view.remove(); });
         });
     }
-    
+
     FileTreeView.prototype.deleteItem = function (file) {
         var path = typeof file === "string" ? file : file.path;
         treeList.removeItem(path);
     };
-    
+
     /**
         Gets the undlerying treeList object. This would be useful if a direct access to manipulating
         the data in the treeList node is needed. The following calls are available
@@ -215,7 +215,7 @@ define(function (require, exports, module) {
         }
         return false;
     };
-    
+
     /**
      * Renames the selected file to the name specified
      * @param {string} newName The newName to give the file.
@@ -232,7 +232,7 @@ define(function (require, exports, module) {
         var res = treeList.getSelectedItem();
         return (res) ? res.path : undefined;
     };
-    
+
     /**
         Gets the selected data in the treeview
         @returns {Object({name, path, isDirectory})}
@@ -242,8 +242,8 @@ define(function (require, exports, module) {
         return (res) ? { name: res.name, path: res.path, isDirectory: res.isDirectory }
             : { name: project.name(), path: project.name(), isDirectory: true };
     };
-    
-    
+
+
     /**
      * Renames the project
      * @param {string} newName The new project name.

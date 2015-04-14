@@ -10,39 +10,39 @@
  * // Example module that uses TripleDisplay.
  * define(function (require, exports, module) {
  *     "use strict";
- * 
+ *
  * });
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, document */
+/*global define */
 
 define(function (require, exports, module) {
     "use strict";
-    
-    var d3 = require("d3/d3");
-    var black, white;
+
+//    var d3 = require("d3/d3");
+//    var black, white;
     var SingleDisplay = require("widgets/SingleDisplay");
-    
-	/**
-	 * @function <a name="TripleDisplay">TripleDisplay</a>
+
+    /**
+     * @function <a name="TripleDisplay">TripleDisplay</a>
      * @description Constructor.
-	 * @param id {String} The ID of the HTML element where the display will be rendered.
-     * @param coords {Object} The four coordinates (x1,y1,x2,y2) of the display, specifying 
+     * @param id {String} The ID of the HTML element where the display will be rendered.
+     * @param coords {Object} The four coordinates (x1,y1,x2,y2) of the display, specifying
      *        the left, top, right, bottom corner of the rectangle (for shape="rect")
      * @param opt {Object}
      * @memberof module:DoubleDisplay
      * @instance
-	 */
-	function TripleDisplay(id, coords, opt) {
+     */
+    function TripleDisplay(id, coords, opt) {
         opt = opt || {};
         this.id = id;
         this.parent = opt.parent || "body";
         this.ratio = opt.ratio || 0.32;
         this.top = coords.top || 0;
         this.left = coords.left || 0;
-		this.width = coords.width || 200;
-		this.height = coords.height || 80;
+        this.width = coords.width || 200;
+        this.height = coords.height || 80;
         var coords_left = {
             top: (opt.left_display && opt.left_display.top) ? opt.left_display.top : this.top,
             left: (opt.left_display && opt.left_display.left) ? opt.left_display.left : this.left,
@@ -97,27 +97,27 @@ define(function (require, exports, module) {
     TripleDisplay.prototype.getLeftDisplay = function () {
         return this.leftDisplay;
     };
-    
+
     TripleDisplay.prototype.getRightDisplay = function () {
         return this.rightDisplay;
     };
-    
+
     TripleDisplay.prototype.getCenterDisplay = function () {
         return this.centerDisplay;
     };
-    
+
     TripleDisplay.prototype.renderLabel = function (txt) {
         return this.leftDisplay.render(txt);
     };
-    
+
     TripleDisplay.prototype.renderValue = function (val) {
         return this.centerDisplay.render(val);
     };
-    
+
     TripleDisplay.prototype.renderUnits = function (units) {
         return this.rightDisplay.render(units);
     };
-    
+
     TripleDisplay.prototype.hide = function () {
         this.leftDisplay.hide();
         this.centerDisplay.hide();

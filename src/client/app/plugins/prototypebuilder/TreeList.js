@@ -1,9 +1,9 @@
 /**
- * 
+ *
  * @author Patrick Oladimeji
  * @date 4/27/14 15:54:08 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 /*global define, d3 */
 define(function (require, exports, module) {
     "use strict";
@@ -13,8 +13,8 @@ define(function (require, exports, module) {
         contextMenuItems = ["New File", "New Folder", "Rename", "Delete"];
     var globalId = 0;
     var eventDispatcher = require("util/eventDispatcher");
- 
-    
+
+
     /**
         Find the node with the give id
     */
@@ -36,7 +36,7 @@ define(function (require, exports, module) {
         }
         return null;
     }
-    
+
     function TreeList(d, _el, _readOnly, _allowMultiSelection) {
         eventDispatcher(this);
         this.el = _el || "body";
@@ -47,12 +47,12 @@ define(function (require, exports, module) {
         this._readOnly = _readOnly;
         this._allowMultiSelection = _allowMultiSelection;
         this.render(this.data);
-        
+
         if (!this._readOnly) {
             this._installContextMenuHandlers();
         }
     }
-    
+
      // install handlers for context menu if this is not a readonly list
     //create custom context menu for the list item
     TreeList.prototype._installContextMenuHandlers = function () {
@@ -115,7 +115,7 @@ define(function (require, exports, module) {
                 d._children = null;
             }
         }
-        
+
         var tree = d3.layout.treelist().childIndent(childIndent).nodeHeight(listHeight);
         var nodes = tree.nodes(self.data);
         var ul = d3.select(el).select("ul");
@@ -123,7 +123,7 @@ define(function (require, exports, module) {
             ul = d3.select(el).append("ul");
         }
         this.treeHeight = nodes.length * tree.nodeHeight();
-        
+
         ul.attr("class", "treelist").classed("noselect", true)
             .attr("id", "file_browser")
             .style("height",  this.treeHeight + "px")
@@ -191,7 +191,7 @@ define(function (require, exports, module) {
             }
         });
 
-        
+
         //add icons for folder for file
         listWrap.append("span").attr("class", function (d) {
             var icon = d.isDirectory ? "glyphicon-folder-close"
@@ -234,7 +234,7 @@ define(function (require, exports, module) {
         updatedNodes.select("span.label").text(function (d) { return d.name; });
         //remove hidden nodes
         exitedNodes.remove();
-       
+
         //update width  of ul element so that selected list item spans full width of the ul even when
         //they overflow on the x-axis
         var max = 0;
@@ -245,14 +245,14 @@ define(function (require, exports, module) {
         });
         ul.style("width", max + "px");
     };
-       
+
     TreeList.prototype.refreshSelectedItem = function () {
         if (this._selectedData) {
             //fire selected item changed event
             this.fire({type: "SelectedItemChanged", data: this._selectedData});
         }
     };
-    
+
     TreeList.prototype.selectItem = function (path) {
         var selectedData = this._selectedData, el = this.el;
         if (!selectedData || selectedData.path !== path) {
@@ -284,8 +284,8 @@ define(function (require, exports, module) {
         }
         return false;
     };
-    
-    /** 
+
+    /**
      * given a selected node, this function selects the next in the hierarchy
      * FIXME: implement this function! now we just select the parent node
      */
@@ -318,9 +318,9 @@ define(function (require, exports, module) {
                 return d.path === path;
             }).classed("dirty", sign ? true : false);
     };
-    
+
     /**
-        Adds a new file item to the tree. 
+        Adds a new file item to the tree.
         @param {object} item the item to add. It should contain the following properties
             !name: <string>
             !path: <string>
@@ -383,7 +383,7 @@ define(function (require, exports, module) {
             console.log("(TreeList.RemoveItem) Warning: cannot find " + path + " in TreeView.");
         }
     };
-    
+
     /**
         Removes the item with the specified id from the tree
         @param {string} id
@@ -400,7 +400,7 @@ define(function (require, exports, module) {
                 toRemove.parent.children.splice(index, 1);
                 this.render(toRemove.parent);
             }
-            
+
             if (selectedData === toRemove && toRemove.parent) {
                 this.selectItem(toRemove.parent.path);
             }
@@ -416,7 +416,7 @@ define(function (require, exports, module) {
         }
         return true;
     };
-    
+
     TreeList.prototype.createNodeEditor = function (node, onEnter, onCancel) {
         function nodeFinder(d) {
             return function (t) { return t.path === d.path; };
@@ -425,18 +425,18 @@ define(function (require, exports, module) {
         var selectedData = this.getSelectedItem();
         selectedData = selectedData ? find(nodeFinder(selectedData), this.data) : selectedData;
         var n = find(nodeFinder(node), this.data) || selectedData;
-        
+
         var nodes = d3.select(this.el).selectAll(".node").filter(function (d) {
             return d === n;
         });
-                
+
         // an input text element is temporarily appended to let the user type the label
         var inputText = nodes.select(".label").html("")
             .append("input").attr("class", "input_text")
             .attr("type", "text")
             .attr("placeholder", node.name)
             .attr("value", node.name);
-        
+
         var oldPath = node.path;
 
         function doCreate(elem, newLabel) {
@@ -450,7 +450,7 @@ define(function (require, exports, module) {
             // NB: the first thing is to remove the onblur event handler, otherwhise the event will be triggered twice
             inputEl.onblur = null;
             doCreate(inputEl, inputEl.value);
-			if (onEnter && typeof onEnter === "function") {
+            if (onEnter && typeof onEnter === "function") {
                 onEnter(n, oldPath);
             }
         };
@@ -462,7 +462,7 @@ define(function (require, exports, module) {
             } else if (event.which === 27) { // escape key pressed
                 inputEl.onblur = null;
                 event.preventDefault();
-				doCreate(inputEl, node.name);
+                doCreate(inputEl, node.name);
                 if (onCancel && typeof onCancel === "function") {
                     onCancel(n, oldPath);
                 }
@@ -470,7 +470,7 @@ define(function (require, exports, module) {
             }
         };
     };
-                
+
     TreeList.prototype.renameItem = function (item, newName) {
         function updatePath(item, newName) {
             item.path = item.parent ? (item.parent.path + "/" + newName) : newName;
@@ -484,7 +484,7 @@ define(function (require, exports, module) {
         updatePath(item, newName);
         this.render(item);
     };
-    
+
     TreeList.prototype.getSelectedItem = function () {
         return this.getSelectedItems()[0];
     };
@@ -493,7 +493,7 @@ define(function (require, exports, module) {
         var els = d3.select(this.el).selectAll(".selected");
         return els.data();
     };
-    
+
     TreeList.prototype.renameRoot = function (newName) {
         // we assume here that the first label in the tree is always the project name
         this.renameItem(d3.select(this.el).select(".label").data()[0], newName);
@@ -510,11 +510,11 @@ define(function (require, exports, module) {
         }
         return this;
     };
-    
+
     TreeList.prototype.findNode = function (f) {
         return find(f, this.data);
     };
-    
+
     module.exports = TreeList;
 
 });

@@ -5,14 +5,11 @@
  * @date 2/20/14 14:52:24 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, Backbone, Handlebars, self */
 define(function (require, exports, module) {
     "use strict";
-    var d3 = require("d3/d3"),
-        formTemplate = require("text!./templates/displayQuestion.handlebars"),
-        BaseDialog = require("pvsioweb/forms/BaseDialog"),
-        FormUtils = require("./FormUtils");
-    
+    var formTemplate = require("text!./templates/displayQuestion.handlebars"),
+        BaseDialog = require("pvsioweb/forms/BaseDialog");
+
     var QuestionView = BaseDialog.extend({
         render: function (data) {
             var template = Handlebars.compile(formTemplate);
@@ -21,11 +18,11 @@ define(function (require, exports, module) {
             return this;
         },
         events: {
-			"click #btnOk": "ok",
-			"click #btnCancel": "cancel"
-		}
+            "click #btnOk": "ok",
+            "click #btnCancel": "cancel"
+        }
     });
-    
+
     module.exports = {
         /**
          * creates a new form view to display questions. Renders two buttons for

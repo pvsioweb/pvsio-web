@@ -10,44 +10,44 @@
  * // Example module that uses LED.
  * define(function (require, exports, module) {
  *     "use strict";
- * 
+ *
  * });
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, document */
+/*global define, d3, document */
 
 define(function (require, exports, module) {
     "use strict";
-    
-    var d3 = require("d3/d3");
-    var black, white;
-    
-	/**
-	 * @function <a name="LED">LED</a>
+
+//    var d3 = require("d3/d3");
+//    var black, white;
+
+    /**
+     * @function <a name="LED">LED</a>
      * @description Constructor.
-	 * @param id {String} The ID of the HTML element where the display will be rendered.
-     * @param coords {Object} The four coordinates (x1,y1,x2,y2) of the display, specifying 
+     * @param id {String} The ID of the HTML element where the display will be rendered.
+     * @param coords {Object} The four coordinates (x1,y1,x2,y2) of the display, specifying
      *        the left, top, right, bottom corner of the rectangle (for shape="rect")
      * @param opt {Object}
      * @memberof module:SingleDisplay
      * @instance
-	 */
-	function LED(id, coords, opt) {
+     */
+    function LED(id, coords, opt) {
         opt = opt || {};
         this.id = id;
         this.parent = opt.parent || "body";
         this.top = coords.top || 0;
         this.left = coords.left || 0;
-		this.width = coords.width || 10;
-		this.height = coords.height || 10;
-		this.font = [this.height, "px ", (opt.font || "sans-serif")];
-		this.smallFont = (this.height * 0.8) + "px " + (opt.font || "sans-serif");
+        this.width = coords.width || 10;
+        this.height = coords.height || 10;
+        this.font = [this.height, "px ", (opt.font || "sans-serif")];
+        this.smallFont = (this.height * 0.8) + "px " + (opt.font || "sans-serif");
         this.align = opt.align || "center";
-		this.textBaseline = "middle";
+        this.textBaseline = "middle";
         this.radius = opt.radius || 4;
         this.color = opt.color || "#00FF66"; // default is light green
-		this.div = d3.select("#" + this.parent)
+        this.div = d3.select("#" + this.parent)
                         .append("div").style("position", "absolute")
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")
@@ -59,7 +59,7 @@ define(function (require, exports, module) {
                         .style("vertical-align", "top");
         return this;
     }
-    
+
     LED.prototype.render = function (opt) {
         opt = opt || {};
         var context = document.getElementById(this.id + "_canvas").getContext("2d");
@@ -72,15 +72,15 @@ define(function (require, exports, module) {
         this.reveal();
         return this;
     };
-    
+
     LED.prototype.on = function (opt) {
         this.render(opt);
     };
-    
+
     LED.prototype.off = function () {
         this.hide();
     };
-    
+
     LED.prototype.hide = function () {
         this.div.style("display", "none");
     };

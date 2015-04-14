@@ -3,26 +3,26 @@
  * @author Patrick Oladimeji, Paolo Masci
  * @date Jan 3, 2013 : 12:56:03 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true*/
-/*global define, require, Handlebars, $, Promise*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
+/*global define, Handlebars, $*/
 define(function (require, exports, module) {
     "use strict";
     var d3			= require("d3/d3"),
         createProjectTemplate = require("text!./templates/createProject.handlebars"),
         BaseDialog  = require("pvsioweb/forms/BaseDialog"),
-        FormUtils   = require("pvsioweb/forms/FormUtils"),
-        MIME        = require("util/MIME"),
-        RemoteFileBrowser = require("pvsioweb/RemoteFileBrowser"),
+//        MIME        = require("util/MIME"),
         PVSioWebClient        = require("PVSioWebClient").getInstance();
 
-    function imageFilter(d) {
-        var mime = MIME.getInstance();
-        return !mime.isHiddenFile(d.path) && (d.isDirectory || mime.isImage(d.path));
-    }
-    function pvsFilter(d) {
-        var mime = MIME.getInstance();
-        return !mime.isHiddenFile(d.path) && (d.isDirectory || mime.isPVS(d.path));
-    }
+//    function imageFilter(d) {
+//        var mime = MIME.getInstance();
+//        return !mime.isHiddenFile(d.path) && (d.isDirectory || mime.isImage(d.path));
+//    }
+//
+//    function pvsFilter(d) {
+//        var mime = MIME.getInstance();
+//        return !mime.isHiddenFile(d.path) && (d.isDirectory || mime.isPVS(d.path));
+//    }
+
     function choose(_title, _encoding) {
         function fileList2Array(fl) {
             var ans = [], i = 0;
@@ -74,7 +74,7 @@ define(function (require, exports, module) {
             choose("Please select PVS model files...");
         }
     });
-    
+
     module.exports = {
         create: function (data) {
             return new CreateProjectView(data);

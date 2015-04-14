@@ -1,7 +1,7 @@
 /**
  * Emulink: a graphical editor similar to Simulink/Statecharts
- * @author Enrico D'Urso <e.durso7@gmail.com> 
- * @author Paolo Masci <paolo.masci@eecs.qmul.ac.uk> 
+ * @author Enrico D'Urso <e.durso7@gmail.com>
+ * @author Paolo Masci <paolo.masci@eecs.qmul.ac.uk>
  * @comment Part of the code is derived from http://bl.ocks.org/rkirsling/5001347
  * @date 9/19/13 10:30:29 AM
  */
@@ -11,12 +11,13 @@
  * @version 0.3
  */
 
- 
+
 /**
  * @module StateMachine
  */
+/*jshint -W040, -W083, unused:false, -W117*/
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, _, Promise, document, FileReader, XMLSerializer*/
+/*global XMLSerializer*/
 
 define(function (require, exports, module) {
     "use strict";
@@ -75,19 +76,19 @@ define(function (require, exports, module) {
     var MODE = { DEFAULT: 0, ADD_NODE: 1, ADD_TRANSITION: 2, ADD_SELF_TRANSITION: 3, ADD_DEFAULT_TRANSITION: 4,
                   ADD_FIELD: 5 };
     var editor_mode = MODE.DEFAULT;
-    
+
     function set_editor_mode(mode, msg) {
         // set new editor mode
         editor_mode = mode;
         var event = {type: "editormodechanged", mode: editor_mode, message: msg};
         sm.fire(event);
     }
-    
+
     function toggle_editor_mode(mode, msg) {
         if (editor_mode !== mode) { return set_editor_mode(mode, msg); }
         return set_editor_mode(MODE.DEFAULT);
     }
-    
+
     function mode2string(mode) {
         if (mode === MODE.DEFAULT) {
             return "browse diagram";
@@ -103,7 +104,7 @@ define(function (require, exports, module) {
             return "add state variable";
         } else { return "error: unknown mode"; }
     }
-    
+
     function modeTooltip(mode) {
         if (mode === MODE.DEFAULT) {
             return "To add new states and transitions to the diagram"
@@ -174,7 +175,7 @@ define(function (require, exports, module) {
         var newNode;
 
         if (selected_nodes.keys().length === 1) {
-            /// Change name in the canvas 
+            /// Change name in the canvas
             object = selected_nodes.get(selected_nodes.keys());
             oldId = object.id;
             oldName = object.name;
@@ -225,7 +226,7 @@ define(function (require, exports, module) {
             }
         }
     }
-    
+
     /***** main function of this module *****/
 
     var emulink = function () {
@@ -234,7 +235,7 @@ define(function (require, exports, module) {
 
         var svg = svgViewHandler.svg;
         var colors = d3.scale.category10();
-        
+
         // handlers to link and node element groups
         var path   = svg.append('svg:g').selectAll('path');
         var node   = svg.append('svg:g').selectAll('node');
@@ -353,7 +354,7 @@ define(function (require, exports, module) {
                 nodeAndEdgeHandler.update_node_size(nodeID, boxWidth, boxHeight);
             }
         }
-        
+
         var resize = d3.behavior.drag().origin(function () {
                 var current = d3.select(this).select("rect.node");
                 return {x: current.attr("x"), y: current.attr("y") };
@@ -365,7 +366,7 @@ define(function (require, exports, module) {
         }
 
         function dragmove(d, i) {
-            // enable dragging nodes only if the editor is in default mode; 
+            // enable dragging nodes only if the editor is in default mode;
             // this is needed to avoid conflicts with the drag action used to create new edges between nodes
             if (editor_mode === MODE.DEFAULT) {
                 d.px += d3.event.dx;
@@ -420,10 +421,10 @@ define(function (require, exports, module) {
             mouseup_link = null;
         }
 
-        var boxWidth  = minBoxWidth; //FIXME: Remove these 2 global variables 
+        var boxWidth  = minBoxWidth; //FIXME: Remove these 2 global variables
         var boxHeight = minBoxHeight;
 
-        
+
         // update graph (called when needed)
         function restart() {
             force = d3.layout.force()
@@ -737,7 +738,7 @@ define(function (require, exports, module) {
                         nodeAndEdgeHandler.defTransFalseNodeId = falseNode.id;
                         // restore default editor mode
                         set_editor_mode(MODE.DEFAULT);
-    //                    $(".button_default_transition").each(function(index, element) { $(element).css("border",""); });                 
+    //                    $(".button_default_transition").each(function(index, element) { $(element).css("border",""); });
                         // redraw svg
                         restart();
                     } else {
@@ -833,12 +834,12 @@ define(function (require, exports, module) {
             toSplice.map(function (l) { links.splice(links.indexOf(l), 1); });
         }
 
-        
+
         // only respond once per keydown
         var lastKeyDown = -1;
-        
+
         function keydown() {
-            ///Disabled, otherwise editor doesn't work 
+            ///Disabled, otherwise editor doesn't work
             //d3.event.preventDefault();
 
             if (lastKeyDown !== -1) { return; }
@@ -907,7 +908,7 @@ define(function (require, exports, module) {
             }
         }
 
-        
+
         d3.selectAll(".zoom").on("click", function () {
             svgViewHandler.zoom(1);
         });
@@ -1051,7 +1052,7 @@ define(function (require, exports, module) {
                     if (value.length === 0) { return; }
 
                     var operation = fieldState + ":= " + value;
-                    //Insert new operation in the list of operations 
+                    //Insert new operation in the list of operations
                     if (!object.listOfOperations) { object.listOfOperations = []; }
                     object.listOfOperations.push(operation);
                     pvsWriter.addOperationInCondition(object.name,
@@ -1083,15 +1084,15 @@ define(function (require, exports, module) {
             set_editor_mode(MODE.ADD_DEFAULT_TRANSITION);
             //TODO: implement the corresponding pvsWriter function and invoke it here
         });
-        
+
         // app starts here
         svg.on('mousedown', mousedown).on('mousemove', mousemove).on('mouseup', mouseup);
         d3.select(window).on('keydown', keydown).on('keyup', keyup);
         restart();
     };
-    
+
     /* * ********************************************* ***************************************** */
-        
+
 
     /* nodeAndEdgeHandler, here all the functions which handle node and edge */
     NodeAndEdgeHandler.prototype.newNodeID = function () { return nodeAndEdgeHandler.nodeIDGenerator++; };
@@ -1125,11 +1126,11 @@ define(function (require, exports, module) {
         pvsWriter.addState(node);
         return node;
     };
-    
+
     NodeAndEdgeHandler.prototype.newEdgeID = function () {
         return nodeAndEdgeHandler.edgeIDGenerator++;
     };
-    
+
     NodeAndEdgeHandler.prototype.add_edge = function (source, target, label, notWriter) {
         var _id = "T" + nodeAndEdgeHandler.newEdgeID();
         var edge = {
@@ -1148,17 +1149,17 @@ define(function (require, exports, module) {
         pvsWriter.addConditionInTransition(edge.name, source, target);
         return edge;
     };
-    
+
     NodeAndEdgeHandler.prototype.delete_node = function (id) {
         graph.nodes.remove(id);
     };
-    
+
     NodeAndEdgeHandler.prototype.delete_all_nodes = function () {
         graph.nodes.forEach(function (key, value) { graph.nodes.remove(key); });
     };
-    
+
     NodeAndEdgeHandler.prototype.deleteNodeAndTransition = function (node, flagObject) {
-        // Delete node from SVG 
+        // Delete node from SVG
         nodeAndEdgeHandler.delete_node(node.id);
 
         // Delete node from specification
@@ -1170,7 +1171,7 @@ define(function (require, exports, module) {
         if (flagObject.deleteTransIn && flagObject.deleteTransOut) {
             edges.forEach(function (key) {
                 if (key.source.id === node.id || key.target.id === node.id) {
-                    nodeAndEdgeHandler.delete_edge(key.id); //Delete from SVG 
+                    nodeAndEdgeHandler.delete_edge(key.id); //Delete from SVG
                     if (!key.source.falseNode) {
                         pvsWriter.deleteCondition(key.name, key.source.name, key.target.name);
                         toDelete[key.name] = key.name;
@@ -1180,7 +1181,7 @@ define(function (require, exports, module) {
         } else if (flagObject.deleteTransOut) {
             edges.forEach(function (key) {
                 if (key.source.id === node.id) {
-                    nodeAndEdgeHandler.delete_edge(key.id); //Delete from SVG 
+                    nodeAndEdgeHandler.delete_edge(key.id); //Delete from SVG
                     if (!key.source.falseNode) {
                         pvsWriter.deleteCondition(key.name, key.source.name, key.target.name);
                         toDelete[key.name] = key.name;
@@ -1191,7 +1192,7 @@ define(function (require, exports, module) {
         } else if (flagObject.deleteTransIn) {
             edges.forEach(function (key) {
                 if (key.target.id === node.id) {
-                    nodeAndEdgeHandler.delete_edge(key.id); //Delete from SVG 
+                    nodeAndEdgeHandler.delete_edge(key.id); //Delete from SVG
                     if (!key.source.falseNode) {
                         pvsWriter.deleteCondition(key.name, key.source.name, key.target.name);
                         toDelete[key.name] = key.name;
@@ -1213,22 +1214,22 @@ define(function (require, exports, module) {
             nodeAndEdgeHandler.defTransFalseNodeId = null;
         }
     };
-    
+
     NodeAndEdgeHandler.prototype.update_node_size = function (id, width, height) {
         var theNode = graph.nodes.get(id);
         theNode.height = height;
         theNode.width = width;
         graph.nodes.set(id, theNode);
     };
-    
+
     NodeAndEdgeHandler.prototype.delete_edge = function (id) {
         graph.edges.remove(id);
     };
-    
+
     NodeAndEdgeHandler.prototype.delete_all_edges = function () {
         graph.edges.forEach(function (key, value) { graph.edges.remove(key); });
     };
-    
+
     NodeAndEdgeHandler.prototype.modifyLabelEdgeToDisplayActionAndCond = function (object, path) {
         var id = object.id;
         var textID = "text:" + id;
@@ -1273,7 +1274,7 @@ define(function (require, exports, module) {
         }
 
     };
-    
+
     NodeAndEdgeHandler.prototype.deleteEdge = function (edge) {
         nodeAndEdgeHandler.delete_edge(edge.id);
         var edges = getEdgesInDiagram();
@@ -1295,22 +1296,22 @@ define(function (require, exports, module) {
         this.lastFileShown = "";
     }
     var diagramHandler = new DiagramHandler();
-    
+
     DiagramHandler.prototype.addNewDiagram = function () {
         var theoryNumber = (diagramHandler.numberFiles === 0) ? "" : diagramHandler.numberFiles;
         var name = "emuchart" + theoryNumber + ".pvs";
         pvsWriter.newSpecification(name);
         diagramHandler.numberFiles++;
     };
-    
-    /** 
+
+    /**
      *  This function is called when user has just selected an emulink file in the listView,
-     *  we need to add nodes and edges objects in  graph.nodes and graph.edges to render them   
+     *  we need to add nodes and edges objects in  graph.nodes and graph.edges to render them
      *
-     *  @param diagramObject    - object having nodes and edges properties 
-     *  
-     *  @returns void 
-     *	      
+     *  @param diagramObject    - object having nodes and edges properties
+     *
+     *  @returns void
+     *
      */
     DiagramHandler.prototype.restoreGraphAfterSwitchingEmulinkFiles = function (diagramObject) {
         var nodes = diagramObject.nodes;
@@ -1330,14 +1331,14 @@ define(function (require, exports, module) {
         nodeAndEdgeHandler.delete_all_edges();
     };
 
-    /** 
+    /**
      *  This function is called when a diagram has to be drawn first time after restoring from saving,
-     *  We need to call add_node() and add_edge() otherwise nodes and edges will be disconnected    
+     *  We need to call add_node() and add_edge() otherwise nodes and edges will be disconnected
      *
-     *  @param graphToRestore  - object having nodes and edges properties 
+     *  @param graphToRestore  - object having nodes and edges properties
      *
-     *  @returns void 
-     *	      
+     *  @returns void
+     *
      */
     DiagramHandler.prototype.restoreDiagramFirstTimeAfterReloadingFromSaving = function (graphToRestore) {
         var nodesToRestore = graphToRestore.nodes;
@@ -1379,21 +1380,21 @@ define(function (require, exports, module) {
         }
         diagramHandler.numberDiagramStillToRestore--;
     };
-    
+
     DiagramHandler.prototype.buildGraph = function () {
         var svg = d3.select("#ContainerStateMachine").append("svg").attr("width", width).attr("height", height)
                 .attr("id", "canvas").style("background", "#fffcec");
         emulink();
     };
-    
-    /** 
-     *  This function is called when an emulink project is restored from saving   
+
+    /**
+     *  This function is called when an emulink project is restored from saving
      *
-     *  @param graphToRestore  - associative array (Key is the name of the file, value is an object having 
-     *                           nodes and edges properties ) 
+     *  @param graphToRestore  - associative array (Key is the name of the file, value is an object having
+     *                           nodes and edges properties )
      *
-     *  @returns void 
-     *	      
+     *  @returns void
+     *
      */
     DiagramHandler.prototype.restoreGraph = function (graphToRestore, editor, ws, fileToShow) {
         diagramHandler.init(editor, ws, pm.project(), projectManager, false);
@@ -1404,20 +1405,20 @@ define(function (require, exports, module) {
         diagramHandler.numberFiles = diagramHandler.numberDiagramStillToRestore;
         // fileToShow is the name of the mainPvsFile or the first file in the project
         diagramHandler.lastFileShown = fileToShow;
-        // Get value using file name as key 
+        // Get value using file name as key
         var diagramInfo = diagramHandler.diagramsInfo[fileToShow];
-        // If fileToShow has diagram information, display it in SVG 
+        // If fileToShow has diagram information, display it in SVG
         if (diagramInfo) {
             diagramHandler.restoreDiagramFirstTimeAfterReloadingFromSaving(diagramInfo);
         }
         emulink();
     };
 
-    /** 
-     *  This function is called when a project has to be saved  
+    /**
+     *  This function is called when a project has to be saved
      *
      *  @returns associative array which has diagrams information (edges and nodes)
-     *	      
+     *
      */
     DiagramHandler.prototype.getGraphDefinition = function () {
         if (diagramHandler.lastFileShown) {
@@ -1447,16 +1448,16 @@ define(function (require, exports, module) {
         pvsWriter.setTagsCond(tagCondStart, tagCondEnd);
         pvsWriter.setTagsField(tagFieldStateStart, tagFieldStateEnd);
     }
-    
+
     DiagramHandler.prototype.init = function (_editor, _wsocket, _projectManager, startWriter, nameFile) {
         // initialise local references to project manager, websocket client, and editor
         ws = _wsocket;
         editor = _editor;
         projectManager = _projectManager;
-        
+
 //        // add listeners
 //        projectManager.addListener("SelectedFileChanged", function (event) {
-//            // Since file selected is going to be changed, 
+//            // Since file selected is going to be changed,
 //            // we need to save diagram information ...
 //            if (diagramHandler.lastFileShown) {
 //                var nodes = getNodesInDiagram();
@@ -1482,15 +1483,15 @@ define(function (require, exports, module) {
 //                                    .attr("width", width).attr("height", height)
 //                                    .attr("id", "canvas").style("background", "#fffcec");
 //
-//            // Update last file shown 
+//            // Update last file shown
 //            diagramHandler.lastFileShown = event.selectedItemString;
 //
 //            // Get information fresh file to display
 //            var diagramInfo = diagramHandler.diagramsInfo[diagramHandler.lastFileShown];
 //            if (diagramInfo) {
-//                //If it has diagram information 
+//                //If it has diagram information
 //                if (diagramHandler.numberDiagramStillToRestore) {
-//                    // Check if this is shown for first time after reloading 
+//                    // Check if this is shown for first time after reloading
 //                    diagramHandler.restoreDiagramFirstTimeAfterReloadingFromSaving(diagramInfo);
 //                } else {
 //                    diagramHandler.restoreGraphAfterSwitchingEmulinkFiles(diagramInfo);
@@ -1498,7 +1499,7 @@ define(function (require, exports, module) {
 //            }
 //            emulink();
 //        }); //End listener
-        
+
         diagramHandler.lastFileShown = nameFile;
         if (!svgViewHandler.svg) {
             svgViewHandler.svg = d3.select("#ContainerStateMachine").append("svg")
@@ -1508,7 +1509,7 @@ define(function (require, exports, module) {
 
         // initi PVS writer that translates Emuchart elements into PVS code
         initPVSWriter();
-                
+
         // start interactive emulink GUI
         emulink();
     };
@@ -1537,7 +1538,7 @@ define(function (require, exports, module) {
                 return this.style.stroke - width;
             });
     };
-    
+
     SvgViewHandler.prototype.highlightElements = function (nodes) {
         // highlight nodes
         var svg = svgViewHandler.svg;
@@ -1598,7 +1599,7 @@ define(function (require, exports, module) {
                 }
             });
     };
-    
+
     SvgViewHandler.prototype.zoom = function (delta) {
         if (delta > 0) {
             svgViewHandler.zoomCounter += 0.3;
@@ -1618,7 +1619,7 @@ define(function (require, exports, module) {
         //svg.style("-webkit-transform", "translate("+ 1 + "px," + 1 + "px) scale(" + zoomCounter+ ")");
 
     };
-    
+
     SvgViewHandler.prototype.resetZoom = function () {
         svgViewHandler.svg.attr("transform", "translate(" + 1 + "," + 1 + ")scale(" + 1 + ")");
         svgViewHandler.zoomCounter = 1;

@@ -6,21 +6,20 @@
  * @date 14/05/14 5:16:13 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, _, Promise, document, FileReader*/
-
+/*jshint unused:false*/
 define(function (require, exports, module) {
-	"use strict";
-    
+    "use strict";
+
     var d3 = require("d3/d3"),
         eventDispatcher = require("util/eventDispatcher"),
         Emucharts = require("plugins/emulink/Emucharts"),
         EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes");
-    
+
     var dbg = false;
-    
+
     // the emuchart data
     var emucharts;
-    
+
     // constants for drawing states
     var width  = 900;
     var height = 800;
@@ -28,12 +27,12 @@ define(function (require, exports, module) {
     var fontSize = 10;
     var defaultWidth = 32;
     var defaultHeight = 32;
-    
+
     // constants for drawing transitions
     var stroke_width_large = "20px";
     var stroke_width_highlighted = "1.5px";
     var stroke_width_normal = "1px";
-    
+
     // mouse event vars used for identifying gestures like creating a new transition
     var mousedown = { node: null, path: null };
     var mouseup = { node: null, path: null };
@@ -43,19 +42,19 @@ define(function (require, exports, module) {
     var sensitivity = { x: 8, y: 8 };
     // mouseOverControlPoint holds an edge object when the mouse is over the control point of an edge
     var mouseOverControlPoint = null;
-    
+
     // editor modes
     var MODE = new EditorModeUtils();
     var editor_mode = MODE.BROWSE();
-    
+
     var _this = null;
-    
+
     function resetView() {
         d3.select("#ContainerStateMachine svg").select("#InitialTransitions").attr("transform", "translate(0,0) scale(1)");
         d3.select("#ContainerStateMachine svg").select("#Transitions").attr("transform", "translate(0,0) scale(1)");
         d3.select("#ContainerStateMachine svg").select("#States").attr("transform", "translate(0,0) scale(1)");
     }
-    
+
     var getMouseMovement = function (event) {
         if (_this.mouseMovement.ready === false) {
             _this.mouseMovement.previousScreen.x = event.screenX;
@@ -74,11 +73,11 @@ define(function (require, exports, module) {
             y: (_this.mouseMovement.currentScreen.y - _this.mouseMovement.previousScreen.y)
         };
     };
-    
-	/**
-	 * Constructor
-	 * @memberof EmuchartsEditor
-	 */
+
+    /**
+     * Constructor
+     * @memberof EmuchartsEditor
+     */
     function EmuchartsEditor(emucharts) {
         _this = this;
         this.d3EventScale = 1;
@@ -105,12 +104,12 @@ define(function (require, exports, module) {
         resetView();
         eventDispatcher(this);
     }
-    
-    
-	/**
-	 * Interface function for setting editor mode
-	 * @memberof EmuchartsEditor
-	 */
+
+
+    /**
+     * Interface function for setting editor mode
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.set_editor_mode = function (mode) {
         if (mode >= 0) {
             editor_mode = mode;
@@ -122,13 +121,13 @@ define(function (require, exports, module) {
         }
     };
 
-    
-    
-	/**
-	 * Utility function for trimming values so that they don't exceed a given range min-max
+
+
+    /**
+     * Utility function for trimming values so that they don't exceed a given range min-max
      * @returns trimmed value
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     function trim(val, min, max) {
         return (val < max) ? ((val > min) ? val : min) : max;
     }
@@ -138,12 +137,12 @@ define(function (require, exports, module) {
     function dec02(val, min) {
         return (val - 0.2 > min) ? val - 0.2 : val;
     }
-    
-	/**
-	 * Interface functions for zooming in and out
+
+    /**
+     * Interface functions for zooming in and out
      * @returns trimmed value
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.zoomChart = function () {
         if (this.emucharts && !this.emucharts.empty()) {
             d3.select("#ContainerStateMachine svg").select("#States")
@@ -168,13 +167,13 @@ define(function (require, exports, module) {
         this.d3EventScale = 1;
         this.zoomChart();
     };
-    
-    
-	/**
-	 * Utility function to generate formatted labels for transitions
+
+
+    /**
+     * Utility function to generate formatted labels for transitions
      * @returns labels, as a formatted string
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     function labelToString(label) {
         var ans = "";
         if (label.listConditions) {
@@ -187,12 +186,12 @@ define(function (require, exports, module) {
         }
         return ans;
     }
-    
-    
-	/**
-	 * Utility function to draw edges between nodes
-	 * @memberof EmuchartsEditor
-	 */
+
+
+    /**
+     * Utility function to draw edges between nodes
+     * @memberof EmuchartsEditor
+     */
     var lineFunction = d3.svg.line()
                          .x(function (d) { return d.x; })
                          .y(function (d) { return d.y; })
@@ -204,13 +203,13 @@ define(function (require, exports, module) {
                          .y(function (d) { return d.y; })
                          .interpolate("bundle");
 
-    
-	/**
-	 * Utility function to obtain control points for edges
+
+    /**
+     * Utility function to obtain control points for edges
      * @params edge
      * @returns vector of control points (3 elements vector)
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     function getControlPoints(edge) {
         var sourceX = edge.source.x;
         var sourceY = edge.source.y;
@@ -244,7 +243,7 @@ define(function (require, exports, module) {
         var sourceHeight05 = sourceHeight / 2;
         var targetWidth05 = targetWidth / 2;
         var targetHeight05 = targetHeight / 2;
-        
+
 
         // NOTE: SVG has the y axis inverted with respect to the Cartesian y axis
         if (dx_target >= targetWidth05 &&
@@ -389,21 +388,21 @@ define(function (require, exports, module) {
                 controlPoint1X = (targetX + sourceX) / 2 + offset;
             }
         }
-        
+
         return [{ "x": sourceX, "y": sourceY },
                 { "x": controlPoint1X, "y": controlPoint1Y},
                 { "x": targetX, "y": targetY }];
     }
-    
-	/**
-	 * Utility function to obtain virtual control points for self-edges
+
+    /**
+     * Utility function to obtain virtual control points for self-edges
      * @params self-edge
      * @returns vector of control points (5 elements vector)
-	 * @memberof EmuchartsEditor
+     * @memberof EmuchartsEditor
      * FIXME: return a structure rather than an array
      * FIXME: merge this function with the other function getControlPoints
      * FIXME: save extra control points so that the cpu time required for rendering is reduced
-	 */
+     */
     function getControlPoints_selfEdge(edge) {
         var sourceX = edge.source.x;
         var sourceY = edge.source.y;
@@ -522,10 +521,10 @@ define(function (require, exports, module) {
     }
 
     /**
-	 * Utility function to refresh rendered transitions.
+     * Utility function to refresh rendered transitions.
      * @returns reference to the updated svg elements
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     function refreshTransitions(transitions) {
         transitions = transitions ||
             d3.select("#ContainerStateMachine svg").select("#Transitions").selectAll(".transition");
@@ -604,12 +603,12 @@ define(function (require, exports, module) {
         });
         return transitions;
     }
-        
-	/**
-	 * Utility function to refresh rendered initial transitions.
+
+    /**
+     * Utility function to refresh rendered initial transitions.
      * @returns reference to the updated svg elements
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     function refreshInitialTransitions(transitions) {
         transitions = transitions ||
             d3.select("#ContainerStateMachine svg").select("#Transitions").selectAll(".itransition");
@@ -639,12 +638,12 @@ define(function (require, exports, module) {
         });
         return transitions;
     }
-    
+
     /**
-	 * Utility function for removing transitions from the SVG
+     * Utility function for removing transitions from the SVG
      * @returns reference to the updated svg elements
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     function removeTransitions(exitedTransitions) {
         return exitedTransitions
                     .transition().duration(220)
@@ -652,11 +651,11 @@ define(function (require, exports, module) {
                     .style("opacity", 0).remove();
     }
 
-	/**
-	 * Utility function for creating an empty svg area and definitions
+    /**
+     * Utility function for creating an empty svg area and definitions
      * @returns reference to the transitions redrawn (svg element)
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.newSVG = function () {
         _this = this;
 
@@ -666,7 +665,7 @@ define(function (require, exports, module) {
             .attr("style", "display: none");
         d3.select("#ContainerStateMachineImage").append("div")
             .attr("id", "svgdataurl").attr("style", "display: none");
-        
+
         // create svg area
         d3.select("#ContainerStateMachine")
             .append("svg")
@@ -687,7 +686,7 @@ define(function (require, exports, module) {
             .attr("d", "M4,0 L1,-3 L10,0 L1,3 L4,0")
             .attr("fill", "black");
 
-        
+
         var arrow_rotated = d3.select("#ContainerStateMachine").select("svg").select("defs")
             .append("svg:marker")
             .attr("id", "end-arrow-rotated")
@@ -699,7 +698,7 @@ define(function (require, exports, module) {
             .append("svg:path")
             .attr("d", "M1,0 L10,-3 L6,0 L10,3 L1,0")
             .attr("fill", "black");
-        
+
         var arrow_rotated_selected = d3.select("#ContainerStateMachine").select("svg").select("defs")
             .append("svg:marker")
             .attr("id", "end-arrow-rotated-selected")
@@ -742,7 +741,7 @@ define(function (require, exports, module) {
             .attr("r", 3.6)
             .attr("stroke", "white")
             .attr("stroke-width", "1");
-        
+
         var selected_bubble = d3.select("#ContainerStateMachine").select("svg").select("defs")
             // bubble for initial state
             .append("svg:marker")
@@ -774,17 +773,17 @@ define(function (require, exports, module) {
             .append("svg:path")
             .attr("d", "M4,0 L1,-3 L10,0 L1,3 L4,0")
             .attr("fill", "black");
-        
+
         drag_line = d3.select("#ContainerStateMachine").select("svg")
             .append("svg:path")
             .attr("id", "dragline")
             .attr("class", "link dragline hidden")
             .attr("d", "M0,0L0,0");
-        
+
         d3.select("#ContainerStateMachine").select("svg").append("svg:g").attr("id", "InitialTransitions");
         d3.select("#ContainerStateMachine").select("svg").append("svg:g").attr("id", "Transitions");
         d3.select("#ContainerStateMachine").select("svg").append("svg:g").attr("id", "States");
-        
+
         var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
             d3.event.sourceEvent.stopPropagation();
             if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.edge) {
@@ -915,15 +914,15 @@ define(function (require, exports, module) {
         // return reference to svg
         return d3.select("#ContainerStateMachine").select("svg");
     };
-    
+
     /**
-	 * Utility function for drawing transitions
-	 * @memberof EmuchartsEditor
-	 */
+     * Utility function for drawing transitions
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.renderTransitions = function () {
         _this = this;
         var svg = d3.select("#ContainerStateMachine").select("svg");
-        
+
         /**
          * Utility function for drawing transitions
          * @returns a reference to the entered transitions
@@ -951,7 +950,7 @@ define(function (require, exports, module) {
                 .style("stroke-width", stroke_width_large)
                 .style("markerUnits", "userSpaceOnUse")
                 .style("cursor", "pointer");
-            
+
             // control points are used to adjust the shape of a path
             var controlPoints = enteredTransitions.append("svg:circle").classed("cpoints", true)
                 .attr("id", function (edge) {return "cpoints_" + edge.id; })
@@ -1146,8 +1145,8 @@ define(function (require, exports, module) {
             d3.event.sourceEvent.stopPropagation();
         };
 
-        
-        
+
+
         if (!this.emucharts || !this.emucharts.getEdges()) { return; }
         // create svg element, if needed
         if (svg.empty()) { svg = this.newSVG(); }
@@ -1169,7 +1168,7 @@ define(function (require, exports, module) {
                 .on("mouseout", mouseOut)
                 .on("click", mouseClick)
                 .on("dblclick", mouseDoubleClick);
-            
+
             enteredTransitions.selectAll(".cpoints")
                 .on("mousedown", function (d) {
                     if (dbg) { console.log("mouseOverControlPoint"); }
@@ -1180,15 +1179,15 @@ define(function (require, exports, module) {
                 });
         }
     };
-    
+
     /**
-	 * Utility function for drawing initial transitions
-	 * @memberof EmuchartsEditor
-	 */
+     * Utility function for drawing initial transitions
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.renderInitialTransitions = function () {
         _this = this;
         var svg = d3.select("#ContainerStateMachine").select("svg");
-        
+
         /**
          * Utility function for drawing transitions
          * @returns a reference to the entered transitions
@@ -1271,8 +1270,8 @@ define(function (require, exports, module) {
                 });
             }
         };
-        
-        
+
+
         if (!this.emucharts || !this.emucharts.getInitialEdges()) { return; }
         // create svg element, if needed
         if (svg.empty()) { svg = this.newSVG(); }
@@ -1290,19 +1289,19 @@ define(function (require, exports, module) {
                 .on("dblclick", mouseDoubleClick);
         }
     };
-    
+
     function newBoxWidth(nodeID) {
         return 18 + d3.select("#label_" + nodeID).node().getBoundingClientRect().width;
     }
-        
+
     /**
-	 * Utility function to refresh rendered states.
+     * Utility function to refresh rendered states.
      * @returns reference to the updated svg elements
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     function refreshStates(states) {
         states = states || d3.select("#ContainerStateMachine svg").select("#States").selectAll(".state");
-        
+
         // refresh labels
         states.select(".state_label").text(function (node) {
             return node.name;
@@ -1321,10 +1320,10 @@ define(function (require, exports, module) {
     }
 
     /**
-	 * Utility function for drawing states
+     * Utility function for drawing states
      * @returns reference to the updated svg elements
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     function drawStates(enteredStates) {
         function nodeHeight(node) {
             return node.height || defaultHeight;
@@ -1332,8 +1331,8 @@ define(function (require, exports, module) {
         function nodeWidth(node) {
             return node.width || defaultWidth;
         }
-        
-        
+
+
         enteredStates = enteredStates.append("svg:g").classed("state", true)
             .attr("id", function (node) { return node.id; })
             .attr("transform", function (node) {
@@ -1377,15 +1376,15 @@ define(function (require, exports, module) {
             .style("font", (fontSize + "px sans-serif"))
             .style("text-rendering", "optimizeLegibility")
             .text(function (node) { return node.name; });
-        
+
         return enteredStates;
     }
-    
+
     /**
-	 * Utility function for removing states from the SVG
+     * Utility function for removing states from the SVG
      * @returns reference to the updated svg elements
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     function removeStates(exitedStates) {
         return exitedStates
                     .transition().duration(220)
@@ -1393,13 +1392,13 @@ define(function (require, exports, module) {
     }
 
     /**
-	 * Utility function for drawing states
-	 * @memberof EmuchartsEditor
-	 */
+     * Utility function for drawing states
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.renderStates = function () {
         _this = this;
         var svg = d3.select("#ContainerStateMachine").select("svg");
-        
+
         // mouse event handlers
         var dragStart = function (node) {
             if (dbg) { console.log("State.dragStart"); }
@@ -1442,7 +1441,7 @@ define(function (require, exports, module) {
                         : { x: controlPoint.x + d3.event.dx * viscosity,
                               y: controlPoint.y + d3.event.dy * viscosity };
             }
-            
+
             if (editor_mode !== MODE.ADD_TRANSITION() && editor_mode !== MODE.DELETE() &&
                     editor_mode !== MODE.RENAME()) {
                 // update node position
@@ -1624,12 +1623,12 @@ define(function (require, exports, module) {
                 .on("dblclick", mouseDoubleClick);
         }
     };
-    
-    
+
+
     /**
-	 * Interface function for rendering the emuchart
-	 * @memberof EmuchartsEditor
-	 */
+     * Interface function for rendering the emuchart
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.render = function () {
         this.renderStates();
         this.renderTransitions();
@@ -1637,7 +1636,7 @@ define(function (require, exports, module) {
         this.refresh();
         return this;
     };
-    
+
     EmuchartsEditor.prototype.refresh = function () {
         refreshStates();
         refreshTransitions();
@@ -1646,110 +1645,110 @@ define(function (require, exports, module) {
     };
 
     /**
-	 * Returns a fresh state name
-	 * @memberof EmuchartsEditor
-	 */
+     * Returns a fresh state name
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.getFreshStateName = function () {
         return this.emucharts.getFreshStateName();
     };
-    
+
     /**
-	 * Returns a fresh transition name
-	 * @memberof EmuchartsEditor
-	 */
+     * Returns a fresh transition name
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.getFreshTransitionName = function () {
         return this.emucharts.getFreshTransitionName();
     };
-    
+
     /**
-	 * Returns a fresh name for initial transitions
-	 * @memberof EmuchartsEditor
-	 */
+     * Returns a fresh name for initial transitions
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.getFreshInitialTransitionName = function () {
         return this.emucharts.getFreshInitialTransitionName();
     };
 
     /**
-	 * Returns an array containing the current set of states in the diagram
+     * Returns an array containing the current set of states in the diagram
      * Each states is given as a pair { name, id }
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.getStates = function () {
         return this.emucharts.getStates();
     };
 
     /**
-	 * Returns an array containing the current set of constants defined in the diagram
-	 * @memberof EmuchartsEditor
-	 */
+     * Returns an array containing the current set of constants defined in the diagram
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.getConstants = function () {
         return this.emucharts.getConstants();
     };
 
     /**
-	 * Returns an array containing the current set of variables defined in the diagram
-	 * @memberof EmuchartsEditor
-	 */
+     * Returns an array containing the current set of variables defined in the diagram
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.getVariables = function () {
         return this.emucharts.getVariables();
     };
 
     /**
-	 * Returns an array containing the current set of input variables defined in the diagram
-	 * @memberof EmuchartsEditor
-	 */
+     * Returns an array containing the current set of input variables defined in the diagram
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.getInputVariables = function () {
         return this.emucharts.getInputVariables();
     };
 
     /**
-	 * Returns an array containing the current set of output variables defined in the diagram
-	 * @memberof EmuchartsEditor
-	 */
+     * Returns an array containing the current set of output variables defined in the diagram
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.getOutputVariables = function () {
         return this.emucharts.getOutputVariables();
     };
 
     /**
-	 * Returns an array containing the current set of local variables defined in the diagram
-	 * @memberof EmuchartsEditor
-	 */
+     * Returns an array containing the current set of local variables defined in the diagram
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.getLocalVariables = function () {
         return this.emucharts.getLocalVariables();
     };
 
     /**
-	 * Returns an array specifying the supported variable scopes
-	 * @memberof EmuchartsEditor
-	 */
+     * Returns an array specifying the supported variable scopes
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.getVariableScopes = function () {
         return this.emucharts.getVariableScopes();
     };
 
     /**
-	 * Returns an array containing the current set of transitions in the diagram
+     * Returns an array containing the current set of transitions in the diagram
      * Each transition is given as a 4-tuple { name, id, source, target }
      * where source and target are pairs { name, id }
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.getTransitions = function () {
         return this.emucharts.getTransitions();
     };
-    
+
     /**
-	 * Returns an array containing the current set of initial transitions in the diagram
+     * Returns an array containing the current set of initial transitions in the diagram
      * Each transition is given as a 3-tuple { name, id, target }
      * where target is a pair { name, id }
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.getInitialTransitions = function () {
         return this.emucharts.getInitialTransitions();
     };
 
     /**
      * utility function to rename transitions
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.rename_transition = function (transitionID, newLabel) {
         this.emucharts.rename_edge(transitionID, newLabel);
         var transitions = d3.select("#ContainerStateMachine")
@@ -1761,8 +1760,8 @@ define(function (require, exports, module) {
 
     /**
      * utility function to rename initial transitions
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.rename_initial_transition = function (transitionID, newLabel) {
         this.emucharts.rename_initial_edge(transitionID, newLabel);
         var itransitions = d3.select("#ContainerStateMachine")
@@ -1772,11 +1771,11 @@ define(function (require, exports, module) {
         refreshInitialTransitions(itransitions);
     };
 
-    
+
     /**
      * utility function to rename states
-	 * @memberof EmuchartsEditor
-	 */
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.rename_state = function (stateID, newLabel) {
         this.emucharts.rename_node(stateID, newLabel);
         // refresh states
@@ -1795,9 +1794,9 @@ define(function (require, exports, module) {
     };
 
     /**
-	 * Interface function for adding states
-	 * @memberof EmuchartsEditor
-	 */
+     * Interface function for adding states
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.add_state = function (stateName, position) {
         var newNode = { name: stateName };
         if (position) {
@@ -1807,11 +1806,11 @@ define(function (require, exports, module) {
         this.emucharts.add_node(newNode);
         return this.renderStates();
     };
-    
+
     /**
-	 * Interface function for deleting states and all transitions incoming/outgoing to this state
-	 * @memberof EmuchartsEditor
-	 */
+     * Interface function for deleting states and all transitions incoming/outgoing to this state
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.delete_state = function (stateID) {
         _this = this;
         var edges = [];
@@ -1839,11 +1838,11 @@ define(function (require, exports, module) {
                 _this.emucharts.remove_initial_edge(initial_edge);
             });
         }
-        
+
         if (this.emucharts && this.emucharts.nodes) {
             this.emucharts.remove_node(stateID);
         }
-        
+
         // refresh editor
         this.renderTransitions();
         this.renderInitialTransitions();
@@ -1851,47 +1850,47 @@ define(function (require, exports, module) {
     };
 
     /**
-	 * Interface function for deleting transitions
-	 * @memberof EmuchartsEditor
-	 */
+     * Interface function for deleting transitions
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.delete_transition = function (transitionID) {
         this.emucharts.remove_edge(transitionID);
         return this.renderTransitions();
     };
 
     /**
-	 * Interface function for deleting initial transitions
-	 * @memberof EmuchartsEditor
-	 */
+     * Interface function for deleting initial transitions
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.delete_initial_transition = function (transitionID) {
         this.emucharts.remove_initial_edge(transitionID);
         return this.renderInitialTransitions();
     };
-    
+
     /**
-	 * Interface function for deleting a constant
+     * Interface function for deleting a constant
      * @param constantID is the unique constant identifier
-     * @returns true if constant removed successfully; otherwise returns false     
-	 * @memberof EmuchartsEditor
-	 */
+     * @returns true if constant removed successfully; otherwise returns false
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.delete_constant = function (constantID) {
         return this.emucharts.remove_constant(constantID);
     };
-    
+
     /**
-	 * Interface function for deleting a variable
+     * Interface function for deleting a variable
      * @param variableID is the unique variable identifier
-     * @returns true if variable removed successfully; otherwise returns false     
-	 * @memberof EmuchartsEditor
-	 */
+     * @returns true if variable removed successfully; otherwise returns false
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.delete_variable = function (variableID) {
         return this.emucharts.remove_variable(variableID);
     };
 
     /**
-	 * Interface function for adding transitions
-	 * @memberof EmuchartsEditor
-	 */
+     * Interface function for adding transitions
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.add_transition = function (transitionName, from, to) {
         var source = this.emucharts.getState(from);
         var target = this.emucharts.getState(to);
@@ -1914,9 +1913,9 @@ define(function (require, exports, module) {
     };
 
     /**
-	 * Interface function for adding initial transitions
-	 * @memberof EmuchartsEditor
-	 */
+     * Interface function for adding initial transitions
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.add_initial_transition = function (transitionName, to) {
         var target = this.emucharts.getState(to);
         if (target) {
@@ -1933,41 +1932,41 @@ define(function (require, exports, module) {
     };
 
     /**
-	 * Interface function for adding new constant definitions
-	 * @memberof EmuchartsEditor
-	 */
+     * Interface function for adding new constant definitions
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.add_constant = function (newConstant) {
         return this.emucharts.add_constant(newConstant);
     };
-    
+
     /**
-	 * Interface function for adding new state variables
-	 * @memberof EmuchartsEditor
-	 */
+     * Interface function for adding new state variables
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.add_variable = function (newVariable) {
         return this.emucharts.add_variable(newVariable);
     };
 
     /**
-	 * Interface function for editing constants
-	 * @memberof EmuchartsEditor
-	 */
+     * Interface function for editing constants
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.rename_constant = function (constantID, newData) {
         return this.emucharts.rename_constant(constantID, newData);
     };
 
     /**
-	 * Interface function for editing state variables
-	 * @memberof EmuchartsEditor
-	 */
+     * Interface function for editing state variables
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.rename_variable = function (variableID, newData) {
         return this.emucharts.rename_variable(variableID, newData);
     };
-    
+
     /**
-	 * Interface function for deleting charts
-	 * @memberof EmuchartsEditor
-	 */
+     * Interface function for deleting charts
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.delete_chart = function () {
         _this = this;
         if (this.emucharts.constants) {
@@ -1996,9 +1995,9 @@ define(function (require, exports, module) {
     };
 
     /**
-	 * Interface function for checking whether the current chart is empty
-	 * @memberof EmuchartsEditor
-	 */
+     * Interface function for checking whether the current chart is empty
+     * @memberof EmuchartsEditor
+     */
     EmuchartsEditor.prototype.empty_chart = function () {
         return this.emucharts && this.emucharts.nodes && this.emucharts.nodes.empty() &&
                 this.emucharts.edges && this.emucharts.edges.empty() &&

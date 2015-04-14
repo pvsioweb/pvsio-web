@@ -10,39 +10,39 @@
  * // Example module that uses DoubleDisplay.
  * define(function (require, exports, module) {
  *     "use strict";
- * 
+ *
  * });
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, document */
+/*global define */
 
 define(function (require, exports, module) {
     "use strict";
-    
-    var d3 = require("d3/d3");
-    var black, white;
+
+//    var d3 = require("d3/d3");
+//    var black, white;
     var SingleDisplay = require("widgets/SingleDisplay");
-    
-	/**
-	 * @function <a name="DoubleDisplay">DoubleDisplay</a>
+
+    /**
+     * @function <a name="DoubleDisplay">DoubleDisplay</a>
      * @description Constructor.
-	 * @param id {String} The ID of the HTML element where the display will be rendered.
-     * @param coords {Object} The four coordinates (x1,y1,x2,y2) of the display, specifying 
+     * @param id {String} The ID of the HTML element where the display will be rendered.
+     * @param coords {Object} The four coordinates (x1,y1,x2,y2) of the display, specifying
      *        the left, top, right, bottom corner of the rectangle (for shape="rect")
      * @param opt {Object}
      * @memberof module:DoubleDisplay
      * @instance
-	 */
-	function DoubleDisplay(id, coords, opt) {
+     */
+    function DoubleDisplay(id, coords, opt) {
         opt = opt || {};
         this.id = id;
         this.parent = opt.parent || "body";
         this.ratio = opt.ratio || 0.5;
         this.top = coords.top || 0;
         this.left = coords.left || 0;
-		this.width = coords.width || 200;
-		this.height = coords.height || 80;
+        this.width = coords.width || 200;
+        this.height = coords.height || 80;
         var coords_left = {
             top: (opt.left_display && opt.left_display.top) ? opt.left_display.top : this.top,
             left: (opt.left_display && opt.left_display.left) ? opt.left_display.left : this.left,
@@ -76,11 +76,11 @@ define(function (require, exports, module) {
     DoubleDisplay.prototype.getLeftDisplay = function () {
         return this.leftDisplay;
     };
-    
+
     DoubleDisplay.prototype.getRightDisplay = function () {
         return this.rightDisplay;
     };
-    
+
     DoubleDisplay.prototype.hide = function () {
         this.leftDisplay.hide();
         this.rightDisplay.hide();
@@ -92,12 +92,12 @@ define(function (require, exports, module) {
         this.rightDisplay.reveal();
         return this;
     };
-    
+
 //    DoubleDisplay.prototype.move = function (data) {
 //        this.leftDisplay.move(data);
 //        this.rightDisplay.move(data);
 //        return this;
 //    };
-    
+
     module.exports = DoubleDisplay;
 });

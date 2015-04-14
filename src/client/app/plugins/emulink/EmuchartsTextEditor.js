@@ -5,20 +5,20 @@
  * @date 15/11/14 4:05:22 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, Promise */
+/*jshint unused:false*/
 define(function (require, exports, module) {
-	"use strict";
-	var  CodeMirror             = require("cm/lib/codemirror"),
+    "use strict";
+    var  CodeMirror             = require("cm/lib/codemirror"),
         d3                      = require("d3/d3"),
-		ProjectManager			= require("project/ProjectManager"),
-		sourceCodeTemplate		= require("text!pvsioweb/forms/templates/sourceCodeEditorPanel.handlebars");
-	var instance;
+        ProjectManager			= require("project/ProjectManager"),
+        sourceCodeTemplate		= require("text!pvsioweb/forms/templates/sourceCodeEditorPanel.handlebars");
+    var instance;
     var currentProject,
         projectManager,
         editor,
         editorContainer,
         pvsioWebClient;
-    
+
     require("cm/addon/fold/foldcode");
     require("cm/addon/fold/foldgutter");
     require("cm/addon/fold/indentFold");
@@ -32,7 +32,7 @@ define(function (require, exports, module) {
     require("cm/addon/search/searchcursor");
     require("cm/addon/search/search");
     require("cm/mode/emucharts/emucharts");
-        
+
     var options = {
         mode: "emucharts",
         lineNumbers: true,
@@ -48,7 +48,7 @@ define(function (require, exports, module) {
             "Ctrl-Space": "autocomplete"
         }
     };
-	       
+           
     /**
      * @par obj is a structure { textArea, size }, where textArea is a DOM object of type textArea,
      *          and size is a structure { width, height } specifying the desired size of the editor
@@ -74,7 +74,7 @@ define(function (require, exports, module) {
         });
         editor.setSize(obj.size.width, obj.size.height);
         editor.refresh();
-	}
+    }
 
     module.exports = EmuchartsTextEditor;
 });

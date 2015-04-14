@@ -5,7 +5,7 @@
  * @date 06/10/14 2:24:01 PM
  *
  *
- * Specification of the EmuchartsParser module: the object representing the parsed text 
+ * Specification of the EmuchartsParser module: the object representing the parsed text
  *      shall have the following characteristics:
  *  - Each object has a type and a value.
  *  - Identifier objects have type 'identifier' and the value is the string representation of the identifier.
@@ -21,21 +21,21 @@
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, _, Promise, document, FileReader*/
+/*jshint unused:false*/
 define(function (require, exports, module) {
     "use strict";
-    
+
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var parser;
-    
+
     /**
-	 * Constructor
-	 */
+     * Constructor
+     */
     function EmuchartsParser_UnitTest() {
         parser = new EmuchartsParser();
         return this;
     }
-    
+
     EmuchartsParser_UnitTest.prototype.unitTest = function () {
         var parser = new EmuchartsParser();
         var success = 0, fail = 0, tot = 0;
@@ -103,8 +103,8 @@ define(function (require, exports, module) {
             failed = false;
         }
         console.log(JSON.stringify(ans.res, null, 2));
-        
-        
+
+
         // test 2
         txt = "[ display <= (display + 100) ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
@@ -140,7 +140,7 @@ define(function (require, exports, module) {
             fail++;
         }
 
-        
+
         // test 3
         txt = "{ display := display + 100; step := step * 10; }";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
@@ -186,7 +186,7 @@ define(function (require, exports, module) {
             console.log("[FAIL]");
             fail++;
         }
-        
+
         // test 4
         txt = "[ display implies (display && -100 => 2.3) ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
@@ -284,7 +284,7 @@ define(function (require, exports, module) {
             summary += "[FAIL]";
             fail++;
         }
-        
+
         // test 7
         txt = "[ f(x) = !display ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
@@ -341,7 +341,7 @@ define(function (require, exports, module) {
             fail++;
         }
 
-        
+
         // test 9
         txt = "[ f(x+y) = !display ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
@@ -429,7 +429,7 @@ define(function (require, exports, module) {
             summary += "[FAIL]";
             fail++;
         }
-        
+
         // test 12
         txt = "click_off { isOn := false }";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
@@ -510,7 +510,7 @@ define(function (require, exports, module) {
             summary += "[FAIL]";
             fail++;
         }
-        
+
         // test 16
         txt = "login [ S_state.correct = true ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
@@ -536,7 +536,7 @@ define(function (require, exports, module) {
             summary += "[FAIL]";
             fail++;
         }
-        
+
         // test 17
         txt = "login [ S_state.d1.correct = true ]";
         summary += "\n\nTest " + (++tot) + ": '" + txt + "'";
@@ -634,7 +634,7 @@ define(function (require, exports, module) {
             summary += "[FAIL]";
             fail++;
         }
-        
+
         // test 20
         txt = [ { name: "pump.device.screen.val" } ];
         summary += "\n\nTest " + (++tot) + ": '" +
@@ -691,7 +691,7 @@ define(function (require, exports, module) {
             summary += "[FAIL]";
             fail++;
         }
-                
+
         // test 21
         txt = [ { name: 'children.val', type: 'A', value: 'initA' },
                 { name: 'children.type', type: 'B', value: 'initB'} ];
@@ -751,14 +751,14 @@ define(function (require, exports, module) {
             fail++;
         }
 
-        
+
         summary += "\n\n--------------------------------------------------------";
         summary += "\n Success: " + success + "/" + tot;
         summary += "\n Fail   : " + fail + "/" + tot;
         summary += "\n--------------------------------------------------------\n";
         return summary;
     };
-   
-    
+
+
     module.exports = EmuchartsParser_UnitTest;
 });
