@@ -458,7 +458,9 @@ define(function (require, exports, module) {
      * @instance
     */
     Project.prototype.importRemoteFiles = function (paths) {
-        paths = paths.split(",");
+        if (paths) {
+            paths = paths.split(",");
+        }
         var imageExts = [".jpg", ".png", ".gif"];
         return new Promise(function (resolve, reject) {
             if (!paths) { return resolve([]); }
