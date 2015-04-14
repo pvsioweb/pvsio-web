@@ -5,15 +5,14 @@
  * @date 2014/09/12 10:58:21 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3 */
 define(function (require, exports, module) {
-	"use strict";
-    
+    "use strict";
+
     var PIM_model;
-    
+
     /**
-	 * Constructor
-	 */
+     * Constructor
+     */
     function EmuchartsPIMPrinter(name) {
         PIM_model = name;
         return this;
@@ -30,7 +29,7 @@ define(function (require, exports, module) {
         if (pos > 0) { return transitionName.substr(0, pos).trim(); }
         return transitionName.trim();
     }
-    
+
     /**
      * Parser for transitions given in the form name [ condition ] { actios },
      * where name is the transition name, and conditions and actions are optionals
@@ -59,11 +58,11 @@ define(function (require, exports, module) {
                     ans.actions.push(a);
                 }
             });
-            
+
         }
         return ans;
     }
-    
+
     /**
      * Prints PIM type definitions
      */
@@ -89,7 +88,7 @@ define(function (require, exports, module) {
         ans += "\n\\end{zed}\n";
         return ans;
     };
-    
+
     /**
      * Prints PIM state schema
      */
@@ -97,7 +96,7 @@ define(function (require, exports, module) {
         var ans = "\n\\begin{schema}{PIMSystem}";
         ans += "\n  currentState : State";
         ans += "\n\\end{schema}\n";
-        
+
         var initial_transitions = emuchart.initial_transitions;
         if (initial_transitions && initial_transitions.length > 0) {
             ans += "\n\\begin{schema}{Init}";
@@ -108,7 +107,7 @@ define(function (require, exports, module) {
         }
         return ans;
     };
-    
+
     /**
      * Prints PIM operation schema for Emuchart transitions given in the form transition [condition] {actions}
      */
@@ -130,7 +129,7 @@ define(function (require, exports, module) {
         }
         return ans;
     };
-    
+
     EmuchartsPIMPrinter.prototype.print_descriptor = function (emuchart) {
         var ans = "% --------------------------------------------------------------" +
                     "\n%  PIM: " + emuchart.name;
@@ -146,7 +145,7 @@ define(function (require, exports, module) {
         ans += "\n% ---------------------------------------------------------------\n";
         return ans;
     };
-    
+
     EmuchartsPIMPrinter.prototype.print_disclaimer = function () {
         var ans = "\n% ---------------------------------------------------------------\n" +
                     "%  PIM model generated using PVSio-web PIMPrinter ver 0.1\n" +
@@ -154,7 +153,7 @@ define(function (require, exports, module) {
                     "\n% ---------------------------------------------------------------\n";
         return ans;
     };
-    
+
     /**
      * Prints the PIM model
      */
@@ -166,6 +165,6 @@ define(function (require, exports, module) {
         ans += this.print_disclaimer();
         return { res: ans };
     };
-    
+
     module.exports = EmuchartsPIMPrinter;
 });
