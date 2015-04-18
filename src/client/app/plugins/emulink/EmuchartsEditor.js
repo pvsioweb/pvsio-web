@@ -6,7 +6,7 @@
  * @date 14/05/14 5:16:13 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*jshint unused:false*/
+/*global define*/
 define(function (require, exports, module) {
     "use strict";
 
@@ -16,9 +16,6 @@ define(function (require, exports, module) {
         EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes");
 
     var dbg = false;
-
-    // the emuchart data
-    var emucharts;
 
     // constants for drawing states
     var width  = 900;
@@ -30,12 +27,12 @@ define(function (require, exports, module) {
 
     // constants for drawing transitions
     var stroke_width_large = "20px";
-    var stroke_width_highlighted = "1.5px";
+//    var stroke_width_highlighted = "1.5px";
     var stroke_width_normal = "1px";
 
     // mouse event vars used for identifying gestures like creating a new transition
     var mousedown = { node: null, path: null };
-    var mouseup = { node: null, path: null };
+//    var mouseup = { node: null, path: null };
     var mouseover = { node: null, path: null };
     var mousedrag = { node: null, path: null };
     var drag_line; // drag line used when creating new transitions
@@ -128,9 +125,9 @@ define(function (require, exports, module) {
      * @returns trimmed value
      * @memberof EmuchartsEditor
      */
-    function trim(val, min, max) {
-        return (val < max) ? ((val > min) ? val : min) : max;
-    }
+//    function trim(val, min, max) {
+//        return (val < max) ? ((val > min) ? val : min) : max;
+//    }
     function inc02(val, max) {
         return (val + 0.2 < max) ? val + 0.2 : val;
     }
@@ -140,7 +137,6 @@ define(function (require, exports, module) {
 
     /**
      * Interface functions for zooming in and out
-     * @returns trimmed value
      * @memberof EmuchartsEditor
      */
     EmuchartsEditor.prototype.zoomChart = function () {
@@ -198,10 +194,10 @@ define(function (require, exports, module) {
                         //.interpolate("basic");
                          .interpolate("cardinal");
 
-    var lineFunction_bundle = d3.svg.line()
-                         .x(function (d) { return d.x; })
-                         .y(function (d) { return d.y; })
-                         .interpolate("bundle");
+//    var lineFunction_bundle = d3.svg.line()
+//                         .x(function (d) { return d.x; })
+//                         .y(function (d) { return d.y; })
+//                         .interpolate("bundle");
 
 
     /**
@@ -687,7 +683,8 @@ define(function (require, exports, module) {
             .attr("fill", "black");
 
 
-        var arrow_rotated = d3.select("#ContainerStateMachine").select("svg").select("defs")
+//        var arrow_rotated = 
+        d3.select("#ContainerStateMachine").select("svg").select("defs")
             .append("svg:marker")
             .attr("id", "end-arrow-rotated")
             .attr("viewBox", "0 -5 10 10")
@@ -699,7 +696,8 @@ define(function (require, exports, module) {
             .attr("d", "M1,0 L10,-3 L6,0 L10,3 L1,0")
             .attr("fill", "black");
 
-        var arrow_rotated_selected = d3.select("#ContainerStateMachine").select("svg").select("defs")
+//        var arrow_rotated_selected = 
+        d3.select("#ContainerStateMachine").select("svg").select("defs")
             .append("svg:marker")
             .attr("id", "end-arrow-rotated-selected")
             .attr("viewBox", "0 -5 10 10")
@@ -711,7 +709,8 @@ define(function (require, exports, module) {
             .attr("d", "M1,0 L10,-3 L6,0 L10,3 L1,0")
             .attr("fill", "green");
 
-        var arrow = d3.select("#ContainerStateMachine").select("svg").select("defs")
+//        var arrow = 
+        d3.select("#ContainerStateMachine").select("svg").select("defs")
             // pointer for hiighlighed edges
             .append("svg:marker")
             .attr("id", "end-arrow-selected")
@@ -896,8 +895,7 @@ define(function (require, exports, module) {
                 return "none";
             });
             var style = "left: " + (m[0] + 20) + "px; top: " + (m[1] - 10) + "px;";
-            var mouseOverlay = d3.select("#MouseOverlay")
-                                    .attr("style", style);
+            d3.select("#MouseOverlay").attr("style", style);
         };
         var mouseOut = function () {
             d3.selectAll("#MouseOverlayIcon").style("display", "none");
@@ -933,7 +931,8 @@ define(function (require, exports, module) {
                 .attr("id", function (edge) { return edge.id; });
 
             // visiblePath is the actual path visible to the user
-            var visiblePath = enteredTransitions.append("svg:path").classed("path", true)
+//            var visiblePath = 
+            enteredTransitions.append("svg:path").classed("path", true)
                 .attr("id", function (edge) { return "path_" + edge.id; })
                 .attr("fill", "none")
                 .style("stroke", "black")
@@ -942,7 +941,8 @@ define(function (require, exports, module) {
                 .style("marker-end", "url(#end-arrow)");
 
             // selection path is used to ease selection with the mouse (it's wide)
-            var selectionPath = enteredTransitions.append("svg:path").classed("path", true)
+//            var selectionPath = 
+            enteredTransitions.append("svg:path").classed("path", true)
                 .attr("id", function (edge) {return "selectionPath_" + edge.id; })
                 .style("opacity", "0")
                 .attr("fill", "none")
@@ -952,7 +952,8 @@ define(function (require, exports, module) {
                 .style("cursor", "pointer");
 
             // control points are used to adjust the shape of a path
-            var controlPoints = enteredTransitions.append("svg:circle").classed("cpoints", true)
+//            var controlPoints = 
+            enteredTransitions.append("svg:circle").classed("cpoints", true)
                 .attr("id", function (edge) {return "cpoints_" + edge.id; })
                 .attr("cx", function (edge) {
                     if (edge.source && edge.target && edge.source.id === edge.target.id) {
@@ -976,7 +977,8 @@ define(function (require, exports, module) {
 
             // labels are drawn using both text and textpath
             // the former is for self-edges, the latter for all other edges
-            var text = enteredTransitions.append("svg:text").classed("tlabel", true)
+//            var text = 
+            enteredTransitions.append("svg:text").classed("tlabel", true)
                 .attr("id", function (d) { return "tlabel_" + d.id; })
                 .style("font", (fontSize + "px sans-serif"))
                 .style("text-rendering", "optimizeLegibility")
@@ -1006,7 +1008,8 @@ define(function (require, exports, module) {
                     return "";
                 });
 
-            var textPath = enteredTransitions.append("svg:text").classed("tlabel", true)
+//            var textPath = 
+            enteredTransitions.append("svg:text").classed("tlabel", true)
                 .attr("id", function (edge) { return "tlabel_" + edge.id; })
                 .style("font", (fontSize + "px sans-serif"))
                 .style("text-rendering", "optimizeLegibility")
@@ -1156,7 +1159,8 @@ define(function (require, exports, module) {
             var transitions = svg.select("#Transitions").selectAll(".transition")
                                     .data(edges, function (edge) { return edge.id; });
             var enteredTransitions = drawTransitions(transitions.enter());
-            var exitedTransitions = removeTransitions(transitions.exit());
+//            var exitedTransitions = 
+            removeTransitions(transitions.exit());
             var drag = d3.behavior.drag().origin(function (edge) {
                 return edge;
             });
@@ -1198,7 +1202,8 @@ define(function (require, exports, module) {
                 .attr("id", function (edge) { return edge.id; });
 
             // visiblePath is the actual path visible to the user
-            var visiblePath = enteredTransitions.append("svg:path").classed("ipath", true)
+//            var visiblePath = 
+            enteredTransitions.append("svg:path").classed("ipath", true)
                 .attr("id", function (edge) { return "ipath_" + edge.id; })
                 .attr("fill", "none")
                 .style("stroke", "black")
@@ -1208,7 +1213,8 @@ define(function (require, exports, module) {
                 .style("marker-end", "url(#end-arrow)");
 
             // selection path is used to ease selection with the mouse (it's wide)
-            var selectionPath = enteredTransitions.append("svg:path").classed("ipath", true)
+//            var selectionPath = 
+            enteredTransitions.append("svg:path").classed("ipath", true)
                 .attr("id", function (edge) {return "iselectionPath_" + edge.id; })
                 .style("opacity", "0")
                 .attr("fill", "none")
@@ -1219,7 +1225,8 @@ define(function (require, exports, module) {
 
             // labels are drawn using both text and textpath
             // the former is for self-edges, the latter for all other edges
-            var text = enteredTransitions.append("svg:text").classed("itlabel", true)
+//            var text = 
+            enteredTransitions.append("svg:text").classed("itlabel", true)
                 .attr("id", function (d) { return "itlabel_" + d.id; })
                 .style("font", (fontSize + "px sans-serif"))
                 .style("text-rendering", "optimizeLegibility")
@@ -1281,7 +1288,8 @@ define(function (require, exports, module) {
             var initial_transitions = svg.select("#InitialTransitions").selectAll(".itransition")
                                     .data(edges, function (edge) { return edge.id; });
             var enteredTransitions = drawInitialTransitions(initial_transitions.enter());
-            var exitedTransitions = removeTransitions(initial_transitions.exit());
+//            var exitedTransitions = 
+            removeTransitions(initial_transitions.exit());
             enteredTransitions
                 .on("mouseover", mouseOver)
                 .on("mouseout", mouseOut)
@@ -1339,7 +1347,8 @@ define(function (require, exports, module) {
                 return "translate(" + node.x + ", " + node.y + ") scale(1.0)";
             });
         // draw states (selectAll will automatically iterate for all states)
-        var state = enteredStates.append("svg:rect").classed("state_box", true)
+//        var state = 
+        enteredStates.append("svg:rect").classed("state_box", true)
             .attr("id", function (node) { return "box_" + node.id; })
             .attr("width", function (node) { return nodeWidth(node); })
             .attr("height", function (node) { return nodeWidth(node); })
@@ -1357,7 +1366,8 @@ define(function (require, exports, module) {
                 return d3.rgb(colors(node.id)).darker().toString();
             });
         // draw move tool for boxes
-        var moveTool = enteredStates.append("svg:rect").classed("state_move", true)
+//        var moveTool = 
+        enteredStates.append("svg:rect").classed("state_move", true)
             .attr("id", function (node) { return "resize_" + node.id; })
             .attr("width", 20).attr("height", 20)
             // place the resize tool at the lower right corner of the box
@@ -1370,7 +1380,8 @@ define(function (require, exports, module) {
             .style("opacity", "0.4") // make the resize tool slightly transparent
             .style("cursor", "pointer"); // change cursor shape on mouse over
         // draw state names
-        var label = enteredStates.append("svg:text").classed("state_label", true)
+//        var label = 
+        enteredStates.append("svg:text").classed("state_label", true)
             .attr("id", function (node) { return "label_" + node.id; })
             .attr("text-anchor", "middle")
             .style("font", (fontSize + "px sans-serif"))
@@ -1609,7 +1620,8 @@ define(function (require, exports, module) {
             var states = svg.select("#States").selectAll(".state")
                             .data(nodes, function (node) { return node.id; });
             var enteredStates = drawStates(states.enter());
-            var exitedStates  = removeStates(states.exit());
+//            var exitedStates  = 
+            removeStates(states.exit());
             var drag = d3.behavior.drag().origin(function (node) {
                 return node;
             });

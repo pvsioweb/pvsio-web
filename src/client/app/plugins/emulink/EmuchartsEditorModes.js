@@ -5,8 +5,7 @@
  * @date 16/05/14 10:44:12 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, _, Promise, document, FileReader*/
-/*jshint unused:false*/
+/*global define*/
 define(function (require, exports, module) {
     "use strict";
 

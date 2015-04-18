@@ -6,7 +6,7 @@
  * @date 27/05/14 9:38:13 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-
+/*global define*/
 /**
  * [[Description]]
  * @param   {[[Type]]} function (require [[Description]]

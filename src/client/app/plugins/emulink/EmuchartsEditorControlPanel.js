@@ -4,17 +4,14 @@
  * @author Paolo Masci
  * @date 05/11/14 5:43:08 PM
  */
-/*jshint unused:false*/
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*global define*/
 define(function (require, exports, module) {
     "use strict";
 
-    var d3 = require("d3/d3"),
-        eventDispatcher = require("util/eventDispatcher"),
-        EmuchartsEditor = require("plugins/emulink/EmuchartsEditor"),
-        EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes");
+    var eventDispatcher = require("util/eventDispatcher"),
+        EmuchartsEditor = require("plugins/emulink/EmuchartsEditor");
 
-    var dbg = false;
     var _this;
 
     /**
@@ -33,18 +30,18 @@ define(function (require, exports, module) {
      * @returns labels, as a formatted string
      * @memberof EmuchartsEditorControlPanel
      */
-    function labelToString(label) {
-        var ans = "";
-        if (label.listConditions) {
-            label.listConditions.forEach(function (cond) { ans += cond + "; "; });
-            ans = " [ " + ans + " ] ";
-        }
-        if (label.listOfOperations) {
-            label.listOfOperations.forEach(function (item) { ans += item + "; "; });
-            ans = " { " + ans + " } ";
-        }
-        return ans;
-    }
+//    function labelToString(label) {
+//        var ans = "";
+//        if (label.listConditions) {
+//            label.listConditions.forEach(function (cond) { ans += cond + "; "; });
+//            ans = " [ " + ans + " ] ";
+//        }
+//        if (label.listOfOperations) {
+//            label.listOfOperations.forEach(function (item) { ans += item + "; "; });
+//            ans = " { " + ans + " } ";
+//        }
+//        return ans;
+//    }
 
 
     /**

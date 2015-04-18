@@ -5,7 +5,7 @@
  * @date 10/03/15 12:23:22 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*jshint unused:false*/
+/*global define, d3*/
 define(function (require, exports, module) {
     "use strict";
 
@@ -43,9 +43,9 @@ define(function (require, exports, module) {
     var displayError = function (msg) {
         displayNotification(msg, "Compilation Error");
     };
-    var displayWarning = function (msg) {
-        displayNotification(msg, "Warning");
-    };
+//    var displayWarning = function (msg) {
+//        displayNotification(msg, "Warning");
+//    };
     /**
      * Constructor
      */

@@ -21,7 +21,7 @@
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*jshint unused:false*/
+/*global define*/
 define(function (require, exports, module) {
     "use strict";
 

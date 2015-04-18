@@ -5,7 +5,7 @@
  * @date 27/05/14 9:38:13 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*jshint unused:false*/
+/*global define, d3*/
 define(function (require, exports, module) {
     "use strict";
 
@@ -46,9 +46,9 @@ define(function (require, exports, module) {
     var displayError = function (msg) {
         displayNotification(msg, "Compilation Error");
     };
-    var displayWarning = function (msg) {
-        displayNotification(msg, "Warning");
-    };
+//    var displayWarning = function (msg) {
+//        displayNotification(msg, "Warning");
+//    };
     /**
      * Constructor
      */
@@ -536,8 +536,8 @@ define(function (require, exports, module) {
             return ret;
         }
 
-        ans += initialTransitions.res;
-        ans += transitions.res;
+        ans += initialTransitions.res || "\n";
+        ans += transitions.res || "\n";
         ans += " END " + emuchart.name + "\n";
         ans += this.print_disclaimer();
         ret.res = ans;

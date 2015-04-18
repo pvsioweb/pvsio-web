@@ -8,13 +8,10 @@
  * @date 14/05/14 2:53:03 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*jshint unused:false*/
-/*jshint unused:false*/
+/*global define, d3*/
 define(function (require, exports, module) {
     "use strict";
 
-    var constants, // d3.map()
-        variables; // d3.map()
     var eventDispatcher = require("util/eventDispatcher");
 
     var defaultValues = { x: 100, y: 100, width: 36, height: 36, fontSize: 10 };
@@ -27,9 +24,9 @@ define(function (require, exports, module) {
     var getFreshNodeID = function () { return nextNodeID + 1; };
     var getFreshEdgeID = function () { return nextEdgeID + 1; };
     var getFreshInitialEdgeID = function () { return nextInitialEdgeID + 1; };
-    var nextConstantID = 0, nextVariableID = 0;
-    var newConstantID = function () { return ++nextConstantID; };
-    var newVariableID = function () { return ++nextVariableID; };
+//    var nextConstantID = 0, nextVariableID = 0;
+//    var newConstantID = function () { return ++nextConstantID; };
+//    var newVariableID = function () { return ++nextVariableID; };
     var createVariableID = function (variable) {
         var id = "VAR_" + variable.name + ":" + variable.type + "(" + variable.scope + ")";
         return id;
@@ -38,8 +35,8 @@ define(function (require, exports, module) {
         var id = "CONST_" + constant.name + ":" + constant.type;
         return id;
     };
-    var getFreshConstantID = function () { return nextConstantID + 1; };
-    var getFreshVariableID = function () { return nextVariableID + 1; };
+//    var getFreshConstantID = function () { return nextConstantID + 1; };
+//    var getFreshVariableID = function () { return nextVariableID + 1; };
 
     /**
      * @function Emucharts
@@ -721,7 +718,6 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.rename_constant = function (constantID, newData) {
-        var _this = this;
         if (!constantID || !this.constants || !this.constants.get(constantID)) { return false; }
         // get the constant, delete it from the constants list,
         // rename fields, and put it back in the constants list
@@ -764,7 +760,6 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.rename_variable = function (variableID, newData) {
-        var _this = this;
         if (!variableID || !this.variables || !this.variables.get(variableID)) { return false; }
         // get the varable, delete it from the variables list,
         // rename fields, and put it back in the variables list

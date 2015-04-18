@@ -7,7 +7,7 @@
  * @date 14/05/14 2:49:23 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*jshint unused:false*/
+/*global define, d3*/
 define(function (require, exports, module) {
     "use strict";
     var Emucharts = require("plugins/emulink/Emucharts"),
@@ -56,7 +56,6 @@ define(function (require, exports, module) {
      * @memberof EmuchartsManager
      */
     EmuchartsManager.prototype.newEmucharts = function (emuchartsName) {
-        var _this = this;
         if (emuchartsName) {
             // create an editor for an empty chart
             var emucharts = new Emucharts({
@@ -190,7 +189,6 @@ define(function (require, exports, module) {
      * FIXME: improve this function!
      */
     EmuchartsManager.prototype.importPIMChart = function (MUZFile) {
-        var _this = this;
         if (MUZFile && MUZFile.content) {
             // parse section ==Seq==
             var needle = MUZFile.content.indexOf("==Seq==");

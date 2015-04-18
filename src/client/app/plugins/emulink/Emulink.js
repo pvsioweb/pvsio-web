@@ -3,19 +3,13 @@
  * @author Paolo Masci
  * @date 25/05/14 6:39:02 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
-/*jshint unused:false*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true*/
+/*global define, Promise, d3*/
 define(function (require, exports, module) {
     "use strict";
-    var stateMachine		= require("plugins/emulink/stateMachine"),
-        handlerFile         = require("util/fileHandler"),
-        pvsWriter           = require("plugins/emulink/stateToPvsSpecificationWriter"),
-        parserSpecification = require("plugins/emulink/parserSpecification"),
-        PrototypeBuilder	= require("plugins/prototypebuilder/PrototypeBuilder"),
+    var PrototypeBuilder	= require("plugins/prototypebuilder/PrototypeBuilder"),
         ProjectManager		= require("project/ProjectManager"),
         ModelEditor         = require("plugins/modelEditor/ModelEditor"),
-        Logger				= require("util/Logger"),
-        Simulator           = require("plugins/emulink/simulator"),
         PVSioWebClient      = require("PVSioWebClient"),
         EditorModeUtils     = require("plugins/emulink/EmuchartsEditorModes"),
         EmuchartsManager    = require("plugins/emulink/EmuchartsManager"),
@@ -23,7 +17,7 @@ define(function (require, exports, module) {
         displayAddTransition   = require("plugins/emulink/forms/displayAddTransition"),
         displayRename          = require("plugins/emulink/forms/displayRename"),
         displayDelete          = require("plugins/emulink/forms/displayDelete"),
-        displayAddExpression   = require("plugins/emulink/forms/displayAddExpression"),
+//        displayAddExpression   = require("plugins/emulink/forms/displayAddExpression"),
         displayAddVariable     = require("plugins/emulink/forms/displayAddVariable"),
         displayEditVariable    = require("plugins/emulink/forms/displayEditVariable"),
         displaySelectVariable  = require("plugins/emulink/forms/displaySelectVariable"),
@@ -39,7 +33,7 @@ define(function (require, exports, module) {
         EmuchartsCppPrinter    = require("plugins/emulink/EmuchartsCppPrinter"),
         EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter2"),
         EmuchartsVDMPrinter    = require("plugins/emulink/EmuchartsVDMPrinter"),
-        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
+//        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         fs = require("util/fileHandler"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
 
@@ -47,7 +41,6 @@ define(function (require, exports, module) {
     var projectManager;
     var editor;
     var ws;
-    var selectedFileChanged;
     var pvsioWebClient;
     var canvas;
 
@@ -204,42 +197,42 @@ define(function (require, exports, module) {
     }
 
     // dbg
-    function print_theory() {
-        var emuchart = {
-            name: "emuchart_th",
-            author: {
-                name: "Paolo Masci",
-                affiliation: "Queen Mary University of London, United Kingdom",
-                contact: "http://www.eecs.qmul.ac.uk/~masci/"
-            },
-            importings: [],
-            constants: emuchartsManager.getConstants(),
-            variables: emuchartsManager.getVariables(),
-            states: emuchartsManager.getStates(),
-            transitions: emuchartsManager.getTransitions()
-        };
-        console.log(emuchartsPVSPrinter.print(emuchart));
-    }
-    function print_node() {
-        var emuchart = {
-            name: "foo",
-            author: {
-                name: "XXX",
-                affiliation: "YYY",
-                contact: "XXX@YYY"
-            },
-            importings: [],
-            constants: emuchartsManager.getConstants(),
-            variables: {
-                input: emuchartsManager.getInputVariables(),
-                output: emuchartsManager.getOutputVariables(),
-                local: emuchartsManager.getLocalVariables()
-            },
-            states: emuchartsManager.getStates(),
-            transitions: emuchartsManager.getTransitions()
-        };
-        console.log(emuchartsLustrePrinter.print(emuchart));
-    }
+//    function print_theory() {
+//        var emuchart = {
+//            name: "emuchart_th",
+//            author: {
+//                name: "Paolo Masci",
+//                affiliation: "Queen Mary University of London, United Kingdom",
+//                contact: "http://www.eecs.qmul.ac.uk/~masci/"
+//            },
+//            importings: [],
+//            constants: emuchartsManager.getConstants(),
+//            variables: emuchartsManager.getVariables(),
+//            states: emuchartsManager.getStates(),
+//            transitions: emuchartsManager.getTransitions()
+//        };
+//        console.log(emuchartsPVSPrinter.print(emuchart));
+//    }
+//    function print_node() {
+//        var emuchart = {
+//            name: "foo",
+//            author: {
+//                name: "XXX",
+//                affiliation: "YYY",
+//                contact: "XXX@YYY"
+//            },
+//            importings: [],
+//            constants: emuchartsManager.getConstants(),
+//            variables: {
+//                input: emuchartsManager.getInputVariables(),
+//                output: emuchartsManager.getOutputVariables(),
+//                local: emuchartsManager.getLocalVariables()
+//            },
+//            states: emuchartsManager.getStates(),
+//            transitions: emuchartsManager.getTransitions()
+//        };
+//        console.log(emuchartsLustrePrinter.print(emuchart));
+//    }
 
     function stateAdded_handler(event) { }//print_theory(); print_node(); }
     function stateRemoved_handler(event) { }//print_theory(); print_node(); }
@@ -310,103 +303,6 @@ define(function (require, exports, module) {
             infoBox.style.cursor = "default";
         }
 
-        // add listeners
-        // this first listner is obsolete
-        d3.select("#button_newDiagram").on("click", function () {
-            stateMachine.init(editor, ws, projectManager);
-            d3.select("#EmuchartLogo").classed("hidden", true);
-            d3.select("#graphicalEditor").classed("hidden", false);
-        });
-        d3.select("#button_state").on("click", function () {
-            stateMachine.add_node_mode();
-        });
-        d3.select("#button_transition").on("click", function () {
-            stateMachine.add_transition_mode();
-        });
-        d3.select("#button_self_transition").on("click", function () {
-            stateMachine.add_self_transition_mode();
-        });
-        d3.select("#button_add_field").on("click", function () {
-            stateMachine.add_field_mode_start();
-            var newField =
-                prompt("Please enter type and name"
-                        + " of the new state variable"
-                        + " (for example, int value)",
-                       "fieldtype fieldname");
-            if (!newField || newField.split(' ').length !== 2) {
-                alert("Wrong format: new state variable has not been added");
-                return stateMachine.add_field_mode_end(null, null);
-            }
-            var field_name = newField.split(' ')[0];
-            var field_type = newField.split(' ')[1];
-            var msg = "State variable " + field_name
-                    + " of type " + field_type + " successfully added.";
-            stateMachine.add_field_mode_end(field_name, field_type, msg);
-        });
-
-        /// User wants to perform an undo operation on the Editor
-        d3.select("#undoEditor").on("click", function () {
-            pvsWriter.undo();
-        });
-
-        /// User want to perform a redo operation on the Editor
-        d3.select("#redoEditor").on("click", function () {
-            pvsWriter.redo();
-        });
-
-        d3.select("#editor").on("click", function () {
-            pvsWriter.click();
-        });
-
-        d3.select("#hideTags").on("click", function () {
-            pvsWriter.hideTags();
-        });
-
-        d3.select("#showTags").on("click", function () {
-            pvsWriter.showTags();
-        });
-
-        d3.select("#specificationToDiagram").on("click", function () {
-            // User has just copied into the editor without opening any project
-//            if (currentProject.pvsFilesList().length === 0) {
-//                currentProject.name("default_pvsProject");
-//                EmulinkFile.new_file(currentProject, editor,
-//									 ws, "TheoryEmulink.pvs",
-//                                     editor.getValue(), projectManager);
-//            }
-//            parserSpecification.init(editor, stateMachine, currentProject,
-//										ws, projectManager, selectedFileChanged);
-//            emulinkHasBeenUsed = true;
-        });
-
-
-        d3.select("#startSimulation").on("click", function () {
-            var simulationIsActive = Simulator.init(ws);
-            if (simulationIsActive) { d3.select(this).html("Disable Animation");
-                } else { d3.select(this).html("Enable Animation"); }
-            //Simulator.setInitState("INITSTATE");
-        });
-
-        /* d3.select("#infoBoxModifiable").on("change", function () {
-
-        stateMachine.changeTextArea();
-
-        });*/
-/*        document.getElementById("emulinkInfo").value = "Emulink status: NOT active";
-        document.getElementById("startEmulink").disabled = false;
-        /// User wants to start emulink
-        d3.select("#startEmulink").on("click", function () {
-            //d3.select(this).html("Diagram created").classed("btn-danger", false).classed("btn-success", true).attr("disabled", true);
-            if( ! emulinkHasBeenUsed )
-            {
-                showEmulinkStatus();
-                stateMachine.init(editor, ws, currentProject, projectManager, true);
-                currentProject.name("default_pvsProject");
-                emulinkHasBeenUsed = true;
-            }
-            stateMachine.addNewDiagram();
-        });
-       */
 
         // bootstrap buttons
         function openChart(callback) {
@@ -701,7 +597,7 @@ define(function (require, exports, module) {
             function imageLoadComplete(res) {
                 context.drawImage(image, 0, 0);
                 var canvasdata = canvas.toDataURL("image/png");
-                var pngimg = '<img src="' + canvasdata + '">';
+//                var pngimg = '<img src="' + canvasdata + '">';
 
                 var a = d3.select("#pngdataurl");
                 a.node().download = projectManager.project().name() + "_emuChart.png";
@@ -721,7 +617,7 @@ define(function (require, exports, module) {
 
         d3.select("#btn_menuNewState").on("click", function () {
             document.getElementById("menuStates").children[1].style.display = "none";
-            var label = emuchartsManager.getFreshStateName();
+//            var label = emuchartsManager.getFreshStateName();
             displayAddState.create({
                 header: "Please enter label for new state",
                 textLabel: "New state",
@@ -789,7 +685,7 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuNewTransition").on("click", function () {
             document.getElementById("menuTransitions").children[1].style.display = "none";
-            var newTransitionName = emuchartsManager.getFreshTransitionName();
+//            var newTransitionName = emuchartsManager.getFreshTransitionName();
             var states = emuchartsManager.getStates();
             var labels = [];
             states.forEach(function (state) {
@@ -1369,8 +1265,8 @@ define(function (require, exports, module) {
     }
 
     Emulink.prototype.initialise = function () {
-        //enable the plugin -- this should also enable any dependencies defined in getDependencies method
-        var prototypeBuilder = PrototypeBuilder.getInstance();
+//        //enable the plugin -- this should also enable any dependencies defined in getDependencies method
+//        var prototypeBuilder = PrototypeBuilder.getInstance();
         // create local references to PVS editor, websocket client, and project manager
         editor = ModelEditor.getInstance().getEditor();
         ws = pvsioWebClient.getWebSocket();

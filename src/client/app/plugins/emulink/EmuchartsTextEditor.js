@@ -5,19 +5,10 @@
  * @date 15/11/14 4:05:22 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*jshint unused:false*/
+/*global define*/
 define(function (require, exports, module) {
     "use strict";
-    var  CodeMirror             = require("cm/lib/codemirror"),
-        d3                      = require("d3/d3"),
-        ProjectManager			= require("project/ProjectManager"),
-        sourceCodeTemplate		= require("text!pvsioweb/forms/templates/sourceCodeEditorPanel.handlebars");
-    var instance;
-    var currentProject,
-        projectManager,
-        editor,
-        editorContainer,
-        pvsioWebClient;
+    var CodeMirror          = require("cm/lib/codemirror");
 
     require("cm/addon/fold/foldcode");
     require("cm/addon/fold/foldgutter");
@@ -48,6 +39,8 @@ define(function (require, exports, module) {
             "Ctrl-Space": "autocomplete"
         }
     };
+    
+    var editor;
            
     /**
      * @par obj is a structure { textArea, size }, where textArea is a DOM object of type textArea,
