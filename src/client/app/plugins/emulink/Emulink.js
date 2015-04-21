@@ -40,6 +40,7 @@ define(function (require, exports, module) {
         EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter2"),
         EmuchartsVDMPrinter    = require("plugins/emulink/EmuchartsVDMPrinter"),
         EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
+        EmuchartsTestGenerator = require("plugins/emulink/EmuchartsTestGenerator"),
         fs = require("util/fileHandler"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
     
@@ -59,6 +60,7 @@ define(function (require, exports, module) {
     var emuchartsCppPrinter;
     var emuchartsMALPrinter;
     var emuchartsVDMPrinter;
+    var emuchartsTestGenerator;
     var options = { autoinit: true };
 
     var displayNotification = function (msg, title) {
@@ -266,6 +268,7 @@ define(function (require, exports, module) {
         emuchartsCppPrinter = new EmuchartsCppPrinter("emuchart_Cpp");
         emuchartsMALPrinter = new EmuchartsMALPrinter("emuchart_MAL");
         emuchartsVDMPrinter = new EmuchartsVDMPrinter("emuchart_VDM");
+        emuchartsTestGenerator = new EmuchartsTestGenerator("emuchart_Test_Gen");
         pvsioWebClient = PVSioWebClient.getInstance();
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
@@ -1326,6 +1329,37 @@ define(function (require, exports, module) {
                 console.log("Warning, VDM model is undefined.");
             }
         });
+        d3.select("#btn_menuTestGenerator").on("click", function () {
+            var emucharts = {
+                name: ("emucharts_" + projectManager.project().name()),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: emuchartsManager.getVariables(),
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            var model = emuchartsTestGenerator.print(emucharts);
+            console.log(model);
+            if (model.err) {
+                console.log(model.err);
+                return;
+            }
+            if (model.res) {
+                var name = emucharts.name + ".txt";
+                var content = model.res;
+                return projectManager.project().addFile(name, content, { overWrite: true });
+            } else {
+                console.log("Warning, TestGenerator model is undefined.");
+            }
+        });
+
+
         //-- Zoom menu -----------------------------------------------------------
         d3.select("#menuZoom").on("mouseover", function () {
             document.getElementById("menuZoom").children[1].style.display = "block";

@@ -116,7 +116,8 @@ define(function (require, exports, module) {
                     .then(registerPluginEvents())
                     .then(enablePlugin(ProjectAutoSaver.getInstance()))
                     .then(enablePlugin(PrototypeBuilder.getInstance()))
-                    .then(enablePlugin(ModelEditor.getInstance()))
+                    .then(enablePlugin(Emulink.getInstance()))
+                    //.then(enablePlugin(ModelEditor.getInstance()))
                     .then(createDefaultProject())
                     .then(showInterface(opt))
                     .then(function (res) {
