@@ -291,6 +291,8 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
     start_tick = function () {
         if (!tick) {
             tick = setInterval(function () {
+	            var dbg = ">>> alaris_tick <<<";
+				d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
                 client.getWebSocket()
                         .sendGuiAction("alaris_tick(" + client.getWebSocket().lastState() + ");", onMessageReceived);
             }, 2000);
@@ -306,9 +308,10 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
 	
     d3.select(".btn_on").on("click", function () {
         stop_tick();
+        var dbg = ">>> on(..) <<<";
+		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
 		client.getWebSocket()
             .sendGuiAction("click_btn_on(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-        start_tick();
     });
     
     // TODO: need to understand how to use Buttons
@@ -322,67 +325,77 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
 
 	d3.select('.btn_fup').on("mousedown", function () {
         stop_tick();
+        var dbg = ">>> release_fup(press_fup(..)) <<<";
+		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
 		client.getWebSocket()
             .sendGuiAction("release_btn_fup(press_btn_fup(" +
                            client.getWebSocket().lastState() + "));", onMessageReceived);
-        start_tick();
 	});
 	d3.select(".btn_sup").on("mousedown", function () {
         stop_tick();
+        var dbg = ">>> release_sup(press_sup(..)) <<<";
+		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
 		client.getWebSocket()
             .sendGuiAction("release_btn_sup(press_btn_sup(" +
                            client.getWebSocket().lastState() + "));", onMessageReceived);
-        start_tick();
 	});
 	d3.select('.btn_fdown').on("mousedown", function () {
         stop_tick();
+        var dbg = ">>> release_fdown(press_fdown(..)) <<<";
+		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
 		client.getWebSocket()
             .sendGuiAction("release_btn_fdown(press_btn_fdown(" +
                            client.getWebSocket().lastState() + "));", onMessageReceived);
-        start_tick();
 	});
 	d3.select(".btn_sdown").on("mousedown", function () {
         stop_tick();
+        var dbg = ">>> release_sdown(press_sdown(..)) <<<";
+		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
 		client.getWebSocket()
             .sendGuiAction("release_btn_sdown(press_btn_sdown(" +
                            client.getWebSocket().lastState() + "));", onMessageReceived);
-        start_tick();
 	});
     d3.select(".btn_run").on("click", function () {
         stop_tick();
+        var dbg = ">>> run(..) <<<";
+		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
 		client.getWebSocket()
             .sendGuiAction("click_btn_run(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-        start_tick();
     });
     d3.select(".btn_pause").on("click", function () {
         stop_tick();
+        var dbg = ">>> pause(..) <<<";
+		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
 		client.getWebSocket()
             .sendGuiAction("click_btn_pause(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-        start_tick();
     });
     d3.select(".btn_query").on("click", function () {
         stop_tick();
+        var dbg = ">>> query(..) <<<";
+		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
 		client.getWebSocket()
             .sendGuiAction("click_btn_query(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-        start_tick();
     });
     d3.select(".btn_key1").on("click", function () {
         stop_tick();
+        var dbg = ">>> key1(..) <<<";
+		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
 		client.getWebSocket()
             .sendGuiAction("click_btn_key1(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-        start_tick();
     });
     d3.select(".btn_key2").on("click", function () {
         stop_tick();
+        var dbg = ">>> key2(..) <<<";
+		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
 		client.getWebSocket()
             .sendGuiAction("click_btn_key2(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-        start_tick();
     });
     d3.select(".btn_key3").on("click", function () {
         stop_tick();
+        var dbg = ">>> key3(..) <<<";
+		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
 		client.getWebSocket()
             .sendGuiAction("click_btn_key3(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-        start_tick();
     });
     d3.select("#btn_pause").on("click", function () {
         stop_tick();
