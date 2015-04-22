@@ -18,7 +18,7 @@ require.config({
     }
 });
 
-require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "widgets/TripleDisplay", "widgets/LED", "widgets/CursoredDisplay", "plugins/graphbuilder/GraphBuilder", "stateParser", "PVSioWebClient"], function (Button, SingleDisplay, DoubleDisplay, TripleDisplay, LED, CursoredDisplay, GraphBuilder, stateParser, PVSioWebClient) {
+require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "widgets/TripleDisplay", "widgets/LED", "widgets/CursoredDisplay", "plugins/graphbuilder/GraphBuilder", "stateParser", "PVSioWebClient", "widgets/ButtonActionsQueue"], function (Button, SingleDisplay, DoubleDisplay, TripleDisplay, LED, CursoredDisplay, GraphBuilder, stateParser, PVSioWebClient, ButtonActionsQueue) {
     "use strict";
 
     var d3 = require("d3/d3");
@@ -248,11 +248,8 @@ require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "wi
     function start_tick() {
         if (!tick) {
             tick = setInterval(function () {
-//                var dbg = ">>> alaris_tick <<<";
-//                d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
-                client.getWebSocket()
-                        .sendGuiAction("alaris_tick(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-            }, 2000);
+                ButtonActionsQueue.getInstance().queueGUIAction("alaris_tick", onMessageReceived);
+           }, 3000);
         }
     }
 
@@ -274,7 +271,6 @@ require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "wi
         }
 
         if (!err) {
-//            client.getWebSocket().lastState(event.data);
             var dbg = prettyprintState(event.data.toString());
             var date = new Date();
             serverLogs.push({data: dbg, date: date, id: event.id, type: "frompvs"});
