@@ -9,7 +9,7 @@ define(function (require, exports, module) {
     "use strict";
     var main = require("main"),
         ProjectManager			= require("project/ProjectManager");
-    
+
     module.exports = {
         run: function () {
             var pm = ProjectManager.getInstance(),
@@ -23,7 +23,7 @@ define(function (require, exports, module) {
                     });
                 };
             }
-            
+
             function click(elid) {
                 return function () {
                     var el = d3.select(elid).node();
@@ -39,8 +39,8 @@ define(function (require, exports, module) {
                     });
                 };
             }
-			
-			function rightclick(el) {
+            
+            function rightclick(el) {
                 return function () {
                     var element = d3.select(el).node();
                     var event = new Event("contextmenu");
@@ -51,7 +51,7 @@ define(function (require, exports, module) {
                         }, 200);
                     });
                 };
-			}
+            }
             /**
                 Utility function to select context menu item (i.e., right click menu) on an element
                 @param {string} el html element selector (e.g., class, tag or id) for the element
@@ -66,14 +66,14 @@ define(function (require, exports, module) {
                         .then(click(".contextmenu " + menu));
                 };
             }
-            
+
             function expectError(done) {
                 return function (err) {
                     expect(err).toBeFalsy();
                     done();
                 };
             }
-            
+
             function dialogCanBeDismissed(btnTrigger, title) {
                 title = title || "dialog triggered by " + btnTrigger;
                 var str = title + " can be dismissed",
@@ -88,7 +88,7 @@ define(function (require, exports, module) {
                         }).catch(expectError(done));
                 });
             }
-            
+
             function pressingButtonOpensDialog(btnTrigger, title) {
                 title = title || "dialog triggered by " + btnTrigger;
                 var str = title + " is opened by clicking " + btnTrigger;
@@ -102,7 +102,7 @@ define(function (require, exports, module) {
                         }).catch(expectError(done));
                 });
             }
-            
+
             function openSampleProject(projectName) {
                 var str = projectName + " project opens successfully",
                     clickOpenProject = click("#openProject"),
@@ -116,28 +116,28 @@ define(function (require, exports, module) {
                         }).catch(expectError(done));
                 });
             }
-            
+
             function loadPlugin(pluginName, pluginPanelHeader) {
                 pluginPanelHeader = pluginPanelHeader || pluginName;
                 var str = pluginName + " plugin adds a collapsible panel to the ui",
                     clickPlugin = click("input[name='" + pluginName + "']");
                 it(str, function (done) {
-					clickPlugin()
-						.then(function () {
-							var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginPanelHeader + "']");
-							expect(pluginPanel.empty()).toBeFalsy();
-							done();
-						}).catch(expectError(done));
+                    clickPlugin()
+                        .then(function () {
+                            var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginPanelHeader + "']");
+                            expect(pluginPanel.empty()).toBeFalsy();
+                            done();
+                        }).catch(expectError(done));
                 });
             }
-            
+
             function unloadPlugin(pluginName, pluginPanelHeader) {
                 pluginPanelHeader = pluginPanelHeader || pluginName;
                 var str = pluginName + " plugin can be unloaded from the ui",
                     clickPlugin = click("input[name='" + pluginName + "']");
                 it(str, function (done) {
-					clickPlugin()//to load
-						.then(clickPlugin)
+                    clickPlugin()//to load
+                        .then(clickPlugin)
                         .then(function () {
                             var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + pluginPanelHeader + "']");
                             expect(pluginPanel.empty()).toEqual(true);
@@ -145,15 +145,15 @@ define(function (require, exports, module) {
                         }).catch(expectError(done));
                 });
             }
-			/**
-				used to toggle (expand/collapse) a collapsible panel
-			*/
-			function togglePanel(pluginName) {
-				var el = "div.collapsible-panel-parent[plugin-owner='" + pluginName + "'] span.toggle-collapse";
-				return click(el);
-			}
-			
+            /**
+                used to toggle (expand/collapse) a collapsible panel
+            */
+            function togglePanel(pluginName) {
+                var el = "div.collapsible-panel-parent[plugin-owner='" + pluginName + "'] span.toggle-collapse";
+                return click(el);
+            }
             
+
             describe("User interface Elements", function () {
                 beforeEach(function (done) {
                     d3.select("div.overlay").remove();
@@ -175,10 +175,10 @@ define(function (require, exports, module) {
                 openSampleProject("AlarisPC_PumpModules");
                 openSampleProject("SmithsMedical_MedFusion3500");
 
-                loadPlugin("Emulink", "EmuCharts Editor");
-                unloadPlugin("Emulink", "EmuCharts Editor");
-                loadPlugin("GraphBuilder");
-                unloadPlugin("GraphBuilder");
+                loadPlugin("EmuCharts Editor", "EmuCharts Editor");
+                unloadPlugin("EmuCharts Editor", "EmuCharts Editor");
+                loadPlugin("Graph Builder");
+                unloadPlugin("Graph Builder");
             });
 
             describe("Prototype Builder", function () {
@@ -244,7 +244,7 @@ define(function (require, exports, module) {
                             }, 300);
                         }).catch(expectError(done));
                 });
-                
+
                 it("can remove files from the project", function (done) {
                     var filesLength = pm.project().getDescriptors().length;
                     click("div.collapsible-panel-parent[plugin-owner='ModelEditor'] .header")()
@@ -260,7 +260,7 @@ define(function (require, exports, module) {
                         }).catch(expectError(done));
                 });
             });
-           
+
         }
     };
 });

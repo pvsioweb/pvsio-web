@@ -11,7 +11,7 @@ define(function (require, exports, module) {
         PVSioWebClient = require("PVSioWebClient"),
         PluginManager = require("plugins/PluginManager").getInstance(),
         ProjectManager = require("project/ProjectManager");
-    
+
     var instance;
     var ws,
         nodesHash = {},
@@ -116,10 +116,14 @@ define(function (require, exports, module) {
 
     function GraphBuilder() {
         var pvsioWebClient = PVSioWebClient.getInstance();
-        
+
         ws  = pvsioWebClient.getWebSocket();
     }
-    
+
+    GraphBuilder.prototype.getName = function () {
+        return "Graph Builder";
+    };
+
     GraphBuilder.prototype.reInitialise = function () {
         this.unload();
         init();
@@ -142,7 +146,7 @@ define(function (require, exports, module) {
         PVSioWebClient.getInstance().removeCollapsiblePanel(canvas);
         return Promise.resolve(true);
     };
-    
+
     GraphBuilder.prototype.getDependencies = function () {
         return [];
     };

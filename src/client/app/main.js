@@ -82,19 +82,19 @@ define(function (require, exports, module) {
                 .on("pluginToggled", function (event) {
                     var plugin;
                     switch (event.target.getAttribute("name")) {
-                    case "Emulink":
+                    case "EmuCharts Editor":
                         plugin = Emulink.getInstance();
                         break;
-                    case "GraphBuilder":
+                    case "Graph Builder":
                         plugin = GraphBuilder.getInstance();
                         break;
-                    case "SafetyTest":
+                    case "Safety Test":
                         plugin = SafetyTest.getInstance();
                         break;
-                    case "ModelEditor":
+                    case "Model Editor":
                         plugin = ModelEditor.getInstance();
                         break;
-                    case "PrototypeBuilder":
+                    case "Prototype Builder":
                         plugin = PrototypeBuilder.getInstance();
                         break;
                     }

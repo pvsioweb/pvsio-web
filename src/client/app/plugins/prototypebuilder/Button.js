@@ -8,9 +8,11 @@
 define(function (require, exports, module) {
     "use strict";
     var Widget = require("./Widget"),
+        d3 = require("d3/d3"),
         property = require("util/property"),
         Timer	= require("util/Timer"),
-        Recorder    = require("util/ActionRecorder");
+        Recorder    = require("util/ActionRecorder"),
+        WSManager = require("websockets/pvs/WSManager");
     //define timer for sensing hold down actions on buttons
     var btnTimer = new Timer(250), timerTickFunction = null;
     var buttonActions = Promise.resolve();//This is a ptr to a sequence of promises that handle button action messages to the server
@@ -40,6 +42,36 @@ define(function (require, exports, module) {
         this.functionText = property.call(this);
         this.imageMap = property.call(this);
     }
+
+
+    Button.createDemoButton = function (id, coords, opt) {
+        opt = opt || {};
+        opt.functionText = opt.functionText || id;
+        opt.evts = opt.evts || ["click"];
+        Widget.call(this, id, "button");
+
+        var parent = d3.select("map#prototypeMap");
+        if (parent.empty()) {
+            parent = d3.select("body").append("map").attr("id", "prototypeMap")
+                .attr("name", "prototypeMap");
+        }
+
+        this.top = coords.top || 0;
+        this.left = coords.left || 0;
+        this.width = coords.width || 40;
+        this.height = coords.height || 40;
+        this.functionText(opt.functionText);
+        this.evts = opt.evts;
+
+        this.area = parent.append("area")
+                        .attr("coords", this.left + "," + this.top + ","
+                              + (this.left + this.width) + "," + (this.top + this.height));
+//                        .attr("id", id).attr("class", id);
+
+        this.createImageMap({area: this.area, callback: opt.callback});
+        return this;
+    };
+
 
     Button.prototype = Object.create(Widget.prototype);
     Button.prototype.constructor = Button;
@@ -91,7 +123,11 @@ define(function (require, exports, module) {
      * @returns {d3.selection} The image map area created
        @memberof Button
      */
-    Button.prototype.createImageMap = function (ws, callback) {
+    Button.prototype.createImageMap = function (opt) {
+        opt = opt || {};
+
+        var ws = WSManager.getWebSocket();
+        var callback = opt.callback || function () {};
         function getGUIActionPromise(action, cb) {
             return new Promise(function (resolve, reject) {
                 ws.sendGuiAction(action, function (err, res) {
@@ -123,7 +159,7 @@ define(function (require, exports, module) {
             return buttonActions;
         }
 
-        var area = Button.prototype.parentClass.createImageMap.apply(this, arguments),
+        var area = opt.area || Button.prototype.parentClass.createImageMap.apply(this, arguments),
             widget = this,
             f,
             evts;

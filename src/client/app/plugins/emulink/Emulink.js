@@ -3,7 +3,7 @@
  * @author Paolo Masci
  * @date 25/05/14 6:39:02 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 /*global define, Promise, d3*/
 define(function (require, exports, module) {
     "use strict";
@@ -286,6 +286,10 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_initialTransitionRemoved", initialTransitionRemoved_handler);
         emuchartsManager.addListener("emuCharts_stateRenamed", stateRenamed_handler);
     }
+
+    Emulink.prototype.getName = function () {
+        return "EmuCharts Editor";
+    };
 
     Emulink.prototype.createHtmlElements = function () {
         var _this = this;

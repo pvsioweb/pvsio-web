@@ -512,10 +512,11 @@ define(function (require, exports, module) {
     ProjectManager.prototype.readFileDialog = function (opt) {
         return new Promise(function (resolve, reject) {
             opt = opt || {};
+            opt.path = opt.path || "~";
             opt.filter = opt.filter ||
                 ((opt.encoding === "base64") ? MIME.getInstance().imageFilter : MIME.getInstance().modelFilter);
             new RemoteFileBrowser(opt.filter)
-                .open("~", { title: opt.title || "Select files (use shift key to select multiple files)" })
+                .open(opt.path, { title: opt.title || "Select files (use shift key to select multiple files)" })
                 .then(function (files) {
                     var paths = files.map(function (f) {
                         return f.path;

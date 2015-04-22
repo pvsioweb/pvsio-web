@@ -37,6 +37,10 @@ define(function (require, exports, module) {
         countdownTimer.reset().start();
     }
 
+    ProjectAutoSaver.prototype.getName = function () {
+        return "Project Auto Saver";
+    };
+
     ProjectAutoSaver.prototype.initialise = function () {
         if (saveInterval > 0) {
             ProjectManager.getInstance().addListener("ProjectSaved", function (e) {

@@ -9,7 +9,7 @@ define(function (require, exports, module) {
     "use strict";
     var ModelEditor = require("plugins/modelEditor/ModelEditor"),
         Emulink = require("plugins/emulink/Emulink"),
-        SafetyTest = require("plugins/safetyTest/SafetyTest"),
+//        SafetyTest = require("plugins/safetyTest/SafetyTest"),
         GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
         Logger	= require("util/Logger"),
@@ -171,15 +171,24 @@ define(function (require, exports, module) {
 
     module.exports = {
         init: function (data) {
-            data = data || {plugins: [PrototypeBuilder.getInstance(), ModelEditor.getInstance(),
-                                      Emulink.getInstance(), GraphBuilder.getInstance(), SafetyTest.getInstance()].map(function (p) {
-                return {label: p.constructor.name, plugin: p};
-            })};
+            var plugins = [
+                    PrototypeBuilder.getInstance(),
+                    ModelEditor.getInstance(),
+                    Emulink.getInstance(),
+                    GraphBuilder.getInstance()
+            ];
+            data = data || {
+                plugins: plugins.map(function (p) {
+                    var label = p.getName ? p.getName() : p.constructor.name;
+                    return {label: label, id: label.replace(/\s/g, ""), plugin: p};
+                })
+            };
+
             PluginManager.getInstance().init();
             PluginManager.getInstance().addListener("PluginEnabled", function (event) {
-                d3.select("#plugin_" + event.plugin.constructor.name).property("checked", true);
+                d3.select("input[name='" + event.plugin.getName() + "']").property("checked", true);
             }).addListener("PluginDisabled", function (event) {
-                d3.select("#plugin_" + event.plugin.constructor.name).property("checked", false);
+                d3.select("input[name='" + event.plugin.getName() + "']").property("checked", false);
             });
             if (this._view) { this.unload(); }
             this._view = createHtmlElements(data);

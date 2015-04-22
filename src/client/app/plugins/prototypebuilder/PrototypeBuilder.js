@@ -38,6 +38,10 @@ define(function (require, exports, module) {
         _prototypeBuilder = this;
     }
 
+    PrototypeBuilder.prototype.getName = function () {
+        return "Prototype Builder";
+    };
+
     /**
      * @function renderImage
      * @description Updates the project image with in the prototype builder

@@ -671,7 +671,8 @@ function run() {
             },
             "readDirectory": function (token, socket, socketid) {
                 initProcessMap(socketid);
-                var absPath = token.path === "~" ? process.env.HOME : isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
+                var absPath = token.path.indexOf("~") === 0 ? path.join(process.env.HOME, token.path.substr(1))
+                    : isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
                 readDirectory(absPath)
                     .then(function (files) {
                         processCallback({

@@ -32,6 +32,7 @@ define(function (require, exports, module) {
         var el_remote = (_encoding === "base64") ? "#prototypeImage" : "#pvsSpec";
         if (PVSioWebClient.serverOnLocalhost()) {
             require("project/ProjectManager").getInstance().readFileDialog({
+                path: "~",
                 encoding: _encoding,
                 title: _title
             }).then(function (res) {

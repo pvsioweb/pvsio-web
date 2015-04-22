@@ -169,6 +169,9 @@ define(function (require, exports, module) {
         };
     }
 
+    ModelEditor.prototype.getName = function () {
+        return "Model Editor";
+    };
     /////These are the api methods that the prototype builder plugin exposes
     ModelEditor.prototype.getDependencies = function () { return []; };
 
