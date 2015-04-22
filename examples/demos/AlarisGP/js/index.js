@@ -1,15 +1,15 @@
 /**
- * 
+ *
  * @author Paolo Masci, Patrick Oladimeji
  * @date 27/03/15 20:30:33 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, document, PVSioWebClient */
+/*global*/
 require.config({
     baseUrl: "../../client/app",
     paths: {
         d3: "../lib/d3",
-		"pvsioweb": "plugins/prototypebuilder",
+        "pvsioweb": "plugins/prototypebuilder",
         "imagemapper": "../lib/imagemapper",
         "text": "../lib/text",
         "lib": "../lib",
@@ -18,12 +18,12 @@ require.config({
     }
 });
 
-require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "widgets/TripleDisplay", "widgets/LED", "widgets/CursoredDisplay", "plugins/graphbuilder/GraphBuilder", "stateParser", "PVSioWebClient"], function (Button, SingleDisplay, DoubleDisplay, TripleDisplay, LED, CursoredDisplay, GraphBuilder, stateParser, PVSioWebClient) {
+require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "widgets/TripleDisplay", "widgets/LED", "widgets/CursoredDisplay", "plugins/graphbuilder/GraphBuilder", "stateParser", "PVSioWebClient"], function (Button, SingleDisplay, DoubleDisplay, TripleDisplay, LED, CursoredDisplay, GraphBuilder, stateParser, PVSioWebClient) {
     "use strict";
-    
-    var d3 = require("d3/d3");
 
-	var client = PVSioWebClient.getInstance();
+    var d3 = require("d3/d3");
+    var serverLogs = [], maxLogSize = 40;
+    var client = PVSioWebClient.getInstance();
     //create a collapsible panel using the pvsiowebclient instance
     var imageHolder = client.createCollapsiblePanel({
         parent: "#content",
@@ -33,22 +33,23 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
     }).style("position", "relative");
     //insert the html into the panel (note that this could have used templates or whatever)
     imageHolder.html('<img src="image.jpg" usemap="#prototypeMap"/>').attr("id", "prototype");
-    
+
     var content = imageHolder.append("div").style("position", "absolute").style("top", "0px").style("left", "400px")
-					.style("height", "40px").style("width", "800px").attr("class", "dbgbuttons");
+                    .style("height", "40px").style("width", "800px").attr("class", "dbgbuttons");
     content.append("button").text("Pause").attr("id", "btn_pause");
     content.append("button").text("Resume").attr("id", "btn_resume");
-    
+
     content = imageHolder.append("div").style("position", "absolute").style("top", "40px").style("left", "400px")
-					.style("height", "460px").style("width", "800px").attr("class", "dbg");
-        
+                    .style("height", "460px").style("width", "800px").attr("class", "dbg");
+
+
     //append a div that will contain the canvas elements
 
-    var w = 120, h = 20;
+//    var w = 120, h = 20;
 
     //topline
     var topline = new SingleDisplay("topline", { top: 112, left: 92, height: 10, width: 120 }, { parent: "prototype" });
-    
+
     //middisp
     var middisp_drate = new TripleDisplay("middisp_drate", { top: 126, left: 94, height: 30, width: 118 },
                                           { parent: "prototype",
@@ -89,7 +90,7 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
     var fndisp3 = new SingleDisplay("fndisp3", { top: 222, left: 172, height: 8, width: 38 },
                                     { parent: "prototype", font: "Courier New"});
 
-    //LEDs    
+    //LEDs
     var onlight = new LED("onlight", { top: 355, left: 198, height: 10, width: 10 },
                           { parent: "prototype" });
     var pauselight = new LED("pauselight", { top: 322, left: 122, height: 10, width: 10 },
@@ -97,32 +98,24 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
     var runlight = new LED("runlight", { top: 295, left: 122, height: 10, width: 10 },
                           { parent: "prototype"});
 
-	//register the graph builder plugin -- so we can visualise the interaction
-    var gb = GraphBuilder.getInstance();
+    //register the graph builder plugin -- so we can visualise the interaction
+//    var gb = GraphBuilder.getInstance();
 //    var gb = client.registerPlugin(GraphBuilder);
-    
+
     /**
         parse the raw state string from pvsio process into key value pairs
     */
     function parseState(str) {
         var res = stateParser.parse(str);
-//        
-//        var args = str.split(","), res = {};
-//        args.forEach(function (d) {
-//            var t = d.split(":=");
-//			if (t[1]) { //FIXME!
-//				res[t[0].replace("(#", "").trim()] = t[1].replace("#)", "").trim();
-//			}
-//        });
         return res;
     }
 
-	var render_LEDs = function (res) {
+    var render_LEDs = function (res) {
         if (res.onlight === "TRUE") { onlight.on(); } else { onlight.off(); }
         if (res.pauselight === "TRUE") { pauselight.on(); } else { pauselight.off(); }
         if (res.runlight === "TRUE") { runlight.on(); } else { runlight.off(); }
-	};
-    
+    };
+
     function render_middisp_dbags(res) {
         var menu = [
             res.bagsval0 + " ml",
@@ -142,10 +135,9 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
             middisp_dbags.hide();
         }
     }
-    
+
     var tick;
-    var start_tick, stop_tick;
-    
+
     function render_fndisp(res) {
         function fn2string(fn) {
             if (fn.toUpperCase() === "FVOL") {
@@ -234,8 +226,8 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
             middisp_dtime.hide();
         }
     }
-    
-    
+
+
     function render_topline(res) {
         function topline2string(msg) {
             msg = msg.toUpperCase();
@@ -252,9 +244,25 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
             topline.hide();
         }
     }
-    
-    
-    
+
+    function start_tick() {
+        if (!tick) {
+            tick = setInterval(function () {
+//                var dbg = ">>> alaris_tick <<<";
+//                d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
+                client.getWebSocket()
+                        .sendGuiAction("alaris_tick(" + client.getWebSocket().lastState() + ");", onMessageReceived);
+            }, 2000);
+        }
+    }
+
+    function stop_tick() {
+        if (tick) {
+            clearInterval(tick);
+            tick = null;
+        }
+    }
+
     /**
         function to handle when an output has been received from the server after sending a guiAction
         if the first parameter is truthy, then an error occured in the process of evaluating the gui action sent
@@ -264,14 +272,34 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
             var state = stateParser.parse(str);
             return JSON.stringify(state, null, " ");
         }
+
         if (!err) {
-            client.getWebSocket().lastState(event.data);
+//            client.getWebSocket().lastState(event.data);
             var dbg = prettyprintState(event.data.toString());
-            d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
+            var date = new Date();
+            serverLogs.push({data: dbg, date: date, id: event.id, type: "frompvs"});
+
+            if (serverLogs.length > maxLogSize) {
+                serverLogs = serverLogs.slice(-maxLogSize);
+            }
+            var logLines = d3.select(".dbg").selectAll("textarea").data(serverLogs, function (d, i) {
+                return d.id;
+            });
+            logLines.enter()
+                .insert("textarea", "textarea").html(function (d) {
+                    return d.date.toString() + "\n" + d.data;
+                }).style("width", "100%")
+                .attr("readonly", true)
+                .attr("rows", function (d) {
+                    return d.data.split("\n").length + 1;
+                }).attr("class", function (d) {
+                    return d.type;
+                });
+            logLines.exit().remove();
             var res = event.data.toString();
             if (res.indexOf("(#") === 0) {
                 res = parseState(event.data.toString());
-				if (res) {
+                if (res) {
                     render_LEDs(res);
                     render_topline(res);
                     render_fndisp(res);
@@ -286,141 +314,42 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
                 }
             }
         } else { console.log(err); }
-	}
-    
-    start_tick = function () {
-        if (!tick) {
-            tick = setInterval(function () {
-	            var dbg = ">>> alaris_tick <<<";
-				d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
-                client.getWebSocket()
-                        .sendGuiAction("alaris_tick(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-            }, 2000);
-        }
-    };
-    
-    stop_tick = function () {
-        if (tick) {
-            clearInterval(tick);
-            tick = null;
-        }
-    };
-	
-    d3.select(".btn_on").on("click", function () {
-        stop_tick();
-        var dbg = ">>> on(..) <<<";
-		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
-		client.getWebSocket()
-            .sendGuiAction("click_btn_on(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-    });
-    
-    // TODO: need to understand how to use Buttons
-//    var btn_on = new Button("btn_on");
-//    btn_on.recallRate(250);
-//    btn_on.evts("click");
-//    btn_on.functionText("btn_on");
-//    var region_btn_on = d3.select(".btn_on");
-//    btn_on.element(region_btn_on);
-//    btn_on.createImageMap(client.getWebSocket(), onMessageReceived);
+    }
 
-	d3.select('.btn_fup').on("mousedown", function () {
-        stop_tick();
-        var dbg = ">>> release_fup(press_fup(..)) <<<";
-		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
-		client.getWebSocket()
-            .sendGuiAction("release_btn_fup(press_btn_fup(" +
-                           client.getWebSocket().lastState() + "));", onMessageReceived);
-	});
-	d3.select(".btn_sup").on("mousedown", function () {
-        stop_tick();
-        var dbg = ">>> release_sup(press_sup(..)) <<<";
-		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
-		client.getWebSocket()
-            .sendGuiAction("release_btn_sup(press_btn_sup(" +
-                           client.getWebSocket().lastState() + "));", onMessageReceived);
-	});
-	d3.select('.btn_fdown').on("mousedown", function () {
-        stop_tick();
-        var dbg = ">>> release_fdown(press_fdown(..)) <<<";
-		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
-		client.getWebSocket()
-            .sendGuiAction("release_btn_fdown(press_btn_fdown(" +
-                           client.getWebSocket().lastState() + "));", onMessageReceived);
-	});
-	d3.select(".btn_sdown").on("mousedown", function () {
-        stop_tick();
-        var dbg = ">>> release_sdown(press_sdown(..)) <<<";
-		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
-		client.getWebSocket()
-            .sendGuiAction("release_btn_sdown(press_btn_sdown(" +
-                           client.getWebSocket().lastState() + "));", onMessageReceived);
-	});
-    d3.select(".btn_run").on("click", function () {
-        stop_tick();
-        var dbg = ">>> run(..) <<<";
-		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
-		client.getWebSocket()
-            .sendGuiAction("click_btn_run(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-    });
-    d3.select(".btn_pause").on("click", function () {
-        stop_tick();
-        var dbg = ">>> pause(..) <<<";
-		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
-		client.getWebSocket()
-            .sendGuiAction("click_btn_pause(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-    });
-    d3.select(".btn_query").on("click", function () {
-        stop_tick();
-        var dbg = ">>> query(..) <<<";
-		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
-		client.getWebSocket()
-            .sendGuiAction("click_btn_query(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-    });
-    d3.select(".btn_key1").on("click", function () {
-        stop_tick();
-        var dbg = ">>> key1(..) <<<";
-		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
-		client.getWebSocket()
-            .sendGuiAction("click_btn_key1(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-    });
-    d3.select(".btn_key2").on("click", function () {
-        stop_tick();
-        var dbg = ">>> key2(..) <<<";
-		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
-		client.getWebSocket()
-            .sendGuiAction("click_btn_key2(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-    });
-    d3.select(".btn_key3").on("click", function () {
-        stop_tick();
-        var dbg = ">>> key3(..) <<<";
-		d3.select(".dbg").node().innerHTML = new Date() + "<br>" + dbg.split("\n").join("<br>") + "<br><br>" + d3.select(".dbg").node().innerHTML;
-		client.getWebSocket()
-            .sendGuiAction("click_btn_key3(" + client.getWebSocket().lastState() + ");", onMessageReceived);
-    });
-    d3.select("#btn_pause").on("click", function () {
-        stop_tick();
-    });
-    d3.select("#btn_resume").on("click", function () {
-        start_tick();
-    });
-    
-	    
+    // region button definitions
+    new Button("btn_on", {left: 149, top: 347}, {callback: onMessageReceived});
+
+    new Button("btn_fup", {left: 91, top: 265}, {callback: onMessageReceived, evts: ['press/release']});
+    new Button("btn_fdown", {left: 186, top: 265}, {callback: onMessageReceived, evts: ['press/release']});
+    new Button("btn_sup", {left: 121, top: 265}, {callback: onMessageReceived, evts: ['press/release']});
+    new Button("btn_sdown", {left: 158, top: 265}, {callback: onMessageReceived, evts: ['press/release']});
+
+    new Button("btn_key1", {left: 95, top: 234}, {callback: onMessageReceived});
+    new Button("btn_key2", {left: 136, top: 234}, {callback: onMessageReceived});
+    new Button("btn_key3", {left: 172, top: 234}, {callback: onMessageReceived});
+
+    new Button("btn_run", {left: 89, top: 299}, {callback: onMessageReceived});
+    new Button("btn_pause", {left: 89, top: 324}, {callback: onMessageReceived});
+    new Button("btn_query", {left: 136, top: 324}, {callback: onMessageReceived});
+
+    //endregion
+
     //register event listener for websocket connection from the client
-	client.addListener('WebSocketConnectionOpened', function (e) {
-		console.log("web socket connected");
-		//start pvs process
-		client.getWebSocket().startPVSProcess({name: "main.pvs", demoName: "AlarisGP/pvs"}, function (err, event) {
-			d3.select(".demo-splash").style("display", "none");
+    client.addListener('WebSocketConnectionOpened', function (e) {
+        console.log("web socket connected");
+        //start pvs process
+        client.getWebSocket().startPVSProcess({name: "main.pvs", demoName: "AlarisGP/pvs"}, function (err, event) {
+            d3.select(".demo-splash").style("display", "none");
             d3.select(".content").style("display", "block");
             start_tick();
-		});
-	}).addListener("WebSocketConnectionClosed", function (e) {
-		console.log("web socket closed");
-	}).addListener("processExited", function (e) {
-		var msg = "Warning!!!\r\nServer process exited. See console for details.";
-		console.log(msg);
-	});
-	
-	client.connectToServer();
-	
+        });
+    }).addListener("WebSocketConnectionClosed", function (e) {
+        console.log("web socket closed");
+    }).addListener("processExited", function (e) {
+        var msg = "Warning!!!\r\nServer process exited. See console for details.";
+        console.log(msg);
+    });
+
+    client.connectToServer();
+
 });
