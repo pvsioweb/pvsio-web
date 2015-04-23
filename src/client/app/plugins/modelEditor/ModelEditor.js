@@ -188,8 +188,7 @@ define(function (require, exports, module) {
                     var importFolder = getImportFolderName();
                     files.forEach(function (file) {
                         // FIXME: directories are discarded when using absolute paths. Can we do better?
-                        if (file.path.indexOf("/") === 0) { file.path = file.name; }
-                        file.path = importFolder + "/" + file.path;
+                        file.path = importFolder + "/" + file.name;
                         promises.push(projectManager.writeFileDialog(file.path, file.content, { encoding: file.encoding }));
                     });
                     Promise.all(promises).then(function (res) {
@@ -292,7 +291,12 @@ define(function (require, exports, module) {
             var pvsFile = projectManager.getSelectedFile(), project = projectManager.project();
             if (pvsFile) {
                 var ws = WSManager.getWebSocket();
-                ws.send({type: "setMainFile", projectName: project.name(), name: pvsFile.path}, function (err) {
+                ws.send({
+                    type: "setMainFile",
+                    projectName: project.name(),
+                    name: pvsFile.name,
+                    path: pvsFile.path
+                }, function (err) {
                     //if there was no error update the main file else alert user
                     if (!err) {
                         // set main file

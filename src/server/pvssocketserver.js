@@ -389,13 +389,24 @@ function run() {
             },
             "setMainFile": function (token, socket, socketid) {
                 initProcessMap(socketid);
-                changeProjectSetting(token.projectName, "mainPVSFile", token.name)
-                    .then(function (res) {
-                        res.id = token.id;
-                        res.socketId = socketid;
-                        res.time = token.time;
-                        processCallback(res, socket);
-                    });
+                var mainFile = token.path.split("/").slice(1).join("/");
+                if (mainFile !== "") {
+                    changeProjectSetting(token.projectName, "mainPVSFile", mainFile)
+                        .then(function (res) {
+                            res.id = token.id;
+                            res.socketId = socketid;
+                            res.time = token.time;
+                            processCallback(res, socket);
+                        });
+                } else {
+                    res.type = res.type + "_error";
+                    res.err = {
+                        message: "Invalid token " + JSON.stringify(token),
+                        code: "ENOENT",
+                        path: token.path
+                    };
+                    processCallback(res, socket);
+                }
             },
             "changeProjectSetting": function (token, socket, socketid) {
                 initProcessMap(socketid);
