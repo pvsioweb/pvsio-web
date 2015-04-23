@@ -947,3 +947,30 @@ input.input_text{
     max-width: 100px;
     width: 100px;
 }
+
+#btnBuilderView.active a, #btnSimulatorView.active a{
+    color: white;
+    background-color: rgb(8, 88, 154);
+    border: none;
+}
+
+#btnBuilderView.active span, #btnSimulatorView.active span{
+    position: absolute;
+    top: 30px;
+    left: 46px;
+    color: white;
+    display: inline;
+}
+
+#btnSimulatorView.active span {
+    left: 54px;
+}
+#btnBuilderView span, #btnSimulatorView span{
+    display: none;
+}
+
+#btnBuilderView a, #btnSimulatorView a{
+    color: #898989;
+}
+
+
