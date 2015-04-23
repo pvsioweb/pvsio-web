@@ -811,7 +811,7 @@ define(function (require, exports, module) {
                         }
                     }
                 });
-                if (fileVersion) {
+                if (fileVersion && parseFloat(fileVersion) >= 2) {
                     // set the main pvs file descriptor
                     if (mainFileName) {
                         var main = _this.getDescriptor(name + "/" + mainFileName);
