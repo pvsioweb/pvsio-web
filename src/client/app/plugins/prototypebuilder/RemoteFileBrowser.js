@@ -143,7 +143,7 @@ define(function (require, exports, module) {
         var self = this;
         getRemoteDirectory(path)
             .then(function (files) {
-                var data = {name: path, path: path, children: files, isDirectory: true};
+                var data = {name: path, path: path, children: files || [], isDirectory: true};
                 self._treeList = new TreeList(data, "#file-browser", true);
                 self._treeList.addListener("SelectedItemChanged", function (event) {
                     var data = event.data,
@@ -164,7 +164,10 @@ define(function (require, exports, module) {
                     if (data.isDirectory && !data.children && !data._children) {
                         getRemoteDirectory(data.path)
                             .then(function (files) {
-                                data.children = files;
+                                data.children = files || [];
+                                if (data.children.length === 0) {
+                                    data.empty = true;
+                                }
                                 self._treeList.render(data);
                             }).catch(function (err) {
                                 console.log(err);

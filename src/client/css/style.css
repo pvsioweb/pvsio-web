@@ -914,6 +914,9 @@ fadeOut
     width: 100%;
 }
 
+input.input_text{
+    color: black;
+}
 #file-browser ul {
     width: 100% !important;
 }
