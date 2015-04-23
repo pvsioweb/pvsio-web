@@ -270,6 +270,7 @@ function run() {
         if (folderPath.indexOf("pvsbin") > -1) { return; }
 
         var watch = function (folder) {
+            if (folder.indexOf("pvsbin") > -1) { return; }
 //            logger.debug("watching changes to .. " + folder);
             return fs.watch(folder, {persistent: false}, function (event, name) {
                 var extension = path.extname(name).toLowerCase();

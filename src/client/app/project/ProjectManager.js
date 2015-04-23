@@ -138,7 +138,7 @@ define(function (require, exports, module) {
                 }
                 // select the folder
                 pvsFilesListView.selectItem(event.path);
-            } else {
+            } else if (!event.isDirectory) {
                 if (!_projectManager.fileDescriptorExists(event.path)) {
                     f = new Descriptor(event.path);
                     if (_projectManager.isImage(event.path)) {
@@ -1144,6 +1144,7 @@ define(function (require, exports, module) {
                                     code: "CANCELED_BY_USER",
                                     message: "Operation cancelled by the user"
                                 });
+                                view.remove();
                             });
                     } else {
                         formView.remove();

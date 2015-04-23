@@ -114,6 +114,13 @@ define(function (require, exports, module) {
                 d.children = d._children;
                 d._children = null;
             }
+            if (d.empty) {
+                d._empty = d.empty;
+                d.empty = null;
+            } else if (d._empty) {
+                d.empty = d._empty;
+                d._empty = null;
+            }
         }
 
         var tree = d3.layout.treelist().childIndent(childIndent).nodeHeight(listHeight);
@@ -132,7 +139,7 @@ define(function (require, exports, module) {
 
         var nodeEls = ul.selectAll("li.node").data(nodes, function (d) {
             d.id = d.id || ++globalId;
-            return d.id;
+            return d.path || d.id;
         });
 
         var enteredNodes = nodeEls.enter()
@@ -165,13 +172,15 @@ define(function (require, exports, module) {
         var listWrap = enteredNodes.append("div").classed("line", true);
         var updatedNodes = nodeEls, exitedNodes = nodeEls.exit();
         var chevron = listWrap.append("span").attr("class", function (d) {
-            var icon = d.children ? " glyphicon-chevron-down"
-                : d._children ? "glyphicon-chevron-right" : "";
+            var icon = d.children || d.empty ? " glyphicon-chevron-down"
+                : d._children ? "glyphicon-chevron-right"
+                : d.isDirectory ? " glyphicon-chevron-right"
+                : "";
             return "chevron glyphicon " + icon;
         }).style("height", function (d) {
-            return (d.isDirectory && (d.children || d._children)) ? "90%" : "0%";
+            return d.isDirectory ? "90%" : "0%";
         }).style("padding", function (d) {
-            return (d.isDirectory && (d.children || d._children)) ? "6px 0px 6px 0px" : "0px";
+            return d.isDirectory ? "6px 0px 6px 0px" : "0px";
         });
         chevron.on("click", function (d) {
             toggleChildren(d);
@@ -204,13 +213,15 @@ define(function (require, exports, module) {
 
         //update chevron direction and style
         nodeEls.select("span.chevron").attr("class", function (d) {
-            var icon = d.children ? " glyphicon-chevron-down"
-                : d._children ? "glyphicon-chevron-right" : "";
+            var icon = d.children || d.empty ? " glyphicon-chevron-down"
+                : d._children ? "glyphicon-chevron-right"
+                : d.isDirectory ? " glyphicon-chevron-right"
+                : "";
             return "chevron glyphicon " + icon;
         }).style("height", function (d) {
-            return (d.isDirectory && (d.children || d._children)) ? "90%" : "0%";
+            return d.isDirectory ? "90%" : "0%";
         }).style("padding", function (d) {
-            return (d.isDirectory && (d.children || d._children)) ? "6px 0px 6px 0px" : "0px";
+            return d.isDirectory ? "6px 0px 6px 0px" : "0px";
         });
         //update list class
         nodeEls.attr("class", function (d, i) {

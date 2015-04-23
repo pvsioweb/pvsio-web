@@ -8,15 +8,15 @@
 
 define(function (require, exports, module) {
     "use strict";
-	//var main = require("main");
-	var Project_UnitTest  = require("test/Project_UnitTest");
-	var Descriptor_UnitTest = require("test/Descriptor_UnitTest");
-	var UI_UnitTest = require("test/UI_UnitTest");
-    
+    //var main = require("main");
+    var Project_UnitTest  = require("test/Project_UnitTest");
+    var Descriptor_UnitTest = require("test/Descriptor_UnitTest");
+    var UI_UnitTest = require("test/UI_UnitTest");
+
     var ProjectManager_UnitTest = require("test/ProjectManager_UnitTest").getInstance();
     ProjectManager_UnitTest.run();
-    UI_UnitTest.run();
     Project_UnitTest.run();
     Descriptor_UnitTest.run();
-	
+    UI_UnitTest.run();
+    
 });
