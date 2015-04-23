@@ -391,6 +391,7 @@ function run() {
                 initProcessMap(socketid);
                 changeProjectSetting(token.projectName, "mainPVSFile", token.name)
                     .then(function (res) {
+                        res.type = token.type;
                         res.id = token.id;
                         res.socketId = socketid;
                         res.time = token.time;

@@ -491,7 +491,7 @@ define(function (require, exports, module) {
                 }
             },
             parent: "#body",
-            owner: "PrototypeBuilder"
+            owner: this.getName()
         });
         pbContainer.html(template);
         layoutjs({el: "#body"});

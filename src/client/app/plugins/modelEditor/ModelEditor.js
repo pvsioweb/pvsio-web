@@ -317,11 +317,11 @@ define(function (require, exports, module) {
     ModelEditor.prototype.initialise = function () {
         editorContainer = pvsioWebClient.createCollapsiblePanel({
             headerText: "Model Editor",
-            showContent: false,
+            showContent: true,
             onClick: function () {
                 editor.refresh();
             },
-            owner: "ModelEditor"
+            owner: this.getName()
         });
         editorContainer.append("div").html(sourceCodeTemplate);
 

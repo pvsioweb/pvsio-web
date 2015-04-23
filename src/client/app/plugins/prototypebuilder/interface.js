@@ -149,7 +149,8 @@ define(function (require, exports, module) {
         },
         events: {
             "change input[type='checkbox']": "checkboxClicked",
-            "click .plugin-box": "pluginClicked"
+            "click .plugin-box": "pluginClicked",
+            "click .plugin-box label": "pluginLabelClicked"
         },
         checkboxClicked: function (event) {
             this.trigger("pluginToggled", event);
@@ -157,6 +158,11 @@ define(function (require, exports, module) {
         pluginClicked: function (event) {
             if (event.target.tagName.toLowerCase() === "li") {
                 d3.select(event.target).select("input[type='checkbox']").node().click();
+            }
+        },
+        pluginLabelClicked: function (event) {
+            if (event.target.tagName.toLowerCase() === "label") {
+                d3.select(event.target.parentNode).select("input[type='checkbox']").node().click();
             }
         },
         scriptClicked: function (event) {

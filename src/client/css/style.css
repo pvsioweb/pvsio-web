@@ -909,7 +909,7 @@ fadeOut
 }
 
 #file-browser {
-    height: 500px;
+    max-height: 300px;
     overflow-y: auto;
     width: 100%;
 }

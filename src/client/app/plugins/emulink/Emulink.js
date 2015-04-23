@@ -297,7 +297,7 @@ define(function (require, exports, module) {
         canvas = pvsioWebClient.createCollapsiblePanel({
             headerText: "EmuCharts Editor",
             showContent: true,
-            owner: "EmuCharts Editor"
+            owner: _this.getName()
         });
         canvas = canvas.html(content);
         var infoBox = document.getElementById("EmuchartsEditorMode");

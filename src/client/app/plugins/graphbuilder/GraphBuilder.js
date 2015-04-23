@@ -23,8 +23,14 @@ define(function (require, exports, module) {
         onGraphUpdate,
         canvas;
 
-    function init() {
-        canvas = PVSioWebClient.getInstance().createCollapsiblePanel({headerText: "State Transitions Logger", owner: "GraphBuilder"});
+    function GraphBuilder() {
+        var pvsioWebClient = PVSioWebClient.getInstance();
+
+        ws  = pvsioWebClient.getWebSocket();
+    }
+
+    GraphBuilder.prototype._init = function () {
+        canvas = PVSioWebClient.getInstance().createCollapsiblePanel({headerText: "State Transitions Logger", owner: this.getName()});
         canvas.classed("graph-container", true);
         var svg = canvas.append("svg").attr("width", w).attr("height", h).append("g")
             .call(d3.behavior.zoom().scaleExtent([0.4, 10]).on("zoom", function () {
@@ -105,7 +111,7 @@ define(function (require, exports, module) {
         };
 
         ws.addListener("GraphUpdate", onGraphUpdate);
-    }
+    };
 
     function clear() {
         canvas.html("");
@@ -114,11 +120,6 @@ define(function (require, exports, module) {
         edgesHash = {};
     }
 
-    function GraphBuilder() {
-        var pvsioWebClient = PVSioWebClient.getInstance();
-
-        ws  = pvsioWebClient.getWebSocket();
-    }
 
     GraphBuilder.prototype.getName = function () {
         return "Graph Builder";
@@ -126,12 +127,12 @@ define(function (require, exports, module) {
 
     GraphBuilder.prototype.reInitialise = function () {
         this.unload();
-        init();
+        this._init();
     };
 
     GraphBuilder.prototype.initialise = function () {
         var gb = this;
-        init();
+        this._init();
         ProjectManager.getInstance()
             .addListener("ProjectChanged", function (event) {
                 if (PluginManager.isLoaded(gb)) {
