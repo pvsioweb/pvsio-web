@@ -6,7 +6,7 @@
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
-/*global define, describe, expect, it, Promise, d3, beforeAll, afterAll, xdescribe*/
+/*global define, describe, expect, it, Promise, d3, beforeAll, afterAll*///, xdescribe*/
 define(function (require, exports, module) {
     "use strict";
 
@@ -207,7 +207,7 @@ define(function (require, exports, module) {
                 txt = "backupProject()";
                 summary += "\n\n Test " + (++cTest) + ": '" + txt + "'";
                 pm.openProject("AlarisPC_PumpModules").then(function (res) {
-                    pm.backupProject("unit_test/autosave/AlarisPC_PumpModules_backup_test").then(function (res) {
+                    pm.backupProject("unit_test/autosave/test/AlarisPumps/AlarisPC_PumpModules_backup_test").then(function (res) {
                         addSuccess(res + " backup copy created successfully\n" + res);
                         resolve(res);
                     }).catch(function (err) {
@@ -1234,7 +1234,7 @@ define(function (require, exports, module) {
                     });
                 });
             });
-            xdescribe("Testing backupProject...", function () {
+            describe("Testing backupProject...", function () {
                 backupProjectAPI_test.forEach(function (test) {
                     it(test.description, function (done) {
                         test.run().then(function (res) {

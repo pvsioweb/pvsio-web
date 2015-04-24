@@ -26,11 +26,11 @@ function mkdirRecursive(dirPath, cb) {
     "use strict";
     cb = cb || noop;
     fs.mkdir(dirPath, function (error) {
-        if (error && error.errno === 34) {
+        if (error && error.code === "ENOENT") {
             // the callback will be invoked only by the first instance of mkdirRecursive
             var parentDirectory = dirPath.substr(0, dirPath.lastIndexOf("/"));
             mkdirRecursive(parentDirectory, function (err) {
-                if (!err) {
+                if (!err || err.code === "EEXIST") {
                     fs.mkdir(dirPath, cb);
                 } else {
                     cb(err);
