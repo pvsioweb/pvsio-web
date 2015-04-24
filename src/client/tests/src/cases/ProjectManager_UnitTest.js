@@ -5,18 +5,18 @@
  * @date 13/11/14 4:09:12 PM
  *
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true*/
-/*global jasmine, define, describe, beforeEach, afterEach, expect, it, Promise, d3, beforeAll, afterAll*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
+/*global define, describe, expect, it, Promise, d3, beforeAll, afterAll, xdescribe*/
 define(function (require, exports, module) {
     "use strict";
-    
+
     var instance;
     var main;
     var pm;
-    
+
     var success, fail, cTest, fTest;
     var header, summary;
-    var txt, data;
+    var txt;
 
     function ProjectManager_UnitTest() {
         main = require("main");
@@ -29,7 +29,7 @@ define(function (require, exports, module) {
         summary = "\n------ Unit test for ProjectManager --------------------";
         return this;
     }
-    
+
     // utility functions
     function printSummary() {
         summary += "\n\n--------------------------------------------------------";
@@ -49,7 +49,7 @@ define(function (require, exports, module) {
         summary += "[FAIL]";
         if (msg) { summary += "\n" + msg; }
     }
-    
+
     function click(elementId) {
         return new Promise(function (resolve, reject) {
             setTimeout(function () {
@@ -63,7 +63,7 @@ define(function (require, exports, module) {
             }, 500);
         });
     }
-    // ----------------------------------------------------------------------------------------------------    
+    // ----------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------
     // Project tests
     // ----------------------------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ define(function (require, exports, module) {
             });
         }
     });
-    
+
     var saveProjectAPI_test = [];
     saveProjectAPI_test.push({
         description: "Testing basic invocation to saveProject after opening a project...",
@@ -197,8 +197,8 @@ define(function (require, exports, module) {
             });
         }
     });
-    
-    
+
+
     var backupProjectAPI_test = [];
     backupProjectAPI_test.push({
         description: "Testing basic invocation to backupProject...",
@@ -221,12 +221,12 @@ define(function (require, exports, module) {
             });
         }
     });
-    
-    
+
+
     // ----------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------
     // File APIs tests
-    // ----------------------------------------------------------------------------------------------------    
+    // ----------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------
     var writeFile_test = [];
     writeFile_test.push({
@@ -339,7 +339,7 @@ define(function (require, exports, module) {
             });
         }
     });
-    
+
     var writeFileDialog_test = [];
     writeFileDialog_test.push({
         description: "Testing basic writeFileDialog call...",
@@ -495,7 +495,7 @@ define(function (require, exports, module) {
             });
         }
     });
-    
+
     var readFile_test = [];
     readFile_test.push({
         description: "Testing readFile with text file...",
@@ -598,7 +598,7 @@ define(function (require, exports, module) {
             });
         }
     });
-    
+
     var deleteFile_test = [];
     deleteFile_test.push({
         description: "Testing deleteFile after writeFile...",
@@ -690,7 +690,7 @@ define(function (require, exports, module) {
             });
         }
     });
-    
+
     var deleteFileDialog_test = [];
     deleteFileDialog_test.push({
         description: "Testing deleteFileDialog after writeFile...",
@@ -715,7 +715,7 @@ define(function (require, exports, module) {
                         addFail(err);
                         reject(err);
                     });
-                    
+
                     click(".overlay #btnOk");
                 }).catch(function (err) { reject(err); });
             });
@@ -806,7 +806,7 @@ define(function (require, exports, module) {
             });
         }
     });
-    
+
     var mkDir_test = [];
     mkDir_test.push({
         description: "Testing creation of an empty folder...",
@@ -878,7 +878,7 @@ define(function (require, exports, module) {
             });
         }
     });
-    
+
     // ----------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------
     // Open existing project tests
@@ -1050,7 +1050,7 @@ define(function (require, exports, module) {
         description: "openProject(ZimedSyringe)"
     });
 
-	function runAllTests() {
+    function runAllTests() {
         describe("ProjectManager - Unit Test", function () {
             beforeAll(function (done) {
                 d3.select("div.overlay").remove();
@@ -1059,12 +1059,12 @@ define(function (require, exports, module) {
                     done();
                 });
             });
-            
+
             afterAll(function (done) {
                 pm.rmDir("unit_test");
                 done();
             });
-            
+
             describe("Starting up PVSio-web...", function () {
                 it("Initialising main...", function (done) {
                     main.start().then(function (res) {
@@ -1234,7 +1234,7 @@ define(function (require, exports, module) {
                     });
                 });
             });
-            describe("Testing backupProject...", function () {
+            xdescribe("Testing backupProject...", function () {
                 backupProjectAPI_test.forEach(function (test) {
                     it(test.description, function (done) {
                         test.run().then(function (res) {
@@ -1258,11 +1258,11 @@ define(function (require, exports, module) {
             });
         });
     }
-    
+
     ProjectManager_UnitTest.prototype.run = function () {
         return runAllTests();
     };
-    
+
     module.exports = {
         getInstance: function () {
             if (!instance) {
@@ -1271,7 +1271,7 @@ define(function (require, exports, module) {
             return instance;
         },
         run: ProjectManager_UnitTest.run
-	};
+    };
 
 
 });
