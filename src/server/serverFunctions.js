@@ -24,18 +24,20 @@ var noop = function () { "use strict"; };
  */
 function mkdirRecursive(dirPath, cb) {
     "use strict";
-    cb = cb || noop;
+	cb = cb || noop;
     fs.mkdir(dirPath, function (error) {
         if (error && error.code === "ENOENT") {
             // the callback will be invoked only by the first instance of mkdirRecursive
             var parentDirectory = dirPath.substr(0, dirPath.lastIndexOf("/"));
-            mkdirRecursive(parentDirectory, function (err) {
-                if (!err) {
+            mkdirRecursive(parentDirectory, function (error) {
+                // note: multiple instances of this function might be running in parallel
+                // because the caller could have invoked the function using Promise.all(promises)
+                // we therefore need to handle the case EEXIST (two or more instances could
+                // be competing for the creation of the same parent directories)
+                if (!error || error.code === "EEXIST") {
                     fs.mkdir(dirPath, cb);
-                } else if (err.code === "EEXIST") {
-                    cb();
                 } else {
-                    cb(err);
+                    cb(error);
                 }
             });
         } else {
