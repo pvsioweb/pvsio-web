@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+        
+        <link href="../../client/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="../../client/app/plugins/graphbuilder/graph.css" rel="stylesheet" type="text/css"/>
+        <link href="../../client/css/style.css" rel="stylesheet" type="text/css"/>
+        <style>
+            area {
+                cursor:pointer;
+            }
+            div#content {
+                margin-left: auto;
+                margin-right: auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="content" class="content" style="display:none;"></div>
+        <div id="splash" class="demo-splash">
+            <div class="loader">
+                <div class="version">Alaris GP Demo</div>
+                <div class="bar">Loading<div></div><div></div><div></div><div></div></div>
+            </div>
+        </div>
+        <map name="prototypeMap" id="prototypeMap">
+<!--
+	    <area class="topline" shape="rect" coords="94,110,210,138">
+	    <area class="fndisp1" shape="rect" coords="92,217,135,230">
+	    <area class="fndisp2" shape="rect" coords="134,217,177,230">
+	    <area class="fndisp3" shape="rect" coords="177,217,217,230">
+        <area class="middisp_drate" shape="rect" coords="92,142,212,214">
+-->
+<!--	    <area class="middisp" shape="rect" coords="92,142,212,214">-->
+		<area class="btn_fup" shape="rect" coords="91,265,121,294" href="#!">
+		<area class="btn_sup" shape="rect" coords="121,267,151,293" href="#!">
+		<area class="btn_sdown" shape="rect" coords="158,265,187,291" href="#!">
+		<area class="btn_fdown" shape="rect" coords="186,265,217,292" href="#!">
+	    <area class="btn_key1" shape="rect" coords="95,234,136,259" href="#!">
+	    <area class="btn_key2" shape="rect" coords="136,232,172,260" href="#!">
+	    <area class="btn_key3" shape="rect" coords="172,229,218,258" href="#!">
+	    <area class="btn_run" shape="rect" coords="89,299,128,324" href="#!">
+	    <area class="btn_pause" shape="rect" coords="88,324,128,352" href="#!">
+	    <area class="btn_query" shape="rect" coords="136,325,171,351" href="#!">
+	    <area class="btn_on" shape="rect" coords="149,347,192,373" href="#!">
+        </map>
+		<script type="application/javascript" src="../../client/lib/promise-0.1.1.js"></script>
+		<script type="text/javascript" src="../../client/lib/jquery.js"></script>
+		<script type="text/javascript" src="../../client/lib/underscore/underscore.js"></script>
+		<script type="text/javascript" src="../../client/lib/backbone.js"></script>
+		<script type="text/javascript" src="../../client/lib/handlebars-v1.1.0.js"></script>
+		<script type="text/javascript" src="../../client/lib/bootstrap/js/bootstrap.min.js"></script>
+        <script src="../../client/require.js" data-main="js/index.js"></script>
+    </body>
+</html>

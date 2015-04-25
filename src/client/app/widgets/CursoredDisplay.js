@@ -1,6 +1,7 @@
 /**
- *
- * @author Patrick Oladimeji
+ * @module CursoredDisplay
+ * @desc Renders a cursor display
+ * @author Patrick Oladimeji, Paolo Masci
  * @date Mar 13, 2012
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
@@ -8,14 +9,15 @@
 
 define(function (require, exports, module) {
     "use strict";
-	module.exports = function (el, width, height) {
+	module.exports = function (el, width, height, opt) {
+        opt = opt || {};
 		width = width || 200;
 		height = height || 80;
-		var font = (height * 0.5) + "px sans-serif",
-			smallFont = (height * 0.4) + 'px sans-serif',
-			align = "center",
-			black = "#000",
-			white = '#fff',
+		var font = (height * 0.5) + "px " + (opt.font || "sans-serif"),
+			smallFont = (height * 0.4) + "px " + (opt.font || "sans-serif"),
+			align = opt.align || "center",
+			black = (opt.inverted) ? '#fff' : "#000",
+			white = (opt.inverted) ? "#000" : '#fff',
 			textBaseline = "middle";
 
 		function fontheight(font) {
@@ -129,6 +131,27 @@ define(function (require, exports, module) {
                         x -= (txtmeasure.width + pad);
                     }
                 });
+				return this;
+			},
+			renderText: function (txt) {
+				clearContext();
+				var th = 28,
+					x,
+                    y,
+					pad = 2;
+				var centerx = width / 2,
+					centery = height / 2,
+					txtmeasure = context.measureText(txt);
+                context.font = font;
+                context.fillStyle = white;
+                context.textAlign = align;
+                if (align === "center") {
+                    context.fillText(txt, centerx, centery);
+                } else if (align === "left") {
+                    context.fillText(txt, pad, centery);
+                } else {
+                    context.fillText(txt, width - txtmeasure.width + pad, centery);
+                }
 				return this;
 			},
 			width: function (w) {

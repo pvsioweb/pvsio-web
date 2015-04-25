@@ -12,6 +12,9 @@ define(function (require, exports, module) {
 		d3 = require("d3/d3");
 	
 	function getCoords(mark) {
+        if (mark && mark.attr("coords")) {
+            return mark.attr("coords");
+        }
         var x = +mark.attr("x"), y = +mark.attr("y"), w = +mark.attr("width"), h = +mark.attr("height");
 		return x + "," + y +	"," + (x + w) + "," + (y + h);
 	}
