@@ -30,8 +30,10 @@ function mkdirRecursive(dirPath, cb) {
             // the callback will be invoked only by the first instance of mkdirRecursive
             var parentDirectory = dirPath.substr(0, dirPath.lastIndexOf("/"));
             mkdirRecursive(parentDirectory, function (err) {
-                if (!err || err.code === "EEXIST") {
+                if (!err) {
                     fs.mkdir(dirPath, cb);
+                } else if (err.code === "EEXIST") {
+                    cb();
                 } else {
                     cb(err);
                 }
