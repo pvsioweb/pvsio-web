@@ -1,4 +1,0 @@
-#Drug_Name	Location	Dose_Unit	Volume unit	Amount	Concentration_lower_soft	Concentration_lower_hard	Concentration_typical	Concentration_upper_soft	Concentration_upper_hard	VTBI_lower_soft	VTBI_lower_hard	VTBI_typical	VTBI_upper_soft	VTBI_upper_hard	Dose_rate_lower_soft	Dose_rate_lower_hard	Dose_rate_typical	Dose_rate_upper_soft	Dose_rate_upper_hard	Bolus_typical	Bolus_time_typical
-10		3		0		1		2000			8				8				8			8					8		200		40		250		300		300			10			10		10				20			24		2000			1200
-10		2		0		2		500			1				1				1			1					1		200		40		500		650		650			10			10		10				20			20		1000			1500
-10		4		0		2		50			2				2				2			2					2		25		25		25		50		50			10			10		10				800			800		0			20

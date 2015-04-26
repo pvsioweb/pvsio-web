@@ -1,1 +1,0 @@
-./node_modules/.bin/jsdoc /Users/piergiuseppe/Projects/pvsio-web/examples/demos/pacemaker/scripts/index.js -d /Users/piergiuseppe/Projects/pvsio-web/examples/demos/pacemaker/scripts/jsdoc_out 
