@@ -3,12 +3,12 @@
  * @date 19/11/14 9:20:12 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, Backbone, Handlebars, self */
+/*global*/
 define(function (require, exports, module) {
     "use strict";
-    
+
     var pvsRecord, pvsTypeDefinition, pvsAssignmentExpression, pvsFieldDeclaration;
-    
+
     function PVSRecordPrinter() {
         /**
          * Template pvsRecord expects context = [ ... ]
@@ -48,7 +48,7 @@ define(function (require, exports, module) {
             Handlebars.compile(require("text!./templates/pvsFieldDeclaration.handlebars"));
         return this;
     }
-    
+
     function blanks(n) {
         var ans = "";
         if (n <= 0) { return ans; }
@@ -71,7 +71,7 @@ define(function (require, exports, module) {
     var getType = function (data) {
         return data.type;
     };
-    
+
     var tabsize = 4;
     function print_aux(data, f, g, opt) {
         function record_rec(data, depth) {
@@ -118,7 +118,7 @@ define(function (require, exports, module) {
         return record_rec(data, 0);
     }
 
-    
+
     PVSRecordPrinter.prototype.printRecordValue = function (data) {
         return print_aux(data, pvsAssignmentExpression, pvsRecord, {isValue: true});
     };
@@ -128,7 +128,7 @@ define(function (require, exports, module) {
     PVSRecordPrinter.prototype.printRecordAccessor = function (name) {
         return name.replace(new RegExp("\\.", "g"), "`");
     };
-    
+
     /**
      * Translates an object state into a pvs record
      * @param state = { type: { name: (string), val: (string) } }
@@ -142,7 +142,7 @@ define(function (require, exports, module) {
             }
         });
     };
-    
+
     module.exports = {
         create: function () {
             return new PVSRecordPrinter();

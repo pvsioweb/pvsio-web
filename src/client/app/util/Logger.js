@@ -4,9 +4,10 @@
  * @date 11/15/13 15:26:47 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, document */
+/*global define, document */
 define(function (require, exports, module) {
 	"use strict";
+    var d3 = require("d3/d3");
     /**
      * log the message -- newest messages are at the top
         @private

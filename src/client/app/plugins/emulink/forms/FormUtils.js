@@ -4,14 +4,12 @@
  * @date 25/5/14 2:03:48 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent */
-
 define(function (require, exports, module) {
-	"use strict";
-	function serializeForm(el, inputSelectors) {
+    "use strict";
+    function serializeForm(el, inputSelectors) {
         var options = d3.map();
         var labels = d3.map();
-		inputSelectors.forEach(function (s) {
+        inputSelectors.forEach(function (s) {
             var elem = document.getElementById(s);
             if (elem.selectedIndex >= 0) {
                 // listbox item
@@ -23,14 +21,14 @@ define(function (require, exports, module) {
         });
         return { options: options, labels: labels };
     }
-	
-	function validate(form, inputSelectors) {
+    
+    function validate(form, inputSelectors) {
         // FIXME: implement this function
-		return true;
-	}
-   
-	module.exports = {
-		serializeForm:	serializeForm,
-		validateForm: validate
-	};
+        return true;
+    }
+
+    module.exports = {
+        serializeForm:	serializeForm,
+        validateForm: validate
+    };
 });

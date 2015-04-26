@@ -1,6 +1,6 @@
-main: THEORY
+main :THEORY
  BEGIN
-  maxinfuse: nat = 999
+  maxinfuse: nat = 1200
   maxrate  : nat = maxinfuse
   infusemin: posreal = 0.1
   timeout  : nat = 200 % must be less than maxtime
@@ -30,16 +30,16 @@ main: THEORY
     bagscursor := midbag,
     qcursor := dlock,
     bagsval := LAMBDA (x: upto(9)):
-    	         COND x = 0 -> 0,
+                 COND x = 0 -> 0,
                       x = 1 -> 50,
-		      x = 2 -> 100,
-		      x = 3 -> 200,
-		      x = 4 -> 250,
-		      x = 5 -> 500,
-		      x = 6 -> 1000,
-		      x = 7 -> 1500,
-		      x = 8 -> 2000,
-		      x = 9 -> 3000 ENDCOND,
+              x = 2 -> 100,
+              x = 3 -> 200,
+              x = 4 -> 250,
+              x = 5 -> 500,
+              x = 6 -> 1000,
+              x = 7 -> 1500,
+              x = 8 -> 2000,
+              x = 9 -> 3000 ENDCOND,
     fndisp1 := fnull,
     fndisp2 := fnull,
     fndisp3 := fnull,
@@ -196,6 +196,9 @@ main: THEORY
       ELSE -> st
     ENDCOND
 
+  click_btn_fup(st: alaris): state =
+    release_btn_fup(press_btn_fup(st))
+
   press_btn_sup(st: alaris): state =
     COND
       per_sup(st) -> sup(st),
@@ -207,6 +210,9 @@ main: THEORY
       per_release_sup(st) -> release_sup(st),
       ELSE -> st
     ENDCOND
+
+  click_btn_sup(st: alaris): state =
+    release_btn_sup(press_btn_sup(st))
 
   press_btn_fdown(st: alaris): state =
     COND
@@ -220,6 +226,9 @@ main: THEORY
       ELSE -> st
     ENDCOND
 
+ click_btn_fdown(st: alaris): state =
+    release_btn_fdown(press_btn_fdown(st))
+
   press_btn_sdown(st: alaris): state =
     COND
       per_sdown(st) -> sdown(st),
@@ -231,6 +240,9 @@ main: THEORY
       per_release_sdown(st) -> release_sdown(st),
       ELSE -> st
     ENDCOND
+
+  click_btn_sdown(st: alaris): state =
+    release_btn_sdown(press_btn_sdown(st))
 
   click_btn_run(st: alaris): state =
     COND

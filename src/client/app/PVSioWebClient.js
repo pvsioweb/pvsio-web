@@ -59,6 +59,10 @@ define(function (require, exports, module) {
         Get or set the url for the server connection
     */
 	PVSioWeb.prototype.serverUrl = property.call(PVSioWeb.prototype, url);
+    /**
+     * Checks whether the server is running on localhost
+     */
+	PVSioWeb.prototype.serverOnLocalhost = function () { return url.indexOf("ws://localhost") === 0; };
 	/**
         Initiate connection to the server.
         Returns a promise object that resolves to the websocket connection when the connection opens

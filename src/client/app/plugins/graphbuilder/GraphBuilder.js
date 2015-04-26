@@ -1,17 +1,17 @@
 /**
- * 
+ *
  * @author Patrick Oladimeji
  * @date 11/22/13 9:03:14 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, Promise*/
 define(function (require, exports, module) {
-	"use strict";
-	var d3 = require("d3/d3"),
+    "use strict";
+    var d3 = require("d3/d3"),
         PVSioWebClient = require("PVSioWebClient"),
-		PluginManager = require("plugins/PluginManager").getInstance(),
-		ProjectManager = require("project/ProjectManager");
-	
+        PluginManager = require("plugins/PluginManager").getInstance(),
+        ProjectManager = require("project/ProjectManager");
+
     var instance;
     var ws,
         nodesHash = {},
@@ -22,9 +22,15 @@ define(function (require, exports, module) {
         force,
         onGraphUpdate,
         canvas;
-    
-    function init() {
-        canvas = PVSioWebClient.getInstance().createCollapsiblePanel({headerText: "State Transitions Logger", owner: "GraphBuilder"});
+
+    function GraphBuilder() {
+        var pvsioWebClient = PVSioWebClient.getInstance();
+
+        ws  = pvsioWebClient.getWebSocket();
+    }
+
+    GraphBuilder.prototype._init = function () {
+        canvas = PVSioWebClient.getInstance().createCollapsiblePanel({headerText: "State Transitions Logger", owner: this.getName()});
         canvas.classed("graph-container", true);
         var svg = canvas.append("svg").attr("width", w).attr("height", h).append("g")
             .call(d3.behavior.zoom().scaleExtent([0.4, 10]).on("zoom", function () {
@@ -51,7 +57,7 @@ define(function (require, exports, module) {
             });
 
         function updateGraph(nodes, edges, currentEdge) {
-            var edgeEls = svg.selectAll("line.edge").data(edges).enter()
+            svg.selectAll("line.edge").data(edges).enter()
                 .insert("line", "circle.node").attr("class", "edge")
                 .attr("x1", function (d) { return d.source.x; })
                 .attr("y1", function (d) { return d.source.y; })
@@ -105,7 +111,7 @@ define(function (require, exports, module) {
         };
 
         ws.addListener("GraphUpdate", onGraphUpdate);
-    }
+    };
 
     function clear() {
         canvas.html("");
@@ -113,41 +119,40 @@ define(function (require, exports, module) {
         nodesHash = {};
         edgesHash = {};
     }
-    
-	function GraphBuilder() {
-        var pvsioWebClient = PVSioWebClient.getInstance();
-		
-		ws  = pvsioWebClient.getWebSocket();
-	}
-	
+
+
+    GraphBuilder.prototype.getName = function () {
+        return "Graph Builder";
+    };
+
     GraphBuilder.prototype.reInitialise = function () {
         this.unload();
-        init();
+        this._init();
     };
-    
+
     GraphBuilder.prototype.initialise = function () {
         var gb = this;
-        init();
+        this._init();
         ProjectManager.getInstance()
             .addListener("ProjectChanged", function (event) {
-				if (PluginManager.isLoaded(gb)) {
-					gb.reInitialise();
-				}
+                if (PluginManager.isLoaded(gb)) {
+                    gb.reInitialise();
+                }
             });
-		return Promise.resolve(true);
+        return Promise.resolve(true);
     };
-    
+
     GraphBuilder.prototype.unload = function () {
         clear();
         PVSioWebClient.getInstance().removeCollapsiblePanel(canvas);
-		return Promise.resolve(true);
+        return Promise.resolve(true);
     };
-	
+
     GraphBuilder.prototype.getDependencies = function () {
         return [];
     };
-    
-	module.exports = {
+
+    module.exports = {
         getInstance: function () {
             if (!instance) {
                 instance = new GraphBuilder();

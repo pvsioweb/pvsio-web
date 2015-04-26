@@ -14,7 +14,7 @@ define(function (require, exports, module) {
         events      = require("websockets/events");
     
     module.exports = function () {
-        var o = eventDispatcher({}), ws, callbackRegistry = {};
+        var o = eventDispatcher({}), ws, callbackRegistry = {}, dbg = false;
         o.url = property.call(o, "ws://localhost");
 		o.port = property.call(o);
         /**
@@ -49,6 +49,9 @@ define(function (require, exports, module) {
                         if (token.id && typeof callbackRegistry[token.id] === "function") {
                             var time = new Date().getTime() - token.time.client.sent;
                             console.log("Time to response for " + token.type + "  " + (time));
+                            if (token.type.indexOf("_error") >= 0 && dbg) {
+                                console.error(token); // errors should always be reported in the browser console
+                            }
                             var f = callbackRegistry[token.id];
                             delete callbackRegistry[token.id];
                             f.call(o, token.err, token);
@@ -63,14 +66,16 @@ define(function (require, exports, module) {
          * sends a message and register a callback to invoke when the message response is received from the server.
          */
         o.send = function (token, cb) {
-            var id = uuid();
-            if (token && token.type) {
-                token.id = token.id || id;
-                token.time = {client: {sent: new Date().getTime()}};
-                callbackRegistry[id] = cb;
-                ws.send(JSON.stringify(token));
-            } else {
-                console.log("Token is undefined");
+            if (ws) {
+                var id = uuid();
+                if (token && token.type) {
+                    token.id = token.id || id;
+                    token.time = {client: {sent: new Date().getTime()}};
+                    callbackRegistry[id] = cb;
+                    ws.send(JSON.stringify(token));
+                } else {
+                    console.log("Token is undefined");
+                }
             }
             return o;
         };

@@ -1,0 +1,53 @@
+main: THEORY
+ BEGIN
+
+  Alarm: TYPE = { off, mute, alarm }
+
+  state: TYPE = [#
+    spo2: real, % sensor data
+    spo2_max: nonneg_real,
+    spo2_min: nonneg_real,
+    spo2_label: string,
+    spo2_alarm: Alarm,
+    isOn: bool
+  #]
+
+  init(x: real): state = (#
+    spo2 := x,
+    spo2_max := 0,
+    spo2_min := 88,
+    spo2_label := "SpO2",
+    spo2_alarm := off,
+    isOn := false
+  #)
+
+  per_on(st: state): bool = true
+  on(st: (per_on)): state = st WITH [ isOn := NOT isOn(st) ]
+  click_btn_on(st: state): state =
+    COND
+      per_on(st) -> on(st),
+      ELSE -> st
+    ENDCOND
+
+  click_btn_mute(st: state): state =
+    COND
+      isOn(st) AND spo2_alarm(st) = alarm -> st WITH [ spo2_alarm := mute ],
+      ELSE -> st
+    ENDCOND
+
+  check_vitals(st: state): state =
+    IF ((spo2_max(st) > 0) AND (spo2(st) >= spo2_max(st))) OR
+       ((spo2_min(st) > 0) AND (spo2(st) <= spo2_min(st)))
+    THEN st WITH [ spo2_alarm := alarm ]
+    ELSE st WITH [ spo2_alarm := off ] ENDIF
+
+  tick(st: state): state =
+    COND
+      isOn(st) -> check_vitals(st),
+      ELSE -> st
+    ENDCOND
+  
+  spo2_sensor_data(x: real)(st: state): state =
+    st WITH [ spo2 := x ]
+
+ END main

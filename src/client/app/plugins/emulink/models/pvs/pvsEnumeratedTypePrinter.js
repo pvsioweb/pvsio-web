@@ -3,11 +3,10 @@
  * @date 20/11/14 4:28:11 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, Backbone, Handlebars, self */
 define(function (require, exports, module) {
     "use strict";
     var pvsEnumeratedType, pvsTypeDefinition;
-    
+
     function PVSEnumeratedTypePrinter() {
         /**
          * Template
@@ -49,7 +48,7 @@ define(function (require, exports, module) {
         }
         return pvsTypeDefinition({data: {name: eName, type: x}});
     };
-    
+
     module.exports = {
         create: function () {
             return new PVSEnumeratedTypePrinter();

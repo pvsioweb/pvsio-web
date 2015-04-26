@@ -18,11 +18,13 @@
     "ws": "0.4.x"
   },
   "devDependencies": {
+    "grunt-contrib-jshint": "^0.11.1",
     "jasmine-node": "~1.14.3",
     "open": "0.0.5"
   },
   "scripts": {
-    "test": "jasmine-node --verbose src/server/servertests; node client-test.js",
+    "test": "grunt test",
+    "local-test": "jasmine-node --verbose src/server/servertests; node client-test.js",
     "start": "node src/server/pvssocketserver.js"
   },
   "repository": {

@@ -8,14 +8,11 @@
  * @date 14/05/14 2:53:03 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, _, Promise, document, FileReader*/
-
+/*global define, d3*/
 define(function (require, exports, module) {
-	"use strict";
-    
-    var constants, // d3.map()
-        variables; // d3.map()
-	var eventDispatcher = require("util/eventDispatcher");
+    "use strict";
+
+    var eventDispatcher = require("util/eventDispatcher");
 
     var defaultValues = { x: 100, y: 100, width: 36, height: 36, fontSize: 10 };
 
@@ -27,9 +24,9 @@ define(function (require, exports, module) {
     var getFreshNodeID = function () { return nextNodeID + 1; };
     var getFreshEdgeID = function () { return nextEdgeID + 1; };
     var getFreshInitialEdgeID = function () { return nextInitialEdgeID + 1; };
-    var nextConstantID = 0, nextVariableID = 0;
-    var newConstantID = function () { return ++nextConstantID; };
-    var newVariableID = function () { return ++nextVariableID; };
+//    var nextConstantID = 0, nextVariableID = 0;
+//    var newConstantID = function () { return ++nextConstantID; };
+//    var newVariableID = function () { return ++nextVariableID; };
     var createVariableID = function (variable) {
         var id = "VAR_" + variable.name + ":" + variable.type + "(" + variable.scope + ")";
         return id;
@@ -38,15 +35,15 @@ define(function (require, exports, module) {
         var id = "CONST_" + constant.name + ":" + constant.type;
         return id;
     };
-    var getFreshConstantID = function () { return nextConstantID + 1; };
-    var getFreshVariableID = function () { return nextVariableID + 1; };
-    
-	/**
-	 * @function Emucharts
+//    var getFreshConstantID = function () { return nextConstantID + 1; };
+//    var getFreshVariableID = function () { return nextVariableID + 1; };
+
+    /**
+     * @function Emucharts
      * @description Constructor.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     function Emucharts(emuchart) {
         if (emuchart) {
             this.nodes = emuchart.nodes || d3.map();
@@ -70,10 +67,10 @@ define(function (require, exports, module) {
             this.variables = d3.map();
             this.constants = d3.map();
         }
-		eventDispatcher(this);
+        eventDispatcher(this);
         return this;
     }
-    
+
     Emucharts.prototype.getEdges = function () {
         return this.edges;
     };
@@ -83,21 +80,21 @@ define(function (require, exports, module) {
     Emucharts.prototype.getNodes = function () {
         return this.nodes;
     };
-    
+
     Emucharts.prototype.getDefaultValues = function () {
         return defaultValues;
     };
-    
-    
-	/**
-	 * @function rename_node
+
+
+    /**
+     * @function rename_node
      * @description Renames a node (i.e., a state) in the emuchart diagram.
      * @param id {String} Identifier of the node that shall be renamed.
      * @param newName {String} New name that shall be assigned to the node.
      * @returns {Boolean} true if node renamed successfully; otherwise returns false
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.rename_node = function (id, newName) {
         var _this = this;
         if (!id || !this.nodes || !this.nodes.get(id)) { return false; }
@@ -134,7 +131,7 @@ define(function (require, exports, module) {
     };
 
     /**
-	 * @function add_node
+     * @function add_node
      * @description Adds a new node (i.e., a new state) to the emucharts diagram.
      * @param node {Object} The characteristics of the node:
      *           <li> name (String): the name of the node. This property is optional. If omitted, the node identifier automatically assigned by this function will be used as node name.</li>
@@ -147,9 +144,9 @@ define(function (require, exports, module) {
      *           <li> y (real): node position (y coordinate).</li>
      *           <li> width (real): node width.</li>
      *           <li> height (real): node height.</li>
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.add_node = function (node) {
         if (!node) { return null; }
         // create a new node with a unique ID
@@ -183,9 +180,9 @@ define(function (require, exports, module) {
      * @description Removes a node from the diagram
      * @param node {Object} The descriptor of the node that shall be removed.
      * @returns {Boolean} true if the node has been removed successfully, false otherwhise.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.remove_node = function (node) {
         var rem = this.nodes.get(node);
         if (rem && this.nodes.remove(node)) {
@@ -202,15 +199,15 @@ define(function (require, exports, module) {
         return false;
     };
 
-	/**
+    /**
      * @function rename_edge
      * @description Renames a edge in the diagram.
      * @param id {String} The identifier of the edge that shall be renamed.
      * @param newName {String} The new name that shall be assigned to the edge.
      * @returns {Boolean} true if edge renamed successfully, false otherwise.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.rename_edge = function (id, newName) {
         if (!id || !this.edges || !this.edges.get(id)) { return false; }
         // get edge and rename it
@@ -235,16 +232,16 @@ define(function (require, exports, module) {
         });
         return true;
     };
-    
-	/**
+
+    /**
      * @function rename_initial_edge
      * @description Renames an initial edge in the diagram.
      * @param id {String} The identifier of the initial edge that shall be renamed.
      * @param newName {String} The new name that shall be assigned to the initial edge.
      * @returns {Boolean} true if initial edge renamed successfully, false otherwise.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.rename_initial_edge = function (id, newName) {
         if (!id || !this.initial_edges || !this.initial_edges.get(id)) { return false; }
         // get edge and rename it
@@ -265,16 +262,16 @@ define(function (require, exports, module) {
         });
         return true;
     };
-    
+
     /**
      * @function set_controlPoint
      * @description Adds a new control point to an edge of the diagram.
      * @param edge {Object} The edge descriptor that whose control point shall be set.
      * @param cp {Object} A control point descriptor.
      * @returns {Object} The descriptor of the edge.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.set_controlPoint = function (edge, cp) {
         if (!edge || !cp) { return false; }
         var ed = this.edges.get(edge.id);
@@ -287,10 +284,10 @@ define(function (require, exports, module) {
         }
         return false;
     };
-    
+
     /**
      * @function add_edge
-	 * @description Adds a new edge to the diagram
+     * @description Adds a new edge to the diagram
      * @param edge {Object} The characteristics of the edge:
      *           <li> target (String): the identifier of the target node where the edge enters into. This property is mandatory.
      *           <li> source (String): the identifier of the source node where the edge originates from. This property is mandatory. FIXME: check why we are accepting edges with undefined source.
@@ -302,9 +299,9 @@ define(function (require, exports, module) {
      *           <li> source (Object): the source node.</li>
      *           <li> target (Object): the target node.</li>
      *           <li> controlPoint (Object): the control point.</li>
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.add_edge = function (edge) {
         if (!edge || !edge.target) {
             return null;
@@ -313,7 +310,7 @@ define(function (require, exports, module) {
             console.log("dbg: warning, target ID not found in emuchart data. New transitions not added.");
             return null;
         }
-        
+
         var target = this.nodes.get(edge.target.id);
         var source = (edge.source) ? this.nodes.get(edge.source.id) : null;
         // create a new node with a unique ID
@@ -349,7 +346,7 @@ define(function (require, exports, module) {
 
     /**
      * @function add_initial_edge
-	 * @description Adds a new initial edge to the diagram. Initial edges originate from an implicit source node (which need not to be specified).
+     * @description Adds a new initial edge to the diagram. Initial edges originate from an implicit source node (which need not to be specified).
      * @param edge {Object} The characteristics of the edge:
      *           <li> target (String): the identifier of the target node where the edge enters into. This property is mandatory.
      *           <li> name (String): the name of the edge. This property is optional. If omitted, the edge identifier automatically assigned by this function will be used as edge name.</li>
@@ -358,9 +355,9 @@ define(function (require, exports, module) {
      *           <li> name (String): the name of the node.</li>
      *           <li> source (Object): the source node.</li>
      *           <li> target (Object): the target node.</li>
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.add_initial_edge = function (edge) {
         if (!edge || !edge.target) {
             return null;
@@ -369,7 +366,7 @@ define(function (require, exports, module) {
             console.log("dbg: warning, target ID not found in emuchart data. New transitions not added.");
             return null;
         }
-        
+
         var target = this.nodes.get(edge.target.id);
         // create a new node with a unique ID
         var id = "IT" + newInitialEdgeID();
@@ -394,14 +391,14 @@ define(function (require, exports, module) {
         });
         return newEdge;
     };
-    
+
     /**
      * @function remove_edge
      * @description Removes an edge from the diagram.
      * @param edge {Object} The descriptor of the edge that shall be removed.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.remove_edge = function (edge) {
         var rem = this.edges.get(edge);
         if (rem && this.edges.remove(edge)) {
@@ -431,9 +428,9 @@ define(function (require, exports, module) {
      * @description Removes an initial edge from the diagram.
      * @param initial_edge {Object} The descriptor of the initial edge that shall be removed.
      * @returns {Boolean} true if the descriptor has been removed successfully, false otherwise.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.remove_initial_edge = function (initial_edge) {
         var rem = this.initial_edges.get(initial_edge);
         if (rem && this.initial_edges.remove(initial_edge)) {
@@ -453,45 +450,45 @@ define(function (require, exports, module) {
         }
         return false;
     };
-            
+
     /**
      * @function getFreshStateName
      * @description Returns a fresh (i.e., not used by other nodes in the diagram) node name.
      * @returns {String} A fresh node name.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getFreshStateName = function () {
         return "X" + getFreshNodeID();
     };
-    
+
     /**
      * @function getFreshTransitionName
      * @description Returns a fresh (i.e., not used by other transitions in the diagram) transitions name.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getFreshTransitionName = function () {
         return "T" + getFreshEdgeID();
     };
-    
+
     /**
      * @function getFreshInitialTransitionName
-	 * @description Returns a fresh (i.e., not used by other initial transitions in the diagram) initial transitions name
-	 * @memberof module:Emucharts
+     * @description Returns a fresh (i.e., not used by other initial transitions in the diagram) initial transitions name
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getFreshInitialTransitionName = function () {
         return "IT" + getFreshInitialEdgeID();
     };
 
     /**
      * @function getStates
-	 * @description Returns the states in the diagram.
+     * @description Returns the states in the diagram.
      * @returns {Array(Object)} An array containing the descriptors of the states in the diagram.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getStates = function () {
         var _this = this;
         var states = [];
@@ -511,33 +508,33 @@ define(function (require, exports, module) {
 
     /**
      * @function getState
-	 * @description Returns the descriptor of a state.
+     * @description Returns the descriptor of a state.
      * @param id {String} The identifier of the state.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getState = function (id) {
         return this.nodes.get(id);
     };
 
     /**
      * @function getTransitions
-	 * @description Returns the descriptor of a transition.
+     * @description Returns the descriptor of a transition.
      * @param id {String} The identifier of the transition.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getTransition = function (id) {
         return this.edges.get(id);
     };
-    
+
     /**
      * @function getTransitions
      * @description Returns the transitions in the diagram.
      * @returns {Array(Object)} An array containing the descriptors of the transitions in the diagram.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getTransitions = function () {
         var _this = this;
         var transitions = [];
@@ -562,26 +559,26 @@ define(function (require, exports, module) {
         });
         return transitions;
     };
-    
+
     /**
      * @function getInitialTransition
      * @description Returns an initial transition.
      * @param id {String} The identifier of the initial transition.
      * @returns {Object} The descriptor of the initial transition.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getInitialTransition = function (id) {
         return this.initial_edges.get(id);
     };
-    
+
     /**
-	 * @function getInitialTransitions
+     * @function getInitialTransitions
      * @description Returns the initial transitions in the diagram.
      * @returns {Array(Object)} An array containing the descriptors of the transitions in the diagram.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getInitialTransitions = function () {
         var _this = this;
         var initial_transitions = [];
@@ -606,7 +603,7 @@ define(function (require, exports, module) {
      * @returns {Object} The descriptor of the constant.
      * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.add_constant = function (constant) {
         // we use name and type as ID so that we automatically avoid duplicated constants
         // (those three fields together identify constants uniquely)
@@ -631,15 +628,15 @@ define(function (require, exports, module) {
         });
         return newConstant;
     };
-    
+
     /**
-	 * @function add_variable
+     * @function add_variable
      * @description Interface function for adding new state variables definitions to the diagram.
      * @param variable {Object} The characteristics of the variable that shall be added to the diagram.
      * @returns {Object} The descriptor of the variable.
      * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.add_variable = function (variable) {
         // we use name type and scope as ID so that we automatically avoid duplicated variables
         // (those three fields together identify variables uniquely)
@@ -665,15 +662,15 @@ define(function (require, exports, module) {
         });
         return newVariable;
     };
-    
+
     /**
      * @function remove_constant
-	 * @description Interface function for removing a constant from the diagram.
+     * @description Interface function for removing a constant from the diagram.
      * @param constantID {String} The identifier of the constant that shall be removed.
      * @returns {Boolean} true if constant removed successfully, false otherwise.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.remove_constant = function (constantID) {
         var rem = this.constants.get(constantID);
         if (rem && this.constants.remove(constantID)) {
@@ -686,15 +683,15 @@ define(function (require, exports, module) {
         }
         return false;
     };
-    
+
     /**
      * @function remove_variable
-	 * @description Interface function for removing a state variable from the diagram.
+     * @description Interface function for removing a state variable from the diagram.
      * @param variableID {String} The identifier of the variable that shall be removed.
      * @returns {Boolean} true if variable removed successfully, false otherwise.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.remove_variable = function (variableID) {
         var rem = this.variables.get(variableID);
         if (rem && this.variables.remove(variableID)) {
@@ -710,20 +707,19 @@ define(function (require, exports, module) {
 
     /**
      * @function rename_constant
-	 * @description Interface function for renaming (i.e., editing) a constant
+     * @description Interface function for renaming (i.e., editing) a constant
      * @param constantID {String} A unique identifier for the constant.
      * @param newData {Object} Constants data, an object containing the following fields
      *           <li> type (String): the constant type (e.g., "real"). This field is mandatory.</li>
      *           <li> name (String): the constant name (e.g., "max"). This field is mandatory.</li>
      *           <li> value (String): the constant value (e.g., "5"). This field is optional.</li>
      * @returns {Boolean} true if the constant was renamed successfully; otherwise returns false.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.rename_constant = function (constantID, newData) {
-        var _this = this;
         if (!constantID || !this.constants || !this.constants.get(constantID)) { return false; }
-        // get the constant, delete it from the constants list, 
+        // get the constant, delete it from the constants list,
         // rename fields, and put it back in the constants list
         var theConstant = this.constants.get(constantID);
         this.constants.remove(constantID);
@@ -753,20 +749,19 @@ define(function (require, exports, module) {
         });
         return true;
     };
-    
+
     /**
      * @function rename_variable
-	 * @description Interface function for renaming (i.e., editing) a state variable.
+     * @description Interface function for renaming (i.e., editing) a state variable.
      * @param variableID {String} is the unique variable identifier
      * @param newData {Object} The new characteristics of the variable: { type: (string), name: (string), scope: (string) }
      * @returns {Boolean} true if variable renamed successfully; otherwise returns false
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.rename_variable = function (variableID, newData) {
-        var _this = this;
         if (!variableID || !this.variables || !this.variables.get(variableID)) { return false; }
-        // get the varable, delete it from the variables list, 
+        // get the varable, delete it from the variables list,
         // rename fields, and put it back in the variables list
         var theVariable = this.variables.get(variableID);
         this.variables.remove(variableID);
@@ -799,14 +794,14 @@ define(function (require, exports, module) {
         });
         return true;
     };
-    
+
     /**
      * @function getConstants
-	 * @description Returns the constants defined in the diagram.
+     * @description Returns the constants defined in the diagram.
      * @returns {Array(Object)} An array of constants descriptors.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getConstants = function () {
         var _this = this;
         var ans = [];
@@ -821,14 +816,14 @@ define(function (require, exports, module) {
         });
         return ans;
     };
-    
+
     /**
      * @function getVariables
-	 * @descriptionb Returns the variables defined in the diagram.
+     * @descriptionb Returns the variables defined in the diagram.
      * @returns {Array(Object)} An array of variables descriptors.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getVariables = function (scope) {
         var _this = this;
         var ans = [];
@@ -846,57 +841,57 @@ define(function (require, exports, module) {
         });
         return ans;
     };
-    
+
     /**
      * @function getInputVariables
-	 * @description Returns the input variables defined in the diagram.
+     * @description Returns the input variables defined in the diagram.
      * @returns {Array(Object)} An array of variables descriptors.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getInputVariables = function () {
         return this.getVariables("Input");
     };
 
     /**
      * @function getOutputVariables
-	 * @description Returns the output variables defined in the diagram.
+     * @description Returns the output variables defined in the diagram.
      * @returns {Array(Object)} An array of variables descriptors.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getOutputVariables = function () {
         return this.getVariables("Output");
     };
 
     /**
      * @function getLocalVariables
-	 * @description Returns the local variables defined in the diagram.
+     * @description Returns the local variables defined in the diagram.
      * @returns {Array(Object)} An array of variables descriptors.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getLocalVariables = function () {
         return this.getVariables("Local");
     };
 
     /**
      * @function getVariableScopes
-	 * @description Returns the supported variable scopes.
+     * @description Returns the supported variable scopes.
      * @returns {Array(String)} An array of Strings specifying the variable scopes supported by the diagram.
-	 * @memberof module:Emucharts
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.getVariableScopes = function () {
         return ["Local", "Input", "Output"];
     };
 
     /**
      * @function empty
-	 * @description Utility function that checks whether the diagram is empty (i.e., 0 nodes, 0 edges)
-	 * @memberof module:Emucharts
+     * @description Utility function that checks whether the diagram is empty (i.e., 0 nodes, 0 edges)
+     * @memberof module:Emucharts
      * @instance
-	 */
+     */
     Emucharts.prototype.empty = function () {
         return this.nodes.empty() && this.edges.empty();
     };

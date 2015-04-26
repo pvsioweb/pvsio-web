@@ -3,27 +3,21 @@
  * @author Patrick Oladimeji
  * @date 11/15/13 16:29:55 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5: true*/
-/*global define, d3, $, Backbone, Handlebars, Promise, layoutjs */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
+/*global define, d3, $, Backbone, Handlebars, layoutjs */
 define(function (require, exports, module) {
-	"use strict";
-	var WSManager = require("websockets/pvs/WSManager"),
-        ModelEditor = require("plugins/modelEditor/ModelEditor"),
+    "use strict";
+    var ModelEditor = require("plugins/modelEditor/ModelEditor"),
         Emulink = require("plugins/emulink/Emulink"),
-		SafetyTest = require("plugins/safetyTest/SafetyTest"),
+//        SafetyTest = require("plugins/safetyTest/SafetyTest"),
         GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
-		Logger	= require("util/Logger"),
-        SaveProjectChanges = require("project/forms/SaveProjectChanges"),
-        Notification = require("pvsioweb/forms/displayNotification"),
-        NotificationManager = require("project/NotificationManager"),
-        Descriptor = require("project/Descriptor"),
-        fs = require("util/fileHandler"),
+        Logger	= require("util/Logger"),
         PluginManager = require("plugins/PluginManager"),
         PVSioWeb = require("PVSioWebClient").getInstance(),
         ProjectManager = require("project/ProjectManager"),
         displayQuestion = require("pvsioweb/forms/displayQuestion");
-	
+
     var template = require("text!pvsioweb/forms/maincontent.handlebars");
     /**
      * @private
@@ -41,23 +35,23 @@ define(function (require, exports, module) {
                            "Please restart the WebServer by running ./restart.sh from the pvsio-web folder."],
                 buttons: ["Dismiss", "Reconnect"]
             };
-        
-        function retry() {
-            function removeDialog() {
-                if (q) { q.remove(); }
-            }
-            if (!PVSioWeb.isWebSocketConnected()) {
-                ProjectManager.getInstance().reconnectToServer()
-                    .then(function () {
-                        removeDialog();
-                        clearTimeout(timerid);
-                    }).catch(function () {
-                        timerid = setTimeout(retry, 1000);
-                    });
-            } else {
-                removeDialog();
-            }
-        }
+
+//        function retry() {
+//            function removeDialog() {
+//                if (q) { q.remove(); }
+//            }
+//            if (!PVSioWeb.isWebSocketConnected()) {
+//                ProjectManager.getInstance().reconnectToServer()
+//                    .then(function () {
+//                        removeDialog();
+//                        clearTimeout(timerid);
+//                    }).catch(function () {
+//                        timerid = setTimeout(retry, 1000);
+//                    });
+//            } else {
+//                removeDialog();
+//            }
+//        }
         //dont create a new question form if one already exists
         if (d3.select(".overlay").empty()) {
             if (!opt || (opt && !opt.silentMode)) {
@@ -83,7 +77,7 @@ define(function (require, exports, module) {
 //            timerid = setTimeout(retry, 1000);
         }
     }
-    
+
     /**
      * @private
      * Called when the pvs process has been disconnected. It sets the appropriate UI markers
@@ -120,7 +114,7 @@ define(function (require, exports, module) {
     function webSocketConnected() {
         var el = d3.select("#lblWebSocketStatus");
         Logger.log("connection to pvsio server established");
-		d3.select("#btnCompile").attr("disabled", null);
+        d3.select("#btnCompile").attr("disabled", null);
         el.classed("disconnected", false)
             .select("span").attr("class", "glyphicon glyphicon-ok");//style("background", "rgb(8, 88, 154)");
         PVSioWeb.isWebSocketConnected(true);
@@ -134,29 +128,30 @@ define(function (require, exports, module) {
     function webSocketDisconnected() {
         var el = d3.select("#lblWebSocketStatus");
         Logger.log("connection to pvsio server closed");
-		d3.select("#btnCompile").attr("disabled", true);
+        d3.select("#btnCompile").attr("disabled", true);
         el.classed("disconnected", true)
             .select("span").attr("class", "glyphicon glyphicon-warning-sign");//.style("background", "red");
         PVSioWeb.isWebSocketConnected(false);
         pvsProcessDisconnected("Websocket connection closed");
     }
 
-	
+
     var  MainView = Backbone.View.extend({
         initialize: function (data) {
-			this.render(data);
-		},
-		render: function (data) {
-			var t = Handlebars.compile(template);
-			this.$el.html(t(data));
-			$("body").append(this.el);
-			layoutjs({el: "#content", useFullHeight: true});
-			return this;
-		},
-		events: {
+            this.render(data);
+        },
+        render: function (data) {
+            var t = Handlebars.compile(template);
+            this.$el.html(t(data));
+            $("body").append(this.el);
+            layoutjs({el: "#content", useFullHeight: true});
+            return this;
+        },
+        events: {
             "change input[type='checkbox']": "checkboxClicked",
-            "click .plugin-box": "pluginClicked"
-		},
+            "click .plugin-box": "pluginClicked",
+            "click .plugin-box label": "pluginLabelClicked"
+        },
         checkboxClicked: function (event) {
             this.trigger("pluginToggled", event);
         },
@@ -165,27 +160,41 @@ define(function (require, exports, module) {
                 d3.select(event.target).select("input[type='checkbox']").node().click();
             }
         },
-		scriptClicked: function (event) {
+        pluginLabelClicked: function (event) {
+            if (event.target.tagName.toLowerCase() === "label") {
+                d3.select(event.target.parentNode).select("input[type='checkbox']").node().click();
+            }
+        },
+        scriptClicked: function (event) {
             this.trigger("scriptClicked", $(event.target).attr("name"));
         }
     });
-    
+
     function createHtmlElements(data) {
         return new MainView(data);
     }
-    
-    
-	module.exports = {
-		init: function (data) {
-            data = data || {plugins: [PrototypeBuilder.getInstance(), ModelEditor.getInstance(),
-                                      Emulink.getInstance(), GraphBuilder.getInstance(), SafetyTest.getInstance()].map(function (p) {
-                return {label: p.constructor.name, plugin: p};
-            })};
+
+
+    module.exports = {
+        init: function (data) {
+            var plugins = [
+                    PrototypeBuilder.getInstance(),
+                    ModelEditor.getInstance(),
+                    Emulink.getInstance(),
+                    GraphBuilder.getInstance()
+            ];
+            data = data || {
+                plugins: plugins.map(function (p) {
+                    var label = p.getName ? p.getName() : p.constructor.name;
+                    return {label: label, id: label.replace(/\s/g, ""), plugin: p};
+                })
+            };
+
             PluginManager.getInstance().init();
             PluginManager.getInstance().addListener("PluginEnabled", function (event) {
-                d3.select("#plugin_" + event.plugin.constructor.name).property("checked", true);
+                d3.select("input[name='" + event.plugin.getName() + "']").property("checked", true);
             }).addListener("PluginDisabled", function (event) {
-                d3.select("#plugin_" + event.plugin.constructor.name).property("checked", false);
+                d3.select("input[name='" + event.plugin.getName() + "']").property("checked", false);
             });
             if (this._view) { this.unload(); }
             this._view = createHtmlElements(data);
@@ -211,5 +220,5 @@ define(function (require, exports, module) {
         reconnectToServer: function () {
             reconnectToServer();
         }
-	};
+    };
 });

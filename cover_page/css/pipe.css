@@ -8,7 +8,7 @@ html {
 }
 
 
-#content-wrap .container {
+#coverpage .container {
     width: 800px;
     margin-right: auto;
     margin-left: auto;
@@ -19,8 +19,8 @@ html {
 }
 
 body {
-  background: #1d1d1d;
-  color: #dddddd;
+  color: #5c5c5c;
+  background: #eeeeee;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 12pt;
@@ -28,11 +28,12 @@ body {
   font-family: "source-sans-pro", sans-serif;
   font-style: normal;
   margin: 0;
+    text-align: justify;
 }
 
 body a {
     font-weight: bold;
-    color: #a3bceb
+    color: rgb(8, 88, 154);
 }
 
 ul {
@@ -42,47 +43,22 @@ ul {
 
 
 #nav {
-  background-color: rgb(8, 88, 154);
   padding-top: 22px;
-  text-align: center;
+  text-align: left;
 }
 
 #nav ul {
   width: 330px;
-  margin: 0 auto;
 }
 
-#nav ul:after, #footer .foot-nav:after {
-  content: ' ';
-  display: block;
-  width: 0;
-  height: 0;
-  clear: both;
-}
 
 #nav ul li {
   position: relative;
-  background-color: rgb(8, 88, 154);
   display: block;
   float: left;
   font-size: 12px;
   line-height: 12px;
   padding-bottom: 20px;
-}
-
-#nav ul li.active:after {
-  top: 100%;
-  left: 50%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-  border-color: rgba(3, 3, 0, 0);
-  border-top-color: rgb(8, 88, 154);
-  border-width: 15px;
-  margin-left: -15px;
 }
 
 #nav ul li a {
@@ -91,11 +67,13 @@ ul {
   border-left: 1px solid rgba(109,109,109,.4);
   text-transform: uppercase;
   font-size: 14px;
-  color: #cccccc;
+  color: rgb(8, 88, 154);
 }
 
 #nav ul li.active a {
-  color: white;
+    color: rgb(8, 88, 154);
+    font-weight: bolder;
+    text-decoration: underline;
 }
 
 #nav ul li:first-child {
@@ -107,10 +85,8 @@ ul {
 }
 
 #intro {
-  width: 800px;
   margin: 0 auto;
   text-align: justify;
-  color: #d2d8ba;
     padding: 30px 0;
 }
 
@@ -161,32 +137,105 @@ ul {
     cursor: pointer;
 }
 
-#downloads .download {
-    background-color: green;
-    color: white;
+
+.screenshots {
+    overflow: hidden;
+    position: relative;
+    height: 400px;
+    background: url(../screenshot.png) 50% ;
+    border-top: 1px solid black;
+}
+
+.screenshots:before {
+    content: "";
     display: block;
-    margin: 0px auto;
-    font-style: normal;
+    position: absolute;
+    top: -16px;
+    height: 16px;
+    width: 100%;
+    box-shadow: 0px 0px 16px rgba(0,0,0,.7);  
+    z-index: 2;
+}
+.screenshots:after {
+    bottom: -16px;
+    content: "";
+    display: block;
+    position: absolute;
+    height: 16px;
+    width: 100%;
+    box-shadow: 0px 0px 16px rgba(0,0,0,.7);  
+    z-index: 2;
+}
+
+.screenshots p, .run p {
+    height: 100%;
     text-align: center;
-    margin-top: 0px;
-    padding-top: 12px;
-    padding-bottom: 10px;
-    border-radius: 8px;
-    cursor: pointer;
+    margin: 0px auto;
 }
 
-.even {
-    background: #2f2f2f;
+.screenshots a {
+    background: #f08519;
+    margin-top: 180px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 1);
+    color: white;
+    font-style: bold;
 }
 
-.odd {
-    background: #222;  
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
+.container.run {
+    border-bottom: 1px solid rgb(8, 88, 154);
+    border-top: 1px solid rgb(8, 88, 154);
 }
 
-#content-wrap {
-    padding-bottom: 50px;
-   
+.container.run a {
+    width: 340px;
+     background: #f08519;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 1);
+    color: white;
+    font-style: bold;
+    margin: 50px 20px;
+    display: inline-block;
 }
 
+#content-wrap .featured-videos {
+    border-bottom: 1px solid rgb(8, 88, 154);
+    padding: 20px 20px 50px 20px;
+}
+.run a.run {
+    background: rgb(8, 88, 154);
+}
+
+.screenshots a:hover {
+    font-weight: bolder;
+    color: white;
+}
+.version {
+    font-size: 30px;
+    display: block;
+}
+
+.tagline {
+    text-align: left;
+    padding: 25px;
+}
+
+.forkme {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 3;
+}
+
+#footer {
+    padding: 20px 0;
+    background: #000;
+    color: #919191;
+}
+
+#footer a {
+    color:   rgb(124, 169, 206) 
+}
+#footer p {
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+}

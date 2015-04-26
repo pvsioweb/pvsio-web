@@ -6,20 +6,27 @@
  * @date 27/05/14 9:38:13 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3 */
+/*global define*/
+/**
+ * [[Description]]
+ * @param   {[[Type]]} function (require [[Description]]
+ * @param   {[[Type]]} exports           [[Description]]
+ * @param   {Object}   module            [[Description]]
+ * @returns {Object}   [[Description]]
+ */
 define(function (require, exports, module) {
-	"use strict";
-    
+    "use strict";
+
     var lustre_node;
-    
+
     /**
-	 * Constructor
-	 */
+     * Constructor
+     */
     function EmuchartsLustrePrinter(name) {
         lustre_node = name;
         return this;
     }
-    
+
     EmuchartsLustrePrinter.prototype.print_input_variables = function (emuchart) {
         var ans = "\n";
         if (emuchart && emuchart.variables && emuchart.variables.input
@@ -70,7 +77,7 @@ define(function (require, exports, module) {
         }
         return ans;
     };
-    
+
     EmuchartsLustrePrinter.prototype.print_descriptor = function (emuchart) {
         var ans = "% --------------------------------------------------------------" +
                     "\n%  Node: " + emuchart.name;
@@ -86,7 +93,7 @@ define(function (require, exports, module) {
         ans += "\n% ---------------------------------------------------------------\n";
         return ans;
     };
-    
+
     EmuchartsLustrePrinter.prototype.print_disclaimer = function () {
         var ans = "\n% ---------------------------------------------------------------\n" +
                     "%  Lustre specification generated using PVSio-web LustrePrinter ver 0.1\n" +
@@ -94,7 +101,7 @@ define(function (require, exports, module) {
                     "\n% ---------------------------------------------------------------\n";
         return ans;
     };
-    
+
     /**
      * Prints the entire Lustre spec
      */
@@ -108,6 +115,6 @@ define(function (require, exports, module) {
         ans += this.print_disclaimer();
         return { res: ans };
     };
-    
+
     module.exports = EmuchartsLustrePrinter;
 });

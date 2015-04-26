@@ -23,13 +23,13 @@ You should have received a copy of the GNU General Public License along with Foo
  * @date 28 Jul 2012 21:52:31
  *
  */
-/*jshint unused: true, undef: true*/
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, undef: true, node: true, es5:true */
+/*jshint undef: true*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, undef: true, node: true*/
 /*global __dirname*/
 
 function run() {
     "use strict";
-    
+
     var pvsio                   = require("./pvsprocess"),
         path                    = require("path"),
         ws                      = require("ws"),
@@ -46,21 +46,21 @@ function run() {
         httpServer              = http.createServer(webserver),
         Promise                 = require("es6-promise").Promise,
         logger                  = require("tracer").console(),
-		serverFuncs				= require("./serverFunctions"),
+        serverFuncs				= require("./serverFunctions"),
         baseProjectDir          = path.join(__dirname, "../../examples/projects/"),
-		baseDemosDir			= path.join(__dirname, "../../examples/demos/"),
-		clientDir				= path.join(__dirname, "../client");
+        baseDemosDir			= path.join(__dirname, "../../examples/demos/"),
+        clientDir				= path.join(__dirname, "../client");
     var clientid = 0, WebSocketServer = ws.Server;
     var fsWatchers = {};
-	var writeFile = serverFuncs.writeFile,
-		stat = serverFuncs.stat,
-		renameFile = serverFuncs.renameFile,
+    var writeFile = serverFuncs.writeFile,
+        stat = serverFuncs.stat,
+        renameFile = serverFuncs.renameFile,
         mkdirRecursive = serverFuncs.mkdirRecursive,
-		openProject = serverFuncs.openProject,
-		listProjects = serverFuncs.listProjects,
+        openProject = serverFuncs.openProject,
+        listProjects = serverFuncs.listProjects,
         getFolderTree = serverFuncs.getFolderTree,
         readFile = serverFuncs.readFile;
-    
+
     /**
      * Utility function that dispatches responses to websocket clients
      * @param {{type:string, data}} token The token to send to the client
@@ -94,8 +94,8 @@ function run() {
                 token.err.message = token.err.message.replace(new RegExp(baseProjectDir, "g"), "");
             }
         }
-        
-        
+
+
         if (socket && socket.readyState === 1) {
             socket.send(JSON.stringify(token));
         }
@@ -134,37 +134,57 @@ function run() {
                 }
             });
         });
-        
+
     }
-    
+
     //create logger
     webserver.use("/demos", function (req, res, next) {
         logger.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
         next();
     });
-	
-	
+
+
     //create the express static server serve contents in the client directory and the demos directory
     webserver.use(express.static(clientDir));
-	webserver.use("/demos", express.static(baseDemosDir));
-	webserver.use("/projects", express.static(baseProjectDir));
-	//creating a pathname prefix for client so that demo css and scripts can be loaded from the client dir
-	webserver.use("/client", express.static(clientDir));
+    webserver.use("/demos", express.static(baseDemosDir));
+    webserver.use("/projects", express.static(baseProjectDir));
+    //creating a pathname prefix for client so that demo css and scripts can be loaded from the client dir
+    webserver.use("/client", express.static(clientDir));
 
     function typeCheck(file, cb) {
-		if (process.env.PORT) { // this is for the PVSio-web version installed on the heroku cloud
-		    procWrapper().exec({
-		        command: "/app/pvs6.0/proveit -T -l -v " + file,
-		        callBack: cb
-		    });
-		} else {
-		    procWrapper().exec({
-		        command: "proveit -l -v " + file,
-		        callBack: cb
-		    });
-		}
+        if (process.env.PORT) { // this is for the PVSio-web version installed on the heroku cloud
+            procWrapper().exec({
+                command: "/app/pvs6.0/proveit -T -l -v " + file,
+                callBack: cb
+            });
+        } else {
+            procWrapper().exec({
+                command: "proveit -l -v " + file,
+                callBack: cb
+            });
+        }
     }
-    
+    /**
+        Creates a function that updates the path of the parameter object such that it is relative to the
+        basePath specified
+    */
+    function toRelativePath(basePath) {
+        basePath = basePath || baseProjectDir;
+        return function (d) {
+            if (d.path && d.path.indexOf(basePath) === 0) {
+                d.path = d.path.replace(basePath, "");
+            }
+            return d;
+        };
+    }
+    /**
+        utility function for check if a path is absolute
+        ///TODO replace with path.isAbsolute once we upgrade node version to 0.12+
+    */
+    function isAbsolute(thepath) {
+        return thepath.trim().indexOf(path.sep) === 0;
+    }
+
     /**
         Reads the contents of a directory.
         @param {string} folderPath
@@ -182,7 +202,13 @@ function run() {
                                 if (err) {
                                     reject(err);
                                 } else {
-                                    resolve(res);
+                                     var fileStats = {
+                                        created: res.birthtime,
+                                        modified: res.mtime,
+                                        size: res.size,
+                                        isDirectory: res.isDirectory()
+                                    };
+                                    resolve(fileStats);
                                 }
                             });
                         });
@@ -191,7 +217,12 @@ function run() {
                     Promise.all(promises)
                         .then(function (res) {
                             var result = res.map(function (d, i) {
-                                return {name: files[i], path: path.join(folderPath, files[i]), isDirectory: d.isDirectory()};
+                                return {
+                                    name: files[i],
+                                    path: path.join(folderPath, files[i]),
+                                    isDirectory: d.isDirectory,
+                                    stats: d
+                                };
                             });
                             resolve(result);
                         }, function (err) {
@@ -203,7 +234,7 @@ function run() {
             });
         });
     }
-    
+
     function unregisterFolderWatcher(folderPath) {
         var watcher = fsWatchers[folderPath];
         if (watcher) {
@@ -212,29 +243,21 @@ function run() {
 //            logger.debug("unregistered watcher for " + folderPath);
         }
     }
-    
+
     function unregisterFolderWatchers() {
         Object.keys(fsWatchers).forEach(function (path) {
             unregisterFolderWatcher(path);
         });
         fsWatchers = {};
     }
-    function toRelativePath() {
-        return function (d) {
-            if (d.path && d.path.indexOf(baseProjectDir) === 0) {
-                d.path = d.path.replace(baseProjectDir, "");
-            }
-            return d;
-        };
-    }
-    
+
     /**
         Register a watcher for the specified folder. Sends updates to the client using the socket.
         @param {string} folderPath
         @param {socket} socket
     */
     function registerFolderWatcher(folderPath, socket) {
-        // this initial check helps us to prevent the server from crashing 
+        // this initial check helps us to prevent the server from crashing
         // when the function is erroneously invoked with wrong arguments
         if (!folderPath || !socket) {
             console.log("(FolderWatcher) Warning: incorrect folderPath or socket (folderPath: " +
@@ -242,11 +265,12 @@ function run() {
             return;
         }
         var notificationDelay = 200;
-        
+
         unregisterFolderWatcher(folderPath);
         if (folderPath.indexOf("pvsbin") > -1) { return; }
-        
+
         var watch = function (folder) {
+            if (folder.indexOf("pvsbin") > -1) { return; }
 //            logger.debug("watching changes to .. " + folder);
             return fs.watch(folder, {persistent: false}, function (event, name) {
                 var extension = path.extname(name).toLowerCase();
@@ -316,7 +340,7 @@ function run() {
             logger.error(err);
         }
     }
-    
+
     function readFolderContent(token, socket) {
         return new Promise(function (resolve, reject) {
             var res = {
@@ -349,8 +373,8 @@ function run() {
             });
         });
     }
-    
-    
+
+
     /**
         get function maps for client sockets
     */
@@ -360,15 +384,30 @@ function run() {
 //            logger.debug(socketid);
         };
         var map = {
+            "keepAlive": function (token, socket, socketid) {
+                // do nothing
+                // console.log("Receiving keepAlive message...");
+            },
             "setMainFile": function (token, socket, socketid) {
                 initProcessMap(socketid);
-                changeProjectSetting(token.projectName, "mainPVSFile", token.name)
-                    .then(function (res) {
-                        res.id = token.id;
-                        res.socketId = socketid;
-                        res.time = token.time;
-                        processCallback(res, socket);
-                    });
+                var mainFile = token.path.split("/").slice(1).join("/");
+                if (mainFile !== "") {
+                    changeProjectSetting(token.projectName, "mainPVSFile", mainFile)
+                        .then(function (res) {
+                            res.id = token.id;
+                            res.socketId = socketid;
+                            res.time = token.time;
+                            processCallback(res, socket);
+                        });
+                } else {
+                    res.type = res.type + "_error";
+                    res.err = {
+                        message: "Invalid token " + JSON.stringify(token),
+                        code: "ENOENT",
+                        path: token.path
+                    };
+                    processCallback(res, socket);
+                }
             },
             "changeProjectSetting": function (token, socket, socketid) {
                 initProcessMap(socketid);
@@ -465,7 +504,7 @@ function run() {
             "startProcess": function (token, socket, socketid) {
                 initProcessMap(socketid);
                 logger.info("Calling start process for client... " + socketid);
-				var root = token.data.projectName ?
+                var root = token.data.projectName ?
                             path.join(baseProjectDir, token.data.projectName)
                             : token.data.demoName ? path.join(baseDemosDir, token.data.demoName) : "";
                 //close the process if it exists and recreate it
@@ -505,17 +544,18 @@ function run() {
                 }
                 unregisterFolderWatchers();
                 processCallback(res, socket);
-                
+
             },
             "readFile": function (token, socket, socketid) {
                 initProcessMap(socketid);
                 var encoding = token.encoding || "utf8";
-                token.path = path.join(baseProjectDir, token.path);
+                token.path = isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
                 readFile(token.path, encoding)
                     .then(function (content) {
                         var res = {
                             id: token.id,
                             type: token.type,
+                            encoding: encoding,
                             content: content,
                             name: token.name,
                             path: token.path,
@@ -550,8 +590,7 @@ function run() {
                     name: token.name,
                     path: token.path
                 };
-                token.path = path.join(baseProjectDir, token.path);
-                
+                token.path = isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
                 writeFile(token.path, token.content, token.encoding, token.opt)
                     .then(function () {
                         processCallback(res, socket);
@@ -598,25 +637,25 @@ function run() {
             },
             "renameFile": function (token, socket, socketid) {
                 initProcessMap(socketid);
-				renameFile(token.oldPath, token.newPath).then(function (res) {
-					processCallback({
+                renameFile(token.oldPath, token.newPath).then(function (res) {
+                    processCallback({
                         type: token.type,
                         id: token.id,
                         socketId: socketid,
                         time: token.time
                     }, socket);
-				}).catch(function (err) {
+                }).catch(function (err) {
                     var msg = "Error while renaming " + token.oldPath + " into " + token.newPath;
                     if (err === "ENOTEMPTY") {
                         msg += " (file with same name already exists)";
                     } else { msg += " (" + err + ")"; }
-				    logger.warn(msg);
-					processCallback({
+                    logger.warn(msg);
+                    processCallback({
                         type: token.type + "_error",
                         id: token.id,
                         socketId: socketid,
                         time: token.time,
-						err: {
+                        err: {
                             oldPath: token.oldPath,
                             newPath: token.newPath,
                             message: err.message,
@@ -624,7 +663,7 @@ function run() {
                             path: err.path
                         }
                     }, socket);
-				});
+                });
             },
             "fileExists": function (token, socket, socketid) {
                 initProcessMap(socketid);
@@ -644,7 +683,9 @@ function run() {
             },
             "readDirectory": function (token, socket, socketid) {
                 initProcessMap(socketid);
-                readDirectory(token.path)
+                var absPath = token.path.indexOf("~") === 0 ? path.join(process.env.HOME, token.path.substr(1))
+                    : isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
+                readDirectory(absPath)
                     .then(function (files) {
                         processCallback({
                             id: token.id,
@@ -658,7 +699,7 @@ function run() {
                             type: token.type + "_error",
                             id: token.id,
                             socketId: socketid,
-                            err: err,
+                            err: err.toString(),
                             time: token.time
                         }, socket);
                     });
@@ -670,7 +711,7 @@ function run() {
                     stat(token.path).then(
                         function (res) {
                             //directory exists: refresh content and send message EEXIST to client
-                            // Note: we refresh the content because this is an existing folder 
+                            // Note: we refresh the content because this is an existing folder
                             // that is visible to the client (the client might not have info about it)
                             unregisterFolderWatcher(token.path, socket);
                             readFolderContent(token, socket).then(function (res) {
@@ -748,7 +789,7 @@ function run() {
                         time: token.time
                     }, socket);
                 }
-                
+
             },
             "deleteDirectory": function (token, socket, socketid) {
                 initProcessMap(socketid);
@@ -785,27 +826,27 @@ function run() {
                 var oldProjectPath = path.join(baseProjectDir, token.oldPath);
                 var newProjectPath = path.join(baseProjectDir, token.newPath);
                 unregisterFolderWatcher(oldProjectPath, socket);
-				renameFile(token.oldPath, token.newPath).then(function (res) {
+                renameFile(token.oldPath, token.newPath).then(function (res) {
                     registerFolderWatcher(newProjectPath, socket);
-					processCallback({
+                    processCallback({
                         type: token.type,
                         id: token.id,
                         socketId: socketid,
                         time: token.time
                     }, socket);
-				}).catch(function (err) {
+                }).catch(function (err) {
                     registerFolderWatcher(oldProjectPath, socket);
                     var msg = "Error while renaming " + token.oldPath + " into " + token.newPath;
                     if (err === "ENOTEMPTY") {
                         msg += " (directory with same name already exists)";
                     } else { msg += " (" + err + ")"; }
-				    logger.warn(msg);
-					processCallback({
+                    logger.warn(msg);
+                    processCallback({
                         type: token.type + "_error",
                         id: token.id,
                         socketId: socketid,
                         time: token.time,
-						err: {
+                        err: {
                             oldPath: token.oldPath,
                             newPath: token.newPath,
                             message: err.message,
@@ -813,7 +854,7 @@ function run() {
                             path: err.path
                         }
                     }, socket);
-				});
+                });
             }
         };
 
@@ -837,6 +878,7 @@ function run() {
                     logger.warn("f is something unexpected -- I expected a function but got type " + typeof f);
                 }
             } catch (error) {
+                logger.error(error.message);
                 logger.warn("Unexpected error while processing token " + JSON.stringify(m));
             }
         });
