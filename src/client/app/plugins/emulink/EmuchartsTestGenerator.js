@@ -71,6 +71,36 @@ define(function (require, exports, module) {
     }
 
     /**
+     * Returns a string of an abstract test for the transition.
+     *
+     * For example, a presentation model called MainWidget
+     * describes an ActionControl titled OtherWidget which
+     * has a behaviour I_SwitchWidget (as detailed below).
+     *
+     * MainWidget : {OtherWidget → I_SwitchWidget}
+     *
+     * Then the test to check that the correct UI is present
+     * in the applicable state is as follows:
+     *
+     * UIState(MainWidget) ⇒
+     *      Widget(OtherWidget)  ∧
+     *      Visible(OtherWidget) ∧
+     *      Active(OtherWidget)  ∧
+     *      hasBehaviour(OtherWidget, I_SwitchWidget)
+     */
+    function getAbstractTestForTransition(transition) {
+        var presentationModel = transition.source.name;
+        var actionControl = transition.target.name;
+        var behaviour = transition.name;
+
+        return "UIState(" + presentationModel + ") => " +
+            "Widget(" + actionControl + ") Λ " +
+            "Visible(" + actionControl + ") Λ " +
+            "Active(" + actionControl + ") Λ " +
+            "hasBehaviour(" + actionControl + ", I_" + behaviour  + ")";
+    }
+
+    /**
      * Returns a string of abstract tests for the emuchart
      */
     EmuchartsTestGenerator.prototype.generateTests = function (emuchart) {
@@ -78,9 +108,14 @@ define(function (require, exports, module) {
         console.log(emuchart);
 
         // add test generation
-        var ans = "no implemented";
+        var tests = "";
 
-        return ans;
+        // Get the tests generated from the transition
+        emuchart.transitions.forEach(function(transition) {
+            tests += getAbstractTestForTransition(transition) + "\n";
+        });
+
+        return tests;
     };
 
     /**
