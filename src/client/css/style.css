@@ -973,4 +973,8 @@ input.input_text{
     color: #898989;
 }
 
-
+#warnings.warnings p {
+    color: red;
+    display: inline;
+    margin: 10px;
+}

@@ -20,7 +20,8 @@ define(function (require, exports, module) {
         ProjectAutoSaver = require("plugins/autoSaver/ProjectAutoSaver"),
         PluginManager  = require("plugins/PluginManager"),
         Constants      = require("util/Constants"),
-        displayQuestion = require("pvsioweb/forms/displayQuestion");
+        displayQuestion = require("pvsioweb/forms/displayQuestion"),
+        BrowserUtils   = require("util/BrowserUtils");
 
     var client = PVSioWebClient.getInstance(),
         pluginManager = PluginManager.getInstance(),
@@ -60,6 +61,15 @@ define(function (require, exports, module) {
         return function (res) {
             return new Promise(function (resolve, reject) {
                 layoutjs({el: "#model-editor-container"});
+                console.log("Browser version: " + BrowserUtils.getVersion());
+                if (BrowserUtils.isBrowserSupported() === false) {
+                    var msg = BrowserUtils.requiredBrowserWarning();
+                    d3.select(".warnings").style("display", "block").append("p").html(msg);
+                    d3.select(".warnings").select("#dismissWarnings").on("click", function () {
+                        d3.select(".warnings").style("display", "none");
+                    });
+                    console.log(msg);
+                }
                 //hide pvsio-web loading screen and make the tool visible
                 if (opt && opt.noSplash) {
                     d3.select("#PVSio-web-logo").style("display", "none");
