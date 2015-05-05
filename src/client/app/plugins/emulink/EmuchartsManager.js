@@ -354,7 +354,262 @@ define(function (require, exports, module) {
             this.importEmucharts({ name: chartName.trim(), content: chart });
         } else { console.log("dbg: warning, undefined or null MUZFile"); }
     };
-    
+
+    /**
+     * Reads in Presentation Interaction Models with corresponding
+     * Presentation Models from a file.
+     * @param file The file to read the models from
+     * @returns {{pims: Array, pms: Array}} The PIMS and PMS from the file
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.importPIMChartV2 = function (fileIn) {
+        /** Index within the file */
+        var index;
+        /** File array */
+        var file;
+        /** Presentation Models array */
+        var pModels = [];
+        /** Presentation Interaction Models array */
+        var pims = [];
+
+        /**
+         * Reads in PIMs (Populates pims)
+         */
+        function readPIMs() {
+            /**
+             * Reads in states
+             * @returns {Array} Array of states for a PIM
+             */
+            function readStates() {
+                var i, n = parseInt(file[index++], 10);
+                var states = [];
+                // Read in states for a PIM
+                for (i = 0; i < n; i++) {
+                    states.push(file[index++]);
+                }
+                return states;
+            }
+
+            /**
+             * Reads in the transitions for a PIM
+             * @returns {Array} Array of transitions for a PIM
+             */
+            function readTransitions() {
+                var i, n = parseInt(file[index++], 10);
+                var transitions = [];
+                var tStartState, tEndState, tBehaviour;
+                // Read in transitions for a PIM
+                for (i = 0; i < n; i++) {
+                    tStartState = file[index++];
+                    tEndState = file[index++];
+                    tBehaviour = file[index++];
+                    transitions.push({
+                        start_state: tStartState,
+                        endState: tEndState,
+                        I_behaviour: tBehaviour
+                    } );
+                }
+                return transitions;
+            }
+
+            var i, n = parseInt(file[index++], 10);
+            var pm, pmName;
+            var pimStates, pimTransitions, pimName, pModel, pimStartState, pimFinalStates;
+
+            // Read in PIMs
+            for (i = 0; i < n; i++) {
+                pimName = file[index++];
+                pimStartState = file[index++];
+
+                pModel = 'undefined';
+                pmName = file[index++];
+                for (pm in pModels) {
+                    if (pModels.hasOwnProperty(pm)) {
+                        if (pModels[pm].name === pmName) {
+                            pModel = pModels[pm];
+                            break;
+                        }
+                    }
+                }
+                // Can't make a PIM without a PM
+                if (pModel === 'undefined') {
+                    throw "PModel (" + pmName + ") not found for PIM";
+                }
+
+                pimStates = readStates();
+                pimFinalStates = readStates();
+                pimTransitions = readTransitions();
+
+                pims.push({
+                    states: pimStates,
+                    transitions: pimTransitions,
+                    name: pimName,
+                    pm: pModel,
+                    start_state: pimStartState,
+                    final_states: pimFinalStates
+                });
+            }
+        }
+
+        /**
+         * Reads in Presentation models (populates pModels)
+         * @param withPMR Do these models have presentation model relations
+         */
+        function readModels(withPMR) {
+            /** Counters used for each PMs widgets and CMs */
+            var widgetsCount, componentModelsCount;
+            /**
+             * Returns the widgets
+             * @returns {Array} Array of widgets
+             */
+            function readWidgets() {
+                /**
+                 * Returns the behaviours for the current widget
+                 * @returns {Array.<T>} Array of behaviours
+                 */
+                function readBehaviours() {
+                    var i, n = parseInt(file[index++], 10);
+                    var behaviours = [];
+                    var behaviour;
+                    // Read in the behaviours for a widget
+                    for (i = 0; i < n; i++) {
+                        behaviour = file[index++];
+                        if (behaviour.charAt(behaviours.length - 1) === '/') {
+                            behaviour = behaviour.slice(0, -1);
+                        }
+                        behaviours.push(behaviour);
+                    }
+                    return behaviours;
+                }
+
+                var widgets = [];
+                var i;
+                var wName, wCategory, wBehaviours;
+                // Read in the widgets
+                for (i = 0; i < widgetsCount; i++) {
+                    wName = file[index++];
+                    wCategory = file[index++];
+                    wBehaviours = readBehaviours();
+                    widgets.push({
+                        name : wName,
+                        category : wCategory,
+                        S_behaviours : wBehaviours
+                    });
+                }
+                return widgets;
+            }
+
+            /**
+             * Returns the presentation model relations
+             * @returns {Array} Array of PMRs
+             */
+            function readPMRs() {
+                var i, n = parseInt(file[index++], 10);
+                var pmrPairs = [];
+                var pmrBehaviour, pmrOperation;
+                // Read in the PMRs for a presentation model
+                for (i = 0; i < n; i++) {
+                    // Add pmr pair
+                    pmrBehaviour = file[index++];
+                    pmrOperation = file[index++];
+
+                    pmrPairs.push({
+                        behaviour : pmrBehaviour,
+                        operation : pmrOperation
+                    });
+                }
+
+                return pmrPairs;
+            }
+
+            /**
+             * Reads in the component models for the presentation model
+             * @returns {Array} Array of component models
+             */
+            function readComponentModels() {
+                var components = [];
+                var i;
+                var cName, pModel;
+                // Read in the component models for a presentation model
+                for (i = 0; i < componentModelsCount; i++) {
+                    cName = file[index++];
+                    for (pModel in pModels) {
+                        if (pModels.hasOwnProperty(pModel)) {
+                            if (cName === pModels[pModel].name) {
+                                components.push(pModels[pModel]);
+                            }
+                        }
+                    }
+                }
+                return components;
+            }
+
+            var i, n = parseInt(file[index++], 10);
+            var pmName, pmr, pmWidgets, pmComponentModels;
+            // Read in the presentation models
+            for (i = 0; i < n; i++) {
+                pmName = file[index++];
+                pmr = [];
+
+                // Need to read these in together
+                widgetsCount = parseInt(file[index++], 10);
+                componentModelsCount = parseInt(file[index++], 10);
+
+                pmWidgets = readWidgets();
+
+                if (withPMR) {
+                    pmr = readPMRs();
+                }
+
+                pmComponentModels = readComponentModels();
+
+                pModels.push({
+                    name: pmName,
+                    widgets: pmWidgets,
+                    components: pmComponentModels,
+                    pmr: pmr
+                });
+            }
+        }
+
+        // Read file
+        if (fileIn && fileIn.content) {
+            index = 0;
+            // Split the file on new line, trim and remove empty lines
+            file = fileIn.content.split("\n").map(function(s) { return s.trim(); }).filter(function(s){ return s; });
+
+            readModels(false);
+            // If more to read in file
+            if (index < file.length -1) {
+                while (file[index] === "") {
+                    index++;
+                }
+
+                if (file[index++] === "====") {
+                    readModels(true);
+                }
+            }
+            // If more to read in file
+            if (index < file.length -1) {
+                while (file[index] === "") {
+                    index++;
+                }
+
+                if (file[index++] === "====") {
+                    readPIMs();
+                }
+            }
+        }
+
+        // TODO: update the EmuChart model with PIM models
+
+        // Return the read in PIMs and PMs
+        return {
+            pims: pims,
+            pms: pModels
+        };
+    }
+
     /**
 	 * Draws the diagrams stored in _emucharts.
 	 * @memberof EmuchartsManager

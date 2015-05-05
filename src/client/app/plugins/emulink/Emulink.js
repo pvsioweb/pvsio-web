@@ -422,14 +422,14 @@ define(function (require, exports, module) {
                     if (res.name.lastIndexOf(".emdl") === res.name.length - 5) {
                         res.content = JSON.parse(res.content);
                         emuchartsManager.importEmucharts(res);
-                        if (callback && typeof callback === "function") {
-                            callback(err, res);
-                        }
-                    } else {
+                    } else if (res.name.lastIndexOf(".muz") === res.name.length - 4) {
                         emuchartsManager.importPIMChart(res);
-                        if (callback && typeof callback === "function") {
-                            callback(err, res);
-                        }
+                    } else {
+                        // Try parse as PIM
+                        emuchartsManager.importPIMChartV2(res);
+                    }
+                    if (callback && typeof callback === "function") {
+                        callback(err, res);
                     }
                 } else {
                     console.log("Error while opening file (" + err + ")");
