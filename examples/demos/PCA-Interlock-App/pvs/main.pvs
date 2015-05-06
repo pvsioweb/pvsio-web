@@ -1,0 +1,40 @@
+% PCA Interlock App -- basic version, supports 1 PCA pump and 1 patient monitor
+main: THEORY
+ BEGIN
+
+  min_spo2: nonneg_real = 88
+  max_spo2: nonneg_real = 100
+  MonitorOutput: TYPE = [# spo2: real #]
+  MonitorAPI: TYPE = [#
+    output: MonitorOutput
+  #]
+
+  PumpCommand: TYPE = { keep, pause }
+  PumpInput: TYPE = [# cmd: PumpCommand #]
+  PumpAPI: TYPE = [#
+    input: PumpInput
+  #]
+
+
+  state: TYPE = [#
+    monitor: MonitorAPI,
+    pump: PumpAPI
+  #]
+
+  init(x: real): state = (#
+    monitor := (# output := (# spo2 := 0 #) #),
+    pump := (# input := (# cmd := keep #) #)
+  #)
+
+  tick(st: state): state =
+    COND
+      spo2(output(monitor(st))) <= min_spo2 OR spo2(output(monitor(st))) >= max_spo2
+        -> st WITH [ pump := pump(st) WITH [ input := (# cmd := pause #) ]],
+      spo2(output(monitor(st))) > min_spo2 AND spo2(output(monitor(st))) < max_spo2
+        -> st WITH [ pump := pump(st) WITH [ input := (# cmd := keep #) ]]
+    ENDCOND
+
+  update_spo2(v: real)(st: state): state =
+    st WITH [ monitor := monitor(st) WITH [ output := (# spo2 := v #) ]]
+
+ END main

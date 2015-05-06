@@ -3,23 +3,47 @@ main: THEORY
 
   Alarm: TYPE = { off, mute, alarm }
 
+  MonitorOutput: TYPE = [# spo2: real #]
+  MonitorAPI: TYPE = [#
+    output: MonitorOutput
+  #]
+
   state: TYPE = [#
+    id: string,
     spo2: real, % sensor data
     spo2_max: nonneg_real,
     spo2_min: nonneg_real,
     spo2_label: string,
     spo2_alarm: Alarm,
-    isOn: bool
+    spo2_fail: bool,
+    isOn: bool,
+    output: MonitorOutput
   #]
 
   init(x: real): state = (#
+    id := "Radical7",
     spo2 := x,
     spo2_max := 0,
     spo2_min := 88,
     spo2_label := "SpO2",
     spo2_alarm := off,
-    isOn := false
+    spo2_fail := false,
+    isOn := false,
+    output := (# spo2 := x #)
   #)
+
+  init(x: real, id: string): state = (#
+    id := id,
+    spo2 := x,
+    spo2_max := 0,
+    spo2_min := 88,
+    spo2_label := "SpO2",
+    spo2_alarm := off,
+    spo2_fail := false,
+    isOn := false,
+    output := (# spo2 := x #)
+  #)
+
 
   per_on(st: state): bool = true
   on(st: (per_on)): state = st WITH [ isOn := NOT isOn(st) ]
@@ -36,10 +60,12 @@ main: THEORY
     ENDCOND
 
   check_vitals(st: state): state =
-    IF ((spo2_max(st) > 0) AND (spo2(st) >= spo2_max(st))) OR
-       ((spo2_min(st) > 0) AND (spo2(st) <= spo2_min(st)))
-    THEN st WITH [ spo2_alarm := alarm ]
-    ELSE st WITH [ spo2_alarm := off ] ENDIF
+    IF spo2_fail(st) = FALSE THEN
+        IF ((spo2_max(st) > 0) AND (spo2(st) >= spo2_max(st))) OR
+    	((spo2_min(st) > 0) AND (spo2(st) <= spo2_min(st)))
+	    THEN st WITH [ spo2_alarm := alarm ]
+	    ELSE st WITH [ spo2_alarm := off ] ENDIF
+    ELSE st WITH [ spo2_alarm := alarm ] ENDIF
 
   tick(st: state): state =
     COND
@@ -48,6 +74,6 @@ main: THEORY
     ENDCOND
   
   spo2_sensor_data(x: real)(st: state): state =
-    st WITH [ spo2 := x ]
+    st WITH [ spo2 := x, spo2_fail := (x < 0 OR x > 100) ]
 
  END main

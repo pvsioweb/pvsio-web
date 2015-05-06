@@ -24,6 +24,7 @@ alaris_th [
   % pump via device
   %  attributes
   alaris: TYPE = [#
+    id: string,
     device : pump,
     topline: iline, % [vis]
     middisp: imid,  % [vis]

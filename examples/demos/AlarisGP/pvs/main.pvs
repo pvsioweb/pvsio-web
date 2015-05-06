@@ -23,7 +23,8 @@ main :THEORY
      time := 0,
      kvorate := infusemin
   #)
-  alaris_init: alaris = (#
+  alaris_init(ID: string): alaris = (#
+    id := ID,
     device := device_init,
     topline := dispblank,
     middisp := LAMBDA (x: upto(9)): FALSE,
@@ -60,6 +61,7 @@ main :THEORY
   #)
 
   state: TYPE = [#
+    id: string,
     device : pump,
     topline: iline, % [vis]
     middisp: list[bool], %imid,  % [vis]
@@ -105,6 +107,7 @@ main :THEORY
   #]
 
   alaris2state(st: alaris): state = (#
+    id := id(st),
     device := device(st),
     topline := topline(st),
     middisp := (: middisp(st)(0), middisp(st)(1), middisp(st)(2), middisp(st)(3), middisp(st)(4), middisp(st)(5), middisp(st)(6), middisp(st)(7), middisp(st)(8), middisp(st)(9) :),
@@ -150,6 +153,7 @@ main :THEORY
   CONVERSION alaris2state
 
   state2alaris(st: state): alaris = (#
+    id := id(st),
     device := device(st),
     topline := topline(st),
     middisp := LAMBDA (x: upto(9)): nth(middisp(st), x),
@@ -176,7 +180,8 @@ main :THEORY
   #)
   CONVERSION state2alaris
 
-  init(x: real): state = alaris_init
+  init(x: real): state = alaris_init("AlarisGP")
+  init(x: real, ID: string): state = alaris_init(ID)
 
   click_btn_on(st: alaris): state =
     COND
