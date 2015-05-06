@@ -1330,33 +1330,33 @@ define(function (require, exports, module) {
             }
         });
         d3.select("#btn_menuTestGenerator").on("click", function () {
-            var emucharts = {
-                name: ("emucharts_" + projectManager.project().name()),
-                author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
-                },
-                importings: [],
-                constants: emuchartsManager.getConstants(),
-                variables: emuchartsManager.getVariables(),
-                states: emuchartsManager.getStates(),
-                transitions: emuchartsManager.getTransitions(),
-                initial_transitions: emuchartsManager.getInitialTransitions()
-            };
-            var model = emuchartsTestGenerator.print(emucharts);
-            console.log(model);
-            if (model.err) {
-                console.log(model.err);
-                return;
-            }
-            if (model.res) {
-                var name = emucharts.name + ".txt";
-                var content = model.res;
-                return projectManager.project().addFile(name, content, { overWrite: true });
-            } else {
-                console.log("Warning, TestGenerator model is undefined.");
-            }
+            var models;
+            // Generate tests from importing a file
+            fs.openLocalFileAsText(function (err, res) {
+                if (res) {
+                    // Try parse as PIM
+                    models = emuchartsManager.importPIMChartV2(res);
+                    var tests = emuchartsTestGenerator.print(models);
+                    console.log(tests);
+                    if (tests.err) {
+                        console.log(tests.err);
+                        return;
+                    }
+
+                    if (tests.res) {
+                        var name = tests.name + ".txt";
+                        var content = tests.res;
+                        return projectManager.project().addFile(name, content, { overWrite: true });
+
+                    } else {
+                        console.log("Warning, TestGenerator model is undefined.");
+                    }
+
+                } else {
+                    console.log("Error while opening file (" + err + ")");
+                }
+
+            }, { header: "Open PIM file...", });
         });
 
 

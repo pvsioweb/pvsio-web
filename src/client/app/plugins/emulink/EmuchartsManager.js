@@ -359,7 +359,7 @@ define(function (require, exports, module) {
      * Reads in Presentation Interaction Models with corresponding
      * Presentation Models from a file.
      * @param file The file to read the models from
-     * @returns {{pims: Array, pms: Array}} The PIMS and PMS from the file
+     * @returns {{pims: Array, pms: Array}} The PIMs and PMs from the file
      * @memberof EmuchartsManager
      */
     EmuchartsManager.prototype.importPIMChartV2 = function (fileIn) {
@@ -385,7 +385,7 @@ define(function (require, exports, module) {
                 var states = [];
                 // Read in states for a PIM
                 for (i = 0; i < n; i++) {
-                    states.push(file[index++]);
+                    states.push({ name: file[index++] });
                 }
                 return states;
             }
@@ -419,7 +419,7 @@ define(function (require, exports, module) {
             // Read in PIMs
             for (i = 0; i < n; i++) {
                 pimName = file[index++];
-                pimStartState = file[index++];
+                pimStartState = { name: file[index++] };
 
                 pModel = 'undefined';
                 pmName = file[index++];
@@ -603,11 +603,14 @@ define(function (require, exports, module) {
 
         // TODO: update the EmuChart model with PIM models
 
-        // Return the read in PIMs and PMs
-        return {
+
+        var models = {
             pims: pims,
             pms: pModels
         };
+        console.log(models);
+        // Return the read in PIMs and PMs
+        return models;
     }
 
     /**
