@@ -1336,7 +1336,7 @@ define(function (require, exports, module) {
                 if (res) {
                     // Try parse as PIM
                     models = emuchartsManager.importPIMChartV2(res);
-                    var tests = emuchartsTestGenerator.print(models);
+                    var tests = emuchartsTestGenerator.print(res.name, models);
                     console.log(tests);
                     if (tests.err) {
                         console.log(tests.err);

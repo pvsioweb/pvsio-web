@@ -12,7 +12,7 @@
         }),
     transitions: (array of {
                 start_state: (string), // Initial state
-                endState: (string),    // End state
+                end_state: (string),    // End state
                 I_behaviour: (string)  // Action on transition (Interactive behaviour)
         }),
     name: (string),
@@ -100,7 +100,7 @@ define(function (require, exports, module) {
                     // The behaviour is on this widget
                     tArgs.push(widget.name);
                     // The behaviours this widget has (add all)
-                    tArgs.push.apply(tArgs, widget.S_behaviours);
+                    tArgs.push.apply(tArgs, widget.S_behaviours.reverse());
 
                     var pName = "hasBehaviour";
 
@@ -128,93 +128,269 @@ define(function (require, exports, module) {
             return componentTests;
         }
 
+
         /**
-         * Generage the tests for the states within a PM / PIM
-         * @param pm PM to get state tests for
-         * @returns {Array} Array of state tests for the PM / PIM
+         * Generate the all the tests for the states within a PM / PIM
+         * @param pm PM / PIM to get state tests for
+         * @returns {string} A string of all the states tests
          */
         function stateTests(pm) {
             /**
-             * Get the tests for a PM
-             * @param pm
-             * @returns AbstractTest {
-             *          state_name: (string),
-             *          widget_name: (string),
-             *          predicates: (array of {
-             *                  name: (string),
-             *                  args: (array of string)
-             *              }) or null
-             *      }
+             * Generate the tests for the states within a PM / PIM recursively
+             * @param pm PM / PIM to get state tests for
+             * @returns {Array} if PIM or {object} if PM of state test(s)
              */
-            function addState(pm) {
-                if (pm.widgets.length === 0) {
-                    return null;
+            function stateTestsRec(pm) {
+                /**
+                 * Get the tests for a PM
+                 * @param pm
+                 * @returns object {
+                 *          state_name: (string),
+                 *          widget_name: (string),
+                 *          predicates: (array of {
+                 *                  name: (string),
+                 *                  args: (array of string)
+                 *              }) or null
+                 *      }
+                 */
+                function addState(pm) {
+                    if (pm.widgets.length === 0) {
+                        return null;
+                    }
+
+                    var tPredicates = [];
+                    // Add widgets predicates
+                    pm.widgets.forEach(function (widget) {
+                        // Add to beginning (unshift)
+                        tPredicates.unshift({ name: "" });
+                        tPredicates.unshift({ name: "Active", args: [widget.name] });
+                        tPredicates.unshift({ name: "Visible", args: [widget.name] });
+                        tPredicates.unshift({ name: "hasWidget", args: [widget.name] });
+                    });
+
+                    return {
+                        state_name: pm.name,
+                        widget_name: pm.widgets[0].name,
+                        predicates: tPredicates
+                    };
                 }
 
-                var tPredicates =[];
-                // Add widgets predicates
-                pm.widgets.forEach(function(widget) {
-                    tPredicates.push({ name: "hasWidget", args: [widget.name] });
-                    tPredicates.push({ name: "Visible", args: [widget.name] });
-                    tPredicates.push({ name: "Active", args: [widget.name] });
-                    tPredicates.push({ name: "" });
-                });
+                if (pm.components.length === 0) {
+                    return addState(pm);
+                }
 
-                return {
-                    state_name: pm.name,
-                    widget_name: pm.widgets[0].name,
-                    predicates: tPredicates
-                };
-            }
-
-            var tests = [];
-            if (pm.components === 0) {
-                tests.push(addState(pm));
-            } else {
+                var tests = [];
                 pm.components.forEach(function (comp) {
-                    tests.push(stateTests(comp));
+                    tests.push(stateTestsRec(comp));
                 });
+
+                return tests;
             }
 
-            return tests;
-        }
-
-        function printStateTests(tests) {
-            var testStr = "";
-            tests.forEach(function(test) {
-                if (test === null) {
-                    return;
-                }
+            /**
+             * Transforms a state test into the correct format to display
+             * @param test Test to display
+             * @returns {string} The formatted state test
+             */
+            function printStateTest(test) {
+                var testStr = "";
                 testStr += "State(" + test.state_name + ") => ";
-                // testString += "\n\t";
+            //    testStr += "\n\t";
                 test.predicates.forEach(function (p) {
                     // Split condition
                     if (p.name === "") {
                         // Replace with "" if want all on the same line
                         testStr += "\n\t";
                     } else {
-                        testStr += p.name + "(" + p.args.join(", ") + ")/\\";
+                        testStr += p.name + "(" + p.args.join(", ") + ") " + "Λ" + " ";
                     }
                 });
-                // slice to remove last '/\\n\t'
-                testStr = testStr.slice(0, -4);
-                testStr += "\n";
+                // slice to remove last '/\ \n\t' -> \n
+                testStr = testStr.substring(0, testStr.lastIndexOf("Λ")) + "\n";
+                return testStr;
+            }
+
+            /**
+             * Display the state tests
+             * @param tests Tests to display
+             * @returns {string} A string of all the state
+             * tests for the PM / PIM
+             */
+            function printStateTests(tests) {
+                var testsStr = "";
+                // If the tests are for a PIM, else for PM
+                if (tests.forEach) {
+                    tests.forEach(function (test) {
+                        if (!test || !test.predicates) {
+                            return;
+                        }
+                        testsStr += printStateTest(test);
+                    });
+                } else {
+                    testsStr += printStateTest(tests);
+                }
+
+                return testsStr;
+            }
+
+            var tests = stateTestsRec(pm);
+
+            return printStateTests(tests);
+        }
+        /**
+         * Generate the all the tests for behaviours within a PM / PIM
+         * @param tests The generated tests
+         * @param pm PM / PIM to get behaviour tests for
+         * @returns string A string of all the behaviour tests
+         * TODO tidy function
+         */
+        function behaviourTests(tests, pm) {
+            var iBehav = [], sBehav = [], sRespBehav = [], noBehav = [];
+
+            // Split the Behaviour based tests into each type of behaviour
+            tests.forEach(function (test) {
+                test.predicates.forEach(function (p) {
+                    if(p.name === "hasBehaviour") {
+                        // Remove the Widget name from the args
+                        p.args.splice(1, p.args.length - 1)
+                            .forEach(function (arg) {
+                            var sub = arg.substring(0, 2);
+                            if (sub === "I_") {
+                                // Is I_Behaviour
+                                // If PIM find details in transitions
+                                if (pm.pm) {
+                                    pm.transitions.forEach(function (tran) {
+                                        if (tran.I_behaviour === arg) {
+                                            iBehav.push({
+                                                start_state: tran.start_state,
+                                                // TODO: check that this is not meant to be p.args
+                                                /*
+                                                 * In PIMed the predicates are printed out by
+                                                 * predicates(0).args.toString. Could be simulated
+                                                 * as "List(" + p.args[0] + ")";
+                                                 */
+                                                predicates: test.predicates[0].args,
+                                                end_state: tran.end_state
+                                            });
+                                        }
+                                    });
+                                }
+                            } else if (sub === "S_") {
+                                // Is S_Behaviour
+                                sBehav.push({
+                                    state_name: test.state_name,
+                                    interaction: test.widget_name,
+                                    gen_behaviour: arg
+                                });
+                            }
+                            // else incorrectly named PIM / PM behaviours
+                        });
+                    } else if (p.name === "resBehaviour") {
+                        // Remove the Widget name from the args
+                        p.args.splice(1, p.args.length - 1)
+                            .forEach(function (arg) {
+                            var sub = arg.substring(0, 2);
+                            if (sub === "S_") {
+                                sRespBehav.push({
+                                    state_name: test.state_name,
+                                    widget_name: test.widget_name,
+                                    res_behaviour: arg
+                                });
+                            }
+                        });
+                    }
+                });
+
+                // Has no behaviour
+                if (test.predicates.length === 3) {
+                    noBehav.push({
+                        state_name: test.state_name,
+                        widget_name: test.widget_name
+                    });
+                }
             });
 
-            return testStr;
+            /**
+             * Display the I_behaviour tests
+             * @param tests I_behaviour tests to display
+             * @returns {string} A string of all the I_behaviour
+             * tests for the PM / PIM
+             */
+            function printIBehaviourTests(tests) {
+                var testsStr = "";
+                tests.forEach(function(test) {
+                    testsStr += "State(" + test.start_state + ") " + "Λ" + " ";
+                    // TODO this not need the list?
+                    testsStr += "Interaction(List(" + test.predicates.join(",") + ")) ";
+                    testsStr += "=> State(" + test.end_state + ")\n";
+                });
+                return testsStr;
+            }
+
+            /**
+             * Display the S_behaviour tests that are not responses
+             * @param tests S_behaviour tests to display
+             * @returns {string} A string of all the S_behaviour
+             * tests for the PM / PIM
+             */
+            function printSBehaviourTests(tests) {
+                var testsStr = "";
+                tests.forEach(function(test) {
+                    testsStr += "State(" + test.state_name + ") " + "Λ" + " ";
+                    testsStr += "Interaction(" + test.interaction + ") => ";
+                    testsStr += "genBehaviour(" + test.gen_behaviour + ")\n";
+                });
+                return testsStr;
+            }
+
+            /**
+             * Display the S_behaviour tests that are responses
+             * @param tests S_behaviour tests to display
+             * @returns {string} A string of all the S_behaviour
+             * tests for the PM / PIM
+             */
+            function printSRespBehaviourTests(tests) {
+                var testsStr = "";
+                tests.forEach(function(test) {
+                    testsStr += "State(" + test.state_name + ") => ";
+                    // TODO this not need the list?
+                    testsStr += "respBehaviour(List(" + test.widget_name + ", " + test.res_behaviour + "))\n";
+                });
+                return testsStr;
+            }
+
+            /**
+             * Display the no behaviour tests
+             * @param tests no behaviour tests to display
+             * @returns {string} A string of all the no behaviour
+             * tests for the PM / PIM
+             */
+            function printNoBehaviourTests(tests) {
+                var testsStr = "";
+                tests.forEach(function(test) {
+                    testsStr += "State(" + test.state_name + ") " + "Λ" + " ";
+                    testsStr += "Interaction(" + test.widget_name + ") => ";
+                    testsStr += "genBehaviour(NONE) " + "Λ" + " respBehaviour(NONE)\n";
+                });
+                return testsStr;
+            }
+
+            var behaviourTestsStr = [];
+            behaviourTestsStr.push(printIBehaviourTests(iBehav));
+            behaviourTestsStr.push(printSBehaviourTests(sBehav));
+            behaviourTestsStr.push(printSRespBehaviourTests(sRespBehav));
+            behaviourTestsStr.push(printNoBehaviourTests(noBehav));
+            // Only put a newline after types of tests that actually have tests in them
+            return behaviourTestsStr.filter(function(s){ return s; }).join("\n");
         }
 
         // add test generation
         var tests = "";
-
         // Get tests for the PIM / PM
         var _tests = genTests(pm.pm || pm);
         // Print state tests
-        tests += printStateTests(stateTests(pm.pm || pm));
-    //    tests += printIBehaviourTests(IBehaviourTests(_tests));
-    //    tests += printSBehaviourGenTests(SBehaviourGenTests(_tests));
-    //    tests += printSBehaviourResTests(SBehaviourResTests(_tests));
-    //    tests += printNoBehaviourTests(noBehaviourTests(_tests));
+        tests += stateTests(pm.pm || pm) + "\n";
+        tests += behaviourTests(_tests, pm);
 
         return tests;
     };
@@ -242,30 +418,38 @@ define(function (require, exports, module) {
     /**
      * Returns a string of abstract tests for the emuchart to be saved in a file
      */
-    EmuchartsTestGenerator.prototype.print = function (models) {
+    EmuchartsTestGenerator.prototype.print = function (name, models) {
         var _this = this;
 
+        // Print PIM tests
         var ans = "Tests for Presentation Interaction Models:\n";
-        // Foreach pim generate tests
-        models.pims.forEach(function(pim) {
-            ans += _this.printDescriptor("PIM", pim) + "\n";
-            ans += _this.generateTests(pim) + "\n";
-        });
+        if (models.pims.length === 0) {
+            ans += "Unable to find any PIMs in file.\n";
+        } else {
+            // Foreach pim generate tests
+            models.pims.forEach(function (pim) {
+                ans += _this.printDescriptor("PIM", pim) + "\n";
+                ans += _this.generateTests(pim) + "\n";
+            });
+        }
 
-        ans += "\nTests for Presentation Models:\n"
+        // Print PM tests
+        ans += "\nTests for Presentation Models:\n";
+        if (models.pms.length === 0) {
+            ans += "Unable to find any PMs in file.\n";
+        } else {
+            models.pms.forEach(function (pm) {
+                // Only test the PMs
+                ans += _this.printDescriptor("PM", pm) + "\n";
+                ans += _this.generateTests(pm) + "\n";
+            });
+        }
 
-        models.pms.forEach(function(pm) {
-            // Only test the PMs
-            if (pm.components.length !== 0) {
-                return;
-            }
-            ans += _this.printDescriptor("PM", pm) + "\n";
-            ans += _this.generateTests(pm) + "\n";
-        });
+        ans += _this.printDisclaimer() + "\n";
 
-        ans += this.printDisclaimer() + "\n";
-        //TODO: change name on model
-        return { name: "PIM_tests", res: ans };
+        // Remove file extension
+        name = name.substr(0, name.lastIndexOf('.'));
+        return { name: name + "_PM_tests", res: ans };
     };
 
     module.exports = EmuchartsTestGenerator;

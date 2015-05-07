@@ -358,7 +358,7 @@ define(function (require, exports, module) {
     /**
      * Reads in Presentation Interaction Models with corresponding
      * Presentation Models from a file.
-     * @param file The file to read the models from
+     * @param fileIn The file to read the models from
      * @returns {{pims: Array, pms: Array}} The PIMs and PMs from the file
      * @memberof EmuchartsManager
      */
@@ -405,7 +405,7 @@ define(function (require, exports, module) {
                     tBehaviour = file[index++];
                     transitions.push({
                         start_state: tStartState,
-                        endState: tEndState,
+                        end_state: tEndState,
                         I_behaviour: tBehaviour
                     } );
                 }
@@ -605,8 +605,8 @@ define(function (require, exports, module) {
 
 
         var models = {
-            pims: pims,
-            pms: pModels
+            pims: pims.reverse(),
+            pms: pModels.reverse()
         };
         console.log(models);
         // Return the read in PIMs and PMs
