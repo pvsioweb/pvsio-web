@@ -25,6 +25,8 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
      * Websocket used to communicate with SAPERE
      */
     var sapere_websocket;
+    var deviceID = "Radical";
+    var deviceAdded;
 
     var d3 = require("d3/d3");
     var serverLogs = [], maxLogSize = 40;
@@ -190,9 +192,9 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
             logLines.exit().remove();
 
             // sapere
-            registerNewDevice().then(function (res) {
-                sapere_websocket.send(dbg);
-            });
+            if(deviceAdded){
+                sendDataUpdate(event.data.toString());
+            }
             
             // rendering
             var res = event.data.toString();
@@ -259,50 +261,51 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
         node.scrollTop = node.scrollHeight;
         //$("#" + logger).animate({ scrollTop: $("#" + logger)[0].scrollHeight}, 500);
     }
-    
-    function registerNewDevice() {
-        function sendMessage() {
-            logOnDiv('Adding Device', 'sapere_response_log');
-            var DeviceAction = {
-                action: "add",
-                name: "Radical",
-                type: "Monitor",
-                description: "Radical monitor description"
-            };
-            sapere_websocket.send(JSON.stringify(DeviceAction));            
-        }
-        return new Promise(function (resolve, reject) {
-            connectSapere().then(function (res) {
-                sendMessage();
-                resolve();
-            }).catch(function (err) { reject(err); });
-        });
-    }
 
     /**
      * @function enable_button
      * @description Binding user interface buttons, in this case there is only the connect button.
      * @memberof module:Radical7
      */
-    function enableAddButton() {
+    function enableButtons() {
         logOnDiv('Button enabled', 'sapere_response_log');
-        d3.select('.btnAddDevice').on('click', registerNewDevice);
+        d3.select('.btnAddDevice').on('click', function () {
+            addDevice();
+        });
 
         d3.select('.btnUpdateDevice').on('click', function () {
             var message = document.getElementById('updateMessage').value;
-            logOnDiv('Sending Message '+ message, 'sapere_response_log');
-            var DeviceAction = {
-                action: "update",
-                deviceID: "Radical",
-                message: message,
-            };
-            sapere_websocket.send(JSON.stringify(DeviceAction));
+            sendDataUpdate(message);
         });
     }
-    
-    function connectDevice() {
-        d3.select('.btnAddDevice').click();
+
+    function addDevice(){
+        if (!deviceAdded){
+            logOnDiv('Adding Device', 'sapere_response_log');
+            var DeviceAction = {
+                action: "add",
+                deviceID: deviceID,
+                type: "Monitor",
+                description: "Radical monitor description"
+            };
+            sapere_websocket.send(JSON.stringify(DeviceAction));
+        }
+        else{
+            logOnDiv('Device already added!', 'sapere_response_log');
+        }
     }
+
+    function sendDataUpdate(message){
+
+        logOnDiv('Sending Message \n'+ message, 'sapere_response_log');
+        var DeviceAction = {
+            action: "update",
+            deviceID: deviceID,
+            message: message,
+        };
+        sapere_websocket.send(JSON.stringify(DeviceAction));
+    }
+
 
 
     /**
@@ -313,7 +316,7 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
      * @memberof module:Pacemaker-Sapere
      */
     var connectSapere = function () {
-        var url = "ws://localhost:8080/websocket/actions",
+        var url = "ws://localhost:8080/SapereEE/actions",
             sapere_log = "sapere_response_log",
             device = "Radical7";
         
@@ -330,8 +333,8 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
                  */
                 sapere_websocket.onopen = function () {
                     logOnDiv(device + " successfully connected to the network!", sapere_log);
-                    enableAddButton();
-                    connectDevice();
+                    enableButtons();
+                    addDevice();
                     resolve();
                 };
                 /*
@@ -366,26 +369,29 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
      * Parse the data sent from Sapere and send it to PVS in order to process it
      * @memberof module:Pacemaker-Sapere
      */
-    function onMessageReceivedSapere(evt) {
-        //var message_received = prettyprintReceivedData(evt.data);
-        var message_received = evt.data;
-        console.log('Message received from SAPERE: ' + message_received);
-        logOnDiv('<-RECEIVED<br>' + message_received, 'sapere_response_log');
-        if (!sapere_websocket) {
-            //pvsio_websocket.sendGuiAction('alaris_tick(10)( ' + message_received + ' )( ' + prettyprintPVSioOutput(pvsio_websocket.lastState()) + ' );', onMessageReceivedPVSio);
-            //logOnDiv('  <<<<<<<<<<<<<<<<    SENT TO PVSio                   ' + '<' + 'br>' + 'alaris_tick(10)( ' + message_received + ' )( ' + prettyprintPVSioOutput(pvsio_websocket.lastState()) + ' );', 'orchestrator');
+    function onMessageReceivedSapere(event) {
+        var text = event.data;
+
+        // JSON FORMAT
+        if (/^[\],:{}\s]*$/.test(text.replace(/\\["\\\/bfnrtu]/g, '@').
+                replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
+                replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+
+            var device = JSON.parse(event.data);
+
+            if (device.action === "remove") {
+                logOnDiv('Device removed', 'sapere_response_log');
+                deviceAdded = false;
+            }
+            if (device.action === "add") {
+                logOnDiv('Device added', 'sapere_response_log');
+                deviceAdded = true;
+            }
+        } // NO JSON
+        else{
+            logOnDiv(text, "sapere_response_log");
         }
     }
-
-
-    // TODO: need to understand how to use Buttons
-//    var btn_on = new Button("btn_on");
-//    btn_on.recallRate(250);
-//    btn_on.evts("click");
-//    btn_on.functionText("btn_on");
-//    var region_btn_on = d3.select(".btn_on");
-//    btn_on.element(region_btn_on);
-//    btn_on.createImageMap(client.getWebSocket(), onMessageReceived);
 
 
     //register event listener for websocket connection from the client
@@ -405,5 +411,7 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
 	});
 	
 	client.connectToServer();
+
+    connectSapere();
 	
 });

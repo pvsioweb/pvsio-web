@@ -3,11 +3,6 @@ main: THEORY
 
   Alarm: TYPE = { off, mute, alarm }
 
-  MonitorOutput: TYPE = [# spo2: real #]
-  MonitorAPI: TYPE = [#
-    output: MonitorOutput
-  #]
-
   state: TYPE = [#
     id: string,
     spo2: real, % sensor data
@@ -16,8 +11,7 @@ main: THEORY
     spo2_label: string,
     spo2_alarm: Alarm,
     spo2_fail: bool,
-    isOn: bool,
-    output: MonitorOutput
+    isOn: bool
   #]
 
   init(x: real): state = (#
@@ -28,8 +22,7 @@ main: THEORY
     spo2_label := "SpO2",
     spo2_alarm := off,
     spo2_fail := false,
-    isOn := false,
-    output := (# spo2 := x #)
+    isOn := false
   #)
 
   init(x: real, id: string): state = (#
@@ -40,8 +33,7 @@ main: THEORY
     spo2_label := "SpO2",
     spo2_alarm := off,
     spo2_fail := false,
-    isOn := false,
-    output := (# spo2 := x #)
+    isOn := false
   #)
 
 
