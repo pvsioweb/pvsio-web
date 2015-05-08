@@ -21,7 +21,6 @@ define(function (require, exports, module) {
     "use strict";
 
     var d3 = require("d3/d3");
-//    var black, white;
 
     /**
      * @function <a name="LED">LED</a>
@@ -45,8 +44,9 @@ define(function (require, exports, module) {
         this.smallFont = (this.height * 0.8) + "px " + (opt.font || "sans-serif");
         this.align = opt.align || "center";
         this.textBaseline = "middle";
-        this.radius = opt.radius || 4;
+        this.radius = opt.radius || 3;
         this.color = opt.color || "#00FF66"; // default is light green
+        this.blinking = opt.blinking || false; // TO BE IMPLEMENTED
         this.div = d3.select("#" + this.parent)
                         .append("div").style("position", "absolute")
                         .style("top", this.top + "px").style("left", this.left + "px")
@@ -57,11 +57,14 @@ define(function (require, exports, module) {
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0)
                         .style("vertical-align", "top");
+        this.timer = null;
+        this.isOn = false;
         return this;
     }
 
     LED.prototype.render = function (opt) {
         opt = opt || {};
+        var _this = this;
         var context = document.getElementById(this.id + "_canvas").getContext("2d");
         context.beginPath();
         context.globalAlpha = 0.9;
@@ -69,24 +72,51 @@ define(function (require, exports, module) {
         context.fillStyle = opt.color || this.color;
         context.fill();
         if (!opt.noborder) { context.stroke(); }
+        if (opt.blinking || this.blinking) {
+            var rate = opt.blinkingRate || 3000;
+            if (!this.timer) {
+                this.timer = setInterval(function () {
+                    _this.toggle();
+                }, rate);
+            }
+        }
         this.reveal();
         return this;
     };
 
+    LED.prototype.toggle = function (opt) {
+        if (this.isOn === true) {
+            this.hide();
+        } else {
+            this.reveal();
+        }
+        return this;
+    };
+    
     LED.prototype.on = function (opt) {
+        this.isOn = true;
         this.render(opt);
+        return this;
     };
 
     LED.prototype.off = function () {
+        this.isOn = false;
         this.hide();
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+        return this;
     };
 
     LED.prototype.hide = function () {
         this.div.style("display", "none");
+        return this;
     };
 
     LED.prototype.reveal = function () {
         this.div.style("display", "block");
+        return this;
     };
 
     module.exports = LED;
