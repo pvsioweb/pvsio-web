@@ -164,6 +164,23 @@ function run() {
             });
         }
     }
+    
+    function startSapereEE(cb) {
+        var cmd = __dirname + "/lib/SapereEE/bin/asadmin start-domain";
+        procWrapper().exec({
+            command: cmd,
+            callBack: cb
+        });
+    }
+    
+    function stopSapereEE(cb) {
+        var cmd = __dirname + "/lib/SapereEE/bin/asadmin stop-domain";
+        procWrapper().exec({
+            command: cmd,
+            callBack: cb
+        });
+    }
+    
     /**
         Creates a function that updates the path of the parameter object such that it is relative to the
         basePath specified
@@ -855,6 +872,63 @@ function run() {
                         }
                     }, socket);
                 });
+            },
+            "startSapereEE": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time
+                };
+                try {
+                    startSapereEE(function (err, stdout, stderr) {
+                        var res = {
+                            id: token.id,
+                            type: token.type,
+                            err: err,
+                            stdout: stdout,
+                            stderr: stderr,
+                            socketId: socketid,
+                            time: token.time
+                        };
+                        console.log("err:" + err);
+                        console.log("stdout" + stdout);
+                        console.log("stderr" + stderr);
+                        processCallback(res, socket);
+                    });
+                } catch (err) {
+                    res.type = token.type + "_error";
+                    res.err = err.message;
+                    processCallback(res, socket);
+                }
+            },
+            "stopSapereEE": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time
+                };
+                try {
+                    stopSapereEE(function (err, stdout, stderr) {
+                        var res = {
+                            id: token.id,
+                            type: token.type,
+                            err: err,
+                            stdout: stdout,
+                            stderr: stderr,
+                            socketId: socketid,
+                            time: token.time
+                        };
+                        processCallback(res, socket);
+                    });
+                } catch (err) {
+                    res.type = token.type + "_error";
+                    res.err = err.message;
+                    processCallback(res, socket);
+                }
             }
         };
 
