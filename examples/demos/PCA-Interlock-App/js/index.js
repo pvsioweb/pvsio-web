@@ -19,10 +19,11 @@ require([
      * Websocket used to communicate with SAPERE
      */
     var sapere_websocket;
-    var orchestratorID = "Orchestrator_ID";
-    var orchestratorAdded = false;
-    var client, pvsio_websocket;
+    var supervisorID = "Supervisor_ID";
+    var supervisorAdded = false;
+    var client;
     var start_tick, stop_tick;
+    var d3 = require("d3/d3");
     /*
      * It indicates the state of the socket (the one connecting to Sapere)
      */
@@ -45,21 +46,21 @@ require([
 
 
     function addDevice(){
-        if (!orchestratorAdded){
-            logOnDiv('Adding Orchestrator', 'monitor');
-            var OrchestratorAction = {
+        if (!supervisorAdded){
+            logOnDiv('Adding Supervisor', 'monitor');
+            var SupervisorAction = {
                 action: "add",
-                deviceID: orchestratorID,
-                type: "Orchestrator",
-                description: "Orchestrator description"
+                deviceID: supervisorID,
+                type: "Supervisor",
+                description: "Supervisor description"
             };
-            sapere_websocket.send(JSON.stringify(OrchestratorAction));
+            sapere_websocket.send(JSON.stringify(SupervisorAction));
         }
         else{
-            logOnDiv('Orchestrator already added!', 'monitor');
+            logOnDiv('Supervisor already added!', 'monitor');
 
         }
-        start_tick();
+//        start_tick();
     }
 
     function sendControlData(to, message){
@@ -70,7 +71,7 @@ require([
         };
         var DeviceAction = {
             action: "orchestrate",
-            deviceID: orchestratorID,
+            deviceID: supervisorID,
             message: payload
         };
         sapere_websocket.send(JSON.stringify(DeviceAction));
@@ -150,12 +151,12 @@ require([
             var device = JSON.parse(event.data);
 
             if (device.action === "add") {
-                orchestratorAdded = true;
-                logOnDiv('Orchestrator added', 'monitor');
+                supervisorAdded = true;
+                logOnDiv('Supervisor added', 'monitor');
             }
             if (device.action === "remove") {
-                orchestratorAdded = false;
-                logOnDiv('Orchestrator removed', 'monitor');
+                supervisorAdded = false;
+                logOnDiv('Supervisor removed', 'monitor');
             }
             if (device.action === "toggle") {
                 var node = document.getElementById(device.deviceID);
@@ -173,8 +174,10 @@ require([
                          "\nTYPE:    " + device.type +
                          "\nMESSAGE: \n" + device.message, "monitor");
                 var res = stateParser.parse(device.message);
-                pvsio_websocket.sendGuiAction("update_spo2(" + res.spo2 + ")(" + pvsio_websocket.lastState() + ");",
-                                              onMessageReceived);
+                client.getWebSocket()
+                        .sendGuiAction("update_spo2(" + res.spo2 + ")" +
+                                       "(" + client.getWebSocket().lastState() + ");",
+                                       onMessageReceived);
             }
         } // NO JSON
         else{
@@ -210,7 +213,7 @@ require([
             var res = stateParser.parse(event.data.toString());
             if (res.pump.input.cmd.trim() === "pause"){
                 console.log("pause pump");
-                sendControlData(orchestratorID, "click_btn_pause");
+                sendControlData(supervisorID, "click_btn_pause");
             }
         } else { console.log(err); }
     }
@@ -220,7 +223,46 @@ require([
      * Get client instance and the websocket it uses to communicate with the server
      */
     client = PVSioWebClient.getInstance();
-    pvsio_websocket = client.getWebSocket();
+    
+    function startSapereEE() {
+        var msg = "Starting ICE Network Controller...";
+        console.log(msg);
+        return new Promise(function (resolve, reject) {
+            client.getWebSocket().send({ type: "startSapereEE" }, function(err) {
+                if (!err) {
+                    msg = "ICE Network Controller started successfully!";
+                    console.log(msg);
+                    resolve(msg);
+                } else {
+                    msg = "Error while starting ICE Network Controller (" + JSON.stringify(err) + ")";
+                    console.log(msg);
+                    reject(err);
+                }
+            });
+        });
+    }
+    function stopSapereEE() {
+        var msg = "Stopping ICE Network Controller...";
+        console.log(msg);
+        return new Promise(function (resolve, reject) {
+            client.getWebSocket().send({ type: "startSapereEE" }, function(err) {
+                if (!err) {
+                    msg = "ICE Network Controller stopped.";
+                    console.log(msg);
+                    resolve(msg);
+                } else {
+                    msg = "Error while stopping ICE Network Controller (" + JSON.stringify(err) + ")";
+                    console.log(msg);
+                    reject(err);
+                }
+            });
+        });
+    }
+    
+    function init() {
+        d3.select("#startICENetwork").on("click", startSapereEE);
+        d3.select("#stopICENetwork").on("click", stopSapereEE);
+    }
 
     /*
      * Register event listener for websocket connection to the server.
@@ -231,17 +273,27 @@ require([
         /*
          * Start the PVS Process for the pacemaker
          */
-        pvsio_websocket.startPVSProcess({
+        client.getWebSocket().startPVSProcess({
             name: 'main.pvs',
             demoName: 'PCA-Interlock-App/pvs'
         }, function (err) {
             if (!err) {
                 logOnDiv('PVS Process started', 'monitor');
-                pvsio_websocket.sendGuiAction(pvsio_websocket.lastState() + ';', addDevice);
+                
+                // start ICE Network Controller (SapereEE) & connect ICE supervisor to it
+                startSapereEE().then(function (res) {
+                    connectSapere();
+                }).catch(function (err) {
+                    console.log(err);
+                });    
+                
+                // initialise PVS model
+                client.getWebSocket().sendGuiAction(client.getWebSocket().lastState() + ';', function () {});
             } else {
                 console.log(err);
             }
         });
+        init();
     }).addListener('WebSocketConnectionClosed', function () {
         logOnDiv('PVS Process closed', 'monitor');
         console.log('web socket closed');
@@ -254,5 +306,4 @@ require([
      */
     logOnDiv('Connecting to the PVSio server...', 'monitor');
     client.connectToServer();
-    connectSapere();
 });
