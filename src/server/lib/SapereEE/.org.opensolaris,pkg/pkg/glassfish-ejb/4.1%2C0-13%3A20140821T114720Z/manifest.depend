@@ -1,0 +1,2 @@
+depend fmri=pkg:/glassfish-ejb-lite type=require
+depend fmri=pkg:/glassfish-corba type=require

@@ -1,0 +1,3 @@
+file f436b0a61cc7f7c9e2ec0dafcf5740ab9733a652 chash=5abad4e7bb9a2e90cd82ee8b7689cabde545ed4a group=sys mode=0664 owner=root path=glassfish/config/osgi.properties pkg.csize=6077 pkg.size=18937 preserve=renameold
+file 1ba97a9ffd4a1dff3e75b76cd3ae3d0eff8493b7 chash=f202c21d6665aeefa6bccc5e0c04281995725978 group=sys mode=0664 owner=root path=glassfish/osgi/felix/bin/felix.jar pkg.csize=487260 pkg.size=529233
+file f5691de42e57e1981adc1e80de850ec464ce7179 chash=c835c350a3e185f4513f692882e1ca0752111de8 group=sys mode=0664 owner=root path=glassfish/modules/org.apache.felix.bundlerepository.jar pkg.csize=150494 pkg.size=164384

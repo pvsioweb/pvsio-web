@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ascii"?>
+<history><client name="pkg" version="1.122.2-57.2889"><args><arg><![CDATA[/export/home/BUILD_AREA/workspace/gf-lw-build-release/pkg-toolkit-sunos-sparc/pkg/bin/client.py]]></arg><arg><![CDATA[install]]></arg><arg><![CDATA[mq-server]]></arg></args></client><operation end_time="20140821T132952Z" name="install" result="Succeeded" start_time="20140821T132950Z" userid="143" username="java_re"><start_state><![CDATA[UNEVALUATED:
++pkg:/mq-server@5.1,0-9.2:20140729T201518Z
+]]></start_state><end_state><![CDATA[None -> pkg:/mq-server@5.1,0-9.2:20140729T201518Z
+None -> pkg:/mq-bin-sh@5.1,0-9.2:20140729T201513Z
+]]></end_state></operation></history>

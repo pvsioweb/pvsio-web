@@ -1,0 +1,14 @@
+set name=fmri value=pkg:/glassfish-ejb-lite@4.1,0-13:20140821T114807Z
+set name=info.classification value="Application Servers"
+set name=pkg.description value="EJB 3.1 Lite is a lightweight subset of EJB 3.1 that includes support for local session beans (stateful / stateless / singleton) and .war-based packaging/deployment.  GlassFish Server is a modular and lightweight Java EE 7 compliant application server. Key features include an OSGi runtime, fast startup time, maven support, and rapid iterative development with Active Redeploy.  GlassFish Server also offers feature-rich administration with the web console, command line, and RESTful API."
+set name=pkg.summary value="GlassFish EJB Lite Container"
+depend fmri=pkg:/glassfish-common type=require
+depend fmri=pkg:/glassfish-jpa type=require
+license 8741fa556feea4ca58ec28abc47de0bf9d5b39a3 chash=28b7cfba8f297b99296afc231955dc90e8d76d47 license="CDDL and GPL v2 with classpath exception" pkg.csize=12394 pkg.size=38052
+dir group=sys mode=0775 owner=root path=glassfish
+dir group=sys mode=0775 owner=root path=glassfish/modules
+file 2aa168cd26167088768dcd067d28f0313ea260f3 chash=229031cab54fd660045f75dd4208d298c00ec4ad group=sys mode=0664 owner=root path=glassfish/modules/console-ejb-lite-plugin.jar pkg.csize=26957 pkg.size=31251
+file e304980571b9cde9a835518c01d82986f56024cd chash=d8855c583a4098c26dbb69132739f80abe77e4bb group=sys mode=0664 owner=root path=glassfish/modules/ejb-container.jar pkg.csize=865105 pkg.size=925716
+file bc294320d31bbd159987ac649eefc8ec5fde154a chash=7ebccfbe955d4e615f43695507be399b9e741e56 group=sys mode=0664 owner=root path=glassfish/modules/javaee-kernel.jar pkg.csize=16747 pkg.size=19257
+file 0c36d09df8619aca745a09940c3189065dcfb478 chash=b1845abe7dec9c255d7e55a5cb0131916725ca0c group=sys mode=0664 owner=root path=glassfish/modules/gf-ejb-connector.jar pkg.csize=15750 pkg.size=19199
+set name=publisher value=release.glassfish.org

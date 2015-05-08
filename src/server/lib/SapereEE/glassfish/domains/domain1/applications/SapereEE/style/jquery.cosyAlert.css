@@ -1,0 +1,83 @@
+/**
+ * cosyAlert
+ * @author Jan Ebsen <xicrow@gmail.com>
+ * @version 1.0.0
+ * @date 2013-04-09
+ * @copyright Jan Ebsen 2013
+ */
+.cosyAlert-container{
+	margin:10px; padding:0px;
+	position:fixed;
+	width:500px;
+	font-weight:normal;
+	font-size:13px;
+	font-family:Tahoma, Geneva, sans-serif;
+	z-index:9999;
+}
+.cosyAlert-container.top{
+	top:0px;
+}
+.cosyAlert-container.middle{
+	top:40%;
+}
+.cosyAlert-container.bottom{
+	bottom:0px;
+}
+.cosyAlert-container.left{
+	left:0px;
+}
+.cosyAlert-container.center{
+	margin:10px auto;
+	left:0px; right:0px;
+}
+.cosyAlert-container.right{
+	right:0px;
+}
+	.cosyAlert{
+		margin:5px 0px; padding:10px;
+		position:relative; top:0px; left:0px;
+		border-width:1px;
+		border-style:solid;
+		z-index:9999;
+	}
+	.cosyAlert.alert{
+		color:#C09853;
+		background-color:#FCF8E3;
+		border-color:#FBEED5;
+	}
+	.cosyAlert.notice{
+		color:#3A87AD;
+		background-color:#D9EDF7;
+		border-color:#BCE8F1;
+	}
+	.cosyAlert.success{
+		color:#468847;
+		background-color:#DFF0D8;
+		border-color:#D6E9C6;
+	}
+	.cosyAlert.error{
+		color:#B94A48;
+		background-color:#F2DEDE;
+		border-color:#EED3D7;
+	}
+		.cosyAlert .close{
+			margin:0px; padding:0px;
+			position:absolute; top:5px; right:5px;
+			font-weight:bold;
+			font-size:15px;
+			line-height:15px;
+			color:#444;
+			cursor:pointer;
+		}
+		.cosyAlert .close:hover{
+			color:#000;
+		}
+		.cosyAlert .loader{
+			margin-top:15px;
+			width:100%; height:5px;
+			clear:both;
+		}
+			/*.cosyAlert .loader-bar{*/
+				/*width:100%; height:5px;*/
+				/*background:#BBB;*/
+			/*}*/

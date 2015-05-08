@@ -1,0 +1,4 @@
+dir path=glassfish/lib 
+dir path=glassfish 
+dir path=glassfish/modules 
+dir path=glassfish/lib/asadmin 

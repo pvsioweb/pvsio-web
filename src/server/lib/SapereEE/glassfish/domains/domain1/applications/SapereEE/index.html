@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="scripts/jquery-1.11.2.min.js"></script>
+        <script src="scripts/jquery.cosyAlert.min.js"></script>
+        <script type="text/javascript" src="scripts/jquery.tooltipster.min.js"></script>
+        <script src="scripts/jquery.connections.js"></script>
+        <link rel="stylesheet" type="text/css" href="style/style.css">
+        <link rel="stylesheet" type="text/css" href="style/960.css">
+
+    </head>
+    <body>
+        <div class="container_12" style="text-align: center;">
+            <div class="grid_12">
+            <h1>SAPERE</h1>
+            </div>
+            <div class="grid_12">
+                <div id="monitor" class="console_log">
+                </div>
+            </div>
+            <div class="grid_12" style="text-align: left">
+                <div id="devices">
+                </div>
+            </div>
+            <div class="grid_12" style="text-align: center; margin-top: 80px;">
+                <div id="orchestrator">
+                </div>
+            </div>
+
+        </div>
+
+    </body>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            queueUpdateStatus();
+            $('.tooltip').tooltipster();
+        });
+
+        function queueUpdateStatus(){
+            $('#queue-status').html(($.cosyAlert.configuration.useQueue ? 'enabled' : 'disabled'));
+        }
+        function queueEnable(){
+            $.cosyAlert.configuration.useQueue = true;
+            queueUpdateStatus();
+        }
+        function queueDisable(){
+            $.cosyAlert.configuration.useQueue = false;
+            queueUpdateStatus();
+        }
+
+        $.cosyAlert.configuration = {
+            defaultType : 'alert',
+            useQueue : false
+        };
+        $.cosyAlert.configurationAlert = {
+            container : null,
+            vPos : 'top',
+            hPos : 'center',
+            autoHide : true,
+            autoHideTime : 4000,
+            showTime : 400,
+            hideTime : 600,
+            onShowComplete : null,
+            onHideComplete : null
+        };
+    </script>
+    <script src="scripts/websocket.js"></script>
+    <link rel="stylesheet" type="text/css" href="style/animate.css" />
+    <link rel="stylesheet" type="text/css" href="style/jquery.cosyAlert.css" />
+    <link rel="stylesheet" type="text/css" href="style/tooltipster.css" />
+    <link rel="stylesheet" type="text/css" href="style/960.css">
+
+
+
+</html>

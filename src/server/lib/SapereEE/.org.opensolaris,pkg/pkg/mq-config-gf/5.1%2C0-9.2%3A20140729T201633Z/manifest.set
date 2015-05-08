@@ -1,0 +1,7 @@
+set name=pkg.maintainer_url value=http://mq.java.net/
+set name=info.classification value=":Message-Oriented Middleware"
+set name=pkg.detailed_url value=http://mq.java.net/about.html
+set name=pkg.summary value="Message Queue Configuration for GlassFish"
+set name=pkg.upstream_url value=http://mq.java.net/
+set name=pkg.description value="Configuration files of the Message Queue product specific to GlassFish.  Message Queue (MQ) is an enterprise quality, production ready, scalable messaging server.  It provides a complete Java Message Service (JMS) implementation for message oriented system integration.  In addition, Message Queue provides the additional enterprise features that are necessary for enterprise deployments, large and small."
+set name=info.source_url value=http://mq.java.net/downloads.html

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="ascii"?>
+<history><client name="pkg" version="1.122.2-57.2889"><args><arg><![CDATA[/export/home/BUILD_AREA/workspace/gf-lw-build-release/pkg-toolkit-sunos-sparc/pkg/bin/client.py]]></arg><arg><![CDATA[install]]></arg><arg><![CDATA[glassfish-ha]]></arg></args></client><operation end_time="20140821T131107Z" name="install" result="Succeeded" start_time="20140821T131107Z" userid="143" username="java_re"><start_state><![CDATA[UNEVALUATED:
++pkg:/glassfish-ha@4.1,0-13:20140821T124502Z
+]]></start_state><end_state><![CDATA[None -> pkg:/glassfish-ha@4.1,0-13:20140821T124502Z
+]]></end_state></operation></history>

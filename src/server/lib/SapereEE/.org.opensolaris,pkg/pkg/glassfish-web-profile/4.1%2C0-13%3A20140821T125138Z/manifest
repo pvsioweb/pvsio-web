@@ -1,0 +1,36 @@
+set name=fmri value=pkg:/glassfish-web-profile@4.1,0-13:20140821T125138Z
+set name=info.classification value="Application Servers"
+set name=pkg.description value="GlassFish Web Profile Metapackage.  GlassFish Server is a modular and lightweight Java EE 7 compliant application server. Key features include an OSGi runtime, fast startup time, maven support, and rapid iterative development with Active Redeploy.  GlassFish Server also offers feature-rich administration with the web console, command line, and RESTful API."
+set name=pkg.summary value="GlassFish Web Profile"
+depend fmri=pkg:/glassfish-grizzly-full type=require
+depend fmri=pkg:/glassfish-osgi-http type=require
+depend fmri=pkg:/glassfish-hk2 type=require
+depend fmri=pkg:/pkg-java type=require
+depend fmri=pkg:/glassfish-web-incorporation type=require
+depend fmri=pkg:/glassfish-jcdi type=require
+depend fmri=pkg:/javadb-common type=require
+depend fmri=pkg:/glassfish-registration type=require
+depend fmri=pkg:/glassfish-web type=require
+depend fmri=pkg:/glassfish-jpa type=require
+depend fmri=pkg:/glassfish-corba-base type=require
+depend fmri=pkg:/glassfish-common type=require
+depend fmri=pkg:/javadb-core type=require
+depend fmri=pkg:/jersey@1.8 type=require
+depend fmri=pkg:/glassfish-ejb-lite type=require
+depend fmri=pkg:/glassfish-grizzly type=require
+depend fmri=pkg:/glassfish-jdbc type=require
+depend fmri=pkg:/glassfish-cluster type=require
+depend fmri=pkg:/glassfish-jsf type=require
+depend fmri=pkg:/felix type=require
+depend fmri=pkg:/glassfish-management type=require
+depend fmri=pkg:/shoal type=require
+depend fmri=pkg:/glassfish-nucleus type=require
+depend fmri=pkg:/glassfish-jts type=require
+depend fmri=pkg:/javadb-client type=require
+depend fmri=pkg:/glassfish-common-web type=require
+depend fmri=pkg:/glassfish-ha type=require
+depend fmri=pkg:/glassfish-jca type=require
+depend fmri=pkg:/glassfish-jta type=require
+depend fmri=pkg:/glassfish-gui type=require
+license 8741fa556feea4ca58ec28abc47de0bf9d5b39a3 chash=28b7cfba8f297b99296afc231955dc90e8d76d47 license="CDDL and GPL v2 with classpath exception" pkg.csize=12394 pkg.size=38052
+set name=publisher value=release.glassfish.org
