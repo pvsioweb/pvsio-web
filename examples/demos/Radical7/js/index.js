@@ -86,12 +86,12 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
                                  { parent: "prototype", font: "Times" });
     var spo2_fail = new SingleDisplay("spo2_fail",
                                  { top: 62, left: 164, height: 22, width: 50 },
-                                 { parent: "prototype", font: "Times" });
+                                 { parent: "prototype", font: "Times", fontColor: "red" });
     var spo2_label = new SingleDisplay("spo2_label",
                                  { top: 86, left: 164, height: 10, width: 50 },
                                  { parent: "prototype", font: "Times" });
     var spo2_alarm = new SingleDisplay("spo2_alarm",
-                                 { top: 48, left: 214, height: 12, width: 12 },
+                                 { top: 50, left: 214, height: 12, width: 12 },
                                  { parent: "prototype", align: "left", fontColor: "red" });
     var spo2_max = new SingleDisplay("spo2_max",
                                  { top: 68, left: 214, height: 8, width: 20 },
@@ -140,7 +140,69 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
             stop_tick();
         }
     }
+        
+    //RRa
+    var rra = new SingleDisplay("rra",
+                                 { top: 54, left: 264, height: 34, width: 50 },
+                                 { parent: "prototype", font: "Times", fontColor: "aqua" });
+    var rra_fail = new SingleDisplay("rra_fail",
+                                 { top: 62, left: 264, height: 22, width: 50 },
+                                 { parent: "prototype", font: "Times", fontColor: "red" });
+    var rra_label = new SingleDisplay("rra_label",
+                                 { top: 86, left: 264, height: 10, width: 50 },
+                                 { parent: "prototype", font: "Times", fontColor: "aqua" });
+    var rra_alarm = new SingleDisplay("rra_alarm",
+                                 { top: 50, left: 314, height: 12, width: 12 },
+                                 { parent: "prototype", align: "left", fontColor: "red" });
+    var rra_max = new SingleDisplay("rra_max",
+                                 { top: 68, left: 314, height: 8, width: 20 },
+                                 { parent: "prototype", align: "left", fontColor: "aqua" });
+    var rra_min = new SingleDisplay("rra_min",
+                                 { top: 76, left: 314, height: 8, width: 20 },
+                                 { parent: "prototype", align: "left", fontColor: "aqua" });
+
+    function evaluate_rra(str) {
+        var v = +str;
+        if (str.indexOf("/") >= 0) {
+            var args = str.split("/");
+            v = +args[0] / +args[1];
+        }
+        return (v <= 0) ? "--" : ((v < 10) ? v.toFixed(1).toString() : v.toFixed(0).toString());
+    }
+    function evaluate_rrarange(str) {
+        var v = +str;
+        if (str.indexOf("/") >= 0) {
+            var args = str.split("/");
+            v = +args[0] / +args[1];
+        }
+        return (v <= 0) ? "--" : v.toFixed(1).toString();
+    }
     
+    
+    function render_rra(res) {
+        if (res.isOn === "TRUE") {
+            if (res.rra_fail === "FALSE") {
+                rra_fail.hide();
+                rra.render(evaluate_rra(res.rra));
+            } else {
+                rra.hide();
+                rra_fail.render("FAIL");
+            }
+            rra_label.render(res.rra_label.replace(/"/g, ""));
+            rra_max.render(evaluate_rrarange(res.rra_max));
+            rra_min.render(evaluate_rrarange(res.rra_min));
+            start_tick();
+        } else {
+            rra.hide();
+            rra_label.hide();
+            rra_max.hide();
+            rra_min.hide();
+            rra_fail.hide();
+            stop_tick();
+        }
+    }
+    
+    // alarms
     function render_alarms(res) {
         if (res.isOn === "TRUE") {
             if (res.spo2_alarm === "off") {
@@ -150,11 +212,18 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
             } else if (res.spo2_alarm === "mute") {
                 spo2_alarm.renderGlyphicon("glyphicon-mute");
             }
+            if (res.rra_alarm === "off") {
+                rra_alarm.hide();
+            } else if (res.rra_alarm === "alarm") {
+                rra_alarm.renderGlyphicon("glyphicon-bell");
+            } else if (res.rra_alarm === "mute") {
+                rra_alarm.renderGlyphicon("glyphicon-mute");
+            }
         } else {
             spo2_alarm.hide();
+            rra_alarm.hide();
         }
-    }
-    
+    }    
     
     /**
         function to handle when an output has been received from the server after sending a guiAction
@@ -202,6 +271,7 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
                 res = stateParser.parse(event.data.toString());
 				if (res) {
                     render_spo2(res);
+                    render_rra(res);
                     render_alarms(res);
                 }
             }
@@ -245,6 +315,16 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
         }
     });
 
+    d3.select("#submit_rra_sensor_data").on("click", function () {
+        var data = d3.select("#rra_sensor_data").node().value;
+        if (data) {
+            data = (isNaN(parseFloat(data))) ? -1 : parseFloat(data);
+            stop_tick();
+            client.getWebSocket()
+                .sendGuiAction("rra_sensor_data(" + data + ")(" + client.getWebSocket().lastState() + ");", onMessageReceived);
+            start_tick();
+        }
+    });
 
 
 
