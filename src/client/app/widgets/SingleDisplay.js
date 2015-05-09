@@ -22,7 +22,6 @@ define(function (require, exports, module) {
     "use strict";
 
     var d3 = require("d3/d3");
-    var black, white;
 
     /**
      * @function <a name="SingleDisplay">SingleDisplay</a>
@@ -46,11 +45,11 @@ define(function (require, exports, module) {
         this.smallFont = (this.height * 0.8) + "px " + (opt.font || "sans-serif");
         this.align = opt.align || "center";
         if (opt.backgroundColor) {
-            black = opt.backgroundColor;
-        } else { black = (opt.inverted) ? '#fff' : "#000"; }
+            this.backgroundColor = opt.backgroundColor;
+        } else { this.backgroundColor = (opt.inverted) ? '#fff' : "#000"; }
         if (opt.fontColor) {
-            white = opt.fontColor;
-        } else { white = (opt.inverted) ? "#000" : '#fff'; }
+            this.fontColor = opt.fontColor;
+        } else { this.fontColor = (opt.inverted) ? "#000" : '#fff'; }
         this.textBaseline = "middle";
         this.div = d3.select("#" + this.parent)
                         .append("div").style("position", "absolute")
@@ -70,17 +69,17 @@ define(function (require, exports, module) {
     }
 
     SingleDisplay.prototype.render = function (txt, opt) {
-        function clearContext(context, width, height) {
+        function clearContext(context, width, height, backgroundColor) {
             context.save();
-            context.fillStyle = black;
+            context.fillStyle = backgroundColor;
             context.fillRect(0, 0, width, height);
             context.restore();
         }
         function renderln(data, opt) {
             opt = opt || {};
-            data.context.fillStyle = opt.backgroundColor || (opt.inverted) ? white : black;
+            data.context.fillStyle = opt.backgroundColor || _this.backgroundColor;
             data.context.fillRect(0, 0, data.width, data.height);
-            data.context.fillStyle = opt.fontColor || (opt.inverted) ? black : white;
+            data.context.fillStyle = opt.fontColor || _this.fontColor;
             if (data.align === "left") {
                 data.context.textAlign = "start";
                 data.context.fillText(data.txt, 0, data.height / 2);
@@ -93,8 +92,9 @@ define(function (require, exports, module) {
             }
         }
         opt = opt || {};
+        var _this = this;
         var context = document.getElementById(this.id + "_canvas").getContext("2d");
-        clearContext(context, this.width, this.height);
+        clearContext(context, this.width, this.height, this.backgroundColor);
         context.textBaseline = this.textBaseline;
         var align = opt.align || this.align;
         context.font = this.font.join("");
@@ -107,7 +107,7 @@ define(function (require, exports, module) {
         opt = opt || {};
         var span = document.getElementById(this.id + "_span");
         span.setAttribute("class", "glyphicon " + icon);
-        span.style.color = opt.fontColor || this.fontColor || white;
+        span.style.color = opt.fontColor || this.fontColor;
         this.reveal();
         return this;
     };
@@ -115,15 +115,15 @@ define(function (require, exports, module) {
     SingleDisplay.prototype.renderMultiline = function (txt, opt) {
         function clearContext(context, width, height) {
             context.save();
-            context.fillStyle = black;
+            context.fillStyle = _this.backgroundColor;
             context.fillRect(0, 0, width, height);
             context.restore();
         }
         function renderln(data, opt) {
             opt = opt || {};
-            data.context.fillStyle = (opt.inverted) ? white : black;
+            data.context.fillStyle = (opt.inverted) ? _this.backgroundColor : _this.fontColor;
             data.context.fillRect(0, data.y, data.width, data.height);
-            data.context.fillStyle = (opt.inverted) ? black : white;
+            data.context.fillStyle = (opt.inverted) ? _this.fontColor : _this.backgroundColor;
             var y_offset = data.y || 0;
             if (data.align === "left") {
                 data.context.textAlign = "start";
@@ -137,6 +137,7 @@ define(function (require, exports, module) {
             }
         }
         opt = opt || {};
+        var _this = this;
         var context = document.getElementById(this.id + "_canvas").getContext("2d");
         clearContext(context, this.width, this.height);
         context.textBaseline = this.textBaseline;
