@@ -15,7 +15,7 @@
  *     device.spo2 = new PatientMonitorDisplay("spo2",
  *                         { top: 56, left: 164, height: 30, width: 100 });
  *     device.spo2.render(10); // the display renders 10
- *     device.spo2.alarm(); // the display shows an alarm
+ *     device.spo2.alarm("ALARM"); // the display shows an alarm
  * });
  *
  */
@@ -206,14 +206,14 @@ define(function (require, exports, module) {
         return this;
     };
 
-    PatientMonitorDisplay.prototype.alarm = function (msg, opt) {
+    PatientMonitorDisplay.prototype.alarm = function (msg) {
         if (msg) {
             if (msg.indexOf("glyphicon") >= 0) {
-                this.disp_alarm.renderGlyphicon(msg, opt);
+                this.disp_alarm.renderGlyphicon(msg, { blinking: true });
             } else if(msg === "off") {
                 this.disp_alarm.hide();
             } else {
-                this.disp_alarm.render(msg, opt);
+                this.disp_alarm.render(msg);
             }
         }
     };
@@ -234,9 +234,9 @@ define(function (require, exports, module) {
     };
     
     PatientMonitorDisplay.prototype.fail = function (msg) {
-        this.disp_fail.render("FAIL");
+        this.disp_fail.render("FAIL", { fontColor: "red" });
         this.disp_value.hide();
-        this.disp_alarm.renderGlyphicon("glyphicon-bell", { blinking: true });
+        this.disp_alarm.renderGlyphicon("glyphicon-bell", { fontColor: "red", blinking: true });
         this.disp_tracings.pauseTrace();
         this.tracings_label_max.render(this.range.max);
         this.tracings_label_med.render(this.range.med);

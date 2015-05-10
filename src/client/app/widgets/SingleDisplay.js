@@ -63,12 +63,14 @@ define(function (require, exports, module) {
         }
         this.blinking = opt.blinking || false;
         this.textBaseline = "middle";
+        var elemClass = id;
+        if (this.blinking) { elemClass += " blink"; }
         this.div = d3.select(this.parent)
                         .append("div").style("position", "absolute")
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")
                         .style("margin", 0).style("padding", 0)
-                        .style("display", "block").attr("id", id).attr("class", id);
+                        .style("display", "block").attr("id", id).attr("class", elemClass);
         this.div.append("span").attr("id", id + "_span").attr("class", id + "_span")
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0)
@@ -105,6 +107,17 @@ define(function (require, exports, module) {
         }
         opt = opt || {};
         var _this = this;
+        // set blinking
+        var elemClass = document.getElementById(this.id).getAttribute("class");
+        if (opt.blinking || this.blinking) {
+            if (elemClass.indexOf("blink") < 0) {
+                elemClass = elemClass + " blink";
+            }
+        } else {
+            elemClass = elemClass.replace(" blink", "");
+        }
+        document.getElementById(this.id).setAttribute("class", elemClass);
+        // render content
         var context = document.getElementById(this.id + "_canvas").getContext("2d");
         clearContext(context, this.width, this.height, this.backgroundColor);
         context.textBaseline = this.textBaseline;

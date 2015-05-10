@@ -148,16 +148,16 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
             if (res.spo2_alarm === "off") {
                 radical.spo2_display.alarm("off");
             } else if (res.spo2_alarm === "alarm") {
-                radical.spo2_display.alarm("glyphicon-bell", { blinking: true });
+                radical.spo2_display.alarm("glyphicon-bell");
             } else if (res.spo2_alarm === "mute") {
-                radical.spo2_display.alarm("glyphicon-mute", { blinking: true });
+                radical.spo2_display.alarm("glyphicon-mute");
             }
             if (res.rra_alarm === "off") {
                 radical.rra_display.alarm("off");
             } else if (res.rra_alarm === "alarm") {
-                radical.rra_display.alarm("glyphicon-bell", { blinking: true });
+                radical.rra_display.alarm("glyphicon-bell");
             } else if (res.rra_alarm === "mute") {
-                radical.rra_display.alarm("glyphicon-mute", { blinking: true });
+                radical.rra_display.alarm("glyphicon-mute");
             }
         } else {
             radical.spo2_display.hide();
