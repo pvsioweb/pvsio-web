@@ -17,7 +17,7 @@ require.config({
     }
 });
 
-require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "widgets/TripleDisplay", "widgets/LED", "widgets/CursoredDisplay", "plugins/graphbuilder/GraphBuilder", "stateParser", "PVSioWebClient"], function (Button, SingleDisplay, DoubleDisplay, TripleDisplay, LED, CursoredDisplay, GraphBuilder, stateParser, PVSioWebClient) {
+require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "widgets/TripleDisplay", "widgets/LED", "widgets/TracingsDisplay", "widgets/med/PatientMonitorDisplay", "plugins/graphbuilder/GraphBuilder", "stateParser", "PVSioWebClient"], function (Button, SingleDisplay, DoubleDisplay, TripleDisplay, LED, TracingsDisplay, PatientMonitorDisplay, GraphBuilder, stateParser, PVSioWebClient) {
     "use strict";
 
 
@@ -76,31 +76,22 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
     });
     
     
-    //append a div that will contain the canvas elements
+    // append a div that will contain the canvas elements
     var tick = null;
     var start_tick = null, stop_tick = null;
 
-    //spo2
-    var spo2 = new SingleDisplay("spo2",
-                                 { top: 54, left: 164, height: 34, width: 50 },
-                                 { parent: "prototype", font: "Times" });
-    var spo2_fail = new SingleDisplay("spo2_fail",
-                                 { top: 62, left: 164, height: 22, width: 50 },
-                                 { parent: "prototype", font: "Times", fontColor: "red" });
-    var spo2_label = new SingleDisplay("spo2_label",
-                                 { top: 86, left: 164, height: 10, width: 50 },
-                                 { parent: "prototype", font: "Times" });
-    var spo2_alarm = new SingleDisplay("spo2_alarm",
-                                 { top: 50, left: 214, height: 12, width: 12 },
-                                 { parent: "prototype", align: "left", fontColor: "red" });
-    var spo2_max = new SingleDisplay("spo2_max",
-                                 { top: 68, left: 214, height: 8, width: 20 },
-                                 { parent: "prototype", align: "left" });
-    var spo2_min = new SingleDisplay("spo2_min",
-                                 { top: 76, left: 214, height: 8, width: 20 },
-                                 { parent: "prototype", align: "left" });
 
-    function evaluate_spo2(str) {
+    // append displays
+    var radical = {};
+    radical.spo2_display = new PatientMonitorDisplay("spo2_display",
+                                 { top: 54, left: 150, height: 34, width: 160 },
+                                 { parent: "prototype", font: "Times", label: "%SpO2" });
+    radical.rra_display = new PatientMonitorDisplay("rra_display",
+                                 { top: 100, left: 150, height: 34, width: 160 },
+                                 { parent: "prototype", font: "Times", label: "RRa", fontColor: "aqua" });
+
+    // utility function
+    function evaluate(str) {
         var v = +str;
         if (str.indexOf("/") >= 0) {
             var args = str.split("/");
@@ -108,96 +99,37 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
         }
         return (v <= 0) ? "--" : ((v < 10) ? v.toFixed(1).toString() : v.toFixed(0).toString());
     }
-    function evaluate_spo2range(str) {
-        var v = +str;
-        if (str.indexOf("/") >= 0) {
-            var args = str.split("/");
-            v = +args[0] / +args[1];
-        }
-        return (v <= 0) ? "--" : v.toFixed(1).toString();
-    }
     
-    
+    // spo2
     function render_spo2(res) {
         if (res.isOn === "TRUE") {
+            radical.spo2_display.set_alarm({ min: parseFloat(res.spo2_min), max: parseFloat(res.spo2_max) });
+            radical.spo2_display.set_range({ min: 0, max: 100 });
             if (res.spo2_fail === "FALSE") {
-                spo2_fail.hide();
-                spo2.render(evaluate_spo2(res.spo2));
+                radical.spo2_display.render(evaluate(res.spo2));
             } else {
-                spo2.hide();
-                spo2_fail.render("FAIL");
+                radical.spo2_display.fail("FAIL");
             }
-            spo2_label.render("%" + res.spo2_label.replace(/"/g, ""));
-            spo2_max.render(evaluate_spo2range(res.spo2_max));
-            spo2_min.render(evaluate_spo2range(res.spo2_min));
             start_tick();
         } else {
-            spo2.hide();
-            spo2_label.hide();
-            spo2_max.hide();
-            spo2_min.hide();
-            spo2_fail.hide();
+            radical.spo2_display.hide();
             stop_tick();
         }
     }
         
-    //RRa
-    var rra = new SingleDisplay("rra",
-                                 { top: 54, left: 264, height: 34, width: 50 },
-                                 { parent: "prototype", font: "Times", fontColor: "aqua" });
-    var rra_fail = new SingleDisplay("rra_fail",
-                                 { top: 62, left: 264, height: 22, width: 50 },
-                                 { parent: "prototype", font: "Times", fontColor: "red" });
-    var rra_label = new SingleDisplay("rra_label",
-                                 { top: 86, left: 264, height: 10, width: 50 },
-                                 { parent: "prototype", font: "Times", fontColor: "aqua" });
-    var rra_alarm = new SingleDisplay("rra_alarm",
-                                 { top: 50, left: 314, height: 12, width: 12 },
-                                 { parent: "prototype", align: "left", fontColor: "red" });
-    var rra_max = new SingleDisplay("rra_max",
-                                 { top: 68, left: 314, height: 8, width: 20 },
-                                 { parent: "prototype", align: "left", fontColor: "aqua" });
-    var rra_min = new SingleDisplay("rra_min",
-                                 { top: 76, left: 314, height: 8, width: 20 },
-                                 { parent: "prototype", align: "left", fontColor: "aqua" });
-
-    function evaluate_rra(str) {
-        var v = +str;
-        if (str.indexOf("/") >= 0) {
-            var args = str.split("/");
-            v = +args[0] / +args[1];
-        }
-        return (v <= 0) ? "--" : ((v < 10) ? v.toFixed(1).toString() : v.toFixed(0).toString());
-    }
-    function evaluate_rrarange(str) {
-        var v = +str;
-        if (str.indexOf("/") >= 0) {
-            var args = str.split("/");
-            v = +args[0] / +args[1];
-        }
-        return (v <= 0) ? "--" : v.toFixed(1).toString();
-    }
-    
-    
+    // RRa
     function render_rra(res) {
         if (res.isOn === "TRUE") {
+            radical.rra_display.set_alarm({ min: parseFloat(res.rra_min), max: parseFloat(res.rra_max) });
+            radical.rra_display.set_range({ min: 0, max: 70 });
             if (res.rra_fail === "FALSE") {
-                rra_fail.hide();
-                rra.render(evaluate_rra(res.rra));
+                radical.rra_display.render(evaluate(res.rra));
             } else {
-                rra.hide();
-                rra_fail.render("FAIL");
+                radical.rra_display.fail("FAIL");
             }
-            rra_label.render(res.rra_label.replace(/"/g, ""));
-            rra_max.render(evaluate_rrarange(res.rra_max));
-            rra_min.render(evaluate_rrarange(res.rra_min));
             start_tick();
         } else {
-            rra.hide();
-            rra_label.hide();
-            rra_max.hide();
-            rra_min.hide();
-            rra_fail.hide();
+            radical.rra_display.hide();
             stop_tick();
         }
     }
@@ -206,22 +138,22 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
     function render_alarms(res) {
         if (res.isOn === "TRUE") {
             if (res.spo2_alarm === "off") {
-                spo2_alarm.hide();
+                radical.spo2_display.alarm("off");
             } else if (res.spo2_alarm === "alarm") {
-                spo2_alarm.renderGlyphicon("glyphicon-bell");
+                radical.spo2_display.alarm("glyphicon-bell");
             } else if (res.spo2_alarm === "mute") {
-                spo2_alarm.renderGlyphicon("glyphicon-mute");
+                radical.spo2_display.alarm("glyphicon-mute");
             }
             if (res.rra_alarm === "off") {
-                rra_alarm.hide();
+                radical.rra_display.alarm("off");
             } else if (res.rra_alarm === "alarm") {
-                rra_alarm.renderGlyphicon("glyphicon-bell");
+                radical.rra_display.alarm("glyphicon-bell");
             } else if (res.rra_alarm === "mute") {
-                rra_alarm.renderGlyphicon("glyphicon-mute");
+                radical.rra_display.alarm("glyphicon-mute");
             }
         } else {
-            spo2_alarm.hide();
-            rra_alarm.hide();
+            radical.spo2_display.hide();
+            radical.rra_display.hide();
         }
     }    
     
