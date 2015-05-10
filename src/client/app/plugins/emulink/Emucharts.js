@@ -28,7 +28,7 @@ define(function (require, exports, module) {
     var getFreshEdgeID = function () {
         function newEdgeID () {
             var i = 1;
-            while(_this.nodes && _this.edges.get("T" + i)) { i++; }
+            while(_this.edges && _this.edges.get("T" + i)) { i++; }
             return i;
         }
         return "T" + newEdgeID();
@@ -36,7 +36,7 @@ define(function (require, exports, module) {
     var getFreshInitialEdgeID = function () {
         function newInitialEdgeID () {
             var i = 1;
-            while(_this.nodes && _this.initial_edges.get("IT" + i)) { i++; }
+            while(_this.initial_edges && _this.initial_edges.get("IT" + i)) { i++; }
             return i;
         }
         return "IT" + newInitialEdgeID();
