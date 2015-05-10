@@ -176,19 +176,19 @@ define(function (require, exports, module) {
         this.disp_fail.hide();
         this.disp_label.render(this.label);
         if (this._alarm.max === 0) {
-            this.disp_alarm_max.render("--", opt);
+            this.disp_alarm_max.render("--");
         } else {
-            this.disp_alarm_max.render(this._alarm.max, opt);
+            this.disp_alarm_max.render(this._alarm.max);
         }
-        this.disp_alarm_min.render(this._alarm.min, opt);
+        this.disp_alarm_min.render(this._alarm.min);
         if (val >= this.range.min && val <= this.range.max) {
-            this.disp_tracings.render(val, opt);
+            this.disp_tracings.render(val);
         } else {
             // display warning Out Of Range
         }
-        this.tracings_label_max.render(this.range.max, opt);
-        this.tracings_label_med.render(this.range.med, opt);
-        this.tracings_label_min.render(this.range.min, opt);
+        this.tracings_label_max.render(this.range.max);
+        this.tracings_label_med.render(this.range.med);
+        this.tracings_label_min.render(this.range.min);
         return this;
     };
     
@@ -209,7 +209,7 @@ define(function (require, exports, module) {
     PatientMonitorDisplay.prototype.alarm = function (msg, opt) {
         if (msg) {
             if (msg.indexOf("glyphicon") >= 0) {
-                this.disp_alarm.renderGlyphicon(msg);
+                this.disp_alarm.renderGlyphicon(msg, opt);
             } else if(msg === "off") {
                 this.disp_alarm.hide();
             } else {
@@ -236,7 +236,7 @@ define(function (require, exports, module) {
     PatientMonitorDisplay.prototype.fail = function (msg) {
         this.disp_fail.render("FAIL");
         this.disp_value.hide();
-        this.disp_alarm.renderGlyphicon("glyphicon-bell");
+        this.disp_alarm.renderGlyphicon("glyphicon-bell", { blinking: true });
         this.disp_tracings.pauseTrace();
         this.tracings_label_max.render(this.range.max);
         this.tracings_label_med.render(this.range.med);

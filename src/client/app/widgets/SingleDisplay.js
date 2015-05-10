@@ -61,6 +61,7 @@ define(function (require, exports, module) {
             this.backgroundColor = this.fontColor;
             this.fontColor = tmp;
         }
+        this.blinking = opt.blinking || false;
         this.textBaseline = "middle";
         this.div = d3.select(this.parent)
                         .append("div").style("position", "absolute")
@@ -117,7 +118,11 @@ define(function (require, exports, module) {
     SingleDisplay.prototype.renderGlyphicon = function (icon, opt) {
         opt = opt || {};
         var span = document.getElementById(this.id + "_span");
-        span.setAttribute("class", "glyphicon " + icon);
+        if (opt.blinking || this.blinking) {
+            span.setAttribute("class", "glyphicon " + icon + " blink");
+        } else {
+            span.setAttribute("class", "glyphicon " + icon);
+        }
         span.style.color = opt.fontColor || this.fontColor;
         this.reveal();
         return this;
