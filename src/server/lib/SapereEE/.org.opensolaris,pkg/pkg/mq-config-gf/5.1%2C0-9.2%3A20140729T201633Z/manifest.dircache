@@ -1,5 +1,0 @@
-dir path=mq/etc/xml 
-dir path=mq/etc/registry 
-dir path=mq/etc 
-dir path=mq 
-dir path=mq/etc/xml/template 

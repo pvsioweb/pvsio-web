@@ -1,3 +1,0 @@
-depend fmri=pkg:/felix type=require
-depend fmri=pkg:/glassfish-hk2 type=require
-depend fmri=pkg:/glassfish-grizzly type=require

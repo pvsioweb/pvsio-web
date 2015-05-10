@@ -1,2 +1,0 @@
-depend fmri=pkg:/glassfish-common type=require
-depend fmri=pkg:/glassfish-jpa type=require

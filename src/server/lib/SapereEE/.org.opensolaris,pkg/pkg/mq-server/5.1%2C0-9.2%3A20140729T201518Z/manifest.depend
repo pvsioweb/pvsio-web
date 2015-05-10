@@ -1,2 +1,0 @@
-depend fmri=pkg:/mq-core@5.1 type=require
-depend fmri=pkg:/mq-bin-sh@5.1 type=require
