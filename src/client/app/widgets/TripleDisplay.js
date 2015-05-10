@@ -37,7 +37,7 @@ define(function (require, exports, module) {
     function TripleDisplay(id, coords, opt) {
         opt = opt || {};
         this.id = id;
-        this.parent = opt.parent || "body";
+        this.parent = (opt.parent) ? ("#" + opt.parent) : "body";
         this.ratio = opt.ratio || 0.32;
         this.top = coords.top || 0;
         this.left = coords.left || 0;

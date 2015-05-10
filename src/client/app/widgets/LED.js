@@ -35,7 +35,7 @@ define(function (require, exports, module) {
     function LED(id, coords, opt) {
         opt = opt || {};
         this.id = id;
-        this.parent = opt.parent || "body";
+        this.parent = (opt.parent) ? ("#" + opt.parent) : "body";
         this.top = coords.top || 0;
         this.left = coords.left || 0;
         this.width = coords.width || 10;
@@ -47,7 +47,7 @@ define(function (require, exports, module) {
         this.radius = opt.radius || 3;
         this.color = opt.color || "#00FF66"; // default is light green
         this.blinking = opt.blinking || false; // TO BE IMPLEMENTED
-        this.div = d3.select("#" + this.parent)
+        this.div = d3.select(this.parent)
                         .append("div").style("position", "absolute")
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")

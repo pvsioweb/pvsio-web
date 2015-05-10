@@ -2,7 +2,7 @@
  * @module SingleDisplay
  * @version 2.0
  * @description Renders a basic digital display.
- *              This module provide APIs for rendering multi-line menus, and to change the look and feel of
+ *              This module provide APIs for changing the look and feel of
  *              the rendered text, including: cursors, background color, font, size, alignment.
  * @author Paolo Masci, Patrick Oladimeji
  * @date Apr 1, 2015
@@ -11,7 +11,9 @@
  * // Example module that uses SingleDisplay.
  * define(function (require, exports, module) {
  *     "use strict";
- *
+ *     var device = {};
+ *     device.disp = new SingleDisplay("disp", { top: 222, left: 96, height: 8, width: 38 });
+ *     device.disp.render(10); // the display renders 10
  * });
  *
  */
@@ -26,17 +28,25 @@ define(function (require, exports, module) {
     /**
      * @function <a name="SingleDisplay">SingleDisplay</a>
      * @description Constructor.
-     * @param id {String} The ID of the HTML element where the display will be rendered.
-     * @param coords {Object} The four coordinates (x1,y1,x2,y2) of the display, specifying
-     *        the left, top, right, bottom corner of the rectangle (for shape="rect")
-     * @param opt {Object}
+     * @param id {String} The ID of the display.
+     * @param coords {Object} The four coordinates (top, left, width, height) of the display, specifying
+     *        the left, top corner, and the width and height of the (rectangular) display.
+     *        Default is { top: 0, left: 0, width: 200, height: 80 }.
+     * @param opt {Object} Options:
+     *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
+     *          <li>font (String): display font type (default is "sans-serif")</li>
+     *          <li>fontColor (String): display font color (default is white, "#fff")</li>
+     *          <li>align (String): text alignment (default is "center")</li>
+     *          <li>inverted (Bool): if true, the text has inverted colors, 
+     *              i.e., fontColor becomes backgroundColor, and backgroundColor becomes fontColor (default is false)</li>
+     *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>                
      * @memberof module:SingleDisplay
      * @instance
      */
     function SingleDisplay(id, coords, opt) {
         opt = opt || {};
         this.id = id;
-        this.parent = opt.parent || "body";
+        this.parent = (opt.parent) ? ("#" + opt.parent) : "body";
         this.top = coords.top || 0;
         this.left = coords.left || 0;
         this.width = coords.width || 200;
@@ -44,14 +54,15 @@ define(function (require, exports, module) {
         this.font = [this.height, "px ", (opt.font || "sans-serif")];
         this.smallFont = (this.height * 0.8) + "px " + (opt.font || "sans-serif");
         this.align = opt.align || "center";
-        if (opt.backgroundColor) {
-            this.backgroundColor = opt.backgroundColor;
-        } else { this.backgroundColor = (opt.inverted) ? '#fff' : "#000"; }
-        if (opt.fontColor) {
-            this.fontColor = opt.fontColor;
-        } else { this.fontColor = (opt.inverted) ? "#000" : '#fff'; }
+        this.backgroundColor = opt.backgroundColor || "#000";
+        this.fontColor = opt.fontColor || "#fff";
+        if (opt.inverted) {
+            var tmp = this.backgroundColor;
+            this.backgroundColor = this.fontColor;
+            this.fontColor = tmp;
+        }
         this.textBaseline = "middle";
-        this.div = d3.select("#" + this.parent)
+        this.div = d3.select(this.parent)
                         .append("div").style("position", "absolute")
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")
