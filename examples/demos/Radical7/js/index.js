@@ -106,7 +106,11 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
             radical.spo2_display.set_alarm({ min: parseFloat(res.spo2_min), max: parseFloat(res.spo2_max) });
             radical.spo2_display.set_range({ min: 0, max: 100 });
             if (res.spo2_fail === "FALSE") {
-                radical.spo2_display.render(evaluate(res.spo2));
+                if (res.spo2_alarm === "off") {
+                    radical.spo2_display.render(evaluate(res.spo2));
+                } else {
+                    radical.spo2_display.render(evaluate(res.spo2), { fontColor: "red" });
+                }
             } else {
                 radical.spo2_display.fail("FAIL");
             }
@@ -123,7 +127,11 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
             radical.rra_display.set_alarm({ min: parseFloat(res.rra_min), max: parseFloat(res.rra_max) });
             radical.rra_display.set_range({ min: 0, max: 70 });
             if (res.rra_fail === "FALSE") {
-                radical.rra_display.render(evaluate(res.rra));
+                if (res.rra_alarm === "off") {
+                    radical.rra_display.render(evaluate(res.rra));
+                } else {
+                    radical.rra_display.render(evaluate(res.rra), { fontColor: "red" });
+                }
             } else {
                 radical.rra_display.fail("FAIL");
             }
@@ -140,16 +148,16 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
             if (res.spo2_alarm === "off") {
                 radical.spo2_display.alarm("off");
             } else if (res.spo2_alarm === "alarm") {
-                radical.spo2_display.alarm("glyphicon-bell");
+                radical.spo2_display.alarm("glyphicon-bell", { blinking: true });
             } else if (res.spo2_alarm === "mute") {
-                radical.spo2_display.alarm("glyphicon-mute");
+                radical.spo2_display.alarm("glyphicon-mute", { blinking: true });
             }
             if (res.rra_alarm === "off") {
                 radical.rra_display.alarm("off");
             } else if (res.rra_alarm === "alarm") {
-                radical.rra_display.alarm("glyphicon-bell");
+                radical.rra_display.alarm("glyphicon-bell", { blinking: true });
             } else if (res.rra_alarm === "mute") {
-                radical.rra_display.alarm("glyphicon-mute");
+                radical.rra_display.alarm("glyphicon-mute", { blinking: true });
             }
         } else {
             radical.spo2_display.hide();
