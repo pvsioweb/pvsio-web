@@ -150,9 +150,9 @@ define(function (require, exports, module) {
         }
         function renderln(data, opt) {
             opt = opt || {};
-            data.context.fillStyle = (opt.inverted) ? _this.backgroundColor : _this.fontColor;
-            data.context.fillRect(0, data.y, data.width, data.height);
             data.context.fillStyle = (opt.inverted) ? _this.fontColor : _this.backgroundColor;
+            data.context.fillRect(0, data.y, data.width, data.height);
+            data.context.fillStyle = (opt.inverted) ? _this.backgroundColor : _this.fontColor;
             var y_offset = data.y || 0;
             if (data.align === "left") {
                 data.context.textAlign = "start";

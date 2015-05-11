@@ -46,7 +46,7 @@ define(function (require, exports, module) {
         this.textBaseline = "middle";
         this.radius = opt.radius || 3;
         this.color = opt.color || "#00FF66"; // default is light green
-        this.blinking = opt.blinking || false; // TO BE IMPLEMENTED
+        this.blinking = opt.blinking || false;
         this.div = d3.select(this.parent)
                         .append("div").style("position", "absolute")
                         .style("top", this.top + "px").style("left", this.left + "px")
@@ -57,14 +57,12 @@ define(function (require, exports, module) {
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0)
                         .style("vertical-align", "top");
-        this.timer = null;
         this.isOn = false;
         return this;
     }
 
     LED.prototype.render = function (opt) {
         opt = opt || {};
-        var _this = this;
         var context = document.getElementById(this.id + "_canvas").getContext("2d");
         context.beginPath();
         context.globalAlpha = 0.9;
@@ -72,14 +70,13 @@ define(function (require, exports, module) {
         context.fillStyle = opt.color || this.color;
         context.fill();
         if (!opt.noborder) { context.stroke(); }
+        var elemClass = this.div.node().getAttribute("class");
         if (opt.blinking || this.blinking) {
-            var rate = opt.blinkingRate || 3000;
-            if (!this.timer) {
-                this.timer = setInterval(function () {
-                    _this.toggle();
-                }, rate);
-            }
+            elemClass += " blink";
+        } else {
+            elemClass = elemClass.replace(" blink", "");
         }
+        this.div.node().setAttribute("class", elemClass);
         this.reveal();
         return this;
     };
@@ -102,10 +99,6 @@ define(function (require, exports, module) {
     LED.prototype.off = function () {
         this.isOn = false;
         this.hide();
-        if (this.timer) {
-            clearInterval(this.timer);
-            this.timer = null;
-        }
         return this;
     };
 
