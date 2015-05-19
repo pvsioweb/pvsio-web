@@ -59,7 +59,8 @@ define(function (require, exports, module) {
     var modelName;
 
     /**
-     * Constructor
+     * Constructor.
+     * @memberof EmuchartsTestGenerator
      */
     function EmuchartsTestGenerator(name) {
         this.modelName = name;
@@ -67,16 +68,17 @@ define(function (require, exports, module) {
     }
 
     /**
-     * Returns a string of abstract tests for the emuchart
+     * Returns a string of abstract tests for the emuchart.
+     * @memberof EmuchartsTestGenerator
      */
     EmuchartsTestGenerator.prototype.generateTests = function (pm) {
         /**
          * Generate tests for the presentation model
          * (If the pm is a PIM then generates tests for all its
          * component models, else if PM then generates tests for its
-         * widgets)
+         * widgets).
          * @param pm The presentation model to get component model
-         * tests for
+         * tests for.
          * @returns {Array} Array of AbstractTests {
          *          state_name: (string),
          *          widget_name: (string),
@@ -130,20 +132,20 @@ define(function (require, exports, module) {
 
 
         /**
-         * Generate the all the tests for the states within a PM / PIM
-         * @param pm PM / PIM to get state tests for
-         * @returns {string} A string of all the states tests
+         * Generate the all the tests for the states within a PM / PIM.
+         * @param pm PM / PIM to get state tests for.
+         * @returns {string} A string of all the states tests.
          */
         function stateTests(pm) {
             /**
-             * Generate the tests for the states within a PM / PIM recursively
-             * @param pm PM / PIM to get state tests for
-             * @returns {Array} if PIM or {object} if PM of state test(s)
+             * Generate the tests for the states within a PM / PIM recursively.
+             * @param pm PM / PIM to get state tests for.
+             * @returns {Array} if PIM or {object} if PM of state test(s).
              */
             function stateTestsRec(pm) {
                 /**
-                 * Get the tests for a PM
-                 * @param pm
+                 * Get the tests for a PM.
+                 * @param pm PM to get states from.
                  * @returns object {
                  *          state_name: (string),
                  *          widget_name: (string),
@@ -188,9 +190,9 @@ define(function (require, exports, module) {
             }
 
             /**
-             * Transforms a state test into the correct format to display
-             * @param test Test to display
-             * @returns {string} The formatted state test
+             * Transforms a state test into the correct format to display.
+             * @param test Test to display.
+             * @returns {string} The formatted state test.
              */
             function printStateTest(test) {
                 var testStr = "";
@@ -205,16 +207,16 @@ define(function (require, exports, module) {
                         testStr += p.name + "(" + p.args.join(", ") + ") " + "Λ" + " ";
                     }
                 });
-                // slice to remove last '/\ \n\t' -> \n
+                // Remove last '/\ \n\t' -> \n
                 testStr = testStr.substring(0, testStr.lastIndexOf("Λ")) + "\n";
                 return testStr;
             }
 
             /**
-             * Display the state tests
-             * @param tests Tests to display
-             * @returns {string} A string of all the state
-             * tests for the PM / PIM
+             * Display the state tests.
+             * @param tests Tests to display.
+             * @returns {string} A string of all the state.
+             * tests for the PM / PIM.
              */
             function printStateTests(tests) {
                 var testsStr = "";
@@ -238,10 +240,10 @@ define(function (require, exports, module) {
             return printStateTests(tests);
         }
         /**
-         * Generate the all the tests for behaviours within a PM / PIM
-         * @param tests The generated tests
-         * @param pm PM / PIM to get behaviour tests for
-         * @returns string A string of all the behaviour tests
+         * Generate the all the tests for behaviours within a PM / PIM.
+         * @param tests The generated tests.
+         * @param pm PM / PIM to get behaviour tests for.
+         * @returns string A string of all the behaviour tests.
          * TODO tidy function
          */
         function behaviourTests(tests, pm) {
@@ -311,10 +313,10 @@ define(function (require, exports, module) {
             });
 
             /**
-             * Display the I_behaviour tests
-             * @param tests I_behaviour tests to display
+             * Display the I_behaviour tests.
+             * @param tests I_behaviour tests to display.
              * @returns {string} A string of all the I_behaviour
-             * tests for the PM / PIM
+             * tests for the PM / PIM.
              */
             function printIBehaviourTests(tests) {
                 var testsStr = "";
@@ -328,10 +330,10 @@ define(function (require, exports, module) {
             }
 
             /**
-             * Display the S_behaviour tests that are not responses
-             * @param tests S_behaviour tests to display
-             * @returns {string} A string of all the S_behaviour
-             * tests for the PM / PIM
+             * Display the S_behaviour tests that are not responses.
+             * @param tests S_behaviour tests to display.
+             * @returns {string} A string of all the S_behaviour.
+             * tests for the PM / PIM.
              */
             function printSBehaviourTests(tests) {
                 var testsStr = "";
@@ -344,10 +346,10 @@ define(function (require, exports, module) {
             }
 
             /**
-             * Display the S_behaviour tests that are responses
-             * @param tests S_behaviour tests to display
+             * Display the S_behaviour tests that are responses.
+             * @param tests S_behaviour tests to display.
              * @returns {string} A string of all the S_behaviour
-             * tests for the PM / PIM
+             * tests for the PM / PIM.
              */
             function printSRespBehaviourTests(tests) {
                 var testsStr = "";
@@ -360,10 +362,10 @@ define(function (require, exports, module) {
             }
 
             /**
-             * Display the no behaviour tests
-             * @param tests no behaviour tests to display
+             * Display the no behaviour tests.
+             * @param tests no behaviour tests to display.
              * @returns {string} A string of all the no behaviour
-             * tests for the PM / PIM
+             * tests for the PM / PIM.
              */
             function printNoBehaviourTests(tests) {
                 var testsStr = "";
@@ -396,7 +398,8 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Returns a string of the emuchart description tests were generated for
+     * Returns a string of the emuchart description tests were generated for.
+     * @memberof EmuchartsTestGenerator
      */
     EmuchartsTestGenerator.prototype.printDescriptor = function (name, pm) {
         var ans = "# ---------------------------------------------------------------\n";
@@ -406,7 +409,8 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Returns a string of the disclaimer for using this tool
+     * Returns a string of the disclaimer for using this tool.
+     * @memberof EmuchartsTestGenerator
      */
     EmuchartsTestGenerator.prototype.printDisclaimer = function () {
         return "\n# ---------------------------------------------------------------\n" +
@@ -416,7 +420,8 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Returns a string of abstract tests for the emuchart to be saved in a file
+     * Returns a string of abstract tests for the emuchart to be saved in a file.
+     * @memberof EmuchartsTestGenerator
      */
     EmuchartsTestGenerator.prototype.print = function (name, models) {
         var _this = this;

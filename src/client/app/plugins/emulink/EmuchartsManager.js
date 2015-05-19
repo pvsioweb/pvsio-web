@@ -580,29 +580,24 @@ define(function (require, exports, module) {
 
             readModels(false);
             // If more to read in file
-            if (index < file.length -1) {
-                while (file[index] === "") {
-                    index++;
-                }
-
+            if (index < file.length - 1) {
                 if (file[index++] === "====") {
                     readModels(true);
+                } else {
+                    throw "Invalid input file. Expected PMRs.";
                 }
             }
             // If more to read in file
-            if (index < file.length -1) {
-                while (file[index] === "") {
-                    index++;
-                }
-
+            if (index < file.length - 1) {
                 if (file[index++] === "====") {
                     readPIMs();
+                } else {
+                    throw "Invalid input file. Expected PIMs.";
                 }
             }
         }
 
         // TODO: update the EmuChart model with PIM models
-
 
         var models = {
             pims: pims.reverse(),
