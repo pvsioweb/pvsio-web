@@ -453,12 +453,17 @@ define(function (require, exports, module) {
         function importChart(callback) {
             var opt = {
                 header: "Import Chart...",
-                extensions: ".muz"
+                extensions: ".muz,.txt,.pm,.dat"
             };
             // MUZ
             fs.openLocalFileAsText(function (err, res) {
                 if (res) {
-                    emuchartsManager.importPIMChart(res);
+                    if (res.name.lastIndexOf(".muz") === res.name.length - 4) {
+                        emuchartsManager.importPIMChart(res);
+                    }
+                    else {
+                        emuchartsManager.importPIMChartV2(res);
+                    }
                     if (callback && typeof callback === "function") {
                         callback(err, res);
                     }
@@ -1330,13 +1335,56 @@ define(function (require, exports, module) {
             }
         });
         d3.select("#btn_menuTestGenerator").on("click", function () {
+            var emuchart = {
+                name: ("emucharts_" + projectManager.project().name() + "_VDM"),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                //constants: emuchartsManager.getConstants(),
+                //variables: emuchartsManager.getVariables(),
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions(),
+                pm: {
+                    name: projectManager.project().name(),
+                    widgets: [],
+                    components: emuchartsManager.getStates(),
+                    pmr: []
+                },
+                // TODO: tidy this up
+                start_state: emuchartsManager.getInitialTransitions()[0].target.name,
+                final_states: [],
+                isPIM: emuchartsManager.getIsPIM()
+            };
+
+            var tests = emuchartsTestGenerator.print(emuchart.name, { pims: [ emuchart ], pm: [] });
+            console.log(tests);
+            if (tests.err) {
+                console.log(tests.err);
+                return;
+            }
+            if (tests.res) {
+                var name = tests.name + ".txt";
+                var content = tests.res;
+                return projectManager.project().addFile(name, content, { overWrite: true });
+            } else {
+                console.log("Warning, TestGenerator model is undefined.");
+            }
+        });
+        d3.select("#btn_menuTestGeneratorFromFile").on("click", function () {
             var models;
             // Generate tests from importing a file
             fs.openLocalFileAsText(function (err, res) {
                 if (res) {
                     // Try parse as PIM
-                    models = emuchartsManager.importPIMChartV2(res);
-                    var tests = emuchartsTestGenerator.print(res.name, models);
+                    models = emuchartsManager.importPIMChartV2(res, false);
+                    if (models.err) {
+                        console.log(models.err);
+                        return;
+                    }
+                    var tests = emuchartsTestGenerator.print(res.name, models.models);
                     console.log(tests);
                     if (tests.err) {
                         console.log(tests.err);
@@ -1356,7 +1404,7 @@ define(function (require, exports, module) {
                     console.log("Error while opening file (" + err + ")");
                 }
 
-            }, { header: "Open PIM file...", });
+            }, { header: "Open PIM file..." });
         });
 
 

@@ -1772,7 +1772,15 @@ define(function (require, exports, module) {
         refreshInitialTransitions(itransitions);
     };
 
-    
+    /**
+     * Is the model a PIM.
+     * @returns {boolean} True if it is a PIM.
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.getIsPIM = function () {
+        return this.emucharts.getIsPIM() || false;
+    };
+
     /**
      * utility function to rename states
 	 * @memberof EmuchartsEditor

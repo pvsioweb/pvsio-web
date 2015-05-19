@@ -88,11 +88,16 @@ define(function (require, exports, module) {
          *              })
          *      }
          */
-        function genTests(pm) {
+        function genTests(pim) {
+            var pm = pim.pm || pim;
+            if (!pm || !pm.widgets || !pm.widgets.forEach) {
+                return [];
+            }
+
             var componentTests = [];
             // If a PIM PM is passed in 1st this will be skipped
             pm.widgets.forEach(function(widget) {
-                var tPredicates =[], tArgs = [];
+                var tPredicates = [], tArgs = [];
                 // Add widget predicates
                 tPredicates.push({ name: "hasWidget", args: [widget.name] });
                 tPredicates.push({ name: "Visible", args: [widget.name] });
@@ -123,9 +128,38 @@ define(function (require, exports, module) {
                 });
             });
 
-            pm.components.forEach(function(component) {
-                componentTests.push.apply(componentTests, genTests(component));
-            });
+            if (!pm.components || !pm.components.forEach) {
+                return componentTests;
+            }
+
+            // If the PIM wasn't loaded as a pim.
+            // TODO: this needs to be changed when PIM editing is added to Emulink. But ultimately should be removed.
+            if (pim.isPIM !== undefined && !pim.isPIM && pim.transitions && pim.transitions.map) {
+                // Use PIM transitions to
+                componentTests = pim.transitions.map(function(t) {
+                    return {
+                        name: "hasBehaviour",
+                        predicates: [{
+                            name: "hasBehaviour",
+                            // hack to put I behaviour as the interaction
+                            args: [t.I_behaviour, "I_" + t.I_behaviour]
+                        }]
+                    };
+                });
+                // ensure the transitions have I_ on them. This should be enforced within emulink.
+                pim.transitions = pim.transitions.map(function(t) {
+                    return {
+                        start_state: t.start_state,
+                        end_state: t.end_state,
+                        I_behaviour: "I_" + t.I_behaviour
+                    };
+                });
+
+            } else {
+                pm.components.forEach(function(component) {
+                    componentTests.push.apply(componentTests, genTests(component));
+                });
+            }
 
             return componentTests;
         }
@@ -156,7 +190,8 @@ define(function (require, exports, module) {
                  *      }
                  */
                 function addState(pm) {
-                    if (pm.widgets.length === 0) {
+                    if (!pm || !pm.widgets || !pm.widgets.forEach ||
+                        pm.widgets.length === 0) {
                         return null;
                     }
 
@@ -177,6 +212,10 @@ define(function (require, exports, module) {
                     };
                 }
 
+                if (!pm || !pm.components) {
+                    return [];
+                }
+
                 if (pm.components.length === 0) {
                     return addState(pm);
                 }
@@ -195,6 +234,11 @@ define(function (require, exports, module) {
              * @returns {string} The formatted state test.
              */
             function printStateTest(test) {
+
+                if (!test || !test.predicates || !test.predicates.forEach) {
+                    return "";
+                }
+
                 var testStr = "";
                 testStr += "State(" + test.state_name + ") => ";
             //    testStr += "\n\t";
@@ -219,6 +263,10 @@ define(function (require, exports, module) {
              * tests for the PM / PIM.
              */
             function printStateTests(tests) {
+                if (!tests) {
+                    return "Error: no tests. Generated from model."
+                }
+
                 var testsStr = "";
                 // If the tests are for a PIM, else for PM
                 if (tests.forEach) {
@@ -247,15 +295,25 @@ define(function (require, exports, module) {
          * TODO tidy function
          */
         function behaviourTests(tests, pm) {
+
+            if (!tests || !tests.forEach || !pm) {
+                return "Error: no behaviour tests from model";
+            }
+
             var iBehav = [], sBehav = [], sRespBehav = [], noBehav = [];
 
             // Split the Behaviour based tests into each type of behaviour
             tests.forEach(function (test) {
+                if (!test.predicates || !test.predicates.forEach) {
+                    return;
+                }
                 test.predicates.forEach(function (p) {
                     if(p.name === "hasBehaviour") {
-                        // Remove the Widget name from the args
-                        p.args.splice(1, p.args.length - 1)
-                            .forEach(function (arg) {
+                        p.args.forEach(function (arg, i) {
+                            // Skip over Widget name in the args
+                            if (i === 0) {
+                                return;
+                            }
                             var sub = arg.substring(0, 2);
                             if (sub === "I_") {
                                 // Is I_Behaviour
@@ -269,9 +327,9 @@ define(function (require, exports, module) {
                                                 /*
                                                  * In PIMed the predicates are printed out by
                                                  * predicates(0).args.toString. Could be simulated
-                                                 * as "List(" + p.args[0] + ")";
+                                                 * as "List(" + p.args[0] + ")"; or p.args
                                                  */
-                                                predicates: test.predicates[0].args,
+                                                predicates: [p.args[0]],
                                                 end_state: tran.end_state
                                             });
                                         }
@@ -319,11 +377,15 @@ define(function (require, exports, module) {
              * tests for the PM / PIM.
              */
             function printIBehaviourTests(tests) {
+                if (!tests || !tests.forEach) {
+                    return "Error: no tests from I behavs.";
+                }
+
                 var testsStr = "";
                 tests.forEach(function(test) {
                     testsStr += "State(" + test.start_state + ") " + "Λ" + " ";
                     // TODO this not need the list?
-                    testsStr += "Interaction(List(" + test.predicates.join(",") + ")) ";
+                    testsStr += "Interaction(List(" + test.predicates.join(", ") + ")) ";
                     testsStr += "=> State(" + test.end_state + ")\n";
                 });
                 return testsStr;
@@ -336,6 +398,10 @@ define(function (require, exports, module) {
              * tests for the PM / PIM.
              */
             function printSBehaviourTests(tests) {
+                if (!tests || !tests.forEach) {
+                    return "Error: no tests from S behavs.";
+                }
+
                 var testsStr = "";
                 tests.forEach(function(test) {
                     testsStr += "State(" + test.state_name + ") " + "Λ" + " ";
@@ -352,6 +418,10 @@ define(function (require, exports, module) {
              * tests for the PM / PIM.
              */
             function printSRespBehaviourTests(tests) {
+                if (!tests || !tests.forEach) {
+                    return "Error: no tests from S Resp. behavs.";
+                }
+
                 var testsStr = "";
                 tests.forEach(function(test) {
                     testsStr += "State(" + test.state_name + ") => ";
@@ -368,6 +438,10 @@ define(function (require, exports, module) {
              * tests for the PM / PIM.
              */
             function printNoBehaviourTests(tests) {
+                if (!tests || !tests.forEach) {
+                    return "Error: no tests from no behavs.";
+                }
+
                 var testsStr = "";
                 tests.forEach(function(test) {
                     testsStr += "State(" + test.state_name + ") " + "Λ" + " ";
@@ -389,7 +463,9 @@ define(function (require, exports, module) {
         // add test generation
         var tests = "";
         // Get tests for the PIM / PM
-        var _tests = genTests(pm.pm || pm);
+        // TODO: this could at a later stage be switched back to passing in a PM
+        //var _tests = genTests(pm.pm || pm);
+        var _tests = genTests(pm);
         // Print state tests
         tests += stateTests(pm.pm || pm) + "\n";
         tests += behaviourTests(_tests, pm);
@@ -428,7 +504,7 @@ define(function (require, exports, module) {
 
         // Print PIM tests
         var ans = "Tests for Presentation Interaction Models:\n";
-        if (models.pims.length === 0) {
+        if (!models.pims || models.pims.length === 0) {
             ans += "Unable to find any PIMs in file.\n";
         } else {
             // Foreach pim generate tests
@@ -440,7 +516,7 @@ define(function (require, exports, module) {
 
         // Print PM tests
         ans += "\nTests for Presentation Models:\n";
-        if (models.pms.length === 0) {
+        if (!models.pms || models.pms.length === 0) {
             ans += "Unable to find any PMs in file.\n";
         } else {
             models.pms.forEach(function (pm) {

@@ -142,13 +142,17 @@ define(function (require, exports, module) {
                         }
                         // associate an editor to the created emuchart
                         // FIXME: Improve the constructor and this importEmuchart function
-                        var emucharts = new Emucharts({
+                        var emuchart = {
                             nodes:  chart.nodes,
                             edges: chart.edges,
                             initial_edges: chart.initial_edges,
                             variables: chart.variables,
                             constants: chart.constants
-                        });
+                        }
+                        if (emuchartsFile.isPIM && emuchartsFile.isPIM === true) {
+                            emuchart.isPIM = true;
+                        }
+                        var emucharts = new Emucharts(emuchart);
                         var newEmuchartsEditor = new EmuchartsEditor(emucharts);
                         _this.installHandlers(newEmuchartsEditor);
                         _emuchartsEditors.set(emuchartsFile.content.descriptor.chart_name, newEmuchartsEditor);
@@ -358,11 +362,13 @@ define(function (require, exports, module) {
     /**
      * Reads in Presentation Interaction Models with corresponding
      * Presentation Models from a file.
-     * @param fileIn The file to read the models from
-     * @returns {{pims: Array, pms: Array}} The PIMs and PMs from the file
+     * @param fileIn The file to read the models from.
+     * @returns {{emuchart: Object, models: {pims: Array, pms: Array}}}
+     * The emuchart, PIMs and PMs from the file.
      * @memberof EmuchartsManager
      */
-    EmuchartsManager.prototype.importPIMChartV2 = function (fileIn) {
+    EmuchartsManager.prototype.importPIMChartV2 = function (fileIn, saveAsChart) {
+        var _this = this;
         /** Index within the file */
         var index;
         /** File array */
@@ -597,11 +603,98 @@ define(function (require, exports, module) {
             }
         }
 
-        // TODO: update the EmuChart model with PIM models
+        /**
+         * Parses a PIM to a Emuchart (pim version) adds to Emulink.
+         * @param pim PIM to parse as Emuchart
+         * @returns Object TODO:
+         */
+        function parsePIMAsEmuchart(pim) {
+
+            // TODO: find a nicer way to position the nodes
+            var init_x = 0, init_y = 0;
+            var incr_x = 50, incr_y = 50;
+
+            // Need to get the states info out of the Component models
+            var states = pim.pm.components.map( function(pm) {
+                // dont add the PIM's PM
+                if (pm.name === pim.name) { return; }
+                init_x += incr_x;
+                init_y += incr_y;
+                return {
+                    name: pm.name,
+                    id: pm.name,
+                    x: init_x,
+                    y: init_y,
+                    width: 50,
+                    height: 50,
+                    widgets: pm.widgets,
+                    // Only PIMs have component models.
+                    //components: pm.components,
+                    pmr: pm.pmr
+                };
+            });
+
+            var transId = 0;
+            var transitions = pim.transitions.map( function(trans) {
+                return {
+                    name: trans.I_behaviour,
+                    id: trans.I_behaviour + transId++,
+                    source: {
+                        name: trans.start_state,
+                        id: trans.start_state
+                    },
+                    target: {
+                        name: trans.end_state,
+                        id: trans.end_state
+                    }
+                };
+            });
+
+            var initialTransition = {
+                id: "INIT_" + pim.start_state.name,
+                name: "INIT_" + pim.start_state.name,
+                target: { name: pim.start_state.name, id: pim.start_state.name }
+            };
+
+            var chart = {
+                descriptor: {
+                    file_type: "emdl",
+                    version: "1.1",
+                    description: "emucharts model from PIM",
+                    chart_name: pim.name
+                },
+                chart: {
+                    states: states,
+                    transitions: transitions,
+                    initial_transitions: [ initialTransition ],
+                    constants: null,
+                    variables: null,
+                    pm: pim.pm,
+                    start_state: pim.start_state,
+                    final_states: pim.final_states
+                }
+            };
+            _this.importEmucharts({ name: pim.name, content: chart, isPIM: true });
+
+            return chart;
+        }
+
+        // Arrange models in correct order
+        pims.reverse();
+        pModels.reverse()
+
+        // Assume only 1 PIM in file. Use the first one in chart.
+        var chart = {};
+        if (saveAsChart === undefined || saveAsChart ) {
+            chart = parsePIMAsEmuchart(pims[0]);
+        }
 
         var models = {
-            pims: pims.reverse(),
-            pms: pModels.reverse()
+            emucharts: chart,
+            models: {
+                pims: pims,
+                pms: pModels
+            }
         };
         console.log(models);
         // Return the read in PIMs and PMs
@@ -800,6 +893,15 @@ define(function (require, exports, module) {
 	 */
     EmuchartsManager.prototype.rename_transition = function (transitionID, newLabel) {
         return _selectedEditor.rename_transition(transitionID, newLabel);
+    };
+
+    /**
+     * Is the model a PIM.
+     * @returns {boolean} True if it is a PIM.
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.getIsPIM = function () {
+        return _selectedEditor.getIsPIM() || false;
     };
 
     /**

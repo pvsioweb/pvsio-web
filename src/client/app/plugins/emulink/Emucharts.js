@@ -40,7 +40,9 @@ define(function (require, exports, module) {
     };
     var getFreshConstantID = function () { return nextConstantID + 1; };
     var getFreshVariableID = function () { return nextVariableID + 1; };
-    
+
+    var isPIM = false;
+
 	/**
 	 * @function Emucharts
      * @description Constructor.
@@ -63,13 +65,19 @@ define(function (require, exports, module) {
             }
             this.constants = emuchart.constants || d3.map();
             this.variables = emuchart.variables || d3.map();
+            this.isPIM = emuchart.isPIM;
         } else {
             this.nodes = d3.map();
             this.edges = d3.map();
             this.initial_edges = d3.map();
             this.variables = d3.map();
             this.constants = d3.map();
+
+            if (emuchart.isPIM && typeof(emuchart.isPIM) === 'boolean') {
+                this.isPIM = isPIM;
+            }
         }
+
 		eventDispatcher(this);
         return this;
     }
@@ -87,7 +95,10 @@ define(function (require, exports, module) {
     Emucharts.prototype.getDefaultValues = function () {
         return defaultValues;
     };
-    
+
+    Emucharts.prototype.getIsPIM = function () {
+        return this.isPIM;
+    }
     
 	/**
 	 * @function rename_node
@@ -165,6 +176,12 @@ define(function (require, exports, module) {
                 width : width,
                 height: defaultValues.height
             };
+
+        // Set PM values
+        newNode.widgets = [];
+        newNode.components = [];
+        newNode.pmr = [];
+
         // add the new node to the diagram
         this.nodes.set(newNode.id, newNode);
         // fire event
@@ -497,14 +514,20 @@ define(function (require, exports, module) {
         var states = [];
         this.nodes.forEach(function (key) {
             var node = _this.nodes.get(key);
-            states.push({
+            var state = {
                 name: node.name,
                 id: node.id,
                 x: node.x,
                 y: node.y,
                 width : node.width,
                 height: node.height
-            });
+            };
+            // Also include PM values for tests.
+            state.widgets = node.widgets || [];
+            state.components = node.components || [];
+            state.pmr = node.pmr || [];
+
+            states.push(state);
         });
         return states;
     };
@@ -543,7 +566,7 @@ define(function (require, exports, module) {
         var transitions = [];
         this.edges.forEach(function (key) {
             var trans = _this.edges.get(key);
-            transitions.push({
+            var newTrans = {
                 name: trans.name,
                 id: key,
                 source: {
@@ -558,7 +581,13 @@ define(function (require, exports, module) {
                     x: trans.controlPoint.x,
                     y: trans.controlPoint.y
                 } : null
-            });
+            };
+            // Also include PIM values for test gen.
+            newTrans.start_state = newTrans.source.name;
+            newTrans.end_state = newTrans.target.name;
+            newTrans.I_behaviour = newTrans.name;
+
+            transitions.push(newTrans);
         });
         return transitions;
     };
