@@ -11,12 +11,14 @@ define(function (require, exports, module) {
 
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
+    var version = 0.2;
 
     var theory_name;
     var parser;
 
     var initialMachineState = "initialMachineState";
     var machineStateType = "MachineState";
+    var emuchartStateType = "EmuchartState";
 
     var vdmRecordTypePrinter = require("plugins/emulink/models/vdm/vdmRecordTypePrinter");
     var vdmStateTypePrinter = require("plugins/emulink/models/vdm/vdmStateTypePrinter");
@@ -85,9 +87,11 @@ define(function (require, exports, module) {
      */
     function print_utils() {
         var ans = "\n  -- utility functions";
-        ans += "\n  enter_into: " + predefined_variables.current_state.type + " * State -> State";
+        ans += "\n  enter_into: " + predefined_variables.current_state.type +
+               " * " + emuchartStateType + " -> " + emuchartStateType;
         ans += "\n  enter_into(ms, s) == mu(s, " + predefined_variables.current_state.name + " |-> ms );";
-        ans += "\n  leave_state: " + predefined_variables.current_state.type + " * State -> State";
+        ans += "\n  leave_state: " + predefined_variables.current_state.type +
+               " * " + emuchartStateType + " -> " + emuchartStateType;
         ans += "\n  leave_state(ms, s) == mu(s, " + predefined_variables.previous_state.name + " |-> ms );\n";
         return ans;
     }
@@ -178,7 +182,7 @@ define(function (require, exports, module) {
             };
             var vdmFunction = {
                 identifier: theTransition.identifier,
-                signature:  "init s == s = mk_State",
+                signature:  "init s == s = mk_" + emuchartStateType,
                 cases: {
                     letExpr: [],
                     inExpr: [ ("st") ]
@@ -208,7 +212,7 @@ define(function (require, exports, module) {
             code += vdmFunction.signature;
             var variables = [];
             predefined_variables.current_state.value = "<" + theTransition.to + ">";
-            predefined_variables.previous_state.value = "<" + theTransition.to + ">";
+            predefined_variables.previous_state.value = "undefined";
             variables.push(predefined_variables.current_state);
             variables.push(predefined_variables.previous_state);
             variables = variables.concat(emuchart.variables);
@@ -297,14 +301,14 @@ define(function (require, exports, module) {
                 // permission function
                 var permissionFunction = {
                     identifier: "per_" + theTransition.identifier.val,
-                    signature : "per_" + theTransition.identifier.val + ": State -> bool",
+                    signature : "per_" + theTransition.identifier.val + ": " + emuchartStateType + " -> bool",
                     cases: []
                     // the body of the permission is given by the disjunction of the collected cases
                 };
                 // transition function
                 var transitionFunction = {
                     identifier: theTransition.identifier.val,
-                    signature : theTransition.identifier.val + ": State -> State",
+                    signature : theTransition.identifier.val + ": " + emuchartStateType + " -> " + emuchartStateType,
                     cases: []
                     // the body of the function is given by a COND-ENDCOND statement
                     // made up from the expressions collected in array cases
@@ -397,19 +401,20 @@ define(function (require, exports, module) {
                 var tmp = [];
                 f.tran.cases.forEach(function (c) {
                     var expr = c.cond.join(" and ") + "\n    then ";
-                    expr += c.letExpr.join(",\n            ") + "\n         ";
+                    expr += c.letExpr.join(" in let\n            ") + "\n         ";
                     expr += " " + c.inExpr;
                     tmp.push(expr);
                 });
                 ans += tmp.join("\n    elseif ") + "\n";
-                ans += "    " + "else s" + "\n";
+                ans += "    " + "else undefined" + "\n";
                 ans += "  " + "pre " + f.per.identifier + "(s);\n";
             });
             ans += "\noperations";
             vdmFunctions.forEach(function (f) {
                 ans += "\n  " + "transition_" + f.tran.identifier + ": () ==> ()";
-                ans += "\n  " + "transition_" + f.tran.identifier + "() == State := " + f.tran.identifier + "(State)";
-                ans += "\n  " + "pre pre_" + f.tran.identifier + "(State);\n";
+                ans += "\n  " + "transition_" + f.tran.identifier + "() == " +
+                       emuchartStateType + " := " + f.tran.identifier + "(" + emuchartStateType + ")";
+                ans += "\n  " + "pre pre_" + f.tran.identifier + "(" + emuchartStateType + ");\n";
             });
             ret.res = ans;
         }
@@ -437,7 +442,7 @@ define(function (require, exports, module) {
         }
         var ans = "  -- emuchart state\n";
         ans += vdmStateTypePrinter.printTypeDefinition({
-            name: "State",
+            name: emuchartStateType,
             value: v.res
         });
         return ans;
@@ -502,7 +507,7 @@ define(function (require, exports, module) {
 
     EmuchartsVDMPrinter.prototype.print_disclaimer = function () {
         var ans = "\n-- ---------------------------------------------------------------\n" +
-                    "--  VDM model generated using PVSio-web VDMPrinter ver 0.1\n" +
+                    "--  VDM model generated using PVSio-web VDMPrinter ver " + version + "\n" +
                     "--  Tool freely available at http://www.pvsioweb.org" +
                     "\n-- ---------------------------------------------------------------\n";
         return ans;
