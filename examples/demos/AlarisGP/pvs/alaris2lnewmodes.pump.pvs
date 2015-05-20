@@ -1,29 +1,33 @@
 % Michael Harrison and Paolo Masci (QMUL and Newcastle University) April 2014
 pump_th [
    maxrate  : posnat,
-   maxinfuse: { maxinfuse: posnat | maxrate = maxinfuse }, % maxtime = maxinfuse needed for proving maxinfuse_over_time_lemma and vtbi_over_time_lemma
+   maxinfuse: posnat,  % | maxrate = maxinfuse }, % maxtime = maxinfuse needed for proving maxinfuse_over_time_lemma and vtbi_over_time_lemma   
    infusemin: { infusemin: posreal | infusemin <= maxinfuse },
+   % >>new edit<<
    timeout  : nat,
    shorttimeout : nat,
-   maxtime  : { maxtime: posnat | maxtime > timeout AND maxtime >= maxinfuse }
+   maxtime  : { maxtime: posnat | maxtime > timeout },% AND maxtime >= maxinfuse },
+   bat_max : {bat_max: posnat | bat_max+1 < maxtime},
+   bat_min: {bat_min: posnat | bat_min < bat_max}
 ]: THEORY
  BEGIN
   ASSUMING
     timeoutLTmaxtime: ASSUMPTION timeout < maxtime
     shorttimeoutLTtimeout: ASSUMPTION shorttimeout < timeout
-    maxinfuseLEQmaxtime: ASSUMPTION maxinfuse <= maxtime    
+    maxinfuseLEQmaxtime: ASSUMPTION maxinfuse <= maxtime
   ENDASSUMING
-  IMPORTING types_and_constants_th[maxrate, maxinfuse,infusemin,timeout,shorttimeout,maxtime]
+  IMPORTING types_and_constants_th[maxrate, maxinfuse, infusemin, timeout, shorttimeout, maxtime, bat_max, bat_min]
 
   %-- useful lemmas ------------------------------------------------------------------
-  maxinfuse_over_time_lemma: LEMMA
-    FORALL(t: {t: itimes | NOT t = 0}): floor(maxinfuse / t) >= 0 AND floor(maxinfuse / t) <= maxrate
-
-  vtbi_over_rate_lemma: LEMMA 
-    FORALL(v: ivols, r: {r: irates | (NOT r = 0)}): floor(v / r) >= 0 AND floor(v / r) <= maxtime
-
-  vtbi_over_time_lemma: LEMMA
-    FORALL(v: ivols, t: {t: itimes | (NOT t = 0)}): floor(v / t) >= 0 AND floor(v / t) <= maxrate
+% -- we don't need these lemmas anymore, they were used to discharge tccs generated when time, rate and volume were integers
+%  maxinfuse_over_time_lemma: LEMMA
+%    FORALL(t: {t: itimes | NOT t = 0}): floor(maxinfuse / t) >= 0 AND floor(maxinfuse / t) <= maxrate
+%
+%  vtbi_over_rate_lemma: LEMMA 
+%    FORALL(v: ivols, r: {r: irates | (NOT r = 0)}): floor(v / r) >= 0 AND floor(v / r) <= maxtime
+%
+%  vtbi_over_time_lemma: LEMMA
+%    FORALL(v: ivols, t: {t: itimes | (NOT t = 0)}): floor(v / t) >= 0 AND floor(v / t) <= maxrate
   %-----------------------------------------------------------------------------------
 
   %-- interactor pump
@@ -43,7 +47,10 @@ pump_th [
     elapsedtime    : itimes,    %[vis]
     kvorate        : irates,
     elapse         : pausetime,
-    kvoflag        : boolean    
+    kvoflag        : boolean,
+    ac_connect     : boolean,
+    battery        : itimes, 
+    set_fitted     : boolean  
   #]
 
   % axioms   
@@ -52,9 +59,13 @@ pump_th [
   init?(st: pump): bool =
      powered_on?(st) = FALSE & infusing?(st) = FALSE & infusionrate(st) = 0 & volumeinfused(st) = 0 &
      vtbi(st) = 0 & elapse(st) = 0 & NOT kvoflag(st) & elapsedtime(st) = 0 & time(st)=0 &
-     kvorate(st)=infusemin
+     kvorate(st)=infusemin & battery(st) = bat_max & set_fitted(st)=TRUE
 
   
+  mains_switch(st: pump): pump =
+      st WITH [ac_connect := NOT ac_connect(st)]
+  connect_set(st: pump): pump =
+      st WITH [set_fitted := TRUE]
 
   on(st: pump): pump=
     COND NOT powered_on?(st)
@@ -76,7 +87,7 @@ pump_th [
                         kvoflag := FALSE ],
           kvoflag(st) & (vtbi(st) = 0) 
             -> st WITH [ infusing? := TRUE ],
-          NOT kvoflag(st) & (vtbi(st) = 0) 
+          NOT kvoflag(st) & ((vtbi(st) = 0) OR (infusionrate(st) = 0))
             -> st WITH [ infusing? := FALSE ],
           NOT kvoflag(st) & (vtbi(st) /= 0)  
             -> st WITH [ infusing? := TRUE ]
@@ -91,19 +102,27 @@ pump_th [
 
 
   % actions
-  per_tick(st: pump): boolean =  powered_on?(st)
+  per_tick(st: pump): boolean =  powered_on?(st) & (NOT infusing?(st) IMPLIES elapse(st) < maxtime)
 
   tick_case_infuse_and_infusionrateLvtbi
-    (st: {st: pump | infusing?(st) & vtbi(st) - infusionrate(st) > 0}): pump =
+    (st: {st: pump | infusing?(st) & (vtbi(st) - infusionrate(st)) > 0}): pump =
             st WITH [ vtbi          := vtbi(st) - infusionrate(st),
                       time          := COND infusionrate(st) = 0 -> 0,
 		      		            %-- Paolo's edit
                                             % ELSE -> (time(st) - 1) ENDCOND,
-                                            ELSE -> floor((vtbi(st) - infusionrate(st)) / infusionrate(st)) ENDCOND,
+					    %-- >>new edit<< --we don't need floor(..), because now time, rate, and volume are real numbers
+                                            %ELSE -> floor((vtbi(st) - infusionrate(st)) / infusionrate(st)) ENDCOND,
+					    ELSE -> (vtbi(st) - infusionrate(st)) / infusionrate(st) ENDCOND,
                       volumeinfused := COND volumeinfused(st) + infusionrate(st) <= maxinfuse -> volumeinfused(st) + infusionrate(st),
 		      		            ELSE -> volumeinfused(st) ENDCOND,
                       elapsedtime   := COND elapsedtime(st) + 1 < maxtime -> elapsedtime(st) + 1,
-                                            ELSE -> elapsedtime(st) ENDCOND ]
+                                            ELSE -> elapsedtime(st) ENDCOND, 
+                      battery := COND
+                                   ac_connect(st) & (battery(st) < bat_max) -> battery(st) + 1,
+                                   NOT ac_connect(st) & (battery(st) - 1 > 0) -> battery(st) - 1,
+                                   ELSE -> battery(st)
+                                 ENDCOND ]
+                                   
 
   tick_case_infuse_and_infusionrateGEvtbi_NOTkvoflag
     (st: {st: pump | infusing?(st) & infusionrate(st) >= vtbi(st) & NOT kvoflag(st)}): pump =
@@ -115,7 +134,13 @@ pump_th [
                       elapsedtime   := COND elapsedtime(st) < maxtime - 1 -> elapsedtime(st) + 1,
                                             ELSE -> elapsedtime(st) ENDCOND,
                       kvorate       := COND infusionrate(st) <  infusemin -> infusionrate(st),
-                                            infusionrate(st) >= infusemin -> infusemin ENDCOND ]
+                                            infusionrate(st) >= infusemin -> infusemin ENDCOND,
+                      battery := COND
+                                   ac_connect(st) & (battery(st) < bat_max) -> battery(st) + 1,
+                                   ac_connect(st) & (battery(st) >= bat_max) -> bat_max,
+                                   NOT ac_connect(st) & (battery(st)-1 > 0) -> battery(st) - 1,
+                                   NOT ac_connect(st) & NOT (battery(st)-1 > 0) -> 0 
+                                 ENDCOND ]
 
   tick_case_infuse_and_infusionrateGEvtbi_kvoflag
     (st: {st: pump | infusing?(st) & infusionrate(st) >= vtbi(st) & kvoflag(st)}): pump =
@@ -125,15 +150,20 @@ pump_th [
 		      volumeinfused := COND volumeinfused(st) + kvorate(st) <= maxinfuse -> volumeinfused(st) + kvorate(st), 
 		      		            ELSE -> volumeinfused(st) ENDCOND,
                       elapsedtime   := COND elapsedtime(st) + 1 < maxtime -> elapsedtime(st) + 1,
-                                            ELSE -> elapsedtime(st) ENDCOND ]
+                                            ELSE -> elapsedtime(st) ENDCOND,
+                      battery := COND
+                                   ac_connect(st) & (battery(st) < bat_max) -> battery(st) + 1,
+                                   ac_connect(st) & (battery(st) >= bat_max) -> bat_max,
+                                   NOT ac_connect(st) & (battery(st) - 1 > 0) -> battery(st) - 1,
+                                   NOT ac_connect(st) & NOT (battery(st)-1 > 0) -> 0 
+                                 ENDCOND ]
 
   tick(st: {st: pump | per_tick(st)}): pump =
         COND
           infusing?(st) & infusionrate(st) < vtbi(st)                -> tick_case_infuse_and_infusionrateLvtbi(st),
           infusing?(st) & infusionrate(st) >= vtbi(st) & NOT kvoflag(st) -> tick_case_infuse_and_infusionrateGEvtbi_NOTkvoflag(st),
           infusing?(st) & infusionrate(st) >= vtbi(st) & kvoflag(st)     -> tick_case_infuse_and_infusionrateGEvtbi_kvoflag(st),
-          NOT infusing?(st)   & elapse(st) >= timeout                      -> st WITH [ elapse := 0 ],
-          NOT infusing?(st)   & elapse(st) < timeout                       -> st WITH [ elapse := elapse(st) + 1 ]
+          NOT infusing?(st)                             -> st WITH [ elapse := elapse(st) + 1 ]
         ENDCOND
 
 
@@ -145,19 +175,24 @@ pump_th [
 
   maxvtbi(st: pump): pump = st WITH [ vtbi := maxinfuse, 
                                       time := COND infusionrate(st) = 0 -> 0,
-                                                   ELSE -> floor(maxinfuse / infusionrate(st)) ENDCOND, 
+				      	      	   % >>new edit<<
+                                                   %ELSE -> floor(maxinfuse / infusionrate(st)) ENDCOND, 
+						   ELSE -> maxinfuse / infusionrate(st) ENDCOND, 
                                       elapse := 0, kvoflag := FALSE ]
 
 
   maxhvtbi(st: pump): pump = st WITH [ vtbi := maxinfuse, 
                                        infusionrate := IF time(st) = 0 THEN 0
 				       		       % Paolo's edit
-                                                       ELSE floor(maxinfuse / time(st)) ENDIF, 
+                                                       %ELSE floor(maxinfuse / time(st)) ENDIF, 
+				      	      	       % >>new edit<<
+						       ELSE maxinfuse / time(st) ENDIF, 
                                        elapse := 0, 
                                        kvoflag := FALSE ]
 
   zerovtbi(st: pump): pump = st WITH [ vtbi := 0, 
   	       	      	     	       time := 0, %-- mod
+
                                        elapse := 0, 
                                        kvoflag := FALSE ]
 
@@ -178,26 +213,34 @@ pump_th [
   modvtbi(x: ivols)(st: pump): pump = st WITH [ vtbi := x, 
                                                 %-- mod
                                                 time := IF infusionrate(st) = 0 THEN 0
-                                                        ELSE floor(x / infusionrate(st)) ENDIF, 
+                                                        % >>new edit<<
+							%ELSE floor(x / infusionrate(st)) ENDIF, 
+							ELSE x / infusionrate(st) ENDIF, 
                                                 elapse := 0,  
                                                 kvoflag := FALSE ]
 
   modhvtbi(x: ivols)(st: pump): pump = st WITH [ vtbi := x, elapse := 0, 
                                                  infusionrate := IF time(st) = 0 THEN 0
-                                                                 ELSE floor(x / time(st)) ENDIF,
+						 	      	 % >>new edit<<
+                                                                 %ELSE floor(x / time(st)) ENDIF,
+								 ELSE x / time(st) ENDIF,
                                                  kvoflag := FALSE ]
 
   pbsvtbi(st: {st: pump | vtbi(st) + bigstep <= maxinfuse}): pump = 
                              st WITH [ vtbi := vtbi(st) + bigstep,
                                        %-- mod
                                        time := IF infusionrate(st) = 0 THEN 0
-                                               ELSE floor((vtbi(st) + bigstep) / infusionrate(st)) ENDIF, 
+				       	       % >>new edit<<
+                                               %ELSE floor((vtbi(st) + bigstep) / infusionrate(st)) ENDIF, 
+					       ELSE (vtbi(st) + bigstep) / infusionrate(st) ENDIF, 
                                        elapse := 0, 
                                        kvoflag := FALSE ]
  aug_vtbi(st: pump, v: ivols): pump =
      st WITH [ vtbi := v,
                time := IF infusionrate(st) = 0 THEN 0
-                                               ELSE floor(v / infusionrate(st)) ENDIF, 
+	       	       	  		       % >>new edit<<
+                                               %ELSE floor(v / infusionrate(st)) ENDIF, 
+					       ELSE v / infusionrate(st) ENDIF, 
                                        elapse := 0, 
                                        kvoflag := FALSE]
 
@@ -205,14 +248,18 @@ pump_th [
   pbshvtbi(st: {st: pump | vtbi(st) + bigstep <= maxinfuse}): pump =
                              st WITH [ vtbi := vtbi(st) + bigstep, 
                                        infusionrate := IF time(st) = 0 THEN 0
-                                                       ELSE floor((vtbi(st) + bigstep) / time(st)) ENDIF,
+				       		       % >>new edit<<
+                                                       %ELSE floor((vtbi(st) + bigstep) / time(st)) ENDIF,
+						       ELSE (vtbi(st) + bigstep) / time(st) ENDIF,
                                        elapse := 0, 
                                        kvoflag := FALSE ]
 
  aug_hvtbi(st: pump, v: ivols): pump =
      st WITH [ vtbi := v,
                infusionrate := IF time(st) = 0 THEN 0
-                                               ELSE floor(v / time(st)) ENDIF, 
+	       		       	  	       % >>new edit<<
+                                               %ELSE floor(v / time(st)) ENDIF, 
+					       ELSE v / time(st) ENDIF, 
                                        elapse := 0, 
                                        kvoflag := FALSE]
 
@@ -221,47 +268,61 @@ pump_th [
                               st WITH [ vtbi := vtbi(st) + 1, 
                                         %-- mod
                                         time := IF infusionrate(st) = 0 THEN 0
-                                                ELSE floor((vtbi(st) + 1) / infusionrate(st)) ENDIF, 
+                                                % >>new edit<<
+						%ELSE floor((vtbi(st) + 1) / infusionrate(st)) ENDIF, 
+						ELSE (vtbi(st) + 1) / infusionrate(st) ENDIF, 
                                         elapse := 0, 
                                         kvoflag := FALSE ]
 
   pihvtbi(st: {st: pump | vtbi(st) + 1 <= maxinfuse}): pump = 
                              st WITH [ vtbi := vtbi(st) + 1,
                                        infusionrate := IF time(st) = 0 THEN 0
-                                                       ELSE floor((vtbi(st) + 1) / time(st)) ENDIF, 
+				       		       % >>new edit<<
+                                                       %ELSE floor((vtbi(st) + 1) / time(st)) ENDIF, 
+						       ELSE (vtbi(st) + 1) / time(st) ENDIF, 
                                        elapse := 0, kvoflag := FALSE ]
 
   mbsvtbi(st: {st: pump | vtbi(st) - bigstep >= 0}): pump = 
                               st WITH [ vtbi := vtbi(st) - bigstep, 
                                         %-- mod
                                         time := IF infusionrate(st) = 0 THEN 0
-                                                ELSE floor((vtbi(st) - bigstep) / infusionrate(st)) ENDIF,
+					     	% >>new edit<<
+                                                %ELSE floor((vtbi(st) - bigstep) / infusionrate(st)) ENDIF,
+						ELSE (vtbi(st) - bigstep) / infusionrate(st) ENDIF,
                                         elapse := 0 ]
 
   mbshvtbi(st: {st: pump | vtbi(st) - bigstep >= 0}): pump = 
                              st WITH [ vtbi := vtbi(st) - bigstep, 
                                        infusionrate := IF time(st) = 0 THEN 0
-                                                       ELSE floor((vtbi(st) - bigstep) / time(st)) ENDIF,
+				       		       % >>new edit<<
+                                                       %ELSE floor((vtbi(st) - bigstep) / time(st)) ENDIF,
+						       ELSE (vtbi(st) - bigstep) / time(st) ENDIF,
                                        elapse := 0 ]
 
   mdvtbi(st: {st: pump | vtbi(st) - 1 >= 0}): pump = 
                               st WITH [ vtbi := vtbi(st) - 1, 
                                         %-- mod
                                         time := COND infusionrate(st) = 0 -> 0,
-                                                     ELSE -> floor((vtbi(st) - 1) / infusionrate(st)) ENDCOND, 
+					     	     % >>new edit<<
+					     	     %ELSE -> floor((vtbi(st) - 1) / infusionrate(st)) ENDCOND, 
+                                                     ELSE -> (vtbi(st) - 1) / infusionrate(st) ENDCOND, 
                                         elapse := 0 ]
 
   mdhvtbi(st: {st: pump | vtbi(st) - 1 >= 0}): pump =
                              st WITH [ vtbi := vtbi(st) - 1, 
                                        infusionrate := COND time(st) = 0 -> 0,
-                                                       ELSE -> floor((vtbi(st) - 1) / time(st)) ENDCOND,
+				       		       % >>new edit<<
+				       		       %ELSE -> floor((vtbi(st) - 1) / time(st)) ENDCOND,
+                                                       ELSE -> (vtbi(st) - 1) / time(st) ENDCOND,
                                        elapse := 0 ]
 
  
 
   modtime(x: itimes)(st: pump): pump = st WITH [ time := x, 
                                                  infusionrate := COND x = 0 -> 0,
-                                                                  ELSE -> floor(vtbi(st) / x) ENDCOND,
+						 	      	  % >>new edit<<
+                                                                  %ELSE -> floor(vtbi(st) / x) ENDCOND,
+								  ELSE -> vtbi(st) / x ENDCOND,
                                                  elapse := 0 ]
 
   zerotime(st: pump): pump = st WITH [ time := 0, 
@@ -269,12 +330,16 @@ pump_th [
   	       	      	     	       elapse := 0 ]
 
   maxitime(st: pump): pump = st WITH [ time := maxtime, 
-                                       infusionrate := floor(vtbi(st) / maxtime),
+  	       	      	     	       % >>new edit<<
+                                       %infusionrate := floor(vtbi(st) / maxtime),
+                                       infusionrate := vtbi(st) / maxtime,
                                        elapse := 0 ]
 
   pbstime(st: {st: pump | time(st) + bigstep <= maxtime}): pump = 
                              st WITH [time := time(st) + bigstep, 
-                                      infusionrate := floor(vtbi(st) / (time(st) + bigstep)),
+			     	      % >>new edit<<
+                                      %infusionrate := floor(vtbi(st) / (time(st) + bigstep)),
+				      infusionrate := vtbi(st) / (time(st) + bigstep),
                                       elapse := 0 ]
 
   aug_time(st: pump, v: itimes): pump =
@@ -286,61 +351,83 @@ pump_th [
  
   pitime(st: {st: pump | time(st) + 1 <= maxtime}): pump = 
                              st WITH [ time := time(st) + 1, 
-                                       infusionrate := floor(vtbi(st) / (time(st) + 1)),
+			     	       % >>new edit<<
+                                       %infusionrate := floor(vtbi(st) / (time(st) + 1)),
+				       infusionrate := vtbi(st) / (time(st) + 1),
                                        elapse := 0 ]
 
   mbstime(st: {st: pump | time(st) - bigstep >= 0}): pump = 
                              st WITH [ time := time(st) - bigstep, 
                                        infusionrate := COND time(st) = bigstep -> 0,
-                                                         ELSE -> floor(vtbi(st) / (time(st) - bigstep)) ENDCOND,
+				       		         % >>new edit<<
+                                                         %ELSE -> floor(vtbi(st) / (time(st) - bigstep)) ENDCOND,
+							 ELSE -> vtbi(st) / (time(st) - bigstep) ENDCOND,
                                        elapse := 0 ]
 
   mdtime(st: {st: pump | time(st) - 1 >= 0}): pump = 
                              st WITH [ time := time(st) - 1, 
                                        infusionrate := COND time(st) = 1 -> 0,
-                                                         ELSE -> floor(vtbi(st) / (time(st) - 1)) ENDCOND,
+				       		         % >>new edit<<
+                                                         %ELSE -> floor(vtbi(st) / (time(st) - 1)) ENDCOND,
+							 ELSE -> vtbi(st) / (time(st) - 1) ENDCOND,
                                        elapse := 0 ]
 
   zerorate(st: pump): pump = st WITH [ infusionrate := 0, time := 0, elapse := 0 ]
 
-  maximrate(st: pump): pump = st WITH [ infusionrate := maxrate, time := floor(vtbi(st) / maxrate), elapse := 0 ]
+  % >>new edit<<
+  %maximrate(st: pump): pump = st WITH [ infusionrate := maxrate, time := floor(vtbi(st) / maxrate), elapse := 0 ]
+  maximrate(st: pump): pump = st WITH [ infusionrate := maxrate, time := vtbi(st) / maxrate, elapse := 0 ]
 
   pbsrate(st: {st: pump | infusionrate(st) + bigstep <= maxrate}): pump = 
                               st WITH [ infusionrate := infusionrate(st) + bigstep, 
-                                        time := floor(vtbi(st) / (infusionrate(st) + bigstep)),
+			      	      	% >>new edit<<
+                                        %time := floor(vtbi(st) / (infusionrate(st) + bigstep)),
+					time := vtbi(st) / (infusionrate(st) + bigstep),
                                         elapse := 0 ]
 
   pirate(st: {st: pump | infusionrate(st) + 1 <= maxrate}): pump = 
                               st WITH [ infusionrate := infusionrate(st) + 1, 
-                                        time := floor(vtbi(st) / (infusionrate(st) + 1)),
+			      	        % >>new edit<<
+                                        %time := floor(vtbi(st) / (infusionrate(st) + 1)),
+					time := vtbi(st) / (infusionrate(st) + 1),
                                         elapse := 0 ]
 
   aug_rate(st: pump, v: irates): pump =
      st WITH [ infusionrate := v,
-               time := COND v=0 -> 0, ELSE -> (floor(vtbi(st) / v)) ENDCOND,
+     	       % >>new edit<<
+               %time := COND v=0 -> 0, ELSE -> (floor(vtbi(st) / v)) ENDCOND,
+               time := COND v=0 -> 0, ELSE -> vtbi(st) / v ENDCOND,
                elapse := 0 ]
 
 
   mbsrate(st: {st: pump | infusionrate(st) - bigstep >= 0}): pump = 
                               st WITH [ infusionrate := infusionrate(st) - bigstep, 
                                         time := COND infusionrate(st) = bigstep -> 0,
-                                                  ELSE -> floor(vtbi(st) / (infusionrate(st) - bigstep)) ENDCOND,
+					     	  % >>new edit<<
+                                                  %ELSE -> floor(vtbi(st) / (infusionrate(st) - bigstep)) ENDCOND,
+                                                  ELSE -> vtbi(st) / (infusionrate(st) - bigstep) ENDCOND,
                                         elapse := 0 ]
 
   mdrate(st: {st: pump | infusionrate(st) - 1 >= 0}): pump = 
                               st WITH [ infusionrate := infusionrate(st) - 1, 
                                         time := COND infusionrate(st) = 1 -> 0,
-                                                  ELSE -> floor(vtbi(st) / (infusionrate(st) - 1)) ENDCOND,
+					          % >>new edit<<
+                                                  %ELSE -> floor(vtbi(st) / (infusionrate(st) - 1)) ENDCOND,
+						  ELSE -> vtbi(st) / (infusionrate(st) - 1) ENDCOND,
                                         elapse := 0 ]
 
   modratevtbi(x: irates, y: ivols)(st: pump): pump = st WITH [ infusionrate := x,
                                                                 time := COND x = 0 -> 0,
-                                                                         ELSE -> floor(y / x) ENDCOND, 
+								         % >>new edit<<
+                                                                         %ELSE -> floor(y / x) ENDCOND, 
+									 ELSE -> y / x ENDCOND, 
                                                                vtbi := y, elapse := 0 ]
 
   modvtbitime(x: ivols, y: itimes)(st: pump): pump = st WITH [ infusionrate := 
                                                                    COND y = 0 -> 0,
-                                                                        ELSE -> floor(x / y) ENDCOND,
+								   	% >>new edit<<
+                                                                        %ELSE -> floor(x / y) ENDCOND,
+                                                                        ELSE -> x / y ENDCOND,
                                                                time := y, vtbi := x, elapse := 0 ]
 
   

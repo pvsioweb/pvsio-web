@@ -41,10 +41,12 @@ require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "wi
     //insert the html into the panel (note that this could have used templates or whatever)
     imageHolder.html('<img src="image.jpg" usemap="#prototypeMap"/>').attr("id", "prototype");
 
+    var pause_simulation = false;
     var content = imageHolder.append("div").style("position", "absolute").style("top", "0px").style("left", "400px")
                     .style("height", "40px").style("width", "800px").attr("class", "dbgbuttons");
-    content.append("button").text("Pause").attr("id", "btn_pause");
-    content.append("button").text("Resume").attr("id", "btn_resume");
+    content.append("button").text("Pause Simulation").attr("id", "pause_simulation").attr("style", "margin:0 20px 0 20px;");
+    content.append("span").attr("id", "simulation_status").text("Ready!");
+    content.append("button").text("Resume Simulation").attr("id", "resume_simulation").attr("style", "margin:0 20px 0 20px;");
 
     content = imageHolder.append("div").style("position", "absolute").style("top", "40px").style("left", "400px")
                     .style("height", "460px").style("width", "400px").attr("class", "dbg");
@@ -97,15 +99,18 @@ require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "wi
                                     { parent: "prototype", font: "Courier New"});
 
     //LEDs
-    alaris.onlight = new LED("onlight", { top: 356, left: 138, height: 10, width: 10 },
+    alaris.ac_light = new LED("ac_light", { top: 356, left: 138, height: 10, width: 10 },
                           { parent: "prototype" });
+    alaris.battery_light = new LED("battery_light", { top: 356, left: 198, height: 10, width: 10 },
+                          { parent: "prototype", color:  "rgb(236, 149, 17)" }); // light orange
     alaris.pauselight = new LED("pauselight", { top: 323, left: 122, height: 10, width: 10 },
                           { parent: "prototype", color:  "rgb(236, 149, 17)" }); // light orange
     alaris.runlight = new LED("runlight", { top: 297, left: 122, height: 10, width: 10 },
                           { parent: "prototype", blinking: true, blinkingRate: 1000 });
 
     var render_LEDs = function (res) {
-        if (res.onlight === "TRUE") { alaris.onlight.on(); } else { alaris.onlight.off(); }
+        if (res.ac_light === "TRUE") { alaris.ac_light.on(); } else { alaris.ac_light.off(); }
+        if (res.battery_light === "TRUE") { alaris.battery_light.on(); } else { alaris.battery_light.off(); }
         if (res.pauselight === "TRUE") { alaris.pauselight.on(); } else { alaris.pauselight.off(); }
         if (res.runlight === "TRUE") { alaris.runlight.on(); } else { alaris.runlight.off(); }
     };
@@ -227,23 +232,38 @@ require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "wi
             msg = msg.toUpperCase();
             if (msg === "DISPVTBI") {
                 return "VTBI";
-            } else if (alaris.topline === "DISPKVO") {
+            } else if (msg === "DISPKVO") {
                 return "KVO";
+            } else if (msg === "HOLDING") {
+                return "ON HOLD";
+            } else if (msg === "SETRATE") {
+                return "ON HOLD - SET RATE";
             }
             return msg;
         }
-        if (res.onlight === "TRUE") {
-            alaris.topline.render(topline2string(res.topline));
+        function topline2options(msg) {
+            msg = msg.toUpperCase();
+            if (msg === "HOLDING" || msg === "SETRATE") {
+                return { blinking: true };
+            }
+            return {};
+        }
+        if (res.device["powered_on?"] === "TRUE") {
+            if (res.topline === "SETRATE") {
+                alaris.topline.renderMultiline(["ON HOLD", "Set rate with chevron keys"], { fontSize: "10" });
+            } else {
+                alaris.topline.render(topline2string(res.topline), topline2options(res.topline));
+            }
         } else {
             alaris.topline.hide();
         }
     }
 
     function start_tick() {
-        if (!tick) {
+        if (!tick && !pause_simulation) {
             tick = setInterval(function () {
                 ButtonActionsQueue.getInstance().queueGUIAction("alaris_tick", onMessageReceived);
-           }, 3000);
+           }, 1000);
         }
     }
 
@@ -391,7 +411,36 @@ require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "wi
             logOnDiv(text, "monitor");
         }
     }
+    
+    function render_infusion_set_status(res) {
+        var state = (res.device.set_fitted === "TRUE") ? "FITTED" : "NOT inserted";
+        document.getElementById("infusionset_status").innerHTML = state;
+    }
+    function render_mains_status(res) {
+        var state = (res.device.ac_connect === "TRUE") ? "connected to MAINS" : "on BATTERY";
+        document.getElementById("mains_status").innerHTML = state;
+    }
 
+    function log(evt) {
+        serverLogs.push(evt);
+        if (serverLogs.length > maxLogSize) {
+            serverLogs = serverLogs.slice(-maxLogSize);
+        }
+        var logLines = d3.select(".dbg").selectAll("textarea").data(serverLogs, function (d, i) {
+            return d.id;
+        });
+        logLines.enter()
+            .insert("textarea", "textarea").html(function (d) {
+                return d.date.toString() + "\n" + d.data;
+            }).style("width", "100%")
+            .attr("readonly", true)
+            .attr("rows", function (d) {
+                return d.data.split("\n").length + 1;
+            }).attr("class", function (d) {
+                return d.type;
+            });
+        logLines.exit().remove();    
+    }
     /**
         function to handle when an output has been received from the server after sending a guiAction
         if the first parameter is truthy, then an error occured in the process of evaluating the gui action sent
@@ -401,33 +450,21 @@ require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "wi
             var state = stateParser.parse(str);
             return JSON.stringify(state, null, " ");
         }
+        d3.select(".demo-splash").style("display", "none");
+        d3.select(".content").style("display", "block");
+        d3.select(".controls").style("display", "block");
 
         if (!err) {
             var dbg = prettyprintState(event.data.toString());
             var date = new Date();
-            serverLogs.push({data: dbg, date: date, id: event.id, type: "frompvs"});
+            log({data: dbg, date: date, id: event.id, type: "frompvs"});
 
-            if (serverLogs.length > maxLogSize) {
-                serverLogs = serverLogs.slice(-maxLogSize);
-            }
-            var logLines = d3.select(".dbg").selectAll("textarea").data(serverLogs, function (d, i) {
-                return d.id;
-            });
-            logLines.enter()
-                .insert("textarea", "textarea").html(function (d) {
-                    return d.date.toString() + "\n" + d.data;
-                }).style("width", "100%")
-                .attr("readonly", true)
-                .attr("rows", function (d) {
-                    return d.data.split("\n").length + 1;
-                }).attr("class", function (d) {
-                    return d.type;
-                });
-            logLines.exit().remove();
             var res = event.data.toString();
             if (res.indexOf("(#") === 0) {
                 res = stateParser.parse(event.data.toString());
                 if (res) {
+                    render_infusion_set_status(res);
+                    render_mains_status(res);
                     render_LEDs(res);
                     render_topline(res);
                     render_fndisp(res);
@@ -452,22 +489,89 @@ require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "wi
     alaris.btn_sup   = new Button("btn_sup", {left: 121, top: 265}, {callback: onMessageReceived, evts: ['press/release']});
     alaris.btn_sdown = new Button("btn_sdown", {left: 158, top: 265}, {callback: onMessageReceived, evts: ['press/release']});
 
-    alaris.btn_key1 = new Button("btn_key1", {left: 95, top: 234}, {callback: onMessageReceived});
-    alaris.btn_key2 = new Button("btn_key2", {left: 136, top: 234}, {callback: onMessageReceived});
-    alaris.btn_key3 = new Button("btn_key3", {left: 172, top: 234}, {callback: onMessageReceived});
+    alaris.btn_key1 = new Button("btn_key1", {left: 95, top: 228}, {callback: onMessageReceived});
+    alaris.btn_key2 = new Button("btn_key2", {left: 136, top: 228}, {callback: onMessageReceived});
+    alaris.btn_key3 = new Button("btn_key3", {left: 172, top: 228}, {callback: onMessageReceived});
 
     alaris.btn_run   = new Button("btn_run", {left: 89, top: 299}, {callback: onMessageReceived});
     alaris.btn_pause = new Button("btn_pause", {left: 89, top: 324}, {callback: onMessageReceived});
     alaris.btn_query = new Button("btn_query", {left: 136, top: 324}, {callback: onMessageReceived});
     //endregion
+    
+    var btn_click_id = 0;
+    d3.select("#btn_on").on("click", function() {
+        log({data: "** USER ACTION: btn_on **", date: new Date(), id: new Date().toISOString(), type: "useraction"});
+    });
+    d3.select("#btn_fup").on("click", function() {
+        log({data: "** USER ACTION: btn_fup **", date: new Date(), id: new Date().toISOString(), type: "useraction"});
+    });
+    d3.select("#btn_fdown").on("click", function() {
+        log({data: "** USER ACTION: btn_fdown **", date: new Date(), id: new Date().toISOString(), type: "useraction"});
+    });
+    d3.select("#btn_sup").on("click", function() {
+        log({data: "** USER ACTION: btn_sup **", date: new Date(), id: new Date().toISOString(), type: "useraction"});
+    });
+    d3.select("#btn_fdown").on("click", function() {
+        log({data: "** USER ACTION: btn_fdown **", date: new Date(), id: new Date().toISOString(), type: "useraction"});
+    });
+    d3.select("#btn_key1").on("click", function() {
+        log({data: "** USER ACTION: btn_key1 **", date: new Date(), id: new Date().toISOString(), type: "useraction"});
+    });
+    d3.select("#btn_key2").on("click", function() {
+        log({data: "** USER ACTION: btn_key2 **", date: new Date(), id: new Date().toISOString(), type: "useraction"});
+    });
+    d3.select("#btn_key3").on("click", function() {
+        log({data: "** USER ACTION: btn_key3 **", date: new Date(), id: new Date().toISOString(), type: "useraction"});
+    });
+    d3.select("#btn_run").on("click", function() {
+        log({data: "** USER ACTION: btn_run **", date: new Date(), id: new Date().toISOString(), type: "useraction"});
+    });
+    d3.select("#btn_pause").on("click", function() {
+        log({data: "** USER ACTION: btn_pause **", date: new Date(), id: new Date().toISOString(), type: "useraction"});
+    });
+    d3.select("#btn_query").on("click", function() {
+        log({data: "** USER ACTION: btn_query **", date: new Date(), id: new Date().toISOString(), type: "useraction"});
+    });
+    
+    d3.select("#btn_insert_infusionset").on("click", function () {
+        ButtonActionsQueue.getInstance().queueGUIAction("insert_infusion_set", onMessageReceived);
+    });
+    d3.select("#btn_remove_infusionset").on("click", function () {
+        ButtonActionsQueue.getInstance().queueGUIAction("remove_infusion_set", onMessageReceived);
+    });
+    
+    d3.select("#btn_plug_mains").on("click", function () {
+        ButtonActionsQueue.getInstance().queueGUIAction("plug_mains", onMessageReceived);
+    });
+    d3.select("#btn_unplug_mains").on("click", function () {
+        ButtonActionsQueue.getInstance().queueGUIAction("unplug_mains", onMessageReceived);
+    });
+    
+    d3.select("#set_battery_level").on("click", function () {
+        var data = d3.select("#battery_level").node().value;
+        if (data) {
+            data = (isNaN(parseFloat(data))) ? -1 : parseFloat(data);
+            ButtonActionsQueue.getInstance().queueGUIAction("set_battery_level(" + data + ")", onMessageReceived);
+        }
+    });
+    
+
+    d3.select("#pause_simulation").on("click", function () {
+        pause_simulation = true;
+        stop_tick();
+        d3.select("#simulation_status").text("Paused").attr("class", "blink");
+    });
+    d3.select("#resume_simulation").on("click", function () {
+        pause_simulation = false;
+        start_tick();
+        d3.select("#simulation_status").text("Ready!").attr("class", "ready");
+    });
 
     //register event listener for websocket connection from the client
     client.addListener('WebSocketConnectionOpened', function (e) {
         console.log("web socket connected");
         //start pvs process
         client.getWebSocket().startPVSProcess({name: "main.pvs", demoName: "AlarisGP/pvs"}, function (err, event) {
-            d3.select(".demo-splash").style("display", "none");
-            d3.select(".content").style("display", "block");
             start_tick();
         });
     }).addListener("WebSocketConnectionClosed", function (e) {

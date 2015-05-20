@@ -6,10 +6,11 @@ main :THEORY
   timeout  : nat = 200 % must be less than maxtime
   shorttime: nat = 20
   maxtime  : nat = maxinfuse
+  bat_max  : nat = maxtime - 1
+  bat_min  : nat = 2
 
-  IMPORTING types_and_constants_th [ maxrate, maxinfuse, infusemin, timeout, shorttime, maxtime ]
-  IMPORTING alaris_th[maxrate, maxinfuse, infusemin, timeout, shorttime, maxtime]
-
+  IMPORTING types_and_constants_th [ maxrate, maxinfuse, infusemin, timeout, shorttime, maxtime, bat_max, bat_min ]
+  IMPORTING alaris_th[maxrate, maxinfuse, infusemin, timeout, shorttime, maxtime, bat_max, bat_min]
 
   device_init: pump = (#
      powered_on? := FALSE,
@@ -21,13 +22,26 @@ main :THEORY
      kvoflag := FALSE,
      elapsedtime := 0,
      time := 0,
-     kvorate := infusemin
+     kvorate := infusemin,
+     ac_connect := true,
+     battery := bat_min,
+     set_fitted := false
   #)
   alaris_init(ID: string): alaris = (#
     id := ID,
     device := device_init,
     topline := dispblank,
     middisp := LAMBDA (x: upto(9)): FALSE,
+    optionsmenu := LAMBDA(x: qcurse):
+                           COND
+                             x=0 -> ratelock,
+                             x=1 -> dosingsumm,
+                             x=2 -> infusionsetup,
+                             x=3 -> setvtbiovertime,
+                             x=4 -> adjalarm,
+                             x=5 -> disableratelock,
+                             x=6 -> pumpdetails
+                           ENDCOND,
     bagscursor := midbag,
     qcursor := dlock,
     bagsval := LAMBDA (x: upto(9)):
@@ -46,7 +60,8 @@ main :THEORY
     fndisp3 := fnull,
     runlight := FALSE,
     pauselight := FALSE,
-    onlight := FALSE,
+    ac_light := FALSE,
+    battery_light := FALSE,
     entrymode := nullmode,
     rlock := false,
     rdisabled := false,
@@ -73,6 +88,7 @@ main :THEORY
     middisp_dnewvtbi: bool,
     middisp_dnewtime: bool,
     middisp_dbags: bool,
+    optionsmenu: list[option_tags],
     bagscursor: ibagscursor, % [vis]
     qcursor: qcurse, % [vis]
     bagsval: list[int], %abags, % [vis]
@@ -91,7 +107,8 @@ main :THEORY
     fndisp3: ifunctions, % [vis]
     runlight: boolean, % [vis]
     pauselight: boolean, % [vis]
-    onlight: boolean, % [vis]
+    ac_light: boolean, % [vis]
+    battery_light: boolean,
     entrymode: emodes,
     rlock: boolean,
     rdisabled: boolean,
@@ -119,6 +136,7 @@ main :THEORY
     middisp_dnewvtbi := middisp(st)(dnewvtbi),
     middisp_dnewtime := middisp(st)(dnewtime),
     middisp_dbags := middisp(st)(dbags),
+    optionsmenu := (: optionsmenu(st)(0), optionsmenu(st)(1), optionsmenu(st)(2), optionsmenu(st)(3), optionsmenu(st)(4), optionsmenu(st)(5), optionsmenu(st)(6) :),
     bagscursor := bagscursor(st),
     qcursor := qcursor(st),
     bagsval := (: bagsval(st)(0), bagsval(st)(1), bagsval(st)(2), bagsval(st)(3), bagsval(st)(4), bagsval(st)(5), bagsval(st)(6), bagsval(st)(7), bagsval(st)(8), bagsval(st)(9) :),
@@ -137,7 +155,8 @@ main :THEORY
     fndisp3 := fndisp3(st),
     runlight := runlight(st),
     pauselight := pauselight(st),
-    onlight := onlight(st),
+    ac_light := ac_light(st),
+    battery_light := battery_light(st),
     entrymode := entrymode(st),
     rlock := rlock(st),
     rdisabled := rdisabled(st),
@@ -157,6 +176,7 @@ main :THEORY
     device := device(st),
     topline := topline(st),
     middisp := LAMBDA (x: upto(9)): nth(middisp(st), x),
+    optionsmenu := LAMBDA (x: upto(dpdtls)): nth(optionsmenu(st), x),
     bagscursor := bagscursor(st),
     qcursor := qcursor(st),
     bagsval := LAMBDA (x: upto(9)): nth(bagsval(st), x),
@@ -165,7 +185,8 @@ main :THEORY
     fndisp3 := fndisp3(st),
     runlight := runlight(st),
     pauselight := pauselight(st),
-    onlight := onlight(st),
+    ac_light := ac_light(st),
+    battery_light := battery_light(st),
     entrymode := entrymode(st),
     rlock := rlock(st),
     rdisabled := rdisabled(st),
@@ -180,14 +201,8 @@ main :THEORY
   #)
   CONVERSION state2alaris
 
-  init(x: real): state = alaris_init("AlarisGP")
-  init(x: real, ID: string): state = alaris_init(ID)
-
   click_btn_on(st: alaris): state =
-    COND
-      per_on(st) -> on(st),
-      ELSE -> st
-    ENDCOND
+    on(st)
 
   press_btn_fup(st: alaris): state =
     COND
@@ -290,6 +305,44 @@ main :THEORY
       per_tick(st) -> tick(st),
       ELSE -> st
     ENDCOND
+
+  insert_infusion_set(st: alaris): state =
+    st WITH [ device := device(st) WITH [ set_fitted := true ]]
+
+  remove_infusion_set(st: alaris): state =
+    st WITH [ device := device(st) WITH [ set_fitted := false ]]
+
+  plug_mains(st: alaris): state =
+    IF NOT ac_connect(device(st)) THEN switch(st) ELSE st ENDIF
+
+  unplug_mains(st: alaris): state =
+    IF ac_connect(device(st)) THEN switch(st) ELSE st ENDIF
+
+  set_battery_level(x: real)(st: alaris): state = 
+    st WITH [ device := device(st) WITH [ battery := IF x < bat_max THEN floor(x) ELSE bat_max ENDIF ]]
+
+  init(x: real): state = 
+    %-- triggering code generation
+    LET st = alaris_init("AlarisGP"),
+    	st = click_btn_on(st),
+	st = click_btn_fup(st),
+	st = click_btn_sup(st),
+	st = click_btn_fdown(st),
+	st = click_btn_sdown(st),
+	st = click_btn_key2(st),
+	st = click_btn_fup(st),
+	st = click_btn_sup(st),
+	st = click_btn_fdown(st),
+	st = click_btn_sdown(st),
+	st = click_btn_key1(st),
+	st = click_btn_query(st),
+	st = click_btn_pause(st),
+	st = click_btn_run(st)
+     IN %--
+  	alaris_init("AlarisGP")
+
+
+  init(x: real, ID: string): state = alaris_init(ID)
 
 
  END main
