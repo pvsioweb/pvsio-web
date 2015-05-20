@@ -51,7 +51,7 @@ define(function (require, exports, module) {
         opt = opt || {};
         this.id = id;
         this.label = opt.label || id;
-        this.parent = (opt.parent) ? ("#" + opt.parent) : "body";
+        this.parent = (opt.parent && opt.parent !== "body") ? ("#" + opt.parent) : "body";
         this.top = coords.top || 0;
         this.left = coords.left || 0;
         this.width = coords.width || 200;
@@ -91,6 +91,7 @@ define(function (require, exports, module) {
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")
                         .style("margin", 0).style("padding", 0)
+                        .style("background-color", this.backgroundColor)
                         .style("display", "block").attr("id", id).attr("class", id);
         
         opt.tracings = opt.tracings || {};
@@ -105,7 +106,7 @@ define(function (require, exports, module) {
         opt.value.height = opt.value.height || this.height;
         opt.value.width = opt.value.width || this.width * 0.3;
 
-        opt.parent = this.div.node().id;
+        opt.parent = (this.div.node()) ? this.div.node().id : "body";
         this.disp_value = new SingleDisplay(id + "_value",
                                      { top: 0,
                                        left: opt.tracings.width + opt.tracings.labels.width,
@@ -116,7 +117,7 @@ define(function (require, exports, module) {
                                        left: opt.tracings.width + opt.tracings.labels.width,
                                        height: opt.value.height * 0.5,
                                        width: opt.value.width },
-                                     { parent: this.div.node().id, font: "Times", fontColor: "red" });
+                                     { parent: opt.parent, font: "Times", fontColor: "red" });
         this.disp_label = new SingleDisplay(id + "_label",
                                      { top: opt.value.height,
                                        left: opt.tracings.width + opt.tracings.labels.width,
@@ -127,45 +128,45 @@ define(function (require, exports, module) {
                                        left: this.disp_value.left + this.disp_value.width,
                                        height: this.disp_value.height / 4,
                                        width: this.disp_value.width / 4 },
-                                     { parent: this.div.node().id, align: "left", font: "Times", fontColor: "red" });
+                                     { parent: opt.parent, align: "left", font: "Times", fontColor: "red" });
         this.disp_alarm_min = new SingleDisplay(id + "_alarm_min",
                                      { top: this.disp_value.height - this.disp_value.height / 4,
                                        left: this.disp_alarm.left,
                                        height: this.disp_alarm.height,
                                        width: this.disp_alarm.width },
-                                     { parent: this.div.node().id, align: "left", font: "Times",
+                                     { parent: opt.parent, align: "left", font: "Times",
                                        fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
         this.disp_alarm_max = new SingleDisplay(id + "_alarm_max",
                                      { top: this.disp_alarm_min.top - this.disp_value.height / 4,
                                        left: this.disp_alarm.left,
                                        height: this.disp_alarm.height,
                                        width: this.disp_alarm.width },
-                                     { parent: this.div.node().id, align: "left", font: "Times",
+                                     { parent: opt.parent, align: "left", font: "Times",
                                        fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
         this.tracings_label_max = new SingleDisplay(id + "_tracings_label_max",
                                      { top: 0, left: 0,
                                        height: opt.tracings.labels.height,
                                        width: opt.tracings.labels.width },
-                                     { parent: this.div.node().id, align: "right", font: "Times",
+                                     { parent: opt.parent, align: "right", font: "Times",
                                        fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
         this.tracings_label_med = new SingleDisplay(id + "_tracings_label_med",
                                      { top: (opt.tracings.height / 2),
                                        left: 0,
                                        height: opt.tracings.labels.height,
                                        width: opt.tracings.labels.width },
-                                     { parent: this.div.node().id, align: "right", font: "Times",
+                                     { parent: opt.parent, align: "right", font: "Times",
                                        fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
         this.tracings_label_min = new SingleDisplay(id + "_tracings_label_min",
                                      { top: opt.tracings.height - opt.tracings.labels.height / 4,
                                        left: 0,
                                        height: opt.tracings.labels.height,
                                        width: opt.tracings.labels.width },
-                                     { parent: this.div.node().id, align: "right", font: "Times",
+                                     { parent: opt.parent, align: "right", font: "Times",
                                        fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
         this.disp_tracings = new TracingsDisplay(id + "_tracings",
                                      { top: opt.tracings.labels.height / 2, left: opt.tracings.left,
                                        height: opt.tracings.height, width: opt.tracings.width },
-                                     { parent: this.div.node().id,
+                                     { parent: opt.parent,
                                        fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
         return this;
     }
