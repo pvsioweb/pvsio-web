@@ -295,7 +295,7 @@ require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "wi
      * It takes the address from the corresponding field in the html page.
      */
     var connectSapere = function () {
-        var url = "ws://localhost:8080/SapereEE/actions",
+        var url = "ws://localhost:8080/NetworkController/actions",
             sapere_log = "monitor";
         
         return new Promise(function (resolve, reject) {

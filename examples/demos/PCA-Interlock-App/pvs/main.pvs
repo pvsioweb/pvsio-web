@@ -29,7 +29,7 @@ main: THEORY
     spo2_label := "SpO2",
     spo2_alarm := off,
     spo2_fail := false,
-    rra := 18, % sensor data - acoustic respiratory rate (breaths per minute, bpm)
+    rra := 23, % sensor data - acoustic respiratory rate (breaths per minute, bpm)
     rra_max := 30,
     rra_min := 6,
     rra_label := "RRa",
@@ -51,7 +51,7 @@ main: THEORY
   #]
   init_pump(p: string): PumpState = (#
     id := p,
-    rate := 4.2,
+    rate := 4,
     vtbi := 50,
     volume := 0,
     isOn := true,

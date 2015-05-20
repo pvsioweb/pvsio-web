@@ -336,7 +336,7 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
      * @memberof module:Pacemaker-Sapere
      */
     var connectSapere = function () {
-        var url = "ws://localhost:8080/SapereEE/actions",
+        var url = "ws://localhost:8080/NetworkController/actions",
             sapere_log = "sapere_response_log",
             device = "Radical7";
         

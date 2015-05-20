@@ -4,7 +4,7 @@
  * @date 14/05/2015 11:33 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
-/*global define, Promise, d3*/
+/*global define, Promise*/
 define(function (require, exports, module) {
     "use strict";
 
@@ -24,7 +24,7 @@ define(function (require, exports, module) {
      */
     function NCDevice(device, opt) {
         opt = opt || {};
-        this.url = opt.url || "ws://localhost:8080/SapereEE/actions";
+        this.url = opt.url || "ws://localhost:8080/NetworkController/actions";
         this.deviceID = device.id;
         this.deviceType = device.type;
         this.deviceDescription = device.description || (device.type + "" + device.id);
@@ -39,33 +39,38 @@ define(function (require, exports, module) {
     var _this;
 
     NCDevice.prototype.connect = function () {
-        nc_websocket_device = new WebSocket(_this.url);
-        /*
-         * It starts the control process that send the information to NC
-         */
-        nc_websocket_device.onopen = function () {
-            console.log(">> Connected to ICE Network Controller!");
-            addDevice();
-            _this.fire({
-                type: "connected"
-            });
-        };
+        return new Promise(function (resolve, reject) {
+            nc_websocket_device = new WebSocket(_this.url);
+            /*
+             * It starts the control process that send the information to NC
+             */
+            nc_websocket_device.onopen = function () {
+                console.log(">> Connected to ICE Network Controller!");
+                addDevice();
+                _this.fire({
+                    type: "connected"
+                });
+                resolve();
+            };
 
-        nc_websocket_device.onmessage = onMessageReceivedNCDevice;
-        /*
-         * Close event
-         */
-        nc_websocket_device.onclose = function () {
-            console.log(">> Disconnected from ICE Network Controller (" + _this.url + ")");
-            nc_websocket_device = null;
-        };
-        /*
-         * Connection failed
-         */
-        nc_websocket_device.onerror = function () {
-            console.log("!! Unable to connect to ICE Network Controller (" + _this.url + ")");
-            nc_websocket_device = null;
-        };
+            nc_websocket_device.onmessage = onMessageReceivedNCDevice;
+            /*
+             * Close event
+             */
+            nc_websocket_device.onclose = function () {
+                console.log(">> Disconnected from ICE Network Controller (" + _this.url + ")");
+                nc_websocket_device = null;
+                reject({ code: "CLOSED" });
+            };
+            /*
+             * Connection failed
+             */
+            nc_websocket_device.onerror = function () {
+                console.log("!! Unable to connect to ICE Network Controller (" + _this.url + ")");
+                nc_websocket_device = null;
+                reject({ code: "ERROR" });
+            };
+        });
     };
 
     var addDevice = function() {
@@ -80,7 +85,7 @@ define(function (require, exports, module) {
             nc_websocket_device.send(JSON.stringify(SupervisorAction));
         }
         else {
-            console.log("!! " + _this.deviceID + " already added !!")
+            console.log("!! " + _this.deviceID + " already added !!");
         }
     };
 

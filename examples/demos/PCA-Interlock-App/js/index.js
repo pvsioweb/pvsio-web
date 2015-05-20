@@ -26,7 +26,6 @@ require([
     //var deviceDescription = "Supervisor";
 
     var client;
-    //var d3 = require("d3/d3");
     var tick = null;
 
     function parseNCMessage(event){
@@ -40,8 +39,6 @@ require([
         if (!tick) {
             tick = setInterval(function () {
                 ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
-//                client.getWebSocket()
-//                    .sendGuiAction("tick(" + client.getWebSocket().lastState() + ");", onMessageReceived);
             }, 2000);
         }
     }
@@ -74,15 +71,14 @@ require([
      */
     function onMessageReceived(err, event) {
         if (!err) {
-//            logOnDiv(event.data.toString(), "monitor");
-//
-//            var res = stateParser.parse(event.data.toString());
-//            if (res.pump.cmd.trim() === "pause"){
-//                console.log("pause pump");
-//                ncDevice.sendControlData("Alaris", "click_btn_pause");
-//            }
+            logOnDiv(event.data.toString(), "monitor");
+            var res = stateParser.parse(event.data.toString());
+            if (res.pump.cmd.trim() === "pause"){
+                console.log("pause pump");
+                ncDevice.sendControlData("Alaris", "click_btn_pause");
+            }
             // rendering
-            var res = event.data.toString();
+            res = event.data.toString();
             if (res.indexOf("(#") === 0) {
                 res = stateParser.parse(event.data.toString());
 				if (res) {
@@ -209,6 +205,14 @@ require([
     }
     // rate
     function render_pump_data(res) {
+        function evaluate(str) {
+            var v = +str;
+            if (str.indexOf("/") >= 0) {
+                var args = str.split("/");
+                v = +args[0] / +args[1];
+            }
+            return v;
+        }        
         if (res.isOn === "TRUE") {
             app.pump.rate.renderLabel("RATE");
             app.pump.rate.renderValue(evaluate(res.rate));
@@ -225,6 +229,24 @@ require([
         }
     }    
     
+    function startNetworkController() {
+        var msg = "Starting ICE Network Controller...";
+        console.log(msg);
+        return new Promise(function (resolve, reject) {
+            client.getWebSocket().send({ type: "startSapereEE" }, function(err) {
+                if (!err) {
+                    msg = "ICE Network Controller started successfully!";
+                    console.log(msg);
+                    resolve(msg);
+                } else {
+                    msg = "Error while starting ICE Network Controller (" + JSON.stringify(err) + ")";
+                    console.log(msg);
+                    reject(err);
+                    resolve(msg);
+                }
+            });
+        });
+    }
 
     /*
      * Register event listener for websocket connection to the server.
@@ -241,24 +263,26 @@ require([
         }, function (err) {
             if (!err) {
                 logOnDiv('PVS Process started', 'monitor');
-                
-                start_tick();
-                
                 // start ICE Network Controller (NCEE) & connect ICE supervisor to it
-                //startNCEE().then(function (res) {
-                //    connectToNC();
-                //}).catch(function (err) {
-                //    connectNC();
-                //    console.log(err);
-                //});
-                
-                // initialise PVS model
-                client.getWebSocket().sendGuiAction(client.getWebSocket().lastState() + ';', function () {});
+                startNetworkController().then(function (res) {
+                    ncMonitor.connect().then(function (res) {
+                        ncDevice.connect().then(function (res) {
+                            start_tick();
+                        }).catch(function (err) { console.log(err); });
+                    }).catch(function (err) { console.log(err); });                                      
+                }).catch(function (err) {
+                    // FIXME: receiving error when glassfish is already running
+                    ncMonitor.connect().then(function (res) {
+                        ncDevice.connect().then(function (res) {
+                            start_tick();
+                        }).catch(function (err) { console.log(err); });
+                    }).catch(function (err) { console.log(err); });                                   
+                    console.log(err);
+                });
             } else {
                 console.log(err);
             }
         });
-        //init();
     }).addListener('WebSocketConnectionClosed', function () {
         logOnDiv('PVS Process closed', 'monitor');
         console.log('web socket closed');
@@ -272,6 +296,5 @@ require([
     logOnDiv('Connecting to the PVSio server...', 'monitor');
     client.connectToServer();
 
-    ncDevice.connect();
-    ncMonitor.connect();
+
 });

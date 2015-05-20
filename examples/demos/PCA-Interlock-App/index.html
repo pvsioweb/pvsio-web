@@ -20,25 +20,15 @@
     </head>
     <body>
         <div id="content" class="container_12" style="text-align: center;">
-
-            <div class="grid_12" style="display:none">
-                <h1>ICE Supervisor</h1>
-                <div id="supervisorControls">
-                    <input type="button" id="startICENetwork" value="Start ICE Network Controller">
-                    <input type="button" id="stopICENetwork" value="Stop ICE Network Controller">
-                </div>
-                <div class="grid_12" style="text-align: center">
-                    <div id="devices">
-                    </div>
-                </div>
-                <div id="monitor" class="console_log grid_6 push_3">
-                </div>
-
-            </div>
-
         </div>
-
-
+        <div class="collapsible-panel-parent" style="display:block">
+            <h1>ICE Supervisor</h1>
+            <div class="grid_12" style="text-align: center">
+                <div id="devices"></div>
+            </div>
+            <div id="monitor" class="console_log grid_6 push_3">
+            </div>
+        </div>        
     </body>
 
     <script type="application/javascript" src="../../client/lib/promise-0.1.1.js"></script>
