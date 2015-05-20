@@ -5,7 +5,9 @@ require.config({
     baseUrl: '../../client/app',
     paths: {
         d3: '../lib/d3',
-        stateParser: './util/PVSioStateParser'
+        stateParser: './util/PVSioStateParser',
+        NCDevice: 'plugins/networkController/NCDevice',
+        NCMonitor: 'plugins/networkController/NCMonitor'
     }
 });
 /**
@@ -13,193 +15,57 @@ require.config({
  */
 require([
     'PVSioWebClient',
-    'stateParser'
-], function (PVSioWebClient, stateParser) {
-    /*
-     * Websocket used to communicate with SAPERE
-     */
-    var sapere_websocket;
-    var supervisorID = "Supervisor_ID";
-    var supervisorAdded = false;
+    'stateParser',
+    'NCDevice',
+    'NCMonitor',
+    "widgets/med/PatientMonitorDisplay", "widgets/TripleDisplay", "widgets/ButtonActionsQueue"
+], function (PVSioWebClient, stateParser, NCDevice, NCMonitor, PatientMonitorDisplay, TripleDisplay, ButtonActionsQueue) {
+
+    var deviceID = "Supervisor_ID";
+    var deviceType = "Supervisor";
+    //var deviceDescription = "Supervisor";
+
     var client;
-    var start_tick, stop_tick;
-    var d3 = require("d3/d3");
-    /*
-     * It indicates the state of the socket (the one connecting to Sapere)
-     */
+    //var d3 = require("d3/d3");
     var tick = null;
 
-
-    /**
-     * @function logOnDiv
-     * @description Utility function, sends messages to different div elements in the html page
-     * @memberof module:Pacemaker-Simulink
-     */
-    function logOnDiv(msg, logger) {
-        var newP = document.createElement("p");
-        newP.innerHTML = msg;
-        var node = document.getElementById(logger);
-        node.appendChild(newP);
-        //node.scrollTop = node.scrollHeight;
-        $("#" + logger).animate({ scrollTop: $("#" + logger)[0].scrollHeight}, 500);
+    function parseNCMessage(event){
+        var res = stateParser.parse(event.message);
+        client.getWebSocket()
+            .sendGuiAction("update_spo2(" + res.spo2 + ")" +
+            "(" + client.getWebSocket().lastState() + ");",
+            onMessageReceived);
     }
-
-
-    function addDevice(){
-        if (!supervisorAdded){
-            logOnDiv('Adding Supervisor', 'monitor');
-            var SupervisorAction = {
-                action: "add",
-                deviceID: supervisorID,
-                type: "Supervisor",
-                description: "Supervisor description"
-            };
-            sapere_websocket.send(JSON.stringify(SupervisorAction));
-        }
-        else{
-            logOnDiv('Supervisor already added!', 'monitor');
-
-        }
-//        start_tick();
-    }
-
-    function sendControlData(to, message){
-        logOnDiv('Sending Message \n'+ message, 'monitor');
-        var payload = {
-            to: to,
-            msg: message
-        };
-        var DeviceAction = {
-            action: "orchestrate",
-            deviceID: supervisorID,
-            message: payload
-        };
-        sapere_websocket.send(JSON.stringify(DeviceAction));
-    }
-
-
-    /**
-     * @function connectSapere
-     * @description Called when clicking the button 'Connect' on the web page.
-     * It connects to the Sapere middleware through a new WebSocket.
-     * It takes the address from the corresponding field in the html page.
-     * @memberof module:Pacemaker-Sapere
-     */
-    var connectSapere = function () {
-        var url = "ws://localhost:8080/SapereEE/actions",
-            sapere_log = "monitor";
-        
-        return new Promise(function (resolve, reject) {
-            if (sapere_websocket && sapere_websocket.readyState === 1) {
-                logOnDiv("ICE Supervisor already connected to ICE Network Controller.", sapere_log);
-                resolve();
-            } else {
-                logOnDiv("Establishing connection with ICE Network Controller at " + url, sapere_log);
-                sapere_websocket = new WebSocket(url);
-
-                /*
-                 * It starts the control process that send the information to Sapere
-                 */
-                sapere_websocket.onopen = function () {
-                    var msg = "Connected to ICE Network Controller!";
-                    logOnDiv(msg, sapere_log);
-                    addDevice();
-                    resolve();
-                };
-                /*
-                 * Receive event
-                 */
-                sapere_websocket.onmessage = function (evt) {
-                    onMessageReceivedSapere(evt);
-                };
-                /*
-                 * Close event
-                 */
-                sapere_websocket.onclose = function () {
-                    var msg = "Disconnected from ICE Network Controller (" + url + ")";
-                    logOnDiv(msg, sapere_log);
-                    sapere_websocket = null;
-                    reject(msg);
-                };
-                /*
-                 * Connection failed
-                 */
-                sapere_websocket.onerror = function () {
-                    var msg = "Unable to connect to ICE Network Controller (" + url + ")";
-                    logOnDiv(msg, sapere_log);
-                    sapere_websocket = null;
-                    reject(msg);
-                };
-            }
-        });
-    };
-
-    /**
-     * @function onMessageReceivedSapere
-     * @description Callback function of sapere websocket <br>
-     * Parse the data sent from Sapere and send it to PVS in order to process it
-     * @memberof module:Pacemaker-Sapere
-     */
-    function onMessageReceivedSapere(event) {
-        var text = event.data;
-
-        // JSON FORMAT
-        if (/^[\],:{}\s]*$/.test(text.replace(/\\["\\\/bfnrtu]/g, '@').
-                replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
-                replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
-
-            var device = JSON.parse(event.data);
-
-            if (device.action === "add") {
-                supervisorAdded = true;
-                logOnDiv('Supervisor added', 'monitor');
-            }
-            if (device.action === "remove") {
-                supervisorAdded = false;
-                logOnDiv('Supervisor removed', 'monitor');
-            }
-            if (device.action === "toggle") {
-                var node = document.getElementById(device.deviceID);
-                var statusText = node.children[2];
-                if (device.status === "ON") {
-                    node.setAttribute("class", "animated pulse infinite device " + device.type);
-                    statusText.innerHTML = "Status: " + device.status + " (<a href=\"#\" OnClick=toggleDevice(" + device.deviceID + ")>Turn OFF</a>)";
-                } else if (device.status === "OFF") {
-                    node.setAttribute("class", "animated flip device " + device.type);
-                    statusText.innerHTML = "Status: " + device.status + " (<a href=\"#\" OnClick=toggleDevice(" + device.deviceID + ")>Turn ON</a>)";
-                }
-            }
-            if (device.action === "update") {
-                logOnDiv("FROM:    " + device.from +
-                         "\nTYPE:    " + device.type +
-                         "\nMESSAGE: \n" + device.message, "monitor");
-                var res = stateParser.parse(device.message);
-                client.getWebSocket()
-                        .sendGuiAction("update_spo2(" + res.spo2 + ")" +
-                                       "(" + client.getWebSocket().lastState() + ");",
-                                       onMessageReceived);
-            }
-        } // NO JSON
-        else{
-            logOnDiv(text, "monitor");
-        }
-    }
-
-    start_tick = function () {
+    function start_tick () {
         if (!tick) {
             tick = setInterval(function () {
-                client.getWebSocket()
-                    .sendGuiAction("tick(" + client.getWebSocket().lastState() + ");", onMessageReceived);
+                ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
+//                client.getWebSocket()
+//                    .sendGuiAction("tick(" + client.getWebSocket().lastState() + ");", onMessageReceived);
             }, 2000);
         }
-    };
-
-    stop_tick = function () {
+    }
+    function stop_tick () {
         if (tick) {
             clearInterval(tick);
             tick = null;
         }
-    };
+    }
+
+
+    var ncDevice = new NCDevice({id: deviceID, type: deviceType});
+    ncDevice.addListener("update", parseNCMessage);
+    ncDevice.addListener("connected", start_tick);
+
+    var ncMonitor = new NCMonitor({});
+
+    function logOnDiv(msg, logger) {
+        var p = $("<p>", {class: "console_element"});
+        p.html(msg);
+        $("#" + logger)
+            .append(p)
+            .animate({scrollTop: $("#" + logger)[0].scrollHeight}, 500);
+    }
 
 
     /**
@@ -208,13 +74,24 @@ require([
      */
     function onMessageReceived(err, event) {
         if (!err) {
-            logOnDiv(event.data.toString(), "monitor");
-
-            var res = stateParser.parse(event.data.toString());
-            if (res.pump.input.cmd.trim() === "pause"){
-                console.log("pause pump");
-                sendControlData(supervisorID, "click_btn_pause");
-            }
+//            logOnDiv(event.data.toString(), "monitor");
+//
+//            var res = stateParser.parse(event.data.toString());
+//            if (res.pump.cmd.trim() === "pause"){
+//                console.log("pause pump");
+//                ncDevice.sendControlData("Alaris", "click_btn_pause");
+//            }
+            // rendering
+            var res = event.data.toString();
+            if (res.indexOf("(#") === 0) {
+                res = stateParser.parse(event.data.toString());
+				if (res) {
+                    render_spo2(res.monitor);
+                    render_rra(res.monitor);
+                    render_alarms(res.monitor);
+                    render_pump_data(res.pump);
+                }
+            }            
         } else { console.log(err); }
     }
 
@@ -223,46 +100,131 @@ require([
      * Get client instance and the websocket it uses to communicate with the server
      */
     client = PVSioWebClient.getInstance();
+    var imageHolder = client.createCollapsiblePanel({
+        parent: "#content",
+        headerText: "Simulation of ICE Supervisor with PCA Interlock Application",
+        showContent: true,
+        isDemo: true
+    }).style("position", "relative").style("width", "1200px");
+    //insert the html into the panel (note that this could have used templates or whatever)
+    var content = imageHolder.html('<img src="ICE-Supervisor.png" usemap="#prototypeMap"/>').attr("id", "prototype");
+    content.attr("style", "margin-left: 0px; float: left;");
     
-    function startSapereEE() {
-        var msg = "Starting ICE Network Controller...";
-        console.log(msg);
-        return new Promise(function (resolve, reject) {
-            client.getWebSocket().send({ type: "startSapereEE" }, function(err) {
-                if (!err) {
-                    msg = "ICE Network Controller started successfully!";
-                    console.log(msg);
-                    resolve(msg);
-                } else {
-                    msg = "Error while starting ICE Network Controller (" + JSON.stringify(err) + ")";
-                    console.log(msg);
-                    reject(err);
-                }
-            });
-        });
-    }
-    function stopSapereEE() {
-        var msg = "Stopping ICE Network Controller...";
-        console.log(msg);
-        return new Promise(function (resolve, reject) {
-            client.getWebSocket().send({ type: "startSapereEE" }, function(err) {
-                if (!err) {
-                    msg = "ICE Network Controller stopped.";
-                    console.log(msg);
-                    resolve(msg);
-                } else {
-                    msg = "Error while stopping ICE Network Controller (" + JSON.stringify(err) + ")";
-                    console.log(msg);
-                    reject(err);
-                }
-            });
-        });
-    }
     
-    function init() {
-        d3.select("#startICENetwork").on("click", startSapereEE);
-        d3.select("#stopICENetwork").on("click", stopSapereEE);
+    var app = { monitor: { spo2_display: null, rra_display: null }, pump: { rate: null } };
+    app.monitor.spo2_display = new PatientMonitorDisplay("spo2_display",
+                                     { top: 286, left: 140, height: 34, width: 180 },
+                                     { font: "Times", label: "%SpO2" });
+    app.monitor.rra_display = new PatientMonitorDisplay("rra_display",
+                                    { top: 338, left: 140, height: 34, width: 180 },
+                                    { font: "Times", label: "RRa", fontColor: "aqua" });
+    
+    app.pump.rate = new TripleDisplay("rate",
+                          { top: 120, left: 140, height: 30, width: 190 },
+                          { left_display: { height: 14, width: 58, align: "left" },
+                            center_display: { width: 80, align: "right", top: 110 },
+                            right_display: { height: 14, align: "right", top: 124 }});
+    app.pump.vtbi = new TripleDisplay("vtbi",
+                          { top: 180, left: 140, height: 30, width: 190 },
+                          { left_display: { height: 14, width: 58, align: "left" },
+                            center_display: { width: 80, align: "right", top: 170 },
+                            right_display: { height: 14, align: "right", top: 184 }});
+    app.pump.volume = new TripleDisplay("volume",
+                          { top: 240, left: 140, height: 30, width: 190 },
+                          { left_display: { height: 14, width: 58, align: "left" },
+                            center_display: { width: 80, align: "right", top: 230 },
+                            right_display: { height: 14, align: "right", top: 244 }});
+    
+    
+    // utility function
+    function evaluate(str) {
+        var v = +str;
+        if (str.indexOf("/") >= 0) {
+            var args = str.split("/");
+            v = +args[0] / +args[1];
+        }
+        return (v <= 0) ? "--" : ((v < 10) ? v.toFixed(1).toString() : v.toFixed(0).toString());
     }
+    // spo2
+    function render_spo2(res) {
+        if (res.isOn === "TRUE") {
+            app.monitor.spo2_display.set_alarm({ min: parseFloat(res.spo2_min), max: parseFloat(res.spo2_max) });
+            app.monitor.spo2_display.set_range({ min: 0, max: 100 });
+            if (res.spo2_fail === "FALSE") {
+                if (res.spo2_alarm === "off") {
+                    app.monitor.spo2_display.render(evaluate(res.spo2));
+                } else {
+                    app.monitor.spo2_display.render(evaluate(res.spo2), { fontColor: "red" });
+                }
+            } else {
+                app.monitor.spo2_display.fail("FAIL");
+            }
+            start_tick();
+        } else {
+            app.monitor.spo2_display.hide();
+            stop_tick();
+        }
+    }
+    // RRa
+    function render_rra(res) {
+        if (res.isOn === "TRUE") {
+            app.monitor.rra_display.set_alarm({ min: parseFloat(res.rra_min), max: parseFloat(res.rra_max) });
+            app.monitor.rra_display.set_range({ min: 0, max: 70 });
+            if (res.rra_fail === "FALSE") {
+                if (res.rra_alarm === "off") {
+                    app.monitor.rra_display.render(evaluate(res.rra));
+                } else {
+                    app.monitor.rra_display.render(evaluate(res.rra), { fontColor: "red" });
+                }
+            } else {
+                app.monitor.rra_display.fail("FAIL");
+            }
+            start_tick();
+        } else {
+            app.monitor.rra_display.hide();
+            stop_tick();
+        }
+    }
+    // alarms
+    function render_alarms(res) {
+        if (res.isOn === "TRUE") {
+            if (res.spo2_alarm === "off") {
+                app.monitor.spo2_display.alarm("off");
+            } else if (res.spo2_alarm === "alarm") {
+                app.monitor.spo2_display.alarm("glyphicon-bell");
+            } else if (res.spo2_alarm === "mute") {
+                app.monitor.spo2_display.alarm("glyphicon-mute");
+            }
+            if (res.rra_alarm === "off") {
+                app.monitor.rra_display.alarm("off");
+            } else if (res.rra_alarm === "alarm") {
+                app.monitor.rra_display.alarm("glyphicon-bell");
+            } else if (res.rra_alarm === "mute") {
+                app.monitor.rra_display.alarm("glyphicon-mute");
+            }
+        } else {
+            app.monitor.spo2_display.hide();
+            app.monitor.rra_display.hide();
+        }
+    }
+    // rate
+    function render_pump_data(res) {
+        if (res.isOn === "TRUE") {
+            app.pump.rate.renderLabel("RATE");
+            app.pump.rate.renderValue(evaluate(res.rate));
+            app.pump.rate.renderUnits("mL/h");
+            app.pump.vtbi.renderLabel("VTBI");
+            app.pump.vtbi.renderValue(evaluate(res.vtbi));
+            app.pump.vtbi.renderUnits("mL");
+            app.pump.volume.renderLabel("VOLUME");
+            app.pump.volume.renderValue(evaluate(res.volume));
+            app.pump.volume.renderUnits("mL");
+        } else {
+            app.pump.rate.hide();
+            app.pump.vtbi.hide();
+        }
+    }    
+    
 
     /*
      * Register event listener for websocket connection to the server.
@@ -280,12 +242,15 @@ require([
             if (!err) {
                 logOnDiv('PVS Process started', 'monitor');
                 
-                // start ICE Network Controller (SapereEE) & connect ICE supervisor to it
-                startSapereEE().then(function (res) {
-                    connectSapere();
-                }).catch(function (err) {
-                    console.log(err);
-                });    
+                start_tick();
+                
+                // start ICE Network Controller (NCEE) & connect ICE supervisor to it
+                //startNCEE().then(function (res) {
+                //    connectToNC();
+                //}).catch(function (err) {
+                //    connectNC();
+                //    console.log(err);
+                //});
                 
                 // initialise PVS model
                 client.getWebSocket().sendGuiAction(client.getWebSocket().lastState() + ';', function () {});
@@ -293,7 +258,7 @@ require([
                 console.log(err);
             }
         });
-        init();
+        //init();
     }).addListener('WebSocketConnectionClosed', function () {
         logOnDiv('PVS Process closed', 'monitor');
         console.log('web socket closed');
@@ -306,4 +271,7 @@ require([
      */
     logOnDiv('Connecting to the PVSio server...', 'monitor');
     client.connectToServer();
+
+    ncDevice.connect();
+    ncMonitor.connect();
 });

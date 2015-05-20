@@ -1,0 +1,218 @@
+.console_log{
+    text-align: left;
+    height:200px;
+    overflow: auto;
+    color: lime;
+    background: black;
+    font-size: small;
+    margin-top: 20px;
+    padding-left: 10px;
+    white-space: pre-wrap;
+}
+
+body{
+    font-family: 'Andale Mono', AndaleMono, monospace;
+}
+
+
+
+.button {
+    display: inline;
+    color: #fff;
+    background-color: #f2791d;
+    padding: 8px;
+    margin: auto;
+    border-radius: 8px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    box-shadow: none;
+    border: none;
+}
+
+.button:hover {
+    background-color: #ffb15e;
+}
+.button a, a:visited, a:hover, a:active {
+    color: #fff;
+    text-decoration: none;
+}
+
+
+.device {
+    width: 180px;
+    height: 150px;
+    margin: 10px;
+    padding: 16px;
+    color: #fff;
+    vertical-align: top;
+    border-radius: 8px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    display: inline-block;
+    text-align: left;
+    font-size: small;
+
+    -webkit-transition: all 1s ease-in-out;
+    -moz-transition: all 1s ease-in-out;
+    -o-transition: all 1s ease-in-out;
+    transition: all 1s ease-in-out;
+}
+
+.connection {
+    border: 4px solid #668;
+    border-radius: 100%;
+
+}
+
+.channel{
+    border: 10px solid red;
+    border-radius: 100%;
+}
+
+
+.device span {
+    display: block;
+}
+
+.deviceName {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.removeDevice {
+    margin-top: 12px;
+    text-align: center;
+}
+
+.device {
+    background-color: #5eb85e;
+}
+
+.device a:hover {
+    color: #a1ed82;
+}
+
+.device_agents{
+    position: relative;
+    top: -250px;
+    right: 28px;
+}
+
+.supervisor_agents{
+    margin-top: 145px;
+}
+
+.supervisor_agents > .agent_subscribe{
+    float: right;
+}
+
+.supervisor_agents > .agent_publish{
+    float: left;
+}
+
+
+
+.supervisor_agents > .agent_publish > .circle-publish{
+    /*top: 30px;*/
+}
+
+/*.device_agents > .agent_subscribe > .circle-subscribe{*/
+/*top: -28px;*/
+/*}*/
+
+.circle-publish {
+    position: relative;
+    display: inline-block;
+    border-radius: 100%;
+    height: 5px;
+    width: 5px;
+    background: orange;
+    float: right;
+}
+
+.circle-subscribe {
+    position: relative;
+    display: inline-block;
+    border-radius: 100%;
+    height: 5px;
+    width: 5px;
+    background: dodgerblue;
+    float: right;
+}
+
+
+
+
+.balls{
+    display: inline;
+}
+
+.device.Supervisor {
+    background-color: #db524d;
+}
+
+.device.Supervisor a:hover {
+    color: #ff907d;
+}
+
+.device a {
+    text-decoration: none;
+}
+
+.device a:visited, a:active, a:hover {
+    color: #fff;
+}
+
+.device a:hover {
+    text-decoration: underline;
+}
+
+
+#sapere {
+    background-color: lightgrey;
+    text-align: center;
+    /*width: 800px;*/
+    height: 200px;
+    margin-top: 80px;
+    margin-bottom: 80px;
+    padding: 16px;
+    color: #fff;
+    vertical-align: top;
+    border-radius: 8px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    display: inline-block;
+    font-size: small;
+    -webkit-transition: all 1s ease-in-out;
+    -moz-transition: all 1s ease-in-out;
+    -o-transition: all 1s ease-in-out;
+    transition: all 1s ease-in-out;
+}
+
+
+hr.line {
+    margin-top: 100px;
+    height: 1px;
+    background: lightgrey;
+    background-image: -webkit-linear-gradient(left, lightgrey, #333, lightgrey);
+    background-image:    -moz-linear-gradient(left, lightgrey, #333, lightgrey);
+    background-image:     -ms-linear-gradient(left, lightgrey, #333, lightgrey);
+    background-image:      -o-linear-gradient(left, lightgrey, #333, lightgrey);
+}
+
+
+.LSAtree{
+    text-align: center;
+}
+
+.sapere_node{
+    text-align: left;
+    font-size: smaller;
+    overflow: scroll;
+    height: 1000px;
+    margin-top: 20px;
+    background-color: honeydew;
+    border-radius: 8px;
+
+}

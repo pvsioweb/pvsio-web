@@ -4,37 +4,92 @@ main: THEORY
 
   min_spo2: nonneg_real = 88
   max_spo2: nonneg_real = 100
-  MonitorOutput: TYPE = [# spo2: real #]
-  MonitorAPI: TYPE = [#
-    output: MonitorOutput
+  Alarm: TYPE = { off, mute, alarm }
+  MonitorState: TYPE = [#
+    id: string,
+    spo2: real, % sensor data - blood oxigenation level (percentage)
+    spo2_max: nonneg_real,
+    spo2_min: nonneg_real,
+    spo2_label: string,
+    spo2_alarm: Alarm,
+    spo2_fail: bool,
+    rra: real, % sensor data - acoustic respiratory rate (breaths per minute, bpm)
+    rra_max: nonneg_real,
+    rra_min: nonneg_real,
+    rra_label: string,
+    rra_alarm: Alarm,
+    rra_fail: bool,
+    isOn: bool
   #]
+  init_monitor(m: string): MonitorState = (#
+    id := m,
+    spo2 := 99, % sensor data - blood oxigenation level (percentage)
+    spo2_max := 0,
+    spo2_min := 88,
+    spo2_label := "SpO2",
+    spo2_alarm := off,
+    spo2_fail := false,
+    rra := 18, % sensor data - acoustic respiratory rate (breaths per minute, bpm)
+    rra_max := 30,
+    rra_min := 6,
+    rra_label := "RRa",
+    rra_alarm := off,
+    rra_fail := false,
+    isOn := true
+  #)
 
   PumpCommand: TYPE = { keep, pause }
-  PumpInput: TYPE = [# cmd: PumpCommand #]
-  PumpAPI: TYPE = [#
-    input: PumpInput
+  PumpState: TYPE = [#
+    %-- outputs
+    id: string,
+    rate: real,
+    vtbi: real,
+    volume: real,
+    isOn: bool,
+    %-- inputs
+    cmd: PumpCommand 
   #]
-
+  init_pump(p: string): PumpState = (#
+    id := p,
+    rate := 4.2,
+    vtbi := 50,
+    volume := 0,
+    isOn := true,
+    cmd := keep
+  #)
 
   state: TYPE = [#
-    monitor: MonitorAPI,
-    pump: PumpAPI
+    monitor: MonitorState,
+    pump: PumpState,
+    isOn: bool
   #]
 
   init(x: real): state = (#
-    monitor := (# output := (# spo2 := 0 #) #),
-    pump := (# input := (# cmd := keep #) #)
+    monitor := init_monitor("Radical7"),
+    pump := init_pump("AlarisGP"),
+    isOn := true
   #)
 
   tick(st: state): state =
-    COND
-      spo2(output(monitor(st))) <= min_spo2 OR spo2(output(monitor(st))) >= max_spo2
-        -> st WITH [ pump := pump(st) WITH [ input := (# cmd := pause #) ]],
-      spo2(output(monitor(st))) > min_spo2 AND spo2(output(monitor(st))) < max_spo2
-        -> st WITH [ pump := pump(st) WITH [ input := (# cmd := keep #) ]]
-    ENDCOND
+    IF isOn(pump(st)) AND isOn(monitor(st))
+    THEN COND
+      spo2(monitor(st)) <= min_spo2 OR spo2(monitor(st)) >= max_spo2
+        -> st WITH [ pump := pump(st) WITH [ cmd := pause ]],
+      spo2(monitor(st)) > min_spo2 AND spo2(monitor(st)) < max_spo2
+        -> st WITH [ pump := pump(st) WITH [ cmd := keep ]]
+         ENDCOND
+    ELSE st ENDIF
+
+  click_onOff(st: state): state =
+    st WITH [ isOn := NOT isOn(st) ]
 
   update_spo2(v: real)(st: state): state =
-    st WITH [ monitor := monitor(st) WITH [ output := (# spo2 := v #) ]]
+    st WITH [ monitor := monitor(st) WITH [ spo2 := v ]]
+
+  update_rra(v: real)(st: state): state =
+    st WITH [ monitor := monitor(st) WITH [ rra := v ]]
+
+  update_monitor(m: MonitorState)(st: state): state =
+    st WITH [ monitor := m ]
 
  END main

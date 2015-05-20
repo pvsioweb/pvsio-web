@@ -11,25 +11,29 @@
         <link href="../../client/app/plugins/graphbuilder/graph.css" rel="stylesheet" type="text/css"/>
         <link href="../../client/css/style.css" rel="stylesheet" type="text/css"/>
 
+        <link href="../../client/css/960.css" rel="stylesheet" type="text/css"/>
+        <link href="../../client/css/animate.css" rel="stylesheet" type="text/css"/>
+        <link href="../../client/css/nc.monitor.css" rel="stylesheet" type="text/css"/>
 
-        <link rel="stylesheet" type="text/css" media="all" href="style/960.css"/>
-        <link rel="stylesheet" type="text/css" media="all" href="style/style.css"/>
-        <!--<script type="text/javascript" src="js/index.js"></script>-->
-        <!--<script type="text/javascript" src="js/require.js"></script>-->
 
 
     </head>
     <body>
         <div id="content" class="container_12" style="text-align: center;">
 
-            <div class="grid_6">
+            <div class="grid_12" style="display:none">
                 <h1>ICE Supervisor</h1>
                 <div id="supervisorControls">
                     <input type="button" id="startICENetwork" value="Start ICE Network Controller">
                     <input type="button" id="stopICENetwork" value="Stop ICE Network Controller">
                 </div>
-                <div id="monitor" class="console_log">
+                <div class="grid_12" style="text-align: center">
+                    <div id="devices">
+                    </div>
                 </div>
+                <div id="monitor" class="console_log grid_6 push_3">
+                </div>
+
             </div>
 
         </div>
@@ -44,6 +48,5 @@
     <script type="text/javascript" src="../../client/lib/handlebars-v1.1.0.js"></script>
     <script type="text/javascript" src="../../client/lib/bootstrap/js/bootstrap.min.js"></script>
     <script src="../../client/require.js" data-main="js/index.js"></script>
-
 
 </html>
