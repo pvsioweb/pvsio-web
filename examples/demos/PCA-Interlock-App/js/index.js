@@ -18,8 +18,8 @@ require([
     'stateParser',
     'NCDevice',
     'NCMonitor',
-    "widgets/med/PatientMonitorDisplay", "widgets/TripleDisplay", "widgets/ButtonActionsQueue"
-], function (PVSioWebClient, stateParser, NCDevice, NCMonitor, PatientMonitorDisplay, TripleDisplay, ButtonActionsQueue) {
+    "widgets/med/PatientMonitorDisplay", "widgets/TripleDisplay", "widgets/SingleDisplay", "widgets/ButtonActionsQueue"
+], function (PVSioWebClient, stateParser, NCDevice, NCMonitor, PatientMonitorDisplay, TripleDisplay, SingleDisplay, ButtonActionsQueue) {
 
     var deviceID = "Supervisor_ID";
     var deviceType = "Supervisor";
@@ -28,12 +28,19 @@ require([
     var client;
     var tick = null;
 
+    //FIXME: StateParser needs improvements for whitespaces and double quotes
     function parseNCMessage(event){
         var res = stateParser.parse(event.message);
-        client.getWebSocket()
-            .sendGuiAction("update_spo2(" + res.spo2 + ")" +
-            "(" + client.getWebSocket().lastState() + ");",
-            onMessageReceived);
+        if (res.id === "\"AlarisGP\"") {
+            ButtonActionsQueue.getInstance().queueGUIAction("update_pump(" + event.message + ")", onMessageReceived);
+        } else if (res.id === "\"Radical7\"") {
+            ButtonActionsQueue.getInstance().queueGUIAction("update_monitor(" + event.message + ")", onMessageReceived);
+        }
+
+//        client.getWebSocket()
+//            .sendGuiAction("update_spo2(" + res.spo2 + ")" +
+//            "(" + client.getWebSocket().lastState() + ");",
+//            onMessageReceived);
     }
     function start_tick () {
         if (!tick) {
@@ -73,7 +80,7 @@ require([
         if (!err) {
             logOnDiv(event.data.toString(), "monitor");
             var res = stateParser.parse(event.data.toString());
-            if (res.pump.cmd.trim() === "pause"){
+            if (res.pumpcmd.trim() === "pause"){
                 console.log("pause pump");
                 ncDevice.sendControlData("Alaris", "click_btn_pause");
             }
@@ -115,16 +122,18 @@ require([
                                     { top: 338, left: 140, height: 34, width: 180 },
                                     { font: "Times", label: "RRa", fontColor: "aqua" });
     
+    app.pump.topline = new SingleDisplay("topline",
+                          { top: 110, left: 140, height: 16, width: 190 });
     app.pump.rate = new TripleDisplay("rate",
-                          { top: 120, left: 140, height: 30, width: 190 },
+                          { top: 160, left: 140, height: 30, width: 190 },
                           { left_display: { height: 14, width: 58, align: "left" },
-                            center_display: { width: 80, align: "right", top: 110 },
-                            right_display: { height: 14, align: "right", top: 124 }});
+                            center_display: { width: 80, align: "right", top: 150 },
+                            right_display: { height: 14, align: "right", top: 164 }});
     app.pump.vtbi = new TripleDisplay("vtbi",
-                          { top: 180, left: 140, height: 30, width: 190 },
+                          { top: 200, left: 140, height: 30, width: 190 },
                           { left_display: { height: 14, width: 58, align: "left" },
-                            center_display: { width: 80, align: "right", top: 170 },
-                            right_display: { height: 14, align: "right", top: 184 }});
+                            center_display: { width: 80, align: "right", top: 190 },
+                            right_display: { height: 14, align: "right", top: 204 }});
     app.pump.volume = new TripleDisplay("volume",
                           { top: 240, left: 140, height: 30, width: 190 },
                           { left_display: { height: 14, width: 58, align: "left" },
@@ -212,8 +221,36 @@ require([
                 v = +args[0] / +args[1];
             }
             return v;
-        }        
+        }
+        function render_topline(res) {
+            function topline2string(msg) {
+                msg = msg.toUpperCase();
+                if (msg === "DISPVTBI") {
+                    return "VTBI";
+                } else if (msg === "DISPKVO") {
+                    return "KVO";
+                } else if (msg === "HOLDING") {
+                    return "ON HOLD";
+                } else if (msg === "SETRATE") {
+                    return "ON HOLD - SET RATE";
+                }
+                return msg;
+            }
+            function topline2options(msg) {
+                msg = msg.toUpperCase();
+                if (msg === "HOLDING" || msg === "SETRATE" || msg === "ATTENTION") {
+                    return { blinking: true };
+                }
+                return {};
+            }
+            if (res.topline === "SETRATE") {
+                app.pump.topline.renderMultiline(["ON HOLD", "Set rate with chevron keys"], { fontSize: "10" });
+            } else {
+                app.pump.topline.render(topline2string(res.topline), topline2options(res.topline));
+            }
+        }
         if (res.isOn === "TRUE") {
+            render_topline(res);
             app.pump.rate.renderLabel("RATE");
             app.pump.rate.renderValue(evaluate(res.rate));
             app.pump.rate.renderUnits("mL/h");
@@ -224,8 +261,10 @@ require([
             app.pump.volume.renderValue(evaluate(res.volume));
             app.pump.volume.renderUnits("mL");
         } else {
+            app.pump.topline.render("OFF");
             app.pump.rate.hide();
             app.pump.vtbi.hide();
+            app.pump.volume.hide();
         }
     }    
     

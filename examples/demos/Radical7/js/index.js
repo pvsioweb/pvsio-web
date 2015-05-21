@@ -316,7 +316,6 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
     }
 
     function sendDataUpdate(message){
-
         logOnDiv('Sending Message \n'+ message, 'sapere_response_log');
         var DeviceAction = {
             action: "update",
@@ -333,7 +332,6 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
      * @description Called when clicking the button 'Connect' on the web page.
      * It connects to the Sapere middleware through a new WebSocket.
      * It takes the address from the corresponding field in the html page.
-     * @memberof module:Pacemaker-Sapere
      */
     var connectSapere = function () {
         var url = "ws://localhost:8080/NetworkController/actions",
@@ -387,7 +385,6 @@ require(["pvsioweb/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "w
      * @function onMessageReceivedSapere
      * @description Callback function of sapere websocket <br>
      * Parse the data sent from Sapere and send it to PVS in order to process it
-     * @memberof module:Pacemaker-Sapere
      */
     function onMessageReceivedSapere(event) {
         var text = event.data;

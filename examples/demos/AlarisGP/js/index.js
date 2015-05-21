@@ -159,6 +159,10 @@ require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "wi
                 return "QUIT";
             } else if (fn.toUpperCase() === "FKEEP") {
                 return "KEEP";
+            } else if (fn.toUpperCase() === "FYES") {
+                return "YES";
+            } else if (fn.toUpperCase() === "FNO") {
+                return "NO";
             }
             return fn;
         }
@@ -220,7 +224,7 @@ require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "wi
         if (res.middisp_dtime === "TRUE") {
             alaris.middisp_dtime.renderLabel("TIME");
             alaris.middisp_dtime.renderValue(evaluate(res.device.time));
-            alaris.middisp_dtime.renderUnits("sec");
+            alaris.middisp_dtime.renderUnits("h");
         } else {
             alaris.middisp_dtime.hide();
         }
@@ -243,7 +247,7 @@ require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "wi
         }
         function topline2options(msg) {
             msg = msg.toUpperCase();
-            if (msg === "HOLDING" || msg === "SETRATE") {
+            if (msg === "HOLDING" || msg === "SETRATE" || msg === "ATTENTION") {
                 return { blinking: true };
             }
             return {};
@@ -458,6 +462,18 @@ require(["widgets/Button", "widgets/SingleDisplay", "widgets/DoubleDisplay", "wi
             var dbg = prettyprintState(event.data.toString());
             var date = new Date();
             log({data: dbg, date: date, id: event.id, type: "frompvs"});
+
+            // sapere
+            if(deviceAdded){
+                var state = stateParser.parse(event.data.toString());
+                var msg = "(# topline:=" + state.topline + ", " +
+                             "rate:=" + state.device.infusionrate + ", " +
+                             "vtbi:=" + state.device.vtbi + ", " +
+                             "volume:=" + state.device.volumeinfused + ", " +
+                             "id:=" + state.id + ", " +
+                             "isOn:=" + state.device["powered_on?"] + " #)";
+                sendDataUpdate(msg);
+            }
 
             var res = event.data.toString();
             if (res.indexOf("(#") === 0) {
