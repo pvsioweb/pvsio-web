@@ -298,10 +298,10 @@ require([
     }
 
     function startNetworkController() {
-        // To use external NetworkController
-        return new Promise(function (resolve, reject) {
-            resolve(msg);
-        });
+//        // Uncomment this to invoke glassfish from commands line
+//        return new Promise(function (resolve, reject) {
+//            resolve(msg);
+//        });
 
         var msg = "Starting ICE Network Controller...";
         console.log(msg);
@@ -315,7 +315,6 @@ require([
                     msg = "Error while starting ICE Network Controller (" + JSON.stringify(err) + ")";
                     console.log(msg);
                     reject(err);
-                    resolve(msg);
                 }
             });
         });
