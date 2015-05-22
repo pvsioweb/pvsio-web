@@ -156,7 +156,7 @@ define(function (require, exports, module) {
 
     NCDevice.prototype.sendDataUpdate = function (message) {
         if(nc_websocket_device != null) {
-            if (_this.deviceType != "Supervisor") {
+            if (_this.deviceType !== "Supervisor") {
                 _this.fire({type: "notify", message: "-> " + message});
                 var DeviceAction = {
                     action: "update",
@@ -179,7 +179,7 @@ define(function (require, exports, module) {
 
     function isJSON(text){
         try {
-            var c = JSON.parse(text);
+            JSON.parse(text);
             return true;
         }
         catch (err) {
