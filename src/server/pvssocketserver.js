@@ -166,7 +166,7 @@ function run() {
     }
     
     function startSapereEE(cb) {
-        var cmd = __dirname + "/lib/glassfish/bin/asadmin start-domain --verbose=true";
+        var cmd = __dirname + "/lib/glassfish4/bin/asadmin start-domain --verbose=true";
         procWrapper().exec({
             command: cmd,
             callBack: cb
@@ -174,7 +174,7 @@ function run() {
     }
     
     function stopSapereEE(cb) {
-        var cmd = __dirname + "/lib/glassfish/bin/asadmin stop-domain --verbose=true";
+        var cmd = __dirname + "/lib/glassfish4/bin/asadmin stop-domain --verbose=true";
         procWrapper().exec({
             command: cmd,
             callBack: cb
