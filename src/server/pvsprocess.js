@@ -29,8 +29,8 @@ module.exports = function () {
     var o                                   = {},
         output                              = [],
         readyString                         = "<PVSio>",
-        garbageCollector                    = ";;; GC:;;; Finished GC",
-        wordsIgnored                        = ["", "==>", readyString, garbageCollector],
+        garbageCollector                    = [";;; GC:", ";;; Finished GC"],
+        wordsIgnored                        = ["", "==>", readyString].concat(garbageCollector),
         filename,
         processReady                        = false,
         workspaceDir                        = path.join(__dirname, "../../examples/");
