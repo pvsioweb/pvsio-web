@@ -28,40 +28,53 @@ require([
     var client;
     var tick = null;
 
-    //FIXME: StateParser needs improvements for whitespaces and double quotes
-    function parseNCMessage(event){
+    function parseNCUpdate(event) {
         var res = stateParser.parse(event.message);
         if (res.id === "\"AlarisGP\"") {
             ButtonActionsQueue.getInstance().queueGUIAction("update_pump(" + event.message + ")", onMessageReceived);
         } else if (res.id === "\"Radical7\"") {
             ButtonActionsQueue.getInstance().queueGUIAction("update_monitor(" + event.message + ")", onMessageReceived);
         }
-
-//        client.getWebSocket()
+        //        client.getWebSocket()
 //            .sendGuiAction("update_spo2(" + res.spo2 + ")" +
 //            "(" + client.getWebSocket().lastState() + ");",
 //            onMessageReceived);
     }
-    function start_tick () {
+
+    function errorMessage(event) {
+        console.log("!!! " + event.message);
+    }
+
+    function notifyMessage(event) {
+        console.log(">>> " + event.message);
+    }
+
+
+    var ncDevice = new NCDevice({id: deviceID, type: deviceType});
+    ncDevice.addListener("update", parseNCUpdate);
+    ncDevice.addListener("error", errorMessage);
+    ncDevice.addListener("notify", notifyMessage);
+
+    var ncMonitor = new NCMonitor({});
+    ncMonitor.addListener("error", errorMessage);
+    ncMonitor.addListener("notify", notifyMessage);
+
+
+    function start_tick() {
         if (!tick) {
             tick = setInterval(function () {
                 ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
             }, 2000);
         }
     }
-    function stop_tick () {
+
+    function stop_tick() {
         if (tick) {
             clearInterval(tick);
             tick = null;
         }
     }
 
-
-    var ncDevice = new NCDevice({id: deviceID, type: deviceType});
-    ncDevice.addListener("update", parseNCMessage);
-    ncDevice.addListener("connected", start_tick);
-
-    var ncMonitor = new NCMonitor({});
 
     function logOnDiv(msg, logger) {
         var p = $("<p>", {class: "console_element"});
@@ -80,7 +93,7 @@ require([
         if (!err) {
             logOnDiv(event.data.toString(), "monitor");
             var res = stateParser.parse(event.data.toString());
-            if (res.pumpcmd.trim() === "pause"){
+            if (res.pumpcmd.trim() === "pause") {
                 console.log("pause pump");
                 ncDevice.sendControlData("Alaris", "click_btn_pause");
             }
@@ -88,14 +101,16 @@ require([
             res = event.data.toString();
             if (res.indexOf("(#") === 0) {
                 res = stateParser.parse(event.data.toString());
-				if (res) {
+                if (res) {
                     render_spo2(res.monitor);
                     render_rra(res.monitor);
                     render_alarms(res.monitor);
                     render_pump_data(res.pump);
                 }
-            }            
-        } else { console.log(err); }
+            }
+        } else {
+            console.log(err);
+        }
     }
 
 
@@ -112,35 +127,41 @@ require([
     //insert the html into the panel (note that this could have used templates or whatever)
     var content = imageHolder.html('<img src="ICE-Supervisor.png" usemap="#prototypeMap"/>').attr("id", "prototype");
     content.attr("style", "margin-left: 0px; float: left;");
-    
-    
-    var app = { monitor: { spo2_display: null, rra_display: null }, pump: { rate: null } };
+
+
+    var app = {monitor: {spo2_display: null, rra_display: null}, pump: {rate: null}};
     app.monitor.spo2_display = new PatientMonitorDisplay("spo2_display",
-                                     { top: 286, left: 140, height: 34, width: 180 },
-                                     { font: "Times", label: "%SpO2" });
+        {top: 286, left: 140, height: 34, width: 180},
+        {font: "Times", label: "%SpO2"});
     app.monitor.rra_display = new PatientMonitorDisplay("rra_display",
-                                    { top: 338, left: 140, height: 34, width: 180 },
-                                    { font: "Times", label: "RRa", fontColor: "aqua" });
-    
+        {top: 338, left: 140, height: 34, width: 180},
+        {font: "Times", label: "RRa", fontColor: "aqua"});
+
     app.pump.topline = new SingleDisplay("topline",
-                          { top: 110, left: 140, height: 16, width: 190 });
+        {top: 110, left: 140, height: 16, width: 190});
     app.pump.rate = new TripleDisplay("rate",
-                          { top: 160, left: 140, height: 30, width: 190 },
-                          { left_display: { height: 14, width: 58, align: "left" },
-                            center_display: { width: 80, align: "right", top: 150 },
-                            right_display: { height: 14, align: "right", top: 164 }});
+        {top: 160, left: 140, height: 30, width: 190},
+        {
+            left_display: {height: 14, width: 58, align: "left"},
+            center_display: {width: 80, align: "right", top: 150},
+            right_display: {height: 14, align: "right", top: 164}
+        });
     app.pump.vtbi = new TripleDisplay("vtbi",
-                          { top: 200, left: 140, height: 30, width: 190 },
-                          { left_display: { height: 14, width: 58, align: "left" },
-                            center_display: { width: 80, align: "right", top: 190 },
-                            right_display: { height: 14, align: "right", top: 204 }});
+        {top: 200, left: 140, height: 30, width: 190},
+        {
+            left_display: {height: 14, width: 58, align: "left"},
+            center_display: {width: 80, align: "right", top: 190},
+            right_display: {height: 14, align: "right", top: 204}
+        });
     app.pump.volume = new TripleDisplay("volume",
-                          { top: 240, left: 140, height: 30, width: 190 },
-                          { left_display: { height: 14, width: 58, align: "left" },
-                            center_display: { width: 80, align: "right", top: 230 },
-                            right_display: { height: 14, align: "right", top: 244 }});
-    
-    
+        {top: 240, left: 140, height: 30, width: 190},
+        {
+            left_display: {height: 14, width: 58, align: "left"},
+            center_display: {width: 80, align: "right", top: 230},
+            right_display: {height: 14, align: "right", top: 244}
+        });
+
+
     // utility function
     function evaluate(str) {
         var v = +str;
@@ -150,16 +171,17 @@ require([
         }
         return (v <= 0) ? "--" : ((v < 10) ? v.toFixed(1).toString() : v.toFixed(0).toString());
     }
+
     // spo2
     function render_spo2(res) {
         if (res.isOn === "TRUE") {
-            app.monitor.spo2_display.set_alarm({ min: parseFloat(res.spo2_min), max: parseFloat(res.spo2_max) });
-            app.monitor.spo2_display.set_range({ min: 0, max: 100 });
+            app.monitor.spo2_display.set_alarm({min: parseFloat(res.spo2_min), max: parseFloat(res.spo2_max)});
+            app.monitor.spo2_display.set_range({min: 0, max: 100});
             if (res.spo2_fail === "FALSE") {
                 if (res.spo2_alarm === "off") {
                     app.monitor.spo2_display.render(evaluate(res.spo2));
                 } else {
-                    app.monitor.spo2_display.render(evaluate(res.spo2), { fontColor: "red" });
+                    app.monitor.spo2_display.render(evaluate(res.spo2), {fontColor: "red"});
                 }
             } else {
                 app.monitor.spo2_display.fail("FAIL");
@@ -170,16 +192,17 @@ require([
             stop_tick();
         }
     }
+
     // RRa
     function render_rra(res) {
         if (res.isOn === "TRUE") {
-            app.monitor.rra_display.set_alarm({ min: parseFloat(res.rra_min), max: parseFloat(res.rra_max) });
-            app.monitor.rra_display.set_range({ min: 0, max: 70 });
+            app.monitor.rra_display.set_alarm({min: parseFloat(res.rra_min), max: parseFloat(res.rra_max)});
+            app.monitor.rra_display.set_range({min: 0, max: 70});
             if (res.rra_fail === "FALSE") {
                 if (res.rra_alarm === "off") {
                     app.monitor.rra_display.render(evaluate(res.rra));
                 } else {
-                    app.monitor.rra_display.render(evaluate(res.rra), { fontColor: "red" });
+                    app.monitor.rra_display.render(evaluate(res.rra), {fontColor: "red"});
                 }
             } else {
                 app.monitor.rra_display.fail("FAIL");
@@ -190,6 +213,7 @@ require([
             stop_tick();
         }
     }
+
     // alarms
     function render_alarms(res) {
         if (res.isOn === "TRUE") {
@@ -212,6 +236,7 @@ require([
             app.monitor.rra_display.hide();
         }
     }
+
     // rate
     function render_pump_data(res) {
         function evaluate(str) {
@@ -222,6 +247,7 @@ require([
             }
             return v;
         }
+
         function render_topline(res) {
             function topline2string(msg) {
                 msg = msg.toUpperCase();
@@ -236,19 +262,22 @@ require([
                 }
                 return msg;
             }
+
             function topline2options(msg) {
                 msg = msg.toUpperCase();
                 if (msg === "HOLDING" || msg === "SETRATE" || msg === "ATTENTION") {
-                    return { blinking: true };
+                    return {blinking: true};
                 }
                 return {};
             }
+
             if (res.topline === "SETRATE") {
-                app.pump.topline.renderMultiline(["ON HOLD", "Set rate with chevron keys"], { fontSize: "10" });
+                app.pump.topline.renderMultiline(["ON HOLD", "Set rate with chevron keys"], {fontSize: "10"});
             } else {
                 app.pump.topline.render(topline2string(res.topline), topline2options(res.topline));
             }
         }
+
         if (res.isOn === "TRUE") {
             render_topline(res);
             app.pump.rate.renderLabel("RATE");
@@ -266,13 +295,18 @@ require([
             app.pump.vtbi.hide();
             app.pump.volume.hide();
         }
-    }    
-    
+    }
+
     function startNetworkController() {
+        // To use external NetworkController
+        return new Promise(function (resolve, reject) {
+            resolve(msg);
+        });
+
         var msg = "Starting ICE Network Controller...";
         console.log(msg);
         return new Promise(function (resolve, reject) {
-            client.getWebSocket().send({ type: "startSapereEE" }, function(err) {
+            client.getWebSocket().send({type: "startSapereEE"}, function (err) {
                 if (!err) {
                     msg = "ICE Network Controller started successfully!";
                     console.log(msg);
@@ -304,18 +338,27 @@ require([
                 logOnDiv('PVS Process started', 'monitor');
                 // start ICE Network Controller (NCEE) & connect ICE supervisor to it
                 startNetworkController().then(function (res) {
-                    ncMonitor.connect().then(function (res) {
-                        ncDevice.connect().then(function (res) {
+                    ncMonitor.start().then(function (res) {
+                        ncDevice.start().then(function (res) {
+                            ncDevice.connect();
                             start_tick();
-                        }).catch(function (err) { console.log(err); });
-                    }).catch(function (err) { console.log(err); });                                      
+                        }).catch(function (err) {
+                            console.log(err);
+                        });
+                    }).catch(function (err) {
+                        console.log(err);
+                    });
                 }).catch(function (err) {
                     // FIXME: receiving error when glassfish is already running
-                    ncMonitor.connect().then(function (res) {
-                        ncDevice.connect().then(function (res) {
-                            start_tick();
-                        }).catch(function (err) { console.log(err); });
-                    }).catch(function (err) { console.log(err); });                                   
+                    ncMonitor.start().then(function (res) {
+                        ncDevice.start().then(function (res) {
+                            ncDevice.connect();
+                        }).catch(function (err) {
+                            console.log(err);
+                        });
+                    }).catch(function (err) {
+                        console.log(err);
+                    });
                     console.log(err);
                 });
             } else {
