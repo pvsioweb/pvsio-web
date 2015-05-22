@@ -7,10 +7,10 @@
 /*global define, Promise*/
 define(function (require, exports, module) {
     "use strict";
-
     var _this;
 
     var nc_websocket_monitor;
+    var eventDispatcher = require("util/eventDispatcher");
 
     /**
      * @function NCMonitor
@@ -24,17 +24,18 @@ define(function (require, exports, module) {
         opt = opt || {};
         this.url = opt.url || "ws://localhost:8080/NetworkController/monitor";
         _this = this;
+        eventDispatcher(this);
         return this;
     }
 
-    NCMonitor.prototype.connect = function () {
+    NCMonitor.prototype.start = function () {
         return new Promise(function (resolve, reject) {
             nc_websocket_monitor = new WebSocket(_this.url);
             /*
              * It starts the control process that send the information to NC
              */
             nc_websocket_monitor.onopen = function () {
-                console.log(">> Connected to ICE Network Controller!");
+                _this.fire({type: "notify", message: "[MONITOR] Connected to ICE Network Controller!"});
                 resolve();
             };
 
@@ -43,7 +44,7 @@ define(function (require, exports, module) {
              * Close event
              */
             nc_websocket_monitor.onclose = function () {
-                console.log(">> Disconnected from ICE Network Controller (" + _this.url + ")");
+                _this.fire({type: "notify", message: "[MONITOR] Disconnected from ICE Network Controller (" + _this.url + ")"});
                 nc_websocket_monitor = null;
                 reject({ code: "CLOSED" });
             };
@@ -51,13 +52,12 @@ define(function (require, exports, module) {
              * Connection failed
              */
             nc_websocket_monitor.onerror = function () {
-                console.log("!! Unable to connect to ICE Network Controller (" + _this.url + ")");
+                _this.fire({type: "error", message: "[MONITOR] Unable to connect to ICE Network Controller (" + _this.url + ")"});
                 nc_websocket_monitor = null;
                 reject({ code: "ERROR" });
             };
         });
     };
-
 
     /**
      * Callback function when a message is received from the nc websocket
@@ -77,14 +77,13 @@ define(function (require, exports, module) {
             /**
              * Notifies when a device has been successfully added to Sapere
              */
-            if (data.action === "add") {
+            if (data.action === "add"){
                 if (data.type === "Supervisor") {
                     printSupervisor(data);
                 }
                 else {
                     printDeviceElement(data);
                 }
-                console.log("           add: " + data.deviceID);
             }
 
             /**
@@ -92,7 +91,6 @@ define(function (require, exports, module) {
              */
             if (data.action === "remove") {
                 $("#" + data.deviceID).remove();
-                console.log("           rmv: " + data.deviceID);
             }
 
             /**
@@ -151,7 +149,7 @@ define(function (require, exports, module) {
         }
         // NO JSON
         else {
-            console.log(text);
+            _this.fire({type: "notify", message: text});
         }
     }
 
@@ -161,6 +159,7 @@ define(function (require, exports, module) {
      * @param element
      */
     function removeDevice(event) {
+
         var id = event.currentTarget.parentElement.getAttribute("id");
         var DeviceAction = {
             action: "remove",
@@ -181,14 +180,6 @@ define(function (require, exports, module) {
         };
         nc_websocket_monitor.send(JSON.stringify(DeviceAction));
     }
-
-//    function toggleDevicebyID(id) {
-//        var DeviceAction = {
-//            action: "toggle",
-//            deviceID: id
-//        };
-//        nc_websocket_monitor.send(JSON.stringify(DeviceAction));
-//    }
 
 
     function printDeviceElement(data) {
