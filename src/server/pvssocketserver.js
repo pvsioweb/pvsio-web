@@ -166,7 +166,7 @@ function run() {
     }
     
     function startSapereEE(cb) {
-        var cmd = __dirname + "/lib/glassfish4/bin/asadmin start-domain --verbose=true";
+        var cmd = __dirname + "/lib/glassfish4/bin/asadmin restart-domain --force=true";
         procWrapper().exec({
             command: cmd,
             callBack: cb
@@ -174,7 +174,7 @@ function run() {
     }
     
     function stopSapereEE(cb) {
-        var cmd = __dirname + "/lib/glassfish4/bin/asadmin stop-domain --verbose=true";
+        var cmd = __dirname + "/lib/glassfish4/bin/asadmin stop-domain";
         procWrapper().exec({
             command: cmd,
             callBack: cb
@@ -883,23 +883,21 @@ function run() {
                 };
                 try {
                     startSapereEE(function (err, stdout, stderr) {
-                        var res = {
-                            id: token.id,
-                            type: token.type,
-                            err: err,
-                            stdout: stdout,
-                            stderr: stderr,
-                            socketId: socketid,
-                            time: token.time
-                        };
-                        console.log("err:" + err);
-                        console.log("stdout" + stdout);
-                        console.log("stderr" + stderr);
+                        res.stdout = stdout;
+                        res.stderr = stderr;
+                        console.log("glassfish err:" + err);
+                        console.log("glassfish stdout:" + stdout);
+                        console.log("glassfish stderr:" + stderr);
                         processCallback(res, socket);
                     });
                 } catch (err) {
-                    res.type = token.type + "_error";
-                    res.err = err.message;
+                    if (err.code === 1 && err.killed === false) {
+                        // glassfish is already running, it's not an error
+                        res.stdout = "PVSio-web Network Controller already started.";
+                    } else {                    
+                        res.type = token.type + "_error";
+                        res.err = err.message;
+                    }
                     processCallback(res, socket);
                 }
             },
@@ -913,7 +911,7 @@ function run() {
                 };
                 try {
                     stopSapereEE(function (err, stdout, stderr) {
-                        var res = {
+                        res = {
                             id: token.id,
                             type: token.type,
                             err: err,
