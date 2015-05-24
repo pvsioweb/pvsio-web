@@ -73,7 +73,7 @@ define(function (require, exports, module) {
             this.variables = d3.map();
             this.constants = d3.map();
 
-            if (emuchart.isPIM && typeof(emuchart.isPIM) === 'boolean') {
+            if (emuchart.isPIM && emuchart.isPIM === true) {
                 this.isPIM = isPIM;
             }
         }

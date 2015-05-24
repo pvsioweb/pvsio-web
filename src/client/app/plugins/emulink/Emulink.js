@@ -671,7 +671,8 @@ define(function (require, exports, module) {
                         transitions: emuchartsManager.getTransitions(),
                         initial_transitions: emuchartsManager.getInitialTransitions(),
                         constants: emuchartsManager.getConstants(),
-                        variables: emuchartsManager.getVariables()
+                        variables: emuchartsManager.getVariables(),
+                        isPIM: emuchartsManager.getIsPIM()
                     }
                 }, null, " ");
                 projectManager.project().addFile(name, content, { overWrite: true }).then(function (res) {
@@ -1336,7 +1337,7 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuTestGenerator").on("click", function () {
             var emuchart = {
-                name: ("emucharts_" + projectManager.project().name() + "_VDM"),
+                name: ("emucharts_" + projectManager.project().name()),
                 author: {
                     name: "<author name>",
                     affiliation: "<affiliation>",
@@ -1359,14 +1360,14 @@ define(function (require, exports, module) {
                 isPIM: emuchartsManager.getIsPIM()
             };
 
-            var tests = emuchartsTestGenerator.print(emuchart.name, { pims: [ emuchart ], pm: [] });
+            var tests = emuchartsTestGenerator.print(emuchart.name, { pims: [ emuchart ], pms: [] });
             console.log(tests);
             if (tests.err) {
                 console.log(tests.err);
                 return;
             }
             if (tests.res) {
-                var name = tests.name + ".txt";
+                var name = tests.file_name;
                 var content = tests.res;
                 return projectManager.project().addFile(name, content, { overWrite: true });
             } else {
@@ -1384,7 +1385,9 @@ define(function (require, exports, module) {
                         console.log(models.err);
                         return;
                     }
-                    var tests = emuchartsTestGenerator.print(res.name, models.models);
+                    // Remove file extension
+                    var name = name = res.name.substr(0, res.name.lastIndexOf('.'));
+                    var tests = emuchartsTestGenerator.print(name, models.models);
                     console.log(tests);
                     if (tests.err) {
                         console.log(tests.err);
@@ -1392,7 +1395,7 @@ define(function (require, exports, module) {
                     }
 
                     if (tests.res) {
-                        var name = tests.name + ".txt";
+                        var name = tests.file_name;
                         var content = tests.res;
                         return projectManager.project().addFile(name, content, { overWrite: true });
 

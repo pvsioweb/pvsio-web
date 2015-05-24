@@ -132,7 +132,7 @@ define(function (require, exports, module) {
                 return componentTests;
             }
 
-            // If the PIM wasn't loaded as a pim.
+            // If the PIM wasn't loaded as a pim, i.e. an emuchart hackily convert it to a pim.
             // TODO: this needs to be changed when PIM editing is added to Emulink. But ultimately should be removed.
             if (pim.isPIM !== undefined && !pim.isPIM && pim.transitions && pim.transitions.map) {
                 // Use PIM transitions to
@@ -142,7 +142,7 @@ define(function (require, exports, module) {
                         predicates: [{
                             name: "hasBehaviour",
                             // hack to put I behaviour as the interaction
-                            args: [t.I_behaviour, "I_" + t.I_behaviour]
+                            args: ["Unknown widget", "I_" + t.I_behaviour]
                         }]
                     };
                 });
@@ -323,13 +323,8 @@ define(function (require, exports, module) {
                                         if (tran.I_behaviour === arg) {
                                             iBehav.push({
                                                 start_state: tran.start_state,
-                                                // TODO: check that this is not meant to be p.args
-                                                /*
-                                                 * In PIMed the predicates are printed out by
-                                                 * predicates(0).args.toString. Could be simulated
-                                                 * as "List(" + p.args[0] + ")"; or p.args
-                                                 */
-                                                predicates: [p.args[0]],
+                                                // Set the widget name and the I_behaviour
+                                                predicates: [p.args[0], arg],
                                                 end_state: tran.end_state
                                             });
                                         }
@@ -378,14 +373,13 @@ define(function (require, exports, module) {
              */
             function printIBehaviourTests(tests) {
                 if (!tests || !tests.forEach) {
-                    return "Error: no tests from I behavs.";
+                    return "Error: no tests from I behaviours.";
                 }
 
                 var testsStr = "";
                 tests.forEach(function(test) {
                     testsStr += "State(" + test.start_state + ") " + "Λ" + " ";
-                    // TODO this not need the list?
-                    testsStr += "Interaction(List(" + test.predicates.join(", ") + ")) ";
+                    testsStr += "Interaction(" + test.predicates.join(", ") + ") ";
                     testsStr += "=> State(" + test.end_state + ")\n";
                 });
                 return testsStr;
@@ -399,7 +393,7 @@ define(function (require, exports, module) {
              */
             function printSBehaviourTests(tests) {
                 if (!tests || !tests.forEach) {
-                    return "Error: no tests from S behavs.";
+                    return "Error: no tests from S behaviours.";
                 }
 
                 var testsStr = "";
@@ -419,14 +413,13 @@ define(function (require, exports, module) {
              */
             function printSRespBehaviourTests(tests) {
                 if (!tests || !tests.forEach) {
-                    return "Error: no tests from S Resp. behavs.";
+                    return "Error: no tests from S Resp. behaviours.";
                 }
 
                 var testsStr = "";
                 tests.forEach(function(test) {
                     testsStr += "State(" + test.state_name + ") => ";
-                    // TODO this not need the list?
-                    testsStr += "respBehaviour(List(" + test.widget_name + ", " + test.res_behaviour + "))\n";
+                    testsStr += "respBehaviour(" + test.widget_name + ", " + test.res_behaviour + ")\n";
                 });
                 return testsStr;
             }
@@ -439,7 +432,7 @@ define(function (require, exports, module) {
              */
             function printNoBehaviourTests(tests) {
                 if (!tests || !tests.forEach) {
-                    return "Error: no tests from no behavs.";
+                    return "Error: no tests from no behaviours.";
                 }
 
                 var testsStr = "";
@@ -504,8 +497,8 @@ define(function (require, exports, module) {
 
         // Print PIM tests
         var ans = "Tests for Presentation Interaction Models:\n";
-        if (!models.pims || models.pims.length === 0) {
-            ans += "Unable to find any PIMs in file.\n";
+        if (!models.pims || models.pims.length === 0 || !models.pims[0].isPIM) {
+            ans += "Unable to find any PIMs.\n";
         } else {
             // Foreach pim generate tests
             models.pims.forEach(function (pim) {
@@ -514,11 +507,9 @@ define(function (require, exports, module) {
             });
         }
 
-        // Print PM tests
-        ans += "\nTests for Presentation Models:\n";
-        if (!models.pms || models.pms.length === 0) {
-            ans += "Unable to find any PMs in file.\n";
-        } else {
+        if (models.pms && models.pms.length > 0) {
+            // Print PM tests
+            ans += "\nTests for Presentation Models:\n";
             models.pms.forEach(function (pm) {
                 // Only test the PMs
                 ans += _this.printDescriptor("PM", pm) + "\n";
@@ -528,9 +519,9 @@ define(function (require, exports, module) {
 
         ans += _this.printDisclaimer() + "\n";
 
-        // Remove file extension
-        name = name.substr(0, name.lastIndexOf('.'));
-        return { name: name + "_PM_tests", res: ans };
+
+
+        return { file_name: name + ".tests", res: ans };
     };
 
     module.exports = EmuchartsTestGenerator;

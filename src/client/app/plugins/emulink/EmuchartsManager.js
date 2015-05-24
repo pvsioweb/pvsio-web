@@ -149,7 +149,7 @@ define(function (require, exports, module) {
                             variables: chart.variables,
                             constants: chart.constants
                         }
-                        if (emuchartsFile.isPIM && emuchartsFile.isPIM === true) {
+                        if (chart_reader.isPIM && chart_reader.isPIM === true) {
                             emuchart.isPIM = true;
                         }
                         var emucharts = new Emucharts(emuchart);
@@ -616,7 +616,7 @@ define(function (require, exports, module) {
 
             // Need to get the states info out of the Component models
             var states = pim.pm.components.map( function(pm) {
-                // dont add the PIM's PM
+                // Don't add the PIM's PM
                 if (pm.name === pim.name) { return; }
                 init_x += incr_x;
                 init_y += incr_y;
@@ -628,8 +628,8 @@ define(function (require, exports, module) {
                     width: 50,
                     height: 50,
                     widgets: pm.widgets,
-                    // Only PIMs have component models.
-                    //components: pm.components,
+                    // Only PIMs currently have component models.
+                    components: pm.components,
                     pmr: pm.pmr
                 };
             });
@@ -671,10 +671,11 @@ define(function (require, exports, module) {
                     variables: null,
                     pm: pim.pm,
                     start_state: pim.start_state,
-                    final_states: pim.final_states
+                    final_states: pim.final_states,
+                    isPIM: true
                 }
             };
-            _this.importEmucharts({ name: pim.name, content: chart, isPIM: true });
+            _this.importEmucharts({ name: pim.name, content: chart });
 
             return chart;
         }
