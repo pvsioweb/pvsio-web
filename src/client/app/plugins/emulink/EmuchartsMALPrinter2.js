@@ -188,6 +188,12 @@ define(function (require, exports, module) {
                 ans += "  [] ";
                 ans += "previous_state = " + transition.to + " & ";
                 ans += "current_state = " + transition.to;
+                //initialize variables
+                if (emuchart.variables && emuchart.variables.length > 0) {
+                    emuchart.variables.forEach(function (v) {
+                        ans += " & " + v.name + " = " + v.value;
+                    });
+                }
                 transition.actions.forEach(function (action) {
                     ans += " & " + action;
                 });
@@ -307,22 +313,24 @@ define(function (require, exports, module) {
         //stopped is repeated: rcButton has 2 stopped
         console.debug(actions);
         
+        
         actions.keys().forEach(function (taction) { //taction - action
             var trAction = taction;
             var trPerms = "";
             actions.get(taction).forEach(function (a) { //a - (from, [(dest, [cond, eff])])
                 //res += "++" + a + "\n";
+                var conds = new Array();
                 a.forEach(function (tfrom) { //tfrom - from
                     var trFrom = tfrom;
                     a.get(tfrom).forEach(function (c) { //c - (dest, [cond, eff])
                         c.forEach(function (tdest) {//tdest - dest
                             var trDest = tdest;
                             var trCond = c.get(tdest)[0];
-                            var trEff = c.get(tdest)[1];
-                            
+                            var trEff = c.get(tdest)[1]; 
                             res += "  (current_state=" + trFrom + ")";
                             if (trCond !== "") {
                                 res += " & (" + trCond + ")";
+                                conds.push(trCond);
                             }
                             res += " -> [" + trAction + "] (current_state'=" + trDest + ")";
                             if (trEff !== "") {
@@ -333,12 +341,17 @@ define(function (require, exports, module) {
                     });
                     
                 });
+                //add condition to permitions
                 var trFrom = a;
-                trPerms += "( current_state = " + trFrom.keys()[0] + ") | ";
+                trPerms += "( current_state = " + trFrom.keys()[0] ;
+                conds.forEach(function (mp) {
+                   trPerms += " & " + mp;
+                });
+                trPerms +=  " ) | ";
             });
             //TODO: per()
             if (trPerms !== "") {
-                res += "  per(" + trAction + ") -> " + trPerms.substring(0, trPerms.length - 2) + "\n\n";
+                res += "  per(" + trAction +") -> " + trPerms.substring(0, trPerms.length - 2) + "\n\n";
             }
         });
         return res;
