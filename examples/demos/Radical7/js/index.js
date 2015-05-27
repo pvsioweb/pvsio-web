@@ -63,7 +63,7 @@ require([
         }
 
         function parseNCControl(event) {
-            var from = event.from;
+//            var from = event.from;
         }
 
         function errorMessage(event) {
@@ -75,7 +75,9 @@ require([
         }
 
 
-        var ncDevice = new NCDevice({id: deviceID, type: deviceType});
+        var url = window.location.origin.split(":").slice(0,2).join(":") + ":8080/NetworkController/devices";
+        url = url.replace("http://", "ws://");
+        var ncDevice = new NCDevice({id: deviceID, type: deviceType}, { url: url });
 
         ncDevice.addListener("update", parseNCUpdate);
         ncDevice.addListener("control", parseNCControl);
