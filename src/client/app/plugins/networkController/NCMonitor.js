@@ -102,10 +102,12 @@ define(function (require, exports, module) {
 
                 if (data.status === "ON") {
                     container_div.removeClass("tada");
-                    status_span.html("<b>Status:</b> " + data.status + " (<a href=\"#!\" class=\"toggle_switch\" >Turn OFF</a>)");
+                    status_span.html("<b>Status:</b> Connected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
+                    _this.fire({type: "connected", message: data});
                 } else if (data.status === "OFF") {
                     container_div.addClass("tada");
-                    status_span.html("<b>Status:</b> " + data.status + " (<a href=\"#!\" class=\"toggle_switch\" >Turn ON</a>)");
+                    status_span.html("<b>Status:</b> Disconnected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
+                    _this.fire({type: "disconnected", message: data});
                 }
             }
 
@@ -196,13 +198,13 @@ define(function (require, exports, module) {
         id = $("<span>", {class: "device_id"}).html(data.deviceID);
         type = $("<span>", {class: "device_type"}).html("<b>Type:</b> " + data.type);
         if (data.status === "ON") {
-            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> " + data.status + " (<a href=\"#!\" class=\"toggle_switch\" >Turn OFF</a>)");
+            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> Connected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
         } else if (data.status === "OFF") {
-            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> " + data.status + " (<a href=\"#!\" class=\"toggle_switch\" >Turn ON</a>)");
+            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> Disconnected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>)");
         }
         status.on("click", toggleDevice);
         description = $("<span>", {class: "device_description"}).html("<b>Comments:</b> " + data.description);
-        remove = $("<span>", {class: "device_remove"}).html("<a href=\"#!\" class=\"remove_switch\")>Remove device</a>");
+        remove = $("<span>", {class: "device_remove"}).html("<a href=\"#!\" class=\"remove_switch\")>Remove Device</a>");
         remove.on("click", removeDevice);
         agents = $("<span>", {class: "agents_block device_agents"});
 
@@ -223,12 +225,12 @@ define(function (require, exports, module) {
         id = $("<span>", {class: "device_id", style: "margin-top: 20px"}).html(data.deviceID);
         type = $("<span>", {class: "device_type"}).html("<b>Type:</b> " + data.type);
         if (data.status === "ON") {
-            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> " + data.status + " (<a href=\"#!\" class=\"toggle_switch\" >Turn OFF</a>)");
+            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> Connected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
         } else if (data.status === "OFF") {
-            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> " + data.status + " (<a href=\"#!\" class=\"toggle_switch\" >Turn ON</a>)");
+            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> Disconnected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
         }
         status.on("click", toggleDevice);
-        remove = $("<span>", {class: "device_remove"}).html("<a href=\"#!\" class=\"remove_switch\")>Remove device</a>");
+        remove = $("<span>", {class: "device_remove"}).html("<a href=\"#!\" class=\"remove_switch\")>Remove Device</a>");
         remove.on("click", removeDevice);
         agents = $("<span>", {class: "agents_block supervisor_agents"});
 
