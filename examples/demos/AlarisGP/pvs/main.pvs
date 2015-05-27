@@ -1,7 +1,7 @@
 main :THEORY
  BEGIN
-  maxinfuse: nat = 1200
-  maxrate  : nat = maxinfuse
+  maxinfuse: nat = 3000
+  maxrate  : nat = 1200
   infusemin: posreal = 0.1
   timeout  : nat = 200 % must be less than maxtime
   shorttime: nat = 20
@@ -25,7 +25,7 @@ main :THEORY
      kvorate := infusemin,
      ac_connect := true,
      battery := bat_min,
-     set_fitted := false
+     set_fitted := true
   #)
   alaris_init(ID: string): alaris = (#
     id := ID,

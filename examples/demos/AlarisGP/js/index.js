@@ -49,25 +49,12 @@ require([
 
         var deviceID = "Alaris";
         var deviceType = "Infusion Pump";
+        var disableNC = false;
 
 
-        function parseNCUpdate(event) {
-
-            var from = event.from;
-
-            if (from === "Radical") {
-
-                var res = stateParser.parse(event.message);
-                client.getWebSocket()
-                    .sendGuiAction("update_spo2(" + res.spo2 + ")" +
-                    "(" + client.getWebSocket().lastState() + ");",
-                    onMessageReceived);
-            }
-        }
+        function parseNCUpdate(event) { }
 
         function parseNCControl(event) {
-            var from = event.from;
-
             if (event.message === "click_btn_pause") {
                 alaris.btn_pause.click();
             }
@@ -76,13 +63,13 @@ require([
         function errorMessage(event) {
             console.log("!!! " + event.message);
         }
-
         function notifyMessage(event) {
             console.log(">>> " + event.message);
         }
 
-
-        var ncDevice = new NCDevice({id: deviceID, type: deviceType});
+        var url = window.location.origin.split(":").slice(0,2).join(":") + ":8080/NetworkController/devices";
+        url = url.replace("http://", "ws://");
+        var ncDevice = new NCDevice({id: deviceID, type: deviceType}, { url: url });
 
         ncDevice.addListener("update", parseNCUpdate);
         ncDevice.addListener("control", parseNCControl);
@@ -130,21 +117,21 @@ require([
                 parent: "prototype",
                 left_display: {height: 8, width: 28, align: "left"},
                 center_display: {width: 64, align: "right"},
-                right_display: {height: 12, top: 142}
+                right_display: {height: 12, top: +16}
             });
         alaris.middisp_dnewvtbi = new TripleDisplay("middisp_dnewvtbi", {top: 132, left: 94, height: 26, width: 118},
             {
                 parent: "prototype",
                 left_display: {height: 8, width: 28, align: "left"},
                 center_display: {width: 64, align: "right"},
-                right_display: {height: 12, top: 144}
+                right_display: {height: 12, top: +12}
             });
         alaris.middisp_dshowvol = new TripleDisplay("middisp_dshowvol", {top: 126, left: 94, height: 30, width: 118},
             {
                 parent: "prototype",
                 left_display: {height: 8, width: 118, align: "center"},
-                center_display: {height: 22, width: 74, top: 140, left: 94, align: "right"},
-                right_display: {height: 12, width: 20, top: 148, left: 168}
+                center_display: {height: 22, width: 74, top: +14, align: "right"},
+                right_display: {height: 12, width: 20, top: +22, left: +74}
             });
         alaris.middisp_dvtbi = new TripleDisplay("middisp_dvtbi", {top: 168, left: 94, height: 12, width: 118},
             {
@@ -161,8 +148,8 @@ require([
         alaris.middisp_dtime = new TripleDisplay("middisp_dtime", {top: 204, left: 94, height: 12, width: 118},
             {
                 parent: "prototype",
-                left_display: {height: 8, width: 34, align: "left"},
-                center_display: {width: 62, align: "right"}
+                left_display: {height: 8, left: +16, width: 16, align: "left"},
+                center_display: {width: 82, align: "right"}
             });
         //middisp_dbags
         alaris.middisp_dbags = new SingleDisplay("middisp_dbags", {top: 126, left: 94, height: 90, width: 118},
@@ -321,10 +308,18 @@ require([
         }
 
         function render_middisp_dtime(res) {
+            function evaluateTime(str) {
+                var x = evaluate(str);
+                var hour = parseInt(x);
+                x = (x - hour) * 60;
+                var min = parseInt(x);
+                x = (x - min) * 60;
+                var sec = parseInt(x);
+                return hour + "h " + min + "m " + sec + "s";
+            }            
             if (res.middisp_dtime === "TRUE") {
-                alaris.middisp_dtime.renderLabel("TIME");
-                alaris.middisp_dtime.renderValue(evaluate(res.device.time));
-                alaris.middisp_dtime.renderUnits("h");
+                alaris.middisp_dtime.getLeftDisplay().renderGlyphicon("glyphicon-time");
+                alaris.middisp_dtime.renderValue(evaluateTime(res.device.time));
             } else {
                 alaris.middisp_dtime.hide();
             }
@@ -447,14 +442,18 @@ require([
                     var date = new Date();
                     log({data: dbg, date: date, id: event.id, type: "frompvs"});
 
-                    var state = stateParser.parse(event.data.toString());
-                    var msg = "(# topline:=" + state.topline + ", " +
-                        "rate:=" + state.device.infusionrate + ", " +
-                        "vtbi:=" + state.device.vtbi + ", " +
-                        "volume:=" + state.device.volumeinfused + ", " +
-                        "id:=" + state.id + ", " +
-                        "isOn:=" + state.device["powered_on?"] + " #)";
-                    ncDevice.sendDataUpdate(msg);
+                    if (disableNC === false) {
+                        // FIXME: send units along with values!
+                        var state = stateParser.parse(event.data.toString());
+                        var msg = "(# topline:=" + state.topline + ", " +
+                            "rate:=" + state.device.infusionrate + ", " +
+                            "vtbi:=" + state.device.vtbi + ", " +
+                            "volume:=" + state.device.volumeinfused + ", " +
+                            "time:=" + state.device.time + ", " +
+                            "id:=" + state.id + ", " +
+                            "isOn:=" + state.device["powered_on?"] + " #)";
+                        ncDevice.sendDataUpdate(msg);
+                    }
 
                     var res = event.data.toString();
                     if (res.indexOf("(#") === 0) {
@@ -646,6 +645,9 @@ require([
             client.getWebSocket().startPVSProcess({name: "main.pvs", demoName: "AlarisGP/pvs"}, function (err, event) {
                 ncDevice.start().then(function (res) {
                     ncDevice.connect();
+                    start_tick();
+                }).catch(function(err) {
+                    disableNC = true;
                     start_tick();
                 });
             });
