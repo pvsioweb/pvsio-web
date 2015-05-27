@@ -20,9 +20,9 @@
 define(function (require, exports, module) {
     "use strict";
 
-//    var d3 = require("d3/d3");
-//    var black, white;
+    var d3 = require("d3/d3");
     var SingleDisplay = require("widgets/SingleDisplay");
+    var Button = require("widgets/Button");
 
     /**
      * @function <a name="TripleDisplay">TripleDisplay</a>
@@ -43,15 +43,33 @@ define(function (require, exports, module) {
         this.left = coords.left || 0;
         this.width = coords.width || 200;
         this.height = coords.height || 80;
+        this.backgroundColor = opt.backgroundColor || ""; //transparent
+        this.fontColor = opt.fontColor || "#fff"; //white
+        if (opt.inverted) {
+            var tmp = this.backgroundColor;
+            this.backgroundColor = this.fontColor;
+            this.fontColor = tmp;
+        }
+        this.blinking = opt.blinking || false;
+        var elemClass = id + " prevent_selection ";
+        if (opt.blinking) { elemClass += " blink "; }
+        if (opt.touchscreen && opt.touchscreen.classStyle) { elemClass += opt.touchscreen.classStyle; }
+        this.div = d3.select(this.parent)
+                        .append("div").style("position", "absolute")
+                        .style("top", this.top + "px").style("left", this.left + "px")
+                        .style("width", this.width + "px").style("height", this.height + "px")
+                        .style("margin", 0).style("padding", 0).style("border-radius", "2px")
+                        .style("background-color", this.backgroundColor)
+                        .style("display", "none").attr("id", id).attr("class", elemClass);
         var coords_left = {
-            top: (opt.left_display && opt.left_display.top) ? opt.left_display.top : this.top,
-            left: (opt.left_display && opt.left_display.left) ? opt.left_display.left : this.left,
+            top: (opt.left_display && opt.left_display.top) ? opt.left_display.top : 0,
+            left: (opt.left_display && opt.left_display.left) ? opt.left_display.left : 0,
             width: (opt.left_display && opt.left_display.width) ? opt.left_display.width : this.width * this.ratio,
             height: (opt.left_display && opt.left_display.height) ? opt.left_display.height : this.height
         };
         var coords_center = {
             top: (opt.center_display && opt.center_display.top)
-                    ? opt.center_display.top : this.top,
+                    ? opt.center_display.top : 0,
             left: (opt.center_display && opt.center_display.left)
                     ? opt.center_display.left : (coords_left.left + coords_left.width),
             width: (opt.center_display && opt.center_display.width)
@@ -62,27 +80,28 @@ define(function (require, exports, module) {
         };
         var coords_right = {
             top: (opt.right_display && opt.right_display.top)
-                    ? opt.right_display.top : this.top,
-            left: (opt.right_display && opt.right_display.center)
-                    ? opt.right_display.center : (coords_center.left + coords_center.width),
+                    ? opt.right_display.top : 0,
+            left: (opt.right_display && opt.right_display.left)
+                    ? (coords_center.left + coords_center.width) + opt.right_display.left 
+                    : (coords_center.left + coords_center.width),
             width: (opt.right_display && opt.right_display.width)
                     ? opt.right_display.width : (this.width - coords_center.width - coords_left.width),
             height: (opt.right_display && opt.right_display.height) ? opt.right_display.height : coords.height
         };
         var opt_left = {
-            parent: opt.parent,
+            parent: id,
             font: opt.font,
             align: (opt.left_display && opt.left_display.align) ? opt.left_display.align : opt.align,
             inverted: opt.inverted
         };
         var opt_center = {
-            parent: opt.parent,
+            parent: id,
             font: opt.font,
             align: (opt.center_display && opt.center_display.align) ? opt.center_display.align : opt.align,
             inverted: opt.inverted
         };
         var opt_right = {
-            parent: opt.parent,
+            parent: id,
             font: opt.font,
             align: (opt.right_display && opt.right_display.align) ? opt.right_display.align : opt.align,
             inverted: opt.inverted
@@ -90,7 +109,23 @@ define(function (require, exports, module) {
         this.leftDisplay = new SingleDisplay(id + "_left", coords_left, opt_left);
         this.centerDisplay = new SingleDisplay(id + "_center", coords_center, opt_center);
         this.rightDisplay = new SingleDisplay(id + "_right", coords_right, opt_right);
-        this.reveal();
+        if (opt.touchscreen) {
+            var touchID = id + "_touchscreen";
+            this.button = new Button(touchID, {
+                left: this.left, top: this.top, height: this.height, width: this.width
+            }, {
+                callback: opt.touchscreen.callback || function (err, res) {},
+                evts: opt.touchscreen.events || ['click'],
+                area: this.div
+            });
+            this.div.style("cursor", "pointer");
+            var _this = this;
+            this.div.on("mouseover", function() {
+                _this.div.style("background-color", "steelblue").style("color", "white");
+            }).on("mouseout", function() {
+                _this.div.style("background-color", _this.backgroundColor).style("color", _this.fontColor);
+            });            
+        }        
         return this;
     }
 
@@ -107,37 +142,53 @@ define(function (require, exports, module) {
     };
 
     TripleDisplay.prototype.renderLabel = function (txt) {
-        return this.leftDisplay.render(txt);
+        this.leftDisplay.render(txt);
+        return this.reveal();
     };
 
     TripleDisplay.prototype.renderValue = function (val) {
-        return this.centerDisplay.render(val);
+        this.centerDisplay.render(val);
+        return this.reveal();
     };
 
     TripleDisplay.prototype.renderUnits = function (units) {
-        return this.rightDisplay.render(units);
+        this.rightDisplay.render(units);
+        return this.reveal();
     };
 
     TripleDisplay.prototype.hide = function () {
-        this.leftDisplay.hide();
-        this.centerDisplay.hide();
-        this.rightDisplay.hide();
+        this.div.style("display", "none");
         return this;
     };
 
     TripleDisplay.prototype.reveal = function () {
-        this.leftDisplay.reveal();
-        this.centerDisplay.reveal();
-        this.rightDisplay.reveal();
+        this.div.style("display", "block");
         return this;
     };
 
-//    TripleDisplay.prototype.move = function (data) {
-//        this.leftDisplay.move(data);
-//        this.centerDisplay.move(data);
-//        this.rightDisplay.move(data);
-//        return this;
-//    };
+    TripleDisplay.prototype.invertColors = function () {
+        var tmp = this.backgroundColor;
+        this.backgroundColor = this.fontColor;
+        this.fontColor = tmp;
+        this.div.style("background-color", this.backgroundColor);
+        this.leftDisplay.invertColors();
+        this.centerDisplay.invertColors();
+        this.rightDisplay.invertColors();
+        return this;
+    };
+
+    TripleDisplay.prototype.move = function (data) {
+        data = data || {};
+        if (data.top) {
+            this.top = data.top;
+            this.div.style("top", this.top + "px");
+        }
+        if (data.left) {
+            this.left = data.left;
+            this.div.style("left", this.left + "px");
+        }
+        return this;
+    };
 
 
     module.exports = TripleDisplay;

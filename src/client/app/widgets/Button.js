@@ -7,7 +7,7 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 define(function (require, exports, module) {
     "use strict";
-    var Widget = require("pvsioweb/Widget"),
+    var Widget = require("widgets/Widget"),
         d3 = require("d3/d3"),
         property = require("util/property"),
         Timer	= require("util/Timer"),
@@ -49,7 +49,7 @@ define(function (require, exports, module) {
         this.width = coords.width || 32;
         this.height = coords.height || 32;
 
-        this.area = parent.append("area")
+        this.area = opt.area || parent.append("area")
                         .attr("coords", this.left + "," + this.top + ","
                               + (this.left + this.width) + "," + (this.top + this.height))
                         .attr("id", id)
