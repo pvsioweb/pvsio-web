@@ -14,7 +14,7 @@ values
 
 types
   -- machine states
-  MachineState = <X1> | <X2>;
+  MachineState = <a> | <b>;
 
   -- emuchart state
   state State of 
@@ -23,8 +23,8 @@ types
   
   -- initial state
   init s == s = mk_State(    
-    <X1>, --current_state
-    <X1>  --previous_state
+    <a>, --current_state
+    <a>  --previous_state
   ) end
 
 functions
@@ -35,20 +35,20 @@ functions
   leave_state(ms, s) == mu(s, previous_state |-> ms );
 
   -- transition functions
-  per_T1: State -> bool
-  per_T1(s) == ((s.current_state = <X1>));
-  T1: State -> State
-  T1(s) ==
-    if (s.current_state = <X1>)
-    then let new_s = leave_state(<X1>, s)
-          in enter_into(<X2>, new_s)
+  per_click: State -> bool
+  per_click(s) == ((s.current_state = <a>) and (con = true));
+  click: State -> State
+  click(s) ==
+    if (s.current_state = <a>) and (con = true)
+    then let new_s = leave_state(<a>, s)
+          in enter_into(<b>, new_s)
     else s
-  pre per_T1(s);
+  pre per_click(s);
 
 operations
-  transition_T1: () ==> ()
-  transition_T1() == State := T1(State)
-  pre pre_T1(State);
+  transition_click: () ==> ()
+  transition_click() == State := click(State)
+  pre pre_click(State);
 
 end emucharts_defaultProject_VDM
 

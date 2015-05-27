@@ -12,7 +12,7 @@ defines
 types
  int = INT_MIN..INT_MAX
  nat = 0..INT_MAX
- MachineState = { X1, X2 }
+ MachineState = { a, b }
 
 interactor main #emucharts_defaultProject_MAL
  attributes
@@ -20,13 +20,13 @@ interactor main #emucharts_defaultProject_MAL
   previous_state: MachineState
 
  actions
-  T1
+  click
 
  axioms
-  [] previous_state = X1 & current_state = X1
+  [] previous_state = a & current_state = a
 
-  (current_state=X1) -> [T1] (current_state'=X2)
-  per(T1) -> ( current_state = X1 ) 
+  (current_state=a) & (con=true) -> [click] (current_state'=b)
+  per(click) -> ( current_state = a & con=true ) 
 
 
 
