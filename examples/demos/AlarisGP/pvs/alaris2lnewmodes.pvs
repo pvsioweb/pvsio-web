@@ -466,7 +466,7 @@ fit_set(st: (per_fit_set)): alaris =
                ((entrymode(st) = vttmode) OR (entrymode(st) = ttmode)) & 
                  (topline(st) = vtbitime)) OR
              (topline(st) = setvtbi) OR (topline(st) = setnotfitted) OR
-             (topline(st) = setrate) OR
+             (topline(st) = setrate) OR (topline(st) = setvtbi) OR
            ((((entrymode(st) = vtmode) & middisp(st)(dnewvtbi)) OR 
               (entrymode(st) = bagmode) OR 
               (entrymode(st) = tbagmode)) & (topline(st) = dispvtbi)) OR
@@ -1032,26 +1032,16 @@ key1_case_options_dsetvtbilocked(st: (per_key1)): alaris =
                              ELSIF topline(st) = vtbitime THEN tbagmode
                              ELSE nullmode ENDIF ]
 
-  key2_case_setvtbi(st: (per_key2)): alaris =
-      st WITH [ topline := dispvtbi,
-                newvtbi := device(st)`vtbi,
-                middisp := LAMBDA(x:imid_type): x = dvtbi,
-                fndisp1 := fok,
-		fndisp2 := fbags,
-		fndisp3 := fquit,
-              	entrymode := vtmode,
-	        device  := resetElapsed(device(st)) ]
+
 
   key2(st: (per_key2)): alaris =
         COND
-          (topline(st) = holding OR topline(st) = setrate OR topline(st) = infusing)   
+          (topline(st) = holding OR topline(st) = setrate OR topline(st) = infusing OR topline(st) = setvtbi)   
                  -> key2_case_holding_infusing(st),
           (topline(st) = volume)                             
                  -> key2_case_volume(st),
           (topline(st) = dispvtbi OR topline(st) = vtbitime) 
-                 -> key2_case_dispvtbiORvtbitime(st),
-          (topline(st) = setvtbi)                            
-                 -> key2_case_setvtbi(st)
+                 -> key2_case_dispvtbiORvtbitime(st)
         ENDCOND
 
 
