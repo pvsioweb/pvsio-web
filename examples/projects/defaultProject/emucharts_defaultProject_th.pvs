@@ -1,0 +1,43 @@
+% ---------------------------------------------------------------
+%  Theory: emucharts_defaultProject_th
+%  Author: Paolo Masci
+%          Queen Mary University of London, United Kingdom
+%          http://www.eecs.qmul.ac.uk/~masci/
+% ---------------------------------------------------------------
+
+emucharts_defaultProject_th: THEORY
+ BEGIN
+
+  %-- machine states
+  MachineState: TYPE = { X1, X2 }
+
+  %-- emuchart state
+  State: TYPE = [#
+    current_state: MachineState,
+    previous_state: MachineState
+  #]
+
+  %-- initial state
+  init(x: real): State = (#
+    current_state := X1,
+    previous_state := X1
+  #)
+  %-- utility functions
+  enter_into(ms: MachineState)(st: State): State = st WITH [ current_state := ms ]
+  leave_state(ms: MachineState)(st: State): State = st WITH [ previous_state := ms ]
+
+  %-- transition functions
+  per_T1(st: State): bool = ((current_state(st) = X1))
+  T1(st: (per_T1)): State =
+    COND
+    (current_state(st) = X1)
+     -> LET new_st = leave_state(X1)(st)
+         IN enter_into(X2)(new_st)
+    ENDCOND
+
+ END emucharts_defaultProject_th
+
+% ---------------------------------------------------------------
+%  PVS theory generated using PVSio-web PVSPrinter ver 0.1
+%  Tool freely available at http://www.pvsioweb.org
+% ---------------------------------------------------------------

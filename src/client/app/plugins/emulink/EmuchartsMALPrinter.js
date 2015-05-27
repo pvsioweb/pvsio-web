@@ -312,7 +312,7 @@ define(function (require, exports, module) {
         ans += this.print_transitions(emuchart);
         ans += "\n";
         ans += this.print_disclaimer();
-        return ans;
+        return { res: ans };
     };
     
     module.exports = EmuchartsMALPrinter;

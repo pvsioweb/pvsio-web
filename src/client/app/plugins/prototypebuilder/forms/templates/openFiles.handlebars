@@ -1,6 +1,6 @@
 <div class="form-center">
     <div class="panel panel-info center dialog shadow">
-        <div class="panel-heading">Import PVS files into Project</div>
+        <div class="panel-heading">{{title}}</div>
         <form class="center form-horizontal" onsubmit="return false" role="form">
             <div class="panel-body center">
                 <div class="form-group">
@@ -11,7 +11,7 @@
                                value=""
                                name="projectFiles"
                                required="true"
-                               accept=".pvs"
+                               accept="{{accept}}"
                                multiple="true"
                                style="box-sizing: content-box;">
                     </div>

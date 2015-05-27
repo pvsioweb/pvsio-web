@@ -6,91 +6,132 @@
 /*jshint unused: false*/
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 /*global define, d3, layoutjs, Promise*/
-
 define(function (require, exports, module) {
     "use strict";
-	var PVSioWebClient = require("PVSioWebClient"),
-		Logger         = require("util/Logger"),
+    var PVSioWebClient = require("PVSioWebClient"),
+        Logger         = require("util/Logger"),
         ui             = require("plugins/prototypebuilder/interface"),
-		PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
-        ModelEditor = require("plugins/modelEditor/ModelEditor"),
+        PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
+        ProjectManager = require("project/ProjectManager"),
+        ModelEditor    = require("plugins/modelEditor/ModelEditor"),
         Emulink        = require("plugins/emulink/Emulink"),
-		SafetyTest		= require("plugins/safetyTest/SafetyTest"),
-		GraphBuilder   = require("plugins/graphbuilder/GraphBuilder"),
-        PluginManager  = require("plugins/PluginManager");
-		
-	var client = PVSioWebClient.getInstance(), pb, pm = PluginManager.getInstance();
-	//register event listeners
-	client.addListener('WebSocketConnectionOpened', function (e) {
-		Logger.log("connection to pvsio server established");
-		d3.select("#btnCompile").attr("disabled", null);
-		d3.select("#lblWebSocketStatus").select("span").attr("class", "glyphicon glyphicon-ok");
-	}).addListener("WebSocketConnectionClosed", function (e) {
-		Logger.log("connection to pvsio server closed");
-		d3.select("#btnCompile").attr("disabled", true);
-		d3.select("#lblWebSocketStatus").select("span").attr("class", "glyphicon glyphicon-warning-sign");
-	}).addListener("processExited", function (e) {
-		d3.select("#lblPVSioStatus").select("span").attr("class", "glyphicon glyphicon-warning-sign");
-	});
-	
-	module.exports = {
-		start: function () {
-			return client.connectToServer()
-				.then(function (ws) {
-					ui.init()
-						.on("pluginToggled", function (event) {
-							var plugin;
-							switch (event.target.getAttribute("name")) {
-							case "Emulink":
-								plugin = Emulink.getInstance();
-								break;
-							case "GraphBuilder":
-								plugin = GraphBuilder.getInstance();
-								break;
-							case "SafetyTest":
-								plugin = SafetyTest.getInstance();
-								break;
-                            case "ModelEditor":
-                                plugin = ModelEditor.getInstance();    
-                                break;
-                            case "PrototypeBuilder":
-                                plugin = PrototypeBuilder.getInstance();
-                                break;
-							}
-                        
+        SafetyTest     = require("plugins/safetyTest/SafetyTest"),
+        GraphBuilder   = require("plugins/graphbuilder/GraphBuilder"),
+        ProjectAutoSaver = require("plugins/autoSaver/ProjectAutoSaver"),
+        PluginManager  = require("plugins/PluginManager"),
+        Constants      = require("util/Constants"),
+        displayQuestion = require("pvsioweb/forms/displayQuestion");
 
-							if (event.target.checked) {
-								pm.enablePlugin(plugin);
-							} else {
-								pm.disablePlugin(plugin);
-							}
-						});
-					pb = PrototypeBuilder.getInstance();
-					return pm.enablePlugin(pb)
-                    .then(function () {
-                        return pm.enablePlugin(ModelEditor.getInstance());    
-                    })
-                    .then(function () {
-						var projectManager = pb.getProjectManager();
-						ui.bindListeners(pb.getProjectManager());
-						return new Promise(function (resolve, reject) {
-							// create and default initial empty project containing an empty file (main.pvs)
-							projectManager.createDefaultProject(function (err, res) {
-								//layout the sourcecode and files
-								layoutjs({el: "#sourcecode-editor-wrapper"});
-								if (err) { reject(err); }
-								else { resolve(res); }
-							});
-						});
-					});
-				});
-		},
-		reset: function() {///This function is not tested
-			//client.disconnectFromServer();
-            if (pm.isLoaded(PrototypeBuilder.getInstance())) {
-                pm.disablePlugin(PrototypeBuilder.getInstance());
+    var client = PVSioWebClient.getInstance(),
+        pluginManager = PluginManager.getInstance(),
+        splashTimeout = null,
+        reconnectOptions = (window.location.origin.indexOf("pvsioweb.herokuapp.com") >= 0 ||
+                   window.location.origin.indexOf("pvsioweb.org") >= 0) ? { silentMode: true} : null;
+
+    //register event listeners
+    client.addListener('WebSocketConnectionOpened', function (e) {
+        ui.webSocketConnected();
+    }).addListener("WebSocketConnectionClosed", function (e) {
+        ui.webSocketDisconnected();
+        ui.reconnectToServer(reconnectOptions);
+    }).addListener("processExited", function (e) {
+        ui.pvsProcessDisconnected();
+    });
+    ProjectManager.getInstance().addListener("PVSProcessReady", function (event) {
+        ui.pvsProcessConnected();
+    }).addListener("PVSProcessDisconnected", function (event) {
+        ui.pvsProcessDisconnected();
+    });
+
+
+    function enablePlugin(plugin) {
+        return function () {
+            return pluginManager.enablePlugin(plugin);
+        };
+    }
+
+    function createDefaultProject() {
+        return function () {
+            return ProjectManager.getInstance().createDefaultProject();
+        };
+    }
+
+    function showInterface(opt) {
+        return function (res) {
+            return new Promise(function (resolve, reject) {
+                layoutjs({el: "#model-editor-container"});
+                //hide pvsio-web loading screen and make the tool visible
+                if (opt && opt.noSplash) {
+                    d3.select("#PVSio-web-logo").style("display", "none");
+                    d3.select("#content").classed("offscreen", false);
+                    resolve(res);
+                } else {
+                    splashTimeout = setTimeout(function () {
+                        d3.select("#PVSio-web-logo").style("display", "none");
+                        d3.select("#content").classed("offscreen", false);
+                        resolve(res);
+                    }, 2400);
+                }
+            });
+        };
+    }
+
+    function registerPluginEvents() {
+        return function (ws) {
+            ui.init()
+                .on("pluginToggled", function (event) {
+                    var plugin;
+                    switch (event.target.getAttribute("name")) {
+                    case "EmuCharts Editor":
+                        plugin = Emulink.getInstance();
+                        break;
+                    case "Graph Builder":
+                        plugin = GraphBuilder.getInstance();
+                        break;
+                    case "Safety Test":
+                        plugin = SafetyTest.getInstance();
+                        break;
+                    case "Model Editor":
+                        plugin = ModelEditor.getInstance();
+                        break;
+                    case "Prototype Builder":
+                        plugin = PrototypeBuilder.getInstance();
+                        break;
+                    }
+                    if (event.target.checked) {
+                        pluginManager.enablePlugin(plugin);
+                    } else {
+                        pluginManager.disablePlugin(plugin);
+                    }
+                });
+            return Promise.resolve(true);
+        };
+    }
+
+    module.exports = {
+        start: function (opt) {
+            clearTimeout(splashTimeout);
+            return new Promise(function (resolve, reject) {
+                client.connectToServer()
+                    .then(registerPluginEvents())
+                    .then(enablePlugin(ProjectAutoSaver.getInstance()))
+                    .then(enablePlugin(PrototypeBuilder.getInstance()))
+                    .then(createDefaultProject())
+                    .then(showInterface(opt))
+                    .then(function (res) {
+                        resolve(res);
+                    }).catch(function (err) {
+                        console.log(err);
+                        reject(err);
+                    });
+            });
+        },
+        reset: function () {///This function is not tested
+            //client.disconnectFromServer();
+            if (pluginManager.isLoaded(PrototypeBuilder.getInstance())) {
+                pluginManager.disablePlugin(PrototypeBuilder.getInstance());
                 ui.unload();
             }
-		}
-	};
+        }
+    };
 });

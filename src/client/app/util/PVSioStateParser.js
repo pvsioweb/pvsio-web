@@ -3,8 +3,8 @@
  * @author Patrick Oladimeji
  * @date 3/17/14 14:06:02 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, white:true */
+/*global define */
 
 define(function (require, exports, module) {
     "use strict";
@@ -16,12 +16,6 @@ define(function (require, exports, module) {
         ")": "(",
         ":)": "):"
     };
-    /**
-        Matches an alphabetic character
-    */
-    function alpha(c) {
-        return (/[a-z]/i).test(c);
-    }
 
     /** matches a numeric character */
     function num(d) {
@@ -33,18 +27,14 @@ define(function (require, exports, module) {
         return (/\s/).test(s);
     }
 
-    /** matches a comma */
-    function comma(c) {
-        return (/\,/).test(c);
-    }
-
     /** matches a word character */
     function wordChar(c) {
         return (/[\w]/).test(c);
     }
 
     /**
-        evaluates a numeric string represented as a fraction. If the string is not a fraction, it converts the string to a number. If the argument is not a string, then the argument is returned unchanged.
+        Evaluates a numeric string represented as a fraction. If the string is not a fraction,
+        it converts the string to a number. If the argument is not a string, then the argument is returned unchanged.
     */
     function evaluate(str) {
         if (typeof str === "string") {
@@ -97,19 +87,24 @@ define(function (require, exports, module) {
     }
     /**
         Resolves the chain of properties represented as a dot-separated string on the state provided
+        @param {object} state a JSON object representing the state returned by the PVS spec
+        @param {string} property a string representing a property or a chain of properties to read from the state
+        @return {object|string|number} the value at the specified property
     */
     function resolve(state, property) {
         var pChain = property.split(".");
-        var obj = state;
-        pChain.forEach(function (key, index) {
+        var obj = state, i = 0, key;
+
+        while (i < pChain.length && obj) {
+            key = pChain[i++];
             obj = obj[key];
-        });
+        }
         return obj;
     }
 
     /**
         Parses a string value representing PVSio function output and returns a JSON object representing the same information.
-        "(", and "(:" designate the beginning of a list and are thus converted to arrays. "(#" designate the beginning of a 
+        "(", and "(:" designate the beginning of a list and are thus converted to arrays. "(#" designate the beginning of a
         key-value pair
     */
     function parseValue(value) {
@@ -170,7 +165,6 @@ define(function (require, exports, module) {
                         index: subValue.index
                     };
                 }
-
             } else {
                 //just an open bracket -- they usually signify a list of some sort
                 subValue = readUntil(value, token.index + 1, function (ch, prev) {
@@ -202,11 +196,11 @@ define(function (require, exports, module) {
         },
         evaluate: evaluate,
         resolve: resolve,
-		isState: function (str) {
-			if (Array.isArray(str)) {
-				str = str.join("");
-			}
-			return str.trim().indexOf("(#") === 0;	
-		}
+        isState: function (str) {
+            if (Array.isArray(str)) {
+                str = str.join("");
+            }
+            return str.trim().indexOf("(#") === 0;
+        }
     };
 });

@@ -3,12 +3,11 @@
  * @date 19/11/14 7:29:02 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, Backbone, Handlebars, self */
 define(function (require, exports, module) {
     "use strict";
-    
+
     var pvsOverrideExpression, pvsAssignmentExpression, pvsBindingExpression;
-    
+
     function PVSOverrideExpressionPrinter() {
         /**
          * Template pvsOverrideExpression expects context = [ ... ]
@@ -36,7 +35,7 @@ define(function (require, exports, module) {
         pvsBindingExpression = Handlebars.compile(require("text!./templates/pvsBindingExpression.handlebars"));
         return this;
     }
-    
+
     function print_aux(data) {
         function override_rec(name, override, original, depth) {
             if (name.indexOf(".") < 0) {
@@ -66,7 +65,7 @@ define(function (require, exports, module) {
         }
         return override_rec(data.name, data.override, data.name, 0);
     }
-    
+
     /**
      * Translates an object state into a pvs record
      * @param data = { name: (string), override: (string) }
@@ -74,7 +73,7 @@ define(function (require, exports, module) {
     PVSOverrideExpressionPrinter.prototype.print = function (data) {
         return print_aux(data);
     };
-    
+
     module.exports = {
         create: function () {
             return new PVSOverrideExpressionPrinter();

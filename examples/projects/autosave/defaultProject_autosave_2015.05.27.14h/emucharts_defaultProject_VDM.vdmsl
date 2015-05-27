@@ -1,0 +1,58 @@
+-- ---------------------------------------------------------------
+--  Model : emucharts_defaultProject_VDM
+--  Author: <author name>
+--          <affiliation>
+--          <contact>
+-- ---------------------------------------------------------------
+
+module emucharts_defaultProject_VDM
+exports all
+
+definitions
+
+values
+
+types
+  -- machine states
+  MachineState = <X1> | <X2>;
+
+  -- emuchart state
+  state State of 
+    current_state: MachineState 
+    previous_state: MachineState
+  
+  -- initial state
+  init s == s = mk_State(    
+    <X1>, --current_state
+    <X1>  --previous_state
+  ) end
+
+functions
+  -- utility functions
+  enter_into: MachineState * State -> State
+  enter_into(ms, s) == mu(s, current_state |-> ms );
+  leave_state: MachineState * State -> State
+  leave_state(ms, s) == mu(s, previous_state |-> ms );
+
+  -- transition functions
+  per_T1: State -> bool
+  per_T1(s) == ((s.current_state = <X1>));
+  T1: State -> State
+  T1(s) ==
+    if (s.current_state = <X1>)
+    then let new_s = leave_state(<X1>, s)
+          in enter_into(<X2>, new_s)
+    else s
+  pre per_T1(s);
+
+operations
+  transition_T1: () ==> ()
+  transition_T1() == State := T1(State)
+  pre pre_T1(State);
+
+end emucharts_defaultProject_VDM
+
+-- ---------------------------------------------------------------
+--  VDM model generated using PVSio-web VDMPrinter ver 0.1
+--  Tool freely available at http://www.pvsioweb.org
+-- ---------------------------------------------------------------

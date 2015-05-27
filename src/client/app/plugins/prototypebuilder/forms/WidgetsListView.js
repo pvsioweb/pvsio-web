@@ -4,24 +4,23 @@
  * @date 9/17/14 14:40:29 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, require, Backbone, Handlebars, $, d3, Event*/
+/*global define, d3, Event*/
 define(function (require, exports, module) {
-	"use strict";
-	var WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager();
-	var itemTemplate = require("text!./templates/widgetListItem.handlebars");
+    "use strict";
+    var WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager();
 
-	function WidgetsListView(widgets) {
-		var el = d3.select("#widgetsList").html("").append("ul");
-		
-        function labelFunction (widget) {
+    function WidgetsListView(widgets) {
+        var el = d3.select("#widgetsList").html("").append("ul");
+
+        function labelFunction(widget) {
             var label = widget.type() + ": ";
             if (widget.type() === "display") {
                 label += widget.displayKey();
             } else { label += widget.functionText(); }
             return label;
         }
-        
-		function update(data) {
+
+        function update(data) {
             var listItems = el.selectAll("li.list-group-item").data(data, function (widget) {
                 return widget.id();
             });
@@ -35,9 +34,13 @@ define(function (require, exports, module) {
                 .text(labelFunction)
                 .on("click", function (w) {
                     var event = d3.event;
-                    if (!event.shiftKey) {
+                    if (!event.shiftKey && !d3.select(this).classed("selected")) {
                         d3.selectAll("g.selected").classed("selected", false);
                         d3.selectAll("#widgetsList ul li").classed("selected", false);
+                    } else if (d3.select(w.parentGroup()).classed("selected")) {
+                        d3.selectAll(".subselected").classed("subselected", false);
+                        d3.select(this).classed("subselected", true);
+                        d3.select(w.parentGroup()).classed("subselected", true);
                     }
                     d3.select(this).classed("selected", true);
                     d3.select(w.parentGroup()).classed("selected", true);
@@ -52,13 +55,13 @@ define(function (require, exports, module) {
                 });
             listItems.text(labelFunction);
             exitedItems.transition().duration(220).style("opacity", 0).remove();
-		}
-		
-		update(widgets);
+        }
+
+        update(widgets);
         el.selectAll("li.list-group-item").classed("selected", false);
-		
-		WidgetManager.addListener("WidgetModified", function (event) {
-			switch (event.action) {
+
+        WidgetManager.addListener("WidgetModified", function (event) {
+            switch (event.action) {
             case "create":
                 widgets.push(event.widget);
                 break;
@@ -70,20 +73,23 @@ define(function (require, exports, module) {
                 break;
             default:
                 break;
-			}
-			update(widgets);
-		}).addListener("WidgetSelected", function (event) {
-			var e = new Event("click");
-			e.shiftKey = event.event.shiftKey;
-			el.select("li[widget-id='" + event.widget.id() + "']").node().dispatchEvent(e);
-		});
-	}
-	
-	
-	module.exports = {
-		create: function () {
-			var widgets = WidgetManager.getAllWidgets();
-			return new WidgetsListView(widgets);
-		}
-	};
+            }
+            update(widgets);
+        }).addListener("WidgetSelected", function (event) {
+            var e = new Event("click");
+            e.shiftKey = event.event.shiftKey;
+            var node = el.select("li[widget-id='" + event.widget.id() + "']").node();
+            node.dispatchEvent(e);
+        }).addListener("WidgetSelectionCleared", function (event) {
+            d3.selectAll("#widgetsList ul li").classed("selected", false);
+        });
+    }
+
+
+    module.exports = {
+        create: function () {
+            var widgets = WidgetManager.getAllWidgets();
+            return new WidgetsListView(widgets);
+        }
+    };
 });

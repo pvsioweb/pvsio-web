@@ -1,3 +1,5 @@
 {
- "mainPVSFile": "SmithsMedical_MedFusion3500/medfusion3500.pvs"
+ "version": "2.0",
+ "mainPVSFile": "medfusion3500.pvs",
+ "prototypeImage": "medfusion.JPG"
 }

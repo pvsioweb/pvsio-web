@@ -6,62 +6,76 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, Promise, FileReader*/
 define(function (require, exports, module) {
-	"use strict";
-	var WSManager = require("websockets/pvs/WSManager"),
-		ws = WSManager.getWebSocket(),
-        openFilesForm = require("pvsioweb/forms/openFiles"),
-        openJSON = require("util/forms/openTextFile");
+    "use strict";
+    var openJSON = require("util/forms/openTextFile");
 
-	
-	/**
-	 *	Deletes the file specified in the path and invokes the callback function once deleted.
-	 *	If an error occurs during deletion, first parameter of callback will be the error.
-	 */
-	function deleteFile(path, callback) {
-		ws.send({type: "deleteFile", fileName: path}, callback);
-	}
 
     /**
-	 *
-	 */
-	function createFileLoadFunction(file, onFileLoaded) {
+     *
+     */
+    function createFileLoadFunction(file, onFileLoaded) {
         return function (cb) {
             var fr = new FileReader();
             fr.onload = function (event) {
                 var content = event.target.result;
-				if (onFileLoaded && typeof onFileLoaded === "function") {
-					onFileLoaded(file, content);
-				}
-				if (cb && typeof cb === "function") { cb(); }
+                if (onFileLoaded && typeof onFileLoaded === "function") {
+                    onFileLoaded(file, content);
+                }
+                if (cb && typeof cb === "function") { cb(); }
             };
             fr.readAsText(file);
         };
     }
-	
-	function readLocalFileAsText(file) {
-        var p = new Promise(function (resolve, reject) {
+
+    function readLocalFileAsImage(file) {
+        return new Promise(function (resolve, reject) {
             var fr = new FileReader();
             fr.onload = function (event) {
                 var content = event.target.result;
-                resolve({fileName: file.name, fileContent: content});
+                resolve({name: file.name, content: content, encoding: "base64"});
+            };
+            fr.onerror = function (event) {
+                reject(event);
+            };
+            fr.readAsDataURL(file);
+        });
+    }
+
+
+    function readLocalFileAsText(file) {
+        return new Promise(function (resolve, reject) {
+            var fr = new FileReader();
+            fr.onload = function (event) {
+                var content = event.target.result;
+                resolve({name: file.name, content: content, encoding: "utf8"});
             };
             fr.onerror = function (event) {
                 reject(event);
             };
             fr.readAsText(file);
         });
-        return p;
     }
-    
-	/**
-	 * Opens text files and returns JSON objects
+
+    function readLocalFile(file) {
+        if (file) {
+            if (file.type && file.type.indexOf("image/") === 0) {
+                return readLocalFileAsImage(file);
+            }
+            return readLocalFileAsText(file);
+        }
+        return Promise.reject();
+    }
+
+
+    /**
+     * Opens text files and returns JSON objects
      * @param callback is the callback function invoked when the files are open
-	 * @param opt is a descriptor containing { query, fileExt }, 
+     * @param opt is a descriptor containing { query, fileExt },
      * where query is the title of the created open window, and FileExt specifies the file extensions (e.g., ".txt,.json")
-	 * @returns { fileName, fileContent }, where filename is a string, and content is a JSON object
-	 * @memberof fileHandler
-	 */
-	function openLocalFileAsJSON(callback, opt) {
+     * @returns { name, content }, where filename is a string, and content is a JSON object
+     * @memberof fileHandler
+     */
+    function openLocalFileAsJSON(callback, opt) {
         if (!callback || typeof callback !== "function") { return; }
         openJSON.create({
             header: opt.header || "Open JSON file...",
@@ -76,8 +90,8 @@ define(function (require, exports, module) {
                 var fr = new FileReader();
                 fr.onload = function (event) {
                     callback(null, {
-                        fileName: file.name,
-                        fileContent: JSON.parse(event.target.result)
+                        name: file.name,
+                        content: JSON.parse(event.target.result)
                     });
                 };
                 fr.onerror = function (event) {
@@ -86,18 +100,18 @@ define(function (require, exports, module) {
                 fr.readAsText(file);
             }
         });
-	}
-        
+    }
 
-	/**
-	 * Opens text files
+
+    /**
+     * Opens text files
      * @param callback is the callback function invoked when the files are open
-	 * @param opt is a descriptor containing { query, fileExt }, 
+     * @param opt is a descriptor containing { query, fileExt },
      * where query is the title of the created open window, and FileExt specifies the file extensions (e.g., ".txt,.json")
-	 * @returns { fileName, fileContent }, where fileName and fileContent are strings
-	 * @memberof fileHandler
-	 */
-	function openLocalFileAsText(callback, opt) {
+     * @returns { name, content }, where name and content are strings
+     * @memberof fileHandler
+     */
+    function openLocalFileAsText(callback, opt) {
         if (!callback || typeof callback !== "function") { return; }
         openJSON.create({
             header: opt.header || "Open text file...",
@@ -112,8 +126,8 @@ define(function (require, exports, module) {
                 var fr = new FileReader();
                 fr.onload = function (event) {
                     callback(null, {
-                        fileName: file.name,
-                        fileContent: event.target.result
+                        name: file.name,
+                        content: event.target.result
                     });
                 };
                 fr.onerror = function (event) {
@@ -122,34 +136,16 @@ define(function (require, exports, module) {
                 fr.readAsText(file);
             }
         });
-	}
-
-    function readLocalFileAsDataURL(file) {
-        var p = new Promise(function (resolve, reject) {
-            var fr = new FileReader();
-            fr.onload = function (event) {
-                var content = event.target.result;
-                resolve({filePath: file.name, fileContent: content});
-            };
-            
-            fr.onerror = function (event) {
-                reject(event);
-            };
-            fr.readAsDataURL(file);
-        });
-        return p;
     }
-	
-	/************* Exported Function ************************************************/
-    // openXXX return pairs { fileName, fileContent }
+
+
+    /************* Exported Function ************************************************/
+    // openXXX return pairs { name, content }
     // readXXX return a Promise
-	module.exports = {
-        openLocalFileAsJSON: openLocalFileAsJSON, // fileContent is a JSON object
-        openLocalFileAsText: openLocalFileAsText, // fileContent is a string
-		deleteFile: deleteFile,
-		createFileLoadFunction: createFileLoadFunction,
-        readLocalFileAsText: readLocalFileAsText,
-        readLocalFileAsDataURL: readLocalFileAsDataURL
-	
-	};
+    module.exports = {
+        openLocalFileAsJSON: openLocalFileAsJSON, // content is a JSON object
+        openLocalFileAsText: openLocalFileAsText, // content is a string
+        createFileLoadFunction: createFileLoadFunction,
+        readLocalFile: readLocalFile
+    };
 });

@@ -126,6 +126,7 @@
             state.query = null;
             cm.removeOverlay(state.overlay);
         });
+        cm.setSelection(cm.getCursor(), cm.getCursor()); // clear the selection
     }
     function dialog(cm, text, shortText, deflt, f) {
         if (cm.fromInputArea) {
@@ -135,20 +136,20 @@
                 f,
                 { value: deflt,
                     bottom: true,
-                    onInput: function (e, query, close) {
-                        clearSearch(cm);
-                        searchFunction(cm, false)(query);
-                    },
+//                    onInput: function (e, query, close) {
+//                        clearSearch(cm);
+//                        searchFunction(cm, false)(query);
+//                    },
                     closeOnBlur: false }
             );
         } else if (cm.openDialog) {
             cm.openDialog(text, f, {
                 value: deflt,
                 bottom: true,
-                onInput: function (e, query, close) {
-                    clearSearch(cm);
-                    searchFunction(cm, false)(query);
-                },
+//                onInput: function (e, query, close) {
+//                    clearSearch(cm);
+//                    searchFunction(cm, false)(query);
+//                },
                 closeOnBlur: false
             });
         } else {
@@ -216,7 +217,13 @@
 
     CodeMirror.commands.find = function (cm) {
         if (cm.options.search) {
-            cm.state.query = cm.options.search;
+            if (cm.options.search === "") {
+                cm.setSelection(cm.getCursor(), cm.getCursor()); // clear the selection
+                return;
+            } else {
+                cm.state.search = cm.state.search || new SearchState();
+                cm.state.search.query = cm.options.search;
+            }
         } else {
             clearSearch(cm);
         }

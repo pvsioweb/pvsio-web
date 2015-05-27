@@ -1,32 +1,31 @@
 /** @module EmuchartsManager*/
 /**
  * EmuchartsManager handles all operations with emuchart diagrams. Uses external modules
- * for rendering and storing emuchart diagrams. This is code is a re-engineered version 
+ * for rendering and storing emuchart diagrams. This is code is a re-engineered version
  * of stateMachine.js implemented in branch emulink-commented
  * @author Paolo Masci
  * @date 14/05/14 2:49:23 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, _, Promise, document, FileReader*/
-
+/*global define, d3*/
 define(function (require, exports, module) {
-	"use strict";
-	var Emucharts = require("plugins/emulink/Emucharts"),
+    "use strict";
+    var Emucharts = require("plugins/emulink/Emucharts"),
         EmuchartsEditor = require("plugins/emulink/EmuchartsEditor"),
         eventDispatcher = require("util/eventDispatcher");
-    
+
     var _emuchartsEditors; // stores emucharts renderers
     var _selectedEditor; // this is the selected editor
-    
-	/**
-	 * Constructor
-	 * @memberof EmuchartsManager
-	 */
+
+    /**
+     * Constructor
+     * @memberof EmuchartsManager
+     */
     function EmuchartsManager() {
         _emuchartsEditors = d3.map();
         eventDispatcher(this);
     }
-    
+
     EmuchartsManager.prototype.installHandlers = function (editor) {
         var _this = this;
         editor.addListener("emuCharts_editorModeChanged", function (event) { _this.fire(event); });
@@ -51,13 +50,12 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
     };
-    
-	/**
-	 * Creates a new empty emuchart using the data passed as argument.
-	 * @memberof EmuchartsManager
-	 */
+
+    /**
+     * Creates a new empty emuchart using the data passed as argument.
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.newEmucharts = function (emuchartsName) {
-        var _this = this;
         if (emuchartsName) {
             // create an editor for an empty chart
             var emucharts = new Emucharts({
@@ -73,24 +71,24 @@ define(function (require, exports, module) {
             _selectedEditor = newEmuchartsEditor;
         } else { console.log("dbg: warning, undefined or null emuchart name"); }
     };
-    
-	/**
-	 * Imports the emuchart passed as argument.
-	 * @memberof EmuchartsManager
+
+    /**
+     * Imports the emuchart passed as argument.
+     * @memberof EmuchartsManager
      * FIXME: improve this function!
-	 */
+     */
     EmuchartsManager.prototype.importEmucharts = function (emuchartsFile) {
         var _this = this;
-        if (emuchartsFile && emuchartsFile.fileContent) {
-            var keys = Object.keys(emuchartsFile.fileContent);
+        if (emuchartsFile && emuchartsFile.content) {
+            var keys = Object.keys(emuchartsFile.content);
             if (keys) {
                 // check if this is version 1.0
-                if (emuchartsFile.fileContent && emuchartsFile.fileContent.descriptor) {
-                    var version = emuchartsFile.fileContent.descriptor.version;
-                    if (version === "1.1" || version === "1.2") {
+                if (emuchartsFile.content && emuchartsFile.content.descriptor) {
+                    var version = emuchartsFile.content.descriptor.version;
+                    if (version && parseFloat(version) >= 1.1) {
                         var chart = { nodes: d3.map(), edges: d3.map(), initial_edges: d3.map(),
                                       variables: d3.map(), constants: d3.map() };
-                        var chart_reader = emuchartsFile.fileContent.chart;
+                        var chart_reader = emuchartsFile.content.chart;
                         if (chart_reader.states) {
                             chart_reader.states.forEach(function (node) {
                                 chart.nodes.set(node.id, node);
@@ -151,7 +149,7 @@ define(function (require, exports, module) {
                         });
                         var newEmuchartsEditor = new EmuchartsEditor(emucharts);
                         _this.installHandlers(newEmuchartsEditor);
-                        _emuchartsEditors.set(emuchartsFile.fileContent.descriptor.chart_name, newEmuchartsEditor);
+                        _emuchartsEditors.set(emuchartsFile.content.descriptor.chart_name, newEmuchartsEditor);
                         _selectedEditor = newEmuchartsEditor;
                     } else {
                         alert("Error while importing emuchart file: unsupported file version " + version);
@@ -161,11 +159,11 @@ define(function (require, exports, module) {
                     // create a map for each chart
                     keys.forEach(function (name) {
                         var chart = { nodes: d3.map(), edges: d3.map(), initial_edges: d3.map() };
-                        emuchartsFile.fileContent[name].nodes
+                        emuchartsFile.content[name].nodes
                             .forEach(function (node) { chart.nodes.set(node.id, node); });
-                        emuchartsFile.fileContent[name].edges
+                        emuchartsFile.content[name].edges
                             .forEach(function (edge) { chart.edges.set(edge.id, edge); });
-                        emuchartsFile.fileContent[name].initial_edges
+                        emuchartsFile.content[name].initial_edges
                             .forEach(function (initial_edge) {
                                 chart.initial_edges.set(initial_edge.id, initial_edge);
                             });
@@ -185,31 +183,30 @@ define(function (require, exports, module) {
         } else { console.log("dbg: warning, undefined or null emuchart"); }
     };
 
-	/**
-	 * Imports the emuchart passed as argument.
-	 * @memberof EmuchartsManager
+    /**
+     * Imports the emuchart passed as argument.
+     * @memberof EmuchartsManager
      * FIXME: improve this function!
-	 */
+     */
     EmuchartsManager.prototype.importPIMChart = function (MUZFile) {
-        var _this = this;
-        if (MUZFile && MUZFile.fileContent) {
+        if (MUZFile && MUZFile.content) {
             // parse section ==Seq==
-            var needle = MUZFile.fileContent.indexOf("==Seq==");
+            var needle = MUZFile.content.indexOf("==Seq==");
             if (needle < 0) {
                 console.log("Error while parsing MUZ file (section ==Seq== not found)");
                 return;
             }
-            MUZFile.fileContent = MUZFile.fileContent.substring(needle + 7);
+            MUZFile.content = MUZFile.content.substring(needle + 7);
             // first line is chart name
-            var txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
+            var txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.content);
             if (txt.length === 0) {
                 console.log("Error while parsing MUZ file (chart name not found)");
                 return;
             }
             var chartName = txt[0];
-            MUZFile.fileContent = MUZFile.fileContent.substring(chartName.length);
+            MUZFile.content = MUZFile.content.substring(chartName.length);
             // second line is initial state
-            txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
+            txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.content);
             if (txt.length === 0) {
                 console.log("Error while parsing MUZ file (initial state not found)");
                 return;
@@ -219,49 +216,49 @@ define(function (require, exports, module) {
                 name: "INIT_" + txt[0].trim(),
                 target: { name: txt[0].trim(), id: txt[0].trim() }
             };
-            MUZFile.fileContent = MUZFile.fileContent.substring(chartName.length);
-            
+            MUZFile.content = MUZFile.content.substring(chartName.length);
+
             // parse section ==States==
-            needle = MUZFile.fileContent.indexOf("==States==");
+            needle = MUZFile.content.indexOf("==States==");
             if (needle < 0) {
                 console.log("Error while parsing MUZ file (section ==States== not found)");
                 return;
             }
-            MUZFile.fileContent = MUZFile.fileContent.substring(needle + 10);
-            
+            MUZFile.content = MUZFile.content.substring(needle + 10);
+
             var states = [];
             var stop = false;
             while (!stop) {
                 // each line contains state name and coordinates
-                txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.content);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (state names not found)");
                     return;
                 }
                 var stateName = txt[0];
-                MUZFile.fileContent = MUZFile.fileContent.substring(stateName.length);
-                txt = new RegExp("[\\n\\s]+[0-9]+").exec(MUZFile.fileContent);
+                MUZFile.content = MUZFile.content.substring(stateName.length);
+                txt = new RegExp("[\\n\\s]+[0-9]+").exec(MUZFile.content);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (position x not found for state " + stateName + ")");
                     return;
                 }
-                needle = MUZFile.fileContent.indexOf("Atomic");
+                needle = MUZFile.content.indexOf("Atomic");
                 if (needle < 0) {
                     console.log("Error while parsing MUZ file (Atomic keyword not found for state " + stateName + ")");
                     return;
                 }
-                MUZFile.fileContent = MUZFile.fileContent.substring(needle + 6);
+                MUZFile.content = MUZFile.content.substring(needle + 6);
                 // note: we use just the first two coordinates to identify the center of the state; height and width are automatically computed by our graphical frontend
                 var x = txt[0];
-                MUZFile.fileContent = MUZFile.fileContent.substring(x.length);
-                txt = new RegExp("[\\n\\s]+[0-9]+").exec(MUZFile.fileContent);
+                MUZFile.content = MUZFile.content.substring(x.length);
+                txt = new RegExp("[\\n\\s]+[0-9]+").exec(MUZFile.content);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (position y not found for state " + stateName + ")");
                     return;
                 }
                 var y = txt[0];
-                MUZFile.fileContent = MUZFile.fileContent.substring(y.length);
-                
+                MUZFile.content = MUZFile.content.substring(y.length);
+
                 // add state to states array
                 states.push({ name: stateName.trim(),
                               id: stateName.trim(),
@@ -271,51 +268,51 @@ define(function (require, exports, module) {
                               height: 50 });
 
                 // remove the rest of the line & check for stop condition
-                MUZFile.fileContent = MUZFile.fileContent.substring(MUZFile.fileContent.indexOf("\n"));
-                if (MUZFile.fileContent.trim().indexOf("==Transitions==") === 0) {
+                MUZFile.content = MUZFile.content.substring(MUZFile.content.indexOf("\n"));
+                if (MUZFile.content.trim().indexOf("==Transitions==") === 0) {
                     stop = true;
                 }
             }
-            
+
             // parse section ==Transitions==
-            needle = MUZFile.fileContent.indexOf("==Transitions==");
+            needle = MUZFile.content.indexOf("==Transitions==");
             if (needle < 0) {
                 console.log("Error while parsing MUZ file (section ==Transitions== not found)");
                 return;
             }
-            MUZFile.fileContent = MUZFile.fileContent.substring(needle + 15);
+            MUZFile.content = MUZFile.content.substring(needle + 15);
 
-            
+
             var transitions = [];
             stop = false;
             var uniqueToken = 0;
             while (!stop) {
                 // each line contains state names (from, to) and transition name
                 // parse source
-                txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\n\\s]+[A-Za-z_0-9]+").exec(MUZFile.content);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (source state for transition not found)");
                     return;
                 }
                 var source = txt[0];
-                MUZFile.fileContent = MUZFile.fileContent.substring(source.length);
+                MUZFile.content = MUZFile.content.substring(source.length);
                 // parse target
-                txt = new RegExp("[\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\s]+[A-Za-z_0-9]+").exec(MUZFile.content);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (target state for transition not found)");
                     return;
                 }
                 var target = txt[0];
-                MUZFile.fileContent = MUZFile.fileContent.substring(target.length);
+                MUZFile.content = MUZFile.content.substring(target.length);
                 // parse transition name
-                txt = new RegExp("[\\s]+[A-Za-z_0-9]+").exec(MUZFile.fileContent);
+                txt = new RegExp("[\\s]+[A-Za-z_0-9]+").exec(MUZFile.content);
                 if (txt.length === 0) {
                     console.log("Error while parsing MUZ file (transition name not found)");
                     return;
                 }
                 var transitionName = txt[0];
-                MUZFile.fileContent = MUZFile.fileContent.substring(transitionName.length);
-                
+                MUZFile.content = MUZFile.content.substring(transitionName.length);
+
                 // add transition to transitions array
                 transitions.push({
                     name: transitionName.trim(),
@@ -331,8 +328,8 @@ define(function (require, exports, module) {
                 });
 
                 // remove the rest of the line & check for stop condition
-                MUZFile.fileContent = MUZFile.fileContent.substring(MUZFile.fileContent.indexOf("\n"));
-                if (MUZFile.fileContent.trim().indexOf("==LocalVariables==") === 0) {
+                MUZFile.content = MUZFile.content.substring(MUZFile.content.indexOf("\n"));
+                if (MUZFile.content.trim().indexOf("==LocalVariables==") === 0) {
                     stop = true;
                 }
             }
@@ -351,299 +348,299 @@ define(function (require, exports, module) {
                     variables: null
                 }
             };
-            this.importEmucharts({ fileName: chartName.trim(), fileContent: chart });
+            this.importEmucharts({ name: chartName.trim(), content: chart });
         } else { console.log("dbg: warning, undefined or null MUZFile"); }
     };
-    
+
     /**
-	 * Draws the diagrams stored in _emucharts.
-	 * @memberof EmuchartsManager
-	 */
+     * Draws the diagrams stored in _emucharts.
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.render = function () {
         _selectedEditor.render();
         return this;
     };
-    
+
     /**
-	 * Returns a fresh state name
-	 * @memberof EmuchartsManager
-	 */
+     * Returns a fresh state name
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getFreshStateName = function () {
         return _selectedEditor.getFreshStateName();
     };
-    
+
     /**
-	 * Returns a fresh transition name
-	 * @memberof EmuchartsManager
-	 */
+     * Returns a fresh transition name
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getFreshTransitionName = function () {
         return _selectedEditor.getFreshTransitionName();
     };
 
     /**
-	 * Returns a fresh name for initial transitions
-	 * @memberof EmuchartsManager
-	 */
+     * Returns a fresh name for initial transitions
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getFreshInitialTransitionName = function () {
         return _selectedEditor.getFreshInitialTransitionName();
     };
 
     /**
-	 * Interface function for changing mode in the currently selected editor
-	 * @memberof EmuchartsManager
-	 */
+     * Interface function for changing mode in the currently selected editor
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.set_editor_mode = function (mode) {
         return _selectedEditor.set_editor_mode(mode);
     };
 
-	/**
-	 * Interface function for adding new states to the diagram
-	 * @memberof EmuchartsManager
-	 */
+    /**
+     * Interface function for adding new states to the diagram
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.add_state = function (stateName, position) {
         return _selectedEditor.add_state(stateName, position);
     };
 
-	/**
-	 * Interface function for deleting states
-	 * @memberof EmuchartsManager
-	 */
+    /**
+     * Interface function for deleting states
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.delete_state = function (stateID) {
         return _selectedEditor.delete_state(stateID);
     };
 
     /**
-	 * Interface function for adding new transitions to the diagram
-	 * @memberof EmuchartsManager
-	 */
+     * Interface function for adding new transitions to the diagram
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.add_transition = function (transitionName, from, to) {
         return _selectedEditor.add_transition(transitionName, from, to);
     };
-    
+
     /**
-	 * Interface function for adding new initial transitions to the diagram
-	 * @memberof EmuchartsManager
-	 */
+     * Interface function for adding new initial transitions to the diagram
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.add_initial_transition = function (transitionName, to) {
         return _selectedEditor.add_initial_transition(transitionName, to);
     };
 
     /**
-	 * Interface function for deleting transitions
-	 * @memberof EmuchartsManager
-	 */
+     * Interface function for deleting transitions
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.delete_transition = function (transitionID) {
         return _selectedEditor.delete_transition(transitionID);
     };
 
     /**
-	 * Interface function for deleting a constant
+     * Interface function for deleting a constant
      * @param constantID is the unique constant identifier
-     * @returns true if constant removed successfully; otherwise returns false     
-	 * @memberof EmuchartsManager
-	 */
+     * @returns true if constant removed successfully; otherwise returns false
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.delete_constant = function (constantID) {
         return _selectedEditor.delete_constant(constantID);
     };
-    
+
     /**
-	 * Interface function for deleting a variable
+     * Interface function for deleting a variable
      * @param variableID is the unique variable identifier
-     * @returns true if variable removed successfully; otherwise returns false     
-	 * @memberof EmuchartsManager
-	 */
+     * @returns true if variable removed successfully; otherwise returns false
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.delete_variable = function (variableID) {
         return _selectedEditor.delete_variable(variableID);
     };
 
     /**
-	 * Interface function for deleting initial transitions
-	 * @memberof EmuchartsManager
-	 */
+     * Interface function for deleting initial transitions
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.delete_initial_transition = function (transitionID) {
         return _selectedEditor.delete_initial_transition(transitionID);
     };
 
     /**
-	 * Returns an array containing the current set of states
+     * Returns an array containing the current set of states
      * Each states is given as a pair { name, id }
-	 * @memberof EmuchartsManager
-	 */
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getStates = function () {
         return _selectedEditor.getStates();
     };
-    
+
     /**
-	 * Returns an array containing the current set of constants defined in the model
-	 * @memberof EmuchartsManager
-	 */
+     * Returns an array containing the current set of constants defined in the model
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getConstants = function () {
         return _selectedEditor.getConstants();
     };
 
     /**
-	 * Returns an array containing the current set of variables defined in the model
-	 * @memberof EmuchartsManager
-	 */
+     * Returns an array containing the current set of variables defined in the model
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getVariables = function () {
         return _selectedEditor.getVariables();
     };
 
     /**
-	 * Returns an array containing the current set of input variables defined in the model
-	 * @memberof EmuchartsManager
-	 */
+     * Returns an array containing the current set of input variables defined in the model
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getInputVariables = function () {
         return _selectedEditor.getInputVariables();
     };
 
     /**
-	 * Returns an array containing the current set of output variables defined in the model
-	 * @memberof EmuchartsManager
-	 */
+     * Returns an array containing the current set of output variables defined in the model
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getOutputVariables = function () {
         return _selectedEditor.getOutputVariables();
     };
 
     /**
-	 * Returns an array containing the current set of local variables defined in the model
-	 * @memberof EmuchartsManager
-	 */
+     * Returns an array containing the current set of local variables defined in the model
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getLocalVariables = function () {
         return _selectedEditor.getLocalVariables();
     };
-    
+
     /**
-	 * Returns an array specifying the supported variable scopes
-	 * @memberof EmuchartsManager
-	 */
+     * Returns an array specifying the supported variable scopes
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getVariableScopes = function () {
         return _selectedEditor.getVariableScopes();
     };
 
     /**
-	 * Returns an array containing the current set of transitions
+     * Returns an array containing the current set of transitions
      * Each transition is given as a 4-tuple { name, id, source, target }
      * where source and target are pairs { name, id }
-	 * @memberof EmuchartsManager
-	 */
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getTransitions = function () {
         return _selectedEditor.getTransitions();
     };
 
     /**
-	 * Returns an array containing the current set of initial transitions
+     * Returns an array containing the current set of initial transitions
      * Each transition is given as a 3-tuple { name, id, target }
      * where target is a pair { name, id }
-	 * @memberof EmuchartsManager
-	 */
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getInitialTransitions = function () {
         return _selectedEditor.getInitialTransitions();
     };
 
     /**
-	 * Utility function to rename transitions
-	 * @memberof EmuchartsManager
-	 */
+     * Utility function to rename transitions
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.rename_transition = function (transitionID, newLabel) {
         return _selectedEditor.rename_transition(transitionID, newLabel);
     };
 
     /**
-	 * Utility function to rename initial transitions
-	 * @memberof EmuchartsManager
-	 */
+     * Utility function to rename initial transitions
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.rename_initial_transition = function (transitionID, newLabel) {
         return _selectedEditor.rename_initial_transition(transitionID, newLabel);
     };
 
     /**
-	 * Utility function to rename states
-	 * @memberof EmuchartsManager
-	 */
+     * Utility function to rename states
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.rename_state = function (stateID, newLabel) {
         return _selectedEditor.rename_state(stateID, newLabel);
     };
-    
+
     /**
-	 * Interface function for renaming (i.e., editing) a constant
+     * Interface function for renaming (i.e., editing) a constant
      * @param constantID is the unique constant identifier
      * @param newData is a record containing fields { type: (string), name: (string), value: (string) }
      *              (field value is optional)
      * @returns true if variable renamed successfully; otherwise returns false
-	 * @memberof EmuchartsManager
-	 */
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.rename_constant = function (constantID, newData) {
         return _selectedEditor.rename_constant(constantID, newData);
     };
 
     /**
-	 * Interface function for renaming (i.e., editing) a state variable
+     * Interface function for renaming (i.e., editing) a state variable
      * @param variableID is the unique variable identifier
      * @param newData is a record containing fields { type: (string), name: (string), scope: (string) }
      * @returns true if variable renamed successfully; otherwise returns false
-	 * @memberof EmuchartsManager
-	 */
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.rename_variable = function (variableID, newData) {
         return _selectedEditor.rename_variable(variableID, newData);
     };
 
     /**
-	 * Interface function for adding constants
-	 * @memberof EmuchartsManager
-	 */
+     * Interface function for adding constants
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.add_constant = function (newConstant) {
         return _selectedEditor.add_constant(newConstant);
     };
 
     /**
-	 * Interface function for adding state variables
-	 * @memberof EmuchartsManager
-	 */
+     * Interface function for adding state variables
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.add_variable = function (newVariable) {
         return _selectedEditor.add_variable(newVariable);
     };
 
     /**
-	 * Interface function for zooming in
-	 * @memberof EmuchartsManager
-	 */
+     * Interface function for zooming in
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.zoom_in = function () {
         return _selectedEditor.zoom_in();
     };
-    
+
     /**
-	 * Interface function for zooming out
-	 * @memberof EmuchartsManager
-	 */
+     * Interface function for zooming out
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.zoom_out = function () {
         return _selectedEditor.zoom_out();
     };
 
     /**
-	 * Interface function for zoom reset
-	 * @memberof EmuchartsManager
-	 */
+     * Interface function for zoom reset
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.zoom_reset = function () {
         return _selectedEditor.zoom_reset();
     };
 
     /**
-	 * Interface function for deleting charts
-	 * @memberof EmuchartsManager
-	 */
+     * Interface function for deleting charts
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.delete_chart = function () {
         return _selectedEditor.delete_chart();
     };
-    
+
     /**
-	 * Interface function for checking whether the selected chart is empty
-	 * @memberof EmuchartsManager
-	 */
+     * Interface function for checking whether the selected chart is empty
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.empty_chart = function () {
         return _selectedEditor.empty_chart();
     };
-    
+
 //    /**
 //	 * Interface function for handling d3 events
 //	 * @memberof EmuchartsManager

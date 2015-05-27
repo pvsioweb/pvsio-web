@@ -19,7 +19,7 @@ require.config({
     }
 });
 
-require([/*"main", "test/Project", "test/ProjectFile"*/"test/FrontEnd"], function () {
+require(["test/FrontEnd"], function () {
     "use strict";
     jasmine.getEnv().execute();
 });

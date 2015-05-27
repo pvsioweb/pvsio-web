@@ -1,0 +1,290 @@
+main :THEORY
+ BEGIN
+  maxinfuse: nat = 1200
+  maxrate  : nat = maxinfuse
+  infusemin: posreal = 0.1
+  timeout  : nat = 200 % must be less than maxtime
+  shorttime: nat = 20
+  maxtime  : nat = maxinfuse
+
+  IMPORTING types_and_constants_th [ maxrate, maxinfuse, infusemin, timeout, shorttime, maxtime ]
+  IMPORTING alaris_th[maxrate, maxinfuse, infusemin, timeout, shorttime, maxtime]
+
+
+  device_init: pump = (#
+     powered_on? := FALSE,
+     infusing? := FALSE,
+     infusionrate := 0,
+     volumeinfused := 0,
+     vtbi := 0,
+     elapse := 0,
+     kvoflag := FALSE,
+     elapsedtime := 0,
+     time := 0,
+     kvorate := infusemin
+  #)
+  alaris_init: alaris = (#
+    device := device_init,
+    topline := dispblank,
+    middisp := LAMBDA (x: upto(9)): FALSE,
+    bagscursor := midbag,
+    qcursor := dlock,
+    bagsval := LAMBDA (x: upto(9)):
+                 COND x = 0 -> 0,
+                      x = 1 -> 50,
+              x = 2 -> 100,
+              x = 3 -> 200,
+              x = 4 -> 250,
+              x = 5 -> 500,
+              x = 6 -> 1000,
+              x = 7 -> 1500,
+              x = 8 -> 2000,
+              x = 9 -> 3000 ENDCOND,
+    fndisp1 := fnull,
+    fndisp2 := fnull,
+    fndisp3 := fnull,
+    runlight := FALSE,
+    pauselight := FALSE,
+    onlight := FALSE,
+    entrymode := nullmode,
+    rlock := false,
+    rdisabled := false,
+    newvtbi := 0,
+    newrate := 0,
+    newtime := 0,
+    which_press := nob,
+    current_sv := 1, %small_step,
+    current_sr := 1, %small_step,
+    current_st := 1, %small_step,
+    pressed := 5 %maxpress
+  #)
+
+  state: TYPE = [#
+    device : pump,
+    topline: iline, % [vis]
+    middisp: list[bool], %imid,  % [vis]
+    middisp_drate: bool,
+    middisp_dvtbi: bool,
+    middisp_dvol: bool,
+    middisp_dtime: bool,
+    middisp_dnewrate: bool,
+    middisp_dnewvtbi: bool,
+    middisp_dnewtime: bool,
+    middisp_dbags: bool,
+    bagscursor: ibagscursor, % [vis]
+    qcursor: qcurse, % [vis]
+    bagsval: list[int], %abags, % [vis]
+    bagsval0: int,
+    bagsval1: int,
+    bagsval2: int,
+    bagsval3: int,
+    bagsval4: int,
+    bagsval5: int,
+    bagsval6: int,
+    bagsval7: int,
+    bagsval8: int,
+    bagsval9: int,
+    fndisp1: ifunctions, % [vis]
+    fndisp2: ifunctions, % [vis]
+    fndisp3: ifunctions, % [vis]
+    runlight: boolean, % [vis]
+    pauselight: boolean, % [vis]
+    onlight: boolean, % [vis]
+    entrymode: emodes,
+    rlock: boolean,
+    rdisabled: boolean,
+    newvtbi: ivols,
+    newrate: irates,
+    newtime: itimes,
+% for the new treatment of chevron keys
+    pressed: presstime,
+    current_sr: steprate,
+    current_sv: stepvol,
+    current_st: steptime,
+    which_press: chev_buttons
+  #]
+
+  alaris2state(st: alaris): state = (#
+    device := device(st),
+    topline := topline(st),
+    middisp := (: middisp(st)(0), middisp(st)(1), middisp(st)(2), middisp(st)(3), middisp(st)(4), middisp(st)(5), middisp(st)(6), middisp(st)(7), middisp(st)(8), middisp(st)(9) :),
+    middisp_drate := middisp(st)(drate),
+    middisp_dvtbi := middisp(st)(dvtbi),
+    middisp_dvol := middisp(st)(dvol),
+    middisp_dtime := middisp(st)(dtime),
+    middisp_dnewrate := middisp(st)(dnewrate),
+    middisp_dnewvtbi := middisp(st)(dnewvtbi),
+    middisp_dnewtime := middisp(st)(dnewtime),
+    middisp_dbags := middisp(st)(dbags),
+    bagscursor := bagscursor(st),
+    qcursor := qcursor(st),
+    bagsval := (: bagsval(st)(0), bagsval(st)(1), bagsval(st)(2), bagsval(st)(3), bagsval(st)(4), bagsval(st)(5), bagsval(st)(6), bagsval(st)(7), bagsval(st)(8), bagsval(st)(9) :),
+    bagsval0 := bagsval(st)(0),
+    bagsval1 := bagsval(st)(1),
+    bagsval2 := bagsval(st)(2),
+    bagsval3 := bagsval(st)(3),
+    bagsval4 := bagsval(st)(4),
+    bagsval5 := bagsval(st)(5),
+    bagsval6 := bagsval(st)(6),
+    bagsval7 := bagsval(st)(7),
+    bagsval8 := bagsval(st)(8),
+    bagsval9 := bagsval(st)(9),
+    fndisp1 := fndisp1(st),
+    fndisp2 := fndisp2(st),
+    fndisp3 := fndisp3(st),
+    runlight := runlight(st),
+    pauselight := pauselight(st),
+    onlight := onlight(st),
+    entrymode := entrymode(st),
+    rlock := rlock(st),
+    rdisabled := rdisabled(st),
+    newvtbi := newvtbi(st),
+    newrate := newrate(st),
+    newtime := newtime(st),
+    which_press := which_press(st),
+    current_sv := current_sv(st),
+    current_sr := current_sr(st),
+    current_st := current_st(st),
+    pressed := pressed(st)
+  #)
+  CONVERSION alaris2state
+
+  state2alaris(st: state): alaris = (#
+    device := device(st),
+    topline := topline(st),
+    middisp := LAMBDA (x: upto(9)): nth(middisp(st), x),
+    bagscursor := bagscursor(st),
+    qcursor := qcursor(st),
+    bagsval := LAMBDA (x: upto(9)): nth(bagsval(st), x),
+    fndisp1 := fndisp1(st),
+    fndisp2 := fndisp2(st),
+    fndisp3 := fndisp3(st),
+    runlight := runlight(st),
+    pauselight := pauselight(st),
+    onlight := onlight(st),
+    entrymode := entrymode(st),
+    rlock := rlock(st),
+    rdisabled := rdisabled(st),
+    newvtbi := newvtbi(st),
+    newrate := newrate(st),
+    newtime := newtime(st),
+    which_press := which_press(st),
+    current_sv := current_sv(st),
+    current_sr := current_sr(st),
+    current_st := current_st(st),
+    pressed := pressed(st)
+  #)
+  CONVERSION state2alaris
+
+  init(x: real): state = alaris_init
+
+  click_btn_on(st: alaris): state =
+    COND
+      per_on(st) -> on(st),
+      ELSE -> st
+    ENDCOND
+
+  press_btn_fup(st: alaris): state =
+    COND
+      per_fup(st) -> fup(st),
+      ELSE -> st
+    ENDCOND
+
+  release_btn_fup(st: alaris): state =
+    COND
+      per_release_fup(st) -> release_fup(st),
+      ELSE -> st
+    ENDCOND
+
+  click_btn_fup(st: alaris): state =
+    release_btn_fup(press_btn_fup(st))
+
+  press_btn_sup(st: alaris): state =
+    COND
+      per_sup(st) -> sup(st),
+      ELSE -> st
+    ENDCOND
+
+  release_btn_sup(st: alaris): state =
+    COND
+      per_release_sup(st) -> release_sup(st),
+      ELSE -> st
+    ENDCOND
+
+  click_btn_sup(st: alaris): state =
+    release_btn_sup(press_btn_sup(st))
+
+  press_btn_fdown(st: alaris): state =
+    COND
+      per_fdown(st) -> fdown(st),
+      ELSE -> st
+    ENDCOND
+
+  release_btn_fdown(st: alaris): state =
+    COND
+      per_release_fdown(st) -> release_fdown(st),
+      ELSE -> st
+    ENDCOND
+
+ click_btn_fdown(st: alaris): state =
+    release_btn_fdown(press_btn_fdown(st))
+
+  press_btn_sdown(st: alaris): state =
+    COND
+      per_sdown(st) -> sdown(st),
+      ELSE -> st
+    ENDCOND
+
+  release_btn_sdown(st: alaris): state =
+    COND
+      per_release_sdown(st) -> release_sdown(st),
+      ELSE -> st
+    ENDCOND
+
+  click_btn_sdown(st: alaris): state =
+    release_btn_sdown(press_btn_sdown(st))
+
+  click_btn_run(st: alaris): state =
+    COND
+      per_run(st) -> run(st),
+      ELSE -> st
+    ENDCOND
+
+  click_btn_pause(st: alaris): state =
+    COND
+      per_pause(st) -> pause(st),
+      ELSE -> st
+    ENDCOND
+
+  click_btn_query(st: alaris): state =
+    COND
+      per_query(st) -> query(st),
+      ELSE -> st
+    ENDCOND
+
+  click_btn_key1(st: alaris): state =
+    COND
+      per_key1(st) -> key1(st),
+      ELSE -> st
+    ENDCOND
+
+  click_btn_key2(st: alaris): state =
+    COND
+      per_key2(st) -> key2(st),
+      ELSE -> st
+    ENDCOND
+
+  click_btn_key3(st: alaris): state =
+    COND
+      per_key3(st) -> key3(st),
+      ELSE -> st
+    ENDCOND
+
+  alaris_tick(st: alaris): state =
+    COND
+      per_tick(st) -> tick(st),
+      ELSE -> st
+    ENDCOND
+
+
+ END main

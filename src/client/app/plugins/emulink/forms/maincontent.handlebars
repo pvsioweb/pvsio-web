@@ -1,5 +1,6 @@
 <!-- container for overlay page with Start button -->
-<div id="EmuchartLogo" class="Start">
+<!--<div id="EmuchartLogo" class="Start">-->
+<div id="EmuchartLogo" class="hidden">
     <span class="center">Load a saved diagram, or create a new empty diagram with the buttons below</span>
     <br/>
     <button class="btn btn-primary" id="btnLoadEmuchart"> Load Emuchart </button>
@@ -7,7 +8,8 @@
 </div>
 
 <!-- container for graphical editor -->
-<div id="graphicalEditor" class="hidden">
+<!--<div id="graphicalEditor" class="hidden">-->
+<div id="graphicalEditor">
     <div id="EmuchartToolbar" >
         <ul class="dropdown dropdown-vertical">
             <li class='toolbar'>
@@ -124,8 +126,8 @@
                     <li><a href='#!' id="btn_menuPVSPrinter"><span>PVS Theory</span></a></li>
 					<li><a href='#!' id="btn_menuPIMPrinter"><span>PIM Model</span></a></li>
                     <li><a href='#!' id="btn_menuMALPrinter"><span>MAL Model</span></a></li>
-                    <li><a href='#!' id="btn_menuMALPrinter2"><span>MAL Model v2</span></a></li>
-                    <li><a href='#!' id="btn_menuSALPrinter" class="tobeimplemented"><span>MAL Model</span></a></li>
+                    <li><a href='#!' id="btn_menuVDMPrinter"><span>VDM Model</span></a></li>
+                    <li><a href='#!' id="btn_menuSALPrinter" class="tobeimplemented"><span>SAL Model</span></a></li>
 					<li><a href='#!' id="btn_menuLustrePrinter" class="tobeimplemented"><span>Lustre Model</span></a></li>
                     <li class="divider"></li>
                     <li><a href='#!' id="btn_menuCPrinter" class="tobeimplemented"><span>C Code</span></a></li>

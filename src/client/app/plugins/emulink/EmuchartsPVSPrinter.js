@@ -5,32 +5,32 @@
  * @date 27/05/14 9:38:13 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3 */
+/*global define, d3*/
 define(function (require, exports, module) {
-	"use strict";
+    "use strict";
 
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var EmuchartsParser_UnitTest = require("plugins/emulink/EmuchartsParser_UnitTest");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
-    
-    
+
+
     var theory_name;
     var parser;
-    
+
     var parserUnitTest;
-    var unitTestEnabled = true;
+    var unitTestEnabled = false;
     var initialMachineState = "initialMachineState";
     var machineStateType = "MachineState";
-    
+
     var pvsRecordTypePrinter = require("plugins/emulink/models/pvs/pvsRecordTypePrinter");
     var pvsEnumeratedTypePrinter = require("plugins/emulink/models/pvs/pvsEnumeratedTypePrinter");
     var pvsOverrideExpressionPrinter = require("plugins/emulink/models/pvs/pvsOverrideExpressionPrinter");
-    
+
     var predefined_variables = {
         previous_state: { name: "previous_state", type: machineStateType, value: initialMachineState },
         current_state: { name: "current_state", type: machineStateType, value: initialMachineState }
     };
-    
+
     var automaticConstants;
 
     var displayNotification = function (msg, title) {
@@ -46,12 +46,12 @@ define(function (require, exports, module) {
     var displayError = function (msg) {
         displayNotification(msg, "Compilation Error");
     };
-    var displayWarning = function (msg) {
-        displayNotification(msg, "Warning");
-    };
+//    var displayWarning = function (msg) {
+//        displayNotification(msg, "Warning");
+//    };
     /**
-	 * Constructor
-	 */
+     * Constructor
+     */
     function EmuchartsPVSPrinter(name) {
         theory_name = name;
         automaticConstants = [];
@@ -65,12 +65,12 @@ define(function (require, exports, module) {
         pvsOverrideExpressionPrinter = pvsOverrideExpressionPrinter.create();
         return this;
     }
-    
+
     EmuchartsPVSPrinter.prototype.set_theory_name = function (name) {
         theory_name = name;
         return this;
     };
-    
+
     /**
      * Prints PVS definitions for Emuchart states
      */
@@ -84,7 +84,7 @@ define(function (require, exports, module) {
         ans += pvsEnumeratedTypePrinter.fromArray("MachineState", tmp);
         return ans;
     };
-    
+
 
     /**
      * Prints PVS definitions of utility functions used in Emuchart
@@ -97,7 +97,7 @@ define(function (require, exports, module) {
                         ")(st: State): State = st WITH [ " + predefined_variables.previous_state.name + " := ms ]\n";
         return ans;
     }
-    
+
     /**
      * This function converts the name of operators in expressions -- needed for && || == != !
      */
@@ -136,7 +136,7 @@ define(function (require, exports, module) {
         }
         return term;
     };
-    
+
     function isVariable(name, emuchart) {
         if (name === predefined_variables.current_state.name ||
                 name === predefined_variables.previous_state.name) {
@@ -153,7 +153,7 @@ define(function (require, exports, module) {
         return false;
     }
 
-    
+
     /**
      * Prints PVS definitions for Emuchart initial transitions
      */
@@ -175,7 +175,7 @@ define(function (require, exports, module) {
                 console.log(ans.err);
                 return ret;
             }
-            
+
             var theTransition = {
                 identifier: ans.res.val.identifier || { type: "identifier", val: "init" },
                 cond:    ans.res.val.cond || { type: "expression", val: [] },
@@ -217,7 +217,7 @@ define(function (require, exports, module) {
             variables.push(predefined_variables.current_state);
             variables.push(predefined_variables.previous_state);
             variables = variables.concat(emuchart.variables);
-            // FIXME: check for name conflicts when adding variables 
+            // FIXME: check for name conflicts when adding variables
             // so user has immediate feedback about issues with names
             // or alternatively popup a dialog, highlight the issues and
             // to let the user fix them
@@ -242,7 +242,7 @@ define(function (require, exports, module) {
         }
         return ret;
     };
-    
+
     /**
      * Prints PVS definitions for Emuchart transitions given in the form transition [condition] {actions}
      */
@@ -276,19 +276,19 @@ define(function (require, exports, module) {
             }
             return term.val;
         }
-        
+
         var ret = { err: null, res: null };
-        // multiple transitions can have the same identifier 
+        // multiple transitions can have the same identifier
         // (because the same transition can originate from different nodes)
         // this keeps track of the transitions we've already processed -- needed to avoid duplicates
         var done = d3.map();
-        
+
         if (emuchart.transitions && emuchart.transitions.length > 0) {
             var transitions = [];
             emuchart.transitions.forEach(function (t) {
                 if (t.name === "") { t.name = "tick"; }
                 var ans = parser.parseTransition(t.name);
-                                
+
                 if (!ans.err && ans.res && ans.res.type === "transition") {
                     transitions.push({
                         identifier: ans.res.val.identifier || { type: "identifier", val: "tick" },
@@ -309,7 +309,7 @@ define(function (require, exports, module) {
                 // if not, add the transition identifier to the list of transitions already processed
                 if (done.get(theTransition.identifier.val)) { return; }
                 done.set(theTransition.identifier.val, true);
-                
+
                 // permission function
                 var permissionFunction = {
                     identifier: "per_" + theTransition.identifier.val,
@@ -322,10 +322,10 @@ define(function (require, exports, module) {
                     identifier: theTransition.identifier.val,
                     signature : theTransition.identifier.val + "(st: (" + permissionFunction.identifier + ")): State",
                     cases: []
-                    // the body of the function is given by a COND-ENDCOND statement 
+                    // the body of the function is given by a COND-ENDCOND statement
                     // made up from the expressions collected in array cases
                 };
-                
+
                 // generate cases for permission function and transition function
                 transitions.forEach(function (transition) {
                     // each case depends on the state from which the transition starts, and the transition conditions
@@ -357,7 +357,7 @@ define(function (require, exports, module) {
                             });
                             cond.push("(" + tmp.join(" ") + ")");
                         }
-                        // the final expression for post is a LET-IN expression 
+                        // the final expression for post is a LET-IN expression
                         // given by the sequence of collected statements separated by commas
                         var letExpr = [ ("LET new_st = leave_state(" + transition.from + ")(st)") ];
                         var inExpr = "";
@@ -393,7 +393,7 @@ define(function (require, exports, module) {
                             });
                         }
                         inExpr = "IN enter_into(" + transition.to + ")(new_st)";
-                        
+
                         permissionFunction.cases.push("(" + cond.join(" AND ") + ")");
                         transitionFunction.cases.push({ cond: cond, letExpr: letExpr, inExpr: inExpr });
                     }
@@ -402,7 +402,7 @@ define(function (require, exports, module) {
                 // store results
                 pvsFunctions.push({ per: permissionFunction, tran: transitionFunction });
             });
-            
+
             var ans = print_utils();
             ans += "\n  %-- transition functions\n";
             pvsFunctions.forEach(function (f) {
@@ -421,8 +421,8 @@ define(function (require, exports, module) {
         }
         return ret;
     };
-    
-    
+
+
     /**
      * Prints the PVS definition for Emuchart variables
      */
@@ -489,7 +489,7 @@ define(function (require, exports, module) {
         }
         return ans;
     };
-        
+
     EmuchartsPVSPrinter.prototype.print_descriptor = function (emuchart) {
         var ans = "% ---------------------------------------------------------------" +
                     "\n%  Theory: " + emuchart.name;
@@ -505,7 +505,7 @@ define(function (require, exports, module) {
         ans += "\n% ---------------------------------------------------------------\n";
         return ans;
     };
-    
+
     EmuchartsPVSPrinter.prototype.print_disclaimer = function () {
         var ans = "\n% ---------------------------------------------------------------\n" +
                     "%  PVS theory generated using PVSio-web PVSPrinter ver 0.1\n" +
@@ -513,21 +513,21 @@ define(function (require, exports, module) {
                     "\n% ---------------------------------------------------------------\n";
         return ans;
     };
-    
+
     /**
      * Prints the entire PVS theory
      */
     EmuchartsPVSPrinter.prototype.print = function (emuchart) {
         automaticConstants = [];
         var ret = { err: null, res: null };
-        
+
         var ans = this.print_descriptor(emuchart) + "\n";
         ans += emuchart.name + ": THEORY\n BEGIN\n";
         ans += this.print_importings(emuchart);
         ans += this.print_constants(emuchart);
         ans += this.print_states(emuchart);    // -- done using handlebars library
         ans += this.print_variables(emuchart); // -- done using handlebars library
-        
+
         var initialTransitions = this.print_initial_transition(emuchart);
         var transitions = this.print_transitions(emuchart);
         if (initialTransitions.err || transitions.err) {
@@ -535,15 +535,15 @@ define(function (require, exports, module) {
             displayError(ret.err);
             return ret;
         }
-        
-        ans += initialTransitions.res;
-        ans += transitions.res;
+
+        ans += initialTransitions.res || "\n";
+        ans += transitions.res || "\n";
         ans += " END " + emuchart.name + "\n";
         ans += this.print_disclaimer();
         ret.res = ans;
-        
+
         return ret;
     };
-    
+
     module.exports = EmuchartsPVSPrinter;
 });

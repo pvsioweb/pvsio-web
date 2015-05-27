@@ -7,20 +7,24 @@
     }
   ],
   "description": "A javascript library to connect to and communicate with a pvsio process using websockets",
-  "version": "0.1.1",
+  "version": "2.0.0",
   "preferGlobal": "true",
   "dependencies": {
-    "ws": "0.4.x",
-    "express": "~4.0.0",
     "body-parser": "~1.0.0",
+    "es6-promise": "0.1.x",
+    "express": "~4.0.0",
+    "open": "0.0.5",
     "tracer": "0.7.1",
-    "es6-promise": "0.1.x"
+    "ws": "0.4.x"
   },
   "devDependencies": {
-    "jasmine-node": "~1.14.3"
+    "grunt-contrib-jshint": "^0.11.1",
+    "jasmine-node": "~1.14.3",
+    "open": "0.0.5"
   },
   "scripts": {
-    "test": "jasmine-node --verbose src/server/servertests",
+    "test": "grunt test",
+    "local-test": "jasmine-node --verbose src/server/servertests; node client-test.js",
     "start": "node src/server/pvssocketserver.js"
   },
   "repository": {

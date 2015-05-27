@@ -53,7 +53,8 @@ require(["PVSioWebClient", "util/PVSioStateParser",
         
     client.addListener("WebSocketConnectionOpened", function (e) {
         console.log("connected");
-        ws.startPVSProcess({fileName: "top.pvs", demoName: "TCAS/pvs"}, function (err, event) {
+        ws.startPVSProcess({name: "top.pvs", demoName: "TCAS/pvs"}, function (err, event) {
+            d3.select("#loading").style("display", "none");
             timer = setInterval(tick, t);
             d3.select("#pause").on("click", function () {
                 clearInterval(timer);
