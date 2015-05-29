@@ -12,5 +12,13 @@ if [ -d "src/server/lib" ] && [ -f "src/server/lib/glassfish-4-1.zip.partaa" ] &
   ./installNC.sh
   cd ../../..
 fi
+if [ -d "src/server/ext" ] && [ ! -d "src/server/ext/IVY" ] &&
+    [ -f "src/server/ext/IVY.zip.partaa" ] && 
+	[ -f "src/server/ext/IVY.zip.partab" ] && 
+	[ -f "src/server/ext/IVY.zip.partac" ]; then
+  cd src/server/ext/
+  ./installIVY.sh
+  cd ../../..
+fi
 cd src/server
 node pvssocketserver.js restart

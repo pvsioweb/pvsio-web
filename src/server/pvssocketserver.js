@@ -181,6 +181,17 @@ function run() {
         });
     }
     
+    function startIVY(cb) {
+        var cmd = "cd " + __dirname + "/ext/IVY" +
+                  " && " +
+                  "java -Dlog4j.configuration=file:log4j.properties -jar lib/jpf-boot.jar -interactive";
+        console.log(cmd);
+        procWrapper().exec({
+            command: cmd,
+            callBack: cb
+        });
+    }
+    
     /**
         Creates a function that updates the path of the parameter object such that it is relative to the
         basePath specified
@@ -898,6 +909,29 @@ function run() {
                         res.type = token.type + "_error";
                         res.err = err.message;
                     }
+                    processCallback(res, socket);
+                }
+            },
+            "startIVY": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time
+                };
+                try {
+                    startIVY(function (err, stdout, stderr) {
+                        res.stdout = stdout;
+                        res.stderr = stderr;
+                        console.log("IVY err:" + err);
+                        console.log("IVY stdout:" + stdout);
+                        console.log("IVY stderr:" + stderr);
+                        processCallback(res, socket);
+                    });
+                } catch (err) {
+                    res.type = token.type + "_error";
+                    res.err = err.message;
                     processCallback(res, socket);
                 }
             },
