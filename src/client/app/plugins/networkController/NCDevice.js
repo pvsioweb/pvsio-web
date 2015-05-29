@@ -180,7 +180,7 @@ define(function (require, exports, module) {
 
     NCDevice.prototype.subscribeTo = function (publisherID) {
         if(nc_websocket_device != null) {
-            _this.fire({type: "notify", message: "-> " + message});
+            _this.fire({type: "notify", message: _this.deviceID + " subTO -> " + publisherID});
                 var DeviceAction = {
                     action: "subscribe",
                     deviceID: _this.deviceID,
