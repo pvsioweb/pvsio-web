@@ -103,11 +103,9 @@ define(function (require, exports, module) {
                 if (data.status === "ON") {
                     container_div.removeClass("tada");
                     status_span.html("<b>Status:</b> Connected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
-                    _this.fire({type: "connected", message: data});
                 } else if (data.status === "OFF") {
                     container_div.addClass("tada");
                     status_span.html("<b>Status:</b> Disconnected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
-                    _this.fire({type: "disconnected", message: data});
                 }
             }
 

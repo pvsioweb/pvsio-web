@@ -227,10 +227,12 @@ define(function (require, exports, module) {
             if (payload.action === "on") {
                 deviceON = true;
                 _this.fire({type: "notify", message: "<- " + _this.deviceID + " is now disconnected"});
+                _this.fire({type: "connected", message: data});
             }
             if (payload.action === "off") {
                 deviceON = false;
                 _this.fire({type: "notify", message: "<- " + _this.deviceID + " is now connected"});
+                _this.fire({type: "disconnected", message: data});
             }
             if (payload.action === "error"){
                 _this.fire({type: "error", message: payload.message});

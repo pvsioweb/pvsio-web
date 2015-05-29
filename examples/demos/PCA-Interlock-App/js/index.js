@@ -26,7 +26,7 @@ require([
     "widgets/TouchScreenButton"
 ], function (PVSioWebClient, stateParser, NCDevice, NCMonitor, PatientMonitorDisplay, PumpMonitorDisplay, TripleDisplay, SingleDisplay, ButtonActionsQueue, TouchScreenButton) {
 
-    var deviceID = "Supervisor_ID";
+    var deviceID = "Supervisor";
     var deviceType = "Supervisor";
     var d3 = require("d3/d3");
     //var deviceDescription = "Supervisor";
@@ -76,14 +76,15 @@ require([
     ncDevice.addListener("update", parseNCUpdate);
     ncDevice.addListener("error", errorMessage);
     ncDevice.addListener("notify", notifyMessage);
+    ncDevice.addListener("connected", onConnect);
+    ncDevice.addListener("disconnected", onDisconnect);
 
     var urlMonitor = window.location.origin.split(":").slice(0,2).join(":") + ":8080/NetworkController/monitor";
     urlMonitor = urlMonitor.replace("http://", "ws://");    
     var ncMonitor = new NCMonitor({ url: urlMonitor });
     ncMonitor.addListener("error", errorMessage);
     ncMonitor.addListener("notify", notifyMessage);
-    ncMonitor.addListener("connected", onConnect);
-    ncMonitor.addListener("disconnected", onDisconnect);
+
 
     //-- UI of the ICE Supervisor
     function start_tick() {
@@ -428,10 +429,10 @@ require([
     
 
     function stoptNetworkController() {
-//        // Uncomment this to invoke glassfish from commands line
-//        return new Promise(function (resolve, reject) {
-//            resolve(msg);
-//        });
+        // Uncomment this to invoke glassfish from commands line
+        return new Promise(function (resolve, reject) {
+            resolve(msg);
+        });
 
         var msg = "Stopping ICE Network Controller...";
         console.log(msg);
@@ -450,10 +451,10 @@ require([
         });
     }
     function startNetworkController() {
-//        // Uncomment this to invoke glassfish from commands line
-//        return new Promise(function (resolve, reject) {
-//            resolve(msg);
-//        });
+        // Uncomment this to invoke glassfish from commands line
+        return new Promise(function (resolve, reject) {
+            resolve(msg);
+        });wi
 
         var msg = "Starting ICE Network Controller...";
         console.log(msg);
