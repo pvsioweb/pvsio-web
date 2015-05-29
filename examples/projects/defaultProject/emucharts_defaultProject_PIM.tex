@@ -1,0 +1,35 @@
+% --------------------------------------------------------------
+%  PIM: emucharts_defaultProject_PIM
+%  Author: <author name>
+%          <affiliation>
+%          <contact>
+% ---------------------------------------------------------------
+
+\begin{zed}
+  State ::= X1 | X2 \\
+  Signal ::= T1 
+\end{zed}
+
+\begin{schema}{PIMSystem}
+  currentState : State
+\end{schema}
+
+\begin{schema}{Init}
+  PIMSystem
+\where
+  currentState = X1
+\end{schema}
+
+\begin{schema}{TransitionX1X2}
+  \Delta PIMSystem\\
+  i? : Signal
+\where
+  i? = T1 \\
+  currentState = X1 \\
+  currentState' = X2
+\end{schema}
+
+% ---------------------------------------------------------------
+%  PIM model generated using PVSio-web PIMPrinter ver 0.1
+%  Tool freely available at http://www.pvsioweb.org
+% ---------------------------------------------------------------
