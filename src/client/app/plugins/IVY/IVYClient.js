@@ -65,6 +65,7 @@ define(function (require, exports, module) {
 
     IVYClient.prototype.send = function(cmd) {
         if(_this.ws && _this.ws.readyState === _this.ws.OPEN) {
+            _this.fire({type: "WebSocketSend", message: "Sending command over websocket connection", serverURL: _this.url, cmd: cmd});
             _this.ws.send(cmd);
         }
         else{
