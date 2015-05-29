@@ -1,2 +1,0 @@
-#Patient_name,	Age, Gender, Weight, Drug, Location
-42		35   0	    280	    10 	  3
