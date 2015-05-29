@@ -31,7 +31,29 @@
     </head>
     <body>
         <div id="content" class="content" style="display:none;"></div>
-        <div id="splash" class="demo-splash">
+        <div id="controls" class="controls" style="display:none;">
+            <div id="infusion_set" style="padding: 10px 28px 10px 28px; border: steelblue; border-style: solid;">
+                <input type="button" id="btn_insert_infusionset" value="Insert infusion set" style="margin-right: 20px">
+                <span>Infusion set</span>
+                <span id="infusionset_status" value="not_inserted">NOT inserted</span>
+                <input type="button" id="btn_remove_infusionset" value="Remove infusion set" style="margin-left: 20px">
+            </div>
+            <div id="mains" style="padding: 10px 28px 10px 28px; border: lightgreen; border-style: solid;">
+                <input type="button" id="btn_plug_mains" value="Plug into Mains" style="margin-right: 20px; margin-left:10px;">
+                <span>Pump</span>
+                <span id="mains_status" value="not_inserted">connected to MAINS</span>
+                <input type="button" id="btn_unplug_mains" value="Run on Battery" style="margin-left: 20px">
+            </div>
+            <div id="battery" style="padding: 10px 28px 10px 28px; border: grey; border-style: solid;">
+                <input type="submit" id="set_battery_level" value="Set New Battery Level" style="margin-left: 10px">
+                <input type="text"
+                       id="battery_level"
+                       name="battery_level"
+                       placeholder="Enter new battery level..."
+                       size="34">
+            </div>            
+        </div>
+        <div id="splash" class="demo-splash" style="height: 800px;">
             <div class="loader">
                 <div class="version">Alaris GP Demo</div>
                 <div class="bar">Loading<div></div><div></div><div></div><div></div></div>

@@ -21,7 +21,6 @@ define(function (require, exports, module) {
     "use strict";
 
     var d3 = require("d3/d3");
-//    var black, white;
 
     /**
      * @function <a name="LED">LED</a>
@@ -36,7 +35,7 @@ define(function (require, exports, module) {
     function LED(id, coords, opt) {
         opt = opt || {};
         this.id = id;
-        this.parent = opt.parent || "body";
+        this.parent = (opt.parent) ? ("#" + opt.parent) : "body";
         this.top = coords.top || 0;
         this.left = coords.left || 0;
         this.width = coords.width || 10;
@@ -45,9 +44,10 @@ define(function (require, exports, module) {
         this.smallFont = (this.height * 0.8) + "px " + (opt.font || "sans-serif");
         this.align = opt.align || "center";
         this.textBaseline = "middle";
-        this.radius = opt.radius || 4;
+        this.radius = opt.radius || 3;
         this.color = opt.color || "#00FF66"; // default is light green
-        this.div = d3.select("#" + this.parent)
+        this.blinking = opt.blinking || false;
+        this.div = d3.select(this.parent)
                         .append("div").style("position", "absolute")
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")
@@ -57,6 +57,7 @@ define(function (require, exports, module) {
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0)
                         .style("vertical-align", "top");
+        this.isOn = false;
         return this;
     }
 
@@ -69,24 +70,46 @@ define(function (require, exports, module) {
         context.fillStyle = opt.color || this.color;
         context.fill();
         if (!opt.noborder) { context.stroke(); }
+        var elemClass = this.div.node().getAttribute("class");
+        if (opt.blinking || this.blinking) {
+            elemClass += " blink";
+        } else {
+            elemClass = elemClass.replace(" blink", "");
+        }
+        this.div.node().setAttribute("class", elemClass);
         this.reveal();
         return this;
     };
 
+    LED.prototype.toggle = function (opt) {
+        if (this.isOn === true) {
+            this.hide();
+        } else {
+            this.reveal();
+        }
+        return this;
+    };
+    
     LED.prototype.on = function (opt) {
+        this.isOn = true;
         this.render(opt);
+        return this;
     };
 
     LED.prototype.off = function () {
+        this.isOn = false;
         this.hide();
+        return this;
     };
 
     LED.prototype.hide = function () {
         this.div.style("display", "none");
+        return this;
     };
 
     LED.prototype.reveal = function () {
         this.div.style("display", "block");
+        return this;
     };
 
     module.exports = LED;

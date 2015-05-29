@@ -7,7 +7,7 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 define(function (require, exports, module) {
     "use strict";
-    var Widget = require("pvsioweb/Widget"),
+    var Widget = require("widgets/Widget"),
         d3 = require("d3/d3"),
         property = require("util/property"),
         Timer	= require("util/Timer"),
@@ -49,7 +49,7 @@ define(function (require, exports, module) {
         this.width = coords.width || 32;
         this.height = coords.height || 32;
 
-        this.area = parent.append("area")
+        this.area = opt.area || parent.append("area")
                         .attr("coords", this.left + "," + this.top + ","
                               + (this.left + this.width) + "," + (this.top + this.height))
                         .attr("id", id)
@@ -64,11 +64,10 @@ define(function (require, exports, module) {
     Button.prototype.constructor = Button;
     Button.prototype.parentClass = Widget.prototype;
     /**
-        Gets a comma separated string representing the functions that will be called in the
-        pvs spec when interating with this button.
-        @returns {string}
-        @memberof Button
-    */
+     * @function boundFunctions
+     * @returns {String} A comma separated string representing the PVS functions modelling actions over this button.
+     * @memberof module:Button
+     */
     Button.prototype.boundFunctions = function () {
         var o = this;
         var res = o.evts().map(function (d) {
@@ -85,9 +84,9 @@ define(function (require, exports, module) {
     };
 
     /**
-        Returns a JSON object representation of this Button.
-        @returns {object}
-        @memberof Button
+     * Returns a JSON object representation of this Button.
+     * @returns {object}
+     * @memberof module:Button
     */
     Button.prototype.toJSON = function () {
         return {
@@ -101,18 +100,103 @@ define(function (require, exports, module) {
     };
 
     /**
+     * @function release
+     * @description API to simulate a release action on the button
+     * @memberof module:Button
+     */
+    Button.prototype.release = function (opt) {
+        opt = opt || {};
+        var f = this.functionText();
+        
+        ButtonActionsQueue.queueGUIAction("release_" + f, opt.callback);
+        Recorder.addAction({
+            id: this.id(),
+            functionText: this.functionText(),
+            action: "release",
+            ts: new Date().getTime()
+        });
+        mouseup(d3.event);
+        return this;
+    };
+    
+    /**
+     * @function press
+     * @description API to simulate a single press action on the button
+     * @memberof module:Button
+     */
+    Button.prototype.press = function (opt) {
+        opt = opt || {};
+        var f = this.functionText();
+        
+        ButtonActionsQueue.queueGUIAction("press_" + f, opt.callback);
+        Recorder.addAction({
+            id: this.id(),
+            functionText: this.functionText(),
+            action: "press",
+            ts: new Date().getTime()
+        });
+        return this;
+    };
+    
+    /**
+     * @function pressAndHold
+     * @description API to simulate a continuous press action on the button
+     * @memberof module:Button
+     */
+    Button.prototype.pressAndHold = function (opt) {
+        opt = opt || {};
+        var f = this.functionText(),
+        widget = this;
+        
+        this.press(opt);
+        timerTickFunction = function () {
+            console.log("timer ticked_" + f);
+            ButtonActionsQueue.queueGUIAction("press_" + f, opt.callback);
+            //record action
+            Recorder.addAction({
+                id: widget.id(),
+                functionText: widget.functionText(),
+                action: "press",
+                ts: new Date().getTime()
+            });
+        };
+        btnTimer.interval(this.recallRate()).start();        
+        
+        return this;
+    };
+    
+    /**
+     * @function click
+     * @description API to simulate a click action on the button
+     * @memberof module:Button
+     */
+    Button.prototype.click = function (opt) {
+        opt = opt || {};
+        var f = this.functionText();
+        ButtonActionsQueue.queueGUIAction("click_" + f, opt.callback);
+        Recorder.addAction({
+            id: this.id(),
+            functionText: this.functionText(),
+            action: "click",
+            ts: new Date().getTime()
+        });
+        return this;
+    };
+    
+    /**
      * @override
-     * Create and image map area for this button and bind functions in the button's events property with appropriate
-     * calls to function in the pvs specification. Whenever a response is returned from the pvs function call, the callback
+     * @function createImageMap
+     * @description Creates an image map area for this button and binds functions in the button's events property with appropriate
+     * calls to function in the PVS model. Whenever a response is returned from the PVS function call, the callback
      * function is invoked.
      * @param {!pvsWSClient} ws A websocket client to use for sending gui actions to the server process
      * @param {function} callback A callback function to invoke when the pvs function call on the server process is returned
-     * @returns {d3.selection} The image map area created
-       @memberof Button
+     * @returns {d3.selection} The image map area created for the button
+     * @memberof Button
      */
     Button.prototype.createImageMap = function (opt) {
         opt = opt || {};
-        var callback = opt.callback || function () {};
+        opt.callback = opt.callback || function () {};
 
         var area = opt.area || Button.prototype.parentClass.createImageMap.apply(this, arguments),
             widget = this,
@@ -120,15 +204,8 @@ define(function (require, exports, module) {
             evts;
 
         var onmouseup = function () {
-            var f = widget.functionText();
-            if (evts && evts.indexOf('press/release') > -1) {
-                ButtonActionsQueue.queueGUIAction("release_" + f, callback);
-                Recorder.addAction({
-                    id: widget.id(),
-                    functionText: widget.functionText(),
-                    action: "release",
-                    ts: new Date().getTime()
-                });
+            if (evts && evts.indexOf("press/release") > -1) {
+                widget.release(opt);
             }
             mouseup(d3.event);
             area.on("mouseup", null);
@@ -138,25 +215,12 @@ define(function (require, exports, module) {
             evts = widget.evts();
             //perform the click event if there is one
             if (evts && evts.indexOf('click') > -1) {
-                ButtonActionsQueue.queueGUIAction("click_" + f, callback);
-                //record action
-                Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "click", ts: new Date().getTime()});
+                widget.click(opt);
             } else if (evts && evts.indexOf("press/release") > -1) {
-                ButtonActionsQueue.queueGUIAction("press_" + f, callback);
-
-                Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
-
-                timerTickFunction = function () {
-                    console.log("timer ticked_" + f);
-                    ButtonActionsQueue.queueGUIAction("press_" + f, callback);
-                    //record action
-                    Recorder.addAction({id: widget.id(), functionText: widget.functionText(), action: "press", ts: new Date().getTime()});
-                };
-                btnTimer.interval(widget.recallRate()).start();
+                widget.pressAndHold(opt);
             }
             //register mouseup/out events here
             area.on("mouseup", onmouseup);
-
         });
         widget.imageMap(area);
         return area;

@@ -1,9 +1,4 @@
-define(function (require, exports, module) {
 (function() {
-  if (typeof module === "undefined") self.queue = queue;
-  else module.exports = queue;
-  queue.version = "1.0.4";
-
   var slice = [].slice;
 
   function queue(parallelism) {
@@ -77,6 +72,9 @@ define(function (require, exports, module) {
   }
 
   function noop() {}
-})();
 
-});
+  queue.version = "1.0.7";
+  if (typeof define === "function" && define.amd) define(function() { return queue; });
+  else if (typeof module === "object" && module.exports) module.exports = queue;
+  else this.queue = queue;
+})();
