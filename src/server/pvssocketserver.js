@@ -186,10 +186,16 @@ function run() {
                   " && " +
                   "java -Dlog4j.configuration=file:log4j.properties -jar lib/jpf-boot.jar -interactive";
         console.log(cmd);
+        // This delayed callback is a workaround to wait for IVY to start up.
+        // We can remove this workaround as soon as the IVY tool implements a way to start IVY and return control to the caller.
+        function delayedCallback() {
+            setTimeout(cb, 2000);
+        }
         procWrapper().exec({
             command: cmd,
-            callBack: cb
+            callBack: null
         });
+        delayedCallback();
     }
     
     /**
