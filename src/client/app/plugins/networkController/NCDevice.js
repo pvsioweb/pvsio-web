@@ -12,7 +12,7 @@ define(function (require, exports, module) {
     var eventDispatcher = require("util/eventDispatcher");
 
     /**
-     * @function NetworkController
+     * @function NCDevice
      * @description Constructor.
      * @param device {!Object} This object describes the device. It has the following fields:<br>
      *     <li>id </li>
@@ -139,7 +139,7 @@ define(function (require, exports, module) {
                     msg: message
                 };
                 var DeviceAction = {
-                    action: "update",
+                    action: "publish",
                     deviceID: _this.deviceID,
                     message: payload
                 };
@@ -159,7 +159,7 @@ define(function (require, exports, module) {
             if (_this.deviceType !== "Supervisor") {
                 _this.fire({type: "notify", message: "-> " + message});
                 var DeviceAction = {
-                    action: "update",
+                    action: "publish",
                     deviceID: _this.deviceID,
                     message: message
                 };
@@ -171,6 +171,22 @@ define(function (require, exports, module) {
                     message: "This function is reserved to Devices different from 'Supervisor' \nUse sendControlData() instead"
                 });
             }
+        }
+        else{
+            _this.fire({type: "error", message: "Websocket not opened"});
+        }
+    };
+
+
+    NCDevice.prototype.subscribeTo = function (publisherID) {
+        if(nc_websocket_device != null) {
+            _this.fire({type: "notify", message: "-> " + message});
+                var DeviceAction = {
+                    action: "subscribe",
+                    deviceID: _this.deviceID,
+                    publisherID: publisherID
+                };
+                nc_websocket_device.send(JSON.stringify(DeviceAction));
         }
         else{
             _this.fire({type: "error", message: "Websocket not opened"});
