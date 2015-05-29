@@ -318,7 +318,7 @@ define(function (require, exports, module) {
             var trPerms = "";
             actions.get(taction).forEach(function (a) { //a - (from, [(dest, [cond, eff])])
                 //res += "++" + a + "\n";
-                var conds = new Array();
+                var conds = [];
                 a.forEach(function (tfrom) { //tfrom - from
                     var trFrom = tfrom;
                     a.get(tfrom).forEach(function (c) { //c - (dest, [cond, eff])
