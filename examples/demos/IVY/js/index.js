@@ -22,15 +22,45 @@ require(["widgets/SingleDisplay", "widgets/Button", "widgets/ButtonActionsQueue"
     
     var d3 = require("d3/d3");
     
+    function logOnDiv(msg) {
+        var newP = document.createElement("p");
+        newP.innerHTML = new Date() + msg;
+        var node = document.getElementById("dbg");
+        node.appendChild(newP);
+        node.scrollTop = node.scrollHeight;
+    }
+
     var ivy = new IVYClient();
-    function onWSOpen(data) { console.log("Connected to IVY!"); console.log(data); }
-    function onWSClose(data) { console.log("Disconnected from IVY :(("); console.log(data); }
-    function onWSError(data) { console.log("Error from IVY :(("); console.log(data); }
-    function onIVYMessageReceived(data) { console.log("New message received from IVY!"); console.log(data); }
+    function onWSOpen(data) {
+        console.log("Connected to IVY!");
+        console.log(data);
+        logOnDiv(JSON.stringify(data, null, " "));
+    }
+    function onWSClose(data) {
+        console.log("Disconnected from IVY :((");
+        console.log(data);
+        logOnDiv(JSON.stringify(data, null, " "));
+    }
+    function onWSError(data) {
+        console.log("Error from IVY :((");
+        console.log(data);
+        logOnDiv(JSON.stringify(data, null, " "));
+    }
+    function onWSSend(data) {
+        console.log("Sending message...");
+        console.log(data);
+        logOnDiv(JSON.stringify(data, null, " "));
+    }
+    function onIVYMessageReceived(data) {
+        console.log("New message received from IVY!");
+        console.log(data);
+        logOnDiv(JSON.stringify(data, null, " "));        
+    }
     ivy.addListener("WebSocketConnectionOpened", onWSOpen);
     ivy.addListener("WebSocketConnectionClosed", onWSClose);
     ivy.addListener("WebSocketConnectionError", onWSError);
     ivy.addListener("ivyMessageReceived", onIVYMessageReceived);
+    ivy.addListener("WebSocketSend", onWSSend);
     
     
 	var client = PVSioWebClient.getInstance();
@@ -61,7 +91,7 @@ require(["widgets/SingleDisplay", "widgets/Button", "widgets/ButtonActionsQueue"
             res[t[0].replace("(#", "").trim()] = t[1].trim();
         });
         return res;
-    }
+    }    
     
     /**
         function to handle when an output has been received from the server after sending a guiAction
@@ -72,7 +102,9 @@ require(["widgets/SingleDisplay", "widgets/Button", "widgets/ButtonActionsQueue"
             if (str.indexOf("/") < 0) { return str; }
             var args = str.split("/");
             return +args[0] / +args[1];
-        }        
+        }
+        console.log("-- new message received --");
+        console.log(err);
         if (!err) {
             client.getWebSocket().lastState(event.data);
             var res = event.data.toString();
@@ -94,21 +126,13 @@ require(["widgets/SingleDisplay", "widgets/Button", "widgets/ButtonActionsQueue"
 		client.getWebSocket().send({ type: "startIVY" }, function (err, event) {
             if (!err) {
                 console.log("IVY started successfully!");
+                logOnDiv("IVY started successfully!");
             } else {
                 console.log("Error while starting IVY :((");
                 console.log(err);
+                logOnDiv(JSON.stringify(err, null, " "));
             }
         });
-    });
-    d3.select("#stopIVY").on("click", function () {
-		client.getWebSocket().send({type: "stopIVY"}, function (err) {
-            if (!err) {
-                console.log("IVY stoppped.");
-            } else {
-                console.log("Error while stopping IVY...");
-                console.log(err);
-            }
-		});    
     });
     d3.select("#connect").on("click", function() {
         ivy.connect().then(function (res) {
@@ -119,22 +143,26 @@ require(["widgets/SingleDisplay", "widgets/Button", "widgets/ButtonActionsQueue"
     d3.select("#sendCommand").on("click", function () {
 		if (ivy && ivy.sendCommandEnabled) {
             var cmd = d3.select("#ivyCommand").node().value;
-            ivy.ws.send(cmd);
+            logOnDiv("Sending command " + cmd);
+            ivy.send(cmd);
         }
     });
     
     //register event listener for websocket connection from the client
 	client.addListener('WebSocketConnectionOpened', function (e) {
-		console.log("web socket connected");
+		console.log("PVSio-web started successfully!");
+        logOnDiv("PVSio-web started successfully!");
 		//-- uncomment these lines to start the bbraun demo in PVS
 //		client.getWebSocket().startPVSProcess({
 //            name: "emucharts_MedtronicMinimed530G_th", demoName: "IVY/pvs"
 //        }, function (err, event) { });
 	}).addListener("WebSocketConnectionClosed", function (e) {
-		console.log("web socket closed");
+		console.log("PVSio-web closed :((");
+        logOnDiv("PVSio-web closed :((");
 	}).addListener("processExited", function (e) {
 		var msg = "Warning!!!\r\nServer process exited. See console for details.";
 		console.log(msg);
+        logOnDiv(msg);
 	});
 	
 	client.connectToServer();
