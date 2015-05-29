@@ -181,6 +181,23 @@ function run() {
         });
     }
     
+    function startIVY(cb) {
+        var cmd = "cd " + __dirname + "/ext/IVY" +
+                  " && " +
+                  "java -Dlog4j.configuration=file:log4j.properties -jar lib/jpf-boot.jar -interactive";
+        console.log(cmd);
+        // This delayed callback is a workaround to wait for IVY to start up.
+        // We can remove this workaround as soon as the IVY tool implements a way to start IVY and return control to the caller.
+        function delayedCallback() {
+            setTimeout(cb, 2000);
+        }
+        procWrapper().exec({
+            command: cmd,
+            callBack: null
+        });
+        delayedCallback();
+    }
+    
     /**
         Creates a function that updates the path of the parameter object such that it is relative to the
         basePath specified
@@ -898,6 +915,29 @@ function run() {
                         res.type = token.type + "_error";
                         res.err = err.message;
                     }
+                    processCallback(res, socket);
+                }
+            },
+            "startIVY": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time
+                };
+                try {
+                    startIVY(function (err, stdout, stderr) {
+                        res.stdout = stdout;
+                        res.stderr = stderr;
+                        console.log("IVY err:" + err);
+                        console.log("IVY stdout:" + stdout);
+                        console.log("IVY stderr:" + stderr);
+                        processCallback(res, socket);
+                    });
+                } catch (err) {
+                    res.type = token.type + "_error";
+                    res.err = err.message;
                     processCallback(res, socket);
                 }
             },
