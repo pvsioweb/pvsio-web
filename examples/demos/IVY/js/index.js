@@ -94,7 +94,6 @@ require(["widgets/SingleDisplay", "widgets/Button", "widgets/ButtonActionsQueue"
 		client.getWebSocket().send({ type: "startIVY" }, function (err, event) {
             if (!err) {
                 console.log("IVY started successfully!");
-                ivy.connect();
             } else {
                 console.log("Error while starting IVY :((");
                 console.log(err);
@@ -111,10 +110,16 @@ require(["widgets/SingleDisplay", "widgets/Button", "widgets/ButtonActionsQueue"
             }
 		});    
     });
+    d3.select("#connect").on("click", function() {
+        ivy.connect().then(function (res) {
+            d3.select("#sendPanel").style("display", "block");
+            ivy.sendCommandEnabled = true;
+        }).catch(function (err) { console.log(err); });
+    });
     d3.select("#sendCommand").on("click", function () {
-		if (ivy) {
+		if (ivy && ivy.sendCommandEnabled) {
             var cmd = d3.select("#ivyCommand").node().value;
-            ivy.send(cmd);
+            ivy.ws.send(cmd);
         }
     });
     
