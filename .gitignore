@@ -4,10 +4,11 @@
 .pvscontext
 .settings
 .DS_Store
-*.prf
+*.bin
 public/uploads/*
 public/widgetDefinitions/*
-public/projects/*/pvsbin/*
+examples/projects/*/pvsbin/*
+examples/projects/autosave
 *.summary
 node_modules/*
 doc/out
@@ -19,3 +20,5 @@ public/pvsioweb/lib/cm/mode/python/python.js
 public/pvsioweb/lib/less-1.7.0.min.js
 public/V1.html
 test.js
+.idea
+pvsio-web.iml
