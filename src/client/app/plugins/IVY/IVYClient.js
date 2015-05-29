@@ -44,19 +44,19 @@ define(function (require, exports, module) {
             _this.ws = new WebSocket(_this.url);
             _this.ws.onopen = function () {
                 console.log("IVY-ws connection open");
-                _this.fire({type: "WebSocketConnectionOpened", message: "Connected to IVY!"});
+                _this.fire({type: "WebSocketConnectionOpened", message: "Connected to IVY!", serverURL: _this.url});
                 resolve();
             };
             _this.ws.onmessage = onMessageReceived;
             _this.ws.onclose = function () {
                 console.log("IVY-ws connection closed");
-                _this.fire({type: "WebSocketConnectionClosed", message: "Disconnected from IVY (" + _this.url + ")"});
+                _this.fire({type: "WebSocketConnectionClosed", message: "Disconnected from IVY (" + _this.url + ")", serverURL: _this.url});
                 _this.ws = null;
                 reject({ code: "CLOSED" });
             };
             _this.ws.onerror = function () {
                 console.log("IVY-ws connection error");
-                _this.fire({type: "WebSocketConnectionError", message: "Unable to connect to IVY (" + _this.url + ")"});
+                _this.fire({type: "WebSocketConnectionError", message: "Unable to connect to IVY (" + _this.url + ")", serverURL: _this.url});
                 _this.ws = null;
                 reject({ code: "ERROR" });
             };
@@ -68,7 +68,7 @@ define(function (require, exports, module) {
             _this.ws.send(cmd);
         }
         else{
-            _this.fire({type: "WebSocketConnectionError", message: "Websocket not opened"});
+            _this.fire({type: "WebSocketConnectionError", message: "Websocket not opened", serverURL: _this.url});
         }
     };
 
