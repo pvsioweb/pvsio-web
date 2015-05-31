@@ -45,14 +45,14 @@ require([
     function errorMessage(event) { console.log("!!! " + event.message); }
     function notifyMessage(event) { console.log(">>> " + event.message); }
     function onConnect(event) {
-        var res = event.message;
+        var res = JSON.parse(event.message);
         if (res.deviceID === "Alaris") {
             ButtonActionsQueue.getInstance()
                 .queueGUIAction("on_connect_pump", onMessageReceived);
         } else if (res.deviceID === "Radical") {
             ButtonActionsQueue.getInstance()
                 .queueGUIAction("on_connect_monitor", onMessageReceived);
-        } else if (res.deviceID === "Supervisor_ID") {
+        } else if (res.deviceID === deviceID) {
             ButtonActionsQueue.getInstance()
                 .queueGUIAction("on_connect_supervisor", onMessageReceived);
         }

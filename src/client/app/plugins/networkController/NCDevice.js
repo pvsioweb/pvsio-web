@@ -94,12 +94,12 @@ define(function (require, exports, module) {
     };
 
 
-    NCDevice.prototype.connect = function(to, message) {
+    NCDevice.prototype.connect = function() {
         if(nc_websocket_device != null) {
             if (!deviceON) {
                 var DeviceAction = {
                     action: "connect",
-                    deviceID: _this.deviceID,
+                    deviceID: _this.deviceID
                 };
                 nc_websocket_device.send(JSON.stringify(DeviceAction));
             }
@@ -112,12 +112,12 @@ define(function (require, exports, module) {
         }
     };
 
-    NCDevice.prototype.disconnect = function(to, message) {
+    NCDevice.prototype.disconnect = function() {
         if(nc_websocket_device != null) {
             if (deviceON) {
                 var DeviceAction = {
                     action: "disconnect",
-                    deviceID: _this.deviceID,
+                    deviceID: _this.deviceID
                 };
                 nc_websocket_device.send(JSON.stringify(DeviceAction));
             }
@@ -224,15 +224,15 @@ define(function (require, exports, module) {
                 deviceAdded = false;
                 _this.fire({type: "notify", message: "<- " + _this.deviceID + " removed from NC"});
             }
-            if (payload.action === "on") {
+            if (payload.action === "connected") {
                 deviceON = true;
-                _this.fire({type: "notify", message: "<- " + _this.deviceID + " is now disconnected"});
-                _this.fire({type: "connected", message: data});
+                _this.fire({type: "disconnected", message: "<- " + _this.deviceID + " is now disconnected"});
+                _this.fire({type: "connected", message: event.data});
             }
             if (payload.action === "off") {
                 deviceON = false;
                 _this.fire({type: "notify", message: "<- " + _this.deviceID + " is now connected"});
-                _this.fire({type: "disconnected", message: data});
+                _this.fire({type: "disconnected", message: event.data});
             }
             if (payload.action === "error"){
                 _this.fire({type: "error", message: payload.message});
