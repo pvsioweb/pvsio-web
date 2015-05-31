@@ -26,7 +26,7 @@ require([
     "widgets/TouchScreenButton"
 ], function (PVSioWebClient, stateParser, NCDevice, NCMonitor, PatientMonitorDisplay, PumpMonitorDisplay, TripleDisplay, SingleDisplay, ButtonActionsQueue, TouchScreenButton) {
 
-    var deviceID = "Supervisor_ID";
+    var deviceID = "Supervisor";
     var deviceType = "Supervisor";
     var d3 = require("d3/d3");
     //var deviceDescription = "Supervisor";
@@ -45,30 +45,34 @@ require([
     function errorMessage(event) { console.log("!!! " + event.message); }
     function notifyMessage(event) { console.log(">>> " + event.message); }
     function onConnect(event) {
-        var res = event.message;
-        if (res.deviceID === "Alaris") {
-            ButtonActionsQueue.getInstance()
-                .queueGUIAction("on_connect_pump", onMessageReceived);
-        } else if (res.deviceID === "Radical") {
-            ButtonActionsQueue.getInstance()
-                .queueGUIAction("on_connect_monitor", onMessageReceived);
-        } else if (res.deviceID === "Supervisor_ID") {
-            ButtonActionsQueue.getInstance()
-                .queueGUIAction("on_connect_supervisor", onMessageReceived);
+        var res = (event) ? event.data : {};
+        if (res) {
+            if (res.deviceID === "Alaris") {
+                ButtonActionsQueue.getInstance()
+                    .queueGUIAction("on_connect_pump", onMessageReceived);
+            } else if (res.deviceID === "Radical") {
+                ButtonActionsQueue.getInstance()
+                    .queueGUIAction("on_connect_monitor", onMessageReceived);
+            } else if (res.deviceID === deviceID) {
+                ButtonActionsQueue.getInstance()
+                    .queueGUIAction("on_connect_supervisor", onMessageReceived);
+            }
         }
     }
     function onDisconnect(event) {
-        var res = event.message;
-        if (res.deviceID === "Alaris") {
-            ButtonActionsQueue.getInstance()
-                .queueGUIAction("on_disconnect_pump", onMessageReceived);
-        } else if (res.deviceID === "Radical") {
-            ButtonActionsQueue.getInstance()
-                .queueGUIAction("on_disconnect_monitor", onMessageReceived);
-        }  else if (res.deviceID === "Supervisor_ID") {
-            ButtonActionsQueue.getInstance()
-                .queueGUIAction("on_disconnect_supervisor", onMessageReceived);
-        }       
+        var res = (event) ? event.data : {};
+        if (res) {
+            if (res.deviceID === "Alaris") {
+                ButtonActionsQueue.getInstance()
+                    .queueGUIAction("on_disconnect_pump", onMessageReceived);
+            } else if (res.deviceID === "Radical") {
+                ButtonActionsQueue.getInstance()
+                    .queueGUIAction("on_disconnect_monitor", onMessageReceived);
+            }  else if (res.deviceID === deviceID) {
+                ButtonActionsQueue.getInstance()
+                    .queueGUIAction("on_disconnect_supervisor", onMessageReceived);
+            }
+        }
     }
     var url = window.location.origin.split(":").slice(0,2).join(":") + ":8080/NetworkController/devices";
     url = url.replace("http://", "ws://");    
@@ -76,6 +80,8 @@ require([
     ncDevice.addListener("update", parseNCUpdate);
     ncDevice.addListener("error", errorMessage);
     ncDevice.addListener("notify", notifyMessage);
+    ncDevice.addListener("connected", onConnect);
+    ncDevice.addListener("disconnected", onDisconnect);
 
     var urlMonitor = window.location.origin.split(":").slice(0,2).join(":") + ":8080/NetworkController/monitor";
     urlMonitor = urlMonitor.replace("http://", "ws://");    
@@ -93,12 +99,12 @@ require([
             }, 4000);
         }
     }
-    function stop_tick() {
-        if (tick) {
-            clearInterval(tick);
-            tick = null;
-        }
-    }
+//    function stop_tick() {
+//        if (tick) {
+//            clearInterval(tick);
+//            tick = null;
+//        }
+//    }
 
     var verboseLogging = false;
     function logOnDiv(msg, logger) {
@@ -137,14 +143,10 @@ require([
                         }
                     }
                 }
-                if (res.supervisor_connected.trim() === "TRUE") {
-                    // rendering
-                    render_patient_monitor(res);
-                    render_pump_monitor(res);
-                    start_tick();
-                } else {
-                    stop_tick();
-                }
+                // rendering
+                render_patient_monitor(res);
+                render_pump_monitor(res);
+                start_tick();
             }
         } else {
             console.log(err);
@@ -427,12 +429,12 @@ require([
     }
     
 
-    function stoptNetworkController() {
+    function stopNetworkController() {
 //        // Uncomment this to invoke glassfish from commands line
 //        return new Promise(function (resolve, reject) {
 //            resolve(msg);
 //        });
-
+//
         var msg = "Stopping ICE Network Controller...";
         console.log(msg);
         return new Promise(function (resolve, reject) {
@@ -488,7 +490,7 @@ require([
             if (!err) {
                 logOnDiv('PVS Process started', 'monitor');
                 //-- start ICE Network Controller (NCEE) & connect ICE supervisor to it
-                stoptNetworkController().then(function (res) {
+                stopNetworkController().then(function (res) {
                     startNetworkController().then(function (res) {
                         ncMonitor.start().then(function (res) {
                             ncDevice.start().then(function (res) {

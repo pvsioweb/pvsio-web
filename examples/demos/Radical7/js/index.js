@@ -335,6 +335,7 @@ require([
                 ncDevice.start().then(
                     function (res) {
                         ncDevice.connect();
+                        ncDevice.subscribeTo("Alaris");
                     });
             });
         }).addListener("WebSocketConnectionClosed", function (e) {
