@@ -32,7 +32,7 @@ define(function (require, exports, module) {
         return new Promise(function (resolve, reject) {
             nc_websocket_monitor = new WebSocket(_this.url);
             /*
-             * It starts the control process that send the information to NC
+             * Starts the control process that sends information to the Network Controller
              */
             nc_websocket_monitor.onopen = function () {
                 _this.fire({type: "notify", message: "[MONITOR] Connected to ICE Network Controller!"});
@@ -103,9 +103,11 @@ define(function (require, exports, module) {
                 if (data.status === "ON") {
                     container_div.removeClass("tada");
                     status_span.html("<b>Status:</b> Connected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
+                    _this.fire({type: "connected", message: event.data, data: data});
                 } else if (data.status === "OFF") {
                     container_div.addClass("tada");
                     status_span.html("<b>Status:</b> Disconnected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
+                    _this.fire({type: "disconnected", message: event.data, data: data});
                 }
             }
 
@@ -159,7 +161,6 @@ define(function (require, exports, module) {
      * @param element
      */
     function removeDevice(event) {
-
         var id = event.currentTarget.parentElement.getAttribute("id");
         var DeviceAction = {
             action: "remove",

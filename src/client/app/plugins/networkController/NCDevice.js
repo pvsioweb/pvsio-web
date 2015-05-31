@@ -134,14 +134,14 @@ define(function (require, exports, module) {
         if(nc_websocket_device != null) {
             if (_this.deviceType === "Supervisor") {
                 _this.fire({type: "notify", message: "-> " + message + "\n - " + to});
-                var payload = {
+                var data = {
                     to: to,
                     msg: message
                 };
                 var DeviceAction = {
                     action: "publish",
                     deviceID: _this.deviceID,
-                    message: payload
+                    message: data
                 };
                 nc_websocket_device.send(JSON.stringify(DeviceAction));
             }
@@ -214,53 +214,55 @@ define(function (require, exports, module) {
         // JSON FORMAT
         if (isJSON(text)) {
 
-            var payload = JSON.parse(event.data);
+            var data = JSON.parse(event.data);
 
-            if (payload.action === "add") {
+            if (data.action === "add") {
                 deviceAdded = true;
-                _this.fire({type: "notify", message: "<- " + _this.deviceID + " added to NC"});
+                _this.fire({type: "notify", message: "<- " + _this.deviceID + " added to NC", data: data});
             }
-            if (payload.action === "remove") {
+            if (data.action === "remove") {
                 deviceAdded = false;
                 _this.fire({type: "notify", message: "<- " + _this.deviceID + " removed from NC"});
             }
-            if (payload.action === "connected") {
+            if (data.action === "connected") {
                 deviceON = true;
-                _this.fire({type: "disconnected", message: "<- " + _this.deviceID + " is now disconnected"});
+                _this.fire({type: "disconnected", message: "<- " + _this.deviceID + " is now disconnected", data: data});
                 _this.fire({type: "connected", message: event.data});
             }
-            if (payload.action === "off") {
+            if (data.action === "off") {
                 deviceON = false;
-                _this.fire({type: "notify", message: "<- " + _this.deviceID + " is now connected"});
+                _this.fire({type: "notify", message: "<- " + _this.deviceID + " is now connected", data: data});
                 _this.fire({type: "disconnected", message: event.data});
             }
-            if (payload.action === "error"){
-                _this.fire({type: "error", message: payload.message});
+            if (data.action === "error"){
+                _this.fire({type: "error", message: data.message});
             }
 
             /**
              * Update message from another device subscribed to
              */
-            if (payload.action === "update") {
+            if (data.action === "update") {
                 // orchestrate message
-                if(isJSON(payload.message)){
-                    var content = JSON.parse(payload.message);
+                if(isJSON(data.message)){
+                    var content = JSON.parse(data.message);
                     // filtering destination device
                     if(content.to === _this.deviceID){
-                        _this.fire({type: "notify", message: "<- control message from: " + payload.from});
+                        _this.fire({type: "notify", message: "<- control message from: " + data.from, data: data});
                         _this.fire({
                             type: "control",
-                            from: payload.from,
-                            message: content.msg
+                            from: data.from,
+                            message: content.msg,
+                            data: data
                         });
                     }
                 }
                 else{
-                    _this.fire({type: "notify", message: "<- update message from: " + payload.from});
+                    _this.fire({type: "notify", message: "<- update message from: " + data.from, data: data});
                     _this.fire({
                         type: "update",
-                        from: payload.from,
-                        message: payload.message
+                        from: data.from,
+                        message: data.message,
+                        data: data
                     });
                 }
             }
