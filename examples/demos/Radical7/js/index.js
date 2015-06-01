@@ -74,6 +74,14 @@ require([
             console.log(">>> " + event.message);
         }
 
+        function onConnect(event) {
+            console.log(">>> CONNECTED");
+        }
+
+        function onDisconnect(event) {
+            console.log(">>> DISCONNECTED");
+        }
+
 
         var url = window.location.origin.split(":").slice(0,2).join(":") + ":8080/NetworkController/devices";
         url = url.replace("http://", "ws://");
@@ -83,6 +91,8 @@ require([
         ncDevice.addListener("control", parseNCControl);
         ncDevice.addListener("error", errorMessage);
         ncDevice.addListener("notify", notifyMessage);
+        ncDevice.addListener("connected", onConnect);
+        ncDevice.addListener("disconnected", onDisconnect);
 
 
         var d3 = require("d3/d3");
@@ -335,7 +345,6 @@ require([
                 ncDevice.start().then(
                     function (res) {
                         ncDevice.connect();
-                        ncDevice.subscribeTo("Alaris");
                     });
             });
         }).addListener("WebSocketConnectionClosed", function (e) {

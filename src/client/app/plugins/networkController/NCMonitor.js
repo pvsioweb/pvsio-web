@@ -44,17 +44,23 @@ define(function (require, exports, module) {
              * Close event
              */
             nc_websocket_monitor.onclose = function () {
-                _this.fire({type: "notify", message: "[MONITOR] Disconnected from ICE Network Controller (" + _this.url + ")"});
+                _this.fire({
+                    type: "notify",
+                    message: "[MONITOR] Disconnected from ICE Network Controller (" + _this.url + ")"
+                });
                 nc_websocket_monitor = null;
-                reject({ code: "CLOSED" });
+                reject({code: "CLOSED"});
             };
             /*
              * Connection failed
              */
             nc_websocket_monitor.onerror = function () {
-                _this.fire({type: "error", message: "[MONITOR] Unable to connect to ICE Network Controller (" + _this.url + ")"});
+                _this.fire({
+                    type: "error",
+                    message: "[MONITOR] Unable to connect to ICE Network Controller (" + _this.url + ")"
+                });
                 nc_websocket_monitor = null;
-                reject({ code: "ERROR" });
+                reject({code: "ERROR"});
             };
         });
     };
@@ -77,7 +83,7 @@ define(function (require, exports, module) {
             /**
              * Notifies when a device has been successfully added to Sapere
              */
-            if (data.action === "add"){
+            if (data.action === "add") {
                 if (data.type === "Supervisor") {
                     printSupervisor(data);
                 }
@@ -96,19 +102,15 @@ define(function (require, exports, module) {
             /**
              * Notifies when a device has been successfully activated or deactivated
              */
-            if (data.action === "toggle") {
-                var container_div = $("#" + data.deviceID);
-                var status_span = container_div.find(".device_status");
+            if (data.action === "connected") {
+                connected(data);
+            }
 
-                if (data.status === "ON") {
-                    container_div.removeClass("tada");
-                    status_span.html("<b>Status:</b> Connected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
-                    _this.fire({type: "connected", message: event.data, data: data});
-                } else if (data.status === "OFF") {
-                    container_div.addClass("tada");
-                    status_span.html("<b>Status:</b> Disconnected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
-                    _this.fire({type: "disconnected", message: event.data, data: data});
-                }
+            /**
+             * Notifies when a device has been successfully activated or deactivated
+             */
+            if (data.action === "disconnected") {
+                disconnected(data);
             }
 
             /**
@@ -158,7 +160,7 @@ define(function (require, exports, module) {
 
     /**
      * Sends a remove message to NC
-     * @param element
+     * @param event
      */
     function removeDevice(event) {
         var id = event.currentTarget.parentElement.getAttribute("id");
@@ -171,7 +173,7 @@ define(function (require, exports, module) {
 
     /**
      * Sends a toggle message to NC
-     * @param element
+     * @param event
      */
     function toggleDevice(event) {
         var id = event.currentTarget.parentElement.getAttribute("id");
@@ -180,6 +182,30 @@ define(function (require, exports, module) {
             deviceID: id
         };
         nc_websocket_monitor.send(JSON.stringify(DeviceAction));
+    }
+
+    /**
+     * Change the status of a device to connected and fire an event
+     * @param data
+     */
+    function connected(data){
+        var container_div = $("#" + data.deviceID);
+        var status_span = container_div.find(".device_status");
+        container_div.removeClass("tada");
+        status_span.html("<b>Status:</b> Connected <br><a href=\"#\" class=\"toggle_switch\" >Toggle Status</a>");
+        _this.fire({type: "connected", device_id: data.deviceID});
+    }
+
+    /**
+     * Change the status of a device to disconnected and fire an event
+     * @param data
+     */
+    function disconnected(data){
+        var container_div = $("#" + data.deviceID);
+        var status_span = container_div.find(".device_status");
+        container_div.addClass("tada");
+        status_span.html("<b>Status:</b> Disconnected <br><a href=\"#\" class=\"toggle_switch\" >Toggle Status</a>");
+        _this.fire({type: "disconnected", device_id: data.deviceID});
     }
 
 
@@ -197,13 +223,13 @@ define(function (require, exports, module) {
         id = $("<span>", {class: "device_id"}).html(data.deviceID);
         type = $("<span>", {class: "device_type"}).html("<b>Type:</b> " + data.type);
         if (data.status === "ON") {
-            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> Connected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
+            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> Connected <br><a href=\"#\" class=\"toggle_switch\" >Toggle Status</a>");
         } else if (data.status === "OFF") {
-            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> Disconnected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>)");
+            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> Disconnected <br><a href=\"#\" class=\"toggle_switch\" >Toggle Status</a>)");
         }
         status.on("click", toggleDevice);
         description = $("<span>", {class: "device_description"}).html("<b>Comments:</b> " + data.description);
-        remove = $("<span>", {class: "device_remove"}).html("<a href=\"#!\" class=\"remove_switch\")>Remove Device</a>");
+        remove = $("<span>", {class: "device_remove"}).html("<a href=\"#\" class=\"remove_switch\">Remove Device</a>");
         remove.on("click", removeDevice);
         agents = $("<span>", {class: "agents_block device_agents"});
 
@@ -224,12 +250,12 @@ define(function (require, exports, module) {
         id = $("<span>", {class: "device_id", style: "margin-top: 20px"}).html(data.deviceID);
         type = $("<span>", {class: "device_type"}).html("<b>Type:</b> " + data.type);
         if (data.status === "ON") {
-            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> Connected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
+            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> Connected <br><a href=\"#\" class=\"toggle_switch\" >Toggle Status</a>");
         } else if (data.status === "OFF") {
-            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> Disconnected <br><a href=\"#!\" class=\"toggle_switch\" >Toggle Status</a>");
+            status = $("<span>", {class: "device_status"}).html("<b>Status:</b> Disconnected <br><a href=\"#\" class=\"toggle_switch\" >Toggle Status</a>");
         }
         status.on("click", toggleDevice);
-        remove = $("<span>", {class: "device_remove"}).html("<a href=\"#!\" class=\"remove_switch\")>Remove Device</a>");
+        remove = $("<span>", {class: "device_remove"}).html("<a href=\"#\" class=\"remove_switch\">Remove Device</a>");
         remove.on("click", removeDevice);
         agents = $("<span>", {class: "agents_block supervisor_agents"});
 

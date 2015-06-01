@@ -44,36 +44,66 @@ require([
     }
     function errorMessage(event) { console.log("!!! " + event.message); }
     function notifyMessage(event) { console.log(">>> " + event.message); }
+
+    /**
+     * Callback DeviceID connected
+     * @param event
+     */
     function onConnect(event) {
-        var res = (event) ? event.data : {};
-        if (res) {
-            if (res.deviceID === "Alaris") {
+        ButtonActionsQueue.getInstance()
+            .queueGUIAction("on_connect_supervisor", onMessageReceived);
+    }
+
+    /**
+     * Callback DeviceID connected
+     * @param event
+     */
+    function onDisconnect(event) {
+        ButtonActionsQueue.getInstance()
+            .queueGUIAction("on_disconnect_supervisor", onMessageReceived);
+    }
+
+    /**
+     * Callback any device connected
+     * @param event even.device_id = ID of the device connected
+     */
+    function onDeviceConnect(event) {
+        var deviceConnected = event.device_id;
+        switch (deviceConnected){
+            case "Alaris":
                 ButtonActionsQueue.getInstance()
                     .queueGUIAction("on_connect_pump", onMessageReceived);
-            } else if (res.deviceID === "Radical") {
+                break;
+            case "Radical":
                 ButtonActionsQueue.getInstance()
                     .queueGUIAction("on_connect_monitor", onMessageReceived);
-            } else if (res.deviceID === deviceID) {
-                ButtonActionsQueue.getInstance()
-                    .queueGUIAction("on_connect_supervisor", onMessageReceived);
-            }
+                break;
+            default:
+                break;
         }
     }
-    function onDisconnect(event) {
-        var res = (event) ? event.data : {};
-        if (res) {
-            if (res.deviceID === "Alaris") {
+
+    /**
+     * Callback any device disconnected
+     * @param event even.device_id = ID of the device connected
+     */
+    function onDeviceDisconnect(event) {
+        var deviceDisconnected = event.device_id;
+        switch (deviceDisconnected){
+            case "Alaris":
                 ButtonActionsQueue.getInstance()
                     .queueGUIAction("on_disconnect_pump", onMessageReceived);
-            } else if (res.deviceID === "Radical") {
+                break;
+            case "Radical":
                 ButtonActionsQueue.getInstance()
                     .queueGUIAction("on_disconnect_monitor", onMessageReceived);
-            }  else if (res.deviceID === deviceID) {
-                ButtonActionsQueue.getInstance()
-                    .queueGUIAction("on_disconnect_supervisor", onMessageReceived);
-            }
+                break;
+            default:
+                break;
         }
     }
+
+
     var url = window.location.origin.split(":").slice(0,2).join(":") + ":8080/NetworkController/devices";
     url = url.replace("http://", "ws://");    
     var ncDevice = new NCDevice({id: deviceID, type: deviceType}, { url: url });
@@ -88,8 +118,8 @@ require([
     var ncMonitor = new NCMonitor({ url: urlMonitor });
     ncMonitor.addListener("error", errorMessage);
     ncMonitor.addListener("notify", notifyMessage);
-    ncMonitor.addListener("connected", onConnect);
-    ncMonitor.addListener("disconnected", onDisconnect);
+    ncMonitor.addListener("connected", onDeviceConnect);
+    ncMonitor.addListener("disconnected", onDeviceDisconnect);
 
     //-- UI of the ICE Supervisor
     function start_tick() {
