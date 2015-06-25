@@ -25,7 +25,9 @@ define(function (require, exports, module) {
         WSManager       = require("websockets/pvs/WSManager"),
         template        = require("text!pvsioweb/forms/templates/fileBrowser.handlebars"),
         BaseDialog      = require("pvsioweb/forms/BaseDialog"),
-        MIME            = require("util/MIME").getInstance();
+        MIME            = require("util/MIME").getInstance(),
+        PreferenceStorage = require("preferences/PreferenceStorage").getInstance(),
+        PreferenceKeys = require("preferences/PreferenceKeys");
     var timer, rfb;
 
     var OpenFilesView = BaseDialog.extend({
@@ -183,6 +185,16 @@ define(function (require, exports, module) {
             }).on("ok", function (event, view) {
                 clearTimeout(timer);
                 var selectedFiles = self._treeList.getSelectedItems();
+                var firstFile = selectedFiles[0],
+                    fileDirectory;
+                if (firstFile.isDirectory) {
+                    fileDirectory = firstFile.path;
+                } else {
+                    fileDirectory = firstFile.parent.path;
+                }
+                if (PreferenceStorage.get(PreferenceKeys.REMEMBER_LAST_DIRECTORY)) {
+                    PreferenceStorage.set(PreferenceKeys.LAST_DIRECTORY_VISITED, fileDirectory);
+                }
                 resolve(selectedFiles);
                 view.remove();
             });

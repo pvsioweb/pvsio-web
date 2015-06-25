@@ -4,7 +4,7 @@
  * @date 5/1/14 13:38:56 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global require, jasmine*/
+/*global require, jasmine, format*/
 
 require.config({
     baseUrl: "../../../app",
@@ -21,5 +21,6 @@ require.config({
 
 require(["test/FrontEnd"], function () {
     "use strict";
+    format.extend(String.prototype);
     jasmine.getEnv().execute();
 });

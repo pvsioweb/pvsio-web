@@ -34,10 +34,12 @@ define(function (require, exports, module) {
         EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter2"),
         EmuchartsVDMPrinter    = require("plugins/emulink/EmuchartsVDMPrinter"),
 //        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
-        fs = require("util/fileHandler"),
+        FileHandler            = require("filesystem/FileHandler"),
+        FileSystem             = require("filesystem/FileSystem"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
 
     var instance;
+    var fs;
     var projectManager;
     var editor;
     var ws;
@@ -285,6 +287,7 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_initialTransitionRenamed", initialTransitionRenamed_handler);
         emuchartsManager.addListener("emuCharts_initialTransitionRemoved", initialTransitionRemoved_handler);
         emuchartsManager.addListener("emuCharts_stateRenamed", stateRenamed_handler);
+        fs = new FileSystem();
     }
 
     Emulink.prototype.getName = function () {
@@ -314,7 +317,7 @@ define(function (require, exports, module) {
                 header: "Open EmuChart file...",
                 extensions: ".emdl,.muz"
             };
-            fs.openLocalFileAsText(function (err, res) {
+            FileHandler.openLocalFileAsText(function (err, res) {
                 if (res) {
                     if (res.name.lastIndexOf(".emdl") === res.name.length - 5) {
                         res.content = JSON.parse(res.content);
@@ -338,7 +341,7 @@ define(function (require, exports, module) {
 //                header: "Open EmuChart file...",
 //                extensions: ".emdl"
 //            };
-//            fs.openLocalFileAsJSON(function (err, res) {
+//            FileHandler.openLocalFileAsJSON(function (err, res) {
 //                if (res) {
 //                    emuchartsManager.importEmucharts(res);
 //                    if (callback && typeof callback === "function") {
@@ -353,7 +356,7 @@ define(function (require, exports, module) {
                 extensions: ".muz"
             };
             // MUZ
-            fs.openLocalFileAsText(function (err, res) {
+            FileHandler.openLocalFileAsText(function (err, res) {
                 if (res) {
                     emuchartsManager.importPIMChart(res);
                     if (callback && typeof callback === "function") {
@@ -1253,7 +1256,7 @@ define(function (require, exports, module) {
     function onProjectChanged(event) {
         // try to open the default emuchart file associated with the project
         var defaultEmuchartFilePath = event.current + "/" + "emucharts_" + event.current + ".emdl";
-        projectManager.readFile(defaultEmuchartFilePath).then(function (res) {
+        fs.readFile(defaultEmuchartFilePath).then(function (res) {
             res.content = JSON.parse(res.content);
             emuchartsManager.importEmucharts(res);
             // make svg visible and reset colors
