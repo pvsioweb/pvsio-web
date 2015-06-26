@@ -24,6 +24,7 @@ define(function (require, exports, module) {
     "use strict";
 
     var d3 = require("d3/d3");
+    var Button = require("widgets/Button");
 
     /**
      * @function <a name="SingleDisplay">SingleDisplay</a>
@@ -54,8 +55,8 @@ define(function (require, exports, module) {
         this.font = [this.height, "px ", (opt.font || "sans-serif")];
         this.smallFont = (this.height * 0.8) + "px " + (opt.font || "sans-serif");
         this.align = opt.align || "center";
-        this.backgroundColor = opt.backgroundColor || "#000";
-        this.fontColor = opt.fontColor || "#fff";
+        this.backgroundColor = opt.backgroundColor || ""; //transparent
+        this.fontColor = opt.fontColor || "#fff"; //white
         if (opt.inverted) {
             var tmp = this.backgroundColor;
             this.backgroundColor = this.fontColor;
@@ -63,36 +64,65 @@ define(function (require, exports, module) {
         }
         this.blinking = opt.blinking || false;
         this.textBaseline = "middle";
-        var elemClass = id;
+        var elemClass = id + " prevent_selection ";
+        if (opt.touchscreen && opt.touchscreen.classStyle) { elemClass += opt.touchscreen.classStyle; }
         if (this.blinking) { elemClass += " blink"; }
         this.div = d3.select(this.parent)
                         .append("div").style("position", "absolute")
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")
-                        .style("margin", 0).style("padding", 0)
-                        .style("display", "block").attr("id", id).attr("class", elemClass);
+                        .style("margin", 0).style("padding", 0).style("border-radius", "2px")
+                        .style("background-color", this.backgroundColor)
+                        .style("display", "none").attr("id", id).attr("class", elemClass);
         this.div.append("span").attr("id", id + "_span").attr("class", id + "_span")
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0)
-                        .style("vertical-align", "top");
+                        .style("vertical-align", "top").style("border-radius", "2px");
         this.div.append("canvas").attr("id", id + "_canvas").attr("class", id + "_canvas")
                         .attr("width", this.width).attr("height", this.height)
-                        .style("margin", 0).style("padding", 0)
+                        .style("margin", 0).style("padding", 0).style("border-radius", "2px")
                         .style("vertical-align", "top");
+        if (opt.touchscreen) {
+            var touchID = id + "_touchscreen";
+            this.touchscreen = new Button(touchID, {
+                left: this.left, top: this.top, height: this.height, width: this.width
+            }, {
+                callback: opt.touchscreen.callback || function (err, res) {},
+                evts: opt.touchscreen.events || ['click'],
+                area: this.div
+            });
+            this.div.style("cursor", "pointer");
+            var _this = this;
+            this.div.on("mouseover", function() {
+                _this.div.style("background-color", "steelblue").style("color", "white");
+            }).on("mouseout", function() {
+                _this.div.style("background-color", _this.backgroundColor).style("color", _this.fontColor);
+            });            
+        }
+        this.txt = "";
         return this;
     }
+    
+    SingleDisplay.prototype.invertColors = function () {
+        var tmp = this.backgroundColor;
+        this.backgroundColor = this.fontColor;
+        this.fontColor = tmp;
+        var elemIsBlinking = (document.getElementById(this.id).getAttribute("class").indexOf("blink") >= 0);
+        return this.render(this.txt, { blinking: elemIsBlinking });
+    };
 
+    SingleDisplay.prototype.invertGlyphiconColors = function () {
+        var tmp = this.backgroundColor;
+        this.backgroundColor = this.fontColor;
+        this.fontColor = tmp;
+        var elemIsBlinking = (document.getElementById(this.id).getAttribute("class").indexOf("blink") >= 0);
+        return this.renderGlyphicon(this.txt, { blinking: elemIsBlinking });
+    };
+    
     SingleDisplay.prototype.render = function (txt, opt) {
-        function clearContext(context, width, height, backgroundColor) {
-            context.save();
-            context.fillStyle = backgroundColor;
-            context.fillRect(0, 0, width, height);
-            context.restore();
-        }
         function renderln(data, opt) {
             opt = opt || {};
-            data.context.fillStyle = opt.backgroundColor || _this.backgroundColor;
-            data.context.fillRect(0, 0, data.width, data.height);
+            data.context.clearRect(0, 0, data.width, data.height);
             data.context.fillStyle = opt.fontColor || _this.fontColor;
             if (data.align === "left") {
                 data.context.textAlign = "start";
@@ -107,6 +137,7 @@ define(function (require, exports, module) {
         }
         opt = opt || {};
         var _this = this;
+        this.txt = txt;
         // set blinking
         var elemClass = document.getElementById(this.id).getAttribute("class");
         if (opt.blinking || this.blinking) {
@@ -119,17 +150,26 @@ define(function (require, exports, module) {
         document.getElementById(this.id).setAttribute("class", elemClass);
         // render content
         var context = document.getElementById(this.id + "_canvas").getContext("2d");
-        clearContext(context, this.width, this.height, this.backgroundColor);
         context.textBaseline = this.textBaseline;
         var align = opt.align || this.align;
         context.font = this.font.join("");
         renderln({ txt: txt, context: context, align: align, height: this.height, width: this.width }, opt);
+        d3.select("#" + this.id + "_canvas").style("display", "block");
+        d3.select("#" + this.id + "_span").style("display", "none");
+        if (this.touchscreen) {
+            if (opt.disableTouch) {
+                this.div.style("cursor", "default");
+            } else {
+                this.div.style("cursor", "pointer");
+            }
+        }
         this.reveal();
         return this;
     };
     
     SingleDisplay.prototype.renderGlyphicon = function (icon, opt) {
         opt = opt || {};
+        this.txt = icon;
         var span = document.getElementById(this.id + "_span");
         if (opt.blinking || this.blinking) {
             span.setAttribute("class", "glyphicon " + icon + " blink");
@@ -137,6 +177,13 @@ define(function (require, exports, module) {
             span.setAttribute("class", "glyphicon " + icon);
         }
         span.style.color = opt.fontColor || this.fontColor;
+        span.style.backgroundColor = opt.backgroundColor || this.backgroundColor;
+        span.style.borderRadius = "2px";
+        span.style.width = this.width;
+        span.style.height = this.height;
+        span.style.fontSize = 0.8 * this.height + "px";
+        d3.select("#" + this.id + "_canvas").style("display", "none");
+        d3.select("#" + this.id + "_span").style("display", "block");        
         this.reveal();
         return this;
     };
@@ -144,15 +191,15 @@ define(function (require, exports, module) {
     SingleDisplay.prototype.renderMultiline = function (txt, opt) {
         function clearContext(context, width, height) {
             context.save();
-            context.fillStyle = _this.backgroundColor;
+            context.fillStyle = backgroundColor;
             context.fillRect(0, 0, width, height);
             context.restore();
         }
         function renderln(data, opt) {
             opt = opt || {};
-            data.context.fillStyle = (opt.inverted) ? _this.fontColor : _this.backgroundColor;
+            data.context.fillStyle = (opt.inverted) ? _this.fontColor : backgroundColor;
             data.context.fillRect(0, data.y, data.width, data.height);
-            data.context.fillStyle = (opt.inverted) ? _this.backgroundColor : _this.fontColor;
+            data.context.fillStyle = (opt.inverted) ? backgroundColor : _this.fontColor;
             var y_offset = data.y || 0;
             if (data.align === "left") {
                 data.context.textAlign = "start";
@@ -167,6 +214,9 @@ define(function (require, exports, module) {
         }
         opt = opt || {};
         var _this = this;
+        this.txt = txt;
+        var backgroundColor = (_this.backgroundColor !== "") ? _this.backgroundColor
+                                : (_this.fontColor !== "#000") ? "#000" : "#fff"; //default is black
         var context = document.getElementById(this.id + "_canvas").getContext("2d");
         clearContext(context, this.width, this.height);
         context.textBaseline = this.textBaseline;
@@ -189,6 +239,18 @@ define(function (require, exports, module) {
                 }, { inverted: (+opt.selected === i) ? true : false });
             }
         }
+        // set blinking
+        var elemClass = document.getElementById(this.id).getAttribute("class");        
+        if (opt.blinking || this.blinking) {
+            if (elemClass.indexOf("blink") < 0) {
+                elemClass = elemClass + " blink";
+            }
+        } else {
+            elemClass = elemClass.replace(" blink", "");
+        }
+        document.getElementById(this.id).setAttribute("class", elemClass);        
+        d3.select("#" + this.id + "_canvas").style("display", "block");
+        d3.select("#" + this.id + "_span").style("display", "none");        
         this.reveal();
         return this;
     };
@@ -203,42 +265,18 @@ define(function (require, exports, module) {
         return this;
     };
 
-//    SingleDisplay.prototype.move = function (data) {
-//        data = data || {};
-//        if (data.top) {
-//            this.top = data.top;
-//            this.div.style("top", this.top + "px");
-//        }
-//        if (data.left) {
-//            this.left = data.left;
-//            this.div.style("left", this.left + "px");
-//        }
-//        return this;
-//    };
-
-//    SingleDisplay.prototype.setWidth = function (w) {
-//        width = w || width;
-//        return this;
-//    };
-//
-//    SingleDisplay.prototype.setHeight = function (h) {
-//        height = h || height;
-//        return this;
-//    };
-//
-//    SingleDisplay.prototype.setFont = function (f) {
-//        if (f) {
-//            this.font = f;
-//        }
-//        return this;
-//    };
-//
-//    SingleDisplay.prototype.setSmallfont = function (f) {
-//        if (f) {
-//            this.smallFont = f;
-//        }
-//        return this;
-//    };
+    SingleDisplay.prototype.move = function (data) {
+        data = data || {};
+        if (data.top) {
+            this.top = data.top;
+            this.div.style("top", this.top + "px");
+        }
+        if (data.left) {
+            this.left = data.left;
+            this.div.style("left", this.left + "px");
+        }
+        return this;
+    };
 
     module.exports = SingleDisplay;
 });

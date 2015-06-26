@@ -21,7 +21,7 @@ The full PVSio-web tool with limited features is also available at http://www.pv
 
 Installation
 ------------
-To install pvsio-web, first you need to install PVS and NodeJS, and the clone the PVSio-web github repository. This can be done as follows.
+To install pvsio-web, first you need to install PVS and NodeJS, and then clone the PVSio-web github repository. This can be done as follows.
 
 #### Step 1: Install PVS and add PVS executables to your PATH
 PVS is required to run PVSio-web. The tool can be downloaded from http://pvs.csl.sri.com/download.shtml Installation instructions are on the aforementioned website.

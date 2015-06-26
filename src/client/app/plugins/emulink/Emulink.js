@@ -498,18 +498,23 @@ define(function (require, exports, module) {
         d3.select("#btn_menuOpenChart").on("click", function () {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
             // we need to delete the current chart because we handle one chart at the moment
-            QuestionForm.create({
-                header: "Warning: unsaved changes will be discarded.",
-                question: "Unsaved changes in the current chart will be discarded."
-                            + "Would you like continue?",
-                buttons: ["Cancel", "Ok"]
-            }).on("ok", function (e, view) {
+            if (!emuchartsManager.empty_chart()) {
+                QuestionForm.create({
+                    header: "Warning: unsaved changes will be discarded.",
+                    question: "Unsaved changes in the current chart will be discarded."
+                                + "Would you like continue?",
+                    buttons: ["Cancel", "Ok"]
+                }).on("ok", function (e, view) {
+                    emuchartsManager.delete_chart();
+                    document.getElementById("btnLoadEmuchart").click();
+                    view.remove();
+                }).on("cancel", function (e, view) {
+                    view.remove();
+                });
+            } else {
                 emuchartsManager.delete_chart();
-                document.getElementById("btnLoadEmuchart").click();
-                view.remove();
-            }).on("cancel", function (e, view) {
-                view.remove();
-            });
+                document.getElementById("btnLoadEmuchart").click();            
+            }
         });
         d3.select("#btn_menuImportChart").on("click", function () {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
@@ -1091,7 +1096,7 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuPVSPrinter").on("click", function () {
             var emucharts = {
-                name: ("emucharts_" + projectManager.project().name() + "_th"),
+                name: ("emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th"),
                 author: {
                     name: "Paolo Masci",
                     affiliation: "Queen Mary University of London, United Kingdom",
@@ -1286,7 +1291,7 @@ define(function (require, exports, module) {
 
 
     Emulink.prototype.getDependencies = function () {
-        return [PrototypeBuilder.getInstance(), ModelEditor.getInstance()];
+        return []; //[PrototypeBuilder.getInstance(), ModelEditor.getInstance()];
     };
 
     function onProjectChanged(event) {

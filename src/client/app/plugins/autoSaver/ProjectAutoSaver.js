@@ -16,6 +16,10 @@ define(function (require, exports, module) {
     function ProjectAutoSaver() {
         saveTimer = new Timer(saveInterval);
         countdownTimer = new Timer(1000);
+        if (window.location.origin.indexOf("pvsioweb.org") >= 0 ||
+                window.location.origin.indexOf("pvsioweb.herokuapp.com") >= 0) {
+            saveInterval = 0; // disabling autosave on heroku cloud
+        }
     }
 
 //    function toTimeString(t) {

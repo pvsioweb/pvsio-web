@@ -166,7 +166,7 @@ function run() {
     }
     
     function startSapereEE(cb) {
-        var cmd = __dirname + "/lib/SapereEE/bin/asadmin start-domain";
+        var cmd = __dirname + "/lib/glassfish4/bin/asadmin restart-domain --force=true";
         procWrapper().exec({
             command: cmd,
             callBack: cb
@@ -174,11 +174,28 @@ function run() {
     }
     
     function stopSapereEE(cb) {
-        var cmd = __dirname + "/lib/SapereEE/bin/asadmin stop-domain";
+        var cmd = __dirname + "/lib/glassfish4/bin/asadmin stop-domain";
         procWrapper().exec({
             command: cmd,
             callBack: cb
         });
+    }
+    
+    function startIVY(cb) {
+        var cmd = "cd " + __dirname + "/ext/IVY" +
+                  " && " +
+                  "java -Dlog4j.configuration=file:log4j.properties -jar lib/jpf-boot.jar -interactive";
+        console.log(cmd);
+        // This delayed callback is a workaround to wait for IVY to start up.
+        // We can remove this workaround as soon as the IVY tool implements a way to start IVY and return control to the caller.
+        function delayedCallback() {
+            setTimeout(cb, 2000);
+        }
+        procWrapper().exec({
+            command: cmd,
+            callBack: null
+        });
+        delayedCallback();
     }
     
     /**
@@ -411,6 +428,7 @@ function run() {
                 if (mainFile !== "") {
                     changeProjectSetting(token.projectName, "mainPVSFile", mainFile)
                         .then(function (res) {
+                            res.type = token.type;
                             res.id = token.id;
                             res.socketId = socketid;
                             res.time = token.time;
@@ -883,18 +901,39 @@ function run() {
                 };
                 try {
                     startSapereEE(function (err, stdout, stderr) {
-                        var res = {
-                            id: token.id,
-                            type: token.type,
-                            err: err,
-                            stdout: stdout,
-                            stderr: stderr,
-                            socketId: socketid,
-                            time: token.time
-                        };
-                        console.log("err:" + err);
-                        console.log("stdout" + stdout);
-                        console.log("stderr" + stderr);
+                        res.stdout = stdout;
+                        res.stderr = stderr;
+                        console.log("glassfish err:" + err);
+                        console.log("glassfish stdout:" + stdout);
+                        console.log("glassfish stderr:" + stderr);
+                        processCallback(res, socket);
+                    });
+                } catch (err) {
+                    if (err.code === 1 && err.killed === false) {
+                        // glassfish is already running, it's not an error
+                        res.stdout = "PVSio-web Network Controller already started.";
+                    } else {                    
+                        res.type = token.type + "_error";
+                        res.err = err.message;
+                    }
+                    processCallback(res, socket);
+                }
+            },
+            "startIVY": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time
+                };
+                try {
+                    startIVY(function (err, stdout, stderr) {
+                        res.stdout = stdout;
+                        res.stderr = stderr;
+                        console.log("IVY err:" + err);
+                        console.log("IVY stdout:" + stdout);
+                        console.log("IVY stderr:" + stderr);
                         processCallback(res, socket);
                     });
                 } catch (err) {
@@ -913,7 +952,7 @@ function run() {
                 };
                 try {
                     stopSapereEE(function (err, stdout, stderr) {
-                        var res = {
+                        res = {
                             id: token.id,
                             type: token.type,
                             err: err,

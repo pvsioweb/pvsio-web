@@ -835,6 +835,7 @@ fadeOut
 }
 
 .demo-splash {
+    height: 800px;
     width: 100%;
     opacity: 0.8;
     float:left;
@@ -989,3 +990,37 @@ input.input_text{
 @-moz-keyframes blink { 67% { opacity: 0 } }
 @-o-keyframes blink { 67% { opacity: 0 } }
 @keyframes blink { 67% { opacity: 0 } }
+
+.prevent_selection {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.waiting_connection:after {
+	border-width: 0 3px 0 0;
+	border-style: solid;
+	border-color: rgba(0, 0, 0, .5);
+	border-radius: 50%;
+	display: block;
+	height: 50px;
+	left: 50%;
+	margin: -25px 0 0 -25px;
+	position: absolute;
+	top: 50%;
+	width: 50px;
+	content: "";
+	animation: spin 1s infinite linear;
+	-webkit-animation: spin 1s infinite linear;
+}
+@keyframes spin {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+	from { -webkit-transform: rotate(0deg); }
+	to { -webkit-transform: rotate(360deg); }
+}

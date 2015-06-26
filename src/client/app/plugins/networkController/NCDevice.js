@@ -4,6 +4,7 @@
  * @date 14/05/2015 11:33 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
+
 /*global define, Promise*/
 define(function (require, exports, module) {
     "use strict";
@@ -11,7 +12,7 @@ define(function (require, exports, module) {
     var eventDispatcher = require("util/eventDispatcher");
 
     /**
-     * @function NetworkController
+     * @function NCDevice
      * @description Constructor.
      * @param device {!Object} This object describes the device. It has the following fields:<br>
      *     <li>id </li>
@@ -24,10 +25,10 @@ define(function (require, exports, module) {
      */
     function NCDevice(device, opt) {
         opt = opt || {};
-        this.url = opt.url || "ws://localhost:8080/NetworkController/actions";
+        this.url = opt.url || "ws://localhost:8080/NetworkController/devices";
         this.deviceID = device.id;
         this.deviceType = device.type;
-        this.deviceDescription = device.description || (device.type + "" + device.id);
+        this.deviceDescription = device.description || (device.type + " " + device.id);
         eventDispatcher(this);
         _this = this;
         return this;
@@ -36,20 +37,18 @@ define(function (require, exports, module) {
 
     var nc_websocket_device;
     var deviceAdded = false;
+    var deviceON = false;
     var _this;
 
-    NCDevice.prototype.connect = function () {
+    NCDevice.prototype.start = function () {
         return new Promise(function (resolve, reject) {
             nc_websocket_device = new WebSocket(_this.url);
             /*
              * It starts the control process that send the information to NC
              */
             nc_websocket_device.onopen = function () {
-                console.log(">> Connected to ICE Network Controller!");
+                _this.fire({type: "notify", message: "Connected to ICE Network Controller!"});
                 addDevice();
-                _this.fire({
-                    type: "connected"
-                });
                 resolve();
             };
 
@@ -58,7 +57,7 @@ define(function (require, exports, module) {
              * Close event
              */
             nc_websocket_device.onclose = function () {
-                console.log(">> Disconnected from ICE Network Controller (" + _this.url + ")");
+                _this.fire({type: "notify", message: "Disconnected from ICE Network Controller (" + _this.url + ")"});
                 nc_websocket_device = null;
                 reject({ code: "CLOSED" });
             };
@@ -66,7 +65,7 @@ define(function (require, exports, module) {
              * Connection failed
              */
             nc_websocket_device.onerror = function () {
-                console.log("!! Unable to connect to ICE Network Controller (" + _this.url + ")");
+                _this.fire({type: "error", message: "Unable to connect to ICE Network Controller (" + _this.url + ")"});
                 nc_websocket_device = null;
                 reject({ code: "ERROR" });
             };
@@ -74,44 +73,135 @@ define(function (require, exports, module) {
     };
 
     var addDevice = function() {
-        if (!deviceAdded) {
-            console.log("-> adding " + _this.deviceID);
-            var SupervisorAction = {
-                action: "add",
-                deviceID: _this.deviceID,
-                type: _this.deviceType,
-                description: _this.deviceDescription
-            };
-            nc_websocket_device.send(JSON.stringify(SupervisorAction));
+        if(nc_websocket_device != null) {
+            if (!deviceAdded) {
+                _this.fire({type: "notify", message: "-> adding " + _this.deviceID});
+                var Action = {
+                    action: "add",
+                    deviceID: _this.deviceID,
+                    type: _this.deviceType,
+                    description: _this.deviceDescription
+                };
+                nc_websocket_device.send(JSON.stringify(Action));
+            }
+            else {
+                _this.fire({type: "error", message: _this.deviceID + " already added"});
+            }
         }
-        else {
-            console.log("!! " + _this.deviceID + " already added !!");
+        else{
+            _this.fire({type: "error", message: "Websocket not opened"});
+        }
+    };
+
+
+    NCDevice.prototype.connect = function() {
+        if(nc_websocket_device != null) {
+            if (!deviceON) {
+                var DeviceAction = {
+                    action: "connect",
+                    deviceID: _this.deviceID
+                };
+                nc_websocket_device.send(JSON.stringify(DeviceAction));
+            }
+            else {
+                _this.fire({type: "error", message: _this.deviceID + " already ON"});
+            }
+        }
+        else{
+            _this.fire({type: "error", message: "Websocket not opened"});
+        }
+    };
+
+    NCDevice.prototype.disconnect = function() {
+        if(nc_websocket_device != null) {
+            if (deviceON) {
+                var DeviceAction = {
+                    action: "disconnect",
+                    deviceID: _this.deviceID
+                };
+                nc_websocket_device.send(JSON.stringify(DeviceAction));
+            }
+            else {
+                _this.fire({type: "error", message: _this.deviceID + " already OFF"});
+            }
+        }
+        else{
+            _this.fire({type: "error", message: "Websocket not opened"});
         }
     };
 
     NCDevice.prototype.sendControlData = function(to, message) {
-        console.log("-> " + message + "\n - " + to);
-        var payload = {
-            to: to,
-            msg: message
-        };
-        var DeviceAction = {
-            action: "orchestrate",
-            deviceID: _this.deviceID,
-            message: payload
-        };
-        nc_websocket_device.send(JSON.stringify(DeviceAction));
+        if(nc_websocket_device != null) {
+            if (_this.deviceType === "Supervisor") {
+                _this.fire({type: "notify", message: "-> " + message + "\n - " + to});
+                var data = {
+                    to: to,
+                    msg: message
+                };
+                var DeviceAction = {
+                    action: "publish",
+                    deviceID: _this.deviceID,
+                    message: data
+                };
+                nc_websocket_device.send(JSON.stringify(DeviceAction));
+            }
+            else {
+                _this.fire({type: "error", message: "This function is reserved to Devices with type 'Supervisor' \nUse sendDataUpdate() instead"});
+            }
+        }
+        else{
+            _this.fire({type: "error", message: "Websocket not opened"});
+        }
     };
 
     NCDevice.prototype.sendDataUpdate = function (message) {
-        console.log("-> " + message);
-        var DeviceAction = {
-            action: "update",
-            deviceID: _this.deviceID,
-            message: message
-        };
-        nc_websocket_device.send(JSON.stringify(DeviceAction));
+        if(nc_websocket_device != null) {
+            if (_this.deviceType !== "Supervisor") {
+                _this.fire({type: "notify", message: "-> " + message});
+                var DeviceAction = {
+                    action: "publish",
+                    deviceID: _this.deviceID,
+                    message: message
+                };
+                nc_websocket_device.send(JSON.stringify(DeviceAction));
+            }
+            else {
+                _this.fire({
+                    type: "error",
+                    message: "This function is reserved to Devices different from 'Supervisor' \nUse sendControlData() instead"
+                });
+            }
+        }
+        else{
+            _this.fire({type: "error", message: "Websocket not opened"});
+        }
     };
+
+
+    NCDevice.prototype.subscribeTo = function (publisherID) {
+        if(nc_websocket_device != null) {
+            _this.fire({type: "notify", message: _this.deviceID + " subTO -> " + publisherID});
+                var DeviceAction = {
+                    action: "subscribe",
+                    deviceID: _this.deviceID,
+                    publisherID: publisherID
+                };
+                nc_websocket_device.send(JSON.stringify(DeviceAction));
+        }
+        else{
+            _this.fire({type: "error", message: "Websocket not opened"});
+        }
+    };
+
+    function isJSON(text){
+        try {
+            JSON.parse(text);
+            return true;
+        }
+        catch (err) {
+            return false;
+        }
+    }
 
     /**
      * Callback function when a message is received from the nc websocket
@@ -122,31 +212,65 @@ define(function (require, exports, module) {
         var text = event.data;
 
         // JSON FORMAT
-        if (/^[\],:{}\s]*$/.test(text.replace(/\\["\\\/bfnrtu]/g, '@').
-                replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
-                replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+        if (isJSON(text)) {
 
-            var device = JSON.parse(event.data);
+            var data = JSON.parse(event.data);
 
-            if (device.action === "add") {
+            if (data.action === "add") {
                 deviceAdded = true;
-                console.log("<- " + _this.deviceID + " added to NC");
+                _this.fire({type: "notify", message: "<- " + _this.deviceID + " added to NC", data: data});
             }
-            if (device.action === "remove") {
+            if (data.action === "remove") {
                 deviceAdded = false;
-                console.log("<- " + _this.deviceID + " removed from NC");
+                _this.fire({type: "notify", message: "<- " + _this.deviceID + " removed from NC"});
             }
-            if (device.action === "update") {
-                console.log("<- " + device.message);
-                _this.fire({
-                    type: "update",
-                    message: device.message
-                });
+            if (data.action === "connected") {
+                deviceON = true;
+                _this.fire({type: "disconnected", message: "<- " + _this.deviceID + " is now disconnected", data: data});
+                _this.fire({type: "connected", message: event.data});
             }
+            if (data.action === "off") {
+                deviceON = false;
+                _this.fire({type: "notify", message: "<- " + _this.deviceID + " is now connected", data: data});
+                _this.fire({type: "disconnected", message: event.data});
+            }
+            if (data.action === "error"){
+                _this.fire({type: "error", message: data.message});
+            }
+
+            /**
+             * Update message from another device subscribed to
+             */
+            if (data.action === "update") {
+                // orchestrate message
+                if(isJSON(data.message)){
+                    var content = JSON.parse(data.message);
+                    // filtering destination device
+                    if(content.to === _this.deviceID){
+                        _this.fire({type: "notify", message: "<- control message from: " + data.from, data: data});
+                        _this.fire({
+                            type: "control",
+                            from: data.from,
+                            message: content.msg,
+                            data: data
+                        });
+                    }
+                }
+                else{
+                    _this.fire({type: "notify", message: "<- update message from: " + data.from, data: data});
+                    _this.fire({
+                        type: "update",
+                        from: data.from,
+                        message: data.message,
+                        data: data
+                    });
+                }
+            }
+
         }
         // NO JSON
         else {
-            console.log(text);
+            _this.fire({type: "notify", message: text});
         }
     };
 

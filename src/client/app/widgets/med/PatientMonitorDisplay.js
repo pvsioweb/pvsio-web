@@ -103,8 +103,12 @@ define(function (require, exports, module) {
         opt.tracings.left = opt.tracings.left || opt.tracings.labels.width + this.width * 0.01;
         
         opt.value = opt.value || {};
-        opt.value.height = opt.value.height || this.height;
+        opt.value.height = opt.value.height || this.height * 0.6;
         opt.value.width = opt.value.width || this.width * 0.3;
+        
+        opt.range = opt.range || {};
+        opt.range.max = opt.range.max || 100;
+        opt.range.min = opt.range.min || 0;
 
         opt.parent = (this.div.node()) ? this.div.node().id : "body";
         this.disp_value = new SingleDisplay(id + "_value",
@@ -167,7 +171,8 @@ define(function (require, exports, module) {
                                      { top: opt.tracings.labels.height / 2, left: opt.tracings.left,
                                        height: opt.tracings.height, width: opt.tracings.width },
                                      { parent: opt.parent,
-                                       fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
+                                       fontColor: opt.fontColor, backgroundColor: opt.backgroundColor,
+                                       range: opt.range });
         return this;
     }
 
@@ -175,7 +180,8 @@ define(function (require, exports, module) {
         opt = opt || {};
         this.disp_value.render(val, opt);
         this.disp_fail.hide();
-        this.disp_label.render(this.label);
+        var label = opt.label || this.label;
+        this.disp_label.render(label);
         if (this._alarm.max === 0) {
             this.disp_alarm_max.render("--");
         } else {
@@ -190,6 +196,7 @@ define(function (require, exports, module) {
         this.tracings_label_max.render(this.range.max);
         this.tracings_label_med.render(this.range.med);
         this.tracings_label_min.render(this.range.min);
+        this.div.style("display", "block");
         return this;
     };
     
@@ -204,6 +211,7 @@ define(function (require, exports, module) {
         this.tracings_label_max.hide();
         this.tracings_label_min.hide();
         this.tracings_label_med.hide();
+        this.div.style("display", "none");
         return this;
     };
 

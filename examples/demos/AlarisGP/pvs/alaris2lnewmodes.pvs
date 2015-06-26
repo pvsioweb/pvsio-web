@@ -3,9 +3,9 @@
 % relating to visibility of vtbi and time and when switching off
 
 alaris_th [
-   maxrate  : posnat, %{maxrate: posnat | maxrate > 1000},
-   maxinfuse: posnat, %{maxinfuse: posnat |  maxinfuse >= 3000 }, % maxtime = maxinfuse needed for proving maxinfuse_over_time_lemma and vtbi_over_time_lemma   
-   infusemin: { infusemin: posreal | infusemin <= maxinfuse },
+   maxrate  : {maxrate: posnat | maxrate > 1000},
+   maxinfuse: {maxinfuse: posnat |  maxinfuse >= 3000 }, % maxtime = maxinfuse needed for proving maxinfuse_over_time_lemma and vtbi_over_time_lemma   
+infusemin: { infusemin: posreal | infusemin <= maxinfuse },
    timeout  : posnat,
    shorttimeout : {shorttimeout: posnat | shorttimeout < timeout},
    maxtime  : { maxtime: posnat | maxtime > timeout AND maxtime >= maxinfuse },
@@ -13,11 +13,11 @@ alaris_th [
    bat_min: {bat_min: posnat | bat_min < bat_max}
 ]: THEORY
  BEGIN
-%  ASSUMING
-%    timeoutLTmaxtime: ASSUMPTION timeout < maxtime
-%    shorttimeoutLTtimeout: ASSUMPTION shorttimeout < timeout
-%    maxinfuseVal: ASSUMPTION maxinfuse >= 3000
-%  ENDASSUMING
+  ASSUMING
+    timeoutLTmaxtime: ASSUMPTION timeout < maxtime
+    shorttimeoutLTtimeout: ASSUMPTION shorttimeout < timeout
+    maxinfuseVal: ASSUMPTION maxinfuse >= 3000
+  ENDASSUMING
   IMPORTING pump_th[maxrate, maxinfuse, infusemin, timeout, shorttimeout, maxtime, bat_max, bat_min]
 % maxtime is actually 1680
   % Interactor main
@@ -25,7 +25,7 @@ alaris_th [
   % pump via device
   %  attributes
   alaris: TYPE = [#
-    id: string,
+	id: string,
     device : pump,
     topline: iline, % [vis]
     middisp: imid,  % [vis]
@@ -752,7 +752,7 @@ tick_case_infuse_infusionrateEQvtbi_kvoflag(st: {st: alaris | per_tick(device(st
                             device := resetElapsed(device(st))]
 
   key1_case_dispvtbi_tbagmode(st: (per_key1)): alaris =
-         LET nvtbi: nonneg_real = COND bagscursor(st) = 0 -> 0,
+         LET nvtbi = COND bagscursor(st) = 0 -> 0,
                                             bagscursor(st) = 1 -> 50,
                                             bagscursor(st) = 2 -> 100,
                                             bagscursor(st) = 3 -> 200,
@@ -777,9 +777,7 @@ tick_case_infuse_infusionrateEQvtbi_kvoflag(st: {st: alaris | per_tick(device(st
 			     entrymode  := vttmode,
 			     newvtbi  := nvtbi,
                              newrate := IF newtime(st) = 0 THEN 0
-			     	     	% >>new edit<<
-                                        %ELSE floor(nvtbi / newtime(st)) ENDIF,
-					ELSE nvtbi / newtime(st) ENDIF,
+                                        ELSE floor(nvtbi / newtime(st)) ENDIF,
                              device := resetElapsed(device(st))
                            ]
 
@@ -1404,9 +1402,7 @@ key1_case_options_dsetvtbilocked(st: (per_key1)): alaris =
           st WITH [newvtbi := nv,
                    newrate := IF
                                newtime(st) = 0 THEN 0
-			      % >>new edit<<
-                              %ELSE floor(nv / newtime(st))
-			      ELSE nv / newtime(st)
+                              ELSE floor(nv / newtime(st))
                               ENDIF,
                    current_sv := s,
                    device  := resetElapsed(device(st))]
@@ -1427,9 +1423,7 @@ key1_case_options_dsetvtbilocked(st: (per_key1)): alaris =
           st WITH [newtime := nt,
                    newrate := IF
                                nt = 0 THEN 0
-			      % >>new edit<<
-                              %ELSE floor(newvtbi(st) / nt)
-			      ELSE newvtbi(st) / nt
+                              ELSE floor(newvtbi(st) / nt)
                               ENDIF,
                    current_st := s,
                    device := resetElapsed(device(st))]
@@ -1471,7 +1465,7 @@ key1_case_options_dsetvtbilocked(st: (per_key1)): alaris =
         ENDCOND) WITH [pressed := d,
                       which_press := fupb]
 
-  alaris_up_rate(d: steprate, v: irates): irates = 
+alaris_up_rate(d: steprate, v: irates): irates = 
      IF    v < 100                 THEN trim_rate( floor((v*10) + d) / 10 )
      ELSIF v >= 100 AND v < 1000 THEN trim_rate( floor((v) + d) )
      ELSE                                 trim_rate( (floor(v/10) + d) * 10 ) ENDIF
@@ -1510,9 +1504,7 @@ sup_case_dispvtbi_vtmode(st: (per_sup)): alaris =
           st WITH [newvtbi := nv,
                    newrate := IF
                                newtime(st) = 0 THEN 0
-			      % >>new edit<<
-			      %ELSE floor(nv / newtime(st))
-                              ELSE nv / newtime(st)
+                              ELSE floor(nv / newtime(st))
                               ENDIF,
                    current_sv := small_step,
                    device  := resetElapsed(device(st))]
@@ -1533,9 +1525,7 @@ sup_case_dispvtbi_vtmode(st: (per_sup)): alaris =
           st WITH [newtime := nt,
                    newrate := IF
                                nt = 0 THEN 0
-			      % >>new edit<<
-                              %ELSE floor(newvtbi(st) / nt)
-                              ELSE newvtbi(st) / nt
+                              ELSE floor(newvtbi(st) / nt)
                               ENDIF,
                    current_st := small_step,
                    device  := resetElapsed(device(st))]
@@ -1646,9 +1636,7 @@ sup_case_dispvtbi_vtmode(st: (per_sup)): alaris =
           st WITH [newvtbi := nv,
                    newrate := IF
                                newtime(st) = 0 THEN 0
-			      % >>new edit<<
-			      %ELSE floor(nv / newtime(st))
-                              ELSE nv / newtime(st)
+                              ELSE floor(nv / newtime(st))
                               ENDIF,
                    current_sv := s,
                    device  := resetElapsed(device(st))]
@@ -1671,9 +1659,7 @@ alaris_dn_time(s: steptime, v: itimes): itimes =
           st WITH [newtime := nt,
                    newrate := IF
                                nt = 0 THEN 0
-			      % >>new edit<<
-			      %ELSE floor(newvtbi(st) / nt)
-                              ELSE newvtbi(st) / nt
+                              ELSE floor(newvtbi(st) / nt)
                               ENDIF,
                    current_st := s,
                    device  := resetElapsed(device(st))]
@@ -1764,9 +1750,7 @@ alaris_dn_time(s: steptime, v: itimes): itimes =
           st WITH [newvtbi := nv,
                    newrate := IF
                                newtime(st) = 0 THEN 0
-			      % >>new edit<<
-			      %ELSE floor(nv / newtime(st))
-                              ELSE nv / newtime(st)
+                              ELSE floor(nv / newtime(st))
                               ENDIF,
                    current_sv := small_step,
                    device  := resetElapsed(device(st))]
@@ -1785,9 +1769,7 @@ alaris_dn_time(s: steptime, v: itimes): itimes =
           st WITH [newtime := nt,
                    newrate := IF
                                nt = 0 THEN 0
-			      % >>new edit<<
-			      %ELSE floor(newvtbi(st) / nt)
-                              ELSE newvtbi(st) / nt
+                              ELSE floor(newvtbi(st) / nt)
                               ENDIF,
                    current_st := s,
                    device  := resetElapsed(device(st))]
@@ -1868,7 +1850,6 @@ per_release_sdown(st: alaris): boolean =
  release_sdown(st:(per_release_sdown)): alaris =
      release_key(st)
 
-%--- unable to prove these theorem within a reasonable time using grind
 % QED Run time  = 42.03 secs. 22/4/15
 check_chev_fup_permission: THEOREM
    FORALL (st: alaris):

@@ -67,7 +67,7 @@ define(function (require, exports, module) {
         this.range = opt.range || { max: 100, min: 0 };
         this.speed = opt.speed || 1;
         this.scanBar = opt.scanBar || { width: 4 };
-        this.keep = opt.keepLastState || true;
+        this.keep = opt.keepLastState || false;
         this.py = this.height * 0.5;
         this.px = 0;
         this.opx = this.px;
@@ -113,7 +113,10 @@ define(function (require, exports, module) {
         }
         var _this = this;
         opt = opt || {};
-        this.py = (val > 0) ? this.height - (val / (_this.range.max - _this.range.min)) * this.height : this.height;
+        opt.range = opt.range || { };
+        opt.range.max = opt.range.max || _this.range.max;
+        opt.range.min = opt.range.min || _this.range.min;
+        this.py = (val > 0) ? this.height - (val / (opt.range.max - opt.range.min)) * this.height : this.height;
         var context = document.getElementById(this.id + "_canvas").getContext("2d");
         if (!this.loop) {
             var align = opt.align || this.align;
