@@ -7,7 +7,7 @@
 /*global define, Promise, d3*/
 define(function (require, exports, module) {
     "use strict";
-    var PrototypeBuilder	= require("plugins/prototypebuilder/PrototypeBuilder"),
+    var //PrototypeBuilder	= require("plugins/prototypebuilder/PrototypeBuilder"),
         ProjectManager		= require("project/ProjectManager"),
         ModelEditor         = require("plugins/modelEditor/ModelEditor"),
         PVSioWebClient      = require("PVSioWebClient"),
@@ -513,7 +513,7 @@ define(function (require, exports, module) {
                 });
             } else {
                 emuchartsManager.delete_chart();
-                document.getElementById("btnLoadEmuchart").click();            
+                document.getElementById("btnLoadEmuchart").click();
             }
         });
         d3.select("#btn_menuImportChart").on("click", function () {
