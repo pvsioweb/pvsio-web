@@ -33,6 +33,7 @@ define(function (require, exports, module) {
         EmuchartsCppPrinter    = require("plugins/emulink/EmuchartsCppPrinter"),
         EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter2"),
         EmuchartsVDMPrinter    = require("plugins/emulink/EmuchartsVDMPrinter"),
+        EmuchartsJSPrinter     = require("plugins/emulink/EmuchartsJavaScriptPrinter"),
 //        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         FileHandler            = require("filesystem/FileHandler"),
         FileSystem             = require("filesystem/FileSystem"),
@@ -54,6 +55,8 @@ define(function (require, exports, module) {
     var emuchartsCppPrinter;
     var emuchartsMALPrinter;
     var emuchartsVDMPrinter;
+    var emuchartsJSPrinter;
+
     var options = { autoinit: true };
 
     var displayNotification = function (msg, title) {
@@ -261,6 +264,8 @@ define(function (require, exports, module) {
         emuchartsCppPrinter = new EmuchartsCppPrinter("emuchart_Cpp");
         emuchartsMALPrinter = new EmuchartsMALPrinter("emuchart_MAL");
         emuchartsVDMPrinter = new EmuchartsVDMPrinter("emuchart_VDM");
+        emuchartsJSPrinter = new EmuchartsJSPrinter("emucharts_JS");
+
         pvsioWebClient = PVSioWebClient.getInstance();
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
@@ -1101,6 +1106,7 @@ define(function (require, exports, module) {
             };
             var model = emuchartsPVSPrinter.print(emucharts);
             console.log(model);
+            console.log(emuchartsJSPrinter.print(emucharts));
             if (model.err) {
                 console.log(model.err);
                 return;
@@ -1227,6 +1233,36 @@ define(function (require, exports, module) {
                 return projectManager.project().addFile(name, content, { overWrite: true });
             } else {
                 console.log("Warning, VDM model is undefined.");
+            }
+        });
+
+        d3.select("#btn_menuJavaScriptPrinter").on("click", function () {
+            var emucharts = {
+                name: ("emucharts_" + projectManager.project().name() + "_JS"),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: emuchartsManager.getVariables(),
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            var model = emuchartsJSPrinter.print(emucharts);
+            console.log(model);
+            if (model.err) {
+                console.log(model.err);
+                return;
+            }
+            if (model.res) {
+                var name = emucharts.name + ".js";
+                var content = model.res;
+                return projectManager.project().addFile(name, content, { overWrite: true });
+            } else {
+                console.log("Warning, JavaScript model is undefined.");
             }
         });
         //-- Zoom menu -----------------------------------------------------------
