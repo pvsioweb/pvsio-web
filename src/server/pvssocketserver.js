@@ -428,6 +428,7 @@ function run() {
                 if (mainFile !== "") {
                     changeProjectSetting(token.projectName, "mainPVSFile", mainFile)
                         .then(function (res) {
+                            res.type = token.type;
                             res.id = token.id;
                             res.socketId = socketid;
                             res.time = token.time;
