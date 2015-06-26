@@ -77,9 +77,7 @@ define(function (require, exports, module) {
         //generate the javascript function
         var transitions = [], sourceData = {};
         emuchart.transitions.forEach(function (t) {
-            var name = t.name,
-                from = t.source.name,
-                to = t.target.name;
+            var name = t.name;
 
             var functionBody = parser.parseTransition(name);
             var id, condition, actions;

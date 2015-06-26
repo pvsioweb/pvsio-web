@@ -2,6 +2,9 @@
  * @module FileReader
  * @author Patrick Oladimeji, Paolo Masci
  * @date 25/06/2015 10:48:39 AM
+ *
+ * This module provides api access to interact with the filesystem. This includes
+ * reading, writing and deleting files, as well as creating and removing directories.
  */
 define(function (require, exports, module) {
 
