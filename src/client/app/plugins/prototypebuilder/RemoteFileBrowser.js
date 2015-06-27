@@ -43,7 +43,8 @@ define(function (require, exports, module) {
             "input #baseDirectory": "onTextChanged",
             "input #currentPath": "onEdit",
             "click #btnHome": "selectHome",
-            "click #btnEdit": "enableEdit"
+            "click #btnEdit": "enableEdit",
+            "click #btnUp": "goUpADirectory"
         },
         onTextChanged: function (event) {
             clearTimeout(timer);
@@ -67,6 +68,14 @@ define(function (require, exports, module) {
                 document.getElementById("btnEdit").style.backgroundColor = "";
                 document.getElementById("currentPath").readOnly = true;
             }
+        },
+        goUpADirectory: function (event) {
+            var dir = d3.select("#currentPath");
+            var path = dir.property("value");
+            var levelUp = path.substr(0, path.lastIndexOf("/"));
+            rfb.rebaseDirectory(levelUp);
+            //update the directory shown on the top of the window
+            dir.property("value", levelUp);
         }
     });
 
@@ -89,7 +98,8 @@ define(function (require, exports, module) {
      * @returns {number} -1 if a < b, 0 if a === b and 1 if a > b
      */
     function fileSort(a, b) {
-        return a.path.toLowerCase() < b.path.toLowerCase() ? -1 : a.path.toLowerCase() === b.path.toLowerCase() ? 0 : 1;
+        return a.path.toLowerCase() < b.path.toLowerCase()
+            ? -1 : a.path.toLowerCase() === b.path.toLowerCase() ? 0 : 1;
     }
 
     function getRemoteDirectory(path) {
