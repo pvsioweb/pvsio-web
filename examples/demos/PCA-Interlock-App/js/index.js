@@ -460,11 +460,11 @@ require([
     
 
     function stopNetworkController() {
-//        // Uncomment this to invoke glassfish from commands line
-//        return new Promise(function (resolve, reject) {
-//            resolve(msg);
-//        });
-//
+        // Uncomment this to invoke glassfish from commands line
+        return new Promise(function (resolve, reject) {
+            resolve(msg);
+        });
+
         var msg = "Stopping ICE Network Controller...";
         console.log(msg);
         return new Promise(function (resolve, reject) {
@@ -482,10 +482,10 @@ require([
         });
     }
     function startNetworkController() {
-//        // Uncomment this to invoke glassfish from commands line
-//        return new Promise(function (resolve, reject) {
-//            resolve(msg);
-//        });
+        // Uncomment this to invoke glassfish from commands line
+        return new Promise(function (resolve, reject) {
+            resolve(msg);
+        });
 
         var msg = "Starting ICE Network Controller...";
         console.log(msg);
