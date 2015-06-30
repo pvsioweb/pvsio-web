@@ -226,12 +226,12 @@ define(function (require, exports, module) {
             }
             if (data.action === "connected") {
                 deviceON = true;
-                _this.fire({type: "disconnected", message: "<- " + _this.deviceID + " is now disconnected", data: data});
+                _this.fire({type: "notify", message: "<- " + _this.deviceID + " is now connected", data: data});
                 _this.fire({type: "connected", message: event.data});
             }
-            if (data.action === "off") {
+            if (data.action === "disconnected") {
                 deviceON = false;
-                _this.fire({type: "notify", message: "<- " + _this.deviceID + " is now connected", data: data});
+                _this.fire({type: "notify", message: "<- " + _this.deviceID + " is now disconnected", data: data});
                 _this.fire({type: "disconnected", message: event.data});
             }
             if (data.action === "error"){
