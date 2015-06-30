@@ -1,19 +1,32 @@
-(function () {
+    //declaration of helper functions
+    function enter(newStateLabel, state) {
+        state.currentState = newStateLabel;
+        return state;
+    }
+
+    function leave(currentStateLabel, state) {
+        state.previousState = currentStateLabel;
+        return state;
+    }
+
+    //function declarations
 {{#each transitions}}
-    function {{id}} () {
-    {{#if condition}}
+    function {{id}} (state) {
+    {{~#if condition}}
         if ({{&condition}}) {
-            {{#each actions}}{{& .}};
+            state = leave('{{source.name}}', state);
+            {{~#each actions}}
+            state.{{&.}};
             {{/each}}
+            state  = enter('{{target.name}}', state);
         }
-    {{else}}
-        {{actions}};
-    {{/if}}
+    {{~else}}
+        state = leave('{{source.name}}', state);
+        {{~#each actions}}
+        state.{{&.}};
+        {{~/each}}
+        state = enter('{{target.name}}', state);
+    {{~/if}}
+        return state;
     }
 {{/each}}
-
-    return {
-        {{#each transitions}}{{id}}:{{id}}{{#unless @last}},{{/unless}}
-        {{/each}}
-    };
-}());
