@@ -9,6 +9,7 @@
 define(function (require, exports, module) {
     "use strict";
     var eventDispatcher = require("util/eventDispatcher"),
+        FileSystem      = require("filesystem/FileSystem"),
         QuestionForm    = require("pvsioweb/forms/displayQuestion"),
         NotificationManager = require("project/NotificationManager"),
         TreeList        = require("./TreeList");
@@ -16,11 +17,13 @@ define(function (require, exports, module) {
     var elementId, project, projectManager, folderCounter = 0,
         unSavedFileName = "untitled_file", unSavedFolderName = "untitled_folder", treeList;
 
+    var fs;
     ///FIXME Sort out the use of alert dialogs to notify errors here --
     ///also are there client side checks we can do to prevent some errors
     function FileTreeView(_elId, folderData, _projectManager) {
         eventDispatcher(this);
         var ftv = this;
+        fs = new FileSystem();
         elementId = _elId;
         project = _projectManager.project();
         projectManager = _projectManager;
@@ -105,7 +108,7 @@ define(function (require, exports, module) {
             }
             function createFile(path, fuel) {
                 return new Promise(function (resolve, reject) {
-                    projectManager.writeFile(path, "", { silentMode: true })
+                    fs.writeFile(path, "", { silentMode: true })
                         .then(function (res) { resolve(res); })
                         .catch(function (err) {
                             if (err.code === "EEXIST") {
@@ -138,7 +141,7 @@ define(function (require, exports, module) {
             }
             function createFolder(path, fuel) {
                 return new Promise(function (resolve, reject) {
-                    projectManager.mkDir(path, { silentMode: true })
+                    fs.mkDir(path, { silentMode: true })
                         .then(function (res) { resolve(res); })
                         .catch(function (err) {
                             if (err.code === "EEXIST") {
@@ -173,10 +176,10 @@ define(function (require, exports, module) {
                 buttons: ["Cancel", "Delete"]
             }).on("delete", function (e, view) {
                 if (isDirectory) {
-                    projectManager.rmDir(path)
+                    fs.rmDir(path)
                         .catch(function (err) { console.log(err); });
                 } else {
-                    projectManager.deleteFile(path)
+                    fs.deleteFile(path)
                         .catch(function (err) { console.log(err); });
                 }
                 if (isMainFile) {

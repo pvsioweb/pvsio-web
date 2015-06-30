@@ -1,0 +1,19 @@
+(function () {
+{{#each transitions}}
+    function {{id}} () {
+    {{#if condition}}
+        if ({{&condition}}) {
+            {{#each actions}}{{& .}};
+            {{/each}}
+        }
+    {{else}}
+        {{actions}};
+    {{/if}}
+    }
+{{/each}}
+
+    return {
+        {{#each transitions}}{{id}}:{{id}}{{#unless @last}},{{/unless}}
+        {{/each}}
+    };
+}());

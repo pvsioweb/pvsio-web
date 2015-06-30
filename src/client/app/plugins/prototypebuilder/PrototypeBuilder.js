@@ -409,7 +409,7 @@ define(function (require, exports, module) {
         d3.selectAll("#btnLoadPicture").on("click", function () {
             return new Promise(function (resolve, reject) {
                 if (PVSioWebClient.getInstance().serverOnLocalhost()) {
-                    projectManager.readFileDialog({encoding: "base64", title: "Select a picture"}).then(function (descriptors) {
+                    fs.readFileDialog({encoding: "base64", title: "Select a picture"}).then(function (descriptors) {
                         _prototypeBuilder.changeImage(descriptors[0].name, descriptors[0].content).then(function (res) {
                             renderImage(res).then(function (res) {
                                 if (d3.select("#imageDiv svg").node() === null) {
