@@ -71,7 +71,7 @@ define(function (require, exports, module) {
         },
         goUpADirectory: function (event) {
             var dir = d3.select("#currentPath");
-            var path = dir.property("value");
+            var path = rfb._baseDirectory;
             var levelUp = path.substr(0, path.lastIndexOf("/"));
             rfb.rebaseDirectory(levelUp);
             //update the directory shown on the top of the window
@@ -91,6 +91,7 @@ define(function (require, exports, module) {
 
     RemoteFileBrowser.prototype._treeList = null;
 
+    RemoteFileBrowser.prototype._baseDirectory = null;
     /**
      * Utility function to sort the list of files returned by the remote file browser
      * @param   {String}   a first argument
@@ -115,6 +116,14 @@ define(function (require, exports, module) {
         });
     }
 
+    /**
+     * Gets the current base directory whose content is being rendered in the remote browser.
+     * @returns {String} The base directory
+     */
+    RemoteFileBrowser.prototype.getBaseDirectory = function () {
+        return this._baseDirectory;
+    };
+
     RemoteFileBrowser.prototype.rebaseDirectory = function (path) {
         var self = this;
         getRemoteDirectory(path)
@@ -122,6 +131,7 @@ define(function (require, exports, module) {
                 var data = {name: path, path: path, children: files, isDirectory: true};
                 self._treeList.data = data;
                 self._treeList.render(data);
+                self._baseDirectory = path;
             }).catch(function (err) {
                 self._treeList.data = [];
             });

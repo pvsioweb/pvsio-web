@@ -9,13 +9,14 @@ define(function (require, exports, module) {
     var instance, saveTimer, countdownTimer;
     var ProjectManager = require("project/ProjectManager"),
         Timer          = require("util/Timer"),
-        Constants      = require("util/Constants");
+        Constants      = require("util/Constants"),
+        PreferenceKeys = require("preferences/PreferenceKeys"),
+        Preferences  = require("preferences/PreferenceStorage").getInstance();
 
-    var saveInterval = 60 * 1000; // 1 min interval
-
+    var saveInterval = Preferences.get(PreferenceKeys.BACKUP_INTERVAL) * 60 * 1000;
     function ProjectAutoSaver() {
         saveTimer = new Timer(saveInterval);
-        countdownTimer = new Timer(1000);
+        countdownTimer = new Timer(saveInterval);
         if (window.location.origin.indexOf("pvsioweb.org") >= 0 ||
                 window.location.origin.indexOf("pvsioweb.herokuapp.com") >= 0) {
             saveInterval = 0; // disabling autosave on heroku cloud
