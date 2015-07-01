@@ -6,13 +6,12 @@
   */
 define(function (require, exports, module) {
     "use strict";
-    var second = 1000,
-        minute = 60 * second;
+
     var preferenceKeys = require("preferences/PreferenceKeys");
     var prefs = {}, instance;
 
     function DefaultPreferences() {
-        prefs[preferenceKeys.BACKUP_INTERVAL] = 5 * minute;
+        prefs[preferenceKeys.BACKUP_INTERVAL] = 1;
         prefs[preferenceKeys.REMEMBER_LAST_DIRECTORY] = true;
         prefs[preferenceKeys.REMEMEBER_ENABLED_PLUGINS] = true;
         prefs[preferenceKeys.LAST_DIRECTORY_VISITED] = "~";

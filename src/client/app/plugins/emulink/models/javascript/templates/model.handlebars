@@ -1,8 +1,9 @@
 (function() {
-{{constants}}
-{{variables}}
+{{~&functions~}}
 
-{{functions}}
-
-{{initialisation}}
+    return {
+        {{~#each transitions}}
+        {{id}}: {{id}}{{#unless @last}},{{/unless}}
+        {{~/each}}
+    };
 }());

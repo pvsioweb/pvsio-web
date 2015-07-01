@@ -1,0 +1,5 @@
+    var machineStates = [
+        {{#each this~}}
+        {{& name}} {{#unless @last}},{{/unless}}
+        {{/each~}}
+    ];

@@ -1,0 +1,11 @@
+    //initialisation function for model
+    function init() {
+        var st = {currentState: '', previousState: ''};
+        //initialising other state properties
+        {{~#each this}}
+        {{~#each actions}}
+        st.{{&.}};
+        {{/each~}}
+        {{/each~}}
+        return st;
+    }

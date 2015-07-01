@@ -1,16 +1,23 @@
 /**
- *  *Manages the persistence of the preference items.
-    * @author Patrick Oladimeji
-    * @date 25/06/2015 9:27:14 AM
-    */
+  * Manages the persistence of the preference items. Persistence is currently done using localStorage in the browser.
+  * Hence there is no need to explicitly call a save method after setting values.
+  * @author Patrick Oladimeji
+  * @date 25/06/2015 9:27:14 AM
+  * @usage
+  *     var Preferences = require("preferences/PreferenceStorage").getInstance();
+  *     var PreferenceKeys = require("preferences/PreferenceKeys");
+  *
+  *     function updateBackupInterval(interval) {
+  *         Preferences.set(PreferenceKeys.BACKUP_INTERVAL, interval);
+  *     }
+  */
 define(function (require, exports, module) {
     "use strict";
     var DefaultPreferences = require("preferences/DefaultPreferences").getInstance();
+    var PreferenceKeys = require("preferences/PreferenceKeys");
 
     var instance;
-    function PreferenceStorage() {
-
-    }
+    function PreferenceStorage() {  }
 
     PreferenceStorage.prototype.get  = function (key) {
         var res = localStorage.getItem(key);
@@ -25,6 +32,15 @@ define(function (require, exports, module) {
 
     PreferenceStorage.prototype.set = function (key, value) {
         localStorage.setItem(key, JSON.stringify(value));
+    };
+
+    PreferenceStorage.prototype.getAllPreferences = function () {
+        var _this = this;
+        var res = {};
+        Object.keys(PreferenceKeys).forEach(function (k) {
+            res[k] = _this.get(k);
+        });
+        return res;
     };
 
     module.exports = {

@@ -198,6 +198,7 @@ define(function (require, exports, module) {
             WidgetsListView.create();
         }).catch(function (err) { Logger.error(err); });
     }
+
     function onWidgetsFileChanged(event) {
         updateImageAndLoadWidgets().then(function (res) {
             WidgetsListView.create();
