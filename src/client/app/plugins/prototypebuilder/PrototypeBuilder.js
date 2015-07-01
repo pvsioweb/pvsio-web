@@ -17,7 +17,8 @@ define(function (require, exports, module) {
         WidgetsListView = require("pvsioweb/forms/WidgetsListView"),
         template		= require("text!pvsioweb/forms/templates/prototypeBuilderPanel.handlebars"),
         ScriptPlayer    = require("util/ScriptPlayer"),
-        fs              = require("util/fileHandler"),
+//        fs              = require("util/fileHandler"),
+        FileSystem          = require("filesystem/FileSystem"),
         NotificationManager = require("project/NotificationManager"),
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
         Descriptor      = require("project/Descriptor");
@@ -29,12 +30,14 @@ define(function (require, exports, module) {
         pvsioWebClient;
     var img; // this is the prototype image displayed in the PVSio-web user interface
     var _prototypeBuilder;
+    var fs;
 
     function PrototypeBuilder() {
         pvsioWebClient = PVSioWebClient.getInstance();
         projectManager = ProjectManager.getInstance();
         currentProject = projectManager.project();
         img = null;
+        fs = new FileSystem();
         _prototypeBuilder = this;
     }
 
