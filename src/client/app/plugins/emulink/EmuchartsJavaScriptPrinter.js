@@ -8,7 +8,7 @@
  * both are of type 'string'.
  *
  * The generated model has the following structure
- * (function () {
+ * function () {
  *      //declaration of machine states
  *      var machineState = [];//array of strings reprensenting state labels of the model
  *      //an object containing the variables used in the model. This is really not needed as the real state of the
@@ -43,8 +43,7 @@
  *      return {
  *          init: init//and include all other functions in the model
  *      };
- *
- * }());
+ * }
  * variables are mapped to js variables
  * constants are also mapped to js variables
  *
@@ -63,7 +62,8 @@ define(function (require, exports, module) {
         initialisationTemplate = require("text!plugins/emulink/models/javascript/templates/initial-transition.handlebars"),
         modelTemplate = require("text!plugins/emulink/models/javascript/templates/model.handlebars"),
         stateTemplate = require("text!plugins/emulink/models/javascript/templates/states.handlebars");
-    var parser;
+    var parser,
+        modelName;
     var allTransitions;
     var operatorOverrides = {
         ":=": "=",
@@ -75,7 +75,7 @@ define(function (require, exports, module) {
     var complexActions = ["expression", "assignment", "function"];
 
     function definedValues(d) {
-        return d !== null && d !== undefined;
+        return d !== null && d !== undefined && d !== "";
     }
 
     function getExpression(expression) {
@@ -139,6 +139,7 @@ define(function (require, exports, module) {
     function Printer(name) {
         parser = new EmuchartsParser();
         allTransitions = [];
+        modelName = name;
     }
 
     Printer.prototype.print_descriptor = function (emuchart) {
@@ -205,9 +206,38 @@ define(function (require, exports, module) {
         return "";
     };
 
+    function getVarsString (vars) {
+        //recursively parses variables in a record format
+        function getVars(vars) {
+            var res = {}, value;
+            Object.keys(vars).forEach(function (v) {
+                if (vars[v].children) {
+                    res[v] = getVars(vars[v].children);
+                } else if (vars[v].val) {
+                    value = vars[v].val.value;
+                    res[v] = value !== undefined ? JSON.parse(vars[v].val.value) : value;
+                }
+            });
+            return res;
+        }
+
+        var res = getVars(vars);
+        //add the default states of current and previous states if not already there
+        if (res.currentState === undefined) {
+            res.currentState = "";
+        }
+
+        if (res.previousState === undefined) {
+            res.previousState = "";
+        }
+        return JSON.stringify(res);
+    }
+
     Printer.prototype.print_initial_transition = function (emuchart) {
         var trans = emuchart.initial_transitions,
             transitions = [];
+        var vars = parser.parseVariables(emuchart.variables);
+
         trans.forEach(function (t) {
             var parsedTransitions = parseTransition(t);
             if (parsedTransitions) {
@@ -215,7 +245,7 @@ define(function (require, exports, module) {
             }
         });
         allTransitions = allTransitions.concat(transitions);
-        var str = Handlebars.compile(initialisationTemplate)(transitions);
+        var str = Handlebars.compile(initialisationTemplate)({transitions: transitions, vars: getVarsString(vars.res)});
         return str;
     };
 
@@ -225,21 +255,26 @@ define(function (require, exports, module) {
     };
 
     Printer.prototype.print = function (emuchart) {
-        var parts = [this.print_descriptor,
-                     this.print_constants,
-                     this.print_variables,
-                     this.print_types,
-                     this.print_states,
-                     this.print_initial_transition,
-                     this.print_transitions,
-                     this.print_disclaimer];
+        var bodyParts = [
+            this.print_constants,
+            this.print_variables,
+            this.print_types,
+            this.print_states,
+            this.print_initial_transition,
+            this.print_transitions
+        ];
+        function printBody (emuchart) {
+            var body = bodyParts.map(function (f) {
+                return f(emuchart);
+            }).filter(definedValues).join("\n");
+            var model = Handlebars.compile(modelTemplate)({functions: body, transitions: allTransitions, name: modelName});
+            return model;
+        }
 
-        var body = parts.map(function (f) {
+        var res = [this.print_descriptor, printBody, this.print_disclaimer].map(function (f) {
             return f(emuchart);
-        }).join("\n");
-
-        var str = Handlebars.compile(modelTemplate)({functions: body, transitions: allTransitions});
-        return {res: str};
+        }).filter(definedValues).join("\n");
+        return {res: res};
     };
 
     module.exports = Printer;
