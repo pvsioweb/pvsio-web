@@ -502,46 +502,46 @@ require([
     function stopNetworkController() {
         // Uncomment this to invoke glassfish from commands line
         return new Promise(function (resolve, reject) {
-            resolve(msg);
+            resolve();
         });
 
-        var msg = "Stopping ICE Network Controller...";
-        console.log(msg);
-        return new Promise(function (resolve, reject) {
-            client.getWebSocket().send({type: "stopSapereEE"}, function (err) {
-                if (!err) {
-                    msg = "ICE Network Controller stopped successfully!";
-                    console.log(msg);
-                    resolve(msg);
-                } else {
-                    msg = "Error while stopping ICE Network Controller (" + JSON.stringify(err) + ")";
-                    console.log(msg);
-                    reject(err);
-                }
-            });
-        });
+//        var msg = "Stopping ICE Network Controller...";
+//        console.log(msg);
+//        return new Promise(function (resolve, reject) {
+//            client.getWebSocket().send({type: "stopSapereEE"}, function (err) {
+//                if (!err) {
+//                    msg = "ICE Network Controller stopped successfully!";
+//                    console.log(msg);
+//                    resolve(msg);
+//                } else {
+//                    msg = "Error while stopping ICE Network Controller (" + JSON.stringify(err) + ")";
+//                    console.log(msg);
+//                    reject(err);
+//                }
+//            });
+//        });
     }
     function startNetworkController() {
         // Uncomment this to invoke glassfish from commands line
         return new Promise(function (resolve, reject) {
-            resolve(msg);
+            resolve();
         });
 
-        var msg = "Starting ICE Network Controller...";
-        console.log(msg);
-        return new Promise(function (resolve, reject) {
-            client.getWebSocket().send({type: "startSapereEE"}, function (err) {
-                if (!err) {
-                    msg = "ICE Network Controller started successfully!";
-                    console.log(msg);
-                    resolve(msg);
-                } else {
-                    msg = "Error while starting ICE Network Controller (" + JSON.stringify(err) + ")";
-                    console.log(msg);
-                    reject(err);
-                }
-            });
-        });
+//        var msg = "Starting ICE Network Controller...";
+//        console.log(msg);
+//        return new Promise(function (resolve, reject) {
+//            client.getWebSocket().send({type: "startSapereEE"}, function (err) {
+//                if (!err) {
+//                    msg = "ICE Network Controller started successfully!";
+//                    console.log(msg);
+//                    resolve(msg);
+//                } else {
+//                    msg = "Error while starting ICE Network Controller (" + JSON.stringify(err) + ")";
+//                    console.log(msg);
+//                    reject(err);
+//                }
+//            });
+//        });
     }
 
     /*
