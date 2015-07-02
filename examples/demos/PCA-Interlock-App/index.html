@@ -22,12 +22,31 @@
         <div id="content" class="content" style="display:none;"></div>
         <div class="collapsible-panel-parent" style="display:block">
             <h1>ICE Supervisor</h1>
-            <div class="grid_12" style="text-align: center">
+            <div style="text-align: center; position:relative; ">
+                <ul class='tg-list'>
+                    <li class='tg-list-item'>
+                        <h4>Front-End Debugging</h4>
+                        <input class='tgl tgl-light' id='toggle_front_debugging' type='checkbox'>
+                        <label class='tgl-btn' for='toggle_front_debugging'></label>
+                    </li>
+                    <li class='tg-list-item'>
+                        <h4>Back-End Debugging</h4>
+                        <input class='tgl tgl-light' id='toggle_back_debugging' type='checkbox'>
+                        <label class='tgl-btn' for='toggle_back_debugging'></label>
+                    </li>
+                    <li class='tg-list-item'>
+                        <h4>Errors</h4>
+                        <input class='tgl tgl-light' id='toggle_errors' type='checkbox'>
+                        <label class='tgl-btn' for='toggle_errors'></label>
+                    </li>
+                </ul>
+            </div>
+            <div id="nc_monitor"  style="position:relative; float: left; text-align: center; margin-bottom: 100px">
                 <div id="devices"></div>
             </div>
             <div id="monitor" class="console_log grid_6 push_3">
             </div>
-        </div>        
+        </div>
         <div id="splash" class="demo-splash">
             <div class="loader">
                 <div class="version" style="font-size:40px; margin-left:12%;">ICE Supervisor Demo</div>

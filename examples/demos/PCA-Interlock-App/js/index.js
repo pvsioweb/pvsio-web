@@ -42,8 +42,26 @@ require([
             ButtonActionsQueue.getInstance().queueGUIAction("update_monitor(" + event.message + ")", onMessageReceived);
         }
     }
-    function errorMessage(event) { console.log("!!! " + event.message); }
-    function notifyMessage(event) { console.log(">>> " + event.message); }
+
+    /**
+     * NCMonitor preferences
+     */
+    var error_mode = false;
+    var debugging_mode_backend = false;
+    var debugging_mode_frontend = false;
+    var extended_mode = false;
+
+    function errorMessage(event) {
+        if(error_mode){
+            console.log("!!! " + event.message);
+        }
+    }
+
+    function notifyMessage(event) {
+        if(debugging_mode_frontend){
+            console.log(">>> " + event.message);
+        }
+    }
 
     /**
      * Callback DeviceID connected
@@ -103,6 +121,25 @@ require([
         }
     }
 
+    $('#toggle_front_debugging').click(function() {
+        debugging_mode_frontend = !debugging_mode_frontend;
+    });
+
+    $('#toggle_back_debugging').click(function() {
+        if(debugging_mode_backend){
+            debugging_mode_backend = false;
+            ncMonitor.deactivateDebug();
+        }
+        else{
+            debugging_mode_backend = true;
+            ncMonitor.activateDebug();
+        }
+    });
+
+    $('#toggle_errors').click(function() {
+        error_mode = !error_mode;
+    });
+
 
     var url = window.location.origin.split(":").slice(0,2).join(":") + ":8080/NetworkController/devices";
     url = url.replace("http://", "ws://");    
@@ -115,7 +152,10 @@ require([
 
     var urlMonitor = window.location.origin.split(":").slice(0,2).join(":") + ":8080/NetworkController/monitor";
     urlMonitor = urlMonitor.replace("http://", "ws://");    
-    var ncMonitor = new NCMonitor({ url: urlMonitor });
+    var ncMonitor = new NCMonitor({
+        extended: extended_mode,
+        debugging: debugging_mode_backend,
+        url: urlMonitor });
     ncMonitor.addListener("error", errorMessage);
     ncMonitor.addListener("notify", notifyMessage);
     ncMonitor.addListener("connected", onDeviceConnect);
@@ -462,46 +502,46 @@ require([
     function stopNetworkController() {
         // Uncomment this to invoke glassfish from commands line
         return new Promise(function (resolve, reject) {
-            resolve(msg);
+            resolve();
         });
 
-        var msg = "Stopping ICE Network Controller...";
-        console.log(msg);
-        return new Promise(function (resolve, reject) {
-            client.getWebSocket().send({type: "stopSapereEE"}, function (err) {
-                if (!err) {
-                    msg = "ICE Network Controller stopped successfully!";
-                    console.log(msg);
-                    resolve(msg);
-                } else {
-                    msg = "Error while stopping ICE Network Controller (" + JSON.stringify(err) + ")";
-                    console.log(msg);
-                    reject(err);
-                }
-            });
-        });
+//        var msg = "Stopping ICE Network Controller...";
+//        console.log(msg);
+//        return new Promise(function (resolve, reject) {
+//            client.getWebSocket().send({type: "stopSapereEE"}, function (err) {
+//                if (!err) {
+//                    msg = "ICE Network Controller stopped successfully!";
+//                    console.log(msg);
+//                    resolve(msg);
+//                } else {
+//                    msg = "Error while stopping ICE Network Controller (" + JSON.stringify(err) + ")";
+//                    console.log(msg);
+//                    reject(err);
+//                }
+//            });
+//        });
     }
     function startNetworkController() {
         // Uncomment this to invoke glassfish from commands line
         return new Promise(function (resolve, reject) {
-            resolve(msg);
+            resolve();
         });
 
-        var msg = "Starting ICE Network Controller...";
-        console.log(msg);
-        return new Promise(function (resolve, reject) {
-            client.getWebSocket().send({type: "startSapereEE"}, function (err) {
-                if (!err) {
-                    msg = "ICE Network Controller started successfully!";
-                    console.log(msg);
-                    resolve(msg);
-                } else {
-                    msg = "Error while starting ICE Network Controller (" + JSON.stringify(err) + ")";
-                    console.log(msg);
-                    reject(err);
-                }
-            });
-        });
+//        var msg = "Starting ICE Network Controller...";
+//        console.log(msg);
+//        return new Promise(function (resolve, reject) {
+//            client.getWebSocket().send({type: "startSapereEE"}, function (err) {
+//                if (!err) {
+//                    msg = "ICE Network Controller started successfully!";
+//                    console.log(msg);
+//                    resolve(msg);
+//                } else {
+//                    msg = "Error while starting ICE Network Controller (" + JSON.stringify(err) + ")";
+//                    console.log(msg);
+//                    reject(err);
+//                }
+//            });
+//        });
     }
 
     /*
