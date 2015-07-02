@@ -276,7 +276,7 @@ define(function (require, exports, module) {
 
     /**
      * Sends a toggle message to NC
-     * @param element
+     * @param event
      */
     function toggleDevice(event) {
         var id = event.currentTarget.parentElement.parentElement.getAttribute("id");
@@ -289,7 +289,7 @@ define(function (require, exports, module) {
 
     /**
      * Sends a remove message to NC
-     * @param element
+     * @param event
      */
     function removeDevice(event) {
 
@@ -317,7 +317,7 @@ define(function (require, exports, module) {
     }
 
 
-    function printLSASpace(msg, logger) {
+    function printLSASpace(msg) {
         var jsonMsg = JSON.parse(msg);
         var LSAtreeDiv = $("#LSAtree");
         LSAtreeDiv.html("");
@@ -363,7 +363,10 @@ define(function (require, exports, module) {
             notify_request();
         }
         else {
-            _this.fire({type: "error", message: "        " + "#" + data.deviceID + "-sub-" + data.key + " already present"});
+            _this.fire({
+                type: "error",
+                message: "        " + "#" + data.deviceID + "-sub-" + data.key + " already present"
+            });
         }
     }
 
@@ -396,7 +399,10 @@ define(function (require, exports, module) {
             notify_request();
         }
         else {
-            _this.fire({type: "error", message: "        " + "#" + data.deviceID + "-pub-" + data.key + " already present"});
+            _this.fire({
+                type: "error",
+                message: "        " + "#" + data.deviceID + "-pub-" + data.key + " already present"
+            });
 
         }
     }
@@ -411,10 +417,10 @@ define(function (require, exports, module) {
         var commands;
 
         if (data.type === "Supervisor") {
-            if(_this.extended){
+            if (_this.extended) {
                 container = $("#supervisor");
             }
-            else{
+            else {
                 container = $("#devices");
             }
             agents = $("<span>", {class: "agents_block supervisor_agents"});
@@ -427,13 +433,13 @@ define(function (require, exports, module) {
         }
         var child = $("<div>", {id: data.deviceID, class: data.type + " animated bounceInUp device"});
         child.one('webkitAnimationEnd oanimationend msAnimationEnd animationend',
-            function (e) {
-                if(_this.extended){
+            function () {
+                if (_this.extended) {
                     _this.printConnectionsSapere();
                 }
             });
 
-        if(!_this.extended){
+        if (!_this.extended) {
             child.css("width", 212).css("height", 165).css("text-align", "left");
         }
 
@@ -464,7 +470,7 @@ define(function (require, exports, module) {
         remove.on("click", removeDevice);
         remove.append(remove_content);
 
-        if(_this.extended && data.type === "Supervisor"){
+        if (_this.extended && data.type === "Supervisor") {
             toggle.css("left", "80px");
             remove.css("right", "80px");
         }
@@ -485,21 +491,21 @@ define(function (require, exports, module) {
             connections.connections('update')
         }, 50);
 
-        $('.device').connections('remove');
-        $('.device').connections({
-            to: $('#sapere'),
-            class: 'channel'
-        });
+        $('.device').connections('remove')
+            .connections({
+                to: $('#sapere'),
+                class: 'channel'
+            });
     };
 
-    NCMonitor.prototype.activateDebug = function(){
+    NCMonitor.prototype.activateDebug = function () {
         var MonitorOptions = {
             action: "debug"
         };
         nc_websocket_monitor.send(JSON.stringify(MonitorOptions));
     };
 
-    NCMonitor.prototype.deactivateDebug = function(){
+    NCMonitor.prototype.deactivateDebug = function () {
         var MonitorOptions = {
             action: "no_debug"
         };
@@ -542,7 +548,9 @@ define(function (require, exports, module) {
         lock();
         _this.fire({type: "notify", message: "           >> BONDUP " + data.key});
 
+        /** @namespace data.publisher_ID */
         var divPub = $('#' + data.publisher_ID + '-pub-' + data.key);
+        /** @namespace data.subscriber_ID */
         var divSub = $('#' + data.subscriber_ID + '-sub-' + data.key);
 
         divPub.removeClass("bounceInUp");
@@ -556,14 +564,14 @@ define(function (require, exports, module) {
             }, 500);
         }, 500);
 
-        // Re-draw the connection TODO: better connection managment
+        // Re-draw the connection
         var nodePub = '#' + data.publisher_ID + '-pubC-' + data.key;
         var nodeSub = '#' + data.subscriber_ID + '-subC-' + data.key;
 
         $(nodeSub).connections('remove');
         $(nodeSub).connections({
             to: nodePub,
-            class: 'connection',
+            class: 'connection'
         });
         var connections = $('connection');
         setInterval(function () {
@@ -584,7 +592,7 @@ define(function (require, exports, module) {
         $(nodeSub).connections('remove');
         $(nodeSub).connections({
             to: nodePub,
-            class: 'connection',
+            class: 'connection'
         });
         var connections = $('connection');
         setInterval(function () {
@@ -625,7 +633,7 @@ define(function (require, exports, module) {
         var device_div = $("#" + data.deviceID);
         device_div.removeClass("bounceInUp").addClass("bounceOutDown");
         device_div.one('webkitAnimationEnd oanimationend msAnimationEnd animationend',
-            function (e) {
+            function () {
                 device_div.remove();
                 _this.fire({type: "notify", message: "           << REMOVE " + data.deviceID});
                 notify_request();
@@ -658,7 +666,7 @@ define(function (require, exports, module) {
                 circle_figure.connections('remove');
                 circle_div.removeClass("bounceInUp").addClass("bounceOutDown");
                 circle_div.one('webkitAnimationEnd oanimationend msAnimationEnd animationend',
-                    function (e) {
+                    function () {
                         circle_div.remove();
                         _this.fire({type: "notify", message: "           << AG_REMOVE " + data.key});
                         notify_request();

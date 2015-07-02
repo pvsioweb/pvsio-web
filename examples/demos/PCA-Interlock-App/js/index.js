@@ -122,12 +122,7 @@ require([
     }
 
     $('#toggle_front_debugging').click(function() {
-        if(debugging_mode_frontend){
-            debugging_mode_frontend = false;
-        }
-        else{
-            debugging_mode_frontend = true;
-        }
+        debugging_mode_frontend = !debugging_mode_frontend;
     });
 
     $('#toggle_back_debugging').click(function() {
@@ -142,12 +137,7 @@ require([
     });
 
     $('#toggle_errors').click(function() {
-        if(error_mode){
-            error_mode = false;
-        }
-        else{
-            error_mode = true;
-        }
+        error_mode = !error_mode;
     });
 
 
