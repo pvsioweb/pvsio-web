@@ -654,11 +654,10 @@ require([
             client.getWebSocket().startPVSProcess({name: "main.pvs", demoName: "AlarisGP/pvs"}, function (err, event) {
                 ncDevice.start().then(function (res) {
                     ncDevice.connect();
-                    start_tick();
                 }).catch(function(err) {
                     disableNC = true;
-                    start_tick();
                 });
+                start_tick();
             });
         }).addListener("WebSocketConnectionClosed", function (e) {
             console.log("web socket closed");

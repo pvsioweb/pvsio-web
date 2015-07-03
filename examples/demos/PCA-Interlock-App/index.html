@@ -20,9 +20,17 @@
     </head>
     <body>
         <div id="content" class="content" style="display:none;"></div>
+        <div class="error" style="display:none;">
+            <h1>Device ID already in use.</h1>
+            <h2>Please, close the other instance or change the Device ID.</h2>
+        </div>
+        <div class="error" style="display:none;">
+            <h1>Connection error</h1>
+            <h2>Glassfish could not be working, please try to restart it.</h2>
+        </div>
         <div class="collapsible-panel-parent" style="display:block">
-            <h1>ICE Supervisor</h1>
-            <div style="text-align: center; position:relative; ">
+            <div style="text-align: left; position:relative; display: none;">
+                <h1>ICE Supervisor</h1>
                 <ul class='tg-list'>
                     <li class='tg-list-item'>
                         <h4>Front-End Debugging</h4>
@@ -41,11 +49,10 @@
                     </li>
                 </ul>
             </div>
-            <div id="nc_monitor"  style="position:relative; float: left; text-align: center; margin-bottom: 100px">
+            <div id="nc_monitor"  style="position:relative; float: left; text-align: center; margin-bottom: 100px; display: none;">
                 <div id="devices"></div>
             </div>
-            <div id="monitor" class="console_log grid_6 push_3">
-            </div>
+
         </div>
         <div id="splash" class="demo-splash">
             <div class="loader">
