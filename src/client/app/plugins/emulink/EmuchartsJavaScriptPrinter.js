@@ -56,14 +56,13 @@
  */
 define(function (require, exports, module) {
 
-    var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
+    var AbstractPrinter = require("plugins/emulink/EmuchartsAbstractPrinter");
     var functionTemplate = require("text!plugins/emulink/models/javascript/templates/function.handlebars"),
         variablesTemplate = require("text!plugins/emulink/models/javascript/templates/variables.handlebars"),
         initialisationTemplate = require("text!plugins/emulink/models/javascript/templates/initial-transition.handlebars"),
         modelTemplate = require("text!plugins/emulink/models/javascript/templates/model.handlebars"),
         stateTemplate = require("text!plugins/emulink/models/javascript/templates/states.handlebars");
-    var parser,
-        modelName;
+
     var allTransitions;
     var operatorOverrides = {
         ":=": "=",
@@ -72,75 +71,24 @@ define(function (require, exports, module) {
         "and": "&&",
         "or": "||"
     };
-    var complexActions = ["expression", "assignment", "function"];
 
     function definedValues(d) {
         return d !== null && d !== undefined && d !== "";
     }
 
-    function getExpression(expression) {
-        if (expression === undefined || expression === null) {
-            return "";
-        }
-        if (expression.type === "assignment") {
-            var args = [
-                expression.val.identifier.val,
-                getExpression(expression.val.binop),
-                getExpression(expression.val.expression)];
-            return args.join(" ");
-        } else {
-            if (Array.isArray(expression.val)) {
-                var res = expression.val.map(function (token) {
-                    if (complexActions.indexOf(token.val) > -1) {
-                        return getExpression(token.val);
-                    } else {
-                        return operatorOverrides[token.val] || token.val;
-                    }
-                });
-
-                return res.join(" ");
-            } else {
-                if (complexActions.indexOf(expression.val) > -1) {
-                    return getExpression(expression.val);
-                } else {
-                    return operatorOverrides[expression.val] || expression.val;
-                }
-            }
-        }
-    }
-
-    function parseTransition(t) {
-        var name = t.name;
-        var functionBody = parser.parseTransition(name);
-        var id, condition, actions;
-        if (functionBody.res) {
-            functionBody = functionBody.res.val;
-            id = functionBody.identifier;
-            condition = functionBody.cond;
-            actions = functionBody.actions;
-            if (condition) {
-                condition = condition.val.map(function (token) {
-                    return getExpression(token);
-                }).join(" ");
-            }
-            //add the condition that enforces we are in the right state to carry out the actions
-            if (t.source) {
-                condition = [condition, "state.currentState === '" + t.source.name + "'"].filter(definedValues).join(" && ");
-            }
-            if (actions) {
-                actions = actions.val.map(function (a) {
-                    return getExpression(a);
-                });
-            }
-            return {id: id.val, actions: actions, condition: condition, source: t.source, target: t.target};
-        }
-    }
-
     function Printer(name) {
-        parser = new EmuchartsParser();
+        AbstractPrinter.call(this, name);
         allTransitions = [];
-        modelName = name;
     }
+
+    Printer.prototype = Object.create(AbstractPrinter.prototype);
+    Printer.prototype.constructor = Printer;
+    Printer.prototype.parentClass = AbstractPrinter.prototype;
+
+
+    Printer.prototype.getOperator = function (op) {
+        return operatorOverrides[op] || op;
+    };
 
     Printer.prototype.print_descriptor = function (emuchart) {
         return "//JS code generated from Emuchart";
@@ -156,10 +104,11 @@ define(function (require, exports, module) {
     };
 
     Printer.prototype.print_transitions = function (emuchart) {
+        var _this = this;
        //generate the javascript function
         var transitions = [], sourceData = {};
         emuchart.transitions.forEach(function (t) {
-            var parsedTransition  = parseTransition(t);
+            var parsedTransition  = _this.parseTransition(t);
             if (parsedTransition) {
                 transitions.push(parsedTransition);
             }
@@ -234,12 +183,13 @@ define(function (require, exports, module) {
     }
 
     Printer.prototype.print_initial_transition = function (emuchart) {
+        var _this = this;
         var trans = emuchart.initial_transitions,
             transitions = [];
-        var vars = parser.parseVariables(emuchart.variables);
+        var vars = this._parser.parseVariables(emuchart.variables);
 
         trans.forEach(function (t) {
-            var parsedTransitions = parseTransition(t);
+            var parsedTransitions = _this.parseTransition(t);
             if (parsedTransitions) {
                 transitions.push(parsedTransitions);
             }
@@ -255,6 +205,7 @@ define(function (require, exports, module) {
     };
 
     Printer.prototype.print = function (emuchart) {
+        var _this = this;
         var bodyParts = [
             this.print_constants,
             this.print_variables,
@@ -265,14 +216,14 @@ define(function (require, exports, module) {
         ];
         function printBody (emuchart) {
             var body = bodyParts.map(function (f) {
-                return f(emuchart);
+                return f.call(_this, emuchart);
             }).filter(definedValues).join("\n");
-            var model = Handlebars.compile(modelTemplate)({functions: body, transitions: allTransitions, name: modelName});
+            var model = Handlebars.compile(modelTemplate)({functions: body, transitions: allTransitions, name: emuchart.name});
             return model;
         }
 
         var res = [this.print_descriptor, printBody, this.print_disclaimer].map(function (f) {
-            return f(emuchart);
+            return f.call(_this, emuchart);
         }).filter(definedValues).join("\n");
         return {res: res};
     };

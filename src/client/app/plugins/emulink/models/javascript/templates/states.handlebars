@@ -1,5 +1,4 @@
-    var machineStates = [
-        {{#each this~}}
-        {{& name}} {{#unless @last}},{{/unless}}
-        {{/each~}}
-    ];
+    //declare state labels as variables
+    {{#each this~}}
+        var {{& name}} = "{{& name}}";
+    {{/each}}

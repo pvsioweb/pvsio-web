@@ -34,6 +34,7 @@ define(function (require, exports, module) {
         EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter2"),
         EmuchartsVDMPrinter    = require("plugins/emulink/EmuchartsVDMPrinter"),
         EmuchartsJSPrinter     = require("plugins/emulink/EmuchartsJavaScriptPrinter"),
+        EmuchartsAdaPrinter    = require("plugins/emulink/EmuchartsAdaPrinter"),
 //        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         FileHandler            = require("filesystem/FileHandler"),
         FileSystem             = require("filesystem/FileSystem"),
@@ -56,6 +57,7 @@ define(function (require, exports, module) {
     var emuchartsMALPrinter;
     var emuchartsVDMPrinter;
     var emuchartsJSPrinter;
+    var emuchartsAdaPrinter;
 
     var options = { autoinit: true };
 
@@ -265,6 +267,7 @@ define(function (require, exports, module) {
         emuchartsMALPrinter = new EmuchartsMALPrinter("emuchart_MAL");
         emuchartsVDMPrinter = new EmuchartsVDMPrinter("emuchart_VDM");
         emuchartsJSPrinter = new EmuchartsJSPrinter("emucharts_JS");
+        emuchartsAdaPrinter = new EmuchartsAdaPrinter("emucharts_Ada");
 
         pvsioWebClient = PVSioWebClient.getInstance();
         MODE = new EditorModeUtils();
@@ -1243,7 +1246,7 @@ define(function (require, exports, module) {
 
         d3.select("#btn_menuJavaScriptPrinter").on("click", function () {
             var emucharts = {
-                name: ("emucharts_" + projectManager.project().name() + "_JS"),
+                name: (emuchartsJSPrinter.modelName),
                 author: {
                     name: "<author name>",
                     affiliation: "<affiliation>",
@@ -1268,6 +1271,36 @@ define(function (require, exports, module) {
                 return projectManager.project().addFile(name, content, { overWrite: true });
             } else {
                 console.log("Warning, JavaScript model is undefined.");
+            }
+        });
+
+        d3.select("#btn_menuAdaPrinter").on("click", function () {
+            var emucharts = {
+                name: (emuchartsAdaPrinter.modelName),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: emuchartsManager.getVariables(),
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            var model = emuchartsAdaPrinter.print(emucharts);
+            console.log(model);
+            if (model.err) {
+                console.log(model.err);
+                return;
+            }
+            if (model.spec && model.body) {
+                var overWrite = {overWrite: true};
+                projectManager.project().addFile(emucharts.name + ".adb", model.body, overWrite);
+                projectManager.project().addFile(emucharts.name + ".ads", model.spec, overWrite);
+            } else {
+                console.log("Warning, Ada model is undefined.");
             }
         });
         //-- Zoom menu -----------------------------------------------------------

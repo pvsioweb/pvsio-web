@@ -1,32 +1,32 @@
     //declaration of helper functions
     function enter(newStateLabel, state) {
-        state.currentState = newStateLabel;
+        st.current_state = newStateLabel;
         return state;
     }
 
-    function leave(currentStateLabel, state) {
-        state.previousState = currentStateLabel;
+    function leave(currentStateLabel, st) {
+        st.previous_state = currentStateLabel;
         return state;
     }
 
     //function declarations
 {{#each transitions}}
-    function {{id}} (state) {
+    function {{id}} (st) {
     {{~#if condition}}
         if ({{&condition}}) {
-            state = leave('{{source.name}}', state);
+            st = leave('{{source.name}}', st);
             {{~#each actions}}
-            state.{{&.}};
+            st.{{&.}};
             {{/each}}
-            state  = enter('{{target.name}}', state);
+            st  = enter('{{target.name}}', st);
         }
     {{~else}}
-        state = leave('{{source.name}}', state);
+        st = leave('{{source.name}}', st);
         {{~#each actions}}
-        state.{{&.}};
+        st.{{&.}};
         {{~/each}}
-        state = enter('{{target.name}}', state);
+        st = enter('{{target.name}}', st);
     {{~/if}}
-        return state;
+        return st;
     }
 {{/each}}
