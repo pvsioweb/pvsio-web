@@ -252,7 +252,7 @@ define(function (require, exports, module) {
                 }
                 if (data.action === "error") {
                     _this.fire({type: "error", message: data.message});
-                    reject();
+                    reject({code: "ERROR"});
                 }
 
                 /**

@@ -7,7 +7,7 @@ require.config({
         d3: '../lib/d3',
         stateParser: './util/PVSioStateParser',
         NCDevice: 'plugins/networkController/NCDevice',
-        NCMonitor: 'plugins/networkController/NCMonitor'
+        NCMonitorCore: 'plugins/networkController/NCMonitorCore'
     }
 });
 /**
@@ -17,14 +17,14 @@ require([
     'PVSioWebClient',
     'stateParser',
     'NCDevice',
-    'NCMonitor',
+    'NCMonitorCore',
     "widgets/med/PatientMonitorDisplay",
     "widgets/med/PumpMonitorDisplay",
     "widgets/TripleDisplay",
     "widgets/SingleDisplay",
     "widgets/ButtonActionsQueue",
     "widgets/TouchScreenButton"
-], function (PVSioWebClient, stateParser, NCDevice, NCMonitor, PatientMonitorDisplay, PumpMonitorDisplay, TripleDisplay, SingleDisplay, ButtonActionsQueue, TouchScreenButton) {
+], function (PVSioWebClient, stateParser, NCDevice, NCMonitorCore, PatientMonitorDisplay, PumpMonitorDisplay, TripleDisplay, SingleDisplay, ButtonActionsQueue, TouchScreenButton) {
 
     var deviceID = "Supervisor";
     var deviceType = "Supervisor";
@@ -44,7 +44,7 @@ require([
     }
 
     /**
-     * NCMonitor preferences
+     * NCMonitorCore preferences
      */
     var error_mode = false;
     var debugging_mode_backend = false;
@@ -60,6 +60,12 @@ require([
     function notifyMessage(event) {
         if (debugging_mode_frontend) {
             console.log(">>> " + event.message);
+        }
+    }
+
+    function debugMessage(event) {
+        if (debugging_mode_backend) {
+            console.log(">!> " + event.message);
         }
     }
 
@@ -81,41 +87,47 @@ require([
             .queueGUIAction("on_disconnect_supervisor", onMessageReceived);
     }
 
-    /**
-     * Callback any device connected
-     * @param event even.device_id = ID of the device connected
-     */
-    function onDeviceConnect(event) {
-        var deviceConnected = event.device_id;
-        switch (deviceConnected) {
-            case "Alaris":
-                ButtonActionsQueue.getInstance()
-                    .queueGUIAction("on_connect_pump", onMessageReceived);
-                break;
-            case "Radical":
-                ButtonActionsQueue.getInstance()
-                    .queueGUIAction("on_connect_monitor", onMessageReceived);
-                break;
-            default:
-                break;
-        }
-    }
 
     /**
-     * Callback any device disconnected
-     * @param event even.device_id = ID of the device connected
+     * Parsing of different actions coming from the Network Controller Monitor
+     * @param event
      */
-    function onDeviceDisconnect(event) {
-        var deviceDisconnected = event.device_id;
-        switch (deviceDisconnected) {
-            case "Alaris":
-                ButtonActionsQueue.getInstance()
-                    .queueGUIAction("on_disconnect_pump", onMessageReceived);
+    function parseNCActions(event) {
+        var kind = event.kind;
+
+        switch (kind) {
+            case "connected":
+                var deviceConnected = event.data.deviceID;
+                switch (deviceConnected) {
+                    case "Alaris":
+                        ButtonActionsQueue.getInstance()
+                            .queueGUIAction("on_connect_pump", onMessageReceived);
+                        break;
+                    case "Radical":
+                        ButtonActionsQueue.getInstance()
+                            .queueGUIAction("on_connect_monitor", onMessageReceived);
+                        break;
+                    default:
+                        break;
+                }
                 break;
-            case "Radical":
-                ButtonActionsQueue.getInstance()
-                    .queueGUIAction("on_disconnect_monitor", onMessageReceived);
+
+            case "disconnected":
+                var deviceDisconnected = event.data.deviceID;
+                switch (deviceDisconnected) {
+                    case "Alaris":
+                        ButtonActionsQueue.getInstance()
+                            .queueGUIAction("on_disconnect_pump", onMessageReceived);
+                        break;
+                    case "Radical":
+                        ButtonActionsQueue.getInstance()
+                            .queueGUIAction("on_disconnect_monitor", onMessageReceived);
+                        break;
+                    default:
+                        break;
+                }
                 break;
+
             default:
                 break;
         }
@@ -128,11 +140,11 @@ require([
     $('#toggle_back_debugging').click(function () {
         if (debugging_mode_backend) {
             debugging_mode_backend = false;
-            ncMonitor.deactivateDebug();
+            ncMonitorCore.deactivateDebug();
         }
         else {
             debugging_mode_backend = true;
-            ncMonitor.activateDebug();
+            ncMonitorCore.activateDebug();
         }
     });
 
@@ -140,6 +152,19 @@ require([
         error_mode = !error_mode;
     });
 
+    var urlMonitor = window.location.origin.split(":").slice(0, 2).join(":") + ":8080/NetworkController/monitor";
+    urlMonitor = urlMonitor.replace("http://", "ws://");
+
+    var ncMonitorCore = new NCMonitorCore({
+        extended: extended_mode,
+        debugging: debugging_mode_backend,
+        url: urlMonitor
+    });
+
+    ncMonitorCore.addListener("error", errorMessage);
+    ncMonitorCore.addListener("notify", notifyMessage);
+    ncMonitorCore.addListener("debug_backend", debugMessage);
+    ncMonitorCore.addListener("action", parseNCActions);
 
     var url = window.location.origin.split(":").slice(0, 2).join(":") + ":8080/NetworkController/devices";
     url = url.replace("http://", "ws://");
@@ -150,17 +175,6 @@ require([
     ncDevice.addListener("connected", onConnect);
     ncDevice.addListener("disconnected", onDisconnect);
 
-    var urlMonitor = window.location.origin.split(":").slice(0, 2).join(":") + ":8080/NetworkController/monitor";
-    urlMonitor = urlMonitor.replace("http://", "ws://");
-    var ncMonitor = new NCMonitor({
-        extended: extended_mode,
-        debugging: debugging_mode_backend,
-        url: urlMonitor
-    });
-    ncMonitor.addListener("error", errorMessage);
-    ncMonitor.addListener("notify", notifyMessage);
-    ncMonitor.addListener("connected", onDeviceConnect);
-    ncMonitor.addListener("disconnected", onDeviceDisconnect);
 
     //-- UI of the ICE Supervisor
     function start_tick() {
@@ -547,7 +561,7 @@ require([
             if (!err) {
                 logOnDiv('PVS Process started', 'monitor');
                 //-- start ICE Network Controller (NCEE) & connect ICE supervisor to it
-                ncMonitor.start().then(function (res) {
+                ncMonitorCore.start().then(function (res) {
                     ncDevice.start(ncDevice).then(function (res) {
                         ncDevice.connect();
                         start_tick();

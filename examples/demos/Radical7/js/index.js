@@ -345,6 +345,8 @@ require([
                 ncDevice.start().then(
                     function (res) {
                         ncDevice.connect();
+                    }).catch(function(err){
+                        console.log(err);
                     });
             });
         }).addListener("WebSocketConnectionClosed", function (e) {

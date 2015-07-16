@@ -1073,7 +1073,7 @@ define(function (require, exports, module) {
                         expect(pm).toBeDefined();
                         done();
                     }).catch(function (err) {
-                        expect(err).toBeFaly();
+                        expect(err).toBeFalsy();
                         console.log("Error while starting PVSio-web main process: " + JSON.stringify(err));
                         done();
                     });
