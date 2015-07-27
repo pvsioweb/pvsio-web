@@ -530,6 +530,8 @@ define(function (require, exports, module) {
         transitions.selectAll(".path").attr("d", function (edge) {
             // fetch control point
             var cp = null;
+            edge = _this.emucharts.edges.get(edge.id); // get info from the emucharts, rather than from the picture
+            if (!edge) { return; }
             // refresh transition path
             if (edge.target && edge.source) {
                 if (edge.target.id === edge.source.id) {
@@ -560,6 +562,8 @@ define(function (require, exports, module) {
                         // else do nothing -- textpath will take care of placing the text
                         return "";
                     });
+                    // clear the text of the other label
+                    d3.select(this.parentNode.lastChild.firstChild).text(function (edge) { return ""; });
                     // refresh control points
                     cpoints = d3.select(this.parentNode).select(".cpoints");
                     cpoints.attr("cx", cp[2].x).attr("cy", cp[2].y);
@@ -573,6 +577,8 @@ define(function (require, exports, module) {
                     label.text(function (edge) {
                         return edge.name + labelToString(edge);
                     });
+                    // clear the text of the other label
+                    d3.select(this.parentNode).select(".tlabel").text(function (edge) { return ""; });
                     // refresh control points
                     cpoints = d3.select(this.parentNode).select(".cpoints");
                     // for now we use only the middle control point
@@ -607,30 +613,26 @@ define(function (require, exports, module) {
      */
     function refreshInitialTransitions(transitions) {
         transitions = transitions ||
-            d3.select("#ContainerStateMachine svg").select("#Transitions").selectAll(".itransition");
-        var label;
+            d3.select("#ContainerStateMachine svg").select("#InitialTransitions").selectAll(".itransition");
+        // refresh position
+        transitions.attr("transform", function (edge) {
+            return "translate(" + edge.target.x + "," + edge.target.y + ") scale(1)";
+        });
         // refresh paths and labels
         transitions.selectAll(".ipath").attr("d", function (edge) {
             // refresh transition label
-            label = d3.select(this.parentNode).select(".itlabel");
+            var label = d3.select(this.parentNode).select(".itlabel");
             label.text(function (edge) {
                 return edge.name + labelToString(edge);
             });
             // adjust text position
             label.attr("x", function (edge) {
-                return (edge.controlPoint) ? edge.controlPoint.x : edge.target.x + 32;
+                return -8;
             }).attr("y", function (edge) {
-                return (edge.controlPoint) ? edge.controlPoint.y : edge.target.y - 32;
-            });
-            // adjust text position
-            label.attr("x", function (edge) {
-                return edge.target.x - 8;
-            }).attr("y", function (edge) {
-                return edge.target.y - 44;
+                return -44;
             });
             // redraw edge
-            return "M" + (edge.target.x - edge.target.width / 2 - 10) + ',' +
-                    (edge.target.y - edge.target.width / 2 - 32) + "q 16 8 28 28";
+            return "M-32,-50 q 16 8 28 28";
         });
         return transitions;
     }
@@ -1309,7 +1311,10 @@ define(function (require, exports, module) {
      */
     function refreshStates(states) {
         states = states || d3.select("#ContainerStateMachine svg").select("#States").selectAll(".state");
-
+        // refresh state position
+        states.attr("transform", function (node) {
+            return "translate(" + node.x + ", " + node.y + ") scale(1.0)";
+        });
         // refresh labels
         states.select(".state_label").text(function (node) {
             return node.name;
@@ -1456,26 +1461,33 @@ define(function (require, exports, module) {
             if (editor_mode !== MODE.ADD_TRANSITION() && editor_mode !== MODE.DELETE() &&
                     editor_mode !== MODE.RENAME()) {
                 // update node position
-                node.x = node.x + d3.event.dx;
-                node.y = node.y + d3.event.dy;
-                d3.select(this).attr("stroke-width", 2);
-                d3.select(this).attr("transform",
-                                     "translate(" + node.x + "," + node.y + ") scale(1.0) ");
-//                                     "translate(" + node.x + "," + node.y + ") scale(1.1) ");
+                var draggedNode = _this.emucharts.nodes.get(node.id);
+                draggedNode.x = node.x + d3.event.dx;
+                draggedNode.y = node.y + d3.event.dy;
+                _this.emucharts.nodes.set(node.id, draggedNode);
+                refreshStates(d3.select("#ContainerStateMachine").select("#States")
+                                .selectAll(".state").filter(function (n) {
+                                    return n.id === node.id;
+                                }));
                 // update all edges connected to this node
                 var updatedTransitions = d3.select("#ContainerStateMachine")
                         .select("#Transitions").selectAll(".transition")
                         .filter(function (edge) {
+                            var draggedEdge = _this.emucharts.edges.get(edge.id);
                             if (edge.source.id === node.id) {
-                                edge.source.x = node.x;
-                                edge.source.y = node.y;
-                                edge.controlPoint = computeControlPoint(edge);
+                                draggedEdge.source.x = draggedNode.x;
+                                draggedEdge.source.y = draggedNode.y;
+                                draggedEdge.controlPoint = computeControlPoint(draggedEdge);
+                                _this.emucharts.edges.set(edge.id, draggedEdge);
+                                console.log("updated x,y coords of edge " + edge.id);
                                 return true;
                             }
                             if (edge.target.id === node.id) {
-                                edge.target.x = node.x;
-                                edge.target.y = node.y;
-                                edge.controlPoint = computeControlPoint(edge);
+                                draggedEdge.target.x = draggedNode.x;
+                                draggedEdge.target.y = draggedNode.y;
+                                draggedEdge.controlPoint = computeControlPoint(draggedEdge);
+                                _this.emucharts.edges.set(edge.id, draggedEdge);
+                                console.log("updated x,y coords of edge " + edge.id);
                                 return true;
                             }
                             return false;
@@ -1484,16 +1496,16 @@ define(function (require, exports, module) {
                 var updatedInitialTransitions = d3.select("#ContainerStateMachine")
                         .select("#InitialTransitions").selectAll(".itransition")
                         .filter(function (edge) {
-                            var updated = false;
+                            var draggedEdge = _this.emucharts.initial_edges.get(edge.id);
                             if (edge.target.id === node.id) {
-                                edge.target.x = node.x;
-                                edge.target.y = node.y;
-                                updated = true;
+                                edge.target.x = draggedNode.x;
+                                edge.target.y = draggedNode.y;
+                                _this.emucharts.initial_edges.set(edge.id, draggedEdge);
+                                return true;
                             }
-                            return updated;
+                            return false;
                         });
                 refreshInitialTransitions(updatedInitialTransitions);
-
             } else if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.node) {
                 if (mousedrag.node && mouseover.node && mousedrag.node.id === mouseover.node.id) {
                     drag_line.attr("d", function (node) {
@@ -1645,11 +1657,6 @@ define(function (require, exports, module) {
         this.renderStates();
         this.renderTransitions();
         this.renderInitialTransitions();
-        this.refresh();
-        return this;
-    };
-
-    EmuchartsEditor.prototype.refresh = function () {
         refreshStates();
         refreshTransitions();
         refreshInitialTransitions();
@@ -1802,7 +1809,16 @@ define(function (require, exports, module) {
                 return (transition.target && transition.target.id === stateID) ||
                         (transition.source && transition.source.id === stateID);
             });
-        refreshTransitions(transitions);
+        transitions = transitions ||
+            d3.select("#ContainerStateMachine svg").select("#Transitions").selectAll(".transition");
+        // refresh labels
+        transitions.selectAll(".path").attr("d", function (edge) {
+            // refresh transition label
+            var label = d3.select(this.parentNode).select(".tlabel");
+            label.text(function (edge) {
+                return edge.name + labelToString(edge);
+            });
+        });
     };
 
     /**
