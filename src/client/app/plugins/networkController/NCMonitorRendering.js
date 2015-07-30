@@ -4,7 +4,8 @@
  * @date 14/05/2015 11:33 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
-/*global define, Promise*/
+/*global define, PrettyJSON*/
+
 define(function (require, exports, module) {
     "use strict";
     var _this;
@@ -29,7 +30,7 @@ define(function (require, exports, module) {
 
     function notify_request() {
         _this.critical_sessions_free = true;
-        if (_this.requests.length != 0) {
+        if (_this.requests.length !== 0) {
             _this.fire({type: "notify", message: "           ** NOTIFY  " + (_this.requests.length - 1)});
             _this.renderAction(_this.requests.shift());
         }
@@ -233,7 +234,7 @@ define(function (require, exports, module) {
     }
 
     function printSubscriber(data) {
-        if ($("#" + data.deviceID + "-sub-" + data.key).length == 0) {
+        if ($("#" + data.deviceID + "-sub-" + data.key).length === 0) {
 
             lock();
             _this.fire({type: "notify", message: "           >> SUBSCRIBE " + data.key});
@@ -271,7 +272,7 @@ define(function (require, exports, module) {
     }
 
     function printPublisher(data) {
-        if ($("#" + data.deviceID + "-pub-" + data.key).length == 0) {
+        if ($("#" + data.deviceID + "-pub-" + data.key).length === 0) {
             lock();
             _this.fire({type: "notify", message: "           >> PUBLISH " + data.key});
             var container_div = $("#" + data.deviceID);
@@ -388,7 +389,7 @@ define(function (require, exports, module) {
 
         var connections = $('connection');
         setInterval(function () {
-            connections.connections('update')
+            connections.connections('update');
         }, 50);
 
         $('.device').connections('remove')
@@ -462,7 +463,7 @@ define(function (require, exports, module) {
         });
         var connections = $('connection');
         setInterval(function () {
-            connections.connections('update')
+            connections.connections('update');
         }, 2000);
 
         _this.fire({type: "notify", message: "           << BONDUP " + data.key});
@@ -483,7 +484,7 @@ define(function (require, exports, module) {
         });
         var connections = $('connection');
         setInterval(function () {
-            connections.connections('update')
+            connections.connections('update');
         }, 2000);
         _this.fire({type: "notify", message: "           << BONDADD " + data.key});
         notify_request();
@@ -549,7 +550,7 @@ define(function (require, exports, module) {
                 circle_figure = agents_span.find("#" + data.deviceID + "-subC-" + data.key);
             }
 
-            if (circle_div.length != 0) {
+            if (circle_div.length !== 0) {
                 circle_figure.connections('remove');
                 circle_div.removeClass("bounceInUp").addClass("bounceOutDown");
                 circle_div.one('webkitAnimationEnd oanimationend msAnimationEnd animationend',
