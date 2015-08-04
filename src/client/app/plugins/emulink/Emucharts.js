@@ -99,7 +99,36 @@ define(function (require, exports, module) {
     Emucharts.prototype.getIsPIM = function () {
         return this.isPIM;
     }
-    
+
+    Emucharts.prototype.edit_node = function (id, newState) {
+        var _this = this;
+        if (!id || !this.nodes || !this.nodes.get(id)) { return false; }
+        this.nodes.set(id, newState);
+        // we need to rename also nodes cached in the edge structure
+        // this can be quite expensive in term of time, but renaming is unlikely to be a frequent operation
+        // so the time cost is acceptable (given that caching is quite useful to speed up rendering)
+        if (this.edges) {
+            this.edges.forEach(function (key) {
+                var edge = _this.edges.get(key);
+                var dirty = false;
+                if (edge.source.id === id) {
+                    edge.source = newState;
+                    dirty = true;
+                }
+                if (edge.target.id === id) {
+                    edge.target = newState;
+                    dirty = true;
+                }
+                if (dirty) { _this.edges.set(key, edge); }
+            });
+        }
+        this.fire({
+            type: "emuCharts_stateEdited",
+            state: newState
+        });
+        return true;
+    }
+
 	/**
 	 * @function rename_node
      * @description Renames a node (i.e., a state) in the emuchart diagram.

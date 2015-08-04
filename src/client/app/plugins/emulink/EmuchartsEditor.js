@@ -1579,7 +1579,7 @@ define(function (require, exports, module) {
             if (editor_mode !== MODE.DELETE()) {
                 d3.event.stopPropagation();
                 _this.fire({
-                    type: "emuCharts_renameState",
+                    type: "emuCharts_editState",
                     node: node
                 });
             }
@@ -1779,6 +1779,27 @@ define(function (require, exports, module) {
      */
     EmuchartsEditor.prototype.getIsPIM = function () {
         return this.emucharts.getIsPIM() || false;
+    };
+
+    /**
+     * utility function to edit states
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.edit_state = function (stateID, newState) {
+        this.emucharts.edit_node(stateID, newState);
+        // refresh states
+        var states = d3.select("#ContainerStateMachine")
+            .select("#States").selectAll(".state")
+            .filter(function (state) { return state.id === stateID; });
+        refreshStates(states);
+        // refresh all incoming and outgoing transitions of the renamed state
+        var transitions = d3.select("#ContainerStateMachine")
+            .select("#Transitions").selectAll(".transition")
+            .filter(function (transition) {
+                return (transition.target && transition.target.id === stateID) ||
+                    (transition.source && transition.source.id === stateID);
+            });
+        refreshTransitions(transitions);
     };
 
     /**

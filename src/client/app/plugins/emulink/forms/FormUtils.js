@@ -23,6 +23,16 @@ define(function (require, exports, module) {
         });
         return { options: options, labels: labels };
     }
+
+    function clearForm(inputSelectors) {
+        inputSelectors.forEach(function (s) {
+            var elem = document.getElementById(s);
+            if (elem.selectedIndex >= 0)
+                elem.selectedIndex = 0;
+            else if (elem.value)
+                elem.value = "";
+        });
+    }
 	
 	function validate(form, inputSelectors) {
         // FIXME: implement this function
@@ -31,6 +41,7 @@ define(function (require, exports, module) {
    
 	module.exports = {
 		serializeForm:	serializeForm,
+        clearForm: clearForm,
 		validateForm: validate
 	};
 });

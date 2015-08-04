@@ -23,6 +23,7 @@ define(function (require, exports, module) {
         displayAddTransition   = require("plugins/emulink/forms/displayAddTransition"),
         displayRename          = require("plugins/emulink/forms/displayRename"),
         displayDelete          = require("plugins/emulink/forms/displayDelete"),
+        displayEditState       = require("plugins/emulink/forms/displayEditState"),
         displayAddExpression   = require("plugins/emulink/forms/displayAddExpression"),
         displayAddVariable     = require("plugins/emulink/forms/displayAddVariable"),
         displayEditVariable    = require("plugins/emulink/forms/displayEditVariable"),
@@ -128,7 +129,7 @@ define(function (require, exports, module) {
     var maxLen = 48;
 
     // rename dialog window for states
-    function editState(s) {
+    function renameState(s) {
         displayRename.create({
             header: "Renaming state " + s.name.substring(0, maxLen) + "...",
             required: true,
@@ -145,8 +146,56 @@ define(function (require, exports, module) {
             view.remove();
         });
     }
+
+    function editState(s) {
+        displayEditState.create({
+            header: "Please enter new state...",
+            textLabel: {
+                newStateName: "State name",
+                newStateWidgets: "State widgets",
+                newStateComponents: "State components",
+                newStatePMR: "State PMR"
+            },
+            placeholder: {
+                newStateName: "Name, e.g., startInfusing",
+                newStateWidgets: "Click to edit this states widgets",
+                newStateComponents: "[Disabled]",
+                newStatePMR: "[Disabled]"
+            },
+            value: {
+                newStateName: s.name,
+                newStateWidgets: null,
+                widgets: s.widgets,
+                newStateComponents: s.components,
+                newStatePMR: s.pmr
+            },
+            buttons: ["Cancel", "Save state"]
+        }).on("save_state", function (e, view) {
+            // Get new values from template.
+            var newStateName = e.data.labels.get("newStateName");
+            var newStateWidgets = e.data.labels.get("newStateWidgets");
+            var newStateComponents = e.data.labels.get("newStateComponents");
+            var newStatePMR = e.data.labels.get("newStatePMR");
+
+            if (newStateName && newStateName.value !== "") {
+                // Save over only the new values.
+                s.name = newStateName;
+                s.widgets = newStateWidgets;
+                //TODO: Yet to be implemented.
+                //s.components = newStateComponents;
+                //s.pmr = newStatePMR;
+
+                emuchartsManager.edit_state(s.id, s);
+                view.remove();
+            }
+        }).on("cancel", function (e, view) {
+            // just remove window
+            view.remove();
+        });
+    };
     
-    function renameState_handler(event) {
+    function editState_handler(event) {
+        //renameState(event.node);
         editState(event.node);
     }
 
@@ -246,6 +295,7 @@ define(function (require, exports, module) {
     function stateAdded_handler(event) { }//print_theory(); print_node(); }
     function stateRemoved_handler(event) { }//print_theory(); print_node(); }
     function stateRenamed_handler(event) { }//print_theory(); print_node(); }
+    function stateEdited_handler(event) { }//print_theory(); print_node(); }
     function transitionAdded_handler(event) { }//print_theory(); print_node(); }
     function transitionRemoved_handler(event) { }//print_theory(); print_node(); }
     function transitionRenamed_handler(event) { }//print_theory(); print_node(); }
@@ -278,7 +328,7 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_deleteTransition", deleteTransition_handler);
         emuchartsManager.addListener("emuCharts_deleteInitialTransition", deleteInitialTransition_handler);
         emuchartsManager.addListener("emuCharts_deleteState", deleteState_handler);
-        emuchartsManager.addListener("emuCharts_renameState", renameState_handler);
+        emuchartsManager.addListener("emuCharts_editState", editState_handler);
         emuchartsManager.addListener("emuCharts_renameTransition", renameTransition_handler);
         emuchartsManager.addListener("emuCharts_renameInitialTransition", renameInitialTransition_handler);
         emuchartsManager.addListener("emuCharts_addTransition", addTransition_handler);
@@ -295,6 +345,7 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_initialTransitionRenamed", initialTransitionRenamed_handler);
         emuchartsManager.addListener("emuCharts_initialTransitionRemoved", initialTransitionRemoved_handler);
         emuchartsManager.addListener("emuCharts_stateRenamed", stateRenamed_handler);
+        emuchartsManager.addListener("emuCharts_stateEdited", stateEdited_handler);
 	}
     
 	Emulink.prototype.createHtmlElements = function () {
@@ -486,7 +537,7 @@ define(function (require, exports, module) {
             openChart(function f() {
                 // make svg visible and reset colors
                 resetToolbarColors();
-                // render emuchart                        
+                // render emuchart
                 emuchartsManager.render();
                 // set initial editor mode
                 d3.select("#btn_toolbarBrowse").node().click();
@@ -761,7 +812,7 @@ define(function (require, exports, module) {
                     var v = e.data.options.get("selectedState");
                     var theState = states[v];
                     view.remove();
-                    editState(theState);
+                    renameState(theState);
                 }
             }).on("cancel", function (e, view) {
                 // just remove window

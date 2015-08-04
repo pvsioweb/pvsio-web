@@ -324,6 +324,10 @@ div.detailsForm select, div.detailsForm textarea{
     width: 540px;
 }
 
+.overlay .panel.panelWide {
+    width: 705px;
+}
+
 .panel-footer {
     min-height:50px;
 }
