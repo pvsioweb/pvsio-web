@@ -27,7 +27,8 @@ define(function (require, exports, module) {
 		events: {
 			"click #btnRight": "right",
 			"click #btnLeft": "left",
-			"click #newStateWidgets": "editWidgets"
+			"click #newStateWidgets": "editWidgets",
+			"keyup .panel": "keyup"
 		},
 		right: function (event) {
 			var form = this.el;
@@ -59,17 +60,31 @@ define(function (require, exports, module) {
 					newWidgetBehaviours: "Behaviours (Multiple with ,)"
 				},
 				value: {
-					// Pass current widgets.
-					widgets: _this._widgets
+					// Pass a clone of current widgets (Care when using stringify functions are striped).
+					widgets: JSON.parse(JSON.stringify(_this._widgets))
 				},
-				buttons: ["Cancel", "Save widgets"]
+				buttons: ["Cancel", "Save Widgets"]
 			}).on("save_widgets", function (e, view) {
+				// Save the clone as the original.
 				_this._widgets = e.data;
-				console.log(_this._widgets);
 				view.remove();
+				d3.select(_this.el).select("#newStateName").node().focus();
 			}).on("cancel", function (e, view) {
+				// Discard the cloned widgets and revert to the original ones.
 				view.remove();
+				d3.select(_this.el).select("#newStateName").node().focus();
 			});
+		},
+		keyup: function (event) {
+			switch(event.keyCode) {
+				case 13: //enter pressed
+					this.right(event);
+					break;
+				case 27: //esc pressed
+					this.left(event);
+					break;
+				default: break;
+			}
 		}
 	});
 

@@ -15,9 +15,11 @@ define(function (require, exports, module) {
 			this.render(data);
 			this._data = data;
 			this._widgets = data.value.widgets;
-			this._widgetsList = document.getElementById("pmWidgetsList");
-			this.rebuildWidgetList();
-			console.log(this._widgets);
+			// Internal count for displaying widgets TODO: replace this with a widget ID in this code.
+			this._count = 0;
+			this._widgetsList = $('#pmWidgetsList', this.el);
+			this._errorDisplay = $('#editWidgetsError', this.el);
+			this.buildWidgetList();
 		},
 		render: function (data) {
 			var template = Handlebars.compile(formTemplate);
@@ -30,7 +32,8 @@ define(function (require, exports, module) {
 			"click #btnRight2": "right",
 			"click #btnLeft2": "left",
 			"click #btnAdd": "add",
-			"click .btnRemove": "removeWidget"
+			"click .btnRemove": "removeWidget",
+			"keyup .panel": "keyup"
 		},
 		right: function (event) {
 			this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
@@ -45,37 +48,92 @@ define(function (require, exports, module) {
 			if (FormUtils.validateForm(form)) {
 				var selectors = ["newWidgetName", "newWidgetCategory", "newWidgetBehaviours"];
 				var formData = FormUtils.serializeForm(form, selectors);
-				FormUtils.clearForm(selectors);
 				var newWidgetName = formData.labels.get("newWidgetName");
 				var newWidgetCategory = formData.labels.get("newWidgetCategory");
-				var newWidgetBehaviours = formData.labels.get("newWidgetBehaviours").split(',').filter(function(b) { return b.trim(); });
-				var newWidget = { name: newWidgetName, category: newWidgetCategory, S_behaviours: newWidgetBehaviours };
+				var newWidgetBehaviours = formData.labels.get("newWidgetBehaviours");
+
+				var newWidget = _this.validateWidget(newWidgetName, newWidgetCategory, newWidgetBehaviours);
+				d3.select(_this.el).select("#newWidgetName").node().focus();
+				if (!newWidget)
+					return;
+
+				// Valid widget clear the inputs for the next widget to get added.
+				FormUtils.clearForm(selectors);
 				// Add new widget to the list.
 				_this._widgets.push(newWidget);
-				_this.rebuildWidgetList();
+				this._widgetsList.append(_this.widgetListItem(newWidget));
 			}
 		},
 		removeWidget: function (event) {
 			if (confirm("Delete this widget?")) {
-				this._widgets.splice(event.currentTarget.parentNode.parentNode.id, 1);
-				this.rebuildWidgetList();
+				// TODO: Replace with a widget ID.
+				var widgetId = event.currentTarget.parentNode.parentNode.id;
+				this._widgets.splice(widgetId, 1);
+				$('#' + widgetId, this._widgetsList).remove();
 			}
 		},
-		rebuildWidgetList: function () {
-			var newList = "";
-			var count = 0;
-			// Rebuild the list each change :/
-			// TODO: improve the table functions (use template) (ensure unique ids) (use a lib)!
-			this._widgets.forEach(function (w) {
-				newList +=
-					'<div id="' + count++ + '" class="row" style="padding: 2px 0 2px 0;">' +
+		buildWidgetList: function () {
+			var _this = this;
+			this._widgetsList.html(_this._widgets.map(_this.widgetListItem, _this));
+		},
+		widgetListItem: function (w) {
+			return  '<div id="' + this._count++ + '" class="row" style="padding: 2px 0 2px 0;">' +
 						'<div class="col-md-3">' + w.name + '</div>' +
 						'<div class="col-md-3">' + w.category + '</div>' +
 						'<div class="col-md-5">' + w.S_behaviours.join(", ") + '</div>' +
 						'<div class="col-md-1"><button type="button" class="btn btn-danger btn-xs btnRemove right" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>' +
 					'</div>';
-			});
-			this._widgetsList.innerHTML = newList;
+		},
+		// newWidgetBehaviours optional. null if inputs aren't valid.
+		validateWidget: function (newWidgetName, newWidgetCategory, newWidgetBehaviours) {
+			// Custom PIM validation on Behaviours.
+			var errors = [];
+			if (!newWidgetName)
+				errors.push('Must have a name.');
+			if (!newWidgetCategory)
+				errors.push('Must have a category.');
+			// Optional.
+			if (newWidgetBehaviours) {
+				// Retrieve behaviours.
+				newWidgetBehaviours =
+					newWidgetBehaviours
+						.split(',')
+						.map(function(b) { return b.trim(); })
+						.filter(function(b) { return b; });
+
+				// Valid behaviour test (true if invalid!! used for $.grep).
+				// TODO: Make this a little tidier.
+				var validBehaviour =
+					function(b) {
+						if (!b || b.length < 3) return true;
+						b = b.substring(0, 2);
+						return !(b === 'S_' || b === 'I_');
+					};
+
+				// Test if any of the behaviours fail the validBehaviour test (i.e. return true).
+				if ($.grep(newWidgetBehaviours, validBehaviour).length) {
+					errors.push('All behaviours must begin with either S_ or I_ and must have a value.');
+				}
+			}
+			if (errors.length) {
+				this._errorDisplay.parent().removeClass('hide');
+				this._errorDisplay.html(errors.join('<br />'));
+				return null;
+			}
+			this._errorDisplay.parent().addClass('hide');
+			this._errorDisplay.empty();
+			return { name: newWidgetName.trim(), category: newWidgetCategory.trim(), S_behaviours: newWidgetBehaviours || [] };
+		},
+		keyup: function (event) {
+			switch(event.keyCode) {
+				case 13: //enter pressed
+					this.right(event);
+					break;
+				case 27: //esc pressed
+					this.left(event);
+					break;
+				default: break;
+			}
 		}
 	});
 
