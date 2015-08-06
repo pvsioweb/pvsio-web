@@ -19,8 +19,8 @@ define(function (require, exports, module) {
     Project_UnitTest.run();
     Descriptor_UnitTest.run();
     UI_UnitTest.run();
-    var NetworkController_UnitTest = require("test/NetworkController_UnitTest").getInstance();
-    NetworkController_UnitTest.run();
+    //var NetworkController_UnitTest = require("test/NetworkController_UnitTest").getInstance();
+    //NetworkController_UnitTest.run();
 
 
 });
