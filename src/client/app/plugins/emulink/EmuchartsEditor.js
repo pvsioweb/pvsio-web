@@ -1156,15 +1156,10 @@ define(function (require, exports, module) {
             d3.event.sourceEvent.stopPropagation();
         };
 
-        var edgeFilterFunc = function (e) {
-            return e.source.name.indexOf(_this._nodeFilter) === 0 &&
-                e.target.name.indexOf(_this._nodeFilter) === 0;
-        };
-
         if (!this.emucharts || !this.emucharts.getEdges()) { return; }
         // create svg element, if needed
         if (svg.empty()) { svg = this.newSVG(); }
-        var edges = this.emucharts.getEdges().values().filter(edgeFilterFunc);
+        var edges = this.emucharts.getEdges().values().filter(_this._edgeFilterFunction());
         if (edges) {
             // create a group of svg elements for transitions, and bind them to data
             var transitions = svg.select("#Transitions").selectAll(".transition")
@@ -1289,13 +1284,10 @@ define(function (require, exports, module) {
             }
         };
 
-        var edgeFilterFunc = function (e) {
-            return e.target.name.indexOf(_this._nodeFilter) === 0;
-        };
         if (!this.emucharts || !this.emucharts.getInitialEdges()) { return; }
         // create svg element, if needed
         if (svg.empty()) { svg = this.newSVG(); }
-        var edges = this.emucharts.getInitialEdges().values().filter(edgeFilterFunc);
+        var edges = this.emucharts.getInitialEdges().values().filter(_this._edgeFilterFunction());
         if (edges) {
             // create a group of svg elements for transitions, and bind them to data
             var initial_transitions = svg.select("#InitialTransitions").selectAll(".itransition")
@@ -1417,6 +1409,37 @@ define(function (require, exports, module) {
                     .transition().duration(220)
                     .style("opacity", 0).remove();
     }
+
+    /**
+     * Utility function used to match node names with a filter regex
+     * @returns {Boolean} true if the node matches the regular expression or false otherwise
+     */
+    EmuchartsEditor.prototype._nodeFilterFunction = function () {
+        var filter = this._nodeFilter;
+        return function (n) {
+            try {
+                var regex = new RegExp(filter, "i", "g");
+                return n.name.search(regex) >= 0;
+            } catch (syntaxError) {
+                return false; //syntax error
+            }
+        };
+    };
+
+    /**
+     * Utility function used to match edges whose source and/or target names matches a filter regex
+     * @returns {Boolean} true if the edge source/target node matches the regular expression or false otherwise
+     */
+    EmuchartsEditor.prototype._edgeFilterFunction = function () {
+        var nodeFilterFunction = this._nodeFilterFunction();
+        return function (e) {
+            if (e.source && e.target) {
+                return nodeFilterFunction(e.source) && nodeFilterFunction(e.target);
+            } else if (e.target) {
+                return nodeFilterFunction(e.target);
+            }
+        };
+    };
 
     /**
      * Utility function for drawing states
@@ -1636,10 +1659,8 @@ define(function (require, exports, module) {
         };
 
         if (!this.emucharts || !this.emucharts.getNodes()) { return; }
-        var nodeFilterFunc = function (n) {
-            return n.name.indexOf(_this._nodeFilter) === 0;
-        };
-        var nodes = this.emucharts.getNodes().values().filter(nodeFilterFunc);
+
+        var nodes = this.emucharts.getNodes().values().filter(_this._nodeFilterFunction());
         if (nodes) {
             if (svg.empty()) { svg = this.newSVG(); }
             // create a group of svg elements for states, and bind them to data
