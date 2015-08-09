@@ -7,8 +7,7 @@
 /*global define, Promise, d3*/
 define(function (require, exports, module) {
     "use strict";
-    var PrototypeBuilder	= require("plugins/prototypebuilder/PrototypeBuilder"),
-        ProjectManager		= require("project/ProjectManager"),
+    var ProjectManager		= require("project/ProjectManager"),
         ModelEditor         = require("plugins/modelEditor/ModelEditor"),
         PVSioWebClient      = require("PVSioWebClient"),
         EditorModeUtils     = require("plugins/emulink/EmuchartsEditorModes"),
@@ -1320,11 +1319,19 @@ define(function (require, exports, module) {
             document.getElementById("menuZoom").children[1].style.display = "none";
         });
 
+        //--node filter handler
+        d3.select("input#filter").on("keyup", function () {
+            var editor = emuchartsManager.getSelectedEditor();
+            if (editor) {
+                editor._nodeFilter = d3.select("input#filter").property("value");
+                emuchartsManager.render();
+            }
+        });
     };
 
 
     Emulink.prototype.getDependencies = function () {
-        return [PrototypeBuilder.getInstance(), ModelEditor.getInstance()];
+        return [];
     };
 
     function onProjectChanged(event) {

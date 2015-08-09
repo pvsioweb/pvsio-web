@@ -1024,3 +1024,7 @@ input.input_text{
     from { -webkit-transform: rotate(0deg); }
     to { -webkit-transform: rotate(360deg); }
 }
+input#filter {
+    color: black;
+    padding: 5px;
+}
