@@ -311,7 +311,7 @@ define(function (require, exports, module) {
             newFile = new Descriptor(path, content, { encoding: encoding });
         }
         // sanity check -- descriptors can be added to the current project only
-        if (newFile.path.startsWith(_this.name()) === false) {
+        if (newFile.path.indexOf(_this.name()) === -1) {
             var tmp = newFile.path.split("/").filter(function (e) { return e !== ""; });
             tmp = [_this.name()].concat(tmp);
             newFile.path = tmp.join("/");
