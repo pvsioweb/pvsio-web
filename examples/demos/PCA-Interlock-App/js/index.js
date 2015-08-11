@@ -70,14 +70,14 @@ require([
                 .queueGUIAction("on_disconnect_supervisor", onMessageReceived);
         }       
     }
-    var url = window.location.origin.split(":").slice(0,2).join(":") + ":8080/NetworkController/devices";
+    var url = window.location.href.split(":").slice(0,2).join(":") + ":8080/NetworkController/devices";
     url = url.replace("http://", "ws://");    
     var ncDevice = new NCDevice({id: deviceID, type: deviceType}, { url: url });
     ncDevice.addListener("update", parseNCUpdate);
     ncDevice.addListener("error", errorMessage);
     ncDevice.addListener("notify", notifyMessage);
 
-    var urlMonitor = window.location.origin.split(":").slice(0,2).join(":") + ":8080/NetworkController/monitor";
+    var urlMonitor = window.location.href.split(":").slice(0,2).join(":") + ":8080/NetworkController/monitor";
     urlMonitor = urlMonitor.replace("http://", "ws://");    
     var ncMonitor = new NCMonitor({ url: urlMonitor });
     ncMonitor.addListener("error", errorMessage);
