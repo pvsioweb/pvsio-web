@@ -86,17 +86,11 @@ This project has the following setup:
 
 Nightly builds
 --------------
-To obtain the latest development versions of pvsio-web, you can clone our alpha and beta branches of the github repository.
+To obtain the latest development versions of pvsio-web, you can clone our alpha branch on the github repository.
 
 To clone the alpha branch, create a new directory (for example, pvsioweb-alpha), open a Terminal window, and execute the following commands from the created directory:
 
     git clone https://github.com/thehogfather/pvsio-web.git -b alpha
-    cd pvsio-web
-    npm install
-
-To clone the beta branch, create a new directory (for example, pvsioweb-beta), open a Terminal window, and execute the following commands from the created directory:
-
-    git clone https://github.com/thehogfather/pvsio-web.git -b beta
     cd pvsio-web
     npm install
 
@@ -105,11 +99,11 @@ Testing the installation
 ------------------------
 To test the client, start the pvsio-web backend by running the following command in a Terminal window (and leave the Terminal window open):
     ./start.sh
-    
+
 and type the following address in a browser window:
 
     http://localhost:8082/tests
-    
+
 To test the server, run the following command in a Terminal window
 
     npm test
@@ -118,4 +112,4 @@ To test the server, run the following command in a Terminal window
 Uninstallation :(
 --------------
 To uninstall, delete the pvsio-web folder from your computer.
-    
+
