@@ -15,9 +15,11 @@ define(function (require, exports, module) {
         Logger              = require("util/Logger"),
         NotificationManager = require("project/NotificationManager"),
         Notification        = require("pvsioweb/forms/displayNotification"),
-        WSManager           = require("websockets/pvs/WSManager");
+        WSManager           = require("websockets/pvs/WSManager"),
+        FileSystem          = require("filesystem/FileSystem");
 //        MIME                = require("util/MIME");
-    var instance;
+    var instance,
+        fs;
     var currentProject,
         projectManager,
         editor,
@@ -167,6 +169,8 @@ define(function (require, exports, module) {
                 }
             }
         };
+
+        fs = new FileSystem();
     }
 
     ModelEditor.prototype.getName = function () {
@@ -189,18 +193,18 @@ define(function (require, exports, module) {
                     files.forEach(function (file) {
                         // FIXME: directories are discarded when using absolute paths. Can we do better?
                         file.path = importFolder + "/" + file.name;
-                        promises.push(projectManager.writeFileDialog(file.path, file.content, { encoding: file.encoding }));
+                        promises.push(fs.writeFileDialog(file.path, file.content, { encoding: file.encoding }));
                     });
                     Promise.all(promises).then(function (res) {
                         resolve(res);
                     }).catch(function (err) { reject(err); });
                 }
                 if (PVSioWebClient.getInstance().serverOnLocalhost()) {
-                    projectManager.readFileDialog({title: "Import files into Project"}).then(function (res) {
+                    fs.readFileDialog({title: "Import files into Project"}).then(function (res) {
                         writeFiles(res);
                     }).catch(function (err) { reject(err); });
                 } else {
-                    projectManager.readLocalFileDialog().then(function (res) {
+                    fs.readLocalFileDialog().then(function (res) {
                         writeFiles(res);
                     }).catch(function (err) { reject(err); });
                 }

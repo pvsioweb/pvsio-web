@@ -122,12 +122,16 @@ init?(st: alaris): bool =
 dispblank?(st: alaris): bool = st`topline = dispblank <=> NOT device(st)`powered_on?
 
 per_switch(st: alaris): boolean =
-         no_button_down(st)
+         device(st)`powered_on? AND no_button_down(st) AND
+              ((device(st)`ac_connect AND ac_light(st)) OR
+               (NOT device(st)`ac_connect AND battery_light(st)))
+
 
 switch_from_battery_low(st: alaris): alaris = 
-      st WITH [ topline := COND device(st)`infusing? -> infusing,
-                                NOT device(st)`infusing? & device(st)`infusionrate = 0 
-                                       -> setrate,
+      st WITH [ topline := COND device(st)`infusing? AND NOT device(st)`kvoflag -> infusing,
+                                device(st)`infusing? AND device(st)`kvoflag -> dispkvo,
+                                NOT device(st)`infusing? & device(st)`infusionrate = 0
+                                        -> setrate,
                                 ELSE -> holding
                            ENDCOND,
                 middisp := 
@@ -140,7 +144,8 @@ switch_from_battery_low(st: alaris): alaris =
                   		 ELSE -> FALSE ENDCOND,
                         ELSE ->
                           LAMBDA(x: imid_type):
-                           COND x = drate -> TRUE,
+                           COND x = drate -> NOT device(st)`kvoflag,
+                                x = dkvorate -> device(st)`kvoflag,
                                 x = dvtbi -> TRUE,
 				x = dvol  -> TRUE,
 				x = dtime -> TRUE,
@@ -152,7 +157,6 @@ switch_from_battery_low(st: alaris): alaris =
 		entrymode  := COND NOT device(st)`infusing? -> rmode,
                                    ELSE -> infusemode
                               ENDCOND
-                
 	        ]
 
 switch_battery_low(st: alaris): alaris =
@@ -173,7 +177,7 @@ switch(st: (per_switch)): alaris =
                     ac_light := NOT device(st)`ac_connect,
                     battery_light := device(st)`ac_connect]
 per_fit_set(st: alaris): boolean =
-      no_button_down(st)
+      device(st)`powered_on? AND no_button_down(st)
 fit_to_hold(st: alaris): alaris =
    st WITH [ topline := COND device(st)`infusionrate = 0 -> setrate,
                            ELSE -> holding ENDCOND,
@@ -466,7 +470,6 @@ fit_set(st: (per_fit_set)): alaris =
                ((entrymode(st) = vttmode) OR (entrymode(st) = ttmode)) & 
                  (topline(st) = vtbitime)) OR
              (topline(st) = setvtbi) OR (topline(st) = setnotfitted) OR
-             (topline(st) = setrate) OR (topline(st) = setvtbi) OR
            ((((entrymode(st) = vtmode) & middisp(st)(dnewvtbi)) OR 
               (entrymode(st) = bagmode) OR 
               (entrymode(st) = tbagmode)) & (topline(st) = dispvtbi)) OR
@@ -663,11 +666,11 @@ tick_case_infuse_infusionrateEQvtbi_kvoflag(st: {st: alaris | per_tick(device(st
      st WITH [ topline := 
               COND
                 device(st)`infusionrate = 0 -> setrate,
-                ELSE -> holding
+                 ELSE -> holding
                ENDCOND,
       	        middisp := LAMBDA(x: imid_type):
                              COND x = drate -> TRUE,
-			          x = dvtbi -> TRUE,
+			          x = dvtbi -> FALSE,
 				  x = dvol  -> TRUE,
 				  ELSE -> FALSE ENDCOND,
                 device := reset(device(st)),
@@ -884,7 +887,6 @@ key1_case_options_dsetvtbilocked(st: (per_key1)): alaris =
                     ENDCOND,
       	        middisp := LAMBDA(x: imid_type):
                              COND x = drate -> TRUE,
-			          x = dvtbi -> TRUE,
 				  x = dvol  -> TRUE,
 				  ELSE -> FALSE ENDCOND,
                 device := reset(device(st)),
@@ -1055,7 +1057,7 @@ key1_case_options_dsetvtbilocked(st: (per_key1)): alaris =
         (((topline(st) = setvtbi) OR 
            (topline(st) = lockrate & NOT device(st)`infusing? & 
              device(st)`vtbi /= 0 & device(st)`infusionrate /= 0) OR
-          (topline(st) = setrate) OR (topline(st) = setnotfitted))  
+          (topline(st) = setnotfitted))  
             & entrymode(st) = nullmode) OR 
         (topline(st) = vtbitime & ((entrymode(st) = vttmode) 
                                                                OR (entrymode(st) = ttmode) )) OR
@@ -1083,7 +1085,8 @@ key1_case_options_dsetvtbilocked(st: (per_key1)): alaris =
 		device  := resetElapsed(device(st)) ]
 
    key3_case_battery_low(st: (per_key3)): alaris = 
-      st WITH [ topline := COND device(st)`infusing? -> infusing,
+      st WITH [ topline := COND device(st)`infusing? AND NOT device(st)`kvoflag -> infusing,
+                                device(st)`infusing? AND device(st)`kvoflag -> dispkvo,
                                 NOT device(st)`infusing? & device(st)`infusionrate = 0
                                         -> setrate,
                                 ELSE -> holding
@@ -1098,7 +1101,8 @@ key1_case_options_dsetvtbilocked(st: (per_key1)): alaris =
                   		 ELSE -> FALSE ENDCOND,
                         ELSE ->
                           LAMBDA(x: imid_type):
-                           COND x = drate -> TRUE,
+                           COND x = drate -> NOT device(st)`kvoflag,
+                                x = dkvorate -> device(st)`kvoflag,
                                 x = dvtbi -> TRUE,
 				x = dvol  -> TRUE,
 				x = dtime -> TRUE,
@@ -1239,7 +1243,12 @@ key1_case_options_dsetvtbilocked(st: (per_key1)): alaris =
   key3_case_setvtbi_rate_notfitted(st: (per_key3)): alaris =
    st WITH [ topline := COND device(st)`infusionrate /= 0 -> holding,
                              ELSE -> setrate ENDCOND,
-             middisp := LAMBDA(x: imid_type): (x = drate) OR ( x = dvol),
+              middisp := LAMBDA(x: imid_type):
+		            COND x = drate -> TRUE,
+			         x = dvtbi -> device(st)`vtbi /= 0,
+			         x = dtime -> device(st)`vtbi /= 0,
+				 x = dvol -> TRUE,
+                  		 ELSE -> FALSE ENDCOND,
              fndisp1 := fvol,
 	     fndisp2 := fvtbi,
              fndisp3 := fnull,
@@ -1312,7 +1321,7 @@ key1_case_options_dsetvtbilocked(st: (per_key1)): alaris =
                              ->  key3_case_dispvtbi_bagmode(st),
                            entrymode(st) = tbagmode 
                              -> key3_case_dispvtbi_tbagmode(st) ENDCOND,
-            ((topline(st) = setvtbi) OR (topline(st) = setrate) OR
+            ((topline(st) = setvtbi) OR
                 (topline(st) = setnotfitted))                    
                   ->  key3_case_setvtbi_rate_notfitted(st),
 	    topline(st) = options OR topline(st) = dispinfo              
@@ -1330,11 +1339,13 @@ key1_case_options_dsetvtbilocked(st: (per_key1)): alaris =
       (NOT device(st)`infusing? &
          (topline(st) = holding OR topline(st) = setrate) & (entrymode(st) = rmode) & 
             middisp(st)(drate) &
+            (middisp(st)(dvtbi) = (device(st)`vtbi /= 0)) &
+            (middisp(st)(dtime) = (device(st)`vtbi /= 0)) &
            (fndisp1(st) = fvol & fndisp2(st) = fvtbi & 
             fndisp3(st) = fnull)) OR
        (device(st)`infusing? &
            (topline(st) = infusing & entrymode(st) = infusemode & 
-            middisp(st)(drate) & middisp(st)(dtime) &
+            middisp(st)(drate) & middisp(st)(dtime) & middisp(st)(dvtbi) &
             fndisp1(st) = fvol & fndisp2(st) = fvtbi & fndisp3(st) = fnull)) OR
        ((topline(st) = dispvtbi) & 
            (((entrymode(st) = vtmode) & middisp(st)(dnewvtbi) AND 

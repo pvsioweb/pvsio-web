@@ -25,14 +25,15 @@ define(function (require, exports, module) {
      * Prints C++ definitions for Emuchart states
      */
     EmuchartsCppPrinter.prototype.print_states = function (emuchart) {
-        var states = emuchart.states;
+        var states = emuchart.states, stateStr;
         var ans = "  // machine states\n  enum MachineState";
         if (states && states.length > 0) {
             ans += " { ";
-            states.forEach(function (state) {
-                ans += state.name + ", ";
-            });
-            ans = ans.substr(0, ans.length - 2) + " };";
+            stateStr = states.map(function (s) {
+                return s.name;
+            }).joing(", ");
+
+            ans = ans.concat(stateStr).concat(" };");
         }
         return ans + "\n";
     };

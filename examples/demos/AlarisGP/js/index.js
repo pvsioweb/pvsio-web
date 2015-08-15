@@ -67,7 +67,15 @@ require([
             console.log(">>> " + event.message);
         }
 
-        var url = window.location.href.split(":").slice(0,2).join(":") + ":8080/NetworkController/devices";
+        function onConnect(event) {
+            console.log(">>> CONNECTED");
+        }
+
+        function onDisconnect(event) {
+            console.log(">>> DISCONNECTED");
+        }
+
+        var url = window.location.origin.split(":").slice(0,2).join(":") + ":8080/NetworkController/devices";
         url = url.replace("http://", "ws://");
         var ncDevice = new NCDevice({id: deviceID, type: deviceType}, { url: url });
 
@@ -75,7 +83,8 @@ require([
         ncDevice.addListener("control", parseNCControl);
         ncDevice.addListener("error", errorMessage);
         ncDevice.addListener("notify", notifyMessage);
-
+        ncDevice.addListener("connected", onConnect);
+        ncDevice.addListener("disconnected", onDisconnect);
 
         var serverLogs = [], maxLogSize = 40;
         var client = PVSioWebClient.getInstance();
@@ -645,11 +654,10 @@ require([
             client.getWebSocket().startPVSProcess({name: "main.pvs", demoName: "AlarisGP/pvs"}, function (err, event) {
                 ncDevice.start().then(function (res) {
                     ncDevice.connect();
-                    start_tick();
                 }).catch(function(err) {
                     disableNC = true;
-                    start_tick();
                 });
+                start_tick();
             });
         }).addListener("WebSocketConnectionClosed", function (e) {
             console.log("web socket closed");

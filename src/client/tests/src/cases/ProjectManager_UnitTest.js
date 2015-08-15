@@ -9,10 +9,11 @@
 /*global define, describe, expect, it, Promise, d3, beforeAll, afterAll*///, xdescribe*/
 define(function (require, exports, module) {
     "use strict";
-
+    var FileSystem = require("filesystem/FileSystem");
     var instance;
     var main;
     var pm;
+    var fs;
 
     var success, fail, cTest, fTest;
     var header, summary;
@@ -24,6 +25,7 @@ define(function (require, exports, module) {
         pm.addListener("ProjectChanged", function (event) {
             console.log("Intercepted new ProjectChanged event " + JSON.stringify(event));
         });
+        fs = new FileSystem();
         success = fail = cTest = fTest = 0;
         header = "\n------ Console log for ProjectManager UnitTest -------------------";
         summary = "\n------ Unit test for ProjectManager --------------------";
@@ -235,7 +237,7 @@ define(function (require, exports, module) {
             txt = "writeFile('unit_test/testFile.pvs')";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFile('unit_test/testFile.pvs').then(function (res) {
+                fs.writeFile('unit_test/testFile.pvs').then(function (res) {
                     if (res.path === 'unit_test/testFile.pvs') {
                         addSuccess(res.path + " successfully created");
                         resolve(res);
@@ -256,7 +258,7 @@ define(function (require, exports, module) {
             txt = "writeFile('unit_test/testFile.pvs', null, { overWrite: true })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFile('unit_test/testFile.pvs', null, { overWrite: true }).then(function (res) {
+                fs.writeFile('unit_test/testFile.pvs', null, { overWrite: true }).then(function (res) {
                     if (res.path === 'unit_test/testFile.pvs') {
                         addSuccess(res.path + " successfully created");
                         resolve(res);
@@ -278,7 +280,7 @@ define(function (require, exports, module) {
             txt = "writeFile('unit_test/testFile.pvs', " + content + "', { overWrite: true })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFile('unit_test/testFile.pvs', content, { overWrite: true }).then(function (res) {
+                fs.writeFile('unit_test/testFile.pvs', content, { overWrite: true }).then(function (res) {
                     if (res.path === 'unit_test/testFile.pvs') {
                         addSuccess(res.path + " successfully created");
                         resolve(res);
@@ -299,7 +301,7 @@ define(function (require, exports, module) {
             txt = "writeFile('unit_test/test/subfolder/testFile.pvs', " + content + "', { overWrite: true })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFile('unit_test/test/subfolder/testFile.pvs', content, { overWrite: true }).then(function (res) {
+                fs.writeFile('unit_test/test/subfolder/testFile.pvs', content, { overWrite: true }).then(function (res) {
                     if (res.path === 'unit_test/test/subfolder/testFile.pvs') {
                         addSuccess(res.path + " successfully created");
                         resolve(res);
@@ -321,8 +323,8 @@ define(function (require, exports, module) {
                     "').then(function (res) { writeFile('unit_test/test_overWrite', '% overwritten!'); })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFile('unit_test/test_overWrite.pvs', content).then(function (res) {
-                    pm.writeFile('unit_test/test_overWrite.pvs', "% overwritten!").then(function (res) {
+                fs.writeFile('unit_test/test_overWrite.pvs', content).then(function (res) {
+                    fs.writeFile('unit_test/test_overWrite.pvs', "% overwritten!").then(function (res) {
                         addFail("File " + res.path + " erroneously overwritten");
                         reject(res.path);
                     }).catch(function (err) {
@@ -347,7 +349,7 @@ define(function (require, exports, module) {
             txt = "writeFileDialog('unit_test/testFile.pvs')";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFileDialog('unit_test/testFile.pvs').then(function (res) {
+                fs.writeFileDialog('unit_test/testFile.pvs').then(function (res) {
                     if (res.path === 'unit_test/testFile.pvs') {
                         addSuccess(res.path + " successfully created");
                         resolve(res);
@@ -376,7 +378,7 @@ define(function (require, exports, module) {
             txt = "writeFileDialog('unit_test/testFile.pvs', null, { overWrite: true })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFileDialog('unit_test/testFile.pvs', null, { overWrite: true }).then(function (res) {
+                fs.writeFileDialog('unit_test/testFile.pvs', null, { overWrite: true }).then(function (res) {
                     if (res.path === 'unit_test/testFile.pvs') {
                         addSuccess(res.path + " successfully created");
                         resolve(res);
@@ -405,7 +407,7 @@ define(function (require, exports, module) {
             txt = "writeFileDialog('unit_test/testFile.pvs', " + content + "', { overWrite: true })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFileDialog('unit_test/testFile.pvs', content, { overWrite: true }).then(function (res) {
+                fs.writeFileDialog('unit_test/testFile.pvs', content, { overWrite: true }).then(function (res) {
                     if (res.path === 'unit_test/testFile.pvs') {
                         addSuccess(res.path + " successfully created");
                         resolve(res);
@@ -434,7 +436,7 @@ define(function (require, exports, module) {
             txt = "writeFileDialog('unit_test/test/subfolder/testFile.pvs', " + content + "', { overWrite: true })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFileDialog('unit_test/test/subfolder/testFile.pvs', content, { overWrite: true }).then(function (res) {
+                fs.writeFileDialog('unit_test/test/subfolder/testFile.pvs', content, { overWrite: true }).then(function (res) {
                     if (res.path === 'unit_test/test/subfolder/testFile.pvs') {
                         addSuccess(res.path + " successfully created");
                         resolve(res);
@@ -464,8 +466,8 @@ define(function (require, exports, module) {
                     "').then(function (res) { writeFileDialog('unit_test/test_overWrite', '% overwritten!'); })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFileDialog('unit_test/test_overWrite.pvs', content).then(function (res) {
-                    pm.writeFileDialog('unit_test/test_overWrite.pvs', "% overwritten!").then(function (res) {
+                fs.writeFileDialog('unit_test/test_overWrite.pvs', content).then(function (res) {
+                    fs.writeFileDialog('unit_test/test_overWrite.pvs', "% overwritten!").then(function (res) {
                         addSuccess("File successfully overwritten!\n");
                         resolve(res);
                     }).catch(function (err) {
@@ -503,7 +505,7 @@ define(function (require, exports, module) {
             txt = "readFile('AlarisGP/AlarisGP.pvs')";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.readFile('AlarisGP/alarisGP.pvs').then(function (res) {
+                fs.readFile('AlarisGP/alarisGP.pvs').then(function (res) {
                     if (res.path === 'AlarisGP/alarisGP.pvs' &&
                             typeof res.content === "string" &&
                                 res.encoding === "utf8" &&
@@ -527,7 +529,7 @@ define(function (require, exports, module) {
             txt = "readFile('AlarisGP/image.jpg', { encoding: 'base64' })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.readFile('AlarisGP/image.jpg', { encoding: "base64"}).then(function (res) {
+                fs.readFile('AlarisGP/image.jpg', { encoding: "base64"}).then(function (res) {
                     if (res.path === 'AlarisGP/image.jpg' &&
                             res.content.indexOf("data:image/") === 0 &&
                                 res.encoding === "base64" &&
@@ -551,8 +553,8 @@ define(function (require, exports, module) {
             txt = "writeFile('unit_test/write_read.txt', 'test', { overWrite: true }).then(function (res) { readFile('unit_test/write_read.txt'); });";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFile('unit_test/write_read.txt', 'test', { overWrite: true }).then(function (res) {
-                    pm.readFile('unit_test/write_read.txt').then(function (res) {
+                fs.writeFile('unit_test/write_read.txt', 'test', { overWrite: true }).then(function (res) {
+                    fs.readFile('unit_test/write_read.txt').then(function (res) {
                         if (res.path === 'unit_test/write_read.txt' &&
                                 res.content === 'test' &&
                                     res.encoding === "utf8" &&
@@ -580,7 +582,7 @@ define(function (require, exports, module) {
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             alert("Please select file AlarisGP/image.jpg");
             return new Promise(function (resolve, reject) {
-                pm.readLocalFileDialog().then(function (res) {
+                fs.readLocalFileDialog().then(function (res) {
                     if (res.path === 'AlarisGP/image.jpg' &&
                             res.content.indexOf("data:image/") === 0 &&
                                 res.encoding === "base64" &&
@@ -606,8 +608,8 @@ define(function (require, exports, module) {
             txt = "writeFile('unit_test/test_deleteFile.pvs', " + content + "', { overWrite: true }).then(function (res) { deleteFile('unit_test/test_deleteFile.pvs'; })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFile('unit_test/test_deleteFile.pvs', content, { overWrite: true }).then(function (res) {
-                    pm.deleteFile('unit_test/test_deleteFile.pvs').then(function (res) {
+                fs.writeFile('unit_test/test_deleteFile.pvs', content, { overWrite: true }).then(function (res) {
+                    fs.deleteFile('unit_test/test_deleteFile.pvs').then(function (res) {
                         if (res === "unit_test/test_deleteFile.pvs") {
                             addSuccess("File " + res + " deleted successfully");
                             resolve(res);
@@ -629,8 +631,8 @@ define(function (require, exports, module) {
             txt = "writeFile('unit_test/testDelete/test_deleteFile.pvs', " + content + "', { overWrite: true }).then(function (res) { deleteFile('unit_test/testDelete/test_deleteFile.pvs'; })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFile('unit_test/testDelete/test_deleteFile.pvs', content, { overWrite: true }).then(function (res) {
-                    pm.deleteFile('unit_test/testDelete/test_deleteFile.pvs').then(function (res) {
+                fs.writeFile('unit_test/testDelete/test_deleteFile.pvs', content, { overWrite: true }).then(function (res) {
+                    fs.deleteFile('unit_test/testDelete/test_deleteFile.pvs').then(function (res) {
                         if (res === "unit_test/testDelete/test_deleteFile.pvs") {
                             addSuccess("File " + res + " deleted successfully");
                             resolve(res);
@@ -652,8 +654,8 @@ define(function (require, exports, module) {
             txt = "writeFile('unit_test/testDelete/test_deleteFile.pvs', " + content + "', { overWrite: true }).then(function (res) { deleteFile('unit_test/testDelete/test_deleteFile.pvs'; })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFile('unit_test/testDelete/test_deleteFile.pvs', content, { overWrite: true }).then(function (res) {
-                    pm.deleteFile(res.path).then(function (res) {
+                fs.writeFile('unit_test/testDelete/test_deleteFile.pvs', content, { overWrite: true }).then(function (res) {
+                    fs.deleteFile(res.path).then(function (res) {
                         if (res === "unit_test/testDelete/test_deleteFile.pvs") {
                             addSuccess("File " + res + " deleted successfully");
                             resolve(res);
@@ -675,7 +677,7 @@ define(function (require, exports, module) {
             txt = "deleteFile('unit_test/test_thisFileDoesNotExist.pvs')";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.deleteFile('unit_test/test_thisFileDoesNotExist.pvs').then(function (res) {
+                fs.deleteFile('unit_test/test_thisFileDoesNotExist.pvs').then(function (res) {
                     if (res === "unit_test/test_thisFileDoesNotExist.pvs") {
                         addSuccess("File " + res.path + " deleted successfully");
                         resolve(res);
@@ -698,8 +700,8 @@ define(function (require, exports, module) {
             txt = "writeFile('unit_test/test_deleteFile.pvs', " + content + "', { overWrite: true }).then(function (res) { deleteFileDialog('unit_test/test_deleteFile.pvs'; })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFile('unit_test/test_deleteFile.pvs', content, { overWrite: true }).then(function (res) {
-                    pm.deleteFileDialog('unit_test/test_deleteFile.pvs').then(function (res) {
+                fs.writeFile('unit_test/test_deleteFile.pvs', content, { overWrite: true }).then(function (res) {
+                    fs.deleteFileDialog('unit_test/test_deleteFile.pvs').then(function (res) {
                         if (res === "unit_test/test_deleteFile.pvs") {
                             addSuccess("File " + res + " deleted successfully");
                             resolve(res);
@@ -727,8 +729,8 @@ define(function (require, exports, module) {
             txt = "writeFile('unit_test/testDelete/test_deleteFile.pvs', " + content + "', { overWrite: true }).then(function (res) { deleteFileDialog('unit_test/testDelete/test_deleteFile.pvs'; })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFile('unit_test/testDelete/test_deleteFile.pvs', content, { overWrite: true }).then(function (res) {
-                    pm.deleteFileDialog('unit_test/testDelete/test_deleteFile.pvs').then(function (res) {
+                fs.writeFile('unit_test/testDelete/test_deleteFile.pvs', content, { overWrite: true }).then(function (res) {
+                    fs.deleteFileDialog('unit_test/testDelete/test_deleteFile.pvs').then(function (res) {
                         if (res === "unit_test/testDelete/test_deleteFile.pvs") {
                             addSuccess("File " + res + " deleted successfully");
                             resolve(res);
@@ -756,8 +758,8 @@ define(function (require, exports, module) {
             txt = "writeFile('unit_test/testDelete/test_deleteFile.pvs', " + content + "', { overWrite: true }).then(function (res) { deleteFileDialog('unit_test/testDelete/test_deleteFile.pvs'; })";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.writeFile('unit_test/testDelete/test_deleteFile.pvs', content, { overWrite: true }).then(function (res) {
-                    pm.deleteFileDialog(res.path).then(function (res) {
+                fs.writeFile('unit_test/testDelete/test_deleteFile.pvs', content, { overWrite: true }).then(function (res) {
+                    fs.deleteFileDialog(res.path).then(function (res) {
                         if (res === "unit_test/testDelete/test_deleteFile.pvs") {
                             addSuccess("File " + res + " deleted successfully");
                             resolve(res);
@@ -785,7 +787,7 @@ define(function (require, exports, module) {
             txt = "deleteFileDialog('unit_test/test_thisFileDoesNotExist.pvs')";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.deleteFileDialog('unit_test/test_thisFileDoesNotExist.pvs').then(function (res) {
+                fs.deleteFileDialog('unit_test/test_thisFileDoesNotExist.pvs').then(function (res) {
                     if (res === "unit_test/test_thisFileDoesNotExist.pvs") {
                         addSuccess("File " + res.path + " deleted successfully");
                         resolve(res);
@@ -814,7 +816,7 @@ define(function (require, exports, module) {
             txt = "mkDir('unit_test/test1')";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.mkDir('unit_test/test1').then(function (res) {
+                fs.mkDir('unit_test/test1').then(function (res) {
                     if (res.path === 'unit_test/test1') {
                         addSuccess(res.path + " successfully created");
                         resolve(res);
@@ -841,7 +843,7 @@ define(function (require, exports, module) {
             txt = "mkDir('unit_test/test1', { overWrite: true } )";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.mkDir('unit_test/test1', { overWrite: true }).then(function (res) {
+                fs.mkDir('unit_test/test1', { overWrite: true }).then(function (res) {
                     if (res.path === 'unit_test/test1') {
                         addSuccess(res.path + " successfully created");
                         resolve(res);
@@ -862,7 +864,7 @@ define(function (require, exports, module) {
             txt = "mkDir('unit_test/test1', { overWrite: false } )";
             summary += "\n\n Test " + (++fTest) + ": '" + txt + "'";
             return new Promise(function (resolve, reject) {
-                pm.mkDir('unit_test/test1', { overWrite: false }).then(function (res) {
+                fs.mkDir('unit_test/test1', { overWrite: false }).then(function (res) {
                     addFail(JSON.stringify(res));
                     reject(res);
                 }).catch(function (err) {
@@ -1055,13 +1057,13 @@ define(function (require, exports, module) {
             beforeAll(function (done) {
                 d3.select("div.overlay").remove();
                 main.start({noSplash: true}).then(function () {
-                    pm.mkDir("unit_test", {overWrite: true});
+                    fs.mkDir("unit_test", {overWrite: true});
                     done();
                 });
             });
 
             afterAll(function (done) {
-                pm.rmDir("unit_test");
+                fs.rmDir("unit_test");
                 done();
             });
 
@@ -1071,7 +1073,7 @@ define(function (require, exports, module) {
                         expect(pm).toBeDefined();
                         done();
                     }).catch(function (err) {
-                        expect(err).toBeFaly();
+                        expect(err).toBeFalsy();
                         console.log("Error while starting PVSio-web main process: " + JSON.stringify(err));
                         done();
                     });
@@ -1250,7 +1252,7 @@ define(function (require, exports, module) {
             describe("Finalising...", function () {
                 it("Saving test summary to browser console...", function (done) {
                     var res = printSummary();
-                    pm.writeFile("unit_test/jasmine.test.log", res).then(function (res) {
+                    fs.writeFile("unit_test/jasmine.test.log", res).then(function (res) {
                         expect(res).toBeDefined();
                         done();
                     });

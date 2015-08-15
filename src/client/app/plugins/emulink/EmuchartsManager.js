@@ -361,6 +361,9 @@ define(function (require, exports, module) {
         return this;
     };
 
+    EmuchartsManager.prototype.getSelectedEditor = function () {
+        return _selectedEditor;
+    };
     /**
      * Returns a fresh state name
      * @memberof EmuchartsManager
