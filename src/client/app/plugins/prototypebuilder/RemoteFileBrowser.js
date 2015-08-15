@@ -25,7 +25,9 @@ define(function (require, exports, module) {
         WSManager       = require("websockets/pvs/WSManager"),
         template        = require("text!pvsioweb/forms/templates/fileBrowser.handlebars"),
         BaseDialog      = require("pvsioweb/forms/BaseDialog"),
-        MIME            = require("util/MIME").getInstance();
+        MIME            = require("util/MIME").getInstance(),
+        PreferenceStorage = require("preferences/PreferenceStorage").getInstance(),
+        PreferenceKeys = require("preferences/PreferenceKeys");
     var timer, rfb;
 
     var OpenFilesView = BaseDialog.extend({
@@ -41,7 +43,8 @@ define(function (require, exports, module) {
             "input #baseDirectory": "onTextChanged",
             "input #currentPath": "onEdit",
             "click #btnHome": "selectHome",
-            "click #btnEdit": "enableEdit"
+            "click #btnEdit": "enableEdit",
+            "click #btnUp": "goUpADirectory"
         },
         onTextChanged: function (event) {
             clearTimeout(timer);
@@ -65,6 +68,14 @@ define(function (require, exports, module) {
                 document.getElementById("btnEdit").style.backgroundColor = "";
                 document.getElementById("currentPath").readOnly = true;
             }
+        },
+        goUpADirectory: function (event) {
+            var dir = d3.select("#currentPath");
+            var path = rfb._baseDirectory;
+            var levelUp = path.substr(0, path.lastIndexOf("/"));
+            rfb.rebaseDirectory(levelUp);
+            //update the directory shown on the top of the window
+            dir.property("value", levelUp);
         }
     });
 
@@ -80,6 +91,7 @@ define(function (require, exports, module) {
 
     RemoteFileBrowser.prototype._treeList = null;
 
+    RemoteFileBrowser.prototype._baseDirectory = null;
     /**
      * Utility function to sort the list of files returned by the remote file browser
      * @param   {String}   a first argument
@@ -87,7 +99,8 @@ define(function (require, exports, module) {
      * @returns {number} -1 if a < b, 0 if a === b and 1 if a > b
      */
     function fileSort(a, b) {
-        return a.path.toLowerCase() < b.path.toLowerCase() ? -1 : a.path.toLowerCase() === b.path.toLowerCase() ? 0 : 1;
+        return a.path.toLowerCase() < b.path.toLowerCase()
+            ? -1 : a.path.toLowerCase() === b.path.toLowerCase() ? 0 : 1;
     }
 
     function getRemoteDirectory(path) {
@@ -103,6 +116,14 @@ define(function (require, exports, module) {
         });
     }
 
+    /**
+     * Gets the current base directory whose content is being rendered in the remote browser.
+     * @returns {String} The base directory
+     */
+    RemoteFileBrowser.prototype.getBaseDirectory = function () {
+        return this._baseDirectory;
+    };
+
     RemoteFileBrowser.prototype.rebaseDirectory = function (path) {
         var self = this;
         getRemoteDirectory(path)
@@ -110,6 +131,7 @@ define(function (require, exports, module) {
                 var data = {name: path, path: path, children: files, isDirectory: true};
                 self._treeList.data = data;
                 self._treeList.render(data);
+                self._baseDirectory = path;
             }).catch(function (err) {
                 self._treeList.data = [];
             });
@@ -183,6 +205,16 @@ define(function (require, exports, module) {
             }).on("ok", function (event, view) {
                 clearTimeout(timer);
                 var selectedFiles = self._treeList.getSelectedItems();
+                var firstFile = selectedFiles[0],
+                    fileDirectory;
+                if (firstFile.isDirectory) {
+                    fileDirectory = firstFile.path;
+                } else {
+                    fileDirectory = firstFile.parent.path;
+                }
+                if (PreferenceStorage.get(PreferenceKeys.REMEMBER_LAST_DIRECTORY)) {
+                    PreferenceStorage.set(PreferenceKeys.LAST_DIRECTORY_VISITED, fileDirectory);
+                }
                 resolve(selectedFiles);
                 view.remove();
             });

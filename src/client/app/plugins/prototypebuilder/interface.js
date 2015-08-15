@@ -16,7 +16,9 @@ define(function (require, exports, module) {
         PluginManager = require("plugins/PluginManager"),
         PVSioWeb = require("PVSioWebClient").getInstance(),
         ProjectManager = require("project/ProjectManager"),
-        displayQuestion = require("pvsioweb/forms/displayQuestion");
+        displayQuestion = require("pvsioweb/forms/displayQuestion"),
+        PreferenceDialog     = require("preferences/PreferenceDialog"),
+        Preferences = require("preferences/PreferenceStorage").getInstance();
 
     var template = require("text!pvsioweb/forms/maincontent.handlebars");
     /**
@@ -150,7 +152,8 @@ define(function (require, exports, module) {
         events: {
             "change input[type='checkbox']": "checkboxClicked",
             "click .plugin-box": "pluginClicked",
-            "click .plugin-box label": "pluginLabelClicked"
+            "click .plugin-box label": "pluginLabelClicked",
+            "click a#preferences": "preferencesClicked"
         },
         checkboxClicked: function (event) {
             this.trigger("pluginToggled", event);
@@ -167,6 +170,17 @@ define(function (require, exports, module) {
         },
         scriptClicked: function (event) {
             this.trigger("scriptClicked", $(event.target).attr("name"));
+        },
+        preferencesClicked: function (event) {
+            PreferenceDialog.create()
+                .on("ok", function (form, view) {
+                    Object.keys(form.data).forEach(function (k) {
+                        Preferences.set(k, form.data[k]);
+                    });
+                    view.remove();
+                }).on("cancel", function (form, view) {
+                    view.remove();
+                });
         }
     });
 

@@ -17,7 +17,8 @@ define(function (require, exports, module) {
         WidgetsListView = require("pvsioweb/forms/WidgetsListView"),
         template		= require("text!pvsioweb/forms/templates/prototypeBuilderPanel.handlebars"),
         ScriptPlayer    = require("util/ScriptPlayer"),
-        fs              = require("util/fileHandler"),
+//        fs              = require("util/fileHandler"),
+        FileSystem          = require("filesystem/FileSystem"),
         NotificationManager = require("project/NotificationManager"),
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
         Descriptor      = require("project/Descriptor");
@@ -29,12 +30,14 @@ define(function (require, exports, module) {
         pvsioWebClient;
     var img; // this is the prototype image displayed in the PVSio-web user interface
     var _prototypeBuilder;
+    var fs;
 
     function PrototypeBuilder() {
         pvsioWebClient = PVSioWebClient.getInstance();
         projectManager = ProjectManager.getInstance();
         currentProject = projectManager.project();
         img = null;
+        fs = new FileSystem();
         _prototypeBuilder = this;
     }
 
@@ -198,6 +201,7 @@ define(function (require, exports, module) {
             WidgetsListView.create();
         }).catch(function (err) { Logger.error(err); });
     }
+
     function onWidgetsFileChanged(event) {
         updateImageAndLoadWidgets().then(function (res) {
             WidgetsListView.create();
@@ -409,7 +413,7 @@ define(function (require, exports, module) {
         d3.selectAll("#btnLoadPicture").on("click", function () {
             return new Promise(function (resolve, reject) {
                 if (PVSioWebClient.getInstance().serverOnLocalhost()) {
-                    projectManager.readFileDialog({encoding: "base64", title: "Select a picture"}).then(function (descriptors) {
+                    fs.readFileDialog({encoding: "base64", title: "Select a picture"}).then(function (descriptors) {
                         _prototypeBuilder.changeImage(descriptors[0].name, descriptors[0].content).then(function (res) {
                             renderImage(res).then(function (res) {
                                 if (d3.select("#imageDiv svg").node() === null) {

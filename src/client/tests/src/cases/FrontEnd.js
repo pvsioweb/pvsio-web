@@ -13,10 +13,14 @@ define(function (require, exports, module) {
     var Descriptor_UnitTest = require("test/Descriptor_UnitTest");
     var UI_UnitTest = require("test/UI_UnitTest");
 
+
     var ProjectManager_UnitTest = require("test/ProjectManager_UnitTest").getInstance();
     ProjectManager_UnitTest.run();
     Project_UnitTest.run();
     Descriptor_UnitTest.run();
     UI_UnitTest.run();
-    
+    //var NetworkController_UnitTest = require("test/NetworkController_UnitTest").getInstance();
+    //NetworkController_UnitTest.run();
+
+
 });

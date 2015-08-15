@@ -9,6 +9,7 @@ define(function (require, exports, module) {
     "use strict";
     var d3			= require("d3/d3"),
         createProjectTemplate = require("text!./templates/createProject.handlebars"),
+        FileSystem      = require("filesystem/FileSystem"),
         BaseDialog  = require("pvsioweb/forms/BaseDialog"),
 //        MIME        = require("util/MIME"),
         PVSioWebClient        = require("PVSioWebClient").getInstance();
@@ -30,9 +31,9 @@ define(function (require, exports, module) {
             return ans;
         }
         var el_remote = (_encoding === "base64") ? "#prototypeImage" : "#pvsSpec";
+        var fs = new FileSystem();
         if (PVSioWebClient.serverOnLocalhost()) {
-            require("project/ProjectManager").getInstance().readFileDialog({
-                path: "~",
+            fs.readFileDialog({
                 encoding: _encoding,
                 title: _title
             }).then(function (res) {

@@ -150,7 +150,11 @@ module.exports = function () {
 		    pvs.start({processName: "/app/pvs6.0/pvsio", args: [filename],
 				onDataReceived: onDataReceived,
 				onProcessExited: onProcessExited});
-		} else {
+		} else if (process.env.pvsdir) {
+		    pvs.start({processName: path.join(process.env.pvsdir, "pvsio"), args: [filename],
+				onDataReceived: onDataReceived,
+				onProcessExited: onProcessExited});        
+        } else {
 		    pvs.start({processName: "pvsio", args: [filename],
 				onDataReceived: onDataReceived,
 				onProcessExited: onProcessExited});

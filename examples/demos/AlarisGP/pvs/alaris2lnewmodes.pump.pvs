@@ -23,11 +23,11 @@ pump_th [
 %  maxinfuse_over_time_lemma: LEMMA
 %    FORALL(t: {t: itimes | NOT t = 0}): floor(maxinfuse / t) >= 0 AND floor(maxinfuse / t) <= maxrate
 %
-%  vtbi_over_rate_lemma: LEMMA 
-%    FORALL(v: ivols, r: {r: irates | (NOT r = 0)}): floor(v / r) >= 0 AND floor(v / r) <= maxtime
-%
-%  vtbi_over_time_lemma: LEMMA
-%    FORALL(v: ivols, t: {t: itimes | (NOT t = 0)}): floor(v / t) >= 0 AND floor(v / t) <= maxrate
+  vtbi_over_rate_lemma: LEMMA 
+    FORALL(v: ivols, r: {r: irates | (NOT r = 0)}): (v / r) >= 0 
+
+  vtbi_over_time_lemma: LEMMA
+    FORALL(v: ivols, t: {t: itimes | (NOT t = 0)}): (v / t) >= 0 
   %-----------------------------------------------------------------------------------
 
   %-- interactor pump
@@ -63,7 +63,8 @@ pump_th [
 
   
   mains_switch(st: pump): pump =
-      st WITH [ac_connect := NOT ac_connect(st)]
+      st WITH [ac_connect := NOT ac_connect(st),
+               elapse := 0]
   connect_set(st: pump): pump =
       st WITH [set_fitted := TRUE]
 
@@ -345,7 +346,7 @@ pump_th [
   aug_time(st: pump, v: itimes): pump =
      st WITH [ time := v,
                infusionrate := COND (v = 0) -> 0,
-                               ELSE -> floor(vtbi(st)/ v) ENDCOND, 
+                               ELSE -> vtbi(st)/ v ENDCOND, 
                elapse := 0]
 
  

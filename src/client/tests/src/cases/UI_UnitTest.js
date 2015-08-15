@@ -33,7 +33,7 @@ define(function (require, exports, module) {
                             el.click();
                             setTimeout(function () {
                                 resolve(elid);
-                            }, 200);
+                            }, 500);
                         } else {
                             reject(elid + " does not exist in the dom");
                         }
@@ -103,7 +103,7 @@ define(function (require, exports, module) {
             function openSampleProject(projectName) {
                 var str = projectName + " project opens successfully",
                     clickOpenProject = click("#openProject"),
-                    clickProject = click("button[data-project='" + projectName + "']");
+                    clickProject = click("button[data-project='{}']".format(projectName));
                 return clickOpenProject()
                         .then(clickProject);
 //                        .then(function () {
@@ -115,13 +115,13 @@ define(function (require, exports, module) {
 
             function loadPlugin(pluginName) {
                 var str = pluginName + " plugin adds a collapsible panel to the ui",
-                    clickPlugin = click("input[name='" + pluginName + "']");
+                    clickPlugin = click("input[name='{}']".format(pluginName));
                 return clickPlugin();
             }
 
             function unloadPlugin(pluginName) {
                 var str = pluginName + " plugin can be unloaded from the ui",
-                    clickPlugin = click("input[name='" + pluginName + "']");
+                    clickPlugin = click("input[name='{}']".format(pluginName));
                 return clickPlugin()//to load
                         .then(clickPlugin);
             }
@@ -202,40 +202,47 @@ define(function (require, exports, module) {
                 });
 
                 it("EmuCharts tool can be unloaded", function (done) {
-                    unloadPlugin("EmuCharts Editor").then(function () {
-                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='EmuCharts Editor']");
-                        expect(pluginPanel.empty()).toEqual(true);
-                        done();
-                    }).catch(expectError(done));
+                    var p = "EmuCharts Editor";
+                    unloadPlugin(p)
+                        .then(function () {
+                            var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='EmuCharts Editor']");
+                            expect(pluginPanel.empty()).toEqual(true);
+                            done();
+                        }).catch(expectError(done));
                 });
 
                 it("Model Editor tool can be loaded", function (done) {
-                    loadPlugin("Model Editor").then(function () {
-                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='Model Editor']");
+                    var p = "Model Editor";
+                    loadPlugin(p).then(function () {
+                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='{}']".format(p));
                         expect(pluginPanel.empty()).toBeFalsy();
                         done();
                     }).catch(expectError(done));
                 });
 
                 it("Model Editor tool can be unloaded", function (done) {
-                    unloadPlugin("Model Editor").then(function () {
-                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='Model Editor']");
-                        expect(pluginPanel.empty()).toEqual(true);
-                        done();
-                    }).catch(expectError(done));
+                    var p = "Model Editor";
+                    unloadPlugin(p)
+                        .then(function () {
+                            var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='{}']".format(p));
+                            expect(pluginPanel.empty()).toEqual(true);
+                            done();
+                        }).catch(expectError(done));
                 });
 
                 it("Graph Builder tool can be loaded", function (done) {
-                    loadPlugin("Graph Builder").then(function () {
-                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='Graph Builder']");
+                    var p = "Graph Builder";
+                    loadPlugin(p).then(function () {
+                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='{}']".format(p));
                         expect(pluginPanel.empty()).toBeFalsy();
                         done();
                     }).catch(expectError(done));
                 });
 
-                it("EmuCharts tool can be unloaded", function (done) {
-                    unloadPlugin("Graph Builder").then(function () {
-                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='Graph Builder']");
+                it("Graph Builder tool can be unloaded", function (done) {
+                    var p = "Graph Builder";
+                    unloadPlugin(p).then(function () {
+                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='{}']".format(p));
                         expect(pluginPanel.empty()).toEqual(true);
                         done();
                     }).catch(expectError(done));
@@ -243,14 +250,14 @@ define(function (require, exports, module) {
             });
 
             describe("Prototype Builder", function () {
-                var pluginName = "Prototype Builder";
-                var editorPanel = "div.collapsible-panel-parent[plugin-owner='" + pluginName + "'] .collapsible-panel";
+                var pluginName = "Prototype Builder", editorPanel;
 
                 beforeEach(function (done) {
                     d3.select("div.overlay").remove();
                     pm = ProjectManager.getInstance();
                     main.start({noSplash: true}).then(function () {
                         p = pm.project();
+                        editorPanel = "div.collapsible-panel-parent[plugin-owner='{}'] .collapsible-panel".format(pluginName);
                         done();
                     }).catch(expectError(done));
                 });

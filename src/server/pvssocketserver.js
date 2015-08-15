@@ -157,9 +157,14 @@ function run() {
                 command: "/app/pvs6.0/proveit -T -l -v " + file,
                 callBack: cb
             });
+        } else if (process.env.pvsdir) {
+            procWrapper().exec({
+                command: path.join(process.env.pvsdir, "proveit") + " -T -l -v " + file,
+                callBack: cb
+            });        
         } else {
             procWrapper().exec({
-                command: "proveit -l -v " + file,
+                command: process.env.pvsdir + "proveit -l -v " + file,
                 callBack: cb
             });
         }
@@ -428,6 +433,7 @@ function run() {
                 if (mainFile !== "") {
                     changeProjectSetting(token.projectName, "mainPVSFile", mainFile)
                         .then(function (res) {
+                            res.type = token.type;
                             res.id = token.id;
                             res.socketId = socketid;
                             res.time = token.time;
@@ -1022,6 +1028,9 @@ function run() {
             process.argv.forEach(function (val, index, array) {
                 if (val.toLowerCase() === "restart") {
                     restart = true;
+                }
+                if (val.toLowerCase().indexOf("pvsdir:") === 0) {
+                    process.env.pvsdir = path.join(__dirname, "../../" + val.toLowerCase().split(":")[1]);
                 }
             });
         }

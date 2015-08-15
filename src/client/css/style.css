@@ -910,7 +910,7 @@ fadeOut
 }
 
 #file-browser {
-    max-height: 300px;
+    height: 300px;
     overflow-y: auto;
     width: 100%;
 }
@@ -1001,26 +1001,30 @@ input.input_text{
 }
 
 .waiting_connection:after {
-	border-width: 0 3px 0 0;
-	border-style: solid;
-	border-color: rgba(0, 0, 0, .5);
-	border-radius: 50%;
-	display: block;
-	height: 50px;
-	left: 50%;
-	margin: -25px 0 0 -25px;
-	position: absolute;
-	top: 50%;
-	width: 50px;
-	content: "";
-	animation: spin 1s infinite linear;
-	-webkit-animation: spin 1s infinite linear;
+    border-width: 0 3px 0 0;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, .5);
+    border-radius: 50%;
+    display: block;
+    height: 50px;
+    left: 50%;
+    margin: -25px 0 0 -25px;
+    position: absolute;
+    top: 50%;
+    width: 50px;
+    content: "";
+    animation: spin 1s infinite linear;
+    -webkit-animation: spin 1s infinite linear;
 }
 @keyframes spin {
-	from { transform: rotate(0deg); }
-	to { transform: rotate(360deg); }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 @-webkit-keyframes spin {
-	from { -webkit-transform: rotate(0deg); }
-	to { -webkit-transform: rotate(360deg); }
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+input#filter {
+    color: black;
+    padding: 5px;
 }

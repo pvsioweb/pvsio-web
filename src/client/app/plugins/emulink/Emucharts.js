@@ -204,6 +204,38 @@ define(function (require, exports, module) {
     };
 
     /**
+     * @function move_node
+     * @description Changes the position of a node in the diagram
+     * @param node {Object} The descriptor of the node that shall be moved.
+     * @param new_pos {Object} The new position of the node.
+     * @returns {Boolean} true if the node has been moved successfully, false otherwhise.
+     * @memberof module:Emucharts
+     * @instance
+     */
+    Emucharts.prototype.move_node = function (node, new_pos) {
+        var move = _this.nodes.get(node);
+        if (move) {
+            // fire event
+            _this.fire({
+                type: "emuCharts_stateMoved",
+                state: {
+                    id: move.id,
+                    name: move.name,
+                    position: {
+                        old: { x: move.x, y: move.y },
+                        new: { x: new_pos.x, y: new_pos.y }
+                    }
+                }
+            });
+            move.x = new_pos.x;
+            move.y = new_pos.y;
+            _this.nodes.set(move.id, move);
+            return true;
+        }
+        return false;
+    };
+
+    /**
      * @function rename_edge
      * @description Renames a edge in the diagram.
      * @param id {String} The identifier of the edge that shall be renamed.

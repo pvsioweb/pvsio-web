@@ -57,6 +57,11 @@ define(function (require, exports, module) {
         };
     }
 
+    function hideSplash() {
+        d3.select("#PVSio-web-logo").style("display", "none");
+        d3.select("#content").classed("offscreen", false);
+    }
+
     function showInterface(opt) {
         return function (res) {
             return new Promise(function (resolve, reject) {
@@ -70,17 +75,12 @@ define(function (require, exports, module) {
                     });
                     console.log(msg);
                 }
-                //hide pvsio-web loading screen and make the tool visible
+                //hide pvsio-web loading screen if noSplash is set in opt and make the tool visible
                 if (opt && opt.noSplash) {
-                    d3.select("#PVSio-web-logo").style("display", "none");
-                    d3.select("#content").classed("offscreen", false);
+                    hideSplash();
                     resolve(res);
                 } else {
-                    splashTimeout = setTimeout(function () {
-                        d3.select("#PVSio-web-logo").style("display", "none");
-                        d3.select("#content").classed("offscreen", false);
-                        resolve(res);
-                    }, 2400);
+                    resolve(res);
                 }
             });
         };
@@ -129,6 +129,8 @@ define(function (require, exports, module) {
                     .then(createDefaultProject())
                     .then(showInterface(opt))
                     .then(function (res) {
+                    //we have finished loading pvsio-web related things so hide the splash screen and show the tool -- we can also use this promise chain to show real updates to the user about what has been loaded
+                        hideSplash();
                         resolve(res);
                     }).catch(function (err) {
                         console.log(err);

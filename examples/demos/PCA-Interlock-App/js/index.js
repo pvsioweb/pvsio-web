@@ -7,7 +7,7 @@ require.config({
         d3: '../lib/d3',
         stateParser: './util/PVSioStateParser',
         NCDevice: 'plugins/networkController/NCDevice',
-        NCMonitor: 'plugins/networkController/NCMonitor'
+        NCMonitorCore: 'plugins/networkController/NCMonitorCore'
     }
 });
 /**
@@ -17,16 +17,16 @@ require([
     'PVSioWebClient',
     'stateParser',
     'NCDevice',
-    'NCMonitor',
+    'NCMonitorCore',
     "widgets/med/PatientMonitorDisplay",
     "widgets/med/PumpMonitorDisplay",
     "widgets/TripleDisplay",
     "widgets/SingleDisplay",
     "widgets/ButtonActionsQueue",
     "widgets/TouchScreenButton"
-], function (PVSioWebClient, stateParser, NCDevice, NCMonitor, PatientMonitorDisplay, PumpMonitorDisplay, TripleDisplay, SingleDisplay, ButtonActionsQueue, TouchScreenButton) {
+], function (PVSioWebClient, stateParser, NCDevice, NCMonitorCore, PatientMonitorDisplay, PumpMonitorDisplay, TripleDisplay, SingleDisplay, ButtonActionsQueue, TouchScreenButton) {
 
-    var deviceID = "Supervisor_ID";
+    var deviceID = "Supervisor";
     var deviceType = "Supervisor";
     var d3 = require("d3/d3");
     //var deviceDescription = "Supervisor";
@@ -42,48 +42,139 @@ require([
             ButtonActionsQueue.getInstance().queueGUIAction("update_monitor(" + event.message + ")", onMessageReceived);
         }
     }
-    function errorMessage(event) { console.log("!!! " + event.message); }
-    function notifyMessage(event) { console.log(">>> " + event.message); }
-    function onConnect(event) {
-        var res = event.message;
-        if (res.deviceID === "Alaris") {
-            ButtonActionsQueue.getInstance()
-                .queueGUIAction("on_connect_pump", onMessageReceived);
-        } else if (res.deviceID === "Radical") {
-            ButtonActionsQueue.getInstance()
-                .queueGUIAction("on_connect_monitor", onMessageReceived);
-        } else if (res.deviceID === "Supervisor_ID") {
-            ButtonActionsQueue.getInstance()
-                .queueGUIAction("on_connect_supervisor", onMessageReceived);
+
+    /**
+     * NCMonitorCore preferences
+     */
+    var error_mode = false;
+    var debugging_mode_backend = false;
+    var debugging_mode_frontend = false;
+    var extended_mode = false;
+
+    function errorMessage(event) {
+        if (error_mode) {
+            console.log("!!! " + event.message);
         }
     }
-    function onDisconnect(event) {
-        var res = event.message;
-        if (res.deviceID === "Alaris") {
-            ButtonActionsQueue.getInstance()
-                .queueGUIAction("on_disconnect_pump", onMessageReceived);
-        } else if (res.deviceID === "Radical") {
-            ButtonActionsQueue.getInstance()
-                .queueGUIAction("on_disconnect_monitor", onMessageReceived);
-        }  else if (res.deviceID === "Supervisor_ID") {
-            ButtonActionsQueue.getInstance()
-                .queueGUIAction("on_disconnect_supervisor", onMessageReceived);
-        }       
+
+    function notifyMessage(event) {
+        if (debugging_mode_frontend) {
+            console.log(">>> " + event.message);
+        }
     }
-    var url = window.location.href.split(":").slice(0,2).join(":") + ":8080/NetworkController/devices";
-    url = url.replace("http://", "ws://");    
-    var ncDevice = new NCDevice({id: deviceID, type: deviceType}, { url: url });
+
+    function debugMessage(event) {
+        if (debugging_mode_backend) {
+            console.log(">!> " + event.message);
+        }
+    }
+
+    /**
+     * Callback DeviceID connected
+     * @param event
+     */
+    function onConnect(event) {
+        ButtonActionsQueue.getInstance()
+            .queueGUIAction("on_connect_supervisor", onMessageReceived);
+    }
+
+    /**
+     * Callback DeviceID connected
+     * @param event
+     */
+    function onDisconnect(event) {
+        ButtonActionsQueue.getInstance()
+            .queueGUIAction("on_disconnect_supervisor", onMessageReceived);
+    }
+
+
+    /**
+     * Parsing of different actions coming from the Network Controller Monitor
+     * @param event
+     */
+    function parseNCActions(event) {
+        var kind = event.kind;
+
+        switch (kind) {
+            case "connected":
+                var deviceConnected = event.data.deviceID;
+                switch (deviceConnected) {
+                    case "Alaris":
+                        ButtonActionsQueue.getInstance()
+                            .queueGUIAction("on_connect_pump", onMessageReceived);
+                        break;
+                    case "Radical":
+                        ButtonActionsQueue.getInstance()
+                            .queueGUIAction("on_connect_monitor", onMessageReceived);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+
+            case "disconnected":
+                var deviceDisconnected = event.data.deviceID;
+                switch (deviceDisconnected) {
+                    case "Alaris":
+                        ButtonActionsQueue.getInstance()
+                            .queueGUIAction("on_disconnect_pump", onMessageReceived);
+                        break;
+                    case "Radical":
+                        ButtonActionsQueue.getInstance()
+                            .queueGUIAction("on_disconnect_monitor", onMessageReceived);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    $('#toggle_front_debugging').click(function () {
+        debugging_mode_frontend = !debugging_mode_frontend;
+    });
+
+    $('#toggle_back_debugging').click(function () {
+        if (debugging_mode_backend) {
+            debugging_mode_backend = false;
+            ncMonitorCore.deactivateDebug();
+        }
+        else {
+            debugging_mode_backend = true;
+            ncMonitorCore.activateDebug();
+        }
+    });
+
+    $('#toggle_errors').click(function () {
+        error_mode = !error_mode;
+    });
+
+    var urlMonitor = window.location.origin.split(":").slice(0, 2).join(":") + ":8080/NetworkController/monitor";
+    urlMonitor = urlMonitor.replace("http://", "ws://");
+
+    var ncMonitorCore = new NCMonitorCore({
+        extended: extended_mode,
+        debugging: debugging_mode_backend,
+        url: urlMonitor
+    });
+
+    ncMonitorCore.addListener("error", errorMessage);
+    ncMonitorCore.addListener("notify", notifyMessage);
+    ncMonitorCore.addListener("debug_backend", debugMessage);
+    ncMonitorCore.addListener("action", parseNCActions);
+
+    var url = window.location.origin.split(":").slice(0, 2).join(":") + ":8080/NetworkController/devices";
+    url = url.replace("http://", "ws://");
+    var ncDevice = new NCDevice({id: deviceID, type: deviceType}, {url: url});
     ncDevice.addListener("update", parseNCUpdate);
     ncDevice.addListener("error", errorMessage);
     ncDevice.addListener("notify", notifyMessage);
+    ncDevice.addListener("connected", onConnect);
+    ncDevice.addListener("disconnected", onDisconnect);
 
-    var urlMonitor = window.location.href.split(":").slice(0,2).join(":") + ":8080/NetworkController/monitor";
-    urlMonitor = urlMonitor.replace("http://", "ws://");    
-    var ncMonitor = new NCMonitor({ url: urlMonitor });
-    ncMonitor.addListener("error", errorMessage);
-    ncMonitor.addListener("notify", notifyMessage);
-    ncMonitor.addListener("connected", onConnect);
-    ncMonitor.addListener("disconnected", onDisconnect);
 
     //-- UI of the ICE Supervisor
     function start_tick() {
@@ -93,14 +184,16 @@ require([
             }, 4000);
         }
     }
-    function stop_tick() {
-        if (tick) {
-            clearInterval(tick);
-            tick = null;
-        }
-    }
+
+//    function stop_tick() {
+//        if (tick) {
+//            clearInterval(tick);
+//            tick = null;
+//        }
+//    }
 
     var verboseLogging = false;
+
     function logOnDiv(msg, logger) {
         if (verboseLogging) {
             d3.select("#monitor").style("display", "block");
@@ -120,7 +213,6 @@ require([
      */
     function onMessageReceived(err, event) {
         d3.select(".demo-splash").style("display", "none");
-        d3.select(".content").style("display", "block");        
         if (!err && event && event.data) {
             logOnDiv(event.data.toString(), "monitor");
             var res = event.data.toString();
@@ -137,14 +229,10 @@ require([
                         }
                     }
                 }
-                if (res.supervisor_connected.trim() === "TRUE") {
-                    // rendering
-                    render_patient_monitor(res);
-                    render_pump_monitor(res);
-                    start_tick();
-                } else {
-                    stop_tick();
-                }
+                // rendering
+                render_patient_monitor(res);
+                render_pump_monitor(res);
+                start_tick();
             }
         } else {
             console.log(err);
@@ -178,13 +266,13 @@ require([
 
     app.alarm = new SingleDisplay("alarm",
         {top: 34, left: 133, height: 16, width: 16},
-        {parent: "prototype", blinking: true, fontColor: "#FF0033" }); // bright red
+        {parent: "prototype", blinking: true, fontColor: "#FF0033"}); // bright red
     app.pump.topline = new SingleDisplay("topline",
         {top: 70, left: 160, height: 12, width: 130},
         {parent: "prototype"});
     app.pump.topline_back = new SingleDisplay("topline_back",
         {top: 70, left: 140, height: 16, width: 16},
-        {parent: "prototype", touchscreen: { callback: onMessageReceived }});
+        {parent: "prototype", touchscreen: {callback: onMessageReceived}});
     app.pump.rate = new TripleDisplay("rate",
         {top: 100, left: 140, height: 24, width: 190},
         {
@@ -192,7 +280,7 @@ require([
             center_display: {width: 80, align: "right"},
             right_display: {height: 14, width: 44, align: "right", top: +10},
             backgroundColor: "black",
-            touchscreen: { callback: onMessageReceived },
+            touchscreen: {callback: onMessageReceived},
             parent: "prototype"
         });
     app.pump.vtbi = new TripleDisplay("vtbi",
@@ -202,7 +290,7 @@ require([
             center_display: {width: 80, align: "right"},
             right_display: {height: 14, width: 44, align: "right", top: +10},
             backgroundColor: "black",
-            touchscreen: { callback: onMessageReceived },
+            touchscreen: {callback: onMessageReceived},
             parent: "prototype"
         });
     app.pump.volume = new TripleDisplay("volume",
@@ -212,7 +300,7 @@ require([
             center_display: {width: 80, align: "right"},
             right_display: {height: 14, width: 44, align: "right", top: +10},
             backgroundColor: "black",
-            touchscreen: { callback: onMessageReceived },
+            touchscreen: {callback: onMessageReceived},
             parent: "prototype"
         });
     app.pump.time = new SingleDisplay("time",
@@ -223,11 +311,11 @@ require([
         });
     app.pump.tracings = new PumpMonitorDisplay("tracings",
         {top: 112, left: 140, height: 34, width: 180},
-        {parent: "prototype", range: { max: 1200, min: 0 }});
+        {parent: "prototype", range: {max: 1200, min: 0}});
     app.pump.searching = new SingleDisplay("searching_pump",
         {top: 112, left: 140, height: 24, width: 190},
         {parent: "prototype"});
-    
+
 
     // utility function
     function evaluate(str) {
@@ -238,7 +326,7 @@ require([
         }
         return (v <= 0) ? "--" : ((v < 10) ? v.toFixed(1).toString() : v.toFixed(0).toString());
     }
-    
+
     // monitor
     function render_patient_monitor(res) {
         // spo2
@@ -248,9 +336,14 @@ require([
             if (monitor.spo2_fail === "FALSE") {
                 if (monitor.spo2_alarm === "off") {
                     app.monitor.spo2_display.render(evaluate(monitor.spo2));
-                } else { app.monitor.spo2_display.render(evaluate(monitor.spo2), {fontColor: "red"}); }
-            } else { app.monitor.spo2_display.fail("FAIL"); }
+                } else {
+                    app.monitor.spo2_display.render(evaluate(monitor.spo2), {fontColor: "red"});
+                }
+            } else {
+                app.monitor.spo2_display.fail("FAIL");
+            }
         }
+
         // RRa
         function render_rra(monitor) {
             app.monitor.rra_display.set_alarm({min: parseFloat(monitor.rra_min), max: parseFloat(monitor.rra_max)});
@@ -258,9 +351,14 @@ require([
             if (monitor.rra_fail === "FALSE") {
                 if (monitor.rra_alarm === "off") {
                     app.monitor.rra_display.render(evaluate(monitor.rra));
-                } else { app.monitor.rra_display.render(evaluate(monitor.rra), {fontColor: "red"}); }
-            } else { app.monitor.rra_display.fail("FAIL"); }
+                } else {
+                    app.monitor.rra_display.render(evaluate(monitor.rra), {fontColor: "red"});
+                }
+            } else {
+                app.monitor.rra_display.fail("FAIL");
+            }
         }
+
         // alarms
         function render_alarms(monitor) {
             switch (monitor.spo2_alarm.trim()) {
@@ -290,12 +388,13 @@ require([
                     break;
             }
             if ((monitor.rra_alarm.trim() === "alarm" || monitor.rra_alarm.trim() === "mute") &&
-                    (monitor.spo2_alarm.trim() === "alarm" || monitor.spo2_alarm.trim() === "mute")) {
+                (monitor.spo2_alarm.trim() === "alarm" || monitor.spo2_alarm.trim() === "mute")) {
                 app.alarm.renderGlyphicon("glyphicon-bell");
             } else {
                 app.alarm.hide();
             }
         }
+
         if (res.monitor_connected === "TRUE") {
             if (res.monitor.isOn.trim() === "TRUE") {
                 render_spo2(res.monitor);
@@ -316,7 +415,7 @@ require([
             app.monitor.rra_display.hide();
             app.monitor.spo2_display.hide();
             app.monitor.rra_display.hide();
-            app.monitor.searching.renderMultiline(["ICE-compatible monitors", "Searching..."], { blinking: true });
+            app.monitor.searching.renderMultiline(["ICE-compatible monitors", "Searching..."], {blinking: true});
         }
     }
 
@@ -327,23 +426,34 @@ require([
         function render_topline(res) {
             function topline2string(msg) {
                 msg = msg.toUpperCase();
-                switch(msg) {
-                    case "DISPVTBI" : return "VTBI";
-                    case "DISPKVO"  : return "KVO";
-                    case "HOLDING"  : return "ON HOLD";
-                    case "SETRATE"  : return "ON HOLD - SET RATE";
-                    case "DISPBLANK": return "";
-                    default : return msg;
+                switch (msg) {
+                    case "DISPVTBI" :
+                        return "VTBI";
+                    case "DISPKVO"  :
+                        return "KVO";
+                    case "HOLDING"  :
+                        return "ON HOLD";
+                    case "SETRATE"  :
+                        return "ON HOLD - SET RATE";
+                    case "DISPBLANK":
+                        return "";
+                    default :
+                        return msg;
                 }
                 return msg;
             }
+
             function topline2options(msg) {
                 msg = msg.toUpperCase();
-                if (msg === "HOLDING" || msg === "SETRATE" || msg === "ATTENTION") { return {blinking: true}; }
+                if (msg === "HOLDING" || msg === "SETRATE" || msg === "ATTENTION") {
+                    return {blinking: true};
+                }
                 return {};
             }
+
             app.pump.topline.render(topline2string(res.topline.trim()), topline2options(res.topline.trim()));
-        }    
+        }
+
         function render_pump_data(res) {
             function evaluate(str) {
                 var v = +str;
@@ -353,6 +463,7 @@ require([
                 }
                 return parseInt(v * 100) / 100; // number truncated at the 2nd fractional digit
             }
+
             function evaluateTime(str) {
                 var x = evaluate(str);
                 var hour = parseInt(x);
@@ -362,6 +473,7 @@ require([
                 var sec = parseInt(x);
                 return hour + "h " + min + "m " + sec + "s";
             }
+
             render_topline(res);
             app.pump.topline_back.hide();
             app.pump.rate.renderLabel("RATE");
@@ -376,6 +488,7 @@ require([
             app.pump.time.render(evaluateTime(res.time));
             app.pump.tracings.hide();
         }
+
         function render_pump_tracings(param, res) {
             function evaluate(str) {
                 var v = +str;
@@ -385,6 +498,7 @@ require([
                 }
                 return v;
             }
+
             param = param.replace("show_", "");
             app.pump.rate.hide();
             app.pump.vtbi.hide();
@@ -393,9 +507,14 @@ require([
             render_topline(res);
             app.pump.topline_back.renderGlyphicon("glyphicon-list");
             var units = (param === "rate") ? "mL/h" : (param === "vtbi" || param === "volume") ? "mL" : "??";
-            var range = (param === "rate") ? { max: 1200 } : (param === "vtbi" || param === "volume") ? { max: 3000 } : { max: 100 };
-            app.pump.tracings.render(evaluate(res[param]), { label: param.toString().toUpperCase(), units: units, range: range });
+            var range = (param === "rate") ? {max: 1200} : (param === "vtbi" || param === "volume") ? {max: 3000} : {max: 100};
+            app.pump.tracings.render(evaluate(res[param]), {
+                label: param.toString().toUpperCase(),
+                units: units,
+                range: range
+            });
         }
+
         if (res.pump_connected.trim() === "TRUE") {
             if (res.pump.isOn.trim() === "TRUE") {
                 if (res.mode.trim() === "monitoring") {
@@ -422,54 +541,8 @@ require([
             app.pump.topline.hide();
             app.pump.tracings.hide();
             app.pump.topline_back.hide();
-            app.pump.searching.renderMultiline(["ICE-compatible pumps", "Searching..."], { blinking: true });
+            app.pump.searching.renderMultiline(["ICE-compatible pumps", "Searching..."], {blinking: true});
         }
-    }
-    
-
-    function stoptNetworkController() {
-//        // Uncomment this to invoke glassfish from commands line
-//        return new Promise(function (resolve, reject) {
-//            resolve(msg);
-//        });
-
-        var msg = "Stopping ICE Network Controller...";
-        console.log(msg);
-        return new Promise(function (resolve, reject) {
-            client.getWebSocket().send({type: "stopSapereEE"}, function (err) {
-                if (!err) {
-                    msg = "ICE Network Controller stopped successfully!";
-                    console.log(msg);
-                    resolve(msg);
-                } else {
-                    msg = "Error while stopping ICE Network Controller (" + JSON.stringify(err) + ")";
-                    console.log(msg);
-                    reject(err);
-                }
-            });
-        });
-    }
-    function startNetworkController() {
-//        // Uncomment this to invoke glassfish from commands line
-//        return new Promise(function (resolve, reject) {
-//            resolve(msg);
-//        });
-
-        var msg = "Starting ICE Network Controller...";
-        console.log(msg);
-        return new Promise(function (resolve, reject) {
-            client.getWebSocket().send({type: "startSapereEE"}, function (err) {
-                if (!err) {
-                    msg = "ICE Network Controller started successfully!";
-                    console.log(msg);
-                    resolve(msg);
-                } else {
-                    msg = "Error while starting ICE Network Controller (" + JSON.stringify(err) + ")";
-                    console.log(msg);
-                    reject(err);
-                }
-            });
-        });
     }
 
     /*
@@ -488,27 +561,18 @@ require([
             if (!err) {
                 logOnDiv('PVS Process started', 'monitor');
                 //-- start ICE Network Controller (NCEE) & connect ICE supervisor to it
-                stoptNetworkController().then(function (res) {
-                    startNetworkController().then(function (res) {
-                        ncMonitor.start().then(function (res) {
-                            ncDevice.start().then(function (res) {
-                                ncDevice.connect();
-                                start_tick();
-                            }).catch(function (err) {
-                                start_tick();
-                                console.log(err);
-                            });
-                        }).catch(function (err) {
-                            start_tick();
-                            console.log(err);
-                        });
-                    }).catch(function (err) {
+                ncMonitorCore.start().then(function (res) {
+                    ncDevice.start(ncDevice).then(function (res) {
+                        ncDevice.connect();
                         start_tick();
-                        console.log(err);
+                        d3.select(".content").style("display", "block");
+                    }).catch(function (err) {
+                        d3.select(".error").style("display", "block");
                     });
                 }).catch(function (err) {
-                        start_tick();
-                        console.log(err);                
+                    console.log(err);
+                    d3.select(".error_monitor").style("display", "block");
+
                 });
             } else {
                 console.log(err);
