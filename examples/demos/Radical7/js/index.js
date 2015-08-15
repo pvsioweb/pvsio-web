@@ -83,7 +83,7 @@ require([
         }
 
 
-        var url = window.location.origin.split(":").slice(0,2).join(":") + ":8080/NetworkController/devices";
+        var url = window.location.href.split(":").slice(0,2).join(":") + ":8080/NetworkController/devices";
         url = url.replace("http://", "ws://");
         var ncDevice = new NCDevice({id: deviceID, type: deviceType}, { url: url });
 

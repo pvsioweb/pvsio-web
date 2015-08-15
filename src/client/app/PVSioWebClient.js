@@ -15,9 +15,9 @@ define(function (require, exports, module) {
 		d3						= require("d3/d3"),
 		property				= require("util/property"),
 		ws,
-		_port = (window.location.origin.indexOf("pvsioweb.herokuapp.com") >= 0 ||
-                   window.location.origin.indexOf("pvsioweb.org") >= 0) ? 0 : 8082,
-		url = window.location.origin.indexOf("file") === 0 ?
+		_port = (window.location.href.indexOf("pvsioweb.herokuapp.com") >= 0 ||
+                   window.location.href.indexOf("pvsioweb.org") >= 0) ? 0 : 8082,
+		url = window.location.href.indexOf("file") === 0 ?
 				("ws://localhost") : ("ws://" + window.location.hostname),
         instance;
 	
