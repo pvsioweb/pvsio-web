@@ -24,7 +24,7 @@ package body {{&modelName}} is
         {{~#each actions}}
             st.{{&.}};
         {{~/each}}
-            st := enter({{&source.name}}, st);
+            st := enter({{&target.name}}, st);
         end if;
     {{~else}}
         {{~#each actions}}
