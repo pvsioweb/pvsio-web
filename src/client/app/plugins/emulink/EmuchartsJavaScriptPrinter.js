@@ -69,7 +69,8 @@ define(function (require, exports, module) {
         "AND": "&&",
         "OR": "||",
         "and": "&&",
-        "or": "||"
+        "or": "||",
+        "=": "==="
     };
 
     function definedValues(d) {
