@@ -6,10 +6,10 @@
 define(function (require, exports, module) {
 	"use strict";
 	var d3 = require("d3/d3"),
-		formTemplate = require("text!./templates/displayEditWidget.handlebars"),
-		FormUtils = require("./FormUtils");
+		formTemplate = require("text!../templates/pim/displayEditPIMWidget.handlebars"),
+		FormUtils = require("plugins/emulink/forms/FormUtils");
 
-	var EditWidgetView = Backbone.View.extend({
+	var EditPIMWidgetView = Backbone.View.extend({
 		initialize: function (data) {
 			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px").style("z-index", 999);
 			this.render(data);
@@ -33,7 +33,8 @@ define(function (require, exports, module) {
 			"click #btnLeft2": "left",
 			"click #btnAdd": "add",
 			"click .btnRemove": "removeWidget",
-			"keyup .panel": "keyup"
+			// listen only on the widgets form (not the states).
+			"keyup #pimWidgetModal": "keyup"
 		},
 		right: function (event) {
 			this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
@@ -80,7 +81,7 @@ define(function (require, exports, module) {
 			return  '<div id="' + this._count++ + '" class="row" style="padding: 2px 0 2px 0;">' +
 						'<div class="col-md-3">' + w.name + '</div>' +
 						'<div class="col-md-3">' + w.category + '</div>' +
-						'<div class="col-md-5">' + w.S_behaviours.join(", ") + '</div>' +
+						'<div class="col-md-5">' + w.behaviours.join(", ") + '</div>' +
 						'<div class="col-md-1"><button type="button" class="btn btn-danger btn-xs btnRemove right" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>' +
 					'</div>';
 		},
@@ -101,11 +102,10 @@ define(function (require, exports, module) {
 						.map(function(b) { return b.trim(); })
 						.filter(function(b) { return b; });
 
-				// Valid behaviour test (true if invalid!! used for $.grep).
-				// TODO: Make this a little tidier.
+				// Valid behaviour test (true if invalid! used for $.grep).
 				var validBehaviour =
 					function(b) {
-						if (!b || b.length < 3) return true;
+						if (!b || b.length < 3) { return true; }
 						b = b.substring(0, 2);
 						return !(b === 'S_' || b === 'I_');
 					};
@@ -122,7 +122,11 @@ define(function (require, exports, module) {
 			}
 			this._errorDisplay.parent().addClass('hide');
 			this._errorDisplay.empty();
-			return { name: newWidgetName.trim(), category: newWidgetCategory.trim(), S_behaviours: newWidgetBehaviours || [] };
+			return {
+				name: newWidgetName.trim(),
+				category: newWidgetCategory.trim(),
+				behaviours: newWidgetBehaviours || []
+			};
 		},
 		keyup: function (event) {
 			switch(event.keyCode) {
@@ -139,7 +143,7 @@ define(function (require, exports, module) {
 
 	module.exports = {
 		create: function (data) {
-			return new EditWidgetView(data);
+			return new EditPIMWidgetView(data);
 		}
 	};
 });

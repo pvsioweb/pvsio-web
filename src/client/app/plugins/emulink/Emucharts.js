@@ -15,7 +15,8 @@ define(function (require, exports, module) {
     
     var constants, // d3.map()
         variables; // d3.map()
-	var eventDispatcher = require("util/eventDispatcher");
+	var eventDispatcher = require("util/eventDispatcher"),
+        PIMs = require("plugins/emulink/pim/PIMs");
 
     var defaultValues = { x: 100, y: 100, width: 36, height: 36, fontSize: 10 };
 
@@ -41,6 +42,7 @@ define(function (require, exports, module) {
     var getFreshConstantID = function () { return nextConstantID + 1; };
     var getFreshVariableID = function () { return nextVariableID + 1; };
 
+    var pim;
     var isPIM = false;
 
 	/**
@@ -65,21 +67,32 @@ define(function (require, exports, module) {
             }
             this.constants = emuchart.constants || d3.map();
             this.variables = emuchart.variables || d3.map();
-            this.isPIM = emuchart.isPIM;
+            this.isPIM = emuchart.isPIM && emuchart.isPIM === true;
         } else {
             this.nodes = d3.map();
             this.edges = d3.map();
             this.initial_edges = d3.map();
             this.variables = d3.map();
             this.constants = d3.map();
-
-            if (emuchart.isPIM && emuchart.isPIM === true) {
-                this.isPIM = isPIM;
-            }
         }
 
 		eventDispatcher(this);
+        this.pim = new PIMs();
         return this;
+    }
+
+    /**
+     * Convert the current Emuchart to a PIM.
+     */
+    Emucharts.prototype.toPIM = function (isPIM) {
+        isPIM = isPIM || true;
+        if (isPIM && !this.getIsPIM()) {
+            this.isPIM = true;
+            this.pim.toPIM(this);
+        } else if (!isPIM && this.getIsPIM()) {
+            this.isPIM = false;
+            // TODO: should the extra pim options be removed from the nodes?
+        }
     }
     
     Emucharts.prototype.getEdges = function () {
@@ -97,7 +110,7 @@ define(function (require, exports, module) {
     };
 
     Emucharts.prototype.getIsPIM = function () {
-        return this.isPIM;
+        return this.isPIM || false;
     }
 
     Emucharts.prototype.edit_node = function (id, newState) {
@@ -206,10 +219,9 @@ define(function (require, exports, module) {
                 height: defaultValues.height
             };
 
-        // Set PM values
-        newNode.widgets = [];
-        newNode.components = [];
-        newNode.pmr = [];
+        if (this.getIsPIM()) {
+            newNode = this.pim.toPIMState(newNode);
+        }
 
         // add the new node to the diagram
         this.nodes.set(newNode.id, newNode);
@@ -539,6 +551,10 @@ define(function (require, exports, module) {
      * @instance
 	 */
     Emucharts.prototype.getStates = function () {
+        // If this emuchart is a pim return the pim combatable transition.
+        if (this.getIsPIM())
+            return this.pim.getStates(this.nodes);
+
         var _this = this;
         var states = [];
         this.nodes.forEach(function (key) {
@@ -569,6 +585,7 @@ define(function (require, exports, module) {
      * @instance
 	 */
     Emucharts.prototype.getState = function (id) {
+        // The state should already be a PIM state if required.
         return this.nodes.get(id);
     };
 
@@ -580,6 +597,10 @@ define(function (require, exports, module) {
      * @instance
 	 */
     Emucharts.prototype.getTransition = function (id) {
+        // If this emuchart is a pim return the pim combatable transition.
+        if (this.getIsPIM())
+            return this.pim.getTransition(this.edges.get(id));
+
         return this.edges.get(id);
     };
     
@@ -591,6 +612,10 @@ define(function (require, exports, module) {
      * @instance
 	 */
     Emucharts.prototype.getTransitions = function () {
+        // If this emuchart is a pim return the pim combatable transition.
+        if (this.getIsPIM())
+            return this.pim.getTransitions(this.edges);
+
         var _this = this;
         var transitions = [];
         this.edges.forEach(function (key) {
@@ -611,13 +636,10 @@ define(function (require, exports, module) {
                     y: trans.controlPoint.y
                 } : null
             };
-            // Also include PIM values for test gen.
-            newTrans.start_state = newTrans.source.name;
-            newTrans.end_state = newTrans.target.name;
-            newTrans.I_behaviour = newTrans.name;
 
             transitions.push(newTrans);
         });
+
         return transitions;
     };
     

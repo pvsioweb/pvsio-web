@@ -13,6 +13,7 @@ define(function (require, exports, module) {
         var labels = d3.map();
 		inputSelectors.forEach(function (s) {
             var elem = document.getElementById(s);
+            if (!elem) { console.log("FORM UTILS ERROR", s, elem); return; }
             if (elem.selectedIndex >= 0) {
                 // listbox item
                 options.set(s, elem.selectedIndex);
@@ -27,6 +28,7 @@ define(function (require, exports, module) {
     function clearForm(inputSelectors) {
         inputSelectors.forEach(function (s) {
             var elem = document.getElementById(s);
+            if (!elem) { return; }
             if (elem.selectedIndex >= 0)
                 elem.selectedIndex = 0;
             else if (elem.value)

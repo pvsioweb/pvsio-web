@@ -6,16 +6,15 @@
 define(function (require, exports, module) {
 	"use strict";
 	var d3 = require("d3/d3"),
-		formTemplate = require("text!./templates/displayEditState.handlebars"),
-		FormUtils = require("./FormUtils"),
-		displayEditWidget = require("plugins/emulink/forms/displayEditWidget");
+		formTemplate = require("text!../templates/pim/displayEditPIMState.handlebars"),
+		FormUtils = require("plugins/emulink/forms/FormUtils"),
+		displayEditPIMWidget = require("plugins/emulink/forms/pim/displayEditPIMWidget");
 
-	var EditStateView = Backbone.View.extend({
+	var EditPIMStateView = Backbone.View.extend({
 		initialize: function (data) {
 			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px").style("z-index", 998);
 			this.render(data);
 			this._data = data;
-			this._widgets = data.value.widgets;
 		},
 		render: function (data) {
 			var template = Handlebars.compile(formTemplate);
@@ -28,15 +27,16 @@ define(function (require, exports, module) {
 			"click #btnRight": "right",
 			"click #btnLeft": "left",
 			"click #newStateWidgets": "editWidgets",
-			"keyup .panel": "keyup"
+			// listen only on the states form (not the widgets).
+			"keyup #pimStateModal": "keyup"
 		},
 		right: function (event) {
 			var form = this.el;
 			if (FormUtils.validateForm(form)) {
-				var selectors = [ "newStateName", "newStateComponents", "newStatePMR" ];
+				var selectors = [ "newStateName", /*"newStateComponents",*/ "newStatePMR" ];
 				var formdata = FormUtils.serializeForm(form, selectors);
 				// Set the widget values obtained from the editWidgits view.
-				formdata.labels.set("newStateWidgets", this._widgets);
+				formdata.labels.set("newStateWidgets", this._data.value.widgets);
 				this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
 					{data: formdata, el: this.el}, this);
 			}
@@ -46,9 +46,10 @@ define(function (require, exports, module) {
 		},
 		editWidgets: function (event) {
 			var _this = this;
-			var vals = _this._data.value;
-			displayEditWidget.create({
-				header: "Edit state " + vals.newStateName + " widgets...",
+			var data = _this._data.value;
+			console.log(data, data.widgets);
+			displayEditPIMWidget.create({
+				header: "Edit state " + data.newStateName + " widgets...",
 				textLabel: {
 					newWidgetName: "Name",
 					newWidgetCategory: "Category",
@@ -60,17 +61,17 @@ define(function (require, exports, module) {
 					newWidgetBehaviours: "Behaviours (Multiple with ,)"
 				},
 				value: {
-					// Pass a clone of current widgets (Care when using stringify functions are striped).
-					widgets: JSON.parse(JSON.stringify(_this._widgets))
+					// Pass a clone of current widgets values.
+					widgets: JSON.parse(JSON.stringify(data.widgets))
 				},
 				buttons: ["Cancel", "Save Widgets"]
 			}).on("save_widgets", function (e, view) {
 				// Save the clone as the original.
-				_this._widgets = e.data;
+				data.widgets = e.data;
 				view.remove();
 				d3.select(_this.el).select("#newStateName").node().focus();
 			}).on("cancel", function (e, view) {
-				// Discard the cloned widgets and revert to the original ones.
+				// Discard the cloned widgets hence revert to the original.
 				view.remove();
 				d3.select(_this.el).select("#newStateName").node().focus();
 			});
@@ -96,7 +97,7 @@ define(function (require, exports, module) {
          * }
 		 */
 		create: function (data) {
-			return new EditStateView(data);
+			return new EditPIMStateView(data);
 		}
 	};
 });

@@ -118,7 +118,8 @@ define(function (require, exports, module) {
                     .then(enablePlugin(PrototypeBuilder.getInstance()))
                     .then(enablePlugin(Emulink.getInstance()))
                     .then(enablePlugin(ModelEditor.getInstance()))
-                    .then(createDefaultProject())
+    //TODO: ** locally this breaks transition bindings when working id default project
+                //    .then(createDefaultProject())
                     .then(showInterface(opt))
                     .then(function (res) {
                         resolve(res);

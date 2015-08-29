@@ -19,11 +19,11 @@ define(function (require, exports, module) {
         PVSioWebClient      = require("PVSioWebClient"),
         EditorModeUtils     = require("plugins/emulink/EmuchartsEditorModes"),
         EmuchartsManager    = require("plugins/emulink/EmuchartsManager"),
+        PIMImporter         = require("plugins/emulink/pim/PIMImporter"),
         displayAddState        = require("plugins/emulink/forms/displayAddState"),
         displayAddTransition   = require("plugins/emulink/forms/displayAddTransition"),
         displayRename          = require("plugins/emulink/forms/displayRename"),
         displayDelete          = require("plugins/emulink/forms/displayDelete"),
-        displayEditState       = require("plugins/emulink/forms/displayEditState"),
         displayAddExpression   = require("plugins/emulink/forms/displayAddExpression"),
         displayAddVariable     = require("plugins/emulink/forms/displayAddVariable"),
         displayEditVariable    = require("plugins/emulink/forms/displayEditVariable"),
@@ -41,9 +41,10 @@ define(function (require, exports, module) {
         EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter2"),
         EmuchartsVDMPrinter    = require("plugins/emulink/EmuchartsVDMPrinter"),
         EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
-        EmuchartsTestGenerator = require("plugins/emulink/EmuchartsTestGenerator"),
+        PimTestGenerator = require("plugins/emulink/pim/PIMTestGenerator"),
         fs = require("util/fileHandler"),
-        displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
+        displayNotificationView  = require("plugins/emulink/forms/displayNotificationView"),
+        PIMEmulink             = require("plugins/emulink/pim/PIMEmulink");
     
     var instance;
     var projectManager;
@@ -61,7 +62,9 @@ define(function (require, exports, module) {
     var emuchartsCppPrinter;
     var emuchartsMALPrinter;
     var emuchartsVDMPrinter;
-    var emuchartsTestGenerator;
+    var pimImporter;
+    var pimTestGenerator;
+    var pimEmulink;
     var options = { autoinit: true };
 
     var displayNotification = function (msg, title) {
@@ -148,48 +151,24 @@ define(function (require, exports, module) {
     }
 
     function editState(s) {
-        displayEditState.create({
-            header: "Please enter new state...",
-            textLabel: {
-                newStateName: "State name",
-                newStateWidgets: "State widgets",
-                newStateComponents: "State components",
-                newStatePMR: "State PMR"
-            },
-            placeholder: {
-                newStateName: "Name, e.g., startInfusing",
-                newStateWidgets: "Click to edit this states widgets",
-                newStateComponents: "[Disabled]",
-                newStatePMR: "[Disabled]"
-            },
-            value: {
-                newStateName: s.name,
-                newStateWidgets: null,
-                widgets: s.widgets,
-                newStateComponents: s.components,
-                newStatePMR: s.pmr
-            },
-            buttons: ["Cancel", "Save state"]
-        }).on("save_state", function (e, view) {
-            // Get new values from template.
-            var newStateName = e.data.labels.get("newStateName");
-            var newStateWidgets = e.data.labels.get("newStateWidgets");
-            var newStateComponents = e.data.labels.get("newStateComponents");
-            var newStatePMR = e.data.labels.get("newStatePMR");
+        if (emuchartsManager.getIsPIM()) {
+            pimEmulink.editState(s);
+            return;
+        }
 
-            if (newStateName && newStateName.value !== "") {
-                // Save over only the new values.
-                s.name = newStateName;
-                s.widgets = newStateWidgets;
-                //TODO: Yet to be implemented.
-                //s.components = newStateComponents;
-                //s.pmr = newStatePMR;
-
-                emuchartsManager.edit_state(s.id, s);
+        displayRename.create({
+            header: "Renaming state " + s.name.substring(0, maxLen) + "...",
+            required: true,
+            currentLabel: s.name, // this dialog will show just one state
+            buttons: ["Cancel", "Rename"]
+        }).on("rename", function (e, view) {
+            var newLabel = e.data.labels.get("newLabel");
+            if (newLabel && newLabel.value !== "") {
+                emuchartsManager.rename_state(s.id, newLabel);
                 view.remove();
             }
         }).on("cancel", function (e, view) {
-            // just remove window
+            // just remove rename window
             view.remove();
         });
     };
@@ -201,6 +180,11 @@ define(function (require, exports, module) {
 
     // rename dialog window for transitions
     function editTransition(t) {
+        if (emuchartsManager.getIsPIM()) {
+            pimEmulink.editTransition(t);
+            return;
+        }
+
         displayRename.create({
             header: "Renaming transition " + t.name.substring(0, maxLen) + "...",
             required: false,
@@ -318,7 +302,6 @@ define(function (require, exports, module) {
         emuchartsCppPrinter = new EmuchartsCppPrinter("emuchart_Cpp");
         emuchartsMALPrinter = new EmuchartsMALPrinter("emuchart_MAL");
         emuchartsVDMPrinter = new EmuchartsVDMPrinter("emuchart_VDM");
-        emuchartsTestGenerator = new EmuchartsTestGenerator("emuchart_Test_Gen");
         pvsioWebClient = PVSioWebClient.getInstance();
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
@@ -346,6 +329,11 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_initialTransitionRemoved", initialTransitionRemoved_handler);
         emuchartsManager.addListener("emuCharts_stateRenamed", stateRenamed_handler);
         emuchartsManager.addListener("emuCharts_stateEdited", stateEdited_handler);
+
+        // PIM objects.
+        pimImporter = new PIMImporter();
+        pimEmulink = new PIMEmulink(emuchartsManager);
+        pimTestGenerator = new PimTestGenerator("pim_Test_Gen");
 	}
     
 	Emulink.prototype.createHtmlElements = function () {
@@ -477,7 +465,7 @@ define(function (require, exports, module) {
                         emuchartsManager.importPIMChart(res);
                     } else {
                         // Try parse as PIM
-                        emuchartsManager.importPIMChartV2(res);
+                        pimImporter.importPIM(res, emuchartsManager);
                     }
                     if (callback && typeof callback === "function") {
                         callback(err, res);
@@ -513,7 +501,7 @@ define(function (require, exports, module) {
                         emuchartsManager.importPIMChart(res);
                     }
                     else {
-                        emuchartsManager.importPIMChartV2(res);
+                        pimImporter.importPIM(res, emuchartsManager);
                     }
                     if (callback && typeof callback === "function") {
                         callback(err, res);
@@ -632,7 +620,7 @@ define(function (require, exports, module) {
             if (!emuchartsManager.empty_chart()) {
                 // we need to delete the current chart because we handle one chart at the moment
                 QuestionForm.create({
-                    header: "Warning: the current chart has unsaved changes.",
+                    header: "Warning: the current chart has und changes.",
                     question: "The current chart has unsaved changes that will be lost. Confirm Close?",
                     buttons: ["Cancel", "Confirm close"]
                 }).on("ok", function (e, view) {
@@ -710,7 +698,7 @@ define(function (require, exports, module) {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
             if (!emuchartsManager.empty_chart()) {
                 var name = "emucharts_" + projectManager.project().name() + ".emdl";
-                var content = JSON.stringify({
+                var emuchart = {
                     descriptor: {
                         file_type: "emdl",
                         version: "1.3",
@@ -722,10 +710,14 @@ define(function (require, exports, module) {
                         transitions: emuchartsManager.getTransitions(),
                         initial_transitions: emuchartsManager.getInitialTransitions(),
                         constants: emuchartsManager.getConstants(),
-                        variables: emuchartsManager.getVariables(),
-                        isPIM: emuchartsManager.getIsPIM()
+                        variables: emuchartsManager.getVariables()
                     }
-                }, null, " ");
+                };
+                // Flags.
+                if (emuchartsManager.getIsPIM())
+                    emuchart.chart.isPIM = true;
+
+                var content = JSON.stringify(emuchart, null, " ");
                 projectManager.project().addFile(name, content, { overWrite: true }).then(function (res) {
                     displayNotification("File " + name + " saved successfully!");
                 }).catch(function (err) {
@@ -1387,6 +1379,10 @@ define(function (require, exports, module) {
             }
         });
         d3.select("#btn_menuTestGenerator").on("click", function () {
+            if (!emuchartsManager.getIsPIM()) {
+                console.log("Warning, current emuchart is not a PIM.");
+                return;
+            }
             var emuchart = {
                 name: ("emucharts_" + projectManager.project().name()),
                 author: {
@@ -1411,7 +1407,7 @@ define(function (require, exports, module) {
                 isPIM: emuchartsManager.getIsPIM()
             };
 
-            var tests = emuchartsTestGenerator.print(emuchart.name, { pims: [ emuchart ], pms: [] });
+            var tests = pimTestGenerator.print(emuchart.name, { pims: [ emuchart ], pms: [] });
             console.log(tests);
             if (tests.err) {
                 console.log(tests.err);
@@ -1431,14 +1427,14 @@ define(function (require, exports, module) {
             fs.openLocalFileAsText(function (err, res) {
                 if (res) {
                     // Try parse as PIM
-                    models = emuchartsManager.importPIMChartV2(res, false);
+                    models = pimImporter.importPIM(res);
                     if (models.err) {
                         console.log(models.err);
                         return;
                     }
                     // Remove file extension
                     var name = name = res.name.substr(0, res.name.lastIndexOf('.'));
-                    var tests = emuchartsTestGenerator.print(name, models.models);
+                    var tests = pimTestGenerator.print(name, models.models);
                     console.log(tests);
                     if (tests.err) {
                         console.log(tests.err);
@@ -1485,7 +1481,7 @@ define(function (require, exports, module) {
     Emulink.prototype.getDependencies = function () {
         return [PrototypeBuilder.getInstance(), ModelEditor.getInstance()];
     };
-    
+
     function onProjectChanged(event) {
         // try to open the default emuchart file associated with the project
         var defaultEmuchartFilePath = event.current + "/" + "emucharts_" + event.current + ".emdl";

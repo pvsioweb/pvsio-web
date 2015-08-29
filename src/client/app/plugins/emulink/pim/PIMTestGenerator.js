@@ -21,14 +21,14 @@
 				widgets: (array of widget {
 						name : (string),
 						category : (string),
-						S_behaviours : (array of string)
+						behaviours : (array of string)
 					}),
 				components: (array of {
 						name: (string),
 						widgets: (array of widget {
 								name : (string),
 								category : (string),
-								S_behaviours : (array of string)
+								behaviours : (array of string)
 							}),
 						components: (empty array (of Presentation Model),
 						pmr: (array of {
@@ -103,11 +103,11 @@ define(function (require, exports, module) {
 				tPredicates.push({ name: "Visible", args: [widget.name] });
 				tPredicates.push({ name: "Active", args: [widget.name] });
 
-				if (widget.S_behaviours.length > 0) {
+				if (widget.behaviours.length > 0) {
 					// The behaviour is on this widget
 					tArgs.push(widget.name);
 					// The behaviours this widget has (add all)
-					tArgs.push.apply(tArgs, widget.S_behaviours.reverse());
+					tArgs.push.apply(tArgs, widget.behaviours.reverse());
 
 					var pName = "hasBehaviour";
 
