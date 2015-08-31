@@ -787,7 +787,7 @@ define(function (require, exports, module) {
                 view.remove();
             });
         });
-        d3.select("#btn_menuRenameState").on("click", function () {
+        d3.select("#btn_menuEditState").on("click", function () {
             document.getElementById("menuStates").children[1].style.display = "none";
             var states = emuchartsManager.getStates();
             var labels = [];
@@ -804,7 +804,8 @@ define(function (require, exports, module) {
                     var v = e.data.options.get("selectedState");
                     var theState = states[v];
                     view.remove();
-                    renameState(theState);
+                    //renameState(theState);
+                    editState(theState);
                 }
             }).on("cancel", function (e, view) {
                 // just remove window
@@ -868,7 +869,7 @@ define(function (require, exports, module) {
                 view.remove();
             });
         });
-        d3.select("#btn_menuRenameTransition").on("click", function () {
+        d3.select("#btn_menuEditTransition").on("click", function () {
             document.getElementById("menuTransitions").children[1].style.display = "none";
             var transitions = emuchartsManager.getTransitions();
             var nTransitions = transitions.length;
@@ -1378,6 +1379,49 @@ define(function (require, exports, module) {
                 console.log("Warning, VDM model is undefined.");
             }
         });
+
+        //-- Zoom menu -----------------------------------------------------------
+        d3.select("#menuZoom").on("mouseover", function () {
+            document.getElementById("menuZoom").children[1].style.display = "block";
+        });
+        d3.select("#btn_menuZoomIn").on("click", function () {
+            emuchartsManager.zoom_in();
+            document.getElementById("menuZoom").children[1].style.display = "none";
+        });
+        d3.select("#btn_menuZoomOut").on("click", function () {
+            emuchartsManager.zoom_out();
+            document.getElementById("menuZoom").children[1].style.display = "none";
+        });
+        d3.select("#btn_menuZoomReset").on("click", function () {
+            emuchartsManager.zoom_reset();
+            document.getElementById("menuZoom").children[1].style.display = "none";
+        });
+
+        //-- PIM -----------------------------------------------------------------
+        d3.select("#btn_toPIM").on("click", function () {
+            if (emuchartsManager.getIsPIM()) {
+                console.log("Warning, current emuchart is already a PIM.");
+                return;
+            }
+            if (emuchartsManager.toPIM(true)) {
+                console.log("Success, converted emuchart to a PIM.");
+            }
+            else {
+                console.log("Warning, unable to convert emuchart to a PIM.");
+            }
+        });
+        d3.select("#btn_fromPIM").on("click", function () {
+            if (!emuchartsManager.getIsPIM()) {
+                console.log("Warning, current emuchart is not a PIM.");
+                return;
+            }
+            if (emuchartsManager.toPIM(false)) {
+                console.log("Success, converted emuchart from a PIM.");
+            }
+            else {
+                console.log("Warning, unable to convert emuchart from a PIM.");
+            }
+        });
         d3.select("#btn_menuTestGenerator").on("click", function () {
             if (!emuchartsManager.getIsPIM()) {
                 console.log("Warning, current emuchart is not a PIM.");
@@ -1455,24 +1499,6 @@ define(function (require, exports, module) {
                 }
 
             }, { header: "Open PIM file..." });
-        });
-
-
-        //-- Zoom menu -----------------------------------------------------------
-        d3.select("#menuZoom").on("mouseover", function () {
-            document.getElementById("menuZoom").children[1].style.display = "block";
-        });
-        d3.select("#btn_menuZoomIn").on("click", function () {
-            emuchartsManager.zoom_in();
-            document.getElementById("menuZoom").children[1].style.display = "none";
-        });
-        d3.select("#btn_menuZoomOut").on("click", function () {
-            emuchartsManager.zoom_out();
-            document.getElementById("menuZoom").children[1].style.display = "none";
-        });
-        d3.select("#btn_menuZoomReset").on("click", function () {
-            emuchartsManager.zoom_reset();
-            document.getElementById("menuZoom").children[1].style.display = "none";
         });
 
 	};

@@ -17,7 +17,7 @@ define(function (require, exports, module) {
 	 * Presentation Models from a file.
 	 * @param fileIn The file to read the models from.
 	 * @param emuchartManager An optional arg, if given the imported PIM will also be loaded as an emuchart.
-	 * @returns {{emuchart: Object, models: {pims: Array, pms: Array}}}
+	 * @returns {{emucharts: Object, models: {pims: Array, pms: Array}}}
 	 * The emuchart, PIMs and PMs from the file.
 	 * @memberof PIMImporter
 	 */

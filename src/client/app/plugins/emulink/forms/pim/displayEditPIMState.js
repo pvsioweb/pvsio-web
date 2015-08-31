@@ -6,15 +6,18 @@
 define(function (require, exports, module) {
 	"use strict";
 	var d3 = require("d3/d3"),
-		formTemplate = require("text!../templates/pim/displayEditPIMState.handlebars"),
-		FormUtils = require("plugins/emulink/forms/FormUtils"),
-		displayEditPIMWidget = require("plugins/emulink/forms/pim/displayEditPIMWidget");
+		formTemplate         = require("text!../templates/pim/displayEditPIMState.handlebars"),
+		FormUtils            = require("plugins/emulink/forms/FormUtils"),
+		displayEditPIMWidget = require("plugins/emulink/forms/pim/displayEditPIMWidget"),
+		PIMs                 = require("plugins/emulink/pim/PIMs");
 
 	var EditPIMStateView = Backbone.View.extend({
 		initialize: function (data) {
 			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px").style("z-index", 998);
 			this.render(data);
 			this._data = data;
+			// Used for cloning the widgets to edit.
+			this.pims = new PIMs();
 		},
 		render: function (data) {
 			var template = Handlebars.compile(formTemplate);
@@ -47,7 +50,6 @@ define(function (require, exports, module) {
 		editWidgets: function (event) {
 			var _this = this;
 			var data = _this._data.value;
-			console.log(data, data.widgets);
 			displayEditPIMWidget.create({
 				header: "Edit state " + data.newStateName + " widgets...",
 				textLabel: {
@@ -61,17 +63,16 @@ define(function (require, exports, module) {
 					newWidgetBehaviours: "Behaviours (Multiple with ,)"
 				},
 				value: {
-					// Pass a clone of current widgets values.
-					widgets: JSON.parse(JSON.stringify(data.widgets))
+					widgets: _this.pims.getWidgets(data.widgets)
 				},
 				buttons: ["Cancel", "Save Widgets"]
 			}).on("save_widgets", function (e, view) {
-				// Save the clone as the original.
+				// Save the cloned widgets as the original.
 				data.widgets = e.data;
 				view.remove();
 				d3.select(_this.el).select("#newStateName").node().focus();
 			}).on("cancel", function (e, view) {
-				// Discard the cloned widgets hence revert to the original.
+				// Discard the cloned widgets, revert to the original.
 				view.remove();
 				d3.select(_this.el).select("#newStateName").node().focus();
 			});

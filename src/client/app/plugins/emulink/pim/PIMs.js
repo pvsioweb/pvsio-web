@@ -9,95 +9,103 @@ define(function (require, exports, module) {
 	function PIMs() { }
 
 	PIMs.prototype.toPIM = function (emuchart, isImport) {
-		if (emuchart) {
-			var _this = this;
-
-			if (isImport) {
-				emuchart.nodes.map(_this.toPIMState);
-				return;
-			}
-
-			console.log("Converted to PIM: Please ensure all transitions conform to the PIM specification.");
-			emuchart.nodes.forEach(function (key) {
-				var node = _this.toPIMState(emuchart.nodes.get(key));
-				emuchart.edit_node(key, node);
-			});
-			return;
+		if (!emuchart) { return false; }
+		if (isImport && isImport === true) {
+			emuchart.nodes.map(this.getState);
+			return true;
 		}
+		var _this = this;
+		console.log("Converted to PIM: Please ensure all transitions conform to the PIM specification.");
+		emuchart.nodes.forEach(function (key) {
+			var node = _this.cloneAsPIMState(emuchart.nodes.get(key));
+			emuchart.edit_node(key, node);
+		});
+		return true;
 	};
 
-	PIMs.prototype.toPIMState = function (state) {
-		if (!state) {
-			return null;
-		}
-		state.widgets = state.widgets || [];
-		state.components = state.components || [];
-		state.pmr = state.pmr || [];
-		return state;
+	PIMs.prototype.clonePIMWidget = function (widget) {
+		if (!widget) { return null; }
+		return {
+			name : widget.name,
+			category : widget.category,
+			// If behaviours becomes an anon object this clone needs to be updated.
+			behaviours : widget.behaviours.slice()
+		};
+	};
+
+	PIMs.prototype.getWidget = function (widget) {
+		if (!widget) { return null; }
+		return this.clonePIMWidget(widget);
+	};
+
+	PIMs.prototype.getWidgets = function (widgets) {
+		if (!widgets) { return []; }
+		var clonedWidgets = [], _this = this;
+		widgets.forEach(function (w) {
+			// If widgets become stored in a map, this will need to be updated to:
+			// clonedWidgets.push(_this.getWidget(widgets.get(w)));
+			clonedWidgets.push(_this.getWidget(w));
+		});
+		return clonedWidgets;
+	}
+
+	PIMs.prototype.cloneAsPIMState = function (node) {
+		if (!node) { return null; }
+		return {
+			name: node.name,
+			id: node.id,
+			x: node.x,
+			y: node.y,
+			width : node.width,
+			height: node.height,
+			widgets : this.getWidgets(node.widgets),
+			components : this.getStates(node.components),
+			pmr : node.pmr || []
+		};
+	};
+
+	PIMs.prototype.getState = function (node) {
+		if (!node) { return null; }
+		return this.cloneAsPIMState(node);
 	};
 
 	PIMs.prototype.getStates = function (nodes) {
-		if (!nodes) {
-			return [];
-		}
-		var states = [];
+		if (!nodes) { return []; }
+		var states = [], _this = this;
 		nodes.forEach(function (key) {
-			var node = nodes.get(key);
-			var state = {
-				name: node.name,
-				id: node.id,
-				x: node.x,
-				y: node.y,
-				width : node.width,
-				height: node.height,
-				widgets : node.widgets || [],
-				components : node.components || [],
-				pmr : node.pmr || []
-			};
-			states.push(state);
+			states.push(_this.getState(nodes.get(key)));
 		});
 		return states;
 	};
 
+	PIMs.prototype.cloneAsPIMTransition = function (trans) {
+		if (!trans) { return null; }
+		return {
+			name: trans.name,
+			id: trans.id,
+			source: this.cloneAsPIMState(trans.source),
+			target: this.cloneAsPIMState(trans.target),
+			controlPoint: (trans.controlPoint) ? {
+				x: trans.controlPoint.x,
+				y: trans.controlPoint.y
+			} : null,
+			// PIM
+			start_state : trans.source.name,
+			end_state : trans.target.name,
+			I_behaviour : trans.name
+		};
+	};
+
 	PIMs.prototype.getTransition = function (trans) {
-		if (!trans) {
-			return null;
-		}
-		// Also include PIM values (for test gen).
-		trans.start_state = trans.source.name;
-		trans.end_state = trans.target.name;
-		trans.I_behaviour = trans.name;
-		return trans;
+		if (!trans) { return null; }
+		return this.cloneAsPIMTransition(trans);
 	};
 
 	PIMs.prototype.getTransitions = function (edges) {
-		if (!edges) {
-			return [];
-		}
-		var transitions = [];
+		if (!edges) { return []; }
+		var transitions = [], _this = this;
 		edges.forEach(function (key) {
-			var trans = edges.get(key);
-			var newTrans = {
-				name: trans.name,
-				id: key,
-				source: {
-					name: trans.source.name,
-					id: trans.source.id
-				},
-				target: {
-					name: trans.target.name,
-					id: trans.target.id
-				},
-				controlPoint: (trans.controlPoint) ? {
-					x: trans.controlPoint.x,
-					y: trans.controlPoint.y
-				} : null,
-				// PIM
-				start_state : trans.source.name,
-				end_state : trans.target.name,
-				I_behaviour : trans.name
-			};
-			transitions.push(newTrans);
+			transitions.push(_this.getTransition(edges.get(key)));
 		});
 		return transitions;
 	};

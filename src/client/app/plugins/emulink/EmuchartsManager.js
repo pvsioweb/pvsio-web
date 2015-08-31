@@ -555,15 +555,6 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Is the model a PIM.
-     * @returns {boolean} True if it is a PIM.
-     * @memberof EmuchartsManager
-     */
-    EmuchartsManager.prototype.getIsPIM = function () {
-        return _selectedEditor.getIsPIM() || false;
-    };
-
-    /**
 	 * Utility function to rename initial transitions
 	 * @memberof EmuchartsManager
 	 */
@@ -665,7 +656,25 @@ define(function (require, exports, module) {
     EmuchartsManager.prototype.empty_chart = function () {
         return _selectedEditor.empty_chart();
     };
-    
+
+    /**
+     * Is the model a PIM.
+     * @returns {boolean} True if it is a PIM.
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.getIsPIM = function () {
+        return _selectedEditor.getIsPIM() || false;
+    };
+
+    /**
+     * Is the model a PIM.
+     * @returns {boolean} True if it is a PIM.
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.toPIM = function (toPIM) {
+        return _selectedEditor.toPIM(toPIM) || false;
+    };
+
 //    /**
 //	 * Interface function for handling d3 events
 //	 * @memberof EmuchartsManager

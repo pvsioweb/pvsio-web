@@ -82,17 +82,22 @@ define(function (require, exports, module) {
     }
 
     /**
-     * Convert the current Emuchart to a PIM.
+     * Convert the current Emuchart to a PIM (or if from a PIM).
+     *
+     * True if something changed.
      */
     Emucharts.prototype.toPIM = function (isPIM) {
-        isPIM = isPIM || true;
+        isPIM = typeof isPIM === 'undefined' ? true : isPIM;
+        console.log(isPIM);
         if (isPIM && !this.getIsPIM()) {
             this.isPIM = true;
-            this.pim.toPIM(this);
+            return this.pim.toPIM(this);
         } else if (!isPIM && this.getIsPIM()) {
             this.isPIM = false;
             // TODO: should the extra pim options be removed from the nodes?
+            return true;
         }
+        return false;
     }
     
     Emucharts.prototype.getEdges = function () {
@@ -220,7 +225,7 @@ define(function (require, exports, module) {
             };
 
         if (this.getIsPIM()) {
-            newNode = this.pim.toPIMState(newNode);
+            newNode = this.pim.getState(newNode);
         }
 
         // add the new node to the diagram
@@ -567,11 +572,6 @@ define(function (require, exports, module) {
                 width : node.width,
                 height: node.height
             };
-            // Also include PM values for tests.
-            state.widgets = node.widgets || [];
-            state.components = node.components || [];
-            state.pmr = node.pmr || [];
-
             states.push(state);
         });
         return states;
@@ -585,6 +585,8 @@ define(function (require, exports, module) {
      * @instance
 	 */
     Emucharts.prototype.getState = function (id) {
+        if (this.getIsPIM())
+            return this.pim.getState(this.nodes.get(id));
         // The state should already be a PIM state if required.
         return this.nodes.get(id);
     };

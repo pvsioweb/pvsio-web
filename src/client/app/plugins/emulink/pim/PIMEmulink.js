@@ -25,8 +25,8 @@ define(function (require, exports, module) {
 			placeholder: {
 				newStateName: "Name, e.g., startInfusing",
 				newStateWidgets: "Click to edit this states widgets",
-			//	newStateComponents: "[Disabled]",
-				newStatePMR: "[Disabled]"
+			//	newStateComponents: "[Not Implemented]",
+				newStatePMR: "[Not Implemented]"
 			},
 			value: {
 				newStateName: s.name,

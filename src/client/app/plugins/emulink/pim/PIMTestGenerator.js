@@ -284,7 +284,7 @@ define(function (require, exports, module) {
 				}
 				//TODO: test multiple S behaviors on 1 widget.
 				test.predicates.forEach(function (p) {
-					if(p.name === "hasBehaviour") {
+					if(p.name === "hasBehaviour" || p.name === "genBehaviour") {
 						p.args.forEach(function (arg, i) {
 							// Skip over Widget name in the args
 							if (i === 0) {
@@ -321,6 +321,7 @@ define(function (require, exports, module) {
 						p.args.splice(1, p.args.length - 1)
 							.forEach(function (arg) {
 							var sub = arg.substring(0, 2);
+							// Only system behaviours can be resBehaviours
 							if (sub === "S_") {
 								sRespBehav.push({
 									state_name: test.state_name,
@@ -431,12 +432,13 @@ define(function (require, exports, module) {
 
 		// add test generation
 		var tests = "";
-		// Get tests for the PIM / PM
+		// Get test predicates for the PIM / PM
 		// TODO: this could at a later stage be switched back to passing in a PM
 		//var _tests = genTests(pm.pm || pm);
 		var _tests = genTests(pm);
-		// Print state tests
+		// Print state tests.
 		tests += stateTests(pm.pm || pm) + "\n";
+		// Print behaviour tests.
 		tests += behaviourTests(_tests, pm);
 
 		return tests;

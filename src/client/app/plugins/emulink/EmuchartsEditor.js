@@ -1773,15 +1773,6 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Is the model a PIM.
-     * @returns {boolean} True if it is a PIM.
-     * @memberof EmuchartsEditor
-     */
-    EmuchartsEditor.prototype.getIsPIM = function () {
-        return this.emucharts.getIsPIM() || false;
-    };
-
-    /**
      * utility function to edit states
      * @memberof EmuchartsEditor
      */
@@ -2033,6 +2024,24 @@ define(function (require, exports, module) {
                 this.emucharts.edges && this.emucharts.edges.empty() &&
                 this.emucharts.constants && this.emucharts.constants.empty() &&
                 this.emucharts.variables && this.emucharts.variables.empty();
+    };
+
+    /**
+     * Is the model a PIM.
+     * @returns {boolean} True if it is a PIM.
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.getIsPIM = function () {
+        return this.emucharts.getIsPIM() || false;
+    };
+
+    /**
+     * Convert the emuchart a PIM.
+     * @returns {boolean} True if conversion was successful.
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.toPIM = function (toPIM) {
+        return this.emucharts.toPIM(toPIM) || false;
     };
 
     module.exports = EmuchartsEditor;
