@@ -177,16 +177,10 @@ define(function (require, exports, module) {
      * @memberof EmuchartsEditor
      */
     function labelToString(label) {
-        var ans = "";
-        if (label.listConditions) {
-            label.listConditions.forEach(function (cond) { ans += cond + "; "; });
-            ans = " [ " + ans + " ] ";
+        if (label.length > 16) {
+            return label.substring(0, 16) + "...";
         }
-        if (label.listOfOperations) {
-            label.listOfOperations.forEach(function (item) { ans += item + "; "; });
-            ans = " { " + ans + " } ";
-        }
-        return ans;
+        return label;
     }
 
 
@@ -546,7 +540,7 @@ define(function (require, exports, module) {
                     // refresh transition label
                     label = d3.select(this.parentNode).select(".tlabel");
                     label.text(function (edge) {
-                        return edge.name + labelToString(edge);
+                        return labelToString(edge.name);
                     });
                     // adjust text position
                     label.attr("x", function (edge) {
@@ -581,7 +575,7 @@ define(function (require, exports, module) {
                     // refresh transition label
                     label = d3.select(this.parentNode.lastChild.firstChild);
                     label.text(function (edge) {
-                        return edge.name + labelToString(edge);
+                        return labelToString(edge.name);
                     });
                     // clear the text of the other label
                     d3.select(this.parentNode).select(".tlabel").text(function (edge) { return ""; });
@@ -629,7 +623,7 @@ define(function (require, exports, module) {
             // refresh transition label
             var label = d3.select(this.parentNode).select(".itlabel");
             label.text(function (edge) {
-                return edge.name + labelToString(edge);
+                return labelToString(edge.name);
             });
             // adjust text position
             label.attr("x", function (edge) {
@@ -1010,7 +1004,7 @@ define(function (require, exports, module) {
                 .text(function (edge) {
                     if (edge.target.id === edge.source.id) {
                         // text for self edges is rendered as standard text field
-                        return edge.name + labelToString(edge);
+                        return labelToString(edge.name);
                     }
                     // text for other edges is rendered as textpath
                     return "";
@@ -1033,7 +1027,7 @@ define(function (require, exports, module) {
                         return "";
                     }
                     // text for other edges is rendered here
-                    return edge.name + labelToString(edge);
+                    return labelToString(edge.name);
                 });
 
             return refreshTransitions(enteredTransitions);
@@ -1238,7 +1232,7 @@ define(function (require, exports, module) {
                 .style("text-rendering", "optimizeLegibility")
                 .style("cursor", "pointer") // change cursor shape
                 .text(function (edge) {
-                    return edge.name + labelToString(edge);
+                    return labelToString(edge.name);
                 });
 
             return refreshInitialTransitions(enteredTransitions);
@@ -1851,7 +1845,7 @@ define(function (require, exports, module) {
             // refresh transition label
             var label = d3.select(this.parentNode).select(".tlabel");
             label.text(function (edge) {
-                return edge.name + labelToString(edge);
+                return labelToString(edge.name);
             });
         });
     };

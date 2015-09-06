@@ -34,6 +34,7 @@ define(function (require, exports, module) {
         EmuchartsVDMPrinter    = require("plugins/emulink/EmuchartsVDMPrinter"),
         EmuchartsJSPrinter     = require("plugins/emulink/EmuchartsJavaScriptPrinter"),
         EmuchartsAdaPrinter    = require("plugins/emulink/EmuchartsAdaPrinter"),
+        EmuchartsBlessPrinter  = require("plugins/emulink/EmuchartsBlessPrinter"),
 //        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         FileHandler            = require("filesystem/FileHandler"),
         FileSystem             = require("filesystem/FileSystem"),
@@ -57,6 +58,7 @@ define(function (require, exports, module) {
     var emuchartsVDMPrinter;
     var emuchartsJSPrinter;
     var emuchartsAdaPrinter;
+    var emuchartsBlessPrinter;
 
     var options = { autoinit: true };
 
@@ -267,6 +269,7 @@ define(function (require, exports, module) {
         emuchartsVDMPrinter = new EmuchartsVDMPrinter("emuchart_VDM");
         emuchartsJSPrinter = new EmuchartsJSPrinter("emucharts_JS");
         emuchartsAdaPrinter = new EmuchartsAdaPrinter("emucharts_Ada");
+        emuchartsBlessPrinter = new EmuchartsBlessPrinter("emucharts_Bless");
 
         pvsioWebClient = PVSioWebClient.getInstance();
         MODE = new EditorModeUtils();
@@ -1112,8 +1115,6 @@ define(function (require, exports, module) {
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
             var model = emuchartsPVSPrinter.print(emucharts);
-            console.log(model);
-            console.log(emuchartsJSPrinter.print(emucharts));
             if (model.err) {
                 console.log(model.err);
                 return;
@@ -1302,6 +1303,38 @@ define(function (require, exports, module) {
                 console.log("Warning, Ada model is undefined.");
             }
         });
+        d3.select("#btn_menuBlessPrinter").on("click", function () {
+            var emucharts = {
+                name: (emuchartsBlessPrinter.modelName),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: {
+                    input: emuchartsManager.getInputVariables(),
+                    output: emuchartsManager.getOutputVariables(),
+                    local: emuchartsManager.getLocalVariables()
+                },
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            var model = emuchartsBlessPrinter.print(emucharts);
+            console.log(model);
+            if (model.err) {
+                console.log(model.err);
+                return;
+            }
+            if (model.thread) {
+                var overWrite = {overWrite: true};
+                projectManager.project().addFile(emucharts.name + ".aadl", model.thread, overWrite);
+            } else {
+                console.log("Warning, Bless model is undefined.");
+            }
+        });        
         //-- Zoom menu -----------------------------------------------------------
         d3.select("#menuZoom").on("mouseover", function () {
             document.getElementById("menuZoom").children[1].style.display = "block";
