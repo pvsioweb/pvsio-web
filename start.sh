@@ -34,8 +34,8 @@ if [ -d "pvs6.0" ] && [ -f "pvs6.0/pvs" ] && [ -f "pvs6.0/pvsio" ] && [ -f "pvs6
 		cd ..
 	fi
 	cd src/server
-	node pvssocketserver.js pvsdir:pvs6.0 restart
+	node pvssocketserver.js pvsdir:pvs6.0 start
 else
 	cd src/server
-	node pvssocketserver.js restart
+	node pvssocketserver.js start
 fi
