@@ -34,7 +34,7 @@ main: THEORY
     rra_label := "RRa",
     rra_alarm := off,
     rra_fail := false,
-    isOn := false
+    isOn := true
   #)
 
   init(x: real, id: string): state = (#
@@ -51,7 +51,7 @@ main: THEORY
     rra_label := "RRa",
     rra_alarm := off,
     rra_fail := false,
-    isOn := false
+    isOn := true
   #)
 
 
