@@ -1,6 +1,6 @@
 /**
  * @module EmuchartsParser
- * @version 0.2
+ * @version 0.3
  * @description
  * EmuchartsParser is a parser for the Emucharts language.
  * The main API of the parser is function parseTransition(label); it can be used to parse
@@ -109,7 +109,7 @@ define(function (require, exports, module) {
     var grammar = function (opt) {
         function exprWithBinaryOp() {
             return " if (!Array.isArray($$)) { $$ = []; }" +
-                   " $$.push($1);" +
+                   " Array.isArray($1) ? $$.concat($1) : $$.push($1);" +
                    " $$.push({" +
                    "      type: 'binop'," +
                    "      val:  $2.toUpperCase()" +
@@ -168,22 +168,22 @@ define(function (require, exports, module) {
         // will take care of establishing the correct precendence and associativity of operators.
         function expressionBNF(mode) {
             return [
-                ["term + e",       exprWithBinaryOp()],
-                ["term - e",       exprWithBinaryOp()],
-                ["term * e",       exprWithBinaryOp()],
-                ["term / e",       exprWithBinaryOp()],
+                ["e + e",       exprWithBinaryOp()],
+                ["e - e",       exprWithBinaryOp()],
+                ["e * e",       exprWithBinaryOp()],
+                ["e / e",       exprWithBinaryOp()],
                 ["- e",            exprWithUnaryOp(), {"prec": "UMINUS"}],
                 ["NOT e",          exprWithUnaryOp()],
                 ["( e )",          exprWithParenthesis()],
-                ["term = e",       exprWithBinaryOp()],  // comparison of equality of two terms
-                ["term != e",      exprWithBinaryOp()],  // comparison of inequality of two terms
-                ["term > e",       exprWithBinaryOp()],
-                ["term >= e",      exprWithBinaryOp()],
-                ["term < e",       exprWithBinaryOp()],
-                ["term <= e",      exprWithBinaryOp()],
-                ["term AND e",     exprWithBinaryOp()],
-                ["term OR e",      exprWithBinaryOp()],
-                ["term IMPLIES e", exprWithBinaryOp()],
+                ["e = e",       exprWithBinaryOp()],  // comparison of equality of two terms
+                ["e != e",      exprWithBinaryOp()],  // comparison of inequality of two terms
+                ["e > e",       exprWithBinaryOp()],
+                ["e >= e",      exprWithBinaryOp()],
+                ["e < e",       exprWithBinaryOp()],
+                ["e <= e",      exprWithBinaryOp()],
+                ["e AND e",     exprWithBinaryOp()],
+                ["e OR e",      exprWithBinaryOp()],
+                ["e IMPLIES e", exprWithBinaryOp()],
                 ["term",           "$$ = [$term]"]
             ];
         }
@@ -196,7 +196,7 @@ define(function (require, exports, module) {
             // the first field specified the associativity of the operator
             "operators": [
                 ["left", "+", "-", "*", "/"], // left means left-to-right
-                ["left", "=", "!=", ">", "<", "<="],
+                ["left", "=", "!=", ">", "<", "<=", ">="],
                 ["left", "IMPLIES", "AND", "OR"],
                 ["right", ":="],
                 ["right", ";", ","],
@@ -292,7 +292,7 @@ define(function (require, exports, module) {
             return this;
         }
     }
-
+    
     /**
      * @function getParserCode
      * @memberof module:EmuchartsParser
@@ -482,6 +482,7 @@ if (ans.res) {
 
      */
     EmuchartsParser.prototype.parseTransition = function (label) {
+        label = (label === "") ? "tick" : label;
         console.log("Parsing transition " + label);
         var ans = { err: null, res: null };
         try {
