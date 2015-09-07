@@ -201,14 +201,6 @@ define(function (require, exports, module) {
 
     Printer.prototype.constructor = Printer;
 
-    Printer.prototype.print_descriptor = function (emuchart) {
-        return "";
-    };
-
-    Printer.prototype.print_disclaimer = function (emuchart) {
-        return "";
-    };
-
     Printer.prototype.print_variables = function (emuchart) {
         if (emuchart.variables) {
             this.model.input_variables = emuchart.variables.input.map(function (v) {
@@ -255,13 +247,38 @@ define(function (require, exports, module) {
     
 
     Printer.prototype.print_types = function (emuchart) {
-        return "";
     };
 
     Printer.prototype.print_states = function (emuchart) {
         this.model.states = emuchart.states;
-        return "";
     };
+    
+    Printer.prototype.print_descriptor = function (emuchart) {
+        this.model.descriptor = 
+            "-- ---------------------------------------------------------------" +
+            "\n--  Model: " + emuchart.name;
+        if (emuchart.author) {
+            this.model.descriptor += 
+                "\n--  Author: " + emuchart.author.name +
+                "\n--          " + emuchart.author.affiliation +
+                "\n--          " + emuchart.author.contact;
+        }
+        if (emuchart.description) {
+            this.model.descriptor += 
+                "\n-- ---------------------------------------------------------------" +
+                "\n--  " + emuchart.description;
+        }
+        this.model.descriptor += 
+            "\n-- ---------------------------------------------------------------\n";
+    };
+    
+    Printer.prototype.print_disclaimer = function (emuchart) {
+        this.model.disclaimer = "\n-- ---------------------------------------------------------------\n" +
+                    "--  Bless/AADL model generated using PVSio-web BlessPrinter ver 0.1\n" +
+                    "--  Tool freely available at http://www.pvsioweb.org" +
+                    "\n-- ---------------------------------------------------------------\n";
+    };
+    
 
     Printer.prototype.print = function (emuchart) {
         this.model.transitions = [];
@@ -269,6 +286,8 @@ define(function (require, exports, module) {
         this.print_transitions(emuchart);
         this.print_initial_transition(emuchart);
         this.print_states(emuchart);
+        this.print_disclaimer(emuchart);
+        this.print_descriptor(emuchart);
 
         var thread = Handlebars.compile(threadTemplate)(this.model);
         return {thread: thread};
