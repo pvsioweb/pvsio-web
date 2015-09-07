@@ -10,15 +10,12 @@ define(function (require, exports, module) {
     "use strict";
 
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
-    var EmuchartsParser_UnitTest = require("plugins/emulink/EmuchartsParser_UnitTest");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
 
 
     var theory_name;
     var parser;
 
-    var parserUnitTest;
-    var unitTestEnabled = false;
     var initialMachineState = "initialMachineState";
     var machineStateType = "MachineState";
 
@@ -56,10 +53,6 @@ define(function (require, exports, module) {
         theory_name = name;
         automaticConstants = [];
         parser = new EmuchartsParser();
-        if (unitTestEnabled) {
-            parserUnitTest = new EmuchartsParser_UnitTest();
-            console.log(parserUnitTest.unitTest());
-        }
         pvsRecordTypePrinter = pvsRecordTypePrinter.create();
         pvsEnumeratedTypePrinter = pvsEnumeratedTypePrinter.create();
         pvsOverrideExpressionPrinter = pvsOverrideExpressionPrinter.create();
