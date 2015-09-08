@@ -58,7 +58,7 @@
   ],
   "transitions": [
    {
-    "name": "mmm\n[ ((now-start_time) >=  Initialization_Timeout) AND\n  (interface_failure = TRUE OR\n   internal_failure = TRUE OR\n   NOT (current_temperature_status = Valid))] \n{ monitor_mode := FAILED }",
+    "name": "mmm\n[ ((now-start_time) >=  Initialization_Timeout) AND\n  (interface_failure = TRUE OR internal_failure = TRUE OR\n   NOT (current_temperature_status = Valid))] \n{ monitor_mode := FAILED }",
     "id": "T2",
     "source": {
      "name": "check_init",
@@ -90,7 +90,7 @@
     }
    },
    {
-    "name": "mmm2\n[ now - start_time >= Initialization_Timeout AND\n  NOT interface_failure OR\n  internal_failure AND\n  current_temperature_status = Valid ]\n{ monitor_mode := NORMAL }",
+    "name": "mmm2\n[ ((now - start_time) >= Initialization_Timeout) AND NOT (interface_failure OR internal_failure) AND (current_temperature_status = Valid) ]\n{ monitor_mode := NORMAL }",
     "id": "T1",
     "source": {
      "name": "check_init",
@@ -138,7 +138,7 @@
     }
    },
    {
-    "name": "mmm3\n[ now - start_time >= Initialization_Timeout AND\n  NOT interface_failure OR internal_failure AND\n  current_temperature_status = Valid ]\n{ monitor_mode := NORMAL }",
+    "name": "mmm3\n[ ((now - start_time) >= Initialization_Timeout) \n   AND NOT (interface_failure OR internal_failure)\n   AND (current_temperature_status = Valid) ]\n{ monitor_mode := NORMAL }",
     "id": "T6",
     "source": {
      "name": "check_normal",
@@ -154,7 +154,7 @@
     }
    },
    {
-    "name": "mmm3x\n[ now - start_time >= Initialization_Timeout AND\n  interface_failure OR internal_failure OR \n  NOT current_temperature_status = Valid ]\n{ monitor_mode := FAILED }",
+    "name": "mmm3x\n[ ((now - start_time) >= Initialization_Timeout) \n  AND (interface_failure OR internal_failure OR\n  NOT (current_temperature_status = Valid)) ]\n{ monitor_mode := FAILED }",
     "id": "T7",
     "source": {
      "name": "check_normal",
@@ -170,7 +170,7 @@
     }
    },
    {
-    "name": "mmm3z\n[ now - start_time < Initialization_Timeout ]",
+    "name": "mmm3z\n[ (now - start_time) < Initialization_Timeout ]",
     "id": "T8",
     "source": {
      "name": "check_normal",
