@@ -164,7 +164,7 @@ function run() {
             });        
         } else {
             procWrapper().exec({
-                command: process.env.pvsdir + "proveit -l -v " + file,
+                command: "proveit -T -l -v " + file,
                 callBack: cb
             });
         }
