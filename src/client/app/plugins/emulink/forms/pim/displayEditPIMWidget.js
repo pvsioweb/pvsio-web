@@ -12,19 +12,19 @@ define(function (require, exports, module) {
 	var EditPIMWidgetView = Backbone.View.extend({
 		initialize: function (data) {
 			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px").style("z-index", 999);
+			// Internal count for displaying widgets.
+			this._count = 0;
 			this.render(data);
 			this._data = data;
 			this._widgets = data.value.widgets;
-			// Internal count for displaying widgets TODO: replace this with a widget ID in this code.
-			this._count = 0;
-			this._widgetsList = $('#pmWidgetsList', this.el);
-			this._errorDisplay = $('#editWidgetsError', this.el);
-			this.buildWidgetList();
 		},
 		render: function (data) {
 			var template = Handlebars.compile(formTemplate);
 			this.$el.html(template(data));
 			$("body").append(this.el);
+			this.$widgetsList = $('#pmWidgetsList', this.el);
+			this.$errorDisplay = $('#editWidgetsError', this.el);
+			this.buildWidgetList(data.value.widgets);
 			d3.select(this.el).select("#newWidgetName").node().focus();
 			return this;
 		},
@@ -32,9 +32,7 @@ define(function (require, exports, module) {
 			"click #btnRight2": "right",
 			"click #btnLeft2": "left",
 			"click #btnAdd": "add",
-			"click .btnRemove": "removeWidget",
-			// listen only on the widgets form (not the states).
-			"keyup #pimWidgetModal": "keyup"
+			"click .btnRemove": "removeWidget"
 		},
 		right: function (event) {
 			this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
@@ -62,7 +60,7 @@ define(function (require, exports, module) {
 				FormUtils.clearForm(selectors);
 				// Add new widget to the list.
 				_this._widgets.push(newWidget);
-				this._widgetsList.append(_this.widgetListItem(newWidget));
+				this.$widgetsList.append(_this.widgetListItem(newWidget));
 			}
 		},
 		removeWidget: function (event) {
@@ -70,20 +68,22 @@ define(function (require, exports, module) {
 				// TODO: Replace with a widget ID.
 				var widgetId = event.currentTarget.parentNode.parentNode.id;
 				this._widgets.splice(widgetId, 1);
-				$('#' + widgetId, this._widgetsList).remove();
+				$('#' + widgetId, this.$widgetsList).remove();
 			}
 		},
-		buildWidgetList: function () {
+		buildWidgetList: function (widgets) {
 			var _this = this;
-			this._widgetsList.html(_this._widgets.map(_this.widgetListItem, _this));
+			this.$widgetsList.html(widgets.map(_this.widgetListItem, _this));
 		},
 		widgetListItem: function (w) {
-			return  '<div id="' + this._count++ + '" class="row" style="padding: 2px 0 2px 0;">' +
-						'<div class="col-md-3">' + w.name + '</div>' +
-						'<div class="col-md-3">' + w.category + '</div>' +
-						'<div class="col-md-5">' + w.behaviours.join(", ") + '</div>' +
-						'<div class="col-md-1"><button type="button" class="btn btn-danger btn-xs btnRemove right" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>' +
-					'</div>';
+			var item =
+				'<div id="' + this._count++ + '" class="row" style="padding: 2px 0 2px 0;">' +
+					'<div class="col-md-3">' + w.name + '</div>' +
+					'<div class="col-md-3">' + w.category + '</div>' +
+					'<div class="col-md-5">' + w.behaviours.join(", ") + '</div>' +
+					'<div class="col-md-1"><button type="button" class="btn btn-danger btn-xs btnRemove right" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>' +
+				'</div>';
+			return item;
 		},
 		// newWidgetBehaviours optional. null if inputs aren't valid.
 		validateWidget: function (newWidgetName, newWidgetCategory, newWidgetBehaviours) {
@@ -102,8 +102,8 @@ define(function (require, exports, module) {
 						.map(function(b) { return b.trim(); })
 						.filter(function(b) { return b; });
 
-				// Valid behaviour test (true if invalid! used for $.grep).
-				var validBehaviour =
+				// Invalid behaviour test (true if invalid. used for $.grep).
+				var invalidBehaviour =
 					function(b) {
 						if (!b || b.length < 3) { return true; }
 						b = b.substring(0, 2);
@@ -111,33 +111,22 @@ define(function (require, exports, module) {
 					};
 
 				// Test if any of the behaviours fail the validBehaviour test (i.e. return true).
-				if ($.grep(newWidgetBehaviours, validBehaviour).length) {
+				if ($.grep(newWidgetBehaviours, invalidBehaviour).length) {
 					errors.push('All behaviours must begin with either S_ or I_ and must have a value.');
 				}
 			}
 			if (errors.length) {
-				this._errorDisplay.parent().removeClass('hide');
-				this._errorDisplay.html(errors.join('<br />'));
+				this.$errorDisplay.parent().removeClass('hide');
+				this.$errorDisplay.html(errors.join('<br />'));
 				return null;
 			}
-			this._errorDisplay.parent().addClass('hide');
-			this._errorDisplay.empty();
+			this.$errorDisplay.parent().addClass('hide');
+			this.$errorDisplay.empty();
 			return {
 				name: newWidgetName.trim(),
 				category: newWidgetCategory.trim(),
 				behaviours: newWidgetBehaviours || []
 			};
-		},
-		keyup: function (event) {
-			switch(event.keyCode) {
-				case 13: //enter pressed
-					this.right(event);
-					break;
-				case 27: //esc pressed
-					this.left(event);
-					break;
-				default: break;
-			}
 		}
 	});
 

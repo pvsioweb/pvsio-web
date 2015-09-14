@@ -14,7 +14,7 @@ define(function (require, exports, module) {
 			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
 			this.render(data);
 			this._data = data;
-			this._errorDisplay = $('#editTransitonError', this.el);
+			this.$errorDisplay = $('#editTransitonError', this.el);
 		},
 		render: function (data) {
 			var template = Handlebars.compile(formTemplate);

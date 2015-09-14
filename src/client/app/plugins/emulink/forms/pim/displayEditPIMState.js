@@ -9,6 +9,7 @@ define(function (require, exports, module) {
 		formTemplate         = require("text!../templates/pim/displayEditPIMState.handlebars"),
 		FormUtils            = require("plugins/emulink/forms/FormUtils"),
 		displayEditPIMWidget = require("plugins/emulink/forms/pim/displayEditPIMWidget"),
+		displayEditPIMPMR    = require("plugins/emulink/forms/pim/displayEditPIMPMR"),
 		PIMs                 = require("plugins/emulink/pim/PIMs");
 
 	var EditPIMStateView = Backbone.View.extend({
@@ -30,8 +31,7 @@ define(function (require, exports, module) {
 			"click #btnRight": "right",
 			"click #btnLeft": "left",
 			"click #newStateWidgets": "editWidgets",
-			// listen only on the states form (not the widgets).
-			"keyup #pimStateModal": "keyup"
+			"click #newStatePMR": "editPMR"
 		},
 		right: function (event) {
 			var form = this.el;
@@ -40,6 +40,8 @@ define(function (require, exports, module) {
 				var formdata = FormUtils.serializeForm(form, selectors);
 				// Set the widget values obtained from the editWidgits view.
 				formdata.labels.set("newStateWidgets", this._data.value.widgets);
+				//formdata.labels.set("newStateComponents", this._data.value.components);
+				formdata.labels.set("newStatePMR", this._data.value.pmr);
 				this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
 					{data: formdata, el: this.el}, this);
 			}
@@ -51,7 +53,7 @@ define(function (require, exports, module) {
 			var _this = this;
 			var data = _this._data.value;
 			displayEditPIMWidget.create({
-				header: "Edit state " + data.newStateName + " widgets...",
+				header: "Edit " + data.newStateName + " widgets...",
 				textLabel: {
 					newWidgetName: "Name",
 					newWidgetCategory: "Category",
@@ -77,16 +79,31 @@ define(function (require, exports, module) {
 				d3.select(_this.el).select("#newStateName").node().focus();
 			});
 		},
-		keyup: function (event) {
-			switch(event.keyCode) {
-				case 13: //enter pressed
-					this.right(event);
-					break;
-				case 27: //esc pressed
-					this.left(event);
-					break;
-				default: break;
-			}
+		editPMR: function (event) {
+			var _this = this;
+			var data = _this._data.value;
+			displayEditPIMPMR.create({
+				header: "Edit " + data.newStateName + " presentation model relations...",
+				textLabel: {
+					behaviour: "S_Behaviour",
+					operation: "Operation"
+				},
+				placeholder: {
+					operation: "Operation"
+				},
+				value: {
+					widgets: data.widgets || [],
+					pmr: data.pmr || []
+				},
+				buttons: ["Cancel", "Save PMR"]
+			}).on("save_pmr", function (e, view) {
+				data.pmr = e.data;
+				view.remove();
+				d3.select(_this.el).select("#newStateName").node().focus();
+			}).on("cancel", function (e, view) {
+				view.remove();
+				d3.select(_this.el).select("#newStateName").node().focus();
+			});
 		}
 	});
 

@@ -26,13 +26,13 @@ define(function (require, exports, module) {
 				newStateName: "Name, e.g., startInfusing",
 				newStateWidgets: "Click to edit this states widgets",
 			//	newStateComponents: "[Not Implemented]",
-				newStatePMR: "[Not Implemented]"
+				newStatePMR: "Click to edit this states PMR"
 			},
 			value: {
 				newStateName: s.name,
 				widgets: s.widgets,
-			//	newStateComponents: s.components,
-				newStatePMR: s.pmr
+			//	components: s.components,
+				pmr: s.pmr
 			},
 			buttons: ["Cancel", "Save state"]
 		}).on("save_state", function (e, view) {
@@ -47,7 +47,7 @@ define(function (require, exports, module) {
 				s.name = newStateName;
 				s.widgets = newStateWidgets;
 				//s.components = newStateComponents;
-				//s.pmr = newStatePMR;
+				s.pmr = newStatePMR;
 
 				_this.emuchartsManager.edit_state(s.id, s);
 				view.remove();
