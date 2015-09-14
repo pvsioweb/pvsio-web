@@ -44,6 +44,7 @@ define(function (require, exports, module) {
 
     var pim;
     var isPIM = false;
+    var pmr;
 
 	/**
 	 * @function Emucharts
@@ -67,39 +68,22 @@ define(function (require, exports, module) {
             }
             this.constants = emuchart.constants || d3.map();
             this.variables = emuchart.variables || d3.map();
-            this.isPIM = emuchart.isPIM && emuchart.isPIM === true;
+            var isPIM = emuchart.isPIM && emuchart.isPIM === true;
+            this.pim = new PIMs(isPIM);
         } else {
             this.nodes = d3.map();
             this.edges = d3.map();
             this.initial_edges = d3.map();
             this.variables = d3.map();
             this.constants = d3.map();
+            this.pim = new PIMs();
         }
+        this.pmr = {};
 
 		eventDispatcher(this);
-        this.pim = new PIMs();
         return this;
     }
 
-    /**
-     * Convert the current Emuchart to a PIM (or if from a PIM).
-     *
-     * True if something changed.
-     */
-    Emucharts.prototype.toPIM = function (isPIM) {
-        isPIM = typeof isPIM === 'undefined' ? true : isPIM;
-        console.log(isPIM);
-        if (isPIM && !this.getIsPIM()) {
-            this.isPIM = true;
-            return this.pim.toPIM(this);
-        } else if (!isPIM && this.getIsPIM()) {
-            this.isPIM = false;
-            // TODO: should the extra pim options be removed from the nodes?
-            return true;
-        }
-        return false;
-    }
-    
     Emucharts.prototype.getEdges = function () {
         return this.edges;
     };
@@ -114,9 +98,6 @@ define(function (require, exports, module) {
         return defaultValues;
     };
 
-    Emucharts.prototype.getIsPIM = function () {
-        return this.isPIM || false;
-    }
 
     Emucharts.prototype.edit_node = function (id, newState) {
         var _this = this;
@@ -981,6 +962,54 @@ define(function (require, exports, module) {
 	 */
     Emucharts.prototype.empty = function () {
         return this.nodes.empty() && this.edges.empty();
+    };
+
+    /** PIM **/
+
+    /**
+     * Convert the current Emuchart to a PIM (or if from a PIM).
+     * @returns {boolean} True Emuchart became a PIM or a PIM became an Emuchart.
+     */
+    Emucharts.prototype.toPIM = function (toPIM) {
+        return this.pim && this.pim.toPIM ? this.pim.toPIM(toPIM) : false;
+    };
+
+    /**
+     * Returns if this emuchart is a PIM.
+     * @returns {boolean} If this emuchart is a PIM.
+     */
+    Emucharts.prototype.getIsPIM = function () {
+        return this.pim && this.pim.getIsPIM ? this.pim.getIsPIM() : false;
+    };
+
+    /**
+     *
+     * @param behaviour
+     * @returns If no behaviour provided returns all PMR as a set,
+     * If behaviour could be found then returns the relation (behaviour, operation),
+     * else returns null.
+     */
+    Emucharts.prototype.getPMR = function (behaviour) {
+        return this.pim && this.pim.getPMR ? this.pim.getPMR(this.pmr, behaviour) : {};
+    };
+
+    /**
+     * Add a PMR (overrites any existing PMR for the given behaviour).
+     * ({behaviour (string), operation (string)}).
+     * @param pmr
+     * @returns boolean true if successfully added.
+     */
+    Emucharts.prototype.addPMR = function (pmr) {
+        return this.pim && this.pim.addPMR ? this.pim.addPMR(this.pmr, pmr) : false;
+    };
+
+    /**
+     * Saves the new PMRs into the pool of all PMRs
+     * @param newPMRs
+     * @returns {boolean}
+     */
+    Emucharts.prototype.mergePMR = function (newPMRs) {
+        return this.pim.mergePMR ? this.pim.mergePMR(this.pmr, newPMRs) : false;
     };
 
     module.exports = Emucharts;

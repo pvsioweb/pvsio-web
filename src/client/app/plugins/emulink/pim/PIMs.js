@@ -6,21 +6,25 @@
 define(function (require, exports, module) {
 	"use strict";
 
-	function PIMs() { }
+	function PIMs(isPIM) {
+		this.isPIM = isPIM || false;
+	}
 
-	PIMs.prototype.toPIM = function (emuchart, isImport) {
-		if (!emuchart) { return false; }
-		if (isImport && isImport === true) {
-			emuchart.nodes.map(this.getState);
+	PIMs.prototype.getIsPIM = function () {
+		return this.isPIM || false;
+	};
+
+	PIMs.prototype.toPIM = function (toPIM) {
+		toPIM =  toPIM === 'undefined' ? true : toPIM;
+		if (toPIM && !this.isPIM) {
+			this.isPIM = true;
 			return true;
 		}
-		var _this = this;
-		console.log("Converted to PIM: Please ensure all transitions conform to the PIM specification.");
-		emuchart.nodes.forEach(function (key) {
-			var node = _this.cloneAsPIMState(emuchart.nodes.get(key));
-			emuchart.edit_node(key, node);
-		});
-		return true;
+		if (!toPIM && this.isPIM) {
+			this.isPIM = false;
+			return true;
+		}
+		return false;
 	};
 
 	PIMs.prototype.clonePIMWidget = function (widget) {
@@ -108,6 +112,54 @@ define(function (require, exports, module) {
 			transitions.push(_this.getTransition(edges.get(key)));
 		});
 		return transitions;
+	};
+
+	/**
+	 *
+	 * @param behaviour
+	 * @returns {*} If no behaviour provided returns all PMR as a set,
+	 * If behaviour could be found then returns the relation (behaviour, operation),
+	 * else returns null.
+	 */
+	PIMs.prototype.getPMR = function (pmrs, behaviour) {
+		if (!pmrs) { return {}; }
+		if (behaviour) {
+			return pmrs[behaviour] || null;
+		}
+		var _pmr = {};
+		for (behaviour in pmrs) {
+			if (pmrs.hasOwnProperty(behaviour)) {
+				_pmr[behaviour] = pmrs[behaviour];
+			}
+		}
+		return _pmr;
+	};
+
+	/**
+	 * Add a PMR (overrides any existing PMR for the given behaviour).
+	 * ({behaviour (string), operation (string)}).
+	 * @param pmr
+	 * @returns {boolean} true if successfully added.
+	 */
+	PIMs.prototype.addPMR = function (pmrs, behaviour, operation) {
+		if (!pmrs || !behaviour || !operation) {
+			return false;
+		}
+		pmrs[behaviour] = operation;
+		return true;
+	};
+
+	/**
+	 * Saves the new PMRs into the pool of all PMRs
+	 * @param newPMRs
+	 * @returns {boolean}
+	 */
+	PIMs.prototype.mergePMR = function (pmrs, newPMRs) {
+		for (var behaviour in newPMRs) {
+			if (newPMRs.hasOwnProperty(behaviour)) {
+				pmrs[behaviour] = newPMRs[behaviour];
+			}
+		}
 	};
 
 	module.exports = PIMs;

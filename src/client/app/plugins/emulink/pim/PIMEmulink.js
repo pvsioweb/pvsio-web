@@ -32,7 +32,8 @@ define(function (require, exports, module) {
 				newStateName: s.name,
 				widgets: s.widgets,
 			//	components: s.components,
-				pmr: s.pmr
+				// Emuchart wide PMR.
+				pmr: _this.emuchartsManager.getPMR()
 			},
 			buttons: ["Cancel", "Save state"]
 		}).on("save_state", function (e, view) {
@@ -47,9 +48,10 @@ define(function (require, exports, module) {
 				s.name = newStateName;
 				s.widgets = newStateWidgets;
 				//s.components = newStateComponents;
-				s.pmr = newStatePMR;
 
 				_this.emuchartsManager.edit_state(s.id, s);
+				// Save the PMR set withing the edit state modal into the existing PMR.
+				_this.emuchartsManager.mergePMR(newStatePMR);
 				view.remove();
 			}
 		}).on("cancel", function (e, view) {

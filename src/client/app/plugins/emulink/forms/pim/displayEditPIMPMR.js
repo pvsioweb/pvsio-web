@@ -47,14 +47,10 @@ define(function (require, exports, module) {
 			if (FormUtils.validateForm(form)) {
 				var formdata = FormUtils.serializeForm(form, setToArray(this._selectors));
 				// Pull out the PMR data.
-				var test = [];
+				var test = {};
 				formdata.labels.forEach(function (r) {
-					test.push({
-						behaviour: r,
-						operation: formdata.labels.get(r)
-					});
+					test[r] = formdata.labels.get(r);
 				});
-
 				this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
 					{data: test, el: this.el}, this);
 			}
@@ -89,6 +85,7 @@ define(function (require, exports, module) {
 			this.$pmrList.html(listItems.map(function (i) { return i.item; }));
 		},
 		PMRListItem: function (pmr, b) {
+			// Strip white space.
 			var id = b.replace(/\s/g, '');
 			// Ensure unique behaviours.
 			if (!this._selectors[id]) {
@@ -96,13 +93,7 @@ define(function (require, exports, module) {
 			} else {
 				return "";
 			}
-
-			var relation = pmr.find(function (r) {
-				return r.behaviour === b;
-			});
-
-			var operation = relation ? relation.operation : "";
-
+			var operation = pmr[b] || "";
 			var item =
 				'<div class="row" style="padding: 2px 0 2px 0;">' +
 					'<label class="control-label col-md-4" for="' + id + '">' + b + '</label>' +

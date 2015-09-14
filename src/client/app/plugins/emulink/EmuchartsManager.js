@@ -657,24 +657,6 @@ define(function (require, exports, module) {
         return _selectedEditor.empty_chart();
     };
 
-    /**
-     * Is the model a PIM.
-     * @returns {boolean} True if it is a PIM.
-     * @memberof EmuchartsManager
-     */
-    EmuchartsManager.prototype.getIsPIM = function () {
-        return _selectedEditor.getIsPIM() || false;
-    };
-
-    /**
-     * Is the model a PIM.
-     * @returns {boolean} True if it is a PIM.
-     * @memberof EmuchartsManager
-     */
-    EmuchartsManager.prototype.toPIM = function (toPIM) {
-        return _selectedEditor.toPIM(toPIM) || false;
-    };
-
 //    /**
 //	 * Interface function for handling d3 events
 //	 * @memberof EmuchartsManager
@@ -682,6 +664,54 @@ define(function (require, exports, module) {
 //    EmuchartsManager.prototype.d3ZoomTranslate = function (d3Scale, d3Translate) {
 //        return _selectedEditor.d3ZoomTranslate(d3Scale, d3Translate);
 //    };
+
+    /** PIM **/
+
+    /**
+     * Convert the current Emuchart to a PIM (or if from a PIM).
+     * @returns {boolean} True Emuchart became a PIM or a PIM became an Emuchart.
+     */
+    EmuchartsManager.prototype.toPIM = function (toPIM) {
+        return _selectedEditor.toPIM ? _selectedEditor.toPIM(toPIM) : false;
+    };
+
+    /**
+     * Returns if this emuchart is a PIM.
+     * @returns {boolean} If this emuchart is a PIM.
+     */
+    EmuchartsManager.prototype.getIsPIM = function () {
+        return _selectedEditor.getIsPIM ? _selectedEditor.getIsPIM() : false;
+    };
+
+    /**
+     *
+     * @param behaviour
+     * @returns If no behaviour provided returns all PMR as a set,
+     * If behaviour could be found then returns the relation (behaviour, operation),
+     * else returns null.
+     */
+    EmuchartsManager.prototype.getPMR = function (behaviour) {
+        return _selectedEditor.getPMR ? _selectedEditor.getPMR(behaviour) : {};
+    };
+
+    /**
+     * Add a PMR (overrites any existing PMR for the given behaviour).
+     * ({behaviour (string), operation (string)}).
+     * @param pmr
+     * @returns boolean true if successfully added.
+     */
+    EmuchartsManager.prototype.addPMR = function (pmr) {
+        return _selectedEditor.addPMR ? _selectedEditor.addPMR(pmr) : false;
+    };
+
+    /**
+     * Saves the new PMRs into the pool of all PMRs
+     * @param newPMRs
+     * @returns {boolean}
+     */
+    EmuchartsManager.prototype.mergePMR = function (newPMRs) {
+        return _selectedEditor.mergePMR ? _selectedEditor.mergePMR(newPMRs) : false;
+    };
 
     module.exports = EmuchartsManager;
 });

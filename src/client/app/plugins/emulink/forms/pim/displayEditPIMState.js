@@ -65,7 +65,7 @@ define(function (require, exports, module) {
 					newWidgetBehaviours: "Behaviours (Multiple with ,)"
 				},
 				value: {
-					widgets: _this.pims.getWidgets(data.widgets)
+					widgets: _this.pims.getWidgets(data.widgets) || []
 				},
 				buttons: ["Cancel", "Save Widgets"]
 			}).on("save_widgets", function (e, view) {
@@ -92,12 +92,12 @@ define(function (require, exports, module) {
 					operation: "Operation"
 				},
 				value: {
-					widgets: data.widgets || [],
-					pmr: data.pmr || []
+					widgets: _this.pims.getWidgets(data.widgets) || [],
+					pmr: _this.pims.getPMR(data.pmr) || []
 				},
 				buttons: ["Cancel", "Save PMR"]
 			}).on("save_pmr", function (e, view) {
-				data.pmr = e.data;
+				_this.pims.mergePMR(data.pmr, e.data);
 				view.remove();
 				d3.select(_this.el).select("#newStateName").node().focus();
 			}).on("cancel", function (e, view) {

@@ -2026,22 +2026,52 @@ define(function (require, exports, module) {
                 this.emucharts.variables && this.emucharts.variables.empty();
     };
 
+    /** PIM **/
+
     /**
-     * Is the model a PIM.
-     * @returns {boolean} True if it is a PIM.
-     * @memberof EmuchartsEditor
+     * Convert the current Emuchart to a PIM (or if from a PIM).
+     * @returns {boolean} True Emuchart became a PIM or a PIM became an Emuchart.
      */
-    EmuchartsEditor.prototype.getIsPIM = function () {
-        return this.emucharts.getIsPIM() || false;
+    EmuchartsEditor.prototype.toPIM = function (toPIM) {
+        return this.emucharts.toPIM ? this.emucharts.toPIM(toPIM) : false;
     };
 
     /**
-     * Convert the emuchart a PIM.
-     * @returns {boolean} True if conversion was successful.
-     * @memberof EmuchartsEditor
+     * Returns if this emuchart is a PIM.
+     * @returns {boolean} If this emuchart is a PIM.
      */
-    EmuchartsEditor.prototype.toPIM = function (toPIM) {
-        return this.emucharts.toPIM(toPIM) || false;
+    EmuchartsEditor.prototype.getIsPIM = function () {
+        return this.emucharts.getIsPIM ? this.emucharts.getIsPIM() : false;
+    };
+
+    /**
+     *
+     * @param behaviour
+     * @returns If no behaviour provided returns all PMR as a set,
+     * If behaviour could be found then returns the relation (behaviour, operation),
+     * else returns null.
+     */
+    EmuchartsEditor.prototype.getPMR = function (behaviour) {
+        return this.emucharts.getPMR ? this.emucharts.getPMR(behaviour) : {};
+    };
+
+    /**
+     * Add a PMR (overrites any existing PMR for the given behaviour).
+     * ({behaviour (string), operation (string)}).
+     * @param pmr
+     * @returns boolean true if successfully added.
+     */
+    EmuchartsEditor.prototype.addPMR = function (pmr) {
+        return this.emucharts.addPMR ? this.emucharts.addPMR(pmr) : false;
+    };
+
+    /**
+     * Saves the new PMRs into the pool of all PMRs
+     * @param newPMRs
+     * @returns {boolean}
+     */
+    EmuchartsEditor.prototype.mergePMR = function (newPMRs) {
+        return this.emucharts.mergePMR ? this.emucharts.mergePMR(newPMRs) : false;
     };
 
     module.exports = EmuchartsEditor;

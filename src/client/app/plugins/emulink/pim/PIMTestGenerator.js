@@ -31,15 +31,13 @@
 								behaviours : (array of string)
 							}),
 						components: (empty array (of Presentation Model),
-						pmr: (array of {
-								behaviour : (string),
-								operation : (string)
+						pmr: ((set of ){
+								behaviour (string): operation (string)
 							})
-					}),
-				pmr: (array of {
-						behaviour : (string),
-						operation : (string)
 					})
+		}),
+	pmr: ((set of ){
+				behaviour (string): operation (string)
 		}),
 	start_state: (State {
 				name: (string)  // Starting state of the PIM
