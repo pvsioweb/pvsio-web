@@ -141,6 +141,15 @@ define(function (require, exports, module) {
                                 chart.constants.set(constant.id, constant);
                             });
                         }
+                        if (chart_reader.pmr) {
+                            chart.pmr = {};
+                            // Construct PMR set.
+                            for (var behaviour in chart_reader.pmr) {
+                                if (chart_reader.pmr.hasOwnProperty(behaviour)) {
+                                    chart.pmr[behaviour] = chart_reader.pmr[behaviour];
+                                }
+                            }
+                        }
                         // associate an editor to the created emuchart
                         // FIXME: Improve the constructor and this importEmuchart function
                         var emuchart = {
@@ -149,6 +158,9 @@ define(function (require, exports, module) {
                             initial_edges: chart.initial_edges,
                             variables: chart.variables,
                             constants: chart.constants
+                        }
+                        if (chart.pmr !== 'undefined') {
+                            emuchart.pmr = chart.pmr;
                         }
                         if (chart_reader.isPIM && chart_reader.isPIM === true) {
                             emuchart.isPIM = true;

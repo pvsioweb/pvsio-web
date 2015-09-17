@@ -62,9 +62,8 @@ define(function (require, exports, module) {
 			y: node.y,
 			width : node.width,
 			height: node.height,
-			widgets : this.getWidgets(node.widgets),
-			components : this.getStates(node.components),
-			pmr : node.pmr || []
+			widgets : this.getWidgets(node.widgets)
+		//	components : this.getStates(node.components)
 		};
 	};
 

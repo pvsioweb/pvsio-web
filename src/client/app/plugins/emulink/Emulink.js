@@ -713,9 +713,9 @@ define(function (require, exports, module) {
                         variables: emuchartsManager.getVariables()
                     }
                 };
-                // Flags.
-                if (emuchartsManager.getIsPIM())
-                    emuchart.chart.isPIM = true;
+                // PIM.
+                emuchart.chart.pmr = emuchartsManager.getPMR();
+                emuchart.chart.isPIM = emuchartsManager.getIsPIM();
 
                 var content = JSON.stringify(emuchart, null, " ");
                 projectManager.project().addFile(name, content, { overWrite: true }).then(function (res) {
@@ -1427,6 +1427,7 @@ define(function (require, exports, module) {
                 console.log("Warning, current emuchart is not a PIM.");
                 return;
             }
+            var initTrans = emuchartsManager.getInitialTransitions();
             var emuchart = {
                 name: ("emucharts_" + projectManager.project().name()),
                 author: {
@@ -1438,15 +1439,14 @@ define(function (require, exports, module) {
                 //variables: emuchartsManager.getVariables(),
                 states: emuchartsManager.getStates(),
                 transitions: emuchartsManager.getTransitions(),
-                initial_transitions: emuchartsManager.getInitialTransitions(),
+                initial_transitions: initTrans,
                 pm: {
                     name: projectManager.project().name(),
                     widgets: [],
                     components: emuchartsManager.getStates(),
                     pmr: []
                 },
-                // TODO: tidy this up
-                start_state: emuchartsManager.getInitialTransitions()[0].target.name,
+                start_state: initTrans ? initTrans[0].target.name : "",
                 final_states: [],
                 isPIM: emuchartsManager.getIsPIM()
             };

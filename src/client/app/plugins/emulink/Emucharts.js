@@ -68,6 +68,7 @@ define(function (require, exports, module) {
             }
             this.constants = emuchart.constants || d3.map();
             this.variables = emuchart.variables || d3.map();
+            this.pmr = emuchart.pmr || {};
             var isPIM = emuchart.isPIM && emuchart.isPIM === true;
             this.pim = new PIMs(isPIM);
         } else {
@@ -76,9 +77,9 @@ define(function (require, exports, module) {
             this.initial_edges = d3.map();
             this.variables = d3.map();
             this.constants = d3.map();
+            this.pmr = {};
             this.pim = new PIMs();
         }
-        this.pmr = {};
 
 		eventDispatcher(this);
         return this;
