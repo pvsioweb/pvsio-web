@@ -2051,8 +2051,8 @@ define(function (require, exports, module) {
      * If behaviour could be found then returns the relation (behaviour, operation),
      * else returns null.
      */
-    EmuchartsEditor.prototype.getPMR = function (behaviour) {
-        return this.emucharts.getPMR ? this.emucharts.getPMR(behaviour) : {};
+    EmuchartsEditor.prototype.getPMR = function (behaviour, isSave) {
+        return this.emucharts.getPMR ? this.emucharts.getPMR(behaviour, isSave) : d3.map();
     };
 
     /**

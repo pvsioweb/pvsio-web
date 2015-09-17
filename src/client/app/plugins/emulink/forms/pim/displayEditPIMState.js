@@ -93,7 +93,7 @@ define(function (require, exports, module) {
 				},
 				value: {
 					widgets: _this.pims.getWidgets(data.widgets) || [],
-					pmr: _this.pims.getPMR(data.pmr) || []
+					pmr: _this.pims.getPMR(data.pmr) || d3.map()
 				},
 				buttons: ["Cancel", "Save PMR"]
 			}).on("save_pmr", function (e, view) {

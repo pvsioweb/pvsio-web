@@ -120,17 +120,26 @@ define(function (require, exports, module) {
 	 * If behaviour could be found then returns the relation (behaviour, operation),
 	 * else returns null.
 	 */
-	PIMs.prototype.getPMR = function (pmrs, behaviour) {
-		if (!pmrs) { return {}; }
+	PIMs.prototype.getPMR = function (pmrs, behaviour, isSave) {
+		if (!pmrs) { return d3.map(); }
 		if (behaviour) {
-			return pmrs[behaviour] || null;
+			return pmrs.get(behaviour) || null;
 		}
-		var _pmr = {};
-		for (behaviour in pmrs) {
-			if (pmrs.hasOwnProperty(behaviour)) {
-				_pmr[behaviour] = pmrs[behaviour];
-			}
+
+		if (isSave) {
+			// Store as a standard object to ensure correct stringfy.
+			var obj = {};
+			pmrs.forEach(function (behaviour) {
+				obj[behaviour] = pmrs.get(behaviour);
+			});
+			return obj;
 		}
+
+		var _this = this;
+		var _pmr = d3.map();
+		pmrs.forEach(function (behaviour) {
+			_this.addPMR(_pmr, behaviour, pmrs.get(behaviour));
+		});
 		return _pmr;
 	};
 
@@ -144,21 +153,20 @@ define(function (require, exports, module) {
 		if (!pmrs || !behaviour || !operation) {
 			return false;
 		}
-		pmrs[behaviour] = operation;
+		pmrs.set(behaviour, operation);
 		return true;
 	};
 
 	/**
 	 * Saves the new PMRs into the pool of all PMRs
 	 * @param newPMRs
-	 * @returns {boolean}
 	 */
 	PIMs.prototype.mergePMR = function (pmrs, newPMRs) {
-		for (var behaviour in newPMRs) {
-			if (newPMRs.hasOwnProperty(behaviour)) {
-				pmrs[behaviour] = newPMRs[behaviour];
-			}
-		}
+		var _this = this;
+		if (!pmrs || !newPMRs) { return; }
+		newPMRs.forEach(function (behaviour) {
+			_this.addPMR(pmrs, behaviour, newPMRs.get(behaviour));
+		});
 	};
 
 	module.exports = PIMs;

@@ -68,7 +68,7 @@ define(function (require, exports, module) {
             }
             this.constants = emuchart.constants || d3.map();
             this.variables = emuchart.variables || d3.map();
-            this.pmr = emuchart.pmr || {};
+            this.pmr = emuchart.pmr || d3.map();
             var isPIM = emuchart.isPIM && emuchart.isPIM === true;
             this.pim = new PIMs(isPIM);
         } else {
@@ -77,7 +77,7 @@ define(function (require, exports, module) {
             this.initial_edges = d3.map();
             this.variables = d3.map();
             this.constants = d3.map();
-            this.pmr = {};
+            this.pmr = d3.map();
             this.pim = new PIMs();
         }
 
@@ -990,8 +990,8 @@ define(function (require, exports, module) {
      * If behaviour could be found then returns the relation (behaviour, operation),
      * else returns null.
      */
-    Emucharts.prototype.getPMR = function (behaviour) {
-        return this.pim && this.pim.getPMR ? this.pim.getPMR(this.pmr, behaviour) : {};
+    Emucharts.prototype.getPMR = function (behaviour, isSave) {
+        return this.pim && this.pim.getPMR ? this.pim.getPMR(this.pmr, behaviour, isSave) : d3.map();
     };
 
     /**

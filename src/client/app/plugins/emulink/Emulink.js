@@ -714,7 +714,7 @@ define(function (require, exports, module) {
                     }
                 };
                 // PIM.
-                emuchart.chart.pmr = emuchartsManager.getPMR();
+                emuchart.chart.pmr = emuchartsManager.getPMR(null, true);
                 emuchart.chart.isPIM = emuchartsManager.getIsPIM();
 
                 var content = JSON.stringify(emuchart, null, " ");

@@ -142,11 +142,10 @@ define(function (require, exports, module) {
                             });
                         }
                         if (chart_reader.pmr) {
-                            chart.pmr = {};
-                            // Construct PMR set.
+                            chart.pmr = d3.map();
                             for (var behaviour in chart_reader.pmr) {
                                 if (chart_reader.pmr.hasOwnProperty(behaviour)) {
-                                    chart.pmr[behaviour] = chart_reader.pmr[behaviour];
+                                    chart.pmr.set(behaviour, chart_reader.pmr[behaviour]);
                                 }
                             }
                         }
@@ -702,8 +701,8 @@ define(function (require, exports, module) {
      * If behaviour could be found then returns the relation (behaviour, operation),
      * else returns null.
      */
-    EmuchartsManager.prototype.getPMR = function (behaviour) {
-        return _selectedEditor.getPMR ? _selectedEditor.getPMR(behaviour) : {};
+    EmuchartsManager.prototype.getPMR = function (behaviour, isSave) {
+        return _selectedEditor.getPMR ? _selectedEditor.getPMR(behaviour, isSave) : d3.map();
     };
 
     /**
