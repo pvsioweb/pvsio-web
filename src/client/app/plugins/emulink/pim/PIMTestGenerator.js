@@ -185,11 +185,11 @@ define(function (require, exports, module) {
 					};
 				}
 
-				if (!pm || !pm.components) {
+				if (!pm) {
 					return [];
 				}
 
-				if (pm.components.length === 0) {
+				if (!pm.components || pm.components.length === 0) {
 					return addState(pm);
 				}
 
