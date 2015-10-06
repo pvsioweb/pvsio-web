@@ -1,0 +1,7 @@
+set name=description value="pkg(5) Client Java API"
+set name=info.classification value=":System Tools"
+set name=pkg.detailed_url value=http://wikis.oracle.com/display/updatecenter/Release+Notes+for+Update+Center+2.3
+set name=pkg.summary value="pkg(5) Client Java API"
+set name=pkg.description value="The Image Packaging System, also known as pkg(5), is a network-centric packaging system. This package provides a pkg(5) client Java API for implementing pkg(5)-enabled clients without any dependency on Python, the implementation language for the core of the pkg(5) system. The Java API provides for software lifecycle management including installation, upgrade, and removal."
+set name=info.upstream_url value=http://java.net/projects/updatecenter2
+set name=info.maintainer_url value=http://java.net/projects/updatecenter2

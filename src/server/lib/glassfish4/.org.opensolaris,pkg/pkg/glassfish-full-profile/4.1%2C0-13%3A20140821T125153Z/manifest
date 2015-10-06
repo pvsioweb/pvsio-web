@@ -1,0 +1,19 @@
+set name=fmri value=pkg:/glassfish-full-profile@4.1,0-13:20140821T125153Z
+set name=info.classification value="Application Servers"
+set name=pkg.description value="GlassFish Full Platform Metapackage.  GlassFish Server is a modular and lightweight Java EE 7 compliant application server. Key features include an OSGi runtime, fast startup time, maven support, and rapid iterative development with Active Redeploy.  GlassFish Server also offers feature-rich administration with the web console, command line, and RESTful API."
+set name=pkg.summary value="GlassFish Full Platform"
+depend fmri=pkg:/metro type=require
+depend fmri=pkg:/glassfish-appclient type=require
+depend fmri=pkg:/mq-server type=require
+depend fmri=pkg:/mq-config-gf type=require
+depend fmri=pkg:/glassfish-jms type=require
+depend fmri=pkg:/glassfish-common-full type=require
+depend fmri=pkg:/glassfish-web-profile type=require
+depend fmri=pkg:/glassfish-cmp type=require
+depend fmri=pkg:/glassfish-ejb type=require
+depend fmri=pkg:/mq-bin-exe type=require
+depend fmri=pkg:/mq-bin-sh type=require
+depend fmri=pkg:/glassfish-full-incorporation type=require
+depend fmri=pkg:/glassfish-corba type=require
+license 8741fa556feea4ca58ec28abc47de0bf9d5b39a3 chash=28b7cfba8f297b99296afc231955dc90e8d76d47 license="CDDL and GPL v2 with classpath exception" pkg.csize=12394 pkg.size=38052
+set name=publisher value=release.glassfish.org

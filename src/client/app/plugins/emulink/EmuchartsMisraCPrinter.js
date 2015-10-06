@@ -2,7 +2,7 @@
  * @author Gioacchino Mauro
  * @date ...
  *
- * MISRA C printer for emucharts models.
+ * MISRA C code printer for emucharts models.
  * Emuchart objects have the following structure:
       emuchart = {
                 name: (string),
@@ -49,7 +49,7 @@
       }
  */
 define(function (require, exports, module) {
-    var threadTemplate = require("text!plugins/emulink/models/bless/templates/thread.handlebars");
+    var threadTemplate = require("text!plugins/emulink/models/misraC/templates/thread.handlebars");
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
     var _parser = new EmuchartsParser();
@@ -77,11 +77,16 @@ define(function (require, exports, module) {
     
     function getType (type) {
         var typeMaps = {
-            "Time": "BLESS_Types::Time",
-            "bool": "Base_Types::Boolean"
+            "Time": "BLESS_Types::Time",    //iachino: Serve??
+            "bool": "unsigned char",
+            "double": "double",
+            "int": "unsigned int"
         };
         if (type.toLowerCase() === "bool" || type.toLowerCase() === "boolean") {
-            type = "bool";
+            type = "unsigned char";
+        }
+        if (type.toLowerCase() === "real") {
+            type = "double";    
         }
         return typeMaps[type] || type;
     }
@@ -146,7 +151,7 @@ define(function (require, exports, module) {
             if (expression.type === "assignment") {
                 var name = expression.val.identifier.val;
                 if (isLocalVariable(name, emuchart)) {
-                    return getTerm(name, emuchart) + " := " +
+                    return getTerm(name, emuchart) + " = " +
                             getExpression(expression.val.expression, emuchart);                
                 }
                 return getTerm(name, emuchart) + "(" +
@@ -255,28 +260,28 @@ define(function (require, exports, module) {
     
     Printer.prototype.print_descriptor = function (emuchart) {
         this.model.descriptor = 
-            "-- ---------------------------------------------------------------" +
-            "\n--  Model: " + emuchart.name;
+            "/**---------------------------------------------------------------" +
+            "\n*   Model: " + emuchart.name;
         if (emuchart.author) {
             this.model.descriptor += 
-                "\n--  Author: " + emuchart.author.name +
-                "\n--          " + emuchart.author.affiliation +
-                "\n--          " + emuchart.author.contact;
+                "\n*   Author: " + emuchart.author.name +
+                "\n*           " + emuchart.author.affiliation +
+                "\n*           " + emuchart.author.contact;
         }
         if (emuchart.description) {
             this.model.descriptor += 
-                "\n-- ---------------------------------------------------------------" +
-                "\n--  " + emuchart.description;
+                "\n*  ---------------------------------------------------------------" +
+                "\n*   " + emuchart.description;
         }
         this.model.descriptor += 
-            "\n-- ---------------------------------------------------------------\n";
+            "\n*  ---------------------------------------------------------------*/\n";
     };
     
     Printer.prototype.print_disclaimer = function (emuchart) {
-        this.model.disclaimer = "\n-- ---------------------------------------------------------------\n" +
-                    "--  Bless/AADL model generated using PVSio-web BlessPrinter ver 0.1\n" +
-                    "--  Tool freely available at http://www.pvsioweb.org" +
-                    "\n-- ---------------------------------------------------------------\n";
+        this.model.disclaimer = "\n/** ---------------------------------------------------------------\n" +
+                    "*   C code generated using PVSio-web MisraCPrinter ver 0.1\n" +
+                    "*   Tool freely available at http://www.pvsioweb.org" +
+                    "\n*  --------------------------------------------------------------*/\n";
     };
     
 

@@ -1,0 +1,38 @@
+set name=fmri value=pkg:/glassfish-ejb@4.1,0-13:20140821T114720Z
+set name=info.classification value="Application Servers"
+set name=pkg.description value="Full implementation of the EJB 3.1 API, including support for remote session beans, asynchronous session bean invocations, the EJB Timer Service, and message-driven beans. GlassFish Server is a modular and lightweight Java EE 7 compliant application server. Key features include an OSGi runtime, fast startup time, maven support, and rapid iterative development with Active Redeploy.  GlassFish Server also offers feature-rich administration with the web console, command line, and RESTful API."
+set name=pkg.summary value="GlassFish EJB Container"
+depend fmri=pkg:/glassfish-ejb-lite type=require
+depend fmri=pkg:/glassfish-corba type=require
+license 8741fa556feea4ca58ec28abc47de0bf9d5b39a3 chash=28b7cfba8f297b99296afc231955dc90e8d76d47 license="CDDL and GPL v2 with classpath exception" pkg.csize=12394 pkg.size=38052
+dir group=sys mode=0775 owner=root path=glassfish
+dir group=sys mode=0775 owner=root path=glassfish/modules
+dir group=sys mode=0775 owner=root path=glassfish/lib
+file 3147619ade5c79f6667d1872e9bb0fad52ced948 chash=91153aeabc05d51b2c98cddd7f1f8269b3dbb69d group=sys mode=0664 owner=root path=glassfish/modules/console-corba-plugin.jar pkg.csize=43997 pkg.size=48576
+file cbdf802cc65f93226faae83c3e8bf0bfe060d494 chash=72019fb05d6104869b45485db346dd206bbfcb45 group=sys mode=0664 owner=root path=glassfish/modules/ejb.security.jar pkg.csize=85873 pkg.size=92592
+file b6cbf907aaddaf91e9f6dae27c4608d2e1228fd1 chash=7cf6ee20a55872657d133ee79ca950c3377e2977 group=sys mode=0664 owner=root path=glassfish/modules/orb-enabler.jar pkg.csize=10589 pkg.size=13370
+file 4d18351757bdeeb4c4fd691d0ea318464c20d3b8 chash=79025dbe55874a7e024fb56df923bf35dbdfa7a7 group=sys mode=0664 owner=root path=glassfish/modules/orb-iiop.jar pkg.csize=80583 pkg.size=86852
+file 4875c67b254ca1ecf9de3e7f2abea0eef2dd9c39 chash=9ec0aeb4b41e4d8dad6f895aea75c263fc934ee1 group=sys mode=0664 owner=root path=glassfish/modules/console-ejb-plugin.jar pkg.csize=28677 pkg.size=32843
+file b8289714a45bb93db2719133b9c77f12275e2c8d chash=bd39e04718c4dac58ba54b91720a44ef2c5499bf group=sys mode=0664 owner=root path=glassfish/modules/ejb-full-container.jar pkg.csize=66658 pkg.size=71237
+dir group=sys mode=0775 owner=root path=glassfish/lib/install
+dir group=sys mode=0775 owner=root path=glassfish/lib/install/databases
+dir group=sys mode=0775 owner=root path=glassfish/lib/install/applications
+file 8839b6465a49b95ac5702ef9bfae62c9688ffae6 chash=cc161c6f11853441886c057972bd3284076d8d55 group=sys mode=0664 owner=root path=glassfish/lib/install/databases/ejbtimer_pointbase.sql pkg.csize=240 pkg.size=604
+file 0b0b4b7386c368e48e44d8a6aa19d009f84d3e41 chash=2cf090a240bcd222c60575aaa5acb98f25ebadc3 group=sys mode=0664 owner=root path=glassfish/lib/install/databases/ejbtimer_derby.sql pkg.csize=230 pkg.size=603
+file 34ed29c502b0ec73a360d21e0fca76c5b65170da chash=d871f97147d0ee8d3daa9744e769064e87d6a386 group=sys mode=0664 owner=root path=glassfish/lib/install/databases/ejbtimer_symfoware.sql pkg.csize=251 pkg.size=623
+file d2997aa182d9cd0780f98ca90cf629b1317d7a3e chash=acc49efa071150e9a4302a4e1af8b466e851f4bb group=sys mode=0664 owner=root path=glassfish/lib/install/databases/ejbtimer_oracle.sql pkg.csize=234 pkg.size=613
+file cab0390b2f1190f7b546d69bcd96442991eb867b chash=c63fad06d4a220f45262e7533d6fd14b404f8959 group=sys mode=0664 owner=root path=glassfish/lib/install/databases/ejbtimer_db2.sql pkg.csize=235 pkg.size=633
+file ce314d13cb4c181feadc9dae151651e756c7c82d chash=7f28c3973294e115f478cd5f7567818f2c8f1f3f group=sys mode=0664 owner=root path=glassfish/lib/install/databases/ejbtimer_mssqlserver.sql pkg.csize=238 pkg.size=627
+file ce314d13cb4c181feadc9dae151651e756c7c82d chash=7f28c3973294e115f478cd5f7567818f2c8f1f3f group=sys mode=0664 owner=root path=glassfish/lib/install/databases/ejbtimer_sybase.sql pkg.csize=238 pkg.size=627
+file 20d4a5c098d4aec43736ab6bc2582a82aae7dcf1 chash=ea96bbfb0f10020e93d78798449a9618db002224 group=sys mode=0664 owner=root path=glassfish/lib/install/databases/ejbtimer_mysql.sql pkg.csize=240 pkg.size=681
+dir group=sys mode=0775 owner=root path=glassfish/lib/install/databases/upgrade
+file d71de0bb13f8543942b493ec5dcfa18267aa9de9 chash=6c0cf3e931aef2d3947a646d14e582662d5cad7d group=sys mode=0664 owner=root path=glassfish/lib/install/databases/upgrade/ejbtimer_upgrade_sybase.sql pkg.csize=110 pkg.size=129
+file 50f4d90f004e9fc591fd58d93a1ba0952ad1198e chash=8a6e290d8c7d491d750d6de27c64148d28b45eb1 group=sys mode=0664 owner=root path=glassfish/lib/install/databases/upgrade/ejbtimer_upgrade_db2.sql pkg.csize=105 pkg.size=122
+file 6a9302e1a4d04448b8ff33380e93d7e2f1752626 chash=4d670eec1c0fd1f81589155f78c48d5a7290a4cc group=sys mode=0664 owner=root path=glassfish/lib/install/databases/upgrade/ejbtimer_upgrade_oracle.sql pkg.csize=108 pkg.size=126
+file d71de0bb13f8543942b493ec5dcfa18267aa9de9 chash=6c0cf3e931aef2d3947a646d14e582662d5cad7d group=sys mode=0664 owner=root path=glassfish/lib/install/databases/upgrade/ejbtimer_upgrade_mssqlserver.sql pkg.csize=110 pkg.size=129
+file 908e39492a426bd0e61f818d89db32684cd8c517 chash=d678d079c0ee19dc4cae9d2d77b677349a196bce group=sys mode=0664 owner=root path=glassfish/lib/install/databases/upgrade/ejbtimer_upgrade_mysql.sql pkg.csize=111 pkg.size=139
+file 2b426de666bf428ca96c3519882980a8733add57 chash=95a8ec39b330fecd4d569228a3da3feb41403aa1 group=sys mode=0664 owner=root path=glassfish/lib/install/databases/upgrade/ejbtimer_upgrade_symfoware.sql pkg.csize=59 pkg.size=41
+file 01fafe29f67e3e1f668d7bfd910e57db3db4ae4e chash=c48e451f18b8201b064a5dcca1245f6ff3520bbe group=sys mode=0664 owner=root path=glassfish/lib/install/databases/upgrade/ejbtimer_upgrade_derby.sql pkg.csize=106 pkg.size=131
+file bfd595a82b6c7bde182a93ce98ea0314d3904543 chash=d94eff74eec4ebc27990fdede17bc9e8fb7212ef group=sys mode=0664 owner=root path=glassfish/lib/install/databases/upgrade/ejbtimer_upgrade_pointbase.sql pkg.csize=107 pkg.size=126
+file 9d09226bccb4d11bb22200a525f3ae14b7ca3cad chash=c55b9f2cc594b4a8d31b6434699df78efed66a7d group=sys mode=0664 owner=root path=glassfish/lib/install/applications/ejb-timer-service-app.war pkg.csize=10015 pkg.size=12018
+set name=publisher value=release.glassfish.org

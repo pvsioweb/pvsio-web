@@ -1,0 +1,10 @@
+set name=fmri value=pkg:/json@1.0,0-0.1:20140821T121256Z
+set name=info.classification value="Web Services"
+set name=pkg.description value="Java API for Processing JSON (JSON-P)"
+set name=pkg.summary value="Java API for Processing JSON (JSON-P"
+license 8741fa556feea4ca58ec28abc47de0bf9d5b39a3 chash=28b7cfba8f297b99296afc231955dc90e8d76d47 license="CDDL and GPL v2 with classpath exception" pkg.csize=12394 pkg.size=38052
+dir group=sys mode=0775 owner=root path=glassfish
+dir group=sys mode=0775 owner=root path=glassfish/modules
+file 7ed3dffcd3a17a5e5ad9476d93f4c435f735443e chash=13611451b428b548c3e6c40438af231c5a420d48 group=sys mode=0664 owner=root path=glassfish/modules/javax.json.jar pkg.csize=73464 pkg.size=82747
+file f159f8bd2ec58ed7a7ddc9c997b36880001a21e9 chash=cb23c22efe88eb0bdd11fbc03c40229b1d63cf4b group=sys mode=0664 owner=root path=glassfish/modules/jsonp-jaxrs.jar pkg.csize=6253 pkg.size=7507
+set name=publisher value=release.glassfish.org

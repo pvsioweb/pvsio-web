@@ -1,0 +1,3 @@
+dir group=sys mode=0755 owner=root path=javadb
+dir group=sys mode=0755 owner=root path=javadb/bin
+dir group=sys mode=0755 owner=root path=javadb/lib

@@ -1,0 +1,12 @@
+dir group=sys mode=0755 owner=root path=mq
+dir group=sys mode=0755 owner=root path=mq/lib
+dir group=sys mode=0755 owner=root path=mq/lib/install
+dir group=sys mode=0755 owner=root path=mq/lib/props
+dir group=sys mode=0755 owner=root path=mq/lib/dtd
+dir group=sys mode=0755 owner=root path=mq/lib/ext
+dir group=sys mode=0755 owner=root path=mq/lib/images
+dir group=sys mode=0755 owner=root path=mq/lib/help
+dir group=sys mode=0755 owner=root path=mq/lib/props/broker
+dir group=sys mode=0755 owner=root path=mq/lib/images/admin
+dir group=sys mode=0755 owner=root path=mq/lib/help/en
+dir group=sys mode=0755 owner=root path=mq/lib/help/images

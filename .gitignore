@@ -22,3 +22,5 @@ public/V1.html
 test.js
 .idea
 pvsio-web.iml
+examples/projects/*
+.gitignore

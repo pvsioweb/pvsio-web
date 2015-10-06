@@ -1,0 +1,455 @@
+set name=fmri value=pkg:/glassfish-common@4.1,0-13:20140821T113850Z
+set name=info.classification value="Application Servers"
+set name=pkg.description value="GlassFish common utilities and components.  GlassFish Server is a modular and lightweight Java EE 7 compliant application server. Key features include an OSGi runtime, fast startup time, maven support, and rapid iterative development with Active Redeploy.  GlassFish Server also offers feature-rich administration with the web console, command line, and RESTful API."
+set name=pkg.summary value="GlassFish Common Components"
+depend fmri=pkg:/glassfish-nucleus type=require
+depend fmri=pkg:/glassfish-corba-base type=require
+license 8741fa556feea4ca58ec28abc47de0bf9d5b39a3 chash=28b7cfba8f297b99296afc231955dc90e8d76d47 license="CDDL and GPL v2 with classpath exception" pkg.csize=12394 pkg.size=38052
+dir group=sys mode=0775 owner=root path=glassfish
+dir group=sys mode=0775 owner=root path=glassfish/modules
+dir group=sys mode=0775 owner=root path=glassfish/lib
+file 3c8fb2e920c3fd3906263c86293004ffff3a2fdd chash=50257344d2a44f8738fb6272b908d921f6ae2959 group=sys mode=0664 owner=root path=glassfish/modules/glassfish-naming.jar pkg.csize=73072 pkg.size=81277
+file 1ee2978da315dde96ef89f61ee9c41dd3037a857 chash=3c48f98b46290c9b86316c4565757a5c78081a65 group=sys mode=0664 owner=root path=glassfish/modules/monitoring-core.jar pkg.csize=89423 pkg.size=101269
+file f41654bbf37734c570f9b16baedd1dd320975388 chash=286b24bbbb08daa8c3b0c59a9dcd3c37cff12b92 group=sys mode=0664 owner=root path=glassfish/modules/shoal-gms-api.jar pkg.csize=30556 pkg.size=41012
+file 05e640772b02a77584228ae1acf1883570c19e86 chash=8d2f1a82bc36a235247836d0c559e6a9fb7bb093 group=sys mode=0664 owner=root path=glassfish/modules/gms-bootstrap.jar pkg.csize=22192 pkg.size=25619
+file 8b00411109bc1d6ea76b229efe1d40492013eb36 chash=8c77aa9385adddf92949d9f0032ce50b8ae217eb group=sys mode=0664 owner=root path=glassfish/modules/javax.enterprise.deploy-api.jar pkg.csize=38470 pkg.size=49692
+dir group=sys mode=0775 owner=root path=glassfish/lib/dtds
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas
+file 8c9d738395df3a230b0945e270f7d75e5d1af3c1 chash=3037738ea712fcd7af58265be2a1a17e9fbea1e2 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-application_1_3-0.dtd pkg.csize=1403 pkg.size=2946
+file aa7bcf179d1ab7bf9daddb38770c8518f73fdc95 chash=472d632ec97ebc9333e4d6c6902cdac2773534ba group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-cmp-mapping_1_0.dtd pkg.csize=2156 pkg.size=5718
+file e4d7a85a468cbfb074195c9479b0e2db497cfe59 chash=69cf0a9bdfcf502265139327cabfed7151af4afe group=sys mode=0664 owner=root path=glassfish/lib/dtds/application-client_1_2.dtd pkg.csize=2950 pkg.size=9600
+file 513a7f85b03119cd5e55c682b57c3837a2b9d9e5 chash=995594ac8b54f8bc0614e12d00af5455e27207ca group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-application-client-container_1_2.dtd pkg.csize=4040 pkg.size=13135
+file e156a3675fe0027816f7449df08778e91257220b chash=28b7721441247dcbff00e83583b9e4e854f455f7 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-web-app_3_0-0.dtd pkg.csize=8778 pkg.size=32176
+file 93bbdf3bbf7c5e6ede5b1f5149d32be2b3873430 chash=7a752de0b050fdacf25cef7ae9b5b7e3bf3bae22 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-web-app_2_3-0.dtd pkg.csize=3577 pkg.size=11497
+file da0b2d67f3dc42ade6819076a98ed3c808154928 chash=809148fa740faf37edf31357846c919ff43cfb27 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-application-client_6_0-0.dtd pkg.csize=5324 pkg.size=18843
+file 4ef0f4a801a6b4ad06add09b97cd8a32c1031697 chash=10a57b130c9d673cad0ca7ab58b310828a01d5fe group=sys mode=0664 owner=root path=glassfish/lib/dtds/web-jsptaglibrary_1_2.dtd pkg.csize=4082 pkg.size=13320
+file f3fe04792a8e4f941d76af95855b67ae115a843c chash=88834ed0ed3aff06f2c96b06875c9fa9acb7ba8e group=sys mode=0664 owner=root path=glassfish/lib/dtds/web-app_2_2.dtd pkg.csize=4777 pkg.size=17275
+file 1de5ba0fc107da7bc8d4b7408897353c4898bac9 chash=b761c37a70d3aa0f331b1d04366e369f0338158e group=sys mode=0664 owner=root path=glassfish/lib/dtds/glassfish-application_6_0-1.dtd pkg.csize=5486 pkg.size=19094
+file c383dd8de486bc9cf0841d9f038bd849f750bcd4 chash=4b62300f9e22fc070e5e9580a9d9a866c45e91fd group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-loadbalancer_1_0.dtd pkg.csize=1987 pkg.size=5957
+file beac7ad0f7df2d5ca87e33997e97101ace01eac4 chash=e21ca24f053f3e7d2cd106b4db159fe6c8c6f1e3 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-application-client_1_4-0.dtd pkg.csize=2514 pkg.size=6978
+file 205949e43c6ea438559ead72dd95255bf4ea6e1b chash=32441396653d61e50b78a4cfe206ad954c352a1e group=sys mode=0664 owner=root path=glassfish/lib/dtds/glassfish-application-client_6_0-1.dtd pkg.csize=5340 pkg.size=19095
+file d2b2f786378ca9b34bce936649ba1a5b87bdb9d7 chash=74f719b347cb6bf9af3a3470a71486f9d3ee2280 group=sys mode=0664 owner=root path=glassfish/lib/dtds/web-app_2_3.dtd pkg.csize=7900 pkg.size=31150
+file 4bc809b9fb72860691dbe9980ef1da30c4d7bb55 chash=71505e81327d3cc7a64f8db36d7ef61e8f6050d1 group=sys mode=0664 owner=root path=glassfish/lib/dtds/glassfish-ejb-jar_3_1-1.dtd pkg.csize=10788 pkg.size=40147
+file fe14c114411dadbdf94c2f55fc56d19e7b7d8216 chash=c97bb33a1a0a4f33b72d06f5da528d91a90ac7f7 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-web-app_2_3-1.dtd pkg.csize=3579 pkg.size=11502
+file bb4dda8c034c7ecaec23b16d8e0ce30cfa3c33af chash=5a7c2698881f2bfc84381a1dbf9e32cb1e3f3a01 group=sys mode=0664 owner=root path=glassfish/lib/dtds/application-client_1_3.dtd pkg.csize=4104 pkg.size=14602
+file aaffb3e1a24ea91a0f7eb9ec1cc05ffeb134ceb8 chash=bcff4b16f59e67b3ff5fa3ef81d333fcb081f235 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-cmp-mapping_1_1.dtd pkg.csize=2153 pkg.size=5689
+file bd10b41f64deb0f87611e4685e56eb5c6949c8c8 chash=805f62b76592bf75f0070b170511589cf405aad4 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-application_5_0-0.dtd pkg.csize=1768 pkg.size=3813
+file 43c3f1868c0b769bbb87163797207f61a0f8889d chash=a0e7ecbea7ef29148f91e8c4860956457bcbdea2 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-application-client_1_4-1.dtd pkg.csize=4541 pkg.size=15959
+file 98e41f68376220dececdcbc2f11d66c7c836c233 chash=d4555d2291a7753b197bb3e8d6bb96166bbcd2a9 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-loadbalancer_1_1.dtd pkg.csize=2137 pkg.size=7297
+file 909061797408302db0b17706ddcd3f736ecf6f9e chash=2c0264b5cd7505b494b2da6933f325ec09cc8d58 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-ejb-jar_3_1-0.dtd pkg.csize=10354 pkg.size=38516
+file 09ae35116e990ed2d162b6ef16b4913766605ebc chash=16b8e271f6eaf812f390436015b52f1a568ff82d group=sys mode=0664 owner=root path=glassfish/lib/dtds/ejb-jar_1_1.dtd pkg.csize=6584 pkg.size=27562
+file d85ab80acd4379f41eed7a6bf82a1924e29196ca chash=3ff0cd7966a574b85949548c54d71d29afc4724e group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-ejb-jar_2_0-1.dtd pkg.csize=4738 pkg.size=16018
+file 9ba287ab53ec0c1646f36d6da8649fa09ab901f4 chash=9e8cb852f9d265c8f73c0c3c4a17e39967de497a group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-ejb-jar_3_0-0.dtd pkg.csize=10328 pkg.size=38577
+file 1ca4fb5862b2862f9035f41259feb173630b9348 chash=2033b9cf8f3dde28c25696159b0b5d2c04967f27 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-web-app_2_4-1.dtd pkg.csize=8117 pkg.size=29687
+file af83d3447bda494d52e5a141e46afcb7388e631b chash=2cc2fb6c3f3a183a5062fd21886cac487c802f9e group=sys mode=0664 owner=root path=glassfish/lib/dtds/glassfish-application-client-container_1_3.dtd pkg.csize=4064 pkg.size=13261
+file 0641399b6896af3d1bc7992af86e45f145b1a79a chash=dcc28450e43dd2931c156396dcba36939d004fa7 group=sys mode=0664 owner=root path=glassfish/lib/dtds/application_1_2.dtd pkg.csize=1997 pkg.size=5869
+file b24bd40af80eae444389ec8ec9af440a3e7a72ed chash=30a628b54ab15bf0b11ca0a1a4b6d79f20525a81 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-cmp-mapping_1_2.dtd pkg.csize=2215 pkg.size=5942
+file 41dbb3c8ea42302fe8654d9158a11b51aba3cd4d chash=f530787f349f9f7c46402b4991a00ca37defe9be group=sys mode=0664 owner=root path=glassfish/lib/dtds/ejb-jar_2_0.dtd pkg.csize=11411 pkg.size=52132
+file 3803ebde6234fd5a88ceb5979af1e698a5e002f8 chash=b90a5aec822f0b00b16e38fdd63879008c39f773 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-application-client-container_1_0.dtd pkg.csize=2736 pkg.size=7507
+file ef3d4fef766a367284a8071eb22941214bf139eb chash=eeb57443a18a7eb3560b6639dd6bf5ba537bd373 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-ejb-jar_2_1-1.dtd pkg.csize=10073 pkg.size=37552
+file 3b70e5b8453d0f8d6c8fc1719ac4e8cc621146fc chash=6f4842568f42e29bcad7de290ac7b61e3add34fb group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-application-client_5_0-0.dtd pkg.csize=5168 pkg.size=18346
+file efddc40b34f10825103b65e99c58b1d6ca1c6720 chash=487dbbd5c7224d3692e892d790b57a0db90c688d group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-ejb-jar_2_0-0.dtd pkg.csize=4735 pkg.size=15899
+file 89d513eb6961c0428ad5d6f27b28e3cdc0855451 chash=817a9cf5bbef821c9048f77fc9cc849bf0643ec5 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-application_6_0-0.dtd pkg.csize=5427 pkg.size=18704
+file 3a435acd6fe337d25858964afcf2ccc460647e10 chash=8f2242169303eaabe7ada8161d65b71819ef4bca group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-application-client_1_3-0.dtd pkg.csize=1300 pkg.size=3180
+file 824bcf3609026b0515bab7fa1640e5966a82e7a2 chash=ffa892c20c66758b54941d330ea7ea4435e3e4b6 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-web-app_2_5-0.dtd pkg.csize=8692 pkg.size=31925
+file c78f4c171b71b4e8e50c59dc3987f7063ee3ea4e chash=a4d82a53147d1a8d81e41f217a9323e718f9dd15 group=sys mode=0664 owner=root path=glassfish/lib/dtds/glassfish-web-app_3_0-1.dtd pkg.csize=8834 pkg.size=32573
+file 8ffa9b1bbbdf39f8be4de523f892e0d54aa74339 chash=f8caf3610866ce615413c585c46123da918e505c group=sys mode=0664 owner=root path=glassfish/lib/dtds/glassfish-application-client_6_0-2.dtd pkg.csize=5434 pkg.size=19364
+file 6f84c4c24649bdcd06c20f29f803257d947f8be6 chash=b992ca09912da2bea2742ff837cf6fe97163b1c1 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-ejb-jar_2_1-0.dtd pkg.csize=7437 pkg.size=25899
+file 83d86e4189f31e1ae880425766037b1313d30161 chash=1ce8705e60130671838758e9a702f8a20f5ab048 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-application_1_4-0.dtd pkg.csize=1649 pkg.size=3532
+file 6b9adda88bce56d74831c3f022ad5004b98d6878 chash=7676051ec1782ea3fa3b8d1d40945ffb50bbe859 group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-application-client-container_1_1.dtd pkg.csize=4010 pkg.size=13034
+file f416627a24403b51a7f84b0ca92ec8043d027de6 chash=89cbdfe2794bc22ee53091a1d6ad9f8f778fa7b2 group=sys mode=0664 owner=root path=glassfish/lib/dtds/web-jsptaglibrary_1_1.dtd pkg.csize=2593 pkg.size=6691
+file 52b0f11e181b3880d445ac7c7b01fd703075e6df chash=efb3a90bae70b475f420ca3b74df2e4db26494c2 group=sys mode=0664 owner=root path=glassfish/lib/dtds/application_1_3.dtd pkg.csize=2845 pkg.size=8472
+file ae6acf79abd30c9bb0370b95deaec1c77ad17ab3 chash=07116482a1d3b8c8411d5b0837b628264804dcff group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-server_1_0.dtd pkg.csize=15988 pkg.size=63807
+file 286abb7993d4bf8508e760df256f4ffe86ad1d7a chash=d34e29667085c9823eec8935694a4beb664640be group=sys mode=0664 owner=root path=glassfish/lib/dtds/sun-web-app_2_4-0.dtd pkg.csize=5850 pkg.size=19426
+dir group=sys mode=0775 owner=root path=glassfish/lib/dtds/wls810
+dir group=sys mode=0775 owner=root path=glassfish/lib/dtds/wls810/dtd
+file 8f05d2838fa88ad3ac7946db70366256e5389f63 chash=54a04c6f46468de643c92c01953806f590a25d2d group=sys mode=0664 owner=root path=glassfish/lib/dtds/wls810/dtd/weblogic-application_2_0.dtd pkg.csize=7839 pkg.size=31219
+file 730ed73d75623dda7d592c37857beb7ef7241343 chash=90c29ff577659211654c2b09a4b0d36fcfc08f13 group=sys mode=0664 owner=root path=glassfish/lib/schemas/application_1_4.xsd pkg.csize=2729 pkg.size=9745
+file 502d876ac380cc80c67044044393ef3f2cb2396c chash=89772448f035f0a70b358e685d228d4ba60eac74 group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-app_3_0.xsd pkg.csize=2674 pkg.size=10943
+file f6f55305d06461e9d54b3a3f4560ffef20ae3fe6 chash=fe69e45eda88ec4001b6dd7fddcb12009adc3f0e group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-fragment_3_0.xsd pkg.csize=2671 pkg.size=10151
+file adaa03ac75401b12de2ab16b32942441d70623a8 chash=5d46e6bab008612df25f3289aa8373a74ea150c5 group=sys mode=0664 owner=root path=glassfish/lib/schemas/XMLSchema.dtd pkg.csize=4034 pkg.size=16078
+file b4044c4da27e25d24b88981134921bae722cbe23 chash=433607cf9953e89501fe13364a72912af547e769 group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-jsptaglibrary_2_1.xsd pkg.csize=6752 pkg.size=32876
+file d30be6e7425e485f5f245ac93bc7951ecc1973d4 chash=70ac62abb1a95af81dacd495266757e1b4257d12 group=sys mode=0664 owner=root path=glassfish/lib/schemas/application-client_5.xsd pkg.csize=3006 pkg.size=10868
+file 973e440e402e7e32ee4b495a6d122d90446f3cbb chash=50f1fe827adfa085cb0840dcdf5d526694461ccc group=sys mode=0664 owner=root path=glassfish/lib/schemas/ejb-jar_3_0.xsd pkg.csize=13630 pkg.size=88953
+file 3cf6d00b6c9e2546836286fd1b194c7d7fa1eecb chash=85e113be7073b35d76d5e3f02c9dce1c568a3058 group=sys mode=0664 owner=root path=glassfish/lib/schemas/j2ee_jaxrpc_mapping_1_1.xsd pkg.csize=5103 pkg.size=27384
+file df12d78d2b0530f0bbefa1094fb28bb086f4c944 chash=4142b4ae656e85202e87f0bc2c72d75b12c8c097 group=sys mode=0664 owner=root path=glassfish/lib/schemas/javaee_web_services_client_1_3.xsd pkg.csize=5104 pkg.size=26834
+file 1ba6475d509b94e60907429945a6383470d87e61 chash=1dee949188b1041c6eb09dd4c37fb634b3919951 group=sys mode=0664 owner=root path=glassfish/lib/schemas/j2ee_web_services_client_1_1.xsd pkg.csize=2830 pkg.size=11088
+file b92027015b0a6670781ad8031961d0b1a77598a3 chash=1dbb1ff465b7b07cd96d570379b7ba81c2fe0bfc group=sys mode=0664 owner=root path=glassfish/lib/schemas/javaee_web_services_client_1_4.xsd pkg.csize=5119 pkg.size=26765
+file 1b53a9da67804be44bc4af833fc81c03d5c69e0a chash=26a9f7ae012630d416c064ac557c8c6f725aa85f group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-facesconfig_2_0.xsd pkg.csize=13665 pkg.size=112699
+file 45f3a6d284470458d1b7738d62d1ee13af1e8621 chash=71b350182eda0ce2566517ac2a723ccfaa713cd0 group=sys mode=0664 owner=root path=glassfish/lib/schemas/persistence_2_0.xsd pkg.csize=2186 pkg.size=12672
+file 79a34765cfa0f26963b2b7bb8ddca45f0410b5c2 chash=1c2ca963a1d7df4cae9900cc56921019272eb897 group=sys mode=0664 owner=root path=glassfish/lib/schemas/jsp_2_3.xsd pkg.csize=3583 pkg.size=14643
+file 79d7b4db5040cf91483efcdd5d538c3063b148da chash=e34656948c12d75f0b97b283a2d7260855feff7e group=sys mode=0664 owner=root path=glassfish/lib/schemas/ejb-jar_3_1.xsd pkg.csize=16272 pkg.size=119009
+file de5947225d33c7ddf101e2f69a776071dae47c15 chash=dd10e0cfe9aece2b39cf5e44919d8efbec8fc3aa group=sys mode=0664 owner=root path=glassfish/lib/schemas/javaee_5.xsd pkg.csize=10089 pkg.size=63695
+file 477f677b92df904d7321ab2354fe5758df7b0b54 chash=8dbf436d4a56e5a44a76aa372b28f62a75eab60c group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-jsptaglibrary_2_0.xsd pkg.csize=6083 pkg.size=28257
+file 145b1ae6e587472ae3a2302d9569957f5796afca chash=d2b40db22105bebcd5f12de72915019475b33f31 group=sys mode=0664 owner=root path=glassfish/lib/schemas/application_5.xsd pkg.csize=2881 pkg.size=10476
+file ff7d5575244d785b91edbc869e07cb0b73e30536 chash=9e497169aa7c889879a7ec527c8cdb18dfbc2a05 group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-fragment_3_1.xsd pkg.csize=3058 pkg.size=13092
+file 8e910e6f6af503531f278f796b16ae56816a6e5e chash=c14687091a4427825ee62298c39447b00ce8595f group=sys mode=0664 owner=root path=glassfish/lib/schemas/xml.xsd pkg.csize=1067 pkg.size=2922
+file e97640a765b19225777397b31ed4941130e0e039 chash=746a5b9e314850107659cfd324fa269acc047a99 group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-app_3_1.xsd pkg.csize=3060 pkg.size=12692
+file db1d9d89a72d97ce0caf7ba9c22868e54e7f33be chash=969db1422d3cfda3b8ded3ad7d256b4ce6082781 group=sys mode=0664 owner=root path=glassfish/lib/schemas/persistence_1_0.xsd pkg.csize=2378 pkg.size=10976
+file 141326d9a628a1f1d5f127ce056fd8a2ef87edb2 chash=c45b8d68d291925396c01a36e406da604f0b9b6e group=sys mode=0664 owner=root path=glassfish/lib/schemas/ejb-jar_2_1.xsd pkg.csize=10681 pkg.size=69127
+file acfcfbd4b3c0b04fb559a851068c2d0480f4702a chash=f59b8f681032309d463fa1772a270636fae953a5 group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-facelettaglibrary_2_2.xsd pkg.csize=3960 pkg.size=24485
+file 788ff091feff90a31f78803dc56c6098994f9bb4 chash=1df148ba667f34b464fa54a66a66fd537894a98c group=sys mode=0664 owner=root path=glassfish/lib/schemas/persistence_2_1.xsd pkg.csize=2170 pkg.size=12331
+file 993483b7364cc194411965b6b339059f90946393 chash=da66402ea4c4c6dabe48b23f3e247ad291be5941 group=sys mode=0664 owner=root path=glassfish/lib/schemas/jsp_2_2.xsd pkg.csize=3607 pkg.size=13269
+file 318b6a7b60d63baa2e5474c20de024a69f127e28 chash=d2834c566fcda574e570b66610168313c6a9b18c group=sys mode=0664 owner=root path=glassfish/lib/schemas/j2ee_web_services_1_1.xsd pkg.csize=3603 pkg.size=15372
+file 68bbf8004f27599225e7cb4f7e1248d43096febc chash=43b8e9c4c2973beac30d430c56c6a353aabcbdec group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-facesconfig_2_1.xsd pkg.csize=12363 pkg.size=98331
+file 858c528e1b1d5adf0721f67c12001253627aeec5 chash=a3f54de6e92eefcd23a40b07563af9c39340bdaf group=sys mode=0664 owner=root path=glassfish/lib/schemas/jdbc-data-source.xsd pkg.csize=10024 pkg.size=53678
+file fda0ebfca55b49385e6072a207c4f4e4464d7140 chash=0debf447f9ef791202d6767ce9ca7443629a7bad group=sys mode=0664 owner=root path=glassfish/lib/schemas/javaee_web_services_client_1_2.xsd pkg.csize=4453 pkg.size=19027
+file e1525b46f9a991043da38b098db9e13cde80cc84 chash=ba5092504136fd5aeea752c58d96d8fcce5255d7 group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-partialresponse_2_2.xsd pkg.csize=2526 pkg.size=12771
+file c2bf6bf411a180fd848078cbf50732ad18bdcaa7 chash=6064d7aff0cc6c38cbdaf5cd0e15f312e98f7628 group=sys mode=0664 owner=root path=glassfish/lib/schemas/application-client_1_4.xsd pkg.csize=2705 pkg.size=9509
+file eab9c48f6f1b50c56ffb10dd260506d76ca3207e chash=36acfd570873c8cea917345c01f9e1fb19694b39 group=sys mode=0664 owner=root path=glassfish/lib/schemas/jax-rpc-ri-config.xsd pkg.csize=3335 pkg.size=18376
+file e18592ea17ef45e4e75be42d8b80207f6efb67c7 chash=2a9169de29ba709a8b3a6bf4151b160b23d59a28 group=sys mode=0664 owner=root path=glassfish/lib/schemas/jsp_2_1.xsd pkg.csize=3258 pkg.size=11453
+file bbdf4cc2488e4826fa5c2ba3b38086a840d95cca chash=0e97ed3380bedb834c4183bed417573d736c51fa group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-facesconfig_2_2.xsd pkg.csize=15452 pkg.size=133938
+file a8e06347ef160fd2500a2a00d44d552ffc3237f5 chash=07c434866491ff69cc4b386517c360e63e31f5ee group=sys mode=0664 owner=root path=glassfish/lib/schemas/orm_2_1.xsd pkg.csize=7553 pkg.size=83989
+file fac0fe64e025239df1ae75b7b39208b5ed9b33a7 chash=89ca3fcdf9591804c78936f6c26d2fe06f9d77bd group=sys mode=0664 owner=root path=glassfish/lib/schemas/datatypes.dtd pkg.csize=2641 pkg.size=8239
+file 4e1a6c10680dc498c04d3942174db2b3b9464186 chash=effabd6fdb7b025c376afadb8b1c823793bf49a0 group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-app_2_5.xsd pkg.csize=7483 pkg.size=38428
+file 39f4ee1a58928cd16c3cfb90e76f83555d522fb5 chash=9846735cfcb8fd5182367eca50399ec3fab204db group=sys mode=0664 owner=root path=glassfish/lib/schemas/permissions_7.xsd pkg.csize=2272 pkg.size=7015
+file 24f92cf5b18c7998519afdda52ae028b367417cb chash=9bda46ea222f0feb12cab42ddeabcd5db3da44b2 group=sys mode=0664 owner=root path=glassfish/lib/schemas/ejb-jar_3_2.xsd pkg.csize=17296 pkg.size=124589
+file 166bb9ba7ff887d829330252569ec0f09d2fcc79 chash=46760a7a946828bc4c4d7084d668b28ca02cbfc7 group=sys mode=0664 owner=root path=glassfish/lib/schemas/orm_1_0.xsd pkg.csize=6209 pkg.size=54564
+file d712da4cf9701c21aa924bcb0adfccc4c44b110f chash=90eb6190f3d2779f56908e711f212ea5550f3d4c group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-common_3_0.xsd pkg.csize=8099 pkg.size=51729
+file 378e486ef48cb7b3e606f0712fb20f2ec5564e0e chash=98277f6632bf190752ef36685b0f6e11f0a64936 group=sys mode=0664 owner=root path=glassfish/lib/schemas/application_6.xsd pkg.csize=3200 pkg.size=14451
+file 272525fa8525c67efc5d33538e582e84d7980a2d chash=5d1900ac1e3c8b1cfdd1b8f51f2186973c263a79 group=sys mode=0664 owner=root path=glassfish/lib/schemas/javaee_6.xsd pkg.csize=11513 pkg.size=80972
+file 404b4a5d769c891e246954d94ecabe5ad3f29a7d chash=549213b7230e5cef0199240ea68ed1e69b4f2e27 group=sys mode=0664 owner=root path=glassfish/lib/schemas/application-client_7.xsd pkg.csize=3131 pkg.size=13309
+file e99c80b80df13c47d026bf7833257cf540fcf946 chash=be8e9ff6b0e974ac93179a3b81daec2fe2e62ec2 group=sys mode=0664 owner=root path=glassfish/lib/schemas/beans_1_0.xsd pkg.csize=1944 pkg.size=8571
+file 8cd832fe033c93995a6f4a0aac8e48dee339b6c7 chash=337b47947e43bae1b375904ec7a5361cd5ab82c6 group=sys mode=0664 owner=root path=glassfish/lib/schemas/javaee_web_services_1_3.xsd pkg.csize=4126 pkg.size=20610
+file b3459ab06d891f665c9a3d3ad4c2a1e6e4c5f83a chash=eb496cb84de6976c19416e898263fe72c1734616 group=sys mode=0664 owner=root path=glassfish/lib/schemas/javaee_web_services_1_4.xsd pkg.csize=4154 pkg.size=20645
+file 35913bd6c5eb12daa110022638212988c176beae chash=a3cd09fa04fed19d6d650f2a08160c6838795705 group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-app_2_4.xsd pkg.csize=7121 pkg.size=37023
+file 8c4ff5795597c24d5c7c2ae3a08a1ff99daabb2e chash=48f49edc7598e2be6e4c73314141cfbb78daccd8 group=sys mode=0664 owner=root path=glassfish/lib/schemas/orm_2_0.xsd pkg.csize=6448 pkg.size=71377
+file 002778a97984fcdf99b005bd6dca1b5647f803b8 chash=56e1079b9933f6e6802cdd0ee392a77316dc4035 group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-facelettaglibrary_2_0.xsd pkg.csize=2955 pkg.size=17855
+file d3dac58a61457fdb15aefd685ec5b25df53c12c8 chash=f442b8fc37121424992366ccdfd11bedcf7ab5f3 group=sys mode=0664 owner=root path=glassfish/lib/schemas/jsp_2_0.xsd pkg.csize=3007 pkg.size=10222
+file 714c58e1ff1456842614b3afc518d65ed184e081 chash=e281ed04fd33661c1d7c4b773be0ab2f708b0fcd group=sys mode=0664 owner=root path=glassfish/lib/schemas/javaee_web_services_1_2.xsd pkg.csize=5227 pkg.size=23813
+file 9b52b2a014ac93977898011721df3ed823af4fa2 chash=ec46b8f6aef745c25f5bd19fc645fb11dfe6ca18 group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-facesconfig_1_2.xsd pkg.csize=10529 pkg.size=85439
+file 76490c9c7236fbe56b6faa245fee2f7010076626 chash=a818821c726c79ccf45c6c83b2095510d7e4da96 group=sys mode=0664 owner=root path=glassfish/lib/schemas/javaee_7.xsd pkg.csize=12797 pkg.size=101466
+file 45f6d908c673ca4d82a63d09bcff4e573894d2eb chash=3f9c421aceddb1ac52fbcdb70aedcfbdd1e37da6 group=sys mode=0664 owner=root path=glassfish/lib/schemas/application-client_6.xsd pkg.csize=3044 pkg.size=12488
+file 7d297517e29f6bd2411eafda874919d50a42938a chash=ff31756f9c01d50a0cff64dd1f77894c92c18119 group=sys mode=0664 owner=root path=glassfish/lib/schemas/web-common_3_1.xsd pkg.csize=7872 pkg.size=48640
+file 59da312e68e6bf8ccff128b5d2300bcfcc97e0e4 chash=f22ae06dae70d1e8954a66afc653226dd0c3af59 group=sys mode=0664 owner=root path=glassfish/lib/schemas/j2ee_1_4.xsd pkg.csize=7749 pkg.size=46582
+file 8a14ca1b51002982784bc79b9ddf0f31ec82d65d chash=0938753be10088e2aaf131c71f0f255b884a268b group=sys mode=0664 owner=root path=glassfish/lib/schemas/application_7.xsd pkg.csize=3285 pkg.size=15272
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-diagnostics-image
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/1.0
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-connector
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-rdbms-jar
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-jms
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-wsee-clienthandlerchain
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-pubsub
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-application
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/persistence-configuration
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-javaee
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/servers
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/security
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.0
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/910
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-ejb-jar
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-diagnostics
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-sca
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-interception
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-wsee-databinding
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/jdbc-data-source
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-web-app
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/920
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-sca-binding
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/domain
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-webservices
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-wsee-standaloneclient
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/webservice-policy-ref
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/deployment-plan
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/90
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-application-client
+file 6434295d93af8c61499fc75c9231761b13eece5b chash=3c3130fb038af63f32a632afa40c1fad85ed4e16 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-diagnostics-image/index.html pkg.csize=421 pkg.size=830
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-diagnostics-image/1.0
+file e5321e7e14c56f295308492ebd4a4e9c2e24707f chash=6dffb104fab23faa6b6f43ca5d03c64d5584e101 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-diagnostics-image/1.0/weblogic-diagnostics-image.xsd pkg.csize=1240 pkg.size=11417
+file ef81698033504d3b8d9a7b950f736e7496805b9a chash=3fce3cf37ac57e4f70eb20df1172186670a02732 group=sys mode=0664 owner=root path=glassfish/lib/schemas/1.0/security.xsd pkg.csize=7631 pkg.size=66034
+file 749cbef72425b5c3da5dd70509543d2c79fcf07d chash=dc8bcfd66f8a51aa6684d84ea8eee6170a100914 group=sys mode=0664 owner=root path=glassfish/lib/schemas/1.0/domain.xsd pkg.csize=97661 pkg.size=830177
+file 520ec6e2b3305f6d154e23ef119dd90d64ddbc12 chash=e6d87281c00979ab51155634efb851de0a1ddf81 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-connector/index.html pkg.csize=438 pkg.size=1062
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-connector/1.2
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-connector/1.0
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-connector/1.3
+file 44c8f92531755ab62d55c46f4f631b89779b3f3b chash=f1ba713b4c5463cc9dc594039a3edc5bd98ef174 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-connector/1.2/weblogic-connector.xsd pkg.csize=1897 pkg.size=11106
+file 73e1dc7914b12b4d5943f4446b0acac11924d50b chash=6c0a5ad191bc0a72d2fdae942be91a6b29bc51bd group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-connector/1.0/weblogic-connector.xsd pkg.csize=1895 pkg.size=11106
+file 5804ad6f80872296057dc38c8ec65450a2b85280 chash=55ff915f3cc6b2e711ce994809e3f84abd0f40a2 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-connector/1.3/weblogic-connector.xsd pkg.csize=6659 pkg.size=46911
+file 78a7ed458ca436eda70f4d532203905f19c77274 chash=c139bf6506328c0df672f72adf890b0b0c16ca28 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-rdbms-jar/index.html pkg.csize=438 pkg.size=1062
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-rdbms-jar/1.0
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-rdbms-jar/1.2
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-rdbms-jar/1.1
+file c4fce2c1cad78aa4a5ac2d8724feaf46e240a8f4 chash=aa666e7a0095f4d69751f7a1c630d1ef941c37b2 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-rdbms-jar/1.0/weblogic-rdbms-jar.xsd pkg.csize=1926 pkg.size=16719
+file f18f4e3c65da67a7696fed1a3bbbf5a62c0ffed6 chash=a9423208947c70817393d4b0fb9fc9abe20ff08c group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-rdbms-jar/1.2/weblogic-rdbms-jar.xsd pkg.csize=1941 pkg.size=16809
+file 514de92a39088d848c87294575c9c5b94b7da8cd chash=91ff889f7b058b14cf1edd903f2287317f46beb5 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-rdbms-jar/1.1/weblogic-rdbms-jar.xsd pkg.csize=1926 pkg.size=16719
+file 0051b877cea090f325d7f3164b50d2147bfd4eeb chash=3ee91889127982d637f3c2e945f28602b3654a73 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-jms/index.html pkg.csize=433 pkg.size=1017
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-jms/1.0
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-jms/1.2
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-jms/1.1
+file 8e36845d75341146705f4cba60d3c2a8424d862e chash=1da70baf721d9b98486f1937c5bf241d1b3c7820 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-jms/1.0/weblogic-jms.xsd pkg.csize=3228 pkg.size=34211
+file 88b07f2c1b63aa2c4823e81700bdd89339940f40 chash=b75af3edb8f81c30f92c179afc69f9748e7824a0 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-jms/1.2/weblogic-jms.xsd pkg.csize=3383 pkg.size=35883
+file b5a0c58a923a10bddab187a71f909b9d7520127d chash=a0258c96ca5a32839fefafe814974e3f2aa7b602 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-jms/1.1/weblogic-jms.xsd pkg.csize=3327 pkg.size=35067
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-ejb-jar
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/deployment-plan
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/jdbc-data-source
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-webservices
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/webservice-policy-ref
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-wsee-clienthandlerchain
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-connector
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-interception
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-application
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-javaee
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-rdbms-jar
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-wsee-standaloneclient
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-diagnostics
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/persistence-configuration
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-pubsub
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-web-app
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-jms
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-application-client
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-extension
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-ejb-jar/1.0
+file e85e481e3dfdce55fbd3b59dc8d949914187e8f1 chash=81fdde484a529b37f4e650ae8ea3890ec9d23059 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-ejb-jar/1.0/weblogic-ejb-jar.xsd pkg.csize=2707 pkg.size=24449
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/deployment-plan/1.0
+file 23165e6e6273d67547d80dde12211fbeb748962b chash=4cacebe9c91fdad681c570e08b8ddabe9023c892 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/deployment-plan/1.0/deployment-plan.xsd pkg.csize=2046 pkg.size=8283
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/jdbc-data-source/1.0
+file 84184ee1f4d1b365d66a6230755b62bd0d57496b chash=5e66f17ffc42b0c5ad00f036a0dc896d82f5b683 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/jdbc-data-source/1.0/jdbc-data-source.xsd pkg.csize=1441 pkg.size=8124
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-webservices/1.0
+file 7aec6a5afa6e323aa8848561f741c3850e1228f8 chash=e738ecc20daa8f8c5f0a68d8c391502acf0b5d19 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-webservices/1.0/weblogic-webservices.xsd pkg.csize=1320 pkg.size=6621
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/webservice-policy-ref/1.0
+file e357a00de08a15d6858aab51f25728d19999db47 chash=125b40ab895e9583b628f8513affa3b492cd7dc5 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/webservice-policy-ref/1.0/webservice-policy-ref.xsd pkg.csize=460 pkg.size=1724
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-wsee-clienthandlerchain/1.0
+file 6a2f447b7c52a9d064d5a0f760242de82ded205d chash=697babdf59f6abece187cb68a2e83743bfc093ee group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-wsee-clienthandlerchain/1.0/weblogic-wsee-clienthandlerchain.xsd pkg.csize=523 pkg.size=1314
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-connector/1.0
+file a103d3bb0260b3c8d902de54bc2611076351708b chash=7c9a24931dd9c20c2cc83951f6e4ba3a6e2de16e group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-connector/1.0/weblogic-connector.xsd pkg.csize=1892 pkg.size=11100
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-interception/1.0
+file ba49d50e20264efbaf014677b0c48738e250487e chash=950e05805cb3a42a3e8d20dcad2e8a654d3d09ca group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-interception/1.0/weblogic-interception.xsd pkg.csize=649 pkg.size=2880
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-application/1.0
+file 544657da5c91a91d0a8320a5614fff1ccc7a36ae chash=7a2e283be1ad348648b3ba3f36fcb668c15627a9 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-application/1.0/weblogic-application.xsd pkg.csize=9071 pkg.size=44731
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-javaee/1.0
+file 032fcb5804f86e6db2106df3b90c0495c7a2396c chash=83a7d30cef29646f14c6d63808f6bd608ba632c5 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-javaee/1.0/weblogic-javaee.xsd pkg.csize=3886 pkg.size=22276
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-rdbms-jar/1.0
+file 7504750fdfdbb34b38fcd3a507277155dd44da3f chash=5a4d359013d62c8bf5b46cf5876d7ad20e7af3e6 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-rdbms-jar/1.0/weblogic-rdbms-jar.xsd pkg.csize=1912 pkg.size=16628
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-wsee-standaloneclient/1.0
+file e41f975767abdeaa3e1bf59aaf5d1dbb4c0d1d9d chash=82d983330198f2df81abbff2516ea63e77d10e7a group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-wsee-standaloneclient/1.0/weblogic-wsee-standaloneclient.xsd pkg.csize=485 pkg.size=1245
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-diagnostics/1.1
+file aa813cb97bffbbdce6551316fabd9eb863e82a4a chash=7019ef6cadc92c7ba58203ac24bcf9a8b79b6710 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-diagnostics/1.1/weblogic-diagnostics.xsd pkg.csize=3657 pkg.size=29819
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/persistence-configuration/1.0
+file f742b9c4986830316c1ad5fb1c2dc540a5b838b4 chash=8d4617dbe62d404977b03f9265c6ace342ff6b44 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/persistence-configuration/1.0/persistence-configuration.xsd pkg.csize=9760 pkg.size=148622
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-pubsub/1.0
+file f746d3ac72e9834b9cfaed3c953391dc2dbd9c8f chash=252277c469a16cdcce8d031e177f2227c97f87aa group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-pubsub/1.0/weblogic-pubsub.xsd pkg.csize=2721 pkg.size=17579
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-web-app/1.0
+file cba6663103ab3b1a297f2a833750ced58a347946 chash=08f24f9165c660f437cd5644dd64778cfc49fb54 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-web-app/1.0/weblogic-web-app.xsd pkg.csize=7560 pkg.size=34728
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-jms/1.0
+file 9a56614307bd6139ff7eee2fa0a59c467e2ce95e chash=e55c64e360bb022dcb1645885f0eb6321ead0b21 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-jms/1.0/weblogic-jms.xsd pkg.csize=3226 pkg.size=34207
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-application-client/1.0
+file 01a72cafd9461656a5adb164c57736f691b5ee58 chash=e3445a3676c49e3a8dcba61ec39d3f5a181db7c6 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-application-client/1.0/weblogic-application-client.xsd pkg.csize=468 pkg.size=1175
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/10.3/weblogic-extension/1.0
+file 6572d86ed18b8389d9eb3007f296fb0ec01ceb7c chash=03d5173d016bbe9f5b0e9860d88ce2d0baa789e8 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.3/weblogic-extension/1.0/weblogic-extension.xsd pkg.csize=1105 pkg.size=4404
+file d4c1b94054e5e062370193cf2f8b689074f7b115 chash=2a988ef5ec54d5a8195eb8546fc03bb850d7d391 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-wsee-clienthandlerchain/index.html pkg.csize=424 pkg.size=852
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-wsee-clienthandlerchain/1.0
+file 2d17de2cbe252d4009ada4fda3dcadde9e3e7f4b chash=d186e8b2571c71b89b81c95069de0659c80f377e group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-wsee-clienthandlerchain/1.0/weblogic-wsee-clienthandlerchain.xsd pkg.csize=525 pkg.size=1318
+file 503ea10d480dfb0f320c44c20762e45c12e67b58 chash=b39bb2e697e2fc64a40815c3a10c30ffe677e6ad group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-pubsub/index.html pkg.csize=411 pkg.size=784
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-pubsub/1.0
+file 24025bbf3b37931ca85a89089cc14b9cd6ccead7 chash=f1f3d9685844bd22495fd3cdeb6d2ecda4d5361c group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-pubsub/1.0/weblogic-pubsub.xsd pkg.csize=2724 pkg.size=17583
+file 965cb28cd8d51bad773d48ab4e15eba72ec7dacb chash=68fac55efc6a0a26b379aa054d84ea7cddc56e9d group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-application/index.html pkg.csize=472 pkg.size=1483
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-application/1.1
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-application/1.6
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-application/1.2
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-application/1.5
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-application/1.0
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-application/1.4
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-application/1.3
+file d6d26935df4dbb946457b3d8b09b2261ee13b971 chash=df231eb514ee64f3e4894eaf26b6e53bff47a4bc group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-application/1.1/weblogic-application.xsd pkg.csize=9068 pkg.size=44517
+file 1ce3011f81cf2d80cc435f3b240f675614ebf143 chash=41143524b9d18ee51d28ffc8973fa84617d5e934 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-application/1.6/weblogic-application.xsd pkg.csize=10045 pkg.size=47803
+file d0475da61a0be0769d53ef27183c7c1a5d0c8959 chash=add37b1a74bf11b8c8a3a7253b6482137c4030da group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-application/1.2/weblogic-application.xsd pkg.csize=9068 pkg.size=44501
+file ee80f3c3d6abf993675f23bfd62b296e788bf9a8 chash=13df0896617cb82b7c774f9f4a16bcead2368e49 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-application/1.5/weblogic-application.xsd pkg.csize=9116 pkg.size=44740
+file 0d0d91e054ed29c4fee94ccf748fa486206745d2 chash=9057cf13f51d5bd7e04c53c9e5748b0f11276ccc group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-application/1.0/weblogic-application.xsd pkg.csize=9405 pkg.size=46122
+file a86dcf14b624a010bc6465818b455effe3681a5f chash=aed01ad623c1596d6867ff589f9565ec56563f04 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-application/1.4/weblogic-application.xsd pkg.csize=9097 pkg.size=44690
+file b34b444ce5a8cec0c7dece8de5cd55617a23a8fb chash=23b6aab6dded11f23939dc213ec853abdf41f676 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-application/1.3/weblogic-application.xsd pkg.csize=9068 pkg.size=44501
+file dd18b57c846dd6dd086541fd44b15f841913a91a chash=0cab23bf8f1915b0f99b727d4b79df08b343fbad group=sys mode=0664 owner=root path=glassfish/lib/schemas/persistence-configuration/index.html pkg.csize=420 pkg.size=824
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/persistence-configuration/1.0
+file 82d62036c447c5676b1efaa307b22d9ed256d854 chash=2cd1f120d278ccc54ae4052e959b26894730062a group=sys mode=0664 owner=root path=glassfish/lib/schemas/persistence-configuration/1.0/persistence-configuration.xsd pkg.csize=9768 pkg.size=149274
+file ecfc64e0e719eb577ab1f87f1e759fdc7054e430 chash=3c8a6f1bacf7864a85dc85c7ef91c51e0babf296 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-javaee/index.html pkg.csize=457 pkg.size=1288
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-javaee/1.1
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-javaee/1.5
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-javaee/1.2
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-javaee/1.0
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-javaee/1.3
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-javaee/1.4
+file db64aaf788f89db30908828a1b4668ab3b63d177 chash=cb47cc9becb7bc938fc4dcb38b18b422dd0fd5f9 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-javaee/1.1/weblogic-javaee.xsd pkg.csize=4948 pkg.size=27913
+file 3dad5c5b9c74a8570c8f65d88714568a1c33dd68 chash=0d6691418ec2ce0fa27fa74c24382cd68abc5d76 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-javaee/1.5/weblogic-javaee.xsd pkg.csize=6016 pkg.size=30828
+file 76a5482f2f8566aeb491f7f4f1a0f7e0839f54d0 chash=382add3d51ea962a6a4350cd5867632c16c71c0e group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-javaee/1.2/weblogic-javaee.xsd pkg.csize=4948 pkg.size=27913
+file 86c0c3d2f6adec4b5c97d8006ee8dfcc51a56531 chash=95d8166f111ebf5868efa697bbc2130aadac4c07 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-javaee/1.0/weblogic-javaee.xsd pkg.csize=3916 pkg.size=22424
+file 428be40291b7ceb33cfd1601bda32255a72a1edb chash=23ab2ab1905975f18f8d4fc1ac0a9333df1ec92e group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-javaee/1.3/weblogic-javaee.xsd pkg.csize=5111 pkg.size=28416
+file 98524a5268c59d5c6398081b1fe5d1d53910f3fa chash=d62ec3669fc371e8694b48b4a22b958498e59f1d group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-javaee/1.4/weblogic-javaee.xsd pkg.csize=5155 pkg.size=28785
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/servers/weblogic
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/servers/portal
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/servers/weblogic/url-template-config
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/servers/weblogic/url-template-config/8.0
+file ce47b62dbd6f5226cb98dc5a13376100c6b1c421 chash=287d669681adf7cae229aa6d518892ad4c242e46 group=sys mode=0664 owner=root path=glassfish/lib/schemas/servers/weblogic/url-template-config/8.0/url-template-config.xsd pkg.csize=848 pkg.size=4292
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/servers/portal/weblogic-portal
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/servers/portal/weblogic-portlet
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/servers/portal/weblogic-portal/8.0
+file 18737bb2a3ff70f71222a8d1647de5f68aadb66d chash=5993ff584809d94decdc88995b00e21ec4732c72 group=sys mode=0664 owner=root path=glassfish/lib/schemas/servers/portal/weblogic-portal/8.0/netuix-config.xsd pkg.csize=2989 pkg.size=14056
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/servers/portal/weblogic-portlet/8.0
+file 09ec9f87d966e36c853c4efbfaae45f1c6858749 chash=26e11b864c62e683a0ad9ca0a3dfdddd2da6eafb group=sys mode=0664 owner=root path=glassfish/lib/schemas/servers/portal/weblogic-portlet/8.0/weblogic-portlet.xsd pkg.csize=1195 pkg.size=7278
+file 0cac89907d2eb378bece4f043c800de350cf8887 chash=8bb270c2de1faf2ea63c98cf7e0b664abd32e707 group=sys mode=0664 owner=root path=glassfish/lib/schemas/security/index.html pkg.csize=410 pkg.size=756
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/security/1.0
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/security/wls
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/security/xacml
+file 9e6ec1bf9cecb7c8cc70bf750a38b15343dbf230 chash=732ce9622b96bf2228adca6101142f8b58648ea8 group=sys mode=0664 owner=root path=glassfish/lib/schemas/security/1.0/security.xsd pkg.csize=7611 pkg.size=65945
+file 510b99c83767aa080ae3f41e8ad051ae4a15e45e chash=b5352be4e02e572e0a40bb00d2f0cf7d33b93fd0 group=sys mode=0664 owner=root path=glassfish/lib/schemas/security/wls/index.html pkg.csize=412 pkg.size=763
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/security/wls/1.0
+file f5e079a464894ef46f867241f4c749e59b9b938f chash=a76831c04290364d148c34b84e6eb3146e554eb9 group=sys mode=0664 owner=root path=glassfish/lib/schemas/security/wls/1.0/wls.xsd pkg.csize=3466 pkg.size=43403
+file 8f75f5eb5653d60271b6cfc577ab034dd226c8b8 chash=0db25c2e0e3adbf12a64562104663aef7ddd026a group=sys mode=0664 owner=root path=glassfish/lib/schemas/security/xacml/index.html pkg.csize=414 pkg.size=771
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/security/xacml/1.0
+file 4554b51e823f5544c85af59807aedf6bfa5e17e4 chash=1b95da6db8d74999f6b4e711bea75c1b88102221 group=sys mode=0664 owner=root path=glassfish/lib/schemas/security/xacml/1.0/xacml.xsd pkg.csize=337 pkg.size=1034
+file 1825c13efcb704244df1a435592ef7f65da88558 chash=93d9df51935b2bdbb1bb08d2f087a7e4464bc28a group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.0/persistence-configuration.xsd pkg.csize=9028 pkg.size=136586
+file b926959209724660c0c9ba61be547b4fa2e6c8e9 chash=7937db11759272e71c58db88272e468d45ba3f13 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.0/weblogic-ejb-jar.xsd pkg.csize=2627 pkg.size=23939
+file feded6840df2370c531899a8786e2bbfd8c57e12 chash=85a48a9f518c971075feb8ae7348dad6af5a1762 group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.0/weblogic-appclient.xsd pkg.csize=438 pkg.size=1028
+file 83d68cec379cf401a11ff9061eee3e34aafd17d8 chash=c95c101ff36c9055772d8498cacd9bfd39a85bde group=sys mode=0664 owner=root path=glassfish/lib/schemas/10.0/weblogic-javaee.xsd pkg.csize=1911 pkg.size=12963
+file 680c2d5a37c81f706cc88541eba4fc649f7840cb chash=e1fbf66ba1f061f57ef04e543368ea17f590fead group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-extension.xsd pkg.csize=1061 pkg.size=4118
+file 470aacd433021f8e2465f0553ea29044e512af4c chash=dd6148f7a3b03e20c852df2e05065f4ec66477b5 group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-rdbms20-persistence.xsd pkg.csize=1800 pkg.size=16132
+file f12ae456abc40e30c6f7dd2282343cf4a985cec8 chash=78fe17e97a5e833bc31fa68088366399b90661c3 group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-wsee-clienthandlerchain.xsd pkg.csize=493 pkg.size=1111
+file e59a92c2c8bd92bbab88872553af96fea0d9b1c4 chash=e627bd1370045ce8ea88d70ac4d20fb00c6c990a group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-web-app.xsd pkg.csize=7054 pkg.size=31482
+file 4fbd53998a873620bfc885bc99a1890e116d9a1a chash=385bdd0ed40435f9c0bf0bb9e7c796d7079e8575 group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-rdbms11-persistence.xsd pkg.csize=967 pkg.size=5214
+file f6f5578fcb0be117fe15dfcf46fb2fb12296491a chash=cfefcc776773b4c9ffc183904b8add04be5e3b26 group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/domain.xsd pkg.csize=73745 pkg.size=677180
+file d958543326af4005505ae10a62dfd8b27ed136be chash=8cd5d6fe377e9a799679c81a81ead9234d0139ff group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-ra-ext.xsd pkg.csize=544 pkg.size=1702
+file 076383b9a230e8a3a622353903e4598b7d7c29df chash=9242988d52bcc4dcc45e42dfc6a183cb8ed631fd group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-interception.xsd pkg.csize=638 pkg.size=2795
+file 6f7b8ae323c69e286a4420ec208cb78174572d02 chash=3d661dab3321c854c1e48bd8c327988360fb53d6 group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-ws-policy.xsd pkg.csize=438 pkg.size=1601
+file 7e7d50d90c22bab5a303f2abfbaf576a235c24ab chash=051ca705dbd792115b30f4db9fab6333127d327a group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-appclient.xsd pkg.csize=362 pkg.size=765
+file 11f8825d55875572f27fe99a5cdab8fdcfee3077 chash=327af739d5a4793c45695d9dead415edcb223f3f group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/diagnostics.xsd pkg.csize=3579 pkg.size=28253
+file ff90ac847f6db592de6905e38721806f767c8bab chash=5c491dc3e4f9dee4ad80a9f76bf86df142021952 group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-ra.xsd pkg.csize=1809 pkg.size=10270
+file 50ae6542536e4397241903266c8ab9893a8c14ed chash=6b3bd2b1ceb52b0d0520d6bc473ac2ac410137a2 group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/diagnostics-image.xsd pkg.csize=1243 pkg.size=11319
+file e2126f4e325deca14f88c4d9012521ad59ab4e8d chash=a6e12b1062f036a1d8e53a40c3aa23447569a785 group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-j2ee.xsd pkg.csize=1790 pkg.size=13050
+file 8fb682019f573895344987aa536b446f022aa300 chash=610738dfd79a7919796803eefd00c7aa8cd0b14c group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-deployment-plan.xsd pkg.csize=1873 pkg.size=7146
+file 96a35bf43194a3ca3fd4188d19241de957b3a1a5 chash=360b663325fdc3a07e2f5f01a4477495e46f2e7c group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-standalone-wsclient.xsd pkg.csize=464 pkg.size=1090
+file 2806a8385cd94e3658c6f356d535b82c987781fc chash=71c3b56ade3ce8a897ebe22e985c7b5b6fd46bed group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-wsee.xsd pkg.csize=690 pkg.size=2900
+file 5889df87893b5098bb801f6de78c3a4d2226afbd chash=7be6000d41f3383187333d13e815ccc5f1febf18 group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-jmsmd.xsd pkg.csize=2934 pkg.size=30801
+file 8a8013009581954fe3e9d62c829bf0d4cf874c2f chash=0ec3cbf0d4ef3fa360abe915152e85a6edb7f08a group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-annotation.xsd pkg.csize=1177 pkg.size=9363
+file 160f3e0ff246a741ba94659923bf18b0acf0f441 chash=ee86f42dbdb51b6e36cc9da30700a694b56ccc01 group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-jdbc.xsd pkg.csize=1385 pkg.size=7920
+file e3ed0e72d835cecbbdf1300e7e21651bc4ddc7d2 chash=f936c3d3c8a0984826cf11a4b9c523c14b83b52b group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-application.xsd pkg.csize=9836 pkg.size=46753
+file 9312ad5a093323d3df5a3454cc53b0c6764c19ed chash=e0fd516587e9efb99334e0331359e9b2eaed1977 group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/weblogic-ejb-jar.xsd pkg.csize=2472 pkg.size=22802
+file fedba5d4b7bde8417ff9ebb16cbdd93b293343c3 chash=baf2dc1b314cac13f63ae744883d817b0178aa46 group=sys mode=0664 owner=root path=glassfish/lib/schemas/910/security.xsd pkg.csize=5752 pkg.size=52151
+file 178166ebaedd177c02fd5ccff62cbb6d15deb6fd chash=7e07ed012e26d29699a078950076a99546442aae group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-ejb-jar/index.html pkg.csize=448 pkg.size=1173
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-ejb-jar/1.2
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-ejb-jar/1.1
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-ejb-jar/1.3
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-ejb-jar/1.0
+file 31fc32190e32b149d50e7cdd123327ee1658ab94 chash=a80d2098b63d244c16d66dcc73b118d8546f84e0 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-ejb-jar/1.2/weblogic-ejb-jar.xsd pkg.csize=2893 pkg.size=24957
+file 42cde83aef9f81b5902fa78f58684f90ccd90847 chash=cf6dfbd8369261c64cdf115906da9c4ce862a532 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-ejb-jar/1.1/weblogic-ejb-jar.xsd pkg.csize=2893 pkg.size=24957
+file f2f48e6b397c00ba4cc45950fcba0f4b3938696d chash=dabef4bdc878769547240d4a277871d67737a897 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-ejb-jar/1.3/weblogic-ejb-jar.xsd pkg.csize=2898 pkg.size=25452
+file 527fe7a9c31ffb3bc0ae72ad9c30f28d50803d82 chash=aa8c1d2b8dbc607e22c235fb94e1d35e831e7ecf group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-ejb-jar/1.0/weblogic-ejb-jar.xsd pkg.csize=2872 pkg.size=24845
+file 91627bf715730b33b09c02d5d6c1de8273d9a866 chash=6721ab6b155cd126ef3030c189202f116c869589 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-diagnostics/index.html pkg.csize=415 pkg.size=806
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-diagnostics/1.0
+file f03212cb92f93d4d5f8881bed10bf62eeeccf7ba chash=816b3b2f34eeca880efe157b25c14c01da31a4d6 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-diagnostics/1.0/weblogic-diagnostics.xsd pkg.csize=3686 pkg.size=30030
+file f34685a9357e561e5bba261a7e66cafbdd416d22 chash=9265d6d98af39e3eaed7c62c9252cf216098deff group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-sca/index.html pkg.csize=410 pkg.size=771
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-sca/1.0
+file 0a87abceabdb41ca9358c094819fab401f1eba1a chash=3aa54b863aab6f39859ada82d93818408c7d4cd8 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-sca/1.0/weblogic-sca.xsd pkg.csize=826 pkg.size=3278
+file da7506e2ce042bc82c8ed9d216876ac97c35a0e4 chash=70ffb773d6379376726ad439973335ce4254e158 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-interception/index.html pkg.csize=412 pkg.size=808
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-interception/1.0
+file 71750b7138b5852bc6888fa4aecb111d3f4aafb0 chash=21e7f549a2585db7ef0c6599f9d8ee29b7b3cb81 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-interception/1.0/weblogic-interception.xsd pkg.csize=651 pkg.size=2886
+file 345adeafe62e5aa7e3b6927ed6e028e1cd175874 chash=8bdfa8b7d3197d7e42e91d14cc71b6601648a8f2 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-wsee-databinding/index.html pkg.csize=443 pkg.size=1113
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-wsee-databinding/1.2
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-wsee-databinding/1.1
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-wsee-databinding/1.0
+file 77d9d4c21ad828c4afa5b60a49e2d5a9db1c4285 chash=d85c58730f27dc11a39cc4d46b086a7af4b5a556 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-wsee-databinding/1.2/weblogic-wsee-databinding.xsd pkg.csize=2893 pkg.size=17005
+file d8c6f85f4855ac9aa61e7a3d2280dcf3660ad96e chash=c19f71835068fe0d54a71a8d69166cd070360534 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-wsee-databinding/1.1/weblogic-wsee-databinding.xsd pkg.csize=2922 pkg.size=17464
+file 6ecb1396f3cdcb2010da7976dbd61fea13abff4a chash=2a4639b17a8cd807ffd731e8042e0544b1e7fa02 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-wsee-databinding/1.0/weblogic-wsee-databinding.xsd pkg.csize=2795 pkg.size=16256
+file 335d6963fa47f6d184fcbd1adaa0974c8de06b7a chash=61aa503f81998891c207f8dab5ce106e75402584 group=sys mode=0664 owner=root path=glassfish/lib/schemas/jdbc-data-source/index.html pkg.csize=442 pkg.size=1049
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/jdbc-data-source/1.0
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/jdbc-data-source/1.1
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/jdbc-data-source/1.2
+file 8864924c6329bbed7f31bd62899a02b317e5ee6c chash=b1a33507155aa6e0fc9fd2bff408bd4d9060a9a9 group=sys mode=0664 owner=root path=glassfish/lib/schemas/jdbc-data-source/1.0/jdbc-data-source.xsd pkg.csize=1479 pkg.size=8340
+file 5c8f8f5d454759a411f595c3ee24c747d482ec11 chash=722e89c1509496ef7a7df77eb2bc4ed4ffc96e14 group=sys mode=0664 owner=root path=glassfish/lib/schemas/jdbc-data-source/1.1/jdbc-data-source.xsd pkg.csize=9353 pkg.size=48982
+file 858c528e1b1d5adf0721f67c12001253627aeec5 chash=a3f54de6e92eefcd23a40b07563af9c39340bdaf group=sys mode=0664 owner=root path=glassfish/lib/schemas/jdbc-data-source/1.2/jdbc-data-source.xsd pkg.csize=10024 pkg.size=53678
+file b3150638382ab249ab54b9968cfec95ee4589f0f chash=878da5ae025a77b1a83db24854eea8b2f586cc57 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-web-app/index.html pkg.csize=457 pkg.size=1300
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-web-app/1.3
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-web-app/1.4
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-web-app/1.0
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-web-app/1.5
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-web-app/1.2
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-web-app/1.1
+file 008066468896fd5da5fea0d019120db76f4e43b5 chash=e9b5bdbe87be90cc146d9404d708ab01da02b351 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-web-app/1.3/weblogic-web-app.xsd pkg.csize=8032 pkg.size=36539
+file 8bbf219df65c1571e3bf2c521a6129c1c0147d49 chash=2064e06fce3500d75d8f27187a39841549f0254c group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-web-app/1.4/weblogic-web-app.xsd pkg.csize=8555 pkg.size=39155
+file 2f288fff6d5621a3cb25bd0dc9a73654eb22f070 chash=54ecabe86fb5d9365e8112f5d39ea1a3f7e80fef group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-web-app/1.0/weblogic-web-app.xsd pkg.csize=7702 pkg.size=35206
+file 461e8d312eefe865e1961b35b490b1858e879f27 chash=cfbae3e2151df32dd46fa0a7a7cac276758b3ea4 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-web-app/1.5/weblogic-web-application.xsd pkg.csize=9459 pkg.size=41387
+file 7c279abb350ae5d4b480d2e8e32a5fc96f2dd8bf chash=d3c18c1f598554bf1914a9fd2f3b7c1c2f39da23 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-web-app/1.2/weblogic-web-app.xsd pkg.csize=7774 pkg.size=35544
+file 650384808489cda4ea06dcb0f6de16f54def8d29 chash=b097ec93adcb80c13361f82ce54cf310dea51727 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-web-app/1.1/weblogic-web-app.xsd pkg.csize=7773 pkg.size=35544
+file 72e59780d9acde9df7c6df38fa3bd97d1d31bcd8 chash=dbb78e34598c7d7cf51c8191678ef85457f3e58a group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-j2ee.xsd pkg.csize=1777 pkg.size=13034
+file 7f5fbccc2da2e3ebe67ab3f22a339c9af7a942f8 chash=4f3b4eac8b02fa85035a978155579c9c78c54979 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-extension.xsd pkg.csize=1060 pkg.size=4118
+file 60b3abcdae33392def03ab4626891034ba783be2 chash=06d792e9d74522c98655be584bc00f7e61933fe9 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-ra.xsd pkg.csize=1809 pkg.size=10270
+file 3a02f61a50a1aaa850b72ce6a01c7c2b04c463a6 chash=9b0ff4cf18fe2721c7e82baaf28378edf5274b87 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/diagnostics.xsd pkg.csize=3618 pkg.size=29225
+file 90efc1be768512680a3a60de53bb3a2d921cd89b chash=40a1461953208374386811f88dd261683881f00b group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-web-app.xsd pkg.csize=7149 pkg.size=31837
+file 6773b1d157a9733cae3e9e0f51ab5f58a6c8c965 chash=254bece0e014a6d5444e3af9f99ee31e1d176e75 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-application.xsd pkg.csize=10655 pkg.size=51329
+file fca5a8d8ef7da28167a3869d246abe2b421bb513 chash=3a57e50d2ecca659037dda8431f20c4c5e8ff30a group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-wsee.xsd pkg.csize=796 pkg.size=3384
+file 12a0cfd99ccabad2b783165502b4b4463bf5c13d chash=aed2dc55b648f440ffaa14e6ed45bbe4d069aa16 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-deployment-plan.xsd pkg.csize=1923 pkg.size=7303
+file 413d0869e3ca8dfd0c53a879d60431a734cc3320 chash=353d79a198ec3f0e4563082621e899a135919f75 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-appclient.xsd pkg.csize=362 pkg.size=765
+file 20e32211721ea8e00e74f62e69520d775425a83a chash=b8608523368867ccf75c08785908e12e7469849f group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-ws-policy.xsd pkg.csize=438 pkg.size=1601
+file 706c964c1ed57e7b669a960b848deff1abe063ca chash=b85cf70d336278fc0a6c8252e544179681657e19 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/security.xsd pkg.csize=5927 pkg.size=54031
+file f2d281d2a7442da77a05a5aeb3f1cb4a27851c34 chash=95feadd4e9c0002dd17af3f2223379d05604b485 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-standalone-wsclient.xsd pkg.csize=464 pkg.size=1090
+file 1b343592339c6f3dddc2f3fad162cf23e11f6d01 chash=bfdfb6d9a064176c0af4114f1c776cab3cc79bf5 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/domain.xsd pkg.csize=80368 pkg.size=725260
+file fc9b5af73918da5efbf310399f54fc645bc78f4a chash=78b56035d24217f58a3807c954506bb41f7d16fd group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-jdbc.xsd pkg.csize=1438 pkg.size=8124
+file 0911315cece12b72230dc54690a2d8b088209bab chash=3a26d3dbe50686d47ca5176b79081b9e9d69d0c0 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-interception.xsd pkg.csize=638 pkg.size=2799
+file 4c5a7d66b380e99bd5c33d6d7152ba2b072674fb chash=357a231827bc5f2dcd59c5062f1865e1fc6314e3 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-wsee-clienthandlerchain.xsd pkg.csize=493 pkg.size=1111
+file 93f412c507c74dcb972abd814c6815cab7a48cc6 chash=c6b37dcb95804da80369627c96912b624fd1ef10 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-ra-ext.xsd pkg.csize=544 pkg.size=1702
+file f1c00f8b675f0213b3e3047d1e624b5f817b9899 chash=0df62ae8430b6f1a7c5eca801607f16a81fc5ca9 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-jmsmd.xsd pkg.csize=3156 pkg.size=33694
+file 2c9f88b5f0b028f1cee8fa077a7194eb698aa694 chash=63f829298f04d52bff41ed2fd15668dd296894c1 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-ejb-jar.xsd pkg.csize=2470 pkg.size=22816
+file 50ae6542536e4397241903266c8ab9893a8c14ed chash=6b3bd2b1ceb52b0d0520d6bc473ac2ac410137a2 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/diagnostics-image.xsd pkg.csize=1243 pkg.size=11319
+file cca9342c6230dcfbc1ee9f2ad6643cefd0a64f91 chash=26a516c878d4d8813fc3fe076fefed2d02d5df7c group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-rdbms20-persistence.xsd pkg.csize=1817 pkg.size=16236
+file d271d273e7dff0624476e8cfa7a7a22db723ddd6 chash=dbe8c45cfe7b648818583b6c3c59ee7e64c757fa group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-annotation.xsd pkg.csize=1181 pkg.size=9415
+file 4fbd53998a873620bfc885bc99a1890e116d9a1a chash=385bdd0ed40435f9c0bf0bb9e7c796d7079e8575 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/weblogic-rdbms11-persistence.xsd pkg.csize=967 pkg.size=5214
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/920/security
+file 31f982c54b1fd39c4ef5380b9ff9f96283d11bf7 chash=68c06c455a0c352d89c0b69b2b78106481ece678 group=sys mode=0664 owner=root path=glassfish/lib/schemas/920/security/medrec.xsd pkg.csize=326 pkg.size=778
+file 754cfd71f93f9d24deb4402a5cc6e62f5b987b71 chash=89d729c79c2de7eb8d7999af5804f94b2067aa4e group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-sca-binding/index.html pkg.csize=415 pkg.size=803
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-sca-binding/1.0
+file 5b79b4574a524f17c6b1c4b4c4499fa6d1aaecbe chash=4512073fa8adaaa722306076c2c313b0c7f9ad80 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-sca-binding/1.0/weblogic-sca-binding.xsd pkg.csize=3276 pkg.size=10449
+file a1b7970b770696e3869daa4e5d4f76dd39a910f6 chash=49890c8e908e264743ba359ebac57b9627455a42 group=sys mode=0664 owner=root path=glassfish/lib/schemas/domain/index_0.html pkg.csize=408 pkg.size=748
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/domain/1.0
+file 423751a076fbf148811d4793f41c873f87472dd7 chash=2b04cde196b8fc59b4597374616e13c34651eaac group=sys mode=0664 owner=root path=glassfish/lib/schemas/domain/1.0/domain.xsd pkg.csize=104519 pkg.size=907306
+file 8acaa895a2d46f929bf2ff7930df572082d978cf chash=d4ae19107e19b968bd9cf41a5f53fa0993cfad0f group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-webservices/index.html pkg.csize=423 pkg.size=935
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-webservices/1.1
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-webservices/1.0
+file 855cb3a339e5000a3d9ff23f1c173c2ff87468f3 chash=4ada227f507c838bc389956f7408607c9146adb5 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-webservices/1.1/weblogic-webservices.xsd pkg.csize=1665 pkg.size=10737
+file 7601eb7ac445833c5be240295ecdc268954a4e84 chash=69b6d7640d1b0ab87db3e89b89f72c48709eb649 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-webservices/1.0/weblogic-webservices.xsd pkg.csize=1323 pkg.size=6625
+file 1cce486eaca9f7989ca36c258d2781f946a2af4f chash=0fae9853b18bf9847e78e1c25c12fc0038ea5811 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-wsee-standaloneclient/index.html pkg.csize=421 pkg.size=844
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-wsee-standaloneclient/1.0
+file beaa301fc0754699303bd4a7c81839372088cac7 chash=996cffd769c3cd63f2c514f82bba849b5a3436cd group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-wsee-standaloneclient/1.0/weblogic-wsee-standaloneclient.xsd pkg.csize=487 pkg.size=1249
+file 575592a07e309b73dc5fb3ce126e230a73dc9c0c chash=4afcefc8216e5155078ff19baefcffcc3badbf57 group=sys mode=0664 owner=root path=glassfish/lib/schemas/webservice-policy-ref/index.html pkg.csize=430 pkg.size=941
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/webservice-policy-ref/1.0
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/webservice-policy-ref/1.1
+file dd5cc829a623b9152525360a5e8fb99af4d388c0 chash=db0f4902d56406800e69d3c9e9012f62b51fdfd8 group=sys mode=0664 owner=root path=glassfish/lib/schemas/webservice-policy-ref/1.0/webservice-policy-ref.xsd pkg.csize=504 pkg.size=1996
+file 8c1f95654f363d328d3c02c6d0cdb3161989d922 chash=9624c6492baeb9f7340537cdd84848481b06970d group=sys mode=0664 owner=root path=glassfish/lib/schemas/webservice-policy-ref/1.1/webservice-policy-ref.xsd pkg.csize=604 pkg.size=2495
+file ef6a7dcc088c1b1e791ea67977a81d1a750ad716 chash=0c81d780f7b41e09bb698945ae04be31e577f569 group=sys mode=0664 owner=root path=glassfish/lib/schemas/deployment-plan/index.html pkg.csize=415 pkg.size=784
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/deployment-plan/1.0
+file 039bc8af4cd4a224ba349f8d689503ae19cd08f4 chash=fc68413e479c6c91784f69d0dac7c51a224e44f4 group=sys mode=0664 owner=root path=glassfish/lib/schemas/deployment-plan/1.0/deployment-plan.xsd pkg.csize=2049 pkg.size=8287
+file 45cc10d299149061f44f87bcf1d4a73338912aa2 chash=86a2fc9db57affac923c13b6fd5dcc96527f0d54 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-interception.xsd pkg.csize=643 pkg.size=2824
+file 8ad62fe690678cf2ea0274fff6ee7f0dae1c8c45 chash=27403254bd5b190bbf45d20ca23654bcf9e9a707 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-ejb-jar.xsd pkg.csize=2368 pkg.size=22265
+file dcf8c3544da445198e75ab29582b6c91b3fc1a5b chash=1a0ead28219e760d62d94d988efbfa161b6e0f67 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-standalone-wsclient.xsd pkg.csize=478 pkg.size=1192
+file eeeb3a9b03b6674f81190ebde5137542e44b3de7 chash=504aee87305d1db3b1cb29d02aab7dad6f930624 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-annotation.xsd pkg.csize=1169 pkg.size=8838
+file e02a91d9d0425ed07a7a7d53116807d5f1a1c05c chash=b559d116eabc4d28c9ef41c7d5b2d285c2b48cd2 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-wsee.xsd pkg.csize=1095 pkg.size=4764
+file f193571c7d5ee4261544b6991096dceba9a91f4a chash=696fbff73213fc714e19e1ee8973b9ed199b03ae group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/diagnostics.xsd pkg.csize=1117 pkg.size=12866
+file a698c96e994086c08880262c6483fbf42ec99c49 chash=9d7eb7061f67d551db79cbc9f7aa205136f196fc group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-application.xsd pkg.csize=10384 pkg.size=49678
+file 8febb210812088f6f4ef38b57c802fed7b91d717 chash=c7476cfb5fd80caa0485a3b30da05daba0c4324b group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/domain.xsd pkg.csize=16632 pkg.size=265657
+file 32ef577bc40684e0ce61e93579fcddbef881efdf chash=81dd115cf0e3bd8aa40b2116458dd75e3683bb4b group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-ra.xsd pkg.csize=1862 pkg.size=10965
+file f058130cd3a8927c9f8f27d468fbfc8dcd066185 chash=8bb40c46772e1796295f4833d9ac6383bdc04d9a group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-jmsmd.xsd pkg.csize=3167 pkg.size=33909
+file 3c1d2401be46cc570d2ee6f3db79461b0a070332 chash=2f6450e7cac18e85deaa39a397cfe017c27b35bb group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-deployment-plan.xsd pkg.csize=931 pkg.size=4297
+file 23ecc624104b04fb23c188963a269d0b7e1d36a5 chash=35ef3477ddfe647414a22ba34af843be84feee25 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-rdbms11-persistence.xsd pkg.csize=966 pkg.size=5220
+file 3c9347ae4c762552f9c65bca5bb33609a684d1b0 chash=5f1bc7e6b1c5fbf48893b862013b3176e1cf4338 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-appclient.xsd pkg.csize=378 pkg.size=840
+file b2a37879cf51be39996131f56fe44d205d2625d5 chash=11c81bd0c47df9005d6e5cc789703fed4b66d1a9 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-ws-policy.xsd pkg.csize=459 pkg.size=1691
+file 6e8388035b22a77c7bd2b5f760a03430c685fb1e chash=d9a26ee99f0e9b59e89e28b821e5998947e6d5b6 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-ra-ext.xsd pkg.csize=560 pkg.size=1805
+file 0c53815384c70830df2f2067dcad16fae85e4220 chash=78bd7ddcc4fcd1d35b3b9d47e45db75f97d3eaec group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-jdbc.xsd pkg.csize=1291 pkg.size=7547
+file d72e45e7e22a5c3e3d36884e61c5a8230ce4214c chash=b4710e6b5b900086feb59fd4967ff0bb61e73343 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-rdbms20-persistence.xsd pkg.csize=1843 pkg.size=16341
+file b6746ce82634689ac8a0ed6bbe47d9fd7b9223ce chash=69eb40478c8803deb154a055735dca43abff4f86 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-wsee-clienthandlerchain.xsd pkg.csize=515 pkg.size=1257
+file 328f0779c95347674a53de4b3baf7b175ffe30de chash=37e7ed1b81ff4b142c02b9881b071720deaf7ee5 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-web-app.xsd pkg.csize=7108 pkg.size=31757
+file ca73b9be88d1c3ec48cea0e08a1b30ddf4db5629 chash=a1b1bed2971c863630298909c2a1d54dd3bbbe53 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-j2ee.xsd pkg.csize=1795 pkg.size=13125
+file 706c964c1ed57e7b669a960b848deff1abe063ca chash=b85cf70d336278fc0a6c8252e544179681657e19 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/security.xsd pkg.csize=5927 pkg.size=54031
+file 788caf09335488ab309499f8707dceb5d92b6a87 chash=6388b42bb50f372d776f69a5374338c46f63dd25 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/weblogic-extension.xsd pkg.csize=1068 pkg.size=4063
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/90/diagnostics
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/90/security
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/90/diagnostics/accessor
+file 090030ab13024586de5ff2a2c5b567864aa2ae5e chash=f14e7886c8da9d549b3d2bacabf1cbc768bda2d9 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/diagnostics/accessor/export.xsd pkg.csize=363 pkg.size=1270
+file 989367e0eb9188ad32af6a331a921c110129247f chash=083d59b96a03eebe4db6ae5280dd958c93fa0cc9 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/security/wls.xsd pkg.csize=3477 pkg.size=42463
+file 0e910d40cb5bddfe402f43cbb8554adfd93c7a67 chash=a2abccab8f7f5cbd16a9fbb5aed14097ee1430a3 group=sys mode=0664 owner=root path=glassfish/lib/schemas/90/security/xacml.xsd pkg.csize=352 pkg.size=1104
+file 2064530260f12ea321705d51817a0d68fc89d191 chash=5c2e78e3a35494f98f03656b59b5948fa485f689 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-application-client/index.html pkg.csize=458 pkg.size=1283
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-application-client/1.2
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-application-client/1.1
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-application-client/1.3
+dir group=sys mode=0775 owner=root path=glassfish/lib/schemas/weblogic-application-client/1.0
+file 3e1e9f7a21e4bfbc48a9b1e5a129d3f84297ab8e chash=f9f0d8036f3ecf3ceba19afd940de09a2c1c6050 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-application-client/1.2/weblogic-application-client.xsd pkg.csize=471 pkg.size=1181
+file df8f71bcd77a8549e9aa35a6f6e23229104f7ad2 chash=ef56c7202d139941e70ae9629d13fcdcc1a1c29c group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-application-client/1.1/weblogic-application-client.xsd pkg.csize=471 pkg.size=1181
+file 5d441297c09d2e88984eaf470c91f6ecd9ab513a chash=d6ff528567368ab14f74c5893392e261780746e8 group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-application-client/1.3/weblogic-application-client.xsd pkg.csize=630 pkg.size=1561
+file 2f81b86977ab2a9e4896dd2f3bf2928a7a22c89b chash=91dab9468bb36d2b6f516669fb48dcda7a35e9dd group=sys mode=0664 owner=root path=glassfish/lib/schemas/weblogic-application-client/1.0/weblogic-application-client.xsd pkg.csize=470 pkg.size=1181
+set name=publisher value=release.glassfish.org

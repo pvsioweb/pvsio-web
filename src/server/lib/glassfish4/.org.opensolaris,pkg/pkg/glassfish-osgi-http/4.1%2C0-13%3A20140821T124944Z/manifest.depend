@@ -1,0 +1,1 @@
+depend fmri=pkg:/glassfish-web@3.1 type=require

@@ -1,0 +1,9 @@
+dir path=glassfish/lib 
+dir path=glassfish/lib/install/applications/jaxr-ra/META-INF 
+dir path=glassfish/lib/install/applications/jaxr-ra 
+dir path=glassfish/lib/install 
+dir path=glassfish/lib/install/applications 
+dir path=glassfish/lib/deployment 
+dir path=glassfish/lib/install/databases 
+dir path=glassfish 
+dir path=glassfish/modules 

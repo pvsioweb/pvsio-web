@@ -1,0 +1,10 @@
+dir path=bin 
+dir path=glassfish/config/branding 
+dir path=glassfish/lib 
+dir path=glassfish/lib/client 
+dir path=glassfish/lib/asadmin 
+dir path=glassfish/modules 
+dir path=glassfish/lib/embedded 
+dir path=glassfish 
+dir path=glassfish/config 
+dir path=glassfish/bin 
