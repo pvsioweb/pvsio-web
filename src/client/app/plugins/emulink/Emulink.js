@@ -35,6 +35,7 @@ define(function (require, exports, module) {
         EmuchartsJSPrinter     = require("plugins/emulink/EmuchartsJavaScriptPrinter"),
         EmuchartsAdaPrinter    = require("plugins/emulink/EmuchartsAdaPrinter"),
         EmuchartsBlessPrinter  = require("plugins/emulink/EmuchartsBlessPrinter"),
+        EmuchartsMisraCPrinter = require("plugins/emulink/EmuchartsMisraCPrinter"),
 //        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         FileHandler            = require("filesystem/FileHandler"),
         FileSystem             = require("filesystem/FileSystem"),
@@ -59,6 +60,7 @@ define(function (require, exports, module) {
     var emuchartsJSPrinter;
     var emuchartsAdaPrinter;
     var emuchartsBlessPrinter;
+    var emuchartsMisraCPrinter;
 
     var options = { autoinit: true };
 
@@ -270,6 +272,7 @@ define(function (require, exports, module) {
         emuchartsJSPrinter = new EmuchartsJSPrinter("emucharts_JS");
         emuchartsAdaPrinter = new EmuchartsAdaPrinter("emucharts_Ada");
         emuchartsBlessPrinter = new EmuchartsBlessPrinter("emucharts_Bless");
+        emuchartsMisraCPrinter = new EmuchartsMisraCPrinter("emucharts_MisraC");
 
         pvsioWebClient = PVSioWebClient.getInstance();
         MODE = new EditorModeUtils();
@@ -1182,7 +1185,7 @@ define(function (require, exports, module) {
                 var content = model.res;
                 return projectManager.project().addFile(name, content, { overWrite: true });
             } else {
-                console.log("Warning, C++ model is undefined.");
+                console.log("Warning, C++ code is undefined.");
             }
         });
         d3.select("#btn_menuMALPrinter").on("click", function () {
@@ -1246,7 +1249,7 @@ define(function (require, exports, module) {
 
         d3.select("#btn_menuJavaScriptPrinter").on("click", function () {
             var emucharts = {
-                name: (emuchartsJSPrinter.modelName),
+                name: ("emucharts_" + projectManager.project().name() + "_JS"),
                 author: {
                     name: "<author name>",
                     affiliation: "<affiliation>",
@@ -1270,13 +1273,13 @@ define(function (require, exports, module) {
                 var content = model.res;
                 return projectManager.project().addFile(name, content, { overWrite: true });
             } else {
-                console.log("Warning, JavaScript model is undefined.");
+                console.log("Warning, JavaScript code is undefined.");
             }
         });
 
         d3.select("#btn_menuAdaPrinter").on("click", function () {
             var emucharts = {
-                name: (emuchartsAdaPrinter.modelName),
+                name: ("emucharts_" + projectManager.project().name() + "_ADA"),
                 author: {
                     name: "<author name>",
                     affiliation: "<affiliation>",
@@ -1300,12 +1303,12 @@ define(function (require, exports, module) {
                 projectManager.project().addFile(emucharts.name + ".adb", model.body, overWrite);
                 projectManager.project().addFile(emucharts.name + ".ads", model.spec, overWrite);
             } else {
-                console.log("Warning, Ada model is undefined.");
+                console.log("Warning, Ada code is undefined.");
             }
         });
         d3.select("#btn_menuBlessPrinter").on("click", function () {
             var emucharts = {
-                name: (emuchartsBlessPrinter.modelName),
+                name: ("emucharts_" + projectManager.project().name() + "_Bless"),
                 author: {
                     name: "<author name>",
                     affiliation: "<affiliation>",
@@ -1335,6 +1338,38 @@ define(function (require, exports, module) {
                 console.log("Warning, Bless model is undefined.");
             }
         });        
+        d3.select("#btn_menuMisraCPrinter").on("click", function () {
+            var emucharts = {
+                name: ("emucharts_" + projectManager.project().name() + "_MisraC"),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: {
+                    input: emuchartsManager.getInputVariables(),
+                    output: emuchartsManager.getOutputVariables(),
+                    local: emuchartsManager.getLocalVariables()
+                },
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            var model = emuchartsMisraCPrinter.print(emucharts);
+            console.log(model);
+            if (model.err) {
+                console.log(model.err);
+                return;
+            }
+            if (model.thread) {
+                var overWrite = {overWrite: true};
+                projectManager.project().addFile(emucharts.name + ".c", model.thread, overWrite);
+            } else {
+                console.log("Warning, MisraC code is undefined.");
+            }
+        }); 
         //-- Zoom menu -----------------------------------------------------------
         d3.select("#menuZoom").on("mouseover", function () {
             document.getElementById("menuZoom").children[1].style.display = "block";
