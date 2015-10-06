@@ -223,6 +223,13 @@ define(function (require, exports, module) {
         }
     };
 
+    Printer.prototype.print_constants = function (emuchart) {
+        this.model.constants = emuchart.constants.map(function (v) {
+            v.type = getType(v.type);
+            return v;
+        });
+    };
+
     Printer.prototype.print_transitions = function (emuchart) {
         var transitions = [];
         emuchart.transitions.forEach(function (t) {
@@ -288,6 +295,7 @@ define(function (require, exports, module) {
     Printer.prototype.print = function (emuchart) {
         this.model.transitions = [];
         this.print_variables(emuchart);
+        this.print_constants(emuchart);
         this.print_transitions(emuchart);
         this.print_initial_transition(emuchart);
         this.print_states(emuchart);
