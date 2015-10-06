@@ -1,6 +1,12 @@
 {{&descriptor}}
 
 //variable declarations //UNCLEAR
+{{~#if constants}}
+// constants variables
+{{~#each constants}}
+{{type}} {{name}}{{#if value}} = {{&value}}{{/if}};
+{{/each}}
+{{~/if}}
 {{~#if input_variables}}
 //input variables
 {{~#each input_variables}}
@@ -32,20 +38,16 @@ void* leave(currentStateLabel, st) {
 }
 
 //declare state labels as variables //UNCLEAR
-{{!-- {{#if initial_transitions}} ---->Serve??
-start: initial state{{/if}} --}}
 {{#each states~}}
 unsigned char *{{&name}} = "{{name}}";
 {{/each}}
 
-//initialisation function for model //UNFINISHED
+//initialisation function for model
 {{#each initial_transitions}}
-
 void* init_{{&id}}(){
-    void* st  = enter('{{target.name}}', st);
+    void* st = enter('{{target.name}}', st);
     return st;
-}
-{{/each}}
+}{{/each}}
 
 //function declarations
 {{#each transitions}}
@@ -54,57 +56,16 @@ void* {{id}} (st) {
     if ({{&condition}}) {
         st = leave('{{source.name}}', st);
         {{~#each actions}}
-        st.{{&.}};
-        {{/each}}
-        st  = enter('{{target.name}}', st);
+        st.{{&.}};{{/each}}
+        st = enter('{{target.name}}', st);
     }
 {{~else}}
     st = leave('{{source.name}}', st);
     {{~#each actions}}
-    st.{{&.}};
-    {{~/each}}
+    st.{{&.}};{{~/each}}
     st = enter('{{target.name}}', st);
 {{~/if}}
     return st;
 }
 {{/each}}
-
----useless---
-
-thread implementation {{&modelName}}.impl
-  annex BLESS
-  {**
-  invariant <<true>>
-  variables
-    {{#each local_variables~}}
-    {{&name}} : {{&type}};
-    {{/each}}
-  states{{#if initial_transitions}}
-    start: initial state{{/if}}
-    {{#each states~}}
-    {{&name}} : state;
-    {{/each}}
-  transitions{{#each initial_transitions}}
-    {{#if parserError}}
-    --- {{&erroneousLabel}}
-    --- {{&parserError}}{{else}}
-    {{&id}}:
-      start-[ {{&condition}} ]->{{&target.name}}
-          { {{~#each actions}}
-            {{&.}}{{#unless @last}}
-          ;{{/unless}}{{/each}}
-           };  --end of start
-    {{/if}}{{/each}}{{#each transitions}}
-    {{#if parserError}}
-    --- {{&erroneousLabel}}
-    --- {{&parserError}}{{else}}
-    {{&id}}:
-      {{&source.name}}-[ {{&condition}} ]->{{&target.name}}
-          { {{~#each actions}}
-            {{&.}}{{#unless @last}}
-          ;{{/unless}}{{/each}}
-           };  --end of {{&id}}{{/if}}
-    {{/each}}
-  **};
-end {{&modelName}}.impl;
 {{&disclaimer}}
