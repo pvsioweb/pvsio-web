@@ -75,25 +75,37 @@ define(function (require, exports, module) {
         current_state: { name: "current_state", type: machineStateType, value: initialMachineState }
     };
     
-    function getType (type) {
+    var operatorOverrides = {
+        ":=": "=",
+        "AND": "&&",
+        "OR": "||",
+        "NOT": "!",
+        "and": "&&",
+        "or": "||",
+        "not": "!",
+        "=": "=="
+    };
+
+    function getType(type) {
         var typeMaps = {
             "Time": "BLESS_Types::Time",    //iachino: Serve??
-            "bool": "unsigned char",
-            "double": "double",
-            "int": "unsigned int"
+            "bool": "UC_8",
+            "int": "UI_4",
+            "long double": "F_16",
+            "double": "F_8"            
         };
         if (type.toLowerCase() === "bool" || type.toLowerCase() === "boolean") {
-            type = "unsigned char";
+            type = "UC_8";
         }
         if (type.toLowerCase() === "real") {
-            type = "double";    
+            type = "F_8";    
         }
         return typeMaps[type] || type;
     }
 
-//    var constantsMap = {
-//        "Initialization_Timeout": "Iso_Properties::Initialization_Timeout"
-//    };
+    function getOperator(op, emuchart) {
+        return operatorOverrides[op] || op;
+    }
     
     function isLocalVariable(name, emuchart) {
         if (name === predefined_variables.current_state.name ||
@@ -133,15 +145,6 @@ define(function (require, exports, module) {
         return false;
     }
     
-    function getTerm(term, emuchart) {
-        if (isInputVariable(term, emuchart)) {
-            term = term + "?";
-        } else if (isOutputVariable(term, emuchart)) {
-            term = term + "!";
-        }
-        return term;
-    }
-
     function parseTransition(t, emuchart) {        
         function getExpression(expression, emuchart) {
             var complexActions = ["expression", "assignment", "function"];
@@ -151,10 +154,10 @@ define(function (require, exports, module) {
             if (expression.type === "assignment") {
                 var name = expression.val.identifier.val;
                 if (isLocalVariable(name, emuchart)) {
-                    return getTerm(name, emuchart) + " = " +
+                    return name + " = " +
                             getExpression(expression.val.expression, emuchart);                
                 }
-                return getTerm(name, emuchart) + "(" +
+                return name + "(" +
                         getExpression(expression.val.expression, emuchart) + ")";
             } else {
                 if (Array.isArray(expression.val)) {
@@ -162,7 +165,7 @@ define(function (require, exports, module) {
                         if (complexActions.indexOf(token.val) > -1) {
                             return getExpression(token.val, emuchart);
                         } else {
-                            return getTerm(token.val, emuchart);
+                            return getOperator(token.val, emuchart);
                         }
                     });
                     return res.join(" ");
@@ -170,7 +173,7 @@ define(function (require, exports, module) {
                     if (complexActions.indexOf(expression.val) > -1) {
                         return getExpression(expression.val, emuchart);
                     } else {
-                        return getTerm(expression.val, emuchart);
+                        return getOperator(expression.val, emuchart);
                     }
                 }
             }
@@ -245,8 +248,18 @@ define(function (require, exports, module) {
     
     Printer.prototype.print_initial_transition = function (emuchart) {
         var initial_transitions = emuchart.initial_transitions,
+            i = 0,
             transitions = [];
         initial_transitions.forEach(function (t) {
+            Handlebars.registerHelper('init_name', function(emuchart) {
+                i++;
+                if(initial_transitions[i-1].name === ""){
+                    return;
+                }
+                else{
+                    return "_" + initial_transitions[i-1].name;
+                }
+            });
             var parsedInit = parseTransition(t, emuchart);
             if (parsedInit) {
                 transitions.push(parsedInit);

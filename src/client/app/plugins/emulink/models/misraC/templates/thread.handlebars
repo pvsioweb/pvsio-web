@@ -1,6 +1,10 @@
 {{&descriptor}}
 
-//variable declarations //UNCLEAR
+//variable declarations
+typedef unsigned char UC_8;
+typedef unsigned int UI_4;
+typedef long double F_16;
+typedef double F_8;
 {{~#if constants}}
 // constants variables
 {{~#each constants}}
@@ -10,19 +14,19 @@
 {{~#if input_variables}}
 //input variables
 {{~#each input_variables}}
-{{type}} {{name}}{{#if value}} = {{&value}}{{/if}};
+extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};
 {{/each}}
 {{~/if}}
 {{~#if output_variables}}
 //output variables
 {{~#each output_variables}}
-{{type}} {{name}}{{#if value}} = {{&value}}{{/if}};
+extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};
 {{/each}}
 {{~/if}}
 {{~#if local_variables}}
 //local variables
 {{~#each local_variables}}
-{{type}} {{name}}{{#if value}} = {{&value}}{{/if}};
+static {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};
 {{/each}}
 {{~/if}}
 
@@ -37,15 +41,21 @@ void* leave(currentStateLabel, st) {
     return state;
 }
 
-//declare state labels as variables //UNCLEAR
+//declare state labels as variables //UNCLEAR: wich type are states?
 {{#each states~}}
-unsigned char *{{&name}} = "{{name}}";
+void *{{&name}} = "{{name}}";
 {{/each}}
 
 //initialisation function for model
 {{#each initial_transitions}}
-void* init_{{&id}}(){
+void* init{{init_name}}(){
     void* st = enter('{{target.name}}', st);
+    ///TRY... does need to set display or user's buisness?
+    {{~#each local_variables}}
+        {{name}} = 0;
+        {{name}}{{#if value}} = {{&value}}{{/if}};
+    {{/each}}
+    ///
     return st;
 }{{/each}}
 
