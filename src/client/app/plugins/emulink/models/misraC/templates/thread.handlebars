@@ -1,4 +1,8 @@
 {{&descriptor}}
+#define true 1
+#define false 0
+#define TRUE 1
+#define FALSE 0
 
 //variable declarations
 typedef unsigned char UC_8;
@@ -50,12 +54,8 @@ void *{{&name}} = "{{name}}";
 {{#each initial_transitions}}
 void* init{{init_name}}(){
     void* st = enter('{{target.name}}', st);
-    ///TRY... does need to set display or user's buisness?
-    {{~#each local_variables}}
-        {{name}} = 0;
-        {{name}}{{#if value}} = {{&value}}{{/if}};
-    {{/each}}
-    ///
+    {{~#each actions}}
+    st.{{&.}};{{/each}}
     return st;
 }{{/each}}
 

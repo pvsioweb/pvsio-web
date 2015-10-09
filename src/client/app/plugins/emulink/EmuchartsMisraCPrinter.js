@@ -88,8 +88,8 @@ define(function (require, exports, module) {
 
     function getType(type) {
         var typeMaps = {
-            "Time": "BLESS_Types::Time",    //iachino: Serve??
-            "bool": "UC_8",
+            "Time": "Time",    //iachino: Serve??
+            "bool": "UC",
             "int": "UI_4",
             "long double": "F_16",
             "double": "F_8"            
@@ -122,30 +122,30 @@ define(function (require, exports, module) {
         }
         return false;
     }
-    function isInputVariable(name, emuchart) {
-        if (emuchart.variables && emuchart.variables.input) {
-            var i = 0;
-            for (i = 0; i < emuchart.variables.input.length; i++) {
-                if (name === emuchart.variables.input[i].name) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    function isOutputVariable(name, emuchart) {
-        if (emuchart.variables && emuchart.variables.output) {
-            var i = 0;
-            for (i = 0; i < emuchart.variables.output.length; i++) {
-                if (name === emuchart.variables.output[i].name) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+    // function isInputVariable(name, emuchart) {
+    //     if (emuchart.variables && emuchart.variables.input) {
+    //         var i = 0;
+    //         for (i = 0; i < emuchart.variables.input.length; i++) {
+    //             if (name === emuchart.variables.input[i].name) {
+    //                 return true;
+    //             }
+    //         }
+    //     }
+    //     return false;
+    // }
+    // function isOutputVariable(name, emuchart) {
+    //     if (emuchart.variables && emuchart.variables.output) {
+    //         var i = 0;
+    //         for (i = 0; i < emuchart.variables.output.length; i++) {
+    //             if (name === emuchart.variables.output[i].name) {
+    //                 return true;
+    //             }
+    //         }
+    //     }
+    //     return false;
+    // }
     
-    function parseTransition(t, emuchart) {        
+    function parseTransition(t, emuchart) {
         function getExpression(expression, emuchart) {
             var complexActions = ["expression", "assignment", "function"];
             if (expression === undefined || expression === null) {
@@ -153,6 +153,10 @@ define(function (require, exports, module) {
             }
             if (expression.type === "assignment") {
                 var name = expression.val.identifier.val;
+                expression.val.expression.val.map(function (v) {
+                    v.val = v.val.toLowerCase();
+                    return;
+                });
                 if (isLocalVariable(name, emuchart)) {
                     return name + " = " +
                             getExpression(expression.val.expression, emuchart);                
@@ -253,11 +257,11 @@ define(function (require, exports, module) {
         initial_transitions.forEach(function (t) {
             Handlebars.registerHelper('init_name', function(emuchart) {
                 i++;
-                if(initial_transitions[i-1].name === ""){
+                if( (initial_transitions[i-1].name === "") || !(initial_transitions[i-1].name[0].match(/[a-z]/i)) ){
                     return;
                 }
                 else{
-                    return "_" + initial_transitions[i-1].name;
+                    return "_" + initial_transitions[i-1].name.substr(0,3);
                 }
             });
             var parsedInit = parseTransition(t, emuchart);
