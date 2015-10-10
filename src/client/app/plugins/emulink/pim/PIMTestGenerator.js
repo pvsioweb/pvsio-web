@@ -273,7 +273,23 @@ define(function (require, exports, module) {
 				return "Error: no behaviour tests from model";
 			}
 
-			var iBehav = [], sBehav = [], sRespBehav = [], noBehav = [];
+			var iBehav, sBehav = [], sRespBehav = [], noBehav = [];
+			var UniqueList = function () {
+				var uList = {};
+				this.get = function () {
+					var arr = [];
+					for (var key in uList) {
+						if (uList.hasOwnProperty(key)) {
+							arr.push(JSON.parse(key));
+						}
+					}
+					return arr;
+				};
+				this.add = function (obj) {
+					uList[JSON.stringify(obj)] = null;
+				};
+			};
+			var uniqueList = new UniqueList();
 
 			// Split the Behaviour based tests into each type of behaviour
 			tests.forEach(function (test) {
@@ -295,7 +311,7 @@ define(function (require, exports, module) {
 								if (pm.pm) {
 									pm.transitions.forEach(function (tran) {
 										if (tran.I_behaviour === arg) {
-											iBehav.push({
+											uniqueList.add({
 												start_state: tran.start_state,
 												// Set the widget name and the I_behaviour
 												predicates: [p.args[0], arg],
@@ -339,6 +355,8 @@ define(function (require, exports, module) {
 					});
 				}
 			});
+			// Ensure the iBehaviour tests are unique.
+			iBehav = uniqueList.get();
 
 			/**
 			 * Display the I_behaviour tests.
