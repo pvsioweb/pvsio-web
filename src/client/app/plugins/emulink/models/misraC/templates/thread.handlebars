@@ -1,37 +1,26 @@
 {{&descriptor}}
-#define true 1
-#define false 0
-#define TRUE 1
-#define FALSE 0
+{{#each importings}}
+{{&.}}{{/each}}
 
-//variable declarations
-typedef unsigned char UC_8;
-typedef unsigned int UI_4;
-typedef long double F_16;
-typedef double F_8;
 {{~#if constants}}
 // constants variables
 {{~#each constants}}
-{{type}} {{name}}{{#if value}} = {{&value}}{{/if}};
-{{/each}}
+static const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{~#if input_variables}}
 //input variables
 {{~#each input_variables}}
-extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};
-{{/each}}
+extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{~#if output_variables}}
 //output variables
 {{~#each output_variables}}
-extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};
-{{/each}}
+extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{~#if local_variables}}
 //local variables
 {{~#each local_variables}}
-static {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};
-{{/each}}
+static {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 
 //declaration of helper functions
@@ -53,7 +42,7 @@ void *{{&name}} = "{{name}}";
 //initialisation function for model
 {{#each initial_transitions}}
 void* init{{init_name}}(){
-    void* st = enter('{{target.name}}', st);
+    void* st = enter("{{target.name}}", st);
     {{~#each actions}}
     st.{{&.}};{{/each}}
     return st;
@@ -64,16 +53,16 @@ void* init{{init_name}}(){
 void* {{id}} (st) {
 {{~#if condition}}
     if ({{&condition}}) {
-        st = leave('{{source.name}}', st);
+        st = leave("{{source.name}}", st);
         {{~#each actions}}
         st.{{&.}};{{/each}}
-        st = enter('{{target.name}}', st);
+        st = enter("{{target.name}}", st);
     }
 {{~else}}
-    st = leave('{{source.name}}', st);
+    st = leave("{{source.name}}", st);
     {{~#each actions}}
     st.{{&.}};{{~/each}}
-    st = enter('{{target.name}}', st);
+    st = enter("{{target.name}}", st);
 {{~/if}}
     return st;
 }

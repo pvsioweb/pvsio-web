@@ -1,6 +1,6 @@
 /**
  * @author Gioacchino Mauro
- * @date ...
+ * @date Mon Oct 12 13:43:39 2015
  *
  * MISRA C code printer for emucharts models.
  * Emuchart objects have the following structure:
@@ -85,22 +85,63 @@ define(function (require, exports, module) {
         "not": "!",
         "=": "=="
     };
-
+    
+    var declarations = {
+        "true" : undefined,
+        "false" : undefined,
+        "TRUE" : undefined,
+        "FALSE" : undefined,
+        "bool" : undefined,
+        "int" : undefined,
+        "float" : undefined,
+        "double" : undefined
+    };
+    
+    function isNumber(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+    
     function getType(type) {
         var typeMaps = {
             "Time": "Time",    //iachino: Serve??
-            "bool": "UC",
-            "int": "UI_4",
-            "long double": "F_16",
-            "double": "F_8"            
+            "bool": "UC_8",
+            "int": "UI_32",
+            "float" : "F_32",
+            "double": "D_64"                      
         };
-        if (type.toLowerCase() === "bool" || type.toLowerCase() === "boolean") {
-            type = "UC_8";
+        if ( (type.toLowerCase() === "bool") || (type.toLowerCase() === "boolean") ) {
+            declarations["true"] = "#define true 1";
+            declarations["false"] = "#define false 0";
+            declarations["TRUE"] = "#define TRUE 1";
+            declarations["FALSE"] = "#define FALSE 0";
+            type = typeMaps["bool"];
+            declarations["bool"] = "typedef unsigned char " + type + ";";
         }
-        if (type.toLowerCase() === "real") {
-            type = "F_8";    
+        if (type.toLowerCase() === "int") {
+            type = typeMaps["int"];
+            declarations["int"] = "typedef unsigned int " + type + ";";
+        }
+        if (type.toLowerCase() === "float"){
+            type = typeMaps["float"];
+            declarations["float"] = "typedef float " + type + ";";
+        }
+        if ((type.toLowerCase() === "real") || (type.toLowerCase() === "double")){
+            type = typeMaps["double"];
+            declarations["double"] = "typedef double " + type + ";";
         }
         return typeMaps[type] || type;
+    }
+    
+    function getSuffix(v) {
+        if (isNumber(v.value)){
+            if (v.type.toLowerCase() === "int") {
+                v.value = v.value + "u";
+            }
+            if ( (v.type.toLowerCase() === "float") || (v.type.toLowerCase() === "double") || (v.type.toLowerCase() === "real") ){
+                v.value = v.value + "f";
+            }
+        }
+        return v.value;
     }
 
     function getOperator(op, emuchart) {
@@ -199,6 +240,13 @@ define(function (require, exports, module) {
                     return getExpression(a, emuchart);
                 });
             }
+            
+            //trying to add suffix even in the actions of transitions
+            // var lengthAction = actions[0];
+            // lengthAction = lengthAction.length;
+            // if ( isNumber(actions[0][lengthAction - 1])) {
+            //     actions[0] = actions[0] + "u";
+            // }
             return {id: id.val, actions: actions, condition: condition, source: t.source, target: t.target};
         } else if (functionBody.err) {
             displayError(functionBody.err);
@@ -216,14 +264,20 @@ define(function (require, exports, module) {
     Printer.prototype.print_variables = function (emuchart) {
         if (emuchart.variables) {
             this.model.input_variables = emuchart.variables.input.map(function (v) {
+                v.value = getSuffix(v);
                 v.type = getType(v.type);
                 return v;
             });
             this.model.output_variables = emuchart.variables.output.map(function (v) {
+                v.value = getSuffix(v);
                 v.type = getType(v.type);
+                if (v.type.toLowerCase() === 'monitor_mode'){
+                    v.value = "\"" + v.value.toLowerCase() + "\"";
+                }
                 return v;
             });
             this.model.local_variables = emuchart.variables.local.map(function (v) {
+                v.value = getSuffix(v);
                 v.type = getType(v.type);
                 return v;
             });
@@ -232,7 +286,9 @@ define(function (require, exports, module) {
 
     Printer.prototype.print_constants = function (emuchart) {
         this.model.constants = emuchart.constants.map(function (v) {
+            v.value = getSuffix(v);
             v.type = getType(v.type);
+            v.name = v.name.toUpperCase();
             return v;
         });
     };
@@ -301,6 +357,10 @@ define(function (require, exports, module) {
             "\n*  ---------------------------------------------------------------*/\n";
     };
     
+    Printer.prototype.print_declarations = function (emuchart) {
+        this.model.importings = declarations;
+    };
+    
     Printer.prototype.print_disclaimer = function (emuchart) {
         this.model.disclaimer = "\n/** ---------------------------------------------------------------\n" +
                     "*   C code generated using PVSio-web MisraCPrinter ver 0.1\n" +
@@ -311,6 +371,7 @@ define(function (require, exports, module) {
 
     Printer.prototype.print = function (emuchart) {
         this.model.transitions = [];
+        this.print_declarations(emuchart);
         this.print_variables(emuchart);
         this.print_constants(emuchart);
         this.print_transitions(emuchart);
@@ -318,7 +379,9 @@ define(function (require, exports, module) {
         this.print_states(emuchart);
         this.print_disclaimer(emuchart);
         this.print_descriptor(emuchart);
-
+        
+        console.log(this.model);//TO debug
+        
         var thread = Handlebars.compile(threadTemplate)(this.model);
         return {thread: thread};
     };
