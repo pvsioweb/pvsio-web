@@ -346,27 +346,21 @@ define(function (require, exports, module) {
         function openChart(callback) {
             var opt = {
                 header: "Open EmuChart file...",
-                extensions: ".emdl,.muz,.pm"
+                extensions: ".emdl,.muz,.pim"
             };
             FileHandler.openLocalFileAsText(function (err, res) {
                 if (res) {
                     if (res.name.lastIndexOf(".emdl") === res.name.length - 5) {
                         res.content = JSON.parse(res.content);
                         emuchartsManager.importEmucharts(res);
-                        if (callback && typeof callback === "function") {
-                            callback(err, res);
-                        }
                     } else if (res.name.lastIndexOf(".muz") === res.name.length - 4) {
                         emuchartsManager.importPIMChart(res);
-                        if (callback && typeof callback === "function") {
-                            callback(err, res);
-                        }
                     } else {
                         // Try parse as PIM
                         pimImporter.importPIM(res, emuchartsManager);
-                        if (callback && typeof callback === "function") {
-                            callback(err, res);
-                        }
+                    }
+                    if (callback && typeof callback === "function") {
+                        callback(err, res);
                     }
                 } else {
                     console.log("Error while opening file (" + err + ")");
@@ -390,7 +384,7 @@ define(function (require, exports, module) {
         function importChart(callback) {
             var opt = {
                 header: "Import Chart...",
-                extensions: ".muz,.pm"
+                extensions: ".muz,.pim"
             };
             // MUZ
             FileHandler.openLocalFileAsText(function (err, res) {
