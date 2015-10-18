@@ -11,7 +11,6 @@ define(function (require, exports, module) {
     var d3 = require("d3/d3"),
         eventDispatcher = require("util/eventDispatcher"),
         imageMapper             = require("imagemapper"),
-        WSManager				= require("websockets/pvs/WSManager"),
         uidGenerator            = require("util/uuidGenerator"),
         EditWidgetView          = require("pvsioweb/forms/editWidget"),
         Button                  = require("pvsioweb/Button"),
@@ -37,7 +36,7 @@ define(function (require, exports, module) {
     }
 
     function createImageMap(widget) {
-        if (widget.needsImageMap()) { widget.createImageMap(WSManager.getWebSocket(), renderResponse); }
+        if (widget.needsImageMap()) { widget.createImageMap({callback: renderResponse}); }
     }
 
 

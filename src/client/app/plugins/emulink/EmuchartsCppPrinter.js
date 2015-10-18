@@ -4,38 +4,40 @@
  * @author Paolo Masci
  * @date 2014/09/19 11:59:43 AM
  */
+/*jshint unused:false*/
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3 */
 define(function (require, exports, module) {
-	"use strict";
-    
+    "use strict";
+
     var class_name;
 
-    
+
     /**
-	 * Constructor
-	 */
+     * Constructor
+     */
     function EmuchartsCppPrinter(name) {
         class_name = name;
         return this;
     }
-    
+
     /**
      * Prints C++ definitions for Emuchart states
      */
     EmuchartsCppPrinter.prototype.print_states = function (emuchart) {
-        var states = emuchart.states;
+        var states = emuchart.states, stateStr;
         var ans = "  // machine states\n  enum MachineState";
         if (states && states.length > 0) {
             ans += " { ";
-            states.forEach(function (state) {
-                ans += state.name + ", ";
-            });
-            ans = ans.substr(0, ans.length - 2) + " };";
+            stateStr = states.map(function (s) {
+                return s.name;
+            }).joing(", ");
+
+            ans = ans.concat(stateStr).concat(" };");
         }
         return ans + "\n";
     };
-    
+
     /**
      * Parser for identifying transition names for transitions given in the
      * form name [ condition ] { actios }, where conditions and actions are optionals
@@ -47,7 +49,7 @@ define(function (require, exports, module) {
         if (pos > 0) { return transition.substr(0, pos).trim(); }
         return transition.trim();
     }
-    
+
     /**
      * Parser for transitions given in the form name [ condition ] { actios },
      * where name is the transition name, and conditions and actions are optionals
@@ -76,7 +78,7 @@ define(function (require, exports, module) {
                     ans.actions.push(a);
                 }
             });
-            
+
         }
         return ans;
     }
@@ -88,13 +90,13 @@ define(function (require, exports, module) {
     function printAction(action, variables) {
         var tmp = "";
         // in this version of the tool we can identify state variables in
-        // state updates, i.e., in actions given in the form v := expr, 
+        // state updates, i.e., in actions given in the form v := expr,
         // where v is a state variable
         if (variables) {
 /*            variables.forEach(function (v) {
                 var state_update = action.split(":=");
                 if (state_update.length === 2) {
-                    // check for the presence of state variables 
+                    // check for the presence of state variables
                     // on the right-hand side of the expression
                     var pos = indexOfStateVariableRT(v.name, state_update[1]);
                     if (pos >= 0) {
@@ -107,8 +109,8 @@ define(function (require, exports, module) {
         tmp += ",\n           new_st = new_st WITH [ " + action + " ]";
         return tmp;
     }
-    
-        
+
+
     /**
      * Utility function for identifying and grouping together cases that make up the body of a transition
      */
@@ -142,8 +144,8 @@ define(function (require, exports, module) {
         ans += "\n  leave_state(ms: MachineState)(st: State): State = st WITH [ previous_state := ms ]\n";
         return ans;
     }
-    
-    
+
+
     /**
      * Prints PVS definitions for Emuchart initial transitions
      */
@@ -177,7 +179,7 @@ define(function (require, exports, module) {
         }
         return ans;
     };
-    
+
     /**
      * Prints PVS definitions for Emuchart transitions given in the form transition [condition] {actions}
      */
@@ -284,7 +286,7 @@ define(function (require, exports, module) {
         }
         return ans;
     };
-        
+
     EmuchartsCppPrinter.prototype.print_descriptor = function (emuchart) {
         var ans = "% ---------------------------------------------------------------" +
                     "\n%  Class: " + emuchart.name;
@@ -300,7 +302,7 @@ define(function (require, exports, module) {
         ans += "\n% ---------------------------------------------------------------\n";
         return ans;
     };
-    
+
     EmuchartsCppPrinter.prototype.print_disclaimer = function () {
         var ans = "\n% ---------------------------------------------------------------\n" +
                     "%  C++ class generated using PVSio-web CppPrinter ver 0.1\n" +
@@ -308,7 +310,7 @@ define(function (require, exports, module) {
                     "\n% ---------------------------------------------------------------\n";
         return ans;
     };
-    
+
     /**
      * Prints the entire C++ class
      */
@@ -325,6 +327,6 @@ define(function (require, exports, module) {
         ans += this.print_disclaimer();
         return { res: ans };
     };
-    
+
     module.exports = EmuchartsCppPrinter;
 });

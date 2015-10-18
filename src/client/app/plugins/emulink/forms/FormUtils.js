@@ -4,16 +4,13 @@
  * @date 25/5/14 2:03:48 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, MouseEvent */
-
 define(function (require, exports, module) {
-	"use strict";
-	function serializeForm(el, inputSelectors) {
+    "use strict";
+    function serializeForm(el, inputSelectors) {
         var options = d3.map();
         var labels = d3.map();
-		inputSelectors.forEach(function (s) {
+        inputSelectors.forEach(function (s) {
             var elem = document.getElementById(s);
-            if (!elem) { console.log("FORM UTILS ERROR", s, elem); return; }
             if (elem.selectedIndex >= 0) {
                 // listbox item
                 options.set(s, elem.selectedIndex);
@@ -32,7 +29,6 @@ define(function (require, exports, module) {
     function clearForm(inputSelectors) {
         inputSelectors.forEach(function (s) {
             var elem = document.getElementById(s);
-            if (!elem) { console.log("FORM UTILS ERROR - clearForm", s, elem); return; }
             if (elem.selectedIndex >= 0)
                 elem.selectedIndex = 0;
             else if (elem.value)

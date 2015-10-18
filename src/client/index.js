@@ -19,5 +19,5 @@ require.config({
 
 require(["main"], function (main) {
     "use strict";
-	main.start();
+    main.start();
 });

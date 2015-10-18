@@ -9,14 +9,16 @@ define(function (require, exports, module) {
     "use strict";
     var ModelEditor = require("plugins/modelEditor/ModelEditor"),
         Emulink = require("plugins/emulink/Emulink"),
-        SafetyTest = require("plugins/safetyTest/SafetyTest"),
+//        SafetyTest = require("plugins/safetyTest/SafetyTest"),
         GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
         Logger	= require("util/Logger"),
         PluginManager = require("plugins/PluginManager"),
         PVSioWeb = require("PVSioWebClient").getInstance(),
         ProjectManager = require("project/ProjectManager"),
-        displayQuestion = require("pvsioweb/forms/displayQuestion");
+        displayQuestion = require("pvsioweb/forms/displayQuestion"),
+        PreferenceDialog     = require("preferences/PreferenceDialog"),
+        Preferences = require("preferences/PreferenceStorage").getInstance();
 
     var template = require("text!pvsioweb/forms/maincontent.handlebars");
     /**
@@ -149,7 +151,9 @@ define(function (require, exports, module) {
         },
         events: {
             "change input[type='checkbox']": "checkboxClicked",
-            "click .plugin-box": "pluginClicked"
+            "click .plugin-box": "pluginClicked",
+            "click .plugin-box label": "pluginLabelClicked",
+            "click a#preferences": "preferencesClicked"
         },
         checkboxClicked: function (event) {
             this.trigger("pluginToggled", event);
@@ -159,8 +163,24 @@ define(function (require, exports, module) {
                 d3.select(event.target).select("input[type='checkbox']").node().click();
             }
         },
+        pluginLabelClicked: function (event) {
+            if (event.target.tagName.toLowerCase() === "label") {
+                d3.select(event.target.parentNode).select("input[type='checkbox']").node().click();
+            }
+        },
         scriptClicked: function (event) {
             this.trigger("scriptClicked", $(event.target).attr("name"));
+        },
+        preferencesClicked: function (event) {
+            PreferenceDialog.create()
+                .on("ok", function (form, view) {
+                    Object.keys(form.data).forEach(function (k) {
+                        Preferences.set(k, form.data[k]);
+                    });
+                    view.remove();
+                }).on("cancel", function (form, view) {
+                    view.remove();
+                });
         }
     });
 
@@ -171,15 +191,24 @@ define(function (require, exports, module) {
 
     module.exports = {
         init: function (data) {
-            data = data || {plugins: [PrototypeBuilder.getInstance(), ModelEditor.getInstance(),
-                                      Emulink.getInstance(), GraphBuilder.getInstance(), SafetyTest.getInstance()].map(function (p) {
-                return {label: p.constructor.name, plugin: p};
-            })};
+            var plugins = [
+                    PrototypeBuilder.getInstance(),
+                    ModelEditor.getInstance(),
+                    Emulink.getInstance(),
+                    GraphBuilder.getInstance()
+            ];
+            data = data || {
+                plugins: plugins.map(function (p) {
+                    var label = p.getName ? p.getName() : p.constructor.name;
+                    return {label: label, id: label.replace(/\s/g, ""), plugin: p};
+                })
+            };
+
             PluginManager.getInstance().init();
             PluginManager.getInstance().addListener("PluginEnabled", function (event) {
-                d3.select("#plugin_" + event.plugin.constructor.name).property("checked", true);
+                d3.select("input[name='" + event.plugin.getName() + "']").property("checked", true);
             }).addListener("PluginDisabled", function (event) {
-                d3.select("#plugin_" + event.plugin.constructor.name).property("checked", false);
+                d3.select("input[name='" + event.plugin.getName() + "']").property("checked", false);
             });
             if (this._view) { this.unload(); }
             this._view = createHtmlElements(data);

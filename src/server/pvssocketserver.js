@@ -157,13 +157,52 @@ function run() {
                 command: "/app/pvs6.0/proveit -T -l -v " + file,
                 callBack: cb
             });
+        } else if (process.env.pvsdir) {
+            procWrapper().exec({
+                command: path.join(process.env.pvsdir, "proveit") + " -T -l -v " + file,
+                callBack: cb
+            });        
         } else {
             procWrapper().exec({
-                command: "proveit -l -v " + file,
+                command: "proveit -T -l -v " + file,
                 callBack: cb
             });
         }
     }
+    
+    function startSapereEE(cb) {
+        var cmd = __dirname + "/lib/glassfish4/bin/asadmin restart-domain --force=true";
+        procWrapper().exec({
+            command: cmd,
+            callBack: cb
+        });
+    }
+    
+    function stopSapereEE(cb) {
+        var cmd = __dirname + "/lib/glassfish4/bin/asadmin stop-domain";
+        procWrapper().exec({
+            command: cmd,
+            callBack: cb
+        });
+    }
+    
+    function startIVY(cb) {
+        var cmd = "cd " + __dirname + "/ext/IVY" +
+                  " && " +
+                  "java -Dlog4j.configuration=file:log4j.properties -jar lib/jpf-boot.jar -interactive";
+        console.log(cmd);
+        // This delayed callback is a workaround to wait for IVY to start up.
+        // We can remove this workaround as soon as the IVY tool implements a way to start IVY and return control to the caller.
+        function delayedCallback() {
+            setTimeout(cb, 2000);
+        }
+        procWrapper().exec({
+            command: cmd,
+            callBack: null
+        });
+        delayedCallback();
+    }
+    
     /**
         Creates a function that updates the path of the parameter object such that it is relative to the
         basePath specified
@@ -202,7 +241,13 @@ function run() {
                                 if (err) {
                                     reject(err);
                                 } else {
-                                    resolve(res);
+                                     var fileStats = {
+                                        created: res.birthtime,
+                                        modified: res.mtime,
+                                        size: res.size,
+                                        isDirectory: res.isDirectory()
+                                    };
+                                    resolve(fileStats);
                                 }
                             });
                         });
@@ -211,7 +256,12 @@ function run() {
                     Promise.all(promises)
                         .then(function (res) {
                             var result = res.map(function (d, i) {
-                                return {name: files[i], path: path.join(folderPath, files[i]), isDirectory: d.isDirectory()};
+                                return {
+                                    name: files[i],
+                                    path: path.join(folderPath, files[i]),
+                                    isDirectory: d.isDirectory,
+                                    stats: d
+                                };
                             });
                             resolve(result);
                         }, function (err) {
@@ -259,6 +309,7 @@ function run() {
         if (folderPath.indexOf("pvsbin") > -1) { return; }
 
         var watch = function (folder) {
+            if (folder.indexOf("pvsbin") > -1) { return; }
 //            logger.debug("watching changes to .. " + folder);
             return fs.watch(folder, {persistent: false}, function (event, name) {
                 var extension = path.extname(name).toLowerCase();
@@ -378,13 +429,25 @@ function run() {
             },
             "setMainFile": function (token, socket, socketid) {
                 initProcessMap(socketid);
-                changeProjectSetting(token.projectName, "mainPVSFile", token.name)
-                    .then(function (res) {
-                        res.id = token.id;
-                        res.socketId = socketid;
-                        res.time = token.time;
-                        processCallback(res, socket);
-                    });
+                var mainFile = token.path.split("/").slice(1).join("/");
+                if (mainFile !== "") {
+                    changeProjectSetting(token.projectName, "mainPVSFile", mainFile)
+                        .then(function (res) {
+                            res.type = token.type;
+                            res.id = token.id;
+                            res.socketId = socketid;
+                            res.time = token.time;
+                            processCallback(res, socket);
+                        });
+                } else {
+                    res.type = res.type + "_error";
+                    res.err = {
+                        message: "Invalid token " + JSON.stringify(token),
+                        code: "ENOENT",
+                        path: token.path
+                    };
+                    processCallback(res, socket);
+                }
             },
             "changeProjectSetting": function (token, socket, socketid) {
                 initProcessMap(socketid);
@@ -660,7 +723,8 @@ function run() {
             },
             "readDirectory": function (token, socket, socketid) {
                 initProcessMap(socketid);
-                var absPath = token.path === "~" ? process.env.HOME : isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
+                var absPath = token.path.indexOf("~") === 0 ? path.join(process.env.HOME, token.path.substr(1))
+                    : isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
                 readDirectory(absPath)
                     .then(function (files) {
                         processCallback({
@@ -831,6 +895,84 @@ function run() {
                         }
                     }, socket);
                 });
+            },
+            "startSapereEE": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time
+                };
+                try {
+                    startSapereEE(function (err, stdout, stderr) {
+                        res.stdout = stdout;
+                        res.stderr = stderr;
+                        console.log("glassfish err:" + err);
+                        console.log("glassfish stdout:" + stdout);
+                        console.log("glassfish stderr:" + stderr);
+                        processCallback(res, socket);
+                    });
+                } catch (err) {
+                    if (err.code === 1 && err.killed === false) {
+                        // glassfish is already running, it's not an error
+                        res.stdout = "PVSio-web Network Controller already started.";
+                    } else {                    
+                        res.type = token.type + "_error";
+                        res.err = err.message;
+                    }
+                    processCallback(res, socket);
+                }
+            },
+            "startIVY": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time
+                };
+                try {
+                    startIVY(function (err, stdout, stderr) {
+                        res.stdout = stdout;
+                        res.stderr = stderr;
+                        console.log("IVY err:" + err);
+                        console.log("IVY stdout:" + stdout);
+                        console.log("IVY stderr:" + stderr);
+                        processCallback(res, socket);
+                    });
+                } catch (err) {
+                    res.type = token.type + "_error";
+                    res.err = err.message;
+                    processCallback(res, socket);
+                }
+            },
+            "stopSapereEE": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                var res = {
+                    id: token.id,
+                    type: token.type,
+                    socketId: socketid,
+                    time: token.time
+                };
+                try {
+                    stopSapereEE(function (err, stdout, stderr) {
+                        res = {
+                            id: token.id,
+                            type: token.type,
+                            err: err,
+                            stdout: stdout,
+                            stderr: stderr,
+                            socketId: socketid,
+                            time: token.time
+                        };
+                        processCallback(res, socket);
+                    });
+                } catch (err) {
+                    res.type = token.type + "_error";
+                    res.err = err.message;
+                    processCallback(res, socket);
+                }
             }
         };
 
@@ -886,6 +1028,9 @@ function run() {
             process.argv.forEach(function (val, index, array) {
                 if (val.toLowerCase() === "restart") {
                     restart = true;
+                }
+                if (val.toLowerCase().indexOf("pvsdir:") === 0) {
+                    process.env.pvsdir = path.join(__dirname, "../../" + val.toLowerCase().split(":")[1]);
                 }
             });
         }

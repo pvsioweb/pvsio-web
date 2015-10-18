@@ -311,7 +311,7 @@ define(function (require, exports, module) {
             newFile = new Descriptor(path, content, { encoding: encoding });
         }
         // sanity check -- descriptors can be added to the current project only
-        if (newFile.path.startsWith(_this.name()) === false) {
+        if (newFile.path.indexOf(_this.name()) !== 0) {
             var tmp = newFile.path.split("/").filter(function (e) { return e !== ""; });
             tmp = [_this.name()].concat(tmp);
             newFile.path = tmp.join("/");
@@ -458,7 +458,9 @@ define(function (require, exports, module) {
      * @instance
     */
     Project.prototype.importRemoteFiles = function (paths) {
-        paths = paths.split(",");
+        if (paths) {
+            paths = paths.split(",");
+        }
         var imageExts = [".jpg", ".png", ".gif"];
         return new Promise(function (resolve, reject) {
             if (!paths) { return resolve([]); }
@@ -809,7 +811,7 @@ define(function (require, exports, module) {
                         }
                     }
                 });
-                if (fileVersion) {
+                if (fileVersion && parseFloat(fileVersion) >= 2) {
                     // set the main pvs file descriptor
                     if (mainFileName) {
                         var main = _this.getDescriptor(name + "/" + mainFileName);

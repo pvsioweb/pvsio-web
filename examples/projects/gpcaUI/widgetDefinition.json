@@ -4,11 +4,11 @@
    "type": "display",
    "id": "Display1360333691427",
    "displayKey": "display",
-   "cursorName": "c",
+   "cursorName": "cursor",
    "auditoryFeedback": true
   },
   {
-   "events": [
+   "evts": [
     "click"
    ],
    "id": "Button1360333703845",
@@ -18,7 +18,7 @@
    "boundFunctions": "click_up"
   },
   {
-   "events": [
+   "evts": [
     "click"
    ],
    "id": "Button1360334003368",
@@ -28,7 +28,7 @@
    "boundFunctions": "click_dn"
   },
   {
-   "events": [
+   "evts": [
     "click"
    ],
    "id": "Button1360334013028",
@@ -38,7 +38,7 @@
    "boundFunctions": "click_lf"
   },
   {
-   "events": [
+   "evts": [
     "click"
    ],
    "id": "Button1360334022698",
@@ -70,13 +70,13 @@
   {
    "class": "Button1360334013028",
    "shape": "rect",
-   "coords": "445.3937557618749,69.88888549804688,486.44857788085943,122.23330433661768",
+   "coords": "445.3937557618749,69.88888549804688,486.4485778808594,122.23330433661768",
    "href": "#!"
   },
   {
    "class": "Button1360334022698",
    "shape": "rect",
-   "coords": "535.9320032327751,72.84584548235591,580.2177621371318,122.26074466760637",
+   "coords": "535.9320032327751,72.84584548235591,580.2177621371318,122.26074466760636",
    "href": "#!"
   }
  ]

@@ -77,11 +77,11 @@ BEGIN
 
 
 
-    init(t0: time): state = 
-      LET so_: Vect2 = (0,0),
-          vo_: Nz_vect2 = (0,600*knt),
-          si_: Vect2 = (-54171/40,78247/40),
-          vi_: Nz_vect2 = (-463/3,463/3),
+    init(so_: Vect2, vo_: Nz_vect2, si_: Vect2, vi_: Nz_vect2, t0: time): state =
+      LET % so_: Vect2 = (0,0),
+          % vo_: Nz_vect2 = (0,600*knt),
+          % si_: Vect2 = (-54171/40,78247/40),
+          % vi_: Nz_vect2 = (-463/3,463/3),
 	  SL_: SensitivityLevel = 8 IN (#
        % ownship's position and velocity
        so := so_,
@@ -139,9 +139,11 @@ BEGIN
       IF vo(st)`y - deltaV >= 0 THEN st WITH [ vo := (vo(st)`x, vo(st)`y - deltaV) ] ELSE st ENDIF
 
     %--  EXAMPLES  -------------------------------------------------------------------
-    example_0: state = init(0)
-    example_1: state = tick(init(0))
-    example_2: state = ntick(2)(init(0))
-    example_n(n:nat): state = ntick(n)(init(0))    
+%    example_0: state = init(0)
+%    example_1: state = tick(init(0))
+%    example_2: state = ntick(2)(init(0))
+%    example_n(n:nat): state = ntick(n)(init(0))
+
+    init_daidalus: state = init((0,0), (0,600*knt), (-54171/40,78247/40), (-463/3,463/3), 0)
       
 END top

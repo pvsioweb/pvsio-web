@@ -5,7 +5,9 @@ types_and_constants_th [
    infusemin: posreal,
    timeout  : nat,
    shorttimeout : nat,
-   maxtime  : posnat
+   maxtime  :posnat,
+   bat_max: posnat,
+   bat_min: posnat
 ]: THEORY
  BEGIN
 
@@ -32,11 +34,6 @@ types_and_constants_th [
    dnewtime : nat = 8
    dnewrate : nat = 9
    dlock    : nat = 0
-   ddosing  : nat = 1
-   dsetup   : nat = 2
-   dsetvtbi : nat = 3
-   dadjustav: nat = 4
-   ddisablerate : nat = 5
    dpdtls   : nat = 6
    mbags    : nat = 9
    midbag   : nat = 4
@@ -51,21 +48,32 @@ types_and_constants_th [
 
    %-- Generic to the device
  %  imode    : TYPE = { blank, hold, infuse }
-   irates   : TYPE = {x : real | x >= 0 & x <= maxrate}
-   ivols    : TYPE = {x: real | x >= 0 & x <= maxinfuse}
-   itimes   : TYPE = {x: real | x >= 0 & x <= maxtime}
+   % >>new edit<<
+   %irates   : TYPE = {x : real | x >= 0 & x <= maxrate}
+   %ivols    : TYPE = {x: real | x >= 0 & x <= maxinfuse}
+   %itimes   : TYPE = {x: real | x >= 0 & x <= maxtime}
+   irates   : TYPE = nonneg_real
+   ivols    : TYPE = nonneg_real
+   itimes   : TYPE = nonneg_real
 
    %-- Specific to Alaris GP
    iline    : TYPE = { holding, infusing, volume, dispvtbi, attention, 
-                       vtbidone, dispkvo, setvtbi, locked, options, dispinfo, vtbitime, dispblank, clearsetup }
+                       vtbidone, dispkvo, setvtbi, setrate, setnotfitted,
+                       lockrate, locked, options, dispinfo, 
+                       vtbitime, dispblank, clearsetup, batterylow }
+   option_tags : TYPE = {ratelock, rateunlock, dosingsumm, adjalarm, 
+                         pumpdetails, infusionsetup, setvtbiovertime, 
+                         disableratelock, enableratelock, optionblank}
    imid_type  : TYPE = {x: upto(dnewrate) | x >= drate}
    imid       : TYPE = [ imid_type -> boolean ]
-   ifunctions : TYPE = { fvol, fvtbi, fcancel, fclear, fnull, fback, fok, fbags, fquit, fkeep }
+   ifunctions : TYPE = { fvol, fvtbi, fcancel, fclear, fnull, fback, fok, 
+                         fbags, fquit, fkeep, fyes, fno }
    emodes     : TYPE = { rmode, bagmode, tbagmode, qmode, vtmode, vttmode, 
                          ttmode, nullmode, infusemode }
    ibags      : TYPE = upto(maxbags)
    ibagscursor: TYPE = upto(mbags)
    qcurse     : TYPE = { x: upto(dpdtls) | x >= dlock }
+   o_menu     : TYPE = [ qcurse -> option_tags ]
    abags      : TYPE = [ upto(mbags) -> ibags ]
    delta      : TYPE = nat
    presstime : TYPE = upto(maxpress)

@@ -37,7 +37,7 @@ module.exports = function (grunt) {
             }
         },
         jshint: {
-            all: ["src/client/app/**/*.js", "src/server/**/*.js"],
+            all: ["src/client/app/**/*.js", "src/server/**/*.js", '!src/server/lib/**/*.js'],
             options: {
                 jshintrc: ".jshintrc"
             }
@@ -48,5 +48,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-requirejs");
     grunt.loadNpmTasks("grunt-contrib-copy");
     grunt.loadNpmTasks("grunt-contrib-jshint");
-    grunt.registerTask("default", ["requirejs", "copy"]);
+    grunt.registerTask("test", ["jshint:all"]);
+    grunt.registerTask("default", ["test"]);
 };

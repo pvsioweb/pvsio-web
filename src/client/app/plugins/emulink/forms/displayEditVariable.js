@@ -4,13 +4,12 @@
  * @date 5/24/14 9:02:22 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, Backbone, Handlebars, self */
 define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
         formTemplate = require("text!./templates/displayEditVariable.handlebars"),
         FormUtils = require("./FormUtils");
-    
+
     var AddVariableView = Backbone.View.extend({
         initialize: function (data) {
             d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
@@ -25,24 +24,24 @@ define(function (require, exports, module) {
             return this;
         },
         events: {
-			"click #btnRight": "right",
-			"click #btnLeft": "left"
-		},
-		right: function (event) {
-			var form = this.el;
-			if (FormUtils.validateForm(form)) {
+            "click #btnRight": "right",
+            "click #btnLeft": "left"
+        },
+        right: function (event) {
+            var form = this.el;
+            if (FormUtils.validateForm(form)) {
                 var selectors = [ "newVariableName", "newVariableType",
                                   "newVariableValue", "newVariableScope" ];
-				var formdata = FormUtils.serializeForm(form, selectors);
-				this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
+                var formdata = FormUtils.serializeForm(form, selectors);
+                this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
                              {data: formdata, el: this.el}, this);
-			}
-		},
-		left: function (event) {
-			this.trigger(this._data.buttons[0].toLowerCase(), {el: this.el}, this);
-		}
+            }
+        },
+        left: function (event) {
+            this.trigger(this._data.buttons[0].toLowerCase(), {el: this.el}, this);
+        }
     });
-    
+
     module.exports = {
         /**
          * @param {

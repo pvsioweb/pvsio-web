@@ -20,13 +20,14 @@ define(function (require, exports, module) {
         ProjectAutoSaver = require("plugins/autoSaver/ProjectAutoSaver"),
         PluginManager  = require("plugins/PluginManager"),
         Constants      = require("util/Constants"),
-        displayQuestion = require("pvsioweb/forms/displayQuestion");
+        displayQuestion = require("pvsioweb/forms/displayQuestion"),
+        BrowserUtils   = require("util/BrowserUtils");
 
     var client = PVSioWebClient.getInstance(),
         pluginManager = PluginManager.getInstance(),
         splashTimeout = null,
-        reconnectOptions = (window.location.origin.indexOf("pvsioweb.herokuapp.com") >= 0 ||
-                   window.location.origin.indexOf("pvsioweb.org") >= 0) ? { silentMode: true} : null;
+        reconnectOptions = (window.location.href.indexOf("pvsioweb.herokuapp.com") >= 0 ||
+                   window.location.href.indexOf("pvsioweb.org") >= 0) ? { silentMode: true} : null;
 
     //register event listeners
     client.addListener('WebSocketConnectionOpened', function (e) {
@@ -56,21 +57,30 @@ define(function (require, exports, module) {
         };
     }
 
+    function hideSplash() {
+        d3.select("#PVSio-web-logo").style("display", "none");
+        d3.select("#content").classed("offscreen", false);
+    }
+
     function showInterface(opt) {
         return function (res) {
             return new Promise(function (resolve, reject) {
                 layoutjs({el: "#model-editor-container"});
-                //hide pvsio-web loading screen and make the tool visible
+                console.log("Browser version: " + BrowserUtils.getVersion());
+                if (BrowserUtils.isBrowserSupported() === false) {
+                    var msg = BrowserUtils.requiredBrowserWarning();
+                    d3.select(".warnings").style("display", "block").append("p").html(msg);
+                    d3.select(".warnings").select("#dismissWarnings").on("click", function () {
+                        d3.select(".warnings").style("display", "none");
+                    });
+                    console.log(msg);
+                }
+                //hide pvsio-web loading screen if noSplash is set in opt and make the tool visible
                 if (opt && opt.noSplash) {
-                    d3.select("#PVSio-web-logo").style("display", "none");
-                    d3.select("#content").classed("offscreen", false);
+                    hideSplash();
                     resolve(res);
                 } else {
-                    splashTimeout = setTimeout(function () {
-                        d3.select("#PVSio-web-logo").style("display", "none");
-                        d3.select("#content").classed("offscreen", false);
-                        resolve(res);
-                    }, 2400);
+                    resolve(res);
                 }
             });
         };
@@ -82,19 +92,19 @@ define(function (require, exports, module) {
                 .on("pluginToggled", function (event) {
                     var plugin;
                     switch (event.target.getAttribute("name")) {
-                    case "Emulink":
+                    case "EmuCharts Editor":
                         plugin = Emulink.getInstance();
                         break;
-                    case "GraphBuilder":
+                    case "Graph Builder":
                         plugin = GraphBuilder.getInstance();
                         break;
-                    case "SafetyTest":
+                    case "Safety Test":
                         plugin = SafetyTest.getInstance();
                         break;
-                    case "ModelEditor":
+                    case "Model Editor":
                         plugin = ModelEditor.getInstance();
                         break;
-                    case "PrototypeBuilder":
+                    case "Prototype Builder":
                         plugin = PrototypeBuilder.getInstance();
                         break;
                     }
@@ -116,12 +126,11 @@ define(function (require, exports, module) {
                     .then(registerPluginEvents())
                     .then(enablePlugin(ProjectAutoSaver.getInstance()))
                     .then(enablePlugin(PrototypeBuilder.getInstance()))
-                    .then(enablePlugin(Emulink.getInstance()))
-                    .then(enablePlugin(ModelEditor.getInstance()))
-    //TODO: ** locally this breaks transition bindings when working id default project
-                //    .then(createDefaultProject())
+                    .then(createDefaultProject())
                     .then(showInterface(opt))
                     .then(function (res) {
+                    //we have finished loading pvsio-web related things so hide the splash screen and show the tool -- we can also use this promise chain to show real updates to the user about what has been loaded
+                        hideSplash();
                         resolve(res);
                     }).catch(function (err) {
                         console.log(err);

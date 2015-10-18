@@ -3,11 +3,11 @@
  * @date 10/03/15 12:41:31 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, Backbone, Handlebars, self */
+/*global*/
 define(function (require, exports, module) {
     "use strict";
     var vdmEnumeratedType, vdmTypeDefinition;
-    
+
     function VDMEnumeratedTypePrinter() {
         /**
          * Template
@@ -49,7 +49,7 @@ define(function (require, exports, module) {
         }
         return vdmTypeDefinition({data: {name: eName, type: x}});
     };
-    
+
     module.exports = {
         create: function () {
             return new VDMEnumeratedTypePrinter();

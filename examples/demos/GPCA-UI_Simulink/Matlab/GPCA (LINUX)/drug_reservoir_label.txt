@@ -1,2 +1,0 @@
-#drug_name	concentration	dose unit	volume unit	amount	diluent_volume
-10		8.0		0		1		2000	250	

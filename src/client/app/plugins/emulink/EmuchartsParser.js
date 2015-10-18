@@ -1,6 +1,6 @@
 /**
  * @module EmuchartsParser
- * @version 0.2
+ * @version 0.3
  * @description
  * EmuchartsParser is a parser for the Emucharts language.
  * The main API of the parser is function parseTransition(label); it can be used to parse
@@ -41,7 +41,6 @@ define(function (require, exports, module) {
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, _, Promise, document, FileReader*/
 
 /**
  *
@@ -73,7 +72,7 @@ define(function (require, exports, module) {
         { rule: ["\\+",                     "return '+'"],            type: "builtin" },
         { rule: ["(\\!\\=)",                "return '!='"],           type: "builtin" },
         { rule: ["(?!(?:(\\=\\>|\\=\\=)))" + // filtering out implication and equality
-                 "(\\=)",                   "return '='"],            type: "builtin" }, 
+                 "(\\=)",                   "return '='"],            type: "builtin" },
         { rule: ["(\\=\\=)",                "return '=='"],           type: "error"   }, // invalid operator
         { rule: ["(?!(?:(\\>\\=)))" + // filtering out >=
                 "(\\>)",   "return '>'"],                             type: "builtin" },
@@ -106,11 +105,11 @@ define(function (require, exports, module) {
         });
         return ans;
     };
-    
+
     var grammar = function (opt) {
         function exprWithBinaryOp() {
             return " if (!Array.isArray($$)) { $$ = []; }" +
-                   " $$.push($1);" +
+                   " Array.isArray($1) ? $$.concat($1) : $$.push($1);" +
                    " $$.push({" +
                    "      type: 'binop'," +
                    "      val:  $2.toUpperCase()" +
@@ -154,13 +153,13 @@ define(function (require, exports, module) {
                    "}" +
                    "$$.val.push({type: 'par', val: $4}); ";
         }
-        
+
         // The order of rules in expressionBNF reflects the precedence of the operators (lowest precedence is at the top)
-        // The considered precedence and associativity is that of the C++ language 
+        // The considered precedence and associativity is that of the C++ language
         // (see http://en.cppreference.com/w/cpp/language/operator_precedence)
         // NOTE: according to the PVS language reference, PVS uses a different associativity for logical operators
         //       wrt C (associativity of AND/OR is right-to-left, see page 46,
-        //       http://pvs.csl.sri.com/doc/pvs-language-reference.pdf). 
+        //       http://pvs.csl.sri.com/doc/pvs-language-reference.pdf).
         //       This might be a typo in the PVS manual, as the implemented associativity seems to be that of C++
         //       (need to check with Sam Owre).
         // For the correctness of this parser, associatibity and precedence don't really matter,
@@ -169,26 +168,26 @@ define(function (require, exports, module) {
         // will take care of establishing the correct precendence and associativity of operators.
         function expressionBNF(mode) {
             return [
-                ["term + e",       exprWithBinaryOp()],
-                ["term - e",       exprWithBinaryOp()],
-                ["term * e",       exprWithBinaryOp()],
-                ["term / e",       exprWithBinaryOp()],
+                ["e + e",       exprWithBinaryOp()],
+                ["e - e",       exprWithBinaryOp()],
+                ["e * e",       exprWithBinaryOp()],
+                ["e / e",       exprWithBinaryOp()],
                 ["- e",            exprWithUnaryOp(), {"prec": "UMINUS"}],
                 ["NOT e",          exprWithUnaryOp()],
                 ["( e )",          exprWithParenthesis()],
-                ["term = e",       exprWithBinaryOp()],  // comparison of equality of two terms
-                ["term != e",      exprWithBinaryOp()],  // comparison of inequality of two terms
-                ["term > e",       exprWithBinaryOp()],
-                ["term >= e",      exprWithBinaryOp()],
-                ["term < e",       exprWithBinaryOp()],
-                ["term <= e",      exprWithBinaryOp()],
-                ["term AND e",     exprWithBinaryOp()],
-                ["term OR e",      exprWithBinaryOp()],
-                ["term IMPLIES e", exprWithBinaryOp()],
+                ["e = e",       exprWithBinaryOp()],  // comparison of equality of two terms
+                ["e != e",      exprWithBinaryOp()],  // comparison of inequality of two terms
+                ["e > e",       exprWithBinaryOp()],
+                ["e >= e",      exprWithBinaryOp()],
+                ["e < e",       exprWithBinaryOp()],
+                ["e <= e",      exprWithBinaryOp()],
+                ["e AND e",     exprWithBinaryOp()],
+                ["e OR e",      exprWithBinaryOp()],
+                ["e IMPLIES e", exprWithBinaryOp()],
                 ["term",           "$$ = [$term]"]
             ];
         }
-                        
+
         return {
             "lex": {
                 "rules": lexerRule2Array()
@@ -197,7 +196,7 @@ define(function (require, exports, module) {
             // the first field specified the associativity of the operator
             "operators": [
                 ["left", "+", "-", "*", "/"], // left means left-to-right
-                ["left", "=", "!=", ">", "<", "<="],
+                ["left", "=", "!=", ">", "<", "<=", ">="],
                 ["left", "IMPLIES", "AND", "OR"],
                 ["right", ":="],
                 ["right", ";", ","],
@@ -276,7 +275,7 @@ define(function (require, exports, module) {
             }
         };
     };
-        
+
     /**
      * @function EmuchartsParser
      * @memberof module:EmuchartsParser
@@ -297,9 +296,9 @@ define(function (require, exports, module) {
     /**
      * @function getParserCode
      * @memberof module:EmuchartsParser
-     * @instance     
+     * @instance
      * @description Returns the javascript code of the parser.
-     * @returns {String} 
+     * @returns {String}
      *      The javascript code of the parser automatically generated using the Jison library and the lexer rules for Emucharts.
      */
     EmuchartsParser.prototype.getParserCode = function () {
@@ -312,7 +311,7 @@ define(function (require, exports, module) {
     /**
      * @function getLexerRules
      * @memberof module:EmuchartsParser
-     * @instance     
+     * @instance
      * @description Returns the lexer rules for Emucharts.
      * @returns Object{Array({ regex: (String), type: (String) })}
      *      Property regex specifies a regular expression.
@@ -326,13 +325,13 @@ define(function (require, exports, module) {
         });
         return ans;
     };
-    
+
     /**
      * @function parseTransition
      * @memberof module:EmuchartsParser
-     * @instance     
+     * @instance
      * @description Parses Emucharts transition labels.
-     * @param label {String} 
+     * @param label {String}
      *    The label of an Emucharts transition.</br>
      *    Emucharts transition labels are strings in the form "name  [ cond ] { actions }", where:
      *      <li>"name" is the transition name, e.g., "click_up";</li>
@@ -343,7 +342,7 @@ define(function (require, exports, module) {
      *    The transition name is mandatory; transition conditions and transition actions are optional.
      * @returns Object{Object({ res: Object, err: String })}
      * {<ul>
-     *     res: Object,</br>     
+     *     res: Object,</br>
      *     err: String</ul>}</br>
      * <ul>
      * <li>Property err is either null or a string reporting a parser error.</li>
@@ -478,11 +477,12 @@ if (ans.res) {
     //      ]
     //    }
     //  }
-    //}    
+    //}
 }
-     
+
      */
     EmuchartsParser.prototype.parseTransition = function (label) {
+        label = (label === "") ? "tick" : label;
         console.log("Parsing transition " + label);
         var ans = { err: null, res: null };
         try {
@@ -493,7 +493,7 @@ if (ans.res) {
         return ans;
     };
 
-    
+
     /**
      * @function parseVariables
      * @memberof module:EmuchartsParser
@@ -501,14 +501,14 @@ if (ans.res) {
      * @description
      *    Parses an array of Emuchart variables and creates a typed object.
      *
-     * @param {Array(Object)} variables Array of emuchart variables to be parsed. 
+     * @param {Array(Object)} variables Array of emuchart variables to be parsed.
      *            Each emuchart variable is a structured object
      *            { name: (String), type: (String), value: (String) }.
      *            Property name is mandatory, whilst the others are optional.
      *
      * @returns Object{Object({ res: Object, err: String })}
      * {<ul>
-     *     res: Object,</br>     
+     *     res: Object,</br>
      *     err: String</ul>}</br>
      * <ul>
      * <li>Property err is either null or a string reporting a parser error.</li>
@@ -613,9 +613,9 @@ if (ans.res) {
                 });
             });
         }
-        
+
         return ans;
     };
-    
+
     module.exports = EmuchartsParser;
 });

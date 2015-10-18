@@ -6,11 +6,14 @@
         <title></title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
-        
+
         <link href="../../client/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
         <link href="../../client/app/plugins/graphbuilder/graph.css" rel="stylesheet" type="text/css"/>
         <link href="../../client/css/style.css" rel="stylesheet" type="text/css"/>
         <style>
+            img {
+                -webkit-user-select: none;
+            }
             area {
                 cursor:pointer;
             }
@@ -18,43 +21,54 @@
                 margin-left: auto;
                 margin-right: auto;
             }
+
+            .dbg textarea {
+                background: transparent;
+                border: none;
+                resize: none;
+            }
         </style>
     </head>
     <body>
         <div id="content" class="content" style="display:none;"></div>
-        <div id="splash" class="demo-splash">
+        <div class="error" style="display:none;">
+            <h1>Device ID already in use.</h1>
+            <h2>Please, close the other instance or change the Device ID.</h2>
+        </div>
+        <div id="controls" class="controls" style="display:none;">
+            <div id="infusion_set" style="padding: 10px 28px 10px 28px; border: steelblue; border-style: solid;">
+                <input type="button" id="btn_insert_infusionset" value="Insert infusion set" style="margin-right: 20px">
+                <span>Infusion set</span>
+                <span id="infusionset_status" value="not_inserted">NOT inserted</span>
+                <input type="button" id="btn_remove_infusionset" value="Remove infusion set" style="margin-left: 20px">
+            </div>
+            <div id="mains" style="padding: 10px 28px 10px 28px; border: lightgreen; border-style: solid;">
+                <input type="button" id="btn_plug_mains" value="Plug into Mains" style="margin-right: 20px; margin-left:10px;">
+                <span>Pump</span>
+                <span id="mains_status" value="not_inserted">connected to MAINS</span>
+                <input type="button" id="btn_unplug_mains" value="Run on Battery" style="margin-left: 20px">
+            </div>
+            <div id="battery" style="padding: 10px 28px 10px 28px; border: grey; border-style: solid;">
+                <input type="submit" id="set_battery_level" value="Set New Battery Level" style="margin-left: 10px">
+                <input type="text"
+                       id="battery_level"
+                       name="battery_level"
+                       placeholder="Enter new battery level..."
+                       size="34">
+            </div>            
+        </div>
+        <div id="splash" class="demo-splash" style="height: 800px;">
             <div class="loader">
                 <div class="version">Alaris GP Demo</div>
                 <div class="bar">Loading<div></div><div></div><div></div><div></div></div>
             </div>
         </div>
-        <map name="prototypeMap" id="prototypeMap">
-<!--
-	    <area class="topline" shape="rect" coords="94,110,210,138">
-	    <area class="fndisp1" shape="rect" coords="92,217,135,230">
-	    <area class="fndisp2" shape="rect" coords="134,217,177,230">
-	    <area class="fndisp3" shape="rect" coords="177,217,217,230">
-        <area class="middisp_drate" shape="rect" coords="92,142,212,214">
--->
-<!--	    <area class="middisp" shape="rect" coords="92,142,212,214">-->
-		<area class="btn_fup" shape="rect" coords="91,265,121,294" href="#!">
-		<area class="btn_sup" shape="rect" coords="121,267,151,293" href="#!">
-		<area class="btn_sdown" shape="rect" coords="158,265,187,291" href="#!">
-		<area class="btn_fdown" shape="rect" coords="186,265,217,292" href="#!">
-	    <area class="btn_key1" shape="rect" coords="95,234,136,259" href="#!">
-	    <area class="btn_key2" shape="rect" coords="136,232,172,260" href="#!">
-	    <area class="btn_key3" shape="rect" coords="172,229,218,258" href="#!">
-	    <area class="btn_run" shape="rect" coords="89,299,128,324" href="#!">
-	    <area class="btn_pause" shape="rect" coords="88,324,128,352" href="#!">
-	    <area class="btn_query" shape="rect" coords="136,325,171,351" href="#!">
-	    <area class="btn_on" shape="rect" coords="149,347,192,373" href="#!">
-        </map>
-		<script type="application/javascript" src="../../client/lib/promise-0.1.1.js"></script>
-		<script type="text/javascript" src="../../client/lib/jquery.js"></script>
-		<script type="text/javascript" src="../../client/lib/underscore/underscore.js"></script>
-		<script type="text/javascript" src="../../client/lib/backbone.js"></script>
-		<script type="text/javascript" src="../../client/lib/handlebars-v1.1.0.js"></script>
-		<script type="text/javascript" src="../../client/lib/bootstrap/js/bootstrap.min.js"></script>
+        <script type="application/javascript" src="../../client/lib/promise-0.1.1.js"></script>
+        <script type="text/javascript" src="../../client/lib/jquery.js"></script>
+        <script type="text/javascript" src="../../client/lib/underscore/underscore.js"></script>
+        <script type="text/javascript" src="../../client/lib/backbone.js"></script>
+        <script type="text/javascript" src="../../client/lib/handlebars-v1.1.0.js"></script>
+        <script type="text/javascript" src="../../client/lib/bootstrap/js/bootstrap.min.js"></script>
         <script src="../../client/require.js" data-main="js/index.js"></script>
     </body>
 </html>

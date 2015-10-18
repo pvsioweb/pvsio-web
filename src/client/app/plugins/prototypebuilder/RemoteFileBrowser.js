@@ -21,11 +21,13 @@
 /*global define, Promise, Handlebars, $ */
 define(function (require, exports, module) {
     "use strict";
-    var TreeList = require("./TreeList"),
-        WSManager = require("websockets/pvs/WSManager");
-
-    var template = require("text!pvsioweb/forms/templates/fileBrowser.handlebars"),
-        BaseDialog = require("pvsioweb/forms/BaseDialog");
+    var TreeList        = require("./TreeList"),
+        WSManager       = require("websockets/pvs/WSManager"),
+        template        = require("text!pvsioweb/forms/templates/fileBrowser.handlebars"),
+        BaseDialog      = require("pvsioweb/forms/BaseDialog"),
+        MIME            = require("util/MIME").getInstance(),
+        PreferenceStorage = require("preferences/PreferenceStorage").getInstance(),
+        PreferenceKeys = require("preferences/PreferenceKeys");
     var timer, rfb;
 
     var OpenFilesView = BaseDialog.extend({
@@ -41,7 +43,8 @@ define(function (require, exports, module) {
             "input #baseDirectory": "onTextChanged",
             "input #currentPath": "onEdit",
             "click #btnHome": "selectHome",
-            "click #btnEdit": "enableEdit"
+            "click #btnEdit": "enableEdit",
+            "click #btnUp": "goUpADirectory"
         },
         onTextChanged: function (event) {
             clearTimeout(timer);
@@ -65,6 +68,14 @@ define(function (require, exports, module) {
                 document.getElementById("btnEdit").style.backgroundColor = "";
                 document.getElementById("currentPath").readOnly = true;
             }
+        },
+        goUpADirectory: function (event) {
+            var dir = d3.select("#currentPath");
+            var path = rfb._baseDirectory;
+            var levelUp = path.substr(0, path.lastIndexOf("/"));
+            rfb.rebaseDirectory(levelUp);
+            //update the directory shown on the top of the window
+            dir.property("value", levelUp);
         }
     });
 
@@ -80,6 +91,18 @@ define(function (require, exports, module) {
 
     RemoteFileBrowser.prototype._treeList = null;
 
+    RemoteFileBrowser.prototype._baseDirectory = null;
+    /**
+     * Utility function to sort the list of files returned by the remote file browser
+     * @param   {String}   a first argument
+     * @param   {String}   b second argument of the sort
+     * @returns {number} -1 if a < b, 0 if a === b and 1 if a > b
+     */
+    function fileSort(a, b) {
+        return a.path.toLowerCase() < b.path.toLowerCase()
+            ? -1 : a.path.toLowerCase() === b.path.toLowerCase() ? 0 : 1;
+    }
+
     function getRemoteDirectory(path) {
         var ws = WSManager.getWebSocket();
         return new Promise(function (resolve, reject) {
@@ -87,11 +110,19 @@ define(function (require, exports, module) {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(res.files.filter(rfb.filterFunc));
+                    resolve(res.files.filter(rfb.filterFunc).sort(fileSort));
                 }
             });
         });
     }
+
+    /**
+     * Gets the current base directory whose content is being rendered in the remote browser.
+     * @returns {String} The base directory
+     */
+    RemoteFileBrowser.prototype.getBaseDirectory = function () {
+        return this._baseDirectory;
+    };
 
     RemoteFileBrowser.prototype.rebaseDirectory = function (path) {
         var self = this;
@@ -100,6 +131,7 @@ define(function (require, exports, module) {
                 var data = {name: path, path: path, children: files, isDirectory: true};
                 self._treeList.data = data;
                 self._treeList.render(data);
+                self._baseDirectory = path;
             }).catch(function (err) {
                 self._treeList.data = [];
             });
@@ -111,21 +143,53 @@ define(function (require, exports, module) {
      @returns {Promise} a Promise that settled (with an array containing selected files/folders [{path: <string>}]) when the user presses the ok or cancel button on the dialog
     */
     RemoteFileBrowser.prototype.open = function (path, opt) {
+        var KB = 1000, MB = KB * KB, GB = KB * MB;
+        var result;
+        function toUserFriendlySize(sizeInBytes) {
+            if (sizeInBytes < KB) {
+                return {value: sizeInBytes, unit: "B"};
+            } else if (sizeInBytes < MB) {
+                result = {value: sizeInBytes / KB, unit: "KB"};
+            } else if (sizeInBytes < GB ) {
+                result = {value: sizeInBytes / MB, unit: "MB"};
+            } else {
+                result = {value: sizeInBytes / GB, unit: "GB"};
+            }
+            result.value = result.value.toFixed(0);
+            return result;
+        }
+
         path = path || "~";
         opt = opt || {};
         var view = new OpenFilesView({baseDirectory: path, title: (opt.title || "Open file")});
         var self = this;
         getRemoteDirectory(path)
             .then(function (files) {
-                var data = {name: path, path: path, children: files, isDirectory: true};
+                var data = {name: path, path: path, children: files || [], isDirectory: true};
                 self._treeList = new TreeList(data, "#file-browser", true);
                 self._treeList.addListener("SelectedItemChanged", function (event) {
-                    var data = event.data;
+                    var data = event.data,
+                        size = data.stats ? toUserFriendlySize(data.stats.size) : "";
                     document.getElementById("currentPath").value = data.path;
+                    d3.select("#file-name").html(data.path);
+                    d3.select("#file-size").html(size.value);
+                    d3.select("#file-size-unit").html(size.unit);
+                    d3.select("#file-last-modified").html(new Date(data.stats.modified).toString());
+                    //if the file is an image retrieve a preview
+                    if (MIME.isImage(data.path)) {
+                        WSManager.getWebSocket().readFile({path: data.path, encoding: "base64"}, function (err, res) {
+                            if (!err) {
+                                d3.select("#image-preview").attr("src", res.content);
+                            }
+                        });
+                    }
                     if (data.isDirectory && !data.children && !data._children) {
                         getRemoteDirectory(data.path)
                             .then(function (files) {
-                                data.children = files;
+                                data.children = files || [];
+                                if (data.children.length === 0) {
+                                    data.empty = true;
+                                }
                                 self._treeList.render(data);
                             }).catch(function (err) {
                                 console.log(err);
@@ -141,6 +205,16 @@ define(function (require, exports, module) {
             }).on("ok", function (event, view) {
                 clearTimeout(timer);
                 var selectedFiles = self._treeList.getSelectedItems();
+                var firstFile = selectedFiles[0],
+                    fileDirectory;
+                if (firstFile.isDirectory) {
+                    fileDirectory = firstFile.path;
+                } else {
+                    fileDirectory = firstFile.parent.path;
+                }
+                if (PreferenceStorage.get(PreferenceKeys.REMEMBER_LAST_DIRECTORY)) {
+                    PreferenceStorage.set(PreferenceKeys.LAST_DIRECTORY_VISITED, fileDirectory);
+                }
                 resolve(selectedFiles);
                 view.remove();
             });

@@ -5,29 +5,31 @@
  * @date 10/03/15 12:23:22 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3 */
+/*global define, d3*/
 define(function (require, exports, module) {
-	"use strict";
+    "use strict";
 
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
-    
+    var version = 0.2;
+
     var theory_name;
     var parser;
-    
+
     var initialMachineState = "initialMachineState";
     var machineStateType = "MachineState";
-    
+    var emuchartStateType = "EmuchartState";
+
     var vdmRecordTypePrinter = require("plugins/emulink/models/vdm/vdmRecordTypePrinter");
     var vdmStateTypePrinter = require("plugins/emulink/models/vdm/vdmStateTypePrinter");
     var vdmEnumeratedTypePrinter = require("plugins/emulink/models/vdm/vdmEnumeratedTypePrinter");
     var vdmOverrideExpressionPrinter = require("plugins/emulink/models/vdm/vdmOverrideExpressionPrinter");
-    
+
     var predefined_variables = {
         previous_state: { name: "previous_state", type: machineStateType, value: initialMachineState },
         current_state: { name: "current_state", type: machineStateType, value: initialMachineState }
     };
-    
+
     var automaticConstants;
 
     var displayNotification = function (msg, title) {
@@ -43,12 +45,12 @@ define(function (require, exports, module) {
     var displayError = function (msg) {
         displayNotification(msg, "Compilation Error");
     };
-    var displayWarning = function (msg) {
-        displayNotification(msg, "Warning");
-    };
+//    var displayWarning = function (msg) {
+//        displayNotification(msg, "Warning");
+//    };
     /**
-	 * Constructor
-	 */
+     * Constructor
+     */
     function EmuchartsVDMPrinter(name) {
         theory_name = name;
         automaticConstants = [];
@@ -59,12 +61,12 @@ define(function (require, exports, module) {
         vdmOverrideExpressionPrinter = vdmOverrideExpressionPrinter.create();
         return this;
     }
-    
+
     EmuchartsVDMPrinter.prototype.set_theory_name = function (name) {
         theory_name = name;
         return this;
     };
-    
+
     /**
      * Prints VDM definitions for Emuchart states
      */
@@ -78,20 +80,22 @@ define(function (require, exports, module) {
         ans += vdmEnumeratedTypePrinter.fromArray("MachineState", tmp);
         return ans;
     };
-    
+
 
     /**
      * Prints VDM definitions of utility functions used in Emuchart
      */
     function print_utils() {
         var ans = "\n  -- utility functions";
-        ans += "\n  enter_into: " + predefined_variables.current_state.type + " * State -> State";
+        ans += "\n  enter_into: " + predefined_variables.current_state.type +
+               " * " + emuchartStateType + " -> " + emuchartStateType;
         ans += "\n  enter_into(ms, s) == mu(s, " + predefined_variables.current_state.name + " |-> ms );";
-        ans += "\n  leave_state: " + predefined_variables.current_state.type + " * State -> State";
+        ans += "\n  leave_state: " + predefined_variables.current_state.type +
+               " * " + emuchartStateType + " -> " + emuchartStateType;
         ans += "\n  leave_state(ms, s) == mu(s, " + predefined_variables.previous_state.name + " |-> ms );\n";
         return ans;
     }
-    
+
     /**
      * This function converts the name of operators in expressions -- needed for && || == != !
      */
@@ -130,7 +134,7 @@ define(function (require, exports, module) {
         }
         return term;
     };
-    
+
     function isVariable(name, emuchart) {
         if (name === predefined_variables.current_state.name ||
                 name === predefined_variables.previous_state.name) {
@@ -147,7 +151,7 @@ define(function (require, exports, module) {
         return false;
     }
 
-    
+
     /**
      * Prints VDM definitions for Emuchart initial transitions
      */
@@ -169,7 +173,7 @@ define(function (require, exports, module) {
                 console.log(ans.err);
                 return ret;
             }
-            
+
             var theTransition = {
                 identifier: ans.res.val.identifier || { type: "identifier", val: "init" },
                 cond:    ans.res.val.cond || { type: "expression", val: [] },
@@ -178,7 +182,7 @@ define(function (require, exports, module) {
             };
             var vdmFunction = {
                 identifier: theTransition.identifier,
-                signature:  "init s == s = mk_State",
+                signature:  "init s == s = mk_" + emuchartStateType,
                 cases: {
                     letExpr: [],
                     inExpr: [ ("st") ]
@@ -208,11 +212,11 @@ define(function (require, exports, module) {
             code += vdmFunction.signature;
             var variables = [];
             predefined_variables.current_state.value = "<" + theTransition.to + ">";
-            predefined_variables.previous_state.value = "<" + theTransition.to + ">";
+            predefined_variables.previous_state.value = "undefined";
             variables.push(predefined_variables.current_state);
             variables.push(predefined_variables.previous_state);
             variables = variables.concat(emuchart.variables);
-            // FIXME: check for name conflicts when adding variables 
+            // FIXME: check for name conflicts when adding variables
             // so user has immediate feedback about issues with names
             // or alternatively popup a dialog, highlight the issues and
             // to let the user fix them
@@ -231,7 +235,7 @@ define(function (require, exports, module) {
         }
         return ret;
     };
-    
+
     /**
      * Prints VDM definitions for Emuchart transitions given in the form transition [condition] {actions}
      */
@@ -260,19 +264,19 @@ define(function (require, exports, module) {
             }
             return term.val;
         }
-        
+
         var ret = { err: null, res: "" };
-        // multiple transitions can have the same identifier 
+        // multiple transitions can have the same identifier
         // (because the same transition can originate from different nodes)
         // this keeps track of the transitions we've already processed -- needed to avoid duplicates
         var done = d3.map();
-        
+
         if (emuchart.transitions && emuchart.transitions.length > 0) {
             var transitions = [];
             emuchart.transitions.forEach(function (t) {
                 if (t.name === "") { t.name = "tick"; }
                 var ans = parser.parseTransition(t.name);
-                                
+
                 if (!ans.err && ans.res && ans.res.type === "transition") {
                     transitions.push({
                         identifier: ans.res.val.identifier || { type: "identifier", val: "tick" },
@@ -293,23 +297,23 @@ define(function (require, exports, module) {
                 // if not, add the transition identifier to the list of transitions already processed
                 if (done.get(theTransition.identifier.val)) { return; }
                 done.set(theTransition.identifier.val, true);
-                
+
                 // permission function
                 var permissionFunction = {
                     identifier: "per_" + theTransition.identifier.val,
-                    signature : "per_" + theTransition.identifier.val + ": State -> bool",
+                    signature : "per_" + theTransition.identifier.val + ": " + emuchartStateType + " -> bool",
                     cases: []
                     // the body of the permission is given by the disjunction of the collected cases
                 };
                 // transition function
                 var transitionFunction = {
                     identifier: theTransition.identifier.val,
-                    signature : theTransition.identifier.val + ": State -> State",
+                    signature : theTransition.identifier.val + ": " + emuchartStateType + " -> " + emuchartStateType,
                     cases: []
-                    // the body of the function is given by a COND-ENDCOND statement 
+                    // the body of the function is given by a COND-ENDCOND statement
                     // made up from the expressions collected in array cases
                 };
-                
+
                 // generate cases for permission function and transition function
                 transitions.forEach(function (transition) {
                     // each case depends on the state from which the transition starts, and the transition conditions
@@ -335,7 +339,7 @@ define(function (require, exports, module) {
                             });
                             cond.push("(" + tmp.join(" ") + ")");
                         }
-                        // the final expression for post is a LET-IN expression 
+                        // the final expression for post is a LET-IN expression
                         // given by the sequence of collected statements separated by commas
                         var letExpr = [ ("let new_s = leave_state(<" + transition.from + ">, s)") ];
                         var inExpr = "";
@@ -374,7 +378,7 @@ define(function (require, exports, module) {
                             });
                         }
                         inExpr = "in enter_into(<" + transition.to + ">, new_s)";
-                        
+
                         permissionFunction.cases.push("(" + cond.join(" and ") + ")");
                         transitionFunction.cases.push({ cond: cond, letExpr: letExpr, inExpr: inExpr });
                     }
@@ -383,7 +387,7 @@ define(function (require, exports, module) {
                 // store results
                 vdmFunctions.push({ per: permissionFunction, tran: transitionFunction });
             });
-            
+
             var ans = "\nfunctions";
             ans += print_utils();
             ans += "\n  -- transition functions";
@@ -397,26 +401,27 @@ define(function (require, exports, module) {
                 var tmp = [];
                 f.tran.cases.forEach(function (c) {
                     var expr = c.cond.join(" and ") + "\n    then ";
-                    expr += c.letExpr.join(",\n            ") + "\n         ";
+                    expr += c.letExpr.join(" in let\n            ") + "\n         ";
                     expr += " " + c.inExpr;
                     tmp.push(expr);
                 });
                 ans += tmp.join("\n    elseif ") + "\n";
-                ans += "    " + "else s" + "\n";
+                ans += "    " + "else undefined" + "\n";
                 ans += "  " + "pre " + f.per.identifier + "(s);\n";
             });
             ans += "\noperations";
             vdmFunctions.forEach(function (f) {
                 ans += "\n  " + "transition_" + f.tran.identifier + ": () ==> ()";
-                ans += "\n  " + "transition_" + f.tran.identifier + "() == State := " + f.tran.identifier + "(State)";
-                ans += "\n  " + "pre pre_" + f.tran.identifier + "(State);\n";
+                ans += "\n  " + "transition_" + f.tran.identifier + "() == " +
+                       emuchartStateType + " := " + f.tran.identifier + "(" + emuchartStateType + ")";
+                ans += "\n  " + "pre pre_" + f.tran.identifier + "(" + emuchartStateType + ");\n";
             });
             ret.res = ans;
         }
         return ret;
     };
-    
-    
+
+
     /**
      * Prints the VDM definition for Emuchart variables
      */
@@ -437,7 +442,7 @@ define(function (require, exports, module) {
         }
         var ans = "  -- emuchart state\n";
         ans += vdmStateTypePrinter.printTypeDefinition({
-            name: "State",
+            name: emuchartStateType,
             value: v.res
         });
         return ans;
@@ -483,7 +488,7 @@ define(function (require, exports, module) {
         }
         return ans;
     };
-        
+
     EmuchartsVDMPrinter.prototype.print_descriptor = function (emuchart) {
         var ans = "-- ---------------------------------------------------------------" +
                     "\n--  Model : " + emuchart.name;
@@ -499,22 +504,22 @@ define(function (require, exports, module) {
         ans += "\n-- ---------------------------------------------------------------\n";
         return ans;
     };
-    
+
     EmuchartsVDMPrinter.prototype.print_disclaimer = function () {
         var ans = "\n-- ---------------------------------------------------------------\n" +
-                    "--  VDM model generated using PVSio-web VDMPrinter ver 0.1\n" +
+                    "--  VDM model generated using PVSio-web VDMPrinter ver " + version + "\n" +
                     "--  Tool freely available at http://www.pvsioweb.org" +
                     "\n-- ---------------------------------------------------------------\n";
         return ans;
     };
-    
+
     /**
      * Prints the entire VDM theory
      */
     EmuchartsVDMPrinter.prototype.print = function (emuchart) {
         automaticConstants = [];
         var ret = { err: null, res: null };
-        
+
         var ans = this.print_descriptor(emuchart);
         ans += "\nmodule " + emuchart.name + "\nexports all";
         ans += this.print_importings(emuchart);
@@ -522,7 +527,7 @@ define(function (require, exports, module) {
         ans += this.print_constants(emuchart);
         ans += this.print_states(emuchart);    // -- done using handlebars library
         ans += this.print_variables(emuchart); // -- done using handlebars library
-        
+
         var initialTransitions = this.print_initial_transition(emuchart);
         var transitions = this.print_transitions(emuchart);
         if (initialTransitions.err || transitions.err) {
@@ -530,15 +535,15 @@ define(function (require, exports, module) {
             displayError(ret.err);
             return ret;
         }
-        
+
         ans += initialTransitions.res;
         ans += transitions.res || "";
         ans += "\nend " + emuchart.name + "\n";
         ans += this.print_disclaimer();
         ret.res = ans;
-        
+
         return ret;
     };
-    
+
     module.exports = EmuchartsVDMPrinter;
 });
