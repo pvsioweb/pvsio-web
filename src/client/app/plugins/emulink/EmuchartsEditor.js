@@ -1841,6 +1841,11 @@ define(function (require, exports, module) {
                 return (transition.target && transition.target.id === stateID) ||
                         (transition.source && transition.source.id === stateID);
             });
+
+        // TODO: temporary fix for transitions not being redrawn after renaming a state.
+        this.renderTransitions();
+
+       /*
         transitions = transitions ||
             d3.select("#ContainerStateMachine svg").select("#Transitions").selectAll(".transition");
         // refresh labels
@@ -1851,6 +1856,7 @@ define(function (require, exports, module) {
                 return labelToString(edge.name);
             });
         });
+       */
     };
 
     /**
