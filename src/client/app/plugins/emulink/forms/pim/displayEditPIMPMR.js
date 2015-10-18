@@ -1,5 +1,7 @@
 /**
  * Displays edit window for the presentation model relations of a state.
+ * @author Nathan Robb
+ * @date 20/10/2015
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3, require, $, brackets, window, Backbone, Handlebars, self */
@@ -11,6 +13,7 @@ define(function (require, exports, module) {
 
 	var EditPIMPMRView = Backbone.View.extend({
 		initialize: function (data) {
+			// Set z-index to be above the edit state modal.
 			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px").style("z-index", 999);
 			// Internal count for displaying relations.
 			this.count = 0;
@@ -24,8 +27,6 @@ define(function (require, exports, module) {
 			$("body").append(this.el);
 			this.$pmrList = $('#pmPMRList', this.el);
 			this.buildPMRList(data);
-			//TODO: link to first relation.
-			//d3.select(this.el).select("").node().focus();
 			return this;
 		},
 		events: {
@@ -42,13 +43,13 @@ define(function (require, exports, module) {
 			var form = this.el;
 			if (FormUtils.validateForm(form)) {
 				var formdata = FormUtils.serializeForm(form, mapToArray(this._selectors));
-				// Pull out the PMR data.
-				var test = d3.map();
+				// Pull out the PMR data into a d3 map.
+				var pmr = d3.map();
 				formdata.labels.forEach(function (r) {
-					test.set(r, formdata.labels.get(r));
+					pmr.set(r, formdata.labels.get(r));
 				});
 				this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
-					{data: test, el: this.el}, this);
+					{data: pmr, el: this.el}, this);
 			}
 		},
 		left: function (event) {
@@ -82,7 +83,7 @@ define(function (require, exports, module) {
 		},
 		PMRListItem: function (pmr, b) {
 			// Strip white space.
-			var id = b.replace(/\s/g, '');
+			var id = b.replace(/\s+/g, '');
 			// Ensure unique behaviours.
 			if (!this._selectors.get(id)) {
 				this._selectors.set(id, id);
@@ -103,6 +104,13 @@ define(function (require, exports, module) {
 	});
 
 	module.exports = {
+		/**
+		 * @param {
+         *    {header} form header
+         *    {textLabel} form labels
+         *    {buttons} names for cancel and ok buttons
+         * }
+		 */
 		create: function (data) {
 			return new EditPIMPMRView(data);
 		}

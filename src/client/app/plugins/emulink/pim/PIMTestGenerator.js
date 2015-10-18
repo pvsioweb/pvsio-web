@@ -1,8 +1,10 @@
-/** @module EmuchartsTestGenerator */
 /**
- * EmuchartsTestGenerator provides functions to generate abstract tests from Emuchart models
- * @authors: Nathan Robb
- * @date 2015/21/04 08:11:43 PM
+ * @module PIMTestGenerator
+ * @version 1.0
+ * @description
+ * PIMTestGenerator provides functions to generate abstract test cases from PIM Emuchart models.
+ * @author Nathan Robb
+ * @date 20/10/2015
  *
  * Presentation Interaction Models have the structure of:
  PIMs = array of PIM
@@ -13,7 +15,7 @@
 	transitions: (array of {
 				start_state: (string), // Initial state
 				end_state: (string),	// End state
-				I_behaviour: (string)  // Action on transition (Interactive behaviour)
+				i_behaviour: (string)  // Action on transition (Interface behaviour)
 		}),
 	name: (string),
 	pm: (Presentation Model {   // Presentation model for this PIM
@@ -58,26 +60,28 @@ define(function (require, exports, module) {
 
 	/**
 	 * Constructor.
-	 * @memberof EmuchartsTestGenerator
+	 * @memberof PIMTestGenerator
 	 */
-	function EmuchartsTestGenerator(name) {
+	function PIMTestGenerator(name) {
 		this.modelName = name;
 		return this;
 	}
 
 	/**
-	 * Returns a string of abstract tests for the emuchart.
-	 * @memberof EmuchartsTestGenerator
+	 * Returns a string of abstract tests for the Emuchart.
+	 * @param pm PM (or PIM) to generate tests for.
+	 * @returns {string} The test cases for the PM/PIM.
+	 * @memberof PIMTestGenerator
 	 */
-	EmuchartsTestGenerator.prototype.generateTests = function (pm) {
+	PIMTestGenerator.prototype.generateTests = function (pm) {
 		/**
 		 * Generate tests for the presentation model
 		 * (If the pm is a PIM then generates tests for all its
 		 * component models, else if PM then generates tests for its
 		 * widgets).
-		 * @param pm The presentation model to get component model
+		 * @param pim The presentation interaction model to get component model
 		 * tests for.
-		 * @returns {Array} Array of AbstractTests {
+		 * @returns Array of AbstractTests {
 		 *		  state_name: (string),
 		 *		  widget_name: (string),
 		 *		  predicates: (array of {
@@ -296,7 +300,7 @@ define(function (require, exports, module) {
 				if (!test.predicates || !test.predicates.forEach) {
 					return;
 				}
-				//TODO: test multiple S behaviors on 1 widget.
+
 				test.predicates.forEach(function (p) {
 					if(p.name === "hasBehaviour" || p.name === "genBehaviour") {
 						p.args.forEach(function (arg, i) {
@@ -306,14 +310,14 @@ define(function (require, exports, module) {
 							}
 							var sub = arg.substring(0, 2);
 							if (sub === "I_") {
-								// Is I_Behaviour
+								// Is I-Behaviour
 								// If PIM find details in transitions
 								if (pm.pm) {
 									pm.transitions.forEach(function (tran) {
-										if (tran.I_behaviour === arg) {
+										if (tran.i_behaviour === arg) {
 											uniqueList.add({
 												start_state: tran.start_state,
-												// Set the widget name and the I_behaviour
+												// Set the widget name and the i_behaviour
 												predicates: [p.args[0], arg],
 												end_state: tran.end_state
 											});
@@ -321,7 +325,7 @@ define(function (require, exports, module) {
 									});
 								}
 							} else if (sub === "S_") {
-								// Is S_Behaviour
+								// Is S-Behaviour
 								sBehav.push({
 									state_name: test.state_name,
 									interaction: test.widget_name,
@@ -359,9 +363,9 @@ define(function (require, exports, module) {
 			iBehav = uniqueList.get();
 
 			/**
-			 * Display the I_behaviour tests.
-			 * @param tests I_behaviour tests to display.
-			 * @returns {string} A string of all the I_behaviour
+			 * Display the i_behaviour tests.
+			 * @param tests Ii_behaviour tests to display.
+			 * @returns {string} A string of all the i_behaviour
 			 * tests for the PM / PIM.
 			 */
 			function printIBehaviourTests(tests) {
@@ -379,9 +383,9 @@ define(function (require, exports, module) {
 			}
 
 			/**
-			 * Display the S_behaviour tests that are not responses.
-			 * @param tests S_behaviour tests to display.
-			 * @returns {string} A string of all the S_behaviour.
+			 * Display the S-Behaviour tests that are not responses.
+			 * @param tests S-Behaviour tests to display.
+			 * @returns {string} A string of all the S-Behaviour.
 			 * tests for the PM / PIM.
 			 */
 			function printSBehaviourTests(tests) {
@@ -399,9 +403,9 @@ define(function (require, exports, module) {
 			}
 
 			/**
-			 * Display the S_behaviour tests that are responses.
-			 * @param tests S_behaviour tests to display.
-			 * @returns {string} A string of all the S_behaviour
+			 * Display the S-Behaviour tests that are responses.
+			 * @param tests S-Behaviour tests to display.
+			 * @returns {string} A string of all the S-Behaviour
 			 * tests for the PM / PIM.
 			 */
 			function printSRespBehaviourTests(tests) {
@@ -449,8 +453,6 @@ define(function (require, exports, module) {
 		// add test generation
 		var tests = "";
 		// Get test predicates for the PIM / PM
-		// TODO: this could at a later stage be switched back to passing in a PM
-		//var _tests = genTests(pm.pm || pm);
 		var _tests = genTests(pm);
 		// Print state tests.
 		tests += stateTests(pm.pm || pm) + "\n";
@@ -461,10 +463,10 @@ define(function (require, exports, module) {
 	};
 
 	/**
-	 * Returns a string of the emuchart description tests were generated for.
-	 * @memberof EmuchartsTestGenerator
+	 * Returns a string of the Emuchart description tests were generated for.
+	 * @memberof PIMTestGenerator
 	 */
-	EmuchartsTestGenerator.prototype.printDescriptor = function (name, pm) {
+	PIMTestGenerator.prototype.printDescriptor = function (name, pm) {
 		var ans = "# ---------------------------------------------------------------\n";
 		ans += "#  Tests for "+ name +": " + pm.name;
 		ans += "\n# ---------------------------------------------------------------\n";
@@ -473,20 +475,20 @@ define(function (require, exports, module) {
 
 	/**
 	 * Returns a string of the disclaimer for using this tool.
-	 * @memberof EmuchartsTestGenerator
+	 * @memberof PIMTestGenerator
 	 */
-	EmuchartsTestGenerator.prototype.printDisclaimer = function () {
+	PIMTestGenerator.prototype.printDisclaimer = function () {
 		return "\n# ---------------------------------------------------------------\n" +
-			"#  Tests generated using PVSio-web Test Generator ver 0.1\n" +
+			"#  Tests generated using PVSio-web PIM Test Generator ver 0.1\n" +
 			"#  Tool freely available at http://www.pvsioweb.org" +
 			"\n# ---------------------------------------------------------------\n";
 	};
 
 	/**
-	 * Returns a string of abstract tests for the emuchart to be saved in a file.
-	 * @memberof EmuchartsTestGenerator
+	 * Returns a string of abstract tests for the Emuchart to be saved in a file.
+	 * @memberof PIMTestGenerator
 	 */
-	EmuchartsTestGenerator.prototype.print = function (name, models) {
+	PIMTestGenerator.prototype.print = function (name, models) {
 		var _this = this;
 
 		// Print PIM tests
@@ -518,5 +520,5 @@ define(function (require, exports, module) {
 		return { file_name: name + ".tests", res: ans };
 	};
 
-	module.exports = EmuchartsTestGenerator;
+	module.exports = PIMTestGenerator;
 });

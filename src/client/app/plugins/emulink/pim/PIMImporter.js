@@ -1,12 +1,14 @@
-/** @module PIMImporter */
 /**
- * PIMImporter handles importing a PIM diagram into emulink (as a chart or not).
+ * @module PIMImporter
+ * @version 1.0
+ * @description
+ * PIMImporter handles the importing a PIM diagram.
+ * If an EmuchartManager is supplied the chart is also loaded into Emulink as an Emuchart.
  * @author Nathan Robb
- * @date 10/08/15 12:17 PM
+ * @date 20/10/15
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3, require, $, brackets, window, _, Promise, document, FileReader*/
-
 define(function (require, exports, module) {
 	"use strict";
 
@@ -16,7 +18,7 @@ define(function (require, exports, module) {
 	 * Reads in Presentation Interaction Models with corresponding
 	 * Presentation Models from a file.
 	 * @param fileIn The file to read the models from.
-	 * @param emuchartManager An optional arg, if given the imported PIM will also be loaded as an emuchart.
+	 * @param emuchartManager An optional arg, if given the imported PIM will also be loaded as an Emuchart.
 	 * @returns {{emucharts: Object, models: {pims: Array, pms: Array}}}
 	 * The emuchart, PIMs and PMs from the file.
 	 * @memberof PIMImporter
@@ -65,7 +67,7 @@ define(function (require, exports, module) {
 					transitions.push({
 						start_state: tStartState,
 						end_state: tEndState,
-						I_behaviour: tBehaviour
+						i_behaviour: tBehaviour
 					} );
 				}
 				return transitions;
@@ -208,18 +210,13 @@ define(function (require, exports, module) {
 			// Read in the presentation models
 			for (i = 0; i < n; i++) {
 				pmName = file[index++];
-				pmr = [];
 
 				// Need to read these in together
 				widgetsCount = parseInt(file[index++], 10);
 				componentModelsCount = parseInt(file[index++], 10);
 
 				pmWidgets = readWidgets();
-
-				if (withPMR) {
-					pmr = readPMRs();
-				}
-
+				pmr = withPMR ? readPMRs() : [];
 				pmComponentModels = readComponentModels();
 
 				pModels.push({
@@ -260,20 +257,31 @@ define(function (require, exports, module) {
 		 * Parses a PIM to a Emuchart (pim version) adds to Emulink.
 		 * @param pim PIM to parse as Emuchart.
 		 * @param emuchartManager Manager to load the PIM into.
-		 * @returns Object TODO:
+		 * @returns object (Emuchart) {
+					states: array of object (Emuchart state),
+					transitions: array of object (Emuchart transition),
+					initial_transitions: array of object (Emuchart transition),
+					constants: null,
+					variables: null,
+					pm: object (PM),
+					start_state: array of object (Emuchart state),
+					final_states: array of object (Emuchart state),
+					isPIM: true
+				}
 		 */
 		function parsePIMAsEmuchart(pim, emuchartManager) {
 			if (!emuchartManager) {
 				return {};
 			}
 
-			// TODO: find a nicer way to position the nodes
+			// TODO: find a nicer way to position the nodes.
+			// Currently loads them in on a diagonal (top left to bottom right)
 			var init_x = 0, init_y = 0;
 			var incr_x = 50, incr_y = 50;
 
-			// Need to get the states info out of the Component models
+			// Need to get the states info out of the PIM's Component models
 			var states = pim.pm.components.map( function(pm) {
-				// Don't add the PIM's PM
+				// Don't add the PIM's PM (a PIM is also a PM)
 				if (pm.name === pim.name) { return; }
 				init_x += incr_x;
 				init_y += incr_y;
@@ -285,7 +293,7 @@ define(function (require, exports, module) {
 					width: 50,
 					height: 50,
 					widgets: pm.widgets,
-					// Only PIMs currently have component models.
+					// Only PIMs currently have component models, set it anyway for now.
 					components: pm.components,
 					pmr: pm.pmr
 				};
@@ -294,8 +302,8 @@ define(function (require, exports, module) {
 			var transId = 0;
 			var transitions = pim.transitions.map( function(trans) {
 				return {
-					name: trans.I_behaviour,
-					id: trans.I_behaviour + transId++,
+					name: trans.i_behaviour,
+					id: trans.i_behaviour + transId++,
 					source: {
 						name: trans.start_state,
 						id: trans.start_state
@@ -307,6 +315,7 @@ define(function (require, exports, module) {
 				};
 			});
 
+			// PIMs have no initial transition, make one using the start states name.
 			var initialTransition = {
 				id: "INIT_" + pim.start_state.name,
 				name: "INIT_" + pim.start_state.name,
@@ -317,7 +326,7 @@ define(function (require, exports, module) {
 				descriptor: {
 					file_type: "emdl",
 					version: "1.1",
-					description: "emucharts model from PIM",
+					description: "Emucharts PIM from PIM import",
 					chart_name: pim.name
 				},
 				chart: {
@@ -330,6 +339,7 @@ define(function (require, exports, module) {
 					pm: pim.pm,
 					start_state: pim.start_state,
 					final_states: pim.final_states,
+					// This is a PIM, used for deciding which Emulink modals to open and test gen.
 					isPIM: true
 				}
 			};

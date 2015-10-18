@@ -1,5 +1,7 @@
 /**
  * Displays edit window for PIM interaction behaviours.
+ * @author Nathan Robb
+ * @date 20/10/2015
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3, require, $, brackets, window, Backbone, Handlebars, self */
@@ -14,6 +16,7 @@ define(function (require, exports, module) {
 			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
 			this.render(data);
 			this._data = data;
+			// Used for displaying the error message for a badly formatted transition.
 			this.$errorDisplay = $('#editTransitonError', this.el);
 		},
 		render: function (data) {

@@ -1,5 +1,7 @@
 /**
  * Displays edit window for the widgets of a state.
+ * @author Nathan Robb
+ * @date 20/10/2015
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3, require, $, brackets, window, Backbone, Handlebars, self */
@@ -11,6 +13,7 @@ define(function (require, exports, module) {
 
 	var EditPIMWidgetView = Backbone.View.extend({
 		initialize: function (data) {
+			// Set z-index to be above the edit state modal.
 			d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px").style("z-index", 999);
 			// Internal count for displaying widgets.
 			this._count = 0;
@@ -41,6 +44,7 @@ define(function (require, exports, module) {
 		left: function (event) {
 			this.trigger(this._data.buttons[0].toLowerCase(), {el: this.el}, this);
 		},
+		// Adds a new widget to the widget list.
 		add: function (event) {
 			var _this = this;
 			var form = this.el;
@@ -65,7 +69,7 @@ define(function (require, exports, module) {
 		},
 		removeWidget: function (event) {
 			if (confirm("Delete this widget?")) {
-				// TODO: Replace with a widget ID.
+				// TODO: Replace with a unique widget ID, this works but not the best implementation.
 				var widgetId = event.currentTarget.parentNode.parentNode.id;
 				this._widgets.splice(widgetId, 1);
 				$('#' + widgetId, this.$widgetsList).remove();
@@ -85,14 +89,14 @@ define(function (require, exports, module) {
 				'</div>';
 			return item;
 		},
-		// newWidgetBehaviours optional. null if inputs aren't valid.
+		// newWidgetBehaviours optional. returns null if inputs aren't valid.
 		validateWidget: function (newWidgetName, newWidgetCategory, newWidgetBehaviours) {
 			// Custom PIM validation on Behaviours.
 			var errors = [];
-			if (!newWidgetName)
-				errors.push('Must have a name.');
-			if (!newWidgetCategory)
-				errors.push('Must have a category.');
+			if (!newWidgetName || !(newWidgetName = newWidgetName.trim()))
+				errors.push('Name must have a value.');
+			if (!newWidgetCategory || !(newWidgetCategory = newWidgetCategory.trim()))
+				errors.push('Category must have a value.');
 			// Optional.
 			if (newWidgetBehaviours) {
 				// Retrieve behaviours.
@@ -131,6 +135,14 @@ define(function (require, exports, module) {
 	});
 
 	module.exports = {
+		/**
+		 * @param {
+         *    {header} form header
+         *    {textLabel} form labels
+         *    {placeholder} form placeholder values
+         *    {buttons} names for cancel and ok buttons
+         * }
+		 */
 		create: function (data) {
 			return new EditPIMWidgetView(data);
 		}

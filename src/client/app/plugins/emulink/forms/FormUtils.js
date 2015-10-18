@@ -25,10 +25,14 @@ define(function (require, exports, module) {
         return { options: options, labels: labels };
     }
 
+    /**
+     * Clears the values from the supplied inputs.
+     * @param inputSelectors The Ids of the inputs to clear values from.
+     */
     function clearForm(inputSelectors) {
         inputSelectors.forEach(function (s) {
             var elem = document.getElementById(s);
-            if (!elem) { return; }
+            if (!elem) { console.log("FORM UTILS ERROR - clearForm", s, elem); return; }
             if (elem.selectedIndex >= 0)
                 elem.selectedIndex = 0;
             else if (elem.value)

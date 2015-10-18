@@ -1,5 +1,7 @@
 /**
  * Displays edit window for pm states.
+ * @author Nathan Robb
+ * @date 20/10/2015
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3, require, $, brackets, window, Backbone, Handlebars, self */
@@ -30,6 +32,7 @@ define(function (require, exports, module) {
 		events: {
 			"click #btnRight": "right",
 			"click #btnLeft": "left",
+			// Opens the edit widget and PMR modals.
 			"click #newStateWidgets": "editWidgets",
 			"click #newStatePMR": "editPMR"
 		},
@@ -65,6 +68,7 @@ define(function (require, exports, module) {
 					newWidgetBehaviours: "Behaviours (Multiple with ,)"
 				},
 				value: {
+					// Clones the widgets.
 					widgets: _this.pims.getWidgets(data.widgets) || []
 				},
 				buttons: ["Cancel", "Save Widgets"]
@@ -85,18 +89,20 @@ define(function (require, exports, module) {
 			displayEditPIMPMR.create({
 				header: "Edit " + data.newStateName + " presentation model relations...",
 				textLabel: {
-					behaviour: "S_Behaviour",
+					behaviour: "S-Behaviour",
 					operation: "Operation"
 				},
 				placeholder: {
 					operation: "Operation"
 				},
 				value: {
+					// Clones the widgets and pmr.
 					widgets: _this.pims.getWidgets(data.widgets) || [],
 					pmr: _this.pims.getPMR(data.pmr) || d3.map()
 				},
 				buttons: ["Cancel", "Save PMR"]
 			}).on("save_pmr", function (e, view) {
+				// Merges the new PMR with the existing (overwrites duplicates).
 				_this.pims.mergePMR(data.pmr, e.data);
 				view.remove();
 				d3.select(_this.el).select("#newStateName").node().focus();
@@ -111,6 +117,8 @@ define(function (require, exports, module) {
 		/**
 		 * @param {
          *    {header} form header
+         *    {textLabel} form labels
+         *    {placeholder} form placeholder values
          *    {buttons} names for cancel and ok buttons
          * }
 		 */
