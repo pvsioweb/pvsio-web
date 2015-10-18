@@ -12,8 +12,8 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var eventDispatcher = require("util/eventDispatcher"),PIMs = require("plugins/emulink/pim/PIMs");
-        PIMs = require("plugins/emulink/pim/PIMs");
+    var eventDispatcher = require("util/eventDispatcher"),
+        PIMs = require("plugins/emulink/models/pim/PIMs");
     var _this;
 
     var pim;
@@ -99,10 +99,10 @@ define(function (require, exports, module) {
     Emucharts.prototype.getDefaultValues = function () {
         return defaultValues;
     };
-    
-    
-	/**
-	 * @function rename_node
+
+
+    /**
+     * @function rename_node
      * @description Renames a node (i.e., a state) in the emuchart diagram.
      * @param id {String} Identifier of the node that shall be renamed.
      * @param newName {String} New name that shall be assigned to the node.

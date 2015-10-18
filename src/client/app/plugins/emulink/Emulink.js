@@ -12,7 +12,6 @@ define(function (require, exports, module) {
         PVSioWebClient      = require("PVSioWebClient"),
         EditorModeUtils     = require("plugins/emulink/EmuchartsEditorModes"),
         EmuchartsManager    = require("plugins/emulink/EmuchartsManager"),
-        PIMImporter         = require("plugins/emulink/pim/PIMImporter"),
         displayAddState        = require("plugins/emulink/forms/displayAddState"),
         displayAddTransition   = require("plugins/emulink/forms/displayAddTransition"),
         displayRename          = require("plugins/emulink/forms/displayRename"),
@@ -40,8 +39,9 @@ define(function (require, exports, module) {
         FileHandler            = require("filesystem/FileHandler"),
         FileSystem             = require("filesystem/FileSystem"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView"),
-        PimTestGenerator       = require("plugins/emulink/pim/PIMTestGenerator"),
-        PIMEmulink             = require("plugins/emulink/pim/PIMEmulink");
+        PimTestGenerator       = require("plugins/emulink/models/pim/PIMTestGenerator"),
+        PIMImporter            = require("plugins/emulink/models/pim/PIMImporter"),
+        PIMEmulink             = require("plugins/emulink/models/pim/PIMEmulink");
     
     var instance;
     var fs;
@@ -417,7 +417,7 @@ define(function (require, exports, module) {
             openChart(function f() {
                 // make svg visible and reset colors
                 resetToolbarColors();
-                // render emuchart                        
+                // render emuchart
                 emuchartsManager.render();
                 // set initial editor mode
                 d3.select("#btn_toolbarBrowse").node().click();
