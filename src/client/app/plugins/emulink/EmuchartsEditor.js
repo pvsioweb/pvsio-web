@@ -1825,6 +1825,9 @@ define(function (require, exports, module) {
      * @memberof EmuchartsEditor
      */
     EmuchartsEditor.prototype.rename_state = function (stateID, newLabel) {
+        if (this.getIsPIM())
+            newLabel = newLabel.name;
+
         this.emucharts.rename_node(stateID, newLabel);
         // refresh states
         var states = d3.select("#ContainerStateMachine")

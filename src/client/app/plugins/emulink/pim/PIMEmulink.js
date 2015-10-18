@@ -73,7 +73,7 @@ define(function (require, exports, module) {
 				s.widgets = newStateWidgets;
 				//s.components = newStateComponents;
 
-				_this.emuchartsManager.edit_state(s.id, s);
+				_this.emuchartsManager.rename_state(s.id, s);
 				// Save the PMR set within the edit state modal into the existing PMR.
 				_this.emuchartsManager.mergePMR(newStatePMR);
 				view.remove();

@@ -299,7 +299,7 @@ define(function (require, exports, module) {
 				};
 			});
 
-			var transId = 0;
+			var transId = 1;
 			var transitions = pim.transitions.map( function(trans) {
 				return {
 					name: trans.i_behaviour,
@@ -362,7 +362,6 @@ define(function (require, exports, module) {
 				pms: pModels
 			}
 		};
-
 		// Return the read in PIMs and PMs
 		return models;
 	};
