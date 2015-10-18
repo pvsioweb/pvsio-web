@@ -346,7 +346,7 @@ define(function (require, exports, module) {
         function openChart(callback) {
             var opt = {
                 header: "Open EmuChart file...",
-                extensions: ".emdl,.muz"
+                extensions: ".emdl,.muz,.pm"
             };
             FileHandler.openLocalFileAsText(function (err, res) {
                 if (res) {

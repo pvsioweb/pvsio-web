@@ -1629,7 +1629,7 @@ define(function (require, exports, module) {
             if (editor_mode !== MODE.DELETE()) {
                 d3.event.stopPropagation();
                 _this.fire({
-                    type: "emuCharts_editState",
+                    type: "emuCharts_renameState",
                     node: node
                 });
             }
