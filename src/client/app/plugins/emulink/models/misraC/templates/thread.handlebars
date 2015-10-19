@@ -1,6 +1,5 @@
 {{&descriptor}}
-{{#each importings}}
-{{&.}}{{/each}}
+#include "{{filename}}.h"
 
 {{~#if constants}}
 // constants variables
@@ -22,7 +21,7 @@ extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~#each local_variables}}
 static {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
-
+{{#if transitions}}
 //declaration of helper functions
 void* enter(newStateLabel, st) {
     st.current_state = newStateLabel;
@@ -32,25 +31,22 @@ void* enter(newStateLabel, st) {
 void* leave(currentStateLabel, st) {
     st.previous_state = currentStateLabel;
     return state;
-}
-
+}{{/if}}
+{{#if states}}
 //declare state labels as variables //UNCLEAR: wich type are states?
-{{#each states~}}
-void *{{&name}} = "{{name}}";
-{{/each}}
-
+{{#each states~}}void *{{&name}} = "{{name}}";
+{{/each}}{{/if}}
+{{#if initial_transitions}}
 //initialisation function for model
-{{#each initial_transitions}}
-void* init{{init_name}}(){
+{{#each initial_transitions}}void* init{{&init_suffix}}(){
     void* st = enter("{{target.name}}", st);
     {{~#each actions}}
     st.{{&.}};{{/each}}
     return st;
-}{{/each}}
-
+}{{/each}}{{/if}}
+{{#if transitions}}
 //function declarations
-{{#each transitions}}
-void* {{id}} (st) {
+{{#each transitions}}void* {{id}}(st) {
 {{~#if condition}}
     if ({{&condition}}) {
         st = leave("{{source.name}}", st);
@@ -66,5 +62,6 @@ void* {{id}} (st) {
 {{~/if}}
     return st;
 }
-{{/each}}
+
+{{/each}}{{/if}}
 {{&disclaimer}}

@@ -1,0 +1,16 @@
+{{&descriptor}}
+{{#each importings}}
+{{&.}}{{/each}}
+ 
+{{#if transitions}}//helper functions
+void* enter(void* newStateLabel, void* st);
+
+void* leave(void* currentStateLabel, void* st);{{/if}}
+{{#if transitions}}
+//functions for model
+{{#each initial_transitions}}void* init{{&init_suffix_for_header}}();
+{{/each}}
+{{#each transitions}}void* {{id}}(void* st);
+
+{{/each}}{{/if}}
+{{&disclaimer}}

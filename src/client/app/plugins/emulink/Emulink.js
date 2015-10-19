@@ -1363,9 +1363,10 @@ define(function (require, exports, module) {
                 console.log(model.err);
                 return;
             }
-            if (model.thread) {
+            if (model.thread && model.header) {
                 var overWrite = {overWrite: true};
                 projectManager.project().addFile(emucharts.name + ".c", model.thread, overWrite);
+                projectManager.project().addFile(emucharts.name + ".h", model.header, overWrite);
             } else {
                 console.log("Warning, MisraC code is undefined.");
             }

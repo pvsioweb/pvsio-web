@@ -50,6 +50,7 @@
  */
 define(function (require, exports, module) {
     var threadTemplate = require("text!plugins/emulink/models/misraC/templates/thread.handlebars");
+    var headerTemplate = require("text!plugins/emulink/models/misraC/templates/header.handlebars");
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
     var _parser = new EmuchartsParser();
@@ -86,16 +87,7 @@ define(function (require, exports, module) {
         "=": "=="
     };
     
-    var declarations = {
-        "true" : undefined,
-        "false" : undefined,
-        "TRUE" : undefined,
-        "FALSE" : undefined,
-        "bool" : undefined,
-        "int" : undefined,
-        "float" : undefined,
-        "double" : undefined
-    };
+    var declarations = {};
     
     function isNumber(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
@@ -110,24 +102,24 @@ define(function (require, exports, module) {
             "double": "D_64"                      
         };
         if ( (type.toLowerCase() === "bool") || (type.toLowerCase() === "boolean") ) {
-            declarations["true"] = "#define true 1";
-            declarations["false"] = "#define false 0";
-            declarations["TRUE"] = "#define TRUE 1";
-            declarations["FALSE"] = "#define FALSE 0";
-            type = typeMaps["bool"];
-            declarations["bool"] = "typedef unsigned char " + type + ";";
+            declarations['true'] = "#define true 1";
+            declarations['false'] = "#define false 0";
+            declarations['TRUE'] = "#define TRUE 1";
+            declarations['FALSE'] = "#define FALSE 0";
+            type = typeMaps['bool'];
+            declarations['bool'] = "typedef unsigned char " + type + ";";
         }
         if (type.toLowerCase() === "int") {
-            type = typeMaps["int"];
-            declarations["int"] = "typedef unsigned int " + type + ";";
+            type = typeMaps['int'];
+            declarations['int'] = "typedef unsigned int " + type + ";";
         }
         if (type.toLowerCase() === "float"){
-            type = typeMaps["float"];
-            declarations["float"] = "typedef float " + type + ";";
+            type = typeMaps['float'];
+            declarations['float'] = "typedef float " + type + ";";
         }
         if ((type.toLowerCase() === "real") || (type.toLowerCase() === "double")){
-            type = typeMaps["double"];
-            declarations["double"] = "typedef double " + type + ";";
+            type = typeMaps['double'];
+            declarations['double'] = "typedef double " + type + ";";
         }
         return typeMaps[type] || type;
     }
@@ -311,13 +303,25 @@ define(function (require, exports, module) {
             i = 0,
             transitions = [];
         initial_transitions.forEach(function (t) {
-            Handlebars.registerHelper('init_name', function(emuchart) {
-                i++;
-                if( (initial_transitions[i-1].name === "") || !(initial_transitions[i-1].name[0].match(/[a-z]/i)) ){
-                    return;
+            Handlebars.registerHelper('init_suffix', function(emuchart) {
+                if (initial_transitions[i]){
+                    i++;
+                    if( (initial_transitions[i-1].name === "") || !(initial_transitions[i-1].name[0].match(/[a-z]/i)) ){
+                        return;
+                    }
+                    else{
+                        return "_" + initial_transitions[i-1].name.substr(0,3);
+                    }
                 }
-                else{
-                    return "_" + initial_transitions[i-1].name.substr(0,3);
+            });
+            Handlebars.registerHelper('init_suffix_for_header', function(emuchart) {
+                if (initial_transitions[i-1]){
+                    if( (initial_transitions[i-1].name === "") || !(initial_transitions[i-1].name[0].match(/[a-z]/i)) ){
+                        return;
+                    }
+                    else{
+                        return "_" + initial_transitions[i-1].name.substr(0,3);
+                    }
                 }
             });
             var parsedInit = parseTransition(t, emuchart);
@@ -342,6 +346,9 @@ define(function (require, exports, module) {
         this.model.descriptor = 
             "/**---------------------------------------------------------------" +
             "\n*   Model: " + emuchart.name;
+        Handlebars.registerHelper('filename', function() {
+                return emuchart.name;
+        });
         if (emuchart.author) {
             this.model.descriptor += 
                 "\n*   Author: " + emuchart.author.name +
@@ -356,7 +363,7 @@ define(function (require, exports, module) {
         this.model.descriptor += 
             "\n*  ---------------------------------------------------------------*/\n";
     };
-    
+            
     Printer.prototype.print_declarations = function (emuchart) {
         this.model.importings = declarations;
     };
@@ -383,7 +390,8 @@ define(function (require, exports, module) {
         console.log(this.model);//TO debug
         
         var thread = Handlebars.compile(threadTemplate)(this.model);
-        return {thread: thread};
+        var header = Handlebars.compile(headerTemplate)(this.model);
+        return {thread: thread, header: header};
     };
 
     module.exports = Printer;
