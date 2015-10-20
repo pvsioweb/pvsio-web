@@ -8,12 +8,10 @@
  * @date 20/10/2015
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, _, Promise, document, FileReader*/
+/*global define, d3*/
 
 define(function (require, exports, module) {
     "use strict";
-
-    var isPIM = false;
 
     /**
      * Creates a new instance of the PIMEmulink object,

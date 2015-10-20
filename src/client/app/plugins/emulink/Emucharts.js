@@ -16,10 +16,6 @@ define(function (require, exports, module) {
         PIMs = require("plugins/emulink/models/pim/PIMs");
     var _this;
 
-    var pim;
-    var isPIM = false;
-    var pmr;
-
     var defaultValues = { x: 100, y: 100, width: 36, height: 36, fontSize: 10 };
 
     var getFreshNodeID = function () {
@@ -70,8 +66,8 @@ define(function (require, exports, module) {
             this.constants = emuchart.constants || d3.map();
             this.variables = emuchart.variables || d3.map();
             this.pmr = emuchart.pmr || d3.map();
-            var isPIM = emuchart.isPIM && emuchart.isPIM === true;
-            this.pim = new PIMs(isPIM);
+            this.isPIM = emuchart.isPIM && emuchart.isPIM === true;
+            this.pim = new PIMs(this.isPIM);
         } else {
             this.nodes = d3.map();
             this.edges = d3.map();
@@ -79,6 +75,7 @@ define(function (require, exports, module) {
             this.variables = d3.map();
             this.constants = d3.map();
             this.pmr = d3.map();
+            this.isPIM = false;
             this.pim = new PIMs();
         }
         eventDispatcher(this);

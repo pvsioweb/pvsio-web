@@ -4,7 +4,7 @@
  * @date 20/10/2015
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, window, Backbone, Handlebars, self */
+/*global define, $, Backbone, Handlebars, self */
 define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),

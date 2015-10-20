@@ -1472,18 +1472,17 @@ define(function (require, exports, module) {
                         return;
                     }
                     // Remove file extension
-                    var name = name = res.name.substr(0, res.name.lastIndexOf('.'));
+                    var name = res.name.substr(0, res.name.lastIndexOf('.'));
                     var tests = pimTestGenerator.print(name, models.models);
-                    console.log(tests);
                     if (tests.err) {
                         console.log(tests.err);
                         return;
                     }
 
                     if (tests.res) {
-                        var name = tests.file_name;
+                        var testsName = tests.file_name;
                         var content = tests.res;
-                        return projectManager.project().addFile(name, content, { overWrite: true });
+                        return projectManager.project().addFile(testsName, content, { overWrite: true });
 
                     } else {
                         console.log("Warning, TestGenerator model is undefined.");

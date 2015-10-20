@@ -154,7 +154,7 @@ define(function (require, exports, module) {
                             initial_edges: chart.initial_edges,
                             variables: chart.variables,
                             constants: chart.constants
-                        }
+                        };
                         if (chart.pmr !== 'undefined') {
                             emuchart.pmr = chart.pmr;
                         }

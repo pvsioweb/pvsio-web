@@ -8,13 +8,11 @@
  * @date 20/10/2015
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, es5:true */
-/*global define, d3, require, $, brackets, window, document, Promise */
+/*global define*/
 define(function (require, exports, module) {
     "use strict";
     var displayEditState       = require("plugins/emulink/models/pim/forms/displayEditPIMState"),
         displayEditTransition  = require("plugins/emulink/models/pim/forms/displayEditPIMTransition");
-
-    var emuchartsManager;
 
     /**
      * Creates a new instance of the PIMEmulink object,

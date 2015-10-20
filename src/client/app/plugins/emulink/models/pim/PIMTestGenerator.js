@@ -51,12 +51,10 @@
  */
 
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3 */
+/*global define */
 
 define(function (require, exports, module) {
     "use strict";
-
-    var modelName;
 
     /**
      * Constructor.
@@ -241,7 +239,7 @@ define(function (require, exports, module) {
              */
             function printStateTests(tests) {
                 if (!tests) {
-                    return "Error: no tests. Generated from model."
+                    return "Error: no tests. Generated from model.";
                 }
 
                 var testsStr = "";
