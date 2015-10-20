@@ -6,47 +6,38 @@
 {{~#each constants}}
 static const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
-{{~#if input_variables}}
-//input variables
-{{~#each input_variables}}
-extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
-{{~/if}}
-{{~#if output_variables}}
-//output variables
-{{~#each output_variables}}
-extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
-{{~/if}}
+
 {{~#if local_variables}}
 //local variables
 {{~#each local_variables}}
 static {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
-{{#if transitions}}
-//declaration of helper functions
-void* enter(newStateLabel, st) {
-    st.current_state = newStateLabel;
-    return state;
-}
-
-void* leave(currentStateLabel, st) {
-    st.previous_state = currentStateLabel;
-    return state;
-}{{/if}}
 {{#if states}}
 //declare state labels as variables //UNCLEAR: wich type are states?
-{{#each states~}}void *{{&name}} = "{{name}}";
+{{#each states~}}UC_8 *{{&name}} = "{{name}}";
 {{/each}}{{/if}}
+{{#if transitions}}
+//declaration of helper functions
+struct_state enter(UC_8* newStateLabel, struct_state st) {
+    st.current_state = newStateLabel;
+    return st;
+}
+
+struct_state leave(UC_8* currentStateLabel, struct_state st) {
+    st.previous_state = currentStateLabel;
+    return st;
+}{{/if}}
 {{#if initial_transitions}}
 //initialisation function for model
-{{#each initial_transitions}}void* init{{&init_suffix}}(){
-    void* st = enter("{{target.name}}", st);
+{{#each initial_transitions}}struct_state init{{&init_suffix}}(){
+    struct_state st = enter("{{target.name}}", st);
     {{~#each actions}}
     st.{{&.}};{{/each}}
     return st;
 }{{/each}}{{/if}}
 {{#if transitions}}
 //function declarations
-{{#each transitions}}void* {{id}}(st) {
+{{#each transitions}}struct_state {{id}}(struct_state st) {
 {{~#if condition}}
     if ({{&condition}}) {
         st = leave("{{source.name}}", st);

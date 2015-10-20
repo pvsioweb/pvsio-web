@@ -88,7 +88,7 @@ define(function (require, exports, module) {
     };
     
     var declarations = {};
-    
+    declarations.char = "typedef unsigned char UC_8;";      //always need    
     function isNumber(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     }
@@ -102,25 +102,26 @@ define(function (require, exports, module) {
             "double": "D_64"                      
         };
         if ( (type.toLowerCase() === "bool") || (type.toLowerCase() === "boolean") ) {
-            declarations['true'] = "#define true 1";
-            declarations['false'] = "#define false 0";
-            declarations['TRUE'] = "#define TRUE 1";
-            declarations['FALSE'] = "#define FALSE 0";
-            type = typeMaps['bool'];
-            declarations['bool'] = "typedef unsigned char " + type + ";";
+            declarations.true = "#define true 1";
+            declarations.false = "#define false 0";
+            declarations.TRUE = "#define TRUE 1";
+            declarations.FALSE = "#define FALSE 0";
+            type = typeMaps.bool;
+
         }
         if (type.toLowerCase() === "int") {
-            type = typeMaps['int'];
-            declarations['int'] = "typedef unsigned int " + type + ";";
+            type = typeMaps.int;
+            declarations.int = "typedef unsigned int " + type + ";";
         }
         if (type.toLowerCase() === "float"){
-            type = typeMaps['float'];
-            declarations['float'] = "typedef float " + type + ";";
+            type = typeMaps.float;
+            declarations.float = "typedef float " + type + ";";
         }
         if ((type.toLowerCase() === "real") || (type.toLowerCase() === "double")){
-            type = typeMaps['double'];
-            declarations['double'] = "typedef double " + type + ";";
+            type = typeMaps.double;
+            declarations.double = "typedef double " + type + ";";
         }
+        console.log(declarations);
         return typeMaps[type] || type;
     }
     

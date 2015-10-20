@@ -2,15 +2,36 @@
 {{#each importings}}
 {{&.}}{{/each}}
  
-{{#if transitions}}//helper functions
-void* enter(void* newStateLabel, void* st);
+/**
+*   This program shall use the following structure:
+*   typedef struct{
+*           UC_8 *current_state;
+*           UC_8 *previous_state;
+*           ??
+*           ??
+*   }struct_state;
+**/ 
+ 
+{{~#if input_variables}}
+//input variables
+{{~#each input_variables}}
+extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
+{{~/if}}
+{{~#if output_variables}}
+//output variables
+{{~#each output_variables}}
+extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
+{{~/if}}
+{{#if transitions}}
+//helper functions
+struct_state enter(UC_8* newStateLabel, struct_state st);
 
-void* leave(void* currentStateLabel, void* st);{{/if}}
+struct_state leave(UC_8* currentStateLabel, struct_state st);{{/if}}
 {{#if transitions}}
 //functions for model
-{{#each initial_transitions}}void* init{{&init_suffix_for_header}}();
+{{#each initial_transitions}}struct_state init{{&init_suffix_for_header}}();
 {{/each}}
-{{#each transitions}}void* {{id}}(void* st);
+{{#each transitions}}struct_state {{id}}(struct_state st);
 
 {{/each}}{{/if}}
 {{&disclaimer}}
