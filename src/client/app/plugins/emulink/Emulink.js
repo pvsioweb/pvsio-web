@@ -1447,7 +1447,6 @@ define(function (require, exports, module) {
             };
 
             var tests = pimTestGenerator.print(emuchart.name, { pims: [ emuchart ], pms: [] });
-            console.log(tests);
             if (tests.err) {
                 console.log(tests.err);
                 return;
