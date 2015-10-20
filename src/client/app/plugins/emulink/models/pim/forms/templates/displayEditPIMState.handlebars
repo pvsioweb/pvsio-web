@@ -2,7 +2,7 @@
     <div id="pimStateModal" class="panel panel-info shadow center">
         <div class="panel-heading">{{header}}</div>
         <form class="center form-horizontal" onsubmit="return false">
-            <div class="panel-body" style="overflow-y: scroll; height: 180px;/*230px;*/">
+            <div class="panel-body" style="overflow-y: auto; height: 180px;/*230px;*/">
                 <div class="form-group">
                     <label class="control-label col-sm-4"
                            for="newStateName">{{textLabel.newStateName}}</label>
@@ -39,7 +39,7 @@
                                type="text"
                                value="{{value.newStateComponents}}"
                                placeholder="{{placeholder.newStateComponents}}"
-                               style="padding: 6px 12px;"
+                               style="padding: 6px 12px; cursor: pointer !important;"
                                disabled/>
                     </div>
                 </div>
@@ -53,7 +53,7 @@
                                type="text"
                                value=""
                                placeholder="{{placeholder.newStatePMR}}"
-                               style="padding: 6px 12px;"
+                               style="padding: 6px 12px; cursor: pointer !important;"
                                readonly="readonly"/>
                     </div>
                 </div>
