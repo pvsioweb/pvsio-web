@@ -350,7 +350,7 @@ define(function (require, exports, module) {
 
         // Arrange models in correct order
         pims.reverse();
-        pModels.reverse()
+        pModels.reverse();
 
         // Assume only 1 PIM in file. Use the first one in chart.
         var chart = emuchartManager ? parsePIMAsEmuchart(pims[0], emuchartManager) : {};

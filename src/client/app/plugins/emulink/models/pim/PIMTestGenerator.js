@@ -513,7 +513,8 @@ define(function (require, exports, module) {
 
         ans += _this.printDisclaimer() + "\n";
 
-
+        // Print tests to console (useful if can't get access to saved test file?).
+        console.log(ans);
 
         return { file_name: name + ".tests", res: ans };
     };

@@ -1834,6 +1834,10 @@ define(function (require, exports, module) {
             .select("#States").selectAll(".state")
             .filter(function (state) { return state.id === stateID; });
         refreshStates(states);
+
+        // TODO: temporary fix for transitions not being redrawn after renaming a state.
+        this.renderTransitions();
+       /*
         // refresh all incoming and outgoing transitions of the renamed state
         var transitions = d3.select("#ContainerStateMachine")
             .select("#Transitions").selectAll(".transition")
@@ -1842,10 +1846,6 @@ define(function (require, exports, module) {
                         (transition.source && transition.source.id === stateID);
             });
 
-        // TODO: temporary fix for transitions not being redrawn after renaming a state.
-        this.renderTransitions();
-
-       /*
         transitions = transitions ||
             d3.select("#ContainerStateMachine svg").select("#Transitions").selectAll(".transition");
         // refresh labels
