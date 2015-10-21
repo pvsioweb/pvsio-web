@@ -1825,12 +1825,19 @@ define(function (require, exports, module) {
      * @memberof EmuchartsEditor
      */
     EmuchartsEditor.prototype.rename_state = function (stateID, newLabel) {
+        if (this.getIsPIM())
+            newLabel = newLabel.name;
+
         this.emucharts.rename_node(stateID, newLabel);
         // refresh states
         var states = d3.select("#ContainerStateMachine")
             .select("#States").selectAll(".state")
             .filter(function (state) { return state.id === stateID; });
         refreshStates(states);
+
+        // TODO: temporary fix for transitions not being redrawn after renaming a state.
+        this.renderTransitions();
+       /*
         // refresh all incoming and outgoing transitions of the renamed state
         var transitions = d3.select("#ContainerStateMachine")
             .select("#Transitions").selectAll(".transition")
@@ -1838,6 +1845,7 @@ define(function (require, exports, module) {
                 return (transition.target && transition.target.id === stateID) ||
                         (transition.source && transition.source.id === stateID);
             });
+
         transitions = transitions ||
             d3.select("#ContainerStateMachine svg").select("#Transitions").selectAll(".transition");
         // refresh labels
@@ -1848,6 +1856,7 @@ define(function (require, exports, module) {
                 return labelToString(edge.name);
             });
         });
+       */
     };
 
     /**
@@ -2060,6 +2069,54 @@ define(function (require, exports, module) {
                 this.emucharts.edges && this.emucharts.edges.empty() &&
                 this.emucharts.constants && this.emucharts.constants.empty() &&
                 this.emucharts.variables && this.emucharts.variables.empty();
+    };
+
+    /** PIM **/
+
+    /**
+     * Convert the current Emuchart to a PIM (or if from a PIM).
+     * @returns {boolean} True Emuchart became a PIM or a PIM became an Emuchart.
+     */
+    EmuchartsEditor.prototype.toPIM = function (toPIM) {
+        return this.emucharts.toPIM ? this.emucharts.toPIM(toPIM) : false;
+    };
+
+    /**
+     * Returns if this emuchart is a PIM.
+     * @returns {boolean} If this emuchart is a PIM.
+     */
+    EmuchartsEditor.prototype.getIsPIM = function () {
+        return this.emucharts.getIsPIM ? this.emucharts.getIsPIM() : false;
+    };
+
+    /**
+     *
+     * @param behaviour
+     * @returns If no behaviour provided returns all PMR as a set,
+     * If behaviour could be found then returns the relation (behaviour, operation),
+     * else returns null.
+     */
+    EmuchartsEditor.prototype.getPMR = function (behaviour, isSave) {
+        return this.emucharts.getPMR ? this.emucharts.getPMR(behaviour, isSave) : d3.map();
+    };
+
+    /**
+     * Add a PMR (overrites any existing PMR for the given behaviour).
+     * ({behaviour (string), operation (string)}).
+     * @param pmr
+     * @returns boolean true if successfully added.
+     */
+    EmuchartsEditor.prototype.addPMR = function (pmr) {
+        return this.emucharts.addPMR ? this.emucharts.addPMR(pmr) : false;
+    };
+
+    /**
+     * Saves the new PMRs into the pool of all PMRs
+     * @param newPMRs
+     * @returns {boolean}
+     */
+    EmuchartsEditor.prototype.mergePMR = function (newPMRs) {
+        return this.emucharts.mergePMR ? this.emucharts.mergePMR(newPMRs) : false;
     };
 
     module.exports = EmuchartsEditor;

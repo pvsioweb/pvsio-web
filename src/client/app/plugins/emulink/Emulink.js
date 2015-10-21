@@ -38,8 +38,11 @@ define(function (require, exports, module) {
 //        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         FileHandler            = require("filesystem/FileHandler"),
         FileSystem             = require("filesystem/FileSystem"),
-        displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
-
+        displayNotificationView  = require("plugins/emulink/forms/displayNotificationView"),
+        PimTestGenerator       = require("plugins/emulink/models/pim/PIMTestGenerator"),
+        PIMImporter            = require("plugins/emulink/models/pim/PIMImporter"),
+        PIMEmulink             = require("plugins/emulink/models/pim/PIMEmulink");
+    
     var instance;
     var fs;
     var projectManager;
@@ -59,6 +62,9 @@ define(function (require, exports, module) {
     var emuchartsJSPrinter;
     var emuchartsAdaPrinter;
     var emuchartsBlessPrinter;
+    var pimImporter;
+    var pimTestGenerator;
+    var pimEmulink;
 
     var options = { autoinit: true };
 
@@ -128,6 +134,11 @@ define(function (require, exports, module) {
 
     // rename dialog window for states
     function editState(s) {
+        if (emuchartsManager.getIsPIM()) {
+            pimEmulink.editState(s);
+            return;
+        }
+        
         displayRename.create({
             header: "Renaming state " + s.name.substring(0, maxLen) + "...",
             required: true,
@@ -151,6 +162,11 @@ define(function (require, exports, module) {
 
     // rename dialog window for transitions
     function editTransition(t) {
+        if (emuchartsManager.getIsPIM()) {
+            pimEmulink.editTransition(t);
+            return;
+        }
+
         displayRename.create({
             header: "Renaming transition " + t.name.substring(0, maxLen) + "...",
             required: false,
@@ -298,6 +314,11 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_initialTransitionRemoved", initialTransitionRemoved_handler);
         emuchartsManager.addListener("emuCharts_stateRenamed", stateRenamed_handler);
         fs = new FileSystem();
+
+        // PIM objects.
+        pimImporter = new PIMImporter();
+        pimEmulink = new PIMEmulink(emuchartsManager);
+        pimTestGenerator = new PimTestGenerator("pim_Test_Gen");
     }
 
     Emulink.prototype.getName = function () {
@@ -325,21 +346,21 @@ define(function (require, exports, module) {
         function openChart(callback) {
             var opt = {
                 header: "Open EmuChart file...",
-                extensions: ".emdl,.muz"
+                extensions: ".emdl,.muz,.pim"
             };
             FileHandler.openLocalFileAsText(function (err, res) {
                 if (res) {
                     if (res.name.lastIndexOf(".emdl") === res.name.length - 5) {
                         res.content = JSON.parse(res.content);
                         emuchartsManager.importEmucharts(res);
-                        if (callback && typeof callback === "function") {
-                            callback(err, res);
-                        }
-                    } else {
+                    } else if (res.name.lastIndexOf(".muz") === res.name.length - 4) {
                         emuchartsManager.importPIMChart(res);
-                        if (callback && typeof callback === "function") {
-                            callback(err, res);
-                        }
+                    } else {
+                        // Try parse as PIM
+                        pimImporter.importPIM(res, emuchartsManager);
+                    }
+                    if (callback && typeof callback === "function") {
+                        callback(err, res);
                     }
                 } else {
                     console.log("Error while opening file (" + err + ")");
@@ -363,12 +384,17 @@ define(function (require, exports, module) {
         function importChart(callback) {
             var opt = {
                 header: "Import Chart...",
-                extensions: ".muz"
+                extensions: ".muz,.pim"
             };
             // MUZ
             FileHandler.openLocalFileAsText(function (err, res) {
                 if (res) {
-                    emuchartsManager.importPIMChart(res);
+                    if (res.name.lastIndexOf(".muz") === res.name.length - 4) {
+                        emuchartsManager.importPIMChart(res);
+                    }
+                    else {
+                        pimImporter.importPIM(res, emuchartsManager);
+                    }
                     if (callback && typeof callback === "function") {
                         callback(err, res);
                     }
@@ -569,7 +595,7 @@ define(function (require, exports, module) {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
             if (!emuchartsManager.empty_chart()) {
                 var name = "emucharts_" + projectManager.project().name() + ".emdl";
-                var content = JSON.stringify({
+                var emuchart = {
                     descriptor: {
                         file_type: "emdl",
                         version: "1.3",
@@ -583,7 +609,12 @@ define(function (require, exports, module) {
                         constants: emuchartsManager.getConstants(),
                         variables: emuchartsManager.getVariables()
                     }
-                }, null, " ");
+                };
+                // PIM.
+                emuchart.chart.pmr = emuchartsManager.getPMR(null, true);
+                emuchart.chart.isPIM = emuchartsManager.getIsPIM();
+
+                var content = JSON.stringify(emuchart, null, " ");
                 projectManager.project().addFile(name, content, { overWrite: true }).then(function (res) {
                     displayNotification("File " + name + " saved successfully!");
                 }).catch(function (err) {
@@ -1360,7 +1391,109 @@ define(function (require, exports, module) {
                 emuchartsManager.render();
             }
         });
-    };
+
+        //-- PIM -----------------------------------------------------------------
+        d3.select("#btn_toPIM").on("click", function () {
+            if (emuchartsManager.getIsPIM()) {
+                console.log("Warning, current emuchart is already a PIM.");
+                return;
+            }
+            if (emuchartsManager.toPIM(true)) {
+                console.log("Success, converted emuchart to a PIM.");
+            }
+            else {
+                console.log("Warning, unable to convert emuchart to a PIM.");
+            }
+        });
+        d3.select("#btn_fromPIM").on("click", function () {
+            if (!emuchartsManager.getIsPIM()) {
+                console.log("Warning, current emuchart is not a PIM.");
+                return;
+            }
+            if (emuchartsManager.toPIM(false)) {
+                console.log("Success, converted emuchart from a PIM.");
+            }
+            else {
+                console.log("Warning, unable to convert emuchart from a PIM.");
+            }
+        });
+        d3.select("#btn_menuTestGenerator").on("click", function () {
+            if (!emuchartsManager.getIsPIM()) {
+                console.log("Warning, current emuchart is not a PIM.");
+                return;
+            }
+            var initTrans = emuchartsManager.getInitialTransitions();
+            var emuchart = {
+                name: ("emucharts_" + projectManager.project().name()),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                //constants: emuchartsManager.getConstants(),
+                //variables: emuchartsManager.getVariables(),
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: initTrans,
+                pm: {
+                    name: projectManager.project().name(),
+                    widgets: [],
+                    components: emuchartsManager.getStates(),
+                    pmr: []
+                },
+                start_state: initTrans ? initTrans[0].target.name : "",
+                final_states: [],
+                isPIM: emuchartsManager.getIsPIM()
+            };
+
+            var tests = pimTestGenerator.print(emuchart.name, { pims: [ emuchart ], pms: [] });
+            if (tests.err) {
+                console.log(tests.err);
+                return;
+            }
+            if (tests.res) {
+                var name = tests.file_name;
+                var content = tests.res;
+                return projectManager.project().addFile(name, content, { overWrite: true });
+            } else {
+                console.log("Warning, TestGenerator model is undefined.");
+            }
+        });
+        d3.select("#btn_menuTestGeneratorFromFile").on("click", function () {
+            var models;
+            // Generate tests from importing a file
+            fs.openLocalFileAsText(function (err, res) {
+                if (res) {
+                    // Try parse as PIM
+                    models = pimImporter.importPIM(res);
+                    if (models.err) {
+                        console.log(models.err);
+                        return;
+                    }
+                    // Remove file extension
+                    var name = res.name.substr(0, res.name.lastIndexOf('.'));
+                    var tests = pimTestGenerator.print(name, models.models);
+                    if (tests.err) {
+                        console.log(tests.err);
+                        return;
+                    }
+
+                    if (tests.res) {
+                        var testsName = tests.file_name;
+                        var content = tests.res;
+                        return projectManager.project().addFile(testsName, content, { overWrite: true });
+
+                    } else {
+                        console.log("Warning, TestGenerator model is undefined.");
+                    }
+
+                } else {
+                    console.log("Error while opening file (" + err + ")");
+                }
+
+            }, { header: "Open PIM file..." });
+        });
+	};
 
 
     Emulink.prototype.getDependencies = function () {
