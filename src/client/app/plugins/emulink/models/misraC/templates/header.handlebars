@@ -5,11 +5,8 @@
 /**
 *   This program shall use the following structure:
 *   typedef struct{
-*           UC_8 *current_state;
-*           UC_8 *previous_state;
-*           ??
-*           ??
-*   }struct_state;
+{{#each structureVar}}*            {{&.}}
+{{/each}}*   }struct_state;
 **/ 
  
 {{~#if input_variables}}

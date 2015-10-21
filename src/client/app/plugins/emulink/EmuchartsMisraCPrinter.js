@@ -87,11 +87,8 @@ define(function (require, exports, module) {
         "=": "=="
     };
     
-    var declarations = {};
-    declarations.char = "typedef unsigned char UC_8;";      //always need    
-    function isNumber(n) {
-        return !isNaN(parseFloat(n)) && isFinite(n);
-    }
+    var declarations = [];
+    declarations.push("typedef unsigned char UC_8;");
     
     function getType(type) {
         var typeMaps = {
@@ -102,26 +99,32 @@ define(function (require, exports, module) {
             "double": "D_64"                      
         };
         if ( (type.toLowerCase() === "bool") || (type.toLowerCase() === "boolean") ) {
-            declarations.true = "#define true 1";
-            declarations.false = "#define false 0";
-            declarations.TRUE = "#define TRUE 1";
-            declarations.FALSE = "#define FALSE 0";
             type = typeMaps.bool;
-
+            if(!isInArray(declarations, "true")){
+                declarations.push("#define true 1");
+                declarations.push("#define false 0");
+                declarations.push("#define TRUE 1");
+                declarations.push("#define FALSE 0");
+            }    
         }
         if (type.toLowerCase() === "int") {
             type = typeMaps.int;
-            declarations.int = "typedef unsigned int " + type + ";";
+            if(!isInArray(declarations, type)){
+                declarations.push("typedef unsigned int " + type + ";");
+            }
         }
         if (type.toLowerCase() === "float"){
             type = typeMaps.float;
-            declarations.float = "typedef float " + type + ";";
+            if(!isInArray(declarations, type)){
+                declarations.push("typedef float " + type + ";");
+            }
         }
         if ((type.toLowerCase() === "real") || (type.toLowerCase() === "double")){
             type = typeMaps.double;
-            declarations.double = "typedef double " + type + ";";
+            if(!isInArray(declarations, type)){
+                declarations.push("typedef double " + type + ";");
+            }
         }
-        console.log(declarations);
         return typeMaps[type] || type;
     }
     
@@ -139,6 +142,16 @@ define(function (require, exports, module) {
 
     function getOperator(op, emuchart) {
         return operatorOverrides[op] || op;
+    }
+    
+    function isInArray(array, search)
+    {
+        var arrayJoin = array.join();
+        return arrayJoin.indexOf(search) >= 0;
+    }
+    
+    function isNumber(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
     }
     
     function isLocalVariable(name, emuchart) {
@@ -286,6 +299,18 @@ define(function (require, exports, module) {
         });
     };
 
+    Printer.prototype.print_declarations = function (emuchart) {
+        this.model.importings = declarations;
+        if (emuchart.variables) {
+            this.model.structureVar = emuchart.variables.local.map(function (v) {
+                v.type = getType(v.type);
+                return (v.type + " "+ v.name + ";");
+            });
+        }
+        this.model.structureVar.push("UC_8 *" + predefined_variables.current_state.name + ";");
+        this.model.structureVar.push("UC_8 *" + predefined_variables.previous_state.name + ";");    
+    };
+    
     Printer.prototype.print_transitions = function (emuchart) {
         var transitions = [];
         emuchart.transitions.forEach(function (t) {
@@ -365,10 +390,6 @@ define(function (require, exports, module) {
             "\n*  ---------------------------------------------------------------*/\n";
     };
             
-    Printer.prototype.print_declarations = function (emuchart) {
-        this.model.importings = declarations;
-    };
-    
     Printer.prototype.print_disclaimer = function (emuchart) {
         this.model.disclaimer = "\n/** ---------------------------------------------------------------\n" +
                     "*   C code generated using PVSio-web MisraCPrinter ver 0.1\n" +
@@ -379,8 +400,8 @@ define(function (require, exports, module) {
 
     Printer.prototype.print = function (emuchart) {
         this.model.transitions = [];
-        this.print_declarations(emuchart);
         this.print_variables(emuchart);
+        this.print_declarations(emuchart);
         this.print_constants(emuchart);
         this.print_transitions(emuchart);
         this.print_initial_transition(emuchart);
