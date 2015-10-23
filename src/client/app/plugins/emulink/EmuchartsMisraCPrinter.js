@@ -90,6 +90,8 @@ define(function (require, exports, module) {
     var declarations = [];
     declarations.push("typedef unsigned char UC_8;");
     
+    //var variablesUsed = [];
+    
     function getType(type) {
         var typeMaps = {
             "Time": "Time",    //iachino: Serve??
@@ -128,17 +130,38 @@ define(function (require, exports, module) {
         return typeMaps[type] || type;
     }
     
-    function getSuffix(v) {
+    function setSuffix(v) {
         if (isNumber(v.value)){
-            if (v.type.toLowerCase() === "int") {
+            if ( v.type.toUpperCase() === getType("int") ) {
                 v.value = v.value + "u";
             }
-            if ( (v.type.toLowerCase() === "float") || (v.type.toLowerCase() === "double") || (v.type.toLowerCase() === "real") ){
+            if ( (v.type.toUpperCase() === getType("float")) || (v.type.toUpperCase() === getType("double")) ){
                 v.value = v.value + "f";
             }
         }
         return v.value;
     }
+    /** devo scorrere i vari 'v.type', vedere se sono 'identifier' o 'constant' e 
+     * confrontare 'v.val' con un array di variabili usate
+     * e.g.   v={(array of)
+     *            type:   (indentifier|constant|binop|number)
+     *            val:    (display|3.14|=|27)
+     *        }
+    **/
+    // function getSuffixInActions(v) {
+    //     console.log(variablesUsed + v);
+    //     if (isInArray(variablesUsed, v.val)){
+    //         var arrayJoin = variablesUsed.join();       //not good
+    //         var tipo = arrayJoin.indexOf(v.val);        //not good
+    //         // if ( v. === getType("int") ) {
+    //         //     return "u";
+    //         // }
+    //         // if ( (v.type.toUpperCase() === getType("float")) || (v.type.toUpperCase() === getType("double")) ){
+    //         //     return "f";
+    //         // }
+    //     }
+    //     return;
+    // }
 
     function getOperator(op, emuchart) {
         return operatorOverrides[op] || op;
@@ -243,16 +266,15 @@ define(function (require, exports, module) {
             }
             if (actions) {
                 actions = actions.val.map(function (a) {
+                    // a.val.expression.val.map(function(b){
+                    //     if(b.type === "number"){
+                    //         b.val+= getSuffixInActions(a);     //return "f" or "u"
+                    //     }
+                    //     console.log(b);
+                    // });
                     return getExpression(a, emuchart);
                 });
             }
-            
-            //trying to add suffix even in the actions of transitions
-            // var lengthAction = actions[0];
-            // lengthAction = lengthAction.length;
-            // if ( isNumber(actions[0][lengthAction - 1])) {
-            //     actions[0] = actions[0] + "u";
-            // }
             return {id: id.val, actions: actions, condition: condition, source: t.source, target: t.target};
         } else if (functionBody.err) {
             displayError(functionBody.err);
@@ -270,21 +292,21 @@ define(function (require, exports, module) {
     Printer.prototype.print_variables = function (emuchart) {
         if (emuchart.variables) {
             this.model.input_variables = emuchart.variables.input.map(function (v) {
-                v.value = getSuffix(v);
                 v.type = getType(v.type);
+                v.value = setSuffix(v);
                 return v;
             });
             this.model.output_variables = emuchart.variables.output.map(function (v) {
-                v.value = getSuffix(v);
                 v.type = getType(v.type);
+                v.value = setSuffix(v);
                 if (v.type.toLowerCase() === 'monitor_mode'){
                     v.value = "\"" + v.value.toLowerCase() + "\"";
                 }
                 return v;
             });
             this.model.local_variables = emuchart.variables.local.map(function (v) {
-                v.value = getSuffix(v);
                 v.type = getType(v.type);
+                v.value = setSuffix(v);
                 return v;
             });
         }
@@ -292,8 +314,8 @@ define(function (require, exports, module) {
 
     Printer.prototype.print_constants = function (emuchart) {
         this.model.constants = emuchart.constants.map(function (v) {
-            v.value = getSuffix(v);
             v.type = getType(v.type);
+            v.value = setSuffix(v);
             v.name = v.name.toUpperCase();
             return v;
         });
@@ -308,15 +330,48 @@ define(function (require, exports, module) {
             });
         }
         this.model.structureVar.push("UC_8 *" + predefined_variables.current_state.name + ";");
-        this.model.structureVar.push("UC_8 *" + predefined_variables.previous_state.name + ";");    
+        this.model.structureVar.push("UC_8 *" + predefined_variables.previous_state.name + ";");
+        // variablesUsed = this.model.structureVar;    
     };
     
     Printer.prototype.print_transitions = function (emuchart) {
         var transitions = [];
+        var functionsName = [];
         emuchart.transitions.forEach(function (t) {
             var parsedTransition  = parseTransition(t, emuchart);
             if (parsedTransition) {
-                transitions.push(parsedTransition);
+                 if(!isInArray(functionsName, parsedTransition.id)){
+                     functionsName.push(parsedTransition.id);
+                     transitions.push(parsedTransition);
+                 }
+                 else{                 
+                     var i;
+                     for ( i = 0; i < transitions.length; i++){
+                         if(transitions[i].id !== 'undefined'){
+                            if (transitions[i].id === parsedTransition.id){
+                                var tmp = [];
+                                tmp.push(transitions[i]);
+                                tmp.push(parsedTransition);
+                                transitions[i] = tmp;
+                            }
+                            else{
+                                var j;
+                                for (j = 0; j < transitions[i].length; j++){
+                                    if (transitions[i][j].id === parsedTransition.id){
+                                        var tmp2 = [];
+                                        transitions[i].map(function (v) {
+                                            tmp2.push(v);
+                                            return;
+                                        });
+                                        tmp2.push(parsedTransition);
+                                        transitions[i] = tmp2;
+                                        break;
+                                    }
+                                }
+                            }
+                         }
+                     }
+                 }
             }
         });
         if (transitions) {
@@ -417,4 +472,6 @@ define(function (require, exports, module) {
     };
 
     module.exports = Printer;
+    
+    declarations = [];
 });

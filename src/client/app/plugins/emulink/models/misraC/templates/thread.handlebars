@@ -37,7 +37,7 @@ struct_state leave(UC_8* currentStateLabel, struct_state st) {
 }{{/each}}{{/if}}
 {{#if transitions}}
 //function declarations
-{{#each transitions}}struct_state {{id}}(struct_state st) {
+{{#each transitions}}{{#if id}}struct_state {{id}}(struct_state st) {
 {{~#if condition}}
     if ({{&condition}}) {
         st = leave("{{source.name}}", st);
@@ -53,6 +53,23 @@ struct_state leave(UC_8* currentStateLabel, struct_state st) {
 {{~/if}}
     return st;
 }
-
+{{else}}struct_state {{0.id}}(struct_state st) {
+{{#each .}}
+{{~#if condition}}
+    if ({{&condition}} && current_state == "{{source.name}}") {
+        st = leave("{{source.name}}", st);
+        {{~#each actions}}
+        st.{{&.}};{{/each}}
+        st = enter("{{target.name}}", st);
+    }{{~else}}
+    if (current_state == "{{source.name}}") {
+        st = leave("{{source.name}}", st);
+        {{~#each actions}}
+        st.{{&.}};{{~/each}}
+        st = enter("{{target.name}}", st);
+{{~/if}}{{/each}}
+    return st;
+}
+{{/if}}
 {{/each}}{{/if}}
 {{&disclaimer}}
