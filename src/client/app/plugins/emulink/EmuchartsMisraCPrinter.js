@@ -89,9 +89,7 @@ define(function (require, exports, module) {
     
     var declarations = [];
     declarations.push("typedef unsigned char UC_8;");
-    
-    //var variablesUsed = [];
-    
+     
     function getType(type) {
         var typeMaps = {
             "Time": "Time",    //iachino: Serve??
@@ -141,27 +139,21 @@ define(function (require, exports, module) {
         }
         return v.value;
     }
-    /** devo scorrere i vari 'v.type', vedere se sono 'identifier' o 'constant' e 
-     * confrontare 'v.val' con un array di variabili usate
-     * e.g.   v={(array of)
-     *            type:   (indentifier|constant|binop|number)
-     *            val:    (display|3.14|=|27)
-     *        }
-    **/
-    // function getSuffixInActions(v) {
-    //     console.log(variablesUsed + v);
-    //     if (isInArray(variablesUsed, v.val)){
-    //         var arrayJoin = variablesUsed.join();       //not good
-    //         var tipo = arrayJoin.indexOf(v.val);        //not good
-    //         // if ( v. === getType("int") ) {
-    //         //     return "u";
-    //         // }
-    //         // if ( (v.type.toUpperCase() === getType("float")) || (v.type.toUpperCase() === getType("double")) ){
-    //         //     return "f";
-    //         // }
-    //     }
-    //     return;
-    // }
+
+    function getSuffixInActions(v, emuchart) {
+        var ret = '';
+        emuchart.variables.local.map(function(z){
+            if(v.val.identifier.val === z.name){
+                if ( z.type === getType("int") ) {
+                    ret = "u";
+                }
+                if ( (z.type === getType("float")) || (z.type === getType("double")) ){
+                    ret = "f";
+                }
+            } 
+        });
+        return ret;
+    }
 
     function getOperator(op, emuchart) {
         return operatorOverrides[op] || op;
@@ -266,12 +258,11 @@ define(function (require, exports, module) {
             }
             if (actions) {
                 actions = actions.val.map(function (a) {
-                    // a.val.expression.val.map(function(b){
-                    //     if(b.type === "number"){
-                    //         b.val+= getSuffixInActions(a);     //return "f" or "u"
-                    //     }
-                    //     console.log(b);
-                    // });
+                    a.val.expression.val.map(function(b){
+                        if(b.type === "number"){
+                            b.val += getSuffixInActions(a, emuchart);
+                        }
+                    });
                     return getExpression(a, emuchart);
                 });
             }
@@ -331,7 +322,6 @@ define(function (require, exports, module) {
         }
         this.model.structureVar.push("UC_8 *" + predefined_variables.current_state.name + ";");
         this.model.structureVar.push("UC_8 *" + predefined_variables.previous_state.name + ";");
-        // variablesUsed = this.model.structureVar;    
     };
     
     Printer.prototype.print_transitions = function (emuchart) {

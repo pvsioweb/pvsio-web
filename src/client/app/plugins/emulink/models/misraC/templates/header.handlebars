@@ -10,22 +10,22 @@
 **/ 
  
 {{~#if input_variables}}
-//input variables
+/* input variables */
 {{~#each input_variables}}
 extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{~#if output_variables}}
-//output variables
+/* output variables */
 {{~#each output_variables}}
 extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if transitions}}
-//helper functions
+/* helper functions */
 struct_state enter(UC_8* newStateLabel, struct_state st);
 
 struct_state leave(UC_8* currentStateLabel, struct_state st);{{/if}}
 {{#if transitions}}
-//functions for model{{#each transitions}}{{#if id}}struct_state {{id}}(struct_state st);
+/* functions for model */{{#each transitions}}{{#if id}}struct_state {{id}}(struct_state st);
 {{else}}
 struct_state {{0.id}}(struct_state st);
 {{/if}}

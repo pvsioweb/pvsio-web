@@ -2,22 +2,22 @@
 #include "{{filename}}.h"
 
 {{~#if constants}}
-// constants variables
+/* constants variables */
 {{~#each constants}}
 static const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 
 {{~#if local_variables}}
-//local variables
+/* local variables */
 {{~#each local_variables}}
 static {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if states}}
-//declare state labels as variables //UNCLEAR: wich type are states?
+/* declare state labels as variables */ //UNCLEAR: wich type are states?
 {{#each states~}}UC_8 *{{&name}} = "{{name}}";
 {{/each}}{{/if}}
 {{#if transitions}}
-//declaration of helper functions
+/* declaration of helper functions */
 struct_state enter(UC_8* newStateLabel, struct_state st) {
     st.current_state = newStateLabel;
     return st;
@@ -28,7 +28,7 @@ struct_state leave(UC_8* currentStateLabel, struct_state st) {
     return st;
 }{{/if}}
 {{#if initial_transitions}}
-//initialisation function for model
+/* initialisation function for model */
 {{#each initial_transitions}}struct_state init{{&init_suffix}}(){
     struct_state st = enter("{{target.name}}", st);
     {{~#each actions}}
@@ -36,7 +36,7 @@ struct_state leave(UC_8* currentStateLabel, struct_state st) {
     return st;
 }{{/each}}{{/if}}
 {{#if transitions}}
-//function declarations
+/* function declarations */
 {{#each transitions}}{{#if id}}struct_state {{id}}(struct_state st) {
 {{~#if condition}}
     if ({{&condition}}) {
