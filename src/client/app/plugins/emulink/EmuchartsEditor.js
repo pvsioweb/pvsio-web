@@ -659,7 +659,8 @@ define(function (require, exports, module) {
 
         // create canvas to be used for exporting svg area as picture
         d3.select("#ContainerStateMachineImage").append("canvas")
-            .attr("width", width).attr("height", height)
+            .attr("min-width", width).attr("min-height", height)
+            .attr("width", "100%").attr("height", "100%")
             .attr("style", "display: none");
         d3.select("#ContainerStateMachineImage").append("div")
             .attr("id", "svgdataurl").attr("style", "display: none");
@@ -670,7 +671,7 @@ define(function (require, exports, module) {
             .attr("version", 1.1)
             .attr("xmlns", "http://www.w3.org/2000/svg")
             //.attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
-            .attr("width", width).attr("height", height)
+            .attr("width", "100%").attr("height", "100%")
             .style("background", "white")
             .append("svg:defs")
             .append("svg:marker")

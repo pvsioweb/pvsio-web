@@ -168,18 +168,20 @@
                     <li class="divider"></li>
                 </ul>
             </li>
-
+		    <li class='active has-sub'><a href='#!' style="cursor:default;">
+                <input class="EmuchartsFilter" type="text" id="filter" placeholder="Filter..." /></a>
+            </li>
         </ul>
     </div>
 
-    <div id="stateMachineFilterBar" >
+    <!--<div id="stateMachineFilterBar" >
         <ul class="dropdown dropdown-horizontal">
             <li>
                 <input class="EmuchartsFilter" type="text" id="filter" placeholder="Filter..." />
             </li>
            <li class='active has-sub'><a href='#!' id="EmuchartsEditorMode" style="display:none;"><span>Editor mode: browse diagram</span></a>
         </ul>
-    </div>
+    </div>-->
     <div id="MouseOverlay">
         <a href="#!" class="toolbar-tooltip" placeholder="addStates" id="MouseOverlayIcon">
             <span title="Add states"
@@ -213,12 +215,12 @@
         <table class="table">
           <!-- This is our clonable table line template -->
           <tr id="StateVariableTemplate">
-            <td contenteditable="false">Name</td>
-            <td contenteditable="false">Value</td>
-            <td>
+            <td contenteditable="false" style="background-color:white;">Name</td>
+            <td contenteditable="false" style="background-color:white;">Value</td>
+            <td style="background-color:white;">
               <span id="RemoveStateAttribute" class="table-remove glyphicon glyphicon-remove"></span>
             </td>
-            <td>
+            <td style="background-color:white;">
               <!--<span id="StateAttributeUP" class="table-up glyphicon glyphicon-arrow-up"></span>
               <span id="StateAttributeDOWN" class="table-down glyphicon glyphicon-arrow-down"></span>-->
                 <span id="EditStateAttribute" class="table-up glyphicon glyphicon-pencil">
@@ -229,7 +231,7 @@
     </div>
     <div id="StateAttributes" class="table-editable floating-table">
         <div class="EmuchartStateHeader"><span>Context Variables</span></div>
-        <table class="table">
+        <table class="table" style="margin-bottom:0 !important;">
           <tr id="heading" class="TableHeading">
             <th>Name</th>
             <th>Initial Value</th>
