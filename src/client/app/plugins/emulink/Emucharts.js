@@ -760,6 +760,7 @@ define(function (require, exports, module) {
                 type: "emuCharts_variableRemoved",
                 variable: rem
             });
+            console.log("variable " + variableID + " deleted");
             return true;
         }
         return false;
@@ -900,6 +901,18 @@ define(function (require, exports, module) {
         return ans;
     };
 
+    /**
+     * @function getVariable
+     * @descriptionb Returns the variable with ID given by the function argument
+     * @param variableID Variable identifier
+     * @returns The variable descriptor
+     * @memberof module:Emucharts
+     * @instance
+     */
+    Emucharts.prototype.getVariable = function (variableID) {
+        return _this.variables.get(variableID);
+    };
+    
     /**
      * @function getInputVariables
      * @description Returns the input variables defined in the diagram.

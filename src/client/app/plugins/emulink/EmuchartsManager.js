@@ -24,6 +24,8 @@ define(function (require, exports, module) {
     function EmuchartsManager() {
         _emuchartsEditors = d3.map();
         eventDispatcher(this);
+        this.newEmucharts("foo");
+        return this;
     }
 
     EmuchartsManager.prototype.installHandlers = function (editor) {
@@ -504,6 +506,14 @@ define(function (require, exports, module) {
         return _selectedEditor.getVariables();
     };
 
+    /**
+     * Returns the descriptor of the variable whose ID is the function argument
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.getVariable = function (variableID) {
+        return _selectedEditor.getVariable(variableID);
+    };
+    
     /**
      * Returns an array containing the current set of input variables defined in the model
      * @memberof EmuchartsManager

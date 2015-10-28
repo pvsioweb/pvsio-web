@@ -1,493 +1,94 @@
 /**
  *
  * @author Paolo Masci
- * @date 25/05/14 6:39:02 PM
+ * @date 28/10/15
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 /*global define, Promise, d3*/
 define(function (require, exports, module) {
     "use strict";
-    var ProjectManager		= require("project/ProjectManager"),
-        ModelEditor         = require("plugins/modelEditor/ModelEditor"),
-        PVSioWebClient      = require("PVSioWebClient"),
-        EditorModeUtils     = require("plugins/emulink/EmuchartsEditorModes"),
-        EmuchartsManager    = require("plugins/emulink/EmuchartsManager"),
-        displayAddState        = require("plugins/emulink/forms/displayAddState"),
-        displayAddTransition   = require("plugins/emulink/forms/displayAddTransition"),
-        displayRename          = require("plugins/emulink/forms/displayRename"),
-        displayDelete          = require("plugins/emulink/forms/displayDelete"),
-//        displayAddExpression   = require("plugins/emulink/forms/displayAddExpression"),
-        displayAddVariable     = require("plugins/emulink/forms/displayAddVariable"),
-        displayEditVariable    = require("plugins/emulink/forms/displayEditVariable"),
-        displaySelectVariable  = require("plugins/emulink/forms/displaySelectVariable"),
-        displaySelectTransition  = require("plugins/emulink/forms/displaySelectTransition"),
-        displaySelectState     = require("plugins/emulink/forms/displaySelectState"),
-        displayAddConstant     = require("plugins/emulink/forms/displayAddConstant"),
-        displayEditConstant    = require("plugins/emulink/forms/displayEditConstant"),
-        displaySelectConstant  = require("plugins/emulink/forms/displaySelectConstant"),
-        QuestionForm           = require("pvsioweb/forms/displayQuestion"),
-        EmuchartsPVSPrinter    = require("plugins/emulink/EmuchartsPVSPrinter"),
-        EmuchartsLustrePrinter = require("plugins/emulink/EmuchartsLustrePrinter"),
-        EmuchartsPIMPrinter    = require("plugins/emulink/EmuchartsPIMPrinter"),
-        EmuchartsCppPrinter    = require("plugins/emulink/EmuchartsCppPrinter"),
-        EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter2"),
-        EmuchartsVDMPrinter    = require("plugins/emulink/EmuchartsVDMPrinter"),
-        EmuchartsJSPrinter     = require("plugins/emulink/EmuchartsJavaScriptPrinter"),
-        EmuchartsAdaPrinter    = require("plugins/emulink/EmuchartsAdaPrinter"),
-        EmuchartsBlessPrinter  = require("plugins/emulink/EmuchartsBlessPrinter"),
-//        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
-        FileHandler            = require("filesystem/FileHandler"),
-        FileSystem             = require("filesystem/FileSystem"),
-        displayNotificationView  = require("plugins/emulink/forms/displayNotificationView"),
-        PimTestGenerator       = require("plugins/emulink/models/pim/PIMTestGenerator"),
-        PIMImporter            = require("plugins/emulink/models/pim/PIMImporter"),
-        PIMEmulink             = require("plugins/emulink/models/pim/PIMEmulink"),
-        ContextTable           = require("plugins/emulink/tools/ContextTable");
+
+    var _this;
     
-    var instance;
-    var fs;
-    var projectManager;
-    var editor;
-    var ws;
-    var pvsioWebClient;
-    var canvas;
+    function EmuchartsMenu(emuchartsManager) {
+        this.emuchartsManager = _this.emuchartsManager;
+        installHandlers();
+        _this = this;
+        return this;
+    }
 
-    var emuchartsManager;
-    var MODE;
-    var emuchartsPVSPrinter;
-    var emuchartsLustrePrinter;
-    var emuchartsPIMPrinter;
-    var emuchartsCppPrinter;
-    var emuchartsMALPrinter;
-    var emuchartsVDMPrinter;
-    var emuchartsJSPrinter;
-    var emuchartsAdaPrinter;
-    var emuchartsBlessPrinter;
-    var pimImporter;
-    var pimTestGenerator;
-    var pimEmulink;
-    var contextTable;
-
-    var options = { autoinit: true };
-
-    var displayNotification = function (msg, title) {
-        title = title || "Notification";
-        displayNotificationView.create({
-            header: title,
-            message: msg,
-            buttons: ["Ok"]
-        }).on("ok", function (e, view) {
-            view.remove();
+    function installHandlers() {
+        // show the menu items when the mouse goes over the menu name
+        d3.select("#menuEmuchart").on("mouseover", function () {
+            document.getElementById("menuEmuchart").children[1].style.display = "block";
         });
-    };
-
-    function initToolbars() {
-        // make sure the svg is visible
-        d3.select("#EmuchartLogo").classed("hidden", true);
-        d3.select("#graphicalEditor").classed("hidden", false);
-        // reset toolbar color
-        document.getElementById("btn_toolbarBrowse").style.background = "black";
-        document.getElementById("btn_toolbarAddState").style.background = "black";
-        document.getElementById("btn_toolbarAddTransition").style.background = "black";
-        document.getElementById("btn_toolbarRename").style.background = "black";
-        document.getElementById("btn_toolbarDelete").style.background = "black";
-    }
-
-    function modeChange_callback(event) {
-        var EmuchartsEditorMode = document.getElementById("EmuchartsEditorMode");
-        if (EmuchartsEditorMode) {
-            if (event.mode === MODE.BROWSE()) {
-                EmuchartsEditorMode.style.background = "green";
-            } else { EmuchartsEditorMode.style.background = "steelblue"; }
-            EmuchartsEditorMode.textContent = "Editor mode: " + MODE.mode2string(event.mode);
-        }
-        var infoBox = document.getElementById("infoBox");
-        if (infoBox) {
-            infoBox.value = MODE.modeTooltip(event.mode);
-        }
-    }
-
-    function addState_handler(evt) {
-        var stateID = emuchartsManager.getFreshStateName();
-        var position = { x: evt.mouse[0], y: evt.mouse[1] };
-        emuchartsManager.add_state(stateID, position);
-        if (options.autoinit && emuchartsManager.getStates().length === 1) {
-            var newTransitionName = emuchartsManager.getFreshInitialTransitionName();
-            emuchartsManager.add_initial_transition(newTransitionName, stateID);
-        }
-    }
-
-    function deleteTransition_handler(event) {
-        var transitionID = event.edge.id;
-        emuchartsManager.delete_transition(transitionID);
-    }
-
-    function deleteInitialTransition_handler(event) {
-        var transitionID = event.edge.id;
-        emuchartsManager.delete_initial_transition(transitionID);
-    }
-
-    function deleteState_handler(event) {
-        var stateID = event.node.id;
-        emuchartsManager.delete_state(stateID);
-    }
-
-    var maxLen = 48;
-
-    // rename dialog window for states
-    function editState(s) {
-        if (emuchartsManager.getIsPIM()) {
-            pimEmulink.editState(s);
-            return;
-        }
-        
-        displayRename.create({
-            header: "Renaming state " + s.name.substring(0, maxLen) + "...",
-            required: true,
-            currentLabel: s.name, // this dialog will show just one state
-            buttons: ["Cancel", "Rename"]
-        }).on("rename", function (e, view) {
-            var newLabel = e.data.labels.get("newLabel");
-            if (newLabel && newLabel.value !== "") {
-                emuchartsManager.rename_state(s.id, newLabel);
-                view.remove();
-            }
-        }).on("cancel", function (e, view) {
-            // just remove rename window
-            view.remove();
-        });
-    }
-
-    function renameState_handler(event) {
-        editState(event.node);
-    }
-
-    // rename dialog window for transitions
-    function editTransition(t) {
-        if (emuchartsManager.getIsPIM()) {
-            pimEmulink.editTransition(t);
-            return;
-        }
-
-        displayRename.create({
-            header: "Renaming transition " + t.name.substring(0, maxLen) + "...",
-            required: false,
-            currentLabel: t.name, // this dialog will show just one transition
-            buttons: ["Cancel", "Rename"]
-        }).on("rename", function (e, view) {
-            var transitionLabel = e.data.labels.get("newLabel");
-            if (!transitionLabel) { transitionLabel = ""; }
-            emuchartsManager.rename_transition(t.id, transitionLabel);
-            view.remove();
-        }).on("cancel", function (e, view) {
-            // just remove rename window
-            view.remove();
-        });
-    }
-
-    function renameTransition_handler(event) {
-        editTransition(event.edge);
-    }
-
-    // rename dialog window for initial transitions
-    function editInitialTransition(t) {
-        displayRename.create({
-            header: "Renaming initial transition " + t.name.substring(0, maxLen) + "...",
-            required: false,
-            currentLabel: t.name,
-            buttons: ["Cancel", "Rename"]
-        }).on("rename", function (e, view) {
-            var transitionLabel = e.data.labels.get("newLabel");
-            if (!transitionLabel) { transitionLabel = ""; }
-            emuchartsManager.rename_initial_transition(t.id, transitionLabel);
-            view.remove();
-        }).on("cancel", function (e, view) {
-            // just remove rename window
-            view.remove();
-        });
-    }
-    function renameInitialTransition_handler(event) {
-        editInitialTransition(event.edge);
-    }
-
-    function addTransition_handler(event) {
-        var newTransitionName = emuchartsManager.getFreshTransitionName();
-        emuchartsManager.add_transition(newTransitionName,
-                                        event.source.id,
-                                        event.target.id);
-    }
-
-    function addInitialTransition_handler(event) {
-        var newTransitionName = emuchartsManager.getFreshInitialTransitionName();
-        emuchartsManager.add_initial_transition(newTransitionName, event.target.id);
-    }
-
-    function stateAdded_handler(event) { }//print_theory(); print_node(); }
-    function stateRemoved_handler(event) { }//print_theory(); print_node(); }
-    function stateRenamed_handler(event) { }//print_theory(); print_node(); }
-    function transitionAdded_handler(event) { }//print_theory(); print_node(); }
-    function transitionRemoved_handler(event) { }//print_theory(); print_node(); }
-    function transitionRenamed_handler(event) { }//print_theory(); print_node(); }
-    function initialTransitionAdded_handler(event) { }//console.log("initial transition added"); }//print_theory(); print_node(); }
-    function initialTransitionRemoved_handler(event) { }//console.log("initial transition removed"); }//print_theory(); print_node(); }
-    function initialTransitionRenamed_handler(event) { }//console.log("initial transition renamed"); }//print_theory(); print_node(); }
-    function constantAdded_handler(event) { }//print_theory(); print_node(); }
-    function variableAdded_handler(event) {
-        contextTable.addContextVariables([ event.variable ]);
-    }
-
-
-
-    /**
-     * Constructor
-     * @memberof Emulink
-     */
-    function Emulink() {
-        emuchartsPVSPrinter = new EmuchartsPVSPrinter("emuchart_th");
-        emuchartsLustrePrinter = new EmuchartsLustrePrinter("emuchart_Lustre");
-        emuchartsPIMPrinter = new EmuchartsPIMPrinter("emuchart_PIM");
-        emuchartsCppPrinter = new EmuchartsCppPrinter("emuchart_Cpp");
-        emuchartsMALPrinter = new EmuchartsMALPrinter("emuchart_MAL");
-        emuchartsVDMPrinter = new EmuchartsVDMPrinter("emuchart_VDM");
-        emuchartsJSPrinter = new EmuchartsJSPrinter("emucharts_JS");
-        emuchartsAdaPrinter = new EmuchartsAdaPrinter("emucharts_Ada");
-        emuchartsBlessPrinter = new EmuchartsBlessPrinter("emucharts_Bless");
-
-        pvsioWebClient = PVSioWebClient.getInstance();
-        MODE = new EditorModeUtils();
-        emuchartsManager = new EmuchartsManager();
-        emuchartsManager.addListener("emuCharts_editorModeChanged", modeChange_callback);
-        emuchartsManager.addListener("emuCharts_addState", addState_handler);
-//        emuchartsManager.addListener("emuCharts_d3ZoomTranslate", d3ZoomTranslate_handler);
-        emuchartsManager.addListener("emuCharts_deleteTransition", deleteTransition_handler);
-        emuchartsManager.addListener("emuCharts_deleteInitialTransition", deleteInitialTransition_handler);
-        emuchartsManager.addListener("emuCharts_deleteState", deleteState_handler);
-        emuchartsManager.addListener("emuCharts_renameState", renameState_handler);
-        emuchartsManager.addListener("emuCharts_renameTransition", renameTransition_handler);
-        emuchartsManager.addListener("emuCharts_renameInitialTransition", renameInitialTransition_handler);
-        emuchartsManager.addListener("emuCharts_addTransition", addTransition_handler);
-        emuchartsManager.addListener("emuCharts_addInitialTransition", addInitialTransition_handler);
-
-        emuchartsManager.addListener("emuCharts_stateAdded", stateAdded_handler);
-        emuchartsManager.addListener("emuCharts_stateRemoved", stateRemoved_handler);
-        emuchartsManager.addListener("emuCharts_constantAdded", constantAdded_handler);
-        emuchartsManager.addListener("emuCharts_variableAdded", variableAdded_handler);
-        emuchartsManager.addListener("emuCharts_transitionAdded", transitionAdded_handler);
-        emuchartsManager.addListener("emuCharts_transitionRenamed", transitionRenamed_handler);
-        emuchartsManager.addListener("emuCharts_transitionRemoved", transitionRemoved_handler);
-        emuchartsManager.addListener("emuCharts_initialTransitionAdded", initialTransitionAdded_handler);
-        emuchartsManager.addListener("emuCharts_initialTransitionRenamed", initialTransitionRenamed_handler);
-        emuchartsManager.addListener("emuCharts_initialTransitionRemoved", initialTransitionRemoved_handler);
-        emuchartsManager.addListener("emuCharts_stateRenamed", stateRenamed_handler);
-        fs = new FileSystem();
-
-        // PIM objects.
-        pimImporter = new PIMImporter();
-        pimEmulink = new PIMEmulink(emuchartsManager);
-        pimTestGenerator = new PimTestGenerator("pim_Test_Gen");
-    }
-
-    Emulink.prototype.getName = function () {
-        return "EmuCharts Editor";
-    };
-    
-    function editVariable (variableID) {
-        var variableScopes = emuchartsManager.getVariableScopes();
-        var theVariable = emuchartsManager.getVariable(variableID);
-        var scopeOptions = [];
-        variableScopes.forEach(function (option) {
-            if (option === theVariable.scope) {
-                scopeOptions.push({ value: option, selected: true});
-            } else {
-                scopeOptions.push({ value: option, selected: false});
-            }
-        });
-        displayEditVariable.create({
-            header: "Editing variable " + theVariable.name,
-            textLabel: {
-                newVariableName: "Variable name",
-                newVariableType: "Variable type",
-                newVariableValue: "Initial value",
-                newVariableScope: "Variable scope"
-            },
-            placeholder: {
-                newVariableName: theVariable.name,
-                newVariableType: theVariable.type,
-                newVariableValue: theVariable.value,
-                newVariableScope: theVariable.scope
-            },
-            scopeOptions: scopeOptions,
-            buttons: ["Cancel", "Ok"]
-        }).on("ok", function (e, view) {
-            var newVariableName = e.data.labels.get("newVariableName");
-            var newVariableType = e.data.labels.get("newVariableType");
-            var newVariableValue = e.data.labels.get("newVariableValue");
-            var newVariableScope = variableScopes[e.data.options.get("newVariableScope")];
-            if (newVariableName && newVariableName.value !== "" &&
-                    newVariableType && newVariableType.value !== "" &&
-                    newVariableValue && newVariableValue.value !== "") {
-                emuchartsManager.rename_variable(
-                    theVariable.id,
-                    {   name: newVariableName,
-                        type: newVariableType,
-                        value: newVariableValue,
-                        scope: newVariableScope   }
-                );
-                view.remove();
-                contextTable.setContextVariables(emuchartsManager.getVariables());
-            }
-        }).on("cancel", function (e, view) {
-            // just remove window
-            view.remove();
-        });
-    }
-
-    Emulink.prototype.createHtmlElements = function () {
-        var _this = this;
-        var content = require("text!plugins/emulink/forms/maincontent.handlebars");
-        canvas = pvsioWebClient.createCollapsiblePanel({
-            headerText: "EmuCharts Editor",
-            showContent: true,
-            owner: _this.getName()
-        });
-        canvas = canvas.html(content);
-        if (document.getElementById("StateAttributes")) {
-            contextTable = new ContextTable();
-            contextTable.addListener("ContextTable_deleteVariable", function(event) {
-                emuchartsManager.delete_variable(event.variable.id);
-            });
-            contextTable.addListener("ContextTable_editVariable", function(event) {
-                editVariable(event.variable.id);
-            });
-        }
-        
-        // bootstrap buttons
-        function openChart(callback) {
-            var opt = {
-                header: "Open EmuChart file...",
-                extensions: ".emdl,.muz,.pim"
-            };
-            FileHandler.openLocalFileAsText(function (err, res) {
-                if (res) {
-                    if (res.name.lastIndexOf(".emdl") === res.name.length - 5) {
-                        res.content = JSON.parse(res.content);
-                        emuchartsManager.importEmucharts(res);
-                    } else if (res.name.lastIndexOf(".muz") === res.name.length - 4) {
-                        emuchartsManager.importPIMChart(res);
-                    } else {
-                        // Try parse as PIM
-                        pimImporter.importPIM(res, emuchartsManager);
-                    }
-                    if (callback && typeof callback === "function") {
-                        callback(err, res);
-                    }
-                } else {
-                    console.log("Error while opening file (" + err + ")");
-                }
-            }, opt);
-        }
-        function importChart(callback) {
-            var opt = {
-                header: "Import Chart...",
-                extensions: ".muz,.pim"
-            };
-            // MUZ
-            FileHandler.openLocalFileAsText(function (err, res) {
-                if (res) {
-                    if (res.name.lastIndexOf(".muz") === res.name.length - 4) {
-                        emuchartsManager.importPIMChart(res);
-                    }
-                    else {
-                        pimImporter.importPIM(res, emuchartsManager);
-                    }
-                    if (callback && typeof callback === "function") {
-                        callback(err, res);
-                    }
-                }
-            }, opt);
-        }
-
+        //-- "File" menu
         d3.select("#btnNewEmuchart").on("click", function () {
             d3.select("#EmuchartLogo").classed("hidden", true);
             d3.select("#graphicalEditor").classed("hidden", false);
-            emuchartsManager.newEmucharts("emucharts.pvs");
+            _this.emuchartsManager.newEmucharts("emucharts.pvs");
             // render emuchart
-            emuchartsManager.render();
+            _this.emuchartsManager.render();
             // make svg visible and reset colors
             initToolbars();
             // set initial editor mode
             d3.select("#btn_toolbarBrowse").node().click();
             //set Variables Table
-            contextTable.setContextVariables(emuchartsManager.getVariables());            
+            contextTable.setContextVariables(_this.emuchartsManager.getVariables());            
         });
-        d3.select("#btnLoadEmuchart").on("click", function () {
-            openChart(function f() {
+
+        function openChart() {
+            function open(callback) {
+                var opt = {
+                    header: "Open EmuChart file...",
+                    extensions: ".emdl,.muz,.pim"
+                };
+                FileHandler.openLocalFileAsText(function (err, res) {
+                    if (res) {
+                        if (res.name.lastIndexOf(".emdl") === res.name.length - 5) {
+                            res.content = JSON.parse(res.content);
+                            _this.emuchartsManager.importEmucharts(res);
+                        } else if (res.name.lastIndexOf(".muz") === res.name.length - 4) {
+                            _this.emuchartsManager.importPIMChart(res);
+                        } else {
+                            // Try parse as PIM
+                            pimImporter.importPIM(res, _this.emuchartsManager);
+                        }
+                        if (callback && typeof callback === "function") {
+                            callback(err, res);
+                        }
+                    } else {
+                        console.log("Error while opening file (" + err + ")");
+                    }
+                }, opt);
+            }            
+            open(function f() {
                 // make svg visible and reset colors
                 initToolbars();
                 // render emuchart
-                emuchartsManager.render();
+                _this.emuchartsManager.render();
                 // set initial editor mode
                 d3.select("#btn_toolbarBrowse").node().click();
                 //set Variables Table
-                contextTable.setContextVariables(emuchartsManager.getVariables());                
+                contextTable.setContextVariables(_this.emuchartsManager.getVariables());                
             });
-        });
+        }
+        
+        d3.select("#btnLoadEmuchart").on("click", openChart);
+        
 
-        // toolbar
-        d3.select("#btn_toolbarAddState").on("click", function () {
-            initToolbars();
-            this.style.background = "steelblue";
-            emuchartsManager.set_editor_mode(MODE.ADD_STATE());
-        });
-        d3.select("#btn_toolbarAddTransition").on("click", function () {
-            initToolbars();
-            this.style.background = "steelblue";
-            emuchartsManager.set_editor_mode(MODE.ADD_TRANSITION());
-        });
-        d3.select("#btn_toolbarRename").on("click", function () {
-            initToolbars();
-            this.style.background = "steelblue";
-            emuchartsManager.set_editor_mode(MODE.RENAME());
-        });
-        d3.select("#btn_toolbarDelete").on("click", function () {
-            initToolbars();
-            this.style.background = "steelblue";
-            emuchartsManager.set_editor_mode(MODE.DELETE());
-        });
-        d3.select("#btn_toolbarBrowse").on("click", function () {
-            initToolbars();
-            this.style.background = "green";
-            emuchartsManager.set_editor_mode(MODE.BROWSE());
-        });
-        d3.select("#btn_toolbarZoomIn").on("click", function () {
-            emuchartsManager.zoom_in();
-        });
-        d3.select("#btn_toolbarZoomOut").on("click", function () {
-            emuchartsManager.zoom_out();
-        });
-        d3.select("#btn_toolbarZoomReset").on("click", function () {
-            emuchartsManager.zoom_reset();
-        });
-
-
-
-
-        //-- Emuchart menu -----------------------------------------------------------
-        d3.select("#menuEmuchart").on("mouseover", function () {
-            document.getElementById("menuEmuchart").children[1].style.display = "block";
-        });
         d3.select("#btn_menuNewChart").on("click", function () {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
             var newChart = function () {
                 d3.select("#EmuchartLogo").classed("hidden", true);
                 d3.select("#graphicalEditor").classed("hidden", false);
-                emuchartsManager.newEmucharts("emucharts.pvs");
+                _this.emuchartsManager.newEmucharts("emucharts.pvs");
                 // set initial editor mode
-                emuchartsManager.set_editor_mode(MODE.BROWSE());
+                _this.emuchartsManager.set_editor_mode(MODE.BROWSE());
                 // render emuchart
-                emuchartsManager.render();
+                _this.emuchartsManager.render();
             };
-            if (!emuchartsManager.empty_chart()) {
+            if (!_this.emuchartsManager.empty_chart()) {
                 // we need to delete the current chart because we handle one chart at the moment
                 QuestionForm.create({
                     header: "Warning: unsaved changes will be discarded.",
@@ -495,7 +96,7 @@ define(function (require, exports, module) {
                                 + "Would you like continue?",
                     buttons: ["Cancel", "Ok"]
                 }).on("ok", function (e, view) {
-                    emuchartsManager.delete_chart();
+                    _this.emuchartsManager.delete_chart();
                     newChart();
                     initToolbars();
                     // set initial editor mode
@@ -508,14 +109,14 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuCloseChart").on("click", function () {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
-            if (!emuchartsManager.empty_chart()) {
+            if (!_this.emuchartsManager.empty_chart()) {
                 // we need to delete the current chart because we handle one chart at the moment
                 QuestionForm.create({
                     header: "Warning: the current chart has unsaved changes.",
                     question: "The current chart has unsaved changes that will be lost. Confirm Close?",
                     buttons: ["Cancel", "Confirm close"]
                 }).on("ok", function (e, view) {
-                    emuchartsManager.delete_chart();
+                    _this.emuchartsManager.delete_chart();
                     initToolbars();
                     // set initial editor mode
                     d3.select("#btn_toolbarBrowse").node().click();
@@ -528,25 +129,45 @@ define(function (require, exports, module) {
         d3.select("#btn_menuOpenChart").on("click", function () {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
             // we need to delete the current chart because we handle one chart at the moment
-            if (!emuchartsManager.empty_chart()) {
+            if (!_this.emuchartsManager.empty_chart()) {
                 QuestionForm.create({
                     header: "Warning: unsaved changes will be discarded.",
                     question: "Unsaved changes in the current chart will be discarded."
                                 + "Would you like continue?",
                     buttons: ["Cancel", "Ok"]
                 }).on("ok", function (e, view) {
-                    emuchartsManager.delete_chart();
+                    _this.emuchartsManager.delete_chart();
                     document.getElementById("btnLoadEmuchart").click();
                     view.remove();
                 }).on("cancel", function (e, view) {
                     view.remove();
                 });
             } else {
-                emuchartsManager.delete_chart();
+                _this.emuchartsManager.delete_chart();
                 document.getElementById("btnLoadEmuchart").click();
             }
         });
         d3.select("#btn_menuImportChart").on("click", function () {
+            function importChart(callback) {
+                var opt = {
+                    header: "Import Chart...",
+                    extensions: ".muz,.pim"
+                };
+                // MUZ
+                FileHandler.openLocalFileAsText(function (err, res) {
+                    if (res) {
+                        if (res.name.lastIndexOf(".muz") === res.name.length - 4) {
+                            _this.emuchartsManager.importPIMChart(res);
+                        }
+                        else {
+                            pimImporter.importPIM(res, _this.emuchartsManager);
+                        }
+                        if (callback && typeof callback === "function") {
+                            callback(err, res);
+                        }
+                    }
+                }, opt);
+            }            
             document.getElementById("menuEmuchart").children[1].style.display = "none";
             // we need to delete the current chart because we handle one chart at the moment
             QuestionForm.create({
@@ -555,12 +176,12 @@ define(function (require, exports, module) {
                             + "Would you like continue?",
                 buttons: ["Cancel", "Ok"]
             }).on("ok", function (e, view) {
-                emuchartsManager.delete_chart();
+                _this.emuchartsManager.delete_chart();
                 //document.getElementById("btnImportChart").click();
                 view.remove();
                 importChart(function f() {
                     // render emuchart
-                    emuchartsManager.render();
+                    _this.emuchartsManager.render();
                     // make svg visible and reset colors
                     initToolbars();
                     // set initial editor mode
@@ -572,14 +193,14 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuQuitEmulink").on("click", function () {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
-            if (!emuchartsManager.empty_chart()) {
+            if (!_this.emuchartsManager.empty_chart()) {
                 // we need to delete the current chart because we handle one chart at the moment
                 QuestionForm.create({
                     header: "Warning: the current chart has unsaved changes.",
                     question: "The current chart has unsaved changes that will be lost. Confirm quit?",
                     buttons: ["Cancel", "Quit Emulink"]
                 }).on("ok", function (e, view) {
-                    emuchartsManager.delete_chart();
+                    _this.emuchartsManager.delete_chart();
                     initToolbars();
                     view.remove();
                     // FIXME: need a better way to deselect the checkbox
@@ -592,7 +213,7 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuSaveChart").on("click", function () {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
-            if (!emuchartsManager.empty_chart()) {
+            if (!_this.emuchartsManager.empty_chart()) {
                 var name = "emucharts_" + projectManager.project().name() + ".emdl";
                 var emuchart = {
                     descriptor: {
@@ -602,16 +223,16 @@ define(function (require, exports, module) {
                         chart_name: ("emucharts_" + projectManager.project().name())
                     },
                     chart: {
-                        states: emuchartsManager.getStates(),
-                        transitions: emuchartsManager.getTransitions(),
-                        initial_transitions: emuchartsManager.getInitialTransitions(),
-                        constants: emuchartsManager.getConstants(),
-                        variables: emuchartsManager.getVariables()
+                        states: _this.emuchartsManager.getStates(),
+                        transitions: _this.emuchartsManager.getTransitions(),
+                        initial_transitions: _this.emuchartsManager.getInitialTransitions(),
+                        constants: _this.emuchartsManager.getConstants(),
+                        variables: _this.emuchartsManager.getVariables()
                     }
                 };
                 // PIM.
-                emuchart.chart.pmr = emuchartsManager.getPMR(null, true);
-                emuchart.chart.isPIM = emuchartsManager.getIsPIM();
+                emuchart.chart.pmr = _this.emuchartsManager.getPMR(null, true);
+                emuchart.chart.isPIM = _this.emuchartsManager.getIsPIM();
 
                 var content = JSON.stringify(emuchart, null, " ");
                 projectManager.project().addFile(name, content, { overWrite: true }).then(function (res) {
@@ -669,14 +290,14 @@ define(function (require, exports, module) {
 
         d3.select("#btn_menuNewState").on("click", function () {
             document.getElementById("menuStates").children[1].style.display = "none";
-//            var label = emuchartsManager.getFreshStateName();
+//            var label = _this.emuchartsManager.getFreshStateName();
             displayAddState.create({
                 header: "Please enter label for new state",
                 textLabel: "New state",
                 buttons: ["Cancel", "Create"]
             }).on("create", function (e, view) {
                 var nodeLabel = e.data.labels.get("newLabel");
-                emuchartsManager.add_state(nodeLabel);
+                _this.emuchartsManager.add_state(nodeLabel);
                 view.remove();
             }).on("cancel", function (e, view) {
                 // just remove window
@@ -685,7 +306,7 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuRenameState").on("click", function () {
             document.getElementById("menuStates").children[1].style.display = "none";
-            var states = emuchartsManager.getStates();
+            var states = _this.emuchartsManager.getStates();
             var labels = [];
             states.forEach(function (state) {
                 labels.push(state.name + "  (id: " + state.id + ")");
@@ -710,7 +331,7 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuDeleteState").on("click", function () {
             document.getElementById("menuStates").children[1].style.display = "none";
-            var states = emuchartsManager.getStates();
+            var states = _this.emuchartsManager.getStates();
             var labels = [];
             states.forEach(function (state) {
                 labels.push(state.name + "  (id: " + state.id + ")");
@@ -723,7 +344,7 @@ define(function (require, exports, module) {
             }).on("delete", function (e, view) {
                 var s = e.data.options.get("currentLabel");
                 var stateID = states[s].id;
-                emuchartsManager.delete_state(stateID);
+                _this.emuchartsManager.delete_state(stateID);
                 view.remove();
             }).on("cancel", function (e, view) {
                 // just remove rename window
@@ -737,8 +358,8 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuNewTransition").on("click", function () {
             document.getElementById("menuTransitions").children[1].style.display = "none";
-//            var newTransitionName = emuchartsManager.getFreshTransitionName();
-            var states = emuchartsManager.getStates();
+//            var newTransitionName = _this.emuchartsManager.getFreshTransitionName();
+            var states = _this.emuchartsManager.getStates();
             var labels = [];
             states.forEach(function (state) {
                 labels.push(state.name + "  (id: " + state.id + ")");
@@ -756,7 +377,7 @@ define(function (require, exports, module) {
                     var sourceNodeID = states[sourceNode].id;
                     var targetNode = e.data.options.get("targetNode");
                     var targetNodeID = states[targetNode].id;
-                    emuchartsManager.add_transition(transitionLabel, sourceNodeID, targetNodeID);
+                    _this.emuchartsManager.add_transition(transitionLabel, sourceNodeID, targetNodeID);
                     view.remove();
                 }
             }).on("cancel", function (e, view) {
@@ -766,9 +387,9 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuRenameTransition").on("click", function () {
             document.getElementById("menuTransitions").children[1].style.display = "none";
-            var transitions = emuchartsManager.getTransitions();
+            var transitions = _this.emuchartsManager.getTransitions();
             var nTransitions = transitions.length;
-            var initialTransitions = emuchartsManager.getInitialTransitions();
+            var initialTransitions = _this.emuchartsManager.getInitialTransitions();
             initialTransitions.forEach(function (it) {
                 transitions.push(it);
             });
@@ -808,8 +429,8 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuDeleteTransition").on("click", function () {
             document.getElementById("menuTransitions").children[1].style.display = "none";
-            var transitions = emuchartsManager.getTransitions();
-            var initialTransitions = emuchartsManager.getInitialTransitions();
+            var transitions = _this.emuchartsManager.getTransitions();
+            var initialTransitions = _this.emuchartsManager.getInitialTransitions();
             initialTransitions.forEach(function (it) {
                 transitions.push(it);
             });
@@ -833,8 +454,8 @@ define(function (require, exports, module) {
             }).on("delete", function (e, view) {
                 var t = e.data.options.get("currentLabel");
                 var transitionID = transitions[t].id;
-                emuchartsManager.delete_transition(transitionID);
-                emuchartsManager.delete_initial_transition(transitionID);
+                _this.emuchartsManager.delete_transition(transitionID);
+                _this.emuchartsManager.delete_initial_transition(transitionID);
                 view.remove();
             }).on("cancel", function (e, view) {
                 // just remove rename window
@@ -848,7 +469,7 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuNewVariable").on("click", function () {
             document.getElementById("menuContext").children[1].style.display = "none";
-            var scopeOptions = emuchartsManager.getVariableScopes();
+            var scopeOptions = _this.emuchartsManager.getVariableScopes();
             displayAddVariable.create({
                 header: "Please enter new state variable...",
                 textLabel: {
@@ -873,7 +494,7 @@ define(function (require, exports, module) {
                 if (newVariableName && newVariableName.value !== "" &&
                         newVariableType && newVariableType.value !== "" &&
                         newVariableValue && newVariableValue.value !== "") {
-                    emuchartsManager.add_variable({
+                    _this.emuchartsManager.add_variable({
                         name: newVariableName,
                         type: newVariableType,
                         value: newVariableValue,
@@ -885,11 +506,60 @@ define(function (require, exports, module) {
                 // just remove window
                 view.remove();
             });
-        });  
+        });
         d3.select("#btn_menuEditVariable").on("click", function () {
+            var editVariable = function (theVariable) {
+                var variableScopes = _this.emuchartsManager.getVariableScopes();
+                var scopeOptions = [];
+                variableScopes.forEach(function (option) {
+                    if (option === theVariable.scope) {
+                        scopeOptions.push({ value: option, selected: true});
+                    } else {
+                        scopeOptions.push({ value: option, selected: false});
+                    }
+                });
+                displayEditVariable.create({
+                    header: "Editing variable " + theVariable.name,
+                    textLabel: {
+                        newVariableName: "Variable name",
+                        newVariableType: "Variable type",
+                        newVariableValue: "Initial value",
+                        newVariableScope: "Variable scope"
+                    },
+                    placeholder: {
+                        newVariableName: theVariable.name,
+                        newVariableType: theVariable.type,
+                        newVariableValue: theVariable.value,
+                        newVariableScope: theVariable.scope
+                    },
+                    scopeOptions: scopeOptions,
+                    buttons: ["Cancel", "Ok"]
+                }).on("ok", function (e, view) {
+                    var newVariableName = e.data.labels.get("newVariableName");
+                    var newVariableType = e.data.labels.get("newVariableType");
+                    var newVariableValue = e.data.labels.get("newVariableValue");
+                    var newVariableScope = variableScopes[e.data.options.get("newVariableScope")];
+                    if (newVariableName && newVariableName.value !== "" &&
+                            newVariableType && newVariableType.value !== "" &&
+                            newVariableValue && newVariableValue.value !== "") {
+                        _this.emuchartsManager.rename_variable(
+                            theVariable.id,
+                            {   name: newVariableName,
+                                type: newVariableType,
+                                value: newVariableValue,
+                                scope: newVariableScope   }
+                        );
+                        view.remove();
+                    }
+                }).on("cancel", function (e, view) {
+                    // just remove window
+                    view.remove();
+                });
+            };
+
             document.getElementById("menuContext").children[1].style.display = "none";
             // step 1: ask to select the variable that needs to be edited
-            var stateVariables = emuchartsManager.getVariables();
+            var stateVariables = _this.emuchartsManager.getVariables();
             var labels = [];
             var variables = [];
             stateVariables.forEach(function (variable) {
@@ -906,7 +576,7 @@ define(function (require, exports, module) {
                     var v = e.data.options.get("selectedVariable");
                     var theVariable = variables[v];
                     view.remove();
-                    editVariable(theVariable.id);
+                    editVariable(theVariable);
                 }
             }).on("cancel", function (e, view) {
                 // just remove window
@@ -918,7 +588,7 @@ define(function (require, exports, module) {
         d3.select("#btn_menuDeleteVariable").on("click", function () {
             document.getElementById("menuContext").children[1].style.display = "none";
             // step 1: ask to select the variable that needs to be edited
-            var stateVariables = emuchartsManager.getVariables();
+            var stateVariables = _this.emuchartsManager.getVariables();
             var labels = [];
             var variables = [];
             stateVariables.forEach(function (variable) {
@@ -935,8 +605,7 @@ define(function (require, exports, module) {
                     var v = e.data.options.get("selectedVariable");
                     var theVariable = variables[v];
                     view.remove();
-                    emuchartsManager.delete_variable(theVariable.id);
-                    contextTable.setContextVariables(emuchartsManager.getVariables());
+                    _this.emuchartsManager.delete_variable(theVariable.id);
                 }
             }).on("cancel", function (e, view) {
                 // just remove window
@@ -966,7 +635,7 @@ define(function (require, exports, module) {
                 var newConstantValue = e.data.labels.get("newConstantValue");
                 if (newConstantName && newConstantName.value !== ""
                         && newConstantType && newConstantType.value !== "") {
-                    emuchartsManager.add_constant({
+                    _this.emuchartsManager.add_constant({
                         name: newConstantName,
                         type: newConstantType,
                         value: newConstantValue //value can be left unspecified (uninterpreted constant)
@@ -1000,7 +669,7 @@ define(function (require, exports, module) {
                     var newConstantValue = e.data.labels.get("newConstantValue");
                     if (newConstantName && newConstantName.value !== ""
                             && newConstantType && newConstantType.value !== "") {
-                        emuchartsManager.rename_constant(
+                        _this.emuchartsManager.rename_constant(
                             theConstant.id,
                             {   name: newConstantName,
                                 type: newConstantType,
@@ -1016,7 +685,7 @@ define(function (require, exports, module) {
 
             document.getElementById("menuContext").children[1].style.display = "none";
             // step 1: ask to select the variable that needs to be edited
-            var constants = emuchartsManager.getConstants();
+            var constants = _this.emuchartsManager.getConstants();
             var labels = [];
             constants.forEach(function (constant) {
                 var l = constant.name + ": " + constant.type;
@@ -1048,7 +717,7 @@ define(function (require, exports, module) {
         d3.select("#btn_menuDeleteConstant").on("click", function () {
             document.getElementById("menuContext").children[1].style.display = "none";
             // step 1: ask to select the variable that needs to be edited
-            var constants = emuchartsManager.getConstants();
+            var constants = _this.emuchartsManager.getConstants();
             var labels = [];
             constants.forEach(function (constant) {
                 var l = constant.name + ": " + constant.type;
@@ -1068,7 +737,7 @@ define(function (require, exports, module) {
                     var c = e.data.options.get("selectedConstant");
                     var theConstant = constants[c];
                     view.remove();
-                    emuchartsManager.delete_constant(theConstant.id);
+                    _this.emuchartsManager.delete_constant(theConstant.id);
                 }
             }).on("cancel", function (e, view) {
                 // just remove window
@@ -1090,11 +759,11 @@ define(function (require, exports, module) {
                     contact: "http://www.eecs.qmul.ac.uk/~masci/"
                 },
                 importings: [],
-                constants: emuchartsManager.getConstants(),
-                variables: emuchartsManager.getVariables(),
-                states: emuchartsManager.getStates(),
-                transitions: emuchartsManager.getTransitions(),
-                initial_transitions: emuchartsManager.getInitialTransitions()
+                constants: _this.emuchartsManager.getConstants(),
+                variables: _this.emuchartsManager.getVariables(),
+                states: _this.emuchartsManager.getStates(),
+                transitions: _this.emuchartsManager.getTransitions(),
+                initial_transitions: _this.emuchartsManager.getInitialTransitions()
             };
             var model = emuchartsPVSPrinter.print(emucharts);
             if (model.err) {
@@ -1118,11 +787,11 @@ define(function (require, exports, module) {
                     contact: "<contact>"
                 },
                 importings: [],
-                constants: emuchartsManager.getConstants(),
-                variables: emuchartsManager.getVariables(),
-                states: emuchartsManager.getStates(),
-                transitions: emuchartsManager.getTransitions(),
-                initial_transitions: emuchartsManager.getInitialTransitions()
+                constants: _this.emuchartsManager.getConstants(),
+                variables: _this.emuchartsManager.getVariables(),
+                states: _this.emuchartsManager.getStates(),
+                transitions: _this.emuchartsManager.getTransitions(),
+                initial_transitions: _this.emuchartsManager.getInitialTransitions()
             };
             var model = emuchartsPIMPrinter.print(emucharts);
             console.log(model);
@@ -1147,11 +816,11 @@ define(function (require, exports, module) {
                     contact: "<contact>"
                 },
                 importings: [],
-                constants: emuchartsManager.getConstants(),
-                variables: emuchartsManager.getVariables(),
-                states: emuchartsManager.getStates(),
-                transitions: emuchartsManager.getTransitions(),
-                initial_transitions: emuchartsManager.getInitialTransitions()
+                constants: _this.emuchartsManager.getConstants(),
+                variables: _this.emuchartsManager.getVariables(),
+                states: _this.emuchartsManager.getStates(),
+                transitions: _this.emuchartsManager.getTransitions(),
+                initial_transitions: _this.emuchartsManager.getInitialTransitions()
             };
             var model = emuchartsPIMPrinter.print(emucharts);
             console.log(model);
@@ -1176,11 +845,11 @@ define(function (require, exports, module) {
                     contact: "<contact>"
                 },
                 importings: [],
-                constants: emuchartsManager.getConstants(),
-                variables: emuchartsManager.getVariables(),
-                states: emuchartsManager.getStates(),
-                transitions: emuchartsManager.getTransitions(),
-                initial_transitions: emuchartsManager.getInitialTransitions()
+                constants: _this.emuchartsManager.getConstants(),
+                variables: _this.emuchartsManager.getVariables(),
+                states: _this.emuchartsManager.getStates(),
+                transitions: _this.emuchartsManager.getTransitions(),
+                initial_transitions: _this.emuchartsManager.getInitialTransitions()
             };
             var model = emuchartsMALPrinter.print(emucharts);
             console.log(model);
@@ -1205,11 +874,11 @@ define(function (require, exports, module) {
                     contact: "<contact>"
                 },
                 importings: [],
-                constants: emuchartsManager.getConstants(),
-                variables: emuchartsManager.getVariables(),
-                states: emuchartsManager.getStates(),
-                transitions: emuchartsManager.getTransitions(),
-                initial_transitions: emuchartsManager.getInitialTransitions()
+                constants: _this.emuchartsManager.getConstants(),
+                variables: _this.emuchartsManager.getVariables(),
+                states: _this.emuchartsManager.getStates(),
+                transitions: _this.emuchartsManager.getTransitions(),
+                initial_transitions: _this.emuchartsManager.getInitialTransitions()
             };
             var model = emuchartsVDMPrinter.print(emucharts);
             console.log(model);
@@ -1235,11 +904,11 @@ define(function (require, exports, module) {
                     contact: "<contact>"
                 },
                 importings: [],
-                constants: emuchartsManager.getConstants(),
-                variables: emuchartsManager.getVariables(),
-                states: emuchartsManager.getStates(),
-                transitions: emuchartsManager.getTransitions(),
-                initial_transitions: emuchartsManager.getInitialTransitions()
+                constants: _this.emuchartsManager.getConstants(),
+                variables: _this.emuchartsManager.getVariables(),
+                states: _this.emuchartsManager.getStates(),
+                transitions: _this.emuchartsManager.getTransitions(),
+                initial_transitions: _this.emuchartsManager.getInitialTransitions()
             };
             var model = emuchartsJSPrinter.print(emucharts);
             console.log(model);
@@ -1265,11 +934,11 @@ define(function (require, exports, module) {
                     contact: "<contact>"
                 },
                 importings: [],
-                constants: emuchartsManager.getConstants(),
-                variables: emuchartsManager.getVariables(),
-                states: emuchartsManager.getStates(),
-                transitions: emuchartsManager.getTransitions(),
-                initial_transitions: emuchartsManager.getInitialTransitions()
+                constants: _this.emuchartsManager.getConstants(),
+                variables: _this.emuchartsManager.getVariables(),
+                states: _this.emuchartsManager.getStates(),
+                transitions: _this.emuchartsManager.getTransitions(),
+                initial_transitions: _this.emuchartsManager.getInitialTransitions()
             };
             var model = emuchartsAdaPrinter.print(emucharts);
             console.log(model);
@@ -1294,15 +963,15 @@ define(function (require, exports, module) {
                     contact: "<contact>"
                 },
                 importings: [],
-                constants: emuchartsManager.getConstants(),
+                constants: _this.emuchartsManager.getConstants(),
                 variables: {
-                    input: emuchartsManager.getInputVariables(),
-                    output: emuchartsManager.getOutputVariables(),
-                    local: emuchartsManager.getLocalVariables()
+                    input: _this.emuchartsManager.getInputVariables(),
+                    output: _this.emuchartsManager.getOutputVariables(),
+                    local: _this.emuchartsManager.getLocalVariables()
                 },
-                states: emuchartsManager.getStates(),
-                transitions: emuchartsManager.getTransitions(),
-                initial_transitions: emuchartsManager.getInitialTransitions()
+                states: _this.emuchartsManager.getStates(),
+                transitions: _this.emuchartsManager.getTransitions(),
+                initial_transitions: _this.emuchartsManager.getInitialTransitions()
             };
             var model = emuchartsBlessPrinter.print(emucharts);
             console.log(model);
@@ -1322,34 +991,34 @@ define(function (require, exports, module) {
             document.getElementById("menuZoom").children[1].style.display = "block";
         });
         d3.select("#btn_menuZoomIn").on("click", function () {
-            emuchartsManager.zoom_in();
+            _this.emuchartsManager.zoom_in();
             document.getElementById("menuZoom").children[1].style.display = "none";
         });
         d3.select("#btn_menuZoomOut").on("click", function () {
-            emuchartsManager.zoom_out();
+            _this.emuchartsManager.zoom_out();
             document.getElementById("menuZoom").children[1].style.display = "none";
         });
         d3.select("#btn_menuZoomReset").on("click", function () {
-            emuchartsManager.zoom_reset();
+            _this.emuchartsManager.zoom_reset();
             document.getElementById("menuZoom").children[1].style.display = "none";
         });
 
         //--node filter handler
         d3.select("input#filter").on("keyup", function () {
-            var editor = emuchartsManager.getSelectedEditor();
+            var editor = _this.emuchartsManager.getSelectedEditor();
             if (editor) {
                 editor._nodeFilter = d3.select("input#filter").property("value");
-                emuchartsManager.render();
+                _this.emuchartsManager.render();
             }
         });
 
         //-- PIM -----------------------------------------------------------------
         d3.select("#btn_toPIM").on("click", function () {
-            if (emuchartsManager.getIsPIM()) {
+            if (_this.emuchartsManager.getIsPIM()) {
                 console.log("Warning, current emuchart is already a PIM.");
                 return;
             }
-            if (emuchartsManager.toPIM(true)) {
+            if (_this.emuchartsManager.toPIM(true)) {
                 console.log("Success, converted emuchart to a PIM.");
             }
             else {
@@ -1357,11 +1026,11 @@ define(function (require, exports, module) {
             }
         });
         d3.select("#btn_fromPIM").on("click", function () {
-            if (!emuchartsManager.getIsPIM()) {
+            if (!_this.emuchartsManager.getIsPIM()) {
                 console.log("Warning, current emuchart is not a PIM.");
                 return;
             }
-            if (emuchartsManager.toPIM(false)) {
+            if (_this.emuchartsManager.toPIM(false)) {
                 console.log("Success, converted emuchart from a PIM.");
             }
             else {
@@ -1369,11 +1038,11 @@ define(function (require, exports, module) {
             }
         });
         d3.select("#btn_menuTestGenerator").on("click", function () {
-            if (!emuchartsManager.getIsPIM()) {
+            if (!_this.emuchartsManager.getIsPIM()) {
                 console.log("Warning, current emuchart is not a PIM.");
                 return;
             }
-            var initTrans = emuchartsManager.getInitialTransitions();
+            var initTrans = _this.emuchartsManager.getInitialTransitions();
             var emuchart = {
                 name: ("emucharts_" + projectManager.project().name()),
                 author: {
@@ -1381,20 +1050,20 @@ define(function (require, exports, module) {
                     affiliation: "<affiliation>",
                     contact: "<contact>"
                 },
-                //constants: emuchartsManager.getConstants(),
-                //variables: emuchartsManager.getVariables(),
-                states: emuchartsManager.getStates(),
-                transitions: emuchartsManager.getTransitions(),
+                //constants: _this.emuchartsManager.getConstants(),
+                //variables: _this.emuchartsManager.getVariables(),
+                states: _this.emuchartsManager.getStates(),
+                transitions: _this.emuchartsManager.getTransitions(),
                 initial_transitions: initTrans,
                 pm: {
                     name: projectManager.project().name(),
                     widgets: [],
-                    components: emuchartsManager.getStates(),
+                    components: _this.emuchartsManager.getStates(),
                     pmr: []
                 },
                 start_state: initTrans ? initTrans[0].target.name : "",
                 final_states: [],
-                isPIM: emuchartsManager.getIsPIM()
+                isPIM: _this.emuchartsManager.getIsPIM()
             };
 
             var tests = pimTestGenerator.print(emuchart.name, { pims: [ emuchart ], pms: [] });
@@ -1444,7 +1113,7 @@ define(function (require, exports, module) {
 
             }, { header: "Open PIM file..." });
         });
-	};
+	}
 
 
     Emulink.prototype.getDependencies = function () {
@@ -1456,15 +1125,15 @@ define(function (require, exports, module) {
         var defaultEmuchartFilePath = event.current + "/" + "emucharts_" + event.current + ".emdl";
         fs.readFile(defaultEmuchartFilePath).then(function (res) {
             res.content = JSON.parse(res.content);
-            emuchartsManager.importEmucharts(res);
+            _this.emuchartsManager.importEmucharts(res);
             // make svg visible and reset colors
             initToolbars();
             // render emuchart
-            emuchartsManager.render();
+            _this.emuchartsManager.render();
             // set initial editor mode
             d3.select("#btn_toolbarBrowse").node().click();
             //set Variables Table
-            contextTable.setContextVariables(emuchartsManager.getVariables());            
+            contextTable.setContextVariables(_this.emuchartsManager.getVariables());            
         }).catch(function (err) {
             // if the default emuchart file is not in the project, then just clear the current diagram
             d3.select("#btnNewEmuchart").node().click();

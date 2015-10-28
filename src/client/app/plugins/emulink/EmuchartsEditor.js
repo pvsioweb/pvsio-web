@@ -1412,7 +1412,7 @@ define(function (require, exports, module) {
         var filter = this._nodeFilter;
         return function (n) {
             try {
-                var regex = new RegExp(filter, "i", "g");
+                var regex = new RegExp("^" + filter, "gi");
                 return n.name.search(regex) >= 0;
             } catch (syntaxError) {
                 return false; //syntax error
@@ -1739,6 +1739,14 @@ define(function (require, exports, module) {
      */
     EmuchartsEditor.prototype.getVariables = function () {
         return this.emucharts.getVariables();
+    };
+    
+    /**
+     * Returns the descriptor of the variable whose ID is the function argument
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.getVariable = function (variableID) {
+        return this.emucharts.getVariable(variableID);
     };
 
     /**
