@@ -659,11 +659,10 @@ define(function (require, exports, module) {
 
         // create canvas to be used for exporting svg area as picture
         d3.select("#ContainerStateMachineImage").append("canvas")
-            .attr("min-width", width).attr("min-height", height)
-            .attr("width", "100%").attr("height", "100%")
             .attr("style", "display: none");
         d3.select("#ContainerStateMachineImage").append("div")
-            .attr("id", "svgdataurl").attr("style", "display: none");
+            .attr("id", "svgdataurl").attr("class", "svgdataurl")
+            .attr("style", "display: none");
 
         // create svg area
         d3.select("#ContainerStateMachine")

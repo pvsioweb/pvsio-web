@@ -627,15 +627,49 @@ define(function (require, exports, module) {
                         .attr("version", 1.1)
                         .attr("xmlns", "http://www.w3.org/2000/svg")
                         //.attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
-                        .style("background", "#ffffff")
-                        .node();
-            var SVGContent = (new window.XMLSerializer()).serializeToString(svg);
+                        .style("background", "#ffffff");
+            
+            // define image size
+            var translate = [0, 0];
+            var maxBoxSize = 200;
+            var minX = Math.min.apply(Math, emuchartsManager.getStates().map(function (data) { return data.x; }));
+            if (minX < 0) {
+                minX = -minX;
+                translate[0] = minX + maxBoxSize;
+            }
+            var maxX = Math.max.apply(Math, emuchartsManager.getStates().map(function (data) { return data.x; }));
+            if (maxX < 0) {
+                maxX = -maxX;
+                translate[0] = translate[0];
+            }
+            var minY = Math.min.apply(Math, emuchartsManager.getStates().map(function (data) { return data.y; }));
+            if (minY < 0) {
+                minY = -minY;
+                translate[1] = minY + maxBoxSize;
+            }
+            var maxY = Math.max.apply(Math, emuchartsManager.getStates().map(function (data) { return data.y; }));
+            if (maxY < 0) {
+                maxY = -maxY;
+                translate[1] = translate[1];
+            }
+            svg.selectAll("#InitialTransitions").attr("transform", "translate(" + translate.join(",") + ")");
+            svg.selectAll("#Transitions").attr("transform", "translate(" + translate.join(",") + ")");
+            svg.selectAll("#States").attr("transform", "translate(" + translate.join(",") + ")");
+            var imageWidth = (minX + maxX) * 1.2;
+            var imageHeight = (minY + maxY) * 1.2;
+            svg.attr("width", imageWidth + "px").attr("height", imageHeight + "px");
+            d3.select("#ContainerStateMachineImage").select("canvas")
+                .attr("width", imageWidth + "px").attr("height", imageHeight + "px");
+            d3.select("#ContainerStateMachineImage").select("div")
+                .attr("width", imageWidth + "px").attr("height", imageHeight + "px");
+            
+            var SVGContent = (new window.XMLSerializer()).serializeToString(svg.node());
             // this workaround is needed to define the xlink namespace -- d3 for some reason does not allow to define it but we need it to export the svg as an image
             SVGContent = SVGContent.replace("xmlns=\"http://www.w3.org/2000/svg\"",
                                             "xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"");
             var imgsrc = "data:image/svg+xml;base64," + window.btoa(SVGContent);
-            var img = '<img src="' + imgsrc + '">';
-            d3.select("#svgdataurl").html(img);
+//            var img = '<img src="' + imgsrc + '">';
+//            d3.select("#svgdataurl").html(img).style("display", "block");
             var canvas = document.querySelector("canvas");
             var context = canvas.getContext("2d");
             var image = new Image();
@@ -648,13 +682,19 @@ define(function (require, exports, module) {
             }
             function imageLoadComplete(res) {
                 context.drawImage(image, 0, 0);
-                var canvasdata = canvas.toDataURL("image/png");
-//                var pngimg = '<img src="' + canvasdata + '">';
-
-                var a = d3.select("#pngdataurl");
-                a.node().download = projectManager.project().name() + "_emuChart.png";
-                a.node().href = canvasdata;
-                a.node().click();
+                d3.select("#toolbarViewExportedImage").select("a").attr("href", imgsrc).on("click", function() {
+                    document.getElementById("toolbarViewExportedImage").setAttribute("style", "display:none");
+                });
+                d3.select("#toolbarViewExportedImage").style("display", "block");
+                //-- this solution with download element is not good enough because only chrome supports this feature
+                //var canvasdata = canvas.toDataURL("image/png");
+                //var pngimg = '<img src="' + canvasdata + '">';
+                //var a = d3.select("#pngdataurl");
+                //a.node().download = projectManager.project().name() + "_emuChart.png";
+                //a.node().href = canvasdata;
+                //a.node().click();
+                //-- this solution with window.open is not good enough because of pop-up blockers
+                //window.open(canvasdata);
             }
 
             image.onload = imageLoadComplete;
