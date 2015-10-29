@@ -173,6 +173,7 @@ ul#context-menu li {
     overflow: auto;
     float: right;
     border: 2px solid steelblue;
+    max-height: 420px;
 }
 #modifyPropertiesToolbar{
 	width: 930px;
