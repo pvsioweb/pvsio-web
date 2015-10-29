@@ -18,8 +18,8 @@ define(function (require, exports, module) {
     var dbg = false;
 
     // constants for drawing states
-    var width  = 900;
-    var height = 800;
+//    var width  = 900;
+//    var height = 800;
     var colors = d3.scale.category10();
     var fontSize = 10;
     var defaultWidth = 32;
