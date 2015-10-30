@@ -6,7 +6,9 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 /*global define, d3*/
 define(function (require, exports, module) {
-    "use strict";
+    "use strict";    
+    
+    var minBorderSize = { x: 200, y: 0 };
     
     function ExportDiagram() {
         return this;
@@ -19,27 +21,29 @@ define(function (require, exports, module) {
         var maxX = (states.length > 0) ? Math.max.apply(Math, states.map(function (data) { return data.x; })) : 0;
         var maxY = (states.length > 0) ? Math.max.apply(Math, states.map(function (data) { return data.y; })) : 0;
         return {
-            minX: (minX < 0) ? -minX : minX,
-            maxX: (maxX < 0) ? -maxX : maxX,
-            minY: (minY < 0) ? -minY : minY,
-            maxY: (maxY < 0) ? -maxY : maxY
+            minX: minX,
+            maxX: maxX,
+            minY: minY,
+            maxY: maxY
         };
     }
     
-    function getImageSize(diagram, offset) {
-        offset = offset || { x: 0, y: 0};
+    function getImageSize(diagram) {
         var boundingBox = getBoundingBox(diagram);
+        boundingBox.minX = (boundingBox.minX < 0) ? -boundingBox.minX : boundingBox.minX;
+        boundingBox.maxX = (boundingBox.maxX < 0) ? -boundingBox.maxX : boundingBox.maxX;
+        boundingBox.minY = (boundingBox.minY < 0) ? -boundingBox.minY : boundingBox.minY;
+        boundingBox.maxY = (boundingBox.maxY < 0) ? -boundingBox.maxY : boundingBox.maxY;
         return {
-            width: (boundingBox.minX + boundingBox.maxX + offset.x) * 1.2,
-            height: (boundingBox.minY + boundingBox.maxY + offset.y) * 1.2
+            width: (boundingBox.minX + boundingBox.maxX + (minBorderSize.x * 2)),
+            height: (boundingBox.minY + boundingBox.maxY + (minBorderSize.y * 2))
         };
     }
     
     function centerDiagram(diagram, offset) {
         offset = offset || { x: 0, y: 0};
         var boundingBox = getBoundingBox(diagram);
-        var minBoxSize = { x: 200, y: 0 };
-        var translate = [ boundingBox.minX + minBoxSize.x + offset.x, boundingBox.minY + minBoxSize.y + offset.y];
+        var translate = [ minBorderSize.x + offset.x - boundingBox.minX, minBorderSize.y + offset.y - boundingBox.minY];
         diagram.svg.selectAll("#InitialTransitions").attr("transform", "translate(" + translate.join(",") + ")");
         diagram.svg.selectAll("#Transitions").attr("transform", "translate(" + translate.join(",") + ")");
         diagram.svg.selectAll("#States").attr("transform", "translate(" + translate.join(",") + ")");
@@ -54,17 +58,25 @@ define(function (require, exports, module) {
         return "data:image/svg+xml;base64," + window.btoa(SVGContent);
     }
     
-//    function appendContextTable(diagram) {
-//        diagram.svg.append("foreignObject")
-//                    .attr("x", 10).attr("y", 10).attr("width", 100).attr("height", 100)
-//                    .attr("requiredExtension", "http://www.w3.org/1999/xhtml")
-//                    .append("div").attr("xmlns", "http://www.w3.org/1999/xhtml")
-//                    .html(diagram.emuchartsManager.getVariables()
-//                          .map(function (v) {
-//                            return v.name + ", " + v.type + ", " + v.value + "<br/>";
-//                            }));
-//        return { width: 0, height: 0 };
-//    }
+    function appendContextTable(diagram, opt) {
+        var variables = diagram.emuchartsManager.getVariables();
+        var padding = 4;
+        var width = (opt && opt.width && opt.width > 320) ? opt.width - (padding * 2) : 320;
+        var rowHeight = 32;
+        var height = variables.length * rowHeight;
+        var svg = diagram.svg.append("foreignObject")
+                    .attr("x", 10).attr("y", 10).attr("width", width).attr("height", height)
+                    .attr("requiredExtension", "http://www.w3.org/1999/xhtml")
+                    .append("div").attr("xmlns", "http://www.w3.org/1999/xhtml")
+                    .style("border", "1px solid steelblue");
+        svg.html(
+            "<div style='background-color: rgb(8, 88, 154); color: white; padding: " + padding + "px;'>Context Variables</div>" +
+            variables.map(function (v) {
+                return "<div style='padding: 2px 0 2px " + padding + "px;'>" + v.name + ": " + v.type + " = " + v.value + "</div>";
+            }).join("")
+        );
+        return { width: width, height: height };
+    }
     
     ExportDiagram.prototype.toVectorialImage = function(_emuchartsManager) {
         var diagram = {
@@ -76,10 +88,11 @@ define(function (require, exports, module) {
                 .attr("xmlns", "http://www.w3.org/2000/svg")
                 .style("background", "#ffffff");
 
-//        var tableSize = appendContextTable(diagram);
-        centerDiagram(diagram);
         var imageSize = getImageSize(diagram);
-        diagram.svg.attr("width", imageSize.width + "px").attr("height", imageSize.height + "px");
+        var tableSize = appendContextTable(diagram, { width: imageSize.width });
+        centerDiagram(diagram, { x: 0, y: tableSize.height });
+        
+        diagram.svg.attr("width", imageSize.width + "px").attr("height", imageSize.height + tableSize.height + "px");
         
         var imgsrc = getImageData(diagram);
         d3.select("#toolbarViewExportedImage").select("a").attr("href", imgsrc).on("click", function() {
