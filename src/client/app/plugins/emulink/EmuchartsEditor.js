@@ -18,8 +18,8 @@ define(function (require, exports, module) {
     var dbg = false;
 
     // constants for drawing states
-    var width  = 900;
-    var height = 800;
+//    var width  = 900;
+//    var height = 800;
     var colors = d3.scale.category10();
     var fontSize = 10;
     var defaultWidth = 32;
@@ -659,10 +659,10 @@ define(function (require, exports, module) {
 
         // create canvas to be used for exporting svg area as picture
         d3.select("#ContainerStateMachineImage").append("canvas")
-            .attr("width", width).attr("height", height)
             .attr("style", "display: none");
         d3.select("#ContainerStateMachineImage").append("div")
-            .attr("id", "svgdataurl").attr("style", "display: none");
+            .attr("id", "svgdataurl").attr("class", "svgdataurl")
+            .attr("style", "display: none");
 
         // create svg area
         d3.select("#ContainerStateMachine")
@@ -670,7 +670,7 @@ define(function (require, exports, module) {
             .attr("version", 1.1)
             .attr("xmlns", "http://www.w3.org/2000/svg")
             //.attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
-            .attr("width", width).attr("height", height)
+            .attr("width", "100%").attr("height", "100%")
             .style("background", "white")
             .append("svg:defs")
             .append("svg:marker")
@@ -1412,7 +1412,7 @@ define(function (require, exports, module) {
         var filter = this._nodeFilter;
         return function (n) {
             try {
-                var regex = new RegExp(filter, "i", "g");
+                var regex = new RegExp("^" + filter, "gi");
                 return n.name.search(regex) >= 0;
             } catch (syntaxError) {
                 return false; //syntax error
@@ -1740,6 +1740,14 @@ define(function (require, exports, module) {
     EmuchartsEditor.prototype.getVariables = function () {
         return this.emucharts.getVariables();
     };
+    
+    /**
+     * Returns the descriptor of the variable whose ID is the function argument
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.getVariable = function (variableID) {
+        return this.emucharts.getVariable(variableID);
+    };
 
     /**
      * Returns an array containing the current set of input variables defined in the diagram
@@ -1825,12 +1833,19 @@ define(function (require, exports, module) {
      * @memberof EmuchartsEditor
      */
     EmuchartsEditor.prototype.rename_state = function (stateID, newLabel) {
+        if (this.getIsPIM())
+            newLabel = newLabel.name;
+
         this.emucharts.rename_node(stateID, newLabel);
         // refresh states
         var states = d3.select("#ContainerStateMachine")
             .select("#States").selectAll(".state")
             .filter(function (state) { return state.id === stateID; });
         refreshStates(states);
+
+        // TODO: temporary fix for transitions not being redrawn after renaming a state.
+        this.renderTransitions();
+       /*
         // refresh all incoming and outgoing transitions of the renamed state
         var transitions = d3.select("#ContainerStateMachine")
             .select("#Transitions").selectAll(".transition")
@@ -1838,6 +1853,7 @@ define(function (require, exports, module) {
                 return (transition.target && transition.target.id === stateID) ||
                         (transition.source && transition.source.id === stateID);
             });
+
         transitions = transitions ||
             d3.select("#ContainerStateMachine svg").select("#Transitions").selectAll(".transition");
         // refresh labels
@@ -1848,6 +1864,7 @@ define(function (require, exports, module) {
                 return labelToString(edge.name);
             });
         });
+       */
     };
 
     /**
@@ -2060,6 +2077,54 @@ define(function (require, exports, module) {
                 this.emucharts.edges && this.emucharts.edges.empty() &&
                 this.emucharts.constants && this.emucharts.constants.empty() &&
                 this.emucharts.variables && this.emucharts.variables.empty();
+    };
+
+    /** PIM **/
+
+    /**
+     * Convert the current Emuchart to a PIM (or if from a PIM).
+     * @returns {boolean} True Emuchart became a PIM or a PIM became an Emuchart.
+     */
+    EmuchartsEditor.prototype.toPIM = function (toPIM) {
+        return this.emucharts.toPIM ? this.emucharts.toPIM(toPIM) : false;
+    };
+
+    /**
+     * Returns if this emuchart is a PIM.
+     * @returns {boolean} If this emuchart is a PIM.
+     */
+    EmuchartsEditor.prototype.getIsPIM = function () {
+        return this.emucharts.getIsPIM ? this.emucharts.getIsPIM() : false;
+    };
+
+    /**
+     *
+     * @param behaviour
+     * @returns If no behaviour provided returns all PMR as a set,
+     * If behaviour could be found then returns the relation (behaviour, operation),
+     * else returns null.
+     */
+    EmuchartsEditor.prototype.getPMR = function (behaviour, isSave) {
+        return this.emucharts.getPMR ? this.emucharts.getPMR(behaviour, isSave) : d3.map();
+    };
+
+    /**
+     * Add a PMR (overrites any existing PMR for the given behaviour).
+     * ({behaviour (string), operation (string)}).
+     * @param pmr
+     * @returns boolean true if successfully added.
+     */
+    EmuchartsEditor.prototype.addPMR = function (pmr) {
+        return this.emucharts.addPMR ? this.emucharts.addPMR(pmr) : false;
+    };
+
+    /**
+     * Saves the new PMRs into the pool of all PMRs
+     * @param newPMRs
+     * @returns {boolean}
+     */
+    EmuchartsEditor.prototype.mergePMR = function (newPMRs) {
+        return this.emucharts.mergePMR ? this.emucharts.mergePMR(newPMRs) : false;
     };
 
     module.exports = EmuchartsEditor;
