@@ -9,7 +9,9 @@ var imageExts = [".jpg", ".jpeg", ".png"],
                    ".vdmsl", 
                    ".aadl", //-- Bless/AADL
                    ".adb",  //-- ADA
-                   ".ads"   //-- ADA
+                   ".ads",  //-- ADA
+                   ".c",    //-- C
+                   ".h"     //-- C
                   ].concat(imageExts);
 
 module.exports = filesFilter;
