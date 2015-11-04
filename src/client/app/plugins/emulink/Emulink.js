@@ -65,10 +65,6 @@ define(function (require, exports, module) {
     var emuchartsJSPrinter;
     var emuchartsAdaPrinter;
     var emuchartsBlessPrinter;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 083245e90dc76ea1e106c67d4c5d6d1cd726b92b
     var emuchartsMisraCPrinter;
 
     var pimImporter;
@@ -76,10 +72,6 @@ define(function (require, exports, module) {
     var pimEmulink;
     var contextTable;
     var exportDiagram;
-<<<<<<< HEAD
->>>>>>> upstream/alpha
-=======
->>>>>>> 083245e90dc76ea1e106c67d4c5d6d1cd726b92b
 
     var options = { autoinit: true };
 
