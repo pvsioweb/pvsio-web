@@ -1,6 +1,6 @@
 /**
  * @author Gioacchino Mauro
- * @date Mon Oct 12 13:43:39 2015
+ * @date Thu Nov  5 11:03:50 2015
  *
  * MISRA C code printer for emucharts models.
  * Emuchart objects have the following structure:
@@ -75,6 +75,8 @@ define(function (require, exports, module) {
         previous_state: { name: "previous_state", type: machineStateType, value: initialMachineState },
         current_state: { name: "current_state", type: machineStateType, value: initialMachineState }
     };
+    var declarations = [];
+    declarations.push("typedef unsigned char UC_8;");
     
     var operatorOverrides = {
         ":=": "=",
@@ -86,10 +88,7 @@ define(function (require, exports, module) {
         "not": "!",
         "=": "=="
     };
-    
-    var declarations = [];
-    declarations.push("typedef unsigned char UC_8;");
-     
+       
     function getType(type) {
         var typeMaps = {
             "Time": "Time",    //iachino: Serve??
@@ -128,6 +127,9 @@ define(function (require, exports, module) {
         return typeMaps[type] || type;
     }
     
+    /**
+     * Add a char with the properly value's suffix, useful for variable declarations
+     */
     function setSuffix(v) {
         if (isNumber(v.value)){
             if ( v.type.toUpperCase() === getType("int") ) {
@@ -139,7 +141,10 @@ define(function (require, exports, module) {
         }
         return v.value;
     }
-
+    
+    /**
+     * Returns a char with the properly value's suffix, useful for parsing transations
+     */
     function getSuffixInActions(v, emuchart) {
         var ret = '';
         emuchart.variables.local.map(function(z){
@@ -154,21 +159,36 @@ define(function (require, exports, module) {
         });
         return ret;
     }
-
+    
+    /**
+     * Change operator sintax from Emulink to C code
+     */
     function getOperator(op, emuchart) {
         return operatorOverrides[op] || op;
     }
     
+    /**
+     * Check if a value is in an array
+     * Return a boolean
+     */
     function isInArray(array, search)
     {
         var arrayJoin = array.join();
         return arrayJoin.indexOf(search) >= 0;
     }
     
+    /**
+     * Check if a value is a float or a finite number
+     * Return a boolean
+     */
     function isNumber(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     }
-    
+   
+    /**
+     * Check if a value is a local variable in the emuchart structure
+     * Return a boolean
+     */
     function isLocalVariable(name, emuchart) {
         if (name === predefined_variables.current_state.name ||
                 name === predefined_variables.previous_state.name) {
