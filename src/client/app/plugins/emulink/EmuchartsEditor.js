@@ -1054,6 +1054,11 @@ define(function (require, exports, module) {
                 d3.select(this.childNodes[2]).attr("opacity", 0.6);
                 d3.select(this.children[3]).style("fill", "green");
                 d3.select(this.children[4]).style("fill", "green");
+                if (edge.source.id === edge.target.id) {
+                    d3.select(this).select(".tlabel").text(function (edge) {
+                        return edge.name;
+                    });
+                }
             }
             if (dbg) { console.log("Transitions.mouseOver"); }
         };
@@ -1079,6 +1084,11 @@ define(function (require, exports, module) {
                 d3.select(this.childNodes[2]).attr("opacity", 0);
                 d3.select(this.children[3]).style("fill", "black");
                 d3.select(this.children[4]).style("fill", "black");
+                if (edge.source.id === edge.target.id) {
+                    d3.select(this).select(".tlabel").text(function (edge) {
+                        return labelToString(edge.name);
+                    });
+                }
             } else if (mouseOverControlPoint && mouseOverControlPoint.id === edge.id) {
                 var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
                 // update selected control point
