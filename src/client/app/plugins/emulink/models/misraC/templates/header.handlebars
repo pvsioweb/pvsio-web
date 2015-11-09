@@ -24,6 +24,9 @@ extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 struct_state enter(UC_8* newStateLabel, struct_state st);
 
 struct_state leave(UC_8* currentStateLabel, struct_state st);{{/if}}
+{{#if initial_transitions}}
+/* initialiser */
+{{#each initial_transitions}}struct_state init{{&init_suffix_for_header}}();}{{/each}}{{/if}}
 {{#if transitions}}
 /* functions for model */{{#each transitions}}{{#if id}}struct_state {{id}}(struct_state st);
 {{else}}

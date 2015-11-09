@@ -76,7 +76,6 @@ define(function (require, exports, module) {
         current_state: { name: "current_state", type: machineStateType, value: initialMachineState }
     };
     var declarations = [];
-    declarations.push("typedef unsigned char UC_8;");
     
     var operatorOverrides = {
         ":=": "=",
@@ -93,6 +92,7 @@ define(function (require, exports, module) {
         var typeMaps = {
             "Time": "Time",    //iachino: Serve??
             "bool": "UC_8",
+            "char": "UC_8",
             "int": "UI_32",
             "float" : "F_32",
             "double": "D_64"                      
@@ -105,6 +105,12 @@ define(function (require, exports, module) {
                 declarations.push("#define TRUE 1");
                 declarations.push("#define FALSE 0");
             }    
+        }
+        if (type.toLowerCase() === "char") {
+            type = typeMaps.char;
+            if(!isInArray(declarations, type)){
+                declarations.push("typedef unsigned char " + type + ";");
+            }
         }
         if (type.toLowerCase() === "int") {
             type = typeMaps.int;
@@ -303,19 +309,31 @@ define(function (require, exports, module) {
     Printer.prototype.print_variables = function (emuchart) {
         if (emuchart.variables) {
             this.model.input_variables = emuchart.variables.input.map(function (v) {
+                if (v.type.toLowerCase() === "char") {
+                    v.value = "\"" + v.value + "\"";
+                    v.type = getType(v.type);
+                    return v;
+                }
                 v.type = getType(v.type);
                 v.value = setSuffix(v);
                 return v;
             });
             this.model.output_variables = emuchart.variables.output.map(function (v) {
+                if (v.type.toLowerCase() === "char") {
+                    v.value = "\"" + v.value + "\"";
+                    v.type = getType(v.type);
+                    return v;
+                }
                 v.type = getType(v.type);
                 v.value = setSuffix(v);
-                if (v.type.toLowerCase() === 'monitor_mode'){
-                    v.value = "\"" + v.value.toLowerCase() + "\"";
-                }
                 return v;
             });
             this.model.local_variables = emuchart.variables.local.map(function (v) {
+                if (v.type.toLowerCase() === "char") {
+                    v.value = "\"" + v.value + "\"";
+                    v.type = getType(v.type);
+                    return v;
+                }
                 v.type = getType(v.type);
                 v.value = setSuffix(v);
                 return v;
@@ -325,9 +343,16 @@ define(function (require, exports, module) {
 
     Printer.prototype.print_constants = function (emuchart) {
         this.model.constants = emuchart.constants.map(function (v) {
-            v.type = getType(v.type);
-            v.value = setSuffix(v);
             v.name = v.name.toUpperCase();
+            if (v.type.toLowerCase() === "char") {
+                v.value = "\"" + v.value + "\"";
+                v.type = getType(v.type);
+                return v;
+            }
+            else{
+                v.type = getType(v.type);
+                v.value = setSuffix(v);
+            }
             return v;
         });
     };
@@ -340,6 +365,7 @@ define(function (require, exports, module) {
                 return (v.type + " "+ v.name + ";");
             });
         }
+        //declarations.push("typedef unsigned char UC_8;"); /*if states are declared as char*/
         this.model.structureVar.push("UC_8 *" + predefined_variables.current_state.name + ";");
         this.model.structureVar.push("UC_8 *" + predefined_variables.previous_state.name + ";");
     };

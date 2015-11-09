@@ -3,17 +3,18 @@
 
 {{~#if constants}}
 /* constants variables */
-{{~#each constants}}
+{{~#each constants}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
 static const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 
 {{~#if local_variables}}
+///TODO Inizializzare le variabili
 /* local variables */
-{{~#each local_variables}}
+{{~#each local_variables}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
 static {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if states}}
-/* declare state labels as variables */ //UNCLEAR: wich type are states?
+/* declare state labels as variables */ //UNCLEAR: maybe enum typdef?
 {{#each states~}}UC_8 *{{&name}} = "{{name}}";
 {{/each}}{{/if}}
 {{#if transitions}}
