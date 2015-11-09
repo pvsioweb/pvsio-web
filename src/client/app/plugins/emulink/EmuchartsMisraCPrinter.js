@@ -482,7 +482,7 @@ define(function (require, exports, module) {
             "\n*  ---------------------------------------------------------------*/\n";
         this.model.makefile_descriptor = this.model.descriptor.replace(/\*|\//g,'#');
     };
-                
+    
     Printer.prototype.print_disclaimer = function (emuchart) {
         this.model.disclaimer = "\n/** ---------------------------------------------------------------\n" +
                     "*   C code generated using PVSio-web MisraCPrinter ver 0.1\n" +
@@ -491,7 +491,6 @@ define(function (require, exports, module) {
         this.model.makefile_disclaimer = this.model.disclaimer.replace(/\*|\//g,'#');
         this.model.makefile_disclaimer = this.model.makefile_disclaimer.replace(/C code/g, "Makefile");
     };
-    
 
     Printer.prototype.print = function (emuchart) {
         this.model.transitions = [];

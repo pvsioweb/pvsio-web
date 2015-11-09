@@ -1,0 +1,42 @@
+{{&makefile_descriptor}}
+NAME = {{filename}}
+CC = gcc
+CFLAG = -Wall -O2 -Werror
+HEAD = {{filename}}.h
+SOURCES = {{filename}}.c
+OBJ = $(SOURCES:.c=.o)
+
+.PHONY : clean help install uninstall
+
+%.o: %.c $(HEAD)
+	@$(CC) -c -o $@ $< $(CFLAGS)
+
+build: $(NAME)
+
+$(NAME): $(OBJ)
+	@$(CC) -o $@ $^ $(CFLAGS)
+	@echo "Build finished. Executable created: $(NAME)"
+
+install:
+	-@cp ./$(NAME) /usr/bin
+	@echo "Installed"
+
+uninstall:
+	-@rm /usr/bin/$(NAME)
+	@echo "Uninstalled"
+
+clean:
+	-@rm -r ./*.o $(NAME)
+
+help:
+	@echo
+	@echo "Makefile"
+	@echo
+	@echo "make/make build  : build all"
+	@echo "install          : install tool in the system. Root permission required"
+	@echo "uninstall        : remove tool from system. Root permission required"
+	@echo "clean            : remove all .o files and executable file"
+	@echo "NAME=yourname    : change program name"
+	@echo 
+
+{{&makefile_disclaimer}}
