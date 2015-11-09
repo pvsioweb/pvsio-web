@@ -49,6 +49,7 @@
       }
  */
 define(function (require, exports, module) {
+    var makefileTemplate = require("text!plugins/emulink/models/misraC/templates/makefile.handlebars");
     var threadTemplate = require("text!plugins/emulink/models/misraC/templates/thread.handlebars");
     var headerTemplate = require("text!plugins/emulink/models/misraC/templates/header.handlebars");
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
@@ -479,13 +480,16 @@ define(function (require, exports, module) {
         }
         this.model.descriptor += 
             "\n*  ---------------------------------------------------------------*/\n";
+        this.model.makefile_descriptor = this.model.descriptor.replace(/\*|\//g,'#');
     };
-            
+                
     Printer.prototype.print_disclaimer = function (emuchart) {
         this.model.disclaimer = "\n/** ---------------------------------------------------------------\n" +
                     "*   C code generated using PVSio-web MisraCPrinter ver 0.1\n" +
                     "*   Tool freely available at http://www.pvsioweb.org" +
                     "\n*  --------------------------------------------------------------*/\n";
+        this.model.makefile_disclaimer = this.model.disclaimer.replace(/\*|\//g,'#');
+        this.model.makefile_disclaimer = this.model.makefile_disclaimer.replace(/C code/g, "Makefile");
     };
     
 
@@ -502,9 +506,10 @@ define(function (require, exports, module) {
         
         console.log(this.model);//TO debug
         
+        var makefile = Handlebars.compile(makefileTemplate)(this.model);
         var thread = Handlebars.compile(threadTemplate)(this.model);
         var header = Handlebars.compile(headerTemplate)(this.model);
-        return {thread: thread, header: header};
+        return {makefile: makefile, thread: thread, header: header};
     };
 
     module.exports = Printer;

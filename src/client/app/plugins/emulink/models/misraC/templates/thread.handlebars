@@ -8,7 +8,6 @@ static const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 
 {{~#if local_variables}}
-///TODO Inizializzare le variabili
 /* local variables */
 {{~#each local_variables}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
 static {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
