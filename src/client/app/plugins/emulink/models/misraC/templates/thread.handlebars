@@ -13,24 +13,28 @@ static const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 static {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if states}}
-/* declare state labels as variables */ //UNCLEAR: maybe enum typdef?
-{{#each states~}}UC_8 *{{&name}} = "{{name}}";
+/* declaration of state labels */
+typedef enum {
+    {{#each states~}}{{name}},{{/each}}
+}state;
+
+{{#each states~}}state {{id}} = {{&name}};
 {{/each}}{{/if}}
 {{#if transitions}}
 /* declaration of helper functions */
-struct_state enter(UC_8* newStateLabel, struct_state st) {
+struct_state enter(state newStateLabel, struct_state st) {
     st.current_state = newStateLabel;
     return st;
 }
 
-struct_state leave(UC_8* currentStateLabel, struct_state st) {
+struct_state leave(state currentStateLabel, struct_state st) {
     st.previous_state = currentStateLabel;
     return st;
 }{{/if}}
 {{#if initial_transitions}}
 /* initialisation function for model */
 {{#each initial_transitions}}struct_state init{{&init_suffix}}(){
-    struct_state st = enter("{{target.name}}", st);
+    struct_state st = enter({{target.id}}, st);
     {{~#each actions}}
     st.{{&.}};{{/each}}
     return st;
@@ -40,33 +44,33 @@ struct_state leave(UC_8* currentStateLabel, struct_state st) {
 {{#each transitions}}{{#if id}}struct_state {{id}}(struct_state st) {
 {{~#if condition}}
     if ({{&condition}}) {
-        st = leave("{{source.name}}", st);
+        st = leave({{source.id}}, st);
         {{~#each actions}}
         st.{{&.}};{{/each}}
-        st = enter("{{target.name}}", st);
+        st = enter({{target.id}}, st);
     }
 {{~else}}
-    st = leave("{{source.name}}", st);
+    st = leave({{source.id}}, st);
     {{~#each actions}}
     st.{{&.}};{{~/each}}
-    st = enter("{{target.name}}", st);
+    st = enter({{target.id}}, st);
 {{~/if}}
     return st;
 }
 {{else}}struct_state {{0.id}}(struct_state st) {
 {{#each .}}
 {{~#if condition}}
-    if ({{&condition}} && current_state == "{{source.name}}") {
-        st = leave("{{source.name}}", st);
+    if ({{&condition}} && current_state == {{source.id}}) {
+        st = leave({{source.id}}, st);
         {{~#each actions}}
         st.{{&.}};{{/each}}
-        st = enter("{{target.name}}", st);
+        st = enter({{target.id}}, st);
     }{{~else}}
-    if (current_state == "{{source.name}}") {
-        st = leave("{{source.name}}", st);
+    if (current_state == {{source.id}}) {
+        st = leave({{source.id}}, st);
         {{~#each actions}}
         st.{{&.}};{{~/each}}
-        st = enter("{{target.name}}", st);
+        st = enter({{target.id}}, st);
 {{~/if}}{{/each}}
     return st;
 }
