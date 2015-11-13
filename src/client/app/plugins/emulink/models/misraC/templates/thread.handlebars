@@ -14,10 +14,6 @@ static {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if states}}
 /* declaration of state labels */
-typedef enum {
-    {{#each states~}}{{name}},{{/each}}
-}state;
-
 {{#each states~}}state {{id}} = {{&name}};
 {{/each}}{{/if}}
 {{#if transitions}}

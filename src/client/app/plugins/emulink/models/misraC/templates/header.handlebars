@@ -1,6 +1,11 @@
 {{&descriptor}}
 {{#each importings}}
 {{&.}}{{/each}}
+{{#if states}}
+/* enumeration of state labels */
+typedef enum {
+    {{#each states~}}{{name}},{{/each}}
+}state;{{/if}}
  
 /**
 *   This program shall use the following structure:

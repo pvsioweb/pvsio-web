@@ -88,18 +88,19 @@ define(function (require, exports, module) {
         "not": "!",
         "=": "=="
     };
+    
+    var typeMaps = {
+        "Time": "Time",    //TO iachino: Serve??
+        "bool": "UC_8",
+        "char": "UC_8",
+        "int": "UI_32",
+        "float" : "F_32",
+        "double": "D_64"                      
+    };
     /**
      * Specific-length equivalents should be typedefd for the specific compile, with respect to MISRA 1998 rule (Rule 13, advisory)
      */   
     function getType(type) {
-        var typeMaps = {
-            "Time": "Time",    //TO iachino: Serve??
-            "bool": "UC_8",
-            "char": "UC_8",
-            "int": "UI_32",
-            "float" : "F_32",
-            "double": "D_64"                      
-        };
         if ( (type.toLowerCase() === "bool") || (type.toLowerCase() === "boolean") ) {
             type = typeMaps.bool;
             if(!isInArray(declarations, "true")){
@@ -107,6 +108,7 @@ define(function (require, exports, module) {
                 declarations.push("#define false 0");
                 declarations.push("#define TRUE 1");
                 declarations.push("#define FALSE 0");
+                declarations.push("typedef unsigned char " + type + ";");
             }    
         }
         if (type.toLowerCase() === "char") { //The type char shall always be declared as unsigned char or signed char, with respect to MISRA 1998 rule (Rule 14, required)
@@ -141,10 +143,10 @@ define(function (require, exports, module) {
      */
     function setSuffix(v) {
         if (isNumber(v.value)){
-            if ( v.type.toUpperCase() === getType("int") ) {
+            if ( v.type.toUpperCase() === typeMaps.int ) {
                 v.value = v.value + "u";
             }
-            if ( (v.type.toUpperCase() === getType("float")) || (v.type.toUpperCase() === getType("double")) ){
+            if ( (v.type.toUpperCase() === typeMaps.float) || (v.type.toUpperCase() === typeMaps.double) ){
                 v.value = v.value + "f";
             }
         }
@@ -158,10 +160,10 @@ define(function (require, exports, module) {
         var ret = '';
         emuchart.variables.local.map(function(z){
             if(v.val.identifier.val === z.name){
-                if ( z.type === getType("int") ) {
+                if ( z.type === typeMaps.int ) {
                     ret = "u";
                 }
-                if ( (z.type === getType("float")) || (z.type === getType("double")) ){
+                if ( (z.type === typeMaps.float) || (z.type === typeMaps.double) ){
                     ret = "f";
                 }
             } 
@@ -368,7 +370,6 @@ define(function (require, exports, module) {
                 return (v.type + " "+ v.name + ";");
             });
         }
-        //declarations.push("typedef unsigned char UC_8;"); /*if states are declared as char*/
         this.model.structureVar.push("state " + predefined_variables.current_state.name + ";");  //TO BE REVIEWED
         this.model.structureVar.push("state " + predefined_variables.previous_state.name + ";"); //TO BE REVIEWED
     };
@@ -510,10 +511,9 @@ define(function (require, exports, module) {
         var makefile = Handlebars.compile(makefileTemplate)(this.model);
         var thread = Handlebars.compile(threadTemplate)(this.model);
         var header = Handlebars.compile(headerTemplate)(this.model);
+        declarations = [];
         return {makefile: makefile, thread: thread, header: header};
     };
 
     module.exports = Printer;
-    
-    declarations = [];
 });
