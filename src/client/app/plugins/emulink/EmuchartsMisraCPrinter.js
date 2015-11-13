@@ -1,6 +1,6 @@
 /**
  * @author Gioacchino Mauro
- * @date Thu Nov  5 11:03:50 2015
+ * @date Fri Nov 13 14:50:28 2015
  *
  * MISRA C code printer for emucharts models.
  * Emuchart objects have the following structure:
@@ -88,10 +88,12 @@ define(function (require, exports, module) {
         "not": "!",
         "=": "=="
     };
-       
+    /**
+     * Specific-length equivalents should be typedefd for the specific compile, with respect to MISRA 1998 rule (Rule 13, advisory)
+     */   
     function getType(type) {
         var typeMaps = {
-            "Time": "Time",    //iachino: Serve??
+            "Time": "Time",    //TO iachino: Serve??
             "bool": "UC_8",
             "char": "UC_8",
             "int": "UI_32",
@@ -107,7 +109,7 @@ define(function (require, exports, module) {
                 declarations.push("#define FALSE 0");
             }    
         }
-        if (type.toLowerCase() === "char") {
+        if (type.toLowerCase() === "char") { //The type char shall always be declared as unsigned char or signed char, with respect to MISRA 1998 rule (Rule 14, required)
             type = typeMaps.char;
             if(!isInArray(declarations, type)){
                 declarations.push("typedef unsigned char " + type + ";");
@@ -135,7 +137,7 @@ define(function (require, exports, module) {
     }
     
     /**
-     * Add a char with the properly value's suffix, useful for variable declarations
+     * Add a char with the properly value's suffix, with respect to MISRA 1998 rule (Rule 18, advisory)
      */
     function setSuffix(v) {
         if (isNumber(v.value)){
@@ -150,7 +152,7 @@ define(function (require, exports, module) {
     }
     
     /**
-     * Returns a char with the properly value's suffix, useful for parsing transations
+     * Returns a char with the properly value's suffix, useful for parsing transations, with respect to MISRA 1998 rule (Rule 18, advisory)
      */
     function getSuffixInActions(v, emuchart) {
         var ret = '';
@@ -367,8 +369,8 @@ define(function (require, exports, module) {
             });
         }
         //declarations.push("typedef unsigned char UC_8;"); /*if states are declared as char*/
-        this.model.structureVar.push("UC_8 *" + predefined_variables.current_state.name + ";");
-        this.model.structureVar.push("UC_8 *" + predefined_variables.previous_state.name + ";");
+        this.model.structureVar.push("state " + predefined_variables.current_state.name + ";");  //TO BE REVIEWED
+        this.model.structureVar.push("state " + predefined_variables.previous_state.name + ";"); //TO BE REVIEWED
     };
     
     Printer.prototype.print_transitions = function (emuchart) {

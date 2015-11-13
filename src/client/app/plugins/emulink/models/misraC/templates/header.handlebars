@@ -11,22 +11,22 @@
  
 {{~#if input_variables}}
 /* input variables */
-{{~#each input_variables}}
+{{~#each input_variables}}{{!-- {{keyword exter may be applied for external objects in header, with respect to MISRA 1998 rule (Rule 27, advisory)}} --}}
 extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{~#if output_variables}}
 /* output variables */
-{{~#each output_variables}}
+{{~#each output_variables}}{{!-- {{keyword exter may be applied for external objects in header, with respect to MISRA 1998 rule (Rule 27, advisory)}} --}}
 extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if transitions}}
 /* helper functions */
-struct_state enter(UC_8* newStateLabel, struct_state st);
+struct_state enter(state newStateLabel, struct_state st);
 
-struct_state leave(UC_8* currentStateLabel, struct_state st);{{/if}}
+struct_state leave(state currentStateLabel, struct_state st);{{/if}}
 {{#if initial_transitions}}
 /* initialiser */
-{{#each initial_transitions}}struct_state init{{&init_suffix_for_header}}();}{{/each}}{{/if}}
+{{#each initial_transitions}}struct_state init{{&init_suffix_for_header}}();{{/each}}{{/if}}
 {{#if transitions}}
 /* functions for model */{{#each transitions}}{{#if id}}struct_state {{id}}(struct_state st);
 {{else}}
