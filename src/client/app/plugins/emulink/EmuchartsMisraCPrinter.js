@@ -139,7 +139,8 @@ define(function (require, exports, module) {
     }
     
     /**
-     * Add a char with the properly value's suffix, with respect to MISRA 1998 rule (Rule 18, advisory)
+     * Set a number with the properly value's suffix, useful for parsing declaration's variable, with respect to MISRA 1998 rule (Rule 18, advisory)
+     * Parameter is current value
      */
     function setSuffix(v) {
         if (isNumber(v.value)){
@@ -147,28 +148,38 @@ define(function (require, exports, module) {
                 v.value = v.value + "u";
             }
             if ( (v.type.toUpperCase() === typeMaps.float) || (v.type.toUpperCase() === typeMaps.double) ){
-                v.value = v.value + "f";
+                if (v.value.indexOf(".") === -1){
+                    v.value = v.value + ".0f";
+                }
+                else{
+                    v.value = v.value + "f";
+                }
             }
         }
         return v.value;
     }
     
     /**
-     * Returns a char with the properly value's suffix, useful for parsing transations, with respect to MISRA 1998 rule (Rule 18, advisory)
+     * Set a number with the properly value's suffix, useful for parsing actions's transations, with respect to MISRA 1998 rule (Rule 18, advisory)
+     * Parameters are variable definitions, current value to analize and emucharts structure
      */
-    function getSuffixInActions(v, emuchart) {
-        var ret = '';
+    function setSuffixInActions(variable, val, emuchart) {
         emuchart.variables.local.map(function(z){
-            if(v.val.identifier.val === z.name){
+            if(variable.val.identifier.val === z.name){
                 if ( z.type === typeMaps.int ) {
-                    ret = "u";
+                    val += "u";
                 }
                 if ( (z.type === typeMaps.float) || (z.type === typeMaps.double) ){
-                    ret = "f";
+                    if (val.indexOf(".") === -1){
+                        val += ".0f";
+                    }
+                    else{
+                        val += "f";
+                    }
                 }
             } 
         });
-        return ret;
+        return val;
     }
     
     /**
@@ -195,7 +206,7 @@ define(function (require, exports, module) {
     function isNumber(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     }
-   
+        
     /**
      * Check if a value is a local variable in the emuchart structure
      * Return a boolean
@@ -297,7 +308,7 @@ define(function (require, exports, module) {
                 actions = actions.val.map(function (a) {
                     a.val.expression.val.map(function(b){
                         if(b.type === "number"){
-                            b.val += getSuffixInActions(a, emuchart);
+                            b.val = setSuffixInActions(a, b.val, emuchart);                         
                         }
                     });
                     return getExpression(a, emuchart);
