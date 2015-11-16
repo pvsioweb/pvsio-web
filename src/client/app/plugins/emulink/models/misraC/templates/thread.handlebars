@@ -1,16 +1,11 @@
 {{&descriptor}}
 #include "{{filename}}.h"
+#include <assert.h>
 
 {{~#if constants}}
 /* constants variables */
 {{~#each constants}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
 static const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
-{{~/if}}
-
-{{~#if local_variables}}
-/* local variables */
-{{~#each local_variables}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
-//static {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if states}}
 /* declaration of state labels */
@@ -19,11 +14,13 @@ static const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{#if transitions}}
 /* declaration of helper functions */
 struct_state enter(state newStateLabel, struct_state st) {
+    assert( (st != NULL) && (newStateLabel != NULL) );
     st.current_state = newStateLabel;
     return st;
 }
 
 struct_state leave(state currentStateLabel, struct_state st) {
+    assert( (st != NULL) && (currentStateLabel != NULL) );
     st.previous_state = currentStateLabel;
     return st;
 }{{/if}}
@@ -31,6 +28,8 @@ struct_state leave(state currentStateLabel, struct_state st) {
 /* initialisation function for model */
 {{#each initial_transitions}}struct_state init{{&init_suffix}}(){
     struct_state st = enter({{target.id}}, st);
+    {{#each ../local_variables}}{{#if value}}st.{{name}} = {{&value}};{{/if}}
+    {{/each}}
     {{~#each actions}}
     {{&.}};{{/each}}
     return st;
@@ -38,6 +37,7 @@ struct_state leave(state currentStateLabel, struct_state st) {
 {{#if transitions}}
 /* function declarations */
 {{#each transitions}}{{#if id}}struct_state {{id}}(struct_state st) {
+    assert(st != NULL); 
 {{~#if condition}}
     if ({{&condition}}) {
         st = leave({{source.id}}, st);
@@ -54,6 +54,7 @@ struct_state leave(state currentStateLabel, struct_state st) {
     return st;
 }
 {{else}}struct_state {{0.id}}(struct_state st) {
+    assert(st != NULL);
 {{#each .}}
 {{~#if condition}}
     if ({{&condition}} && st.current_state == {{source.id}}) {
