@@ -247,16 +247,22 @@ define(function (require, exports, module) {
             if (expression.type === "assignment") {
                 var name = expression.val.identifier.val;
                 expression.val.expression.val.map(function (v) {
-                    v.val = v.val.toLowerCase();
+                    if (v.type === "identifier"){
+                        v.val = "st." + v.val;
+                    }
+                    v.val = v.val.toLowerCase();                    
                     return;
                 });
                 if (isLocalVariable(name, emuchart)) {
-                    return name + " = " +
+                    return "st." + name + " = " +
                             getExpression(expression.val.expression, emuchart);                
                 }
-                return name + "(" +
+                return "st." + name + "(" +
                         getExpression(expression.val.expression, emuchart) + ")";
             } else {
+                if (expression.type === 'identifier'){
+                    expression.val = "st." + expression.val; 
+                }
                 if (Array.isArray(expression.val)) {
                     var res = expression.val.map(function (token) {
                         if (complexActions.indexOf(token.val) > -1) {

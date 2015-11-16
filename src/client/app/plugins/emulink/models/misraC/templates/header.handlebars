@@ -7,12 +7,10 @@ typedef enum {
     {{#each states~}}{{name}},{{/each}}
 }state;{{/if}}
  
-/**
-*   This program shall use the following structure:
-*   typedef struct{
-{{#each structureVar}}*            {{&.}}
-{{/each}}*   }struct_state;
-**/ 
+/* This program shall use the following structure:*/
+typedef struct{
+{{#each structureVar}} 		{{&.}}
+{{/each}} }struct_state;
  
 {{~#if input_variables}}
 /* input variables */

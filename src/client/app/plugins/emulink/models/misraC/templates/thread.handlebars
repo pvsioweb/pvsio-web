@@ -10,7 +10,7 @@ static const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~#if local_variables}}
 /* local variables */
 {{~#each local_variables}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
-static {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
+//static {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if states}}
 /* declaration of state labels */
@@ -32,7 +32,7 @@ struct_state leave(state currentStateLabel, struct_state st) {
 {{#each initial_transitions}}struct_state init{{&init_suffix}}(){
     struct_state st = enter({{target.id}}, st);
     {{~#each actions}}
-    st.{{&.}};{{/each}}
+    {{&.}};{{/each}}
     return st;
 }{{/each}}{{/if}}
 {{#if transitions}}
@@ -42,13 +42,13 @@ struct_state leave(state currentStateLabel, struct_state st) {
     if ({{&condition}}) {
         st = leave({{source.id}}, st);
         {{~#each actions}}
-        st.{{&.}};{{/each}}
+        {{&.}};{{/each}}
         st = enter({{target.id}}, st);
     }
 {{~else}}
     st = leave({{source.id}}, st);
     {{~#each actions}}
-    st.{{&.}};{{~/each}}
+    {{&.}};{{~/each}}
     st = enter({{target.id}}, st);
 {{~/if}}
     return st;
@@ -56,16 +56,16 @@ struct_state leave(state currentStateLabel, struct_state st) {
 {{else}}struct_state {{0.id}}(struct_state st) {
 {{#each .}}
 {{~#if condition}}
-    if ({{&condition}} && current_state == {{source.id}}) {
+    if ({{&condition}} && st.current_state == {{source.id}}) {
         st = leave({{source.id}}, st);
         {{~#each actions}}
-        st.{{&.}};{{/each}}
+        {{&.}};{{/each}}
         st = enter({{target.id}}, st);
     }{{~else}}
     if (current_state == {{source.id}}) {
         st = leave({{source.id}}, st);
         {{~#each actions}}
-        st.{{&.}};{{~/each}}
+        {{&.}};{{~/each}}
         st = enter({{target.id}}, st);
 {{~/if}}{{/each}}
     return st;
