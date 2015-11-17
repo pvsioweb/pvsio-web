@@ -1,6 +1,7 @@
 {{&descriptor}}
 #include "{{filename}}.h"
 #include <assert.h>
+#include <stddef.h>
 
 {{~#if constants}}
 /* constants variables */
@@ -14,20 +15,21 @@ static const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{#if transitions}}
 /* declaration of helper functions */
 struct_state enter(state newStateLabel, struct_state st) {
-    assert( (st != NULL) && (newStateLabel != NULL) );
+    //assert( (st != NULL) && (newStateLabel != NULL) );
     st.current_state = newStateLabel;
     return st;
 }
 
 struct_state leave(state currentStateLabel, struct_state st) {
-    assert( (st != NULL) && (currentStateLabel != NULL) );
+    //assert( (st != NULL) && (currentStateLabel != NULL) );
     st.previous_state = currentStateLabel;
     return st;
 }{{/if}}
 {{#if initial_transitions}}
 /* initialisation function for model */
 {{#each initial_transitions}}struct_state init{{&init_suffix}}(){
-    struct_state st = enter({{target.id}}, st);
+    struct_state st;
+    st = enter({{target.id}}, st);
     {{#each ../local_variables}}{{#if value}}st.{{name}} = {{&value}};{{/if}}
     {{/each}}
     {{~#each actions}}
@@ -37,7 +39,7 @@ struct_state leave(state currentStateLabel, struct_state st) {
 {{#if transitions}}
 /* function declarations */
 {{#each transitions}}{{#if id}}struct_state {{id}}(struct_state st) {
-    assert(st != NULL); 
+    //assert(st.current_state != NULL); 
 {{~#if condition}}
     if ({{&condition}}) {
         st = leave({{source.id}}, st);
@@ -54,7 +56,7 @@ struct_state leave(state currentStateLabel, struct_state st) {
     return st;
 }
 {{else}}struct_state {{0.id}}(struct_state st) {
-    assert(st != NULL);
+    //assert(st.current_state != NULL);
 {{#each .}}
 {{~#if condition}}
     if ({{&condition}} && st.current_state == {{source.id}}) {

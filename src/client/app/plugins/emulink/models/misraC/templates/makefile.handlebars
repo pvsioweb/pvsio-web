@@ -1,7 +1,7 @@
 {{&makefile_descriptor}}
 NAME = {{filename}}
 CC = gcc
-CFLAG = -Wall -O2 -Werror
+CFLAGS = -Wall -O2 -Werror -Waggregate-return -Wmissing-noreturn -Wpacked -Wunreachable-code
 HEAD = {{filename}}.h
 SOURCES = {{filename}}.c
 OBJ = $(SOURCES:.c=.o)
@@ -9,12 +9,12 @@ OBJ = $(SOURCES:.c=.o)
 .PHONY : clean help install uninstall
 
 %.o: %.c $(HEAD)
-	@$(CC) -c -o $@ $< $(CFLAGS)
+	@$(CC) $(CFLAGS) -c $< -o $@ 
 
 build: $(NAME)
 
 $(NAME): $(OBJ)
-	@$(CC) -o $@ $^ $(CFLAGS)
+	#@$(CC) $(CFLAGS) -c $< -o $@
 	@echo "Build finished. Executable created: $(NAME)"
 
 install:
@@ -37,6 +37,11 @@ help:
 	@echo "uninstall        : remove tool from system. Root permission required"
 	@echo "clean            : remove all .o files and executable file"
 	@echo "NAME=yourname    : change program name"
-	@echo 
+	@echo
+	@echo  "-------------------------------------------------------------"
+	@echo  "  Makefile generated using PVSio-web MisraCPrinter ver 0.1"
+	@echo  "  Tool freely available at http:##www.pvsioweb.org"
+	@echo  "-------------------------------------------------------------" 
+	@echo
 
 {{&makefile_disclaimer}}
