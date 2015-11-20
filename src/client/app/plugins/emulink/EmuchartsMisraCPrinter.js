@@ -97,19 +97,27 @@ define(function (require, exports, module) {
         "float" : "F_32",
         "double": "D_64"                      
     };
+    
+    /* Adding initial declarations, always useful to manage boolean variable */
+    declarations.push("#define true 1");
+    declarations.push("#define false 0");
+    declarations.push("#define TRUE 1");
+    declarations.push("#define FALSE 0");
+    declarations.push("typedef unsigned char " + typeMaps.bool + ";");
+    
     /**
      * Specific-length equivalents should be typedefd for the specific compile, with respect to MISRA 1998 rule (Rule 13, advisory)
      */   
     function getType(type) {
         if ( (type.toLowerCase() === "bool") || (type.toLowerCase() === "boolean") ) {
             type = typeMaps.bool;
-            if(!isInArray(declarations, "true")){
-                declarations.push("#define true 1");
-                declarations.push("#define false 0");
-                declarations.push("#define TRUE 1");
-                declarations.push("#define FALSE 0");
-                declarations.push("typedef unsigned char " + type + ";");
-            }    
+            // if(!isInArray(declarations, "true")){
+            //     declarations.push("#define true 1");
+            //     declarations.push("#define false 0");
+            //     declarations.push("#define TRUE 1");
+            //     declarations.push("#define FALSE 0");
+            //     declarations.push("typedef unsigned char " + type + ";");
+            // }    
         }
         if (type.toLowerCase() === "char") { //The type char shall always be declared as unsigned char or signed char, with respect to MISRA 1998 rule (Rule 14, required)
             type = typeMaps.char;
@@ -259,20 +267,20 @@ define(function (require, exports, module) {
                 var name = expression.val.identifier.val;
                 expression.val.expression.val.map(function (v) {
                     if (v.type === "identifier"){
-                        v.val = "st." + v.val;
+                        v.val = "st->" + v.val;
                     }
-                    v.val = v.val.toLowerCase();                    
+                    v.val = v.val.toLowerCase();
                     return;
                 });
                 if (isLocalVariable(name, emuchart)) {
-                    return "st." + name + " = " +
+                    return "st->" + name + " = " +
                             getExpression(expression.val.expression, emuchart);                
                 }
-                return "st." + name + "(" +
+                return "st" + name + "(" +
                         getExpression(expression.val.expression, emuchart) + ")";
             } else {
                 if (expression.type === 'identifier'){
-                    expression.val = "st." + expression.val; 
+                    expression.val = "st->" + expression.val;
                 }
                 if (Array.isArray(expression.val)) {
                     var res = expression.val.map(function (token) {
@@ -387,6 +395,7 @@ define(function (require, exports, module) {
                 return (v.type + " "+ v.name + ";");
             });
         }
+        this.model.structureVar.push(typeMaps.bool + " valid;");
         this.model.structureVar.push("state " + predefined_variables.current_state.name + ";");  //TO BE REVIEWED
         this.model.structureVar.push("state " + predefined_variables.previous_state.name + ";"); //TO BE REVIEWED
     };

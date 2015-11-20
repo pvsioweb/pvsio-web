@@ -1,7 +1,6 @@
 {{&descriptor}}
 #include "{{filename}}.h"
 #include <assert.h>
-#include <stddef.h>
 
 {{~#if constants}}
 /* constants variables */
@@ -14,64 +13,63 @@ static const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{/each}}{{/if}}
 {{#if transitions}}
 /* declaration of helper functions */
-struct_state enter(state newStateLabel, struct_state st) {
-    //assert( (st != NULL) && (newStateLabel != NULL) );
-    st.current_state = newStateLabel;
-    return st;
+void enter(state newStateLabel, struct_state *st) {
+    assert( st->valid );
+    st->current_state = newStateLabel;
 }
 
-struct_state leave(state currentStateLabel, struct_state st) {
-    //assert( (st != NULL) && (currentStateLabel != NULL) );
-    st.previous_state = currentStateLabel;
-    return st;
+void leave(state currentStateLabel, struct_state *st) {
+    assert( st->valid );
+    st->previous_state = currentStateLabel;
 }{{/if}}
 {{#if initial_transitions}}
 /* initialisation function for model */
 {{#each initial_transitions}}struct_state init{{&init_suffix}}(){
-    struct_state st;
-    st = enter({{target.id}}, st);
-    {{#each ../local_variables}}{{#if value}}st.{{name}} = {{&value}};{{/if}}
+    struct_state p;{{!-- {{useful to use te arrow notation event inside init functions}} --}}
+    struct_state *st = &p;
+    st->valid = true;
+    enter({{target.id}}, st);
+    {{#each ../local_variables}}{{#if value}}st->{{name}} = {{&value}};{{/if}}
     {{/each}}
     {{~#each actions}}
     {{&.}};{{/each}}
-    return st;
-}{{/each}}{{/if}}
+    return *st;
+}
+{{/each}}{{/if}}
 {{#if transitions}}
 /* function declarations */
-{{#each transitions}}{{#if id}}struct_state {{id}}(struct_state st) {
-    //assert(st.current_state != NULL); 
+{{#each transitions}}{{#if id}}void {{id}}(struct_state *st) {
+    assert( st->valid ); 
 {{~#if condition}}
     if ({{&condition}}) {
-        st = leave({{source.id}}, st);
+        leave({{source.id}}, st);
         {{~#each actions}}
         {{&.}};{{/each}}
-        st = enter({{target.id}}, st);
+        enter({{target.id}}, st);
     }
 {{~else}}
-    st = leave({{source.id}}, st);
+    leave({{source.id}}, st);
     {{~#each actions}}
     {{&.}};{{~/each}}
-    st = enter({{target.id}}, st);
+    enter({{target.id}}, st);
 {{~/if}}
-    return st;
 }
 {{else}}struct_state {{0.id}}(struct_state st) {
-    //assert(st.current_state != NULL);
+    assert( st->valid );
 {{#each .}}
 {{~#if condition}}
-    if ({{&condition}} && st.current_state == {{source.id}}) {
-        st = leave({{source.id}}, st);
+    if ({{&condition}} && st->current_state == {{source.id}}) {
+        leave({{source.id}}, st);
         {{~#each actions}}
         {{&.}};{{/each}}
-        st = enter({{target.id}}, st);
+        enter({{target.id}}, st);
     }{{~else}}
     if (current_state == {{source.id}}) {
-        st = leave({{source.id}}, st);
+        leave({{source.id}}, st);
         {{~#each actions}}
         {{&.}};{{~/each}}
-        st = enter({{target.id}}, st);
+        enter({{target.id}}, st);
 {{~/if}}{{/each}}
-    return st;
 }
 {{/if}}
 {{/each}}{{/if}}

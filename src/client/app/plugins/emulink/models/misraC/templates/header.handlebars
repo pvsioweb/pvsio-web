@@ -24,16 +24,18 @@ extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if transitions}}
 /* helper functions */
-struct_state enter(state newStateLabel, struct_state st);
+void enter(state newStateLabel, struct_state *st);
 
-struct_state leave(state currentStateLabel, struct_state st);{{/if}}
+void leave(state currentStateLabel, struct_state *st);{{/if}}
 {{#if initial_transitions}}
 /* initialiser */
-{{#each initial_transitions}}struct_state init{{&init_suffix_for_header}}();{{/each}}{{/if}}
+{{#each initial_transitions}}struct_state init{{&init_suffix_for_header}}();
+{{/each}}{{/if}}
 {{#if transitions}}
-/* functions for model */{{#each transitions}}{{#if id}}struct_state {{id}}(struct_state st);
+/* functions for model */
+{{#each transitions}}{{#if id}}void {{id}}(struct_state *st);
 {{else}}
-struct_state {{0.id}}(struct_state st);
+void {{0.id}}(struct_state *st);
 {{/if}}
 {{/each}}{{/if}}
 {{&disclaimer}}

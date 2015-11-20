@@ -14,7 +14,7 @@ OBJ = $(SOURCES:.c=.o)
 build: $(NAME)
 
 $(NAME): $(OBJ)
-	#@$(CC) $(CFLAGS) -c $< -o $@
+	#@$(CC) $(CFLAGS) $< -o $@
 	@echo "Build finished. Executable created: $(NAME)"
 
 install:
