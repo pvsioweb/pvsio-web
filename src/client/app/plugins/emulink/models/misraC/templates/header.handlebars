@@ -13,15 +13,15 @@ typedef struct{
 {{/each}} }struct_state;
  
 {{~#if input_variables}}
-/* input variables */
+/* input variables 
 {{~#each input_variables}}{{!-- {{keyword exter may be applied for external objects in header, with respect to MISRA 1998 rule (Rule 27, advisory)}} --}}
 extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
-{{~/if}}
+*/{{~/if}}
 {{~#if output_variables}}
-/* output variables */
+/* output variables 
 {{~#each output_variables}}{{!-- {{keyword exter may be applied for external objects in header, with respect to MISRA 1998 rule (Rule 27, advisory)}} --}}
 extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
-{{~/if}}
+*/{{~/if}}
 {{#if transitions}}
 /* helper functions */
 void enter(state newStateLabel, struct_state *st);
@@ -33,9 +33,9 @@ void leave(state currentStateLabel, struct_state *st);{{/if}}
 {{/each}}{{/if}}
 {{#if transitions}}
 /* functions for model */
-{{#each transitions}}{{#if id}}void {{id}}(struct_state *st);
+{{#each transitions}}{{#if id}}void {{id}}(struct_state *st, void* InOutVAriables);
 {{else}}
-void {{0.id}}(struct_state *st);
+void {{0.id}}(struct_state *st, void* InOutVAriables);
 {{/if}}
 {{/each}}{{/if}}
 {{&disclaimer}}

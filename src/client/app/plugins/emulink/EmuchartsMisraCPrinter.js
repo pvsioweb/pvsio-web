@@ -90,7 +90,7 @@ define(function (require, exports, module) {
     };
     
     var typeMaps = {
-        "Time": "Time",    //TO iachino: Serve??
+        "Time": "Time",    //Iachino: Serve??
         "bool": "UC_8",
         "char": "UC_8",
         "int": "UI_32",
@@ -98,7 +98,7 @@ define(function (require, exports, module) {
         "double": "D_64"                      
     };
     
-    /* Adding initial declarations, always useful to manage boolean variable */
+    /* Adding initial declarations, always useful to manage boolean variables */
     declarations.push("#define true 1");
     declarations.push("#define false 0");
     declarations.push("#define TRUE 1");
@@ -111,7 +111,7 @@ define(function (require, exports, module) {
     function getType(type) {
         if ( (type.toLowerCase() === "bool") || (type.toLowerCase() === "boolean") ) {
             type = typeMaps.bool;
-            // if(!isInArray(declarations, "true")){
+            // if(!isInArray(declarations, "true")){  //Iachino: remove in case of decision to declare always boolean typedef
             //     declarations.push("#define true 1");
             //     declarations.push("#define false 0");
             //     declarations.push("#define TRUE 1");
@@ -267,20 +267,27 @@ define(function (require, exports, module) {
                 var name = expression.val.identifier.val;
                 expression.val.expression.val.map(function (v) {
                     if (v.type === "identifier"){
-                        v.val = "st->" + v.val;
+                        if(isLocalVariable(v.val, emuchart)) {
+                            v.val = "st->" + v.val;
+                        }else {
+                            v.val = "InOutVAriables->"+ v.val;
+                        }
                     }
-                    v.val = v.val.toLowerCase();
                     return;
                 });
                 if (isLocalVariable(name, emuchart)) {
                     return "st->" + name + " = " +
                             getExpression(expression.val.expression, emuchart);                
                 }
-                return "st" + name + "(" +
-                        getExpression(expression.val.expression, emuchart) + ")";
+                return "InOutVAriables->" + name + " = " +
+                        getExpression(expression.val.expression, emuchart);
             } else {
                 if (expression.type === 'identifier'){
-                    expression.val = "st->" + expression.val;
+                    if(isLocalVariable(expression.val, emuchart)) {
+                            expression.val = "st->" + expression.val;
+                        }else {
+                            expression.val = "InOutVAriables->"+ expression.val;
+                        }
                 }
                 if (Array.isArray(expression.val)) {
                     var res = expression.val.map(function (token) {
@@ -532,7 +539,7 @@ define(function (require, exports, module) {
         this.print_disclaimer(emuchart);
         this.print_descriptor(emuchart);
         
-        console.log(this.model);//TO debug
+        console.log(this.model);//Iachino: TO debug
         
         var makefile = Handlebars.compile(makefileTemplate)(this.model);
         var thread = Handlebars.compile(threadTemplate)(this.model);
