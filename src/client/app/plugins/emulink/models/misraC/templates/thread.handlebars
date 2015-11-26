@@ -1,8 +1,8 @@
 {{&descriptor}}
- /** Asserts:
-  *      'st->valid' is TRUE.
-  *      The structure is initialized
-  */
+/** Asserts:
+ *      'st->valid' is TRUE.
+ *      The structure is initialized
+ */
 #include "{{filename}}.h"
 #include <assert.h>
 
@@ -58,7 +58,7 @@ void leave(state currentStateLabel, struct_state *st) {
     enter({{target.id}}, st);
 {{~/if}}
 }
-{{else}}struct_state {{0.id}}(struct_state st, void* InOutVAriables) {
+{{else}}void {{0.id}}(struct_state *st, void* InOutVAriables) {
     assert( st->valid );
 {{#each .}}
 {{~#if condition}}

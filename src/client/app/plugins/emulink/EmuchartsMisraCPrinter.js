@@ -98,13 +98,6 @@ define(function (require, exports, module) {
         "double": "D_64"                      
     };
     
-    /* Adding initial declarations, always useful to manage boolean variables */
-    declarations.push("#define true 1");
-    declarations.push("#define false 0");
-    declarations.push("#define TRUE 1");
-    declarations.push("#define FALSE 0");
-    declarations.push("typedef unsigned char " + typeMaps.bool + ";");
-    
     /**
      * Specific-length equivalents should be typedefd for the specific compile, with respect to MISRA 1998 rule (Rule 13, advisory)
      */   
@@ -395,6 +388,12 @@ define(function (require, exports, module) {
     };
 
     Printer.prototype.print_declarations = function (emuchart) {
+        /* Adding initial declarations, always useful to manage boolean variables */
+        declarations.push("#define true 1");
+        declarations.push("#define false 0");
+        declarations.push("#define TRUE 1");
+        declarations.push("#define FALSE 0");
+        declarations.push("typedef unsigned char " + typeMaps.bool + ";");
         this.model.importings = declarations;
         if (emuchart.variables) {
             this.model.structureVar = emuchart.variables.local.map(function (v) {

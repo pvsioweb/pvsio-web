@@ -4,24 +4,24 @@
 {{#if states}}
 /* enumeration of state labels */
 typedef enum {
-    {{#each states~}}{{name}},{{/each}}
+    {{#each states~}}{{name}}{{#unless @last}},{{/unless}}{{/each}}
 }state;{{/if}}
  
-/* This program shall use the following structure:*/
+/* Structure containing labelled states and local variables*/
 typedef struct{
 {{#each structureVar}} 		{{&.}}
-{{/each}} }struct_state;
- 
-{{~#if input_variables}}
-/* input variables 
-{{~#each input_variables}}{{!-- {{keyword exter may be applied for external objects in header, with respect to MISRA 1998 rule (Rule 27, advisory)}} --}}
-extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
-*/{{~/if}}
+{{/each}}
+{{~#if input_variables}}        //input variables   //TO REWIEV
+{{~#each input_variables}}
+        {{type}} {{name}};{{/each}}
+{{~/if}} 
 {{~#if output_variables}}
-/* output variables 
-{{~#each output_variables}}{{!-- {{keyword exter may be applied for external objects in header, with respect to MISRA 1998 rule (Rule 27, advisory)}} --}}
-extern {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
-*/{{~/if}}
+        //output variables
+{{~#each output_variables}}
+        {{type}} {{name}};{{/each}}
+{{~/if}}
+}struct_state;
+ 
 {{#if transitions}}
 /* helper functions */
 void enter(state newStateLabel, struct_state *st);
