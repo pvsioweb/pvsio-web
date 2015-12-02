@@ -6,6 +6,12 @@
 typedef enum {
     {{#each states~}}{{name}}{{#unless @last}},{{/unless}}{{/each}}
 }state;{{/if}}
+
+{{~#if constants}}
+/* constants variables */
+{{~#each constants}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
+extern const {{type}} {{name}};{{/each}}
+{{~/if}}
  
 /* Structure containing labelled states and local variables*/
 typedef struct{

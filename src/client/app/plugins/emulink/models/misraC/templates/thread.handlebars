@@ -1,20 +1,22 @@
 {{&descriptor}}
 /** Asserts:
  *      'st->valid' is TRUE.
- *      The structure is initialized
+ *          The structure is initialized
+ *      st->current_state == [state]
+ *          Function are called from the right state      
  */
 #include "{{filename}}.h"
 #include <assert.h>
 
-{{~#if constants}}
-/* constants variables */
-{{~#each constants}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
-static const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
-{{~/if}}
 {{#if states}}
 /* declaration of state labels */
 {{#each states~}}state {{id}} = {{&name}};
 {{/each}}{{/if}}
+{{~#if constants}}
+/* constants variables */
+{{~#each constants}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
+const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
+{{~/if}}
 {{#if transitions}}
 /* declaration of helper functions */
 void enter(state newStateLabel, struct_state *st) {
@@ -43,7 +45,7 @@ void leave(state currentStateLabel, struct_state *st) {
 {{#if transitions}}
 /* function declarations */
 {{#each transitions}}{{#if id}}void {{id}}(struct_state *st, void* InOutVAriables) {
-    assert( st->valid ); 
+    assert( st->valid && st->current_state == {{source.id}}); 
 {{~#if condition}}
     if ({{&condition}}) {
         leave({{source.id}}, st);
