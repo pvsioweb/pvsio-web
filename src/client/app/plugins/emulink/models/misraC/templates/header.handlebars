@@ -35,7 +35,7 @@ void enter(state newStateLabel, struct_state *st);
 void leave(state currentStateLabel, struct_state *st);{{/if}}
 {{#if initial_transitions}}
 /* initialiser */
-{{#each initial_transitions}}struct_state init{{&init_suffix_for_header}}();
+{{#each initial_transitions}}struct_state init{{&init_suffix_for_header}}(struct_state *st);
 {{/each}}{{/if}}
 {{#if transitions}}
 /* functions for model */

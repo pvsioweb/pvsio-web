@@ -30,9 +30,7 @@ void leave(state currentStateLabel, struct_state *st) {
 }{{/if}}
 {{#if initial_transitions}}
 /* initialisation function for model */
-{{#each initial_transitions}}struct_state init{{&init_suffix}}(){
-    struct_state p;{{!-- {{useful to use te arrow notation event inside init functions}} --}}
-    struct_state *st = &p;
+{{#each initial_transitions}}struct_state init{{&init_suffix}}(struct_state *st){
     st->valid = true;
     enter({{target.id}}, st);
     {{#each ../local_variables}}{{#if value}}st->{{name}} = {{&value}};{{/if}}
