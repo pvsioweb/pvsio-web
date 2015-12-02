@@ -263,7 +263,7 @@ define(function (require, exports, module) {
                         if(isLocalVariable(v.val, emuchart)) {
                             v.val = "st->" + v.val;
                         }else {
-                            v.val = "InOutVAriables->"+ v.val;
+                            v.val = "st->"+ v.val;
                         }
                     }
                     return;
@@ -272,14 +272,14 @@ define(function (require, exports, module) {
                     return "st->" + name + " = " +
                             getExpression(expression.val.expression, emuchart);                
                 }
-                return "InOutVAriables->" + name + " = " +
+                return "st->" + name + " = " +
                         getExpression(expression.val.expression, emuchart);
             } else {
                 if (expression.type === 'identifier'){
                     if(isLocalVariable(expression.val, emuchart)) {
                             expression.val = "st->" + expression.val;
                         }else {
-                            expression.val = "InOutVAriables->"+ expression.val;
+                            expression.val = "st->"+ expression.val;
                         }
                 }
                 if (Array.isArray(expression.val)) {
