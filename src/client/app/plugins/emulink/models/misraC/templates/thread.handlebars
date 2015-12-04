@@ -8,10 +8,6 @@
 #include "{{filename}}.h"
 #include <assert.h>
 
-{{#if states}}
-/* declaration of state labels */
-{{#each states~}}state {{id}} = {{&name}};
-{{/each}}{{/if}}
 {{~#if constants}}
 /* constants variables */
 {{~#each constants}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
@@ -32,7 +28,7 @@ void leave(state currentStateLabel, struct_state *st) {
 /* initialisation function for model */
 {{#each initial_transitions}}struct_state init{{&init_suffix}}(struct_state *st){
     st->valid = true;
-    enter({{target.id}}, st);
+    enter({{target.name}}, st);
     {{#each ../local_variables}}{{#if value}}st->{{name}} = {{&value}};{{/if}}
     {{/each}}
     {{~#each actions}}
@@ -42,38 +38,40 @@ void leave(state currentStateLabel, struct_state *st) {
 {{/each}}{{/if}}
 {{#if transitions}}
 /* function declarations */
-{{#each transitions}}{{#if id}}void {{id}}(struct_state *st) {
-    assert( st->valid && st->current_state == {{source.id}}); 
+{{#each transitions}}{{#if id}}struct_state {{id}}(struct_state *st) {
+    assert( st->valid && st->current_state == {{source.name}}); 
 {{~#if condition}}
     if ({{&condition}}) {
-        leave({{source.id}}, st);
+        leave({{source.name}}, st);
         {{~#each actions}}
         {{&.}};{{/each}}
-        enter({{target.id}}, st);
+        enter({{target.name}}, st);
     }
 {{~else}}
-    leave({{source.id}}, st);
+    leave({{source.name}}, st);
     {{~#each actions}}
     {{&.}};{{~/each}}
-    enter({{target.id}}, st);
+    enter({{target.name}}, st);
 {{~/if}}
+    return *st;
 }
-{{else}}void {{0.id}}(struct_state *st) {
+{{else}}struct_state {{0.id}}(struct_state *st) {
     assert( st->valid );
 {{#each .}}
 {{~#if condition}}
-    if ({{&condition}} && st->current_state == {{source.id}}) {
-        leave({{source.id}}, st);
+    if ({{&condition}} && st->current_state == {{source.name}}) {
+        leave({{source.name}}, st);
         {{~#each actions}}
         {{&.}};{{/each}}
-        enter({{target.id}}, st);
+        enter({{target.name}}, st);
     }{{~else}}
-    if (current_state == {{source.id}}) {
-        leave({{source.id}}, st);
+    if (current_state == {{source.name}}) {
+        leave({{source.name}}, st);
         {{~#each actions}}
         {{&.}};{{~/each}}
-        enter({{target.id}}, st);
+        enter({{target.name}}, st);
 {{~/if}}{{/each}}
+    return *st;
 }
 {{/if}}
 {{/each}}{{/if}}
