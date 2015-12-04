@@ -5,7 +5,7 @@
 /* enumeration of state labels */
 typedef enum {
     {{#each states~}}{{name}}{{#unless @last}},{{/unless}}{{/each}}
-}state;{{/if}}
+} MachineState;{{/if}}
 
 {{~#if constants}}
 /* constants variables */
@@ -14,32 +14,24 @@ extern const {{type}} {{name}};{{/each}}
 {{~/if}}
  
 /* Structure containing labelled states and local variables*/
-typedef struct{
-{{#each structureVar}} 		{{&.}}
-{{/each}}
+typedef struct{ {{#each structureVar}}
+    {{&.}}{{/each}}
 {{~#if input_variables}}        //input variables
 {{~#each input_variables}}
-        {{type}} {{name}};{{/each}}
-{{~/if}} 
-{{~#if output_variables}}
-        //output variables
+    {{type}} {{name}};{{/each}}{{~/if}}{{~#if output_variables}}
+    //output variables
 {{~#each output_variables}}
-        {{type}} {{name}};{{/each}}
-{{~/if}}
-}struct_state;
- 
-{{#if transitions}}
-/* helper functions */
-void enter(state newStateLabel, struct_state *st);
+    {{type}} {{name}};{{/each}}{{~/if}}
+} state;
 
-void leave(state currentStateLabel, struct_state *st);{{/if}}
-{{#if initial_transitions}}
-/* initialiser */
-{{#each initial_transitions}}struct_state init{{&init_suffix_for_header}}(struct_state *st);
-{{/each}}{{/if}}
-{{#if transitions}}
-/* functions for model */
-{{#each transitions}}{{#if id}}struct_state {{id}}(struct_state *st);
-{{else}}struct_state {{0.id}}(struct_state *st);{{/if}}
+{{#if transitions}}/* auxiliary functions */
+void enter(MachineState newStateLabel, state *st);
+void leave(MachineState currentStateLabel, state *st);{{/if}}
+
+{{#if initial_transitions}}/* initialiser */
+state init{{&init_suffix_for_header}}(state *st);{{/if}}
+
+{{#if transitions}}/* transition functions */
+{{#each transitions}}{{#if id}}state {{id}}(state *st);{{else}}state {{0.id}}(state *st);{{/if}}
 {{/each}}{{/if}}
 {{&disclaimer}}

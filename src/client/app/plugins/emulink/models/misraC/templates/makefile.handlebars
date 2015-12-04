@@ -1,7 +1,7 @@
 {{&makefile_descriptor}}
 NAME = {{filename}}
 CC = gcc
-CFLAGS = -Wall -O2 -Werror -Waggregate-return -Wmissing-noreturn -Wpacked -Wunreachable-code
+CFLAGS = -Wall -O2 -Werror -Wmissing-noreturn -Wpacked -Wunreachable-code
 HEAD = {{filename}}.h
 SOURCES = {{filename}}.c
 OBJ = $(SOURCES:.c=.o)
@@ -15,18 +15,18 @@ build: $(NAME)
 
 $(NAME): $(OBJ)
 	#@$(CC) $(CFLAGS) $< -o $@
-	@echo "Build finished. Executable created: $(NAME)"
+	@echo $(OBJ) "compiled successfully!"
 
 install:
-	-@cp ./$(NAME) /usr/bin
-	@echo "Installed"
+	-@cp ./$(OBJ) /usr/bin
+	@echo $(OBJ) "installed in /usr/bin"
 
 uninstall:
-	-@rm /usr/bin/$(NAME)
-	@echo "Uninstalled"
+	-@rm /usr/bin/$(OBJ)
+	@echo $(OBJ) "uninstalled from /usr/bin"
 
 clean:
-	-@rm -r ./*.o $(NAME)
+	@echo $(OBJ) "removed successfully!"
 
 help:
 	@echo

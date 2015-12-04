@@ -1,6 +1,6 @@
 {{&descriptor}}
 /** Asserts:
- *      'st->valid' is TRUE.
+ *      st->valid is TRUE.
  *          The structure is initialized
  *      st->current_state == [state]
  *          Function are called from the right state      
@@ -14,31 +14,28 @@
 const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if transitions}}
-/* declaration of helper functions */
-void enter(state newStateLabel, struct_state *st) {
+/* definition of auxiliary functions */
+void enter(MachineState newStateLabel, state *st) {
     assert( st->valid );
     st->current_state = newStateLabel;
 }
-
-void leave(state currentStateLabel, struct_state *st) {
+void leave(MachineState currentStateLabel, state *st) {
     assert( st->valid );
     st->previous_state = currentStateLabel;
 }{{/if}}
-{{#if initial_transitions}}
-/* initialisation function for model */
-{{#each initial_transitions}}struct_state init{{&init_suffix}}(struct_state *st){
+
+{{#if initial_transitions}}/* definition of initialisation function */
+{{#each initial_transitions}}state init{{&init_suffix}}(state *st){
     st->valid = true;
     enter({{target.name}}, st);
-    {{#each ../local_variables}}{{#if value}}st->{{name}} = {{&value}};{{/if}}
-    {{/each}}
-    {{~#each actions}}
-    {{&.}};{{/each}}
-    return *st;
+    {{#each ../local_variables}}{{#if value}}st->{{name}} = {{&value}};
+    {{/if}}{{/each}}{{~#each actions}}{{&.}};
+    {{/each}}return *st;
 }
 {{/each}}{{/if}}
-{{#if transitions}}
-/* function declarations */
-{{#each transitions}}{{#if id}}struct_state {{id}}(struct_state *st) {
+
+{{#if transitions}}/* definition of transition functions */
+{{#each transitions}}{{#if id}}state {{id}}(state *st) {
     assert( st->valid && st->current_state == {{source.name}}); 
 {{~#if condition}}
     if ({{&condition}}) {
@@ -55,7 +52,7 @@ void leave(state currentStateLabel, struct_state *st) {
 {{~/if}}
     return *st;
 }
-{{else}}struct_state {{0.id}}(struct_state *st) {
+{{else}}state {{0.id}}(state *st) {
     assert( st->valid );
 {{#each .}}
 {{~#if condition}}

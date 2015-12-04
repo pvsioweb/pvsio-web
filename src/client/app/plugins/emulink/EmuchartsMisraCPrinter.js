@@ -70,7 +70,7 @@ define(function (require, exports, module) {
         displayNotification(msg, "Compilation Error");
     };
 
-    var machineStateType = "state";
+    var machineStateType = "MachineState";
     var initialMachineState = "initialMachineState";
     var predefined_variables = {
         previous_state: { name: "previous_state", type: machineStateType, value: initialMachineState },
@@ -402,8 +402,8 @@ define(function (require, exports, module) {
             });
         }
         this.model.structureVar.push(typeMaps.bool + " valid;");
-        this.model.structureVar.push("state " + predefined_variables.current_state.name + ";");  //TO BE REVIEWED
-        this.model.structureVar.push("state " + predefined_variables.previous_state.name + ";"); //TO BE REVIEWED
+        this.model.structureVar.push(machineStateType + " " + predefined_variables.current_state.name + ";");  //TO BE REVIEWED
+        this.model.structureVar.push(machineStateType + " " + predefined_variables.previous_state.name + ";"); //TO BE REVIEWED
     };
     
     Printer.prototype.print_transitions = function (emuchart) {
