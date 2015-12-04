@@ -138,8 +138,11 @@
     "id": "VAR_display:real(Local)",
     "name": "display",
     "type": "real",
+    "value": "0",
     "scope": "Local"
    }
-  ]
+  ],
+  "pmr": {},
+  "isPIM": false
  }
 }
