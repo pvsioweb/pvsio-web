@@ -90,7 +90,7 @@
     }
    },
    {
-    "name": "click_DOWN [ display = 0 ] { display := 10 }",
+    "name": "click_DOWN [ display = 0 ] { display := 0 }",
     "id": "T7",
     "source": {
      "name": "on",
@@ -106,7 +106,7 @@
     }
    },
    {
-    "name": "click_UP [ display = 10 ] { display := 0 }",
+    "name": "click_UP [ display = 10 ] { display := 10 }",
     "id": "T8",
     "source": {
      "name": "on",
