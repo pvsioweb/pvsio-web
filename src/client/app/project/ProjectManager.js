@@ -120,6 +120,7 @@ define(function (require, exports, module) {
             }
         } else if (event.event === "rename" || event.event === "change") { //file or folder added
             if (event.isDirectory && event.name !== "pvsbin") {
+                event.subFiles = event.subFiles || [];
                 children = getFolderChildren(event.subFiles, event.path);
                 if (!pvsFilesListView.getTreeList().nodeExists(event.path)) {
                     parentFolderName = event.path.split("/").slice(0, -1).join("/");
@@ -686,12 +687,15 @@ define(function (require, exports, module) {
                                 // remove existing folder, save project and then rename folder
                                 fs.rmDir(e.data.projectName).then(function (res) {
                                     saveProject(e.data.projectName);
-                                }).catch(function (err) { reject(err); });
+                                }).catch(function (err) {
+                                    console.log("Warning: Error while trying to remove project folder. " + err);
+                                    saveProject(e.data.projectName);
+                                });
                                 view.remove();
                             }).on("cancel", function (e, view) {
                                 reject({
                                     code: "EEXISTS",
-                                    message: "Cannot save: project " + e.data.projectName + " already exists."
+                                    message: "Operation cancelled by the user"
                                 });
                             });
                     } else {

@@ -177,8 +177,8 @@ define(function (require, exports, module) {
      * @memberof EmuchartsEditor
      */
     function labelToString(label) {
-        if (label.length > 16) {
-            return label.substring(0, 16) + "...";
+        if (label.length > 64) {
+            return label.substring(0, 64) + "...";
         }
         return label;
     }

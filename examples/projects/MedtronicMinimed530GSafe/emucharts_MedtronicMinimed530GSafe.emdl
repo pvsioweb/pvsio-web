@@ -3,7 +3,7 @@
   "file_type": "emdl",
   "version": "1.3",
   "description": "emucharts model",
-  "chart_name": "emucharts_MedtronicMinimed530G"
+  "chart_name": "emucharts_MedtronicMinimed530GSafe"
  },
  "chart": {
   "states": [
