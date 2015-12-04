@@ -257,10 +257,16 @@ define(function (require, exports, module) {
             switchToSimulatorView();
         });
         d3.select("#btnSaveProject").on("click", function () {
+            if (d3.select("#btn_menuSaveChart").node()) {
+                d3.select("#btn_menuSaveChart").node().click();
+            }
             projectManager.saveProject();
         });
 
         d3.select("#btnSaveProjectAs").on("click", function () {
+            if (d3.select("#btn_menuSaveChart").node()) {
+                d3.select("#btn_menuSaveChart").node().click();
+            }
             var name = projectManager.project().name() + "_" + (new Date().getFullYear()) + "." +
                             (new Date().getMonth() + 1) + "." + (new Date().getDate());
             projectManager.saveProjectDialog(name);

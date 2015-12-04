@@ -619,7 +619,7 @@ define(function (require, exports, module) {
 
                 var content = JSON.stringify(emuchart, null, " ");
                 projectManager.project().addFile(name, content, { overWrite: true }).then(function (res) {
-                    displayNotification("File " + name + " saved successfully!");
+                    //displayNotification("File " + name + " saved successfully!");
                 }).catch(function (err) {
                     displayNotification("Error while saving file " +
                                           name + " (" + JSON.stringify(err) + ")");
