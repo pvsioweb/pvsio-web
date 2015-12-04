@@ -456,27 +456,6 @@ define(function (require, exports, module) {
             i = 0,
             transitions = [];
         initial_transitions.forEach(function (t) {
-            Handlebars.registerHelper('init_suffix', function(emuchart) {
-                if (initial_transitions[i]){
-                    i++;
-                    if( (initial_transitions[i-1].name === "") || !(initial_transitions[i-1].name[0].match(/[a-z]/i)) ){
-                        return;
-                    }
-                    else{
-                        return "_" + initial_transitions[i-1].name.substr(0,3);
-                    }
-                }
-            });
-            Handlebars.registerHelper('init_suffix_for_header', function(emuchart) {
-                if (initial_transitions[i-1]){
-                    if( (initial_transitions[i-1].name === "") || !(initial_transitions[i-1].name[0].match(/[a-z]/i)) ){
-                        return;
-                    }
-                    else{
-                        return "_" + initial_transitions[i-1].name.substr(0,3);
-                    }
-                }
-            });
             var parsedInit = parseTransition(t, emuchart);
             if (parsedInit) {
                 transitions.push(parsedInit);

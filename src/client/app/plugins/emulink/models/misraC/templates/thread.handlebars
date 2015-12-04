@@ -25,14 +25,21 @@ void leave(MachineState currentStateLabel, state *st) {
 }{{/if}}
 
 {{#if initial_transitions}}/* definition of initialisation function */
-{{#each initial_transitions}}state init{{&init_suffix}}(state *st){
+state init(state *st){
     st->valid = true;
-    enter({{target.name}}, st);
     {{#each ../local_variables}}{{#if value}}st->{{name}} = {{&value}};
-    {{/if}}{{/each}}{{~#each actions}}{{&.}};
-    {{/each}}return *st;
+    {{/if}}{{/each}}
+    {{~#each initial_transitions}}
+    {{~#if condition}}if ({{&condition}}) {
+        enter({{target.name}}, st);
+        {{#each actions}}{{&.}};
+        {{/each}}
+    }
+    return *st;{{~else}}enter({{target.name}}, st);
+    {{#each actions}}{{&.}};
+    {{/each}}return *st;{{/if}}{{/each}}
 }
-{{/each}}{{/if}}
+{{/if}}
 
 {{#if transitions}}/* definition of transition functions */
 {{#each transitions}}{{#if id}}state {{id}}(state *st) {

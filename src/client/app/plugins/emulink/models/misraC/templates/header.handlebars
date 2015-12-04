@@ -29,7 +29,7 @@ void enter(MachineState newStateLabel, state *st);
 void leave(MachineState currentStateLabel, state *st);{{/if}}
 
 {{#if initial_transitions}}/* initialiser */
-state init{{&init_suffix_for_header}}(state *st);{{/if}}
+state init(state *st);{{/if}}
 
 {{#if transitions}}/* transition functions */
 {{#each transitions}}{{#if id}}state {{id}}(state *st);{{else}}state {{0.id}}(state *st);{{/if}}
