@@ -1,15 +1,15 @@
 ###---------------------------------------------------------------
-#   Model: emucharts_MedtronicMinimed530G_MisraC
+#   Model: emucharts_MedtronicMinimed530GSafe_MisraC
 #   Author: <author name>
 #           <affiliation>
 #           <contact>
 #  ---------------------------------------------------------------##
 
-NAME = emucharts_MedtronicMinimed530G_MisraC
+NAME = emucharts_MedtronicMinimed530GSafe_MisraC
 CC = gcc
-CFLAGS = -Wall -O2 -Werror -Waggregate-return -Wmissing-noreturn -Wpacked -Wunreachable-code
-HEAD = emucharts_MedtronicMinimed530G_MisraC.h
-SOURCES = emucharts_MedtronicMinimed530G_MisraC.c
+CFLAGS = -Wall -O2 -Werror -Wmissing-noreturn -Wpacked -Wunreachable-code
+HEAD = emucharts_MedtronicMinimed530GSafe_MisraC.h
+SOURCES = emucharts_MedtronicMinimed530GSafe_MisraC.c
 OBJ = $(SOURCES:.c=.o)
 
 .PHONY : clean help install uninstall
@@ -21,18 +21,19 @@ build: $(NAME)
 
 $(NAME): $(OBJ)
 	#@$(CC) $(CFLAGS) $< -o $@
-	@echo "Build finished. Executable created: $(NAME)"
+	@echo $(OBJ) "compiled successfully!"
 
 install:
-	-@cp ./$(NAME) /usr/bin
+	-@cp ./$(OBJ) /usr/bin
 	@echo "Installed"
 
 uninstall:
-	-@rm /usr/bin/$(NAME)
+	-@rm /usr/bin/$(OBJ)
 	@echo "Uninstalled"
 
 clean:
-	-@rm -r ./*.o $(NAME)
+	-@rm -rf $(OBJ)
+	@echo $(OBJ) "removed successfully!"
 
 help:
 	@echo
