@@ -1,9 +1,11 @@
 {{&descriptor}}
 /** Asserts:
- *      st->valid is TRUE.
+ *      st->valid is TRUE
  *          The structure is initialized
  *      st->current_state == [state]
- *          Function are called from the right state      
+ *          Function are called from the right state
+ *      edited is TRUE
+ *          Function has actually performed the transaction     
  */
 #include "{{filename}}.h"
 #include <assert.h>
@@ -43,13 +45,15 @@ state init(state *st){
 
 {{#if transitions}}/* definition of transition functions */
 {{#each transitions}}{{#if id}}state {{id}}(state *st) {
-    assert( st->valid && st->current_state == {{source.name}}); 
+    assert( st->valid && st->current_state == {{source.name}});
 {{~#if condition}}
+    UC_8 edited = false; 
     if ({{&condition}}) {
         leave({{source.name}}, st);
         {{~#each actions}}
         {{&.}};{{/each}}
         enter({{target.name}}, st);
+        edited = true;
     }
 {{~else}}
     leave({{source.name}}, st);
@@ -57,10 +61,13 @@ state init(state *st){
     {{&.}};{{~/each}}
     enter({{target.name}}, st);
 {{~/if}}
+{{~#if condition}}
+    assert ( edited );{{/if}}
     return *st;
 }
 {{else}}state {{0.id}}(state *st) {
     assert( st->valid );
+    UC_8 edited = false; 
 {{#each .}}
 {{~#if condition}}
     if ({{&condition}} && st->current_state == {{source.name}}) {
@@ -68,13 +75,16 @@ state init(state *st){
         {{~#each actions}}
         {{&.}};{{/each}}
         enter({{target.name}}, st);
+        edited = true;
     }{{~else}}
     if (current_state == {{source.name}}) {
         leave({{source.name}}, st);
         {{~#each actions}}
         {{&.}};{{~/each}}
         enter({{target.name}}, st);
+        edited = true;
 {{~/if}}{{/each}}
+    assert ( edited );
     return *st;
 }
 {{/if}}
