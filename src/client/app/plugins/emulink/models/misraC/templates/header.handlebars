@@ -16,7 +16,8 @@ extern const {{type}} {{name}};{{/each}}
 /* Structure containing labelled states and local variables*/
 typedef struct{ {{#each structureVar}}
     {{&.}}{{/each}}
-{{~#if input_variables}}        //input variables
+{{~#if input_variables}}
+    //input variables
 {{~#each input_variables}}
     {{type}} {{name}};{{/each}}{{~/if}}{{~#if output_variables}}
     //output variables

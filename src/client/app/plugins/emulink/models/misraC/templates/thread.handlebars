@@ -4,8 +4,6 @@
  *          The structure is initialized
  *      st->current_state == [state]
  *          Function are called from the right state
- *      edited is TRUE
- *          Function has actually performed the transaction     
  */
 #include "{{filename}}.h"
 #include <assert.h>
@@ -31,15 +29,21 @@ state init(state *st){
     st->valid = true;
     {{#each ../local_variables}}{{#if value}}st->{{name}} = {{&value}};
     {{/if}}{{/each}}
+    {{~#each ../input_variables}}{{#if value}}st->{{name}} = {{&value}};
+    {{/if}}{{/each}}
+    {{~#each ../output_variables}}{{#if value}}st->{{name}} = {{&value}};
+    {{/if}}{{/each}}
     {{~#each initial_transitions}}
     {{~#if condition}}if ({{&condition}}) {
         enter({{target.name}}, st);
         {{#each actions}}{{&.}};
-        {{/each}}
+        {{/each}}assert ( st->current_state == {{target.name}} );
+        return *st;
     }
-    return *st;{{~else}}enter({{target.name}}, st);
+    {{else}}enter({{target.name}}, st);
     {{#each actions}}{{&.}};
-    {{/each}}return *st;{{/if}}{{/each}}
+    {{/each}}assert ( st->current_state == {{target.name}} );
+    return *st;{{/if}}{{/each}}
 }
 {{/if}}
 
@@ -47,13 +51,11 @@ state init(state *st){
 {{#each transitions}}{{#if id}}state {{id}}(state *st) {
     assert( st->valid && st->current_state == {{source.name}});
 {{~#if condition}}
-    UC_8 edited = false; 
     if ({{&condition}}) {
         leave({{source.name}}, st);
         {{~#each actions}}
         {{&.}};{{/each}}
         enter({{target.name}}, st);
-        edited = true;
     }
 {{~else}}
     leave({{source.name}}, st);
@@ -61,13 +63,11 @@ state init(state *st){
     {{&.}};{{~/each}}
     enter({{target.name}}, st);
 {{~/if}}
-{{~#if condition}}
-    assert ( edited );{{/if}}
+    assert( st->current_state == {{target.name}} );
     return *st;
 }
 {{else}}state {{0.id}}(state *st) {
     assert( st->valid );
-    UC_8 edited = false; 
 {{#each .}}
 {{~#if condition}}
     if ({{&condition}} && st->current_state == {{source.name}}) {
@@ -75,16 +75,17 @@ state init(state *st){
         {{~#each actions}}
         {{&.}};{{/each}}
         enter({{target.name}}, st);
-        edited = true;
+        assert( st->current_state == {{target.name}} );
+        return *st;
     }{{~else}}
     if (current_state == {{source.name}}) {
         leave({{source.name}}, st);
         {{~#each actions}}
         {{&.}};{{~/each}}
         enter({{target.name}}, st);
-        edited = true;
+        assert( st->valid && st->current_state == {{target.name}} );
+        return *st;
 {{~/if}}{{/each}}
-    assert ( edited );
     return *st;
 }
 {{/if}}
