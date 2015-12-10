@@ -1,7 +1,7 @@
 {{&descriptor}}
 /** Asserts:
- *      st->valid is TRUE
- *          The structure is initialized
+ *      st->previous_state != NaN
+ *          System is initialised
  *      st->current_state == [state]
  *          Function are called from the right state
  */
@@ -16,17 +16,15 @@ const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{#if transitions}}
 /* definition of auxiliary functions */
 void enter(MachineState newStateLabel, state *st) {
-    assert( st->valid );
     st->current_state = newStateLabel;
 }
 void leave(MachineState currentStateLabel, state *st) {
-    assert( st->valid );
     st->previous_state = currentStateLabel;
 }{{/if}}
 
 {{#if initial_transitions}}/* definition of initialisation function */
 state init(state *st){
-    st->valid = true;
+    leave(off, st);     //leave call is issued in order to initilise previous state
     {{#each ../local_variables}}{{#if value}}st->{{name}} = {{&value}};
     {{/if}}{{/each}}
     {{~#each ../input_variables}}{{#if value}}st->{{name}} = {{&value}};
@@ -44,12 +42,11 @@ state init(state *st){
     {{#each actions}}{{&.}};
     {{/each}}assert ( st->current_state == {{target.name}} );
     return *st;{{/if}}{{/each}}
-}
-{{/if}}
+}{{/if}}
 
 {{#if transitions}}/* definition of transition functions */
 {{#each transitions}}{{#if id}}state {{id}}(state *st) {
-    assert( st->valid && st->current_state == {{source.name}});
+    assert( st->previous_state != NaN && st->current_state == {{source.name}});
 {{~#if condition}}
     if ({{&condition}}) {
         leave({{source.name}}, st);
@@ -67,7 +64,7 @@ state init(state *st){
     return *st;
 }
 {{else}}state {{0.id}}(state *st) {
-    assert( st->valid );
+    assert( st->previous_state != NaN && ({{~#each .}}st->current_state ==  {{source.name}} {{#unless @last}}|| {{/unless}}{{/each}}));
 {{#each .}}
 {{~#if condition}}
     if ({{&condition}} && st->current_state == {{source.name}}) {
@@ -83,10 +80,26 @@ state init(state *st){
         {{~#each actions}}
         {{&.}};{{~/each}}
         enter({{target.name}}, st);
-        assert( st->valid && st->current_state == {{target.name}} );
+        assert( st->previous_state != NaN && st->current_state == {{target.name}} );
         return *st;
 {{~/if}}{{/each}}
     return *st;
+}
+{{/if}}
+{{/each}}{{/if}}
+{{#if transitions}}/* definition of permission function for transition functions */
+{{#each transitions}}{{#if id}}UC_8 per_{{id}}(state *st) {
+    if(st->current_state == {{source.name}}){
+        return true;
+    }
+    return false;
+}
+{{else}}UC_8 per_{{0.id}}(state *st) {
+{{#each .}}
+    if (st->current_state == {{source.name}}){
+        return true;
+    }{{/each}}
+    return false;
 }
 {{/if}}
 {{/each}}{{/if}}

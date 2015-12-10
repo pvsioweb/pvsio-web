@@ -389,11 +389,11 @@ define(function (require, exports, module) {
 
     Printer.prototype.print_declarations = function (emuchart) {
         /* Adding initial declarations, always useful to manage boolean variables */
+        declarations.push("typedef unsigned char " + typeMaps.bool + ";");
         declarations.push("#define true 1");
         declarations.push("#define false 0");
         declarations.push("#define TRUE 1");
         declarations.push("#define FALSE 0");
-        declarations.push("typedef unsigned char " + typeMaps.bool + ";");
         this.model.importings = declarations;
         if (emuchart.variables) {
             this.model.structureVar = emuchart.variables.local.map(function (v) {
@@ -401,9 +401,8 @@ define(function (require, exports, module) {
                 return (v.type + " "+ v.name + ";");
             });
         }
-        this.model.structureVar.push(typeMaps.bool + " valid;");
-        this.model.structureVar.push(machineStateType + " " + predefined_variables.current_state.name + ";");  //TO BE REVIEWED
-        this.model.structureVar.push(machineStateType + " " + predefined_variables.previous_state.name + ";"); //TO BE REVIEWED
+        this.model.structureVar.push(machineStateType + " " + predefined_variables.current_state.name + ";");
+        this.model.structureVar.push(machineStateType + " " + predefined_variables.previous_state.name + ";");
     };
     
     Printer.prototype.print_transitions = function (emuchart) {

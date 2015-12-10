@@ -3,7 +3,7 @@ NAME = {{filename}}
 CC = gcc
 CFLAGS = -Wall -O2 -Werror -Wmissing-noreturn -Wpacked -Wunreachable-code
 HEAD = {{filename}}.h
-SOURCES = {{filename}}.c
+SOURCES = {{filename}}.c main.c
 OBJ = $(SOURCES:.c=.o)
 
 .PHONY : clean help install uninstall
@@ -14,7 +14,7 @@ OBJ = $(SOURCES:.c=.o)
 build: $(NAME)
 
 $(NAME): $(OBJ)
-	#@$(CC) $(CFLAGS) $< -o $@
+	#@$(CC) $(CFLAGS) -o $@ $^
 	@echo $(OBJ) "compiled successfully!"
 
 install:

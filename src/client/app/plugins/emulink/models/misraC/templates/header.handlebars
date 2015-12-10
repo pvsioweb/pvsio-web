@@ -4,7 +4,7 @@
 {{#if states}}
 /* enumeration of state labels */
 typedef enum {
-    {{#each states~}}{{name}}{{#unless @last}},{{/unless}}{{/each}}
+    NaN,{{#each states~}}{{name}}{{#unless @last}},{{/unless}}{{/each}}
 } MachineState;{{/if}}
 
 {{~#if constants}}
@@ -34,5 +34,8 @@ state init(state *st);{{/if}}
 
 {{#if transitions}}/* transition functions */
 {{#each transitions}}{{#if id}}state {{id}}(state *st);{{else}}state {{0.id}}(state *st);{{/if}}
+{{/each}}{{/if}}
+{{#if transitions}}/* permission function for transition functions */
+{{#each transitions}}{{#if id}}UC_8 per_{{id}}(state *st);{{else}}UC_8 per_{{0.id}}(state *st);{{/if}}
 {{/each}}{{/if}}
 {{&disclaimer}}
