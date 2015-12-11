@@ -14,8 +14,12 @@ OBJ = $(SOURCES:.c=.o)
 build: $(NAME)
 
 $(NAME): $(OBJ)
-	#@$(CC) $(CFLAGS) -o $@ $^
+	@$(CC) $(CFLAGS) -o $@ $^
+	@echo " "
 	@echo $(OBJ) "compiled successfully!"
+	@echo $(NAME) "was generated for illustrative purposes"
+	@echo " "
+	@echo "Edit 'main.c' file and compile again if you want to try to interact with the generated functions."
 
 install:
 	-@cp ./$(OBJ) /usr/bin

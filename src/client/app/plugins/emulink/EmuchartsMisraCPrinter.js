@@ -52,6 +52,7 @@ define(function (require, exports, module) {
     var makefileTemplate = require("text!plugins/emulink/models/misraC/templates/makefile.handlebars");
     var threadTemplate = require("text!plugins/emulink/models/misraC/templates/thread.handlebars");
     var headerTemplate = require("text!plugins/emulink/models/misraC/templates/header.handlebars");
+    var mainTemplate = require("text!plugins/emulink/models/misraC/templates/main.handlebars");
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
     var _parser = new EmuchartsParser();
@@ -521,8 +522,9 @@ define(function (require, exports, module) {
         var makefile = Handlebars.compile(makefileTemplate)(this.model);
         var thread = Handlebars.compile(threadTemplate)(this.model);
         var header = Handlebars.compile(headerTemplate)(this.model);
+        var main = Handlebars.compile(mainTemplate)(this.model);
         declarations = [];
-        return {makefile: makefile, thread: thread, header: header};
+        return {makefile: makefile, thread: thread, header: header, main: main};
     };
 
     module.exports = Printer;

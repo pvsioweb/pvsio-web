@@ -1317,6 +1317,7 @@ define(function (require, exports, module) {
             if (model.thread && model.header) {
                 var overWrite = {overWrite: true};
                 projectManager.project().addFile("Makefile", model.makefile, overWrite);
+                projectManager.project().addFile("main.c", model.main, overWrite);
                 projectManager.project().addFile(emucharts.name + ".c", model.thread, overWrite);
                 projectManager.project().addFile(emucharts.name + ".h", model.header, overWrite);
             } else {

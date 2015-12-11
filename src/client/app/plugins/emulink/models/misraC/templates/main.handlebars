@@ -1,0 +1,55 @@
+{{&descriptor}}
+#include "{{filename}}.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+#define NUM_OF_FUNC {{transitions.length}}
+#define NUM_OF_TESTS 20
+
+
+int main(){
+    char *MachineState[] = { "NaN", {{#each states~}}"{{name}}"{{#unless @last}}, {{/unless}}{{/each}} };
+    /*
+     * At first instantiate state variable and call init() in order to initialise it as follow: 
+     */
+    state s;
+    init(&s);
+    printf("Initialised, current state: %s \n-------\n", MachineState[s.current_state]);
+    
+    /*
+     * It's recommended to call permission function before issuing the transition function as follow
+     *   if (per_{{#if transitions/0.id}}{{transitions/0.id}}{{else}}{{transitions/0.0.id}}{{/if}}(&s)){
+     *      {{#if transitions/0.id}}{{transitions/0.id}}{{else}}{{transitions/0.0.id}}{{/if}}(&s);
+     *      // Actions issued
+     *   }
+     *   else{
+     *      // Permission denied
+     *   }
+     */
+     
+    
+    /*
+     * Example generated in order to call all the functions with a stochastic process
+     * (this example doesn't have the knowledge of the diagram, it's illustrative purposes only)
+     *
+    char *function_name[] = { {{#each transitions}}"{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}"{{#unless @last}}, {{/unless}}{{/each}} };
+    int i,t;
+    for(i = 0; i < NUM_OF_TESTS; i++) {
+        t = rand() % (NUM_OF_FUNC + 1);
+        {{#each transitions}}if (strcmp(function_name[t], "{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}")){
+            if (per_{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}(&s)){
+                {{#if id}}{{id}}{{else}}{{0.id}}{{/if}}(&s);
+                printf("Press %s: current state: %s previous state: %s \n-------\n", function_name[t], MachineState[s.current_state], MachineState[s.previous_state]);
+            }
+            else{
+                printf("Permission to %s function denied\n", function_name[t]);
+            }
+        }
+        {{/each}} 
+    }
+    */
+    
+    return 0;
+}
+{{&disclaimer}}

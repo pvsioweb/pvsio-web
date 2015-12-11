@@ -3,7 +3,7 @@
  *      st->previous_state != NaN
  *          System is initialised
  *      st->current_state == [state]
- *          Function are called from the right state
+ *          Function is called from the right state
  */
 #include "{{filename}}.h"
 #include <assert.h>
@@ -24,7 +24,7 @@ void leave(MachineState currentStateLabel, state *st) {
 
 {{#if initial_transitions}}/* definition of initialisation function */
 state init(state *st){
-    leave(off, st);     //leave call is issued in order to initilise previous state
+    leave({{initial_transitions/0.target.name}}, st);     //leave call is issued in order to initilise previous state
     {{#each ../local_variables}}{{#if value}}st->{{name}} = {{&value}};
     {{/if}}{{/each}}
     {{~#each ../input_variables}}{{#if value}}st->{{name}} = {{&value}};
