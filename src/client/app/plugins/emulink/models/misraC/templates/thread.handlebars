@@ -46,7 +46,10 @@ state init(state *st){
 
 {{#if transitions}}/* definition of transition functions */
 {{#each transitions}}{{#if id}}state {{id}}(state *st) {
-    assert( st->previous_state != NaN && st->current_state == {{source.name}});
+    assert( st->previous_state != NaN );
+    assert( st->current_state ==  {{source.name}});
+    {{~#if condition}}
+    assert( {{&condition}} );{{~/if}}
 {{~#if condition}}
     if ({{&condition}}) {
         leave({{source.name}}, st);
@@ -64,7 +67,9 @@ state init(state *st){
     return *st;
 }
 {{else}}state {{0.id}}(state *st) {
-    assert( st->previous_state != NaN && ({{~#each .}}st->current_state ==  {{source.name}} {{#unless @last}}|| {{/unless}}{{/each}}));
+    assert( st->previous_state != NaN );
+    assert( {{#each .}}st->current_state ==  {{source.name}} {{#unless @last}}|| {{/unless}}{{/each}});
+    assert( {{#each .}}{{&condition}} {{#unless @last}}|| {{/unless}}{{/each}});
 {{#each .}}
 {{~#if condition}}
     if ({{&condition}} && st->current_state == {{source.name}}) {
