@@ -53,6 +53,7 @@ define(function (require, exports, module) {
     var threadTemplate = require("text!plugins/emulink/models/misraC/templates/thread.handlebars");
     var headerTemplate = require("text!plugins/emulink/models/misraC/templates/header.handlebars");
     var mainTemplate = require("text!plugins/emulink/models/misraC/templates/main.handlebars");
+    var doxygenTemplate = require("text!plugins/emulink/models/misraC/templates/doxygen.handlebars");
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
     var _parser = new EmuchartsParser();
@@ -402,8 +403,8 @@ define(function (require, exports, module) {
                 return (v.type + " "+ v.name + ";");
             });
         }
-        this.model.structureVar.push(machineStateType + " " + predefined_variables.current_state.name + ";");
-        this.model.structureVar.push(machineStateType + " " + predefined_variables.previous_state.name + ";");
+        this.model.structureVar.push(machineStateType + " " + predefined_variables.current_state.name + ";  ///<  Predefined variable for current state.");
+        this.model.structureVar.push(machineStateType + " " + predefined_variables.previous_state.name + ";  ///<  Predefined variable for previous state.");
     };
     
     Printer.prototype.print_transitions = function (emuchart) {
@@ -523,8 +524,9 @@ define(function (require, exports, module) {
         var thread = Handlebars.compile(threadTemplate)(this.model);
         var header = Handlebars.compile(headerTemplate)(this.model);
         var main = Handlebars.compile(mainTemplate)(this.model);
+        var doxygen = Handlebars.compile(doxygenTemplate)(this.model);
         declarations = [];
-        return {makefile: makefile, thread: thread, header: header, main: main};
+        return {makefile: makefile, thread: thread, header: header, main: main, doxygen: doxygen};
     };
 
     module.exports = Printer;

@@ -2,18 +2,24 @@
 {{#each importings}}
 {{&.}}{{/each}}
 {{#if states}}
-/* enumeration of state labels */
+/** 
+ * Enumeration of state labels.
+ */
 typedef enum {
     NaN,{{#each states~}}{{name}}{{#unless @last}},{{/unless}}{{/each}}
 } MachineState;{{/if}}
 
 {{~#if constants}}
-/* constants variables */
+/** 
+ * constants variables 
+ */
 {{~#each constants}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
 extern const {{type}} {{name}};{{/each}}
 {{~/if}}
  
-/* Structure containing labelled states and local variables*/
+/**
+ * Structure containing labelled states and variables
+ */
 typedef struct{ {{#each structureVar}}
     {{&.}}{{/each}}
 {{~#if input_variables}}
@@ -25,17 +31,50 @@ typedef struct{ {{#each structureVar}}
     {{type}} {{name}};{{/each}}{{~/if}}
 } state;
 
-{{#if transitions}}/* auxiliary functions */
+{{#if transitions}}/** 'Enter' auxiliary function.
+ *    \param newStateLabel a label to update the current state.
+ *    \param st a state structure pointer.
+ *    \return void
+ *    \sa leave()
+ */
 void enter(MachineState newStateLabel, state *st);
+/** 'Leave' auxiliary function.
+ *    \param currentStateLabel a label to update the previous state.
+ *    \param st a state structure pointer.
+ *    \return void
+ *   \sa enter()
+ */
 void leave(MachineState currentStateLabel, state *st);{{/if}}
 
-{{#if initial_transitions}}/* initialiser */
+{{#if initial_transitions}}/** Initialiser.
+ *   \param st a state structure pointer.
+ *    \return a state structure pointer
+ */
 state init(state *st);{{/if}}
-
-{{#if transitions}}/* transition functions */
-{{#each transitions}}{{#if id}}state {{id}}(state *st);{{else}}state {{0.id}}(state *st);{{/if}}
+{{#if transitions}}{{#each transitions}}
+{{#if id}}/** {{id}} transition function.
+ *    \param st a state structure pointer.
+ *    \return a state structure pointer
+ */
+state {{id}}(state *st);{{else}}/** {{0.id}} transition function.
+ * This function is generated merging two or more homonyms trasitions.
+ *    \param st a state structure pointer.
+ *    \return a state structure pointer
+ */
+state {{0.id}}(state *st);{{/if}}
 {{/each}}{{/if}}
-{{#if transitions}}/* permission function for transition functions */
-{{#each transitions}}{{#if id}}UC_8 per_{{id}}(state *st);{{else}}UC_8 per_{{0.id}}(state *st);{{/if}}
+{{#if transitions}}
+{{#each transitions}}{{#if id}}/** {{id}} permission function for transition.
+ * Useful to check if functions are invoking on the correct state.
+ *    \param st a state structure pointer.
+ *    \return a boolean
+ */
+UC_8 per_{{id}}(state *st);{{else}}/** {{0.id}} permission function for transition.
+ * Useful to check if functions are invoking on the correct state.
+ *    \param st a state structure pointer.
+ *    \return a boolean
+ */
+UC_8 per_{{0.id}}(state *st);{{/if}}
+
 {{/each}}{{/if}}
 {{&disclaimer}}

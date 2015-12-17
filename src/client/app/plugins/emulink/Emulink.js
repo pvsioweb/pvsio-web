@@ -1320,6 +1320,7 @@ define(function (require, exports, module) {
                 projectManager.project().addFile("main.c", model.main, overWrite);
                 projectManager.project().addFile(emucharts.name + ".c", model.thread, overWrite);
                 projectManager.project().addFile(emucharts.name + ".h", model.header, overWrite);
+                projectManager.project().addFile("Doxyfile", model.doxygen, overWrite);
             } else {
                 console.log("Warning, MisraC code is undefined.");
             }

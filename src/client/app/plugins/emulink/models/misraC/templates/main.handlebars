@@ -9,7 +9,7 @@
 
 
 int main(){
-    char *MachineState[] = { "NaN", {{#each states~}}"{{name}}"{{#unless @last}}, {{/unless}}{{/each}} };
+    char *MachineState[] = { "NaN", {{#each states~}}"{{name}}"{{#unless @last}}, {{/unless}}{{/each}} };   ///< Useful for printf()
     /*
      * At first instantiate state variable and call init() in order to initialise it as follow: 
      */
@@ -33,7 +33,7 @@ int main(){
      * Example generated in order to call all the functions with a stochastic process
      * (this example doesn't have the knowledge of the diagram, it's illustrative purposes only)
      *
-    char *function_name[] = { {{#each transitions}}"{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}"{{#unless @last}}, {{/unless}}{{/each}} };
+    char *function_name[] = { {{#each transitions}}"{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}"{{#unless @last}}, {{/unless}}{{/each}} };   ///< Useful for printf()
     int i,t;
     for(i = 0; i < NUM_OF_TESTS; i++) {
         t = rand() % (NUM_OF_FUNC + 1);
