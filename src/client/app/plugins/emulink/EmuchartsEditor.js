@@ -14,13 +14,13 @@ define(function (require, exports, module) {
         eventDispatcher = require("util/eventDispatcher"),
         Emucharts = require("plugins/emulink/Emucharts"),
         EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes");
-
+    
     var dbg = false;
 
     // constants for drawing states
 //    var width  = 900;
 //    var height = 800;
-    var colors = d3.scale.category10();
+//    var colors = d3.scale.category10();
     var fontSize = 10;
     var defaultWidth = 32;
     var defaultHeight = 32;
@@ -97,6 +97,7 @@ define(function (require, exports, module) {
         this.emucharts.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_initialTransitionRemoved", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_stateRenamed", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_stateColorChanged", function (event) { _this.fire(event); });
 
         this.emucharts.addListener("emuCharts_nodeFilterChanged", function (event) {
             _this._nodeFilter = event.filter;
@@ -1326,12 +1327,17 @@ define(function (require, exports, module) {
         states.select(".state_label").text(function (node) {
             return node.name;
         });
-        // refresh box size and position, if needed
+        // refresh box size, position, and color
         states.select(".state_box").attr("width", function (node) {
             return newBoxWidth(node.id);
         }).attr("x", function (node) {
             return -(newBoxWidth(node.id) / 2);
+        }).style("fill", function (node) {
+            return node.color;
+        }).style("stroke", function (node) { // draw a frame around the box
+            return d3.rgb(node.color).darker().toString();
         });
+
         // refresh move tool, if needed
         states.select(".state_move").attr("x", function (node) {
             return (newBoxWidth(node.id) / 2) - 18;
@@ -1370,12 +1376,11 @@ define(function (require, exports, module) {
             .attr("rx", 6).attr("ry", 6) // draw rounded corners
             .style("opacity", "0.9") // make the node slightly transparent
             .style("cursor", "pointer") // change cursor shape on mouse over
-            .style("fill", function (node) { // fill the box, avoid black
-                return (node.id === 0) ? d3.rgb(colors(node.id)).brighter().toString()
-                            : colors(node.id);
+            .style("fill", function (node) {
+                return node.color;
             })
             .style("stroke", function (node) { // draw a frame around the box
-                return d3.rgb(colors(node.id)).darker().toString();
+                return d3.rgb(node.color).darker().toString();
             });
         // draw move tool for boxes
 //        var moveTool =
@@ -1611,8 +1616,8 @@ define(function (require, exports, module) {
                 if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.node) {
                     if (mousedrag.node.id !== node.id) {
                         // change colour of drag arrow to give a cue that a mouse release will trigger the creation of a new transition between nodes
-                        drag_line.style("stroke", colors(node.id));
-                        d3.select("#drag-arrow path").style("fill", colors(node.id));
+                        drag_line.style("stroke", node.color);
+                        d3.select("#drag-arrow path").style("fill", node.color);
                     } else {
                         drag_line.style("stroke", "black");
                         d3.select("#drag-arrow path").style("fill", "black");
@@ -1736,6 +1741,15 @@ define(function (require, exports, module) {
     };
 
     /**
+     * @description Returns the descriptor of a state.
+     * @param id {String} The identifier of the state.
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.getState = function (id) {
+        return this.emucharts.getState(id);
+    };
+    
+    /**
      * Returns an array containing the current set of constants defined in the diagram
      * @memberof EmuchartsEditor
      */
@@ -1837,16 +1851,12 @@ define(function (require, exports, module) {
         refreshInitialTransitions(itransitions);
     };
 
-
     /**
-     * utility function to rename states
+     * utility function to edit states
      * @memberof EmuchartsEditor
      */
-    EmuchartsEditor.prototype.rename_state = function (stateID, newLabel) {
-        if (this.getIsPIM())
-            newLabel = newLabel.name;
-
-        this.emucharts.rename_node(stateID, newLabel);
+    EmuchartsEditor.prototype.edit_state = function (stateID, data) {
+        this.emucharts.edit_node(stateID, data);
         // refresh states
         var states = d3.select("#ContainerStateMachine")
             .select("#States").selectAll(".state")
