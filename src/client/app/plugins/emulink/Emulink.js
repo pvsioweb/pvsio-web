@@ -717,10 +717,10 @@ define(function (require, exports, module) {
 
         d3.select("#btn_menuNewState").on("click", function () {
             document.getElementById("menuStates").children[1].style.display = "none";
-//            var label = emuchartsManager.getFreshStateName();
+            var label = emuchartsManager.getFreshStateName();
             displayAddState.create({
-                header: "Please enter label for new state",
-                textLabel: "New state",
+                header: "Please enter a label for the new machine state",
+                textLabel: label,
                 buttons: ["Cancel", "Create"]
             }).on("create", function (e, view) {
                 var nodeLabel = e.data.labels.get("newLabel");
