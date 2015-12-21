@@ -30,6 +30,7 @@ uninstall:
 	@echo $(OBJ) "uninstalled from /usr/bin"
 
 clean:
+	-@rm -r ./*.o $(NAME)
 	@echo $(OBJ) "removed successfully!"
 
 help:

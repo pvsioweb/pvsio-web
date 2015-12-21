@@ -1,7 +1,22 @@
 {{&descriptor}}
 #include "{{filename}}.h"
 #include <assert.h>
+#ifndef STDIO_H 
+#define STDIO_H
+#include <stdio.h>
+#endif
 
+#define DEBUG
+
+#ifdef DEBUG
+#define DEBUG_TEST 1
+#else
+#define DEBUG_TEST 0
+#endif
+
+#define debug_print(fmt, args...) \
+        do { if (DEBUG_TEST) fprintf(stderr, "%s:%d:%s(): " fmt, \
+                __FILE__, __LINE__, __FUNCTION__, ##args); } while (0)
 {{~#if constants}}
 /* constants variables */
 {{~#each constants}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
@@ -10,15 +25,18 @@ const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{#if transitions}}
 /* definition of auxiliary functions */
 void enter(MachineState newStateLabel, state *st) {
+    debug_print("Entering state nr. '%u'.\n", newStateLabel);
     st->current_state = newStateLabel;
 }
 void leave(MachineState currentStateLabel, state *st) {
+    debug_print("Leaving state nr. '%u'.\n", currentStateLabel);
     st->previous_state = currentStateLabel;
 }{{/if}}
 
 {{#if initial_transitions}}/* definition of initialisation function */
 state init(state *st){
     leave({{initial_transitions/0.target.name}}, st);     //leave call is issued in order to initilise previous state
+    debug_print("Initialisation of state variables.\n");
     {{#each ../local_variables}}{{#if value}}st->{{name}} = {{&value}};
     {{/if}}{{/each}}
     {{~#each ../input_variables}}{{#if value}}st->{{name}} = {{&value}};
@@ -29,11 +47,13 @@ state init(state *st){
     {{~#if condition}}if ({{&condition}}) {
         enter({{target.name}}, st);
         {{#each actions}}{{&.}};
+        debug_print("Action {{&.}} issued.\n");
         {{/each}}assert ( st->current_state == {{target.name}} );
         return *st;
     }
     {{else}}enter({{target.name}}, st);
     {{#each actions}}{{&.}};
+    debug_print("Action {{&.}} issued.\n");
     {{/each}}assert ( st->current_state == {{target.name}} );
     return *st;{{/if}}{{/each}}
 }{{/if}}
@@ -48,13 +68,15 @@ state init(state *st){
     if ({{&condition}}) {
         leave({{source.name}}, st);
         {{~#each actions}}
-        {{&.}};{{/each}}
+        {{&.}};
+        debug_print("Action {{&.}} issued.\n");{{/each}}
         enter({{target.name}}, st);
     }
 {{~else}}
     leave({{source.name}}, st);
     {{~#each actions}}
-    {{&.}};{{~/each}}
+    {{&.}};
+    debug_print("Action {{&.}} issued.\n");{{~/each}}
     enter({{target.name}}, st);
 {{~/if}}
     assert( st->current_state == {{target.name}} );
@@ -69,7 +91,8 @@ state init(state *st){
     if ({{&condition}} && st->current_state == {{source.name}}) {
         leave({{source.name}}, st);
         {{~#each actions}}
-        {{&.}};{{/each}}
+        {{&.}};
+        debug_print("Action {{&.}} issued.\n");{{/each}}
         enter({{target.name}}, st);
         assert( st->current_state == {{target.name}} );
         return *st;
@@ -77,7 +100,8 @@ state init(state *st){
     if (current_state == {{source.name}}) {
         leave({{source.name}}, st);
         {{~#each actions}}
-        {{&.}};{{~/each}}
+        {{&.}};
+        debug_print("Action {{&.}} issued.\n");{{~/each}}
         enter({{target.name}}, st);
         assert( st->previous_state != NaN && st->current_state == {{target.name}} );
         return *st;
