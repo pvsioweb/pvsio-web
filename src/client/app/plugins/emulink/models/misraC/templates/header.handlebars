@@ -33,45 +33,54 @@ typedef struct{ {{#each structureVar}}
 
 {{#if transitions}}/** 'Enter' auxiliary function.
  *    \param newStateLabel a label to update the current state.
- *    \param st a state structure pointer.
+ *    \param st a state structure pointer
  *    \return void
  *    \sa leave()
  */
 void enter(MachineState newStateLabel, state *st);
 /** 'Leave' auxiliary function.
  *    \param currentStateLabel a label to update the previous state.
- *    \param st a state structure pointer.
+ *    \param st a state structure pointer
  *    \return void
- *   \sa enter()
+ *    \sa enter()
  */
 void leave(MachineState currentStateLabel, state *st);{{/if}}
 
 {{#if initial_transitions}}/** Initialiser.
- *   \param st a state structure pointer.
+ *    \param st a state structure pointer
  *    \return a state structure pointer
  */
 state init(state *st);{{/if}}
 {{#if transitions}}{{#each transitions}}
 {{#if id}}/** {{id}} transition function.
- *    \param st a state structure pointer.
+ *    It changes state from "{{source.name}}" to "{{target.name}}"{{~#if condition}} when condition [{{&condition}}] holds{{~/if}}.
+ *    \param st a state structure pointer
  *    \return a state structure pointer
+ *    \pre system is initialised (st->previous_state != NaN)
+ *    \pre function is called from the right state ("{{source.name}}" in this case)
+  *   \post function is moving to the right state ("{{target.name}}" in this case)
  */
 state {{id}}(state *st);{{else}}/** {{0.id}} transition function.
  * This function is generated merging two or more homonyms trasitions.
- *    \param st a state structure pointer.
+ *    It changes state{{~#each .}} from "{{source.name}}" to "{{target.name}}"{{~#if condition}} when condition [{{&condition}}] holds{{~/if}}{{#unless @last}},{{/unless}}
+ *    {{/each}}
+ *    \param st a state structure pointer
  *    \return a state structure pointer
+ *    \pre system is initialised (st->previous_state != NaN)
+ *    \pre function is called from the right state ({{#each .}}"{{source.name}}" {{#unless @last}}or {{/unless}}{{/each}}in this case)
+ *    \post function is moving to the right state ({{#each .}}"{{target.name}}" {{#unless @last}}or {{/unless}}{{/each}}in this case)
  */
 state {{0.id}}(state *st);{{/if}}
 {{/each}}{{/if}}
 {{#if transitions}}
 {{#each transitions}}{{#if id}}/** {{id}} permission function for transition.
  * Useful to check if functions are invoking on the correct state.
- *    \param st a state structure pointer.
+ *    \param st a state structure pointer
  *    \return a boolean
  */
 UC_8 per_{{id}}(state *st);{{else}}/** {{0.id}} permission function for transition.
  * Useful to check if functions are invoking on the correct state.
- *    \param st a state structure pointer.
+ *    \param st a state structure pointer
  *    \return a boolean
  */
 UC_8 per_{{0.id}}(state *st);{{/if}}
