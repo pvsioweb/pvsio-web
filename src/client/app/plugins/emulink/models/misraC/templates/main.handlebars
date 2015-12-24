@@ -15,7 +15,7 @@
 
 
 int main(){
-    UC_8 *MachineState[] = { "NaN", {{#each states~}}"{{name}}"{{#unless @last}}, {{/unless}}{{/each}} };   ///< Useful for printf()
+    char *MachineState[] = { "NaN", {{#each states~}}"{{name}}"{{#unless @last}}, {{/unless}}{{/each}} };   ///< Useful for printf()
     /*
      * At first instantiate state variable and call init() in order to initialise it as follow: 
      */
@@ -39,11 +39,11 @@ int main(){
      * Example generated in order to call all the functions with a stochastic process
      * (this example doesn't have the knowledge of the diagram, it's illustrative purposes only)
      *
-    UC_8 *function_name[] = { {{#each transitions}}"{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}"{{#unless @last}}, {{/unless}}{{/each}} };   ///< Useful for printf()
+    char *function_name[] = { {{#each transitions}}"{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}"{{#unless @last}}, {{/unless}}{{/each}} };   ///< Useful for printf()
     int i,t;
     for(i = 0; i < NUM_OF_TESTS; i++) {
-        t = rand() % (NUM_OF_FUNC + 1);
-        {{#each transitions}}if (strcmp(function_name[t], "{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}")){
+        t = rand() % (NUM_OF_FUNC);
+        {{#each transitions}}if (strcmp(function_name[t], "{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}") == 0){
             if (per_{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}(&s)){
                 {{#if id}}{{id}}{{else}}{{0.id}}{{/if}}(&s);
                 printf("Press %s: current state: %s previous state: %s \n-------\n", function_name[t], MachineState[s.current_state], MachineState[s.previous_state]);
