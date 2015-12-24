@@ -1,11 +1,12 @@
 {{&makefile_descriptor}}
-NAME = {{filename}}
+NAME = main
 CC = gcc
 CFLAGS = -Wall -O2 -Werror -Wmissing-noreturn -Wpacked -Wunreachable-code
 DEBUG = -Wall -O2 -Werror -Wmissing-noreturn -Wpacked -Wunreachable-code -D DEBUG
 HEAD = {{filename}}.h
 SOURCES = {{filename}}.c main.c
 OBJ = $(SOURCES:.c=.o)
+DEBUGFILES = main.dSYM
 
 .PHONY : clean help install uninstall
 
@@ -16,15 +17,17 @@ build: $(NAME)
 
 debug:$(OBJ)
 	@$(CC) $(DEBUG) -g $(SOURCES) -o $(NAME)
+	-@rm -r main.o
 	@echo " "
-	@echo $(OBJ) "compiled successfully! in debug mode"
-	@echo $(NAME) "was generated for illustrative purposes"
+	@echo $(OBJ) "compiled successfully in debug mode"
+	@echo "executable file (main) was generated for illustrative purposes"
 	
 $(NAME): $(OBJ)
 	@$(CC) $(CFLAGS) -o $@ $^
+	-@rm -r main.o
 	@echo " "
 	@echo $(OBJ) "compiled successfully!"
-	@echo $(NAME) "was generated for illustrative purposes"
+	@echo "executable file (main) was generated for illustrative purposes"
 	@echo " "
 	@echo "Edit 'main.c' file and compile again if you want to try to interact with the generated functions."
 
@@ -37,7 +40,7 @@ uninstall:
 	@echo $(OBJ) "uninstalled from /usr/bin"
 
 clean:
-	-@rm -r ./*.o $(NAME)
+	-@rm -f -r ./*.o $(NAME) $(DEBUGFILES)
 	@echo $(OBJ) "removed successfully!"
 
 help:
@@ -49,7 +52,7 @@ help:
 	@echo "install          : install tool in the system. Root permission required"
 	@echo "uninstall        : remove tool from system. Root permission required"
 	@echo "clean            : remove all .o files and executable file"
-	@echo "NAME=yourname    : change program name, default is:" $(NAME)"
+	@echo "NAME=yourname    : change program name, default is: 'main' "
 	@echo
 	@echo  "-------------------------------------------------------------"
 	@echo  "  Makefile generated using PVSio-web MisraCPrinter ver 0.1"
