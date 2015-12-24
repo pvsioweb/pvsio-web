@@ -2,6 +2,7 @@
 NAME = {{filename}}
 CC = gcc
 CFLAGS = -Wall -O2 -Werror -Wmissing-noreturn -Wpacked -Wunreachable-code
+DEBUG = -Wall -O2 -Werror -Wmissing-noreturn -Wpacked -Wunreachable-code -D DEBUG
 HEAD = {{filename}}.h
 SOURCES = {{filename}}.c main.c
 OBJ = $(SOURCES:.c=.o)
@@ -13,6 +14,12 @@ OBJ = $(SOURCES:.c=.o)
 
 build: $(NAME)
 
+debug:$(OBJ)
+	@$(CC) $(DEBUG) -g $(SOURCES) -o $(NAME)
+	@echo " "
+	@echo $(OBJ) "compiled successfully! in debug mode"
+	@echo $(NAME) "was generated for illustrative purposes"
+	
 $(NAME): $(OBJ)
 	@$(CC) $(CFLAGS) -o $@ $^
 	@echo " "
@@ -38,10 +45,11 @@ help:
 	@echo "Makefile"
 	@echo
 	@echo "make/make build  : build all"
+	@echo "debug 			: enable and compile in debug mode"
 	@echo "install          : install tool in the system. Root permission required"
 	@echo "uninstall        : remove tool from system. Root permission required"
 	@echo "clean            : remove all .o files and executable file"
-	@echo "NAME=yourname    : change program name"
+	@echo "NAME=yourname    : change program name, default is:" $(NAME)"
 	@echo
 	@echo  "-------------------------------------------------------------"
 	@echo  "  Makefile generated using PVSio-web MisraCPrinter ver 0.1"
