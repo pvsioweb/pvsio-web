@@ -67,37 +67,39 @@ function run() {
      * @param {Socket} socket The websocket to use to send the token
      */
     function processCallback(token, socket) {
-        //called when any data is recieved from pvs process
-        //if the type of the token is 'processExited' then send message to client if the socket is still open
-        token.time  = token.time || {server: {}};
-        token.time.server.sent = new Date().getTime();
+        try {
+            //called when any data is recieved from pvs process
+            //if the type of the token is 'processExited' then send message to client if the socket is still open
+            token.time  = token.time || {server: {}};
+            token.time.server.sent = new Date().getTime();
 
-        //always send relative directories to the client
-        if (token.name && token.name.indexOf(baseProjectDir) === 0) {
-            token.name = token.name.replace(baseProjectDir, "");
-        }
-        if (token.path && token.path.indexOf(baseProjectDir) === 0) {
-            token.path = token.path.replace(baseProjectDir, "");
-        }
-        if (token.files) {
-            token.files.forEach(function (f) {
-                if (f.path && f.path.indexOf(baseProjectDir) === 0) {
-                    f.path = f.path.replace(baseProjectDir, "");
+            //always send relative directories to the client
+            if (token.name && token.name.indexOf(baseProjectDir) === 0) {
+                token.name = token.name.replace(baseProjectDir, "");
+            }
+            if (token.path && token.path.indexOf(baseProjectDir) === 0) {
+                token.path = token.path.replace(baseProjectDir, "");
+            }
+            if (token.files) {
+                token.files.forEach(function (f) {
+                    if (f.path && f.path.indexOf(baseProjectDir) === 0) {
+                        f.path = f.path.replace(baseProjectDir, "");
+                    }
+                });
+            }
+            if (token.err) {
+                if (token.err.path) {
+                    token.err.path = token.err.path.replace(new RegExp(baseProjectDir, "g"), "");
                 }
-            });
-        }
-        if (token.err) {
-            if (token.err.path) {
-                token.err.path = token.err.path.replace(new RegExp(baseProjectDir, "g"), "");
+                if (token.err.message) {
+                    token.err.message = token.err.message.replace(new RegExp(baseProjectDir, "g"), "");
+                }
             }
-            if (token.err.message) {
-                token.err.message = token.err.message.replace(new RegExp(baseProjectDir, "g"), "");
+            if (socket && socket.readyState === 1) {
+                socket.send(JSON.stringify(token));
             }
-        }
-
-
-        if (socket && socket.readyState === 1) {
-            socket.send(JSON.stringify(token));
+        } catch (processCallbackError) {
+            console.log("WARNING: processCallbackError " + JSON.stringify(processCallbackError));
         }
     }
 
@@ -634,7 +636,7 @@ function run() {
                 writeFile(token.path, token.content, token.encoding, token.opt)
                     .then(function () {
                         processCallback(res, socket);
-                    }, function (err) {
+                    }).catch(function (err) {
                         res.type = token.type + "_error";
                         res.err = {
                             code: err.code,

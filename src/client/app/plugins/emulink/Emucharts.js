@@ -8,14 +8,24 @@
  * @date 14/05/14 2:53:03 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3*/
+/*global define*/
 define(function (require, exports, module) {
     "use strict";
 
-    var eventDispatcher = require("util/eventDispatcher");
+    var eventDispatcher = require("util/eventDispatcher"),
+        PIMs = require("plugins/emulink/models/pim/PIMs"),
+        d3 = require("d3/d3"),
+        Colors = require("plugins/emulink/tools/Colors");
     var _this;
 
-    var defaultValues = { x: 100, y: 100, width: 36, height: 36, fontSize: 10 };
+    var defaultValues = {
+            x: 100,
+            y: 100,
+            width: 36,
+            height: 36,
+            fontSize: 10,
+            color: Colors.getColor
+    };
 
     var getFreshNodeID = function () {
         function newNodeID () {
@@ -64,18 +74,24 @@ define(function (require, exports, module) {
             this.initial_edges = emuchart.initial_edges || d3.map();
             this.constants = emuchart.constants || d3.map();
             this.variables = emuchart.variables || d3.map();
+            this.pmr = emuchart.pmr || d3.map();
+            this.isPIM = emuchart.isPIM && emuchart.isPIM === true;
+            this.pim = new PIMs(this.isPIM);
         } else {
             this.nodes = d3.map();
             this.edges = d3.map();
             this.initial_edges = d3.map();
             this.variables = d3.map();
             this.constants = d3.map();
+            this.pmr = d3.map();
+            this.isPIM = false;
+            this.pim = new PIMs();
         }
         eventDispatcher(this);
         _this = this;
         return this;
     }
-
+    
     Emucharts.prototype.getEdges = function () {
         return _this.edges;
     };
@@ -92,19 +108,22 @@ define(function (require, exports, module) {
 
 
     /**
-     * @function rename_node
-     * @description Renames a node (i.e., a state) in the emuchart diagram.
+     * @function edit_node
+     * @description Edits a node (i.e., a state) in the emuchart diagram.
      * @param id {String} Identifier of the node that shall be renamed.
-     * @param newName {String} New name that shall be assigned to the node.
+     * @param data {Object} Structured type containing one field
+     *      - name (String), specifying the new name of the node
+     *      - color (String)
      * @returns {Boolean} true if node renamed successfully; otherwise returns false
      * @memberof module:Emucharts
      * @instance
      */
-    Emucharts.prototype.rename_node = function (id, newName) {
+    Emucharts.prototype.edit_node = function (id, data) {
         if (!id || !_this.nodes || !_this.nodes.get(id)) { return false; }
         // get node and rename it
         var node = _this.nodes.get(id);
-        node.name = newName;
+        node.name = data.name || node.name || "X" + node.id;
+        node.color = data.color || node.color || defaultValues.color(id);
         _this.nodes.set(node.id, node);
         // we need to rename also nodes cached in the edge structure
         // this can be quite expensive in term of time, but renaming is unlikely to be a frequent operation
@@ -114,11 +133,11 @@ define(function (require, exports, module) {
                 var edge = _this.edges.get(key);
                 var dirty = false;
                 if (edge.source.id === id) {
-                    edge.source.name = newName;
+                    edge.source.name = node.name;
                     dirty = true;
                 }
                 if (edge.target.id === id) {
-                    edge.target.name = newName;
+                    edge.target.name = node.name;
                     dirty = true;
                 }
                 if (dirty) { _this.edges.set(key, edge); }
@@ -128,7 +147,8 @@ define(function (require, exports, module) {
             type: "emuCharts_stateRenamed",
             state: {
                 id: node.id,
-                name: node.name
+                name: node.name,
+                color: node.color
             }
         });
         return true;
@@ -148,6 +168,7 @@ define(function (require, exports, module) {
      *           <li> y (real): node position (y coordinate).</li>
      *           <li> width (real): node width.</li>
      *           <li> height (real): node height.</li>
+     *           <li> color (String): node color.</li>
      * @memberof module:Emucharts
      * @instance
      */
@@ -164,16 +185,24 @@ define(function (require, exports, module) {
                 x: node.x || defaultValues.x,
                 y: node.y || defaultValues.y,
                 width : width,
-                height: defaultValues.height
+                height: defaultValues.height,
+                color: node.color || defaultValues.color(id)
             };
+
+        if (_this.getIsPIM()) {
+            newNode = _this.pim.getState(newNode);
+            newNode.color = newNode.color || defaultValues.color(newNode.id);
+        }
+
         // add the new node to the diagram
         _this.nodes.set(newNode.id, newNode);
         // fire event
         _this.fire({
             type: "emuCharts_stateAdded",
             state: {
-                id: id,
-                name: name
+                id: newNode.id,
+                name: newNode.name,
+                color: newNode.color
             }
         });
         return newNode;
@@ -526,6 +555,15 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getStates = function () {
+        // If this emuchart is a pim return the pim combatable transition.
+        if (_this.getIsPIM()) {
+            var ans = _this.pim.getStates(this.nodes) || [];
+            ans.forEach(function (state) {
+                state.color = state.color || defaultValues.color(state.id);
+            });
+            return ans;
+        }
+        
         var states = [];
         _this.nodes.forEach(function (key) {
             var node = _this.nodes.get(key);
@@ -535,7 +573,8 @@ define(function (require, exports, module) {
                 x: node.x,
                 y: node.y,
                 width : node.width,
-                height: node.height
+                height: node.height,
+                color: node.color
             });
         });
         return states;
@@ -549,6 +588,14 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getState = function (id) {
+        if (_this.getIsPIM()) {
+            var state = _this.pim.getState(this.nodes.get(id));
+            if (state) {
+                state.color = state.color || defaultValues.color(state.id);
+            }
+            return state;
+        }
+        // The state should already be a PIM state if required.
         return _this.nodes.get(id);
     };
 
@@ -560,6 +607,10 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getTransition = function (id) {
+        // If this emuchart is a pim return the pim combatable transition.
+        if (_this.getIsPIM()) {
+            return _this.pim.getTransition(this.edges.get(id));
+        }
         return _this.edges.get(id);
     };
 
@@ -571,6 +622,11 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getTransitions = function () {
+        // If this emuchart is a pim return the pim combatable transition.
+        if (_this.getIsPIM()) {
+            return _this.pim.getTransitions(this.edges);
+        }
+        
         var transitions = [];
         _this.edges.forEach(function (key) {
             var trans = _this.edges.get(key);
@@ -874,6 +930,18 @@ define(function (require, exports, module) {
     };
 
     /**
+     * @function getVariable
+     * @descriptionb Returns the variable with ID given by the function argument
+     * @param variableID Variable identifier
+     * @returns The variable descriptor
+     * @memberof module:Emucharts
+     * @instance
+     */
+    Emucharts.prototype.getVariable = function (variableID) {
+        return _this.variables.get(variableID);
+    };
+    
+    /**
      * @function getInputVariables
      * @description Returns the input variables defined in the diagram.
      * @returns {Array(Object)} An array of variables descriptors.
@@ -925,6 +993,54 @@ define(function (require, exports, module) {
      */
     Emucharts.prototype.empty = function () {
         return _this.nodes.empty() && _this.edges.empty();
+    };
+
+    /** PIM **/
+
+    /**
+     * Convert the current Emuchart to a PIM (or if from a PIM).
+     * @returns {boolean} True Emuchart became a PIM or a PIM became an Emuchart.
+     */
+    Emucharts.prototype.toPIM = function (toPIM) {
+        return _this.pim && _this.pim.toPIM ? _this.pim.toPIM(toPIM) : false;
+    };
+
+    /**
+     * Returns if this emuchart is a PIM.
+     * @returns {boolean} If this emuchart is a PIM.
+     */
+    Emucharts.prototype.getIsPIM = function () {
+        return _this.pim && _this.pim.getIsPIM ? _this.pim.getIsPIM() : false;
+    };
+
+    /**
+     *
+     * @param behaviour
+     * @returns If no behaviour provided returns all PMR as a set,
+     * If behaviour could be found then returns the relation (behaviour, operation),
+     * else returns null.
+     */
+    Emucharts.prototype.getPMR = function (behaviour, isSave) {
+        return _this.pim && _this.pim.getPMR ? _this.pim.getPMR(_this.pmr, behaviour, isSave) : d3.map();
+    };
+
+    /**
+     * Add a PMR (overrites any existing PMR for the given behaviour).
+     * ({behaviour (string), operation (string)}).
+     * @param pmr
+     * @returns boolean true if successfully added.
+     */
+    Emucharts.prototype.addPMR = function (pmr) {
+        return _this.pim && _this.pim.addPMR ? _this.pim.addPMR(_this.pmr, pmr) : false;
+    };
+
+    /**
+     * Saves the new PMRs into the pool of all PMRs
+     * @param newPMRs
+     * @returns {boolean}
+     */
+    Emucharts.prototype.mergePMR = function (newPMRs) {
+        return _this.pim.mergePMR ? _this.pim.mergePMR(_this.pmr, newPMRs) : false;
     };
 
     module.exports = Emucharts;

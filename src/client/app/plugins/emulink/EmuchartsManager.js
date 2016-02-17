@@ -12,7 +12,8 @@ define(function (require, exports, module) {
     "use strict";
     var Emucharts = require("plugins/emulink/Emucharts"),
         EmuchartsEditor = require("plugins/emulink/EmuchartsEditor"),
-        eventDispatcher = require("util/eventDispatcher");
+        eventDispatcher = require("util/eventDispatcher"),
+        Colors = require("plugins/emulink/tools/Colors");
 
     var _emuchartsEditors; // stores emucharts renderers
     var _selectedEditor; // this is the selected editor
@@ -24,6 +25,8 @@ define(function (require, exports, module) {
     function EmuchartsManager() {
         _emuchartsEditors = d3.map();
         eventDispatcher(this);
+        this.newEmucharts("foo");
+        return this;
     }
 
     EmuchartsManager.prototype.installHandlers = function (editor) {
@@ -34,6 +37,7 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_addInitialTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_constantAdded", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_variableAdded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_variableRemoved", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteInitialTransition", function (event) { _this.fire(event); });
@@ -91,6 +95,7 @@ define(function (require, exports, module) {
                         var chart_reader = emuchartsFile.content.chart;
                         if (chart_reader.states) {
                             chart_reader.states.forEach(function (node) {
+                                node.color = node.color || Colors.getColor(node.id);
                                 chart.nodes.set(node.id, node);
                             });
                         }
@@ -138,15 +143,30 @@ define(function (require, exports, module) {
                                 chart.constants.set(constant.id, constant);
                             });
                         }
+                        if (chart_reader.pmr) {
+                            chart.pmr = d3.map();
+                            for (var behaviour in chart_reader.pmr) {
+                                if (chart_reader.pmr.hasOwnProperty(behaviour)) {
+                                    chart.pmr.set(behaviour, chart_reader.pmr[behaviour]);
+                                }
+                            }
+                        }
                         // associate an editor to the created emuchart
                         // FIXME: Improve the constructor and this importEmuchart function
-                        var emucharts = new Emucharts({
+                        var emuchart = {
                             nodes:  chart.nodes,
                             edges: chart.edges,
                             initial_edges: chart.initial_edges,
                             variables: chart.variables,
                             constants: chart.constants
-                        });
+                        };
+                        if (chart.pmr !== 'undefined') {
+                            emuchart.pmr = chart.pmr;
+                        }
+                        if (chart_reader.isPIM && chart_reader.isPIM === true) {
+                            emuchart.isPIM = true;
+                        }
+                        var emucharts = new Emucharts(emuchart);
                         var newEmuchartsEditor = new EmuchartsEditor(emucharts);
                         _this.installHandlers(newEmuchartsEditor);
                         _emuchartsEditors.set(emuchartsFile.content.descriptor.chart_name, newEmuchartsEditor);
@@ -160,7 +180,10 @@ define(function (require, exports, module) {
                     keys.forEach(function (name) {
                         var chart = { nodes: d3.map(), edges: d3.map(), initial_edges: d3.map() };
                         emuchartsFile.content[name].nodes
-                            .forEach(function (node) { chart.nodes.set(node.id, node); });
+                            .forEach(function (node) {
+                                node.color = node.color || Colors.getColor(node.id);
+                                chart.nodes.set(node.id, node);
+                            });
                         emuchartsFile.content[name].edges
                             .forEach(function (edge) { chart.edges.set(edge.id, edge); });
                         emuchartsFile.content[name].initial_edges
@@ -474,6 +497,17 @@ define(function (require, exports, module) {
     };
 
     /**
+     * Returns an array containing the current set of states
+     * @description Returns the descriptor of a state.
+     * @param id {String} The identifier of the state.
+     * @memberof EmuchartsManager
+     * @instance
+     */
+    EmuchartsManager.prototype.getState = function (id) {
+        return _selectedEditor.getState(id);
+    };
+    
+    /**
      * Returns an array containing the current set of constants defined in the model
      * @memberof EmuchartsManager
      */
@@ -489,6 +523,14 @@ define(function (require, exports, module) {
         return _selectedEditor.getVariables();
     };
 
+    /**
+     * Returns the descriptor of the variable whose ID is the function argument
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.getVariable = function (variableID) {
+        return _selectedEditor.getVariable(variableID);
+    };
+    
     /**
      * Returns an array containing the current set of input variables defined in the model
      * @memberof EmuchartsManager
@@ -558,11 +600,15 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Utility function to rename states
+     * Utility function to edit states
+     * @param stateID unique state identifier
+     * @param data Structured type with two fields:
+     *    - name (String)
+     *    - color (String)
      * @memberof EmuchartsManager
      */
-    EmuchartsManager.prototype.rename_state = function (stateID, newLabel) {
-        return _selectedEditor.rename_state(stateID, newLabel);
+    EmuchartsManager.prototype.edit_state = function (stateID, data) {
+        return _selectedEditor.edit_state(stateID, data);
     };
 
     /**
@@ -651,6 +697,54 @@ define(function (require, exports, module) {
 //    EmuchartsManager.prototype.d3ZoomTranslate = function (d3Scale, d3Translate) {
 //        return _selectedEditor.d3ZoomTranslate(d3Scale, d3Translate);
 //    };
+
+    /** PIM **/
+
+    /**
+     * Convert the current Emuchart to a PIM (or if from a PIM).
+     * @returns {boolean} True Emuchart became a PIM or a PIM became an Emuchart.
+     */
+    EmuchartsManager.prototype.toPIM = function (toPIM) {
+        return _selectedEditor.toPIM ? _selectedEditor.toPIM(toPIM) : false;
+    };
+
+    /**
+     * Returns if this emuchart is a PIM.
+     * @returns {boolean} If this emuchart is a PIM.
+     */
+    EmuchartsManager.prototype.getIsPIM = function () {
+        return _selectedEditor.getIsPIM ? _selectedEditor.getIsPIM() : false;
+    };
+
+    /**
+     *
+     * @param behaviour
+     * @returns If no behaviour provided returns all PMR as a set,
+     * If behaviour could be found then returns the relation (behaviour, operation),
+     * else returns null.
+     */
+    EmuchartsManager.prototype.getPMR = function (behaviour, isSave) {
+        return _selectedEditor.getPMR ? _selectedEditor.getPMR(behaviour, isSave) : d3.map();
+    };
+
+    /**
+     * Add a PMR (overrites any existing PMR for the given behaviour).
+     * ({behaviour (string), operation (string)}).
+     * @param pmr
+     * @returns boolean true if successfully added.
+     */
+    EmuchartsManager.prototype.addPMR = function (pmr) {
+        return _selectedEditor.addPMR ? _selectedEditor.addPMR(pmr) : false;
+    };
+
+    /**
+     * Saves the new PMRs into the pool of all PMRs
+     * @param newPMRs
+     * @returns {boolean}
+     */
+    EmuchartsManager.prototype.mergePMR = function (newPMRs) {
+        return _selectedEditor.mergePMR ? _selectedEditor.mergePMR(newPMRs) : false;
+    };
 
     module.exports = EmuchartsManager;
 });

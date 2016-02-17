@@ -14,13 +14,13 @@ define(function (require, exports, module) {
         eventDispatcher = require("util/eventDispatcher"),
         Emucharts = require("plugins/emulink/Emucharts"),
         EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes");
-
+    
     var dbg = false;
 
     // constants for drawing states
-    var width  = 900;
-    var height = 800;
-    var colors = d3.scale.category10();
+//    var width  = 900;
+//    var height = 800;
+//    var colors = d3.scale.category10();
     var fontSize = 10;
     var defaultWidth = 32;
     var defaultHeight = 32;
@@ -97,6 +97,7 @@ define(function (require, exports, module) {
         this.emucharts.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_initialTransitionRemoved", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_stateRenamed", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_stateColorChanged", function (event) { _this.fire(event); });
 
         this.emucharts.addListener("emuCharts_nodeFilterChanged", function (event) {
             _this._nodeFilter = event.filter;
@@ -177,8 +178,8 @@ define(function (require, exports, module) {
      * @memberof EmuchartsEditor
      */
     function labelToString(label) {
-        if (label.length > 16) {
-            return label.substring(0, 16) + "...";
+        if (label.length > 64) {
+            return label.substring(0, 64) + "...";
         }
         return label;
     }
@@ -659,10 +660,10 @@ define(function (require, exports, module) {
 
         // create canvas to be used for exporting svg area as picture
         d3.select("#ContainerStateMachineImage").append("canvas")
-            .attr("width", width).attr("height", height)
             .attr("style", "display: none");
         d3.select("#ContainerStateMachineImage").append("div")
-            .attr("id", "svgdataurl").attr("style", "display: none");
+            .attr("id", "svgdataurl").attr("class", "svgdataurl")
+            .attr("style", "display: none");
 
         // create svg area
         d3.select("#ContainerStateMachine")
@@ -670,7 +671,7 @@ define(function (require, exports, module) {
             .attr("version", 1.1)
             .attr("xmlns", "http://www.w3.org/2000/svg")
             //.attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
-            .attr("width", width).attr("height", height)
+            .attr("width", "100%").attr("height", "100%")
             .style("background", "white")
             .append("svg:defs")
             .append("svg:marker")
@@ -1054,6 +1055,11 @@ define(function (require, exports, module) {
                 d3.select(this.childNodes[2]).attr("opacity", 0.6);
                 d3.select(this.children[3]).style("fill", "green");
                 d3.select(this.children[4]).style("fill", "green");
+                if (edge.source.id === edge.target.id) {
+                    d3.select(this).select(".tlabel").text(function (edge) {
+                        return edge.name;
+                    });
+                }
             }
             if (dbg) { console.log("Transitions.mouseOver"); }
         };
@@ -1079,6 +1085,11 @@ define(function (require, exports, module) {
                 d3.select(this.childNodes[2]).attr("opacity", 0);
                 d3.select(this.children[3]).style("fill", "black");
                 d3.select(this.children[4]).style("fill", "black");
+                if (edge.source.id === edge.target.id) {
+                    d3.select(this).select(".tlabel").text(function (edge) {
+                        return labelToString(edge.name);
+                    });
+                }
             } else if (mouseOverControlPoint && mouseOverControlPoint.id === edge.id) {
                 var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
                 // update selected control point
@@ -1316,12 +1327,17 @@ define(function (require, exports, module) {
         states.select(".state_label").text(function (node) {
             return node.name;
         });
-        // refresh box size and position, if needed
+        // refresh box size, position, and color
         states.select(".state_box").attr("width", function (node) {
             return newBoxWidth(node.id);
         }).attr("x", function (node) {
             return -(newBoxWidth(node.id) / 2);
+        }).style("fill", function (node) {
+            return node.color;
+        }).style("stroke", function (node) { // draw a frame around the box
+            return d3.rgb(node.color).darker().toString();
         });
+
         // refresh move tool, if needed
         states.select(".state_move").attr("x", function (node) {
             return (newBoxWidth(node.id) / 2) - 18;
@@ -1360,12 +1376,11 @@ define(function (require, exports, module) {
             .attr("rx", 6).attr("ry", 6) // draw rounded corners
             .style("opacity", "0.9") // make the node slightly transparent
             .style("cursor", "pointer") // change cursor shape on mouse over
-            .style("fill", function (node) { // fill the box, avoid black
-                return (node.id === 0) ? d3.rgb(colors(node.id)).brighter().toString()
-                            : colors(node.id);
+            .style("fill", function (node) {
+                return node.color;
             })
             .style("stroke", function (node) { // draw a frame around the box
-                return d3.rgb(colors(node.id)).darker().toString();
+                return d3.rgb(node.color).darker().toString();
             });
         // draw move tool for boxes
 //        var moveTool =
@@ -1412,7 +1427,7 @@ define(function (require, exports, module) {
         var filter = this._nodeFilter;
         return function (n) {
             try {
-                var regex = new RegExp(filter, "i", "g");
+                var regex = new RegExp("^" + filter, "gi");
                 return n.name.search(regex) >= 0;
             } catch (syntaxError) {
                 return false; //syntax error
@@ -1601,8 +1616,8 @@ define(function (require, exports, module) {
                 if (editor_mode === MODE.ADD_TRANSITION() && mousedrag.node) {
                     if (mousedrag.node.id !== node.id) {
                         // change colour of drag arrow to give a cue that a mouse release will trigger the creation of a new transition between nodes
-                        drag_line.style("stroke", colors(node.id));
-                        d3.select("#drag-arrow path").style("fill", colors(node.id));
+                        drag_line.style("stroke", node.color);
+                        d3.select("#drag-arrow path").style("fill", node.color);
                     } else {
                         drag_line.style("stroke", "black");
                         d3.select("#drag-arrow path").style("fill", "black");
@@ -1726,6 +1741,15 @@ define(function (require, exports, module) {
     };
 
     /**
+     * @description Returns the descriptor of a state.
+     * @param id {String} The identifier of the state.
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.getState = function (id) {
+        return this.emucharts.getState(id);
+    };
+    
+    /**
      * Returns an array containing the current set of constants defined in the diagram
      * @memberof EmuchartsEditor
      */
@@ -1739,6 +1763,14 @@ define(function (require, exports, module) {
      */
     EmuchartsEditor.prototype.getVariables = function () {
         return this.emucharts.getVariables();
+    };
+    
+    /**
+     * Returns the descriptor of the variable whose ID is the function argument
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.getVariable = function (variableID) {
+        return this.emucharts.getVariable(variableID);
     };
 
     /**
@@ -1819,18 +1851,21 @@ define(function (require, exports, module) {
         refreshInitialTransitions(itransitions);
     };
 
-
     /**
-     * utility function to rename states
+     * utility function to edit states
      * @memberof EmuchartsEditor
      */
-    EmuchartsEditor.prototype.rename_state = function (stateID, newLabel) {
-        this.emucharts.rename_node(stateID, newLabel);
+    EmuchartsEditor.prototype.edit_state = function (stateID, data) {
+        this.emucharts.edit_node(stateID, data);
         // refresh states
         var states = d3.select("#ContainerStateMachine")
             .select("#States").selectAll(".state")
             .filter(function (state) { return state.id === stateID; });
         refreshStates(states);
+
+        // TODO: temporary fix for transitions not being redrawn after renaming a state.
+        this.renderTransitions();
+       /*
         // refresh all incoming and outgoing transitions of the renamed state
         var transitions = d3.select("#ContainerStateMachine")
             .select("#Transitions").selectAll(".transition")
@@ -1838,6 +1873,7 @@ define(function (require, exports, module) {
                 return (transition.target && transition.target.id === stateID) ||
                         (transition.source && transition.source.id === stateID);
             });
+
         transitions = transitions ||
             d3.select("#ContainerStateMachine svg").select("#Transitions").selectAll(".transition");
         // refresh labels
@@ -1848,6 +1884,7 @@ define(function (require, exports, module) {
                 return labelToString(edge.name);
             });
         });
+       */
     };
 
     /**
@@ -2060,6 +2097,54 @@ define(function (require, exports, module) {
                 this.emucharts.edges && this.emucharts.edges.empty() &&
                 this.emucharts.constants && this.emucharts.constants.empty() &&
                 this.emucharts.variables && this.emucharts.variables.empty();
+    };
+
+    /** PIM **/
+
+    /**
+     * Convert the current Emuchart to a PIM (or if from a PIM).
+     * @returns {boolean} True Emuchart became a PIM or a PIM became an Emuchart.
+     */
+    EmuchartsEditor.prototype.toPIM = function (toPIM) {
+        return this.emucharts.toPIM ? this.emucharts.toPIM(toPIM) : false;
+    };
+
+    /**
+     * Returns if this emuchart is a PIM.
+     * @returns {boolean} If this emuchart is a PIM.
+     */
+    EmuchartsEditor.prototype.getIsPIM = function () {
+        return this.emucharts.getIsPIM ? this.emucharts.getIsPIM() : false;
+    };
+
+    /**
+     *
+     * @param behaviour
+     * @returns If no behaviour provided returns all PMR as a set,
+     * If behaviour could be found then returns the relation (behaviour, operation),
+     * else returns null.
+     */
+    EmuchartsEditor.prototype.getPMR = function (behaviour, isSave) {
+        return this.emucharts.getPMR ? this.emucharts.getPMR(behaviour, isSave) : d3.map();
+    };
+
+    /**
+     * Add a PMR (overrites any existing PMR for the given behaviour).
+     * ({behaviour (string), operation (string)}).
+     * @param pmr
+     * @returns boolean true if successfully added.
+     */
+    EmuchartsEditor.prototype.addPMR = function (pmr) {
+        return this.emucharts.addPMR ? this.emucharts.addPMR(pmr) : false;
+    };
+
+    /**
+     * Saves the new PMRs into the pool of all PMRs
+     * @param newPMRs
+     * @returns {boolean}
+     */
+    EmuchartsEditor.prototype.mergePMR = function (newPMRs) {
+        return this.emucharts.mergePMR ? this.emucharts.mergePMR(newPMRs) : false;
     };
 
     module.exports = EmuchartsEditor;
