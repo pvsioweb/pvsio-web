@@ -919,6 +919,8 @@ fadeOut
     height: 300px;
     overflow-y: auto;
     width: 100%;
+    height: 100%;
+    float:left;
 }
 
 input.input_text{
@@ -949,10 +951,14 @@ input.input_text{
     border-top: 1px solid grey;
     padding-top: 10px;
     margin-top: 0 !important;
+    height: 100%;
+    padding:20px !important;
+    border: 1px solid;
+    float:right;
 }
 #image-preview {
-    max-width: 100px;
-    width: 100px;
+    max-width: 200px;
+    max-height: 140px;
 }
 
 #btnBuilderView.active a, #btnSimulatorView.active a{

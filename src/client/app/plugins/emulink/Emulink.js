@@ -46,7 +46,8 @@ define(function (require, exports, module) {
         PIMEmulink             = require("plugins/emulink/models/pim/PIMEmulink"),
         ContextTable           = require("plugins/emulink/tools/ContextTable"),
         MachineStatesTable     = require("plugins/emulink/tools/MachineStatesTable"),
-        ExportDiagram          = require("plugins/emulink/tools/ExportDiagram");
+        ExportDiagram          = require("plugins/emulink/tools/ExportDiagram"),
+        MIME                   = require("util/MIME").getInstance();
     
     var instance;
     var fs;
@@ -443,11 +444,7 @@ define(function (require, exports, module) {
         
         // bootstrap buttons
         function openChart(callback) {
-            var opt = {
-                header: "Open EmuChart file...",
-                extensions: ".emdl,.muz,.pim"
-            };
-            FileHandler.openLocalFileAsText(function (err, res) {
+            function doOpen(err, res) {
                 if (res) {
                     if (res.name.lastIndexOf(".emdl") === res.name.length - 5) {
                         res.content = JSON.parse(res.content);
@@ -464,7 +461,30 @@ define(function (require, exports, module) {
                 } else {
                     console.log("Error while opening file (" + err + ")");
                 }
-            }, opt);
+            }
+            var opt = {
+                header: "Open EmuChart file...",
+                extensions: ".emdl,.muz,.pim"
+            };
+            if (PVSioWebClient.getInstance().serverOnLocalhost()) {
+                return new Promise(function (resolve, reject) {
+                    fs.readFileDialog({
+                        encoding: "utf8",
+                        title: opt.header,
+                        filter: MIME.filter(opt.extensions.split(","))
+                    }).then(function (descriptors) {
+                        doOpen(null, descriptors[0]);
+                        resolve(descriptors[0]);
+                    }).catch(function (err) {
+                        doOpen(err, null);
+                        reject(err);
+                    });
+                });
+            } else {
+                FileHandler.openLocalFileAsText(function (err, res) {
+                    doOpen(err, res);
+                }, opt);
+            }
         }
         function importChart(callback) {
             var opt = {
