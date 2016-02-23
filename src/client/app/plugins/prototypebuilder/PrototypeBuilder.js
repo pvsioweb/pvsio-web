@@ -21,7 +21,8 @@ define(function (require, exports, module) {
         FileSystem          = require("filesystem/FileSystem"),
         NotificationManager = require("project/NotificationManager"),
         SaveProjectChanges = require("project/forms/SaveProjectChanges"),
-        Descriptor      = require("project/Descriptor");
+        Descriptor      = require("project/Descriptor"),
+        MIME            = require("util/MIME").getInstance();
 
     var instance;
     var currentProject,
@@ -419,7 +420,11 @@ define(function (require, exports, module) {
         d3.selectAll("#btnLoadPicture").on("click", function () {
             return new Promise(function (resolve, reject) {
                 if (PVSioWebClient.getInstance().serverOnLocalhost()) {
-                    fs.readFileDialog({encoding: "base64", title: "Select a picture"}).then(function (descriptors) {
+                    fs.readFileDialog({
+                        encoding: "base64",
+                        title: "Select a picture",
+                        filter: MIME.imageFilter
+                    }).then(function (descriptors) {
                         _prototypeBuilder.changeImage(descriptors[0].name, descriptors[0].content).then(function (res) {
                             renderImage(res).then(function (res) {
                                 if (d3.select("#imageDiv svg").node() === null) {
