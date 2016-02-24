@@ -28,6 +28,9 @@ define(function (require, exports, module) {
             d3.selectAll("#RenameMachineState").on("click", function () {
                 _this.renameMachineState(this.parentElement.parentElement.id);
             });
+            d3.selectAll("#MachineStateName").on("click", function () {
+                _this.renameMachineState(this.parentElement.parentElement.id);
+            });
             d3.selectAll("#MachineStateColor").on("click", function () {
                 _this.changeStateColor(this.parentElement.parentElement.id);
             });
@@ -37,7 +40,8 @@ define(function (require, exports, module) {
             newState.name = e.name;
             newState.color = e.color;
             newState.id = e.id;
-            newState.children[0].innerHTML = newState.name;
+            newState.children[0].children[0].innerHTML = newState.name;
+            newState.children[0].children[0].style.width = (newState.name.length * 8) + "px";
             newState.children[1].children[0].style.backgroundColor = newState.color;
             d3.select("#MachineStates").select("tbody").node().appendChild(newState);
         }

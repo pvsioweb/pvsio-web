@@ -243,7 +243,9 @@
             <table class="table">
               <!-- This is our clonable table line template -->
               <tr id="MachineStateTemplate">
-                <td contenteditable="false" style="background-color:white; cursor: default;">Name</td>
+                <td contenteditable="false" style="background-color:white; cursor: default;">
+                    <div id="MachineStateName" style="overflow: hidden; cursor: pointer;">Name</div>
+                </td>
                 <td style="background-color:white;">
                     <div id="MachineStateColor" style="width:20px; border: 1px solid; cursor: pointer;">&nbsp;</div>
                 </td>
@@ -273,7 +275,7 @@
             <table class="table" style="margin-bottom:0 !important;">
               <tr id="heading" class="TableHeading">
                 <th style="cursor: default;">Name</th>
-                <th style="cursor: default;">Color</th>
+                <th style="cursor: default;">Color Code</th>
                 <th></th>
                 <th class="width32"><span id="AddMachineState" class="table-add glyphicon glyphicon-plus"></span></th>
               </tr>
