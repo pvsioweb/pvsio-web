@@ -73,8 +73,8 @@ define(function (require, exports, module) {
         var height = headerHeight + variables.length * rowHeight;
         var svg = diagram.svg.append("foreignObject")
                     .attr("x", 10).attr("y", 10).attr("width", width).attr("height", height)
-                    .attr("requiredExtension", "http://www.w3.org/1999/xhtml")
-                    .append("div").attr("xmlns", "http://www.w3.org/1999/xhtml")
+                    .attr("requiredExtension", "http://www.w3.org/1999/xhtml");
+        svg.append("div").attr("xmlns", "http://www.w3.org/1999/xhtml")
                     .style("border", "1px solid steelblue");
         svg.html(
             "<div style='background-color: rgb(8, 88, 154); color: white; padding: " + padding + "px;'>Context Variables</div>" +
