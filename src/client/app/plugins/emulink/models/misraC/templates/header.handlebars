@@ -67,8 +67,8 @@ state {{id}}(state *st);{{else}}/** {{0.id}} transition function.
  *    \param st a state structure pointer
  *    \return a state structure pointer
  *    \pre system is initialised (st->previous_state != NaN)
- *    \pre function is called from the right state ({{#each .}}"{{source.name}}" {{#unless @last}}or {{/unless}}{{/each}}in this case)
- *    \post function is moving to the right state ({{#each .}}"{{target.name}}" {{#unless @last}}or {{/unless}}{{/each}}in this case)
+ *    \pre function is called from the right state ({{#each 0.sources}}"{{&.}}" {{#unless @last}}or {{/unless}}{{/each}}in this case)
+ *    \post function is moving to the right state ({{#each 0.targets}}"{{&.}}" {{#unless @last}}or {{/unless}}{{/each}}in this case)
  */
 state {{0.id}}(state *st);{{/if}}
 {{/each}}{{/if}}
