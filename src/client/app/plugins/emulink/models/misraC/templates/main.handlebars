@@ -15,7 +15,7 @@
 
 
 int main(){
-    UC_8 *MachineState[] = { (UC_8*)"NaN", {{#each states~}}(UC_8*)"{{name}}"{{#unless @last}}, {{/unless}}{{/each}} };   ///< Useful for printf()
+    UC_8 *MachineState[] = { (UC_8*)"NaN", {{#each states~}}(UC_8*)"{{name}}"{{#unless @last}}, {{/unless}}{{/each}} };   // Useful for printf()
     /*
      * At first instantiate state variable and call init() in order to initialise it as follow: 
      */

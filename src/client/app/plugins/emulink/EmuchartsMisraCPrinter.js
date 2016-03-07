@@ -1,6 +1,6 @@
 /**
  * @author Gioacchino Mauro
- * @date Wed Dec  2 16:47:15 2015
+ * @date Mon  7 Mar 2016 15:40:53 CET
  *
  * MISRA C code printer for emucharts models.
  * Emuchart objects have the following structure:
@@ -324,7 +324,7 @@ define(function (require, exports, module) {
                     return getExpression(a, emuchart);
                 });
             }
-            return {id: id.val, actions: actions, condition: condition, source: t.source, target: t.target};
+            return {id: id.val, actions: actions, condition: condition, source: t.source, target: t.target, sources: [], targets: []};
         } else if (functionBody.err) {
             displayError(functionBody.err);
             return { erroneousLabel: name, parserError: functionBody.err };
@@ -421,6 +421,30 @@ define(function (require, exports, module) {
                      var i;
                      for ( i = 0; i < transitions.length; i++){
                          if(transitions[i].id !== 'undefined'){
+                            if(!transitions[i].sources){                            //control in transictions list
+                                if(!isInArray(transitions[i][0].sources, parsedTransition.source.name) && (transitions[i][0].id === parsedTransition.id)){   //it checks if there are different sources in transitions
+                                    transitions[i][0].sources.push(parsedTransition.source.name);
+                                    console.log("pushed source!", parsedTransition.source.name, " in " , transitions[i][0].id );
+                                }
+                            }
+                            else{                                                   //control in transictions innested list
+                                if(!isInArray(transitions[i].sources, parsedTransition.source.name) && (transitions[i].id === parsedTransition.id)){         //it checks if there are different sources in transitions
+                                    transitions[i].sources.push(parsedTransition.source.name);
+                                    console.log("pushed source!", parsedTransition.source.name, " in " , transitions[i].id );
+                                }
+                            }
+                            if(!transitions[i].targets){                            //control in transictions list
+                                if(!isInArray(transitions[i][0].targets, parsedTransition.target.name) && (transitions[i][0].id === parsedTransition.id)){   //it checks if there are different targets in transitions
+                                    transitions[i][0].targets.push(parsedTransition.target.name);
+                                    console.log("pushed target!", parsedTransition.source.name, " in " , transitions[i][0].id );
+                                }
+                            }
+                            else{                                                   //control in transictions innested list
+                                if(!isInArray(transitions[i].targets, parsedTransition.target.name) && (transitions[i].id === parsedTransition.id)){         //it checks if there are different targets in transitions
+                                    transitions[i].targets.push(parsedTransition.target.name);
+                                    console.log("pushed target!", parsedTransition.target.name, " in " , transitions[i].id );
+                                }
+                            }
                             if (transitions[i].id === parsedTransition.id){
                                 var tmp = [];
                                 tmp.push(transitions[i]);
@@ -431,13 +455,13 @@ define(function (require, exports, module) {
                                 var j;
                                 for (j = 0; j < transitions[i].length; j++){
                                     if (transitions[i][j].id === parsedTransition.id){
-                                        var tmp2 = [];
+                                        var tmp = [];
                                         transitions[i].map(function (v) {
-                                            tmp2.push(v);
+                                            tmp.push(v);
                                             return;
                                         });
-                                        tmp2.push(parsedTransition);
-                                        transitions[i] = tmp2;
+                                        tmp.push(parsedTransition);
+                                        transitions[i] = tmp;
                                         break;
                                     }
                                 }

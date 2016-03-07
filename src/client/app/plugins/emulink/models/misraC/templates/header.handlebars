@@ -58,7 +58,7 @@ state init(state *st);{{/if}}
  *    \return a state structure pointer
  *    \pre system is initialised (st->previous_state != NaN)
  *    \pre function is called from the right state ("{{source.name}}" in this case)
-  *   \post function is moving to the right state ("{{target.name}}" in this case)
+ *    \post function is moving to the right state ("{{target.name}}" in this case)
  */
 state {{id}}(state *st);{{else}}/** {{0.id}} transition function.
  * This function is generated merging two or more homonyms trasitions.
