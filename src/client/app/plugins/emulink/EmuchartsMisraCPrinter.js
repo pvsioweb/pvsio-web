@@ -85,8 +85,10 @@ define(function (require, exports, module) {
         "AND": "&&",
         "OR": "||",
         "NOT": "!",
+        //"MOD": "%",
         "and": "&&",
         "or": "||",
+        //"mod": "%",
         "not": "!",
         "=": "=="
     };
@@ -252,6 +254,22 @@ define(function (require, exports, module) {
     //     return false;
     // }
     
+    /**
+     * Check if a value is a constant in the emuchart structure
+     * Return a boolean
+     */
+    function isConstant(name, emuchart) {
+        if (emuchart.constants) {
+            var i = 0;
+            for (i = 0; i < emuchart.constants.length; i++) {
+                if (name === emuchart.constants[i].name) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
     function parseTransition(t, emuchart) {
         function getExpression(expression, emuchart) {
             var complexActions = ["expression", "assignment", "function"];
@@ -264,8 +282,8 @@ define(function (require, exports, module) {
                     if (v.type === "identifier"){
                         if(isLocalVariable(v.val, emuchart)) {
                             v.val = "st->" + v.val;
-                        }else {
-                            v.val = "st->"+ v.val;
+                        }else if (!isConstant(v.val, emuchart)){
+                                v.val = "st->"+ v.val;
                         }
                     }
                     return;
@@ -280,7 +298,7 @@ define(function (require, exports, module) {
                 if (expression.type === 'identifier'){
                     if(isLocalVariable(expression.val, emuchart)) {
                             expression.val = "st->" + expression.val;
-                        }else {
+                        }else if (!isConstant(expression.val, emuchart)){
                             expression.val = "st->"+ expression.val;
                         }
                 }
@@ -375,7 +393,6 @@ define(function (require, exports, module) {
 
     Printer.prototype.print_constants = function (emuchart) {
         this.model.constants = emuchart.constants.map(function (v) {
-            v.name = v.name.toUpperCase();
             if (v.type.toLowerCase() === "char") {
                 v.value = "\"" + v.value + "\"";
                 v.type = getType(v.type);
@@ -424,25 +441,21 @@ define(function (require, exports, module) {
                             if(!transitions[i].sources){                            //control in transictions list
                                 if(!isInArray(transitions[i][0].sources, parsedTransition.source.name) && (transitions[i][0].id === parsedTransition.id)){   //it checks if there are different sources in transitions
                                     transitions[i][0].sources.push(parsedTransition.source.name);
-                                    console.log("pushed source!", parsedTransition.source.name, " in " , transitions[i][0].id );
                                 }
                             }
                             else{                                                   //control in transictions innested list
                                 if(!isInArray(transitions[i].sources, parsedTransition.source.name) && (transitions[i].id === parsedTransition.id)){         //it checks if there are different sources in transitions
                                     transitions[i].sources.push(parsedTransition.source.name);
-                                    console.log("pushed source!", parsedTransition.source.name, " in " , transitions[i].id );
                                 }
                             }
                             if(!transitions[i].targets){                            //control in transictions list
                                 if(!isInArray(transitions[i][0].targets, parsedTransition.target.name) && (transitions[i][0].id === parsedTransition.id)){   //it checks if there are different targets in transitions
                                     transitions[i][0].targets.push(parsedTransition.target.name);
-                                    console.log("pushed target!", parsedTransition.source.name, " in " , transitions[i][0].id );
                                 }
                             }
                             else{                                                   //control in transictions innested list
                                 if(!isInArray(transitions[i].targets, parsedTransition.target.name) && (transitions[i].id === parsedTransition.id)){         //it checks if there are different targets in transitions
                                     transitions[i].targets.push(parsedTransition.target.name);
-                                    console.log("pushed target!", parsedTransition.target.name, " in " , transitions[i].id );
                                 }
                             }
                             if (transitions[i].id === parsedTransition.id){
