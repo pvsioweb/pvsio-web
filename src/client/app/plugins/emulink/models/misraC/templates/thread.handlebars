@@ -116,8 +116,8 @@ state init(state *st){
     return false;
 }
 {{else}}UC_8 per_{{0.id}}(state *st) {
-{{#each .}}
-    if (st->current_state == {{source.name}}){
+{{#each 0.sources}}
+    if (st->current_state ==  {{&.}}){
         return true;
     }{{/each}}
     return false;
