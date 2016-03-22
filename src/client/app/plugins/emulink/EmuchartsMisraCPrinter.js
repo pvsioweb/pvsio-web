@@ -85,10 +85,10 @@ define(function (require, exports, module) {
         "AND": "&&",
         "OR": "||",
         "NOT": "!",
-        //"MOD": "%",
+        "MOD": "fmod",
         "and": "&&",
         "or": "||",
-        //"mod": "%",
+        "mod": "fmod",
         "not": "!",
         "=": "=="
     };
@@ -276,6 +276,32 @@ define(function (require, exports, module) {
             if (expression === undefined || expression === null) {
                 return "";
             }
+            if (Array.isArray(expression.val)){             //managing modulus operator
+                var i,j;
+                for ( i = 0; i < expression.val.length; i++){
+                    if (expression.val[i].type === 'modop'){
+                        if(!isInArray(declarations, "#include <math.h>")){
+                            declarations.push("#include <math.h>");
+                        }
+                        var lpar = 0;
+                        var rpar = 1;
+                        for ( j = i; j >= 0; j--){
+                            if ( expression.val[j].val === '(')
+                                lpar++;
+                            if ( expression.val[j].val === ')')
+                                rpar++;
+                            if ( lpar === rpar ){  
+                                var tmp = new Object();
+                                tmp.type = "builtin";
+                                tmp.val = ",";
+                                expression.val.splice(j, 0, expression.val[i]);       //swap modulus operator
+                                expression.val.splice(i+1, 1, tmp); 
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
             if (expression.type === "assignment") {
                 var name = expression.val.identifier.val;
                 expression.val.expression.val.map(function (v) {
@@ -283,7 +309,7 @@ define(function (require, exports, module) {
                         if(isLocalVariable(v.val, emuchart)) {
                             v.val = "st->" + v.val;
                         }else if (!isConstant(v.val, emuchart)){
-                                v.val = "st->"+ v.val;
+                                v.val = "st->"+ v.val;          //same of before but leave intentionally in case of different choise
                         }
                     }
                     return;
@@ -299,7 +325,7 @@ define(function (require, exports, module) {
                     if(isLocalVariable(expression.val, emuchart)) {
                             expression.val = "st->" + expression.val;
                         }else if (!isConstant(expression.val, emuchart)){
-                            expression.val = "st->"+ expression.val;
+                            expression.val = "st->"+ expression.val;        //same of before but leave intentionally in case of different choise
                         }
                 }
                 if (Array.isArray(expression.val)) {
