@@ -37,14 +37,14 @@ typedef struct{ {{#each structureVar}}
  *    \return void
  *    \sa leave()
  */
-void enter(MachineState newStateLabel, state *st);
+void enter(const MachineState newStateLabel, state *st);
 /** 'Leave' auxiliary function.
  *    \param currentStateLabel a label to update the previous state.
  *    \param st a state structure pointer
  *    \return void
  *    \sa enter()
  */
-void leave(MachineState currentStateLabel, state *st);{{/if}}
+void leave(const MachineState currentStateLabel, state *st);{{/if}}
 
 {{#if initial_transitions}}/** Initialiser.
  *    \param st a state structure pointer
@@ -78,12 +78,12 @@ state {{0.id}}(state *st);{{/if}}
  *    \param st a state structure pointer
  *    \return a boolean
  */
-UC_8 per_{{id}}(state *st);{{else}}/** {{0.id}} permission function for transition.
+UC_8 per_{{id}}(const state *st);{{else}}/** {{0.id}} permission function for transition.
  * Useful to check if functions are invoking on the correct state.
  *    \param st a state structure pointer
  *    \return a boolean
  */
-UC_8 per_{{0.id}}(state *st);{{/if}}
+UC_8 per_{{0.id}}(const state *st);{{/if}}
 
 {{/each}}{{/if}}
 {{&disclaimer}}

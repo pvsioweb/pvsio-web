@@ -25,11 +25,11 @@ const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if transitions}}
 /* definition of auxiliary functions */
-void enter(MachineState newStateLabel, state *st) {
+void enter(const MachineState newStateLabel, state *st) {
     debug_print("Entering state nr. '%u'.\n", newStateLabel);
     st->current_state = newStateLabel;
 }
-void leave(MachineState currentStateLabel, state *st) {
+void leave(const MachineState currentStateLabel, state *st) {
     debug_print("Leaving state nr. '%u'.\n", currentStateLabel);
     st->previous_state = currentStateLabel;
 }{{/if}}
@@ -112,13 +112,13 @@ state init(state *st){
 {{/if}}
 {{/each}}{{/if}}
 {{#if transitions}}/* definition of permission function for transition functions */
-{{#each transitions}}{{#if id}}UC_8 per_{{id}}(state *st) {
+{{#each transitions}}{{#if id}}UC_8 per_{{id}}(const state *st) {
     if(st->current_state == {{source.name}}){
         return true;
     }
     return false;
 }
-{{else}}UC_8 per_{{0.id}}(state *st) {
+{{else}}UC_8 per_{{0.id}}(const state *st) {
 {{#each 0.sources}}
     if (st->current_state ==  {{&.}}){
         return true;

@@ -11,7 +11,7 @@
                     affiliation: (string),
                     contact: (string)
                 },
-                importings: (not used for now),
+                importings: (array of including and defining pre-processing directives, according to types of variale used),
                 constants: (array of {
                                 name: (string), // the constant identifier
                                 type: (string), // the constant type
@@ -20,7 +20,7 @@
                 variables: (array of {
                                 name: (string), // the variable identifier
                                 type: (string), // the variable type
-                                scope: (string) // the variable scope, either local or global
+                                scope: (string) // the variable scope, either local or input or output
                             }),
                 states: (array of {
                                 name: (string), // the state label
@@ -33,10 +33,17 @@
                                     name: (string), // the source state label
                                     id: (string)    // a unique identifier
                                 },
+                                sources: (array of 
+                                    :(string)       //sources state label list in case of homonyms transitions with different source
+                                ),
                                 target: {
                                     name: (string), // the target state label
                                     id: (string)    // a unique identifier
                                 },
+                                targets: (array of 
+                                    :(string)       //target state label list in case of homonyms transitionswith different target
+                                ),
+                               (array of array of in case of homonyms transitions),
                             }),
                 initial_transitions: (array of {
                                 name: (string), // the initial transition label
@@ -315,7 +322,7 @@ define(function (require, exports, module) {
                         if(isLocalVariable(v.val, emuchart)) {
                             v.val = "st->" + v.val;
                         }else if (!isConstant(v.val, emuchart)){
-                                v.val = "st->"+ v.val;          //same of before but leave intentionally in case of different choise
+                                v.val = "st->"+ v.val;          //same of before but left the prototype intentionally in case of different choise
                         }
                     }
                     return;
@@ -331,7 +338,7 @@ define(function (require, exports, module) {
                     if(isLocalVariable(expression.val, emuchart)) {
                             expression.val = "st->" + expression.val;
                         }else if (!isConstant(expression.val, emuchart)){
-                            expression.val = "st->"+ expression.val;        //same of before but leave intentionally in case of different choise
+                            expression.val = "st->"+ expression.val;        //same of before but left the prototype intentionally in case of different choise
                         }
                 }
                 if (Array.isArray(expression.val)) {
