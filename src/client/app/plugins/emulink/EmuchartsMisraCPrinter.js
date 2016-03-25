@@ -276,7 +276,10 @@ define(function (require, exports, module) {
             if (expression === undefined || expression === null) {
                 return "";
             }
-            if (Array.isArray(expression.val)){             //managing modulus operator
+            if (expression.type === 'modop'){             //managing modulus operator in condition forms, it's valid only for integer values
+                expression.val = '%';
+            }
+            if (Array.isArray(expression.val)){             //managing modulus operator in expression forms
                 var i,j;
                 for ( i = 0; i < expression.val.length; i++){
                     if (expression.val[i].type === 'modop'){
