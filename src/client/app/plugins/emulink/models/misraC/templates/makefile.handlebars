@@ -19,14 +19,14 @@ debug:$(OBJ)
 	@$(CC) $(DEBUG) -g $(SOURCES) -o $(NAME)
 	-@rm -r main.o
 	@echo " "
-	@echo $(OBJ) "compiled successfully in debug mode"
+	@echo "\033[1m$(OBJ)\033[0m compiled successfully in debug mode"
 	@echo "executable file (main) was generated for illustrative purposes"
 	
 $(NAME): $(OBJ)
 	@$(CC) $(CFLAGS) -o $@ $^
 	-@rm -r main.o
 	@echo " "
-	@echo $(OBJ) "compiled successfully!"
+	@echo "\033[1m$(OBJ)\033[0m compiled successfully!"
 	@echo "executable file (main) was generated for illustrative purposes"
 	@echo " "
 	@echo "Edit 'main.c' file and compile again if you want to try to interact with the generated functions."

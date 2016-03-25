@@ -281,7 +281,10 @@ define(function (require, exports, module) {
                 for ( i = 0; i < expression.val.length; i++){
                     if (expression.val[i].type === 'modop'){
                         if(!isInArray(declarations, "#include <math.h>")){
+                            declarations.push("#ifndef MATH_H");
+                            declarations.push("#define MATH_H");
                             declarations.push("#include <math.h>");
+                            declarations.push("#endif");
                         }
                         var lpar = 0;
                         var rpar = 1;
