@@ -780,7 +780,7 @@ define(function (require, exports, module) {
         d3.select("#ContainerStateMachine").select("svg").append("svg:g").attr("id", "States");
 
         var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
-            if (_this.mousedown.canvas || _this.mousedown.edge || _this.mousedown.node) {
+            if (_this.mousedown.canvas) {
                 d3.event.sourceEvent.stopPropagation();
                 if (editor_mode === MODE.ADD_TRANSITION() && _this.mousedrag.edge) {
                     var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
