@@ -14,7 +14,7 @@ define(function (require, exports, module) {
         eventDispatcher = require("util/eventDispatcher"),
         Emucharts = require("plugins/emulink/Emucharts"),
         EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes");
-    
+
     var dbg = false;
 
     // constants for drawing states

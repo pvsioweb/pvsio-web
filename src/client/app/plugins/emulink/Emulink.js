@@ -856,6 +856,14 @@ define(function (require, exports, module) {
                 view.remove();
             });
         });
+        d3.select("#btn_menuLayOutStates").on("click", function () {
+            console.log("layout");
+            var editor = emuchartsManager.getSelectedEditor();
+            if (editor) {
+                editor.emucharts.layOutChart();
+                emuchartsManager.render();
+            }
+        });
 
         //-- Transitions menu -----------------------------------------------------------
         d3.select("#menuTransitions").on("mouseover", function () {
