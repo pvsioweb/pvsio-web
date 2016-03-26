@@ -505,11 +505,10 @@ define(function (require, exports, module) {
             return fs.mkDir(data.projectName, opt).then(function (res) {
                 if (PVSioWebClient.serverOnLocalhost()) {
                     project.importRemoteFiles(data.pvsSpec).then(function (res) {
-                        if (res) {
+                        if (res && res.length > 0) {
                             descriptors = descriptors.concat(res);
                             pvsiowebJSON.mainPVSFile = res[0].path.split("/").slice(1).join("/");
                         }
-                    }).then(function (res) {
                         project.importRemoteFiles(data.prototypeImage).then(function (res) {
                             if (res && res.length > 0) {
                                 descriptors = descriptors.concat(res);
@@ -518,6 +517,7 @@ define(function (require, exports, module) {
                             finalise({ project: project, descriptors: descriptors });
                         });
                     }).catch(function (err) {
+                        console.log(err);
                         finalise({ project: project, descriptors: descriptors, success: false });
                     });
                 } else {
