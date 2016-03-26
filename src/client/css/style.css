@@ -824,10 +824,12 @@ fadeOut
     background: red;
 }
 
+/*
 #content.prototypebuilder.offscreen {
     position: absolute;
     left: -2000px;
 }
+*/
 
 .PVSio-web-logo {
     width: 100%;
