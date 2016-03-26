@@ -540,9 +540,7 @@ define(function (require, exports, module) {
                     // this is a self-edge
                     // refresh transition label
                     label = d3.select(this.parentNode).select(".tlabel");
-                    label.text(function (edge) {
-                        return labelToString(edge.name);
-                    });
+                    label.text(labelToString(edge.name));
                     // adjust text position
                     label.attr("x", function (edge) {
                         if (edge.target.id === edge.source.id) {
@@ -575,9 +573,7 @@ define(function (require, exports, module) {
                     cp = getControlPoints(edge);
                     // refresh transition label
                     label = d3.select(this.parentNode.lastChild.firstChild);
-                    label.text(function (edge) {
-                        return labelToString(edge.name);
-                    });
+                    label.text(labelToString(edge.name));
                     // clear the text of the other label
                     d3.select(this.parentNode).select(".tlabel").text(function (edge) { return ""; });
                     // refresh control points
@@ -623,9 +619,7 @@ define(function (require, exports, module) {
         transitions.selectAll(".ipath").attr("d", function (edge) {
             // refresh transition label
             var label = d3.select(this.parentNode).select(".itlabel");
-            label.text(function (edge) {
-                return labelToString(edge.name);
-            });
+            label.text(labelToString(edge.name));
             // adjust text position
             label.attr("x", function (edge) {
                 return -8;
@@ -1880,9 +1874,7 @@ define(function (require, exports, module) {
         transitions.selectAll(".path").attr("d", function (edge) {
             // refresh transition label
             var label = d3.select(this.parentNode).select(".tlabel");
-            label.text(function (edge) {
-                return labelToString(edge.name);
-            });
+            label.text(labelToString(edge.name));
         });
        */
     };
