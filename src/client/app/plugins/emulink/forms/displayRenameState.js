@@ -8,9 +8,10 @@ define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
         formTemplate = require("text!./templates/displayEditState.handlebars"),
+        BaseDialog = require("pvsioweb/forms/BaseDialog"),
         FormUtils = require("./FormUtils");
 
-    var AddStateView = Backbone.View.extend({
+    var AddStateView = BaseDialog.extend({
         initialize: function (data) {
             d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
             this.render(data);
@@ -25,7 +26,8 @@ define(function (require, exports, module) {
         },
         events: {
             "click #btnRight": "right",
-            "click #btnLeft": "left"
+            "click #btnLeft": "left",
+            "keydown .panel": "keypress"
         },
         right: function (event) {
             var form = this.el;
