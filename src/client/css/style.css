@@ -68,7 +68,7 @@ div.plugins {
     min-width: 1200px;
     overflow-y: scroll;
     width: 100%;
-    height: 100%;
+    height: 100% !important;
     position: relative;
     min-width: 800px;
     -webkit-animation: fadeIn 1s; /* Chrome, Safari, Opera */
