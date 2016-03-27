@@ -52,8 +52,7 @@ define(function (require, exports, module) {
 //                .on("dragend", dragEnd);
 //            d3.select(".panel-heading").call(drag);            
             
-            var parent = this.el,
-                bbox = d3.select(".panel-heading").node().getBoundingClientRect();
+            var parent = this.el;
             var startx = bbox.left, starty = bbox.top,
                 mx = event.clientX, my = event.clientY;
             function mousemove() {
