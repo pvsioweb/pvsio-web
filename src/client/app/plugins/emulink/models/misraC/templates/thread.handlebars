@@ -61,7 +61,6 @@ state init(state *st){
 
 {{#if transitions}}/* definition of transition functions */
 {{#each transitions}}{{#if id}}state {{id}}(state *st) {
-    assert( st->previous_state != NaN );
     assert( st->current_state ==  {{source.name}});
     {{~#if condition}}
     assert( {{&condition}} );{{~/if}}
@@ -84,7 +83,6 @@ state init(state *st){
     return *st;
 }
 {{else}}state {{0.id}}(state *st) {
-    assert( st->previous_state != NaN );
     assert( {{#each 0.sources}}st->current_state ==  {{&.}} {{#unless @last}}|| {{/unless}}{{/each}});
     assert( {{#each .}}{{&condition}} {{#unless @last}}|| {{/unless}}{{/each}});
 {{#each .}}
@@ -104,7 +102,7 @@ state init(state *st){
         {{&.}};
         debug_print("Action {{&.}} issued.\n");{{~/each}}
         enter({{target.name}}, st);
-        assert( st->previous_state != NaN && st->current_state == {{target.name}} );
+        assert( st->current_state == {{target.name}} );
         return *st;
 {{~/if}}{{/each}}
     return *st;
