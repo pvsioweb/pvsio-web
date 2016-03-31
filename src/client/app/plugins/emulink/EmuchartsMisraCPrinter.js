@@ -277,13 +277,21 @@ define(function (require, exports, module) {
         return false;
     }
     
+    /**
+     * Splice method for strings
+     * Returns the new string
+     */
+    function spliceSlice(str, index, count, add) {
+        return str.slice(0, index) + (add || "") + str.slice(index + count);
+    }
+    
     function parseTransition(t, emuchart) {
         function getExpression(expression, emuchart) {
             var complexActions = ["expression", "assignment", "function"];
             if (expression === undefined || expression === null) {
                 return "";
             }
-            if (expression.type === 'modop'){             //managing modulus operator in condition forms, it's valid only for integer values
+            if (expression.type === 'modop'){             //handling modulus operator in condition forms, it's valid only for integer values
                 expression.val = '%';
             }
             /** 
@@ -310,11 +318,11 @@ define(function (require, exports, module) {
                             if ( expression.val[j].val === ')')
                                 rpar++;
                             if ( lpar === rpar ){  
-                                var tmp = new Object();
+                                var tmp = new Object();         //creating a new object for the new comma in the expression
                                 tmp.type = "builtin";
                                 tmp.val = ",";
-                                expression.val.splice(j, 0, expression.val[i]);       //swap modulus operator
-                                expression.val.splice(i+1, 1, tmp); 
+                                expression.val.splice(j, 0, expression.val[i]);     //moving 'fmod' back to the last parenthesis
+                                expression.val.splice(i+1, 1, tmp);                 //adding new comma
                                 break;
                             }
                         }
@@ -376,6 +384,26 @@ define(function (require, exports, module) {
                 condition = condition.val.map(function (token) {
                     return getExpression(token, emuchart);
                 }).join(" ");
+                /** 
+                 * Handling logical operators, according to MISRA C rule 34 (The operands of a logical && or || shall be primary expressions)
+                 * Adding ') ' and ' (' rispectively before and after logical operator
+                 * With a flag it checks if it's the firts logical operator, in order to add '( ' and ' )' as well to the beginning and to the end of the string
+                 **/
+                var i;
+                var firstTime = true;
+                for (i = 0; i < condition.length; i++){
+                    if ( (condition[i] === '&' ) || (condition[i] === '|') ){
+                        condition = spliceSlice(condition, i, 0, ') ');
+                        condition = spliceSlice(condition, i+4, 0, ' (');
+                        i += 4;
+                        if (firstTime){
+                            condition = spliceSlice(condition, 0, 0, '( ');
+                            condition = spliceSlice(condition, condition.length, 0, ' )');
+                            i +=4;
+                            firstTime = false;
+                        }
+                    }
+                }
             }
             if (actions) {
                 actions = actions.val.map(function (a) {
