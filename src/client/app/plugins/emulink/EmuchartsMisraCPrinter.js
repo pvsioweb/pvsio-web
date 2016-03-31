@@ -1,6 +1,6 @@
 /**
  * @author Gioacchino Mauro
- * @date Mon  7 Mar 2016 15:40:53 CET
+ * @date Gio 31 Mar 2016 11:29:34 CEST
  *
  * MISRA C code printer for emucharts models.
  * Emuchart objects have the following structure:
@@ -195,15 +195,15 @@ define(function (require, exports, module) {
     }
     
     /**
-     * Change operator sintax from Emulink to C code
+     * Change operator sintax from Emucharts to C code
      */
     function getOperator(op, emuchart) {
         return operatorOverrides[op] || op;
     }
     
     /**
-     * Check if a value is in an array
-     * Return a boolean
+     * Checks if a value is in an array
+     * Returns a boolean
      */
     function isInArray(array, search)
     {
@@ -212,16 +212,16 @@ define(function (require, exports, module) {
     }
     
     /**
-     * Check if a value is a float or a finite number
-     * Return a boolean
+     * Checks if a value is a float or a finite number
+     * Returns a boolean
      */
     function isNumber(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     }
         
     /**
-     * Check if a value is a local variable in the emuchart structure
-     * Return a boolean
+     * Checks if a value is a local variable in the emuchart structure
+     * Returns a boolean
      */
     function isLocalVariable(name, emuchart) {
         if (name === predefined_variables.current_state.name ||
@@ -262,8 +262,8 @@ define(function (require, exports, module) {
     // }
     
     /**
-     * Check if a value is a constant in the emuchart structure
-     * Return a boolean
+     * Checks if a value is a constant in the emuchart structure
+     * Returns a boolean
      */
     function isConstant(name, emuchart) {
         if (emuchart.constants) {
@@ -286,7 +286,13 @@ define(function (require, exports, module) {
             if (expression.type === 'modop'){             //managing modulus operator in condition forms, it's valid only for integer values
                 expression.val = '%';
             }
-            if (Array.isArray(expression.val)){             //managing modulus operator in expression forms
+            /** 
+             * Managing modulus operator in expression forms
+             * It controls if type is 'modop' (eventually include math.h library in order to use fmod())
+             * It moves 'fmod' string back to the last parenthesis oh his expression and istead of it adds a comma to separate two parameters of fmod function
+             * right parenthesis (rpar) start with one unit more than left parenthesis (lpar), the algorithm stops when they are equals.
+             */
+            if (Array.isArray(expression.val)){
                 var i,j;
                 for ( i = 0; i < expression.val.length; i++){
                     if (expression.val[i].type === 'modop'){
@@ -322,7 +328,7 @@ define(function (require, exports, module) {
                         if(isLocalVariable(v.val, emuchart)) {
                             v.val = "st->" + v.val;
                         }else if (!isConstant(v.val, emuchart)){
-                                v.val = "st->"+ v.val;          //same of before but left the prototype intentionally in case of different choise
+                                v.val = "st->"+ v.val;          //same treatment of LocalVariables, left the prototype intentionally in case of different choise
                         }
                     }
                     return;
@@ -338,7 +344,7 @@ define(function (require, exports, module) {
                     if(isLocalVariable(expression.val, emuchart)) {
                             expression.val = "st->" + expression.val;
                         }else if (!isConstant(expression.val, emuchart)){
-                            expression.val = "st->"+ expression.val;        //same of before but left the prototype intentionally in case of different choise
+                            expression.val = "st->"+ expression.val;        //same treatment of LocalVariables, left the prototype intentionally in case of different choise
                         }
                 }
                 if (Array.isArray(expression.val)) {
@@ -459,8 +465,8 @@ define(function (require, exports, module) {
                 return (v.type + " "+ v.name + ";");
             });
         }
-        this.model.structureVar.push(machineStateType + " " + predefined_variables.current_state.name + ";  ///<  Predefined variable for current state.");
-        this.model.structureVar.push(machineStateType + " " + predefined_variables.previous_state.name + ";  ///<  Predefined variable for previous state.");
+        this.model.structureVar.push(machineStateType + " " + predefined_variables.current_state.name + ";  //  Predefined variable for current state.");
+        this.model.structureVar.push(machineStateType + " " + predefined_variables.previous_state.name + ";  //  Predefined variable for previous state.");
     };
     
     Printer.prototype.print_transitions = function (emuchart) {
