@@ -105,9 +105,12 @@ define(function (require, exports, module) {
         "bool": "UC_8",
         "char": "UC_8",
         "int": "UI_32",
+        "Sint": "SI_32",
         "float" : "F_32",
         "double": "D_64"                      
     };
+    
+    var Ints = ["int", "unsigned int", "long", "unsigned long"];
     
     /**
      * Specific-length equivalents should be typedefd for the specific compile, with respect to MISRA 1998 rule (Rule 13, advisory)
@@ -123,16 +126,22 @@ define(function (require, exports, module) {
             //     declarations.push("typedef unsigned char " + type + ";");
             // }    
         }
-        if (type.toLowerCase() === "char") { //The type char shall always be declared as unsigned char or signed char, with respect to MISRA 1998 rule (Rule 14, required)
+        if ( (type.toLowerCase() === "char") || (type.toLowerCase() === "unsigned char") ) { //The type char shall always be declared as unsigned char or signed char, with respect to MISRA 1998 rule (Rule 14, required)
             type = typeMaps.char;
             if(!isInArray(declarations, type)){
                 declarations.push("typedef unsigned char " + type + ";");
             }
         }
-        if (type.toLowerCase() === "int") {
+        if (Ints.indexOf(type.toLowerCase()) >= 0) {
             type = typeMaps.int;
             if(!isInArray(declarations, type)){
                 declarations.push("typedef unsigned int " + type + ";");
+            }
+        }
+        if ( (type.toLowerCase() === "signed int") || (type.toLowerCase() === "signed long") ) {
+            type = typeMaps.Sint;
+            if(!isInArray(declarations, type)){
+                declarations.push("typedef signed int " + type + ";");
             }
         }
         if (type.toLowerCase() === "float"){
@@ -156,7 +165,7 @@ define(function (require, exports, module) {
      */
     function setSuffix(v) {
         if (isNumber(v.value)){
-            if ( v.type.toUpperCase() === typeMaps.int ) {
+            if ( (v.type.toUpperCase() === typeMaps.int) || (v.type.toUpperCase() === typeMaps.Sint) ) {
                 v.value = v.value + "u";
             }
             if ( (v.type.toUpperCase() === typeMaps.float) || (v.type.toUpperCase() === typeMaps.double) ){
@@ -177,8 +186,8 @@ define(function (require, exports, module) {
      */
     function setSuffixInActions(variable, val, emuchart) {
         emuchart.variables.local.map(function(z){
-            if(variable.val.identifier.val === z.name){
-                if ( z.type === typeMaps.int ) {
+            if(variable.val.identifier.val === z.name) {
+                if ( (z.type === typeMaps.int) || (z.type === typeMaps.Sint) ) {
                     val += "u";
                 }
                 if ( (z.type === typeMaps.float) || (z.type === typeMaps.double) ){
