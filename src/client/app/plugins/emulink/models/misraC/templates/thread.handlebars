@@ -96,10 +96,10 @@ state init(state *st){
 }
 {{else}}state {{0.id}}(state *st) {
     assert( {{#each 0.sources}}st->current_state ==  {{&.}} {{#unless @last}}|| {{/unless}}{{/each}});
-    assert( {{#each .}}{{&condition}} {{#unless @last}}|| {{/unless}}{{/each}});
+    assert( {{#each .}}({{&condition}}) {{#unless @last}}|| {{/unless}}{{/each}});
 {{#each .}}
 {{~#if condition}}
-    if ({{&condition}} && st->current_state == {{source.name}}) {
+    if ( ({{&condition}}) && (st->current_state == {{source.name}}) ) {
         leave({{source.name}}, st);
         {{~#each actions}}
         {{&.}};
