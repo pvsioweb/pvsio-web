@@ -27,23 +27,23 @@
                                 id: (string),   // a unique identifier
                             }),
                 transitions: (array of {
-                                name: (string), // the transition label
+                                name: (string), // the transition label (it includes trigger name, condition and actions)
                                 id: (string),   // a unique identifier
                                 source: {
                                     name: (string), // the source state label
                                     id: (string)    // a unique identifier
                                 },
-                                sources: (array of 
-                                    :(string)       //sources state label list in case of homonyms transitions with different source
-                                ),
                                 target: {
                                     name: (string), // the target state label
                                     id: (string)    // a unique identifier
                                 },
-                                targets: (array of 
-                                    :(string)       //target state label list in case of homonyms transitionswith different target
+                                listSources: (array of 
+                                    :(string)       // sources state label list in case of homonymous transitions with different source
                                 ),
-                               (array of array of in case of homonyms transitions),
+                                listTargets: (array of 
+                                    :(string)       // target state label list in case of homonymous transitions with different target
+                                ),
+                               (array of array in case of homonymous transitions),
                             }),
                 initial_transitions: (array of {
                                 name: (string), // the initial transition label
@@ -424,7 +424,7 @@ define(function (require, exports, module) {
                     return getExpression(a, emuchart);
                 });
             }
-            return {id: id.val, actions: actions, condition: condition, source: t.source, target: t.target, sources: [], targets: []};
+            return {id: id.val, actions: actions, condition: condition, source: t.source, target: t.target, listSources: [], listTargets: []};
         } else if (functionBody.err) {
             displayError(functionBody.err);
             return { erroneousLabel: name, parserError: functionBody.err };
@@ -520,24 +520,24 @@ define(function (require, exports, module) {
                      var i;
                      for ( i = 0; i < transitions.length; i++){
                          if(transitions[i].id !== 'undefined'){
-                            if(!transitions[i].sources){                            //control in transictions list
-                                if(!isInArray(transitions[i][0].sources, parsedTransition.source.name) && (transitions[i][0].id === parsedTransition.id)){   //it checks if there are different sources in transitions
-                                    transitions[i][0].sources.push(parsedTransition.source.name);
+                            if(!transitions[i].listSources){                            //control in transitions list
+                                if(!isInArray(transitions[i][0].listSources, parsedTransition.source.name) && (transitions[i][0].id === parsedTransition.id)){   //it checks if there are different sources in transitions
+                                    transitions[i][0].listSources.push(parsedTransition.source.name);
                                 }
                             }
-                            else{                                                   //control in transictions innested list
-                                if(!isInArray(transitions[i].sources, parsedTransition.source.name) && (transitions[i].id === parsedTransition.id)){         //it checks if there are different sources in transitions
-                                    transitions[i].sources.push(parsedTransition.source.name);
+                            else{                                                   //control in transitions innested list
+                                if(!isInArray(transitions[i].listSources, parsedTransition.source.name) && (transitions[i].id === parsedTransition.id)){         //it checks if there are different sources in transitions
+                                    transitions[i].listSources.push(parsedTransition.source.name);
                                 }
                             }
-                            if(!transitions[i].targets){                            //control in transictions list
-                                if(!isInArray(transitions[i][0].targets, parsedTransition.target.name) && (transitions[i][0].id === parsedTransition.id)){   //it checks if there are different targets in transitions
-                                    transitions[i][0].targets.push(parsedTransition.target.name);
+                            if(!transitions[i].listTargets){                            //control in transitions list
+                                if(!isInArray(transitions[i][0].listTargets, parsedTransition.target.name) && (transitions[i][0].id === parsedTransition.id)){   //it checks if there are different targets in transitions
+                                    transitions[i][0].listTargets.push(parsedTransition.target.name);
                                 }
                             }
-                            else{                                                   //control in transictions innested list
-                                if(!isInArray(transitions[i].targets, parsedTransition.target.name) && (transitions[i].id === parsedTransition.id)){         //it checks if there are different targets in transitions
-                                    transitions[i].targets.push(parsedTransition.target.name);
+                            else{                                                   //control in transitions innested list
+                                if(!isInArray(transitions[i].listTargets, parsedTransition.target.name) && (transitions[i].id === parsedTransition.id)){         //it checks if there are different targets in transitions
+                                    transitions[i].listTargets.push(parsedTransition.target.name);
                                 }
                             }
                             if (transitions[i].id === parsedTransition.id){

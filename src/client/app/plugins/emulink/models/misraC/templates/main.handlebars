@@ -7,7 +7,6 @@
 #ifndef STDLIBS_H 
 #define STDLIBS_H
 #include <stdlib.h>
-#include <time.h>
 #include <string.h>
 #endif
 #define NUM_OF_FUNC {{transitions.length}}
@@ -48,7 +47,10 @@ int main(){
     }
      while(1){    
         printf("Enter number of transition to be issued (enter 0 to exit): ");
-        scanf("%d",&t);
+        if( scanf("%d",&t) != 1 ){
+            fprintf( stderr, "Expected a numbers as input\n");
+            exit(1);
+        }
         t--;
         printf("\n");
         if (t >= NUM_OF_FUNC){

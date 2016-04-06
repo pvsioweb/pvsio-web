@@ -95,7 +95,7 @@ state init(state *st){
     return *st;
 }
 {{else}}state {{0.id}}(state *st) {
-    assert( {{#each 0.sources}}st->current_state ==  {{&.}} {{#unless @last}}|| {{/unless}}{{/each}});
+    assert( {{#each 0.listSources}}st->current_state ==  {{&.}} {{#unless @last}}|| {{/unless}}{{/each}});
     assert( {{#each .}}({{&condition}}) {{#unless @last}}|| {{/unless}}{{/each}});
 {{#each .}}
 {{~#if condition}}
@@ -133,7 +133,7 @@ state init(state *st){
     return false;
 }
 {{else}}UC_8 per_{{0.id}}(const state *st) {
-{{#each 0.sources}}
+{{#each 0.listSources}}
     if (st->current_state ==  {{&.}}){
         return true;
     }{{/each}}

@@ -60,13 +60,13 @@ state init(state *st);{{/if}}
  *    \post function is moving to the right state ("{{target.name}}" in this case)
  */
 state {{id}}(state *st);{{else}}/** {{0.id}} transition function.
- * This function is generated merging two or more homonyms trasitions.
+ * This function is generated merging two or more homonymous trasitions.
  *    It changes state{{~#each .}} from "{{source.name}}" to "{{target.name}}"{{~#if condition}} when condition [{{&condition}}] holds{{~/if}}{{#unless @last}},{{/unless}}
  *    {{/each}}
  *    \param st state structure pointer
  *    \return state structure
- *    \pre function is called from the right state ({{#each 0.sources}}"{{&.}}" {{#unless @last}}or {{/unless}}{{/each}}in this case)
- *    \post function is moving to the right state ({{#each 0.targets}}"{{&.}}" {{#unless @last}}or {{/unless}}{{/each}}in this case)
+ *    \pre function is called from the right state ({{#each 0.listSources}}"{{&.}}" {{#unless @last}}or {{/unless}}{{/each}}in this case)
+ *    \post function is moving to the right state ({{#each 0.listTargets}}"{{&.}}" {{#unless @last}}or {{/unless}}{{/each}}in this case)
  */
 state {{0.id}}(state *st);{{/if}}
 {{/each}}{{/if}}
@@ -79,7 +79,7 @@ state {{0.id}}(state *st);{{/if}}
  */
 UC_8 per_{{id}}(const state *st);{{else}}/** {{0.id}} permission function for transition.
  * Use to check if functions can be performed, it controls if the current state is eligible.
- * (i.e., current state is {{#each 0.sources}}"{{&.}}"{{#unless @last}} or {{/unless}}{{/each}})
+ * (i.e., current state is {{#each 0.listSources}}"{{&.}}"{{#unless @last}} or {{/unless}}{{/each}})
  *    \param st state structure pointer
  *    \return boolean
  */
