@@ -2,6 +2,7 @@
 NAME = main
 CC = gcc
 CFLAGS = -Wall -O2 -Werror -Wmissing-noreturn -Wpacked -Wunreachable-code
+LDFLAGS= -lm
 DEBUG = -Wall -O2 -Werror -Wmissing-noreturn -Wpacked -Wunreachable-code -D DEBUG
 HEAD = {{filename}}.h
 SOURCES = {{filename}}.c main.c
@@ -16,14 +17,14 @@ DEBUGFILES = main.dSYM
 build: $(NAME)
 
 debug:$(OBJ)
-	@$(CC) $(DEBUG) -g $(SOURCES) -o $(NAME)
+	@$(CC) $(DEBUG) -g $(SOURCES) -o $(NAME) $(LDFLAGS)
 	-@rm -r main.o
 	@echo " "
 	@echo "\033[1m$(OBJ)\033[0m compiled successfully in debug mode"
 	@echo "executable file (main) was generated for illustrative purposes"
 	
 $(NAME): $(OBJ)
-	@$(CC) $(CFLAGS) -o $@ $^
+	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 	-@rm -r main.o
 	@echo " "
 	@echo "\033[1m$(OBJ)\033[0m compiled successfully!"
