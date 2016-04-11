@@ -1,14 +1,8 @@
 {{&descriptor}}
 #include "{{filename}}.h"
-#ifndef STDIO_H 
 #define STDIO_H
 #include <stdio.h>
-#endif
-#ifndef STDLIBS_H 
-#define STDLIBS_H
-#include <stdlib.h>
 #include <string.h>
-#endif
 #define NUM_OF_FUNC {{transitions.length}}
 #define NUM_OF_TESTS 20
 
@@ -49,7 +43,7 @@ int main(){
         printf("Enter number of transition to be issued (enter 0 to exit): ");
         if( scanf("%d",&t) != 1 ){
             fprintf( stderr, "Expected a numbers as input\n");
-            exit(1);
+            return 1;
         }
         t--;
         printf("\n");
