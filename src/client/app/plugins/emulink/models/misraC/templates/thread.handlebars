@@ -31,7 +31,6 @@ void leave(const MachineState currentStateLabel, state *st) {
 
 {{#if initial_transitions}}/* definition of initialisation function */
 state init(state *st){
-    leave({{initial_transitions/0.target.name}}, st);     //leave call is issued in order to initilise previous state
 #ifdef DEBUG    
     debug_print("Initialisation of state variables.\n");
 #endif    
@@ -62,7 +61,7 @@ state init(state *st){
 
 {{#if transitions}}/* definition of transition functions */
 {{#each transitions}}{{#if id}}state {{id}}(state *st) {
-    assert( st->current_state ==  {{source.name}});
+    assert( st->current_state == {{source.name}});
     {{~#if condition}}
     assert( {{&condition}} );{{~/if}}
 {{~#if condition}}
@@ -90,10 +89,9 @@ state init(state *st){
 }
 {{else}}state {{0.id}}(state *st) {
     assert( {{#each 0.listSources}}st->current_state ==  {{&.}} {{#unless @last}}|| {{/unless}}{{/each}});
-    assert( {{#each .}}({{&condition}}) {{#unless @last}}|| {{/unless}}{{/each}});
 {{#each .}}
 {{~#if condition}}
-    if ( ({{&condition}}) && (st->current_state == {{source.name}}) ) {
+    if ( (st->current_state == {{source.name}}) && ({{&condition}}) ) {
         leave({{source.name}}, st);
         {{~#each actions}}
         {{&.}};
