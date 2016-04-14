@@ -35,7 +35,7 @@ Once PVS is installed, please add the following PVS executable files to your PAT
 Please note that the ln command requires a full path.
 
 #### Step 2: Install NodeJS
-NodeJS is required to run PVSio-web. Please download and install NodeJS from http://nodejs.org/download/
+NodeJS is required to run PVSio-web. Please download and install NodeJS from http://nodejs.org
 Installation instructions are on the aforementioned website.
 
 #### Step 3: Clone the PVSio-web repository
