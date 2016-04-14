@@ -96,7 +96,7 @@ define(function (require, exports, module) {
             }
             editor.clearHistory();
         }
-        if (event.selectedItem) {
+        if (event.selectedItem && document.getElementById("editor")) {
             if (event.selectedItem.isDirectory) {
                 document.getElementById("editor").style.display = "inline-block";
                 document.getElementById("imageViewer").style.display = "none";
