@@ -148,7 +148,7 @@ define(function (require, exports, module) {
         }
         
         displayRenameState.create({
-            header: "Editing state " + theState.name.substring(0, maxLen) + "...",
+            header: "Renaming state " + theState.name.substring(0, maxLen) + "...",
             textLabel: {
                 newStateName: "State name",
                 newStateColor: "State color"
@@ -182,7 +182,7 @@ define(function (require, exports, module) {
         }
         
         displayChangeStateColor.create({
-            header: "Editing state " + theState.name.substring(0, maxLen) + "...",
+            header: "Renaming state " + theState.name.substring(0, maxLen) + "...",
             textLabel: {
                 newStateName: "State name",
                 newStateColor: "State color"
@@ -1480,7 +1480,7 @@ define(function (require, exports, module) {
         d3.select("#btn_menuTestGeneratorFromFile").on("click", function () {
             var models;
             // Generate tests from importing a file
-            fs.openLocalFileAsText(function (err, res) {
+            FileHandler.openLocalFileAsText(function (err, res) {
                 if (res) {
                     // Try parse as PIM
                     models = pimImporter.importPIM(res);

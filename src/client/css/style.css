@@ -66,9 +66,9 @@ div.plugins {
 
 #content{
     min-width: 1200px;
-    overflow-y: scroll;
+/*    overflow-y: scroll;*/
     width: 100%;
-    height: 100%;
+    height: 100% !important;
     position: relative;
     min-width: 800px;
     -webkit-animation: fadeIn 1s; /* Chrome, Safari, Opera */
@@ -824,10 +824,12 @@ fadeOut
     background: red;
 }
 
+/*
 #content.prototypebuilder.offscreen {
     position: absolute;
     left: -2000px;
 }
+*/
 
 .PVSio-web-logo {
     width: 100%;
