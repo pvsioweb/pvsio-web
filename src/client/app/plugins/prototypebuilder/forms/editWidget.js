@@ -16,7 +16,7 @@ define(function (require, exports, module) {
         var f = d3.select("#functionText").property("value"),
             str = "",
             events = [];
-        d3.selectAll("input[type='radio'][name='events']").each(function () {
+        d3.selectAll("input[type='radio'][name='evts']").each(function () {
             if (this.checked) {
                 events = events.concat(this.value.split("/"));
             }
