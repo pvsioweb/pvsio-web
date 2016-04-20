@@ -512,7 +512,9 @@ define(function (require, exports, module) {
         projectManager.addListener("ProjectChanged", onProjectChanged);
         projectManager.addListener("WidgetsFileChanged", onWidgetsFileChanged);
         projectManager.addListener("SelectedFileChanged", onSelectedFileChanged);
-        WidgetsListView.create();
+        updateImageAndLoadWidgets().then(function (res) {
+            WidgetsListView.create();
+        }).catch(function (err) { Logger.error(err); });
         bindListeners();
         d3.select("#header #txtProjectName").html(projectManager.project().name());
         return updateImageAndLoadWidgets();
