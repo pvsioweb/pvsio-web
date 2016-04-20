@@ -193,8 +193,6 @@ define(function (require, exports, module) {
             });
         }
 
-        document.title = "PVSio-Web -- " + event.current;
-        d3.select("#header #txtProjectName").html(event.current);
         switchToBuilderView();
         WidgetManager.clearWidgetAreas();
         ScriptPlayer.clearView();
