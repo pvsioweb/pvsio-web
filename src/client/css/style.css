@@ -561,25 +561,26 @@ div.detailsForm select, div.detailsForm textarea{
 .caption button {
     width: 100%;
 }
-#widgetsList {
+#widgetsList, #timersList {
     overflow-y: auto;
     padding: 0;
-    margin: 0;
-    height: 100%;
+    margin: 4 0 2;
+    max-height: 50%;
+    margin-right: 6px;
 }
-#widgetsList li{
+#widgetsList li, #timersList li{
     cursor: pointer;
 }
 
-#widgetsList li.selected {
+#widgetsList li.selected, #timersList li.selected {
     background: rgb(8, 88, 154);
     color: white;
 }
-#widgetsList li:hover {
+#widgetsList li:hover, #timersList li:hover {
     color: white;
     background: black;
 }
-#widgetsList li.selected:hover {
+#widgetsList li.selected:hover, #timersList li.selected.hover {
     color: white;
     background: rgb(8, 88, 154);
 }
@@ -1041,4 +1042,32 @@ input.input_text{
 input#filter {
     color: black;
     padding: 5px;
+}
+
+.widgetsListHeader, .timersListHeader{
+    padding: 4px;
+    padding-left: 12px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    display: block;
+     
+    border-right: 30px solid transparent;
+    border-bottom: 30px solid #4c4c4c;
+     
+    height: 0;
+    line-height: 40px;
+}
+
+.timerAdd {
+    background-color: steelblue;
+    color: white;
+    padding-top:0px !important;
+    height: 22px;
+    float: right;
+    margin-top: 9px;
+}
+.timerAdd:hover {
+    background-color: black;
+    color: white;
 }
