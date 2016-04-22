@@ -31,6 +31,7 @@ define(function (require, exports, module) {
         opt.functionText = opt.functionText || id;
         opt.recallRate = opt.recallRate || 250;
         opt.evts = opt.evts || ["click"];
+        opt.callback = opt.callback || function (){};
         this.evts = property.call(this, opt.evts);
         this.recallRate = property.call(this, opt.recallRate);
         this.functionText = property.call(this, opt.functionText);
