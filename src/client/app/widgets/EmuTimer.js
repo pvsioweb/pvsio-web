@@ -119,6 +119,9 @@ define(function (require, exports, module) {
             id = this.id();
         var callback = this.callback;
         this.tick(opt);
+        if (opt.timerRate && opt.timerRate > 100) {
+            this.timerRate(opt.timerRate);
+        }
         timerTickFunction = function () {
             ButtonActionsQueue.queueGUIAction(timerFunction, callback);
             //record action
