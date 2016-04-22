@@ -13,7 +13,7 @@ define(function (require, exports, module) {
         imageMapper             = require("imagemapper"),
         uidGenerator            = require("util/uuidGenerator"),
         EditWidgetView          = require("pvsioweb/forms/editWidget"),
-        Button                  = require("pvsioweb/Button"),
+        Button                  = require("widgets/Button"),
         Display                 = require("pvsioweb/Display"),
         Storyboard              = require("pvsioweb/Storyboard"),
         EmuTimer                = require("widgets/EmuTimer"),
@@ -95,7 +95,17 @@ define(function (require, exports, module) {
             _.each(defs.widgetMaps, function (w, key) {
                 w.type = w.type.toLowerCase();
                 if (w.type === "button") {
-                    widget = new Button(key);
+                    if (defs.regionDefs && defs.regionDefs[key].coords) {
+                        var coords = defs.regionDefs[key].coords;
+                        var height = coords[3] - coords[1], width= coords[2] - coords[0], x = coords[0], y = coords[1];
+                        widget = new Button(
+                            key,
+                            { top: y, left: x, width: width, height: height },
+                            { callback: renderResponse}
+                        );
+                    } else {
+                        widget = new Button(key, null, { callback: renderResponse });
+                    }
                 } else if (w.type === "display") {
                     widget = new Display(key);
                 } else if (w.type === "storyboard") {
