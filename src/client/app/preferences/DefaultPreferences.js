@@ -11,7 +11,7 @@ define(function (require, exports, module) {
     var prefs = {}, instance;
 
     function DefaultPreferences() {
-        prefs[preferenceKeys.BACKUP_INTERVAL] = 60; //seconds
+        prefs[preferenceKeys.BACKUP_INTERVAL] = 60 * 10; //in seconds
         prefs[preferenceKeys.REMEMBER_LAST_DIRECTORY] = true;
         prefs[preferenceKeys.REMEMEBER_ENABLED_PLUGINS] = true;
         prefs[preferenceKeys.LAST_DIRECTORY_VISITED] = "~";

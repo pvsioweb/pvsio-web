@@ -132,6 +132,14 @@ define(function (require, exports, module) {
         btnTimer.interval(this.timerRate()).start();
         return this;
     };
+    
+    EmuTimer.prototype.updateInterval = function (millis) {
+        // minimum allowed interval is 100 millis
+        if (millis > 100) {
+            this.stop();
+            this.start({ timerRate: millis });
+        }
+    };
 
     /**
      * @function stop
