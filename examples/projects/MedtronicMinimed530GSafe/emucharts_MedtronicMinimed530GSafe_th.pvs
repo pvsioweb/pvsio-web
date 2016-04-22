@@ -20,7 +20,7 @@ emucharts_MedtronicMinimed530GSafe_th: THEORY
 
   %-- initial state
   init(x: real): State = (#
-    current_state := on,
+    current_state := off,
     previous_state := off,
     display := 0
   #)
@@ -35,6 +35,12 @@ emucharts_MedtronicMinimed530GSafe_th: THEORY
     (current_state(st) = off)
      -> LET new_st = leave_state(off)(st)
          IN enter_into(on)(new_st)
+    ENDCOND
+    
+  tick(st: (per_turn_on)): State =
+    COND
+      per_turn_on(st) -> turn_on(st),
+      ELSE -> st
     ENDCOND
 
   per_turn_off(st: State): bool = ((current_state(st) = on))

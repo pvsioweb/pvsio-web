@@ -1,8 +1,8 @@
 <div class="form-center">
+    <form class="center form-horizontal" onsubmit="return false" role="form">
     <div class="panel panel-info shadow center dialog">
         <div class="panel-heading">Create Widget</div>
         <div class="panel-body">
-            <form class="center form-horizontal" onsubmit="return false" role="form">
                 <ul class="nav nav-tabs" id="tabHeaders">
                     <li>
                         <a href="#display" data-toggle="tab" id="displayTab">Display</a>
@@ -14,21 +14,35 @@
                 <div class="tab-content">
                     <div class="tab-pane active" id="display">
                         <div class="form-group">
-                            <label for="auditoryFeedback" class="col-sm-4 control-label">Enable Audio Feeback</label>
+                            <label for="displayKey" class="col-sm-4 control-label">Display Name</label>
                             <div class="col-sm-8">
+                                <input type="text" name="displayKey" id="displayKey" required class="form-control" placeholder="disp" value="disp" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cursorName" class="col-sm-4 control-label">Cursor Name</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="cursorName" id="cursorName" class="form-control" placeholder="c" value="c" />
+                            </div>
+                        </div>
+<!--
+                        <div class="form-group">
+                            <label for="margin" class="col-sm-4 control-label" style="padding-top:30px;">Position (px)</label>
+                            <div class="col-sm-8" style="padding-top:6px;" name="margin">
+                                <div class="coordTable">Top corner: <input type="text" name="top" id="top" class="form-control numField" placeholder="{{top}}" value="{{top}}"/></div>
+                                <div class="coordTable">Left corner: <input type="text" name="left" id="left" class="form-control numField" placeholder="{{left}}" value="{{left}}"/></div>
+                            </div>
+                            <label for="size" class="col-sm-4 control-label" style="padding-top:30px;">Dimensions (px)</label>
+                            <div class="col-sm-8" style="padding-top:6px;" name="size">
+                                <div class="coordTable">Width: <input type="text" name="width" id="width" class="form-control numField" placeholder="{{width}}" value="{{width}}"/></div>
+                                <div class="coordTable">Height: <input type="text" name="height" id="height" class="form-control numField" placeholder="{{height}}" value="{{height}}"/></div>
+                            </div>
+                        </div>
+-->
+                        <div class="form-group">
+                            <label for="auditoryFeedback" class="col-sm-4 control-label">Voice Readback</label>
+                            <div class="col-sm-8" style="padding-top:6px;">
                                 <input type="checkbox" name="auditoryFeedback" value="auditoryFeedback"/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="displayKey" class="col-sm-4 control-label">Display name</label>
-                            <div class="col-sm-8">
-                                <input type="text" name="displayKey" id="displayKey" required class="form-control" value="" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="cursorName" class="col-sm-4 control-label">Cursor name</label>
-                            <div class="col-sm-8">
-                                <input type="text" name="cursorName" id="cursorName" class="form-control" value="" />
                             </div>
                         </div>
                     </div>
@@ -68,12 +82,11 @@
                         </div>
                     </div>
                 </div>
-            </form>
         </div>
         <div class="panel-footer">
             <button type="button" class="btn btn-danger left" id="btnCancel">Cancel</button>
             <button type="submit" class="btn btn-success right" id="btnOk">OK</button>
         </div>
     </div>
-
+    </form>
 </div>
