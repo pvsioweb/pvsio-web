@@ -358,7 +358,7 @@ define(function (require, exports, module) {
             projectManager.reconnectToServer();
         });
         d3.select("#btnAddNewTimer").on("click", function () {
-            WidgetManager.addTimer();
+//            WidgetManager.addTimer();
         });
         d3.select("#btnAddNewWidget").on("click", function () {
             
@@ -528,7 +528,7 @@ define(function (require, exports, module) {
         }).catch(function (err) { Logger.error(err); });
         
         // add default tick timer
-        WidgetManager.addTimer("tick");
+        WidgetManager.addWallClockTimer();
         //TimersListView.create();
 
         bindListeners();

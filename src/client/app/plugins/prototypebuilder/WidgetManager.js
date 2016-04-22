@@ -10,15 +10,17 @@ define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
         eventDispatcher = require("util/eventDispatcher"),
-        imageMapper             = require("imagemapper"),
-        uidGenerator            = require("util/uuidGenerator"),
-        EditWidgetView          = require("pvsioweb/forms/editWidget"),
-        Button                  = require("widgets/Button"),
-        Display                 = require("pvsioweb/Display"),
-        Storyboard              = require("pvsioweb/Storyboard"),
-        EmuTimer                = require("widgets/EmuTimer"),
-        NewWidgetView           = require("pvsioweb/forms/newWidget"),
-        StateParser             = require("util/PVSioStateParser");
+        imageMapper     = require("imagemapper"),
+        uidGenerator    = require("util/uuidGenerator"),
+        EditWidgetView  = require("pvsioweb/forms/editWidget"),
+        Button          = require("widgets/Button"),
+        Display         = require("pvsioweb/Display"),
+        Storyboard      = require("pvsioweb/Storyboard"),
+        EmuTimer        = require("widgets/EmuTimer"),
+        NewWidgetView   = require("pvsioweb/forms/newWidget"),
+        StateParser     = require("util/PVSioStateParser"),
+        PreferenceKeys  = require("preferences/PreferenceKeys"),
+        Preferences     = require("preferences/PreferenceStorage").getInstance();
     var wm, mapCreator;
 
    ///TODO this should be moved out of this file and promoted to a property, or a function parameter in createImageMap
@@ -35,12 +37,13 @@ define(function (require, exports, module) {
             w.render(state);
         });
     }
-
     function createImageMap(widget) {
-        if (widget.needsImageMap()) { widget.createImageMap({callback: renderResponse}); }
+        if (widget.needsImageMap()) {
+            widget.createImageMap({
+                callback: renderResponse
+            });
+        }
     }
-
-
     function handleWidgetEdit(widget, wm) {
         if (widget) {
             EditWidgetView.create(widget)
@@ -80,6 +83,13 @@ define(function (require, exports, module) {
     function WidgetManager() {
         this._widgets = {};
         this._timers = {};
+        Preferences.addListener("preferenceChanged", function (e) {
+            if (e.key === "WALL_CLOCK_INTERVAL" && wm._timers.tick) {
+                var timerRate = Preferences.get(PreferenceKeys.WALL_CLOCK_INTERVAL) * 1000;
+                wm._timers.tick.updateInterval(timerRate);
+                console.log("tick timer interval updated to " + timerRate/1000 + " secs");
+            }
+        });
         eventDispatcher(this);
     }
 
@@ -251,11 +261,11 @@ define(function (require, exports, module) {
     WidgetManager.prototype.addWidget = function (widget) {
         this._widgets[widget.id()] = widget;
     };
-    WidgetManager.prototype.addTimer = function (t) {
+    WidgetManager.prototype.addWallClockTimer = function () {
         //pop up the timer edit dialog
-        t = t || "tick";
-        var id = "timer_" + uidGenerator();
-        var emuTimer = new EmuTimer(id, { timerEvent: t, timerRate: 1000, callback: renderResponse });
+        var id = "tick";
+        var timerRate = Preferences.get(PreferenceKeys.WALL_CLOCK_INTERVAL) * 1000;
+        var emuTimer = new EmuTimer(id, { timerEvent: id, timerRate: timerRate, callback: renderResponse });
         this._timers[emuTimer.id()] = emuTimer;
         // fire event widget created
         var event = { type: "TimerModified", action: "create", timer: emuTimer };
