@@ -1,0 +1,179 @@
+{
+ "widgetMaps": [
+  {
+   "type": "display",
+   "id": "display_91429717-8548-47db-c570-2e3cad97acb4",
+   "displayKey": "display_hour",
+   "cursorName": ""
+  },
+  {
+   "type": "display",
+   "id": "display_c98ca874-5c7c-442d-996c-85f8989d5f7a",
+   "displayKey": "display_alarm",
+   "cursorName": ""
+  },
+  {
+   "evts": [
+    "click"
+   ],
+   "id": "button_6ea2d3ff-41c3-486e-d77f-5260e2949d5c",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "mode",
+   "boundFunctions": "click_mode"
+  },
+  {
+   "evts": [
+    "click"
+   ],
+   "id": "button_30cdfe04-f461-4e4d-9e43-db977858ddda",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "alarm_switch",
+   "boundFunctions": "click_alarm_switch"
+  },
+  {
+   "evts": [
+    "click"
+   ],
+   "id": "button_1c60ca95-089f-4747-9767-c6e19b07f75f",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "minute",
+   "boundFunctions": "click_minute"
+  },
+  {
+   "type": "display",
+   "id": "display_07052e5e-f402-49c7-bb5a-405360a6fe37",
+   "displayKey": "display_minute",
+   "cursorName": ""
+  },
+  {
+   "evts": [
+    "click"
+   ],
+   "id": "button_c7437d48-3a6b-475f-8ce9-7f7919952947",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "hour",
+   "boundFunctions": "click_hour"
+  },
+  {
+   "evts": [
+    "click"
+   ],
+   "id": "button_34c4aa0a-20e2-4efa-f0b6-f2e328b16f9c",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "screen_on_switch",
+   "boundFunctions": "click_screen_on_switch"
+  },
+  {
+   "type": "display",
+   "id": "display_abdd7523-3e5d-47e4-9027-675a38212211",
+   "displayKey": "display_set",
+   "cursorName": ""
+  },
+  {
+   "evts": [
+    "click"
+   ],
+   "id": "button_0687f0ec-3125-4bd1-d676-e58fa7f99e94",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "tick",
+   "boundFunctions": "click_tick"
+  },
+  {
+   "evts": [
+    "click"
+   ],
+   "id": "button_927c9e37-d4a2-424e-8ede-58d6b6032e85",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "tick",
+   "boundFunctions": "click_tick"
+  },
+  {
+   "type": "display",
+   "id": "display_f4159c2b-0fda-4208-9e75-10df10cb1e42",
+   "displayKey": "display_alarming",
+   "cursorName": "",
+   "auditoryFeedback": false
+  }
+ ],
+ "regionDefs": [
+  {
+   "class": "display_91429717-8548-47db-c570-2e3cad97acb4",
+   "shape": "rect",
+   "coords": "130.72498323261857,289.77155507413,277.72498323261857,427.7715550741301",
+   "href": null
+  },
+  {
+   "class": "display_c98ca874-5c7c-442d-996c-85f8989d5f7a",
+   "shape": "rect",
+   "coords": "486.54391942771696,319.82897131644285,516.543919427717,354.82897131644296",
+   "href": null
+  },
+  {
+   "class": "button_6ea2d3ff-41c3-486e-d77f-5260e2949d5c",
+   "shape": "rect",
+   "coords": "105.32547262046145,145.80830232606482,220.739967452924,185.93687438964844",
+   "href": "#!"
+  },
+  {
+   "class": "button_30cdfe04-f461-4e4d-9e43-db977858ddda",
+   "shape": "rect",
+   "coords": "521.6039245847797,141.55113930580987,590.559040562564,179.12979072372403",
+   "href": "#!"
+  },
+  {
+   "class": "button_1c60ca95-089f-4747-9767-c6e19b07f75f",
+   "shape": "rect",
+   "coords": "341.92768837882403,142.6716611295493,400.3421956417425,182.95755205248187",
+   "href": "#!"
+  },
+  {
+   "class": "display_07052e5e-f402-49c7-bb5a-405360a6fe37",
+   "shape": "rect",
+   "coords": "298.9414289286833,291.9001599063493,435.94142892868337,428.9001599063493",
+   "href": null
+  },
+  {
+   "class": "button_c7437d48-3a6b-475f-8ce9-7f7919952947",
+   "shape": "rect",
+   "coords": "253.92019645771325,145.99313074751421,310.4632706017397,182.700380411314",
+   "href": "#!"
+  },
+  {
+   "class": "button_34c4aa0a-20e2-4efa-f0b6-f2e328b16f9c",
+   "shape": "rect",
+   "coords": "617.3904005654063,135.22849612371124,655.5396118164066,190.47880734978457",
+   "href": "#!"
+  },
+  {
+   "class": "display_abdd7523-3e5d-47e4-9027-675a38212211",
+   "shape": "rect",
+   "coords": "441.0057546978103,390.5959631654437,535.0632226088246,417.4960632324219",
+   "href": null
+  },
+  {
+   "class": "button_0687f0ec-3125-4bd1-d676-e58fa7f99e94",
+   "shape": "rect",
+   "coords": "821,289,858.9999999999998,332.0000000000001",
+   "href": "#!"
+  },
+  {
+   "class": "button_927c9e37-d4a2-424e-8ede-58d6b6032e85",
+   "shape": "rect",
+   "coords": "715.0139620671949,442.164913566927,784.110009947197,511.2609614469289",
+   "href": "#!"
+  },
+  {
+   "class": "display_f4159c2b-0fda-4208-9e75-10df10cb1e42",
+   "shape": "rect",
+   "coords": "138.56373264932768,441.0087246780461,567.8654071824545,467.06133289509603",
+   "href": null
+  }
+ ]
+}
