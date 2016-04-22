@@ -16,6 +16,7 @@ define(function (require, exports, module) {
         Button                  = require("pvsioweb/Button"),
         Display                 = require("pvsioweb/Display"),
         Storyboard              = require("pvsioweb/Storyboard"),
+        EmuTimer                = require("widgets/EmuTimer"),
         NewWidgetView           = require("pvsioweb/forms/newWidget"),
         StateParser             = require("util/PVSioStateParser");
     var wm, mapCreator;
@@ -42,19 +43,32 @@ define(function (require, exports, module) {
 
     function handleWidgetEdit(widget, wm) {
         if (widget) {
-            var wEd = EditWidgetView.create(widget);
-            wEd.on("ok", function (e, view) {
+            EditWidgetView.create(widget)
+                .on("ok", function (e, view) {
+                    view.remove();
+                    widget.updateWithProperties(e.data);
+                    //create an interactive image area only if there isnt one already
+                    createImageMap(widget);
+                    // fire event widget modified
+                    wm.fire({type: "WidgetModified"});
+                }).on("cancel", function (e, view) {
+                    view.remove();
+                });
+            }
+    }
+    function handleTimerEdit(emuTimer, wm) {
+        EditWidgetView.create(emuTimer)
+            .on("ok", function (e, view) {
                 view.remove();
-                widget.updateWithProperties(e.data);
-                //create an interactive image area only if there isnt one already
-                createImageMap(widget);
-                // fire event widget modified
-                wm.fire({type: "WidgetModified"});
+                emuTimer.updateWithProperties(e.data);
+                // fire event widget created
+                var event = { type: "TimerModified", action: "create", timer: emuTimer };
+                wm.fire(event);
             }).on("cancel", function (e, view) {
                 view.remove();
-            });
-        }
+            });    
     }
+        
     /**
         @class WidgetManager
         @classdesc WidgetManager deals with interacting with user interface widgets used for prototyping picture based uis.
@@ -65,6 +79,7 @@ define(function (require, exports, module) {
      */
     function WidgetManager() {
         this._widgets = {};
+        this._timers = {};
         eventDispatcher(this);
     }
 
@@ -115,6 +130,10 @@ define(function (require, exports, module) {
         }
     };
 
+    function round(v) {
+        return Math.round(v*10)/10;
+    }
+    
     WidgetManager.prototype.updateMapCreator = function (scale, cb) {
         scale = scale || 1;
         var wm = this, event = {type: "WidgetModified"};
@@ -125,7 +144,11 @@ define(function (require, exports, module) {
                     handleWidgetEdit(wm.getWidget(region.attr("id")), wm);
                 });
                 //pop up the widget edit dialog
-                NewWidgetView.create()
+                var coord = {
+                    top: round(e.pos.y), left: round(e.pos.x), 
+                    width: round(e.pos.width), height: round(e.pos.height)
+                };
+                NewWidgetView.create(coord)
                     .on("ok", function (e, view) {
                         view.remove();
                         var id = e.data.type + "_" + uidGenerator();
@@ -205,23 +228,61 @@ define(function (require, exports, module) {
     /**
         Gets the widget with the specified id.
         @param {string} id The html element id of the widget
-        @memberof WidgetManager
+        @memberof module:WidgetManager
      */
     WidgetManager.prototype.getWidget = function (id) {
         return this._widgets[id];
     };
     /**
         Adds the specified widget to the list of widgets.
-        @param {Widget} widget The widget to add.
-        @memberof WidgetManager
+        @param {Widget} widget The widget to be added.
+        @memberof module:WidgetManager
      */
     WidgetManager.prototype.addWidget = function (widget) {
         this._widgets[widget.id()] = widget;
     };
+    WidgetManager.prototype.addTimer = function (t) {
+        //pop up the timer edit dialog
+        t = t || "tick";
+        var id = "timer_" + uidGenerator();
+        var emuTimer = new EmuTimer(id, { timerEvent: t, timerRate: 1000, callback: renderResponse });
+        this._timers[emuTimer.id()] = emuTimer;
+        // fire event widget created
+        var event = { type: "TimerModified", action: "create", timer: emuTimer };
+        wm.fire(event);
+
+    };
+    WidgetManager.prototype.editTimer = function (emuTimer) {
+        handleTimerEdit(emuTimer, wm);
+    };
+    
+    /**
+        Edits the specified widget.
+        @param {Widget} widget The widget to be edited.
+        @memberof module:WidgetManager
+     */
+    WidgetManager.prototype.editWidget = function(widget) {
+        // widget types supported in the current implementation are Button, Display
+        handleWidgetEdit(widget,wm);
+    };    
+    WidgetManager.prototype.editTimer = function(emuTimer) {
+        // the only timer type supported in the current implementation is EmuTimer
+        handleTimerEdit(emuTimer,wm);
+    };
+    WidgetManager.prototype.startTimers = function () {
+        _.each(this._timers, function (timer) {
+            timer.start();
+        });
+    };
+    WidgetManager.prototype.stopTimers = function () {
+        _.each(this._timers, function (timer) {
+            timer.stop();
+        });
+    };
     /**
         Removes the specified widget from the list of widgets.
         @param {Widget} widget The widget to remove.
-        @memberof WidgetManager
+        @memberof module:WidgetManager
      */
     WidgetManager.prototype.removeWidget = function (widget) {
         widget.remove();
@@ -230,7 +291,7 @@ define(function (require, exports, module) {
     /**
         Gets a list of all the display widgets loaded on the page.
         @returns {Display[]}
-        @memberof WidgetManager
+        @memberof module:WidgetManager
      */
     WidgetManager.prototype.getDisplayWidgets = function () {
         return _.filter(this._widgets, function (w) {
@@ -268,6 +329,11 @@ define(function (require, exports, module) {
         return this.getDisplayWidgets()
                     .concat(this.getButtonWidgets())
                     .concat(this.getStoryboardWidgets());
+    };
+    WidgetManager.prototype.getAllTimers = function () {
+        return _.filter(this._widgets, function (w) {
+            return w.type() === "timer";
+        });
     };
 
     /**

@@ -15,6 +15,7 @@ define(function (require, exports, module) {
         Recorder        = require("util/ActionRecorder"),
         Prompt          = require("pvsioweb/forms/displayPrompt"),
         WidgetsListView = require("pvsioweb/forms/WidgetsListView"),
+        TimersListView  = require("pvsioweb/forms/TimersListView"),
         template		= require("text!pvsioweb/forms/templates/prototypeBuilderPanel.handlebars"),
         ScriptPlayer    = require("util/ScriptPlayer"),
 //        fs              = require("util/fileHandler"),
@@ -173,6 +174,7 @@ define(function (require, exports, module) {
         d3.select("#btnBuilderView").classed('active', true);
         d3.selectAll("div.display,#controlsContainer button").classed("builder", true);
         d3.selectAll("div.display,#controlsContainer button").classed("simulator", false);
+        WidgetManager.stopTimers();
     }
     function onProjectChanged(event) {
         var pvsioStatus = d3.select("#lblPVSioStatus");
@@ -199,12 +201,14 @@ define(function (require, exports, module) {
         updateImageAndLoadWidgets().then(function (res) {
             WidgetsListView.create();
         }).catch(function (err) { Logger.error(err); });
+        TimersListView.create();
     }
 
     function onWidgetsFileChanged(event) {
         updateImageAndLoadWidgets().then(function (res) {
             WidgetsListView.create();
         }).catch(function (err) { Logger.error(err); });
+        TimersListView.create();
     }
 
     function onSelectedFileChanged(event) {
@@ -228,6 +232,7 @@ define(function (require, exports, module) {
         d3.select("#btnSimulatorView").classed("selected", true);
         d3.selectAll("div.display,#controlsContainer button").classed("simulator", true);
         d3.selectAll("div.display,#controlsContainer button").classed("builder", false);
+        WidgetManager.startTimers();
     }
 
     function bindListeners() {
@@ -351,6 +356,12 @@ define(function (require, exports, module) {
         });
         d3.select("#btnReconnect").on("click", function () {
             projectManager.reconnectToServer();
+        });
+        d3.select("#btnAddNewTimer").on("click", function () {
+            WidgetManager.addTimer();
+        });
+        d3.select("#btnAddNewWidget").on("click", function () {
+            
         });
     }
 
@@ -515,6 +526,11 @@ define(function (require, exports, module) {
         updateImageAndLoadWidgets().then(function (res) {
             WidgetsListView.create();
         }).catch(function (err) { Logger.error(err); });
+        
+        // add default tick timer
+        WidgetManager.addTimer("tick");
+        //TimersListView.create();
+
         bindListeners();
         d3.select("#header #txtProjectName").html(projectManager.project().name());
         return updateImageAndLoadWidgets();

@@ -26,12 +26,18 @@ define(function (require, exports, module) {
         }).join(", ");
         d3.select("#boundFunction").text(str);
     }
+    function updateTimerEvent() {
+        var f = d3.select("#timerEvent").property("value");
+        d3.select("#timerFunction").text(f);
+    }
 
     var EditWidgetView	= BaseDialog.extend({
         render: function (widget) {
             var t = Handlebars.compile(template);
             var widgetData = widget.toJSON();
             widgetData.isDisplay = widget.type() === "display";
+            widgetData.isButton = widget.type() === "button";
+            widgetData.isTimer = widget.type() === "timer";
             this.$el.html(t(widgetData));
             $("body").append(this.el);
             this.widget = widget;
@@ -51,15 +57,20 @@ define(function (require, exports, module) {
             "change input[type='radio'][name='evts']": "eventsChanged",
             "click #btnOk": "ok",
             "click #btnCancel": "cancel",
-            "keyup #functionText": "eventsChanged"
+            "keyup #functionText": "eventsChanged",
+            "keyup #timerEvent": "timerEventChanged"
         },
         eventsChanged: function (event) {
             updateBoundFunctionsLabel();
         },
+        timerEventChanged: function (event) {
+            updateTimerEvent();
+        },
         ok: function (event) {
             var form = this.el;
-            if (FormUtils.validateForm(form, "input[type='radio'][name='evts'], input[type='text'], textarea")) {
-                var formdata = FormUtils.serializeForm(form, "input");
+            var selectors = "input[type='radio'][name='evts'], input[type='text'], textarea";
+            if (FormUtils.validateForm(form, selectors)) {
+                var formdata = FormUtils.serializeForm(form, selectors);
                 //add auditory feedback property manually
                 if (this.widget.auditoryFeedback && this.widget.auditoryFeedback()) {
                     formdata.auditoryFeedback = d3.select("input[type='checkbox'][name='auditoryFeedback']").property("checked");

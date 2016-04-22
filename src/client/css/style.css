@@ -156,7 +156,7 @@ area{
     cursor: pointer;
 }
 
-#controlsContainer a.status {
+#controlsContainer a.status, #listContainer a.status {
     padding:10px;
     text-decoration: none;
     color: #555;
@@ -165,10 +165,17 @@ area{
 #imageDiv{
     position: relative;
 }
-#controlsContainer{
+#controlsContainer {
     position: relative;
     height: 50px;
     min-width: 400px;
+}
+#listContainer {
+    height: 40px;
+    width: 100%;
+    min-width: 240px;
+    padding: 2px;
+    background-color: whitesmoke;
 }
 
 div.displayWidget{
@@ -459,6 +466,7 @@ div.detailsForm select, div.detailsForm textarea{
     width: 20%;
     background: white;
     height: 480px;
+    overflow-y: auto;
 }
 
 #projectTitle {
@@ -562,7 +570,7 @@ div.detailsForm select, div.detailsForm textarea{
     width: 100%;
 }
 #widgetsList, #timersList {
-    overflow-y: auto;
+/*    overflow-y: auto;*/
     padding: 0;
     margin: 4 0 2;
     max-height: 50%;
@@ -964,16 +972,22 @@ input.input_text{
     max-height: 140px;
 }
 
-#btnBuilderView.active a, #btnSimulatorView.active a{
+#btnBuilderView.active a, #btnSimulatorView.active a, #btnWidgetsView.active a, #btnTimersView.active a{
     color: white;
     background-color: rgb(8, 88, 154);
     border: none;
 }
-
-#btnBuilderView.active span, #btnSimulatorView.active span{
+#btnBuilderView.active span, #btnSimulatorView.active span {
     position: absolute;
     top: 30px;
     left: 46px;
+    color: white;
+    display: inline;
+}
+#btnWidgetsView.active span, #btnTimersView.active span{
+    position: absolute;
+    top: 30px;
+    left: 36px;
     color: white;
     display: inline;
 }
@@ -981,11 +995,14 @@ input.input_text{
 #btnSimulatorView.active span {
     left: 54px;
 }
-#btnBuilderView span, #btnSimulatorView span{
+#btnTimersView.active span {
+    left: 30px;
+}
+#btnBuilderView span, #btnSimulatorView span, #btnWidgetsView span, #btnTimersView span{
     display: none;
 }
 
-#btnBuilderView a, #btnSimulatorView a{
+#btnBuilderView a, #btnSimulatorView a, #btnWidgetsView a, #btnTimersView a{
     color: #898989;
 }
 
@@ -1044,30 +1061,40 @@ input#filter {
     padding: 5px;
 }
 
-.widgetsListHeader, .timersListHeader{
-    padding: 4px;
+.widgets {
+    padding: 0px;
     padding-left: 12px;
     text-decoration: none;
     color: white;
     font-weight: bold;
     display: block;
      
-    border-right: 30px solid transparent;
-    border-bottom: 30px solid #4c4c4c;
+    border-right: 70px solid transparent;
+    border-bottom: 40px solid #4c4c4c;
      
     height: 0;
     line-height: 40px;
 }
-
-.timerAdd {
-    background-color: steelblue;
-    color: white;
-    padding-top:0px !important;
-    height: 22px;
-    float: right;
-    margin-top: 9px;
+.widgetsListHeader, .timersListHeader{
+    width: 100%;
+    color:black !important;
+    background-color: whitesmoke!important;
 }
-.timerAdd:hover {
+.widgetsListHeader:hover, .timersListHeader:hover{
+    color:white !important;
+    background-color: black !important;
+}
+.newTimer, .newWidget {
+    float:right;
+    color:white;
+    background-color:rgb(8, 88, 154);
+    margin-top:2px;
+}
+.newTimer:hover, .newWidget:hover {
     background-color: black;
     color: white;
+}
+.coordTable {
+    display: inline-block;
+    width: 140px;
 }
