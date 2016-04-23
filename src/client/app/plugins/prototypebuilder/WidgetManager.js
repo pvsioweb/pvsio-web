@@ -102,24 +102,24 @@ define(function (require, exports, module) {
         var wm = this;
         if (defs) {
             var widget;
-            _.each(defs.widgetMaps, function (w, key) {
+            _.each(defs.widgetMaps, function (w,i) {
                 w.type = w.type.toLowerCase();
                 if (w.type === "button") {
-                    if (defs.regionDefs && defs.regionDefs[key].coords) {
-                        var coords = defs.regionDefs[key].coords;
+                    if (defs.regionDefs && defs.regionDefs[i].coords) {
+                        var coords = defs.regionDefs[i].coords;
                         var height = coords[3] - coords[1], width= coords[2] - coords[0], x = coords[0], y = coords[1];
                         widget = new Button(
-                            key,
+                            w.id,
                             { top: y, left: x, width: width, height: height },
-                            { callback: renderResponse}
+                            { callback: renderResponse, buttonReadback: w.buttonReadback }
                         );
                     } else {
-                        widget = new Button(key, null, { callback: renderResponse });
+                        widget = new Button(w.id, null, { callback: renderResponse });
                     }
                 } else if (w.type === "display") {
-                    widget = new Display(key);
+                    widget = new Display(w.id);
                 } else if (w.type === "storyboard") {
-                    widget = new Storyboard(key);
+                    widget = new Storyboard(w.id);
                 }
                 if (w.hasOwnProperty("events")) {
                     w.evts = w.events;

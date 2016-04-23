@@ -12,6 +12,7 @@ define(function (require, exports, module) {
         property = require("util/property"),
         Timer	= require("util/Timer"),
         Recorder    = require("util/ActionRecorder"),
+        Speaker  = require("widgets/TextSpeaker"),
         ButtonActionsQueue = require("widgets/ButtonActionsQueue").getInstance();
     //define timer for sensing hold down actions on buttons
     var btnTimer = new Timer(250), timerTickFunction = null;
@@ -32,10 +33,12 @@ define(function (require, exports, module) {
         opt.recallRate = opt.recallRate || 250;
         opt.evts = opt.evts || ["click"];
         opt.callback = opt.callback || function (){};
+        opt.buttonReadback = opt.buttonReadback || "";
         this.evts = property.call(this, opt.evts);
         this.recallRate = property.call(this, opt.recallRate);
         this.functionText = property.call(this, opt.functionText);
         this.imageMap = property.call(this);
+        this.buttonReadback = property.call(this, opt.buttonReadback);
 
         Widget.call(this, id, "button");
 
@@ -53,6 +56,7 @@ define(function (require, exports, module) {
         this.area = opt.area || parent.append("area")
                         .attr("coords", this.left + "," + this.top + ","
                               + (this.left + this.width) + "," + (this.top + this.height))
+                        .attr("shape", "rect")
                         .attr("id", id)
                         .attr("class", id);
 
@@ -96,7 +100,8 @@ define(function (require, exports, module) {
             type: this.type(),
             recallRate: this.recallRate(),
             functionText: this.functionText(),
-            boundFunctions: this.boundFunctions()
+            boundFunctions: this.boundFunctions(),
+            buttonReadback: this.buttonReadback()
         };
     };
 
@@ -181,6 +186,9 @@ define(function (require, exports, module) {
             action: "click",
             ts: new Date().getTime()
         });
+        if (this.buttonReadback() && this.buttonReadback() !== "") {
+            Speaker.speak(this.buttonReadback());
+        }
         return this;
     };
     

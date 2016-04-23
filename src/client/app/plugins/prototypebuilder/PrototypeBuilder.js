@@ -136,6 +136,8 @@ define(function (require, exports, module) {
                             WidgetManager.restoreWidgetDefinitions(wd);
                             //update the widget area map scales
                             WidgetManager.scaleAreaMaps(scale);
+                            //select prototype builder
+                            switchToBuilderView();
                         }
                         resolve();
                     });
