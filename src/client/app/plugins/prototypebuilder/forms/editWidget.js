@@ -68,9 +68,8 @@ define(function (require, exports, module) {
         },
         ok: function (event) {
             var form = this.el;
-            var selectors = "input[type='radio'][name='evts'], input[type='text'], textarea";
-            if (FormUtils.validateForm(form, selectors)) {
-                var formdata = FormUtils.serializeForm(form, selectors);
+            if (FormUtils.validateForm(form)) {
+                var formdata = FormUtils.serializeForm(form, "input");
                 //add auditory feedback property manually
                 if (this.widget.auditoryFeedback && this.widget.auditoryFeedback()) {
                     formdata.auditoryFeedback = d3.select("input[type='checkbox'][name='auditoryFeedback']").property("checked");
