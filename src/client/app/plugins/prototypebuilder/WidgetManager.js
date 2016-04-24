@@ -114,7 +114,11 @@ define(function (require, exports, module) {
                             { callback: renderResponse, buttonReadback: w.buttonReadback }
                         );
                     } else {
-                        widget = new Button(w.id, null, { callback: renderResponse });
+                        widget = new Button(
+                            w.id,
+                            null,
+                            { callback: renderResponse, buttonReadback: w.buttonReadback }
+                        );
                     }
                 } else if (w.type === "display") {
                     widget = new Display(w.id);
@@ -172,7 +176,16 @@ define(function (require, exports, module) {
                     .on("ok", function (e, view) {
                         view.remove();
                         var id = e.data.type + "_" + uidGenerator();
-                        var widget = e.data.type === "button" ? new Button(id) : new Display(id);
+                        var widget = e.data.type === "button" ?
+                            new Button(
+                                id,
+                                { top: d3.select("#imageDiv .selected rect").attr("y"),
+                                  left: d3.select("#imageDiv .selected rect").attr("x"),
+                                  width: d3.select("#imageDiv .selected rect").attr("width"),
+                                  height: d3.select("#imageDiv .selected rect").attr("height")
+                                },
+                                { callback: renderResponse, buttonReadback: e.data.buttonReadback }
+                            ) : new Display(id);
                         region.classed(widget.type(), true)
                             .attr("id", id);
                         if (e.data.hasOwnProperty("events")) {

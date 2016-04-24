@@ -34,11 +34,16 @@ define(function (require, exports, module) {
         opt.evts = opt.evts || ["click"];
         opt.callback = opt.callback || function (){};
         opt.buttonReadback = opt.buttonReadback || "";
+        opt.keyCode = opt.keyCode || "";
+        opt.keyName = opt.keyName || "";
+        coords = coords || {};
         this.evts = property.call(this, opt.evts);
         this.recallRate = property.call(this, opt.recallRate);
         this.functionText = property.call(this, opt.functionText);
         this.imageMap = property.call(this);
         this.buttonReadback = property.call(this, opt.buttonReadback);
+        this.keyCode = property.call(this, opt.keyCode);
+        this.keyName = property.call(this, opt.keyName);
 
         Widget.call(this, id, "button");
 
@@ -53,14 +58,13 @@ define(function (require, exports, module) {
         this.width = coords.width || 32;
         this.height = coords.height || 32;
 
-        this.area = opt.area || parent.append("area")
-                        .attr("coords", this.left + "," + this.top + ","
-                              + (this.left + this.width) + "," + (this.top + this.height))
-                        .attr("shape", "rect")
-                        .attr("id", id)
-                        .attr("class", id);
+        this.area = opt.area || parent.append("area");
+        var x2 = parseFloat(this.left) + parseFloat(this.width);
+        var x3 = parseFloat(this.top) + parseFloat(this.height);
+        this.area.attr("shape", "rect").attr("id", id).attr("class", id)
+                 .attr("coords", this.left + "," + this.top + "," + x2 + "," + x3);
 
-        this.createImageMap({area: this.area, callback: opt.callback});
+        this.createImageMap({ area: this.area, callback: opt.callback });
         return this;
     }
 
@@ -101,7 +105,9 @@ define(function (require, exports, module) {
             recallRate: this.recallRate(),
             functionText: this.functionText(),
             boundFunctions: this.boundFunctions(),
-            buttonReadback: this.buttonReadback()
+            buttonReadback: this.buttonReadback(),
+            keyCode: this.keyCode(),
+            keyName: this.keyName()
         };
     };
 
@@ -206,8 +212,10 @@ define(function (require, exports, module) {
     Button.prototype.createImageMap = function (opt) {
         opt = opt || {};
         opt.callback = opt.callback || function () {};
+        opt.keyCode = opt.keyCode || null;
 
         var area = opt.area || Button.prototype.parentClass.createImageMap.apply(this, arguments),
+            keyCode = opt.keyCode || this.keyCode,
             widget = this,
             f,
             evts;
@@ -232,6 +240,17 @@ define(function (require, exports, module) {
             area.on("mouseup", onmouseup);
         });
         widget.imageMap(area);
+        if (keyCode) {
+            $(document).keydown(function (e) {
+                if (e.keyCode === keyCode) {
+                    if (evts && evts.indexOf('click') > -1) {
+                        widget.click(opt);
+                    } else if (evts && evts.indexOf("press/release") > -1) {
+                        widget.pressAndHold(opt);
+                    }
+                }
+            });
+        }
         return area;
     };
 
