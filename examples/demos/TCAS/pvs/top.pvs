@@ -77,7 +77,7 @@ BEGIN
 
 
 
-    init(so_: Vect2, vo_: Nz_vect2, si_: Vect2, vi_: Nz_vect2, t0: time): state =
+    init_alt(so_: Vect2, vo_: Nz_vect2, si_: Vect2, vi_: Nz_vect2, t0: time): state =
       LET % so_: Vect2 = (0,0),
           % vo_: Nz_vect2 = (0,600*knt),
           % si_: Vect2 = (-54171/40,78247/40),
@@ -144,6 +144,7 @@ BEGIN
 %    example_2: state = ntick(2)(init(0))
 %    example_n(n:nat): state = ntick(n)(init(0))
 
-    init_daidalus: state = init((0,0), (0,600*knt), (-54171/40,78247/40), (-463/3,463/3), 0)
+    init(x: real): state = init_alt((0,0), (0,600*knt), (-54171/40,78247/40), (-463/3,463/3), x)
+    
       
 END top

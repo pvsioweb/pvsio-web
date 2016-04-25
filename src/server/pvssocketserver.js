@@ -49,6 +49,7 @@ function run() {
         serverFuncs				= require("./serverFunctions"),
         baseProjectDir          = path.join(__dirname, "../../examples/projects/"),
         baseDemosDir			= path.join(__dirname, "../../examples/demos/"),
+        baseExamplesDir         = path.join(__dirname, "../../examples/"),
         clientDir				= path.join(__dirname, "../client");
     var clientid = 0, WebSocketServer = ws.Server;
     var fsWatchers = {};
@@ -727,6 +728,7 @@ function run() {
                 initProcessMap(socketid);
                 var absPath = token.path.indexOf("~") === 0 ? path.join(process.env.HOME, token.path.substr(1))
                     : isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
+                console.log("\n>> Reading folder " + absPath);
                 readDirectory(absPath)
                     .then(function (files) {
                         processCallback({
@@ -742,6 +744,30 @@ function run() {
                             id: token.id,
                             socketId: socketid,
                             err: err.toString(),
+                            time: token.time
+                        }, socket);
+                    });
+            },
+            "readExamplesFolder": function (token, socket, socketid) {
+                initProcessMap(socketid);
+                console.log("\n>> Reading examples folder " + baseExamplesDir);
+                readDirectory(baseExamplesDir)
+                    .then(function (files) {
+                        processCallback({
+                            id: token.id,
+                            type: token.type,
+                            socketId: socketid,
+                            files: files,
+                            path: baseExamplesDir,
+                            time: token.time
+                        }, socket);
+                    }).catch(function (err) {
+                        processCallback({
+                            type: token.type + "_error",
+                            id: token.id,
+                            socketId: socketid,
+                            err: err.toString(),
+                            path: baseExamplesDir,
                             time: token.time
                         }, socket);
                     });

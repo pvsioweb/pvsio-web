@@ -13,6 +13,8 @@ define(function (require, exports, module) {
         EditorModeUtils     = require("plugins/emulink/EmuchartsEditorModes"),
         EmuchartsManager    = require("plugins/emulink/EmuchartsManager"),
         displayAddState        = require("plugins/emulink/forms/displayAddState"),
+        displayRenameState     = require("plugins/emulink/forms/displayRenameState"),
+        displayChangeStateColor= require("plugins/emulink/forms/displayChangeStateColor"),
         displayAddTransition   = require("plugins/emulink/forms/displayAddTransition"),
         displayRename          = require("plugins/emulink/forms/displayRename"),
         displayDelete          = require("plugins/emulink/forms/displayDelete"),
@@ -44,7 +46,9 @@ define(function (require, exports, module) {
         PIMImporter            = require("plugins/emulink/models/pim/PIMImporter"),
         PIMEmulink             = require("plugins/emulink/models/pim/PIMEmulink"),
         ContextTable           = require("plugins/emulink/tools/ContextTable"),
-        ExportDiagram          = require("plugins/emulink/tools/ExportDiagram");
+        MachineStatesTable     = require("plugins/emulink/tools/MachineStatesTable"),
+        ExportDiagram          = require("plugins/emulink/tools/ExportDiagram"),
+        MIME                   = require("util/MIME").getInstance();
     
     var instance;
     var fs;
@@ -71,6 +75,7 @@ define(function (require, exports, module) {
     var pimTestGenerator;
     var pimEmulink;
     var contextTable;
+    var machineStatesTable;
     var exportDiagram;
 
     var options = { autoinit: true };
@@ -140,31 +145,79 @@ define(function (require, exports, module) {
     var maxLen = 48;
 
     // rename dialog window for states
-    function editState(s) {
+    function renameState(theState) {
         if (emuchartsManager.getIsPIM()) {
-            pimEmulink.editState(s);
-            return;
+            return pimEmulink.editState(theState);
         }
         
-        displayRename.create({
-            header: "Renaming state " + s.name.substring(0, maxLen) + "...",
-            required: true,
-            currentLabel: s.name, // this dialog will show just one state
-            buttons: ["Cancel", "Rename"]
-        }).on("rename", function (e, view) {
-            var newLabel = e.data.labels.get("newLabel");
-            if (newLabel && newLabel.value !== "") {
-                emuchartsManager.rename_state(s.id, newLabel);
+        displayRenameState.create({
+            header: "Renaming state " + theState.name.substring(0, maxLen) + "...",
+            textLabel: {
+                newStateName: "State name",
+                newStateColor: "State color"
+            },
+            placeholder: {
+                newStateName: theState.name,
+                newStateColor: theState.color
+            },
+            buttons: ["Cancel", "Ok"]
+        }).on("ok", function (e, view) {
+            var newStateName = e.data.labels.get("newStateName");
+            var newStateColor = e.data.labels.get("newStateColor");
+            if (newStateName && newStateName.value !== "") {
+                emuchartsManager.edit_state(
+                    theState.id,
+                    { name: newStateName,
+                      color: newStateColor }
+                );
                 view.remove();
+                machineStatesTable.setMachineStates(emuchartsManager.getStates());
             }
         }).on("cancel", function (e, view) {
-            // just remove rename window
+            // just remove window
+            view.remove();
+        });
+    }
+    // change state color dialog
+    function changeStateColor(theState) {
+        if (emuchartsManager.getIsPIM()) {
+            return pimEmulink.editState(theState);
+        }
+        
+        displayChangeStateColor.create({
+            header: "Renaming state " + theState.name.substring(0, maxLen) + "...",
+            textLabel: {
+                newStateName: "State name",
+                newStateColor: "State color"
+            },
+            placeholder: {
+                newStateName: theState.name,
+                newStateColor: theState.color
+            },
+            buttons: ["Cancel", "Ok"]
+        }).on("ok", function (e, view) {
+            var newStateName = e.data.labels.get("newStateName");
+            var newStateColor = e.data.labels.get("newStateColor");
+            if (newStateColor && newStateColor.value !== "") {
+                emuchartsManager.edit_state(
+                    theState.id,
+                    { name: newStateName,
+                      color: newStateColor }
+                );
+                view.remove();
+                machineStatesTable.setMachineStates(emuchartsManager.getStates());
+            }
+        }).on("cancel", function (e, view) {
+            // just remove window
             view.remove();
         });
     }
 
     function renameState_handler(event) {
-        editState(event.node);
+        renameState(event.node);
+    }
+    function changeStateColor_handler(event) {
+        changeStateColor(event.node);
     }
 
     // rename dialog window for transitions
@@ -226,10 +279,15 @@ define(function (require, exports, module) {
         var newTransitionName = emuchartsManager.getFreshInitialTransitionName();
         emuchartsManager.add_initial_transition(newTransitionName, event.target.id);
     }
-
-    function stateAdded_handler(event) { }//print_theory(); print_node(); }
-    function stateRemoved_handler(event) { }//print_theory(); print_node(); }
+    
+    function stateAdded_handler(event) {
+        machineStatesTable.addMachineStates([ event.state ]);
+    }
+    function stateRemoved_handler(event) {
+        machineStatesTable.setMachineStates(emuchartsManager.getStates());
+    }
     function stateRenamed_handler(event) { }//print_theory(); print_node(); }
+    function stateColorChanged_handler(event) { }//print_theory(); print_node(); }
     function transitionAdded_handler(event) { }//print_theory(); print_node(); }
     function transitionRemoved_handler(event) { }//print_theory(); print_node(); }
     function transitionRenamed_handler(event) { }//print_theory(); print_node(); }
@@ -240,7 +298,9 @@ define(function (require, exports, module) {
     function variableAdded_handler(event) {
         contextTable.addContextVariables([ event.variable ]);
     }
-
+    function variableRemoved_handler(event) {
+        contextTable.setContextVariables(emuchartsManager.getVariables());
+    }
 
 
     /**
@@ -269,6 +329,7 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_deleteInitialTransition", deleteInitialTransition_handler);
         emuchartsManager.addListener("emuCharts_deleteState", deleteState_handler);
         emuchartsManager.addListener("emuCharts_renameState", renameState_handler);
+        emuchartsManager.addListener("emuCharts_changeStateColor", changeStateColor_handler);
         emuchartsManager.addListener("emuCharts_renameTransition", renameTransition_handler);
         emuchartsManager.addListener("emuCharts_renameInitialTransition", renameInitialTransition_handler);
         emuchartsManager.addListener("emuCharts_addTransition", addTransition_handler);
@@ -278,6 +339,7 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_stateRemoved", stateRemoved_handler);
         emuchartsManager.addListener("emuCharts_constantAdded", constantAdded_handler);
         emuchartsManager.addListener("emuCharts_variableAdded", variableAdded_handler);
+        emuchartsManager.addListener("emuCharts_variableRemoved", variableRemoved_handler);
         emuchartsManager.addListener("emuCharts_transitionAdded", transitionAdded_handler);
         emuchartsManager.addListener("emuCharts_transitionRenamed", transitionRenamed_handler);
         emuchartsManager.addListener("emuCharts_transitionRemoved", transitionRemoved_handler);
@@ -285,6 +347,7 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_initialTransitionRenamed", initialTransitionRenamed_handler);
         emuchartsManager.addListener("emuCharts_initialTransitionRemoved", initialTransitionRemoved_handler);
         emuchartsManager.addListener("emuCharts_stateRenamed", stateRenamed_handler);
+        emuchartsManager.addListener("emuCharts_stateColorChanged", stateColorChanged_handler);
         fs = new FileSystem();
 
         // PIM objects.
@@ -368,14 +431,24 @@ define(function (require, exports, module) {
                 editVariable(event.variable.id);
             });
         }
+        if (document.getElementById("MachineStates")) {
+            machineStatesTable = new MachineStatesTable();
+            machineStatesTable.addListener("MachineStatesTable_deleteState", function(event) {
+                emuchartsManager.delete_state(event.state.id);
+            });
+            machineStatesTable.addListener("MachineStatesTable_renameState", function(event) {
+                var theState = emuchartsManager.getState(event.state.id);
+                renameState(theState);
+            });
+            machineStatesTable.addListener("MachineStatesTable_changeStateColor", function(event) {
+                var theState = emuchartsManager.getState(event.state.id);
+                changeStateColor(theState);
+            });
+        }
         
         // bootstrap buttons
         function openChart(callback) {
-            var opt = {
-                header: "Open EmuChart file...",
-                extensions: ".emdl,.muz,.pim"
-            };
-            FileHandler.openLocalFileAsText(function (err, res) {
+            function doOpen(err, res) {
                 if (res) {
                     if (res.name.lastIndexOf(".emdl") === res.name.length - 5) {
                         res.content = JSON.parse(res.content);
@@ -392,7 +465,30 @@ define(function (require, exports, module) {
                 } else {
                     console.log("Error while opening file (" + err + ")");
                 }
-            }, opt);
+            }
+            var opt = {
+                header: "Open EmuChart file...",
+                extensions: ".emdl,.muz,.pim"
+            };
+            if (PVSioWebClient.getInstance().serverOnLocalhost()) {
+                return new Promise(function (resolve, reject) {
+                    fs.readFileDialog({
+                        encoding: "utf8",
+                        title: opt.header,
+                        filter: MIME.filter(opt.extensions.split(","))
+                    }).then(function (descriptors) {
+                        doOpen(null, descriptors[0]);
+                        resolve(descriptors[0]);
+                    }).catch(function (err) {
+                        doOpen(err, null);
+                        reject(err);
+                    });
+                });
+            } else {
+                FileHandler.openLocalFileAsText(function (err, res) {
+                    doOpen(err, res);
+                }, opt);
+            }
         }
         function importChart(callback) {
             var opt = {
@@ -425,8 +521,10 @@ define(function (require, exports, module) {
             initToolbars();
             // set initial editor mode
             d3.select("#btn_toolbarBrowse").node().click();
-            //set Variables Table
-            contextTable.setContextVariables(emuchartsManager.getVariables());            
+            // set Variables Table
+            contextTable.setContextVariables(emuchartsManager.getVariables());
+            // set Machine States Table
+            machineStatesTable.setMachineStates(emuchartsManager.getStates());
         });
         d3.select("#btnLoadEmuchart").on("click", function () {
             openChart(function f() {
@@ -438,6 +536,8 @@ define(function (require, exports, module) {
                 d3.select("#btn_toolbarBrowse").node().click();
                 //set Variables Table
                 contextTable.setContextVariables(emuchartsManager.getVariables());                
+                // set Machine States Table
+                machineStatesTable.setMachineStates(emuchartsManager.getStates());
             });
         });
 
@@ -641,10 +741,10 @@ define(function (require, exports, module) {
 
         d3.select("#btn_menuNewState").on("click", function () {
             document.getElementById("menuStates").children[1].style.display = "none";
-//            var label = emuchartsManager.getFreshStateName();
+            var label = emuchartsManager.getFreshStateName();
             displayAddState.create({
-                header: "Please enter label for new state",
-                textLabel: "New state",
+                header: "Please enter a label for the new machine state",
+                textLabel: label,
                 buttons: ["Cancel", "Create"]
             }).on("create", function (e, view) {
                 var nodeLabel = e.data.labels.get("newLabel");
@@ -672,7 +772,7 @@ define(function (require, exports, module) {
                     var v = e.data.options.get("selectedState");
                     var theState = states[v];
                     view.remove();
-                    editState(theState);
+                    renameState(theState);
                 }
             }).on("cancel", function (e, view) {
                 // just remove window
@@ -908,7 +1008,6 @@ define(function (require, exports, module) {
                     var theVariable = variables[v];
                     view.remove();
                     emuchartsManager.delete_variable(theVariable.id);
-                    contextTable.setContextVariables(emuchartsManager.getVariables());
                 }
             }).on("cancel", function (e, view) {
                 // just remove window
@@ -1421,7 +1520,7 @@ define(function (require, exports, module) {
         d3.select("#btn_menuTestGeneratorFromFile").on("click", function () {
             var models;
             // Generate tests from importing a file
-            fs.openLocalFileAsText(function (err, res) {
+            FileHandler.openLocalFileAsText(function (err, res) {
                 if (res) {
                     // Try parse as PIM
                     models = pimImporter.importPIM(res);
@@ -1472,7 +1571,9 @@ define(function (require, exports, module) {
             // set initial editor mode
             d3.select("#btn_toolbarBrowse").node().click();
             //set Variables Table
-            contextTable.setContextVariables(emuchartsManager.getVariables());            
+            contextTable.setContextVariables(emuchartsManager.getVariables());
+            // set Machine States Table
+            machineStatesTable.setMachineStates(emuchartsManager.getStates());
         }).catch(function (err) {
             // if the default emuchart file is not in the project, then just clear the current diagram
             d3.select("#btnNewEmuchart").node().click();

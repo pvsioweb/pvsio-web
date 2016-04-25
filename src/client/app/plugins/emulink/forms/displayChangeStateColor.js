@@ -1,18 +1,17 @@
 /**
- * Displays select variable window
+ * Displays edit window for machine states.
  * @author Paolo Masci
- * @date 5/5/14 9:40:42 PM
+ * @date 18/12/2015
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*jshint unused:false*/
 define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
-        formTemplate = require("text!./templates/displaySelectVariable.handlebars"),
-        BaseDialog = require("pvsioweb/forms/BaseDialog"),        
+        formTemplate = require("text!./templates/displayEditState.handlebars"),
+        BaseDialog = require("pvsioweb/forms/BaseDialog"),
         FormUtils = require("./FormUtils");
 
-    var SelectVariableView = BaseDialog.extend({
+    var AddStateView = BaseDialog.extend({
         initialize: function (data) {
             d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
             this.render(data);
@@ -22,7 +21,7 @@ define(function (require, exports, module) {
             var template = Handlebars.compile(formTemplate);
             this.$el.html(template(data));
             $("body").append(this.el);
-            d3.select(this.el).select("#selectedVariable").node().focus();
+            d3.select(this.el).select("#newStateColor").node().focus();
             return this;
         },
         events: {
@@ -32,7 +31,7 @@ define(function (require, exports, module) {
         right: function (event) {
             var form = this.el;
             if (FormUtils.validateForm(form)) {
-                var selectors = [ "selectedVariable" ];
+                var selectors = [ "newStateName", "newStateColor" ];
                 var formdata = FormUtils.serializeForm(form, selectors);
                 this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
                              {data: formdata, el: this.el}, this);
@@ -51,7 +50,7 @@ define(function (require, exports, module) {
          * }
          */
         create: function (data) {
-            return new SelectVariableView(data);
+            return new AddStateView(data);
         }
     };
 });
