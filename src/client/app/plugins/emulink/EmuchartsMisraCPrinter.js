@@ -116,7 +116,7 @@ define(function (require, exports, module) {
      * Specific-length equivalents should be typedefd for the specific compile, with respect to MISRA 1998 rule (Rule 13, advisory)
      */   
     function getType(type) {
-        if ( (type.toLowerCase() === "bool") || (type.toLowerCase() === "boolean") ) {
+        if ((type.toLowerCase() === "bool") || (type.toLowerCase() === "boolean")) {
             type = typeMaps.bool;
             // if(!isInArray(declarations, "true")){  //Iachino: remove in case of decision to declare always boolean typedef
             //     declarations.push("#define true 1");
@@ -125,32 +125,29 @@ define(function (require, exports, module) {
             //     declarations.push("#define FALSE 0");
             //     declarations.push("typedef unsigned char " + type + ";");
             // }    
-        }
-        if ( (type.toLowerCase() === "char") || (type.toLowerCase() === "unsigned char") ) { //The type char shall always be declared as unsigned char or signed char, with respect to MISRA 1998 rule (Rule 14, required)
+        } else if ((type.toLowerCase() === "char") || (type.toLowerCase() === "unsigned char")) {
+            //The type char shall always be declared as unsigned char or signed char
+            //see MISRA 1998 rules (Rule 14, required)
             type = typeMaps.char;
             if(!isInArray(declarations, type)){
                 declarations.push("typedef unsigned char " + type + ";");
             }
-        }
-        if (Ints.indexOf(type.toLowerCase()) >= 0) {
+        } else if (Ints.indexOf(type.toLowerCase()) >= 0) {
             type = typeMaps.int;
             if(!isInArray(declarations, type)){
                 declarations.push("typedef unsigned int " + type + ";");
             }
-        }
-        if ( (type.toLowerCase() === "signed int") || (type.toLowerCase() === "signed long") ) {
+        } else if ((type.toLowerCase() === "signed int") || (type.toLowerCase() === "signed long")) {
             type = typeMaps.Sint;
             if(!isInArray(declarations, type)){
                 declarations.push("typedef signed int " + type + ";");
             }
-        }
-        if (type.toLowerCase() === "float"){
+        } else if (type.toLowerCase() === "float"){
             type = typeMaps.float;
             if(!isInArray(declarations, type)){
                 declarations.push("typedef float " + type + ";");
             }
-        }
-        if ((type.toLowerCase() === "real") || (type.toLowerCase() === "double")){
+        } else if ((type.toLowerCase() === "real") || (type.toLowerCase() === "double")) {
             type = typeMaps.double;
             if(!isInArray(declarations, type)){
                 declarations.push("typedef double " + type + ";");
@@ -164,15 +161,13 @@ define(function (require, exports, module) {
      * Parameter is current value
      */
     function setSuffix(v) {
-        if (isNumber(v.value)){
-            if ( (v.type.toUpperCase() === typeMaps.int) || (v.type.toUpperCase() === typeMaps.Sint) ) {
+        if (isNumber(v.value)) {
+            if ((v.type.toUpperCase() === typeMaps.int) || (v.type.toUpperCase() === typeMaps.Sint)) {
                 v.value = v.value + "u";
-            }
-            if ( (v.type.toUpperCase() === typeMaps.float) || (v.type.toUpperCase() === typeMaps.double) ){
-                if (v.value.indexOf(".") === -1){
+            } else if ((v.type.toUpperCase() === typeMaps.float) || (v.type.toUpperCase() === typeMaps.double)) {
+                if (v.value.indexOf(".") === -1) {
                     v.value = v.value + ".0f";
-                }
-                else{
+                } else {
                     v.value = v.value + "f";
                 }
             }
@@ -185,16 +180,14 @@ define(function (require, exports, module) {
      * Parameters are variable definitions, current value to analize and emucharts structure
      */
     function setSuffixInActions(variable, val, emuchart) {
-        emuchart.variables.local.map(function(z){
+        emuchart.variables.local.map(function(z) {
             if(variable.val.identifier.val === z.name) {
-                if ( (z.type === typeMaps.int) || (z.type === typeMaps.Sint) ) {
+                if ((z.type === typeMaps.int) || (z.type === typeMaps.Sint)) {
                     val += "u";
-                }
-                if ( (z.type === typeMaps.float) || (z.type === typeMaps.double) ){
+                } else if ((z.type === typeMaps.float) || (z.type === typeMaps.double)) {
                     if (val.indexOf(".") === -1){
                         val += ".0f";
-                    }
-                    else{
+                    } else {
                         val += "f";
                     }
                 }
@@ -214,8 +207,7 @@ define(function (require, exports, module) {
      * Checks if a value is in an array
      * Returns a boolean
      */
-    function isInArray(array, search)
-    {
+    function isInArray(array, search) {
         var arrayJoin = array.join();
         return arrayJoin.indexOf(search) >= 0;
     }
@@ -300,31 +292,30 @@ define(function (require, exports, module) {
             if (expression === undefined || expression === null) {
                 return "";
             }
-            if (expression.type === 'modop'){             //handling modulus operator in condition forms, it's valid only for integer values
+            if (expression.type === 'modop') {
+                //handling modulo operator in condition forms, it's valid only for integer values
                 expression.val = '%';
             }
             /** 
-             * Managing modulus operator in expression forms
-             * It controls if type is 'modop' (eventually include math.h library in order to use fmod())
-             * It moves 'fmod' string back to the last parenthesis oh his expression and istead of it adds a comma to separate two parameters of fmod function
-             * right parenthesis (rpar) start with one unit more than left parenthesis (lpar), the algorithm stops when they are equals.
+             * Managing modulo operator in expression forms:
+             * 1. check if type is 'modop' (and include math.h library so we can use fmod())
+             * 2. move 'fmod' string back to the last parenthesis of the expression and introduce a comma to separate two parameters of fmod function
+             * 3. right parenthesis (rpar) start with one unit more than left parenthesis (lpar), the algorithm stops when they are equals.
              */
             if (Array.isArray(expression.val)){
-                var i,j;
-                for ( i = 0; i < expression.val.length; i++){
-                    if (expression.val[i].type === 'modop'){
-                        if(!isInArray(declarations, "#include <math.h>")){
+                var i, j;
+                for (i = 0; i < expression.val.length; i++) {
+                    if (expression.val[i].type === 'modop') {
+                        if(!isInArray(declarations, "#include <math.h>")) {
                             declarations.push("#include <math.h>");
                         }
                         var lpar = 0;
                         var rpar = 1;
-                        for ( j = i; j >= 0; j--){
-                            if ( expression.val[j].val === '(')
-                                lpar++;
-                            if ( expression.val[j].val === ')')
-                                rpar++;
-                            if ( lpar === rpar ){  
-                                var tmp = new Object();         //creating a new object for the new comma in the expression
+                        for ( j = i; j >= 0; j--) {
+                            if (expression.val[j].val === '(') { lpar++; }
+                            if (expression.val[j].val === ')') { rpar++; }
+                            if (lpar === rpar) {
+                                var tmp = {};         // TODO: upgrade the emucharts parser, so we have this builtin operator
                                 tmp.type = "builtin";
                                 tmp.val = ",";
                                 expression.val.splice(j, 0, expression.val[i]);     //moving 'fmod' back to the last parenthesis
@@ -339,10 +330,11 @@ define(function (require, exports, module) {
                 var name = expression.val.identifier.val;
                 expression.val.expression.val.map(function (v) {
                     if (v.type === "identifier"){
-                        if(isLocalVariable(v.val, emuchart)) {
+                        if (isLocalVariable(v.val, emuchart)) {
                             v.val = "st->" + v.val;
-                        }else if (!isConstant(v.val, emuchart)){
-                                v.val = "st->"+ v.val;          //same treatment of LocalVariables, left the prototype intentionally in case of different choise
+                        } else if (!isConstant(v.val, emuchart)) {
+                            //same treatment of LocalVariables, left the prototype intentionally in case of different choice
+                            v.val = "st->"+ v.val;
                         }
                     }
                     return;
@@ -357,8 +349,9 @@ define(function (require, exports, module) {
                 if (expression.type === 'identifier'){
                     if(isLocalVariable(expression.val, emuchart)) {
                             expression.val = "st->" + expression.val;
-                        }else if (!isConstant(expression.val, emuchart)){
-                            expression.val = "st->"+ expression.val;        //same treatment of LocalVariables, left the prototype intentionally in case of different choise
+                        } else if (!isConstant(expression.val, emuchart)){
+                            //same treatment of LocalVariables, left the prototype intentionally in case of different choice
+                            expression.val = "st->"+ expression.val;
                         }
                 }
                 if (Array.isArray(expression.val)) {
@@ -392,8 +385,8 @@ define(function (require, exports, module) {
                 }).join(" ");
                 /** 
                  * Handling logical operators, according to MISRA C rule 34 (The operands of a logical && or || shall be primary expressions)
-                 * Adding ') ' and ' (' rispectively before and after logical operator
-                 * With a flag it checks if it's the firts logical operator, in order to add '( ' and ' )' as well to the beginning and to the end of the string
+                 * Adding ') ' and ' (' before and after logical operators
+                 * With a flag it checks if it's the first logical operator, in order to add '( ' and ' )' as well to the beginning and to the end of the string
                  **/
                 var i;
                 var firstTime = true;
@@ -405,7 +398,7 @@ define(function (require, exports, module) {
                         if (firstTime){
                             condition = spliceSlice(condition, 0, 0, '( ');
                             condition = spliceSlice(condition, condition.length, 0, ' )');
-                            i +=4;
+                            i += 4;
                             firstTime = false;
                         }
                     }
@@ -507,47 +500,58 @@ define(function (require, exports, module) {
         var transitions = [];
         var functionsName = [];
         emuchart.transitions.forEach(function (t) {
+            if (t.name === "") { t.name = "tick"; }
             var parsedTransition  = parseTransition(t, emuchart);
             if (parsedTransition) {
                  if(!isInArray(functionsName, parsedTransition.id)){
                      functionsName.push(parsedTransition.id);
                      transitions.push(parsedTransition);
-                 }
-                 else{                 
-                     var i;
-                     for ( i = 0; i < transitions.length; i++){
-                         if(transitions[i].id !== 'undefined'){
-                            if(!transitions[i].listSources){                            //control in transitions list
-                                if(!isInArray(transitions[i][0].listSources, parsedTransition.source.name) && (transitions[i][0].id === parsedTransition.id)){   //it checks if there are different sources in transitions
+                 } else {                 
+                     var i, tmp;
+                     for (i = 0; i < transitions.length; i++) {
+                         if (transitions[i].id) {
+                            if(!transitions[i].listSources){
+                                //control in transitions list
+                                if(!isInArray(transitions[i][0].listSources, parsedTransition.source.name) &&
+                                   (transitions[i][0].id === parsedTransition.id)) {
+                                    //checks if there are different sources in transitions
                                     transitions[i][0].listSources.push(parsedTransition.source.name);
                                 }
-                            }
-                            else{                                                   //control in transitions innested list
-                                if(!isInArray(transitions[i].listSources, parsedTransition.source.name) && (transitions[i].id === parsedTransition.id)){         //it checks if there are different sources in transitions
+                            } else {
+                                //control in transitions innested list
+                                if(!isInArray(transitions[i].listSources, parsedTransition.source.name) &&
+                                   (transitions[i].id === parsedTransition.id)){
+                                    //checks if there are different sources in transitions
                                     transitions[i].listSources.push(parsedTransition.source.name);
                                 }
                             }
-                            if(!transitions[i].listTargets){                            //control in transitions list
-                                if(!isInArray(transitions[i][0].listTargets, parsedTransition.target.name) && (transitions[i][0].id === parsedTransition.id)){   //it checks if there are different targets in transitions
+
+                            if(!transitions[i].listTargets) {
+                                //control in transitions list
+                                if(!isInArray(transitions[i][0].listTargets, parsedTransition.target.name) &&
+                                   (transitions[i][0].id === parsedTransition.id)){
+                                    //checks if there are different targets in transitions
                                     transitions[i][0].listTargets.push(parsedTransition.target.name);
                                 }
-                            }
-                            else{                                                   //control in transitions innested list
-                                if(!isInArray(transitions[i].listTargets, parsedTransition.target.name) && (transitions[i].id === parsedTransition.id)){         //it checks if there are different targets in transitions
+                            } else {
+                                //control in transitions in nested list
+                                if(!isInArray(transitions[i].listTargets, parsedTransition.target.name) &&
+                                   (transitions[i].id === parsedTransition.id)){
+                                    //checks if there are different targets in transitions
                                     transitions[i].listTargets.push(parsedTransition.target.name);
                                 }
                             }
-                            if (transitions[i].id === parsedTransition.id){
-                                var tmp = [];
+
+                            if (transitions[i].id === parsedTransition.id) {
+                                tmp = [];
                                 tmp.push(transitions[i]);
                                 tmp.push(parsedTransition);
                                 transitions[i] = tmp;
-                            }
-                            else{
+                            } else {
                                 var j;
-                                for (j = 0; j < transitions[i].length; j++){
+                                for (j = 0; j < transitions[i].length; j++) { //FIXME: I don't understand this loop, transitions[i] is an object, not an array. This loop does nothing because length is always undefined.
                                     if (transitions[i][j].id === parsedTransition.id){
-                                        var tmp = [];
+                                        tmp = [];
                                         transitions[i].map(function (v) {
                                             tmp.push(v);
                                             return;
@@ -570,7 +574,6 @@ define(function (require, exports, module) {
     
     Printer.prototype.print_initial_transition = function (emuchart) {
         var initial_transitions = emuchart.initial_transitions,
-            i = 0,
             transitions = [];
         initial_transitions.forEach(function (t) {
             var parsedInit = parseTransition(t, emuchart);
