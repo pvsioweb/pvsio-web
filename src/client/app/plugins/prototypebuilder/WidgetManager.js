@@ -52,6 +52,9 @@ define(function (require, exports, module) {
                     widget.updateWithProperties(e.data);
                     //create an interactive image area only if there isnt one already
                     createImageMap(widget);
+                    if (e.data.keyCode) {
+                        wm._keyCode2widget[e.data.keyCode] = widget;
+                    }
                     // fire event widget modified
                     wm.fire({type: "WidgetModified"});
                 }).on("cancel", function (e, view) {
@@ -71,27 +74,31 @@ define(function (require, exports, module) {
                 view.remove();
             });
     }
-    function initialiseKeypressHandler(wm) {
+    function installKeypressHandler(wm) {
         d3.select(document).on("keydown", function () {
-            var eventKeyCode = d3.event.which;
-            var widget = wm._keyCode2widget[eventKeyCode];
-            if (d3.select("#btnSimulatorView").classed("active") && widget) {
-                if (typeof widget.evts === "function" && widget.evts().indexOf('click') > -1) {
+            if (d3.select("#btnSimulatorView").classed("active")) {
+                var eventKeyCode = d3.event.which;
+                var widget = wm._keyCode2widget[eventKeyCode];
+                if (widget && typeof widget.evts === "function" && widget.evts().indexOf('click') > -1) {
                     widget.click({ callback: renderResponse });
                     halo(widget.id());
-                } else if (typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
+                } else if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
                     widget.pressAndHold({ callback: renderResponse });
                     halo(widget.id());
                 }
+                d3.event.preventDefault();
+                d3.event.stopPropagation();
             }
         });
         d3.select(document).on("keyup", function () {
-            var eventKeyCode = d3.event.which;
-            var widget = wm._keyCode2widget[eventKeyCode];
-            if (typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
-                widget.release({ callback: renderResponse });
-            }            
-            haloOff();
+            if (d3.select("#btnSimulatorView").classed("active")) {
+                var eventKeyCode = d3.event.which;
+                var widget = wm._keyCode2widget[eventKeyCode];
+                if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
+                    widget.release({ callback: renderResponse });
+                }            
+                haloOff();
+            }
         });
     }
     function halo (buttonID) {
@@ -142,6 +149,7 @@ define(function (require, exports, module) {
     WidgetManager.prototype.restoreWidgetDefinitions = function (defs) {
         var wm = this;
         if (defs) {
+            wm._keyCode2widget = {};
             var widget;
             _.each(defs.widgetMaps, function (w, i) {
                 w.type = w.type.toLowerCase();
@@ -197,7 +205,7 @@ define(function (require, exports, module) {
                 });
             }
             
-            initialiseKeypressHandler(this);
+            installKeypressHandler(this);
         }
     };
 
