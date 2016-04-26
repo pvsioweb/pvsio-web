@@ -25,17 +25,23 @@ define(function (require, exports, module) {
 
    ///TODO this should be moved out of this file and promoted to a property, or a function parameter in createImageMap
     function renderResponse(err, res) {
-//        var state = res.data.join("");
-        var stateString = res.data[0];
-        var state = StateParser.parse(stateString);
-        //render storyboard
-        wm.getStoryboardWidgets().forEach(function (w) {
-            w.render(state);
-        });
-        //render displays
-        wm.getDisplayWidgets().forEach(function (w) {
-            w.render(state);
-        });
+        if (!err) {
+            var stateString = res.data[0];
+            var state = StateParser.parse(stateString);
+            //render storyboard
+            wm.getStoryboardWidgets().forEach(function (w) {
+                w.render(state);
+            });
+            //render displays
+            wm.getDisplayWidgets().forEach(function (w) {
+                w.render(state);
+            });
+        } else {
+            if (err.failedCommand && err.failedCommand.indexOf("tick(") === 0) {
+                wm.stopTimers();
+                console.log("wallclock paused (tick function not implemented in the selected prototype)");
+            }
+        }
     }
     function createImageMap(widget) {
         if (widget.needsImageMap()) {

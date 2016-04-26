@@ -536,10 +536,13 @@ function run() {
                 pvsioProcessMap[socketid].sendCommand(token.data.command, function (data) {
                     var res = {
                         id: token.id,
+                        command: token.data.command,
                         data: [data],
                         socketId: socketid,
                         type: "commandResult",
-                        time: token.time
+                        time: token.time,
+                        err: (typeof data === "string" && data.indexOf("Expecting an expression") === 0) ?
+                                { message: data, failedCommand: token.data.command } : null
                     };
                     processCallback(res, socket);
                 });
