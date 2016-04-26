@@ -14,7 +14,10 @@
    "type": "button",
    "recallRate": "250",
    "functionText": "UP",
-   "boundFunctions": "click_UP"
+   "boundFunctions": "click_UP",
+   "buttonReadback": "",
+   "keyCode": "38",
+   "keyName": "up arrow"
   },
   {
    "evts": [
@@ -24,7 +27,10 @@
    "type": "button",
    "recallRate": "250",
    "functionText": "DOWN",
-   "boundFunctions": "click_DOWN"
+   "boundFunctions": "click_DOWN",
+   "buttonReadback": "",
+   "keyCode": "40",
+   "keyName": "down arrow"
   }
  ],
  "regionDefs": [
@@ -38,13 +44,13 @@
    "class": "button_62606785-939b-4f87-99d2-5f4d7179898b",
    "shape": "rect",
    "coords": "204.140625,28,243.140625,71",
-   "href": "#!"
+   "href": null
   },
   {
    "class": "button_24b88be8-e2db-4268-bfb9-70a10533cbec",
    "shape": "rect",
    "coords": "203.140625,86,246.140625,127",
-   "href": "#!"
+   "href": null
   }
  ]
 }

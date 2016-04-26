@@ -5,6 +5,7 @@
  * @date 10/31/13 11:26:16 AM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
+/*global define*/
 define(function (require, exports, module) {
     "use strict";
     var Widget = require("widgets/Widget"),
@@ -32,7 +33,7 @@ define(function (require, exports, module) {
         opt.functionText = opt.functionText || id;
         opt.recallRate = opt.recallRate || 250;
         opt.evts = opt.evts || ["click"];
-        opt.callback = opt.callback || function (){};
+        opt.callback = opt.callback || function () {};
         opt.buttonReadback = opt.buttonReadback || "";
         opt.keyCode = opt.keyCode || "";
         opt.keyName = opt.keyName || "";
@@ -158,7 +159,7 @@ define(function (require, exports, module) {
     Button.prototype.pressAndHold = function (opt) {
         opt = opt || {};
         var f = this.functionText(),
-        widget = this;
+            widget = this;
         
         this.press(opt);
         timerTickFunction = function () {
@@ -172,7 +173,7 @@ define(function (require, exports, module) {
                 ts: new Date().getTime()
             });
         };
-        btnTimer.interval(this.recallRate()).start();        
+        btnTimer.interval(this.recallRate()).start();
         
         return this;
     };
@@ -212,10 +213,8 @@ define(function (require, exports, module) {
     Button.prototype.createImageMap = function (opt) {
         opt = opt || {};
         opt.callback = opt.callback || function () {};
-        opt.keyCode = opt.keyCode || null;
 
         var area = opt.area || Button.prototype.parentClass.createImageMap.apply(this, arguments),
-            keyCode = opt.keyCode || this.keyCode,
             widget = this,
             f,
             evts;
@@ -240,17 +239,6 @@ define(function (require, exports, module) {
             area.on("mouseup", onmouseup);
         });
         widget.imageMap(area);
-        if (keyCode) {
-            $(document).keydown(function (e) {
-                if (e.keyCode === keyCode) {
-                    if (evts && evts.indexOf('click') > -1) {
-                        widget.click(opt);
-                    } else if (evts && evts.indexOf("press/release") > -1) {
-                        widget.pressAndHold(opt);
-                    }
-                }
-            });
-        }
         return area;
     };
 

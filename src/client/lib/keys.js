@@ -67,7 +67,7 @@ function displayKeyCode(charCode) {
     if (charCode === 220) return "\\"; // back slash
     if (charCode === 221) return "]"; // close bracket
     if (charCode === 222) return "'"; // single quote
-    return String.fromCharCode(charCode);
+    return "key " + String.fromCharCode(charCode);
 }
 function uniKeyCode(event) {
     if (event.keyCode === 27) {//  escape

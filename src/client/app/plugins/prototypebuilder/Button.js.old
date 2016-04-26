@@ -3,6 +3,7 @@
  * @desc Button Widget
  * @author Patrick Oladimeji
  * @date 10/31/13 11:26:16 AM
+ * THIS MODULE IS OBSOLETE AND WILL BE REMOVED -- REPLACED BY widgets/Button.js
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 define(function (require, exports, module) {
