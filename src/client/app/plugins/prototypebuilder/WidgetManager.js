@@ -57,7 +57,7 @@ define(function (require, exports, module) {
                 }).on("cancel", function (e, view) {
                     view.remove();
                 });
-            }
+        }
     }
     function handleTimerEdit(emuTimer, wm) {
         EditWidgetView.create(emuTimer)
@@ -69,7 +69,47 @@ define(function (require, exports, module) {
                 wm.fire(event);
             }).on("cancel", function (e, view) {
                 view.remove();
-            });    
+            });
+    }
+    function initialiseKeypressHandler(wm) {
+        d3.select(document).on("keydown", function () {
+            var eventKeyCode = d3.event.which;
+            var widget = wm._keyCode2widget[eventKeyCode];
+            if (d3.select("#btnSimulatorView").classed("active") && widget) {
+                if (typeof widget.evts === "function" && widget.evts().indexOf('click') > -1) {
+                    widget.click({ callback: renderResponse });
+                    halo(widget.id());
+                } else if (typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
+                    widget.pressAndHold({ callback: renderResponse });
+                    halo(widget.id());
+                }
+            }
+        });
+        d3.select(document).on("keyup", function () {
+            var eventKeyCode = d3.event.which;
+            var widget = wm._keyCode2widget[eventKeyCode];
+            if (typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
+                widget.release({ callback: renderResponse });
+            }            
+            haloOff();
+        });
+    }
+    function halo (buttonID) {
+        var coords = d3.select("." + buttonID).attr("coords");
+        coords = coords.split(",");
+        var pos = {x1: +coords[0], y1: +coords[1], x2: +coords[2], y2: coords[3]};        
+        var w = pos.x2 - pos.x1, hrad = w / 2, h = pos.y2 - pos.y1, vrad = h / 2, brad = hrad + "px " + vrad + "px";
+        var mark = d3.select(".animation-halo");
+        if (mark.empty()) {
+            mark = d3.select("#imageDiv").append("div").attr("class", "animation-halo");
+        }
+        mark.style("top", pos.y1 + "px").style("left", pos.x1 + "px")
+            .style("width", (pos.x2 - pos.x1) + "px").style("height", (pos.y2 - pos.y1) + "px")
+            .style("border-top-left-radius", brad).style("border-top-right-radius", brad)
+            .style("border-bottom-left-radius", brad).style("border-bottom-right-radius", brad);        
+    }
+    function haloOff (buttonID) {
+        d3.select(".animation-halo").remove();
     }
         
     /**
@@ -83,11 +123,12 @@ define(function (require, exports, module) {
     function WidgetManager() {
         this._widgets = {};
         this._timers = {};
+        this._keyCode2widget = {}; // this table stores information about the relation between keyCodes and widgets
         Preferences.addListener("preferenceChanged", function (e) {
             if (e.key === "WALL_CLOCK_INTERVAL" && wm._timers.tick) {
                 var timerRate = Preferences.get(PreferenceKeys.WALL_CLOCK_INTERVAL) * 1000;
                 wm._timers.tick.updateInterval(timerRate);
-                console.log("tick timer interval updated to " + timerRate/1000 + " secs");
+                console.log("tick timer interval updated to " + timerRate / 1000 + " secs");
             }
         });
         eventDispatcher(this);
@@ -102,12 +143,12 @@ define(function (require, exports, module) {
         var wm = this;
         if (defs) {
             var widget;
-            _.each(defs.widgetMaps, function (w,i) {
+            _.each(defs.widgetMaps, function (w, i) {
                 w.type = w.type.toLowerCase();
                 if (w.type === "button") {
                     if (defs.regionDefs && defs.regionDefs[i].coords) {
                         var coords = defs.regionDefs[i].coords;
-                        var height = coords[3] - coords[1], width= coords[2] - coords[0], x = coords[0], y = coords[1];
+                        var height = coords[3] - coords[1], width = coords[2] - coords[0], x = coords[0], y = coords[1];
                         widget = new Button(
                             w.id,
                             { top: y, left: x, width: width, height: height },
@@ -117,9 +158,13 @@ define(function (require, exports, module) {
                         widget = new Button(
                             w.id,
                             null,
-                            { callback: renderResponse, buttonReadback: w.buttonReadback }
+                            { callback: renderResponse, buttonReadback: w.buttonReadback,
+                              keyCode: w.keyCode, keyName: w.keyName }
                         );
                     }
+                    if (w.keyCode) {
+                        wm._keyCode2widget[w.keyCode] = widget;
+                    }                        
                 } else if (w.type === "display") {
                     widget = new Display(w.id);
                 } else if (w.type === "storyboard") {
@@ -151,11 +196,13 @@ define(function (require, exports, module) {
                     });
                 });
             }
+            
+            initialiseKeypressHandler(this);
         }
     };
 
     function round(v) {
-        return Math.round(v*10)/10;
+        return Math.round(v * 10) / 10;
     }
     
     WidgetManager.prototype.updateMapCreator = function (scale, cb) {
@@ -169,23 +216,30 @@ define(function (require, exports, module) {
                 });
                 //pop up the widget edit dialog
                 var coord = {
-                    top: round(e.pos.y), left: round(e.pos.x), 
-                    width: round(e.pos.width), height: round(e.pos.height)
+                    top: round(e.pos.y),
+                    left: round(e.pos.x),
+                    width: round(e.pos.width),
+                    height: round(e.pos.height)
                 };
                 NewWidgetView.create(coord)
                     .on("ok", function (e, view) {
                         view.remove();
                         var id = e.data.type + "_" + uidGenerator();
-                        var widget = e.data.type === "button" ?
-                            new Button(
-                                id,
+                        var widget;
+                        if (e.data.type === "button") {
+                            widget = new Button(id,
                                 { top: d3.select("#imageDiv .selected rect").attr("y"),
                                   left: d3.select("#imageDiv .selected rect").attr("x"),
                                   width: d3.select("#imageDiv .selected rect").attr("width"),
-                                  height: d3.select("#imageDiv .selected rect").attr("height")
-                                },
-                                { callback: renderResponse, buttonReadback: e.data.buttonReadback }
-                            ) : new Display(id);
+                                  height: d3.select("#imageDiv .selected rect").attr("height") },
+                                { callback: renderResponse,
+                                  buttonReadback: e.data.buttonReadback });
+                            if (e.data.keyCode) {
+                                wm._keyCode2widget[e.data.keyCode] = widget;
+                            }
+                        } else {
+                            widget = new Display(id);
+                        }
                         region.classed(widget.type(), true)
                             .attr("id", id);
                         if (e.data.hasOwnProperty("events")) {
@@ -294,13 +348,13 @@ define(function (require, exports, module) {
         @param {Widget} widget The widget to be edited.
         @memberof module:WidgetManager
      */
-    WidgetManager.prototype.editWidget = function(widget) {
+    WidgetManager.prototype.editWidget = function (widget) {
         // widget types supported in the current implementation are Button, Display
-        handleWidgetEdit(widget,wm);
-    };    
-    WidgetManager.prototype.editTimer = function(emuTimer) {
+        handleWidgetEdit(widget, wm);
+    };
+    WidgetManager.prototype.editTimer = function (emuTimer) {
         // the only timer type supported in the current implementation is EmuTimer
-        handleTimerEdit(emuTimer,wm);
+        handleTimerEdit(emuTimer, wm);
     };
     WidgetManager.prototype.startTimers = function () {
         _.each(this._timers, function (timer) {
