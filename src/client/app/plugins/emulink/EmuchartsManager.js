@@ -36,8 +36,11 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_addTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_addInitialTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_constantAdded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_constantRemoved", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_constantRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_variableAdded", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_variableRemoved", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_variableRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteInitialTransition", function (event) { _this.fire(event); });

@@ -524,10 +524,9 @@ define(function (require, exports, module) {
             }, opt);
         }
 
-        d3.select("#btnNewEmuchart").on("click", function () {
-            d3.select("#EmuchartLogo").classed("hidden", true);
-            d3.select("#graphicalEditor").classed("hidden", false);
-            emuchartsManager.newEmucharts("emucharts.pvs");
+        function restartEditor() {
+            // set initial editor mode
+            emuchartsManager.set_editor_mode(MODE.BROWSE());            
             // render emuchart
             emuchartsManager.render();
             // make svg visible and reset colors
@@ -539,22 +538,18 @@ define(function (require, exports, module) {
             // set Machine States Table
             machineStatesTable.setMachineStates(emuchartsManager.getStates());
             // set Transitions Table
-            transitionsTable.setTransitions(emuchartsManager.getTransitions());
+            transitionsTable.setTransitions(emuchartsManager.getTransitions());        
+        }
+        
+        d3.select("#btnNewEmuchart").on("click", function () {
+            d3.select("#EmuchartLogo").classed("hidden", true);
+            d3.select("#graphicalEditor").classed("hidden", false);
+            emuchartsManager.newEmucharts("emucharts.pvs");
+            restartEditor();
         });
         d3.select("#btnLoadEmuchart").on("click", function () {
             openChart(function f() {
-                // make svg visible and reset colors
-                initToolbars();
-                // render emuchart
-                emuchartsManager.render();
-                // set initial editor mode
-                d3.select("#btn_toolbarBrowse").node().click();
-                //set Variables Table
-                contextTable.setContextVariables(emuchartsManager.getVariables());                
-                // set Machine States Table
-                machineStatesTable.setMachineStates(emuchartsManager.getStates());
-                // set Transitions Table
-                transitionsTable.setTransitions(emuchartsManager.getTransitions());
+                restartEditor();
             });
         });
 
@@ -603,15 +598,6 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuNewChart").on("click", function () {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
-            var newChart = function () {
-                d3.select("#EmuchartLogo").classed("hidden", true);
-                d3.select("#graphicalEditor").classed("hidden", false);
-                emuchartsManager.newEmucharts("emucharts.pvs");
-                // set initial editor mode
-                emuchartsManager.set_editor_mode(MODE.BROWSE());
-                // render emuchart
-                emuchartsManager.render();
-            };
             if (!emuchartsManager.empty_chart()) {
                 // we need to delete the current chart because we handle one chart at the moment
                 QuestionForm.create({
@@ -621,10 +607,7 @@ define(function (require, exports, module) {
                     buttons: ["Cancel", "Ok"]
                 }).on("ok", function (e, view) {
                     emuchartsManager.delete_chart();
-                    newChart();
-                    initToolbars();
-                    // set initial editor mode
-                    d3.select("#btn_toolbarBrowse").node().click();
+                    d3.select("#btnNewEmuchart").node().click();
                     view.remove();
                 }).on("cancel", function (e, view) {
                     view.remove();
@@ -641,8 +624,6 @@ define(function (require, exports, module) {
                     buttons: ["Cancel", "Confirm close"]
                 }).on("ok", function (e, view) {
                     emuchartsManager.delete_chart();
-                    initToolbars();
-                    // set initial editor mode
                     d3.select("#btn_toolbarBrowse").node().click();
                     view.remove();
                 }).on("cancel", function (e, view) {

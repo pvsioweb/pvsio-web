@@ -82,16 +82,20 @@ define(function (require, exports, module) {
         this.emucharts = emucharts || new Emucharts();
         this.emucharts.addListener("emuCharts_stateAdded", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_stateRemoved", function (event) { _this.fire(event); });
-        this.emucharts.addListener("emuCharts_constantAdded", function (event) { _this.fire(event); });
-        this.emucharts.addListener("emuCharts_variableAdded", function (event) { _this.fire(event); });
-        this.emucharts.addListener("emuCharts_transitionAdded", function (event) { _this.fire(event); });
-        this.emucharts.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
-        this.emucharts.addListener("emuCharts_transitionRemoved", function (event) { _this.fire(event); });
-        this.emucharts.addListener("emuCharts_initialTransitionAdded", function (event) { _this.fire(event); });
-        this.emucharts.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
-        this.emucharts.addListener("emuCharts_initialTransitionRemoved", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_stateRenamed", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_stateColorChanged", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_constantAdded", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_constantRemoved", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_constantRenamed", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_variableAdded", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_variableRemoved", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_variableRenamed", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_transitionAdded", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_transitionRemoved", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_initialTransitionAdded", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_initialTransitionRemoved", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
 
         this.emucharts.addListener("emuCharts_nodeFilterChanged", function (event) {
             _this._nodeFilter = event.filter;
@@ -2075,12 +2079,12 @@ define(function (require, exports, module) {
         _this = this;
         if (this.emucharts.constants) {
             this.emucharts.constants.forEach(function (key) {
-                _this.emucharts.constants.remove(key);
+                _this.delete_constants(key);
             });
         }
         if (this.emucharts.variables) {
             this.emucharts.variables.forEach(function (key) {
-                _this.emucharts.variables.remove(key);
+                _this.delete_variable(key);
             });
         }
         var transitions = this.emucharts.getTransitions();
