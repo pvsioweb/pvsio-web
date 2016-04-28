@@ -11,7 +11,7 @@
                     affiliation: (string),
                     contact: (string)
                 },
-                importings: (array of including and defining pre-processing directives, according to types of variale used),
+                importings: (array of including and defining pre-processing directives, according to types of variable used),
                 constants: (array of {
                                 name: (string), // the constant identifier
                                 type: (string), // the constant type
@@ -142,7 +142,7 @@ define(function (require, exports, module) {
             if(!isInArray(declarations, type)){
                 declarations.push("typedef signed int " + type + ";");
             }
-        } else if (type.toLowerCase() === "float"){
+        } else if (type.toLowerCase() === "float") {
             type = typeMaps.float;
             if(!isInArray(declarations, type)){
                 declarations.push("typedef float " + type + ";");
@@ -391,7 +391,7 @@ define(function (require, exports, module) {
                 var i;
                 var firstTime = true;
                 for (i = 0; i < condition.length; i++){
-                    if ( (condition[i] === '&' ) || (condition[i] === '|') ){
+                    if ((condition[i] === '&' ) || (condition[i] === '|')){
                         condition = spliceSlice(condition, i, 0, ') ');
                         condition = spliceSlice(condition, i+4, 0, ' (');
                         i += 4;
@@ -509,7 +509,7 @@ define(function (require, exports, module) {
                  } else {                 
                      var i, tmp;
                      for (i = 0; i < transitions.length; i++) {
-                         if (transitions[i].id) {
+                         if (transitions[i].id !== 'undefined') {
                             if(!transitions[i].listSources){
                                 //control in transitions list
                                 if(!isInArray(transitions[i][0].listSources, parsedTransition.source.name) &&
@@ -550,7 +550,7 @@ define(function (require, exports, module) {
                             } else {
                                 var j;
                                 for (j = 0; j < transitions[i].length; j++) { //FIXME: I don't understand this loop, transitions[i] is an object, not an array. This loop does nothing because length is always undefined.
-                                    if (transitions[i][j].id === parsedTransition.id){
+                                    if (transitions[i][j].id === parsedTransition.id) {
                                         tmp = [];
                                         transitions[i].map(function (v) {
                                             tmp.push(v);
