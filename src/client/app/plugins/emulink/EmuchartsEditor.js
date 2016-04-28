@@ -1817,6 +1817,15 @@ define(function (require, exports, module) {
     EmuchartsEditor.prototype.getTransitions = function () {
         return this.emucharts.getTransitions();
     };
+    
+    /**
+     * @description Returns the descriptor of a transition.
+     * @param id {String} The identifier of the transition.
+     * @memberof EmuchartsEditor
+     */    
+    EmuchartsEditor.prototype.getTransition = function (id) {
+        return this.emucharts.getTransition(id);
+    };
 
     /**
      * Returns an array containing the current set of initial transitions in the diagram

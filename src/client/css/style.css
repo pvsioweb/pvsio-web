@@ -54,7 +54,7 @@ div.plugins {
 }
 #graphicalEditor{
     position:  relative;
-    min-width: 1200px;
+/*    min-width: 1200px;*/
 }
 
 #graphicalEditor.hidden {
