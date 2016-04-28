@@ -157,7 +157,9 @@ define(function (require, exports, module) {
                     project.refreshDescriptor(f).then(function (res) {
                         if (res.content) {
                             pvsFilesListView.getTreeList().refreshSelectedItem();
-                            NotificationManager.show("Another application changed " + event.path +
+//                            NotificationManager.show("Another application changed " + event.path +
+//                                                     ". PVSio-web has reloaded the file content from disk.");
+                            console.log("Another application changed " + event.path +
                                                      ". PVSio-web has reloaded the file content from disk.");
                         }
                     }).catch(function (err) { console.log(err); });

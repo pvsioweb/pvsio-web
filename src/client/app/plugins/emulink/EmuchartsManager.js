@@ -572,6 +572,9 @@ define(function (require, exports, module) {
     EmuchartsManager.prototype.getTransitions = function () {
         return _selectedEditor.getTransitions();
     };
+    EmuchartsManager.prototype.getTransition = function (id) {
+        return _selectedEditor.getTransition(id);
+    };
 
     /**
      * Returns an array containing the current set of initial transitions

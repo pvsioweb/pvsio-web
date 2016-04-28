@@ -41,7 +41,7 @@ define(function (require, exports, module) {
             newState.color = e.color;
             newState.id = e.id;
             newState.children[0].children[0].innerHTML = newState.name;
-            newState.children[0].children[0].style.width = (newState.name.length * 8) + "px";
+//            newState.children[0].children[0].style.width = (newState.name.length * 10) + "px";
             newState.children[1].children[0].style.backgroundColor = newState.color;
             d3.select("#MachineStates").select("tbody").node().appendChild(newState);
         }
