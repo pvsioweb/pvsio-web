@@ -67,6 +67,7 @@ define(function (require, exports, module) {
                 document.getElementById("btnEdit").style.backgroundColor = "white";
                 document.getElementById("currentPath").readOnly = false;
                 document.getElementById("currentPath").focus();
+                document.getElementById("currentPath").addEventListener("keydown", keyHandler, false);
             } else {
                 document.getElementById("btnEdit").style.backgroundColor = "";
                 document.getElementById("currentPath").readOnly = true;
@@ -82,6 +83,51 @@ define(function (require, exports, module) {
         }
     });
 
+    function keyHandler(e) {
+        var code = e.keyCode;
+        if (code == 9) {
+            e.preventDefault();
+
+            var path = document.getElementById("currentPath").value;
+
+            var tmp = path.substr(0, path.lastIndexOf("/"));
+            var name = path.substr(path.lastIndexOf("/")+1, path.length-1);
+
+            getRemoteDirectory(tmp).then(function (files) {
+
+            if (files.length == 1) {
+                document.getElementById("currentPath").value = files[0].path;
+            } else {
+                var found = false;
+                for (var j=0; j< files.length;j++) {
+                    if (files[j].name.indexOf(name) > -1 && name !== "" && files[j].name.startsWith(name) && !found) {
+                        document.getElementById("currentPath").value = files[j].path;
+                        found = true;
+                    }
+                }
+            }
+                
+            }).catch(function (err) {
+                console.log(err);
+            });              
+        }
+
+        if (code == 39) {
+
+            var path = document.getElementById("currentPath").value;
+
+            if (path.substr(path.length-1) != "/") {
+                document.getElementById("currentPath").value = path.concat("/");
+                rfb.rebaseDirectory(path.concat("/"));    
+            }
+        }
+
+        if (code == 13) {
+            e.preventDefault();
+            window.location.hash = '#file-browser';
+        } 
+    } 
+    
     /**
         Constructs a new instance of the RemoteFileBrowser
         @param {function} filterFunc a function to filter which file should be shown in the browser if null, then all files are shown
