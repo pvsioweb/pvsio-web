@@ -88,12 +88,14 @@ define(function (require, exports, module) {
                 if (widget && typeof widget.evts === "function" && widget.evts().indexOf('click') > -1) {
                     widget.click({ callback: renderResponse });
                     halo(widget.id());
+                    d3.event.preventDefault();
+                    d3.event.stopPropagation();                    
                 } else if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
                     widget.pressAndHold({ callback: renderResponse });
                     halo(widget.id());
+                    d3.event.preventDefault();
+                    d3.event.stopPropagation();
                 }
-                d3.event.preventDefault();
-                d3.event.stopPropagation();
             }
         });
         d3.select(document).on("keyup", function () {
