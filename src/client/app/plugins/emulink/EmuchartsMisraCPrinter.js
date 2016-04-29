@@ -504,12 +504,42 @@ define(function (require, exports, module) {
             var parsedTransition  = parseTransition(t, emuchart);
             if (parsedTransition) {
                  if(!isInArray(functionsName, parsedTransition.id)){
+                     //first insertion of a new transition  
                      functionsName.push(parsedTransition.id);
+                     parsedTransition.listSources = [];
+                     parsedTransition.listSources.push(parsedTransition.source.name);
+                     parsedTransition.listTargets = [];
+                     parsedTransition.listTargets.push(parsedTransition.target.name);
                      transitions.push(parsedTransition);
-                 } else {                 
+                 } else {
+                     //transition name is already in the list                  
                      var i, tmp;
                      for (i = 0; i < transitions.length; i++) {
                          if (transitions[i].id !== 'undefined') {
+                            if (transitions[i].id === parsedTransition.id) {
+                                //transitions with the same name are now in an unique list
+                                tmp = [];
+                                tmp.push(transitions[i]);
+                                tmp.push(parsedTransition);
+                                transitions[i] = tmp;
+                            } else {
+                                var j;
+                                for (j = 0; j < transitions[i].length; j++) {
+                                    //from third case on, scroll through the proper list and push the new transition 
+                                    if (transitions[i][j].id === parsedTransition.id) {
+                                        tmp = [];
+                                        transitions[i].map(function (v) {
+                                            tmp.push(v);
+                                            return;
+                                        });
+                                        tmp.push(parsedTransition);
+                                        transitions[i] = tmp;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            //adding current source and target into the proper list, the lists (listSources and listTargest) are in the first element of the proper transition array (transitions[i][0]) 
                             if(!transitions[i].listSources){
                                 //control in transitions list
                                 if(!isInArray(transitions[i][0].listSources, parsedTransition.source.name) &&
@@ -525,7 +555,7 @@ define(function (require, exports, module) {
                                     transitions[i].listSources.push(parsedTransition.source.name);
                                 }
                             }
-
+                            
                             if(!transitions[i].listTargets) {
                                 //control in transitions list
                                 if(!isInArray(transitions[i][0].listTargets, parsedTransition.target.name) &&
@@ -539,27 +569,6 @@ define(function (require, exports, module) {
                                    (transitions[i].id === parsedTransition.id)){
                                     //checks if there are different targets in transitions
                                     transitions[i].listTargets.push(parsedTransition.target.name);
-                                }
-                            }
-
-                            if (transitions[i].id === parsedTransition.id) {
-                                tmp = [];
-                                tmp.push(transitions[i]);
-                                tmp.push(parsedTransition);
-                                transitions[i] = tmp;
-                            } else {
-                                var j;
-                                for (j = 0; j < transitions[i].length; j++) { //FIXME: I don't understand this loop, transitions[i] is an object, not an array. This loop does nothing because length is always undefined.
-                                    if (transitions[i][j].id === parsedTransition.id) {
-                                        tmp = [];
-                                        transitions[i].map(function (v) {
-                                            tmp.push(v);
-                                            return;
-                                        });
-                                        tmp.push(parsedTransition);
-                                        transitions[i] = tmp;
-                                        break;
-                                    }
                                 }
                             }
                          }
