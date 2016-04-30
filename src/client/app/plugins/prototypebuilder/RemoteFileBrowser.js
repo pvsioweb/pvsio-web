@@ -28,7 +28,11 @@ define(function (require, exports, module) {
         MIME            = require("util/MIME").getInstance(),
         PreferenceStorage = require("preferences/PreferenceStorage").getInstance(),
         PreferenceKeys = require("preferences/PreferenceKeys");
-    var timer, rfb;
+    var timer, rfb, grabPosition = [0,0], source;
+
+    Handlebars.registerHelper("inc", function(value, options) {
+        return parseInt(value) + 1;
+    });
 
     var OpenFilesView = BaseDialog.extend({
         render: function (data) {
@@ -43,7 +47,19 @@ define(function (require, exports, module) {
             "input #baseDirectory": "onTextChanged",
             "input #currentPath": "onEdit",
             "click #btnHome": "selectHome",
-            "click #btnEdit": "enableEdit"
+            "click #btnEdit": "enableEdit",
+            "click .bookmark": "bookmarks",
+            "dragstart .bookmark": "handleDragStart",
+            "dragenter .bookmark": "handleDragEnter",
+            "dragover .bookmark": "handleDragOver",
+            "dragleave .bookmark": "handleDragLeave",
+            "dragend .bookmark": "handleDragEnd",
+            "drop .bookmark": "handleDrop",
+            "dragstart .line": "handleDragStartLine",
+            "dragleave .line": "handleDragLeaveLine",
+            "dragenter .line": "handleDragEnterLine",
+            "dragover .line": "handleDragOverLine",
+            "dragend .line": "handleDragEndLine"
         },
         onTextChanged: function (event) {
             clearTimeout(timer);
@@ -80,8 +96,223 @@ define(function (require, exports, module) {
             rfb.rebaseDirectory(levelUp);
             //update the directory shown on the top of the window
             dir.property("value", levelUp);
+        },
+        bookmarks: function(event) {
+            var key = event.currentTarget.innerText.trim();
+            var paths = PreferenceStorage.get(PreferenceKeys.BOOKMARKS);
+            rfb.rebaseDirectory(paths[key]);
+            document.getElementById("currentPath").value = paths[key];
+        },
+        handleDragStartLine: function(event) {
+            if (event.currentTarget.getAttribute("draggable") == "true") {
+                document.getElementById("file-bookmarks").classList.add("over");
+                source = event.currentTarget;
+                event.originalEvent.dataTransfer.effectAllowed = "move";
+
+                var posX = event.originalEvent.offsetX;
+                var posY = event.originalEvent.offsetY;
+
+                grabPosition[0] = posX;
+                grabPosition[1] = posY;
+            } else {
+                return false;    
+            }
+            
+        },
+        handleDragStart: function(event) {
+            
+            document.getElementById(event.currentTarget.id).classList.add("opacity");
+            
+            source = event.currentTarget;
+            event.originalEvent.dataTransfer.effectAllowed = "move";
+            event.originalEvent.dataTransfer.setData('text', event.currentTarget.innerHTML);
+
+            var posX = event.originalEvent.offsetX;
+            var posY = event.originalEvent.offsetY;
+
+            grabPosition[0] = posX;
+            grabPosition[1] = posY;
+        },
+        handleDragEnter: function(event) {
+            if (event.currentTarget.id.indexOf("bookmark-list") > -1) {
+                if (source != event.currentTarget) {
+                    document.getElementById(event.currentTarget.id).classList.add("over");
+                }   
+            }
+            return false;
+        },
+        handleDragEnterLine: function(event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            }
+
+            return false;
+        },
+        handleDragOver: function(event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            }
+
+            event.originalEvent.dataTransfer.effectAllowed = "move";
+           
+            return false;
+        },
+        handleDragOverLine: function(event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            }
+
+            event.originalEvent.dataTransfer.effectAllowed = "move";
+
+            return false;
+        },
+        handleDragLeave: function(event) {
+            document.getElementById(event.currentTarget.id).classList.remove("over");
+            console.log("leave");
+
+            return false;
+        },
+        handleDragLeaveLine: function(event) {
+            
+            if (event.preventDefault()) {
+                event.preventDefault();
+            }
+
+            return false;
+        },
+        handleDrop: function(event) {
+            if (event.stopPropagation()){
+                event.stopPropagation();
+            }
+
+            if (event.preventDefault()) {
+                event.preventDefault();
+            }
+
+            if (source.id.indexOf("line") > -1) {
+                var path = source.__data__.path;
+                var key = source.innerText.trim();
+                var paths = PreferenceStorage.get(PreferenceKeys.BOOKMARKS);
+
+                if (!(paths[key])) {
+                    var id = Object.keys(paths).length;
+
+                    var div = document.createElement("div");
+                    div.setAttribute("id","bookmark-list-" + (id+1));
+                    div.setAttribute("class","bookmark");
+                    div.setAttribute("draggable",true);
+
+                    var li = document.createElement("li");
+
+                    var span_icon = document.createElement("span");
+                    span_icon.setAttribute("class","glyphicon glyphicon-folder-close");
+                    var span_text = document.createElement("span");
+                    span_text.setAttribute("class","bookmark-label");
+                    span_text.textContent = " " + key;
+                    li.appendChild(span_icon);
+                    li.appendChild(span_text);
+
+                    div.appendChild(li);
+
+                    document.getElementById("bookmark-ul").appendChild(div);
+                }
+
+                paths[key] = path;
+                PreferenceStorage.set(PreferenceKeys.BOOKMARKS,paths);
+                
+            }
+
+            if (source.id.indexOf("bookmark-list") > -1) {
+                if (source != event.currentTarget) {
+                    source.innerHTML = event.currentTarget.innerHTML;
+                    event.currentTarget.innerHTML = event.originalEvent.dataTransfer.getData('text');
+                }
+            }
+
+            document.getElementById(event.currentTarget.id).classList.remove("over");
+            return false;
+        },
+        handleDragEnd: function(event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            }
+
+            if (isOutside(event,"open-file-browser")) {
+                var elem = document.getElementById(event.currentTarget.id);
+                elem.remove();
+                var key = source.innerText.trim();
+                var paths = PreferenceStorage.get(PreferenceKeys.BOOKMARKS);
+                delete paths[key];
+                PreferenceStorage.set(PreferenceKeys.BOOKMARKS, paths);
+            } else {
+
+                document.getElementById(event.currentTarget.id).classList.remove("opacity");
+            }
+
+            return false;
+        },
+        handleDragEndLine: function(event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            }
+
+            if (source.id.indexOf("line") > -1 && !isOutside(event,"file-bookmarks")) {
+                var path = source.__data__.path;
+                var key = source.innerText.trim();
+                var paths = PreferenceStorage.get(PreferenceKeys.BOOKMARKS);
+
+                if (!(paths[key])) {
+                    var id = Object.keys(paths).length;
+
+                    var div = document.createElement("div");
+                    div.setAttribute("id","bookmark-list-" + (id+1));
+                    div.setAttribute("class","bookmark");
+                    div.setAttribute("draggable",true);
+
+                    var li = document.createElement("li");
+
+                    var span_icon = document.createElement("span");
+                    span_icon.setAttribute("class","glyphicon glyphicon-folder-close");
+                    var span_text = document.createElement("span");
+                    span_text.setAttribute("class","bookmark-label");
+                    span_text.textContent = " " + key;
+                    li.appendChild(span_icon);
+                    li.appendChild(span_text);
+
+                    div.appendChild(li);
+
+                    document.getElementById("bookmark-ul").appendChild(div);
+                }
+
+                paths[key] = path;
+                PreferenceStorage.set(PreferenceKeys.BOOKMARKS,paths);
+                
+            }
+
+            document.getElementById("file-bookmarks").classList.remove("over");
+            document.getElementById(event.currentTarget.id).classList.remove("opacity");
+            
+            return false;
         }
+
     });
+
+    function isOutside(evt, id) {
+        var element = document.getElementById(id).getBoundingClientRect();
+
+        var posX = evt.originalEvent.clientX + grabPosition[0];
+        var posY = evt.originalEvent.clientY + grabPosition[1];
+
+        if (posX < element.left || posX > (element.left + element.width)) {
+            return true;
+        } else {
+            if (posY < element.top || posY > (element.top + element.height)) {
+                return true;
+            } else {
+               return false;
+            }
+        }
+    }
 
     function keyHandler(e) {
         var code = e.keyCode;
@@ -95,17 +326,17 @@ define(function (require, exports, module) {
 
             getRemoteDirectory(tmp).then(function (files) {
 
-            if (files.length == 1) {
-                document.getElementById("currentPath").value = files[0].path;
-            } else {
-                var found = false;
-                for (var j=0; j< files.length;j++) {
-                    if (files[j].name.indexOf(name) > -1 && name !== "" && files[j].name.startsWith(name) && !found) {
-                        document.getElementById("currentPath").value = files[j].path;
-                        found = true;
+                if (files.length == 1) {
+                    document.getElementById("currentPath").value = files[0].path;
+                } else {
+                    var found = false;
+                    for (var j=0; j< files.length;j++) {
+                        if (files[j].name.indexOf(name) > -1 && name !== "" && files[j].name.startsWith(name) && !found) {
+                            document.getElementById("currentPath").value = files[j].path;
+                            found = true;
+                        }
                     }
                 }
-            }
                 
             }).catch(function (err) {
                 console.log(err);
@@ -225,7 +456,7 @@ define(function (require, exports, module) {
 
         path = path || "";
         opt = opt || {};
-        var view = new OpenFilesView({baseDirectory: path, title: (opt.title || "Open file")});
+        var view = new OpenFilesView({baseDirectory: path, bookmarks: PreferenceStorage.get(PreferenceKeys.BOOKMARKS), title: (opt.title || "Open file")});
 //        getRemoteDirectory(path)
         readExamplesFolder()
             .then(function (ans) {
@@ -256,11 +487,11 @@ define(function (require, exports, module) {
                     }
                     
                     if (data.isDirectory) {
-                        d3.select("#file-browser").style("width", "100%");
+                        d3.select("#file-browser").style("width", "82.5%");
                         d3.select("#file-preview").style("display", "none");
                     } else {
-                        d3.select("#file-browser").style("width", "400px");
-                        d3.select("#file-preview").style("width", "230px").style("display", "block");
+                        d3.select("#file-browser").style("width", "55%").style("float", "left").style("margin-left","0");
+                        d3.select("#file-preview").style("width", "25%").style("display", "block");
                     }
                     
                     if (data.isDirectory && !data.children && !data._children) {

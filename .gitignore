@@ -22,3 +22,4 @@ public/V1.html
 test.js
 .idea
 pvsio-web.iml
+src/server/lib/glassfish4/*

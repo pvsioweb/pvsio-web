@@ -926,17 +926,80 @@ fadeOut
     20% { transform: scaleY(1.0); }
 }
 
+#file-bookmarks {
+    height: 100%;
+    background-color: lightgrey;
+    width: 17.5%;
+    float:left;
+    overflow: auto; 
+}
+
+#file-bookmarks.over{
+    border: 2px dashed #000;
+}
+
+#file-bookmarks .title, #file-bookmarks .title span {
+    margin-left: 5%;
+    margin-top: 3%;
+    margin-right: 5%;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+#file-bookmarks .title hr {
+    margin-top: 3%;
+    margin-bottom: 5%;
+}
+
+#file-bookmarks .list {
+    height: 100%
+    width: 100%;
+}
+
+#file-bookmarks .list:hover {
+    cursor: pointer;
+}
+
+li span.bookmark-label {
+    font-size: 11px;
+    color : #333;
+}
+
+#file-bookmarks .bookmark.opacity {
+    opacity: 0.4;
+}
+
+#file-bookmarks li {
+    list-style-type: none;
+    padding-left: 13%;
+    padding-bottom: 5%;
+}
+
+[draggable] {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Required to make elements draggable in old WebKit */
+  -khtml-user-drag: element;
+  -webkit-user-drag: element;
+}
+
+#file-bookmarks .bookmark.over {
+    border: 2px dashed #000;
+}
+
 #file-browser {
     height: 300px;
     overflow-y: auto;
-    width: 100%;
+    margin-left: 17.5%;
     height: 100%;
-    float:left;
 }
 
 input.input_text{
     color: black;
 }
+
 #file-browser ul {
     width: 100% !important;
 }
