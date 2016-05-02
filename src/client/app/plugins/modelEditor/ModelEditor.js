@@ -262,7 +262,7 @@ define(function (require, exports, module) {
                                 notification: msg.split("\n")
                             }).on("ok", function (e, view) { view.remove(); });
                         } else {
-                            var logFile = projectManager.project().name() + "/" + fp.substring(0, fp.length - 4) + ".log";
+                            var logFile = fp.substring(0, fp.length - 4) + ".log";
                             var header = "Compilation error";
                             ws.getFile(logFile, function (err, res) {
                                 if (!err) {
@@ -270,8 +270,10 @@ define(function (require, exports, module) {
                                     msg = msg.replace("Parsing", "Error while parsing");
                                 } else {
                                     msg = msg.substring(msg.indexOf("Writing output to file"));
-                                    header += ", please check the PVS output file for details.";
+//                                    header += ", please check the PVS output file for details.";
                                 }
+                                msg = msg.replace(/\\n/g,". ");
+                                msg = msg.split("{").join(" ").split("}").join(" ");
                                 Notification.create({
                                     header: header,
                                     notification: msg.split("\n")

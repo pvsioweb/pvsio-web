@@ -29,18 +29,13 @@ emucharts_MedtronicMinimed530GSafe_th: THEORY
   leave_state(ms: MachineState)(st: State): State = st WITH [ previous_state := ms ]
 
   %-- transition functions
-  per_turn_on(st: State): bool = ((current_state(st) = off))
-  turn_on(st: (per_turn_on)): State =
+  per_tick(st: State): bool = ((current_state(st) = off))
+  tick(st: (per_tick)): State =
     COND
     (current_state(st) = off)
      -> LET new_st = leave_state(off)(st)
-         IN enter_into(on)(new_st)
-    ENDCOND
-    
-  tick(st: (per_turn_on)): State =
-    COND
-      per_turn_on(st) -> turn_on(st),
-      ELSE -> st
+         IN enter_into(on)(new_st),
+    ELSE -> st
     ENDCOND
 
   per_turn_off(st: State): bool = ((current_state(st) = on))
@@ -48,7 +43,8 @@ emucharts_MedtronicMinimed530GSafe_th: THEORY
     COND
     (current_state(st) = on)
      -> LET new_st = leave_state(on)(st)
-         IN enter_into(off)(new_st)
+         IN enter_into(off)(new_st),
+    ELSE -> st
     ENDCOND
 
   per_click_DOWN(st: State): bool = ((current_state(st) = on) AND (display(st) > 0)) OR ((current_state(st) = on) AND (display(st) = 0))
@@ -61,7 +57,8 @@ emucharts_MedtronicMinimed530GSafe_th: THEORY
     (current_state(st) = on) AND (display(st) = 0)
      -> LET new_st = leave_state(on)(st),
             new_st = new_st WITH [ display := 0 ]
-         IN enter_into(on)(new_st)
+         IN enter_into(on)(new_st),
+    ELSE -> st
     ENDCOND
 
   per_click_UP(st: State): bool = ((current_state(st) = on) AND (display(st) < 10)) OR ((current_state(st) = on) AND (display(st) = 10))
@@ -74,7 +71,8 @@ emucharts_MedtronicMinimed530GSafe_th: THEORY
     (current_state(st) = on) AND (display(st) = 10)
      -> LET new_st = leave_state(on)(st),
             new_st = new_st WITH [ display := 10 ]
-         IN enter_into(on)(new_st)
+         IN enter_into(on)(new_st),
+    ELSE -> st
     ENDCOND
 
  END emucharts_MedtronicMinimed530GSafe_th

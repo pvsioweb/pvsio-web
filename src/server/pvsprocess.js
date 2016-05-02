@@ -21,7 +21,7 @@ You should have received a copy of the GNU General Public License along with Foo
 
 var util = require("util"),
     path = require("path"),
-    logger = require("tracer").colorConsole();
+    logger = require("tracer").console();
 var procWrapper = require("./processwrapper");
 module.exports = function () {
     "use strict";
@@ -164,7 +164,7 @@ module.exports = function () {
 		
 		logger.info("\n-------------------------------------\nPVSio process started with theory "
                     + filename + "\n-------------------------------------");
-        logger.info("Process context is " + o.workspaceDir());
+        console.log("\nProcess context is " + o.workspaceDir() + "\n");
 		return o;
 	};
 	

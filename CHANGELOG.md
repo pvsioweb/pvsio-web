@@ -6,6 +6,10 @@
     Added new feature: voice readback for button actions
     Added new feature: wallclock for automatic execution of tick transitions defined in the PVS model
     Improved Emucharts Editor
+    
+##2.0.1b (Sep 2015)
+    Added new modelling extension: Presentation Interaction Models (PIMs)
+    Added PVSio-web network controller for distributed simulations
 
 ##2.0.1 (April 2015)
     Added new Model Generators: VMD-SL (Vienna Development Method)

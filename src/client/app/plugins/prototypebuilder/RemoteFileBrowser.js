@@ -27,6 +27,7 @@ define(function (require, exports, module) {
         BaseDialog      = require("pvsioweb/forms/BaseDialog"),
         MIME            = require("util/MIME").getInstance(),
         PreferenceStorage = require("preferences/PreferenceStorage").getInstance(),
+        EmuchartsManager = require("plugins/emulink/EmuchartsManager"),
         PreferenceKeys = require("preferences/PreferenceKeys");
     var timer, rfb;
 
@@ -67,6 +68,7 @@ define(function (require, exports, module) {
                 document.getElementById("btnEdit").style.backgroundColor = "white";
                 document.getElementById("currentPath").readOnly = false;
                 document.getElementById("currentPath").focus();
+                document.getElementById("currentPath").addEventListener("keydown", keyHandler, false);
             } else {
                 document.getElementById("btnEdit").style.backgroundColor = "";
                 document.getElementById("currentPath").readOnly = true;
@@ -82,6 +84,44 @@ define(function (require, exports, module) {
         }
     });
 
+    function keyHandler(e) {
+        var code = e.keyCode;
+        var path;
+        if (code === 9) {
+            e.preventDefault();
+            path = document.getElementById("currentPath").value;
+            var tmp = path.substr(0, path.lastIndexOf("/"));
+            var name = path.substr(path.lastIndexOf("/")+1, path.length-1);
+            getRemoteDirectory(tmp).then(function (files) {
+                if (files.length === 1) {
+                    document.getElementById("currentPath").value = files[0].path;
+                } else {
+                    var found = false;
+                    for (var j=0; j< files.length;j++) {
+                        if (files[j].name.indexOf(name) > -1 && name !== "" && files[j].name.startsWith(name) && !found) {
+                            document.getElementById("currentPath").value = files[j].path;
+                            found = true;
+                        }
+                    }
+                }
+            }).catch(function (err) {
+                console.log(err);
+            });              
+        }
+
+        if (code === 39) {
+            path = document.getElementById("currentPath").value;
+            if (path.substr(path.length-1) !== "/") {
+                document.getElementById("currentPath").value = path.concat("/");
+                rfb.rebaseDirectory(path.concat("/"));
+            }
+        }
+        if (code === 13) {
+            e.preventDefault();
+            window.location.hash = '#file-browser';
+        }
+    } 
+    
     /**
         Constructs a new instance of the RemoteFileBrowser
         @param {function} filterFunc a function to filter which file should be shown in the browser if null, then all files are shown
@@ -89,6 +129,7 @@ define(function (require, exports, module) {
     function RemoteFileBrowser(filterFunc) {
         rfb = this;
         timer = null;
+        this.emuchartsManager = new EmuchartsManager();
         this.filterFunc = filterFunc || function (d) { return true; };
     }
 
@@ -207,6 +248,16 @@ define(function (require, exports, module) {
                                 d3.select("#image-preview").attr("src", res.content).style("display", "block");
                             }
                         });
+                    }
+                    if (MIME.isEmucharts(data.path)) {
+                        WSManager.getWebSocket().readFile({path: data.path}, function (err, res) {
+                            if (!err) {
+                                var preview = { name: "preview", content: JSON.parse(res.content) };
+                                rfb.emuchartsManager.importEmucharts(preview);
+                                rfb.emuchartsManager.preview("#svg-preview");
+                                d3.select("#file-preview").style("display", "block");
+                            }
+                        });                    
                     }
                     
                     if (data.isDirectory) {
