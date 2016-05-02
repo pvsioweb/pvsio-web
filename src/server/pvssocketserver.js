@@ -155,17 +155,21 @@ function run() {
     webserver.use("/client", express.static(clientDir));
 
     function typeCheck(file, cb) {
+        console.log("typechecking file " + file + " ...");
         if (process.env.PORT) { // this is for the PVSio-web version installed on the heroku cloud
+            console.log("/app/pvs6.0/proveit -T -l -v " + file);
             procWrapper().exec({
                 command: "/app/pvs6.0/proveit -T -l -v " + file,
                 callBack: cb
             });
         } else if (process.env.pvsdir) {
+            console.log(path.join(process.env.pvsdir, "proveit") + " -T -l -v " + file);
             procWrapper().exec({
                 command: path.join(process.env.pvsdir, "proveit") + " -T -l -v " + file,
                 callBack: cb
-            });        
+            });
         } else {
+            console.log("proveit -T -l -v " + file);
             procWrapper().exec({
                 command: "proveit -T -l -v " + file,
                 callBack: cb
@@ -596,6 +600,7 @@ function run() {
                 initProcessMap(socketid);
                 var encoding = token.encoding || "utf8";
                 token.path = isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
+                console.log("reading file " + token.path);
                 readFile(token.path, encoding)
                     .then(function (content) {
                         var res = {
