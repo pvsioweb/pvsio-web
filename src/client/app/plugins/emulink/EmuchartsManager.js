@@ -517,6 +517,14 @@ define(function (require, exports, module) {
     EmuchartsManager.prototype.getConstants = function () {
         return _selectedEditor.getConstants();
     };
+    
+    /**
+     * Returns the descriptor of the constant whose ID is the function argument
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.getConstant = function (constantID) {
+        return _selectedEditor.getConstant(constantID);
+    };
 
     /**
      * Returns an array containing the current set of variables defined in the model

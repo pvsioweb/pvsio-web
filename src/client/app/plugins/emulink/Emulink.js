@@ -47,6 +47,7 @@ define(function (require, exports, module) {
         ContextTable           = require("plugins/emulink/tools/ContextTable"),
         MachineStatesTable     = require("plugins/emulink/tools/MachineStatesTable"),
         TransitionsTable       = require("plugins/emulink/tools/TransitionsTable"),
+        ConstantsTable         = require("plugins/emulink/tools/ConstantsTable"),
         ExportDiagram          = require("plugins/emulink/tools/ExportDiagram"),
         MIME                   = require("util/MIME").getInstance();
     
@@ -75,6 +76,7 @@ define(function (require, exports, module) {
     var contextTable;
     var machineStatesTable;
     var transitionsTable;
+    var constantsTable;
     var exportDiagram;
 
     var options = { autoinit: true };
@@ -281,7 +283,7 @@ define(function (require, exports, module) {
     }
     
     function stateAdded_handler(event) {
-        machineStatesTable.addMachineStates([ event.state ]);
+        machineStatesTable.setMachineStates(emuchartsManager.getStates());
     }
     function stateRemoved_handler(event) {
         machineStatesTable.setMachineStates(emuchartsManager.getStates());
@@ -289,7 +291,7 @@ define(function (require, exports, module) {
     function stateRenamed_handler(event) { }//print_theory(); print_node(); }
     function stateColorChanged_handler(event) { }//print_theory(); print_node(); }
     function transitionAdded_handler(event) {
-        transitionsTable.addTransitions([ event.transition ]);
+        transitionsTable.setTransitions(emuchartsManager.getTransitions());
     }
     function transitionRemoved_handler(event) {
         transitionsTable.setTransitions(emuchartsManager.getTransitions());
@@ -298,9 +300,14 @@ define(function (require, exports, module) {
     function initialTransitionAdded_handler(event) { }//console.log("initial transition added"); }//print_theory(); print_node(); }
     function initialTransitionRemoved_handler(event) { }//console.log("initial transition removed"); }//print_theory(); print_node(); }
     function initialTransitionRenamed_handler(event) { }//console.log("initial transition renamed"); }//print_theory(); print_node(); }
-    function constantAdded_handler(event) { }//print_theory(); print_node(); }
+    function constantAdded_handler(event) {
+        constantsTable.setConstants(emuchartsManager.getConstants());
+    }
+    function constantRemoved_handler(event) {
+        constantsTable.setConstants(emuchartsManager.getConstants());
+    }
     function variableAdded_handler(event) {
-        contextTable.addContextVariables([ event.variable ]);
+        contextTable.setContextVariables(emuchartsManager.getVariables());
     }
     function variableRemoved_handler(event) {
         contextTable.setContextVariables(emuchartsManager.getVariables());
@@ -341,6 +348,7 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_stateAdded", stateAdded_handler);
         emuchartsManager.addListener("emuCharts_stateRemoved", stateRemoved_handler);
         emuchartsManager.addListener("emuCharts_constantAdded", constantAdded_handler);
+        emuchartsManager.addListener("emuCharts_constantRemoved", constantRemoved_handler);
         emuchartsManager.addListener("emuCharts_variableAdded", variableAdded_handler);
         emuchartsManager.addListener("emuCharts_variableRemoved", variableRemoved_handler);
         emuchartsManager.addListener("emuCharts_transitionAdded", transitionAdded_handler);
@@ -415,6 +423,40 @@ define(function (require, exports, module) {
             view.remove();
         });
     }
+    function editConstant (theConstant) {
+        displayEditConstant.create({
+            header: "Editing constant " + theConstant.name,
+            textLabel: {
+                newConstantName: "Constant name",
+                newConstantType: "Constant type",
+                newConstantValue: "Constant value"
+            },
+            placeholder: {
+                newConstantName: theConstant.name,
+                newConstantType: theConstant.type,
+                newConstantValue: theConstant.value
+            },
+            buttons: ["Cancel", "Ok"]
+        }).on("ok", function (e, view) {
+            var newConstantName = e.data.labels.get("newConstantName");
+            var newConstantType = e.data.labels.get("newConstantType");
+            var newConstantValue = e.data.labels.get("newConstantValue");
+            if (newConstantName && newConstantName.value !== ""
+                    && newConstantType && newConstantType.value !== "") {
+                emuchartsManager.rename_constant(
+                    theConstant.id,
+                    {   name: newConstantName,
+                        type: newConstantType,
+                        value: newConstantValue   }
+                );
+                view.remove();
+                constantsTable.setConstants(emuchartsManager.getConstants());
+            }
+        }).on("cancel", function (e, view) {
+            // just remove window
+            view.remove();
+        });
+    }
 
     Emulink.prototype.createHtmlElements = function () {
         var _this = this;
@@ -456,6 +498,16 @@ define(function (require, exports, module) {
             transitionsTable.addListener("TransitionsTable_renameTransition", function(event) {
                 var theTransition = emuchartsManager.getTransition(event.transition.id);
                 editTransition(theTransition);
+            });
+        }
+        if (document.getElementById("ConstantsTable")) {
+            constantsTable = new ConstantsTable();
+            constantsTable.addListener("ConstantsTable_deleteConstant", function(event) {
+                emuchartsManager.delete_constant(event.constant.id);
+            });
+            constantsTable.addListener("ConstantsTable_editConstant", function(event) {
+                var theConstant = emuchartsManager.getConstant(event.constant.id);
+                editConstant(theConstant);
             });
         }
         
@@ -538,7 +590,9 @@ define(function (require, exports, module) {
             // set Machine States Table
             machineStatesTable.setMachineStates(emuchartsManager.getStates());
             // set Transitions Table
-            transitionsTable.setTransitions(emuchartsManager.getTransitions());        
+            transitionsTable.setTransitions(emuchartsManager.getTransitions());
+            // set Constants
+            constantsTable.setConstants(emuchartsManager.getConstants());
         }
         
         d3.select("#btnNewEmuchart").on("click", function () {
@@ -588,9 +642,6 @@ define(function (require, exports, module) {
         d3.select("#btn_toolbarZoomReset").on("click", function () {
             emuchartsManager.zoom_reset();
         });
-
-
-
 
         //-- Emuchart menu -----------------------------------------------------------
         d3.select("#menuEmuchart").on("mouseover", function () {
@@ -1050,40 +1101,6 @@ define(function (require, exports, module) {
         });
 
         d3.select("#btn_menuEditConstant").on("click", function () {
-            var editConstant = function (theConstant) {
-                displayEditConstant.create({
-                    header: "Editing constant " + theConstant.name,
-                    textLabel: {
-                        newConstantName: "Constant name",
-                        newConstantType: "Constant type",
-                        newConstantValue: "Constant value"
-                    },
-                    placeholder: {
-                        newConstantName: theConstant.name,
-                        newConstantType: theConstant.type,
-                        newConstantValue: theConstant.value
-                    },
-                    buttons: ["Cancel", "Ok"]
-                }).on("ok", function (e, view) {
-                    var newConstantName = e.data.labels.get("newConstantName");
-                    var newConstantType = e.data.labels.get("newConstantType");
-                    var newConstantValue = e.data.labels.get("newConstantValue");
-                    if (newConstantName && newConstantName.value !== ""
-                            && newConstantType && newConstantType.value !== "") {
-                        emuchartsManager.rename_constant(
-                            theConstant.id,
-                            {   name: newConstantName,
-                                type: newConstantType,
-                                value: newConstantValue   }
-                        );
-                        view.remove();
-                    }
-                }).on("cancel", function (e, view) {
-                    // just remove window
-                    view.remove();
-                });
-            };
-
             document.getElementById("menuContext").children[1].style.display = "none";
             // step 1: ask to select the variable that needs to be edited
             var constants = emuchartsManager.getConstants();
@@ -1418,25 +1435,41 @@ define(function (require, exports, module) {
             d3.select("#btnStates").attr("class", "active");
             d3.select("#btnTransitions").attr("class", "");
             d3.select("#btnVariables").attr("class", "");
+            d3.select("#btnConstants").attr("class", "");
             d3.select("#MachineStates").style("display", "block");
             d3.select("#TransitionsTable").style("display", "none");
             d3.select("#StateAttributes").style("display", "none");
+            d3.select("#ConstantsTable").style("display", "none");
         });
         d3.select("#btnTransitions").on("click", function () {
             d3.select("#btnStates").attr("class", "");
             d3.select("#btnTransitions").attr("class", "active");
             d3.select("#btnVariables").attr("class", "");
+            d3.select("#btnConstants").attr("class", "");
             d3.select("#MachineStates").style("display", "none");
             d3.select("#TransitionsTable").style("display", "block").classed("active");
             d3.select("#StateAttributes").style("display", "none");
+            d3.select("#ConstantsTable").style("display", "none");
         });
         d3.select("#btnVariables").on("click", function () {
             d3.select("#btnStates").attr("class", "");
             d3.select("#btnTransitions").attr("class", "");
             d3.select("#btnVariables").attr("class", "active");
+            d3.select("#btnConstants").attr("class", "");
             d3.select("#MachineStates").style("display", "none");
             d3.select("#TransitionsTable").style("display", "none");
             d3.select("#StateAttributes").style("display", "block").classed("active");
+            d3.select("#ConstantsTable").style("display", "none");
+        });
+        d3.select("#btnConstants").on("click", function () {
+            d3.select("#btnStates").attr("class", "");
+            d3.select("#btnTransitions").attr("class", "");
+            d3.select("#btnVariables").attr("class", "");
+            d3.select("#btnConstants").attr("class", "active");
+            d3.select("#MachineStates").style("display", "none");
+            d3.select("#TransitionsTable").style("display", "none");
+            d3.select("#StateAttributes").style("display", "none");
+            d3.select("#ConstantsTable").style("display", "block").classed("active");
         });
         d3.select("#btnViewHideTable").on("click", function () {
             d3.select("#EmuchartsFloatTable").style("top", "814px");
@@ -1575,6 +1608,8 @@ define(function (require, exports, module) {
             machineStatesTable.setMachineStates(emuchartsManager.getStates());
             // set Transitions Table
             transitionsTable.setTransitions(emuchartsManager.getTransitions());
+            // set Constants Table
+            constantsTable.setConstants(emuchartsManager.getConstants());
         }).catch(function (err) {
             // if the default emuchart file is not in the project, then just clear the current diagram
             d3.select("#btnNewEmuchart").node().click();

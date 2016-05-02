@@ -239,6 +239,22 @@
               <!-- -->
             </table>
         </div>
+        <div id="NewConstant" style="display:none;">
+            <table class="table">
+              <!-- This is our clonable table line template -->
+              <tr id="ConstantsTemplate">
+                <td contenteditable="false" style="background-color:white; cursor: default;">Name</td>
+                <td contenteditable="false" style="background-color:white; cursor: default;">Value</td>
+                <td style="background-color:white; width:48px;">
+                  <span id="RemoveConstant" class="table-remove glyphicon glyphicon-remove"></span>
+                </td>
+                <td style="background-color:white;">
+                    <span id="EditConstant" class="table-up glyphicon glyphicon-pencil">
+                </td>
+              </tr>
+              <!-- -->
+            </table>
+        </div>
         <div id="NewMachineState" style="display:none;">
             <table class="table">
               <!-- This is our clonable table line template -->
@@ -266,6 +282,8 @@
                 <li id="btnTransitions"><a href="#!">Transitions</a>
                 </li>
                 <li id="btnVariables"><a href="#!">Context Variables</a>
+                </li>
+                <li id="btnConstants"><a href="#!">Constants</a>
                 </li>
             </ul>
             <ul class="dropdown" role="tablist" style="float:right;">
@@ -332,6 +350,17 @@
                     <th style="cursor: default;">Initial Value</th>
                     <th></th>
                     <th class="width32"><span id="AddStateAttribute" class="table-add glyphicon glyphicon-plus"></span></th>
+                  </tr>
+                </table>
+            </div>
+            <div id="ConstantsTable" class="table-editable floating-table" style="display:none;">
+                <div class="EmuchartTableHeader" style="cursor: default;"><span>Constants</span></div>
+                <table class="table" style="margin-bottom:0 !important;">
+                  <tr id="heading" class="TableHeading" style="margin-left:0">
+                    <th style="cursor: default;">Name</th>
+                    <th style="cursor: default;">Initial Value</th>
+                    <th></th>
+                    <th class="width32"><span id="AddConstant" class="table-add glyphicon glyphicon-plus"></span></th>
                   </tr>
                 </table>
             </div>

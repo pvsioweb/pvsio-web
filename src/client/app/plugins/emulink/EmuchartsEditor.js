@@ -1765,6 +1765,14 @@ define(function (require, exports, module) {
     };
 
     /**
+     * Returns the descriptor of the variable whose ID is the function argument
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.getConstant = function (constantID) {
+        return this.emucharts.getConstant(constantID);
+    };
+
+    /**
      * Returns an array containing the current set of variables defined in the diagram
      * @memberof EmuchartsEditor
      */
