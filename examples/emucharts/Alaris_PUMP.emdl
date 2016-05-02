@@ -110,7 +110,7 @@
     }
    },
    {
-    "name": "start \n[ !ac_connect AND NOT kvoflag AND (vtbi(st) != 0) ]\n{ infusing := TRUE; }",
+    "name": "start \n[ !ac_connect AND NOT kvoflag AND (vtbi != 0) ]\n{ infusing := TRUE; }",
     "id": "T5",
     "source": {
      "name": "ON",
@@ -1246,7 +1246,7 @@
     }
    },
    {
-    "name": "start \n[ ac_connect AND NOT kvoflag AND (vtbi(st) != 0) ]\n{ infusing := TRUE; }",
+    "name": "start \n[ ac_connect AND NOT kvoflag AND (vtbi != 0) ]\n{ infusing := TRUE; }",
     "id": "T79",
     "source": {
      "name": "ON",
