@@ -60,8 +60,9 @@ state init(state *st);{{/if}}
  *    \post function is moving to the right state ("{{target.name}}" in this case)
  */
 state {{id}}(state *st);{{else}}/** {{0.id}} transition function.
- * This function is generated merging two or more homonymous trasitions.
+ * This function is generated merging two or more triggers with the same name.
  *    It changes state{{~#each .}} from "{{source.name}}" to "{{target.name}}"{{~#if condition}} when condition [{{&condition}}] holds{{~/if}}{{#unless @last}},{{/unless}}
+ *
  *    {{/each}}
  *    \param st state structure pointer
  *    \return state structure
