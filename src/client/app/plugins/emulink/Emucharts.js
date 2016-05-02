@@ -577,7 +577,9 @@ define(function (require, exports, module) {
                 color: node.color
             });
         });
-        return states;
+        return states.sort(function (a, b) {
+            return a.name.localeCompare(b.name);
+        });
     };
 
     /**
@@ -647,7 +649,9 @@ define(function (require, exports, module) {
                 } : null
             });
         });
-        return transitions;
+        return transitions.sort(function (a, b) {
+            return a.name.localeCompare(b.name);
+        });
     };
 
     /**
@@ -682,7 +686,9 @@ define(function (require, exports, module) {
                 }
             });
         });
-        return initial_transitions;
+        return initial_transitions.sort(function (a, b) {
+            return a.name.localeCompare(b.name);
+        });
     };
 
     /**
@@ -902,8 +908,23 @@ define(function (require, exports, module) {
                 value: c.value
             });
         });
-        return ans;
+        return ans.sort(function (a, b) {
+            return a.name.localeCompare(b.name);
+        });
     };
+    
+    /**
+     * @function getConstant
+     * @descriptionb Returns the constant with ID given by the function argument
+     * @param constantID Constant identifier
+     * @returns The constant descriptor
+     * @memberof module:Emucharts
+     * @instance
+     */
+    Emucharts.prototype.getConstant = function (constantID) {
+        return _this.constants.get(constantID);
+    };
+
 
     /**
      * @function getVariables
@@ -926,7 +947,9 @@ define(function (require, exports, module) {
                 });
             }
         });
-        return ans;
+        return ans.sort(function (a, b) {
+            return a.name.localeCompare(b.name);
+        });
     };
 
     /**

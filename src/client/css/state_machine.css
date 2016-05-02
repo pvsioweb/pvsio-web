@@ -161,7 +161,7 @@ ul#context-menu li {
   position: absolute;
 }
 
-#StateAttributes, #MachineStates, #TransitionsTable {
+#StateAttributes, #MachineStates, #TransitionsTable, #ConstantsTable {
     position: relative;
     top: 0px;
     width: 100%;
@@ -185,19 +185,19 @@ ul#context-menu li {
     overflow: auto;
     float: right;
 }
-#btnStates.active a, #btnTransitions.active a, #btnVariables.active a {
+#btnStates.active a, #btnTransitions.active a, #btnVariables.active a, #btnConstants.active a {
     color: white;
     background-color: rgb(8, 88, 154);
     border: none;
 }
-#btnStates a, #btnTransitions a, #btnVariables a {
+#btnStates a, #btnTransitions a, #btnVariables a, #btnConstants a {
     width: 160px;
     color: black;
     background-color: whitesmoke;
     border: none;
     text-align: center;
 }
-#btnStates a:hover, #btnTransitions a:hover, #btnVariables a:hover {
+#btnStates a:hover, #btnTransitions a:hover, #btnVariables a:hover, #btnConstants a:hover {
     color: white;
     background-color: black;
 }

@@ -36,8 +36,11 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_addTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_addInitialTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_constantAdded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_constantRemoved", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_constantRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_variableAdded", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_variableRemoved", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_variableRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteState", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deleteInitialTransition", function (event) { _this.fire(event); });
@@ -384,9 +387,25 @@ define(function (require, exports, module) {
         return this;
     };
 
+    /**
+     * Draws the a preview of the diagram in the div element passed as parameter
+     * @param container DIV element that will contain the preview
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.preview = function (container) {
+        _selectedEditor.preview(container);
+        return this;
+    };
+
+    /**
+     * Returns a the Emucharts Editor that is currently active.
+     * The current implementation supports only one Emucharts Editor.
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getSelectedEditor = function () {
         return _selectedEditor;
     };
+    
     /**
      * Returns a fresh state name
      * @memberof EmuchartsManager
@@ -513,6 +532,14 @@ define(function (require, exports, module) {
      */
     EmuchartsManager.prototype.getConstants = function () {
         return _selectedEditor.getConstants();
+    };
+    
+    /**
+     * Returns the descriptor of the constant whose ID is the function argument
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.getConstant = function (constantID) {
+        return _selectedEditor.getConstant(constantID);
     };
 
     /**
