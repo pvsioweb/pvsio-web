@@ -10,6 +10,11 @@ define(function (require, exports, module) {
     var preferenceKeys = require("preferences/PreferenceKeys");
     var prefs = {}, instance;
 
+    var paths = { Desktop: "/Users/hmtlg/Desktop", 
+                  Documents: "/Users/hmtlg/Documents",
+                  Pictures: "/Users/hmtlg/Pictures"
+                };
+
     function DefaultPreferences() {
         prefs[preferenceKeys.BACKUP_INTERVAL] = 60 * 10; //in seconds
         prefs[preferenceKeys.REMEMBER_LAST_DIRECTORY] = true;
@@ -17,6 +22,7 @@ define(function (require, exports, module) {
         prefs[preferenceKeys.LAST_DIRECTORY_VISITED] = "~";
         prefs[preferenceKeys.WALL_CLOCK_NAME] = "tick";
         prefs[preferenceKeys.WALL_CLOCK_INTERVAL] = 1; //seconds
+        prefs[preferenceKeys.BOOKMARKS] = paths;
     }
 
     DefaultPreferences.prototype.get = function (key) {

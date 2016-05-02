@@ -1,5 +1,5 @@
 <div class="form-center">
-    <div class="panel panel-info center dialog shadow" style="width:640px">
+    <div id="open-file-browser" class="panel panel-info center dialog shadow" style="width:840px">
         <div class="panel-heading">{{title}}</div>
         <form class="center form-horizontal" onsubmit="return false" role="form">
             <div class="input-group">
@@ -34,6 +34,23 @@
 -->
             </div>
             <div class="center" style="height:320px;">
+                <div id="file-bookmarks">
+                  <div class="title">
+                    <span class="glyphicon glyphicon-bookmark"></span>
+                    Bookmarks
+                    <hr/>
+                  </div>
+                  <ul id="bookmark-ul" class="list">
+                    {{#each bookmarks}}
+                    <div id="bookmark-list-{{inc @index}}" class="bookmark" draggable="true">
+                      <li>
+                        <span class="glyphicon glyphicon-folder-close"></span>
+                        <span class="bookmark-label">{{@key}}</span>
+                      </li>
+                    </div>
+                    {{/each}}
+                  </ul>
+                </div>
                 <div id="file-browser"></div>
                 <div id="file-preview" class="media" style="display:none;">
                     <div class="media-left">
