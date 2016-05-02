@@ -649,11 +649,13 @@ define(function (require, exports, module) {
 
     /**
      * Utility function for creating an empty svg area and definitions
+     * @param container reference to the DIV element that will contain the SVG. Only one container ("#ContainerStateMachine") will support editing, the others are lightweight SVGs for rendering a preview of the Emucharts diagram.
      * @returns reference to the transitions redrawn (svg element)
      * @memberof EmuchartsEditor
      */
-    EmuchartsEditor.prototype.newSVG = function () {
+    EmuchartsEditor.prototype.newSVG = function (container) {
         _this = this;
+        container = container || "#ContainerStateMachine";
 
         // create canvas to be used for exporting svg area as picture
         d3.select("#ContainerStateMachineImage").append("canvas")
@@ -663,7 +665,7 @@ define(function (require, exports, module) {
             .attr("style", "display: none");
 
         // create svg area
-        d3.select("#ContainerStateMachine")
+        d3.select(container)
             .append("svg")
             .attr("version", 1.1)
             .attr("xmlns", "http://www.w3.org/2000/svg")
@@ -684,7 +686,7 @@ define(function (require, exports, module) {
 
 
 //        var arrow_rotated =
-        d3.select("#ContainerStateMachine").select("svg").select("defs")
+        d3.select(container).select("svg").select("defs")
             .append("svg:marker")
             .attr("id", "end-arrow-rotated")
             .attr("viewBox", "0 -5 10 10")
@@ -697,7 +699,7 @@ define(function (require, exports, module) {
             .attr("fill", "black");
 
 //        var arrow_rotated_selected =
-        d3.select("#ContainerStateMachine").select("svg").select("defs")
+        d3.select(container).select("svg").select("defs")
             .append("svg:marker")
             .attr("id", "end-arrow-rotated-selected")
             .attr("viewBox", "0 -5 10 10")
@@ -710,7 +712,7 @@ define(function (require, exports, module) {
             .attr("fill", "green");
 
 //        var arrow =
-        d3.select("#ContainerStateMachine").select("svg").select("defs")
+        d3.select(container).select("svg").select("defs")
             // pointer for hiighlighed edges
             .append("svg:marker")
             .attr("id", "end-arrow-selected")
@@ -723,7 +725,7 @@ define(function (require, exports, module) {
             .attr("d", "M4,0 L1,-3 L10,0 L1,3 L4,0")
             .attr("fill", "green");
 
-        var bubble = d3.select("#ContainerStateMachine").select("svg").select("defs")
+        var bubble = d3.select(container).select("svg").select("defs")
             // bubble for initial state
             .append("svg:marker")
             .attr("id", "bubble")
@@ -741,7 +743,7 @@ define(function (require, exports, module) {
             .attr("stroke", "white")
             .attr("stroke-width", "1");
 
-        var selected_bubble = d3.select("#ContainerStateMachine").select("svg").select("defs")
+        var selected_bubble = d3.select(container).select("svg").select("defs")
             // bubble for initial state
             .append("svg:marker")
             .attr("id", "bubble-selected")
@@ -760,7 +762,7 @@ define(function (require, exports, module) {
             .attr("fill", "green")
             .attr("stroke-width", "1");
 
-        d3.select("#ContainerStateMachine").select("svg").select("defs")
+        d3.select(container).select("svg").select("defs")
             // arrow for drag line
             .append("svg:marker")
             .attr("id", "drag-arrow")
@@ -773,163 +775,166 @@ define(function (require, exports, module) {
             .attr("d", "M4,0 L1,-3 L10,0 L1,3 L4,0")
             .attr("fill", "black");
 
-        drag_line = d3.select("#ContainerStateMachine").select("svg")
+        drag_line = d3.select(container).select("svg")
             .append("svg:path")
             .attr("id", "dragline")
             .attr("class", "link dragline hidden")
             .attr("d", "M0,0L0,0");
 
-        d3.select("#ContainerStateMachine").select("svg").append("svg:g").attr("id", "InitialTransitions");
-        d3.select("#ContainerStateMachine").select("svg").append("svg:g").attr("id", "Transitions");
-        d3.select("#ContainerStateMachine").select("svg").append("svg:g").attr("id", "States");
+        d3.select(container).select("svg").append("svg:g").attr("id", "InitialTransitions");
+        d3.select(container).select("svg").append("svg:g").attr("id", "Transitions");
+        d3.select(container).select("svg").append("svg:g").attr("id", "States");
 
-        var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
-            if (_this.mousedown.canvas) {
-                d3.event.sourceEvent.stopPropagation();
-                if (editor_mode === MODE.ADD_TRANSITION() && _this.mousedrag.edge) {
-                    var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
-                    // initial transition
-                    drag_line.attr("d", "M" + _this.mousedrag.edge.x + "," + _this.mousedrag.edge.y +
-                                    "L" + m[0] + "," + m[1]);
-                } else if (editor_mode !== MODE.ADD_TRANSITION() && !_this.mousedrag.node &&
-                        editor_mode !== MODE.DELETE() && editor_mode !== MODE.RENAME()) {
+        if (container === "#ContainerStateMachine") {
+            var zoom = d3.behavior.zoom().scaleExtent([0.5, 4]).on("zoom", function () {
+                if (_this.mousedown.canvas) {
                     d3.event.sourceEvent.stopPropagation();
-                    var event = d3.event.sourceEvent;
-                    if (event.type === "mousemove") {
-    //                    note: movementX and movementY are not supported by all browser, therefore we are not using them for now
-    //                    console.log(getMouseMovement(event));
-    //                    var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-    //                    var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
-    //                    _this.d3EventTranslate[0] += movementX * d3.behavior.zoom().scale();
-    //                    _this.d3EventTranslate[1] += movementY * d3.behavior.zoom().scale();
-    //                    console.log([movementX, movementY]);
-                        var movement = getMouseMovement(event);
-    //                    console.log(movement);
-                        _this.d3EventTranslate[0] += movement.x * d3.behavior.zoom().scale();
-                        _this.d3EventTranslate[1] += movement.y * d3.behavior.zoom().scale();
-                        d3.select("#ContainerStateMachine svg").select("#States")
-                            .attr("transform", "translate(" + _this.d3EventTranslate +
-                                  ") scale(" + _this.d3EventScale + ")");
-                        d3.select("#ContainerStateMachine svg").select("#Transitions")
-                            .attr("transform", "translate(" + _this.d3EventTranslate +
-                                  ") scale(" + _this.d3EventScale + ")");
-                        d3.select("#ContainerStateMachine svg").select("#InitialTransitions")
-                            .attr("transform", "translate(" + _this.d3EventTranslate +
-                                  ") scale(" + _this.d3EventScale + ")");
-                        d3.select("#ContainerStateMachine svg").select("#dragline")
-                            .attr("transform", "translate(" + _this.d3EventTranslate +
-                                  ") scale(" + _this.d3EventScale + ")");
-                        if (_this.SVGdragged === null) {
-                            _this.SVGdragged = [_this.d3EventTranslate[0], _this.d3EventTranslate[1]];
+                    if (editor_mode === MODE.ADD_TRANSITION() && _this.mousedrag.edge) {
+                        var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+                        // initial transition
+                        drag_line.attr("d", "M" + _this.mousedrag.edge.x + "," + _this.mousedrag.edge.y +
+                                        "L" + m[0] + "," + m[1]);
+                    } else if (editor_mode !== MODE.ADD_TRANSITION() && !_this.mousedrag.node &&
+                            editor_mode !== MODE.DELETE() && editor_mode !== MODE.RENAME()) {
+                        d3.event.sourceEvent.stopPropagation();
+                        var event = d3.event.sourceEvent;
+                        if (event.type === "mousemove") {
+        //                    note: movementX and movementY are not supported by all browser, therefore we are not using them for now
+        //                    console.log(getMouseMovement(event));
+        //                    var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        //                    var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+        //                    _this.d3EventTranslate[0] += movementX * d3.behavior.zoom().scale();
+        //                    _this.d3EventTranslate[1] += movementY * d3.behavior.zoom().scale();
+        //                    console.log([movementX, movementY]);
+                            var movement = getMouseMovement(event);
+        //                    console.log(movement);
+                            _this.d3EventTranslate[0] += movement.x * d3.behavior.zoom().scale();
+                            _this.d3EventTranslate[1] += movement.y * d3.behavior.zoom().scale();
+                            d3.select("#ContainerStateMachine svg").select("#States")
+                                .attr("transform", "translate(" + _this.d3EventTranslate +
+                                      ") scale(" + _this.d3EventScale + ")");
+                            d3.select("#ContainerStateMachine svg").select("#Transitions")
+                                .attr("transform", "translate(" + _this.d3EventTranslate +
+                                      ") scale(" + _this.d3EventScale + ")");
+                            d3.select("#ContainerStateMachine svg").select("#InitialTransitions")
+                                .attr("transform", "translate(" + _this.d3EventTranslate +
+                                      ") scale(" + _this.d3EventScale + ")");
+                            d3.select("#ContainerStateMachine svg").select("#dragline")
+                                .attr("transform", "translate(" + _this.d3EventTranslate +
+                                      ") scale(" + _this.d3EventScale + ")");
+                            if (_this.SVGdragged === null) {
+                                _this.SVGdragged = [_this.d3EventTranslate[0], _this.d3EventTranslate[1]];
+                            }
+        //                    if (dbg) { console.log("Drag canvas"); }
                         }
-    //                    if (dbg) { console.log("Drag canvas"); }
+                    }
+                } else {
+                    // disable zoom handler, so the web page can be scrolled
+                    d3.select("#ContainerStateMachine svg").on(".zoom", null);
+                }
+            });
+            var mouseUp = function () {
+                if (editor_mode === MODE.ADD_TRANSITION()) {
+                    // this is equivalent to drag end
+                    // remove drag line
+                    drag_line.classed("hidden", true)
+                             .style("marker-end", "")
+                             .style("marker-start", "")
+                             .attr("d", "M0,0L0,0");
+                    if (_this.mouseover.node && !_this.mousedrag.node) {
+                        // fire event
+                        _this.fire({
+                            type: "emuCharts_addInitialTransition",
+                            source: null,
+                            target: _this.mouseover.node
+                        });
+                    }
+                    _this.mousedrag.edge = null;
+                }
+                _this.mousedown.canvas = false;
+                _this.mouseMovement.ready = false;
+            };
+            var mouseDown = function () {
+                if (mouseOverControlPoint === null &&
+                        editor_mode === MODE.ADD_TRANSITION()) {
+                    d3.event.stopPropagation();
+                    // this is equivalent to drag start for default-initial transitions
+                    // create an arrow from the selected node to the cursor position
+                    var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+                    if (!_this.mousedrag.edge) {
+                        _this.mousedrag.edge = { x: m[0], y: m[1] };
+                    }
+                    drag_line.classed("hidden", false)
+                        .style("marker-end", "url(#drag-arrow)")
+                        .style("marker-start", "url(#bubble)")
+                        .attr("d", "M" + m[0] + "," + m[1] +
+                                    "L" + m[0] + "," + m[1]);
+                }
+                _this.mousedown.canvas = true;
+                _this.mouseMovement.ready = false;
+            };
+            var mouseClick = function () {
+                if (editor_mode === MODE.ADD_STATE() && !_this.mouseover.node && !mouseOverControlPoint) {
+                    if (_this.SVGdragged === null ||
+                            (Math.abs(_this.SVGdragged[0] - _this.d3EventTranslate[0]) < sensitivity.x &&
+                                 Math.abs(_this.SVGdragged[1] - _this.d3EventTranslate[1]) < sensitivity.y)) {
+                        d3.event.stopPropagation();
+                        var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+                        _this.fire({
+                            type: "emuCharts_addState",
+                            mouse: m,
+                            mouseover: _this.mouseover,
+                            preventCreation: editor_mode !== MODE.ADD_STATE()
+                        });
                     }
                 }
-            } else {
-                // disable zoom handler, so the web page can be scrolled
-                d3.select("#ContainerStateMachine svg").on(".zoom", null);
-            }
-        });
-        var mouseUp = function () {
-            if (editor_mode === MODE.ADD_TRANSITION()) {
-                // this is equivalent to drag end
-                // remove drag line
-                drag_line.classed("hidden", true)
-                         .style("marker-end", "")
-                         .style("marker-start", "")
-                         .attr("d", "M0,0L0,0");
-                if (_this.mouseover.node && !_this.mousedrag.node) {
-                    // fire event
-                    _this.fire({
-                        type: "emuCharts_addInitialTransition",
-                        source: null,
-                        target: _this.mouseover.node
-                    });
-                }
-                _this.mousedrag.edge = null;
-            }
-            _this.mousedown.canvas = false;
-            _this.mouseMovement.ready = false;
-        };
-        var mouseDown = function () {
-            if (mouseOverControlPoint === null &&
-                    editor_mode === MODE.ADD_TRANSITION()) {
-                d3.event.stopPropagation();
-                // this is equivalent to drag start for default-initial transitions
-                // create an arrow from the selected node to the cursor position
-                var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
-                if (!_this.mousedrag.edge) {
-                    _this.mousedrag.edge = { x: m[0], y: m[1] };
-                }
-                drag_line.classed("hidden", false)
-                    .style("marker-end", "url(#drag-arrow)")
-                    .style("marker-start", "url(#bubble)")
-                    .attr("d", "M" + m[0] + "," + m[1] +
-                                "L" + m[0] + "," + m[1]);
-            }
-            _this.mousedown.canvas = true;
-            _this.mouseMovement.ready = false;
-        };
-        var mouseClick = function () {
-            if (editor_mode === MODE.ADD_STATE() && !_this.mouseover.node && !mouseOverControlPoint) {
-                if (_this.SVGdragged === null ||
-                        (Math.abs(_this.SVGdragged[0] - _this.d3EventTranslate[0]) < sensitivity.x &&
-                             Math.abs(_this.SVGdragged[1] - _this.d3EventTranslate[1]) < sensitivity.y)) {
-                    d3.event.stopPropagation();
-                    var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
-                    _this.fire({
-                        type: "emuCharts_addState",
-                        mouse: m,
-                        mouseover: _this.mouseover,
-                        preventCreation: editor_mode !== MODE.ADD_STATE()
-                    });
-                }
-            }
-            _this.SVGdragged = null;
-            _this.mousedown.canvas = false;
-            _this.mouseMovement.ready = false;
-        };
-        var mouseMove = function () {
-            var m = d3.mouse(d3.select("#ContainerStateMachine svg").node());
-//            console.log(m);
-//            console.log(event);
-            d3.selectAll("#MouseOverlayIcon").style("display", function () {
-                if ((this.getAttribute("placeholder") === "addStates" && editor_mode === MODE.ADD_STATE()) ||
-                        (this.getAttribute("placeholder") === "addTransitions" && editor_mode === MODE.ADD_TRANSITION()) ||
-                        (this.getAttribute("placeholder") === "rename" && editor_mode === MODE.RENAME()) ||
-                        (this.getAttribute("placeholder") === "delete" && editor_mode === MODE.DELETE())) {
-                    return "block";
-                }
-                return "none";
-            });
-            var style = "left: " + (m[0] + 20) + "px; top: " + (m[1] - 10) + "px;";
-            d3.select("#MouseOverlay").attr("style", style);
-            // enable zoom handler for scrolling the svg
-            d3.select("#ContainerStateMachine svg").call(zoom);
-        };
-        var mouseOut = function () {
-            d3.selectAll("#MouseOverlayIcon").style("display", "none");
-            _this.mouseMovement.ready = false;
-        };
-        d3.select("#ContainerStateMachine svg")
-            .on("click", mouseClick)
-            .on("mousedown", mouseDown)
-            .on("mouseup", mouseUp)
-            .on("mousemove", mouseMove)
-            .on("mouseout", mouseOut)
-            .call(zoom);
+                _this.SVGdragged = null;
+                _this.mousedown.canvas = false;
+                _this.mouseMovement.ready = false;
+            };
+            var mouseMove = function () {
+                var m = d3.mouse(d3.select("#ContainerStateMachine svg").node());
+    //            console.log(m);
+    //            console.log(event);
+                d3.selectAll("#MouseOverlayIcon").style("display", function () {
+                    if ((this.getAttribute("placeholder") === "addStates" && editor_mode === MODE.ADD_STATE()) ||
+                            (this.getAttribute("placeholder") === "addTransitions" && editor_mode === MODE.ADD_TRANSITION()) ||
+                            (this.getAttribute("placeholder") === "rename" && editor_mode === MODE.RENAME()) ||
+                            (this.getAttribute("placeholder") === "delete" && editor_mode === MODE.DELETE())) {
+                        return "block";
+                    }
+                    return "none";
+                });
+                var style = "left: " + (m[0] + 20) + "px; top: " + (m[1] - 10) + "px;";
+                d3.select("#MouseOverlay").attr("style", style);
+                // enable zoom handler for scrolling the svg
+                d3.select("#ContainerStateMachine svg").call(zoom);
+            };
+            var mouseOut = function () {
+                d3.selectAll("#MouseOverlayIcon").style("display", "none");
+                _this.mouseMovement.ready = false;
+            };
+            d3.select("#ContainerStateMachine svg")
+                .on("click", mouseClick)
+                .on("mousedown", mouseDown)
+                .on("mouseup", mouseUp)
+                .on("mousemove", mouseMove)
+                .on("mouseout", mouseOut)
+                .call(zoom);
+        }
 
         // return reference to svg
-        return d3.select("#ContainerStateMachine").select("svg");
+        return d3.select(container).select("svg");
     };
 
     /**
      * Utility function for drawing transitions
      * @memberof EmuchartsEditor
      */
-    EmuchartsEditor.prototype.renderTransitions = function () {
+    EmuchartsEditor.prototype.renderTransitions = function (container) {
         _this = this;
-        var svg = d3.select("#ContainerStateMachine").select("svg");
+        container = container || "#ContainerStateMachine";
+        var svg = d3.select(container).select("svg");
 
         /**
          * Utility function for drawing transitions
@@ -1179,26 +1184,28 @@ define(function (require, exports, module) {
             var enteredTransitions = drawTransitions(transitions.enter());
 //            var exitedTransitions =
             removeTransitions(transitions.exit());
-            var drag = d3.behavior.drag().origin(function (edge) {
-                return edge;
-            });
-            drag.on("dragstart", dragStart)
-                .on("drag", dragEdge)
-                .on("dragend", dragEnd);
-            enteredTransitions.call(drag)
-                .on("mouseover", mouseOver)
-                .on("mouseout", mouseOut)
-                .on("click", mouseClick)
-                .on("dblclick", mouseDoubleClick);
-
-            enteredTransitions.selectAll(".cpoints")
-                .on("mousedown", function (d) {
-                    if (dbg) { console.log("mouseOverControlPoint"); }
-                    mouseOverControlPoint = d;
-                }).on("mouseup", function (d) {
-                    if (dbg) { console.log("mouseLeavingControlPoint"); }
-                    mouseOverControlPoint = null;
+            if (container === "#ContainerStateMachine") {
+                var drag = d3.behavior.drag().origin(function (edge) {
+                    return edge;
                 });
+                drag.on("dragstart", dragStart)
+                    .on("drag", dragEdge)
+                    .on("dragend", dragEnd);
+                enteredTransitions.call(drag)
+                    .on("mouseover", mouseOver)
+                    .on("mouseout", mouseOut)
+                    .on("click", mouseClick)
+                    .on("dblclick", mouseDoubleClick);
+
+                enteredTransitions.selectAll(".cpoints")
+                    .on("mousedown", function (d) {
+                        if (dbg) { console.log("mouseOverControlPoint"); }
+                        mouseOverControlPoint = d;
+                    }).on("mouseup", function (d) {
+                        if (dbg) { console.log("mouseLeavingControlPoint"); }
+                        mouseOverControlPoint = null;
+                    });
+            }
         }
     };
 
@@ -1206,9 +1213,10 @@ define(function (require, exports, module) {
      * Utility function for drawing initial transitions
      * @memberof EmuchartsEditor
      */
-    EmuchartsEditor.prototype.renderInitialTransitions = function () {
+    EmuchartsEditor.prototype.renderInitialTransitions = function (container) {
         _this = this;
-        var svg = d3.select("#ContainerStateMachine").select("svg");
+        container = container || "#ContainerStateMachine";
+        var svg = d3.select(container).select("svg");
 
         /**
          * Utility function for drawing transitions
@@ -1307,11 +1315,13 @@ define(function (require, exports, module) {
             var enteredTransitions = drawInitialTransitions(initial_transitions.enter());
 //            var exitedTransitions =
             removeTransitions(initial_transitions.exit());
-            enteredTransitions
-                .on("mouseover", mouseOver)
-                .on("mouseout", mouseOut)
-                .on("click", mouseClick)
-                .on("dblclick", mouseDoubleClick);
+            if (container === "#ContainerStateMachine") {
+                enteredTransitions
+                    .on("mouseover", mouseOver)
+                    .on("mouseout", mouseOut)
+                    .on("click", mouseClick)
+                    .on("dblclick", mouseDoubleClick);
+            }
         }
     };
 
@@ -1461,9 +1471,10 @@ define(function (require, exports, module) {
      * Utility function for drawing states
      * @memberof EmuchartsEditor
      */
-    EmuchartsEditor.prototype.renderStates = function () {
+    EmuchartsEditor.prototype.renderStates = function (container) {
         _this = this;
-        var svg = d3.select("#ContainerStateMachine").select("svg");
+        container = container || "#ContainerStateMachine";
+        var svg = d3.select(container).select("svg");
 
         // mouse event handlers
         var dragStart = function (node) {
@@ -1515,12 +1526,12 @@ define(function (require, exports, module) {
                 draggedNode.x = node.x + d3.event.dx;
                 draggedNode.y = node.y + d3.event.dy;
                 _this.emucharts.nodes.set(node.id, draggedNode);
-                refreshStates(d3.select("#ContainerStateMachine").select("#States")
+                refreshStates(d3.select(container).select("#States")
                                 .selectAll(".state").filter(function (n) {
                                     return n.id === node.id;
                                 }));
                 // update all edges connected to this node
-                var updatedTransitions = d3.select("#ContainerStateMachine")
+                var updatedTransitions = d3.select(container)
                         .select("#Transitions").selectAll(".transition")
                         .filter(function (edge) {
                             var draggedEdge = _this.emucharts.edges.get(edge.id);
@@ -1543,7 +1554,7 @@ define(function (require, exports, module) {
                             return false;
                         });
                 refreshTransitions(updatedTransitions);
-                var updatedInitialTransitions = d3.select("#ContainerStateMachine")
+                var updatedInitialTransitions = d3.select(container)
                         .select("#InitialTransitions").selectAll(".itransition")
                         .filter(function (edge) {
                             var draggedEdge = _this.emucharts.initial_edges.get(edge.id);
@@ -1660,13 +1671,13 @@ define(function (require, exports, module) {
             if (mouseOverControlPoint) {
                 d3.event.stopPropagation();
                 //console.log("mouseover control point");
-                var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
+                var m = d3.mouse(d3.select(container + " svg").select("#States").node());
                 // update selected control point
                 var cp = { x: m[0], y: m[1] };
                 //console.log("(" + m[0] + "," + m[1] + ")");
                 _this.emucharts.set_controlPoint(mouseOverControlPoint, cp);
                 var transitionID = mouseOverControlPoint.id;
-                var transitions = d3.select("#ContainerStateMachine")
+                var transitions = d3.select(container)
                                     .select("#Transitions").selectAll(".transition")
                                     .filter(function (transition) { return transition.id === transitionID; });
                 // refresh transitions
@@ -1678,24 +1689,26 @@ define(function (require, exports, module) {
 
         var nodes = this.emucharts.getNodes().values().filter(_this._nodeFilterFunction());
         if (nodes) {
-            if (svg.empty()) { svg = this.newSVG(); }
+            if (svg.empty()) { svg = this.newSVG(container); }
             // create a group of svg elements for states, and bind them to data
             var states = svg.select("#States").selectAll(".state")
                             .data(nodes, function (node) { return node.id; });
             var enteredStates = drawStates(states.enter());
 //            var exitedStates  =
             removeStates(states.exit());
-            var drag = d3.behavior.drag().origin(function (node) {
-                return node;
-            });
-            drag.on("dragstart", dragStart)
-                .on("drag", dragNode)
-                .on("dragend", dragEnd);
-            enteredStates.call(drag)
-                .on("mouseover", mouseOver)
-                .on("mouseout", mouseOut)
-                .on("mousemove", mouseMove)
-                .on("dblclick", mouseDoubleClick);
+            if (container === "#ContainerStateMachine") {
+                var drag = d3.behavior.drag().origin(function (node) {
+                    return node;
+                });
+                drag.on("dragstart", dragStart)
+                    .on("drag", dragNode)
+                    .on("dragend", dragEnd);
+                enteredStates.call(drag)
+                    .on("mouseover", mouseOver)
+                    .on("mouseout", mouseOut)
+                    .on("mousemove", mouseMove)
+                    .on("dblclick", mouseDoubleClick);
+            }
         }
     };
 
@@ -1713,6 +1726,29 @@ define(function (require, exports, module) {
         refreshInitialTransitions();
         return this;
     };
+    
+    EmuchartsEditor.prototype.preview = function (container) {
+        if (container && d3.select(container).node()) {
+            d3.select(container + " svg").style("display", "null");
+            if (d3.select(container + " svg").node()) {
+                d3.select(container).node().removeChild(d3.select(container + " svg").node());
+            }
+            this.renderStates(container);
+            this.renderTransitions(container);
+            this.renderInitialTransitions(container);
+            d3.select(container + " svg").select("#States")
+                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + 0.3 + ")");
+            d3.select(container + " svg").select("#Transitions")
+                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + 0.3 + ")");
+            d3.select(container + " svg").select("#InitialTransitions")
+                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + 0.3 + ")");
+            d3.select(container + " svg").select("#dragline")
+                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + 0.3 + ")");
+            d3.select(container + " svg").style("display", "block");
+        }
+        return this;
+    };
+    
 
     /**
      * Returns a fresh state name
@@ -2087,7 +2123,7 @@ define(function (require, exports, module) {
         _this = this;
         if (this.emucharts.constants) {
             this.emucharts.constants.forEach(function (key) {
-                _this.delete_constants(key);
+                _this.delete_constant(key);
             });
         }
         if (this.emucharts.variables) {

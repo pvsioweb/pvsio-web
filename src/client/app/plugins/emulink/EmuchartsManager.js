@@ -387,9 +387,25 @@ define(function (require, exports, module) {
         return this;
     };
 
+    /**
+     * Draws the a preview of the diagram in the div element passed as parameter
+     * @param container DIV element that will contain the preview
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.preview = function (container) {
+        _selectedEditor.preview(container);
+        return this;
+    };
+
+    /**
+     * Returns a the Emucharts Editor that is currently active.
+     * The current implementation supports only one Emucharts Editor.
+     * @memberof EmuchartsManager
+     */
     EmuchartsManager.prototype.getSelectedEditor = function () {
         return _selectedEditor;
     };
+    
     /**
      * Returns a fresh state name
      * @memberof EmuchartsManager

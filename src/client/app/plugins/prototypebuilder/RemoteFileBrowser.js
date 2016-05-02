@@ -27,6 +27,7 @@ define(function (require, exports, module) {
         BaseDialog      = require("pvsioweb/forms/BaseDialog"),
         MIME            = require("util/MIME").getInstance(),
         PreferenceStorage = require("preferences/PreferenceStorage").getInstance(),
+        EmuchartsManager = require("plugins/emulink/EmuchartsManager"),
         PreferenceKeys = require("preferences/PreferenceKeys");
     var timer, rfb;
 
@@ -128,6 +129,7 @@ define(function (require, exports, module) {
     function RemoteFileBrowser(filterFunc) {
         rfb = this;
         timer = null;
+        this.emuchartsManager = new EmuchartsManager();
         this.filterFunc = filterFunc || function (d) { return true; };
     }
 
@@ -246,6 +248,16 @@ define(function (require, exports, module) {
                                 d3.select("#image-preview").attr("src", res.content).style("display", "block");
                             }
                         });
+                    }
+                    if (MIME.isEmucharts(data.path)) {
+                        WSManager.getWebSocket().readFile({path: data.path}, function (err, res) {
+                            if (!err) {
+                                var preview = { name: "preview", content: JSON.parse(res.content) };
+                                rfb.emuchartsManager.importEmucharts(preview);
+                                rfb.emuchartsManager.preview("#svg-preview");
+                                d3.select("#file-preview").style("display", "block");
+                            }
+                        });                    
                     }
                     
                     if (data.isDirectory) {

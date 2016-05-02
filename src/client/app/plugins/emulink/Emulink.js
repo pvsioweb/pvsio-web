@@ -578,7 +578,7 @@ define(function (require, exports, module) {
 
         function restartEditor() {
             // set initial editor mode
-            emuchartsManager.set_editor_mode(MODE.BROWSE());            
+            emuchartsManager.set_editor_mode(MODE.BROWSE());
             // render emuchart
             emuchartsManager.render();
             // make svg visible and reset colors
