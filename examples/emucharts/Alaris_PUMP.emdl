@@ -1352,64 +1352,57 @@
     }
    }
   ],
-  "constants": [],
+  "constants": [
+   {
+    "id": "CONST_bat_max:real",
+    "name": "bat_max",
+    "type": "real",
+    "value": "2999"
+   },
+   {
+    "id": "CONST_bat_min:real",
+    "name": "bat_min",
+    "type": "real",
+    "value": "2"
+   },
+   {
+    "id": "CONST_infusemin:real",
+    "name": "infusemin",
+    "type": "real",
+    "value": "0.1"
+   },
+   {
+    "id": "CONST_maxinfuse:real",
+    "name": "maxinfuse",
+    "type": "real",
+    "value": "3000"
+   },
+   {
+    "id": "CONST_maxrate:real",
+    "name": "maxrate",
+    "type": "real",
+    "value": "1200"
+   },
+   {
+    "id": "CONST_maxtime:real",
+    "name": "maxtime",
+    "type": "real",
+    "value": "3000"
+   },
+   {
+    "id": "CONST_shorttime:real",
+    "name": "shorttime",
+    "type": "real",
+    "value": "20"
+   },
+   {
+    "id": "CONST_timeout:real",
+    "name": "timeout",
+    "type": "real",
+    "value": "200"
+   }
+  ],
   "variables": [
-   {
-    "id": "VAR_infusionrate:irates(Local)",
-    "name": "infusionrate",
-    "type": "irates",
-    "value": "0",
-    "scope": "Local"
-   },
-   {
-    "id": "VAR_volumeinfused:ivols(Local)",
-    "name": "volumeinfused",
-    "type": "ivols",
-    "value": "0",
-    "scope": "Local"
-   },
-   {
-    "id": "VAR_vtbi:ivols(Local)",
-    "name": "vtbi",
-    "type": "ivols",
-    "value": "0",
-    "scope": "Local"
-   },
-   {
-    "id": "VAR_time:itimes(Local)",
-    "name": "time",
-    "type": "itimes",
-    "value": "0",
-    "scope": "Local"
-   },
-   {
-    "id": "VAR_elapsedtime:itimes(Local)",
-    "name": "elapsedtime",
-    "type": "itimes",
-    "value": "0",
-    "scope": "Local"
-   },
-   {
-    "id": "VAR_kvorate:irates(Local)",
-    "name": "kvorate",
-    "type": "irates",
-    "value": "0",
-    "scope": "Local"
-   },
-   {
-    "id": "VAR_elapse:pausetime(Local)",
-    "name": "elapse",
-    "type": "pausetime",
-    "value": "0",
-    "scope": "Local"
-   },
-   {
-    "id": "VAR_kvoflag:bool(Local)",
-    "name": "kvoflag",
-    "type": "bool",
-    "value": "FALSE",
-    "scope": "Local"
-   },
    {
     "id": "VAR_ac_connect:bool(Local)",
     "name": "ac_connect",
@@ -1425,10 +1418,45 @@
     "scope": "Local"
    },
    {
-    "id": "VAR_set_fitted:bool(Local)",
-    "name": "set_fitted",
+    "id": "VAR_elapse:pausetime(Local)",
+    "name": "elapse",
+    "type": "pausetime",
+    "value": "0",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_elapsedtime:itimes(Local)",
+    "name": "elapsedtime",
+    "type": "itimes",
+    "value": "0",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_infusing:boolean(Local)",
+    "name": "infusing",
+    "type": "boolean",
+    "value": "FALSE",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_infusionrate:irates(Local)",
+    "name": "infusionrate",
+    "type": "irates",
+    "value": "0",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_kvoflag:bool(Local)",
+    "name": "kvoflag",
     "type": "bool",
-    "value": "TRUE",
+    "value": "FALSE",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_kvorate:irates(Local)",
+    "name": "kvorate",
+    "type": "irates",
+    "value": "0",
     "scope": "Local"
    },
    {
@@ -1436,6 +1464,34 @@
     "name": "powered_on",
     "type": "bool",
     "value": "FALSE",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_set_fitted:bool(Local)",
+    "name": "set_fitted",
+    "type": "bool",
+    "value": "TRUE",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_time:itimes(Local)",
+    "name": "time",
+    "type": "itimes",
+    "value": "0",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_volumeinfused:ivols(Local)",
+    "name": "volumeinfused",
+    "type": "ivols",
+    "value": "0",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_vtbi:ivols(Local)",
+    "name": "vtbi",
+    "type": "ivols",
+    "value": "0",
     "scope": "Local"
    }
   ],
