@@ -926,6 +926,23 @@ fadeOut
     20% { transform: scaleY(1.0); }
 }
 
+.img-svg-preview {
+    pointer-events: none;
+    cursor: default;
+}
+
+.info-details {
+    font-size: 12px;
+}
+
+#file-details {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    position: absolute;
+    bottom: 0;
+    height: 25%;
+}
+
 #file-bookmarks {
     height: 100%;
     background-color: lightgrey;
@@ -1003,6 +1020,7 @@ input.input_text{
 #file-browser ul {
     width: 100% !important;
 }
+
 .noselect {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -1021,18 +1039,30 @@ input.input_text{
     font-family: Arial, Helvetica, sans-serif;
     font-size: small;
 }
+
 #file-preview {
-    border-top: 1px solid grey;
-    padding-top: 10px;
-    margin-top: 0 !important;
     height: 100%;
-    padding:20px !important;
-    border: 1px solid;
+    border-left: 1px solid lightgrey;
     float:right;
+    position: relative;
 }
+
 #image-preview {
-    max-width: 200px;
-    max-height: 140px;
+    height: 75%;
+    width: 100%;
+}
+
+#preview-zoom {
+    z-index: 1000;
+    position: absolute;
+    width: 600px;
+    height: 100%;
+}
+
+.test {
+    display: block;
+    border: 2px solid lightblue;
+    border-radius: 5px;
 }
 
 #btnBuilderView.active a, #btnSimulatorView.active a, #btnWidgetsView.active a, #btnTimersView.active a{

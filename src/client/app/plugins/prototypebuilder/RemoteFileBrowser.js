@@ -28,7 +28,9 @@ define(function (require, exports, module) {
         MIME            = require("util/MIME").getInstance(),
         PreferenceStorage = require("preferences/PreferenceStorage").getInstance(),
         EmuchartsManager = require("plugins/emulink/EmuchartsManager"),
+        dateFormat  = require("lib/dateformat"),
         PreferenceKeys = require("preferences/PreferenceKeys");
+
     var timer, rfb, grabPosition = [0,0], source;
 
     Handlebars.registerHelper("inc", function(value, options) {
@@ -60,7 +62,10 @@ define(function (require, exports, module) {
             "dragleave .line": "handleDragLeaveLine",
             "dragenter .line": "handleDragEnterLine",
             "dragover .line": "handleDragOverLine",
-            "dragend .line": "handleDragEndLine"
+            "dragend .line": "handleDragEndLine",
+            "mouseover #file-preview": "handleMouseEnter",
+            "mouseleave #file-preview": "handleMouseLeave",
+            "dblclick .line": "handleDoubleClickLine"
         },
         onTextChanged: function (event) {
             clearTimeout(timer);
@@ -105,7 +110,7 @@ define(function (require, exports, module) {
             document.getElementById("currentPath").value = paths[key];
         },
         handleDragStartLine: function(event) {
-            if (event.currentTarget.getAttribute("draggable") == "true") {
+            if (event.currentTarget.getAttribute("draggable") === "true") {
                 document.getElementById("file-bookmarks").classList.add("over");
                 source = event.currentTarget;
                 event.originalEvent.dataTransfer.effectAllowed = "move";
@@ -136,7 +141,7 @@ define(function (require, exports, module) {
         },
         handleDragEnter: function(event) {
             if (event.currentTarget.id.indexOf("bookmark-list") > -1) {
-                if (source != event.currentTarget) {
+                if (source !== event.currentTarget) {
                     document.getElementById(event.currentTarget.id).classList.add("over");
                 }   
             }
@@ -224,7 +229,7 @@ define(function (require, exports, module) {
             }
 
             if (source.id.indexOf("bookmark-list") > -1) {
-                if (source != event.currentTarget) {
+                if (source !== event.currentTarget) {
                     source.innerHTML = event.currentTarget.innerHTML;
                     event.currentTarget.innerHTML = event.originalEvent.dataTransfer.getData('text');
                 }
@@ -294,6 +299,33 @@ define(function (require, exports, module) {
             document.getElementById(event.currentTarget.id).classList.remove("opacity");
             
             return false;
+        },
+        handleMouseEnter: function(event) {
+
+            event.preventDefault();
+            var path = document.getElementById("currentPath").value;
+
+            d3.select("#preview-zoom").style("display","block").style("right", "110%").style("top", "10%");
+
+            if (MIME.isEmucharts(path)) {
+                WSManager.getWebSocket().readFile({path: path}, function (err, res) {
+                    if (!err) {
+                        var preview = { name: "preview", content: JSON.parse(res.content) };
+                        rfb.emuchartsManager.importEmucharts(preview);
+                        rfb.emuchartsManager.preview("#svg-preview-zoom", 0.6, "zoom");
+                    }
+                });                    
+            }
+                     
+        },
+        handleMouseLeave: function(event) {
+            event.preventDefault();
+            d3.select("#preview-zoom").style("display","none").style("right", "0px").style("top", "0px");
+        },
+
+        handleDoubleClickLine: function(event) {
+            event.preventDefault();
+
         }
 
     });
@@ -337,7 +369,7 @@ define(function (require, exports, module) {
                         }
                     }
                 }
-                
+
             }).catch(function (err) {
                 console.log(err);
             });              
@@ -452,6 +484,10 @@ define(function (require, exports, module) {
             return result;
         }
 
+        function toUserFriendlyDate(date) {
+            return dateFormat(date, "dddd, mmmm dd, yyyy 'at' HH:MM:ss");
+        }
+
         path = path || "";
         opt = opt || {};
         var view = new OpenFilesView({baseDirectory: path, bookmarks: PreferenceStorage.get(PreferenceKeys.BOOKMARKS), title: (opt.title || "Open file")});
@@ -469,12 +505,13 @@ define(function (require, exports, module) {
                 rfb._treeList.addListener("SelectedItemChanged", function (event) {
                     var data = event.data,
                         size = data.stats ? toUserFriendlySize(data.stats.size) : "",
-                        modified = data.stats ? new Date(data.stats.modified).toString() : "";
+                        modified = data.stats ? toUserFriendlyDate(data.stats.modified) : "";
                     document.getElementById("currentPath").value = data.path;
                     d3.select("#file-name").html(data.path);
                     d3.select("#file-size").html(size.value);
                     d3.select("#file-size-unit").html(size.unit);
                     d3.select("#file-last-modified").html(modified);
+                    
                     //if the file is an image retrieve a preview
                     if (MIME.isImage(data.path)) {
                         WSManager.getWebSocket().readFile({path: data.path, encoding: "base64"}, function (err, res) {
@@ -488,7 +525,7 @@ define(function (require, exports, module) {
                             if (!err) {
                                 var preview = { name: "preview", content: JSON.parse(res.content) };
                                 rfb.emuchartsManager.importEmucharts(preview);
-                                rfb.emuchartsManager.preview("#svg-preview");
+                                rfb.emuchartsManager.preview("#svg-preview", 0.3, "preview");
                                 d3.select("#file-preview").style("display", "block");
                             }
                         });                    
@@ -498,8 +535,8 @@ define(function (require, exports, module) {
                         d3.select("#file-browser").style("width", "82.5%");
                         d3.select("#file-preview").style("display", "none");
                     } else {
-                        d3.select("#file-browser").style("width", "55%").style("float", "left").style("margin-left","0");
-                        d3.select("#file-preview").style("width", "25%").style("display", "block");
+                        d3.select("#file-browser").style("width", "57%").style("float", "left").style("margin-left","0");
+                        d3.select("#file-preview").style("width", "25.5%").style("display", "block");
                     }
                     
                     if (data.isDirectory && !data.children && !data._children) {
