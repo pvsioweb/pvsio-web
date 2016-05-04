@@ -325,7 +325,7 @@ define(function (require, exports, module) {
 
         handleDoubleClickLine: function(event) {
             event.preventDefault();
-
+            d3.select("#btnOk").node().click();
         }
 
     });
