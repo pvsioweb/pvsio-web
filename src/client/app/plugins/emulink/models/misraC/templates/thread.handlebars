@@ -34,7 +34,7 @@ state init(state *st){
 #ifdef DEBUG    
     debug_print("Initialisation of state variables.\n");
 #endif    
-    {{#each ../local_variables}}{{#if value}}st->{{name}} = {{&value}};
+    {{#each ../local_variables}}{{#if value}}{{#if isstring}}{{&value}}{{else}}st->{{name}} = {{&value}}{{/if}};
     {{/if}}{{/each}}
     {{~#each ../input_variables}}{{#if value}}st->{{name}} = {{&value}};
     {{/if}}{{/each}}

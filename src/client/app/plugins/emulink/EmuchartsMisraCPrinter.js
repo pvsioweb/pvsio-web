@@ -86,26 +86,28 @@ define(function (require, exports, module) {
         current_state: { name: "current_state", type: machineStateType, value: initialMachineState }
     };
     var declarations = [];
+    var string_length = 0;  //MAX stringh length for strings variables
     
     var operatorOverrides = {
-        ":=": "=",
-        "AND": "&&",
-        "OR": "||",
-        "NOT": "!",
-        "MOD": "fmod",
-        "and": "&&",
-        "or": "||",
-        "mod": "fmod",
-        "not": "!",
-        "=": "=="
+        ":="    : "=",
+        "AND"   : "&&",
+        "OR"    : "||",
+        "NOT"   : "!",
+        "MOD"   : "fmod",
+        "and"   : "&&",
+        "or"    : "||",
+        "mod"   : "fmod",
+        "not"   : "!",
+        "="     : "=="
     };
     
     var typeMaps = {
-        "Time": "Time",    //Iachino: Serve??
-        "bool": "UC_8",
-        "char": "UC_8",
-        "int": "UI_32",
-        "Sint": "SI_32",
+        "Time"  : "Time",    //Iachino: Serve??
+        "bool"  : "UC_8",
+        "char"  : "UC_8",
+        "string": "C_8",
+        "int"   : "UI_32",
+        "Sint"  : "SI_32",
         "float" : "F_32",
         "double": "D_64"                      
     };
@@ -129,9 +131,9 @@ define(function (require, exports, module) {
             //The type char shall always be declared as unsigned char or signed char
             //see MISRA 1998 rules (Rule 14, required)
             type = typeMaps.char;
-            if(!isInArray(declarations, type)){
-                declarations.push("typedef unsigned char " + type + ";");
-            }
+            //if(!isInArray(declarations, type)){
+            //    declarations.push("typedef unsigned char " + type + ";");
+            //}
         } else if (Ints.indexOf(type.toLowerCase()) >= 0) {
             type = typeMaps.int;
             if(!isInArray(declarations, type)){
@@ -147,10 +149,18 @@ define(function (require, exports, module) {
             if(!isInArray(declarations, type)){
                 declarations.push("typedef float " + type + ";");
             }
-        } else if ((type.toLowerCase() === "real") || (type.toLowerCase() === "double")) {
+        } else if ((type.toLowerCase() === "real") || (type.toLowerCase() === "double") ||
+                   (type.toLowerCase() === "itimes") || (type.toLowerCase() === "pausetime") || (type.toLowerCase() === "irates") || (type.toLowerCase() === "ivols")   //ONLY FOR TESTING with Alaris GP model 
+                    ) {
             type = typeMaps.double;
             if(!isInArray(declarations, type)){
                 declarations.push("typedef double " + type + ";");
+            }
+        } else if (type.toLowerCase() === "string") {
+            type = typeMaps.string;
+            if(!isInArray(declarations, type)){
+                declarations.push("#include <string.h>");
+                declarations.push("typedef char " + type + ";");
             }
         }
         return typeMaps[type] || type;
@@ -328,6 +338,17 @@ define(function (require, exports, module) {
             }
             if (expression.type === "assignment") {
                 var name = expression.val.identifier.val;
+                var isstring = false;
+                expression.val.expression.val.map(function (v) {
+                    if (v.type === "string") {
+                        // different treatment for strings assignemnts
+                        string_length = Math.max(string_length,v.val.length - 2);
+                        v.val =  "strcpy(st->" + name + ", " + v.val + ")";
+                        isstring = true;
+                    }
+                    return string_length;
+                });
+
                 expression.val.expression.val.map(function (v) {
                     if (v.type === "identifier"){
                         if (isLocalVariable(v.val, emuchart)) {
@@ -340,11 +361,21 @@ define(function (require, exports, module) {
                     return;
                 });
                 if (isLocalVariable(name, emuchart)) {
-                    return "st->" + name + " = " +
-                            getExpression(expression.val.expression, emuchart);                
+                    if (isstring) {
+                        // In strings case we use strcpy, not a regular assignment
+                        return getExpression(expression.val.expression, emuchart);
+                    } else {
+                        return "st->" + name + " = " +
+                            getExpression(expression.val.expression, emuchart);
+                    }                
                 }
-                return "st->" + name + " = " +
+                //same treatment of LocalVariables, left the prototype intentionally in case of different choice
+                if (isstring) {
+                    return getExpression(expression.val.expression, emuchart);
+                } else {
+                    return "st->" + name + " = " +
                         getExpression(expression.val.expression, emuchart);
+                }  
             } else {
                 if (expression.type === 'identifier'){
                     if(isLocalVariable(expression.val, emuchart)) {
@@ -456,6 +487,13 @@ define(function (require, exports, module) {
                     v.type = getType(v.type);
                     return v;
                 }
+                if (v.type.toLowerCase() === "string") {
+                    string_length = Math.max(string_length,v.value.length);
+                    v.value =  "strcpy(st->" + v.name + ", \"" + v.value + "\")";
+                    v.isstring = true;
+                    v.type = getType(v.type);
+                    return v;
+                }
                 v.type = getType(v.type);
                 v.value = setSuffix(v);
                 return v;
@@ -485,10 +523,16 @@ define(function (require, exports, module) {
         declarations.push("#define false 0");
         declarations.push("#define TRUE 1");
         declarations.push("#define FALSE 0");
+        if (string_length > 0){
+            declarations.push("#define STRING_LENGTH " + string_length);
+        }
         this.model.importings = declarations;
         if (emuchart.variables) {
             this.model.structureVar = emuchart.variables.local.map(function (v) {
                 v.type = getType(v.type);
+                if (v.isstring === true) { 
+                    return (v.type + "* "+ v.name + "[STRING_LENGTH];");
+                }
                 return (v.type + " "+ v.name + ";");
             });
         }
@@ -638,11 +682,11 @@ define(function (require, exports, module) {
     Printer.prototype.print = function (emuchart) {
         this.model.transitions = [];
         this.print_variables(emuchart);
-        this.print_declarations(emuchart);
         this.print_constants(emuchart);
         this.print_transitions(emuchart);
         this.print_initial_transition(emuchart);
         this.print_states(emuchart);
+        this.print_declarations(emuchart);
         this.print_disclaimer(emuchart);
         this.print_descriptor(emuchart);
         
