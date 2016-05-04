@@ -531,7 +531,7 @@ define(function (require, exports, module) {
             this.model.structureVar = emuchart.variables.local.map(function (v) {
                 v.type = getType(v.type);
                 if (v.isstring === true) { 
-                    return (v.type + "* "+ v.name + "[STRING_LENGTH];");
+                    return (v.type + " "+ v.name + "[STRING_LENGTH];");
                 }
                 return (v.type + " "+ v.name + ";");
             });
