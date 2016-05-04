@@ -10,10 +10,9 @@ define(function (require, exports, module) {
     var preferenceKeys = require("preferences/PreferenceKeys");
     var prefs = {}, instance;
 
-    var paths = { Desktop: "/Users/hmtlg/Desktop", 
-                  Documents: "/Users/hmtlg/Documents",
-                  Pictures: "/Users/hmtlg/Pictures"
-                };
+    var paths = { Desktop: "~/Desktop", 
+                  Documents: "~/Documents",
+                  Pictures: "~/Pictures" };
 
     function DefaultPreferences() {
         prefs[preferenceKeys.BACKUP_INTERVAL] = 60 * 10; //in seconds

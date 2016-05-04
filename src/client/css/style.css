@@ -1048,6 +1048,11 @@ input.input_text{
 }
 
 #image-preview {
+    max-width: 200px;
+    max-height: 140px;
+}
+
+#svg-image-preview {
     height: 75%;
     width: 100%;
 }

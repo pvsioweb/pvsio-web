@@ -63,8 +63,9 @@ define(function (require, exports, module) {
             "dragenter .line": "handleDragEnterLine",
             "dragover .line": "handleDragOverLine",
             "dragend .line": "handleDragEndLine",
-            "mouseover #file-preview": "handleMouseEnter",
-            "mouseleave #file-preview": "handleMouseLeave",
+//            "mouseover #image-svg-preview": "handleMouseEnter",
+//            "mouseleave #file-preview": "handleMouseLeave",
+//            "mouseleave #preview-zoom": "handleMouseLeave",
             "dblclick .line": "handleDoubleClickLine"
         },
         onTextChanged: function (event) {
@@ -305,7 +306,7 @@ define(function (require, exports, module) {
             event.preventDefault();
             var path = document.getElementById("currentPath").value;
 
-            d3.select("#preview-zoom").style("display","block").style("right", "110%").style("top", "10%");
+            d3.select("#preview-zoom").style("display","block");//.style("right", "110%").style("top", "10%");
 
             if (MIME.isEmucharts(path)) {
                 WSManager.getWebSocket().readFile({path: path}, function (err, res) {

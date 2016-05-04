@@ -1751,7 +1751,7 @@ define(function (require, exports, module) {
             if (type === "zoom") {
                 d3.select(container + " svg").attr("class","test");
             } else {
-                 d3.select(container + " svg").style("display", "block");
+                d3.select(container + " svg").style("display", "block");
             }
             
         }
