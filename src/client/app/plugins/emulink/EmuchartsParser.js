@@ -267,7 +267,7 @@ define(function (require, exports, module) {
                     ["NUMBER", "$$ = { type: 'number', val: $NUMBER }"]
                 ],
                 "string": [
-                    ["STRING", "$$ = { type: 'constant', val: $STRING }"]
+                    ["STRING", "$$ = { type: 'string', val: $STRING }"]
                 ],
                 "true_false": [
                     ["TRUE", "$$ = { type: 'constant', val: $TRUE }"],
