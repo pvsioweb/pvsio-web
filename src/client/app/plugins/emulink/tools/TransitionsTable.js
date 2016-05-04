@@ -53,7 +53,7 @@ define(function (require, exports, module) {
     
     TransitionsTable.prototype.removeTransition = function(elementID) {
         var table = d3.select("#TransitionsTable").select("tbody").node();
-        var theTransition = d3.select("#Transitions").select("#" + elementID).node();
+        var theTransition = d3.select("#TransitionsTable").select("#" + elementID).node();
         table.removeChild(theTransition);
         _this.fire({
             type: "TransitionsTable_deleteTransition",
