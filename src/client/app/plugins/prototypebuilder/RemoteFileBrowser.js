@@ -372,7 +372,7 @@ define(function (require, exports, module) {
 
             }).catch(function (err) {
                 console.log(err);
-            });              
+            });
         }
 
         if (code === 39) {
@@ -386,8 +386,8 @@ define(function (require, exports, module) {
             e.preventDefault();
             window.location.hash = '#file-browser';
         }
-    } 
-    
+    }
+
     /**
         Constructs a new instance of the RemoteFileBrowser
         @param {function} filterFunc a function to filter which file should be shown in the browser if null, then all files are shown
@@ -401,7 +401,7 @@ define(function (require, exports, module) {
 
     RemoteFileBrowser.prototype._treeList = null;
     RemoteFileBrowser.prototype._baseDirectory = null;
-    
+
     /**
      * Utility function to sort the list of files returned by the remote file browser
      * @param   {String}   a first argument
@@ -425,7 +425,7 @@ define(function (require, exports, module) {
             });
         });
     }
-    
+
     function readExamplesFolder() {
         var ws = WSManager.getWebSocket();
         return new Promise(function (resolve, reject) {
@@ -528,9 +528,9 @@ define(function (require, exports, module) {
                                 rfb.emuchartsManager.preview("#svg-preview", 0.3, "preview");
                                 d3.select("#file-preview").style("display", "block");
                             }
-                        });                    
+                        });
                     }
-                    
+
                     if (data.isDirectory) {
                         d3.select("#file-browser").style("width", "82.5%");
                         d3.select("#file-preview").style("display", "none");
@@ -538,8 +538,10 @@ define(function (require, exports, module) {
                         d3.select("#file-browser").style("width", "57%").style("float", "left").style("margin-left","0");
                         d3.select("#file-preview").style("width", "25.5%").style("display", "block");
                     }
-                    
-                    if (data.isDirectory && !data.children && !data._children) {
+                }).addListener("ItemExpanded", function (event) {
+                    var data = event.data;
+
+                    if (data.isDirectory && !data.children && !data._children && !data.empty && !data._empty) {
                         getRemoteDirectory(data.path)
                             .then(function (files) {
                                 data.children = files || [];

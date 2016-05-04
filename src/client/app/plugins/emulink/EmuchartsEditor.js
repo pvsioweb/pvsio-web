@@ -1718,6 +1718,10 @@ define(function (require, exports, module) {
      * @memberof EmuchartsEditor
      */
     EmuchartsEditor.prototype.render = function () {
+        var container = "#ContainerStateMachine";
+        if (d3.select(container + " svg").node()) {
+            d3.select(container).node().removeChild(d3.select(container + " svg").node());
+        }        
         this.renderStates();
         this.renderTransitions();
         this.renderInitialTransitions();
