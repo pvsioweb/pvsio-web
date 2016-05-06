@@ -326,7 +326,11 @@ define(function (require, exports, module) {
 
         handleDoubleClickLine: function(event) {
             event.preventDefault();
-            d3.select("#btnOk").node().click();
+            var selectedFiles = rfb._treeList.getSelectedItems();
+            var firstFile = selectedFiles[0];
+            if (firstFile && !firstFile.isDirectory) {
+                d3.select("#open-file-browser").select("#btnOk").node().click();
+            }
         }
 
     });
