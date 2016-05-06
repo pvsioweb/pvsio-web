@@ -1,0 +1,4 @@
+file 2aa168cd26167088768dcd067d28f0313ea260f3 chash=229031cab54fd660045f75dd4208d298c00ec4ad group=sys mode=0664 owner=root path=glassfish/modules/console-ejb-lite-plugin.jar pkg.csize=26957 pkg.size=31251
+file e304980571b9cde9a835518c01d82986f56024cd chash=d8855c583a4098c26dbb69132739f80abe77e4bb group=sys mode=0664 owner=root path=glassfish/modules/ejb-container.jar pkg.csize=865105 pkg.size=925716
+file bc294320d31bbd159987ac649eefc8ec5fde154a chash=7ebccfbe955d4e615f43695507be399b9e741e56 group=sys mode=0664 owner=root path=glassfish/modules/javaee-kernel.jar pkg.csize=16747 pkg.size=19257
+file 0c36d09df8619aca745a09940c3189065dcfb478 chash=b1845abe7dec9c255d7e55a5cb0131916725ca0c group=sys mode=0664 owner=root path=glassfish/modules/gf-ejb-connector.jar pkg.csize=15750 pkg.size=19199

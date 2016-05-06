@@ -1,0 +1,3 @@
+dir group=sys mode=0755 owner=root path=glassfish/osgi/felix/conf
+dir group=sys mode=0775 owner=root path=glassfish/osgi/felix/bin
+dir group=sys mode=0775 owner=root path=glassfish/modules

@@ -1,0 +1,7 @@
+dir path=bin 
+dir path=glassfish/lib 
+dir path=glassfish/modules 
+dir path=glassfish 
+dir path=glassfish/lib/appclient 
+dir path=glassfish/config 
+dir path=glassfish/bin 

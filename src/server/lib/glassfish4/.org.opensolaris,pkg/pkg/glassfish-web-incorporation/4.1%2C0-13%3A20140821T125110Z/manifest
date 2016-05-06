@@ -1,0 +1,36 @@
+set name=fmri value=pkg:/glassfish-web-incorporation@4.1,0-13:20140821T125110Z
+set name=info.classification value="Application Servers"
+set name=pkg.description value="GlassFish Web Profile Incorporation Package.  GlassFish Server is a modular and lightweight Java EE 7 compliant application server. Key features include an OSGi runtime, fast startup time, maven support, and rapid iterative development with Active Redeploy.  GlassFish Server also offers feature-rich administration with the web console, command line, and RESTful API."
+set name=pkg.summary value="GlassFish Web Profile Incorporation"
+depend fmri=pkg:/glassfish-nucleus@4.1,0-13 type=incorporate
+depend fmri=pkg:/shoal@1.6.18,0-0 type=incorporate
+depend fmri=pkg:/glassfish-jts@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-common@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-jta@4.1,0-13 type=incorporate
+depend fmri=pkg:/felix@4.0.2,0-0 type=incorporate
+depend fmri=pkg:/javadb-core@10 type=incorporate
+depend fmri=pkg:/glassfish-web@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-osgi-http@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-scripting@3.1 type=incorporate
+depend fmri=pkg:/glassfish-jcdi@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-cluster@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-ejb-lite@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-registration@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-grizzly-full@2.3.15,0-1 type=incorporate
+depend fmri=pkg:/javadb-common@10 type=incorporate
+depend fmri=pkg:/glassfish-jsf@2.2.7,0-0 type=incorporate
+depend fmri=pkg:/jersey@2 type=incorporate
+depend fmri=pkg:/glassfish-management@4.1,0-13 type=incorporate
+depend fmri=pkg:/pkg-java@1 type=incorporate
+depend fmri=pkg:/javadb-client@10 type=incorporate
+depend fmri=pkg:/glassfish-jca@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-hk2@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-gui@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-jdbc@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-ha@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-corba-base@4.0.0,0-4 type=incorporate
+depend fmri=pkg:/glassfish-jpa@4.1,0-13 type=incorporate
+depend fmri=pkg:/glassfish-grizzly@2.3.15,0-1 type=incorporate
+depend fmri=pkg:/glassfish-commons-web@4.1,0-13 type=incorporate
+license 8741fa556feea4ca58ec28abc47de0bf9d5b39a3 chash=28b7cfba8f297b99296afc231955dc90e8d76d47 license="CDDL and GPL v2 with classpath exception" pkg.csize=12394 pkg.size=38052
+set name=publisher value=release.glassfish.org

@@ -1,0 +1,3 @@
+dir path=mq/lib 
+dir path=mq/bin 
+dir path=mq 

@@ -1,0 +1,9 @@
+dir group=sys mode=0775 owner=root path=glassfish
+dir group=sys mode=0775 owner=root path=glassfish/lib
+dir group=sys mode=0775 owner=root path=glassfish/modules
+dir group=sys mode=0775 owner=root path=glassfish/lib/install
+dir group=sys mode=0775 owner=root path=glassfish/lib/deployment
+dir group=sys mode=0775 owner=root path=glassfish/lib/install/databases
+dir group=sys mode=0775 owner=root path=glassfish/lib/install/applications
+dir group=sys mode=0775 owner=root path=glassfish/lib/install/applications/jaxr-ra
+dir group=sys mode=0775 owner=root path=glassfish/lib/install/applications/jaxr-ra/META-INF

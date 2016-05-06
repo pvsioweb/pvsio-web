@@ -1,0 +1,3 @@
+file 4c1974b8c595090bf998d287e665d3bc58cd24e1 chash=c2c436813efa8e492c580ec3e8ba9e2c60a43e92 group=sys mode=0664 owner=root path=glassfish/modules/jmxremote_optional-repackaged.jar pkg.csize=218546 pkg.size=242360
+file aedd8681da42ec174cd789747b650e4f7c1a1ea2 chash=0dbcd4b7a300f48c3f31b660d21ede450bb1fdee group=sys mode=0664 owner=root path=glassfish/modules/amx-core.jar pkg.csize=404067 pkg.size=440699
+file bf6e1c715213b461afea6bfb7572d1c4a7d2f7c1 chash=e947903079072549aff04d49e3538083b784498a group=sys mode=0664 owner=root path=glassfish/modules/glassfish-mbeanserver.jar pkg.csize=63372 pkg.size=69647
