@@ -1,3 +1,0 @@
-set name=info.classification value="Web Services"
-set name=pkg.description value="Jersey core runtime libraries including some 3rd party dependencies.  Jersey is the open source (under dual CDDL+GPL license) JAX-RS (JSR 339) Reference Implementation for building RESTful Web services.  But, it is also more than the Reference Implementation.  Jersey provides additional APIs and extension points (SPIs)  so that developers may extend Jersey to suite their needs."
-set name=pkg.summary value="Jersey 2 Core, RESTful Web services for GlassFish"

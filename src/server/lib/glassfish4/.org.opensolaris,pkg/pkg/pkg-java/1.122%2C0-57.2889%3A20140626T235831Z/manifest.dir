@@ -1,6 +1,0 @@
-dir group=sys mode=0755 owner=root path=pkg/javadocs
-dir group=sys mode=0755 owner=root path=pkg/javadocs/resources
-dir group=sys mode=0755 owner=root path=pkg/javadocs/com
-dir group=sys mode=0755 owner=root path=pkg/javadocs/com/sun
-dir group=sys mode=0755 owner=root path=pkg/javadocs/com/sun/pkg
-dir group=sys mode=0755 owner=root path=pkg/javadocs/com/sun/pkg/client

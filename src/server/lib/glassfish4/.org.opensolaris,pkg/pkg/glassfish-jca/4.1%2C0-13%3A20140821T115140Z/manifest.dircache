@@ -1,9 +1,0 @@
-dir path=glassfish/lib 
-dir path=glassfish/lib/install/templates 
-dir path=glassfish/lib/schemas 
-dir path=glassfish/lib/install 
-dir path=glassfish/lib/install/templates/resources/custom 
-dir path=glassfish/lib/dtds 
-dir path=glassfish 
-dir path=glassfish/modules 
-dir path=glassfish/lib/install/templates/resources 
