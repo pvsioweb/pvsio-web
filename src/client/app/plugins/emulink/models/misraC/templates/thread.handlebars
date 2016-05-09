@@ -11,7 +11,7 @@
 
 {{~#if constants}}
 /* constants variables */
-{{~#each constants}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
+{{~#each constants}}
 const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if transitions}}

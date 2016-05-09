@@ -13,7 +13,7 @@ typedef enum {
 /** 
  * constants variables 
  */
-{{~#each constants}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
+{{~#each constants}}
 extern const {{type}} {{name}};{{/each}}
 {{~/if}}
  
