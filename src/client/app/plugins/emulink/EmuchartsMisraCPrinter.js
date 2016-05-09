@@ -445,7 +445,7 @@ define(function (require, exports, module) {
                     return getExpression(a, emuchart);
                 });
             }
-            return {id: id.val, actions: actions, condition: condition, source: t.source, target: t.target, listSources: [], listTargets: []};
+            return {id: id.val, actions: actions, condition: condition, source: t.source, target: t.target };
         } else if (functionBody.err) {
             displayError(functionBody.err);
             return { erroneousLabel: name, parserError: functionBody.err };
