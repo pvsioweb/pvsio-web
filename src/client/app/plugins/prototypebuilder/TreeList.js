@@ -13,7 +13,7 @@ define(function (require, exports, module) {
         contextMenuItems = ["New File", "New Folder", "Rename", "Delete"];
     var globalId = 0;
     var eventDispatcher = require("util/eventDispatcher");
-
+    var lineID = 0;
 
     /**
         Find the node with the give id
@@ -230,6 +230,15 @@ define(function (require, exports, module) {
         updatedNodes.selectAll(".line").style("padding-left", function (d) {
             return d.x + "px";
         });
+        // Add an ID to the line for draggable purposes
+        updatedNodes.select(".line").attr("id", function (d) {
+            return "line-" + lineID++;
+        });
+        // Set all the .line to be draggable
+        updatedNodes.selectAll(".line").attr("draggable", function(d) {
+            return d.isDirectory ? true : false;
+        });
+
         //update any label names
         updatedNodes.select("span.label").text(function (d) { return d.name; });
         //remove hidden nodes

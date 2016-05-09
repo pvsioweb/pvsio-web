@@ -1,8 +1,0 @@
-dir path=glassfish/lib 
-dir path=glassfish/lib/install 
-dir path=glassfish/modules/endorsed 
-dir path=glassfish/lib/install/applications 
-dir path=glassfish/modules 
-dir path=glassfish 
-dir path=glassfish/lib/install/applications/metro 
-dir path=glassfish/bin 

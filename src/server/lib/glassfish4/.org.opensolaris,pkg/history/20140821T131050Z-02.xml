@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="ascii"?>
-<history><client name="pkg" version="1.122.2-57.2889"><args><arg><![CDATA[/export/home/BUILD_AREA/workspace/gf-lw-build-release/pkg-toolkit-sunos-sparc/pkg/bin/client.py]]></arg><arg><![CDATA[install]]></arg><arg><![CDATA[felix]]></arg></args></client><operation end_time="20140821T131050Z" name="install" result="Succeeded" start_time="20140821T131050Z" userid="143" username="java_re"><start_state><![CDATA[UNEVALUATED:
-+pkg:/felix@4.0.2,0-0:20140821T124406Z
-]]></start_state><end_state><![CDATA[None -> pkg:/felix@4.0.2,0-0:20140821T124406Z
-]]></end_state></operation></history>

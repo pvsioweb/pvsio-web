@@ -392,8 +392,8 @@ define(function (require, exports, module) {
      * @param container DIV element that will contain the preview
      * @memberof EmuchartsManager
      */
-    EmuchartsManager.prototype.preview = function (container) {
-        _selectedEditor.preview(container);
+    EmuchartsManager.prototype.preview = function (container, scale_zoom, type) {
+        _selectedEditor.preview(container, scale_zoom, type);
         return this;
     };
 

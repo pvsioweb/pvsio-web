@@ -1,5 +1,0 @@
-file 47b573e3824cd5e02a1a3ae99e2735b49e0256e4 chash=7e61862a5f57daa3aaaa110c33eb83a5d2a4c791 group=sys mode=0644 owner=root path=javadb/3RDPARTY pkg.csize=3982 pkg.size=11560
-file d8c2a2c9094aab74d278342e322cf093973f1db7 chash=a19f7c4a194723bd85e4ca76117415c62efdbdd0 group=sys mode=0644 owner=root path=javadb/index.html pkg.csize=2025 pkg.size=5246
-file 47b573e3824cd5e02a1a3ae99e2735b49e0256e4 chash=7e61862a5f57daa3aaaa110c33eb83a5d2a4c791 group=sys mode=0644 owner=root path=javadb/LICENSE pkg.csize=3982 pkg.size=11560
-file 5609deb3d61883064953bb5737529df78d39f5c5 chash=3026d0438620e4ee2d584198c12fa8569dcd9bea group=sys mode=0644 owner=root path=javadb/NOTICE pkg.csize=1845 pkg.size=7323
-file 3281caf6e563ce30d854ae7ab77888a3c3afa664 chash=c3a895f1bd1d61ec417c10587f91b2a56a6703d1 group=sys mode=0644 owner=root path=javadb/RELEASE-NOTES.html pkg.csize=12063 pkg.size=49122

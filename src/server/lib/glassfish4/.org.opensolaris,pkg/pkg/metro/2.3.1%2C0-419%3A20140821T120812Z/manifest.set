@@ -1,3 +1,0 @@
-set name=info.classification value="Web Services"
-set name=pkg.description value="Metro is a high-performance, extensible, easy-to-use web service stack. It is a one-stop shop for all your web service needs, from the simplest hello world web service to reliable, secured, and transacted web service that involves .NET services."
-set name=pkg.summary value="Metro Web Services Stack"

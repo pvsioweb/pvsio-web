@@ -1731,7 +1731,7 @@ define(function (require, exports, module) {
         return this;
     };
     
-    EmuchartsEditor.prototype.preview = function (container) {
+    EmuchartsEditor.prototype.preview = function (container, scale_zoom, type) {
         if (container && d3.select(container).node()) {
             d3.select(container + " svg").style("display", "null");
             if (d3.select(container + " svg").node()) {
@@ -1741,14 +1741,19 @@ define(function (require, exports, module) {
             this.renderTransitions(container);
             this.renderInitialTransitions(container);
             d3.select(container + " svg").select("#States")
-                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + 0.3 + ")");
+                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + scale_zoom + ")");
             d3.select(container + " svg").select("#Transitions")
-                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + 0.3 + ")");
+                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + scale_zoom + ")");
             d3.select(container + " svg").select("#InitialTransitions")
-                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + 0.3 + ")");
+                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + scale_zoom + ")");
             d3.select(container + " svg").select("#dragline")
-                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + 0.3 + ")");
-            d3.select(container + " svg").style("display", "block");
+                .attr("transform", "translate(" + this.d3EventTranslate + ") scale(" + scale_zoom + ")");
+            if (type === "zoom") {
+                d3.select(container + " svg").attr("class","test");
+            } else {
+                d3.select(container + " svg").style("display", "block");
+            }
+            
         }
         return this;
     };

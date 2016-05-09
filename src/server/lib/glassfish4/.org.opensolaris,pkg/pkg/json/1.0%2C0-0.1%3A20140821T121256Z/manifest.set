@@ -1,3 +1,0 @@
-set name=info.classification value="Web Services"
-set name=pkg.description value="Java API for Processing JSON (JSON-P)"
-set name=pkg.summary value="Java API for Processing JSON (JSON-P"

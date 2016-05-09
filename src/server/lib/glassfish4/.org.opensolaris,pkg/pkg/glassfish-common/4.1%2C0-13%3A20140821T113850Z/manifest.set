@@ -1,3 +1,0 @@
-set name=info.classification value="Application Servers"
-set name=pkg.description value="GlassFish common utilities and components.  GlassFish Server is a modular and lightweight Java EE 7 compliant application server. Key features include an OSGi runtime, fast startup time, maven support, and rapid iterative development with Active Redeploy.  GlassFish Server also offers feature-rich administration with the web console, command line, and RESTful API."
-set name=pkg.summary value="GlassFish Common Components"

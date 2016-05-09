@@ -1,2 +1,0 @@
-depend fmri=pkg:/glassfish-jta type=require
-depend fmri=pkg:/glassfish-corba-base type=require
