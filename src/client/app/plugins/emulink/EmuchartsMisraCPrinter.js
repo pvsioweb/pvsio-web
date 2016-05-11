@@ -1,6 +1,6 @@
 /**
  * @author Gioacchino Mauro
- * @date Gio 31 Mar 2016 11:29:34 CEST
+ * @date Mer 11 Mag 2016 10:50:09 CEST
  *
  * MISRA C code printer for emucharts models.
  * Emuchart objects have the following structure:
@@ -39,15 +39,18 @@
                                 },
                                 listSources: (array of 
                                     :(string)       // sources state label list in case of homonymous transitions with different source
+                                                    // (this array is present only into the first object of the array with the same trigger name)
                                 ),
                                 listTargets: (array of 
                                     :(string)       // target state label list in case of homonymous transitions with different target
+                                                    // (this array is present only into the first object of the array with the same trigger name)
                                 ),
-                               (array of array in case of homonymous transitions),
                             }),
                 initial_transitions: (array of {
-                                name: (string), // the initial transition label
-                                id: (string),   // a unique identifier
+                                name: (string),         // the initial transition label
+                                id: (string),           // a unique identifier
+                                condition: (string),    // It is an optional, in case of multiple initial transitions
+                                actions: (string)       // It is an optional, in case of different expression, instead of initializations
                                 target: {
                                     name: (string), // the target state label
                                     id: (string)    // a unique identifier
