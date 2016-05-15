@@ -1,0 +1,31 @@
+// Panel used in the right sidebar
+
+.expandable-panel {
+    width: 100%;
+    position:relative;
+    overflow:auto;
+    border:1px solid #999;
+}
+
+.expandable-panel-heading {
+    @extend .noselect;
+
+    width:100%;
+    cursor:pointer;
+    min-height:32px;
+    clear:both;
+    background-color:#E5E5E5;
+    padding-left: 16px;
+    padding-top: 4px;
+    white-space: nowrap;
+
+	&:hover {
+	    color: white;
+	    background-color: black;
+	}
+
+	span {
+	    font-size:small;
+	    line-height:20px;
+	}
+}

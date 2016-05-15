@@ -1,0 +1,30 @@
+li.plugin-box {
+    @extend %dark-hover;
+}
+
+div.plugins {
+    @extend .noselect;
+
+    white-space: nowrap;
+    margin-top: 1px;
+    padding-top: 6px;
+    padding-left: 12px;
+    min-height: 36px;
+    border:1px solid #4088B6;
+    background-color: white;
+    cursor: default;
+}
+
+.plugins-group .list-group-item {
+    @extend .noselect;
+
+    border-radius: 0;
+    cursor: pointer;
+}
+
+.plugins-group .list-group-item input {
+    cursor: pointer;
+}
+.plugins-group .list-group-item label {
+    cursor: pointer;
+}

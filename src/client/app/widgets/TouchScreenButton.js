@@ -50,7 +50,7 @@ define(function (require, exports, module) {
         this.blinking = opt.blinking || false;
         this.textBaseline = "middle";
         this.btnClass = opt.btnClass || "primary";
-        var elemClass = id + " prevent_selection";
+        var elemClass = id + " noselect";
         if (this.blinking) { elemClass += " blink"; }
         this.div = d3.select(this.parent)
                         .append("div").style("position", "absolute")
@@ -72,7 +72,7 @@ define(function (require, exports, module) {
         this.txt = opt.txt || id;
         return this;
     }
-    
+
     TouchScreenButton.prototype.render = function (txt, opt) {
         opt = opt || {};
         var button = document.getElementById(this.id + "_button");
@@ -82,7 +82,7 @@ define(function (require, exports, module) {
         button.style.height = this.height;
         button.style.fontSize = 0.8 * this.height + "px";
         button.textContent = opt.txt || this.txt;
-        d3.select("#" + this.id + "_button").style("display", "block");        
+        d3.select("#" + this.id + "_button").style("display", "block");
         this.reveal();
         return this;
     };
@@ -96,7 +96,7 @@ define(function (require, exports, module) {
         button.style.height = this.height;
         button.style.fontSize = 0.8 * this.height + "px";
         button.textContent = opt.txt || this.txt;
-        d3.select("#" + this.id + "_button").style("display", "block");        
+        d3.select("#" + this.id + "_button").style("display", "block");
         this.reveal();
         return this;
     };

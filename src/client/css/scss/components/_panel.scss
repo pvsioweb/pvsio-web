@@ -1,0 +1,30 @@
+span.toggle-collapse {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.collapsible-panel-parent {
+    background-color: whitesmoke;
+    width: 100%;
+    overflow:hidden;
+    border:1px solid #ccc;
+    margin-bottom: 5px;
+}
+
+.collapsible-panel-parent span.header {
+    margin-left: 10px;
+    display:inline-block;
+}
+
+div.header {
+    @extend .noselect;
+    
+    padding: 5px;
+    min-height: 36px;
+    border:1px solid #4088B6;
+    background-color: white;
+    cursor: pointer;
+}

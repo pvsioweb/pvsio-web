@@ -1,0 +1,160 @@
+// Table containing lists of states, transitions, variables, etc.
+
+#StateAttributes,
+#MachineStates,
+#TransitionsTable,
+#ConstantsTable {
+    position: relative;
+    top: 0px;
+    width: 100%;
+    left: 0px;
+    margin: 1px;
+    background: white;
+    font-family: Tahoma, sans-serif;
+    overflow: auto;
+    float: right;
+    border: 2px solid steelblue;
+    height: 200px;
+}
+
+#EmuchartsFloatTable {
+    position: absolute;
+    top: 614px;
+    width: 100%;
+    left: 0px;
+    margin: 1px;
+    background: whitesmoke;
+    font-family: Tahoma, sans-serif;
+    overflow: auto;
+    float: right;
+}
+
+#btnStates.active a,
+#btnTransitions.active a,
+#btnVariables.active a,
+#btnConstants.active a {
+    color: white;
+    background-color: $color-primary;
+    border: none;
+}
+
+#btnStates a,
+#btnTransitions a,
+#btnVariables a,
+#btnConstants a {
+    width: 160px;
+    color: black;
+    background-color: whitesmoke;
+    border: none;
+    text-align: center;
+}
+
+#btnStates a:hover,
+#btnTransitions a:hover,
+#btnVariables a:hover,
+#btnConstants a:hover {
+    color: white;
+    background-color: black;
+}
+
+#btnViewHideTable span,
+#btnViewRevealTable span {
+    padding: 9px 0 8px 4px;
+    width: 20px;
+}
+
+#btnViewHideTable,
+#btnViewRevealTable {
+    background-color: $color-primary;
+}
+
+#btnViewHideTable:hover,
+#btnViewRevealTable:hover {
+    background-color: black;
+}
+
+#modifyPropertiesToolbar {
+    width: 930px;
+    font-family: Tahoma, sans-serif;
+    display: block;
+}
+
+#modifyPropertiesToolbarNode {
+    border-style: dotted;
+    font: 20px/24px cursive;
+    display: none;
+}
+
+#modifyPropertiesToolbarEdge {
+    border-style: dotted;
+    font: 20px/24px cursive;
+    display:none;
+}
+
+#stateMachineMenu .tobeimplemented {
+    color: gray;
+}
+
+.table-editable {
+    position: relative;
+}
+
+.table-editable .glyphicon {
+    font-size: 20px;
+}
+
+.table-remove {
+    color: #700;
+    cursor: pointer;
+}
+
+.table-remove:hover {
+    color: #f00;
+}
+
+.table-up, .table-down {
+    color: #007;
+    cursor: pointer;
+}
+
+.table-up:hover, .table-down:hover {
+    color: #00f;
+}
+
+.table-add {
+    color: #070;
+    cursor: pointer;
+    background-color: whitesmoke !important;
+}
+
+.table-add:hover {
+    color: #0b0;
+    background-color: whitesmoke !important;
+}
+
+
+.floating-table {
+    position: absolute;
+    margin-right: 20px;
+}
+
+.TableHeading {
+    background-color:whitesmoke;
+}
+
+.TableHeading > th {
+    padding: 4px 2px 0 8px !important;
+}
+
+
+.width32 {
+    width: 32px;
+}
+
+.EmuchartTableHeader {
+    padding: 4px 4px 4px 8px;
+    color: white;
+    background-color: $color-primary;
+    height: 30px;
+    display: none;
+}

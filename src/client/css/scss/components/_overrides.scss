@@ -1,0 +1,29 @@
+// Styles specifically for overriding Bootstrap and/or browser defaults
+
+/***bootstrap overrides ***/
+select,
+input,
+textarea,
+div.detailsForm  input,
+div.detailsForm select,
+div.detailsForm textarea {
+    margin-bottom: 0px;
+}
+
+#body {
+    background: white;
+}
+
+.tab-content {
+    margin-top: 20px;
+}
+
+.panel-footer {
+    min-height:50px;
+}
+
+ul {
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+}

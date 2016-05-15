@@ -65,6 +65,15 @@ To update pvsio-web to the latest version, open a Terminal window, and execute t
 
     git pull
 
+
+Running for development
+-----------------------
+In order to automatically run the required compilation steps for the frontend (primarily compiling the CSS styling), the `dev` Grunt task should be used (after installing the required libraries with `npm install`):
+
+    grunt dev
+
+This will also automatically run the standard `start.sh` script, described above.
+
 Examples
 --------
 Realistic simulations created with PVSio-web can be watched in this youtube video:
@@ -112,4 +121,3 @@ To test the server, run the following command in a Terminal window
 Uninstallation :(
 --------------
 To uninstall, delete the pvsio-web folder from your computer.
-

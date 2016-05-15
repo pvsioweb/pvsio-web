@@ -1,0 +1,68 @@
+#header {
+    @extend .noselect;
+
+    position: fixed;
+    z-index: 1024;
+    min-width: 1024px;
+    max-height: 54px;
+    width: 100%;
+
+    .btn {
+        @extend %dark-hover;
+    }
+
+    .btn-group > span {
+        position: absolute;
+        width: 712px;
+        padding-left: 216px;
+        padding-top: 8px;
+    }
+}
+
+#projectTitle {
+    width: 100%;
+    background-color: $color-primary;
+    background-image: url("toolbar.png");
+    background-repeat: no-repeat;
+    padding: 0px;
+    color: white;
+    font: 20px sans-serif;
+    opacity: 0.96;
+    display: inline-flex;
+    display: -webkit-flex;
+
+    .btn.txtProjectName {
+        font-size: large;
+        cursor: default;
+        padding-bottom: 1px;
+        min-height: 52px;
+        padding-top: 14px;
+
+        &:hover {
+            background-color: transparent;
+            color: inherit;
+        }
+    }
+
+    a {
+        background-color: $color-primary;
+        color: #f5eee5;
+        min-height: 52px;
+        padding-top: 16px;
+
+        &:hover {
+            color: white;
+        }
+    }
+
+    #btnReconnect {
+        background: lawngreen;
+        color: black;
+
+        @extend %dark-hover;
+    }
+
+    .btn.disconnected {
+        background: $color-warning;
+    }
+}

@@ -1,0 +1,33 @@
+// Classes that can either be @extend-ed from other files or used directly on elements (i.e. as modifier classes)
+
+%dark-hover {
+    &:hover {
+        background: black;
+        color: white;
+    }
+}
+
+.noselect {
+    user-select: none;
+}
+
+.hide {
+    display:none;
+}
+
+.center {
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.right {
+    float: right;
+}
+
+.left {
+    float: left;
+}
+
+.shadow {
+    box-shadow: 0px 0px 40px 0px rgba(#444, 0.8);
+}
