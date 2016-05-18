@@ -5,7 +5,7 @@
 
 #model-editor-container .ljs-right {
     width: 20%;
-    background: white;
+    background: $color-bg-lighter;
 }
 
 fileListItem.hide {
@@ -13,7 +13,7 @@ fileListItem.hide {
 }
 
 #pvsFiles {
-    display:inline-block;
+    display: inline-block;
     max-height: 400px;
     width: 100%;
     height: 100%;
@@ -22,43 +22,43 @@ fileListItem.hide {
     font-size: 15px;
     padding-left: 5px;
     color: #999;
-    background-color: white;
+    background-color: $color-bg-lighter;
 }
 
 #pvsFiles .treelist {
     min-width: 100%;
 }
 
-#editor {
-    z-index: 30;
-    width: 100%;
-    min-height: 400px;
-    max-height: 400px;
-    overflow: hidden;
-    border: 1px solid #ddd;
-    display: inline-block;
-}
-
+#editor,
 #imageViewer {
     z-index: 30;
     width: 100%;
-    height: 400px;
-    border: 1px solid #ddd;
+    border: 1px solid $color-grey-lighter;
     display: inline-block;
+}
+
+#editor {
+    min-height: 400px;
+    max-height: 400px;
+    overflow: hidden;
+}
+
+#imageViewer {
+    height: 400px;
 }
 
 #editorToolbar {
     padding: 4px;
     min-width: 1024px;
-    background-color: whitesmoke;
+    background-color: $color-bg-light;
 
-	button {
-	    @extend %dark-hover;
+    button {
+        @extend %dark-hover;
 
-		&:hover {
-			text-shadow: none;
-		}
-	}
+        &:hover {
+            text-shadow: none;
+        }
+    }
 }
 
 #editor-search-bar {

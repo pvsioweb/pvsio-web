@@ -1,4 +1,4 @@
-span.toggle-collapse {
+.toggle-collapse {
     display: inline-block;
     width: 25px;
     height: 25px;
@@ -7,24 +7,24 @@ span.toggle-collapse {
 }
 
 .collapsible-panel-parent {
-    background-color: whitesmoke;
+    background-color: $color-bg-light;
     width: 100%;
-    overflow:hidden;
-    border:1px solid #ccc;
+    overflow: hidden;
+    border: 1px solid $color-grey-light;
     margin-bottom: 5px;
-}
 
-.collapsible-panel-parent span.header {
-    margin-left: 10px;
-    display:inline-block;
-}
+    > .header {
+        @extend .noselect;
 
-div.header {
-    @extend .noselect;
-    
-    padding: 5px;
-    min-height: 36px;
-    border:1px solid #4088B6;
-    background-color: white;
-    cursor: pointer;
+        padding: 5px;
+        min-height: 36px;
+        border: 1px solid $color-primary-light;
+        background-color: $color-bg-lighter;
+        cursor: pointer;
+
+        .header {
+            margin-left: 10px;
+            display: inline-block;
+        }
+    }
 }

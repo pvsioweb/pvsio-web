@@ -2,8 +2,8 @@
 
 %dark-hover {
     &:hover {
-        background: black;
-        color: white;
+        background: $color-bg-darker;
+        color: $color-fg-light;
     }
 }
 
@@ -12,7 +12,7 @@
 }
 
 .hide {
-    display:none;
+    display: none;
 }
 
 .center {
@@ -29,5 +29,5 @@
 }
 
 .shadow {
-    box-shadow: 0px 0px 40px 0px rgba(#444, 0.8);
+    box-shadow: 0 0 40px 0 rgba(#444, 0.8);
 }

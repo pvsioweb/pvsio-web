@@ -3,15 +3,12 @@
 /***bootstrap overrides ***/
 select,
 input,
-textarea,
-div.detailsForm  input,
-div.detailsForm select,
-div.detailsForm textarea {
-    margin-bottom: 0px;
+textarea {
+    margin-bottom: 0;
 }
 
 #body {
-    background: white;
+    background: $color-bg-lighter;
 }
 
 .tab-content {
@@ -19,7 +16,7 @@ div.detailsForm textarea {
 }
 
 .panel-footer {
-    min-height:50px;
+    min-height: 50px;
 }
 
 ul {

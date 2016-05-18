@@ -1,13 +1,13 @@
 #stateMachineMenu {
     position: absolute;
     float: left;
-    margin-left: 0px;
+    margin-left: 0;
     width: 1000px;
 }
 
 #ContainerStateMachine  {
     border: 2px solid;
-    background: white;
+    background: $color-bg-lighter;
     min-width: 934px;
     border-radius: 4px;
     height: 844px;
@@ -28,7 +28,7 @@
 }
 
 .EmuchartsFilter {
-    color: black;
+    color: $color-fg-dark;
     padding: 2px 0 2px 10px;
     margin-top: -6px;
     margin-bottom: -4px;
@@ -45,7 +45,7 @@
 }
 
 #MouseOverlay {
-     width: 20px;
+    width: 20px;
     height: 20px;
     position: absolute;
     opacity: 0.9;
@@ -75,12 +75,11 @@
     text-align: center;
 }
 
-
 #stateMachineFilterBar {
     position: absolute;
     padding-left: 704px;
     height: 28px;
-    background-color: black;
+    background-color: $color-bg-darker;
 }
 
 // end unused

@@ -1,7 +1,7 @@
 // Dialogs and general overlay styling
 
 .dialog {
-    background: white;
+    background: $color-bg-lighter;
     width: 500px;
 }
 
@@ -10,26 +10,26 @@
 }
 
 .scrollable-dialog {
-	.panel-body {
-	    max-height: 600px;
-	    overflow-y: auto;
-	    overflow-x: hidden;
-	}
+    .panel-body {
+        max-height: 600px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
 
-	.thumbnail {
-	    text-align: center;
-	}
+    .thumbnail {
+        text-align: center;
+    }
 
-	.thumbnail > .image {
-	    height: 150px;
-	    overflow: hidden;
-	}
+    .thumbnail > .image {
+        height: 150px;
+        overflow: hidden;
+    }
 
-	.thumbnail img {
-	    max-height: 150px;
-	    max-width: 100%;
-	    overflow-y: hidden;
-	}
+    .thumbnail img {
+        max-height: 150px;
+        max-width: 100%;
+        overflow-y: hidden;
+    }
 
     .caption button {
         width: 100%;
@@ -44,8 +44,8 @@
 .overlay {
     display: table;
     position: absolute;
-    top:0px;
-    left: 0px;
+    top: 0;
+    left: 0;
     height: 100%;
     width: 100%;
     z-index: 2000000;

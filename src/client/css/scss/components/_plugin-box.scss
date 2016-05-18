@@ -1,8 +1,8 @@
-li.plugin-box {
+.plugin-box {
     @extend %dark-hover;
 }
 
-div.plugins {
+.plugins {
     @extend .noselect;
 
     white-space: nowrap;
@@ -10,8 +10,8 @@ div.plugins {
     padding-top: 6px;
     padding-left: 12px;
     min-height: 36px;
-    border:1px solid #4088B6;
-    background-color: white;
+    border: 1px solid $color-primary-light;
+    background-color: $color-bg-lighter;
     cursor: default;
 }
 
@@ -25,6 +25,7 @@ div.plugins {
 .plugins-group .list-group-item input {
     cursor: pointer;
 }
+
 .plugins-group .list-group-item label {
     cursor: pointer;
 }

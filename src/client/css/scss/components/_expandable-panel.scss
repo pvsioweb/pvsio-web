@@ -2,30 +2,26 @@
 
 .expandable-panel {
     width: 100%;
-    position:relative;
-    overflow:auto;
-    border:1px solid #999;
+    position: relative;
+    overflow: auto;
+    border: 1px solid #999;
 }
 
 .expandable-panel-heading {
     @extend .noselect;
+    @extend %dark-hover;
 
-    width:100%;
-    cursor:pointer;
-    min-height:32px;
-    clear:both;
-    background-color:#E5E5E5;
+    width: 100%;
+    cursor: pointer;
+    min-height: 32px;
+    clear: both;
+    background-color: $color-grey-lighter;
     padding-left: 16px;
     padding-top: 4px;
     white-space: nowrap;
 
-	&:hover {
-	    color: white;
-	    background-color: black;
-	}
-
-	span {
-	    font-size:small;
-	    line-height:20px;
-	}
+    span {
+        font-size: $font-size-small;
+        line-height: 20px;
+    }
 }

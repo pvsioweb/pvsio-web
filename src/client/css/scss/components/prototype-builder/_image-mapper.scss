@@ -7,11 +7,11 @@
     }
 
     .tr {
-        cursor:ne-resize;
+        cursor: ne-resize;
     }
 
     .tl {
-        cursor:nw-resize;
+        cursor: nw-resize;
     }
 
     .br {
@@ -23,7 +23,7 @@
     }
 
     g.selected .region {
-        stroke: yellow;
+        stroke: #ffff00;
         stroke-width: 2.5px;
     }
 

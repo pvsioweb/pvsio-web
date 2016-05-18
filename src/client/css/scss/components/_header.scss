@@ -24,15 +24,14 @@
     background-color: $color-primary;
     background-image: url("toolbar.png");
     background-repeat: no-repeat;
-    padding: 0px;
-    color: white;
+    padding: 0;
+    color: $color-fg-light;
     font: 20px sans-serif;
     opacity: 0.96;
     display: inline-flex;
-    display: -webkit-flex;
 
     .btn.txtProjectName {
-        font-size: large;
+        font-size: $font-size-large;
         cursor: default;
         padding-bottom: 1px;
         min-height: 52px;
@@ -51,15 +50,15 @@
         padding-top: 16px;
 
         &:hover {
-            color: white;
+            color: #fff;
         }
     }
 
     #btnReconnect {
-        background: lawngreen;
-        color: black;
-
         @extend %dark-hover;
+
+        background: lawngreen;
+        color: $color-fg-dark;
     }
 
     .btn.disconnected {

@@ -2,7 +2,7 @@
 
 .emuchart {
     svg {
-        background-color: #FFF;
+        background-color: $color-bg-lighter;
         cursor: default;
         user-select: none;
 
@@ -15,14 +15,14 @@
         }
     }
 
-    path.link {
+    .link {
         fill: none;
         stroke: #000;
         stroke-width: 1px;
         cursor: default;
 
         &.selected {
-            stroke-dasharray: 10,2;
+            stroke-dasharray: 10, 2;
         }
 
         &.dragline {
@@ -35,11 +35,11 @@
     }
 
     text {
-        font: 12px sans-serif;
+        font: $font-size-small sans-serif;
         pointer-events: none;
 
         &.id {
-          text-anchor: middle;
+            text-anchor: middle;
             font-weight: bold;
         }
     }

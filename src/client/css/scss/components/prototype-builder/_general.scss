@@ -16,7 +16,7 @@
 }
 
 .dndcontainer {
-    background: white;
+    background: $color-bg-lighter;
     text-align: center;
     position: absolute;
     border: 4px dashed teal;
@@ -27,68 +27,17 @@
 }
 
 #specDragAndDrop.dndcontainer {
-    display:none;
+    display: none;
 }
 
 .dndcontainer span {
-    display:block;
+    display: block;
     margin-top: 150px;
     width: 400px;
     font-size: 30px;
     font-family: Times, serif;
     line-height: 1.1;
     text-align: center;
-}
-
-// TODO: The tab styling is overly complex and should be reworked (probably just so they all have a common class)
-
-#btnBuilderView.active a,
-#btnSimulatorView.active a,
-#btnWidgetsView.active a,
-#btnTimersView.active a {
-    color: white;
-    background-color: $color-primary;
-    border: none;
-}
-
-#btnBuilderView.active span,
-#btnSimulatorView.active span {
-    position: absolute;
-    top: 30px;
-    left: 46px;
-    color: white;
-    display: inline;
-}
-
-#btnWidgetsView.active span,
-#btnTimersView.active span {
-    position: absolute;
-    top: 30px;
-    left: 36px;
-    color: white;
-    display: inline;
-}
-
-#btnSimulatorView.active span {
-    left: 54px;
-}
-
-#btnTimersView.active span {
-    left: 30px;
-}
-
-#btnBuilderView span,
-#btnSimulatorView span,
-#btnWidgetsView span,
-#btnTimersView span {
-    display: none;
-}
-
-#btnBuilderView a,
-#btnSimulatorView a,
-#btnWidgetsView a,
-#btnTimersView a {
-    color: #898989;
 }
 
 svg.image-map-layer {
