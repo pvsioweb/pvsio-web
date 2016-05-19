@@ -575,10 +575,15 @@ define(function (require, exports, module) {
                                     //from third case on, scroll through the proper list and push the new transition 
                                     if (transitions[i][j].id === parsedTransition.id) {
                                         tmp = [];
-                                        transitions[i].map(function (v) {
-                                            tmp.push(v);
-                                            return;
-                                        });
+                                        var k;
+                                        var v = transitions[i];
+                                        for (k = 0; k < v.length; k++) {
+                                            tmp.push(v[k]);
+                                        }
+//                                        transitions[i].map(function (v) {
+//                                            tmp.push(v);
+//                                            return;
+//                                        });
                                         tmp.push(parsedTransition);
                                         transitions[i] = tmp;
                                         break;
