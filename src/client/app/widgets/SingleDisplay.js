@@ -38,9 +38,9 @@ define(function (require, exports, module) {
      *          <li>font (String): display font type (default is "sans-serif")</li>
      *          <li>fontColor (String): display font color (default is white, "#fff")</li>
      *          <li>align (String): text alignment (default is "center")</li>
-     *          <li>inverted (Bool): if true, the text has inverted colors, 
+     *          <li>inverted (Bool): if true, the text has inverted colors,
      *              i.e., fontColor becomes backgroundColor, and backgroundColor becomes fontColor (default is false)</li>
-     *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>                
+     *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
      * @memberof module:SingleDisplay
      * @instance
      */
@@ -64,7 +64,7 @@ define(function (require, exports, module) {
         }
         this.blinking = opt.blinking || false;
         this.textBaseline = "middle";
-        var elemClass = id + " prevent_selection ";
+        var elemClass = id + " noselect ";
         if (opt.touchscreen && opt.touchscreen.classStyle) { elemClass += opt.touchscreen.classStyle; }
         if (this.blinking) { elemClass += " blink"; }
         this.div = d3.select(this.parent)
@@ -97,12 +97,12 @@ define(function (require, exports, module) {
                 _this.div.style("background-color", "steelblue").style("color", "white");
             }).on("mouseout", function() {
                 _this.div.style("background-color", _this.backgroundColor).style("color", _this.fontColor);
-            });            
+            });
         }
         this.txt = "";
         return this;
     }
-    
+
     SingleDisplay.prototype.invertColors = function () {
         var tmp = this.backgroundColor;
         this.backgroundColor = this.fontColor;
@@ -118,7 +118,7 @@ define(function (require, exports, module) {
         var elemIsBlinking = (document.getElementById(this.id).getAttribute("class").indexOf("blink") >= 0);
         return this.renderGlyphicon(this.txt, { blinking: elemIsBlinking });
     };
-    
+
     SingleDisplay.prototype.render = function (txt, opt) {
         function renderln(data, opt) {
             opt = opt || {};
@@ -166,7 +166,7 @@ define(function (require, exports, module) {
         this.reveal();
         return this;
     };
-    
+
     SingleDisplay.prototype.renderGlyphicon = function (icon, opt) {
         opt = opt || {};
         this.txt = icon;
@@ -183,11 +183,11 @@ define(function (require, exports, module) {
         span.style.height = this.height;
         span.style.fontSize = 0.8 * this.height + "px";
         d3.select("#" + this.id + "_canvas").style("display", "none");
-        d3.select("#" + this.id + "_span").style("display", "block");        
+        d3.select("#" + this.id + "_span").style("display", "block");
         this.reveal();
         return this;
     };
-    
+
     SingleDisplay.prototype.renderMultiline = function (txt, opt) {
         function clearContext(context, width, height) {
             context.save();
@@ -240,7 +240,7 @@ define(function (require, exports, module) {
             }
         }
         // set blinking
-        var elemClass = document.getElementById(this.id).getAttribute("class");        
+        var elemClass = document.getElementById(this.id).getAttribute("class");
         if (opt.blinking || this.blinking) {
             if (elemClass.indexOf("blink") < 0) {
                 elemClass = elemClass + " blink";
@@ -248,9 +248,9 @@ define(function (require, exports, module) {
         } else {
             elemClass = elemClass.replace(" blink", "");
         }
-        document.getElementById(this.id).setAttribute("class", elemClass);        
+        document.getElementById(this.id).setAttribute("class", elemClass);
         d3.select("#" + this.id + "_canvas").style("display", "block");
-        d3.select("#" + this.id + "_span").style("display", "none");        
+        d3.select("#" + this.id + "_span").style("display", "none");
         this.reveal();
         return this;
     };

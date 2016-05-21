@@ -51,7 +51,7 @@ define(function (require, exports, module) {
         ConstantsTable         = require("plugins/emulink/tools/ConstantsTable"),
         ExportDiagram          = require("plugins/emulink/tools/ExportDiagram"),
         MIME                   = require("util/MIME").getInstance();
-    
+
     var instance;
     var fs;
     var projectManager;
@@ -153,7 +153,7 @@ define(function (require, exports, module) {
         if (emuchartsManager.getIsPIM()) {
             return pimEmulink.editState(theState);
         }
-        
+
         displayRenameState.create({
             header: "Renaming state " + theState.name.substring(0, maxLen) + "...",
             textLabel: {
@@ -187,7 +187,7 @@ define(function (require, exports, module) {
         if (emuchartsManager.getIsPIM()) {
             return pimEmulink.editState(theState);
         }
-        
+
         displayChangeStateColor.create({
             header: "Renaming state " + theState.name.substring(0, maxLen) + "...",
             textLabel: {
@@ -284,7 +284,7 @@ define(function (require, exports, module) {
         var newTransitionName = emuchartsManager.getFreshInitialTransitionName();
         emuchartsManager.add_initial_transition(newTransitionName, event.target.id);
     }
-    
+
     function stateAdded_handler(event) {
         machineStatesTable.setMachineStates(emuchartsManager.getStates());
     }
@@ -369,14 +369,14 @@ define(function (require, exports, module) {
         pimImporter = new PIMImporter();
         pimEmulink = new PIMEmulink(emuchartsManager);
         pimTestGenerator = new PimTestGenerator("pim_Test_Gen");
-        
+
         exportDiagram = new ExportDiagram();
     }
 
     Emulink.prototype.getName = function () {
         return "EmuCharts Editor";
     };
-    
+
     function editVariable (variableID) {
         var variableScopes = emuchartsManager.getVariableScopes();
         var theVariable = emuchartsManager.getVariable(variableID);
@@ -514,7 +514,7 @@ define(function (require, exports, module) {
                 editConstant(theConstant);
             });
         }
-        
+
         // bootstrap buttons
         function openChart(callback) {
             function doOpen(err, res) {
@@ -598,7 +598,7 @@ define(function (require, exports, module) {
             // set Constants
             constantsTable.setConstants(emuchartsManager.getConstants());
         }
-        
+
         d3.select("#btnNewEmuchart").on("click", function () {
             d3.select("#EmuchartLogo").classed("hidden", true);
             d3.select("#graphicalEditor").classed("hidden", false);
@@ -1011,7 +1011,7 @@ define(function (require, exports, module) {
                 // just remove window
                 view.remove();
             });
-        });  
+        });
         d3.select("#btn_menuEditVariable").on("click", function () {
             document.getElementById("menuContext").children[1].style.display = "none";
             // step 1: ask to select the variable that needs to be edited
@@ -1407,7 +1407,7 @@ define(function (require, exports, module) {
             } else {
                 console.log("Warning, Bless model is undefined.");
             }
-        });        
+        });
         d3.select("#btn_menuMisraCPrinter").on("click", function () {
             var emucharts = {
                 name: ("emucharts_" + projectManager.project().name() + "_MisraC"),
@@ -1443,7 +1443,7 @@ define(function (require, exports, module) {
             } else {
                 console.log("Warning, MisraC code is undefined.");
             }
-        }); 
+        });
         //-- Zoom menu -----------------------------------------------------------
         d3.select("#menuZoom").on("mouseover", function () {
             document.getElementById("menuZoom").children[1].style.display = "block";
@@ -1471,41 +1471,42 @@ define(function (require, exports, module) {
         });
 
         //-- tables
+        // TODO: Just passing by, but this should really be generalised to a function
         d3.select("#btnStates").on("click", function () {
-            d3.select("#btnStates").attr("class", "active");
-            d3.select("#btnTransitions").attr("class", "");
-            d3.select("#btnVariables").attr("class", "");
-            d3.select("#btnConstants").attr("class", "");
+            d3.select("#btnStates").classed("active", true);
+            d3.select("#btnTransitions").classed("active", false);
+            d3.select("#btnVariables").classed("active", false);
+            d3.select("#btnConstants").classed("active", false);
             d3.select("#MachineStates").style("display", "block");
             d3.select("#TransitionsTable").style("display", "none");
             d3.select("#StateAttributes").style("display", "none");
             d3.select("#ConstantsTable").style("display", "none");
         });
         d3.select("#btnTransitions").on("click", function () {
-            d3.select("#btnStates").attr("class", "");
-            d3.select("#btnTransitions").attr("class", "active");
-            d3.select("#btnVariables").attr("class", "");
-            d3.select("#btnConstants").attr("class", "");
+            d3.select("#btnStates").classed("active", false);
+            d3.select("#btnTransitions").classed("active", true);
+            d3.select("#btnVariables").classed("active", false);
+            d3.select("#btnConstants").classed("active", false);
             d3.select("#MachineStates").style("display", "none");
             d3.select("#TransitionsTable").style("display", "block").classed("active");
             d3.select("#StateAttributes").style("display", "none");
             d3.select("#ConstantsTable").style("display", "none");
         });
         d3.select("#btnVariables").on("click", function () {
-            d3.select("#btnStates").attr("class", "");
-            d3.select("#btnTransitions").attr("class", "");
-            d3.select("#btnVariables").attr("class", "active");
-            d3.select("#btnConstants").attr("class", "");
+            d3.select("#btnStates").classed("active", false);
+            d3.select("#btnTransitions").classed("active", false);
+            d3.select("#btnVariables").classed("active", true);
+            d3.select("#btnConstants").classed("active", false);
             d3.select("#MachineStates").style("display", "none");
             d3.select("#TransitionsTable").style("display", "none");
             d3.select("#StateAttributes").style("display", "block").classed("active");
             d3.select("#ConstantsTable").style("display", "none");
         });
         d3.select("#btnConstants").on("click", function () {
-            d3.select("#btnStates").attr("class", "");
-            d3.select("#btnTransitions").attr("class", "");
-            d3.select("#btnVariables").attr("class", "");
-            d3.select("#btnConstants").attr("class", "active");
+            d3.select("#btnStates").classed("active", false);
+            d3.select("#btnTransitions").classed("active", false);
+            d3.select("#btnVariables").classed("active", false);
+            d3.select("#btnConstants").classed("active", true);
             d3.select("#MachineStates").style("display", "none");
             d3.select("#TransitionsTable").style("display", "none");
             d3.select("#StateAttributes").style("display", "none");
@@ -1521,7 +1522,7 @@ define(function (require, exports, module) {
             d3.select("#btnViewHideTable").style("display", "block");
             d3.select("#btnViewRevealTable").style("display", "none");
         });
-        
+
         //-- PIM -----------------------------------------------------------------
         d3.select("#btn_toPIM").on("click", function () {
             if (emuchartsManager.getIsPIM()) {

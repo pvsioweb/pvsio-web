@@ -1,0 +1,61 @@
+#builder-controls.ljs-left {
+    width: 20%;
+    background: $color-bg-lighter;
+    height: 480px;
+    overflow-y: auto;
+}
+
+#widgetsList,
+#timersList {
+    padding: 0;
+    margin: 4 0 2;
+    max-height: 50%;
+    margin-right: 6px;
+
+    li {
+        @extend %dark-hover;
+
+        cursor: pointer;
+
+        &.selected {
+            background: $color-primary;
+            color: $color-fg-light;
+
+            &:hover {
+                color: $color-fg-light;
+                background: $color-primary;
+            }
+        }
+    }
+}
+
+.widgets {
+    padding: 0;
+    padding-left: 18px;
+    text-decoration: none;
+    color: $color-fg-light;
+    font-weight: bold;
+    display: block;
+
+    border-right: 70px solid transparent;
+    border-bottom: 40px solid #4c4c4c;
+
+    height: 0;
+    line-height: 40px;
+}
+
+// TODO: are these classes actually used?
+.newTimer,
+.newWidget {
+    @extend %dark-hover;
+
+    float: right;
+    color: $color-fg-light;
+    background-color: $color-primary;
+    margin-top: 2px;
+}
+
+.coordTable {
+    display: inline-block;
+    width: 140px;
+}
