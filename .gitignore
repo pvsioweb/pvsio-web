@@ -25,3 +25,4 @@ pvsio-web.iml
 src/server/lib/glassfish4/*
 examples/projects/*
 .gitignore
+src/client/**/*.css.map
