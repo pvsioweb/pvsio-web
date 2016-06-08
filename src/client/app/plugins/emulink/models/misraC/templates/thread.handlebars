@@ -16,13 +16,13 @@ const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if transitions}}
 /* definition of auxiliary functions */
-void enter(const MachineState newStateLabel, state *st) {
+void enter(MachineState newStateLabel, state *st) {
 #ifdef DEBUG
     debug_print("Entering state nr. '%u'.\n", newStateLabel);
 #endif
     st->current_state = newStateLabel;
 }
-void leave(const MachineState currentStateLabel, state *st) {
+void leave(MachineState currentStateLabel, state *st) {
 #ifdef DEBUG    
     debug_print("Leaving state nr. '%u'.\n", currentStateLabel);
 #endif    

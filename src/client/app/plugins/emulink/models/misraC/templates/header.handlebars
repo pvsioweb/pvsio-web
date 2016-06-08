@@ -37,14 +37,14 @@ typedef struct{ {{#each structureVar}}
  *    \return void
  *    \sa leave()
  */
-void enter(const MachineState newStateLabel, state *st);
+void enter(MachineState newStateLabel, state *st);
 /** 'Leave' auxiliary function.
  *    \param currentStateLabel label to update the previous state.
  *    \param st state structure pointer
  *    \return void
  *    \sa enter()
  */
-void leave(const MachineState currentStateLabel, state *st);{{/if}}
+void leave(MachineState currentStateLabel, state *st);{{/if}}
 
 {{#if initial_transitions}}/** Initialiser.
  *    \param st state structure pointer
