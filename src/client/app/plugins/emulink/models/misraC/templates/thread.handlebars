@@ -62,8 +62,6 @@ state init(state *st){
 {{#if transitions}}/* definition of transition functions */
 {{#each transitions}}{{#if id}}state {{id}}(state *st) {
     assert( st->current_state == {{source.name}});
-    {{~#if condition}}
-    assert( {{&condition}} );{{~/if}}
 {{~#if condition}}
     if ({{&condition}}) {
         leave({{source.name}}, st);
@@ -80,7 +78,7 @@ state init(state *st){
     {{&.}};
 #ifdef DEBUG    
     debug_print("Action {{&.}} issued.\n");
-#endiaaaf{{~/each}}
+#endif{{~/each}}
   
     enter({{target.name}}, st);
 {{~/if}}
