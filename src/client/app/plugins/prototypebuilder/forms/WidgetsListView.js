@@ -1,49 +1,90 @@
 /**
- * View that renders the list of widgets currently on the simulator
- * @author Patrick Oladimeji
- * @date 9/17/14 14:40:29 PM
+ * View that lists all widgets within a prototype
+ * @author Nathaniel Watson
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, Event*/
+/*global define, Handlebars, Backbone */
 define(function (require, exports, module) {
     "use strict";
+    var template = require("text!./templates/widgetList.handlebars");
     var WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager();
 
-    function WidgetsListView(widgets) {
-        var el = d3.select("#widgetsList").html("").append("ul");
+    var WidgetsListView = Backbone.View.extend({
+        // TODO: nwatson: add some sort of clean-up function that removes listener callbacks when the view is removed (this will depend on how the widgetmanager is implemented)
 
-        function labelFunction(widget) {
+        initialize: function (data) {
+            this.d3El = d3.select(this.el);
+            this.$el.addClass("widgetsList noselect");
+			this.template = Handlebars.compile(template);
+            this.widgets = data.widgets || [];
+
+            var _this = this;
+
+            WidgetManager.addListener("WidgetModified", function (event) {
+                switch (event.action) {
+                case "create":
+                    _this.widgets.push(event.widget);
+                    break;
+                case "remove":
+                    var index = _this.widgets.indexOf(event.widget);
+                    if (index > -1) {
+                        _this.widgets.splice(index, 1);
+                    }
+                    break;
+                default:
+                    break;
+                }
+                _this.update();
+            }).addListener("WidgetSelected", function (event) {
+                _this.selectWidget(event.widget, event.event.shiftKey);
+            }).addListener("WidgetSelectionCleared", function (event) {
+                _this.d3El.selectAll("li").classed("selected", false);
+            });
+        },
+
+        render: function (data) {
+            this.$el.html(this.template());
+            this.update();
+            return this;
+        },
+
+        selectWidget: function(widget, add) {
+            var element = this.listItems.filter(function (d) { return d.id === widget.id; });
+
+            if (!add) {
+                this.listItems.classed("selected", false);
+            }
+
+            element.classed("selected", true);
+        },
+
+        labelFunction: function (widget) {
             var label = widget.type() + ": ";
             if (widget.type() === "display") {
                 label += widget.displayKey();
-            } else { label += widget.functionText(); }
+            } else {
+                label += widget.functionText();
+            }
             return label;
-        }
+        },
 
-        function update(data) {
-            var listItems = el.selectAll("li.list-group-item").data(data, function (widget) {
+        update: function () {
+            var _this = this;
+
+            this.listItems = this.d3El.selectAll("li.list-group-item").data(this.widgets, function (widget) {
                 return widget.id();
             });
-            var enteredItems = listItems.enter();
-            var exitedItems = listItems.exit();
+            var enteredItems = this.listItems.enter();
+            var exitedItems = this.listItems.exit();
             enteredItems.append("li").attr("class", "list-group-item")
                 .attr("widget-id", function (w) {
-                    d3.selectAll("#widgetsList ul li").classed("selected", false);
+                    _this.d3El.selectAll("ul li").classed("selected", false);
                     return w.id();
                 }).classed("selected", true)
-                .text(labelFunction)
+                .text(this.labelFunction)
                 .on("click", function (w) {
                     var event = d3.event;
-                    if (!event.shiftKey && !d3.select(this).classed("selected")) {
-                        d3.selectAll("g.selected").classed("selected", false);
-                        d3.selectAll("#widgetsList ul li").classed("selected", false);
-                    } else if (d3.select(w.parentGroup()).classed("selected")) {
-                        d3.selectAll(".subselected").classed("subselected", false);
-                        d3.select(this).classed("subselected", true);
-                        d3.select(w.parentGroup()).classed("subselected", true);
-                    }
-                    d3.select(this).classed("selected", true);
-                    d3.select(w.parentGroup()).classed("selected", true);
+                    WidgetManager.fire({type: "WidgetSelected", widget: w, event: event});
                     event.preventDefault();
                     event.stopPropagation();
                 }).on("dblclick", function (w) {
@@ -53,43 +94,15 @@ define(function (require, exports, module) {
                     event.preventDefault();
                     event.stopPropagation();
                 });
-            listItems.text(labelFunction);
+            this.listItems.text(this.labelFunction);
             exitedItems.transition().duration(220).style("opacity", 0).remove();
+        },
+
+        setWidgets: function(widgets) {
+            this.widgets = widgets || [];
+            this.update();
         }
+    });
 
-        update(widgets);
-        el.selectAll("li.list-group-item").classed("selected", false);
-
-        WidgetManager.addListener("WidgetModified", function (event) {
-            switch (event.action) {
-            case "create":
-                widgets.push(event.widget);
-                break;
-            case "remove":
-                var index = widgets.indexOf(event.widget);
-                if (index > -1) {
-                    widgets.splice(index, 1);
-                }
-                break;
-            default:
-                break;
-            }
-            update(widgets);
-        }).addListener("WidgetSelected", function (event) {
-            var e = new Event("click");
-            e.shiftKey = event.event.shiftKey;
-            var node = el.select("li[widget-id='" + event.widget.id() + "']").node();
-            node.dispatchEvent(e);
-        }).addListener("WidgetSelectionCleared", function (event) {
-            d3.selectAll("#widgetsList ul li").classed("selected", false);
-        });
-    }
-
-
-    module.exports = {
-        create: function () {
-            var widgets = WidgetManager.getAllWidgets();
-            return new WidgetsListView(widgets);
-        }
-    };
+    return WidgetsListView;
 });

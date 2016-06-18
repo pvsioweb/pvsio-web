@@ -89,7 +89,7 @@ define(function (require, exports, module) {
                     widget.click({ callback: renderResponse });
                     halo(widget.id());
                     d3.event.preventDefault();
-                    d3.event.stopPropagation();                    
+                    d3.event.stopPropagation();
                 } else if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
                     widget.pressAndHold({ callback: renderResponse });
                     halo(widget.id());
@@ -104,7 +104,7 @@ define(function (require, exports, module) {
                 var widget = wm._keyCode2widget[eventKeyCode];
                 if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
                     widget.release({ callback: renderResponse });
-                }            
+                }
                 haloOff();
             }
         });
@@ -112,7 +112,7 @@ define(function (require, exports, module) {
     function halo (buttonID) {
         var coords = d3.select("." + buttonID).attr("coords");
         coords = coords.split(",");
-        var pos = {x1: +coords[0], y1: +coords[1], x2: +coords[2], y2: coords[3]};        
+        var pos = {x1: +coords[0], y1: +coords[1], x2: +coords[2], y2: coords[3]};
         var w = pos.x2 - pos.x1, hrad = w / 2, h = pos.y2 - pos.y1, vrad = h / 2, brad = hrad + "px " + vrad + "px";
         var mark = d3.select(".animation-halo");
         if (mark.empty()) {
@@ -121,12 +121,12 @@ define(function (require, exports, module) {
         mark.style("top", pos.y1 + "px").style("left", pos.x1 + "px")
             .style("width", (pos.x2 - pos.x1) + "px").style("height", (pos.y2 - pos.y1) + "px")
             .style("border-top-left-radius", brad).style("border-top-right-radius", brad)
-            .style("border-bottom-left-radius", brad).style("border-bottom-right-radius", brad);        
+            .style("border-bottom-left-radius", brad).style("border-bottom-right-radius", brad);
     }
     function haloOff (buttonID) {
         d3.select(".animation-halo").remove();
     }
-        
+
     /**
         @class WidgetManager
         @classdesc WidgetManager deals with interacting with user interface widgets used for prototyping picture based uis.
@@ -180,7 +180,7 @@ define(function (require, exports, module) {
                     }
                     if (w.keyCode) {
                         wm._keyCode2widget[w.keyCode] = widget;
-                    }                        
+                    }
                 } else if (w.type === "display") {
                     widget = new Display(w.id);
                 } else if (w.type === "storyboard") {
@@ -212,7 +212,7 @@ define(function (require, exports, module) {
                     });
                 });
             }
-            
+
             installKeypressHandler(this);
         }
     };
@@ -220,7 +220,7 @@ define(function (require, exports, module) {
     function round(v) {
         return Math.round(v * 10) / 10;
     }
-    
+
     WidgetManager.prototype.updateMapCreator = function (scale, cb) {
         scale = scale || 1;
         var wm = this, event = {type: "WidgetModified"};
@@ -358,7 +358,7 @@ define(function (require, exports, module) {
     WidgetManager.prototype.editTimer = function (emuTimer) {
         handleTimerEdit(emuTimer, wm);
     };
-    
+
     /**
         Edits the specified widget.
         @param {Widget} widget The widget to be edited.

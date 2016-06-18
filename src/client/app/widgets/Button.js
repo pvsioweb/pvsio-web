@@ -120,7 +120,7 @@ define(function (require, exports, module) {
     Button.prototype.release = function (opt) {
         opt = opt || {};
         var f = this.functionText();
-        
+
         ButtonActionsQueue.queueGUIAction("release_" + f, opt.callback);
         Recorder.addAction({
             id: this.id(),
@@ -131,7 +131,7 @@ define(function (require, exports, module) {
         mouseup(d3.event);
         return this;
     };
-    
+
     /**
      * @function press
      * @description API to simulate a single press action on the button
@@ -140,7 +140,7 @@ define(function (require, exports, module) {
     Button.prototype.press = function (opt) {
         opt = opt || {};
         var f = this.functionText();
-        
+
         ButtonActionsQueue.queueGUIAction("press_" + f, opt.callback);
         Recorder.addAction({
             id: this.id(),
@@ -150,7 +150,7 @@ define(function (require, exports, module) {
         });
         return this;
     };
-    
+
     /**
      * @function pressAndHold
      * @description API to simulate a continuous press action on the button
@@ -160,7 +160,7 @@ define(function (require, exports, module) {
         opt = opt || {};
         var f = this.functionText(),
             widget = this;
-        
+
         this.press(opt);
         timerTickFunction = function () {
             console.log("timer ticked_" + f);
@@ -174,10 +174,10 @@ define(function (require, exports, module) {
             });
         };
         btnTimer.interval(this.recallRate()).start();
-        
+
         return this;
     };
-    
+
     /**
      * @function click
      * @description API to simulate a click action on the button
@@ -198,7 +198,7 @@ define(function (require, exports, module) {
         }
         return this;
     };
-    
+
     /**
      * @override
      * @function createImageMap

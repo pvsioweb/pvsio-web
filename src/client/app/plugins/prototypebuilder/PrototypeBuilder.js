@@ -33,6 +33,7 @@ define(function (require, exports, module) {
     var img; // this is the prototype image displayed in the PVSio-web user interface
     var _prototypeBuilder;
     var fs;
+    var widgetListView; // TODO: nwatson: this is used so that the list can be updated when a new project is loaded. This should be changed to use events
 
     function PrototypeBuilder() {
         pvsioWebClient = PVSioWebClient.getInstance();
@@ -171,13 +172,22 @@ define(function (require, exports, module) {
      */
     function switchToBuilderView() {
         d3.select(".image-map-layer").style("opacity", 1).style("z-index", 190);
-        d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
         d3.select("#controlsContainer .active").classed("active", false);
         d3.select("#btnBuilderView").classed('active', true);
-        d3.selectAll("div.display,#controlsContainer button").classed("builder", true);
-        d3.selectAll("div.display,#controlsContainer button").classed("simulator", false);
         WidgetManager.stopTimers();
+
+        widgetListView = new WidgetsListView({el: $("#widgetsList")});
     }
+
+    function switchToPIMBuilderView() {
+        d3.select(".image-map-layer").style("opacity", 1).style("z-index", 190);
+        d3.select("#controlsContainer .active").classed("active", false);
+        d3.select("#btnPIMBuilderView").classed('active', true);
+        WidgetManager.stopTimers();
+
+        widgetListView = new WidgetsListView({el: $("#widgetsList")});
+    }
+
     function onProjectChanged(event) {
         var pvsioStatus = d3.select("#lblPVSioStatus");
         pvsioStatus.select("span").remove();
@@ -201,14 +211,14 @@ define(function (require, exports, module) {
         WidgetManager.clearWidgetAreas();
         ScriptPlayer.clearView();
         updateImageAndLoadWidgets().then(function (res) {
-            WidgetsListView.create();
+            widgetListView.setWidgets(WidgetManager.getAllWidgets());
         }).catch(function (err) { Logger.error(err); });
         TimersListView.create();
     }
 
     function onWidgetsFileChanged(event) {
         updateImageAndLoadWidgets().then(function (res) {
-            WidgetsListView.create();
+            widgetListView.setWidgets(WidgetManager.getAllWidgets());
         }).catch(function (err) { Logger.error(err); });
         TimersListView.create();
     }
@@ -228,12 +238,9 @@ define(function (require, exports, module) {
     */
     function switchToSimulatorView() {
         d3.select(".image-map-layer").style("opacity", 0.1).style("z-index", -2);
-        d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
         d3.select("#controlsContainer .active").classed("active", false);
         d3.select("#btnSimulatorView").classed("active", true);
         d3.select("#btnSimulatorView").classed("selected", true);
-        d3.selectAll("div.display,#controlsContainer button").classed("simulator", true);
-        d3.selectAll("div.display,#controlsContainer button").classed("builder", false);
         WidgetManager.startTimers();
     }
 
@@ -242,8 +249,11 @@ define(function (require, exports, module) {
         /**
          * Add event listener for toggling the prototyping layer and the interaction layer
          */
-        d3.select("#btnBuilderView").classed("selected", true).on("click", function () {
+        d3.select("#btnBuilderView").on("click", function () {
             switchToBuilderView();
+        });
+        d3.select("#btnPIMBuilderView").on("click", function () {
+            switchToPIMBuilderView();
         });
         d3.select("#btnSimulatorView").on("click", function () {
             var img = d3.select("#imageDiv img");
@@ -267,7 +277,7 @@ define(function (require, exports, module) {
                 // FIXME: Implement APIs to save the diagram in the EmuCharts module!
                 if (d3.select("#btn_menuSaveChart").node()) {
                     d3.select("#btn_menuSaveChart").node().click();
-                }            
+                }
             });
         });
 
@@ -365,7 +375,7 @@ define(function (require, exports, module) {
 //            WidgetManager.addTimer();
         });
         d3.select("#btnAddNewWidget").on("click", function () {
-            
+
         });
     }
 
@@ -528,9 +538,9 @@ define(function (require, exports, module) {
         projectManager.addListener("WidgetsFileChanged", onWidgetsFileChanged);
         projectManager.addListener("SelectedFileChanged", onSelectedFileChanged);
         updateImageAndLoadWidgets().then(function (res) {
-            WidgetsListView.create();
+            widgetListView.setWidgets(WidgetManager.getAllWidgets());
         }).catch(function (err) { Logger.error(err); });
-        
+
         // add default tick timer
         WidgetManager.addWallClockTimer();
         //TimersListView.create();
