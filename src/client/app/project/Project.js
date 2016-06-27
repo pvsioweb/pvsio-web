@@ -80,7 +80,7 @@ define(function (require, exports, module) {
             _this.fire({type: "ProjectMainSpecFileChanged", previous: event.old, current: event.fresh});
         });
         //listen for widget manager event for widget modification
-        WidgetManager.clearListeners()
+        WidgetManager.clearListeners() // TODO: nwatson swap this for a cleanup method that just removes what was added by this object instance. Look at ProjectManager#fireProjectChanged for where to do the cleanup.
             .addListener("WidgetModified", function () {
                 _this._dirty(true);
                 var newWDStr = JSON.stringify(WidgetManager.getWidgetDefinitions(), null, " ");

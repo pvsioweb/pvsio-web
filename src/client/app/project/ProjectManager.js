@@ -373,7 +373,7 @@ define(function (require, exports, module) {
     function fireProjectChanged(event) {
         var project = event.current;
         document.title = "PVSio-Web -- " + event.current;
-        d3.select("#header #txtProjectName").html(event.current);        
+        d3.select("#header #txtProjectName").html(event.current);
         renderSourceFileList();
         _projectManager.selectFile(project.mainPVSFile() || project.pvsFilesList()[0] || project.name());
         _projectManager.fire(event);
