@@ -6,44 +6,30 @@
 /*global define, Backbone */
 define(function (require, exports, module) {
     "use strict";
-    var WidgetManager = require("pvsioweb/WidgetManager").getWidgetManager();
 
     var WidgetsListView = Backbone.View.extend({
-        // TODO: nwatson: add some sort of clean-up function that removes listener callbacks when the view is removed (this will depend on how the widgetmanager is implemented)
-
         /**
          * @function initialize
          * @description Creates a new widget list view and renders it to the provided element
          * @param {Object} options Options for the view.
-         * @param {Object} [options.widgets] Array of widgets to display within the view.
+         * @param {WidgetManager} options.widgetManager Widget Manager to be used by the view
          */
-        initialize: function (data) {
+        initialize: function (options) {
+            this._widgetManager = options.widgetManager;
             this.$el.addClass("widgetsList noselect");
             var list = document.createElement("ul");
             this.$el.append(list);
             this.d3ListElement = d3.select(list);
-            this.widgets = data.widgets || [];
 
             var _this = this;
 
-            WidgetManager.addListener("WidgetModified", function (event) {
-                switch (event.action) {
-                case "create":
-                    _this.widgets.push(event.widget);
-                    break;
-                case "remove":
-                    var index = _this.widgets.indexOf(event.widget);
-                    if (index > -1) {
-                        _this.widgets.splice(index, 1);
-                    }
-                    break;
-                default:
-                    break;
-                }
-                _this.update();
-            }).addListener("WidgetSelected", function (event) {
-                _this.selectWidget(event.widget, event.event.shiftKey);
-            }).addListener("WidgetSelectionCleared", function (event) {
+            this.listenTo(this._widgetManager, "WidgetModified", _this.update);
+            
+            this.listenTo(this._widgetManager, "WidgetSelected", function (event) {
+                _this.selectWidget(event.widget, event.add);
+            });
+            
+            this.listenTo(this._widgetManager, "WidgetSelectionCleared", function (event) {
                 _this.d3ListElement.selectAll("li").classed("selected", false);
             });
 
@@ -94,7 +80,7 @@ define(function (require, exports, module) {
         update: function () {
             var _this = this;
 
-            this.listItems = this.d3ListElement.selectAll("li.list-group-item").data(this.widgets, function (widget) {
+            this.listItems = this.d3ListElement.selectAll("li.list-group-item").data(this._widgetManager.getAllWidgets(), function (widget) {
                 return widget.id();
             });
             var enteredItems = this.listItems.enter();
@@ -106,10 +92,11 @@ define(function (require, exports, module) {
                 }).classed("selected", false)
                 .text(this.labelFunction)
                 .on("click", function (w) {
-                    var event = d3.event;
-                    WidgetManager.fire({type: "WidgetSelected", widget: w, event: event});
-                    event.preventDefault();
-                    event.stopPropagation();
+                    var add = d3.event.shiftKey;
+                    _this.selectWidget(w, add);
+                    _this.trigger("WidgetSelected", w, add);
+                    d3.event.preventDefault();
+                    d3.event.stopPropagation();
                 }).on("dblclick", function (w) {
                     var event = d3.event;
                     var dblclick = new Event("dblclick");
@@ -119,16 +106,6 @@ define(function (require, exports, module) {
                 });
             this.listItems.text(this.labelFunction);
             exitedItems.transition().duration(220).style("opacity", 0).remove();
-        },
-
-        /**
-         * @function setWidgets
-         * @description Sets the widgets that the view displays and updates the view accordingly
-         * @param {Array} widgets Array of widget objects that the view should represent
-         */
-        setWidgets: function(widgets) {
-            this.widgets = widgets || [];
-            this.update();
         }
     });
 

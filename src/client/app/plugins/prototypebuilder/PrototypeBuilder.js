@@ -17,6 +17,8 @@ define(function (require, exports, module) {
         PrototypeImageView = require("pvsioweb/forms/PrototypeImageView"),
         WidgetsListView     = require("pvsioweb/forms/WidgetsListView"),
         TimersListView      = require("pvsioweb/forms/TimersListView"),
+        NewWidgetView       = require("pvsioweb/forms/newWidget"),
+        EditWidgetView  = require("pvsioweb/forms/editWidget"),
         template            = require("text!pvsioweb/forms/templates/prototypeBuilderPanel.handlebars"),
         ScriptPlayer        = require("util/ScriptPlayer"),
 //        fs              = require("util/fileHandler"),
@@ -33,7 +35,7 @@ define(function (require, exports, module) {
         pvsioWebClient;
     var _prototypeBuilder;
     var fs;
-    var widgetListView; // TODO: nwatson: this is used so that the list can be updated when a new project is loaded. This should be changed to use events
+    var widgetListView;
     var prototypeImageView;
 
     function PrototypeBuilder() {
@@ -73,16 +75,18 @@ define(function (require, exports, module) {
     function updateImageAndLoadWidgets() {
         var p = projectManager.project();
         var image = p.getImage();
-        WidgetManager.clearWidgetAreas();
+        WidgetManager.clearWidgets();
+        
+        if (prototypeImageView) {
+            prototypeImageView.clearWidgetAreas();
+        }
+    
         d3.select("div#body").style("display", null);
         if (!image) {
             // remove previous image, if any
-            d3.select("#imageDiv img").attr("src", "").attr("height", "430").attr("width", "1128");
-            d3.select("#imageDiv svg").attr("height", "0").attr("width", "0");
-            d3.select("#imageDiv").attr("style", "");
-            d3.select("#body").attr("style", "height: 480px"); // 430 + 44 + 6
-            //show the image drag and drop div
-            d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
+            if (prototypeImageView) {
+                prototypeImageView.clearImage();
+            }
             return Promise.resolve();
         }
         // else
@@ -95,9 +99,7 @@ define(function (require, exports, module) {
         function showImage() {
             return new Promise(function (resolve, reject) {
                 prototypeImageView.setImage(image).then(function (scale) {
-
-                    // TODO: nwatson: move this to PTImageView?
-                    WidgetManager.updateMapCreator(scale, function () {
+                    prototypeImageView.updateMapCreator(scale, function () {
                         var wdStr = p.getWidgetDefinitionFile().content;
                         if (wdStr && wdStr !== "") {
                             var wd = JSON.parse(p.getWidgetDefinitionFile().content);
@@ -131,9 +133,9 @@ define(function (require, exports, module) {
 
     function onWidgetsFileChanged(event) {
         updateImageAndLoadWidgets().then(function (res) {
-            widgetListView.setWidgets(WidgetManager.getAllWidgets());
+            widgetListView.update();
         }).catch(function (err) { Logger.error(err); });
-        TimersListView.create();
+        TimersListView.create(WidgetManager);
     }
 
     function onProjectChanged(event) {
@@ -156,7 +158,8 @@ define(function (require, exports, module) {
         }
 
         switchToBuilderView();
-        WidgetManager.clearWidgetAreas();
+        WidgetManager.clearWidgets();
+        prototypeImageView.clearWidgetAreas();
         ScriptPlayer.clearView();
         onWidgetsFileChanged(event);
     }
@@ -376,7 +379,7 @@ define(function (require, exports, module) {
                                 if (d3.select("#imageDiv svg").node() === null) {
                                     // we need to create the svg layer, as it's not there
                                     // this happens when a new project is created without selecting an image
-                                    WidgetManager.updateMapCreator();
+                                    prototypeImageView.updateMapCreator();
                                 }
                                 resolve(res);
                             });
@@ -417,10 +420,55 @@ define(function (require, exports, module) {
                     if (d3.select("#imageDiv svg").node() === null) {
                         // we need to create the svg layer, as it's not there
                         // this happens when a new project is created without selecting an image
-                        WidgetManager.updateMapCreator();
+                        prototypeImageView.updateMapCreator();
                     }
                 });
             }
+        });
+    };
+    
+    /**
+     * Sets up listeners on child views that are used to communicate between the children and back to this class
+     * @private
+     */
+    PrototypeBuilder.prototype._setUpChildListeners = function() {
+        prototypeImageView.on("WidgetRegionDrawn", function(coord, region) {
+            NewWidgetView.create(coord)
+                .on("ok", function (e, view) {
+                    view.remove();
+                    
+                    var widget = WidgetManager.addNewWidget(e.data, coord, function(w, renderResponse) {
+                        region.classed(w.type(), true)
+                            .attr("id", w.id());
+                        w.element(region);
+                        w.createImageMap({ callback: renderResponse });
+                    });
+                    
+                    widgetListView.selectWidget(widget, false);
+                }).on("cancel", function (e, view) {
+                    view.remove();
+                    d3.select(region.node().parentNode).remove();
+                });
+        });
+        
+        prototypeImageView.on("WidgetEditRequested", function(widgetID) {
+            var widget = WidgetManager.getWidget(widgetID);
+            
+            EditWidgetView.create(widget)
+                .on("ok", function (e, view) {
+                    view.remove();
+                    WidgetManager.editWidget(widget, e.data);
+                }).on("cancel", function (e, view) {
+                    view.remove();
+                });
+        });
+        
+        prototypeImageView.on("WidgetSelected", function(widget, add) {
+            widgetListView.selectWidget(widget, add);
+        });
+        
+        widgetListView.on("WidgetSelected", function(widget, add) {
+            prototypeImageView.selectWidget(widget, add);
         });
     };
 
@@ -445,7 +493,7 @@ define(function (require, exports, module) {
         projectManager.addListener("WidgetsFileChanged", onWidgetsFileChanged);
         projectManager.addListener("SelectedFileChanged", onSelectedFileChanged);
         updateImageAndLoadWidgets().then(function (res) {
-            widgetListView.setWidgets(WidgetManager.getAllWidgets());
+            widgetListView.update();
         }).catch(function (err) { Logger.error(err); });
 
         // add default tick timer
@@ -453,15 +501,18 @@ define(function (require, exports, module) {
         //TimersListView.create();
 
         // Create child views
-        widgetListView = new WidgetsListView({el: $("#widgetsList")});
-        prototypeImageView = new PrototypeImageView({el: $("#imageDiv")});
+        widgetListView = new WidgetsListView({el: $("#widgetsList"), widgetManager: WidgetManager});
+        prototypeImageView = new PrototypeImageView({el: $("#imageDiv"), widgetManager: WidgetManager});
         preparePageForImageUpload();
+        this._setUpChildListeners();
         bindListeners();
         d3.select("#header #txtProjectName").html(projectManager.project().name());
         return updateImageAndLoadWidgets();
     };
 
     PrototypeBuilder.prototype.unload = function () {
+        widgetListView.remove();
+        prototypeImageView.remove();
         pvsioWebClient.removeCollapsiblePanel(pbContainer);
         projectManager.removeListener("ProjectChanged", onProjectChanged);
         projectManager.removeListener("WidgetsFileChanged", onWidgetsFileChanged);

@@ -22,7 +22,6 @@ define(function (require, exports, module) {
         NotificationManager = require("project/NotificationManager");
 
     var _descriptors;
-    var _this;
     var propertyChangedEvent = "PropertyChanged";
 
 
@@ -36,7 +35,7 @@ define(function (require, exports, module) {
      * @returns {Project}
      */
     function Project(name) {
-        _this = this;
+        var _this = this;
         _descriptors = [];
         /**
          * get or set if the project is dirty
@@ -79,28 +78,34 @@ define(function (require, exports, module) {
             _this._dirty(true);
             _this.fire({type: "ProjectMainSpecFileChanged", previous: event.old, current: event.fresh});
         });
-        //listen for widget manager event for widget modification
-        WidgetManager.clearListeners() // TODO: nwatson swap this for a cleanup method that just removes what was added by this object instance. Look at ProjectManager#fireProjectChanged for where to do the cleanup.
-            .addListener("WidgetModified", function () {
-                _this._dirty(true);
-                var newWDStr = JSON.stringify(WidgetManager.getWidgetDefinitions(), null, " ");
-                //get the widget definitions and update the widgetDefinition file
-                var wdf = _this.getWidgetDefinitionFile();
-                wdf.content = newWDStr;
-                wdf.dirty(true);
-            }).addListener("StoryboardWidgetModified", function (data) {
-                var filenames = Object.keys(data.widget.images);
-                filenames.forEach(function (key) {
-                    var imagePath = _this.name() + "/" + key;
-                    _this.fileExists(imagePath).then(function (res) {
-                        if (res === false) {
-                            var imageData = data.widget.images[key].imageData;
-                            _this.addFile(imagePath, imageData, { encoding: "base64" });
-                        }
-                    });
+    }
+    
+    /**
+     * Sets up listeners for widget manager event for widget modification
+     */
+    Project.prototype.setUpListeners = function() {
+        var _this = this;
+        WidgetManager.on("WidgetModified", function (e) {
+            _this._dirty(true);
+            var newWDStr = JSON.stringify(WidgetManager.getWidgetDefinitions(), null, " ");
+            //get the widget definitions and update the widgetDefinition file
+            var wdf = _this.getWidgetDefinitionFile();
+            wdf.content = newWDStr;
+            wdf.dirty(true);
+        }, this);
+        WidgetManager.on("StoryboardWidgetModified", function (data) {
+            var filenames = Object.keys(data.widget.images);
+            filenames.forEach(function (key) {
+                var imagePath = _this.name() + "/" + key;
+                _this.fileExists(imagePath).then(function (res) {
+                    if (res === false) {
+                        var imageData = data.widget.images[key].imageData;
+                        _this.addFile(imagePath, imageData, { encoding: "base64" });
+                    }
                 });
             });
-    }
+        }, this);
+    };
 
     /**
      * @function saveFiles
@@ -112,6 +117,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Project.prototype.saveFiles = function (descriptors, opt) {
+        var _this = this;
         return new Promise(function (resolve, reject) {
             var promises = [];
             if (descriptors) {
@@ -137,6 +143,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Project.prototype.getImage = function () {
+        var _this = this;
         return _this.prototypeImage;
     };
     /**
@@ -147,6 +154,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Project.prototype.getWidgetDefinitionFile = function () {
+        var _this = this;
         var wdPath = _this.name() + "/" + Constants.widgetDefinitionsFile;
         var res = _this.getDescriptor(wdPath);
         if (!res) {
@@ -163,6 +171,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Project.prototype.getRecordedScripts = function () {
+        var _this = this;
         var scriptsPath = _this.name() + "/" + Constants.scriptFile;
         var res = _this.getDescriptor(scriptsPath);
         if (!res) {
@@ -189,6 +198,7 @@ define(function (require, exports, module) {
      * @instance
     */
     Project.prototype.getFolderStructure = function () {
+        var _this = this;
         var projectName = _this.name();
         var structure = {path: projectName, name: projectName, isDirectory: true};
         var tree = {};
@@ -301,6 +311,7 @@ define(function (require, exports, module) {
      */
     //Project.prototype.addDescriptor = function (path, content, encoding, suppressEvent) {
     Project.prototype.addDescriptor = function (newFile, suppressEvent) {
+        var _this = this;
         var path, content, encoding;
         if (typeof arguments[0] === "string") {
             console.log("Deprecated: addDescriptor(string, string, string, boolean) is deprecated use addDescriptor(Descriptor, boolean) instead");
@@ -344,6 +355,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Project.prototype.addFolder = function (folderPath, opt) {
+        var _this = this;
         return new Promise(function (resolve, reject) {
             var path = _this.name() + folderPath;
             WSManager.getWebSocket().writeDirectory(path, function (err, res) {
@@ -385,6 +397,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Project.prototype.addFile = function (name, content, opt) {
+        var _this = this;
         if (!name) {
             return new Promise(function (resolve, reject) {
                 reject({ type: "ERROR", msg: "Incorrect file name " + name});
@@ -408,6 +421,7 @@ define(function (require, exports, module) {
     };
 
     Project.prototype.addFileDialog = function (name, content, opt) {
+        var _this = this;
         return _this.addFile(name, content, opt).catch(function (err) {
             if (err.code === "EEXIST") {
                 var overWrite = confirm("File " + name + " already exists. Overwrite file?");
@@ -421,6 +435,7 @@ define(function (require, exports, module) {
     };
 
     Project.prototype.importLocalFiles = function (fileList) {
+        var _this = this;
         return new Promise(function (resolve, reject) {
             if (!fileList) { return resolve([]); }
             function addLocalFilesToProject(files) {
@@ -458,6 +473,7 @@ define(function (require, exports, module) {
      * @instance
     */
     Project.prototype.importRemoteFiles = function (paths) {
+        var _this = this;
         if (paths) {
             paths = paths.split(",");
         }
@@ -511,6 +527,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Project.prototype.refreshDescriptor = function (descriptor) {
+        var _this = this;
         if (descriptor && descriptor.path) {
             var f = _this.getDescriptors().filter(function (d) {
                 return d.path === descriptor.path;
@@ -544,6 +561,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Project.prototype.removeFile = function (name) {
+        var _this = this;
         if (!name) {
             return new Promise(function (resolve, reject) {
                 reject({ type: "ERROR", msg: "Incorrect file name " + name});
@@ -622,7 +640,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Project.prototype.setProjectName = function (projectName) {
-        _this.name(projectName);
+        this.name(projectName);
     };
 
     /**
@@ -633,17 +651,17 @@ define(function (require, exports, module) {
      * @param folderPath {String} The path to the folder whose descriptor should be updated.
      * @param newFolderPath {String} The new path that shall be used for the folder descriptor.
      */
-    var updateDescriptorsPath = function (folderPath, newFolderPath) {
-        var descriptors = _this.getDescriptors();
+    Project.prototype._updateDescriptorsPath = function (folderPath, newFolderPath) {
+        var descriptors = this.getDescriptors();
         if (descriptors) {
-            var affectedFiles = _this.getDescriptors().filter(function (f) {
+            var affectedFiles = this.getDescriptors().filter(function (f) {
                 return f.path.indexOf(folderPath) === 0;
             });
             affectedFiles.forEach(function (f) {
                 f.path = f.path.replace(folderPath, newFolderPath);
             });
         }
-        return _this;
+        return this;
     };
 
     /**
@@ -656,6 +674,7 @@ define(function (require, exports, module) {
      * @instance
     */
     Project.prototype.renameFolder = function (oldPath, newPath, cb) {
+        var _this = this;
         WSManager.getWebSocket().send({
             type: "renameFile", // files and folders are treated the same way on the server
             oldPath: oldPath,
@@ -667,7 +686,7 @@ define(function (require, exports, module) {
                     _this.name(newPath);
                 }
                 //update the paths of descriptors saved in the project
-                updateDescriptorsPath(oldPath, newPath);
+                _this._updateDescriptorsPath(oldPath, newPath);
             } else {
                 Logger.log(err);
             }
@@ -686,6 +705,7 @@ define(function (require, exports, module) {
      * @instance
     */
     Project.prototype.renameProject = function (newName, cb) {
+        var _this = this;
         var oldName = _this.name();
         WSManager.getWebSocket().send({
             type: "renameProject",
@@ -694,7 +714,7 @@ define(function (require, exports, module) {
         }, function (err, res) {
             if (!err) {
                 //update the paths of descriptors saved in the project
-                updateDescriptorsPath(oldName, newName);
+                _this._updateDescriptorsPath(oldName, newName);
                 // update the project name and the dirty flag
                 _this.name(newName);
                 _this._dirty(false);
@@ -717,6 +737,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Project.prototype.renameFile = function (file, newName, cb) {
+        var _this = this;
         var ws = WSManager.getWebSocket();
         var baseDir = file.path.substring(0, file.path.lastIndexOf("/")),
             newPath = baseDir + "/" + newName,
@@ -743,6 +764,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Project.prototype.saveProject = function () {
+        var _this = this;
         return new Promise(function (resolve, reject) {
             _this.saveFiles(_this.getDescriptors(), { overWrite: true }).then(function (res) {
                 _this._dirty(false);
@@ -766,7 +788,7 @@ define(function (require, exports, module) {
         Adds a script to the project
     */
     Project.prototype.addScript = function (script) {
-        var scriptFile = _this.getRecordedScripts(), scriptJson;
+        var scriptFile = this.getRecordedScripts(), scriptJson;
         if (!scriptFile.content || scriptFile.content.trim().length === 0) {
             scriptJson = [];
         } else {
@@ -776,14 +798,14 @@ define(function (require, exports, module) {
         ScriptPlayer.addScriptToView(script);
         scriptFile.content = JSON.stringify(scriptJson, null, " ");
         scriptFile.dirty(true);
-        _this._dirty(true);
+        this._dirty(true);
     };
     /**
      * Overrides toString() method for Project
      * @returns {string} project name
      */
     Project.prototype.toString = function () {
-        return _this.name();
+        return this.name();
     };
 
     /**
@@ -795,6 +817,8 @@ define(function (require, exports, module) {
      * @instance
      */
     Project.prototype.initFromJSON = function (descriptors) {
+        var _this = this;
+        
         if (descriptors) {
             var name = _this.name();
             var mainFileName, prototypeImage, fileVersion;
@@ -849,8 +873,11 @@ define(function (require, exports, module) {
         }
         return _this;
     };
-
-
+    
+    Project.prototype.cleanup = function () {
+        WidgetManager.off(null, null, this);
+    };
+    
     module.exports = Project;
 
     /**

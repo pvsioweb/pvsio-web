@@ -250,6 +250,8 @@ define(function (require, exports, module) {
          * The current project can be accessed as using _projectManager.project()
          */
         this.project = property.call(this, project).addListener("PropertyChanged", function (e) {
+            e.old.cleanup();
+            e.fresh.setUpListeners();
             registerFSUpdateEvents(e.fresh);
         });
         window.onbeforeunload =  function () {

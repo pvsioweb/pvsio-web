@@ -34,6 +34,21 @@
             return +(s.replace("scale", "").replace("(", "").replace(")", ""));
         } else { return 1; }
     }
+    
+    function select(region, svg, add, dispatcher) {
+        var g = d3.select(region.node().parentNode);
+        
+        //remove previous selections if shift key wasnt pressed and we are not selecting a previously selected region
+        if (!add && !g.classed("selected")) {
+            svg.selectAll("g.selected").classed("selected", false);
+        } else if (g.classed("selected")) {
+            svg.selectAll("g.subselected").classed("subselected", false);
+            g.classed("subselected", true);
+        }
+        //higlight the region show it has been selected
+        g.classed("selected", true);
+        dispatcher.select({region: region, event: d3.event});
+    }
 
     function updateRegion(r, d) {
         var svg = d3.select("svg.image-map-layer");
@@ -54,7 +69,7 @@
     }
 
     function enableRegionDrag(region, dispatcher) {
-        var g = d3.select(region.node().parentNode), svg = d3.select("svg.image-map-layer");
+        var svg = d3.select("svg.image-map-layer");
         region.on("mousedown", function () {
             var _scale = scale(svg.select("g"));
             var mdPos = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]},
@@ -83,16 +98,8 @@
                 svg.on("mousemove.region", null);
                 dispatcher.move({region: region, pos: pos(region), scale: _scale});
             });
-            //remove previous selections if shift key wasnt pressed and we are not selecting a previously selected region
-            if (!d3.event.shiftKey && !g.classed("selected")) {
-                svg.selectAll("g.selected").classed("selected", false);
-            } else if (g.classed("selected")) {
-                svg.selectAll("g.subselected").classed("subselected", false);
-                g.classed("subselected", true);
-            }
-            //higlight the region show it has been selected
-            g.classed("selected", true);
-            dispatcher.select({region: region, event: d3.event});
+            
+            select(region, svg, d3.event.shiftKey, dispatcher);
         });
     }
 
@@ -193,7 +200,7 @@
         config.parent = config.parent || "body";
         config.scale = config.scale || 1;
         //clear any previous svgs
-        d3.select(config.parent + " svg").remove();
+        d3.select(config.parent).select("svg").remove();
         var imageEl = d3.select(config.element), props, mapLayer, svg,
             ed = d3.dispatch("create", "remove", "resize", "move", "select", "clearselection"), initTimer;
         props = cr(imageEl);
@@ -227,13 +234,18 @@
                 .on("mouseup", null);
             return r;
         }
+        
+        function selectRegion(element, add) {
+            select(element, svg, add, ed);
+        }
 
         var res = {
             clear: function () {
-                d3.select(config.parent + " svg").remove();
+                d3.select(config.parent).select("svg").remove();
             },
             restoreRectRegion: restoreRectRegion,
             getImageMapData: getImageMapData,
+            selectRegion: selectRegion,
             on: function (type, f) {
                 ed.on(type, f);
                 return this;
