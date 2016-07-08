@@ -71,6 +71,10 @@ define(function (require, exports, module) {
         d3.select("#btnSimulatorView").classed("selected", true);
         WidgetManager.startTimers();
     }
+    
+    function updateControlsHeight() {
+        d3.select("#builder-controls").style("height", d3.select("#prototype-builder-container").node().getBoundingClientRect().height + "px");
+    }
 
     function updateImageAndLoadWidgets() {
         var p = projectManager.project();
@@ -99,6 +103,7 @@ define(function (require, exports, module) {
         function showImage() {
             return new Promise(function (resolve, reject) {
                 prototypeImageView.setImage(image).then(function (scale) {
+                    updateControlsHeight();
                     prototypeImageView.updateMapCreator(scale, function () {
                         var wdStr = p.getWidgetDefinitionFile().content;
                         if (wdStr && wdStr !== "") {
@@ -376,6 +381,7 @@ define(function (require, exports, module) {
                     }).then(function (descriptors) {
                         _prototypeBuilder.changeImage(descriptors[0].name, descriptors[0].content).then(function (res) {
                             prototypeImageView.setImage(res).then(function (res) {
+                                updateControlsHeight();
                                 if (d3.select("#imageDiv svg").node() === null) {
                                     // we need to create the svg layer, as it's not there
                                     // this happens when a new project is created without selecting an image
@@ -397,7 +403,7 @@ define(function (require, exports, module) {
                 fs.readLocalFile(file).then(function (res) {
                     _prototypeBuilder.changeImage(res.name, res.content).then(function (res) {
                         prototypeImageView.setImage(res).then(function (res) {
-//                            projectManager.project().getImage();
+                            updateControlsHeight();
                             resolve(res);
                         });
                     });
@@ -502,7 +508,7 @@ define(function (require, exports, module) {
 
         // Create child views
         widgetListView = new WidgetsListView({el: $("#widgetsList"), widgetManager: WidgetManager});
-        prototypeImageView = new PrototypeImageView({el: $("#imageDiv"), widgetManager: WidgetManager});
+        prototypeImageView = new PrototypeImageView({el: $("#imageDiv"), widgetManager: WidgetManager, mapID: "prototypeMap"});
         preparePageForImageUpload();
         this._setUpChildListeners();
         bindListeners();

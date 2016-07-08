@@ -8,6 +8,8 @@ define(function (require, exports, module) {
     "use strict";
     var template = require("text!./templates/prototypeImageArea.handlebars");
     var imageMapper     = require("imagemapper");
+    
+    var nextID = 0; // Simple counter used so that IDs within each instance are globally unique
 
     var PrototypeImageView = Backbone.View.extend({
         events: {
@@ -23,6 +25,8 @@ define(function (require, exports, module) {
          * @description Creates a new image view area and renders it to the provided element
          * @param {Object} options Options for the view.
          * @param {WidgetManager} options.widgetManager Widget Manager to be used by the view
+         * @param {String} [options.mapID] ID of the image map that will be created for this view. If no value is
+         *                                 provided, an ID will be automatically generated.
          */
         initialize: function (options) {
             this.d3El = d3.select(this.el);
@@ -31,6 +35,10 @@ define(function (require, exports, module) {
 
             this.render();
             this._innerContainer = this.d3El.select("div"); // TODO: nwatson: select based on class
+            var mapID = options.mapID || ("prototypeImageMap" + nextID);
+            this._map = this.d3El.select("map");
+            this._map.attr("name", mapID).attr("id", mapID);
+            this.d3El.select("img").attr("usemap", "#" + mapID);
             this.updateMapCreator();
             
             var _this = this;
@@ -43,6 +51,8 @@ define(function (require, exports, module) {
                     _this.trigger("WidgetEditRequested", mark.attr("id"));
                 });
             });
+            
+            nextID++;
         },
 
         /**
@@ -129,10 +139,9 @@ define(function (require, exports, module) {
                             _this.d3El.select("svg").attr("height", adjustedHeight).attr("width", adjustedWidth);
                             _this.d3El.select("svg > g").attr("transform", "scale(" + scale + ")");
                             //hide the draganddrop stuff
-                            _this.d3El.select("#imageDragAndDrop.dndcontainer").style("display", "none");
+                            _this.d3El.select(".dndcontainer").style("display", "none");
 
                             //update widgets maps after resizing
-                            d3.select("#builder-controls").style("height", (50 + adjustedHeight) + "px");
                             _this._widgetManager.scaleAreaMaps(scale);
                         }
                     }
@@ -147,7 +156,7 @@ define(function (require, exports, module) {
                 _this.img.onload = imageLoadComplete;
                 _this.img.onerror = function (res) {
                     //show the image drag and drop div
-                    _this.d3El.select("#imageDragAndDrop.dndcontainer").style("display", null);
+                    _this.d3El.select(".dndcontainer").style("display", null);
                     alert("Failed to load picture " + image.name);
                     reject(res);
                 };
@@ -166,7 +175,7 @@ define(function (require, exports, module) {
             this.d3El.attr("style", "");
             this.d3El.select("#body").attr("style", "height: 480px"); // 430 + 44 + 6
             //show the image drag and drop div
-            this.d3El.select("#imageDragAndDrop.dndcontainer").style("display", null);
+            this.d3El.select(".dndcontainer").style("display", null);
         },
 
         /**
