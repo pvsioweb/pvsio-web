@@ -14,10 +14,12 @@ define(function (require, exports, module) {
         describe("Switching to PIM prototyping mode", function() {
             it("provides a button to switch to the mode", function() {
                 /*
-                Given the prototyping module is visible
-                Then a tab labelled _PIM Builder_ exists
+                 Given the UI is loaded
+                Then a tab for activating the mode exists
                  */
-                fail();
+                
+                var button = d3.select(".plugin-box input[name='PIM Prototyper']");
+                expect(button.empty()).toBe(false);
             });
 
             it("switches to PIM mode correctly", function() {

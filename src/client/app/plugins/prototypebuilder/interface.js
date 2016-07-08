@@ -11,6 +11,7 @@ define(function (require, exports, module) {
         Emulink = require("plugins/emulink/Emulink"),
 //        SafetyTest = require("plugins/safetyTest/SafetyTest"),
         GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
+        PIMPrototyper = require("plugins/pimPrototyper/PIMPrototyper"),
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
         Logger	= require("util/Logger"),
         PluginManager = require("plugins/PluginManager"),
@@ -195,7 +196,8 @@ define(function (require, exports, module) {
                     PrototypeBuilder.getInstance(),
                     ModelEditor.getInstance(),
                     Emulink.getInstance(),
-                    GraphBuilder.getInstance()
+                    GraphBuilder.getInstance(),
+                    PIMPrototyper.getInstance()
             ];
             data = data || {
                 plugins: plugins.map(function (p) {
