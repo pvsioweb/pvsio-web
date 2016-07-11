@@ -14,6 +14,8 @@ define(function (require, exports, module) {
 			
 			function() {
 				require("./ScreenControlsView_UnitTest")();
+				require("./NewScreenView_UnitTest")();
+				require("./EditScreenView_UnitTest")();
 			}
 		);
         }

@@ -5,6 +5,11 @@
   background: #000;
   color: #fff; }
 
+.overlay .panel-footer {
+  content: "";
+  clear: both;
+  display: table; }
+
 .noselect, .content-body > .ljs-hcontent, #header, .plugins, .plugins-group .list-group-item, .collapsible-panel-parent > .header, .expandable-panel-heading, [draggable] {
   -webkit-user-select: none;
      -moz-user-select: none;
@@ -38,9 +43,6 @@ textarea {
 
 .tab-content {
   margin-top: 20px; }
-
-.panel-footer {
-  min-height: 50px; }
 
 ul {
   margin: 0;
@@ -838,6 +840,8 @@ fileListItem.hide {
     width: 705px; }
   .overlay .panel-heading {
     cursor: move; }
+  .overlay .panel-footer {
+    width: 100%; }
 
 .nav-tabs-solid li.active a,
 .nav-tabs-solid li.active a:hover,
@@ -1209,6 +1213,17 @@ label[for=selectPicture] {
     fill: rgba(35, 101, 32, 0.2);
     stroke: rgba(35, 101, 32, 0.7);
     cursor: move; }
+
+.pim-screen-controls {
+  padding: 10px; }
+  .pim-screen-controls .btn-screen-dropdown_label {
+    width: 200px;
+    display: inline-block;
+    float: left;
+    overflow: hidden;
+    text-overflow: ellipsis; }
+  .pim-screen-controls .screen-controls-buttons {
+    float: right; }
 
 img {
   z-index: -2; }

@@ -9,7 +9,7 @@ define(function (require, exports, module) {
 	"use strict";
     var BaseWidgetManager  = require("pvsioweb/BaseWidgetManager");
 
-    var Screen = Backbone.View.extend({
+    var Screen = Backbone.Model.extend({
         
     });
     

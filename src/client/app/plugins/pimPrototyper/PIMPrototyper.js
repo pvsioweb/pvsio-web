@@ -1,6 +1,8 @@
 define(function (require, exports, module) {
     "use strict";
-    var PVSioWebClient = require("PVSioWebClient");
+    var PVSioWebClient = require("PVSioWebClient"),
+        ScreenControlsView = require("./forms/ScreenControlsView"),
+        ScreenCollection = require("./ScreenCollection");
         
     var instance;
         
@@ -8,7 +10,12 @@ define(function (require, exports, module) {
     };
     
     PIMPrototyper.prototype._init = function () {
-        PVSioWebClient.getInstance().createCollapsiblePanel({headerText: "PIM Prototyper", owner: this.getName()});
+        this._container = PVSioWebClient.getInstance().createCollapsiblePanel({headerText: "PIM Prototyper", owner: this.getName()});
+        this._screens = new ScreenCollection(["a", "b", "c"]);
+        this._screenControls = new ScreenControlsView({
+            el: this._container.node(),
+            collection: this._screens
+         });
     };
     
     PIMPrototyper.prototype.getName = function() {
@@ -17,6 +24,11 @@ define(function (require, exports, module) {
     
     PIMPrototyper.prototype.initialise = function () {
         this._init();
+        return Promise.resolve(true);
+    };
+    
+    PIMPrototyper.prototype.unload = function () {
+        PVSioWebClient.getInstance().removeCollapsiblePanel(this._container);
         return Promise.resolve(true);
     };
     
