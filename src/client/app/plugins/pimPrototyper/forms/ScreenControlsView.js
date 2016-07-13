@@ -92,7 +92,8 @@ define(function (require, exports, module) {
 
             var data = {header: "Confirm Delete",
                         question: "Are you sure you want to delete the current screen? This cannot be undone.",
-                       buttons: ["Cancel", "Delete"]};
+                        buttons: ["Cancel", "Delete"],
+                        primaryLevel: "danger"};
             DisplayQuestion.create(data)
                 .on("delete", function (e, view) {
                     _this.collection.remove(_this.collection.getSelected());
