@@ -6,9 +6,9 @@
 /*global require, jasmine, format*/
 
 require.config({
-    baseUrl: "../../../../../app",
+    baseUrl: "../../../../app",
     paths: {
-        "test": "../tests/src/cases/pim-prototyping/views",
+        "test": "../tests/src/cases/pim-prototyping",
         "d3": "../lib/d3",
         "pvsioweb": "plugins/prototypebuilder",
         "imagemapper": "../lib/imagemapper",
@@ -18,11 +18,12 @@ require.config({
     }
 });
 
-require(["test/PIMViews"], function (PIMViews) {
+require(["test/views/PIMViews", "test/unit/PIMUnits"], function (PIMViews, PIMUnits) {
     "use strict";
     format.extend(String.prototype);
-    
+
     PIMViews.run();
-    
+    PIMUnits.run();
+
     jasmine.getEnv().execute();
 });

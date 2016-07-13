@@ -128,7 +128,7 @@ define(function (require, exports, module) {
         });
     }
     
-    _.extend(WidgetManager.prototype, BaseWidgetManager.prototype);
+    WidgetManager.prototype = Object.create(BaseWidgetManager.prototype);
 
     /**
         Restores the widget definitions passed in the parameter.

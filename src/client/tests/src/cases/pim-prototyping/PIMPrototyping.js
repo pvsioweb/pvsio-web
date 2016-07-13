@@ -8,9 +8,13 @@
 define(function (require, exports, module) {
     "use strict";
 
+    var PIMViews = require("./views/PIMViews"),
+        PIMUnits = require("./unit/PIMUnits");
     module.exports = {
         run: function () {
             describe("The behaviour of the PIM Prototyping", require("./PIMPrototyping_Behavior"));
+            PIMViews.run();
+            PIMUnits.run();
         }
     };
 });

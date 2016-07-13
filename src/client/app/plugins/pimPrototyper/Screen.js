@@ -3,17 +3,16 @@
  * attributes.
  */
 
- /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
- /*global _, define, Backbone */
+/*global define, Backbone */
 define(function (require, exports, module) {
-	"use strict";
-    var BaseWidgetManager  = require("pvsioweb/BaseWidgetManager");
+    "use strict";
 
     var Screen = Backbone.Model.extend({
-        
+        defaults: {
+            name: "New screen",
+            isInitial: false
+        }
     });
-    
-    _.extend(Screen.prototype, BaseWidgetManager.prototype);
-    
+
     return Screen;
 });
