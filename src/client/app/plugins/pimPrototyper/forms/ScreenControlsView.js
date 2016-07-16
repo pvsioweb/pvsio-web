@@ -31,6 +31,7 @@ define(function (require, exports, module) {
             this.listenTo(this.collection, "add remove change:name", this._updateScreenList); // TODO: don't re-render the list when a single item changes
             this.listenTo(this.collection, "selectionChanged", this._updateSelection);
             this._template = Handlebars.compile(template);
+            this.$el.addClass("pim-screen-controls");
             this.render();
 
             return this;

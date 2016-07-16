@@ -1,12 +1,11 @@
-#builder-controls.ljs-left {
+.prototype-sidebar.ljs-left {
     width: 20%;
     background: $color-bg-lighter;
     height: 480px;
     overflow-y: auto;
 }
 
-#widgetsList,
-#timersList {
+.prototype-list-container {
     padding: 0;
     margin: 4 0 2;
     max-height: 50%;

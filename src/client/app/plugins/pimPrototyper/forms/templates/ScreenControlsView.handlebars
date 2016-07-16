@@ -1,31 +1,28 @@
-<div class="pim-screen-controls">
+<div class="btn-group" role="group">
+    <div class="btn-group dropup">
+        <button type="button" class="btn btn-default dropdown-toggle btn-screen-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="btn-screen-dropdown_label">Select screen</span>
+			<span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu screen-dropdown">
+        </ul>
+    </div>
+    <button class="btn btn-default btn-screen-add" aria-label="Add screen" title="Add screen">
+        <span class="glyphicon glyphicon-plus"></span>
+    </button>
+</div>
+
+<div class="screen-controls-buttons">
     <div class="btn-group" role="group">
-        <div class="btn-group dropup">
-            <button type="button" class="btn btn-default dropdown-toggle btn-screen-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="btn-screen-dropdown_label">Select screen</span>
-				<span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu screen-dropdown">
-            </ul>
-        </div>
-        <button class="btn btn-default btn-screen-add" aria-label="Add screen" title="Add screen">
-            <span class="glyphicon glyphicon-plus"></span>
+        <button class="btn btn-default btn-screen-options">
+            <span class="glyphicon glyphicon-cog"></span> Screen Options
+        </button>
+        <button class="btn btn-default btn-screen-image">
+            <span class="glyphicon glyphicon-picture"></span> Change image
         </button>
     </div>
-    
-    <div class="screen-controls-buttons">
-        <div class="btn-group" role="group">
-            <button class="btn btn-default btn-screen-options">
-                <span class="glyphicon glyphicon-cog"></span> Screen Options
-            </button>
-            <button class="btn btn-default btn-screen-image">
-                <span class="glyphicon glyphicon-picture"></span> Change image
-            </button>
-        </div>
-        
-        <button class="btn btn-default btn-screen-delete" title="Delete screen">
-            <span class="glyphicon glyphicon-trash"></span>
-        </button>
-    </div>
-    
+
+    <button class="btn btn-default btn-screen-delete" title="Delete screen">
+        <span class="glyphicon glyphicon-trash"></span>
+    </button>
 </div>

@@ -1,15 +1,15 @@
-#controlsContainer a.status,
+.prototype-controls-container a.status,
 #listContainer a.status {
     padding: 10px;
     text-decoration: none;
     color: #555;
 }
 
-#imageDiv {
+.prototype-image-container {
     position: relative;
 }
 
-#controlsContainer {
+.prototype-controls-container {
     position: relative;
     height: 50px;
     min-width: 400px;

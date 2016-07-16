@@ -1,6 +1,5 @@
 /*! Auto-generated from SCSS files. Modifications made here WILL be lost */
-#header .btn:hover, #projectTitle #btnReconnect:hover, .plugin-box:hover, .expandable-panel-heading:hover, #editorToolbar button:hover, .treelist .node .chevron:hover, .table-tab a:hover, .table-toggle-visible:hover, #widgetsList li:hover,
-#timersList li:hover, .newTimer:hover,
+#header .btn:hover, #projectTitle #btnReconnect:hover, .plugin-box:hover, .expandable-panel-heading:hover, #editorToolbar button:hover, .treelist .node .chevron:hover, .table-tab a:hover, .table-toggle-visible:hover, .prototype-list-container li:hover, .newTimer:hover,
 .newWidget:hover {
   background: #000;
   color: #fff; }
@@ -1096,16 +1095,16 @@ fileListItem.hide {
   height: 30px;
   display: none; }
 
-#controlsContainer a.status,
+.prototype-controls-container a.status,
 #listContainer a.status {
   padding: 10px;
   text-decoration: none;
   color: #555; }
 
-#imageDiv {
+.prototype-image-container {
   position: relative; }
 
-#controlsContainer {
+.prototype-controls-container {
   position: relative;
   height: 50px;
   min-width: 400px; }
@@ -1141,27 +1140,23 @@ area {
 label[for=selectPicture] {
   display: inline; }
 
-#builder-controls.ljs-left {
+.prototype-sidebar.ljs-left {
   width: 20%;
   background: #fff;
   height: 480px;
   overflow-y: auto; }
 
-#widgetsList,
-#timersList {
+.prototype-list-container {
   padding: 0;
   margin: 4 0 2;
   max-height: 50%;
   margin-right: 6px; }
-  #widgetsList li,
-  #timersList li {
+  .prototype-list-container li {
     cursor: pointer; }
-    #widgetsList li.selected,
-    #timersList li.selected {
+    .prototype-list-container li.selected {
       background: #08589a;
       color: #fff; }
-      #widgetsList li.selected:hover,
-      #timersList li.selected:hover {
+      .prototype-list-container li.selected:hover {
         color: #fff;
         background: #08589a; }
 
@@ -1215,7 +1210,7 @@ label[for=selectPicture] {
     cursor: move; }
 
 .pim-screen-controls {
-  padding: 10px; }
+  clear: both; }
   .pim-screen-controls .btn-screen-dropdown_label {
     width: 200px;
     display: inline-block;
