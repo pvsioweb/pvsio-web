@@ -12,10 +12,11 @@ define(function (require, exports, module) {
         run: function () {
             describe("The PIM Prototyping components",
 
-			function() {
-				require("./ScreenCollection_UnitTest")();
-			}
-		);
+            function() {
+                require("./ScreenCollection_UnitTest")();
+                require("./PIMPrototyper_UnitTest")();
+            }
+        );
         }
     };
 });

@@ -4,7 +4,11 @@
  */
 
 define(function (require, exports, module) {
+    var Screen = require("./Screen");
+
     var ScreenCollection = Backbone.Collection.extend({
+
+        model: Screen,
 
         initialize: function () {
             this.on("remove", this._onScreenRemoved);
@@ -19,7 +23,7 @@ define(function (require, exports, module) {
             this._selected = screen;
 
             if (oldSelected !== this._selected) {
-                this.trigger("selectionChanged", oldSelected, this._selected);
+                this.trigger("selectionChanged", this._selected, oldSelected);
             }
         },
 

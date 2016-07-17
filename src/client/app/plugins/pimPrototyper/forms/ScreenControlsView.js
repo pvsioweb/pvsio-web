@@ -18,6 +18,7 @@ define(function (require, exports, module) {
         events: {
             "click .btn-screen-add": "showAddScreen",
             "click .btn-screen-options": "showEditScreen",
+            "click .btn-screen-image": "onClickChangeImage",
             "click .btn-screen-delete": "showDeleteConfirmation"
         },
 
@@ -104,6 +105,10 @@ define(function (require, exports, module) {
                 });
         },
 
+        onClickChangeImage: function () {
+            this.trigger("changeImageClicked");
+        },
+
         _updateScreenList: function () {
             var _this = this;
 
@@ -127,7 +132,7 @@ define(function (require, exports, module) {
             selection.exit().remove();
         },
 
-        _updateSelection: function (oldSelection, newSelection) {
+        _updateSelection: function (newSelection, oldSelection) {
             if (newSelection == null) {
                 this._setButtonStates(false);
             } else if (oldSelection == null) {

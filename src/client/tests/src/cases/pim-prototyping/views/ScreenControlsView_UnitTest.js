@@ -23,6 +23,24 @@ define(function (require, exports, module) {
                 expect(el.length).toBeGreaterThan(0);
             }
 
+
+            /**
+            * @param {ScreenControlsView} view View being watched
+             * @param {string} event Name of the event to listen for
+             * @return {function} The function being spied on
+             * @private
+             */
+            function spyOnEvent(view, event) {
+                var handler = {
+                    handler: function(){}
+                };
+
+                spyOn(handler, "handler");
+
+                view.on(event, handler.handler);
+                return handler.handler;
+            }
+
             it("renders a dropdown list", function() {
                 hasElement(".btn-screen-dropdown");
             });
@@ -84,6 +102,15 @@ define(function (require, exports, module) {
                 expect(view.$el.find(".btn-screen-options").attr("disabled")).toBeUndefined();
                 expect(view.$el.find(".btn-screen-image").attr("disabled")).toBeUndefined();
                 expect(view.$el.find(".btn-screen-delete").attr("disabled")).toBeUndefined();
+            });
+
+            it("emits an event when the change image button is clicked", function() {
+                var collection = createCollection(["a", "b", "c"]);
+                var view = createView(collection);
+                collection.setSelected(collection.last());
+                var f = spyOnEvent(view, "changeImageClicked");
+                view.$el.find(".btn-screen-image").click();
+                expect(f).toHaveBeenCalled();
             });
         });
     };
