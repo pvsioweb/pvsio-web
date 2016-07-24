@@ -49,10 +49,7 @@ define(function (require, exports, module) {
              mapID: "prototypeMap"
          });
 
-         // Set up listeners on the sub-views
-         this._prototypeImageView.on("loadImageClicked", this._showLoadImageDialog, this);
-         this._screenControlsView.on("changeImageClicked", this._showLoadImageDialog, this);
-         this._screens.on("selectionChanged", this._onSelectedScreenChange, this);
+         this._setUpChildListeners();
 
          layoutjs({el: "#body"});
     };
@@ -120,18 +117,47 @@ define(function (require, exports, module) {
                 // TODO: nwatson: implement/hook into file upload functionality
             }
         });
-    }
+    };
 
     PIMPrototyper.prototype._onSelectedScreenChange = function (selectedScreen) {
-        // TODO: nwatson: update the WidgetManager with the new data
-        var img = selectedScreen.get("image");
+        this._prototypeImageView.softClearWidgetAreas();
+        this._widgetManager.setScreen(selectedScreen);
 
-        if (img == null) {
+        if (selectedScreen == null || selectedScreen.get("image") == null) {
             this._prototypeImageView.clearImage();
         } else {
-            this._prototypeImageView.setImage(img);
+            this._prototypeImageView.setImage(selectedScreen.get("image"));
         }
-    }
+    };
+
+    /**
+     * Sets up listeners on child views that are used to communicate between the children and back to this class
+     * @private
+     */
+    PIMPrototyper.prototype._setUpChildListeners = function() {
+        var _this = this;
+
+        this._prototypeImageView.on("loadImageClicked", this._showLoadImageDialog, this);
+        this._screenControlsView.on("changeImageClicked", this._showLoadImageDialog, this);
+        this._screens.on("selectionChanged", this._onSelectedScreenChange, this);
+
+        this._prototypeImageView.on("WidgetRegionDrawn", function(coord, region) {
+            var data = {};
+            _this._widgetManager.addNewWidget(data, coord, function(w, renderResponse) {
+                region.classed(w.type(), true)
+                    .attr("id", w.id());
+                w.element(region);
+                w.createImageMap({ callback: renderResponse });
+            });
+        });
+
+        this._prototypeImageView.on("WidgetEditRequested", function(widgetID) {
+            var widget = _this._widgetManager.getWidget(widgetID);
+            // TODO: nwatson: show edit widget view
+        });
+
+        // TODO: nwatson: set up selecting widgets in the list and editor views
+    };
 
     module.exports = {
         getInstance: function () {

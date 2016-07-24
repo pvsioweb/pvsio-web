@@ -11,6 +11,10 @@ define(function (require, exports, module) {
         defaults: {
             name: "New screen",
             isInitial: false
+        },
+
+        initialize: function () {
+            this.set("widgets", {});
         }
     });
 

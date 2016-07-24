@@ -7,9 +7,9 @@
 /*global define, _ */
 define(function (require, exports, module) {
     function WidgetManager() {}
-    
+
     _.extend(WidgetManager.prototype, Backbone.Events);
-    
+
     /**
         Gets the widget with the specified id.
         @param {string} id The html element id of the widget
@@ -18,7 +18,7 @@ define(function (require, exports, module) {
     WidgetManager.prototype.getWidget = function (id) {
         return this._widgets[id];
     };
-    
+
     /**
         Adds the specified widget to the list of widgets.
         @param {Widget} widget The widget to be added.
@@ -27,7 +27,7 @@ define(function (require, exports, module) {
     WidgetManager.prototype.addWidget = function (widget) {
         this._widgets[widget.id()] = widget;
     };
-    
+
     /**
         Removes the specified widget from the list of widgets.
         @param {Widget} widget The widget to remove.
@@ -37,7 +37,18 @@ define(function (require, exports, module) {
         widget.remove();
         delete this._widgets[widget.id()];
     };
-    
+
+    /**
+        Gets a list of all the widgets loaded on the page. The returned array contains all
+        widget types
+        @returns {Widget[]}
+        @memberof WidgetManager
+    */
+
+    WidgetManager.prototype.getAllWidgets = function () {
+        return this._widgets;
+    };
+
     /**
         Update  the location of the widget by updating the image map coords to the position given.
         @param {Widget} widget The widget to update
@@ -56,7 +67,7 @@ define(function (require, exports, module) {
             widget.updateLocationAndSize(pos);
         }
     };
-    
+
     /**
      * Returns a JSON object representing widget definitions for the currently open project
        @memberof WidgetManager
@@ -80,15 +91,6 @@ define(function (require, exports, module) {
     };
 
     /**
-        Removes all the widgets on the interface
-     */
-    WidgetManager.prototype.clearWidgets = function () {
-        _.each(this._widgets, function (value) {
-            value.remove();//remove the widgets from the interface
-        });
-        this._widgets = {};
-    };
-    /**
         update all the area maps attributed to all widgets on the project by the given scale factor
         @param {Number} scale the scale to transform the maps by
     */
@@ -98,11 +100,14 @@ define(function (require, exports, module) {
         function _getPos(el) {
             return {x: el.attr("x"), y: el.attr("y"), height: el.attr("height"), width: el.attr("width")};
         }
-        widgets.forEach(function (w) {
-            var pos = _getPos(w.element());
-            _this.updateLocationAndSize(w, pos, scale);
-        });
+
+        if (widgets) {
+            widgets.forEach(function (w) {
+                var pos = _getPos(w.element());
+                _this.updateLocationAndSize(w, pos, scale);
+            });
+        }
     };
-        
+
     module.exports = WidgetManager;
 });

@@ -8,7 +8,7 @@ define(function (require, exports, module) {
     "use strict";
     var template = require("text!./templates/prototypeImageArea.handlebars");
     var imageMapper     = require("imagemapper");
-    
+
     var nextID = 0; // Simple counter used so that IDs within each instance are globally unique
 
     var PrototypeImageView = Backbone.View.extend({
@@ -40,7 +40,7 @@ define(function (require, exports, module) {
             this._map.attr("name", mapID).attr("id", mapID);
             this.d3El.select("img").attr("usemap", "#" + mapID);
             this.updateMapCreator();
-            
+
             var _this = this;
             this.listenTo(this._widgetManager, "WidgetRegionRestored", function(widget, coord) {
                 var mark = _this._mapCreator.restoreRectRegion(coord);
@@ -51,7 +51,7 @@ define(function (require, exports, module) {
                     _this.trigger("WidgetEditRequested", mark.attr("id"));
                 });
             });
-            
+
             nextID++;
         },
 
@@ -91,7 +91,7 @@ define(function (require, exports, module) {
             this.trigger('imageDropped', ev.originalEvent.dataTransfer.files[0]);
             return false;
         },
-        
+
         /**
          * Displays the region for the given widget as selected
          * @param {Widget} widget Widget to display as selected
@@ -100,12 +100,19 @@ define(function (require, exports, module) {
         selectWidget: function (widget, add) {
             this._mapCreator.selectRegion(widget.element(), add);
         },
-        
+
         /**
          * Removes a widget regions from the display
          */
         clearWidgetAreas: function () {
             this._mapCreator.clear();
+        },
+
+        /**
+         * Removes widget areas from the view, without completely removing the widget container itself
+         */
+        softClearWidgetAreas: function () {
+            this._mapCreator.clearRegions();
         },
 
         /**
@@ -164,7 +171,7 @@ define(function (require, exports, module) {
                 _this.img.src = image.content;
             });
         },
-        
+
         /**
          * Removes the image displayed within the prototype builder image view
          */
@@ -186,23 +193,23 @@ define(function (require, exports, module) {
         hasImage: function() {
             return this.img && this.img.src && this.img.src !== "";
         },
-        
+
         updateMapCreator: function(scale, cb) {
             scale = scale || 1;
             var wm = this._widgetManager, event = {};
             var _this = this;
-            
+
             var round = function(v) {
                 return Math.round(v * 10) / 10;
             };
-            
+
             imageMapper({scale: scale, element: _this.d3El.select("img").node(), parent: _this.el, onReady: function (mc) {
                 _this._mapCreator = mc.on("create", function (e) {
                     var region = e.region;
                     region.on("dblclick", function () {
                         _this.trigger("WidgetEditRequested", region.attr("id"));
                     });
-                    
+
                     //pop up the widget edit dialog
                     var coord = {
                         top: round(e.pos.y),
@@ -210,7 +217,7 @@ define(function (require, exports, module) {
                         width: round(e.pos.width),
                         height: round(e.pos.height)
                     };
-                    
+
                     _this.trigger("WidgetRegionDrawn", coord, region);
                 }).on("resize", function (e) {
                     wm.updateLocationAndSize(e.region.attr("id"), e.pos, e.scale);

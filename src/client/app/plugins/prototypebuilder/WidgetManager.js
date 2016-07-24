@@ -127,7 +127,7 @@ define(function (require, exports, module) {
             }
         });
     }
-    
+
     WidgetManager.prototype = Object.create(BaseWidgetManager.prototype);
 
     /**
@@ -237,7 +237,7 @@ define(function (require, exports, module) {
             timer.stop();
         });
     };
-    
+
     /**
      * Creates a new widget and adds it to the WidgetManager
      * @param {object} data Data object from a NewWidgetView callback
@@ -259,16 +259,16 @@ define(function (require, exports, module) {
         } else {
             widget = new Display(id);
         }
-        
+
         if (onCreate) {
             onCreate(widget, renderResponse);
         }
-        
+
         if (data.hasOwnProperty("events")) {
             data.evts = data.events;
             delete data.events;
         }
-        
+
         widget.updateWithProperties(data);
         this.addWidget(widget);
         this.trigger("WidgetModified", {action: "create", widget: widget});
@@ -276,7 +276,16 @@ define(function (require, exports, module) {
         return widget;
     };
 
-    
+    /**
+        Removes all the widgets on the interface
+     */
+    WidgetManager.prototype.clearWidgets = function () {
+        _.each(this._widgets, function (value) {
+            value.remove();//remove the widgets from the interface
+        });
+        this._widgets = {};
+    };
+
     /**
         Gets a list of all the display widgets loaded on the page.
         @returns {Display[]}

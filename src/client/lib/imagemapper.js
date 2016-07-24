@@ -34,10 +34,10 @@
             return +(s.replace("scale", "").replace("(", "").replace(")", ""));
         } else { return 1; }
     }
-    
+
     function select(region, svg, add, dispatcher) {
         var g = d3.select(region.node().parentNode);
-        
+
         //remove previous selections if shift key wasnt pressed and we are not selecting a previously selected region
         if (!add && !g.classed("selected")) {
             svg.selectAll("g.selected").classed("selected", false);
@@ -51,7 +51,6 @@
     }
 
     function updateRegion(r, d) {
-        var svg = d3.select("svg.image-map-layer");
         d.width = isNaN(d.width) || d.width === null ? parseFloat(r.attr("width")) : d.width;
         d.height = isNaN(d.height) || d.height === null ? parseFloat(r.attr("height")) : d.height;
 
@@ -98,7 +97,7 @@
                 svg.on("mousemove.region", null);
                 dispatcher.move({region: region, pos: pos(region), scale: _scale});
             });
-            
+
             select(region, svg, d3.event.shiftKey, dispatcher);
         });
     }
@@ -234,9 +233,13 @@
                 .on("mouseup", null);
             return r;
         }
-        
+
         function selectRegion(element, add) {
             select(element, svg, add, ed);
+        }
+
+        function clearRegions() {
+            mapLayer.html("");
         }
 
         var res = {
@@ -246,6 +249,7 @@
             restoreRectRegion: restoreRectRegion,
             getImageMapData: getImageMapData,
             selectRegion: selectRegion,
+            clearRegions: clearRegions,
             on: function (type, f) {
                 ed.on(type, f);
                 return this;
