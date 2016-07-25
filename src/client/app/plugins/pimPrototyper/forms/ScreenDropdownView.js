@@ -45,11 +45,18 @@ define(function (require, exports, module) {
          * @param {Screen} selected Screen to display as selected
          */
         setSelected: function (selected) {
-            this.d3El.select(".btn-screen-dropdown_label").text(selected ? selected.get("name") : "Select a screen");
+            this._selected = selected;
+            this._updateSelectedText();
+        },
+
+        _updateSelectedText: function () {
+            this.d3El.select(".btn-screen-dropdown_label").text(this._selected ? this._selected.get("name") : "Select a screen");
         },
 
         _updateScreenList: function () {
             var _this = this;
+
+            this._updateSelectedText();
 
             var selection = this._dropdown.selectAll("li")
                 .data(this.collection.models);

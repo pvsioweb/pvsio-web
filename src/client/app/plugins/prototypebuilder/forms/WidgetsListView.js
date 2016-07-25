@@ -13,9 +13,13 @@ define(function (require, exports, module) {
          * @description Creates a new widget list view and renders it to the provided element
          * @param {Object} options Options for the view.
          * @param {WidgetManager} options.widgetManager Widget Manager to be used by the view
+         * @param {function} options.labelFunction Function that generates the display text for a given widget
          */
         initialize: function (options) {
             this._widgetManager = options.widgetManager;
+            this._labelFunction = options.labelFunction || function (w) {
+                return w.toString();
+            };
             this.$el.addClass("widgetsList noselect");
             var list = document.createElement("ul");
             this.$el.append(list);
@@ -24,11 +28,11 @@ define(function (require, exports, module) {
             var _this = this;
 
             this.listenTo(this._widgetManager, "WidgetModified", _this.update);
-            
+
             this.listenTo(this._widgetManager, "WidgetSelected", function (event) {
                 _this.selectWidget(event.widget, event.add);
             });
-            
+
             this.listenTo(this._widgetManager, "WidgetSelectionCleared", function (event) {
                 _this.d3ListElement.selectAll("li").classed("selected", false);
             });
@@ -63,16 +67,6 @@ define(function (require, exports, module) {
             element.classed("selected", true);
         },
 
-        labelFunction: function (widget) {
-            var label = widget.type() + ": ";
-            if (widget.type() === "display") {
-                label += widget.displayKey();
-            } else {
-                label += widget.functionText();
-            }
-            return label;
-        },
-
         /**
         * @function update
         * @description Updates the data that the view displays (and updates the UI with any new/changed data)
@@ -85,12 +79,13 @@ define(function (require, exports, module) {
             });
             var enteredItems = this.listItems.enter();
             var exitedItems = this.listItems.exit();
+
             enteredItems.append("li").attr("class", "list-group-item")
                 .attr("widget-id", function (w) {
                     _this.d3ListElement.selectAll("ul li").classed("selected", false);
                     return w.id();
                 }).classed("selected", false)
-                .text(this.labelFunction)
+                .text(this._labelFunction)
                 .on("click", function (w) {
                     var add = d3.event.shiftKey;
                     _this.selectWidget(w, add);
@@ -104,7 +99,7 @@ define(function (require, exports, module) {
                     event.preventDefault();
                     event.stopPropagation();
                 });
-            this.listItems.text(this.labelFunction);
+            this.listItems.text(this._labelFunction);
             exitedItems.transition().duration(220).style("opacity", 0).remove();
         }
     });

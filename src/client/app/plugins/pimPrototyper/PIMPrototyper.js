@@ -7,6 +7,7 @@ define(function (require, exports, module) {
         ScreenCollection = require("./ScreenCollection"),
         PIMWidgetManager = require("./PIMWidgetManager"),
         PrototypeImageView = require("pvsioweb/forms/PrototypeImageView"),
+        WidgetsListView = require("pvsioweb/forms/WidgetsListView"),
         WidgetConfigView = require("./forms/WidgetConfigView"),
         template = require("text!./forms/templates/PIMPrototyperPanel.handlebars"),
         FileSystem = require("filesystem/FileSystem"),
@@ -45,9 +46,17 @@ define(function (require, exports, module) {
          });
 
          this._prototypeImageView = new PrototypeImageView({
-             el: this._container.select(".prototype-image-container").node(),
-             widgetManager: this._widgetManager,
-             mapID: "prototypeMap"
+            el: this._container.select(".prototype-image-container").node(),
+            widgetManager: this._widgetManager,
+            mapID: "prototypeMap"
+         });
+
+         this._widgetListView = new WidgetsListView({
+            el: this._container.select(".prototype-list-container").node(),
+            widgetManager: this._widgetManager,
+            labelFunction: function (widget) {
+                return widget.name();
+            }
          });
 
          this._setUpChildListeners();
@@ -65,6 +74,8 @@ define(function (require, exports, module) {
     };
 
     PIMPrototyper.prototype.unload = function () {
+        this._prototypeImageView.remove();
+        this._widgetListView.remove();
         PVSioWebClient.getInstance().removeCollapsiblePanel(this._container);
         return Promise.resolve(true);
     };
@@ -123,6 +134,7 @@ define(function (require, exports, module) {
     PIMPrototyper.prototype._onSelectedScreenChange = function (selectedScreen) {
         this._prototypeImageView.softClearWidgetAreas();
         this._widgetManager.setScreen(selectedScreen);
+        this._widgetListView.update();
 
         if (selectedScreen == null || selectedScreen.get("image") == null) {
             this._prototypeImageView.clearImage();
@@ -178,11 +190,19 @@ define(function (require, exports, module) {
             })
             .on("ok", function(data, view) {
                 widget.updateWithProperties(data.data);
+                _this._widgetManager.trigger("WidgetModified");
                 view.remove();
             });
         });
 
-        // TODO: nwatson: set up selecting widgets in the list and editor views
+
+        this._prototypeImageView.on("WidgetSelected", function(widget, add) {
+            _this._widgetListView.selectWidget(widget, add);
+        });
+
+        this._widgetListView.on("WidgetSelected", function(widget, add) {
+            _this._prototypeImageView.selectWidget(widget, add);
+        });
     };
 
     module.exports = {

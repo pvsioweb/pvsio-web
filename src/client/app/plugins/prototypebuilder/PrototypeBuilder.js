@@ -71,7 +71,7 @@ define(function (require, exports, module) {
         d3.select("#btnSimulatorView").classed("selected", true);
         WidgetManager.startTimers();
     }
-    
+
     function updateControlsHeight() {
         d3.select("#builder-controls").style("height", d3.select("#prototype-builder-container").node().getBoundingClientRect().height + "px");
     }
@@ -80,11 +80,11 @@ define(function (require, exports, module) {
         var p = projectManager.project();
         var image = p.getImage();
         WidgetManager.clearWidgets();
-        
+
         if (prototypeImageView) {
             prototypeImageView.clearWidgetAreas();
         }
-    
+
         d3.select("div#body").style("display", null);
         if (!image) {
             // remove previous image, if any
@@ -432,7 +432,7 @@ define(function (require, exports, module) {
             }
         });
     };
-    
+
     /**
      * Sets up listeners on child views that are used to communicate between the children and back to this class
      * @private
@@ -442,24 +442,24 @@ define(function (require, exports, module) {
             NewWidgetView.create(coord)
                 .on("ok", function (e, view) {
                     view.remove();
-                    
+
                     var widget = WidgetManager.addNewWidget(e.data, coord, function(w, renderResponse) {
                         region.classed(w.type(), true)
                             .attr("id", w.id());
                         w.element(region);
                         w.createImageMap({ callback: renderResponse });
                     });
-                    
+
                     widgetListView.selectWidget(widget, false);
                 }).on("cancel", function (e, view) {
                     view.remove();
                     d3.select(region.node().parentNode).remove();
                 });
         });
-        
+
         prototypeImageView.on("WidgetEditRequested", function(widgetID) {
             var widget = WidgetManager.getWidget(widgetID);
-            
+
             EditWidgetView.create(widget)
                 .on("ok", function (e, view) {
                     view.remove();
@@ -468,11 +468,11 @@ define(function (require, exports, module) {
                     view.remove();
                 });
         });
-        
+
         prototypeImageView.on("WidgetSelected", function(widget, add) {
             widgetListView.selectWidget(widget, add);
         });
-        
+
         widgetListView.on("WidgetSelected", function(widget, add) {
             prototypeImageView.selectWidget(widget, add);
         });
@@ -507,8 +507,26 @@ define(function (require, exports, module) {
         //TimersListView.create();
 
         // Create child views
-        widgetListView = new WidgetsListView({el: $("#widgetsList"), widgetManager: WidgetManager});
-        prototypeImageView = new PrototypeImageView({el: $("#imageDiv"), widgetManager: WidgetManager, mapID: "prototypeMap"});
+        widgetListView = new WidgetsListView({
+            el: $("#widgetsList"),
+            widgetManager: WidgetManager,
+            labelFunction: function (widget) {
+                var label = widget.type() + ": ";
+                if (widget.type() === "display") {
+                    label += widget.displayKey();
+                } else {
+                    label += widget.functionText();
+                }
+                return label;
+            }
+        });
+
+        prototypeImageView = new PrototypeImageView({
+            el: $("#imageDiv"),
+            widgetManager: WidgetManager,
+            mapID: "prototypeMap"
+        });
+
         preparePageForImageUpload();
         this._setUpChildListeners();
         bindListeners();

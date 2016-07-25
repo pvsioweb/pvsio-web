@@ -6,6 +6,8 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 /*global define, _ */
 define(function (require, exports, module) {
+    var d3 = require("d3/d3");
+
     function WidgetManager() {}
 
     _.extend(WidgetManager.prototype, Backbone.Events);
@@ -46,7 +48,7 @@ define(function (require, exports, module) {
     */
 
     WidgetManager.prototype.getAllWidgets = function () {
-        return this._widgets;
+        return d3.values(this._widgets);
     };
 
     /**
