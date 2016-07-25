@@ -1,6 +1,6 @@
 /**
  * @module PIMWidget
- * @desc PIM Prototype widget
+ * @desc Widget within the PIM prototype editor
  * @author Nathanile Watson
  */
 define(function (require, exports, module) {
@@ -20,6 +20,9 @@ define(function (require, exports, module) {
         this.x = coords.left || 0;
         this.width = coords.width || 32;
         this.height = coords.height || 32;
+
+        this.name = property.call(this, opt.name || "New widget");
+        this.targetScreen = property.call(this, opt.targetScreen);
 
         return this;
     };

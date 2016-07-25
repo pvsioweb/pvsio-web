@@ -7,6 +7,7 @@ define(function (require, exports, module) {
         ScreenCollection = require("./ScreenCollection"),
         PIMWidgetManager = require("./PIMWidgetManager"),
         PrototypeImageView = require("pvsioweb/forms/PrototypeImageView"),
+        WidgetConfigView = require("./forms/WidgetConfigView"),
         template = require("text!./forms/templates/PIMPrototyperPanel.handlebars"),
         FileSystem = require("filesystem/FileSystem"),
         MIME = require("util/MIME").getInstance();
@@ -142,18 +143,43 @@ define(function (require, exports, module) {
         this._screens.on("selectionChanged", this._onSelectedScreenChange, this);
 
         this._prototypeImageView.on("WidgetRegionDrawn", function(coord, region) {
-            var data = {};
-            _this._widgetManager.addNewWidget(data, coord, function(w, renderResponse) {
-                region.classed(w.type(), true)
-                    .attr("id", w.id());
-                w.element(region);
-                w.createImageMap({ callback: renderResponse });
+            new WidgetConfigView({
+                screenCollection: _this._screens,
+                title: "New widget",
+                okText: "Create",
+            })
+            .on("cancel", function(data, view) {
+                view.remove();
+                d3.select(region.node().parentNode).remove();
+            })
+            .on("ok", function(data, view) {
+                _this._widgetManager.addNewWidget(data.data, coord, function(w, renderResponse) {
+                    region.classed(w.type(), true)
+                        .attr("id", w.id());
+                    w.element(region);
+                    w.createImageMap({ callback: renderResponse });
+                });
+
+                view.remove();
             });
         });
 
         this._prototypeImageView.on("WidgetEditRequested", function(widgetID) {
             var widget = _this._widgetManager.getWidget(widgetID);
-            // TODO: nwatson: show edit widget view
+
+            new WidgetConfigView({
+                screenCollection: _this._screens,
+                title: "Edit widget",
+                okText: "Save",
+                widget: widget
+            })
+            .on("cancel", function(data, view) {
+                view.remove();
+            })
+            .on("ok", function(data, view) {
+                widget.updateWithProperties(data.data);
+                view.remove();
+            });
         });
 
         // TODO: nwatson: set up selecting widgets in the list and editor views

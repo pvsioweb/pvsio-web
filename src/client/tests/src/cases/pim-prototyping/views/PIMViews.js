@@ -11,13 +11,15 @@ define(function (require, exports, module) {
     module.exports = {
         run: function () {
             describe("The PIM Prototyping views",
-			
-			function() {
-				require("./ScreenControlsView_UnitTest")();
-				require("./NewScreenView_UnitTest")();
-				require("./EditScreenView_UnitTest")();
-			}
-		);
+
+            function() {
+                require("./ScreenControlsView_UnitTest")();
+                require("./ScreenDropdownView_UnitTest")();
+                require("./NewScreenView_UnitTest")();
+                require("./EditScreenView_UnitTest")();
+                require("./WidgetConfigView_UnitTest")();
+            }
+        );
         }
     };
 });

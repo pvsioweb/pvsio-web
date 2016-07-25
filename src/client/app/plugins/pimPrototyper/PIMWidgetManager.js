@@ -44,9 +44,9 @@ define(function (require, exports, module) {
      * @return {Widget} The new widget
      */
     PIMWidgetManager.prototype.addNewWidget = function (data, coord, onCreate) {
-        var id = data.type + "_" + uidGenerator();
+        var id = "pimwidget_" + uidGenerator();
 
-        var widget = new PIMWidget(id, coord);
+        var widget = new PIMWidget(id, coord, data);
 
         if (onCreate) {
             onCreate(widget);

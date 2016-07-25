@@ -8,6 +8,7 @@ define(function (require, exports, module) {
 
     var d3 = require("d3/d3"),
         template = require("text!./templates/ScreenControlsView.handlebars"),
+        ScreenDropdownView = require("./ScreenDropdownView"),
         NewScreenView = require("./NewScreenView"),
         EditScreenView = require("./EditScreenView"),
         Screen = require("../Screen"),
@@ -29,8 +30,19 @@ define(function (require, exports, module) {
          * @param {ScreenCollection} options.collection Required. Collection of screens to use
          */
         initialize: function (options) {
-            this.listenTo(this.collection, "add remove change:name", this._updateScreenList); // TODO: don't re-render the list when a single item changes
-            this.listenTo(this.collection, "selectionChanged", this._updateSelection);
+            var _this = this;
+            this.listenTo(this.collection, "selectionChanged", this._onSelectionChanged);
+
+            this._screenDropdown = new ScreenDropdownView({
+                collection: this.collection,
+                up: true,
+                buttonClasses: ""
+            });
+
+            this.listenTo(this._screenDropdown, "screenSelected", function (selected) {
+                _this.collection.setSelected(selected);
+            });
+
             this._template = Handlebars.compile(template);
             this.$el.addClass("pim-screen-controls");
             this.render();
@@ -46,14 +58,13 @@ define(function (require, exports, module) {
         render: function () {
             this.$el.html(this._template());
             this.d3El = d3.select(this.el);
-            this._dropdown = this.d3El.select(".screen-dropdown");
             this._screenButtons = [
                 this.d3El.select(".btn-screen-options"),
                 this.d3El.select(".btn-screen-image"),
                 this.d3El.select(".btn-screen-delete")
             ];
 
-            this._updateScreenList();
+            this._screenDropdown.setElement(this.d3El.select(".dropdown-container").node()).render();
             this._setButtonStates(false); // disable buttons by default
             return this;
         },
@@ -109,37 +120,14 @@ define(function (require, exports, module) {
             this.trigger("changeImageClicked");
         },
 
-        _updateScreenList: function () {
-            var _this = this;
+        _onSelectionChanged: function (newSelection, oldSelection) {
+            this._screenDropdown.setSelected(newSelection);
 
-            var selected = this.collection.getSelected();
-            this.d3El.select(".btn-screen-dropdown_label").text(selected ? selected.get("name") : "No screens");
-
-            var selection = this._dropdown.selectAll("li")
-                .data(this.collection.models);
-
-            var listItemsEnter = selection.enter().append("li");
-
-            listItemsEnter.append("a")
-                .on("click", function(d) {
-                    _this.collection.setSelected(d);
-                });
-
-            selection.select("a").text(function(d) {
-                return d.get("name");
-            });
-
-            selection.exit().remove();
-        },
-
-        _updateSelection: function (newSelection, oldSelection) {
             if (newSelection == null) {
                 this._setButtonStates(false);
             } else if (oldSelection == null) {
                 this._setButtonStates(true);
             }
-
-            this._updateScreenList();
         },
 
         _setButtonStates: function (enabled) {

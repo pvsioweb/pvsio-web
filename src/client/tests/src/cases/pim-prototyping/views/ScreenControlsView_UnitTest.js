@@ -12,12 +12,12 @@ define(function (require, exports, module) {
                 return new ScreenCollection(modelData);
             }
 
-            function createView (collection) {
+            function createView(collection) {
                 collection = collection || createCollection();
                 return new ScreenControlsView({ collection: collection });
             }
 
-            function hasElement (selector) {
+            function hasElement(selector) {
                 var viewEl = createView().render().$el;
                 var el = viewEl.find(selector);
                 expect(el.length).toBeGreaterThan(0);
@@ -59,21 +59,6 @@ define(function (require, exports, module) {
 
             it("renders an add button", function() {
                 hasElement(".btn-screen-add");
-            });
-
-            it("lists all the screens in the model", function() {
-                var collection = createCollection(["a", "b", "c"]);
-                var view = createView(collection);
-                var count = view.render().$el.find(".screen-dropdown li").length;
-                expect(count).toEqual(collection.length);
-            });
-
-            it("updates the screen list when the collection is removed from", function() {
-                var collection = createCollection(["a", "b", "c"]);
-                var view = createView(collection);
-                collection.remove(collection.last());
-                var count = view.$el.find(".screen-dropdown li").length;
-                expect(count).toEqual(collection.length);
             });
 
             it("updates the screen displayed as selected when the selection changes", function() {
