@@ -24,6 +24,8 @@ define(function (require, exports, module) {
      * @private
      */
     PIMPrototyper.prototype._init = function (parentElement) {
+        var _this = this;
+
         var opts = {
             headerText: "PIM Prototyper",
             owner: this.getName()
@@ -36,6 +38,19 @@ define(function (require, exports, module) {
         this._container = PVSioWebClient.getInstance().createCollapsiblePanel(opts);
         this._container.html(Handlebars.compile(template)());
 
+        this._modeButtons = {
+            builder: this._container.select(".prototype-builder-button"),
+            simulator: this._container.select(".prototype-simulator-button")
+        };
+
+        this._modeButtons.builder.on("click", function() {
+            _this.switchToBuilderView();
+        });
+
+        this._modeButtons.simulator.on("click", function() {
+            _this.switchToSimulatorView();
+        });
+
         this._fileSystem = new FileSystem();
         this._widgetManager = new PIMWidgetManager();
 
@@ -47,8 +62,7 @@ define(function (require, exports, module) {
 
          this._prototypeImageView = new PrototypeImageView({
             el: this._container.select(".prototype-image-container").node(),
-            widgetManager: this._widgetManager,
-            mapID: "prototypeMap"
+            widgetManager: this._widgetManager
          });
 
          this._widgetListView = new WidgetsListView({
@@ -101,6 +115,28 @@ define(function (require, exports, module) {
         }
 
         selected.set("image", descriptor);
+    };
+
+    PIMPrototyper.prototype.switchToSimulatorView = function () {
+        this._container.select(".image-map-layer").style("opacity", 0.1).style("z-index", -2);
+        this._modeButtons.builder.classed("active", false);
+        this._modeButtons.simulator.classed("active", true);
+        this._modeButtons.simulator.classed("selected", true);
+    };
+
+    PIMPrototyper.prototype.switchToBuilderView = function () {
+        this._container.select(".image-map-layer").style("opacity", 1).style("z-index", 190);
+        this._modeButtons.simulator.classed("active", false);
+        this._modeButtons.builder.classed("active", true);
+        this._modeButtons.builder.classed("selected", true);
+    };
+
+    PIMPrototyper.prototype._onWidgetClicked = function (widget) {
+        var target = widget.targetScreen();
+
+        if (target != null) {
+            this._screens.setSelected(target);
+        }
     };
 
     PIMPrototyper.prototype._showLoadImageDialog = function () {
@@ -165,11 +201,16 @@ define(function (require, exports, module) {
                 d3.select(region.node().parentNode).remove();
             })
             .on("ok", function(data, view) {
-                _this._widgetManager.addNewWidget(data.data, coord, function(w, renderResponse) {
+                _this._widgetManager.addNewWidget(data.data, coord, function(w) {
                     region.classed(w.type(), true)
                         .attr("id", w.id());
                     w.element(region);
-                    w.createImageMap({ callback: renderResponse });
+                    w.createImageMap({
+                        onClick: function(widget) {
+                            _this._onWidgetClicked(widget)
+                        },
+                        map: _this._prototypeImageView.getImageMap()
+                     });
                 });
 
                 view.remove();

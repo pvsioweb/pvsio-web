@@ -45,6 +45,17 @@ define(function (require, exports, module) {
     };
 
     /**
+     * Removes the widget's image map from the DOM (but does not remove the widget's reference to it)
+     */
+    PIMWidget.prototype.removeImageMap = function () {
+        if (this.imageMap()) {
+            this.imageMap().remove();
+        }
+    };
+
+
+
+    /**
      * Returns an object containing the x, y, width and height properties of the widget.
      * @returns {object}
      * @memberof PIMWidget
@@ -58,7 +69,26 @@ define(function (require, exports, module) {
         };
     };
 
+    /**
+     * @override
+     * @function createImageMap
+     * @description Creates an image map area for this widget, which is used by the simulator mode
+     * @param {function} opt.onCLick Callback to call when the widget is clicked in the simulator
+     * @returns {d3.selection} The image map area created for the widget
+     * @memberof PIMWidget
+     */
     PIMWidget.prototype.createImageMap = function (opt) {
+        opt = opt || {};
+
+        var area = opt.area || PIMWidget.prototype.parentClass.createImageMap.apply(this, arguments);
+        var _this = this;
+
+        area.on("mousedown", function (e) {
+            opt.onClick(_this, e);
+        });
+
+        this.imageMap(area);
+        return area;
     };
 
     PIMWidget.prototype.updateLocationAndSize = function (pos) {
@@ -67,7 +97,7 @@ define(function (require, exports, module) {
         this.width = pos.width;
         this.height = pos.height;
 
-        // TODO: nwatson: update the area map
+        PIMWidget.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
     };
 
     module.exports = PIMWidget;

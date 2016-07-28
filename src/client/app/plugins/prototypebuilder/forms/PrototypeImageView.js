@@ -47,6 +47,11 @@ define(function (require, exports, module) {
                 mark.attr("id", widget.id()).classed(widget.type(), true);
                 widget.element(mark);
 
+                // Reattach the widget's area map if it isn't already attached to the DOM
+                if (widget.imageMap() && widget.imageMap().node().parentNode == null) {
+                    this._map.node().appendChild(widget.imageMap().node());
+                }
+
                 mark.on("dblclick", function () {
                     _this.trigger("WidgetEditRequested", mark.attr("id"));
                 });
@@ -175,7 +180,7 @@ define(function (require, exports, module) {
         /**
          * Removes the image displayed within the prototype builder image view
          */
-        clearImage: function() {
+        clearImage: function () {
             this._innerContainer.attr("style", null);
             this.d3El.select("img").attr("src", "").attr("height", "430").attr("width", "1128");
             this.d3El.select("svg").attr("height", "0").attr("width", "0");
@@ -190,11 +195,18 @@ define(function (require, exports, module) {
          * @description Returns whether or not the view is currently displaying an image
          * @returns {Boolean} true if an image is currently displayed, false otherwise.
          */
-        hasImage: function() {
+        hasImage: function () {
             return this.img && this.img.src && this.img.src !== "";
         },
 
-        updateMapCreator: function(scale, cb) {
+        /**
+         * @return {d3.selection} The image map element used by this view
+         */
+        getImageMap: function () {
+            return this._map;
+        },
+
+        updateMapCreator: function (scale, cb) {
             scale = scale || 1;
             var wm = this._widgetManager, event = {};
             var _this = this;

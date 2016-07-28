@@ -22,6 +22,10 @@ define(function (require, exports, module) {
      * @param {Screen} scrn Prototype screen whose widgets should be managed by this manager
      */
     PIMWidgetManager.prototype.setScreen = function (scrn) {
+        _.each(this._widgets, function(widget) {
+            widget.removeImageMap();
+        });
+
         var _this = this;
         this._screen = scrn;
 
