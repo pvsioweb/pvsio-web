@@ -584,20 +584,27 @@ define(function (require, exports, module) {
                     // for now we use only the middle control point
                     cpoints.attr("cx", cp[1].x).attr("cy", cp[1].y);
                     // flip path if edge.source.x > edge.target.x
-                    if (edge.source.x >= edge.target.x) {
+                    if (edge.source.id === edge.target.id ||
+                            edge.source.x >= edge.target.x) {
+                        // invert the direction of the path to avoid text being flipped upside down.
+                        //The arrow pointer needs to be adjuted accordingly (see code below) otherwise the arrow direction will be inverted
                         var swap = cp[0];
                         cp[0] = cp[2];
                         cp[2] = swap;
-                        d3.select(this.parentNode).select(".path")
-                            .style("marker-end", "")
-                            .style("marker-start", "url(#end-arrow-rotated)");
-                    } else {
-                        if (d3.select(this).attr("style").indexOf("marker-start") >= 0) {
-                            d3.select(this.parentNode).select(".path")
-                                .style("marker-end", "url(#end-arrow)")
-                                .style("marker-start", "");
-                        }
                     }
+                    d3.select(this.parentNode).select(".path")
+                        .style("marker-start", function (edge) {
+                            if (edge.source.id === edge.target.id ||
+                                    edge.source.x >= edge.target.x) {
+                                return "url(#end-arrow-rotated)";
+                            } else { return ""; }
+                        })
+                        .style("marker-end", function (edge) {
+                            if (edge.source.id === edge.target.id ||
+                                    edge.source.x >= edge.target.x) {
+                                return "";
+                            } else { return "url(#end-arrow)"; }
+                        });
                     // refresh path
                     return lineFunction(cp);
                 }
