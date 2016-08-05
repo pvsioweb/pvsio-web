@@ -46,23 +46,33 @@ FCUDataEntry: THEORY
 			          rejectKeys := true ] endif
 	else    st endif
 
-  click_CLR(st: state): state =
+  click_cancel(st: state): state =
 	if (NOT rejectKeys(st))
-	then st WITH [ display := snprintf(0, MAIN_DISPLAY_SIZE)(FALSE, 0),
-	     	       dispval := IF inHg?(dispval(st)) THEN inHg(0) ELSE hPa(0) ENDIF,
+	then st WITH [ dispval := IF (inHg?(dispval(st))) THEN inHg(0) ELSE hPa(0) ENDIF,
+		       display := snprintf(0, MAIN_DISPLAY_SIZE)(FALSE, 0),
 		       pointEntered := false,
 		       rejectKeys := false,
 		       decimalDigits := 0 ]
 	else %{ // cancel error message and display last valid value
 	     st WITH [ 	rejectKeys := false,
-	     	     	display := snprintf(dispval(st), MAIN_DISPLAY_SIZE)(pointEntered(st), decimalDigits(st)) ] endif  
+	     	     	display := snprintf(dispval(st), MAIN_DISPLAY_SIZE)(pointEntered(st), decimalDigits(st)) ] endif
+
+  click_reset(st: state): state = 
+   st WITH [
+    dispval := IF (inHg?(dispval(st))) THEN inHg(0) ELSE hPa(0) ENDIF,
+	display := snprintf(0, MAIN_DISPLAY_SIZE)(FALSE,0),
+	pointEntered := false,
+	decimalDigits := 0,
+	rejectKeys := false,
+	programmedValue := 0 ]
+  
 
   EXCEPTION(errType: int, key: int, val: unsigned_long_int)(st: state): state =
 	st WITH [ display := snprintf(errType + ":" + key + ":" + val),
 	          rejectKeys := true ]
 
   processKey(key: KEY_CODE)(st: state): state =
-   if(programmedValue(st) = 0 OR key = KEY_CLR) then
+   if(programmedValue(st) = 0 OR key = KEY_RESET OR key = KEY_CANCEL) then
     COND
 	 key = KEY_0 OR key = KEY_1 OR key = KEY_2 OR key = KEY_3 OR key = KEY_4
 	  or key = KEY_5 OR key = KEY_6 OR key = KEY_7 OR key = KEY_8 OR key = KEY_9
@@ -74,8 +84,12 @@ FCUDataEntry: THEORY
 	 key = KEY_OK  
 	       -> click_ok(st),
 	
-	 key = KEY_CLR
-	       -> click_CLR(st),
+	 key = KEY_CANCEL
+	       -> click_cancel(st),
+
+	 key = KEY_RESET
+               -> click_reset(st),
+
          ELSE % unrecognised key - call exception handler
 	       -> EXCEPTION(INVALID_KEY, key, dispval(st))(st)
    ENDCOND
@@ -182,7 +196,7 @@ constants: THEORY
         i = 2 -> "Out of Range",
         i = 3 -> "Invalid Key" ENDCOND
 
-  KEY_CODE: TYPE = { KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_POINT, KEY_OK, KEY_CLR };
+  KEY_CODE: TYPE = { KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_POINT, KEY_OK, KEY_CANCEL, KEY_RESET, KEY_NULL };
   KEY_CODE_TO_INT(k: KEY_CODE): int =
    COND k = KEY_0 -> 0,
         k = KEY_1 -> 1,
@@ -196,7 +210,9 @@ constants: THEORY
 	k = KEY_9 -> 9,
 	k = KEY_POINT -> 10,
 	k = KEY_OK -> 11,
-	k = KEY_CLR -> 12 ENDCOND
+	k = KEY_CANCEL -> 12,
+	k = KEY_RESET -> 13,
+	k = KEY_NULL -> 14 ENDCOND
    CONVERSION KEY_CODE_TO_INT
 
   messageID: TYPE = { TOO_HIGH, TOO_LOW, OUT_OF_RANGE };

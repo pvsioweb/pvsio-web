@@ -6,7 +6,7 @@
 % ---------------------------------------------------------------
 
 emucharts_FCU_th: THEORY
- BEGIN IMPORTING FCUDataEntry
+ BEGIN
 
   %-- machine states
   MachineState: TYPE = { Editing, Error, QNH, STD, Validation }
@@ -44,11 +44,11 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = Error)
      -> LET new_st = leave_state(Error)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_CLR)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_CLR) ]
          IN enter_into(Editing)(new_st),
     (current_state(st) = Editing)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_CLR)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_CLR) ]
          IN enter_into(Editing)(new_st),
     ELSE -> st
     ENDCOND
@@ -58,11 +58,11 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_0)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_0) ]
          IN enter_into(Editing)(new_st),
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = TRUE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_0)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_0) ]
          IN enter_into(Error)(new_st),
     ELSE -> st
     ENDCOND
@@ -72,11 +72,11 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_1)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_1) ]
          IN enter_into(Editing)(new_st),
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = trUE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_1)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_1) ]
          IN enter_into(Error)(new_st),
     ELSE -> st
     ENDCOND
@@ -86,11 +86,11 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_2)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_2) ]
          IN enter_into(Editing)(new_st),
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = TRUE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_2)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_2) ]
          IN enter_into(Error)(new_st),
     ELSE -> st
     ENDCOND
@@ -100,11 +100,11 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_3)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_3) ]
          IN enter_into(Editing)(new_st),
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = TRUE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_3)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_3) ]
          IN enter_into(Error)(new_st),
     ELSE -> st
     ENDCOND
@@ -114,11 +114,11 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_4)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_4) ]
          IN enter_into(Editing)(new_st),
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = TRUE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_4)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_4) ]
          IN enter_into(Error)(new_st),
     ELSE -> st
     ENDCOND
@@ -128,11 +128,11 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_5)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_5) ]
          IN enter_into(Editing)(new_st),
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = TRUE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_5)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_5) ]
          IN enter_into(Error)(new_st),
     ELSE -> st
     ENDCOND
@@ -142,11 +142,11 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_6)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_6) ]
          IN enter_into(Editing)(new_st),
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = TRUE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_6)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_6) ]
          IN enter_into(Error)(new_st),
     ELSE -> st
     ENDCOND
@@ -156,11 +156,11 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_7)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_7) ]
          IN enter_into(Editing)(new_st),
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = TRUE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_7)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_7) ]
          IN enter_into(Error)(new_st),
     ELSE -> st
     ENDCOND
@@ -170,11 +170,11 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_8)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_8) ]
          IN enter_into(Editing)(new_st),
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = TRUE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_8)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_8) ]
          IN enter_into(Error)(new_st),
     ELSE -> st
     ENDCOND
@@ -184,11 +184,11 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_9)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_9) ]
          IN enter_into(Editing)(new_st),
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = TRUE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_9)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_9) ]
          IN enter_into(Error)(new_st),
     ELSE -> st
     ENDCOND
@@ -207,7 +207,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_OK)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_OK) ]
          IN enter_into(Validation)(new_st),
     ELSE -> st
     ENDCOND
@@ -217,7 +217,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
      -> LET new_st = leave_state(Editing)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_POINT)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_POINT) ]
          IN enter_into(Editing)(new_st),
     ELSE -> st
     ENDCOND

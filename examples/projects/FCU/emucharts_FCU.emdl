@@ -1,0 +1,564 @@
+{
+ "descriptor": {
+  "file_type": "emdl",
+  "version": "1.3",
+  "description": "emucharts model",
+  "chart_name": "emucharts_FCU"
+ },
+ "chart": {
+  "states": [
+   {
+    "name": "Editing",
+    "id": "X5",
+    "x": 701,
+    "y": 241,
+    "width": 36,
+    "height": 36,
+    "color": "#9467bd"
+   },
+   {
+    "name": "Error",
+    "id": "X4",
+    "x": 1385.4165649414062,
+    "y": 603.6667175292969,
+    "width": 36,
+    "height": 36,
+    "color": "#d62728"
+   },
+   {
+    "name": "QNH",
+    "id": "X2",
+    "x": 412.5,
+    "y": 242.25,
+    "width": 36,
+    "height": 36,
+    "color": "#ff7f0e"
+   },
+   {
+    "name": "STD",
+    "id": "X1",
+    "x": 185,
+    "y": 244.25,
+    "width": 36,
+    "height": 36,
+    "color": "#1f77b4"
+   },
+   {
+    "name": "Validation",
+    "id": "X3",
+    "x": 412.4166564941406,
+    "y": 554.8333129882812,
+    "width": 36,
+    "height": 36,
+    "color": "#2ca02c"
+   }
+  ],
+  "transitions": [
+   {
+    "name": "click_CLR\n{ data_entry := processKey(KEY_CLR) }",
+    "id": "T16",
+    "source": {
+     "name": "Error",
+     "id": "X4"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 717.1211547851562,
+     "y": 568.1959838867188
+    }
+   },
+   {
+    "name": "click_CLR\n{ data_entry := processKey(KEY_CLR); }",
+    "id": "T14",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 817.1211547851562,
+     "y": -141.80397033691406
+    }
+   },
+   {
+    "name": "click_digit_0\n[ data_entry.rejectKeys = FALSE ]\n{ data_entry := processKey(KEY_0) }",
+    "id": "T4",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 882,
+     "y": 130
+    }
+   },
+   {
+    "name": "click_digit_0\n[ data_entry.rejectKeys = TRUE ]\n{ data_entry := processKey(KEY_0) }",
+    "id": "T15",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Error",
+     "id": "X4"
+    },
+    "controlPoint": {
+     "x": 864.9234355571981,
+     "y": 462.86783337901227
+    }
+   },
+   {
+    "name": "click_digit_1\n[ data_entry.rejectKeys = FALSE ]\n{ data_entry := processKey(KEY_1) }",
+    "id": "T5",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 872,
+     "y": 110
+    }
+   },
+   {
+    "name": "click_digit_1\n[ data_entry.rejectKeys = trUE ]\n{ data_entry := processKey(KEY_1) }",
+    "id": "T17",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Error",
+     "id": "X4"
+    },
+    "controlPoint": {
+     "x": 876.6597780501758,
+     "y": 437.6454066324931
+    }
+   },
+   {
+    "name": "click_digit_2\n[ data_entry.rejectKeys = FALSE ]\n{ data_entry := processKey(KEY_2) }",
+    "id": "T13",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 861,
+     "y": 90
+    }
+   },
+   {
+    "name": "click_digit_2\n[ data_entry.rejectKeys = TRUE ]\n{ data_entry := processKey(KEY_2) }",
+    "id": "T18",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Error",
+     "id": "X4"
+    },
+    "controlPoint": {
+     "x": 889.9764641612513,
+     "y": 415.0699495842598
+    }
+   },
+   {
+    "name": "click_digit_3\n[ data_entry.rejectKeys = FALSE ]\n{ data_entry := processKey(KEY_3) }",
+    "id": "T12",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 851,
+     "y": 69
+    }
+   },
+   {
+    "name": "click_digit_3\n[ data_entry.rejectKeys = TRUE ]\n{ data_entry := processKey(KEY_3) }",
+    "id": "T19",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Error",
+     "id": "X4"
+    },
+    "controlPoint": {
+     "x": 899.9992692805911,
+     "y": 385.1192074967879
+    }
+   },
+   {
+    "name": "click_digit_4\n[ data_entry.rejectKeys = FALSE ]\n{ data_entry := processKey(KEY_4) }",
+    "id": "T11",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 840,
+     "y": 46
+    }
+   },
+   {
+    "name": "click_digit_4\n[ data_entry.rejectKeys = TRUE ]\n{ data_entry := processKey(KEY_4) }",
+    "id": "T20",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Error",
+     "id": "X4"
+    },
+    "controlPoint": {
+     "x": 911.579602958897,
+     "y": 359.80156678354354
+    }
+   },
+   {
+    "name": "click_digit_5\n[ data_entry.rejectKeys = FALSE ]\n{ data_entry := processKey(KEY_5) }",
+    "id": "T10",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 834,
+     "y": 23
+    }
+   },
+   {
+    "name": "click_digit_5\n[ data_entry.rejectKeys = TRUE ]\n{ data_entry := processKey(KEY_5) }",
+    "id": "T21",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Error",
+     "id": "X4"
+    },
+    "controlPoint": {
+     "x": 932.9233071072176,
+     "y": 338.67261961928216
+    }
+   },
+   {
+    "name": "click_digit_6\n[ data_entry.rejectKeys = FALSE ]\n{ data_entry := processKey(KEY_6) }",
+    "id": "T9",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 830,
+     "y": 1
+    }
+   },
+   {
+    "name": "click_digit_6\n[ data_entry.rejectKeys = TRUE ]\n{ data_entry := processKey(KEY_6) }",
+    "id": "T22",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Error",
+     "id": "X4"
+    },
+    "controlPoint": {
+     "x": 939.4759352143974,
+     "y": 311.93169546264267
+    }
+   },
+   {
+    "name": "click_digit_7\n[ data_entry.rejectKeys = FALSE ]\n{ data_entry := processKey(KEY_7) }",
+    "id": "T8",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 825,
+     "y": -24
+    }
+   },
+   {
+    "name": "click_digit_7\n[ data_entry.rejectKeys = TRUE ]\n{ data_entry := processKey(KEY_7) }",
+    "id": "T23",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Error",
+     "id": "X4"
+    },
+    "controlPoint": {
+     "x": 975.4605407636996,
+     "y": 301.4921689841435
+    }
+   },
+   {
+    "name": "click_digit_8\n[ data_entry.rejectKeys = FALSE ]\n{ data_entry := processKey(KEY_8) }",
+    "id": "T7",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 824,
+     "y": -50
+    }
+   },
+   {
+    "name": "click_digit_8\n[ data_entry.rejectKeys = TRUE ]\n{ data_entry := processKey(KEY_8) }",
+    "id": "T24",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Error",
+     "id": "X4"
+    },
+    "controlPoint": {
+     "x": 977.0231632686996,
+     "y": 276.4174740601461
+    }
+   },
+   {
+    "name": "click_digit_9\n[ data_entry.rejectKeys = FALSE ]\n{ data_entry := processKey(KEY_9) }",
+    "id": "T6",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 821,
+     "y": -74
+    }
+   },
+   {
+    "name": "click_digit_9\n[ data_entry.rejectKeys = TRUE ]\n{ data_entry := processKey(KEY_9) }",
+    "id": "T26",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Error",
+     "id": "X4"
+    },
+    "controlPoint": {
+     "x": 1003.1269011474305,
+     "y": 261.2863810567125
+    }
+   },
+   {
+    "name": "click_editbox",
+    "id": "T3",
+    "source": {
+     "name": "QNH",
+     "id": "X2"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 559.2731518690043,
+     "y": 240.7777899453878
+    }
+   },
+   {
+    "name": "click_OK\n[ data_entry.rejectKeys = FALSE ]\n{ data_entry := processKey(KEY_OK) }",
+    "id": "T27",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Validation",
+     "id": "X3"
+    },
+    "controlPoint": {
+     "x": 515.1313792311421,
+     "y": 441.18680492498123
+    }
+   },
+   {
+    "name": "click_point\n[ data_entry.rejectKeys = FALSE ]\n{ data_entry := processKey(KEY_POINT) }",
+    "id": "T25",
+    "source": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "target": {
+     "name": "Editing",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 820,
+     "y": -100
+    }
+   },
+   {
+    "name": "click_std_switch_central",
+    "id": "T2",
+    "source": {
+     "name": "QNH",
+     "id": "X2"
+    },
+    "target": {
+     "name": "STD",
+     "id": "X1"
+    },
+    "controlPoint": {
+     "x": 250.04736835520788,
+     "y": 294.24393259628874
+    }
+   },
+   {
+    "name": "click_std_switch_central",
+    "id": "T1",
+    "source": {
+     "name": "STD",
+     "id": "X1"
+    },
+    "target": {
+     "name": "QNH",
+     "id": "X2"
+    },
+    "controlPoint": {
+     "x": 306.6504142671949,
+     "y": 242.36314457218563
+    }
+   },
+   {
+    "name": "tick",
+    "id": "T28",
+    "source": {
+     "name": "Validation",
+     "id": "X3"
+    },
+    "target": {
+     "name": "QNH",
+     "id": "X2"
+    },
+    "controlPoint": {
+     "x": 412.19282284215615,
+     "y": 392.5339313546322
+    }
+   }
+  ],
+  "initial_transitions": [
+   {
+    "name": "IT1",
+    "id": "IT1",
+    "target": {
+     "name": "STD",
+     "id": "X1"
+    }
+   }
+  ],
+  "constants": [],
+  "variables": [
+   {
+    "id": "VAR_data_entry.decimalDigits:integer(Local)",
+    "name": "data_entry.decimalDigits",
+    "type": "integer",
+    "value": "0",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_data_entry.display:string(Local)",
+    "name": "data_entry.display",
+    "type": "string",
+    "value": "\"0\"",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_data_entry.dispval:PressureType(Local)",
+    "name": "data_entry.dispval",
+    "type": "PressureType",
+    "value": "inHg(0)",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_data_entry.pointEntered:bool(Local)",
+    "name": "data_entry.pointEntered",
+    "type": "bool",
+    "value": "FALSE",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_data_entry.programmedValue:float(Local)",
+    "name": "data_entry.programmedValue",
+    "type": "float",
+    "value": "0",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_data_entry.rejectKeys:bool(Local)",
+    "name": "data_entry.rejectKeys",
+    "type": "bool",
+    "value": "FALSE",
+    "scope": "Local"
+   }
+  ],
+  "pmr": {},
+  "isPIM": false
+ }
+}
