@@ -14,7 +14,7 @@ define(function (require, exports, module) {
         eventDispatcher = require("util/eventDispatcher"),
         Emucharts = require("plugins/emulink/Emucharts"),
         EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes");
-    
+
     var dbg = false;
 
     // constants for drawing states
@@ -87,6 +87,9 @@ define(function (require, exports, module) {
         this.emucharts.addListener("emuCharts_constantAdded", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_constantRemoved", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_constantRenamed", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_datatypeAdded", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_datatypeRemoved", function (event) { _this.fire(event); });
+        this.emucharts.addListener("emuCharts_datatypeRenamed", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_variableAdded", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_variableRemoved", function (event) { _this.fire(event); });
         this.emucharts.addListener("emuCharts_variableRenamed", function (event) { _this.fire(event); });
@@ -1728,7 +1731,7 @@ define(function (require, exports, module) {
         var container = "#ContainerStateMachine";
         if (d3.select(container + " svg").node()) {
             d3.select(container).node().removeChild(d3.select(container + " svg").node());
-        }        
+        }
         this.renderStates();
         this.renderTransitions();
         this.renderInitialTransitions();
@@ -1737,7 +1740,7 @@ define(function (require, exports, module) {
         refreshInitialTransitions();
         return this;
     };
-    
+
     EmuchartsEditor.prototype.preview = function (container, scale_zoom, type) {
         if (container && d3.select(container).node()) {
             d3.select(container + " svg").style("display", "null");
@@ -1760,11 +1763,11 @@ define(function (require, exports, module) {
             } else {
                 d3.select(container + " svg").style("display", "block");
             }
-            
+
         }
         return this;
     };
-    
+
 
     /**
      * Returns a fresh state name
@@ -1807,7 +1810,7 @@ define(function (require, exports, module) {
     EmuchartsEditor.prototype.getState = function (id) {
         return this.emucharts.getState(id);
     };
-    
+
     /**
      * Returns an array containing the current set of constants defined in the diagram
      * @memberof EmuchartsEditor
@@ -1825,13 +1828,28 @@ define(function (require, exports, module) {
     };
 
     /**
+     * Returns an array containing the current set of datatypes defined in the diagram
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.getDatatypes = function () {
+        return this.emucharts.getDatatypes();
+    };
+
+    /**
+     * Returns the descriptor of the datatype whose ID is the function argument
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.getDatatype = function (datatypeID) {
+        return this.emucharts.getDatatype(datatypeID);
+    };
+    /**
      * Returns an array containing the current set of variables defined in the diagram
      * @memberof EmuchartsEditor
      */
     EmuchartsEditor.prototype.getVariables = function () {
         return this.emucharts.getVariables();
     };
-    
+
     /**
      * Returns the descriptor of the variable whose ID is the function argument
      * @memberof EmuchartsEditor
@@ -1881,12 +1899,12 @@ define(function (require, exports, module) {
     EmuchartsEditor.prototype.getTransitions = function () {
         return this.emucharts.getTransitions();
     };
-    
+
     /**
      * @description Returns the descriptor of a transition.
      * @param id {String} The identifier of the transition.
      * @memberof EmuchartsEditor
-     */    
+     */
     EmuchartsEditor.prototype.getTransition = function (id) {
         return this.emucharts.getTransition(id);
     };
@@ -2046,6 +2064,16 @@ define(function (require, exports, module) {
     };
 
     /**
+     * Interface function for deleting a datatype
+     * @param constantID is the unique datatype identifier
+     * @returns true if datatype removed successfully; otherwise returns false
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.delete_datatype = function (datatypeID) {
+        return this.emucharts.remove_datatype(datatypeID);
+    };
+
+    /**
      * Interface function for deleting a variable
      * @param variableID is the unique variable identifier
      * @returns true if variable removed successfully; otherwise returns false
@@ -2108,6 +2136,14 @@ define(function (require, exports, module) {
     };
 
     /**
+     * Interface function for adding new datatype definitions
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.add_datatype = function (newDatatype) {
+        return this.emucharts.add_datatype(newDatatype);
+    };
+
+    /**
      * Interface function for adding new state variables
      * @memberof EmuchartsEditor
      */
@@ -2121,6 +2157,14 @@ define(function (require, exports, module) {
      */
     EmuchartsEditor.prototype.rename_constant = function (constantID, newData) {
         return this.emucharts.rename_constant(constantID, newData);
+    };
+
+    /**
+     * Interface function for editing datatypes
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.rename_datatype = function (datatypeID, newData) {
+        return this.emucharts.rename_datatype(datatypeID, newData);
     };
 
     /**

@@ -970,7 +970,8 @@ fileListItem.hide {
 #StateAttributes,
 #MachineStates,
 #TransitionsTable,
-#ConstantsTable {
+#ConstantsTable,
+#DatatypesTable {
   position: relative;
   top: 0;
   width: 100%;
@@ -1312,7 +1313,7 @@ ul.dropdown ul ul {
 ul.dropdown li:hover > ul {
   visibility: visible; }
 
-/** 
+/**
  * NVIDIA CSS Drop-Down Menu Theme
  *
  * @file		default.css

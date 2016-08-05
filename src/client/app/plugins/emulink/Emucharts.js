@@ -60,6 +60,10 @@ define(function (require, exports, module) {
         var id = "CONST_" + constant.name + ":" + constant.type;
         return id;
     };
+    var createDatatypeID = function (datatype) {
+        var id = "DATATYPE_" + datatype.name;
+        return id;
+    };
 
     /**
      * @function Emucharts
@@ -74,6 +78,7 @@ define(function (require, exports, module) {
             this.initial_edges = emuchart.initial_edges || d3.map();
             this.constants = emuchart.constants || d3.map();
             this.variables = emuchart.variables || d3.map();
+            this.datatypes = emuchart.datatypes || d3.map();
             this.pmr = emuchart.pmr || d3.map();
             this.isPIM = emuchart.isPIM && emuchart.isPIM === true;
             this.pim = new PIMs(this.isPIM);
@@ -83,6 +88,7 @@ define(function (require, exports, module) {
             this.initial_edges = d3.map();
             this.variables = d3.map();
             this.constants = d3.map();
+            this.datatypes = d3.map();
             this.pmr = d3.map();
             this.isPIM = false;
             this.pim = new PIMs();
@@ -91,7 +97,7 @@ define(function (require, exports, module) {
         _this = this;
         return this;
     }
-    
+
     Emucharts.prototype.getEdges = function () {
         return _this.edges;
     };
@@ -563,7 +569,7 @@ define(function (require, exports, module) {
             });
             return ans;
         }
-        
+
         var states = [];
         _this.nodes.forEach(function (key) {
             var node = _this.nodes.get(key);
@@ -628,7 +634,7 @@ define(function (require, exports, module) {
         if (_this.getIsPIM()) {
             return _this.pim.getTransitions(this.edges);
         }
-        
+
         var transitions = [];
         _this.edges.forEach(function (key) {
             var trans = _this.edges.get(key);
@@ -725,6 +731,37 @@ define(function (require, exports, module) {
     };
 
     /**
+     * @function add_datatype
+     * @description Interface function for adding new datatype definitions.
+     * @param datatype {Object} The characteristics of the datatype that shall be added to the diagram.
+     * @returns {Object} The descriptor of the datatype.
+     * @memberof module:Emucharts
+     * @instance
+     */
+    Emucharts.prototype.add_datatype = function (datatype) {
+        // we use the datatype name as ID for the datatype
+        var id = createDatatypeID(datatype);
+        var newDatatype = {
+            id: id,
+            name: datatype.name,
+            constructors: datatype.constructors,
+            value: datatype.value
+        };
+        _this.datatypes.set(id, newDatatype);
+        // fire event
+        _this.fire({
+            type: "emuCharts_datatypeAdded",
+            constant: {
+                id: id,
+                name: datatype.name,
+                constructors: datatype.constructors,
+                value: datatype.value
+            }
+        });
+        return newDatatype;
+    };
+
+    /**
      * @function add_variable
      * @description Interface function for adding new state variables definitions to the diagram.
      * @param variable {Object} The characteristics of the variable that shall be added to the diagram.
@@ -772,6 +809,27 @@ define(function (require, exports, module) {
             // fire event
             _this.fire({
                 type: "emuCharts_constantRemoved",
+                constant: rem
+            });
+            return true;
+        }
+        return false;
+    };
+
+    /**
+     * @function remove_datatype
+     * @description Interface function for removing a datatype definition.
+     * @param datatypeID {String} The identifier of the datatype that shall be removed.
+     * @returns {Boolean} true if datatype removed successfully, false otherwise.
+     * @memberof module:Emucharts
+     * @instance
+     */
+    Emucharts.prototype.remove_datatype = function (datatypeID) {
+        var rem = _this.datatypes.get(datatypeID);
+        if (rem && _this.datatypes.remove(datatypeID)) {
+            // fire event
+            _this.fire({
+                type: "emuCharts_datatypeRemoved",
                 constant: rem
             });
             return true;
@@ -846,6 +904,51 @@ define(function (require, exports, module) {
     };
 
     /**
+     * @function rename_datatype
+     * @description Interface function for renaming (i.e., editing) a datatype
+     * @param constantID {String} A unique identifier for the datatype.
+     * @param newData {Object} Datatype data, an object containing the following fields
+     *           <li> name (String): the datatype name (e.g., "MultiDisplay"). This field is mandatory.</li>
+     *           <li> type (Array): the datatype constructors (e.g., "[ rate(x: real), vtbi(x:real) ]"). This field is mandatory.</li>
+     *           <li> value (String): the initial value (e.g., "rate(0)"). This field is mandatory.</li>
+     * @returns {Boolean} true if the datatype was renamed successfully; otherwise returns false.
+     * @memberof module:Emucharts
+     * @instance
+     */
+    Emucharts.prototype.rename_datatype = function (datatypeID, newData) {
+        if (!datatypeID || !_this.datatypes || !_this.datatypes.get(datatypeID)) { return false; }
+        // get the datatype, delete it from the datatype list,
+        // rename fields, and put it back in the datatypes list
+        var theDatatype = _this.datatypes.get(datatypeID);
+        _this.datatypes.remove(datatypeID);
+        var newDatatype = {
+            name: newData.name || theConstant.name,
+            constructors: newData.constructors || theDatatype.constructors,
+            value: newData.value || theDatatype.value
+        };
+        // update datatypeID
+        var newDatatypeID = createDatatypeID(newDatatype);
+        newDatatype.id = newDatatypeID;
+        _this.datatypes.set(newDatatypeID, newDatatype);
+        _this.fire({
+            type: "emuCharts_datatypeRenamed",
+            pre: {
+                id: theDatatype.id,
+                constructors: theDatatype.constructors,
+                name: theDatatype.name,
+                value: theDatatype.value
+            },
+            post: {
+                id: newDatatype.id,
+                constructors: newDatatype.type,
+                name: newDatatype.name,
+                value: newDatatype.value
+            }
+        });
+        return true;
+    };
+
+    /**
      * @function rename_variable
      * @description Interface function for renaming (i.e., editing) a state variable.
      * @param variableID {String} is the unique variable identifier
@@ -912,7 +1015,7 @@ define(function (require, exports, module) {
             return a.name.localeCompare(b.name);
         });
     };
-    
+
     /**
      * @function getConstant
      * @descriptionb Returns the constant with ID given by the function argument
@@ -925,6 +1028,41 @@ define(function (require, exports, module) {
         return _this.constants.get(constantID);
     };
 
+
+    /**
+     * @function getDatatypes
+     * @description Returns all datatypes defined in the diagram.
+     * @returns {Array(Object)} An array of datatype descriptors.
+     * @memberof module:Emucharts
+     * @instance
+     */
+    Emucharts.prototype.getDatatypes = function () {
+        var ans = [];
+        _this.datatypes.forEach(function (key) {
+            var c = _this.datatypes.get(key);
+            ans.push({
+                id: c.id,
+                name: c.name,
+                constructors: c.constructors,
+                value: c.value
+            });
+        });
+        return ans.sort(function (a, b) {
+            return a.name.localeCompare(b.name);
+        });
+    };
+
+    /**
+     * @function getDatatype
+     * @descriptionb Returns the datatype with ID given by the function argument
+     * @param datatypeID Datatype identifier
+     * @returns The datatype descriptor
+     * @memberof module:Emucharts
+     * @instance
+     */
+    Emucharts.prototype.getDatatype = function (datatypeID) {
+        return _this.datatypes.get(datatypeID);
+    };
 
     /**
      * @function getVariables
@@ -963,7 +1101,7 @@ define(function (require, exports, module) {
     Emucharts.prototype.getVariable = function (variableID) {
         return _this.variables.get(variableID);
     };
-    
+
     /**
      * @function getInputVariables
      * @description Returns the input variables defined in the diagram.

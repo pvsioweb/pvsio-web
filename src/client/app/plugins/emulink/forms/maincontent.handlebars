@@ -127,6 +127,10 @@
                     <li><a href='#!' id="btn_menuEditConstant"><span>Edit constant</span></a></li>
                     <li><a href='#!' id="btn_menuDeleteConstant"><span>Delete constant</span></a></li>
                     <li class="divider"></li>
+                    <li><a href='#!' id="btn_menuNewDatatype"><span>New datatype</span></a></li>
+                    <li><a href='#!' id="btn_menuEditDatatype"><span>Edit datatype</span></a></li>
+                    <li><a href='#!' id="btn_menuDeleteDatatype"><span>Delete datatype</span></a></li>
+                    <li class="divider"></li>
                 </ul>
             </li>
             <li class='active has-sub' id="menuCodeGenenerators"><a href='#!'><span>Code Generators</span></a>
@@ -255,6 +259,23 @@
               <!-- -->
             </table>
         </div>
+        <div id="NewDatatype" style="display:none;">
+            <table class="table">
+              <!-- This is our clonable table line template -->
+              <tr id="DatatypeTemplate">
+                <td contenteditable="false" style="background-color:white; cursor: default;">Name</td>
+                <td contenteditable="false" style="background-color:white; cursor: default;">Constructors</td>
+                <td contenteditable="false" style="background-color:white; cursor: default;">Value</td>
+                <td style="background-color:white; width:48px;">
+                  <span id="RemoveDatatype" class="table-remove glyphicon glyphicon-remove"></span>
+                </td>
+                <td style="background-color:white;">
+                    <span id="EditDatatype" class="table-up glyphicon glyphicon-pencil">
+                </td>
+              </tr>
+              <!-- -->
+            </table>
+        </div>
         <div id="NewMachineState" style="display:none;">
             <table class="table">
               <!-- This is our clonable table line template -->
@@ -284,6 +305,8 @@
                 <li id="btnVariables" class="table-tab"><a href="#!">Context Variables</a>
                 </li>
                 <li id="btnConstants" class="table-tab"><a href="#!">Constants</a>
+                </li>
+                <li id="btnDatatypes" class="table-tab"><a href="#!">Datatypes</a>
                 </li>
             </ul>
             <ul class="table-toggle-container" role="tablist">
@@ -334,7 +357,7 @@
                 <div class="EmuchartTableHeader" style="cursor: default;"><span>Transitions</span></div>
                 <table class="table" style="margin-bottom:0 !important;">
                   <tr id="heading" class="TableHeading">
-                    <th style="cursor: default;">Label</th>
+                    <th style="cursor: default;">Transition Label</th>
                     <th style="cursor: default;">Source</th>
                     <th style="cursor: default;">Target</th>
                     <th></th>
@@ -346,7 +369,7 @@
                 <div class="EmuchartTableHeader" style="cursor: default;"><span>Context Variables</span></div>
                 <table class="table" style="margin-bottom:0 !important;">
                   <tr id="heading" class="TableHeading" style="margin-left:0">
-                    <th style="cursor: default;">Name</th>
+                    <th style="cursor: default;">Variable Name</th>
                     <th style="cursor: default;">Initial Value</th>
                     <th></th>
                     <th class="width32"><span id="AddStateAttribute" class="table-add glyphicon glyphicon-plus"></span></th>
@@ -357,10 +380,22 @@
                 <div class="EmuchartTableHeader" style="cursor: default;"><span>Constants</span></div>
                 <table class="table" style="margin-bottom:0 !important;">
                   <tr id="heading" class="TableHeading" style="margin-left:0">
-                    <th style="cursor: default;">Name</th>
+                    <th style="cursor: default;">Constant Name</th>
                     <th style="cursor: default;">Initial Value</th>
                     <th></th>
                     <th class="width32"><span id="AddConstant" class="table-add glyphicon glyphicon-plus"></span></th>
+                  </tr>
+                </table>
+            </div>
+            <div id="DatatypesTable" class="table-editable floating-table" style="display:none;">
+                <div class="EmuchartTableHeader" style="cursor: default;"><span>Datatypes</span></div>
+                <table class="table" style="margin-bottom:0 !important;">
+                  <tr id="heading" class="TableHeading" style="margin-left:0">
+                    <th style="cursor: default;">Datatype Name</th>
+                    <th style="cursor: default;">Constructors</th>
+                    <th style="cursor: default;">Initial Value</th>
+                    <th></th>
+                    <th class="width32"><span id="AddDatatype" class="table-add glyphicon glyphicon-plus"></span></th>
                   </tr>
                 </table>
             </div>

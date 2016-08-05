@@ -14,7 +14,8 @@ define(function (require, exports, module) {
         Timer	= require("util/Timer"),
         Recorder    = require("util/ActionRecorder"),
         Speaker  = require("widgets/TextSpeaker"),
-        ButtonActionsQueue = require("widgets/ButtonActionsQueue").getInstance();
+        ButtonActionsQueue = require("widgets/ButtonActionsQueue").getInstance(),
+        ButtonHalo = require("widgets/ButtonHalo").getInstance();
     //define timer for sensing hold down actions on buttons
     var btnTimer = new Timer(250), timerTickFunction = null;
     //add event listener for timer's tick
@@ -64,8 +65,12 @@ define(function (require, exports, module) {
         var x3 = parseFloat(this.top) + parseFloat(this.height);
         this.area.attr("shape", "rect").attr("id", id).attr("class", id)
                  .attr("coords", this.left + "," + this.top + "," + x2 + "," + x3);
+        this.callback = opt.callback;
 
-        this.createImageMap({ area: this.area, callback: opt.callback });
+        this.createImageMap({ area: this.area, callback: this.callback });
+        if (opt.keyCode) {
+            ButtonHalo.installKeypressHandler(this);
+        }
         return this;
     }
 
@@ -120,7 +125,7 @@ define(function (require, exports, module) {
     Button.prototype.release = function (opt) {
         opt = opt || {};
         var f = this.functionText();
-        
+
         ButtonActionsQueue.queueGUIAction("release_" + f, opt.callback);
         Recorder.addAction({
             id: this.id(),
@@ -131,7 +136,7 @@ define(function (require, exports, module) {
         mouseup(d3.event);
         return this;
     };
-    
+
     /**
      * @function press
      * @description API to simulate a single press action on the button
@@ -140,7 +145,7 @@ define(function (require, exports, module) {
     Button.prototype.press = function (opt) {
         opt = opt || {};
         var f = this.functionText();
-        
+
         ButtonActionsQueue.queueGUIAction("press_" + f, opt.callback);
         Recorder.addAction({
             id: this.id(),
@@ -150,7 +155,7 @@ define(function (require, exports, module) {
         });
         return this;
     };
-    
+
     /**
      * @function pressAndHold
      * @description API to simulate a continuous press action on the button
@@ -160,7 +165,7 @@ define(function (require, exports, module) {
         opt = opt || {};
         var f = this.functionText(),
             widget = this;
-        
+
         this.press(opt);
         timerTickFunction = function () {
             console.log("timer ticked_" + f);
@@ -174,10 +179,10 @@ define(function (require, exports, module) {
             });
         };
         btnTimer.interval(this.recallRate()).start();
-        
+
         return this;
     };
-    
+
     /**
      * @function click
      * @description API to simulate a click action on the button
@@ -198,7 +203,7 @@ define(function (require, exports, module) {
         }
         return this;
     };
-    
+
     /**
      * @override
      * @function createImageMap

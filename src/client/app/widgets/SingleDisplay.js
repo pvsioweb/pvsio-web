@@ -73,17 +73,19 @@ define(function (require, exports, module) {
                         .style("width", this.width + "px").style("height", this.height + "px")
                         .style("margin", 0).style("padding", 0).style("border-radius", "2px")
                         .style("background-color", this.backgroundColor)
-                        .style("display", "none").attr("id", id).attr("class", elemClass);
-        this.div.append("span").attr("id", id + "_span").attr("class", id + "_span")
+                        .style("display", "none").attr("id", this.id).attr("class", elemClass);
+        this.div.append("span").attr("id", this.id + "_span").attr("class", id + "_span")
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0)
                         .style("vertical-align", "top").style("border-radius", "2px");
-        this.div.append("canvas").attr("id", id + "_canvas").attr("class", id + "_canvas")
+        this.div.append("canvas").attr("id", this.id + "_canvas").attr("class", id + "_canvas")
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0).style("border-radius", "2px")
                         .style("vertical-align", "top");
         if (opt.touchscreen) {
-            var touchID = id + "_touchscreen";
+            var touchID = this.id;
+            this.touchscreenBackgroundColor = opt.touchscreen.backgroundColor || "steelblue";
+            this.touchscreenFontColor = opt.touchscreen.fontColor || "white";
             this.touchscreen = new Button(touchID, {
                 left: this.left, top: this.top, height: this.height, width: this.width
             }, {
@@ -94,7 +96,7 @@ define(function (require, exports, module) {
             this.div.style("cursor", "pointer");
             var _this = this;
             this.div.on("mouseover", function() {
-                _this.div.style("background-color", "steelblue").style("color", "white");
+                _this.div.style("background-color", _this.touchscreenBackgroundColor).style("color", _this.touchscreenFontColor);
             }).on("mouseout", function() {
                 _this.div.style("background-color", _this.backgroundColor).style("color", _this.fontColor);
             });

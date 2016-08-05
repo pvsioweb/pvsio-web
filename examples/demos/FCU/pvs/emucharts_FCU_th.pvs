@@ -1,0 +1,214 @@
+% ---------------------------------------------------------------
+%  Theory: emucharts_FCU_th
+%  Author: Paolo Masci
+%          Queen Mary University of London, United Kingdom
+%          http://www.eecs.qmul.ac.uk/~masci/
+% ---------------------------------------------------------------
+
+emucharts_FCU_th: THEORY
+ BEGIN IMPORTING FCUDataEntry
+
+  %-- machine states
+  MachineState: TYPE = { Editing, Error, QNH, STD, Validation }
+
+  %-- emuchart state
+  State: TYPE = [#
+    current_state: MachineState,
+    previous_state: MachineState,
+    data_entry: [# decimalDigits: integer,
+        display: string,
+        dispval: PressureType,
+        pointEntered: bool,
+        programmedValue: float,
+        rejectKeys: bool #]
+  #]
+
+  %-- initial state
+  init(x: real): State = (#
+    current_state := STD,
+    previous_state := STD,
+    data_entry := (# decimalDigits := 0,
+        display := "0",
+        dispval := inHg(0),
+        pointEntered := FALSE,
+        programmedValue := 0,
+        rejectKeys := FALSE #)
+  #)
+  %-- utility functions
+  enter_into(ms: MachineState)(st: State): State = st WITH [ current_state := ms ]
+  leave_state(ms: MachineState)(st: State): State = st WITH [ previous_state := ms ]
+
+  %-- transition functions
+  per_click_CLR(st: State): bool = ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)) OR ((current_state(st) = Error))
+  click_CLR(st: (per_click_CLR)): State =
+    COND
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
+     -> LET new_st = leave_state(Editing)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_CANCEL)(data_entry(st)) ]
+         IN enter_into(Editing)(new_st),
+    (current_state(st) = Error)
+     -> LET new_st = leave_state(Error)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_CANCEL)(data_entry(st)) ]
+         IN enter_into(Editing)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_digit_0(st: State): bool = ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE))
+  click_digit_0(st: (per_click_digit_0)): State =
+    COND
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
+     -> LET new_st = leave_state(Editing)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_0)(data_entry(st)) ]
+         IN enter_into(Editing)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_digit_1(st: State): bool = ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE))
+  click_digit_1(st: (per_click_digit_1)): State =
+    COND
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
+     -> LET new_st = leave_state(Editing)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_1)(data_entry(st)) ]
+         IN enter_into(Editing)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_digit_2(st: State): bool = ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE))
+  click_digit_2(st: (per_click_digit_2)): State =
+    COND
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
+     -> LET new_st = leave_state(Editing)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_2)(data_entry(st)) ]
+         IN enter_into(Editing)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_digit_3(st: State): bool = ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE))
+  click_digit_3(st: (per_click_digit_3)): State =
+    COND
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
+     -> LET new_st = leave_state(Editing)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_3)(data_entry(st)) ]
+         IN enter_into(Editing)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_digit_4(st: State): bool = ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE))
+  click_digit_4(st: (per_click_digit_4)): State =
+    COND
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
+     -> LET new_st = leave_state(Editing)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_4)(data_entry(st)) ]
+         IN enter_into(Editing)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_digit_5(st: State): bool = ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE))
+  click_digit_5(st: (per_click_digit_5)): State =
+    COND
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
+     -> LET new_st = leave_state(Editing)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_5)(data_entry(st)) ]
+         IN enter_into(Editing)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_digit_6(st: State): bool = ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE))
+  click_digit_6(st: (per_click_digit_6)): State =
+    COND
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
+     -> LET new_st = leave_state(Editing)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_6)(data_entry(st)) ]
+         IN enter_into(Editing)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_digit_7(st: State): bool = ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE))
+  click_digit_7(st: (per_click_digit_7)): State =
+    COND
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
+     -> LET new_st = leave_state(Editing)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_7)(data_entry(st)) ]
+         IN enter_into(Editing)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_digit_8(st: State): bool = ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE))
+  click_digit_8(st: (per_click_digit_8)): State =
+    COND
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
+     -> LET new_st = leave_state(Editing)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_8)(data_entry(st)) ]
+         IN enter_into(Editing)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_digit_9(st: State): bool = ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE))
+  click_digit_9(st: (per_click_digit_9)): State =
+    COND
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
+     -> LET new_st = leave_state(Editing)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_9)(data_entry(st)) ]
+         IN enter_into(Editing)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_editbox(st: State): bool = ((current_state(st) = QNH))
+  click_editbox(st: (per_click_editbox)): State =
+    COND
+    (current_state(st) = QNH)
+     -> LET new_st = leave_state(QNH)(st)
+         IN enter_into(Editing)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_OK(st: State): bool = ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE))
+  click_OK(st: (per_click_OK)): State =
+    COND
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
+     -> LET new_st = leave_state(Editing)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_OK)(data_entry(st)) ]
+         IN enter_into(Validation)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_point(st: State): bool = ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE))
+  click_point(st: (per_click_point)): State =
+    COND
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = FALSE)
+     -> LET new_st = leave_state(Editing)(st),
+            new_st = new_st WITH [ data_entry := processKey(KEY_POINT)(data_entry(st)) ]
+         IN enter_into(Editing)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_click_std_switch_central(st: State): bool = ((current_state(st) = QNH) OR (current_state(st) = STD))
+  click_std_switch_central(st: (per_click_std_switch_central)): State =
+    COND
+    (current_state(st) = QNH)
+     -> LET new_st = leave_state(QNH)(st)
+         IN enter_into(STD)(new_st),
+    (current_state(st) = STD)
+     -> LET new_st = leave_state(STD)(st)
+         IN enter_into(QNH)(new_st),
+    ELSE -> st
+    ENDCOND
+
+  per_tick(st: State): bool = ((current_state(st) = Validation)) OR ((current_state(st) = Editing) AND (data_entry(st)`rejectKeys = TRUE))
+  tick(st: (per_tick)): State =
+    COND
+    (current_state(st) = Validation)
+     -> LET new_st = leave_state(Validation)(st)
+         IN enter_into(QNH)(new_st),
+    (current_state(st) = Editing) AND (data_entry(st)`rejectKeys = TRUE)
+     -> LET new_st = leave_state(Editing)(st)
+         IN enter_into(Error)(new_st),
+    ELSE -> st
+    ENDCOND
+
+ END emucharts_FCU_th
+
+% ---------------------------------------------------------------
+%  PVS theory generated using PVSio-web PVSPrinter ver 0.1
+%  Tool freely available at http://www.pvsioweb.org
+% ---------------------------------------------------------------

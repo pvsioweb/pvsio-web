@@ -38,6 +38,9 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_constantAdded", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_constantRemoved", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_constantRenamed", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_datatypeAdded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_datatypeRemoved", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_datatypeRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_variableAdded", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_variableRemoved", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_variableRenamed", function (event) { _this.fire(event); });
@@ -405,7 +408,7 @@ define(function (require, exports, module) {
     EmuchartsManager.prototype.getSelectedEditor = function () {
         return _selectedEditor;
     };
-    
+
     /**
      * Returns a fresh state name
      * @memberof EmuchartsManager
@@ -489,6 +492,16 @@ define(function (require, exports, module) {
     };
 
     /**
+     * Interface function for deleting a datatype
+     * @param constantID is the unique datatype identifier
+     * @returns true if datatype removed successfully; otherwise returns false
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.delete_datatype = function (datatypeID) {
+        return _selectedEditor.delete_datatype(datatypeID);
+    };
+
+    /**
      * Interface function for deleting a variable
      * @param variableID is the unique variable identifier
      * @returns true if variable removed successfully; otherwise returns false
@@ -525,7 +538,7 @@ define(function (require, exports, module) {
     EmuchartsManager.prototype.getState = function (id) {
         return _selectedEditor.getState(id);
     };
-    
+
     /**
      * Returns an array containing the current set of constants defined in the model
      * @memberof EmuchartsManager
@@ -533,13 +546,29 @@ define(function (require, exports, module) {
     EmuchartsManager.prototype.getConstants = function () {
         return _selectedEditor.getConstants();
     };
-    
+
     /**
      * Returns the descriptor of the constant whose ID is the function argument
      * @memberof EmuchartsManager
      */
     EmuchartsManager.prototype.getConstant = function (constantID) {
         return _selectedEditor.getConstant(constantID);
+    };
+
+    /**
+     * Returns an array containing the current set of datatypes defined in the model
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.getDatatypes = function () {
+        return _selectedEditor.getDatatypes();
+    };
+
+    /**
+     * Returns the descriptor of the datatype whose ID is the function argument
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.getDatatype = function (datatypeID) {
+        return _selectedEditor.getDatatype(datatypeID);
     };
 
     /**
@@ -557,7 +586,7 @@ define(function (require, exports, module) {
     EmuchartsManager.prototype.getVariable = function (variableID) {
         return _selectedEditor.getVariable(variableID);
     };
-    
+
     /**
      * Returns an array containing the current set of input variables defined in the model
      * @memberof EmuchartsManager
@@ -646,11 +675,22 @@ define(function (require, exports, module) {
      * @param constantID is the unique constant identifier
      * @param newData is a record containing fields { type: (string), name: (string), value: (string) }
      *              (field value is optional)
-     * @returns true if variable renamed successfully; otherwise returns false
+     * @returns true if constant renamed successfully; otherwise returns false
      * @memberof EmuchartsManager
      */
     EmuchartsManager.prototype.rename_constant = function (constantID, newData) {
         return _selectedEditor.rename_constant(constantID, newData);
+    };
+
+    /**
+     * Interface function for renaming (i.e., editing) a datatype
+     * @param constantID is the unique datatype identifier
+     * @param newData is a record containing fields { type: (string), constructors: [Array], value: (string) }
+     * @returns true if datatype renamed successfully; otherwise returns false
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.rename_datatype = function (datatypeID, newData) {
+        return _selectedEditor.rename_datatype(datatypeID, newData);
     };
 
     /**
@@ -670,6 +710,14 @@ define(function (require, exports, module) {
      */
     EmuchartsManager.prototype.add_constant = function (newConstant) {
         return _selectedEditor.add_constant(newConstant);
+    };
+
+    /**
+     * Interface function for adding datatypes
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.add_datatype = function (newDatatype) {
+        return _selectedEditor.add_datatype(newDatatype);
     };
 
     /**
