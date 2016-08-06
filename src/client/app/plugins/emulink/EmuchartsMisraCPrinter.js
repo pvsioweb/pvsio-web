@@ -64,6 +64,8 @@ define(function (require, exports, module) {
     var headerTemplate = require("text!plugins/emulink/models/misraC/templates/header.handlebars");
     var mainTemplate = require("text!plugins/emulink/models/misraC/templates/main.handlebars");
     var doxygenTemplate = require("text!plugins/emulink/models/misraC/templates/doxygen.handlebars");
+    var Android_threadTemplate = require("text!plugins/emulink/models/misraC/templates/threadAndroid.handlebars");
+    var Android_headerTemplate = require("text!plugins/emulink/models/misraC/templates/headerAndroid.handlebars");
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
     var _parser = new EmuchartsParser();
@@ -680,7 +682,7 @@ define(function (require, exports, module) {
     
     Printer.prototype.print_disclaimer = function (emuchart) {
         this.model.disclaimer = "\n/** ---------------------------------------------------------------\n" +
-                    "*   C code generated using PVSio-web MisraCPrinter ver 0.1\n" +
+                    "*   C code generated using PVSio-web MisraCPrinter ver 1.0\n" +
                     "*   Tool freely available at http://www.pvsioweb.org" +
                     "\n*  --------------------------------------------------------------*/\n";
         this.model.makefile_disclaimer = this.model.disclaimer.replace(/\*|\//g,'#');
@@ -705,8 +707,10 @@ define(function (require, exports, module) {
         var header = Handlebars.compile(headerTemplate)(this.model);
         var main = Handlebars.compile(mainTemplate)(this.model);
         var doxygen = Handlebars.compile(doxygenTemplate)(this.model);
+        var Android_thread = Handlebars.compile(Android_threadTemplate)(this.model);
+        var Android_header = Handlebars.compile(Android_headerTemplate)(this.model);
         declarations = [];
-        return {makefile: makefile, thread: thread, header: header, main: main, doxygen: doxygen};
+        return {makefile: makefile, thread: thread, header: header, main: main, doxygen: doxygen, Android_thread: Android_thread, Android_header: Android_header};
     };
 
     module.exports = Printer;
