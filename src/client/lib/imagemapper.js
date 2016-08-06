@@ -67,8 +67,7 @@
             .attr("y", function (d) {return d.y - cornerOffset; });
     }
 
-    function enableRegionDrag(region, dispatcher) {
-        var svg = d3.select("svg.image-map-layer");
+    function enableRegionDrag(region, svg, dispatcher) {
         region.on("mousedown", function () {
             var _scale = scale(svg.select("g"));
             var mdPos = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]},
@@ -76,7 +75,7 @@
                 ryStart = +region.attr("y");
             region.attr("startx", rxStart).attr("starty", ryStart);
             //cache the start pos in each element
-            d3.selectAll("g.selected .region").attr("startx", function () {
+            svg.selectAll("g.selected .region").attr("startx", function () {
                 return d3.select(this).attr("x");
             }).attr("starty", function () {
                 return d3.select(this).attr("y");
@@ -87,7 +86,7 @@
             svg.on("mousemove.region", function () {
                 var e = {x: d3.mouse(this)[0] / _scale, y: d3.mouse(this)[1] / _scale};
                 var delta = {x: (e.x - mdPos.x), y: (e.y - mdPos.y)};
-                d3.selectAll("g.selected .region").each(function (d) {
+                svg.selectAll("g.selected .region").each(function (d) {
                     var r = d3.select(this);
                     updateRegion(r, {x: (+r.attr("startx") + delta.x), y: (+r.attr("starty") + delta.y)}, false);
                 });
@@ -102,9 +101,8 @@
         });
     }
 
-    function enableRegionResize(region, dispatcher) {
-        var g = d3.select(region.node().parentNode), corners = g.selectAll("rect.corner"),
-            svg = d3.select("svg.image-map-layer");
+    function enableRegionResize(region, svg, dispatcher) {
+        var g = d3.select(region.node().parentNode), corners = g.selectAll("rect.corner");
         corners.on("mousedown", function (d, i) {
             var _scale = scale(svg.select("g"));
             d3.event.preventDefault();
@@ -188,9 +186,9 @@
         });
 
         //create move listener for region
-        enableRegionDrag(region, dispatcher);
+        enableRegionDrag(region, svg, dispatcher);
         //create listener for corners
-        enableRegionResize(region, dispatcher);
+        enableRegionResize(region, svg, dispatcher);
         return region;
     }
 
