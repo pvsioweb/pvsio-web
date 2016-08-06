@@ -482,13 +482,17 @@ define(function (require, exports, module) {
         @returns {Promise} a promise that resolves when the prototype builder has been initialised
     */
     PrototypeBuilder.prototype.initialise = function () {
+        var _this = this;
         pbContainer = pvsioWebClient.createCollapsiblePanel({
             headerText: "Prototype Builder",
-            showContent: true,
-            onClick: function () {
+            showContent: !this.collapsed,
+            ownerObject: this,
+            onClick: function (collapsed) {
                 if (pbContainer.style("display") !== "none" && pbContainer.select("svg").empty()) {
                     updateImageAndLoadWidgets();
                 }
+
+                _this.collapsed = collapsed;
             },
             parent: "#body",
             owner: this.getName()
@@ -542,6 +546,12 @@ define(function (require, exports, module) {
         projectManager.removeListener("WidgetsFileChanged", onWidgetsFileChanged);
         projectManager.removeListener("SelectedFileChanged", onSelectedFileChanged);
         return Promise.resolve(true);
+    };
+
+    PrototypeBuilder.prototype.handleKeyEvent = function (e) {
+        if (!this.collapsed) {
+            prototypeImageView._mapCreator.handleKeyEvent(e);
+        }
     };
 
     /**

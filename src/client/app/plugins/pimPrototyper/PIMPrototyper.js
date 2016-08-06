@@ -25,10 +25,16 @@ define(function (require, exports, module) {
      */
     PIMPrototyper.prototype._init = function (parentElement) {
         var _this = this;
+        this.collapsed = false;
 
         var opts = {
             headerText: "PIM Prototyper",
-            owner: this.getName()
+            owner: this.getName(),
+            ownerObject: this,
+            showContent: !this.collapsed,
+            onClick: function (collapsed) {
+                _this.collapsed = collapsed;
+            }
         };
 
         if (parentElement) {
@@ -96,6 +102,12 @@ define(function (require, exports, module) {
 
     PIMPrototyper.prototype.getDependencies = function () {
         return [];
+    };
+
+    PIMPrototyper.prototype.handleKeyEvent = function (e) {
+        if (!this.collapsed) {
+            this._prototypeImageView._mapCreator.handleKeyEvent(e);
+        }
     };
 
     /**

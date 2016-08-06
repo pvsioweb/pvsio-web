@@ -242,6 +242,21 @@
             mapLayer.html("");
         }
 
+        /**
+         * Handles the given keyboard event, performing the appropriate action on the selected area.
+         * Classes creating an imagemapper should listen for key events and call this function when an event occurs.
+         * The imagemapper itself does not register key listeners on the page to allow for flexibility in when they are
+         * triggered and to avoid collisions between multiple imagemapper instances.
+         * @param {event} e JavaScript event for the key press
+         */
+        function handleKeyEvent(e) {
+            if ((e.which === 46 || e.which === 8)) {
+                ed.remove({regions: mapLayer.selectAll("g.selected rect.region")});
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }
+
         var res = {
             clear: function () {
                 d3.select(config.parent).select("svg").remove();
@@ -250,6 +265,7 @@
             getImageMapData: getImageMapData,
             selectRegion: selectRegion,
             clearRegions: clearRegions,
+            handleKeyEvent: handleKeyEvent,
             on: function (type, f) {
                 ed.on(type, f);
                 return this;
@@ -270,15 +286,6 @@
             }
         };
         loadImage();
-
-        d3.select("body").on("keydown", function () {
-            var e = d3.event;
-            if ((e.which === 46 || e.which === 8) && e.target === this) {
-                ed.remove({regions: mapLayer.selectAll("g.selected rect.region")});
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        });
     }
 
     if (typeof define === "function") {
