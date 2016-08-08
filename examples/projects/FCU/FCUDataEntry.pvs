@@ -1,193 +1,151 @@
 FCUDataEntry: THEORY
- BEGIN IMPORTING constants, datatypes 
-  
+ BEGIN IMPORTING constants
+
+  DOUBLE_MAX_BIG: AXIOM
+    DOUBLE_MAX >= 9999.99
+
+
+  UnitsType: TYPE = { inHg, hPa }
+  STD_INHG: double = 759.93
+  STD_HPA: double = 1013.24 
+
   state: TYPE = [#
-    dispval       : PressureType,
-    display       : { s: string | s`length <= MAIN_DISPLAY_SIZE + 1 },
-    pointEntered  : bool,
-    decimalDigits : { x: integer | x >= 0 },
-    rejectKeys    : bool,
-    programmedValue: float
+    decimalDigits: {x: nat | x <= MAX_DECIMAL_DIGITS},
+    integerDigits: {x: nat | x <= MAX_INTEGER_DIGITS},
+    display: string,
+    dispval: { x: double | x >= 0 AND x <= 9999.99 } ,
+    msg: string,
+    pointEntered: bool,
+    units: UnitsType,
+    programmedValue: {x: double | IF units = inHg THEN x >= MIN_inHg AND x <= MAX_inHg ELSE x >= MIN_hPa AND x <= MAX_hPa ENDIF }
   #]
 
-  click_digit(key: KEY_CODE)(st: state): state = 
-    LET tmp: float = dispval(st),
-        (tmp, st) =
-        if (pointEntered(st))
-	then	if (decimalDigits(st) < MAX_DECIMAL_DIGITS)
-		then  LET PPdecimalDigits = decimalDigits(st) + 1
-		       IN (tmp + key * pow10(-1 * PPdecimalDigits), st WITH [ decimalDigits := PPdecimalDigits])
-		% else signal error
-		else (tmp, st WITH [ rejectKeys := true ] ) endif
-	else
-	     (tmp * 10 + key, st) endif
-     IN
-	if (tmp >= 0 AND tmp < IF inHg?(dispval(st)) THEN MAX_inHg ELSE MAX_hPa ENDIF) %{
-	then	LET st = st WITH [ dispval := IF inHg?(dispval(st)) THEN inHg(tmp) ELSE hPa(tmp) ENDIF ]
-		 IN      st WITH [ display := snprintf(dispval(st), MAIN_DISPLAY_SIZE)(pointEntered(st), decimalDigits(st)) ]
-	%}
-	else %{ 
-		st WITH [ display := message(TOO_HIGH),
-		          rejectKeys := true ] endif
-	%}
+  %-- initial state
+  init_data_entry(x: real): state = (#
+    decimalDigits := 0,
+    integerDigits := 0,
+    display := STD_INHG,
+    dispval := STD_INHG,
+    msg := "",
+    pointEntered := FALSE,
+    programmedValue := STD_INHG,
+    units := inHg
+  #)
 
-  click_point(st: state): state =
-	if (NOT rejectKeys(st) AND NOT pointEntered(st))
+  dispmsg(dispval: real, units: UnitsType, decimalDigits: int): string =
+    IF (decimalDigits > MAX_DECIMAL_DIGITS)   THEN message(PRECISION_EXCEEDED)
+    ELSIF units = inHg AND dispval < MIN_inHg THEN message(TOO_LOW)
+    ELSIF units = inHg AND dispval > MAX_inHg THEN message(TOO_HIGH)
+    ELSIF units = hPa AND dispval < MIN_hPa   THEN message(TOO_LOW)
+    ELSIF units = hPa AND dispval > MAX_hPa   THEN message(TOO_HIGH)
+    ELSE "" ENDIF
+
+  val_AXIOM: AXIOM
+    FORALL (st: state):
+      ((integerDigits(st) < 4 AND decimalDigits(st) = 2) IMPLIES (pointEntered(st) AND dispval(st) <= 999.99))
+      AND
+      ((integerDigits(st) < 4 AND decimalDigits(st) = 1) IMPLIES (pointEntered(st) AND dispval(st) <= 999.9))
+      AND
+      ((integerDigits(st) < 4 AND decimalDigits(st) = 0) IMPLIES dispval(st) <= 999)
+
+  click_digit(key: {key : KEY_CODE | key = KEY_0 OR key = KEY_1 OR key = KEY_2 OR key = KEY_3 OR key = KEY_4
+	  or key = KEY_5 OR key = KEY_6 OR key = KEY_7 OR key = KEY_8 OR key = KEY_9})(st: state): state =
+    if integerDigits(st) < MAX_INTEGER_DIGITS AND decimalDigits(st) < MAX_DECIMAL_DIGITS THEN
+       LET (tmp, st) = if (pointEntered(st))
+	   	       then LET decimalDigitsPP = decimalDigits(st) + 1
+		             IN (dispval(st) + key * pow10(-1 * decimalDigitsPP),
+		       	      	 st WITH [ decimalDigits := decimalDigitsPP ])
+		       else LET integerDigitsPP = integerDigits(st) + 1
+	          	     IN (dispval(st) * 10 + key,
+	               	         st WITH [ integerDigits := integerDigitsPP ]) endif
+        IN st WITH [ dispval := tmp,
+	    	     display := snprintf(tmp, MAIN_DISPLAY_SIZE)(pointEntered(st), decimalDigits(st)),
+                         msg := dispmsg(tmp, units(st), decimalDigits(st)) ]
+    else st endif
+
+
+  click_POINT(st: state): state =
+	if (NOT pointEntered(st))
 	then st WITH [ pointEntered := true,
 		       display := strcat(display(st),".") ]
-	else st WITH [ rejectKeys := true ] endif
+	else st endif
 
-  click_ok(st: state): state =
-	if (NOT rejectKeys(st))
-	then	if (dispval(st) >= IF inHg?(dispval(st)) THEN MIN_inHg ELSE MIN_hPa ENDIF)
-		then	st WITH [ programmedValue := dispval(st) ]
-		else
-			st WITH [ display := message(OUT_OF_RANGE),
-			          rejectKeys := true ] endif
-	else    st endif
+  validate_data_entry(st: state): state =
+     COND
+       (units(st) = inHg AND dispval(st) < MIN_inHg)
+         -> st WITH [ dispval := MIN_inHg, display := MIN_inHg, programmedValue := MIN_inHg ],
+       (units(st) = inHg AND dispval(st) > MAX_inHg)
+         -> st WITH [ dispval := MAX_inHg, display := MAX_inHg, programmedValue := MAX_inHg ],
+       (units(st) = hPa AND dispval(st) < MIN_hPa)
+         -> st WITH [ dispval := MIN_hPa, display := MIN_hPa, programmedValue := MIN_hPa ],
+       (units(st) = hPa AND dispval(st) > MAX_hPa)
+         -> st WITH [ dispval := MAX_hPa, display := MAX_hPa, programmedValue := MAX_hPa ],
+       (units(st) = hPa AND dispval(st) >= MIN_hPa AND dispval(st) <= MAX_hPa) OR
+              (units(st) = inHg AND dispval(st) >= MIN_inHg AND dispval(st) <= MAX_inHg)
+         -> st WITH [ programmedValue := dispval(st) ]
+     ENDCOND
 
-  click_cancel(st: state): state =
-	if (NOT rejectKeys(st))
-	then st WITH [ dispval := IF (inHg?(dispval(st))) THEN inHg(0) ELSE hPa(0) ENDIF,
-		       display := snprintf(0, MAIN_DISPLAY_SIZE)(FALSE, 0),
-		       pointEntered := false,
-		       rejectKeys := false,
-		       decimalDigits := 0 ]
-	else %{ // cancel error message and display last valid value
-	     st WITH [ 	rejectKeys := false,
-	     	     	display := snprintf(dispval(st), MAIN_DISPLAY_SIZE)(pointEntered(st), decimalDigits(st)) ] endif
+  %-- clear display value
+  clear_data_entry(st: state): state =
+     st WITH [ display := "0",
+	       dispval := 0,
+	       pointEntered := false,
+	       decimalDigits := 0,
+	       integerDigits := 0,
+	       msg := ""]
 
-  click_reset(st: state): state = 
-   st WITH [
-    dispval := IF (inHg?(dispval(st))) THEN inHg(0) ELSE hPa(0) ENDIF,
-	display := snprintf(0, MAIN_DISPLAY_SIZE)(FALSE,0),
-	pointEntered := false,
-	decimalDigits := 0,
-	rejectKeys := false,
-	programmedValue := 0 ]
-  
+  %-- restore (previous) programmed value
+  click_ESC(st: state): state =
+        st WITH [ display := programmedValue(st),
+	          dispval := programmedValue(st) ]
 
   EXCEPTION(errType: int, key: int, val: unsigned_long_int)(st: state): state =
-	st WITH [ display := snprintf(errType + ":" + key + ":" + val),
-	          rejectKeys := true ]
+	st WITH [ display := snprintf(errType + ":" + key + ":" + val) ]
 
   processKey(key: KEY_CODE)(st: state): state =
-   if(programmedValue(st) = 0 OR key = KEY_RESET OR key = KEY_CANCEL) then
     COND
 	 key = KEY_0 OR key = KEY_1 OR key = KEY_2 OR key = KEY_3 OR key = KEY_4
 	  or key = KEY_5 OR key = KEY_6 OR key = KEY_7 OR key = KEY_8 OR key = KEY_9
                -> click_digit(key)(st),
 
          key = KEY_POINT 
-               -> click_point(st),
+               -> click_POINT(st),
 
 	 key = KEY_OK  
-	       -> click_ok(st),
+	       -> validate_data_entry(st),
 	
-	 key = KEY_CANCEL
-	       -> click_cancel(st),
+	 key = KEY_CLR
+	       -> clear_data_entry(st),
 
-	 key = KEY_RESET
-               -> click_reset(st),
-
+         key = KEY_ESC
+	       -> click_ESC(st),
+	       
          ELSE % unrecognised key - call exception handler
 	       -> EXCEPTION(INVALID_KEY, key, dispval(st))(st)
    ENDCOND
-    else st endif	
 
-   init_data_entry(x: real): state = (#
-   	dispval := inHg(x),
-	display := snprintf(x, MAIN_DISPLAY_SIZE)(FALSE,0),
-	pointEntered := false,
-	decimalDigits := 0,
-	rejectKeys := false,
-	programmedValue := 0
-   #)
-
+  processEvent(evt: EVT_CODE)(st: state): state =
+    COND
+         evt = EVT_TIMEOUT 
+	       -> click_ESC(st),
+	       
+         ELSE % unrecognised key - call exception handler
+	       -> EXCEPTION(INVALID_EVENT, evt, dispval(st))(st)
+   ENDCOND
 
 
  END FCUDataEntry
-
-limits: THEORY
- BEGIN
-
-  % Two C header files float.h and limits.h define implementation-specific limits for the platform
-  SHRT_MAX: { s: int | s = 32767  }  %= 32767
-  SHRT_MIN: { s: int | s = -32767 }  %= -32767
-  USHRT_MAX: { us: int | us >= SHRT_MAX } %= 65535
-  INT_MAX  : { i: int | i >= SHRT_MAX }   % = 2147483647
-  INT_MIN  : { i: int | i <= SHRT_MIN }   % = -2147483647 - 1
-  UINT_MAX : { ui: int | ui >= INT_MAX }  % = 4294967295
-  LONG_MAX : { li: int | li >= INT_MAX }  % = 2147483647
-  LONG_MIN : { li: int | li <= INT_MIN }  % -2147483647 - 1
-  ULONG_MAX: { ul: int | ul >= LONG_MAX } % int = 4294967295
-
-  integer: TYPE = { x: int | x >= INT_MIN AND x <= INT_MAX }
-  unsigned_int: TYPE = { x: int | x >= 0 AND x <= UINT_MAX }
-  long_int: TYPE = { x: int | x >= LONG_MIN AND x <= LONG_MAX }
-  unsigned_long_int: TYPE = { x: int | x >= 0 AND x <= ULONG_MAX }
-
-  % 3.402823466 E+38
-  FLOAT_MAX: { x: nonneg_real | x >= ULONG_MAX }
-  float: TYPE = {x: real | x > -FLOAT_MAX AND x < FLOAT_MAX }
-  % 1.7976931348623158 E+308
-  DOUBLE_MAX: { x: nonneg_real | x >= FLOAT_MAX }
-  double: TYPE = {x: real | x > -DOUBLE_MAX AND x < DOUBLE_MAX}
-
-  % converts boolean to integer
-  bool2int(b: bool): int = IF b = TRUE THEN 1 ELSE 0 ENDIF
-  CONVERSION bool2int
-
-  % computes 10^i
-  pow10(i: int): RECURSIVE real =
-   IF i = 0 THEN 1
-   ELSE IF i < 0 THEN pow10(i+1) / 10 
-        ELSE pow10(i-1) * 10 ENDIF ENDIF
-  MEASURE LAMBDA(i: int): IF i > 0 THEN i ELSE -i ENDIF
-  
-  % float fmod (      float numerator,      float denominator );
-  % The remainder of a division operation is the result of subtracting 
-  % the integral quotient multiplied by the denominator from the numerator:
-  % remainder = numerator - quotient * denominator
-  % the accuracy of floating point numbers is 7 decimal digits
-  fmod(numerator: real, denominator: {x: real | x /= 0}): real = 
-    LET quotient = floor(numerator / denominator)
-     IN numerator - quotient * denominator
-
-  % float point abs
-  fabs(x: real): nonneg_real = IF x >= 0 THEN x ELSE -x ENDIF
-
-  EOS: string = "\r";
-  % counts how many characters preceed "\r" (return), which we use as EOF
-  strlen(s: string): int = strfind(EOS,s)
-  strcat(s1,s2: string): string = s1 + s2
-  strcpy(s1,s2: string): string = s2
-
-  snprintf(s: string): string = s
-  % this version supports up to two decimal digits
-  snprintf(val: float, MAX_LEN: nat)(pointEntered: bool, decimalDigits: nat): { s: string | s`length < MAX_LEN } =
-   "" + floor(val) 
-         + LET firstDecimal = mod(floor(val*10),10),
-	       secondDecimal = mod(floor(val*100),10)
-            IN COND 
- 	     pointEntered AND decimalDigits = 2 -> "." + firstDecimal + secondDecimal,
- 	     pointEntered AND decimalDigits = 1 -> "." + firstDecimal,
-	     pointEntered AND decimalDigits = 0 -> ".",
-	     NOT pointEntered -> "" ENDCOND
-
-  sprintf(s: string)(pointEntered: bool, decimalDigits: int): string = s
-
- END limits
 
 
 constants: THEORY
  BEGIN IMPORTING limits
   MAIN_DISPLAY_SIZE     : int = 16;
   MAX_DECIMAL_DIGITS    : int = 2;
-  MAX_inHg              : float = 825;
-  MIN_inHg		: float = 558.75; 
-  MAX_hPa               : float = 1100;
-  MIN_hPa		: float = 745; 
+  MAX_INTEGER_DIGITS    : int = 4;
+  MAX_inHg              : double = 825;
+  MIN_inHg		: double = 558.75; 
+  MAX_hPa               : double = 1100;
+  MIN_hPa		: double = 745; 
 
   N_MESSAGES: int = 4;
   message(i: below(N_MESSAGES)): { s: string | s`length <= MAIN_DISPLAY_SIZE } =
@@ -196,7 +154,7 @@ constants: THEORY
         i = 2 -> "Out of Range",
         i = 3 -> "Invalid Key" ENDCOND
 
-  KEY_CODE: TYPE = { KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_POINT, KEY_OK, KEY_CANCEL, KEY_RESET, KEY_NULL };
+  KEY_CODE: TYPE = { KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_POINT, KEY_OK, KEY_CLR, KEY_ESC };
   KEY_CODE_TO_INT(k: KEY_CODE): int =
    COND k = KEY_0 -> 0,
         k = KEY_1 -> 1,
@@ -210,20 +168,25 @@ constants: THEORY
 	k = KEY_9 -> 9,
 	k = KEY_POINT -> 10,
 	k = KEY_OK -> 11,
-	k = KEY_CANCEL -> 12,
-	k = KEY_RESET -> 13,
-	k = KEY_NULL -> 14 ENDCOND
+	k = KEY_CLR -> 12,
+	k = KEY_ESC -> 13 ENDCOND
    CONVERSION KEY_CODE_TO_INT
 
-  messageID: TYPE = { TOO_HIGH, TOO_LOW, OUT_OF_RANGE };
+  EVT_CODE: TYPE = { EVT_TIMEOUT };
+  EVT_CODE_TO_INT(evt: EVT_CODE): int =
+    COND evt = EVT_TIMEOUT -> 1000
+    ENDCOND
+  CONVERSION EVT_CODE_TO_INT
+
+  messageID: TYPE = { TOO_HIGH, TOO_LOW, PRECISION_EXCEEDED };
   messageID_TO_INT(m: messageID): int =
    COND m = TOO_HIGH -> 0,
         m = TOO_LOW  -> 1,
-	m = OUT_OF_RANGE -> 2 ENDCOND
+	m = PRECISION_EXCEEDED -> 2 ENDCOND
    CONVERSION messageID_TO_INT
 
   FAILURE_CODES: TYPE = { NULL_POINTER_ASSIGNMENT, ARRAY_INDEX_OUT_OF_BOUNDS, KEYPROCESS_DEFAULT, DIVISION_BY_ZERO, MATH_ERROR, 
-                            FLOATING_POINT_ERROR, OUT_OF_MEMORY, INVALID_KEY, INVALID_VALUE };
+                            FLOATING_POINT_ERROR, OUT_OF_MEMORY, INVALID_KEY, INVALID_VALUE, INVALID_EVENT };
   FAILURE_CODES_TO_INT(f: FAILURE_CODES): int =
    COND f = NULL_POINTER_ASSIGNMENT   -> 0, 
         f = ARRAY_INDEX_OUT_OF_BOUNDS -> 1, 
@@ -233,25 +196,9 @@ constants: THEORY
         f = FLOATING_POINT_ERROR      -> 5, 
 	f = OUT_OF_MEMORY	      -> 6, 
 	f = INVALID_KEY		      -> 100, 
-	f = INVALID_VALUE	      -> 101 ENDCOND
+	f = INVALID_VALUE	      -> 101,
+	f = INVALID_EVENT	      -> 102 ENDCOND
    CONVERSION FAILURE_CODES_TO_INT
 
 
  END constants
-
-
-
-datatypes: THEORY
- BEGIN
-
-  PressureType: DATATYPE
-    BEGIN
-     inHg(p: real): inHg?
-     hPa(p: real): hPa?
-    END PressureType
-  P2real(x: PressureType): real = p(x)
-  CONVERSION P2real
-  
- END datatypes
-
-

@@ -7,8 +7,8 @@
    "id": "button_9798e6bc-c571-4be3-f051-851ebb5b6d8a",
    "type": "button",
    "recallRate": "250",
-   "functionText": "std",
-   "boundFunctions": "click_std",
+   "functionText": "std_button",
+   "boundFunctions": "click_std_button",
    "buttonReadback": "",
    "keyCode": "17",
    "keyName": "ctrl"
@@ -185,123 +185,168 @@
    "evts": [
     "click"
    ],
-   "id": "button_5d5da71e-ecf8-4293-ee9f-e88e04ff7dbf",
+   "id": "button_e9df4dc9-c57e-4674-bbc9-a08b922fbdb5",
    "type": "button",
    "recallRate": "250",
-   "functionText": "editbox",
-   "boundFunctions": "click_editbox",
+   "functionText": "OK",
+   "boundFunctions": "click_OK",
+   "buttonReadback": "",
+   "keyCode": "13",
+   "keyName": "enter"
+  },
+  {
+   "evts": [
+    "click"
+   ],
+   "id": "button_2ed0d572-23bc-42df-f949-0a5068789f8f",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "ESC",
+   "boundFunctions": "click_ESC",
    "buttonReadback": "",
    "keyCode": "",
    "keyName": ""
   },
   {
-   "type": "display",
-   "id": "display_7180b4b2-0a8e-4279-e5e0-f9ce2d5079e8",
-   "displayKey": "data_entry.programmedValue",
-   "cursorName": ""
+   "evts": [
+    "click"
+   ],
+   "id": "button_3de4b39f-b7be-4344-9436-f5b05d2ff836",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "inHg",
+   "boundFunctions": "click_inHg",
+   "buttonReadback": "",
+   "keyCode": "",
+   "keyName": ""
+  },
+  {
+   "evts": [
+    "click"
+   ],
+   "id": "button_91971140-d09c-4a36-946e-065c4028791b",
+   "type": "button",
+   "recallRate": "250",
+   "functionText": "hPa",
+   "boundFunctions": "click_hPa",
+   "buttonReadback": "",
+   "keyCode": "",
+   "keyName": ""
   }
  ],
  "regionDefs": [
   {
    "class": "button_9798e6bc-c571-4be3-f051-851ebb5b6d8a",
    "shape": "rect",
-   "coords": "454.5,117,485.5,151",
+   "coords": "34.2347726667445,100.00801617408773,65.2347726667445,134.00801617408771",
    "href": null
   },
   {
    "class": "display_e5b6e217-ede5-43b5-a4db-466d94a461cc",
    "shape": "rect",
-   "coords": "67.5,62,213.5,99",
+   "coords": "20.374379013153636,54.15357660116109,78.5577523781864,73.38115760300768",
    "href": null
   },
   {
    "class": "button_91a7fbf3-49b1-4859-da61-0d1dcc18260f",
    "shape": "rect",
-   "coords": "38.5,455,68.5,486",
+   "coords": "208.203125,321,233.2031249999999,347",
    "href": null
   },
   {
    "class": "button_add01261-3cf3-45c1-b11e-e8ebd4404e14",
    "shape": "rect",
-   "coords": "76.5,456,105.5,487",
+   "coords": "233.203125,321,260.203125,346",
    "href": null
   },
   {
    "class": "button_3652dfa6-c112-438e-c6a9-4868d50e96db",
    "shape": "rect",
-   "coords": "112.5,457,142.5,486",
+   "coords": "258.203125,322,281.203125,344",
    "href": null
   },
   {
    "class": "button_6252e6a3-dff0-4840-d550-d0c4f5a07e8d",
    "shape": "rect",
-   "coords": "38.5,487,72.5,519",
+   "coords": "208.5,346,233.49999999999991,369.99999999999994",
    "href": null
   },
   {
    "class": "button_42b2af66-d35d-4780-e521-b97f26a44802",
    "shape": "rect",
-   "coords": "75.5,487,108.5,519",
+   "coords": "233.5,346,257.5,369",
    "href": null
   },
   {
    "class": "button_5c902e38-a492-4ab5-a4ac-c9f33197b16a",
    "shape": "rect",
-   "coords": "111.5,487,141.5,519",
+   "coords": "258.203125,345.5,282.203125,369.4999999999998",
    "href": null
   },
   {
    "class": "button_377f92a0-28b5-4244-808a-9bb717a26e76",
    "shape": "rect",
-   "coords": "39.5,519,72.5,551",
+   "coords": "208.5,370,233.49999999999991,393.00000000000017",
    "href": null
   },
   {
    "class": "button_db19966b-8fe2-48f1-ff9d-096d9f18db22",
    "shape": "rect",
-   "coords": "74.5,517,108.5,551",
+   "coords": "232.5,369,257.5,393",
    "href": null
   },
   {
    "class": "button_8b0943f6-558e-48e0-a7a5-e73018f117f0",
    "shape": "rect",
-   "coords": "108.5,517,142.5,549",
+   "coords": "257.5,369,280.5,393",
    "href": null
   },
   {
    "class": "button_d4848e61-6f2c-4d07-f4a6-7bad7c108dc6",
    "shape": "rect",
-   "coords": "75.5,550,105.5,581",
+   "coords": "232.5,393,258.5,416.99999999999994",
    "href": null
   },
   {
    "class": "button_7b6d97b1-1042-45cb-c25f-8c7369fab8aa",
    "shape": "rect",
-   "coords": "41.5,550,71.5,580",
+   "coords": "208.5,393,233.49999999999991,416",
    "href": null
   },
   {
    "class": "button_464debc3-0535-48c6-a543-7981007b6bc4",
    "shape": "rect",
-   "coords": "312.5,551,337.5,576",
+   "coords": "15.392378626701031,210.8172806871431,40.39237838621189,232.50381351905892",
    "href": null
   },
   {
    "class": "display_db65afe6-abf7-42e6-e909-7fc2ae1420f5",
    "shape": "rect",
-   "coords": "472.3125,52,506.3125,65",
+   "coords": "20,41.80000305175781,50.81825459857892,51.754569934951896",
    "href": null
   },
   {
-   "class": "button_5d5da71e-ecf8-4293-ee9f-e88e04ff7dbf",
+   "class": "button_e9df4dc9-c57e-4674-bbc9-a08b922fbdb5",
    "shape": "rect",
-   "coords": "4.5,57,216.5,101",
+   "coords": "250.52421079119114,289.6631106637409,279.80173057227586,311.6212504995544",
    "href": null
   },
   {
-   "class": "display_7180b4b2-0a8e-4279-e5e0-f9ce2d5079e8",
+   "class": "button_2ed0d572-23bc-42df-f949-0a5068789f8f",
    "shape": "rect",
-   "coords": "435.5,50,504.5,84",
+   "coords": "18.760079000403316,184.81786173616655,44.37790880885233,206.77600157197998",
+   "href": null
+  },
+  {
+   "class": "button_3de4b39f-b7be-4344-9436-f5b05d2ff836",
+   "shape": "rect",
+   "coords": "16.44725544561063,84.3649770230582,40.98680544010934,101.89322701912873",
+   "href": null
+  },
+  {
+   "class": "button_91971140-d09c-4a36-946e-065c4028791b",
+   "shape": "rect",
+   "coords": "59.454720159189655,84.52367108888265,85.39859585710391,101.81959039413277",
    "href": null
   }
  ]

@@ -211,6 +211,7 @@ emucharts_FCU_th: THEORY
             new_st = new_st WITH [ data_entry := data_entry(st) WITH [
 	                units := hPa,
 			programmedValue := STD_HPA,
+			display := STD_HPA,
 			dispval := STD_HPA ]]
          IN enter_into(STD)(new_st),
     ELSE -> st
@@ -240,6 +241,7 @@ emucharts_FCU_th: THEORY
             new_st = new_st WITH [ data_entry := data_entry(st) WITH [
 	                units := inHg,
 			programmedValue := STD_INHG,
+			display := STD_INHG,
 			dispval := STD_INHG ]]
          IN enter_into(STD)(new_st),
     ELSE -> st

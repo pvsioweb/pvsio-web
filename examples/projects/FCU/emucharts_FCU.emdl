@@ -245,7 +245,7 @@
     }
    },
    {
-    "name": "click_hPa\n[ data_entry.units != hPa ]\n{ data_entry.units := hPa;\n  data_entry.dispval := data_entry.dispval / 0.75;\n  data_entry.display := data_entry.dispval / 0.75;\n  data_entry.programmedValue := data_entry.dispval / 0.75; }",
+    "name": "click_hPa\n{ data_entry := switch2hPa(data_entry(st)) }",
     "id": "T35",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -261,7 +261,7 @@
     }
    },
    {
-    "name": "click_hPa\n[ data_entry.units != hPa ]\n{ data_entry.units := hPa;\n  data_entry.dispval := data_entry.dispval / 0.75;\n  data_entry.display := data_entry.dispval / 0.75;\n  data_entry.programmedValue := data_entry.dispval / 0.75; }",
+    "name": "click_hPa\n{ data_entry := switch2hPa(data_entry(st)) }",
     "id": "T15",
     "source": {
      "name": "QNH",
@@ -272,12 +272,12 @@
      "id": "X2"
     },
     "controlPoint": {
-     "x": 243.27272033691406,
-     "y": 129.91761779785156
+     "x": 231.27272033691406,
+     "y": 96.44886779785156
     }
    },
    {
-    "name": "click_hPa\n{ data_entry.units := hPa;\n  data_entry.programmedValue := STD_HPA;\n  data_entry.dispval := STD_HPA; }",
+    "name": "click_hPa\n{ data_entry.units := hPa;\n  data_entry.programmedValue := 1013.25;\n  data_entry.dispval := 1013.25; }",
     "id": "T17",
     "source": {
      "name": "STD",
@@ -293,7 +293,7 @@
     }
    },
    {
-    "name": "click_inHg\n[ data_entry.units != inHg ]\n{ data_entry.units := inHg;\n  data_entry.dispval := data_entry.dispval * 0.75;\n  data_entry.display := data_entry.dispval * 0.75;\n  data_entry.programmedValue := data_entry.dispval * 0.75; }",
+    "name": "click_inHg\n{ data_entry := switch2inHg(data_entry(st)) }",
     "id": "T18",
     "source": {
      "name": "QNH",
@@ -304,12 +304,12 @@
      "id": "X2"
     },
     "controlPoint": {
-     "x": 230.27272033691406,
-     "y": 95.91761779785156
+     "x": 221.27272033691406,
+     "y": 126.91761779785156
     }
    },
    {
-    "name": "click_inHg\n[ data_entry.units != inHg ]\n{ data_entry.units := inHg;\n  data_entry.dispval := data_entry.dispval * 0.75;\n  data_entry.display := data_entry.dispval * 0.75;\n  data_entry.programmedValue := data_entry.dispval * 0.75; }",
+    "name": "click_inHg\n{ data_entry := switch2inHg(data_entry(st)) }",
     "id": "T34",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -325,7 +325,7 @@
     }
    },
    {
-    "name": "click_inHg\n{ data_entry.units := inHg;\n  data_entry.programmedValue := STD_INHG;\n  data_entry.dispval := STD_INHG; }",
+    "name": "click_inHg\n{ data_entry.units := inHg;\n  data_entry.programmedValue := 759.93;\n  data_entry.dispval := 759.93; }",
     "id": "T16",
     "source": {
      "name": "STD",
@@ -373,23 +373,23 @@
     }
    },
    {
-    "name": "click_std_button\n[ units = hPa ]\n{ data_entry.programmedValue := STD_HPA;\n  data_entry.dispval := STD_HPA;\n  data_entry.display := STD_HPA; }",
-    "id": "T20",
+    "name": "click_std_button\n{ data_entry := switch2QNH(data_entry(st)) }",
+    "id": "T1",
     "source": {
-     "name": "QNH",
-     "id": "X2"
-    },
-    "target": {
      "name": "STD",
      "id": "X1"
     },
+    "target": {
+     "name": "QNH",
+     "id": "X2"
+    },
     "controlPoint": {
-     "x": 45.272727966308594,
-     "y": 150.91761779785156
+     "x": 144.48421547503102,
+     "y": 237.81603149492656
     }
    },
    {
-    "name": "click_std_button\n[ units = inHg ]\n{ data_entry.programmedValue := STD_INHG;\n  data_entry.dispval := STD_INHG;\n  data_entry.display := STD_INHG; }",
+    "name": "click_std_button\n{ data_entry := switch2STD(data_entry(st)) }",
     "id": "T2",
     "source": {
      "name": "QNH",
@@ -402,22 +402,6 @@
     "controlPoint": {
      "x": 42.448985297379124,
      "y": 312.435015950684
-    }
-   },
-   {
-    "name": "click_std_button\n{ data_entry.dispval := data_entry.programmedValue;\n  data_entry.display := data_entry.programmedValue; }",
-    "id": "T1",
-    "source": {
-     "name": "STD",
-     "id": "X1"
-    },
-    "target": {
-     "name": "QNH",
-     "id": "X2"
-    },
-    "controlPoint": {
-     "x": 135.27272033691406,
-     "y": 235.91761779785156
     }
    },
    {
@@ -515,13 +499,6 @@
     "scope": "Local"
    },
    {
-    "id": "VAR_data_entry.units:UnitsType(Local)",
-    "name": "data_entry.units",
-    "type": "UnitsType",
-    "value": "inHg",
-    "scope": "Local"
-   },
-   {
     "id": "VAR_editbox_selected:bool(Local)",
     "name": "editbox_selected",
     "type": "bool",
@@ -533,6 +510,13 @@
     "name": "elapse",
     "type": "int",
     "value": "MAX_ELAPSE",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_units:UnitsType(Local)",
+    "name": "units",
+    "type": "UnitsType",
+    "value": "inHg",
     "scope": "Local"
    }
   ],
