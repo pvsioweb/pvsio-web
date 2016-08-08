@@ -54,15 +54,15 @@ define(function (require, exports, module) {
         this.label_right = this.div.append("div").append("span").style("font-size", "10px").style("position", "absolute")
                         .style("font-family", "sans-serif").text("hPa")
                         .style("margin-top", "-26px").style("cursor", "pointer")
-                        .style("margin-left", "48px").style("color", "whitesmoke");
+                        .style("margin-left", "44px").style("color", "whitesmoke");
         var notch = this.div.append("div").attr("class", id + "_notch").style("left", "42%").style("top", "10px")
                         .style("position", "absolute").style("width", "0px").style("height", "12px")
                         .style("border-left", "5px solid transparent").style("border-right", "5px solid transparent")
                         .style("border-bottom", "5px solid whitesmoke")
-                        .style("transform", "rotate(36deg) translate(10px,-4px)");;
+                        .style("transform", "rotate(-36deg) translate(-10px,-8px)");;
 
         opt.switch_left = opt.switch_left || {};
-        this.switch_left = new Button(id + "_switch_left", {
+        this.switch_left = new Button("inHg", {
             left: this.left - 15, top: this.top - 45, height: 26, width: 26
         }, {
             callback: opt.callback || function (err, res) {},
@@ -70,25 +70,25 @@ define(function (require, exports, module) {
             area: this.label_left
         });
         opt.switch_right = opt.switch_right || {};
-        this.switch_right = new Button(id + "_switch_right", {
+        this.switch_right = new Button("hPa", {
             left: this.left + 45, top: this.top - 45, height: 26, width: 26
         }, {
             callback: opt.callback || function (err, res) {},
             evts: opt.switch_right.events || ['click'],
             area: this.label_right
         });
-        d3.select("#" + id + "_switch_right").on("click", function (evt) {
-            notch.style("-webkit-transition", ".6s all").style("-webkit-transform-origin", "0% 100%").style("transform", "rotate(36deg) translate(10px,-4px)");
+        d3.select("#hPa").on("click", function (evt) {
+            notch.style("-webkit-transition", ".6s all").style("-webkit-transform-origin", "0% 100%").style("transform", "rotate(36deg) translate(4px,-6px)");
         });
-        d3.select("#" + id + "_switch_left").on("click", function (evt) {
-            notch.style("-webkit-transition", ".6s all").style("-webkit-transform-origin", "0% 100%").style("transform", "rotate(-36deg) translate(-12px,0px)");
+        d3.select("#inHg").on("click", function (evt) {
+            notch.style("-webkit-transition", ".6s all").style("-webkit-transform-origin", "0% 100%").style("transform", "rotate(-36deg) translate(-8px,-4px)");
         });
 
         opt.switch_central = opt.switch_central || {};
-        this.switch_central = this.div.append("div").attr("id", id + "_switch_central").attr("class", id + "_switch_central")
+        this.switch_central = this.div.append("div").attr("id", id).attr("class", id)
                         .style("margin-left", "16px").style("margin-top", "26px")
                         .style("width", "26px").style("height", "26px").style("border-width", 0);
-        this.switch_central = new Button(id + "_switch_central", {
+        this.switch_central = new Button(id + "_button", {
             left: this.left + 15, top: this.top - 15, height: 26, width: 26
         }, {
             callback: opt.callback || function (err, res) {},

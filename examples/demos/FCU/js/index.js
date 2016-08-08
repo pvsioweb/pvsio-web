@@ -50,7 +50,7 @@ require([
             isDemo: true
         }).style("position", "relative").style("width", "1200px");
         //insert the html into the panel (note that this could have used templates or whatever)
-        imageHolder.html('<img src="Airbus-KCCU-ext-1.jpg" usemap="#prototypeMap"/>').attr("id", "prototype");
+        imageHolder.html('<img src="Airbus-KCCU.jpg" usemap="#prototypeMap"/>').attr("id", "prototype");
 
         /**
          function to handle when an output has been received from the server after sending a guiAction
@@ -106,45 +106,50 @@ require([
 
         // append displays
         var fcu = {};
-        fcu.display = new SingleDisplay("editbox",
-                              { top: 70, left: 62, height: 24, width: 124},
+        fcu.editbox = new SingleDisplay("editbox_pressure",
+                              { top: 58, left: 20, height: 16, width: 60},
                               {
                                   backgroundColor: "black",
                                   fontColor: "white",
                                   parent: "prototype",
-                                  touchscreen: {callback: onMessageReceived, backgroundColor: "green"}
+                                  touchscreen: {callback: onMessageReceived, backgroundColor: "green", highlightOnMouseClick: true}
                               });
         fcu.qnh = new SingleDisplay("qnh",
-                              { top: 652, left: 890, height: 9, width: 30},
+                              { top: 44, left: 22, height: 9, width: 20},
                               {
                                   backgroundColor: "black",
                                   parent: "prototype"
                               });
         fcu.std = new SingleDisplay("std",
-                              { top: 652, left: 860, height: 9, width: 30},
+                              { top: 58, left: 20, height: 16, width: 60},
+                              {
+                                  backgroundColor: "black",
+                                  fontColor: "white",
+                                  parent: "prototype"
+                              });
+        fcu.programmedValue = new SingleDisplay("programmedValue",
+                              { top: 44, left: 46, height: 9, width: 32},
                               {
                                   backgroundColor: "black",
                                   fontColor: "white",
                                   parent: "prototype"
                               });
 
-        fcu.btn_key1 = new Button("digit_1", {left: 245, top: 475}, {callback: onMessageReceived, keyCode:49, keyName:"key 1"});
-        fcu.btn_key2 = new Button("digit_2", {left: 275, top: 475}, {callback: onMessageReceived, keyCode:50, keyName:"key 2"});
-        fcu.btn_key3 = new Button("digit_3", {left: 305, top: 475}, {callback: onMessageReceived, keyCode:51, keyName:"key 3"});
-        fcu.btn_key4 = new Button("digit_4", {left: 245, top: 505}, {callback: onMessageReceived, keyCode:52, keyName:"key 4"});
-        fcu.btn_key5 = new Button("digit_5", {left: 275, top: 505}, {callback: onMessageReceived, keyCode:53, keyName:"key 5"});
-        fcu.btn_key6 = new Button("digit_6", {left: 305, top: 505}, {callback: onMessageReceived, keyCode:54, keyName:"key 6"});
-        fcu.btn_key7 = new Button("digit_7", {left: 245, top: 530}, {callback: onMessageReceived, keyCode:55, keyName:"key 7"});
-        fcu.btn_key8 = new Button("digit_8", {left: 275, top: 530}, {callback: onMessageReceived, keyCode:56, keyName:"key 8"});
-        fcu.btn_key9 = new Button("digit_9", {left: 305, top: 530}, {callback: onMessageReceived, keyCode:57, keyName:"key 9"});
-        fcu.btn_key0 = new Button("digit_0", {left: 275, top: 560}, {callback: onMessageReceived, keyCode:48, keyName:"key 0"});
-        fcu.btn_point = new Button("point", {left:
-           245, top: 560}, {callback: onMessageReceived, keyCode:190, keyName:"."});
-        fcu.btn_CLR = new Button("CLR", {left: 20, top: 345}, {callback: onMessageReceived, keyCode:46, keyName:"delete"});
-        fcu.btn_OK = new Button("OK", {left: 295, top: 440}, {callback: onMessageReceived, keyCode:13, keyName:"enter"});
+        fcu.btn_key1 = new Button("digit_1", {left: 205, top: 315}, {callback: onMessageReceived, keyCode:49, keyName:"key 1"});
+        fcu.btn_key2 = new Button("digit_2", {left: 230, top: 315}, {callback: onMessageReceived, keyCode:50, keyName:"key 2"});
+        fcu.btn_key3 = new Button("digit_3", {left: 255, top: 315}, {callback: onMessageReceived, keyCode:51, keyName:"key 3"});
+        fcu.btn_key4 = new Button("digit_4", {left: 205, top: 340}, {callback: onMessageReceived, keyCode:52, keyName:"key 4"});
+        fcu.btn_key5 = new Button("digit_5", {left: 230, top: 340}, {callback: onMessageReceived, keyCode:53, keyName:"key 5"});
+        fcu.btn_key6 = new Button("digit_6", {left: 255, top: 340}, {callback: onMessageReceived, keyCode:54, keyName:"key 6"});
+        fcu.btn_key7 = new Button("digit_7", {left: 205, top: 365}, {callback: onMessageReceived, keyCode:55, keyName:"key 7"});
+        fcu.btn_key8 = new Button("digit_8", {left: 230, top: 365}, {callback: onMessageReceived, keyCode:56, keyName:"key 8"});
+        fcu.btn_key9 = new Button("digit_9", {left: 255, top: 365}, {callback: onMessageReceived, keyCode:57, keyName:"key 9"});
+        fcu.btn_key0 = new Button("digit_0", {left: 230, top: 390}, {callback: onMessageReceived, keyCode:48, keyName:"key 0"});
+        fcu.btn_point = new Button("point", {left: 205, top: 390}, {callback: onMessageReceived, keyCode:190, keyName:"."});
+        fcu.btn_CLR = new Button("CLR", {left: 12, top: 205}, {callback: onMessageReceived, keyCode:46, keyName:"delete"});
+        fcu.btn_OK = new Button("OK", {left: 250, top: 285}, {callback: onMessageReceived, keyCode:13, keyName:"enter"});
 
-        fcu.btn_inHg_hPa = new Knob("std", {left: 864, top: 736}, {callback: onMessageReceived});
-//        fcu.btn_std = new Button("std", {left: 876, top: 720}, {callback: onMessageReceived, keyCode:17, keyName:"ctrl"});
+        fcu.btn_inHg_hPa = new Knob("std", {left: 24, top: 120}, {callback: onMessageReceived, keyCode:17, keyName:"ctrl"});
 
         // utility functions
         function evaluate(str) {
@@ -154,19 +159,30 @@ require([
                 var args = str.split("/");
                 v = +args[0] / +args[1];
             }
-            return v;
+            return v.toFixed(2).toString();
         }
         function render_display(res) {
-            var str = res.data_entry.display.replace(/"/g, "");
-            fcu.display.render(str);
+            if (res.current_state !== "STD") {
+                var str = res.data_entry.display.replace(/"/g, "");
+                fcu.editbox.render(str);
+            } else {
+                fcu.editbox.hide();
+            }
         }
         function render_state(res) {
             if (res.current_state === "STD") {
-                fcu.std.render("STD");
+                fcu.std.render("Std");
                 fcu.qnh.hide();
             } else {
                 fcu.qnh.render("QNH");
                 fcu.std.hide();
+            }
+        }
+        function render_programmedValue(res) {
+            if (res.current_state === "EDIT_PRESSURE") {
+                fcu.programmedValue.render(evaluate(res.data_entry.programmedValue))
+            } else {
+                fcu.programmedValue.hide();
             }
         }
 
@@ -174,6 +190,7 @@ require([
         function render(res) {
           render_display(res);
           render_state(res);
+          render_programmedValue(res);
         }
 
 
