@@ -4,7 +4,6 @@
 define(function (require, exports, module) {
 
     var instance;
-    var WSManager = require("websockets/pvs/WSManager");
     var d3        = require("d3/d3");
 
     function ButtonHalo() {
@@ -56,7 +55,7 @@ define(function (require, exports, module) {
                 haloOff();
             });
         }
-    }
+    };
 
     module.exports = {
         getInstance: function () {

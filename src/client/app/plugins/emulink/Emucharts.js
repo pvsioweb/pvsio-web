@@ -922,7 +922,7 @@ define(function (require, exports, module) {
         var theDatatype = _this.datatypes.get(datatypeID);
         _this.datatypes.remove(datatypeID);
         var newDatatype = {
-            name: newData.name || theConstant.name,
+            name: newData.name || theDatatype.name,
             constructors: newData.constructors || theDatatype.constructors,
             value: newData.value || theDatatype.value
         };

@@ -5,7 +5,7 @@
  * @date August 4, 2016
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, document */
+/*global define */
 
 define(function (require, exports, module) {
     "use strict";
@@ -59,7 +59,7 @@ define(function (require, exports, module) {
                         .style("position", "absolute").style("width", "0px").style("height", "12px")
                         .style("border-left", "5px solid transparent").style("border-right", "5px solid transparent")
                         .style("border-bottom", "5px solid whitesmoke")
-                        .style("transform", "rotate(-36deg) translate(-10px,-8px)");;
+                        .style("transform", "rotate(-36deg) translate(-10px,-8px)");
 
         opt.switch_left = opt.switch_left || {};
         this.switch_left = new Button("inHg", {
