@@ -194,8 +194,8 @@ emucharts_FCU_th: THEORY
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
             new_st = new_st WITH [ data_entry := data_entry(st) WITH [
 	                units := hPa,
-			dispval := data_entry(st)`programmedValue / 0.75,
-			display := (floor(data_entry(st)`programmedValue / 0.75) * 100) / 100,
+%			dispval := data_entry(st)`programmedValue / 0.75,
+%			display := (floor(data_entry(st)`programmedValue / 0.75) * 100) / 100,
 			programmedValue := data_entry(st)`programmedValue / 0.75 ]]
          IN enter_into(EDIT_PRESSURE)(new_st),
     (current_state(st) = QNH) AND (data_entry(st)`units /= hPa)
@@ -231,8 +231,8 @@ emucharts_FCU_th: THEORY
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
             new_st = new_st WITH [ data_entry := data_entry(st) WITH [
 	    	        units := inHg,
-			dispval := data_entry(st)`programmedValue * 0.75,
-			display := (floor(data_entry(st)`programmedValue * 0.75 * 100)) / 100,
+%			dispval := data_entry(st)`programmedValue * 0.75,
+%			display := (floor(data_entry(st)`programmedValue * 0.75 * 100)) / 100,
 			programmedValue := data_entry(st)`programmedValue * 0.75 ]]
          IN enter_into(EDIT_PRESSURE)(new_st),
     (current_state(st) = STD)

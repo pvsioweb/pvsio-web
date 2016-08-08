@@ -40,23 +40,29 @@ FCUDataEntry: THEORY
     ELSIF units = hPa AND dispval > MAX_hPa   THEN message(TOO_HIGH)
     ELSE "" ENDIF
 
-  click_digit(key: KEY_CODE)(st: state): state = 
-    LET tmp: double = dispval(st),
-        (tmp, st) =
-        if (pointEntered(st))
-	then if decimalDigits(st) < MAX_DECIMAL_DIGITS
-	     then LET decimalDigitsPP = decimalDigits(st) + 1
-		   IN (tmp + key * pow10(-1 * decimalDigitsPP),
-		       st WITH [ decimalDigits := decimalDigitsPP ])
-	     else (tmp, st) endif
-	else if integerDigits(st) < MAX_INTEGER_DIGITS
-	     then LET integerDigitsPP = integerDigits(st) + 1
-	           IN (tmp * 10 + key,
-	               st WITH [ integerDigits := integerDigitsPP ])
-             else (tmp, st) endif endif
-     IN st WITH [ dispval := tmp,
-	    	  display := snprintf(tmp, MAIN_DISPLAY_SIZE)(pointEntered(st), decimalDigits(st)),
-                      msg := dispmsg(tmp, units(st), decimalDigits(st)) ]
+  val_AXIOM: AXIOM
+    FORALL (st: state):
+      ((integerDigits(st) < 4 AND decimalDigits(st) = 2) IMPLIES (pointEntered(st) AND dispval(st) <= 999.99))
+      AND
+      ((integerDigits(st) < 4 AND decimalDigits(st) = 1) IMPLIES (pointEntered(st) AND dispval(st) <= 999.9))
+      AND
+      ((integerDigits(st) < 4 AND decimalDigits(st) = 0) IMPLIES dispval(st) <= 999)
+
+  click_digit(key: {key : KEY_CODE | key = KEY_0 OR key = KEY_1 OR key = KEY_2 OR key = KEY_3 OR key = KEY_4
+	  or key = KEY_5 OR key = KEY_6 OR key = KEY_7 OR key = KEY_8 OR key = KEY_9})(st: state): state =
+    if integerDigits(st) < MAX_INTEGER_DIGITS AND decimalDigits(st) < MAX_DECIMAL_DIGITS THEN
+       LET (tmp, st) = if (pointEntered(st))
+	   	       then LET decimalDigitsPP = decimalDigits(st) + 1
+		             IN (dispval(st) + key * pow10(-1 * decimalDigitsPP),
+		       	      	 st WITH [ decimalDigits := decimalDigitsPP ])
+		       else LET integerDigitsPP = integerDigits(st) + 1
+	          	     IN (dispval(st) * 10 + key,
+	               	         st WITH [ integerDigits := integerDigitsPP ]) endif
+        IN st WITH [ dispval := tmp,
+	    	     display := snprintf(tmp, MAIN_DISPLAY_SIZE)(pointEntered(st), decimalDigits(st)),
+                         msg := dispmsg(tmp, units(st), decimalDigits(st)) ]
+    else st endif
+
 
   click_POINT(st: state): state =
 	if (NOT pointEntered(st))
@@ -74,7 +80,9 @@ FCUDataEntry: THEORY
          -> st WITH [ dispval := MIN_hPa, display := MIN_hPa, programmedValue := MIN_hPa ],
        (units(st) = hPa AND dispval(st) > MAX_hPa)
          -> st WITH [ dispval := MAX_hPa, display := MAX_hPa, programmedValue := MAX_hPa ],
-       ELSE -> st WITH [ programmedValue := dispval(st) ]
+       (units(st) = hPa AND dispval(st) >= MIN_hPa AND dispval(st) <= MAX_hPa) OR
+              (units(st) = inHg AND dispval(st) >= MIN_inHg AND dispval(st) <= MAX_inHg)
+         -> st WITH [ programmedValue := dispval(st) ]
      ENDCOND
 
   %-- clear display value
@@ -88,7 +96,7 @@ FCUDataEntry: THEORY
 
   %-- restore (previous) programmed value
   click_ESC(st: state): state =
-        st WITH [ display := "" + programmedValue(st),
+        st WITH [ display := programmedValue(st),
 	          dispval := programmedValue(st) ]
 
   EXCEPTION(errType: int, key: int, val: unsigned_long_int)(st: state): state =
