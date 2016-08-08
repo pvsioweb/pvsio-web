@@ -147,6 +147,7 @@ require([
         fcu.btn_key0 = new Button("digit_0", {left: 230, top: 390}, {callback: onMessageReceived, keyCode:48, keyName:"key 0"});
         fcu.btn_point = new Button("point", {left: 205, top: 390}, {callback: onMessageReceived, keyCode:190, keyName:"."});
         fcu.btn_CLR = new Button("CLR", {left: 12, top: 205}, {callback: onMessageReceived, keyCode:46, keyName:"delete"});
+        fcu.btn_ESC = new Button("ESC", {left: 16, top: 180}, {callback: onMessageReceived, keyCode:27, keyName:"esc"});
         fcu.btn_OK = new Button("OK", {left: 250, top: 285}, {callback: onMessageReceived, keyCode:13, keyName:"enter"});
 
         fcu.btn_inHg_hPa = new Knob("std", {left: 24, top: 120}, {callback: onMessageReceived, keyCode:17, keyName:"ctrl"});

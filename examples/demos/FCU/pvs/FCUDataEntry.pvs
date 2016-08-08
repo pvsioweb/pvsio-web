@@ -95,9 +95,11 @@ FCUDataEntry: THEORY
 	       msg := ""]
 
   %-- restore (previous) programmed value
-  click_ESC(st: state): state =
-        st WITH [ display := programmedValue(st),
-	          dispval := programmedValue(st) ]
+  restore_display(st: state): state =
+        clear_data_entry(st) WITH [
+		display := programmedValue(st),
+	        dispval := programmedValue(st)
+		]
 
   EXCEPTION(errType: int, key: int, val: unsigned_long_int)(st: state): state =
 	st WITH [ display := snprintf(errType + ":" + key + ":" + val) ]
@@ -118,7 +120,7 @@ FCUDataEntry: THEORY
 	       -> clear_data_entry(st),
 
          key = KEY_ESC
-	       -> click_ESC(st),
+	       -> restore_display(st),
 	       
          ELSE % unrecognised key - call exception handler
 	       -> EXCEPTION(INVALID_KEY, key, dispval(st))(st)
@@ -127,7 +129,7 @@ FCUDataEntry: THEORY
   processEvent(evt: EVT_CODE)(st: state): state =
     COND
          evt = EVT_TIMEOUT 
-	       -> click_ESC(st),
+	       -> restore_display(st),
 	       
          ELSE % unrecognised key - call exception handler
 	       -> EXCEPTION(INVALID_EVENT, evt, dispval(st))(st)

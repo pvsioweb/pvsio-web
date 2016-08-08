@@ -182,7 +182,9 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_ESC)(data_entry(st)) ]
+            new_st = new_st WITH [
+	    	   data_entry := processKey(KEY_ESC)(data_entry(st)),
+		   editbox_selected := FALSE ]
          IN enter_into(QNH)(new_st),
     ELSE -> st
     ENDCOND
