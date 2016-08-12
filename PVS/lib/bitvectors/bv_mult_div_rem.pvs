@@ -1,0 +1,23 @@
+%
+%  JAVA BITVECTOR INTEGRALS
+%  ========================
+%
+%  for Translating Java Classes into the Higher Order Logic of PVS.
+%
+%  All integral types are interpreted as PVS integers, without 
+%  taking bounds into account
+%
+%  Author: Bart Jacobs
+%  Started: Wednesday 24 May 00 10:59:26 bart@frustratie
+%  Last-modified: $Date$
+%  Last-modified by: $Author$
+
+
+bv_mult_div_rem: THEORY
+BEGIN
+  IMPORTING BitvectorUtil, BitvectorMultiplication,
+            BitvectorMultiplicationWidenNarrow, DivisionUtil,
+            BitvectorOneComplementDivision, BitvectorTwoComplementDivision,
+            BitvectorTwoComplementDivisionWidenNarrow
+ END bv_mult_div_rem
+

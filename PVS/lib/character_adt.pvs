@@ -1,0 +1,94 @@
+%%% ADT file generated from NIL
+
+character_adt: THEORY
+ BEGIN
+
+  character: TYPE
+
+  char?: [character -> boolean]
+
+  code: [character -> below[256]]
+
+  char: [below[256] -> (char?)]
+
+  character_ord: [character -> upto(0)]
+
+  character_ord_defaxiom: AXIOM
+    FORALL (code: below[256]): character_ord(char(code)) = 0;
+
+  ord(x: character): [character -> upto(0)] =
+      CASES x OF char(char1_var): 0 ENDCASES
+
+  character_char_extensionality: AXIOM
+    FORALL (char?_var: (char?), char?_var2: (char?)):
+      code(char?_var) = code(char?_var2) IMPLIES char?_var = char?_var2;
+
+  character_char_eta: AXIOM
+    FORALL (char?_var: (char?)): char(code(char?_var)) = char?_var;
+
+  character_code_char: AXIOM
+    FORALL (char1_var: below[256]): code(char(char1_var)) = char1_var;
+
+  character_inclusive: AXIOM
+    FORALL (character_var: character): char?(character_var);
+
+  character_induction: AXIOM
+    FORALL (p: [character -> boolean]):
+      (FORALL (char1_var: below[256]): p(char(char1_var))) IMPLIES
+       (FORALL (character_var: character): p(character_var));
+
+  subterm(x: character, y: character):  boolean = x = y;
+
+  <<:  (strict_well_founded?[character]) = LAMBDA (x, y: character): FALSE;
+
+  character_well_founded: AXIOM strict_well_founded?[character](<<);
+
+  reduce_nat(char?_fun: [below[256] -> nat]):  [character -> nat] =
+      LAMBDA (character_adtvar: character):
+        LET red: [character -> nat] = reduce_nat(char?_fun) IN
+          CASES character_adtvar OF char(char1_var): char?_fun(char1_var)
+            ENDCASES;
+
+  REDUCE_nat(char?_fun: [[below[256], character] -> nat]):
+        [character -> nat] =
+      LAMBDA (character_adtvar: character):
+        LET red: [character -> nat] = REDUCE_nat(char?_fun) IN
+          CASES character_adtvar
+            OF char(char1_var): char?_fun(char1_var, character_adtvar)
+            ENDCASES;
+
+  reduce_ordinal(char?_fun: [below[256] -> ordinal]):
+        [character -> ordinal] =
+      LAMBDA (character_adtvar: character):
+        LET red: [character -> ordinal] = reduce_ordinal(char?_fun) IN
+          CASES character_adtvar OF char(char1_var): char?_fun(char1_var)
+            ENDCASES;
+
+  REDUCE_ordinal(char?_fun: [[below[256], character] -> ordinal]):
+        [character -> ordinal] =
+      LAMBDA (character_adtvar: character):
+        LET red: [character -> ordinal] = REDUCE_ordinal(char?_fun) IN
+          CASES character_adtvar
+            OF char(char1_var): char?_fun(char1_var, character_adtvar)
+            ENDCASES;
+ END character_adt
+
+character_adt_reduce[range: TYPE]: THEORY
+ BEGIN
+
+  IMPORTING character_adt
+
+  reduce(char?_fun: [below[256] -> range]):  [character -> range] =
+      LAMBDA (character_adtvar: character):
+        LET red: [character -> range] = reduce(char?_fun) IN
+          CASES character_adtvar OF char(char1_var): char?_fun(char1_var)
+            ENDCASES;
+
+  REDUCE(char?_fun: [[below[256], character] -> range]):
+        [character -> range] =
+      LAMBDA (character_adtvar: character):
+        LET red: [character -> range] = REDUCE(char?_fun) IN
+          CASES character_adtvar
+            OF char(char1_var): char?_fun(char1_var, character_adtvar)
+            ENDCASES;
+ END character_adt_reduce
