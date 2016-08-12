@@ -157,9 +157,9 @@ function run() {
     function typeCheck(file, cb) {
         console.log("typechecking file " + file + " ...");
         if (process.env.PORT) { // this is for the PVSio-web version installed on the heroku cloud
-            console.log("/app/pvs6.0/proveit -T -l -v " + file);
+            console.log("/app/PVS/proveit -T -l -v " + file);
             procWrapper().exec({
-                command: "/app/pvs6.0/proveit -T -l -v " + file,
+                command: "/app/PVS/proveit -T -l -v " + file,
                 callBack: cb
             });
         } else if (process.env.pvsdir) {
@@ -176,7 +176,7 @@ function run() {
             });
         }
     }
-    
+
     function startSapereEE(cb) {
         var cmd = __dirname + "/lib/glassfish4/bin/asadmin restart-domain --force=true";
         procWrapper().exec({
@@ -184,7 +184,7 @@ function run() {
             callBack: cb
         });
     }
-    
+
     function stopSapereEE(cb) {
         var cmd = __dirname + "/lib/glassfish4/bin/asadmin stop-domain";
         procWrapper().exec({
@@ -192,7 +192,7 @@ function run() {
             callBack: cb
         });
     }
-    
+
     function startIVY(cb) {
         var cmd = "cd " + __dirname + "/ext/IVY" +
                   " && " +
@@ -209,7 +209,7 @@ function run() {
         });
         delayedCallback();
     }
-    
+
     /**
         Creates a function that updates the path of the parameter object such that it is relative to the
         basePath specified
@@ -953,7 +953,7 @@ function run() {
                     if (err.code === 1 && err.killed === false) {
                         // glassfish is already running, it's not an error
                         res.stdout = "PVSio-web Network Controller already started.";
-                    } else {                    
+                    } else {
                         res.type = token.type + "_error";
                         res.err = err.message;
                     }

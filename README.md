@@ -26,11 +26,11 @@ To install pvsio-web, first you need to install PVS and NodeJS, and then clone t
 #### Step 1: Install PVS and add PVS executables to your PATH
 PVS is required to run PVSio-web. The tool can be downloaded from http://pvs.csl.sri.com/download.shtml Installation instructions are on the aforementioned website.
 
-Once PVS is installed, please add the following PVS executable files to your PATH: pvs, pvsio and proveit. A simple way to do this is to create symbolic links to those files, and place the symbolic links in /usr/bin. For instance, if PVS is installed in /opt/pvs6.0/pvs, the following commands executed in a Terminal window create the required symbolic links:
+Once PVS is installed, please add the following PVS executable files to your PATH: pvs, pvsio and proveit. A simple way to do this is to create symbolic links to those files, and place the symbolic links in /usr/bin. For instance, if PVS is installed in /opt/PVS/pvs, the following commands executed in a Terminal window create the required symbolic links:
 
-    sudo ln -s /opt/pvs6.0/pvs /usr/bin/pvs
-    sudo ln -s /opt/pvs6.0/pvsio /usr/bin/pvsio
-    sudo ln -s /opt/pvs6.0/proveit /usr/bin/proveit
+    sudo ln -s /opt/PVS/pvs /usr/bin/pvs
+    sudo ln -s /opt/PVS/pvsio /usr/bin/pvsio
+    sudo ln -s /opt/PVS/proveit /usr/bin/proveit
 
 Please note that the ln command requires a full path.
 

@@ -15,12 +15,12 @@ define(function (require, exports, module) {
 		d3						= require("d3/d3"),
 		property				= require("util/property"),
 		ws,
-		_port = (window.location.href.indexOf("pvsioweb.herokuapp.com") >= 0 ||
+		_port = (window.location.href.indexOf(".herokuapp.com") >= 0 ||
                    window.location.href.indexOf("pvsioweb.org") >= 0) ? 0 : 8082,
 		url = window.location.href.indexOf("file") === 0 ?
 				("ws://localhost") : ("ws://" + window.location.hostname),
         instance;
-	
+
 	/**
 	 * Creates a new PVSioWeb client object. This object is an event emitter and emits the following events:
 	 * @constructor
@@ -54,7 +54,7 @@ define(function (require, exports, module) {
     PVSioWeb.prototype.isPVSProcessConnected = property.call(PVSioWeb.prototype, false);
     /**get or set the port for the server connection */
 	PVSioWeb.prototype.port = property.call(PVSioWeb.prototype, _port);
-	
+
     /**
         Get or set the url for the server connection
     */
@@ -77,7 +77,7 @@ define(function (require, exports, module) {
             return ws.serverUrl(this.serverUrl()).logon();
         }
 	};
-	
+
     /**
         Disconnects from the server
     */
@@ -89,10 +89,10 @@ define(function (require, exports, module) {
         Get the websocket connection
     */
 	PVSioWeb.prototype.getWebSocket = function () { return ws; };
-	
+
     /**
         Creates a collapsible panel on the client app
-		@param {object} options 
+		@param {object} options
 			{
 			headerText: string to display in panel header
 			owner: <string> the name of the plugin that owns the panel
@@ -108,7 +108,7 @@ define(function (require, exports, module) {
 		var div = d3.select(options.parent).append("div").attr("class", "collapsible-panel-parent");
 		var header = div.append("div").classed("header", true);
 		var content = div.append("div").attr("class", "collapsible-panel");
-		
+
         if (!options.isDemo) {
             header.on("click", function () {
                 var icon = d3.select(this.firstChild);
@@ -144,7 +144,7 @@ define(function (require, exports, module) {
         }
 		return content;
 	};
-    
+
     /**
         Removes the collapsible specified in the parameter.
         @param {d3.selection} container The div returned from a call to createCollapsiblePanel
@@ -157,7 +157,7 @@ define(function (require, exports, module) {
             }
         }
     };
-    
+
     /**
         Adds a stylesheet with the specified url to the page
      */
@@ -170,7 +170,7 @@ define(function (require, exports, module) {
             cb("error");
         });
     };
-	
+
 	module.exports = {
         getInstance: function () {
             if (!instance) {

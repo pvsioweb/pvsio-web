@@ -26,7 +26,7 @@ define(function (require, exports, module) {
     var client = PVSioWebClient.getInstance(),
         pluginManager = PluginManager.getInstance(),
         splashTimeout = null,
-        reconnectOptions = (window.location.href.indexOf("pvsioweb.herokuapp.com") >= 0 ||
+        reconnectOptions = (window.location.href.indexOf(".herokuapp.com") >= 0 ||
                    window.location.href.indexOf("pvsioweb.org") >= 0) ? { silentMode: true} : null;
 
     //register event listeners
