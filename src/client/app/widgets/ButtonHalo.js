@@ -35,12 +35,12 @@ define(function (require, exports, module) {
                 var eventKeyCode = d3.event.which;
                 var widget = instance._keyCode2widget[eventKeyCode];
                 if (widget && typeof widget.evts === "function" && widget.evts().indexOf('click') > -1) {
-                    widget.click({ callback: w.callback });
+                    widget.click({ callback: widget.callback });
                     halo(widget.id());
                     d3.event.preventDefault();
                     d3.event.stopPropagation();
                 } else if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
-                    widget.pressAndHold({ callback: w.callback });
+                    widget.pressAndHold({ callback: widget.callback });
                     halo(widget.id());
                     d3.event.preventDefault();
                     d3.event.stopPropagation();
@@ -50,7 +50,7 @@ define(function (require, exports, module) {
                 var eventKeyCode = d3.event.which;
                 var widget = instance._keyCode2widget[eventKeyCode];
                 if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
-                    widget.release({ callback: w.callback });
+                    widget.release({ callback: widget.callback });
                 }
                 haloOff();
             });

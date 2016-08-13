@@ -65,23 +65,23 @@ define(function (require, exports, module) {
         this.switch_left = new Button("inHg", {
             left: this.left - 15, top: this.top - 45, height: 26, width: 26
         }, {
-            callback: opt.callback || function (err, res) {},
+            callback: opt.callback,
+            animation: function() { notch.style("-webkit-transition", ".6s all").style("-webkit-transform-origin", "0% 100%").style("transform", "rotate(-36deg) translate(-8px,-4px)");},
             evts: opt.switch_left.events || ['click'],
-            area: this.label_left
+            area: this.label_left,
+            keyCode:37,
+            keyName:"arrow left"
         });
         opt.switch_right = opt.switch_right || {};
         this.switch_right = new Button("hPa", {
             left: this.left + 45, top: this.top - 45, height: 26, width: 26
         }, {
-            callback: opt.callback || function (err, res) {},
+            callback: opt.callback,
+            animation: function () { notch.style("-webkit-transition", ".6s all").style("-webkit-transform-origin", "0% 100%").style("transform", "rotate(36deg) translate(4px,-6px)"); },
             evts: opt.switch_right.events || ['click'],
-            area: this.label_right
-        });
-        d3.select("#hPa").on("click", function (evt) {
-            notch.style("-webkit-transition", ".6s all").style("-webkit-transform-origin", "0% 100%").style("transform", "rotate(36deg) translate(4px,-6px)");
-        });
-        d3.select("#inHg").on("click", function (evt) {
-            notch.style("-webkit-transition", ".6s all").style("-webkit-transform-origin", "0% 100%").style("transform", "rotate(-36deg) translate(-8px,-4px)");
+            area: this.label_right,
+            keyCode:39,
+            keyName:"arrow right"
         });
 
         opt.switch_central = opt.switch_central || {};
