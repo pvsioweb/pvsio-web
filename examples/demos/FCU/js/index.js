@@ -114,13 +114,13 @@ require([
                                   parent: "prototype",
                                   touchscreen: {callback: onMessageReceived, backgroundColor: "green", highlightOnMouseClick: true}
                               });
-        fcu.qnh = new SingleDisplay("qnh",
+        fcu.dispQNH = new SingleDisplay("dispQNH",
                               { top: 44, left: 22, height: 9, width: 20},
                               {
                                   backgroundColor: "black",
                                   parent: "prototype"
                               });
-        fcu.std = new SingleDisplay("std",
+        fcu.dispSTD = new SingleDisplay("dispSTD",
                               { top: 58, left: 20, height: 16, width: 60},
                               {
                                   backgroundColor: "black",
@@ -172,11 +172,11 @@ require([
         }
         function render_state(res) {
             if (res.current_state === "STD") {
-                fcu.std.render("Std");
-                fcu.qnh.hide();
+                fcu.dispSTD.render("Std");
+                fcu.dispQNH.hide();
             } else {
-                fcu.qnh.render("QNH");
-                fcu.std.hide();
+                fcu.dispQNH.render("QNH");
+                fcu.dispSTD.hide();
             }
         }
         function render_programmedValue(res) {

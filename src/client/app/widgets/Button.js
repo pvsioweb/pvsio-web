@@ -38,6 +38,7 @@ define(function (require, exports, module) {
         opt.buttonReadback = opt.buttonReadback || "";
         opt.keyCode = opt.keyCode || "";
         opt.keyName = opt.keyName || "";
+        opt.animation = opt.animation || function () {};
         coords = coords || {};
         this.evts = property.call(this, opt.evts);
         this.recallRate = property.call(this, opt.recallRate);
@@ -46,6 +47,7 @@ define(function (require, exports, module) {
         this.buttonReadback = property.call(this, opt.buttonReadback);
         this.keyCode = property.call(this, opt.keyCode);
         this.keyName = property.call(this, opt.keyName);
+        this.animation = opt.animation;
 
         Widget.call(this, id, "button");
 
@@ -125,8 +127,10 @@ define(function (require, exports, module) {
     Button.prototype.release = function (opt) {
         opt = opt || {};
         var f = this.functionText();
+        var anim = opt.animation || this.animation || function () {};
 
         ButtonActionsQueue.queueGUIAction("release_" + f, opt.callback);
+        anim();
         Recorder.addAction({
             id: this.id(),
             functionText: this.functionText(),
@@ -145,8 +149,10 @@ define(function (require, exports, module) {
     Button.prototype.press = function (opt) {
         opt = opt || {};
         var f = this.functionText();
+        var anim = opt.animation || this.animation || function () {};
 
         ButtonActionsQueue.queueGUIAction("press_" + f, opt.callback);
+        anim();
         Recorder.addAction({
             id: this.id(),
             functionText: this.functionText(),
@@ -165,11 +171,13 @@ define(function (require, exports, module) {
         opt = opt || {};
         var f = this.functionText(),
             widget = this;
+        var anim = opt.animation || this.animation || function () {};
 
         this.press(opt);
         timerTickFunction = function () {
             console.log("timer ticked_" + f);
             ButtonActionsQueue.queueGUIAction("press_" + f, opt.callback);
+            anim();
             //record action
             Recorder.addAction({
                 id: widget.id(),
@@ -191,7 +199,9 @@ define(function (require, exports, module) {
     Button.prototype.click = function (opt) {
         opt = opt || {};
         var f = this.functionText();
+        var anim = opt.animation || this.animation || function () {};
         ButtonActionsQueue.queueGUIAction("click_" + f, opt.callback);
+        anim();
         Recorder.addAction({
             id: this.id(),
             functionText: this.functionText(),
