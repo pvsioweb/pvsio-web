@@ -18,7 +18,7 @@ define(function (require, exports, module) {
          * @param {ScreenCollection} options.collection Required. Collection of screens to display in the dropdown
          */
         initialize: function (options) {
-            this.listenTo(this.collection, "add remove change:name", this._updateScreenList); // TODO: don't re-render the list when a single item changes
+            this._setupCollectionListeners();
             this._template = Handlebars.compile(template);
             this._options = options;
 
@@ -47,6 +47,21 @@ define(function (require, exports, module) {
         setSelected: function (selected) {
             this._selected = selected;
             this._updateSelectedText();
+        },
+
+        /**
+         * Sets the collection of screens being represented by this view
+         * @param {ScreenCollection} collection Collection of screens to use
+         */
+        setCollection: function (collection) {
+            this.stopListening(this.collection);
+            this.collection = collection;
+            this._setupCollectionListeners();
+            this._updateScreenList();
+        },
+
+        _setupCollectionListeners: function () {
+            this.listenTo(this.collection, "add remove change:name", this._updateScreenList); // TODO: don't re-render the list when a single item changes
         },
 
         _updateSelectedText: function () {

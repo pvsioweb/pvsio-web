@@ -23,6 +23,40 @@ define(function (require, exports, module) {
                     expect(coords.height).toBe(inputCoords.height);
                 });
             });
+
+            describe("toJSON function", function () {
+                it("returns the expected object representation", function() {
+                    var inputCoords = {
+                        top: 50,
+                        left: 60,
+                        width: 70,
+                        height: 80
+                    };
+
+                    var id = 1;
+
+                    var opt = {
+                        targetScreen: new Backbone.Model(),
+                        name: "a widget"
+                    };
+
+                    var widget = new PIMWidget(id, inputCoords, opt);
+                    var json = widget.toJSON();
+
+                    expect(json).toEqual({
+                        id: id,
+                        coords: {
+                            x: inputCoords.left,
+                            y: inputCoords.top,
+                            width: inputCoords.width,
+                            height: inputCoords.height
+                        },
+                        targetScreen: opt.targetScreen.cid,
+                        name: opt.name,
+                        type: "pim-button"
+                    });
+                });
+            });
         });
     };
 });

@@ -14,7 +14,9 @@ define(function (require, exports, module) {
 
             function() {
                 require("./ScreenCollection_UnitTest")();
+                require("./Screen_UnitTest")();
                 require("./PIMPrototyper_UnitTest")();
+                require("./PIMProjectManager_UnitTest")();
                 require("./PIMWidget_UnitTest")();
             }
         );

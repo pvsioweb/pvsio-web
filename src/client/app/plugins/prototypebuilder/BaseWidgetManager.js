@@ -71,28 +71,6 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Returns a JSON object representing widget definitions for the currently open project
-       @memberof WidgetManager
-     */
-    WidgetManager.prototype.getWidgetDefinitions = function () {
-        var scale = (d3.select("svg > g").node()) ?
-                        +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
-        var widgets = [], regionDefs = [];
-        _.each(this._widgets, function (widget) {
-            widgets.push(widget.toJSON());
-            var a = widget.imageMap();
-            if (a) {
-                var scaledCoords = a.attr("coords").split(",").map(function (c) {
-                    return +c / scale;
-                }).join(",");
-                regionDefs.push({"class": a.attr("class"), shape: a.attr("shape"),
-                            coords: scaledCoords, href: a.attr("href")});
-            }
-        });
-        return {widgetMaps: widgets, regionDefs: regionDefs};
-    };
-
-    /**
         update all the area maps attributed to all widgets on the project by the given scale factor
         @param {Number} scale the scale to transform the maps by
     */

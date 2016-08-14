@@ -31,7 +31,7 @@ define(function (require, exports, module) {
          */
         initialize: function (options) {
             var _this = this;
-            this.listenTo(this.collection, "selectionChanged", this._onSelectionChanged);
+            this._setupCollectionListeners();
 
             this._screenDropdown = new ScreenDropdownView({
                 collection: this.collection,
@@ -114,6 +114,22 @@ define(function (require, exports, module) {
                 }).on("cancel", function (e, view) {
                     view.remove();
                 });
+        },
+
+        /**
+         * Sets the collection of screens being represented by this view
+         * @param {ScreenCollection} collection Collection of screens to use
+         */
+        setCollection: function (collection) {
+            this.stopListening(this.collection);
+            this.collection = collection;
+            this._screenDropdown.setCollection(collection);
+            this._screenDropdown.setSelected(null);
+            this._setupCollectionListeners();
+        },
+
+        _setupCollectionListeners: function () {
+            this.listenTo(this.collection, "selectionChanged", this._onSelectionChanged);
         },
 
         onClickChangeImage: function () {

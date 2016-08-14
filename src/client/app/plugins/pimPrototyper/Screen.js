@@ -3,7 +3,7 @@
  * attributes.
  */
 
-/*global define, Backbone */
+/*global define, Backbone, _ */
 define(function (require, exports, module) {
     "use strict";
 
@@ -15,6 +15,26 @@ define(function (require, exports, module) {
 
         initialize: function () {
             this.set("widgets", {});
+        },
+
+        toJSON: function () {
+            // Copy the attributes from the Backbone model
+            var json = _.clone(this.attributes);
+            if (json.image != null) {
+                // Replace the image object with its file name
+                json.image = json.image.name;
+            }
+
+            var flatWidgets = [];
+
+            // Replace each widget object with its JSON representation
+            _.forEach(json.widgets, function (w) {
+                flatWidgets.push(w.toJSON());
+            });
+
+            json.widgets = flatWidgets;
+
+            return json;
         }
     });
 

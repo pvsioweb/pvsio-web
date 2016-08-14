@@ -11,6 +11,8 @@ define(function (require, exports, module) {
         WidgetConfigView = require("./forms/WidgetConfigView"),
         template = require("text!./forms/templates/PIMPrototyperPanel.handlebars"),
         FileSystem = require("filesystem/FileSystem"),
+        ProjectManager = require("project/ProjectManager"),
+        PIMProjectManager = require("./PIMProjectManager"),
         MIME = require("util/MIME").getInstance();
 
     var instance;
@@ -26,6 +28,12 @@ define(function (require, exports, module) {
     PIMPrototyper.prototype._init = function (parentElement) {
         var _this = this;
         this.collapsed = false;
+        this._projectManager = new PIMProjectManager(ProjectManager.getInstance());
+        this._screens = new ScreenCollection();
+
+        this._projectManager.on("PIMProjectChanged", function () {
+            _this._onProjectChanged();
+        });
 
         var opts = {
             headerText: "PIM Prototyper",
@@ -60,28 +68,28 @@ define(function (require, exports, module) {
         this._fileSystem = new FileSystem();
         this._widgetManager = new PIMWidgetManager();
 
-        this._screens = new ScreenCollection();
         this._screenControlsView = new ScreenControlsView({
             el: this._container.select(".panel-footer").node(),
             collection: this._screens
          });
 
-         this._prototypeImageView = new PrototypeImageView({
+        this._prototypeImageView = new PrototypeImageView({
             el: this._container.select(".prototype-image-container").node(),
             widgetManager: this._widgetManager
-         });
+        });
 
-         this._widgetListView = new WidgetsListView({
+        this._widgetListView = new WidgetsListView({
             el: this._container.select(".prototype-list-container").node(),
             widgetManager: this._widgetManager,
             labelFunction: function (widget) {
                 return widget.name();
             }
-         });
+        });
 
-         this._setUpChildListeners();
+        this._setUpChildListeners();
+        this._onProjectChanged();
 
-         layoutjs({el: "#body"});
+        layoutjs({el: "#body"});
     };
 
     PIMPrototyper.prototype.getName = function () {
@@ -111,22 +119,27 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Change the image fpr the active screen (or create a screen if none are currently selected)
+     * Change the image for the active screen (or create a screen if none are currently selected)
      * @param {string} imagePath
      * @param {string} imageData base64 encoded data
      */
-    PIMPrototyper.prototype.changeImage = function (descriptor) {
-        // TODO: nwatson: copy the image into the project directory
-        var selected = this._screens.getSelected();
+    PIMPrototyper.prototype.changeImage = function (imagePath, imageData) {
+        var _this = this;
 
-        // The user is changing the image with no screen selected, so add a new screen
-        if (selected == null) {
-            selected = new Screen({ name: "New screen" });
-            this._screens.add(selected);
-            this._screens.setSelected(selected);
-        }
+        return this._projectManager.addImage(imagePath, imageData).then(function (res) {
+            var selected = _this._screens.getSelected();
 
-        selected.set("image", descriptor);
+            // The user is changing the image with no screen selected, so add a new screen
+            if (selected == null) {
+                selected = new Screen({ name: "New screen" });
+                _this._screens.add(selected);
+                _this._screens.setSelected(selected);
+            }
+
+            selected.set("image", res);
+
+            return res;
+        });
     };
 
     PIMPrototyper.prototype.switchToSimulatorView = function () {
@@ -161,16 +174,16 @@ define(function (require, exports, module) {
                     title: "Select a picture",
                     filter: MIME.imageFilter
                 }).then(function (descriptors) {
-                    _this.changeImage(descriptors[0]);
-
-                    _this._prototypeImageView.setImage(descriptors[0]).then(function (res) {
-                        _this.updateControlsHeight();
-                        if (d3.select("#imageDiv svg").node() === null) {
-                            // we need to create the svg layer, as it's not there
-                            // this happens when a new project is created without selecting an image
-                            _this._prototypeImageView.updateMapCreator();
-                        }
-                        resolve(res);
+                    _this.changeImage(descriptors[0].name, descriptors[0].content).then(function (res) {
+                        _this._prototypeImageView.setImage(res).then(function (res) {
+                            _this.updateControlsHeight();
+                            if (_this._container.select("#imageDiv svg").node() === null) {
+                                // we need to create the svg layer, as it's not there
+                                // this happens when a new project is created without selecting an image
+                                _this._prototypeImageView.updateMapCreator();
+                            }
+                            resolve(res);
+                        });
                     });
                 }).catch(function (err) { reject(err); });
             } else {
@@ -191,16 +204,22 @@ define(function (require, exports, module) {
         }
     };
 
+    PIMPrototyper.prototype._onProjectChanged = function () {
+        this._screens = this._projectManager.screens();
+        this._screens.on("selectionChanged", this._onSelectedScreenChange, this);
+        this._screenControlsView.setCollection(this._screens);
+        this._onSelectedScreenChange();
+    };
+
     /**
      * Sets up listeners on child views that are used to communicate between the children and back to this class
      * @private
      */
-    PIMPrototyper.prototype._setUpChildListeners = function() {
+    PIMPrototyper.prototype._setUpChildListeners = function () {
         var _this = this;
 
         this._prototypeImageView.on("loadImageClicked", this._showLoadImageDialog, this);
         this._screenControlsView.on("changeImageClicked", this._showLoadImageDialog, this);
-        this._screens.on("selectionChanged", this._onSelectedScreenChange, this);
 
         this._prototypeImageView.on("WidgetRegionDrawn", function(coord, region) {
             new WidgetConfigView({

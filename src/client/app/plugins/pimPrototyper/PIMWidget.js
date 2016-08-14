@@ -38,9 +38,24 @@ define(function (require, exports, module) {
      * @memberof PIMWidget
     */
     PIMWidget.prototype.toJSON = function () {
+        var targetScreen = this.targetScreen();
+        var targetId;
+
+        if (targetScreen != null) {
+            targetId = targetScreen.cid;
+        }
+
         return {
             id: this.id(),
-            type: this.type()
+            type: this.type(),
+            name: this.name(),
+            targetScreen: targetId,
+            coords: {
+                x: this.x,
+                y: this.y,
+                width: this.width,
+                height: this.height
+            }
         };
     };
 
