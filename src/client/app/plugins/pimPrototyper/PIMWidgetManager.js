@@ -20,8 +20,10 @@ define(function (require, exports, module) {
     /**
      * Updates the widget manager to use the provided screen
      * @param {Screen} scrn Prototype screen whose widgets should be managed by this manager
+     * @param {function} widgetClickHandler Function to call when any restored widget is clicked
+     * @param {Element} widgetImageMap Image map element that any widget's area maps should be added to
      */
-    PIMWidgetManager.prototype.setScreen = function (scrn) {
+    PIMWidgetManager.prototype.setScreen = function (scrn, widgetClickHandler, widgetImageMap) {
         _.each(this._widgets, function(widget) {
             widget.removeImageMap();
         });
@@ -30,10 +32,17 @@ define(function (require, exports, module) {
         this._screen = scrn;
 
         if (this._screen != null && this._screen.get("widgets") != null) {
-            this._widgets = this._screen.get("widgets"); // TODO: nwatson: would this be better as an ES5 getter?
+            this._widgets = this._screen.get("widgets");
 
             _.each(this._widgets, function(widget) {
                 _this.trigger("WidgetRegionRestored", widget, widget.getCoords());
+
+                if (widget.needsImageMap()) {
+                    widget.createImageMap({
+                        onClick: widgetClickHandler,
+                        map: widgetImageMap
+                    });
+                }
             });
         } else {
             this._widgets = {};

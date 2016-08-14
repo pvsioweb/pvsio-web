@@ -42,7 +42,7 @@ define(function (require, exports, module) {
         var targetId;
 
         if (targetScreen != null) {
-            targetId = targetScreen.cid;
+            targetId = targetScreen.id;
         }
 
         return {
@@ -67,8 +67,6 @@ define(function (require, exports, module) {
             this.imageMap().remove();
         }
     };
-
-
 
     /**
      * Returns an object containing the x, y, width and height properties of the widget.
@@ -113,6 +111,29 @@ define(function (require, exports, module) {
         this.height = pos.height;
 
         PIMWidget.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
+    };
+
+    /**
+     * Creates a new widget from the data in the provided object.
+     * @param {object} jsonObj JSON-style object with the data for the widget
+     * @param {ScreenCollection} screens Collection of screens that the widget's targetScreen is contained within
+     * @return {Widget} The new widget
+     */
+    PIMWidget.initFromJSON = function (jsonObj, screens) {
+        var widget = new PIMWidget(jsonObj.id, {
+            top: jsonObj.coords.y,
+            left: jsonObj.coords.x,
+            width: jsonObj.coords.width,
+            height: jsonObj.coords.height
+        }, {
+            name: jsonObj.name
+        });
+
+        if (jsonObj.targetScreen) {
+            widget.targetScreen(screens.get(jsonObj.targetScreen));
+        }
+
+        return widget;
     };
 
     module.exports = PIMWidget;

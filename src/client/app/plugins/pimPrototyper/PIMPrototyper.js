@@ -193,14 +193,24 @@ define(function (require, exports, module) {
     };
 
     PIMPrototyper.prototype._onSelectedScreenChange = function (selectedScreen) {
+        var _this = this;
         this._prototypeImageView.softClearWidgetAreas();
-        this._widgetManager.setScreen(selectedScreen);
+        this._widgetManager.setScreen(
+            selectedScreen,
+            function(widget) {
+                _this._onWidgetClicked(widget);
+            },
+            this._prototypeImageView.getImageMap()
+        );
         this._widgetListView.update();
 
         if (selectedScreen == null || selectedScreen.get("image") == null) {
             this._prototypeImageView.clearImage();
         } else {
-            this._prototypeImageView.setImage(selectedScreen.get("image"));
+            var image = selectedScreen.get("image");
+            image.getContent().then(function () {
+                _this._prototypeImageView.setImage(image);
+            });
         }
     };
 

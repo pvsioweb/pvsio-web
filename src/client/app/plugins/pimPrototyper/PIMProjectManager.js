@@ -9,6 +9,8 @@ define(function (require, exports, module) {
     "use strict";
     var Descriptor = require("project/Descriptor"),
         ScreenCollection = require("./ScreenCollection"),
+        Screen = require("./Screen"),
+        PIMWidget = require("./PIMWidget"),
         property = require("util/property"),
         Logger = require("util/Logger");
 
@@ -60,8 +62,32 @@ define(function (require, exports, module) {
         return JSON.stringify(screens);
     };
 
-    PIMProjectManager.prototype.deserializeProject = function (json) {
-        // TODO: nwatson: create a prototype from the deserialized json
+    /**
+     * Restores a project from the data in the provided object. The restored project will be set as the active project
+     * within the PIM project manager.
+     * @param {object} json JSON-style object to restore from
+     */
+    PIMProjectManager.prototype.initFromJSON = function (json) {
+        var pimImageFolder = this._project.name() + "/" + PIM_IMAGES_FOLDER;
+
+        var screens = new ScreenCollection();
+        _.forEach(json, function (scr) {
+            screens.add(Screen.initFromJSON(scr, pimImageFolder));
+        });
+
+        // Loop over all the widgets and restore them. This is done seperately since the widgets make reference to
+        // screens within the screen collection.
+        _.forEach(json, function (scr) {
+            var widgets = {};
+
+            _.forEach(scr.widgets, function (w) {
+                widgets[w.id] = PIMWidget.initFromJSON(w, screens);
+            });
+
+            screens.get(scr.id).set("widgets", widgets);
+        });
+
+        this.screens(screens);
     };
 
     PIMProjectManager.prototype._onProjectChanged = function (newProject) {
@@ -72,19 +98,21 @@ define(function (require, exports, module) {
 
         // If the new project has a PIM prototype file, load it in, otherwise create an empty descriptor for it
         if (pimDescriptor) {
-            this.deserializeProject(pimDescriptor.content);
-            this.screens(new ScreenCollection());
+                pimDescriptor.getContent().then(function (res) {
+                    var json = JSON.parse(res);
+                    _this.initFromJSON(json);
+                    _this.trigger("PIMProjectChanged");
+                });
         } else {
-            pimDescriptor = new Descriptor(PIM_FILE_NAME, "{}", { encoding: "utf8" });
+            pimDescriptor = new Descriptor(PIM_FILE_NAME, "[]", { encoding: "utf8" });
             this._project.addDescriptor(pimDescriptor);
             this.screens(new ScreenCollection());
+            this.trigger("PIMProjectChanged");
         }
 
         pimDescriptor.setContentGenerator(function () {
             return _this.serializeProject();
         });
-
-        this.trigger("PIMProjectChanged");
     };
 
     module.exports = PIMProjectManager;

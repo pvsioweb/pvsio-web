@@ -7,10 +7,15 @@
 define(function (require, exports, module) {
     "use strict";
 
+    var Descriptor = require("project/Descriptor"),
+        PIMWidget = require("./PIMWidget"),
+        uuid = require("util/uuidGenerator");
+
     var Screen = Backbone.Model.extend({
         defaults: {
             name: "New screen",
-            isInitial: false
+            isInitial: false,
+            id: uuid()
         },
 
         initialize: function () {
@@ -37,6 +42,31 @@ define(function (require, exports, module) {
             return json;
         }
     });
+
+
+    /**
+     * Creates a new widget from the data in the provided object.
+     * @param {object} jsonObj JSON-style object with the data for the widget
+     * @param {ScreenCollection} screens Collection of screens that the widget's targetScreen is contained within
+     * @return {Widget} The new widget
+     */
+
+    /**
+     * Creates a new screen from the data in the provided object. Note: this does not restore/populate the screen's
+     * 'wdigets' attribute.
+     * @param {object} jsonObj JSON-style object with the data for the screen
+     * @param {string} imageDirectory location of the prototype's images, relative to the projects/ directory
+     * @return {Screen} The new screen
+     */
+    Screen.initFromJSON = function (jsonObj, imageDirectory) {
+        var scr = new Screen({ id: jsonObj.id, name: jsonObj.name, isInitial: jsonObj.isInitial });
+
+        if (jsonObj.image) {
+            scr.set("image", new Descriptor(imageDirectory + jsonObj.image, null, { encoding: "base64" }));
+        }
+
+        return scr;
+    };
 
     return Screen;
 });
