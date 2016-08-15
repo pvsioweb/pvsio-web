@@ -18,6 +18,7 @@ define(function (require, exports, module) {
                 require("./PIMPrototyper_UnitTest")();
                 require("./PIMProjectManager_UnitTest")();
                 require("./PIMWidget_UnitTest")();
+                require("./EmuWrapper_UnitTest")();
             }
         );
         }

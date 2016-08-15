@@ -1634,6 +1634,9 @@ define(function (require, exports, module) {
         });
 	};
 
+    Emulink.prototype.getEmuchartsManager = function () {
+        return emuchartsManager;
+    };
 
     Emulink.prototype.getDependencies = function () {
         return [];
@@ -1642,7 +1645,7 @@ define(function (require, exports, module) {
     function onProjectChanged(event) {
         // try to open the default emuchart file associated with the project
         var defaultEmuchartFilePath = event.current + "/" + "emucharts_" + event.current + ".emdl";
-        fs.readFile(defaultEmuchartFilePath).then(function (res) {
+        return fs.readFile(defaultEmuchartFilePath).then(function (res) {
             res.content = JSON.parse(res.content);
             emuchartsManager.importEmucharts(res);
             // make svg visible and reset colors
@@ -1676,9 +1679,13 @@ define(function (require, exports, module) {
         projectManager.addListener("ProjectChanged", onProjectChanged);
         // create user interface elements
         this.createHtmlElements();
-        // try to load default emuchart for the current project
-        onProjectChanged({current: projectManager.project().name()});
-        return Promise.resolve(true);
+        return new Promise(function (resolve, reject) {
+            // try to load default emuchart for the current project
+            onProjectChanged({current: projectManager.project().name()})
+                .then(function () {
+                    resolve(true);
+                })
+        });
     };
 
     Emulink.prototype.unload = function () {
@@ -1692,6 +1699,10 @@ define(function (require, exports, module) {
                 instance = new Emulink();
             }
             return instance;
+        },
+
+        hasInstance: function () {
+            return !!instance;
         }
     };
 });

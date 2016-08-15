@@ -1109,6 +1109,9 @@ fileListItem.hide {
   height: 50px;
   min-width: 400px; }
 
+.prototype-controls-right {
+  float: right; }
+
 .dndcontainer {
   background: #fff;
   text-align: center;

@@ -1,7 +1,7 @@
 /**
  * @module PIMWidget
  * @desc Widget within the PIM prototype editor
- * @author Nathanile Watson
+ * @author Nathaniel Watson
  */
 define(function (require, exports, module) {
     "use strict";

@@ -13,6 +13,9 @@ define(function (require, exports, module) {
         FileSystem = require("filesystem/FileSystem"),
         ProjectManager = require("project/ProjectManager"),
         PIMProjectManager = require("./PIMProjectManager"),
+        PluginManager = require("plugins/PluginManager"),
+        EmuWrapper = require("./EmuWrapper"),
+        Emulink = require("plugins/emulink/Emulink"),
         MIME = require("util/MIME").getInstance();
 
     var instance;
@@ -63,6 +66,31 @@ define(function (require, exports, module) {
 
         this._modeButtons.simulator.on("click", function() {
             _this.switchToSimulatorView();
+        });
+
+        this._container.select(".pim-convert-button").on("click", function() {
+            var emulink = Emulink.getInstance();
+
+            (PluginManager.getInstance().isLoaded(emulink)
+                ? Promise.resolve()
+                : PluginManager.getInstance().enablePlugin(emulink))
+            .then(function () {
+                var emuManager = emulink.getEmuchartsManager();
+                var emuEditor = emuManager.getSelectedEditor();
+
+                if (_this._emuWrapper != null) {
+                    _this._emuWrapper.setEmuchartsEditor(emuEditor);
+                } else {
+                    _this._emuWrapper = new EmuWrapper(emuEditor);
+                }
+
+                // Make sure the Emucharts editor is in PIM mode
+                if (!emuManager.getIsPIM()) {
+                    emuManager.toPIM(true);
+                }
+
+                _this._emuWrapper.addScreens(_this._screens);
+            });
         });
 
         this._fileSystem = new FileSystem();

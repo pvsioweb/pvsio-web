@@ -175,7 +175,7 @@ define(function (require, exports, module) {
     Emucharts.prototype.add_node = function (node) {
         if (!node) { return null; }
         // create a new node with a unique ID
-        var id = getFreshNodeID();
+        var id = node.id || getFreshNodeID();
         var name = node.name || id;
         var estimatedTextWidth = name.length * defaultValues.fontSize / 4;
         var width = (estimatedTextWidth < defaultValues.width) ? defaultValues.width : estimatedTextWidth;
@@ -970,7 +970,7 @@ define(function (require, exports, module) {
             return a.name.localeCompare(b.name);
         });
     };
-    
+
     /**
      * @function getConstant
      * @descriptionb Returns the constant with ID given by the function argument
