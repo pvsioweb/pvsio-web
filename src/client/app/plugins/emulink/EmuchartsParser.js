@@ -303,7 +303,7 @@ define(function (require, exports, module) {
             return this;
         }
     }
-    
+
     /**
      * @function getParserCode
      * @memberof module:EmuchartsParser
@@ -497,7 +497,7 @@ if (ans.res) {
 
      */
     EmuchartsParser.prototype.parseTransition = function (label) {
-        label = (label === "" || label.trim().indexOf("[") === 0 || label.trim().indexOf("{") === 0) ? 
+        label = (label === "" || label.trim().indexOf("[") === 0 || label.trim().indexOf("{") === 0) ?
             ("tick " + label) : label;
         console.log("Parsing transition " + label);
         var ans = { err: null, res: null };
@@ -630,6 +630,20 @@ if (ans.res) {
             });
         }
 
+        return ans;
+    };
+
+    EmuchartsParser.prototype.printFunction = function(f) {
+        var ans = "";
+        if (f.type === "function") {
+            f.val.forEach(function (v) {
+                if (v.type === "function") {
+                    printFunction(v);
+                } else {
+                    ans += v.val;
+                }
+            })
+        }
         return ans;
     };
 

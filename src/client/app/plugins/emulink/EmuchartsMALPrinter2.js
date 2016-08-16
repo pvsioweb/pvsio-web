@@ -53,12 +53,12 @@
 /*global define, d3 */
 define(function (require, exports, module) {
 	"use strict";
-    
+
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
-    
+
     var model_name;
     var parser;
-    
+
     /**
 	 * Constructor
 	 */
@@ -67,11 +67,11 @@ define(function (require, exports, module) {
         parser = new EmuchartsParser();
         return this;
     }
-    
+
     function preprocessName(name) {
         return name.replace(new RegExp("_", "g"),"");
     }
-    
+
     /**
      * Prints MAL types
      */
@@ -91,12 +91,12 @@ define(function (require, exports, module) {
         }
         return ans + "\n";
     };
-    
+
 
 //    /**
 //     * Parser for transitions given in the form name [ condition ] { actios },
 //     * where name is the transition name, and conditions and actions are optionals
-//     * @returns a transition object with the following structure: 
+//     * @returns a transition object with the following structure:
 //     *                  { name: string, // the transition label
 //     *                    cond: string, // represents a boolean expression
 //     *                    actions: (array of strings), // each action represents a state update
@@ -134,7 +134,7 @@ define(function (require, exports, module) {
 //                    ans.actions.push(a);
 //                }
 //            });
-//            
+//
 //        }
 //        return ans;
 //    }
@@ -147,7 +147,7 @@ define(function (require, exports, module) {
         //.... TODO
         return ans;
     };
-    
+
     /**
      * Prints MAL actions
      * Each transition is a structure with the following fields:
@@ -160,7 +160,7 @@ define(function (require, exports, module) {
     EmuchartsMALPrinter.prototype.print_actions = function (emuchart) {
         var ans = " actions\n";
         var actions = d3.map();
-        
+
         if (emuchart.transitions && emuchart.transitions.length > 0) {
             emuchart.transitions.forEach(function (t) {
                 var transition = parser.parseTransition(t.name);
@@ -230,7 +230,7 @@ define(function (require, exports, module) {
             var label = preprocessName(mLabel.name);
             var from = preprocessName(mLabel.source.name);
             var to = preprocessName(mLabel.target.name);
-            
+
             if (!label || label === "") {
                 return { err: "Unexpected label", res: null };
             }
@@ -241,10 +241,10 @@ define(function (require, exports, module) {
                     cond:       ans.res.val.cond || { type: "expression", val: [] },
                     actions:    ans.res.val.actions || { type: "actions", val: [] }
                 };
-                
+
                 //The transition "Action"
                 var action = transition.identifier.val;
-                
+
                 //The transiton "Effect"
                 var effect = "";
                 if (transition.actions.val.length > 0) {
@@ -255,10 +255,14 @@ define(function (require, exports, module) {
                     }
                     effect += bo;
                     transition.actions.val[0].val.expression.val.forEach(function (v) {
-                        effect += v.val;
+						if (v.type === "function") {
+							effect += parser.printFunction(v);
+						} else {
+                        	effect += v.val;
+						}
                     });
                 }
-                
+
                 //The transition "Condition"
                 var cond = "";
                 if (transition.cond.val.length > 0) {
@@ -273,15 +277,15 @@ define(function (require, exports, module) {
                         cond += transition.cond.val[2].val;
                     }
                 }
-                
+
                 //Create pair (dest, [condition,effect]) -- Transition
                 var mtransition = d3.map();
                 var ce = [];
                 ce.push(cond);
                 ce.push(effect);
                 mtransition.set(to, ce);
-                
-                
+
+
                 //Create pair (from, [<Transition>]) --Condition
                 var mval = d3.map();
                 var a = [];
@@ -295,7 +299,7 @@ define(function (require, exports, module) {
                 }
                 a.push(mtransition);
                 mval.set(from, a);
-                
+
                 //creating pair (action, <Condition>)
                 var aa = [];
                 if (actions.get(action) !== undefined) {
@@ -314,7 +318,7 @@ define(function (require, exports, module) {
                         console.log("Result: " + JSON.stringify(actions.get(action)));
                     }
                     aa = actions.get(action);
-                    
+
                 }
                 aa.push(mval);
                 actions.set(action, aa);
@@ -327,10 +331,10 @@ define(function (require, exports, module) {
         //opSensor - opening -> open, ""
         //click_on - closed  -> opening, display=100
         //
-        
+
         //stopped is repeated: rcButton has 2 stopped
         console.debug(actions);
-        
+
         actions.keys().forEach(function (taction) { //taction - action
             var trAction = taction;
             var trPerms = "";
@@ -356,7 +360,7 @@ define(function (require, exports, module) {
                             res += "\n";
                         });
                     });
-                    
+
                 });
                 //add condition to permitions
                 var trFrom = a;
@@ -373,7 +377,7 @@ define(function (require, exports, module) {
         });
         return res;
     };
-    
+
     /**
      * Prints MAL attributes
      */
@@ -427,7 +431,7 @@ define(function (require, exports, module) {
         ans += "\n# ---------------------------------------------------------------\n";
         return ans;
     };
-    
+
     EmuchartsMALPrinter.prototype.print_disclaimer = function () {
         var ans = "\n# ---------------------------------------------------------------\n" +
                     "#  MAL model generated using PVSio-web MALPrinter2 ver 0.1\n" +
@@ -435,7 +439,7 @@ define(function (require, exports, module) {
                     "\n# ---------------------------------------------------------------\n";
         return ans;
     };
-    
+
     /**
      * Prints the entire MAL model
      */
@@ -443,18 +447,18 @@ define(function (require, exports, module) {
         var ans = this.print_descriptor(emuchart) + "\n";
         ans += this.print_constants(emuchart); // "defines" section
         ans += this.print_types(emuchart); // "types" section
-        
+
         //ans += "interactor " + emuchart.name + "\n"; // the MAL interactor
         ans += "interactor main #" + emuchart.name + "\n";
         ans += this.print_attributes(emuchart); // MAL attributes
         ans += this.print_actions(emuchart);
-        
+
         ans += this.print_initial_transition(emuchart);
         ans += this.print_transitions(emuchart);
         ans += "\n";
         ans += this.print_disclaimer();
         return { res: ans };
     };
-    
+
     module.exports = EmuchartsMALPrinter;
 });
