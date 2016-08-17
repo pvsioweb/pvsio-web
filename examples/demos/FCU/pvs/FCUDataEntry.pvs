@@ -94,17 +94,20 @@ FCUDataEntry: THEORY
 	       integerDigits := 0,
 	       msg := ""]
 
+  trim(x: real): real =
+     floor(x * 100) / 100
+
   %-- restore (previous) programmed value
   restore_display(st: state): state =
         clear_data_entry(st) WITH [
-		display := programmedValue(st),
+		display := trim(programmedValue(st)),
 	        dispval := programmedValue(st)
 		]
 
   EXCEPTION(errType: int, key: int, val: unsigned_long_int)(st: state): state =
 	st WITH [ display := snprintf(errType + ":" + key + ":" + val) ]
 
-  processKey(key: KEY_CODE)(st: state): state =
+  processKey(key: KEY_CODE, st: state): state =
     COND
 	 key = KEY_0 OR key = KEY_1 OR key = KEY_2 OR key = KEY_3 OR key = KEY_4
 	  or key = KEY_5 OR key = KEY_6 OR key = KEY_7 OR key = KEY_8 OR key = KEY_9
@@ -126,7 +129,7 @@ FCUDataEntry: THEORY
 	       -> EXCEPTION(INVALID_KEY, key, dispval(st))(st)
    ENDCOND
 
-  processEvent(evt: EVT_CODE)(st: state): state =
+  processEvent(evt: EVT_CODE, st: state): state =
     COND
          evt = EVT_TIMEOUT 
 	       -> restore_display(st),
