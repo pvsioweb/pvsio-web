@@ -635,14 +635,15 @@ if (ans.res) {
 
     EmuchartsParser.prototype.printFunction = function(f) {
         var ans = "";
+        var _this = this;
         if (f.type === "function") {
             f.val.forEach(function (v) {
                 if (v.type === "function") {
-                    printFunction(v);
+                    _this.printFunction(v);
                 } else {
                     ans += v.val;
                 }
-            })
+            });
         }
         return ans;
     };
