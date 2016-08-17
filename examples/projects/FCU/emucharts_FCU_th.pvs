@@ -1,12 +1,12 @@
 % ---------------------------------------------------------------
 %  Theory: emucharts_FCU_th
 %  Author: Paolo Masci
-%          HASLab/INESC TEC and Universidade do Minho, Portugal
-%          http://haslab.uminho.pt/masci/
+%          Queen Mary University of London, United Kingdom
+%          http://www.eecs.qmul.ac.uk/~masci/
 % ---------------------------------------------------------------
 
 emucharts_FCU_th: THEORY
- BEGIN IMPORTING FCUDataEntry
+ BEGIN
 
   %-- constants
   MAX_ELAPSE: int = 60
@@ -18,7 +18,14 @@ emucharts_FCU_th: THEORY
   State: TYPE = [#
     current_state: MachineState,
     previous_state: MachineState,
-    data_entry: state,
+    data_entry: [# decimalDigits: integer,
+        display: string,
+        dispval: double,
+        integerDigits: nat,
+        msg: string,
+        pointEntered: bool,
+        programmedValue: double,
+        units: UnitsType #],
     editbox_selected: bool,
     elapse: int
   #]
@@ -27,15 +34,14 @@ emucharts_FCU_th: THEORY
   init(x: real): State = (#
     current_state := STD,
     previous_state := STD,
-    data_entry := (#
-        decimalDigits := 0,
-	integerDigits := 0,
-        units := inHg,
+    data_entry := (# decimalDigits := 0,
         display := STD_INHG,
         dispval := STD_INHG,
+        integerDigits := 0,
         msg := "",
         pointEntered := FALSE,
-        programmedValue := STD_INHG #),
+        programmedValue := STD_INHG,
+        units := inHg #),
     editbox_selected := FALSE,
     elapse := MAX_ELAPSE
   #)
@@ -49,7 +55,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_CLR)(data_entry(st)) ],
+            new_st = new_st WITH [ data_entry := processKey(KEY_CLR,data_entry(st)) ],
             new_st = new_st WITH [ elapse := MAX_ELAPSE ]
          IN enter_into(EDIT_PRESSURE)(new_st),
     ELSE -> st
@@ -60,7 +66,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_0)(data_entry(st)) ],
+            new_st = new_st WITH [ data_entry := processKey(KEY_0,data_entry(st)) ],
             new_st = new_st WITH [ elapse := MAX_ELAPSE ]
          IN enter_into(EDIT_PRESSURE)(new_st),
     ELSE -> st
@@ -71,7 +77,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_1)(data_entry(st)) ],
+            new_st = new_st WITH [ data_entry := processKey(KEY_1,data_entry(st)) ],
             new_st = new_st WITH [ elapse := MAX_ELAPSE ]
          IN enter_into(EDIT_PRESSURE)(new_st),
     ELSE -> st
@@ -82,7 +88,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_2)(data_entry(st)) ],
+            new_st = new_st WITH [ data_entry := processKey(KEY_2,data_entry(st)) ],
             new_st = new_st WITH [ elapse := MAX_ELAPSE ]
          IN enter_into(EDIT_PRESSURE)(new_st),
     ELSE -> st
@@ -93,7 +99,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_3)(data_entry(st)) ],
+            new_st = new_st WITH [ data_entry := processKey(KEY_3,data_entry(st)) ],
             new_st = new_st WITH [ elapse := MAX_ELAPSE ]
          IN enter_into(EDIT_PRESSURE)(new_st),
     ELSE -> st
@@ -104,7 +110,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_4)(data_entry(st)) ],
+            new_st = new_st WITH [ data_entry := processKey(KEY_4,data_entry(st)) ],
             new_st = new_st WITH [ elapse := MAX_ELAPSE ]
          IN enter_into(EDIT_PRESSURE)(new_st),
     ELSE -> st
@@ -115,7 +121,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_5)(data_entry(st)) ],
+            new_st = new_st WITH [ data_entry := processKey(KEY_5,data_entry(st)) ],
             new_st = new_st WITH [ elapse := MAX_ELAPSE ]
          IN enter_into(EDIT_PRESSURE)(new_st),
     ELSE -> st
@@ -126,7 +132,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_6)(data_entry(st)) ],
+            new_st = new_st WITH [ data_entry := processKey(KEY_6,data_entry(st)) ],
             new_st = new_st WITH [ elapse := MAX_ELAPSE ]
          IN enter_into(EDIT_PRESSURE)(new_st),
     ELSE -> st
@@ -137,7 +143,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_7)(data_entry(st)) ],
+            new_st = new_st WITH [ data_entry := processKey(KEY_7,data_entry(st)) ],
             new_st = new_st WITH [ elapse := MAX_ELAPSE ]
          IN enter_into(EDIT_PRESSURE)(new_st),
     ELSE -> st
@@ -148,7 +154,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_8)(data_entry(st)) ],
+            new_st = new_st WITH [ data_entry := processKey(KEY_8,data_entry(st)) ],
             new_st = new_st WITH [ elapse := MAX_ELAPSE ]
          IN enter_into(EDIT_PRESSURE)(new_st),
     ELSE -> st
@@ -159,7 +165,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_9)(data_entry(st)) ],
+            new_st = new_st WITH [ data_entry := processKey(KEY_9,data_entry(st)) ],
             new_st = new_st WITH [ elapse := MAX_ELAPSE ]
          IN enter_into(EDIT_PRESSURE)(new_st),
     ELSE -> st
@@ -182,37 +188,33 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_ESC)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processKey(KEY_ESC,data_entry(st)) ],
+            new_st = new_st WITH [ editbox_selected := FALSE ]
          IN enter_into(QNH)(new_st),
     ELSE -> st
     ENDCOND
 
-  per_click_hPa(st: State): bool = ((current_state(st) = EDIT_PRESSURE) AND (data_entry(st)`units /= hPa)) OR ((current_state(st) = QNH) AND (data_entry(st)`units /= hPa)) OR ((current_state(st) = STD))
+  per_click_hPa(st: State): bool = ((current_state(st) = QNH) AND (data_entry(st)`units /= hPa)) OR ((current_state(st) = EDIT_PRESSURE) AND (data_entry(st)`units /= hPa)) OR ((current_state(st) = STD))
   click_hPa(st: (per_click_hPa)): State =
     COND
-    (current_state(st) = EDIT_PRESSURE) AND (data_entry(st)`units /= hPa)
-     -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := data_entry(st) WITH [
-	                units := hPa,
-%			dispval := data_entry(st)`programmedValue / 0.75,
-%			display := (floor(data_entry(st)`programmedValue / 0.75) * 100) / 100,
-			programmedValue := data_entry(st)`programmedValue / 0.75 ]]
-         IN enter_into(EDIT_PRESSURE)(new_st),
     (current_state(st) = QNH) AND (data_entry(st)`units /= hPa)
      -> LET new_st = leave_state(QNH)(st),
-            new_st = new_st WITH [ data_entry := data_entry(st) WITH [
-	                units := hPa,
-			dispval := data_entry(st)`programmedValue / 0.75,
-			display := (floor(data_entry(st)`programmedValue / 0.75 * 100)) / 100,
-			programmedValue := data_entry(st)`programmedValue / 0.75 ]]
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ units := hPa ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ dispval := data_entry(st)`programmedValue / 0.75 ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ display := trim(data_entry(st)`programmedValue/0.75) ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := data_entry(st)`programmedValue / 0.75 ]]
          IN enter_into(QNH)(new_st),
+    (current_state(st) = EDIT_PRESSURE) AND (data_entry(st)`units /= hPa)
+     -> LET new_st = leave_state(EDIT_PRESSURE)(st),
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ units := hPa ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := data_entry(st)`programmedValue / 0.75 ]]
+         IN enter_into(EDIT_PRESSURE)(new_st),
     (current_state(st) = STD)
      -> LET new_st = leave_state(STD)(st),
-            new_st = new_st WITH [ data_entry := data_entry(st) WITH [
-	                units := hPa,
-			programmedValue := STD_HPA,
-			display := STD_HPA,
-			dispval := STD_HPA ]]
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ units := hPa ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := STD_HPA ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ dispval := STD_HPA ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ display := STD_HPA ]]
          IN enter_into(STD)(new_st),
     ELSE -> st
     ENDCOND
@@ -220,41 +222,34 @@ emucharts_FCU_th: THEORY
   per_click_inHg(st: State): bool = ((current_state(st) = QNH) AND (data_entry(st)`units /= inHg)) OR ((current_state(st) = EDIT_PRESSURE) AND (data_entry(st)`units /= inHg)) OR ((current_state(st) = STD))
   click_inHg(st: (per_click_inHg)): State =
     COND
-    (current_state(st) = QNH) AND (data_entry(st)`units = hPa)
+    (current_state(st) = QNH) AND (data_entry(st)`units /= inHg)
      -> LET new_st = leave_state(QNH)(st),
-            new_st = new_st WITH [ data_entry := data_entry(st) WITH [
-	                units := inHg,
-			dispval := data_entry(st)`programmedValue * 0.75,
-			display := (floor(data_entry(st)`programmedValue * 0.75 * 100)) / 100,
-			programmedValue := data_entry(st)`programmedValue * 0.75 ]]
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ units := inHg ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ dispval := data_entry(st)`programmedValue * 0.75 ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ display := trim(data_entry(st)`programmedValue*0.75) ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := data_entry(st)`programmedValue * 0.75 ]]
          IN enter_into(QNH)(new_st),
-    (current_state(st) = EDIT_PRESSURE) AND (data_entry(st)`units = hPa)
+    (current_state(st) = EDIT_PRESSURE) AND (data_entry(st)`units /= inHg)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := data_entry(st) WITH [
-	    	        units := inHg,
-%			dispval := data_entry(st)`programmedValue * 0.75,
-%			display := (floor(data_entry(st)`programmedValue * 0.75 * 100)) / 100,
-			programmedValue := data_entry(st)`programmedValue * 0.75 ]]
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ units := inHg ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := data_entry(st)`programmedValue * 0.75 ]]
          IN enter_into(EDIT_PRESSURE)(new_st),
     (current_state(st) = STD)
      -> LET new_st = leave_state(STD)(st),
-            new_st = new_st WITH [ data_entry := data_entry(st) WITH [
-	                units := inHg,
-			programmedValue := STD_INHG,
-			display := STD_INHG,
-			dispval := STD_INHG ]]
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ units := inHg ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := STD_INHG ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ dispval := STD_INHG ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ display := STD_INHG ]]
          IN enter_into(STD)(new_st),
     ELSE -> st
     ENDCOND
-
-
 
   per_click_OK(st: State): bool = ((current_state(st) = EDIT_PRESSURE))
   click_OK(st: (per_click_OK)): State =
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_OK)(data_entry(st)) ],
+            new_st = new_st WITH [ data_entry := processKey(KEY_OK,data_entry(st)) ],
             new_st = new_st WITH [ editbox_selected := FALSE ]
          IN enter_into(QNH)(new_st),
     ELSE -> st
@@ -265,22 +260,22 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processKey(KEY_POINT)(data_entry(st)) ],
+            new_st = new_st WITH [ data_entry := processKey(KEY_POINT,data_entry(st)) ],
             new_st = new_st WITH [ elapse := MAX_ELAPSE ]
          IN enter_into(EDIT_PRESSURE)(new_st),
     ELSE -> st
     ENDCOND
 
-  per_click_std_button(st: State): bool = ((current_state(st) = QNH) AND (units(data_entry(st)) = hPa)) OR ((current_state(st) = QNH) AND (units(data_entry(st)) = inHg)) OR ((current_state(st) = STD))
+  per_click_std_button(st: State): bool = ((current_state(st) = QNH) AND (data_entry(st)`units = hPa)) OR ((current_state(st) = QNH) AND (data_entry(st)`units = inHg)) OR ((current_state(st) = STD))
   click_std_button(st: (per_click_std_button)): State =
     COND
-    (current_state(st) = QNH) AND (units(data_entry(st)) = hPa)
+    (current_state(st) = QNH) AND (data_entry(st)`units = hPa)
      -> LET new_st = leave_state(QNH)(st),
             new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := STD_HPA ]],
             new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ dispval := STD_HPA ]],
             new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ display := STD_HPA ]]
          IN enter_into(STD)(new_st),
-    (current_state(st) = QNH) AND (units(data_entry(st)) = inHg)
+    (current_state(st) = QNH) AND (data_entry(st)`units = inHg)
      -> LET new_st = leave_state(QNH)(st),
             new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := STD_INHG ]],
             new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ dispval := STD_INHG ]],
@@ -299,7 +294,7 @@ emucharts_FCU_th: THEORY
     COND
     (current_state(st) = EDIT_PRESSURE) AND (elapse(st) = 0)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
-            new_st = new_st WITH [ data_entry := processEvent(EVT_TIMEOUT)(data_entry(st)) ]
+            new_st = new_st WITH [ data_entry := processEvent(EVT_TIMEOUT,data_entry(st)) ]
          IN enter_into(QNH)(new_st),
     (current_state(st) = EDIT_PRESSURE) AND (elapse(st) > 0)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),

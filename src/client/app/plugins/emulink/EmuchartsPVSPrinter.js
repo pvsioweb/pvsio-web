@@ -8,7 +8,6 @@
 /*global define, d3*/
 define(function (require, exports, module) {
     "use strict";
-
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
 
@@ -91,13 +90,41 @@ define(function (require, exports, module) {
         return ans;
     }
 
+    function isVariable(name, emuchart) {
+        if (name === predefined_variables.current_state.name ||
+                name === predefined_variables.previous_state.name) {
+            return true;
+        }
+        if (emuchart.variables) {
+            var i = 0;
+            for (i = 0; i < emuchart.variables.length; i++) {
+                if (name === emuchart.variables[i].name ||
+                      emuchart.variables[i].name.indexOf(name + ".") >= 0 ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * This function converts the name of operators in expressions -- needed for && || == != !
      */
-    var preProcess = function (term) {
+    var preProcess = function (term, emuchart) {
         function printFunction(term) {
-            if (term.type === "identifier" || term.type === "par" ||
-                    term.type === "binop" || term.type === "separator") {
+            if (term.type === "identifier") {
+                if (isVariable(term.val, emuchart)) {
+                    if (term.val.indexOf(".") >= 0) {
+                        var v = term.val.split(".");
+                        v[0] += "(st)";
+                        term.val = v.join("`");
+                    } else {
+                        term.val += "(st)";
+                    }
+                }
+                return term.val;
+            } else if (term.type === "par" ||
+                    term.type === "binop" || term.type === "separator" || term.type === "number") {
                 return term.val;
             } else if (term.type === "function") {
                 var ans = "", i = 0;
@@ -129,22 +156,6 @@ define(function (require, exports, module) {
         }
         return term;
     };
-
-    function isVariable(name, emuchart) {
-        if (name === predefined_variables.current_state.name ||
-                name === predefined_variables.previous_state.name) {
-            return true;
-        }
-        if (emuchart.variables) {
-            var i = 0;
-            for (i = 0; i < emuchart.variables.length; i++) {
-                if (name === emuchart.variables[i].name) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 
 
     /**
@@ -191,7 +202,7 @@ define(function (require, exports, module) {
                         if (isVariable(term.val, emuchart)) {
                             term = pvsRecordTypePrinter.printRecordAccessor("st." + term.val);
                         } else {
-                            term = preProcess(term);
+                            term = preProcess(term, emuchart);
                         }
                         tmp.push(term.val);
                     });
@@ -240,7 +251,7 @@ define(function (require, exports, module) {
      * Prints PVS definitions for Emuchart transitions given in the form transition [condition] {actions}
      */
     EmuchartsPVSPrinter.prototype.print_transitions = function (emuchart) {
-        function isVariable(term) {
+/*        function isVariable(term) {
             if (term.type === "identifier") {
                 if (term.val === predefined_variables.current_state.name ||
                         term.val === predefined_variables.previous_state.name) {
@@ -256,9 +267,9 @@ define(function (require, exports, module) {
                 }
             }
             return false;
-        }
+        }*/
         function printValue(term) {
-            if (isVariable(term)) {
+            if (isVariable(term.val, emuchart)) {
                 if (term.val.indexOf(".") >= 0) {
                     var v = term.val.split(".");
                     v[0] += "(st)";
@@ -332,8 +343,8 @@ define(function (require, exports, module) {
                             transition.cond.val.forEach(function (term) {
                                 // identifiers of state variables need to be followed by (st)
                                 if (term.type === "identifier") {
-                                    preProcess(term);
-                                    if (isVariable(term, emuchart)) {
+                                    preProcess(term, emuchart);
+                                    if (isVariable(term.val, emuchart)) {
                                         if (term.val.indexOf(".") >= 0) {
                                             var v = term.val.split(".");
                                             v[0] += "(st)";
@@ -344,7 +355,7 @@ define(function (require, exports, module) {
                                     }
                                     tmp.push(term.val);
                                 } else {
-                                    preProcess(term);
+                                    preProcess(term, emuchart);
                                     tmp.push(term.val);
                                 }
                             });
@@ -365,7 +376,7 @@ define(function (require, exports, module) {
                                     for (i = 0; i < v.length; i++) {
                                         expr += v[i];
                                         if (i < v.length - 1) {
-                                            expr += " := " + v[i] + "(st) WITH [ ";
+                                            expr += " := " + v[i] + "(new_st) WITH [ ";
                                             brackets.push("]");
                                         }
                                     }
@@ -375,7 +386,7 @@ define(function (require, exports, module) {
                                 expr += " := ";
                                 var tmp = [];
                                 action.val.expression.val.forEach(function (term) {
-                                    preProcess(term);
+                                    preProcess(term, emuchart);
                                     tmp.push(printValue(term));
                                 });
                                 expr += tmp.join(" ") + " ]";

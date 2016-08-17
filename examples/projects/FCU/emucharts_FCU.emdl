@@ -37,7 +37,7 @@
   ],
   "transitions": [
    {
-    "name": "click_CLR\n{ data_entry := processKey(KEY_CLR); elapse := MAX_ELAPSE; }",
+    "name": "click_CLR\n{ data_entry := processKey(KEY_CLR, data_entry);\n  elapse := MAX_ELAPSE; }",
     "id": "T14",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -53,7 +53,7 @@
     }
    },
    {
-    "name": "click_digit_0\n{ data_entry := processKey(KEY_0);\n  elapse := MAX_ELAPSE; }",
+    "name": "click_digit_0\n{ data_entry := processKey(KEY_0, data_entry);\n  elapse := MAX_ELAPSE; }",
     "id": "T4",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -69,7 +69,7 @@
     }
    },
    {
-    "name": "click_digit_1\n{ data_entry := processKey(KEY_1);\n  elapse := MAX_ELAPSE; }",
+    "name": "click_digit_1\n{ data_entry := processKey(KEY_1, data_entry);\n  elapse := MAX_ELAPSE; }",
     "id": "T5",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -85,7 +85,7 @@
     }
    },
    {
-    "name": "click_digit_2\n{ data_entry := processKey(KEY_2);\n  elapse := MAX_ELAPSE; }",
+    "name": "click_digit_2\n{ data_entry := processKey(KEY_2, data_entry);\n  elapse := MAX_ELAPSE; }",
     "id": "T13",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -101,7 +101,7 @@
     }
    },
    {
-    "name": "click_digit_3\n{ data_entry := processKey(KEY_3);\n  elapse := MAX_ELAPSE; }",
+    "name": "click_digit_3\n{ data_entry := processKey(KEY_3, data_entry);\n  elapse := MAX_ELAPSE; }",
     "id": "T12",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -117,7 +117,7 @@
     }
    },
    {
-    "name": "click_digit_4\n{ data_entry := processKey(KEY_4);\n  elapse := MAX_ELAPSE; }",
+    "name": "click_digit_4\n{ data_entry := processKey(KEY_4, data_entry);\n  elapse := MAX_ELAPSE; }",
     "id": "T11",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -133,7 +133,7 @@
     }
    },
    {
-    "name": "click_digit_5\n{ data_entry := processKey(KEY_5);\n  elapse := MAX_ELAPSE; }",
+    "name": "click_digit_5\n{ data_entry := processKey(KEY_5, data_entry);\n  elapse := MAX_ELAPSE; }",
     "id": "T10",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -149,7 +149,7 @@
     }
    },
    {
-    "name": "click_digit_6\n{ data_entry := processKey(KEY_6);\n  elapse := MAX_ELAPSE; }",
+    "name": "click_digit_6\n{ data_entry := processKey(KEY_6, data_entry);\n  elapse := MAX_ELAPSE; }",
     "id": "T9",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -165,7 +165,7 @@
     }
    },
    {
-    "name": "click_digit_7\n{ data_entry := processKey(KEY_7);\n  elapse := MAX_ELAPSE; }",
+    "name": "click_digit_7\n{ data_entry := processKey(KEY_7, data_entry);\n  elapse := MAX_ELAPSE; }",
     "id": "T8",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -181,7 +181,7 @@
     }
    },
    {
-    "name": "click_digit_8\n{ data_entry := processKey(KEY_8);\n  elapse := MAX_ELAPSE; }",
+    "name": "click_digit_8\n{ data_entry := processKey(KEY_8, data_entry);\n  elapse := MAX_ELAPSE; }",
     "id": "T7",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -197,7 +197,7 @@
     }
    },
    {
-    "name": "click_digit_9\n{ data_entry := processKey(KEY_9);\n  elapse := MAX_ELAPSE; }",
+    "name": "click_digit_9\n{ data_entry := processKey(KEY_9, data_entry);\n  elapse := MAX_ELAPSE; }",
     "id": "T6",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -213,7 +213,7 @@
     }
    },
    {
-    "name": "click_editbox_pressure\n[ !editbox_selected ]\n{ editbox_selected := TRUE;\n  elapse := MAX_ELAPSE;\n  data_entry := clear_data_entry(st); }",
+    "name": "click_editbox_pressure\n[ !editbox_selected ]\n{ editbox_selected := TRUE;\n  elapse := MAX_ELAPSE;\n  data_entry := clear_data_entry(data_entry); }",
     "id": "T3",
     "source": {
      "name": "QNH",
@@ -229,7 +229,7 @@
     }
    },
    {
-    "name": "click_ESC\n{ data_entry := processKey(KEY_ESC) }",
+    "name": "click_ESC\n{ data_entry := processKey(KEY_ESC, data_entry);\n  editbox_selected := FALSE; }",
     "id": "T31",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -245,23 +245,7 @@
     }
    },
    {
-    "name": "click_hPa\n{ data_entry := switch2hPa(data_entry(st)) }",
-    "id": "T35",
-    "source": {
-     "name": "EDIT_PRESSURE",
-     "id": "X5"
-    },
-    "target": {
-     "name": "EDIT_PRESSURE",
-     "id": "X5"
-    },
-    "controlPoint": {
-     "x": 871.272705078125,
-     "y": -156.08238220214844
-    }
-   },
-   {
-    "name": "click_hPa\n{ data_entry := switch2hPa(data_entry(st)) }",
+    "name": "click_hPa\n[ data_entry.units != hPa ]\n{ data_entry.units := hPa;\n  data_entry.dispval := data_entry.programmedValue / 0.75;\n  data_entry.display := trim(data_entry.programmedValue / 0.75);\n  data_entry.programmedValue := data_entry.programmedValue / 0.75; }",
     "id": "T15",
     "source": {
      "name": "QNH",
@@ -277,7 +261,23 @@
     }
    },
    {
-    "name": "click_hPa\n{ data_entry.units := hPa;\n  data_entry.programmedValue := 1013.25;\n  data_entry.dispval := 1013.25; }",
+    "name": "click_hPa\n[ data_entry.units != hPa ]\n{ data_entry.units := hPa;\n  data_entry.programmedValue := data_entry.programmedValue / 0.75; }",
+    "id": "T35",
+    "source": {
+     "name": "EDIT_PRESSURE",
+     "id": "X5"
+    },
+    "target": {
+     "name": "EDIT_PRESSURE",
+     "id": "X5"
+    },
+    "controlPoint": {
+     "x": 871.272705078125,
+     "y": -156.08238220214844
+    }
+   },
+   {
+    "name": "click_hPa\n{ data_entry.units := hPa;\n  data_entry.programmedValue := STD_HPA;\n  data_entry.dispval := STD_HPA;\n  data_entry.display := STD_HPA; }",
     "id": "T17",
     "source": {
      "name": "STD",
@@ -293,7 +293,7 @@
     }
    },
    {
-    "name": "click_inHg\n{ data_entry := switch2inHg(data_entry(st)) }",
+    "name": "click_inHg\n[ data_entry.units != inHg ]\n{ data_entry.units := inHg;\n  data_entry.dispval := data_entry.programmedValue * 0.75;\n  data_entry.display := trim(data_entry.programmedValue * 0.75);\n  data_entry.programmedValue := data_entry.programmedValue * 0.75; }",
     "id": "T18",
     "source": {
      "name": "QNH",
@@ -304,12 +304,12 @@
      "id": "X2"
     },
     "controlPoint": {
-     "x": 221.27272033691406,
-     "y": 126.91761779785156
+     "x": 222.27272033691406,
+     "y": 122.91761779785156
     }
    },
    {
-    "name": "click_inHg\n{ data_entry := switch2inHg(data_entry(st)) }",
+    "name": "click_inHg\n[ data_entry.units != inHg ]\n{ data_entry.units := inHg;\n  data_entry.programmedValue := data_entry.programmedValue * 0.75; }",
     "id": "T34",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -325,7 +325,7 @@
     }
    },
    {
-    "name": "click_inHg\n{ data_entry.units := inHg;\n  data_entry.programmedValue := 759.93;\n  data_entry.dispval := 759.93; }",
+    "name": "click_inHg\n{ data_entry.units := inHg;\n  data_entry.programmedValue := STD_INHG;\n  data_entry.dispval := STD_INHG;\n  data_entry.display := STD_INHG; }",
     "id": "T16",
     "source": {
      "name": "STD",
@@ -341,7 +341,7 @@
     }
    },
    {
-    "name": "click_OK\n{ data_entry := processKey(KEY_OK);\n  editbox_selected := FALSE; }",
+    "name": "click_OK\n{ data_entry := processKey(KEY_OK, data_entry);\n  editbox_selected := FALSE; }",
     "id": "T19",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -357,7 +357,7 @@
     }
    },
    {
-    "name": "click_point\n{ data_entry := processKey(KEY_POINT);\n  elapse := MAX_ELAPSE; }",
+    "name": "click_point\n{ data_entry := processKey(KEY_POINT, data_entry);\n  elapse := MAX_ELAPSE; }",
     "id": "T25",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -373,23 +373,23 @@
     }
    },
    {
-    "name": "click_std_button\n{ data_entry := switch2QNH(data_entry(st)) }",
-    "id": "T1",
+    "name": "click_std_button\n[ data_entry.units = hPa ]\n{ data_entry.programmedValue := STD_HPA;\n  data_entry.dispval := STD_HPA;\n  data_entry.display := STD_HPA; }",
+    "id": "T20",
     "source": {
-     "name": "STD",
-     "id": "X1"
-    },
-    "target": {
      "name": "QNH",
      "id": "X2"
     },
+    "target": {
+     "name": "STD",
+     "id": "X1"
+    },
     "controlPoint": {
-     "x": 144.48421547503102,
-     "y": 237.81603149492656
+     "x": 39.272727966308594,
+     "y": 152.91761779785156
     }
    },
    {
-    "name": "click_std_button\n{ data_entry := switch2STD(data_entry(st)) }",
+    "name": "click_std_button\n[ data_entry.units = inHg ]\n{ data_entry.programmedValue := STD_INHG;\n  data_entry.dispval := STD_INHG;\n  data_entry.display := STD_INHG; }",
     "id": "T2",
     "source": {
      "name": "QNH",
@@ -405,7 +405,23 @@
     }
    },
    {
-    "name": "tick\n[ elapse = 0 ]\n{ data_entry := processEvent(EVT_TIMEOUT); }",
+    "name": "click_std_button\n{ data_entry.dispval := data_entry.programmedValue;\n  data_entry.display := data_entry.programmedValue; }",
+    "id": "T1",
+    "source": {
+     "name": "STD",
+     "id": "X1"
+    },
+    "target": {
+     "name": "QNH",
+     "id": "X2"
+    },
+    "controlPoint": {
+     "x": 144.48421547503102,
+     "y": 237.81603149492656
+    }
+   },
+   {
+    "name": "tick\n[ elapse = 0 ]\n{ data_entry := processEvent(EVT_TIMEOUT, data_entry); }",
     "id": "T32",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -467,14 +483,21 @@
     "id": "VAR_data_entry.display:string(Local)",
     "name": "data_entry.display",
     "type": "string",
-    "value": "\"759.93\"",
+    "value": "STD_INHG",
     "scope": "Local"
    },
    {
     "id": "VAR_data_entry.dispval:double(Local)",
     "name": "data_entry.dispval",
     "type": "double",
-    "value": "759.93",
+    "value": "STD_INHG",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_data_entry.integerDigits:nat(Local)",
+    "name": "data_entry.integerDigits",
+    "type": "nat",
+    "value": "0",
     "scope": "Local"
    },
    {
@@ -495,7 +518,14 @@
     "id": "VAR_data_entry.programmedValue:double(Local)",
     "name": "data_entry.programmedValue",
     "type": "double",
-    "value": "759.93",
+    "value": "STD_INHG",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_data_entry.units:UnitsType(Local)",
+    "name": "data_entry.units",
+    "type": "UnitsType",
+    "value": "inHg",
     "scope": "Local"
    },
    {
@@ -510,13 +540,6 @@
     "name": "elapse",
     "type": "int",
     "value": "MAX_ELAPSE",
-    "scope": "Local"
-   },
-   {
-    "id": "VAR_units:UnitsType(Local)",
-    "name": "units",
-    "type": "UnitsType",
-    "value": "inHg",
     "scope": "Local"
    }
   ],

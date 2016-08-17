@@ -107,33 +107,97 @@ require([
         // append displays
         var fcu = {};
         fcu.editbox = new SingleDisplay("editbox_pressure",
-                              { top: 58, left: 20, height: 16, width: 60},
-                              {
-                                  backgroundColor: "black",
-                                  fontColor: "white",
-                                  parent: "prototype",
-                                  touchscreen: {callback: onMessageReceived, backgroundColor: "green", highlightOnMouseClick: true}
-                              });
-        fcu.dispQNH = new SingleDisplay("dispQNH",
-                              { top: 44, left: 22, height: 9, width: 20},
-                              {
-                                  backgroundColor: "black",
-                                  parent: "prototype"
-                              });
-        fcu.dispSTD = new SingleDisplay("dispSTD",
-                              { top: 58, left: 20, height: 16, width: 60},
-                              {
-                                  backgroundColor: "black",
-                                  fontColor: "white",
-                                  parent: "prototype"
-                              });
+                            { top: 58, left: 20, height: 16, width: 60},
+                            {
+                              backgroundColor: "black",
+                              fontColor: "white",
+                              parent: "prototype",
+                              touchscreen: {callback: onMessageReceived, backgroundColor: "green", highlightOnMouseClick: true}
+                            });
+        fcu.qnh = new SingleDisplay("qnh",
+                            { top: 44, left: 22, height: 9, width: 20},
+                            {
+                              backgroundColor: "black",
+                              parent: "prototype"
+                            });
+        fcu.std = new SingleDisplay("std",
+                            { top: 58, left: 20, height: 16, width: 60},
+                            {
+                              backgroundColor: "black",
+                              fontColor: "white",
+                              parent: "prototype"
+                            });
         fcu.programmedValue = new SingleDisplay("programmedValue",
-                              { top: 44, left: 46, height: 9, width: 32},
-                              {
-                                  backgroundColor: "black",
-                                  fontColor: "white",
-                                  parent: "prototype"
-                              });
+                            { top: 44, left: 46, height: 9, width: 32},
+                            {
+                              backgroundColor: "black",
+                              fontColor: "white",
+                              parent: "prototype"
+                            });
+
+        // static display elements, row 1
+        fcu.cstr = new SingleDisplay("cstr",
+                            { top: 43, left: 95, height: 11, width: 34},
+                            {
+                                backgroundColor: "black",
+                                parent: "prototype"
+                            });
+        fcu.wpt = new SingleDisplay("wpt",
+                            { top: 43, left: 134, height: 11, width: 34},
+                            {
+                                backgroundColor: "black",
+                                parent: "prototype"
+                            });
+        fcu.vord = new SingleDisplay("vord",
+                            { top: 43, left: 172, height: 11, width: 34},
+                            {
+                                backgroundColor: "black",
+                                parent: "prototype"
+                            });
+        fcu.ndb = new SingleDisplay("ndb",
+                            { top: 43, left: 210, height: 11, width: 34},
+                            {
+                                backgroundColor: "black",
+                                parent: "prototype"
+                            });
+        fcu.arpt = new SingleDisplay("arpt",
+                            { top: 43, left: 250, height: 11, width: 34},
+                            {
+                                backgroundColor: "black",
+                                parent: "prototype"
+                            });
+        // static display elements, row 2
+        fcu.adf1 = new SingleDisplay("adf1",
+                            { top: 63, left: 95, height: 11, width: 34},
+                            {
+                                backgroundColor: "black",
+                                parent: "prototype"
+                            });
+        fcu.wx = new SingleDisplay("wx",
+                            { top: 63, left: 134, height: 11, width: 34},
+                            {
+                                backgroundColor: "black",
+                                parent: "prototype"
+                            });
+        fcu.terr = new SingleDisplay("terr",
+                            { top: 63, left: 172, height: 11, width: 34},
+                            {
+                                backgroundColor: "black",
+                                parent: "prototype"
+                            });
+        fcu.traf = new SingleDisplay("traf",
+                            { top: 63, left: 210, height: 11, width: 34},
+                            {
+                                backgroundColor: "black",
+                                parent: "prototype"
+                            });
+        fcu.sym = new SingleDisplay("sym",
+                            { top: 63, left: 250, height: 11, width: 34},
+                            {
+                                backgroundColor: "black",
+                                font: "Courier New, Courier, monospace",
+                                parent: "prototype"
+                            });
 
         fcu.btn_key1 = new Button("digit_1", {left: 205, top: 315}, {callback: onMessageReceived, keyCode:49, keyName:"key 1"});
         fcu.btn_key2 = new Button("digit_2", {left: 230, top: 315}, {callback: onMessageReceived, keyCode:50, keyName:"key 2"});
@@ -160,7 +224,7 @@ require([
                 var args = str.split("/");
                 v = +args[0] / +args[1];
             }
-            return v.toFixed(2).toString();
+            return Math.floor(v * 100) / 100;
         }
         function render_display(res) {
             if (res.current_state !== "STD") {
@@ -172,11 +236,11 @@ require([
         }
         function render_state(res) {
             if (res.current_state === "STD") {
-                fcu.dispSTD.render("Std");
-                fcu.dispQNH.hide();
+                fcu.std.render("Std");
+                fcu.qnh.hide();
             } else {
-                fcu.dispQNH.render("QNH");
-                fcu.dispSTD.hide();
+                fcu.qnh.render("QNH");
+                fcu.std.hide();
             }
         }
         function render_programmedValue(res) {
@@ -186,12 +250,27 @@ require([
                 fcu.programmedValue.hide();
             }
         }
+        function render_staticdisp() {
+            // row 1
+            fcu.cstr.render("CSTR");
+            fcu.wpt.render("WPT");
+            fcu.vord.render("VORD");
+            fcu.ndb.render("NDB");
+            fcu.arpt.render("ARPT");
+            // row 2
+            fcu.adf1.render("ADF1");
+            fcu.wx.render("WX");
+            fcu.terr.render("TERR");
+            fcu.traf.render("TRAF");
+            fcu.sym.render("\u2013<==");
+        }
 
         // display
         function render(res) {
           render_display(res);
           render_state(res);
           render_programmedValue(res);
+          render_staticdisp()
         }
 
 
