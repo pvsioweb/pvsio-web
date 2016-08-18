@@ -48,6 +48,7 @@ define(function (require, exports, module) {
         this.keyCode = property.call(this, opt.keyCode);
         this.keyName = property.call(this, opt.keyName);
         this.animation = opt.animation;
+        this.cursor = opt.cursor || "pointer";
 
         Widget.call(this, id, "button");
 
@@ -66,7 +67,8 @@ define(function (require, exports, module) {
         var x2 = parseFloat(this.left) + parseFloat(this.width);
         var x3 = parseFloat(this.top) + parseFloat(this.height);
         this.area.attr("shape", "rect").attr("id", id).attr("class", id)
-                 .attr("coords", this.left + "," + this.top + "," + x2 + "," + x3);
+                 .attr("coords", this.left + "," + this.top + "," + x2 + "," + x3)
+                 .style("cursor", this.cursor);
         this.callback = opt.callback;
 
         this.createImageMap({ area: this.area, callback: this.callback });

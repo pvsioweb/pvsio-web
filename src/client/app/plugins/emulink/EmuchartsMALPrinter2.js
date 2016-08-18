@@ -69,8 +69,15 @@ define(function (require, exports, module) {
     }
 
     function preprocessName(name) {
-        return name.replace(new RegExp("_", "g"),"");
+        //name = name.replace(/_/g, "");
+		return name.replace(/\./g, "_");
     }
+
+	function preprocessType(type) {
+		if (type === "bool" || type === "boolean") { return "boolean"; }
+		if (type === "int" || type === "integer" || type === "double" || type === "float") { return "nat"; }
+		return type;
+	}
 
     /**
      * Prints MAL types
@@ -79,6 +86,8 @@ define(function (require, exports, module) {
         var ans = "types\n";
         ans += " int = INT_MIN..INT_MAX\n";
         ans += " nat = 0..INT_MAX\n";
+		ans += " char = { blank, numeral, letter, symbol }\n";
+		ans += " string = array id .. dd of char\n";
         if (emuchart.states && emuchart.states.length > 0) {
             ans += " MachineState = { ";
             var i = 0;
@@ -387,7 +396,7 @@ define(function (require, exports, module) {
         ans += "  previous_state: MachineState\n";
         if (emuchart.variables && emuchart.variables.length > 0) {
             emuchart.variables.forEach(function (v) {
-                ans += "  " + preprocessName(v.name) + ": " + v.type + "\n";
+                ans += "  " + preprocessName(v.name) + ": " + preprocessType(v.type) + "\n";
             });
         }
         ans += "\n";
@@ -402,12 +411,13 @@ define(function (require, exports, module) {
         var ans = "defines\n";
         ans += " INT_MIN = -4\n";
         ans += " INT_MAX = 4\n";
+		ans += " id = 1\n dd = 3\n";
         if (constants && constants.length > 0) {
             constants.forEach(function (c) {
                 if (c.value) {
-                    ans += preprocessName(c.name) + " " + c.value + "\n";
+                    ans += " " + c.name + " = " + c.value + "\n";
                 } else {
-                    ans += "# " + preprocessName(c.name) + "\n";
+                    ans += "# " + c.name + "\n";
                 }
             });
         }
