@@ -123,8 +123,7 @@ define(function (require, exports, module) {
                     }
                 }
                 return term.val;
-            } else if (term.type === "par" ||
-                    term.type === "binop" || term.type === "separator" || term.type === "number") {
+            } else if (typeof term.val === "string") {
                 return term.val;
             } else if (term.type === "function") {
                 var ans = "", i = 0;

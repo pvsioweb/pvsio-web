@@ -127,6 +127,9 @@ define(function (require, exports, module) {
                 }
             });
         }
+        if (options.width) {
+            div.style("width", options.width + "px");
+        }
 		header.append("span")
 			.attr("class", function () {
 				return options.showContent === true ? "toggle-collapse glyphicon glyphicon-minus-sign" :

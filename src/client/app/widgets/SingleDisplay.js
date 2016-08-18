@@ -52,11 +52,13 @@ define(function (require, exports, module) {
         this.left = coords.left || 0;
         this.width = coords.width || 200;
         this.height = coords.height || 80;
-        this.font = [this.height, "px ", (opt.font || "sans-serif")];
-        this.smallFont = (this.height * 0.8) + "px " + (opt.font || "sans-serif");
+        this.fontsize = opt.fontsize || this.height;
+        this.font = [this.fontsize, "px ", (opt.font || "sans-serif")];
+        this.smallFont = (this.fontsize * 0.8) + "px " + (opt.font || "sans-serif");
         this.align = opt.align || "center";
         this.backgroundColor = opt.backgroundColor || ""; //transparent
         this.fontColor = opt.fontColor || "#fff"; //white
+        this.cursor = opt.cursor || "default";
         if (opt.inverted) {
             var tmp = this.backgroundColor;
             this.backgroundColor = this.fontColor;
@@ -91,9 +93,11 @@ define(function (require, exports, module) {
             }, {
                 callback: opt.touchscreen.callback || function (err, res) {},
                 evts: opt.touchscreen.events || ['click'],
-                area: this.div
+                area: this.div,
+                functionText: opt.functionText
             });
-            this.div.style("cursor", "pointer");
+            this.cursor = opt.cursor || "pointer";
+            this.div.style("cursor", this.cursor);
             var _this = this;
             this.div.on("mouseover", function() {
                 _this.div.style("background-color", _this.touchscreenBackgroundColor).style("color", _this.touchscreenFontColor);
@@ -162,7 +166,7 @@ define(function (require, exports, module) {
             if (opt.disableTouch) {
                 this.div.style("cursor", "default");
             } else {
-                this.div.style("cursor", "pointer");
+                this.div.style("cursor", this.cursor);
             }
         }
         this.reveal();

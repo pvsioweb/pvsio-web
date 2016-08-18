@@ -1,12 +1,12 @@
 % ---------------------------------------------------------------
 %  Theory: emucharts_FCU_th
 %  Author: Paolo Masci
-%          Queen Mary University of London, United Kingdom
-%          http://www.eecs.qmul.ac.uk/~masci/
+%          HASLab/INESC TEC and Universidade do Minho
+%          http://haslab.uminho.pt/masci/
 % ---------------------------------------------------------------
 
 emucharts_FCU_th: THEORY
- BEGIN
+ BEGIN IMPORTING FCUDataEntry
 
   %-- constants
   MAX_ELAPSE: int = 60
