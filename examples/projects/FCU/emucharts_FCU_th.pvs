@@ -1,12 +1,12 @@
 % ---------------------------------------------------------------
 %  Theory: emucharts_FCU_th
 %  Author: Paolo Masci
-%          Queen Mary University of London, United Kingdom
-%          http://www.eecs.qmul.ac.uk/~masci/
+%          HASLab/INESC TEC and Universidade do Minho
+%          http://haslab.uminho.pt/masci/
 % ---------------------------------------------------------------
 
 emucharts_FCU_th: THEORY
- BEGIN
+ BEGIN IMPORTING FCUDataEntry
 
   %-- constants
   MAX_ELAPSE: int = 60
@@ -200,14 +200,14 @@ emucharts_FCU_th: THEORY
     (current_state(st) = QNH) AND (data_entry(st)`units /= hPa)
      -> LET new_st = leave_state(QNH)(st),
             new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ units := hPa ]],
-            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ dispval := data_entry(st)`programmedValue * 33.46 ]],
-            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ display := trim(data_entry(st)`programmedValue*33.46) ]],
-            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := data_entry(st)`programmedValue * 33.46 ]]
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ dispval := data_entry(st)`programmedValue * 33.86 ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ display := trim(data_entry(st)`programmedValue*33.86) ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := data_entry(st)`programmedValue * 33.86 ]]
          IN enter_into(QNH)(new_st),
     (current_state(st) = EDIT_PRESSURE) AND (data_entry(st)`units /= hPa)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),
             new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ units := hPa ]],
-            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := data_entry(st)`programmedValue * 33.46 ]]
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := data_entry(st)`programmedValue * 33.86 ]]
          IN enter_into(EDIT_PRESSURE)(new_st),
     (current_state(st) = STD)
      -> LET new_st = leave_state(STD)(st),
@@ -225,9 +225,9 @@ emucharts_FCU_th: THEORY
     (current_state(st) = QNH) AND (data_entry(st)`units /= inHg)
      -> LET new_st = leave_state(QNH)(st),
             new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ units := inHg ]],
-            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ dispval := data_entry(st)`programmedValue / 33.46 ]],
-            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ display := trim(data_entry(st)`programmedValue/33.46) ]],
-            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := data_entry(st)`programmedValue / 33.46 ]]
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ dispval := data_entry(st)`programmedValue / 33.86 ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ display := trim(data_entry(st)`programmedValue/33.86) ]],
+            new_st = new_st WITH [ data_entry := data_entry(new_st) WITH [ programmedValue := data_entry(st)`programmedValue / 33.86 ]]
          IN enter_into(QNH)(new_st),
     (current_state(st) = EDIT_PRESSURE) AND (data_entry(st)`units /= inHg)
      -> LET new_st = leave_state(EDIT_PRESSURE)(st),

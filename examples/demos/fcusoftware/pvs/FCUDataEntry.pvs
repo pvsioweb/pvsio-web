@@ -6,8 +6,8 @@ FCUDataEntry: THEORY
 
 
   UnitsType: TYPE = { inHg, hPa }
-  STD_INHG: double = 29.13
-  STD_HPA: double = 1013.24 
+  STD_INHG: double = 29.92
+  STD_HPA: double = 29.92 * 33.86 
 
   state: TYPE = [#
     decimalDigits: {x: nat | x <= MAX_DECIMAL_DIGITS},
