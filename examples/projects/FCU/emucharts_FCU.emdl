@@ -245,7 +245,7 @@
     }
    },
    {
-    "name": "click_hPa\n[ data_entry.units != hPa ]\n{ data_entry.units := hPa;\n  data_entry.dispval := data_entry.programmedValue * 33.46;\n  data_entry.display := trim(data_entry.programmedValue * 33.46);\n  data_entry.programmedValue := data_entry.programmedValue * 33.46; }",
+    "name": "click_hPa\n[ data_entry.units != hPa ]\n{ data_entry.units := hPa;\n  data_entry.dispval := data_entry.programmedValue * 33.86;\n  data_entry.display := trim(data_entry.programmedValue * 33.86);\n  data_entry.programmedValue := data_entry.programmedValue * 33.86; }",
     "id": "T15",
     "source": {
      "name": "QNH",
@@ -261,7 +261,7 @@
     }
    },
    {
-    "name": "click_hPa\n[ data_entry.units != hPa ]\n{ data_entry.units := hPa;\n  data_entry.programmedValue := data_entry.programmedValue * 33.46; }",
+    "name": "click_hPa\n[ data_entry.units != hPa ]\n{ data_entry.units := hPa;\n  data_entry.programmedValue := data_entry.programmedValue * 33.86; }",
     "id": "T35",
     "source": {
      "name": "EDIT_PRESSURE",
@@ -293,7 +293,7 @@
     }
    },
    {
-    "name": "click_inHg\n[ data_entry.units != inHg ]\n{ data_entry.units := inHg;\n  data_entry.dispval := data_entry.programmedValue / 33.46;\n  data_entry.display := trim(data_entry.programmedValue / 33.46);\n  data_entry.programmedValue := data_entry.programmedValue / 33.46; }",
+    "name": "click_inHg\n[ data_entry.units != inHg ]\n{ data_entry.units := inHg;\n  data_entry.dispval := data_entry.programmedValue / 33.86;\n  data_entry.display := trim(data_entry.programmedValue / 33.86);\n  data_entry.programmedValue := data_entry.programmedValue / 33.86; }",
     "id": "T18",
     "source": {
      "name": "QNH",

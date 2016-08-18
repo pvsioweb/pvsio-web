@@ -6,8 +6,8 @@ FCUDataEntry: THEORY
 
 
   UnitsType: TYPE = { inHg, hPa }
-  STD_INHG: double = 759.93
-  STD_HPA: double = 1013.24 
+  STD_INHG: double = 29.92
+  STD_HPA: double = 29.92 * 33.86 
 
   state: TYPE = [#
     decimalDigits: {x: nat | x <= MAX_DECIMAL_DIGITS},
@@ -94,15 +94,20 @@ FCUDataEntry: THEORY
 	       integerDigits := 0,
 	       msg := ""]
 
+  trim(x: real): real =
+     floor(x * 100) / 100
+
   %-- restore (previous) programmed value
-  click_ESC(st: state): state =
-        st WITH [ display := programmedValue(st),
-	          dispval := programmedValue(st) ]
+  restore_display(st: state): state =
+        clear_data_entry(st) WITH [
+		display := trim(programmedValue(st)),
+	        dispval := programmedValue(st)
+		]
 
   EXCEPTION(errType: int, key: int, val: unsigned_long_int)(st: state): state =
 	st WITH [ display := snprintf(errType + ":" + key + ":" + val) ]
 
-  processKey(key: KEY_CODE)(st: state): state =
+  processKey(key: KEY_CODE, st: state): state =
     COND
 	 key = KEY_0 OR key = KEY_1 OR key = KEY_2 OR key = KEY_3 OR key = KEY_4
 	  or key = KEY_5 OR key = KEY_6 OR key = KEY_7 OR key = KEY_8 OR key = KEY_9
@@ -118,16 +123,16 @@ FCUDataEntry: THEORY
 	       -> clear_data_entry(st),
 
          key = KEY_ESC
-	       -> click_ESC(st),
+	       -> restore_display(st),
 	       
          ELSE % unrecognised key - call exception handler
 	       -> EXCEPTION(INVALID_KEY, key, dispval(st))(st)
    ENDCOND
 
-  processEvent(evt: EVT_CODE)(st: state): state =
+  processEvent(evt: EVT_CODE, st: state): state =
     COND
          evt = EVT_TIMEOUT 
-	       -> click_ESC(st),
+	       -> restore_display(st),
 	       
          ELSE % unrecognised key - call exception handler
 	       -> EXCEPTION(INVALID_EVENT, evt, dispval(st))(st)
@@ -142,8 +147,8 @@ constants: THEORY
   MAIN_DISPLAY_SIZE     : int = 16;
   MAX_DECIMAL_DIGITS    : int = 2;
   MAX_INTEGER_DIGITS    : int = 4;
-  MAX_inHg              : double = 825;
-  MIN_inHg		: double = 558.75; 
+  MAX_inHg              : double = 32.48;
+  MIN_inHg		: double = 22; 
   MAX_hPa               : double = 1100;
   MIN_hPa		: double = 745; 
 
