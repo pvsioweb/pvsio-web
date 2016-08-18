@@ -277,7 +277,7 @@
     }
    },
    {
-    "name": "click_hPa\n{ data_entry.units := hPa;\n  data_entry.programmedValue := STD_HPA;\n  data_entry.dispval := STD_HPA;\n  data_entry.display := STD_HPA; }",
+    "name": "click_hPa\n{ data_entry.units := hPa;\n  data_entry.programmedValue := STD_HPA;\n  data_entry.dispval := STD_HPA;\n  data_entry.display := trim(STD_HPA); }",
     "id": "T17",
     "source": {
      "name": "STD",
@@ -325,7 +325,7 @@
     }
    },
    {
-    "name": "click_inHg\n{ data_entry.units := inHg;\n  data_entry.programmedValue := STD_INHG;\n  data_entry.dispval := STD_INHG;\n  data_entry.display := STD_INHG; }",
+    "name": "click_inHg\n{ data_entry.units := inHg;\n  data_entry.programmedValue := STD_INHG;\n  data_entry.dispval := STD_INHG;\n  data_entry.display := trim(STD_INHG); }",
     "id": "T16",
     "source": {
      "name": "STD",
@@ -373,7 +373,7 @@
     }
    },
    {
-    "name": "click_QNH_RADIO\n{ data_entry.dispval := data_entry.programmedValue;\n  data_entry.display := data_entry.programmedValue; }",
+    "name": "click_QNH_RADIO\n{ data_entry.dispval := data_entry.programmedValue;\n  data_entry.display := trim(data_entry.programmedValue); }",
     "id": "T1",
     "source": {
      "name": "STD",
@@ -389,7 +389,7 @@
     }
    },
    {
-    "name": "click_STD_RADIO\n[ data_entry.units = hPa ]\n{ data_entry.programmedValue := STD_HPA;\n  data_entry.dispval := STD_HPA;\n  data_entry.display := STD_HPA; }",
+    "name": "click_STD_RADIO\n[ data_entry.units = hPa ]\n{ data_entry.programmedValue := STD_HPA;\n  data_entry.dispval := STD_HPA;\n  data_entry.display := trim(STD_HPA); }",
     "id": "T20",
     "source": {
      "name": "QNH",
@@ -400,12 +400,12 @@
      "id": "X1"
     },
     "controlPoint": {
-     "x": 39.272727966308594,
-     "y": 152.91761779785156
+     "x": 35.77777862548828,
+     "y": 154.00694274902344
     }
    },
    {
-    "name": "click_STD_RADIO\n[ data_entry.units = inHg ]\n{ data_entry.programmedValue := STD_INHG;\n  data_entry.dispval := STD_INHG;\n  data_entry.display := STD_INHG; }",
+    "name": "click_STD_RADIO\n[ data_entry.units = inHg ]\n{ data_entry.programmedValue := STD_INHG;\n  data_entry.dispval := STD_INHG;\n  data_entry.display := trim(STD_INHG); }",
     "id": "T2",
     "source": {
      "name": "QNH",
