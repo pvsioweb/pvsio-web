@@ -84,6 +84,7 @@ define(function (require, exports, module) {
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0).style("border-radius", "2px")
                         .style("vertical-align", "top");
+        this.div.style("cursor", this.cursor);
         if (opt.touchscreen) {
             var touchID = this.id;
             this.touchscreenBackgroundColor = opt.touchscreen.backgroundColor || "steelblue";
@@ -142,6 +143,7 @@ define(function (require, exports, module) {
             }
         }
         opt = opt || {};
+        txt = txt || "";
         var _this = this;
         this.txt = txt;
         // set blinking

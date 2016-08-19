@@ -48,10 +48,11 @@ require([
             headerText: "Simulation of the FCU Software",
             showContent: true,
             isDemo: true,
-            width: 624
-        }).style("position", "relative").style("width", "624px");
+            width: 1230
+        }).style("position", "relative").style("width", "1230px");
         //insert the html into the panel (note that this could have used templates or whatever)
-        imageHolder.html('<img src="FCU-Software.png" usemap="#prototypeMap"/>').attr("id", "prototype").attr("class", "fcusoftware");
+        imageHolder.html('<img src="FCU-Software-ext.png" usemap="#prototypeMap"/>').attr("id", "prototype").attr("class", "fcusoftware").style("float", "left");
+        //d3.select(".collapsible-panel-parent").append("div").attr("id", "kccu").attr("class", "kccu").html('<img src="KCCU.png" usemap="#prototypeMap"/>').style("float", "left");
 
         /**
          function to handle when an output has been received from the server after sending a guiAction
@@ -107,6 +108,14 @@ require([
 
         // append displays
         var fcu = {};
+        fcu.cursorOverlay = new SingleDisplay("cursorOverlay",
+                            {top: 0, left: 0, height: 800, width: 624 },
+                            {
+                                backgroundColor: "transparent",
+                                parent: "prototype",
+                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
+                            });
+
         fcu.editbox = new SingleDisplay("editbox_pressure",
                             { top: 333, left: 16, height: 28, width: 100},
                             {
@@ -176,19 +185,6 @@ require([
                             });
 
 
-        fcu.qnh = new SingleDisplay("qnh",
-                            { top: 44, left: 22, height: 9, width: 20},
-                            {
-                              backgroundColor: "black",
-                              parent: "prototype"
-                            });
-        fcu.std = new SingleDisplay("std",
-                            { top: 58, left: 20, height: 16, width: 60},
-                            {
-                              backgroundColor: "black",
-                              fontColor: "white",
-                              parent: "prototype"
-                            });
         fcu.programmedValue = new SingleDisplay("programmedValue",
                             { top: 44, left: 46, height: 9, width: 32},
                             {
@@ -200,95 +196,34 @@ require([
         fcu.STD_LED = new LED("STD_LED", {top: 243, left: 10, height: 32, width: 32},
                             {
                                 radius: 9,
-                                parent: "prototype"
+                                parent: "prototype",
+                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
-        fcu.btn_STD_RADIO = new Button("STD_RADIO", {top: 243, left: 10, height: 32, width: 70},
+        fcu.btn_STD_RADIO = new SingleDisplay("STD_RADIO",
+                            {top: 243, left: 10, height: 32, width: 72},
                             {
-                                callback: onMessageReceived,
-//                                keyCode: 83,
-//                                keyName: "Key S",
-                                buttonReadback: "Standard mode selected",
+                                backgroundColor: "transparent",
+                                parent: "prototype",
+                                touchscreen: {callback: onMessageReceived, backgroundColor: "transparent", highlightOnMouseClick: true},
+                                functionText: "STD_RADIO",
                                 cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
 
         fcu.QNH_LED = new LED("QNH_LED", {top: 275, left: 10, height: 32, width: 32},
                             {
                                 radius: 9,
-                                parent: "prototype"
-                            });
-        fcu.btn_QNH_RADIO = new Button("QNH_RADIO", {top: 275, left: 10, height: 32, width: 70},
-                            {
-                                callback: onMessageReceived,
-//                                keyCode: 81,
-//                                keyName: "Key Q",
-                                buttonReadback: "Regional pressure mode selected",
+                                parent: "prototype",
                                 cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
-
-        //
-        // // static display elements, row 1
-        // fcu.cstr = new SingleDisplay("cstr",
-        //                     { top: 43, left: 95, height: 11, width: 34},
-        //                     {
-        //                         backgroundColor: "black",
-        //                         parent: "prototype"
-        //                     });
-        // fcu.wpt = new SingleDisplay("wpt",
-        //                     { top: 43, left: 134, height: 11, width: 34},
-        //                     {
-        //                         backgroundColor: "black",
-        //                         parent: "prototype"
-        //                     });
-        // fcu.vord = new SingleDisplay("vord",
-        //                     { top: 43, left: 172, height: 11, width: 34},
-        //                     {
-        //                         backgroundColor: "black",
-        //                         parent: "prototype"
-        //                     });
-        // fcu.ndb = new SingleDisplay("ndb",
-        //                     { top: 43, left: 210, height: 11, width: 34},
-        //                     {
-        //                         backgroundColor: "black",
-        //                         parent: "prototype"
-        //                     });
-        // fcu.arpt = new SingleDisplay("arpt",
-        //                     { top: 43, left: 250, height: 11, width: 34},
-        //                     {
-        //                         backgroundColor: "black",
-        //                         parent: "prototype"
-        //                     });
-        // // static display elements, row 2
-        // fcu.adf1 = new SingleDisplay("adf1",
-        //                     { top: 63, left: 95, height: 11, width: 34},
-        //                     {
-        //                         backgroundColor: "black",
-        //                         parent: "prototype"
-        //                     });
-        // fcu.wx = new SingleDisplay("wx",
-        //                     { top: 63, left: 134, height: 11, width: 34},
-        //                     {
-        //                         backgroundColor: "black",
-        //                         parent: "prototype"
-        //                     });
-        // fcu.terr = new SingleDisplay("terr",
-        //                     { top: 63, left: 172, height: 11, width: 34},
-        //                     {
-        //                         backgroundColor: "black",
-        //                         parent: "prototype"
-        //                     });
-        // fcu.traf = new SingleDisplay("traf",
-        //                     { top: 63, left: 210, height: 11, width: 34},
-        //                     {
-        //                         backgroundColor: "black",
-        //                         parent: "prototype"
-        //                     });
-        // fcu.sym = new SingleDisplay("sym",
-        //                     { top: 63, left: 250, height: 11, width: 34},
-        //                     {
-        //                         backgroundColor: "black",
-        //                         font: "Courier New, Courier, monospace",
-        //                         parent: "prototype"
-        //                     });
+        fcu.btn_QNH_RADIO = new SingleDisplay("QNH_RADIO",
+                            {top: 275, left: 10, height: 32, width: 72},
+                            {
+                                backgroundColor: "transparent",
+                                parent: "prototype",
+                                touchscreen: {callback: onMessageReceived, backgroundColor: "transparent", highlightOnMouseClick: true},
+                                functionText: "QNH_RADIO",
+                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
+                            });
 
         fcu.btn_key1 = new Button("digit_1", {left: 1032, top: 294}, {callback: onMessageReceived, keyCode:49, keyName:"key 1"});
         fcu.btn_key2 = new Button("digit_2", {left: 1080, top: 294}, {callback: onMessageReceived, keyCode:50, keyName:"key 2"});
@@ -304,9 +239,6 @@ require([
         fcu.btn_CLR = new Button("CLR", {left: 672, top: 82}, {callback: onMessageReceived, keyCode:46, keyName:"delete"});
         fcu.btn_ESC = new Button("ESC", {left: 680, top: 34}, {callback: onMessageReceived, keyCode:27, keyName:"esc"});
         fcu.btn_OK = new Button("OK", {left: 1110, top: 234}, {callback: onMessageReceived, keyCode:13, keyName:"enter"});
-
-        //fcu.btn_inHg_hPa = new Knob("std", {left: 24, top: 120}, {callback: onMessageReceived, keyCode:17, keyName:"ctrl"});
-
 
         // utility functions
         function evaluate(str) {
@@ -336,20 +268,13 @@ require([
                 fcu.display_units.render(res.data_entry.units);
             }
         }
-        function render_state(res) {
+        function render_STD_QNH_buttons(res) {
             if (res.current_state.trim() === "STD") {
                 fcu.STD_LED.on();
                 fcu.QNH_LED.off();
             } else {
                 fcu.STD_LED.off();
                 fcu.QNH_LED.on();
-            }
-        }
-        function render_programmedValue(res) {
-            if (res.current_state.trim() === "EDIT_PRESSURE") {
-                fcu.programmedValue.render(evaluate(res.data_entry.programmedValue))
-            } else {
-                fcu.programmedValue.hide();
             }
         }
         function render_inHg_hPa_buttons(res) {
@@ -361,29 +286,23 @@ require([
                 fcu.btn_toINHG.render("HPA -> INHG");
             }
         }
-        function render_staticdisp() {
-            // // row 1
-            // fcu.cstr.render("CSTR");
-            // fcu.wpt.render("WPT");
-            // fcu.vord.render("VORD");
-            // fcu.ndb.render("NDB");
-            // fcu.arpt.render("ARPT");
-            // // row 2
-            // fcu.adf1.render("ADF1");
-            // fcu.wx.render("WX");
-            // fcu.terr.render("TERR");
-            // fcu.traf.render("TRAF");
-            // fcu.sym.render("\u2013<==");
+        function render_cursorOverlay(res) {
+//            if (res.current_state.trim() === "EDIT_PRESSURE") {
+//                fcu.cursorOverlay.hide();
+//            } else {
+                fcu.cursorOverlay.render();
+//            }
         }
 
         // display
         function render(res) {
-          render_display(res);
-          render_state(res);
-          //render_programmedValue(res);
-          render_staticdisp();
-          render_inHg_hPa_buttons(res);
-          fcu.btn_CLEAR.render("CLR INFO");
+            render_display(res);
+            render_STD_QNH_buttons(res);
+            render_inHg_hPa_buttons(res);
+            fcu.btn_CLEAR.render("CLR INFO");
+            fcu.btn_QNH_RADIO.render();
+            fcu.btn_STD_RADIO.render();
+            render_cursorOverlay(res);
         }
 
 

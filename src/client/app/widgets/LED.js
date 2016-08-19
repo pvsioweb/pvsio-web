@@ -47,6 +47,7 @@ define(function (require, exports, module) {
         this.radius = opt.radius || 3;
         this.color = opt.color || "#00FF66"; // default is light green
         this.blinking = opt.blinking || false;
+        this.cursor = opt.cursor || "default";
         this.div = d3.select(this.parent)
                         .append("div").style("position", "absolute")
                         .style("top", this.top + "px").style("left", this.left + "px")
@@ -57,6 +58,7 @@ define(function (require, exports, module) {
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0)
                         .style("vertical-align", "top");
+        this.div.style("cursor", this.cursor);
         this.isOn = false;
         return this;
     }
@@ -89,7 +91,7 @@ define(function (require, exports, module) {
         }
         return this;
     };
-    
+
     LED.prototype.on = function (opt) {
         this.isOn = true;
         this.render(opt);
