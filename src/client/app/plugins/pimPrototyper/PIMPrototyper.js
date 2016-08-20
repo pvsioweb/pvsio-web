@@ -54,6 +54,7 @@ define(function (require, exports, module) {
 
         this._container = PVSioWebClient.getInstance().createCollapsiblePanel(opts);
         this._container.html(Handlebars.compile(template)());
+        this._container.classed("pim-prototyper", true);
 
         this._modeButtons = {
             builder: this._container.select(".prototype-builder-button"),
@@ -183,8 +184,8 @@ define(function (require, exports, module) {
         this._container.select(".image-map-layer").style("opacity", toViewMode ? 0 : 1).style("z-index", toViewMode ? -2 : 190);
         this._modeButtons.simulator.classed("btn-info active", toViewMode);
         this._modeButtons.builder.classed("btn-info active", !toViewMode);
-        this._container.select(".ljs-left").style("width", toViewMode ? 0 : "25%");
-        this._container.select(".ljs-hcontent").style("width", toViewMode ? "100%" : "75%");
+        this._container.select(".ljs-left").style("width", toViewMode ? 0 : "20%");
+        this._container.select(".ljs-hcontent").style("width", toViewMode ? "100%" : "80%");
     };
 
     PIMPrototyper.prototype._onWidgetClicked = function (widget) {

@@ -18,6 +18,10 @@
         border-radius: 0;
         cursor: pointer;
 
+        &:first-child {
+            border-top: none;
+        }
+
         &.selected {
             background: $color-primary;
             color: $color-fg-light;

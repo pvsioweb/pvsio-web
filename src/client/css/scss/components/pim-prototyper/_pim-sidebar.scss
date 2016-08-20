@@ -1,0 +1,17 @@
+.pim-prototyper {
+    .prototype-sidebar {
+        &-heading {
+            padding: 10px 15px;
+            background: $color-bg-light;
+            border-bottom: 1px solid $color-grey-lighter;
+            font-weight: bold;
+        }
+    }
+
+    .ljs-parent:not(.ljs-resizing) {
+        .ljs-left,
+        .ljs-hcontent {
+            transition: width 0.3s;
+        }
+    }
+}
