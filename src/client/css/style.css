@@ -1,5 +1,5 @@
 /*! Auto-generated from SCSS files. Modifications made here WILL be lost */
-#header .btn:hover, #projectTitle #btnReconnect:hover, .plugin-box:hover, .expandable-panel-heading:hover, #editorToolbar button:hover, .treelist .node .chevron:hover, .table-tab a:hover, .table-toggle-visible:hover, .prototype-list-container li:hover, .newTimer:hover,
+#header .btn:hover, #projectTitle #btnReconnect:hover, .plugin-box:hover, .expandable-panel-heading:hover, #editorToolbar button:hover, .treelist .node .chevron:hover, .table-tab a:hover, .table-toggle-visible:hover, .prototype-list-container .list-group-item:hover, .newTimer:hover,
 .newWidget:hover {
   background: #000;
   color: #fff; }
@@ -484,6 +484,16 @@ ul {
     .collapsible-panel-parent > .header .header {
       margin-left: 10px;
       display: inline-block; }
+
+/**
+ * Simple container for a collection of buttons
+ */
+.toolbar {
+  padding: 10px 15px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e6e6e6; }
+  .toolbar-right {
+    float: right; }
 
 .expandable-panel {
   width: 100%;
@@ -1109,9 +1119,6 @@ fileListItem.hide {
   height: 50px;
   min-width: 400px; }
 
-.prototype-controls-right {
-  float: right; }
-
 .dndcontainer {
   background: #fff;
   text-align: center;
@@ -1151,15 +1158,17 @@ label[for=selectPicture] {
 
 .prototype-list-container {
   padding: 0;
-  margin: 4 0 2;
   max-height: 50%;
-  margin-right: 6px; }
-  .prototype-list-container li {
+  margin-right: 5px; }
+  .prototype-list-container .list-group-item {
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
     cursor: pointer; }
-    .prototype-list-container li.selected {
+    .prototype-list-container .list-group-item.selected {
       background: #08589a;
       color: #fff; }
-      .prototype-list-container li.selected:hover {
+      .prototype-list-container .list-group-item.selected:hover {
         color: #fff;
         background: #08589a; }
 
@@ -1222,6 +1231,13 @@ label[for=selectPicture] {
     text-overflow: ellipsis; }
   .pim-screen-controls .screen-controls-buttons {
     float: right; }
+
+.pim-mode-toggle .btn {
+  padding-left: 15px;
+  padding-right: 15px; }
+
+.pim-mode-toggle .btn.active {
+  text-shadow: none; }
 
 img {
   z-index: -2; }

@@ -118,6 +118,7 @@ define(function (require, exports, module) {
         this._onProjectChanged();
 
         layoutjs({el: "#body"});
+        this.switchToBuilderView();
     };
 
     PIMPrototyper.prototype.getName = function () {
@@ -171,17 +172,19 @@ define(function (require, exports, module) {
     };
 
     PIMPrototyper.prototype.switchToSimulatorView = function () {
-        this._container.select(".image-map-layer").style("opacity", 0.1).style("z-index", -2);
-        this._modeButtons.builder.classed("active", false);
-        this._modeButtons.simulator.classed("active", true);
-        this._modeButtons.simulator.classed("selected", true);
+        this._switchToView(true);
     };
 
     PIMPrototyper.prototype.switchToBuilderView = function () {
-        this._container.select(".image-map-layer").style("opacity", 1).style("z-index", 190);
-        this._modeButtons.simulator.classed("active", false);
-        this._modeButtons.builder.classed("active", true);
-        this._modeButtons.builder.classed("selected", true);
+        this._switchToView(false);
+    };
+
+    PIMPrototyper.prototype._switchToView = function (toViewMode) {
+        this._container.select(".image-map-layer").style("opacity", toViewMode ? 0 : 1).style("z-index", toViewMode ? -2 : 190);
+        this._modeButtons.simulator.classed("btn-info active", toViewMode);
+        this._modeButtons.builder.classed("btn-info active", !toViewMode);
+        this._container.select(".ljs-left").style("width", toViewMode ? 0 : "25%");
+        this._container.select(".ljs-hcontent").style("width", toViewMode ? "100%" : "75%");
     };
 
     PIMPrototyper.prototype._onWidgetClicked = function (widget) {
