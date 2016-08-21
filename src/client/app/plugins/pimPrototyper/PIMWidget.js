@@ -114,6 +114,16 @@ define(function (require, exports, module) {
     };
 
     /**
+     * Updates the location and size of the widget's image map to the given location.
+     * This does not change the stored position of the widget itself, only the image map area associated with the widget.
+     * This should be used for presentation/view-level changes such as the prototype being zoomed.
+     * @param {object} pos x, y, width, height for the widget's image map area
+     */
+    PIMWidget.prototype.updateImageMapLocationAndSize = function (pos) {
+        this.imageMap().attr("coords", [pos.x, pos.y, pos.x + pos.width, pos.y + pos.height].join(","));
+    };
+
+    /**
      * Creates a new widget from the data in the provided object.
      * @param {object} jsonObj JSON-style object with the data for the widget
      * @param {ScreenCollection} screens Collection of screens that the widget's targetScreen is contained within

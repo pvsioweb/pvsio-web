@@ -4,6 +4,11 @@
     position: relative;
 }
 
+.prototype-image-inner {
+    margin: 0 auto; // center the prototype
+    position: relative;
+}
+
 .dndcontainer {
     background: $color-bg-lighter;
     text-align: center;

@@ -8,10 +8,12 @@
         }
     }
 
-    .ljs-parent:not(.ljs-resizing) {
-        .ljs-left,
-        .ljs-hcontent {
-            transition: width 0.3s;
+    .ljs-parent {
+        // Preventing the image view from shifting down when the sidebar is resized
+        white-space: nowrap;
+
+        > * {
+            white-space: normal;
         }
     }
 }

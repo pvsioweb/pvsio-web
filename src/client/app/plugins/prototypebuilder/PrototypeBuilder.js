@@ -531,6 +531,10 @@ define(function (require, exports, module) {
             mapID: "prototypeMap"
         });
 
+        pbContainer.select(".ljs-hcontent").on("resize", function () {
+            prototypeImageView.resize();
+        });
+
         preparePageForImageUpload();
         this._setUpChildListeners();
         bindListeners();

@@ -118,6 +118,10 @@ define(function (require, exports, module) {
         this._setUpChildListeners();
         this._onProjectChanged();
 
+        this._container.select(".ljs-hcontent").on("resize", function () {
+            _this._prototypeImageView.resize();
+        });
+
         layoutjs({el: "#body"});
         this.switchToBuilderView();
     };
@@ -181,11 +185,30 @@ define(function (require, exports, module) {
     };
 
     PIMPrototyper.prototype._switchToView = function (toViewMode) {
+        var _this = this;
+        var slideDuration = 300;
         this._container.select(".image-map-layer").style("opacity", toViewMode ? 0 : 1).style("z-index", toViewMode ? -2 : 190);
         this._modeButtons.simulator.classed("btn-info active", toViewMode);
         this._modeButtons.builder.classed("btn-info active", !toViewMode);
-        this._container.select(".ljs-left").style("width", toViewMode ? 0 : "20%");
-        this._container.select(".ljs-hcontent").style("width", toViewMode ? "100%" : "80%");
+        this._container.select(".ljs-left")
+            .transition()
+            .duration(slideDuration)
+            .styleTween("width", function () {
+                var from = this.style.width,
+                    to = toViewMode ? "0%" : "20%";
+                return d3.interpolateString(from, to);
+            });
+        this._container.select(".ljs-hcontent")
+            .transition()
+            .duration(slideDuration)
+            .styleTween("width", function () {
+                var from = this.style.width,
+                    to = toViewMode ? "100%" : "80%";
+                return d3.interpolateString(from, to);
+            })
+            .each("end", function () {
+                _this._prototypeImageView.resize();
+            });
     };
 
     PIMPrototyper.prototype._onWidgetClicked = function (widget) {
@@ -280,7 +303,7 @@ define(function (require, exports, module) {
                     w.element(region);
                     w.createImageMap({
                         onClick: function(widget) {
-                            _this._onWidgetClicked(widget)
+                            _this._onWidgetClicked(widget);
                         },
                         map: _this._prototypeImageView.getImageMap()
                      });

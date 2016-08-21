@@ -8,7 +8,6 @@ define(function (require, exports, module) {
     "use strict";
 
     var Descriptor = require("project/Descriptor"),
-        PIMWidget = require("./PIMWidget"),
         uuid = require("util/uuidGenerator");
 
     var Screen = Backbone.Model.extend({
@@ -42,14 +41,6 @@ define(function (require, exports, module) {
             return json;
         }
     });
-
-
-    /**
-     * Creates a new widget from the data in the provided object.
-     * @param {object} jsonObj JSON-style object with the data for the widget
-     * @param {ScreenCollection} screens Collection of screens that the widget's targetScreen is contained within
-     * @return {Widget} The new widget
-     */
 
     /**
      * Creates a new screen from the data in the provided object. Note: this does not restore/populate the screen's

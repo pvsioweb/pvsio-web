@@ -70,6 +70,37 @@ define(function (require, exports, module) {
             return this;
         },
 
+        /**
+         * Resizes the image and widgets to fit the view's element size
+         * @return {number} Scale of the image
+         */
+        resize: function () {
+            var scale = 1;
+            if (this.img) {
+                var pbox = this.d3El.node().getBoundingClientRect(),
+                    adjustedWidth = this.img.width,
+                    adjustedHeight = this.img.height;
+
+                if (this.img.width > pbox.width && pbox.width > 0 && pbox.height > 0) {
+                    adjustedWidth = pbox.width;
+                    scale = adjustedWidth / this.img.width;
+                    adjustedHeight = scale * this.img.height;
+                }
+
+                this._innerContainer.style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
+                this.d3El.select("img").attr("src", this.img.src).attr("height", adjustedHeight).attr("width", adjustedWidth);
+                this.d3El.select("svg").attr("height", adjustedHeight).attr("width", adjustedWidth);
+                this.d3El.select("svg > g").attr("transform", "scale(" + scale + ")");
+                //hide the draganddrop stuff
+                this.d3El.select(".dndcontainer").style("display", "none");
+
+                //update widgets maps after resizing
+                this._widgetManager.scaleAreaMaps(scale);
+            }
+
+            return scale;
+        },
+
         onClickLoad: function () {
             this.trigger('loadImageClicked');
         },
@@ -131,36 +162,7 @@ define(function (require, exports, module) {
 
             return new Promise(function (resolve, reject) {
                 function imageLoadComplete(res) {
-                    //if the image width is more than the the containing element scale it down a little
-                    var scale = 1;
-                    function resize() {
-                        if (_this.img) {
-                            var pbox = _this.d3El.node().getBoundingClientRect(),
-                                adjustedWidth = _this.img.width,
-                                adjustedHeight = _this.img.height;
-                            scale = 1;
-
-                            if (_this.img.width > pbox.width && pbox.width > 0 && pbox.height > 0) {
-                                adjustedWidth = pbox.width;
-                                scale = adjustedWidth / _this.img.width;
-                                adjustedHeight = scale * _this.img.height;
-                            }
-
-                            _this._innerContainer.style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
-                            _this.d3El.select("img").attr("src", _this.img.src).attr("height", adjustedHeight).attr("width", adjustedWidth);
-                            _this.d3El.select("svg").attr("height", adjustedHeight).attr("width", adjustedWidth);
-                            _this.d3El.select("svg > g").attr("transform", "scale(" + scale + ")");
-                            //hide the draganddrop stuff
-                            _this.d3El.select(".dndcontainer").style("display", "none");
-
-                            //update widgets maps after resizing
-                            _this._widgetManager.scaleAreaMaps(scale);
-                        }
-                    }
-
-                    resize();
-                    _this.d3El.node().addEventListener("resize", resize); // TODO: nwwatson: resizing the editor currently has no effect
-
+                    var scale = _this.resize();
                     resolve(scale);
                 }
 
@@ -183,6 +185,7 @@ define(function (require, exports, module) {
         clearImage: function () {
             this._innerContainer.attr("style", null);
             this.d3El.select("img").attr("src", "").attr("height", "430").attr("width", "1128");
+            this.img = null;
             this.d3El.select("svg").attr("height", "0").attr("width", "0");
             this.d3El.attr("style", "");
             this.d3El.select("#body").attr("style", "height: 480px"); // 430 + 44 + 6
@@ -215,7 +218,7 @@ define(function (require, exports, module) {
                 return Math.round(v * 10) / 10;
             };
 
-            imageMapper({scale: scale, element: _this.d3El.select("img").node(), parent: _this.el, onReady: function (mc) {
+            imageMapper({scale: scale, element: _this.d3El.select("img").node(), parent: _this._innerContainer.node(), onReady: function (mc) {
                 _this._mapCreator = mc.on("create", function (e) {
                     var region = e.region;
                     region.on("dblclick", function () {

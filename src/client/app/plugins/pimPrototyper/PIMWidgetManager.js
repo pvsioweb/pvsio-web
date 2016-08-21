@@ -72,6 +72,26 @@ define(function (require, exports, module) {
         return widget;
     };
 
+    /**
+     * update all the area maps attributed to all widgets on the project by the given scale factor.
+     * For PIM prototypes this only affects the displayed scale, not the scale of the position values held by each width
+     * @param {Number} scale the scale to transform the maps by
+     */
+    PIMWidgetManager.prototype.scaleAreaMaps = function (scale) {
+        var _this = this;
+        var widgets = _this.getAllWidgets();
+
+        if (widgets) {
+            widgets.forEach(function (w) {
+                w.updateImageMapLocationAndSize({
+                    x: w.x * scale,
+                    y: w.y * scale,
+                    width: w.width * scale,
+                    height: w.height * scale
+                });
+            });
+        }
+    };
 
     return PIMWidgetManager;
 });

@@ -1195,6 +1195,10 @@ label[for=selectPicture] {
 .prototype-image-container {
   position: relative; }
 
+.prototype-image-inner {
+  margin: 0 auto;
+  position: relative; }
+
 .dndcontainer {
   background: #fff;
   text-align: center;
@@ -1243,9 +1247,10 @@ area {
   border-bottom: 1px solid #e6e6e6;
   font-weight: bold; }
 
-.pim-prototyper .ljs-parent:not(.ljs-resizing) .ljs-left,
-.pim-prototyper .ljs-parent:not(.ljs-resizing) .ljs-hcontent {
-  transition: width 0.3s; }
+.pim-prototyper .ljs-parent {
+  white-space: nowrap; }
+  .pim-prototyper .ljs-parent > * {
+    white-space: normal; }
 
 .pim-prototyper .image-map-layer rect.corner {
   fill: #c2f1ca;
