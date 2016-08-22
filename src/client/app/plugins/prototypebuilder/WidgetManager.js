@@ -89,7 +89,7 @@ define(function (require, exports, module) {
                     widget.click({ callback: renderResponse });
                     halo(widget.id());
                     d3.event.preventDefault();
-                    d3.event.stopPropagation();                    
+                    d3.event.stopPropagation();
                 } else if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
                     widget.pressAndHold({ callback: renderResponse });
                     halo(widget.id());
@@ -104,7 +104,7 @@ define(function (require, exports, module) {
                 var widget = wm._keyCode2widget[eventKeyCode];
                 if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
                     widget.release({ callback: renderResponse });
-                }            
+                }
                 haloOff();
             }
         });
@@ -112,7 +112,7 @@ define(function (require, exports, module) {
     function halo (buttonID) {
         var coords = d3.select("." + buttonID).attr("coords");
         coords = coords.split(",");
-        var pos = {x1: +coords[0], y1: +coords[1], x2: +coords[2], y2: coords[3]};        
+        var pos = {x1: +coords[0], y1: +coords[1], x2: +coords[2], y2: coords[3]};
         var w = pos.x2 - pos.x1, hrad = w / 2, h = pos.y2 - pos.y1, vrad = h / 2, brad = hrad + "px " + vrad + "px";
         var mark = d3.select(".animation-halo");
         if (mark.empty()) {
@@ -121,12 +121,12 @@ define(function (require, exports, module) {
         mark.style("top", pos.y1 + "px").style("left", pos.x1 + "px")
             .style("width", (pos.x2 - pos.x1) + "px").style("height", (pos.y2 - pos.y1) + "px")
             .style("border-top-left-radius", brad).style("border-top-right-radius", brad)
-            .style("border-bottom-left-radius", brad).style("border-bottom-right-radius", brad);        
+            .style("border-bottom-left-radius", brad).style("border-bottom-right-radius", brad);
     }
     function haloOff (buttonID) {
         d3.select(".animation-halo").remove();
     }
-        
+
     /**
         @class WidgetManager
         @classdesc WidgetManager deals with interacting with user interface widgets used for prototyping picture based uis.
@@ -163,11 +163,16 @@ define(function (require, exports, module) {
                 w.type = w.type.toLowerCase();
                 if (w.type === "button") {
                     if (defs.regionDefs && defs.regionDefs[i].coords) {
-                        var coords = defs.regionDefs[i].coords;
-                        var height = coords[3] - coords[1], width = coords[2] - coords[0], x = coords[0], y = coords[1];
+                        var coords = defs.regionDefs[i].coords.split(",");
+                        var height = parseFloat(coords[3]) - parseFloat(coords[1]),
+                            width = parseFloat(coords[2]) - parseFloat(coords[0]),
+                            x = parseFloat(coords[0]),
+                            y = parseFloat(coords[1]);
+                        var scale = (d3.select("svg > g").node()) ?
+                                        +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
                         widget = new Button(
                             w.id,
-                            { top: y, left: x, width: width, height: height },
+                            { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
                             { callback: renderResponse, buttonReadback: w.buttonReadback }
                         );
                     } else {
@@ -180,7 +185,7 @@ define(function (require, exports, module) {
                     }
                     if (w.keyCode) {
                         wm._keyCode2widget[w.keyCode] = widget;
-                    }                        
+                    }
                 } else if (w.type === "display") {
                     widget = new Display(w.id);
                 } else if (w.type === "storyboard") {
@@ -201,7 +206,10 @@ define(function (require, exports, module) {
                     var coords = d.coords.split(",").map(function (d) {
                         return parseFloat(d);
                     });
-                    var h = coords[3] - coords[1], w = coords[2] - coords[0], x = coords[0], y = coords[1];
+                    var h = parseFloat(coords[3]) - parseFloat(coords[1]),
+                        w = parseFloat(coords[2]) - parseFloat(coords[0]),
+                        x = parseFloat(coords[0]),
+                        y = parseFloat(coords[1]);
                     var mark = mapCreator.restoreRectRegion({x: x, y: y, width: w, height: h});
                     mark.attr("id", widget.id()).classed(widget.type(), true);
                     widget.element(mark);
@@ -212,7 +220,7 @@ define(function (require, exports, module) {
                     });
                 });
             }
-            
+
             installKeypressHandler(this);
         }
     };
@@ -220,7 +228,7 @@ define(function (require, exports, module) {
     function round(v) {
         return Math.round(v * 10) / 10;
     }
-    
+
     WidgetManager.prototype.updateMapCreator = function (scale, cb) {
         scale = scale || 1;
         var wm = this, event = {type: "WidgetModified"};
@@ -242,12 +250,18 @@ define(function (require, exports, module) {
                         view.remove();
                         var id = e.data.type + "_" + uidGenerator();
                         var widget;
+                        var height = parseFloat(d3.select("#imageDiv .selected rect").attr("height")),
+                            width = parseFloat(d3.select("#imageDiv .selected rect").attr("width")),
+                            x = parseFloat(d3.select("#imageDiv .selected rect").attr("x")),
+                            y = parseFloat(d3.select("#imageDiv .selected rect").attr("y"));
+                        var scale = (d3.select("svg > g").node()) ?
+                                        +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
                         if (e.data.type === "button") {
                             widget = new Button(id,
-                                { top: d3.select("#imageDiv .selected rect").attr("y"),
-                                  left: d3.select("#imageDiv .selected rect").attr("x"),
-                                  width: d3.select("#imageDiv .selected rect").attr("width"),
-                                  height: d3.select("#imageDiv .selected rect").attr("height") },
+                                { top: y * scale,
+                                  left: x * scale,
+                                  width: width * scale,
+                                  height: height * scale },
                                 { callback: renderResponse,
                                   buttonReadback: e.data.buttonReadback });
                             if (e.data.keyCode) {
@@ -358,7 +372,7 @@ define(function (require, exports, module) {
     WidgetManager.prototype.editTimer = function (emuTimer) {
         handleTimerEdit(emuTimer, wm);
     };
-    
+
     /**
         Edits the specified widget.
         @param {Widget} widget The widget to be edited.
