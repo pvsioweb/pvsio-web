@@ -13,12 +13,12 @@ define(function (require, exports, module) {
     var Screen = Backbone.Model.extend({
         defaults: {
             name: "New screen",
-            isInitial: false,
-            id: uuid()
+            isInitial: false
         },
 
-        initialize: function () {
+        initialize: function (opts) {
             this.set("widgets", {});
+            this.set("id", opts.id || uuid());
         },
 
         toJSON: function () {
