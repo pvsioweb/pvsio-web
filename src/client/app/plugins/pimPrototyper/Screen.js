@@ -18,7 +18,8 @@ define(function (require, exports, module) {
 
         initialize: function (opts) {
             this.set("widgets", {});
-            this.set("id", opts.id || uuid());
+            var id = (opts && opts.id != null) ? opts.id : uuid();
+            this.set("id", id);
         },
 
         toJSON: function () {

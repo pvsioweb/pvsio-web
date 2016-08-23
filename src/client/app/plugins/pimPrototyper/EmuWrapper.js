@@ -24,10 +24,26 @@ define(function (require, exports, module) {
         });
 
         screens.forEach(function (s) {
+            var targets = d3.set();
             var widgets = s.get("widgets");
+
             _.forEach(widgets, function (w) {
-                _this._addWidgetTransition(w, s);
+                // Add a transition from this screen to the widget's target, but only if a transition for the same event
+                // doesn't already exist.
+                if (w.targetScreen() != null && !targets.has(w.targetScreen().get("name"))) {
+                    _this._addWidgetTransition(w, s);
+                    targets.add(w.targetScreen().get("name"));
+                }
             });
+
+            // Add the initial transtion if this screen is the starting screen
+            if (s.get("isInitial")) {
+                _this._emuchartsEditor.emucharts.add_initial_edge({
+                    target: { id: s.id },
+                    name: "init",
+                    controlPoint: { x: 0, y: 0 }
+                });
+            }
         });
 
         this._emuchartsEditor.emucharts.layOutChart();
@@ -101,7 +117,7 @@ define(function (require, exports, module) {
     };
 
     EmuWrapper.prototype._createBehaviourName = function (targetScreen) {
-        return "I_showScreen-" + targetScreen.get("name").trim().replace(/\s+/g, "-");
+        return "I_" + targetScreen.get("name").trim().replace(/[\s-]+/g, "_");
     };
 
     module.exports = EmuWrapper;

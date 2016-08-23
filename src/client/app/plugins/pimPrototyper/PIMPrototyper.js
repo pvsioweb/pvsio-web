@@ -16,6 +16,7 @@ define(function (require, exports, module) {
         PluginManager = require("plugins/PluginManager"),
         EmuWrapper = require("./EmuWrapper"),
         Emulink = require("plugins/emulink/Emulink"),
+        DisplayQuestion = require("pvsioweb/forms/displayQuestion"),
         MIME = require("util/MIME").getInstance();
 
     var instance;
@@ -70,28 +71,40 @@ define(function (require, exports, module) {
         });
 
         this._container.select(".pim-convert-button").on("click", function() {
-            var emulink = Emulink.getInstance();
+            var data = {header: "Warning: chart will be cleared",
+                        question: "This will clear any existing chart in the EmuCharts Editor. Do you want to continue?",
+                        buttons: ["Cancel", "Continue"],
+                        primaryLevel: "success"};
+            DisplayQuestion.create(data)
+                .on("continue", function (e, view) {
+                    view.remove();
+                    var emulink = Emulink.getInstance();
 
-            (PluginManager.getInstance().isLoaded(emulink)
-                ? Promise.resolve()
-                : PluginManager.getInstance().enablePlugin(emulink))
-            .then(function () {
-                var emuManager = emulink.getEmuchartsManager();
-                var emuEditor = emuManager.getSelectedEditor();
+                    (PluginManager.getInstance().isLoaded(emulink)
+                        ? Promise.resolve()
+                        : PluginManager.getInstance().enablePlugin(emulink))
+                    .then(function () {
+                        var emuManager = emulink.getEmuchartsManager();
+                        var emuEditor = emuManager.getSelectedEditor();
 
-                if (_this._emuWrapper != null) {
-                    _this._emuWrapper.setEmuchartsEditor(emuEditor);
-                } else {
-                    _this._emuWrapper = new EmuWrapper(emuEditor);
-                }
+                        emuManager.delete_chart();
 
-                // Make sure the Emucharts editor is in PIM mode
-                if (!emuManager.getIsPIM()) {
-                    emuManager.toPIM(true);
-                }
+                        if (_this._emuWrapper != null) {
+                            _this._emuWrapper.setEmuchartsEditor(emuEditor);
+                        } else {
+                            _this._emuWrapper = new EmuWrapper(emuEditor);
+                        }
 
-                _this._emuWrapper.addScreens(_this._screens);
-            });
+                        // Make sure the Emucharts editor is in PIM mode
+                        if (!emuManager.getIsPIM()) {
+                            emuManager.toPIM(true);
+                        }
+
+                        _this._emuWrapper.addScreens(_this._screens);
+                    });
+                }).on("cancel", function (e, view) {
+                    view.remove();
+                });
         });
 
         this._fileSystem = new FileSystem();
