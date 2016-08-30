@@ -483,6 +483,7 @@ define(function (require, exports, module) {
     */
     PrototypeBuilder.prototype.initialise = function () {
         var _this = this;
+        this.collapsed = false;
         pbContainer = pvsioWebClient.createCollapsiblePanel({
             headerText: "Prototype Builder",
             showContent: !this.collapsed,
