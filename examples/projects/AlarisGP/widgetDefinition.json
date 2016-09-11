@@ -4,6 +4,7 @@
    "type": "display",
    "id": "Display1360329548294",
    "displayKey": "display",
+   "cursorName": "",
    "auditoryFeedback": false
   },
   {
@@ -57,6 +58,13 @@
    "buttonReadback": "",
    "keyCode": "34",
    "keyName": "page down"
+  },
+  {
+   "type": "led",
+   "id": "led_1e4d2a41-2bcd-4413-c39b-9189fcc101b5",
+   "ledON": "",
+   "ledKey": "power_led",
+   "ledColor": "lightgreen"
   }
  ],
  "regionDefs": [
@@ -88,6 +96,12 @@
    "class": "Button1360329673407",
    "shape": "rect",
    "coords": "187.6666717529297,265.6666564941406,215.65104675292966,291.6666564941406",
+   "href": null
+  },
+  {
+   "class": "led_1e4d2a41-2bcd-4413-c39b-9189fcc101b5",
+   "shape": "rect",
+   "coords": "137.60000610351562,354.79998779296875,148.60000610351562,367.79998779296875",
    "href": null
   }
  ]

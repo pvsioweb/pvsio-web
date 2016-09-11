@@ -10,6 +10,9 @@
                     <li>
                         <a href="#button" data-toggle="tab" id="buttonTab">Button</a>
                     </li>
+                    <li>
+                        <a href="#led" data-toggle="tab" id="ledTab">LED</a>
+                    </li>
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane active" id="display">
@@ -51,7 +54,7 @@
                         <div class="form-group">
                             <label for="functionText" class="col-sm-4 control-label">Button Name</label>
                             <div class="col-sm-8">
-                                <input type="text" name="functionText" id="functionText" required class="form-control" 
+                                <input type="text" name="functionText" id="functionText" required class="form-control"
                                        value="" placeholder="Please enter button name (mandatory)"/>
                             </div>
                         </div>
@@ -77,11 +80,11 @@
                         <div class="form-group">
                             <label for="buttonReadback" class="col-sm-4 control-label">Voice Readback</label>
                             <div class="col-sm-8">
-                                <input type="text" name="buttonReadback" id="buttonReadback" class="form-control" 
+                                <input type="text" name="buttonReadback" id="buttonReadback" class="form-control"
                                        value="{{buttonReadback}}" placeholder="Please enter readback text (optional)"/>
                             </div>
                         </div>
-                        <div class="form-group">                           
+                        <div class="form-group">
                             <label for="keyCode" class="col-sm-4 control-label">Keyboard Key</label>
                             <div class="col-sm-8">
                                 <input onkeydown="uniKeyCode(event)" class="form-control"
@@ -94,6 +97,28 @@
                             <div class="col-sm-8">
                                 <textarea id="boundFunctions" name="boundFunctions" type="text" readonly="true" class="form-control">
                                 </textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="led">
+                        <div class="form-group">
+                            <label for="ledKey" class="col-sm-4 control-label">LED Name</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="ledKey" id="ledKey" required class="form-control"
+                                       value="" placeholder="Please enter LED name (mandatory)"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ledON" class="col-sm-4 control-label">Powered ON when...</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="ledON" id="ledON" class="form-control" placeholder="always ON" value="{{ledON}}" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ledColor" class="col-sm-4 control-label">Color</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="ledColor" id="ledColor" class="form-control" placeholder="Please enter LED color (default: lightgreen)" value="{{ledColor}}" />
                             </div>
                         </div>
                     </div>

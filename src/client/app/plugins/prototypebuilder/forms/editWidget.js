@@ -37,6 +37,7 @@ define(function (require, exports, module) {
             var widgetData = widget.toJSON();
             widgetData.isDisplay = widget.type() === "display";
             widgetData.isButton = widget.type() === "button";
+            widgetData.isLED = widget.type() === "led";
             widgetData.isTimer = widget.type() === "timer";
             this.$el.html(t(widgetData));
             $("body").append(this.el);

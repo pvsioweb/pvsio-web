@@ -130,9 +130,9 @@ define(function (require, exports, module) {
     SingleDisplay.prototype.constructor = SingleDisplay;
     SingleDisplay.prototype.parentClass = Widget.prototype;
     /**
-     * Returns a JSON object representation of this Button.
+     * Returns a JSON object representation of this Widget.
      * @returns {object}
-     * @memberof module:Button
+     * @memberof module:SingleDisplay
     */
     SingleDisplay.prototype.toJSON = function () {
         return {
@@ -144,7 +144,7 @@ define(function (require, exports, module) {
         };
     };
     /**
-     * Updates the location of the display widget with the given position
+    * Updates the location and size of the widget according to the given position and size
      */
     SingleDisplay.prototype.updateLocationAndSize = function (pos) {
         SingleDisplay.prototype.parentClass.updateLocationAndSize.apply(this, arguments);

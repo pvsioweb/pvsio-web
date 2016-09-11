@@ -26,7 +26,7 @@ define(function (require, exports, module) {
         }).join(", ");
         d3.select("#boundFunctions").text(str);
     }
-    
+
     var NewWidgetView	= BaseDialog.extend({
         render: function (data) {
             var t = Handlebars.compile(template);
@@ -40,6 +40,7 @@ define(function (require, exports, module) {
             "click #btnCancel": "cancel",
             "click #displayTab": "displayTabClicked",
             "click #buttonTab": "buttonTabClicked",
+            "click #ledTab": "ledTabClicked",            
             "change input[type='radio'][name='events']": "eventsChanged",
             "keyup #functionText": "eventsChanged"
         },
@@ -66,9 +67,13 @@ define(function (require, exports, module) {
         buttonTabClicked: function (event) {
             event.preventDefault();
             $(event.target).tab("show");
+        },
+        ledTabClicked: function (event) {
+            event.preventDefault();
+            $(event.target).tab("show");
         }
     });
-    
+
     module.exports = {
         create: function (data) {
             data = data || { top: 10, left: 10, width: 60, height: 32 };

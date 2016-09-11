@@ -16,7 +16,13 @@ define(function (require, exports, module) {
             var label = widget.type() + ": ";
             if (widget.type() === "display") {
                 label += widget.displayKey();
-            } else { label += widget.functionText(); }
+            } else if (widget.type() === "led") {
+                label = "LED: " + widget.ledKey();
+            } else if (widget.type() === "button") {
+                label += widget.functionText();
+            } else {
+                label += widget.id();
+            }
             return label;
         }
 

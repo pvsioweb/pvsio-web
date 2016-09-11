@@ -41,7 +41,7 @@
                         <textarea id="timerFunction" name="timerFunction" type="text" readonly="true" class="form-control">{{timerFunction}}</textarea>
                     </div>
                 </div>
-                {{else}}
+                {{else}}{{#if isButton}}
                 <div class="form-group">
                     <label for="functionText" class="col-sm-4 control-label">Button Name</label>
                     <div class="col-sm-8">
@@ -73,7 +73,7 @@
                         <input type="text" name="buttonReadback" id="buttonReadback" class="form-control" value="{{buttonReadback}}" />
                     </div>
                 </div>
-                <div class="form-group">                           
+                <div class="form-group">
                     <label for="keyCode" class="col-sm-4 control-label">Keyboard Key</label>
                     <div class="col-sm-8">
                         <input onkeydown="uniKeyCode(event)" class="form-control"
@@ -87,7 +87,26 @@
                         <textarea id="boundFunction" name="boundFunction" type="text" readonly="true" class="form-control">{{boundFunctions}}</textarea>
                     </div>
                 </div>
-                {{/if}}{{/if}}
+                {{else}}{{#if isLED}}
+                <div class="form-group">
+                    <label for="prefix" class="col-sm-4 control-label">LED name</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="ledKey" id="ledKey" required class="form-control" value="{{ledKey}}" placeholder="Please enter LED name (mandatory)"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="ledON" class="col-sm-4 control-label">Powered ON when...</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="ledON" id="ledON" class="form-control" placeholder="always ON" value="{{ledON}}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="ledColor" class="col-sm-4 control-label">Color</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="ledColor" id="ledColor" class="form-control" placeholder="Please enter LED color (default: lightgreen)" value="{{ledColor}}" />
+                    </div>
+                </div>
+                {{/if}}{{/if}}{{/if}}{{/if}}
         </div>
         <div class="panel-footer">
             <button type="button" class="btn btn-danger left" id="btnCancel">Cancel</button>

@@ -14,7 +14,7 @@ define(function (require, exports, module) {
         uidGenerator    = require("util/uuidGenerator"),
         EditWidgetView  = require("pvsioweb/forms/editWidget"),
         Button          = require("widgets/Button"),
-        //Display         = require("pvsioweb/Display"),
+        LED             = require("widgets/LED"),
         SingleDisplay   = require("widgets/SingleDisplay"),
         Storyboard      = require("pvsioweb/Storyboard"),
         EmuTimer        = require("widgets/EmuTimer"),
@@ -35,6 +35,10 @@ define(function (require, exports, module) {
             });
             //render displays
             wm.getDisplayWidgets().forEach(function (w) {
+                w.render(state);
+            });
+            //render LEDs
+            wm.getLEDWidgets().forEach(function (w) {
                 w.render(state);
             });
         } else {
@@ -183,6 +187,11 @@ define(function (require, exports, module) {
                         { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
                         { displayKey: w.displayKey, auditoryFeedback: w.auditoryFeedback,
                           parent: "imageDiv" });
+                } else if (w.type === "led") {
+                    widget = new LED(w.id,
+                        { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                        { ledKey: w.ledKey, ledON: w.ledON, color: w.ledColor,
+                          parent: "imageDiv" });
                 } else if (w.type === "storyboard") {
                     widget = new Storyboard(w.id);
                 }
@@ -259,14 +268,23 @@ define(function (require, exports, module) {
                             if (e.data.keyCode) {
                                 wm._keyCode2widget[e.data.keyCode] = widget;
                             }
-                        } else {
+                        } else if (e.data.type === "display") {
                             widget = new SingleDisplay(id,
                                 { top: y, left: x, width: width, height: height },
                                 { displayKey: e.data.displayKey, auditoryFeedback: e.data.auditoryFeedback,
                                   parent: "imageDiv" });
+                        } else if (e.data.type === "led") {
+                            widget = new LED(id,
+                                { top: y, left: x, width: width, height: height },
+                                { ledKey: e.data.ledKey, ledON: e.data.ledON, color: e.data.ledColor,
+                                  parent: "imageDiv" });
+                        } else {
+                            console.log("warning: unrecognised widget type " + e.data.type);
+                            view.remove();
+                            d3.select(region.node().parentNode).remove();
+                            return;
                         }
-                        region.classed(widget.type(), true)
-                            .attr("id", id);
+                        region.classed(widget.type(), true).attr("id", id);
                         if (e.data.hasOwnProperty("events")) {
                             e.data.evts = e.data.events;
                             delete e.data.events;
@@ -401,7 +419,7 @@ define(function (require, exports, module) {
         delete this._widgets[widget.id()];
     };
     /**
-        Gets a list of all the display widgets loaded on the page.
+        Gets a list of all display widgets loaded on the page.
         @returns {Display[]}
         @memberof module:WidgetManager
      */
@@ -411,7 +429,17 @@ define(function (require, exports, module) {
         });
     };
     /**
-        Gets a list of all the button widgets loaded on the page.
+        Gets a list of all LED widgets loaded on the page.
+        @returns {LED[]}
+        @memberof module:WidgetManager
+     */
+    WidgetManager.prototype.getLEDWidgets = function () {
+        return _.filter(this._widgets, function (w) {
+            return w.type() === "led";
+        });
+    };
+    /**
+        Gets a list of all button widgets loaded on the page.
         @returns {Button[]}
         @memberof WidgetManager
      */
@@ -439,6 +467,7 @@ define(function (require, exports, module) {
     */
     WidgetManager.prototype.getAllWidgets = function () {
         return this.getDisplayWidgets()
+                    .concat(this.getLEDWidgets())
                     .concat(this.getButtonWidgets())
                     .concat(this.getStoryboardWidgets());
     };
