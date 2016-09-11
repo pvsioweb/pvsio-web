@@ -11,7 +11,7 @@ define(function (require, exports, module) {
         CursoredDisplay = require("widgets/CursoredDisplay"),
         StateParser = require("util/PVSioStateParser"),
         Speaker  = require("widgets/TextSpeaker");
-    
+
     function Display(id) {
         Widget.call(this, id, "display");
         //this.regex = property.call(this);
@@ -81,12 +81,12 @@ define(function (require, exports, module) {
             auditoryFeedback: this.auditoryFeedback()
         };
     };
-    
+
     Display.prototype.remove = function () {
         Display.prototype.parentClass.remove.apply(this);
         d3.select("div." + this.id()).remove();
     };
-    
+
     /**
         Updates the location of the display widget with the given position
     */
@@ -108,6 +108,6 @@ define(function (require, exports, module) {
             this.displayKey(props.regex.split(":=")[0]);
         }
     };
-    
+
     module.exports = Display;
 });

@@ -64,8 +64,8 @@ define(function (require, exports, module) {
         this.height = coords.height || 32;
 
         this.area = opt.area || parent.append("area");
-        var x2 = parseFloat(this.left) + parseFloat(this.width);
-        var x3 = parseFloat(this.top) + parseFloat(this.height);
+        var x2 = this.left + this.width;
+        var x3 = this.top + this.height;
         this.area.attr("shape", "rect").attr("id", id).attr("class", id)
                  .attr("coords", this.left + "," + this.top + "," + x2 + "," + x3)
                  .style("cursor", this.cursor);

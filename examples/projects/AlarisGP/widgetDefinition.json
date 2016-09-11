@@ -3,7 +3,8 @@
   {
    "type": "display",
    "id": "Display1360329548294",
-   "displayKey": "display"
+   "displayKey": "display",
+   "auditoryFeedback": false
   },
   {
    "evts": [
@@ -62,7 +63,7 @@
   {
    "class": "Display1360329548294",
    "shape": "rect",
-   "coords": "110.66665649414061,117.66665649414062,205.66665649414065,160.65103149414062",
+   "coords": "99.66665649414061,145,208.66665649414065,179.984375",
    "href": null
   },
   {

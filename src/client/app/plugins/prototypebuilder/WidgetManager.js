@@ -14,7 +14,8 @@ define(function (require, exports, module) {
         uidGenerator    = require("util/uuidGenerator"),
         EditWidgetView  = require("pvsioweb/forms/editWidget"),
         Button          = require("widgets/Button"),
-        Display         = require("pvsioweb/Display"),
+        //Display         = require("pvsioweb/Display"),
+        SingleDisplay   = require("widgets/SingleDisplay"),
         Storyboard      = require("pvsioweb/Storyboard"),
         EmuTimer        = require("widgets/EmuTimer"),
         NewWidgetView   = require("pvsioweb/forms/newWidget"),
@@ -156,38 +157,32 @@ define(function (require, exports, module) {
      */
     WidgetManager.prototype.restoreWidgetDefinitions = function (defs) {
         var wm = this;
+        this.clearWidgets();
         if (defs) {
             wm._keyCode2widget = {};
             var widget;
             _.each(defs.widgetMaps, function (w, i) {
+                defs.regionDefs = defs.regionDefs || [];
+                var coords = ((i < defs.regionDefs.length) && defs.regionDefs[i].coords) ? defs.regionDefs[i].coords.split(",") : [0,0,0,0];
+                var height = parseFloat(coords[3]) - parseFloat(coords[1]),
+                    width  = parseFloat(coords[2]) - parseFloat(coords[0]),
+                         x = parseFloat(coords[0]),
+                         y = parseFloat(coords[1]);
+                var scale = (d3.select("svg > g").node()) ?
+                             +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
                 w.type = w.type.toLowerCase();
                 if (w.type === "button") {
-                    if (defs.regionDefs && defs.regionDefs[i].coords) {
-                        var coords = defs.regionDefs[i].coords.split(",");
-                        var height = parseFloat(coords[3]) - parseFloat(coords[1]),
-                            width = parseFloat(coords[2]) - parseFloat(coords[0]),
-                            x = parseFloat(coords[0]),
-                            y = parseFloat(coords[1]);
-                        var scale = (d3.select("svg > g").node()) ?
-                                        +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
-                        widget = new Button(
-                            w.id,
-                            { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
-                            { callback: renderResponse, buttonReadback: w.buttonReadback }
-                        );
-                    } else {
-                        widget = new Button(
-                            w.id,
-                            null,
-                            { callback: renderResponse, buttonReadback: w.buttonReadback,
-                              keyCode: w.keyCode, keyName: w.keyName }
-                        );
-                    }
+                    widget = new Button(w.id,
+                        { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                        { callback: renderResponse, buttonReadback: w.buttonReadback });
                     if (w.keyCode) {
                         wm._keyCode2widget[w.keyCode] = widget;
                     }
                 } else if (w.type === "display") {
-                    widget = new Display(w.id);
+                    widget = new SingleDisplay(w.id,
+                        { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                        { displayKey: w.displayKey, auditoryFeedback: w.auditoryFeedback,
+                          parent: "imageDiv" });
                 } else if (w.type === "storyboard") {
                     widget = new Storyboard(w.id);
                 }
@@ -220,7 +215,6 @@ define(function (require, exports, module) {
                     });
                 });
             }
-
             installKeypressHandler(this);
         }
     };
@@ -250,25 +244,26 @@ define(function (require, exports, module) {
                         view.remove();
                         var id = e.data.type + "_" + uidGenerator();
                         var widget;
-                        var height = parseFloat(d3.select("#imageDiv .selected rect").attr("height")),
-                            width = parseFloat(d3.select("#imageDiv .selected rect").attr("width")),
-                            x = parseFloat(d3.select("#imageDiv .selected rect").attr("x")),
-                            y = parseFloat(d3.select("#imageDiv .selected rect").attr("y"));
                         var scale = (d3.select("svg > g").node()) ?
                                         +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
+                        var height = parseFloat(d3.select("#imageDiv .selected rect").attr("height")) * scale,
+                            width = parseFloat(d3.select("#imageDiv .selected rect").attr("width")) * scale,
+                            x = parseFloat(d3.select("#imageDiv .selected rect").attr("x")) * scale,
+                            y = parseFloat(d3.select("#imageDiv .selected rect").attr("y")) * scale;
                         if (e.data.type === "button") {
                             widget = new Button(id,
-                                { top: y * scale,
-                                  left: x * scale,
-                                  width: width * scale,
-                                  height: height * scale },
+                                { top: y, left: x, width: width, height: height },
                                 { callback: renderResponse,
                                   buttonReadback: e.data.buttonReadback });
+                            widget.updateWithProperties(e.data); //TODO: remove this call, and use the constructor's parameters to update all relevant properties
                             if (e.data.keyCode) {
                                 wm._keyCode2widget[e.data.keyCode] = widget;
                             }
                         } else {
-                            widget = new Display(id);
+                            widget = new SingleDisplay(id,
+                                { top: y, left: x, width: width, height: height },
+                                { displayKey: e.data.displayKey, auditoryFeedback: e.data.auditoryFeedback,
+                                  parent: "imageDiv" });
                         }
                         region.classed(widget.type(), true)
                             .attr("id", id);
@@ -276,9 +271,9 @@ define(function (require, exports, module) {
                             e.data.evts = e.data.events;
                             delete e.data.events;
                         }
-                        widget.updateWithProperties(e.data);
                         widget.element(region);
                         createImageMap(widget);
+                        widget.updateLocationAndSize({ x: x, y: y, width: width, height: height });
                         wm.addWidget(widget);
                         event.action = "create";
                         event.widget = widget;

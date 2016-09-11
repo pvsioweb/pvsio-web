@@ -139,8 +139,8 @@ require([
             {
                 parent: "prototype",
                 left_display: {height: 8, width: 118, align: "center"},
-                center_display: {height: 22, width: 74, top: +14, align: "right"},
-                right_display: {height: 12, width: 20, top: +22, left: +74}
+                center_display: {height: 22, width: 74, top: +14, align: "right", left: -4},
+                right_display: {height: 12, width: 20, top: +22, left: +14}
             });
         alaris.middisp_dvtbi = new TripleDisplay("middisp_dvtbi", {top: 168, left: 94, height: 12, width: 118},
             {
@@ -325,7 +325,7 @@ require([
                 x = (x - min) * 60;
                 var sec = parseInt(x);
                 return hour + "h " + min + "m " + sec + "s";
-            }            
+            }
             if (res.middisp_dtime === "TRUE") {
                 alaris.middisp_dtime.getLeftDisplay().renderGlyphicon("glyphicon-time");
                 alaris.middisp_dtime.renderValue(evaluateTime(res.device.time));

@@ -4,7 +4,8 @@
    "type": "display",
    "id": "display_58f9aa5c-b14d-4c5d-cb25-3f534cf8c4aa",
    "displayKey": "d",
-   "cursorName": "c"
+   "cursorName": "c",
+   "auditoryFeedback": "disabled"
   },
   {
    "evts": [
@@ -76,7 +77,7 @@
   {
    "class": "display_58f9aa5c-b14d-4c5d-cb25-3f534cf8c4aa",
    "shape": "rect",
-   "coords": "112.88888549804688,271.3229217529297,202.88888549804688,313.3229217529297",
+   "coords": "114.60000610351562,275.79998779296875,202.60000610351562,296.79998779296875",
    "href": null
   },
   {

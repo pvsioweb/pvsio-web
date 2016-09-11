@@ -1,5 +1,5 @@
 /**
- * @module CursoredDisplay
+ * @module CursoredDisplay --- REPLACED BY SingleDisplay -------
  * @desc Renders a cursor display
  * @author Patrick Oladimeji, Paolo Masci
  * @date Mar 13, 2012
