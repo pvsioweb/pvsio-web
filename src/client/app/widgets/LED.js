@@ -137,8 +137,8 @@ define(function (require, exports, module) {
             // txt in this case is a PVS state that needs to be parsed
             var str = StateParser.resolve(txt, this.ledKey());
             if (str) {
-                var txt = StateParser.evaluate(str);
-                if (txt === this.ledON) {
+                str = StateParser.evaluate(str);
+                if (str === this.ledON) {
                     this.reveal();
                 } else {
                     this.hide();
