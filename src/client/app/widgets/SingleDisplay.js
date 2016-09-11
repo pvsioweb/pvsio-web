@@ -305,7 +305,7 @@ define(function (require, exports, module) {
 
         opt = opt || {};
         txt = txt || "";
-        if (typeof txt !== "string") {
+        if (typeof txt === "object") {
             // txt in this case is a PVS state that needs to be parsed
             var str = StateParser.resolve(txt, this.displayKey());
             if (str) {

@@ -133,7 +133,7 @@ define(function (require, exports, module) {
         this.div.node().setAttribute("class", elemClass);
         if ((this.ledKey() !== "" && this.ledON() === "") || (typeof txt === "string" && txt === "")) {
             this.reveal();
-        } else if (typeof txt !== "string") {
+        } else if (typeof txt === "object") {
             // txt in this case is a PVS state that needs to be parsed
             var str = StateParser.resolve(txt, this.ledKey());
             if (str) {
