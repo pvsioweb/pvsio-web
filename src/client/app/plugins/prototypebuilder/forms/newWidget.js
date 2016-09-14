@@ -13,18 +13,22 @@ define(function (require, exports, module) {
         d3							= require("d3/d3");
 
     function updateBoundFunctionsLabel() {
-        var f = d3.select("#functionText").property("value"),
-            str = "",
-            events = [];
-        d3.selectAll("input[type='radio'][name='events']").each(function () {
-            if (this.checked) {
-                events = events.concat(this.value.split("/"));
-            }
-        });
-        str = events.map(function (d) {
-            return d + "_" + f;
-        }).join(", ");
-        d3.select("#boundFunctions").text(str);
+        var activeForm = d3.select("form").select(".active").node();
+        if (activeForm) {
+            var tabName = activeForm.children[0].text.toLowerCase();
+            var f = d3.select("#" + tabName).select("#functionText").property("value"),
+                str = "",
+                events = [];
+            d3.select("#" + tabName).select("#events").selectAll("input[type='radio']").each(function () {
+                if (this.checked) {
+                    events = events.concat(this.value.split("/"));
+                }
+            });
+            str = events.map(function (d) {
+                return d + "_" + f;
+            }).join(", ");
+            d3.select("#" + tabName).select("#boundFunctions").text(str);
+        }
     }
 
     var NewWidgetView	= BaseDialog.extend({
@@ -40,7 +44,7 @@ define(function (require, exports, module) {
             "click #btnCancel": "cancel",
             "click #displayTab": "displayTabClicked",
             "click #buttonTab": "buttonTabClicked",
-            "click #ledTab": "ledTabClicked",            
+            "click #ledTab": "ledTabClicked",
             "change input[type='radio'][name='events']": "eventsChanged",
             "keyup #functionText": "eventsChanged"
         },
@@ -54,6 +58,11 @@ define(function (require, exports, module) {
             if (FormUtils.validateForm(activeForm)) {
                 var formdata = FormUtils.serializeForm(activeForm, "input");
                 formdata.type = type;
+                // group together style properties
+                formdata.style = formdata.style || {};
+                formdata.style.fontsize = formdata.style.fontsize || formdata.fontsize;
+                formdata.style.backgroundColor = formdata.style.backgroundColor || formdata.backgroundColor;
+                // trigger event
                 this.trigger("ok", {data: formdata, el: this.el, event: event}, this);
             }
         },

@@ -44,7 +44,7 @@ define(function (require, exports, module) {
             }
             if (!isNaN(+str)) { return +str; }
         }
-        return str;
+        return str.trim();
     }
 
     /**
@@ -190,6 +190,30 @@ define(function (require, exports, module) {
         }
     }
 
+    /**
+     * Lightweight parser for simple expressions with boolean constants (true/false)
+     * and equality/inequality operators between attributes and constants, e.g., attr = const, attr != const
+     */
+    function simpleExpressionParser (expr) {
+        var ans = { res: null, err: null };
+        if (expr) {
+            if (expr.indexOf("!=") >= 0) {
+                ans.res = expr.split("!=");
+                ans.res = { type: "boolexpr", binop: "!=", attr: ans.res[0].trim(), constant: ans.res[1].trim() };
+            } else if (expr.indexOf("=") >= 0) {
+                ans.res = expr.split("=");
+                ans.res = { type: "boolexpr", binop: "=", attr: ans.res[0].trim(), constant: ans.res[1].trim() };
+            } else if (expr.toLowerCase() === "true") {
+                ans.res = { type: "constexpr", constant: "true" };
+            } else if (expr.toLowerCase() === "false") {
+                ans.res = { type: "constexpr", constant: "false" };
+            }
+            return ans;
+        }
+        ans.err = "unsupported expression " + expr;
+        return ans;
+    }
+
     module.exports = {
         parse: function (state) {
             return parseValue(state).value;
@@ -201,6 +225,7 @@ define(function (require, exports, module) {
                 str = str.join("");
             }
             return str.trim().indexOf("(#") === 0;
-        }
+        },
+        simpleExpressionParser: simpleExpressionParser
     };
 });

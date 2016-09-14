@@ -117,37 +117,41 @@ define(function (require, exports, module) {
     LED.prototype.render = function (txt, opt) {
         opt = opt || {};
         txt = txt || "";
-        var context = document.getElementById(this.id() + "_canvas").getContext("2d");
-        context.beginPath();
-        context.globalAlpha = 0.9;
-        context.arc(this.width / 2, this.height / 2, this.radius, 0, 2 * Math.PI, false);
-        context.fillStyle = opt.color || this.ledColor();
-        context.fill();
-        if (!opt.noborder) { context.stroke(); }
-        var elemClass = this.div.node().getAttribute("class");
-        if (opt.blinking || this.blinking) {
-            elemClass += " blink";
-        } else {
-            elemClass = elemClass.replace(" blink", "");
+        var _this = this;
+        function doRender() {
+            var context = document.getElementById(_this.id() + "_canvas").getContext("2d");
+            context.beginPath();
+            context.globalAlpha = 0.9;
+            context.arc(_this.width / 2, _this.height / 2, _this.radius, 0, 2 * Math.PI, false);
+            context.fillStyle = opt.color || _this.ledColor();
+            context.fill();
+            if (!opt.noborder) { context.stroke(); }
+            var elemClass = _this.div.node().getAttribute("class");
+            if (opt.blinking || _this.blinking) {
+                elemClass += " blink";
+            } else {
+                elemClass = elemClass.replace(" blink", "");
+            }
+            _this.div.node().setAttribute("class", elemClass);
+            return _this.reveal();
         }
-        this.div.node().setAttribute("class", elemClass);
-        if ((this.ledKey() !== "" && this.ledON() === "") || (typeof txt === "string" && txt === "")) {
-            this.reveal();
+        if ((_this.ledKey() !== "" && _this.ledON() === "") || (typeof txt === "string" && txt === "")) {
+            return doRender();
         } else if (typeof txt === "object") {
             // txt in this case is a PVS state that needs to be parsed
-            var str = StateParser.resolve(txt, this.ledKey());
-            if (str) {
-                str = StateParser.evaluate(str);
-                if (str === this.ledON) {
-                    this.reveal();
-                } else {
-                    this.hide();
+            var expr = StateParser.simpleExpressionParser(_this.ledON());
+            if (expr && expr.res) {
+                var str = StateParser.resolve(txt, expr.res.attr);
+                if (str) {
+                    str = StateParser.evaluate(str);
+                    if (expr.res.binop === "=" && str === expr.res.constant ||
+                            expr.res.binop === "!=" && str !== expr.res.constant) {
+                        return doRender();
+                    }
                 }
             }
-        } else {
-            this.hide();
         }
-        return this;
+        return _this.hide();
     };
 
     LED.prototype.toggle = function (opt) {

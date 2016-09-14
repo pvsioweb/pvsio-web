@@ -688,7 +688,7 @@ require.config({
     }
 });
 
-require(["scripts/gip.js", "PVSioWebClient"], function(_g, PVSioWebClient){
+require(["NavKeys/scripts/gip.js", "PVSioWebClient"], function(_g, PVSioWebClient){
 
     var client = PVSioWebClient.getInstance();
     ws = client.getWebSocket();

@@ -572,7 +572,8 @@ require([
                 }).catch(function (err) {
                     console.log(err);
                     d3.select(".error_monitor").style("display", "block");
-
+                    start_tick();
+                    d3.select(".content").style("display", "block");
                 });
             } else {
                 console.log(err);

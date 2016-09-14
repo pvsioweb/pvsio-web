@@ -14,6 +14,7 @@ define(function (require, exports, module) {
         Timer	= require("util/Timer"),
         Recorder    = require("util/ActionRecorder"),
         Speaker  = require("widgets/TextSpeaker"),
+        StateParser = require("util/PVSioStateParser"),
         ButtonActionsQueue = require("widgets/ButtonActionsQueue").getInstance(),
         ButtonHalo = require("widgets/ButtonHalo").getInstance();
     //define timer for sensing hold down actions on buttons
@@ -39,6 +40,7 @@ define(function (require, exports, module) {
         opt.keyCode = opt.keyCode || "";
         opt.keyName = opt.keyName || "";
         opt.animation = opt.animation || function () {};
+        opt.enabledWhen =  (opt.enabledWhen && opt.enabledWhen !== "") ? opt.enabledWhen : "false";
         coords = coords || {};
         this.evts = property.call(this, opt.evts);
         this.recallRate = property.call(this, opt.recallRate);
@@ -48,6 +50,7 @@ define(function (require, exports, module) {
         this.keyCode = property.call(this, opt.keyCode);
         this.keyName = property.call(this, opt.keyName);
         this.animation = opt.animation;
+        this.enabledWhen = property.call(this, opt.enabledWhen);
         this.cursor = opt.cursor || "pointer";
 
         Widget.call(this, id, "button");
@@ -75,6 +78,7 @@ define(function (require, exports, module) {
         if (opt.keyCode) {
             ButtonHalo.installKeypressHandler(this);
         }
+        this.isEnabled = property.call(this, true);
         return this;
     }
 
@@ -117,7 +121,8 @@ define(function (require, exports, module) {
             boundFunctions: this.boundFunctions(),
             buttonReadback: this.buttonReadback(),
             keyCode: this.keyCode(),
-            keyName: this.keyName()
+            keyName: this.keyName(),
+            enabledWhen: this.enabledWhen()
         };
     };
 
@@ -214,6 +219,35 @@ define(function (require, exports, module) {
             Speaker.speak(this.buttonReadback());
         }
         return this;
+    };
+
+    /**
+     * @function render
+     * @description API for updating properties of the button, e.g., whether it's enabled/visible
+     * @memberof module:Button
+     */
+    Button.prototype.render = function (txt, opt) {
+        opt = opt || {};
+        txt = txt || "";
+        if (typeof txt === "object") {
+            var expr = StateParser.simpleExpressionParser(this.enabledWhen());
+            if (expr && expr.res) {
+                if (expr.res.type === "constexpr" && expr.res.constant === "true") {
+                    return this.isEnabled(true);
+                } else if (expr.res.type === "boolexpr" && expr.res.binop) {
+                    // txt in this case is a PVS state that needs to be parsed
+                    var str = StateParser.resolve(txt, expr.res.attr);
+                    if (str) {
+                        str = StateParser.evaluate(str);
+                        if ((expr.res.binop === "=" && str === expr.res.constant) ||
+                             (expr.res.binop === "!=" && str !== expr.res.constant)) {
+                                 return this.isEnabled(true);
+                        }
+                    }
+                }
+            }
+        }
+        return this.isEnabled(false);
     };
 
     /**

@@ -25,7 +25,6 @@ require([
         "widgets/DoubleDisplay",
         "widgets/TripleDisplay",
         "widgets/LED",
-        "widgets/CursoredDisplay",
         "plugins/graphbuilder/GraphBuilder",
         "stateParser",
         "PVSioWebClient",
@@ -36,7 +35,6 @@ require([
               DoubleDisplay,
               TripleDisplay,
               LED,
-              CursoredDisplay,
               GraphBuilder,
               stateParser,
               PVSioWebClient,
@@ -151,8 +149,8 @@ require([
         alaris.middisp_dvol = new TripleDisplay("middisp_dvol", {top: 186, left: 94, height: 12, width: 118},
             {
                 parent: "prototype",
-                left_display: {height: 8, width: 34, align: "left"},
-                center_display: {width: 62, align: "right"}
+                left_display: {height: 8, width: 62, align: "left"},
+                center_display: {width: 34, align: "right"}
             });
         alaris.middisp_dtime = new TripleDisplay("middisp_dtime", {top: 204, left: 94, height: 12, width: 118},
             {

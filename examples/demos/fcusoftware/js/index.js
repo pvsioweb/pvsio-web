@@ -178,9 +178,8 @@ require([
                                 backgroundColor: "black",
                                 fontColor: "white",
                                 parent: "prototype",
-                                touchscreen: {callback: onMessageReceived, backgroundColor: "green", highlightOnMouseClick: true},
+                                touchscreen: {callback: onMessageReceived, functionText: "CLR", backgroundColor: "green", highlightOnMouseClick: true},
                                 fontsize: 16,
-                                functionText: "CLR",
                                 cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
 
@@ -204,8 +203,7 @@ require([
                             {
                                 backgroundColor: "transparent",
                                 parent: "prototype",
-                                touchscreen: {callback: onMessageReceived, backgroundColor: "transparent", highlightOnMouseClick: true},
-                                functionText: "STD_RADIO",
+                                touchscreen: {callback: onMessageReceived, functionText: "STD_RADIO", backgroundColor: "transparent", highlightOnMouseClick: true},
                                 cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
 
@@ -220,8 +218,7 @@ require([
                             {
                                 backgroundColor: "transparent",
                                 parent: "prototype",
-                                touchscreen: {callback: onMessageReceived, backgroundColor: "transparent", highlightOnMouseClick: true},
-                                functionText: "QNH_RADIO",
+                                touchscreen: {callback: onMessageReceived, functionText: "QNH_RADIO", backgroundColor: "transparent", highlightOnMouseClick: true},
                                 cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
 

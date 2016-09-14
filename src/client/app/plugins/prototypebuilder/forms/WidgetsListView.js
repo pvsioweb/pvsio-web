@@ -20,6 +20,8 @@ define(function (require, exports, module) {
                 label = "LED: " + widget.ledKey();
             } else if (widget.type() === "button") {
                 label += widget.functionText();
+            } else if (widget.type() === "softbutton") {
+                label += widget.functionText();
             } else {
                 label += widget.id();
             }

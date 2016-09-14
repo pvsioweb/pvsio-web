@@ -5,13 +5,13 @@
 
 
 <!-- JS addition for GIP & PVSio -->
-    <script type="application/javascript" src="../../../client/lib/promise-0.1.1.js"></script>
-    <script type="text/javascript" src="../../../client/lib/jquery.js"></script>
-    <script type="text/javascript" src="../../../client/lib/underscore/underscore.js"></script>
-    <script type="text/javascript" src="../../../client/lib/backbone.js"></script>
-    <script type="text/javascript" src="../../../client/lib/handlebars-v1.1.0.js"></script>
-    <script type="text/javascript" src="../../../client/lib/bootstrap/js/bootstrap.min.js"></script>
-    <script src="../../../client/require.js" data-main="scripts/pvsio_utils.js"></script>
+    <script type="application/javascript" src="../../client/lib/promise-0.1.1.js"></script>
+    <script type="text/javascript" src="../../client/lib/jquery.js"></script>
+    <script type="text/javascript" src="../../client/lib/underscore/underscore.js"></script>
+    <script type="text/javascript" src="../../client/lib/backbone.js"></script>
+    <script type="text/javascript" src="../../client/lib/handlebars-v1.1.0.js"></script>
+    <script type="text/javascript" src="../../client/lib/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../../client/require.js" data-main="NavKeys/scripts/pvsio_utils.js"></script>
 
     <!--<script type="text/javascript" src="scripts/require.js" data-main='scripts/pvsio_utils.js'></script>-->
 
@@ -21,16 +21,16 @@
     }
 <!--
 
-.invertedcolor { 
+.invertedcolor {
   color: white;
   background-color: gray;
 }
 
-.decimaldigit { 
+.decimaldigit {
 	font: bold 36px Arial;
 }
 
-.decimaldigitSMALL { 
+.decimaldigitSMALL {
 	font: bold 22px Arial;
 }
 
@@ -404,7 +404,7 @@
 -->
 </STYLE>
 <BODY>
-<img src="GPCA-UI.png" alt="GPCA-UI V2" width="1024" height="220" vspace="4" border="0" usemap="#Map">
+<img src="NavKeys/GPCA-UI.png" alt="GPCA-UI V2" width="1024" height="220" vspace="4" border="0" usemap="#Map">
 <map name="Map">
   <area shape="rect" coords="674,122,728,168" id="btnOk">
   <area shape="rect" coords="745,123,799,169" id="btnEdit">
@@ -424,7 +424,7 @@
 <p><strong>Advanced GPCA-UI demo:</strong> the user interface of the pump is connected to a PVS formal model of the original GPCA Controller developed at the FDA's Office of Science and Engineering Laboratories.</p>
 <input id="show_controller_state_button" name="show_controller_state_button" type="button" onClick="show_controller_state();" value="Show controller state"/>
 <input id="show_ui_state_button" name="show_ui_state_button" type="button" onClick="show_ui_state();" value="Show user interface state"/>
-  
+
 <div id='console_demo'>
   <p>The GPCA-UI backend is off-line.<br><br>
   Please start the GPCA-UI backend by executing <em>pvsio-web</em> in a Terminal window (<a href="screenshots/pvsio-web.png" target="_blank" class="style3">see screenshot</a>).<br><br>
@@ -458,6 +458,6 @@
 <DIV ID="GIP-displayONE-botline"> </DIV>
 
 
-<script type="text/javascript" src="scripts/UI_mappings.js"></script>
+<script type="text/javascript" src="NavKeys/scripts/UI_mappings.js"></script>
 </BODY>
 </HTML>

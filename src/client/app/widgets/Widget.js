@@ -115,6 +115,9 @@ define(function (require, exports, module) {
         @memberof Widget
     */
     Widget.prototype.updateLocationAndSize = function (pos) {
+        if (this.needsImageMap()) {
+            this.createImageMap();
+        }
         this.imageMap().attr("coords", [pos.x, pos.y, pos.x + pos.width, pos.y + pos.height].join(","));
     };
 

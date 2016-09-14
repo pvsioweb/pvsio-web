@@ -51,13 +51,13 @@ define(function (require, exports, module) {
     function SingleDisplay(id, coords, opt) {
         opt = opt || {};
         coords = coords || {};
-        this.id = id;
+        this.id = property.call(this, id);
         this.parent = (opt.parent) ? ("#" + opt.parent) : "body";
         this.top = coords.top || 0;
         this.left = coords.left || 0;
         this.width = coords.width || 200;
         this.height = coords.height || 80;
-        this.fontsize = opt.fontsize || this.height;
+        this.fontsize = opt.fontsize || (this.height * 0.9);
         this.fontfamily = opt.fontfamily || "sans-serif";
         this.font = [this.fontsize, "px ", this.fontfamily];
         this.smallFont = [(this.fontsize * 0.8), "px ", this.fontfamily];
@@ -81,12 +81,12 @@ define(function (require, exports, module) {
                         .style("width", this.width + "px").style("height", this.height + "px")
                         .style("margin", 0).style("padding", 0).style("border-radius", "2px")
                         .style("background-color", this.backgroundColor)
-                        .style("display", "none").attr("id", this.id).attr("class", elemClass);
-        this.div.append("span").attr("id", this.id + "_span").attr("class", id + "_span")
+                        .style("display", "none").attr("id", id).attr("class", elemClass);
+        this.div.append("span").attr("id", id + "_span").attr("class", id + "_span")
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0)
                         .style("vertical-align", "top").style("border-radius", "2px");
-        this.div.append("canvas").attr("id", this.id + "_canvas").attr("class", id + "_canvas")
+        this.div.append("canvas").attr("id", id + "_canvas").attr("class", id + "_canvas")
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0).style("border-radius", "2px")
                         .style("vertical-align", "top");
@@ -94,36 +94,46 @@ define(function (require, exports, module) {
         var x3 = this.top + this.height;
         this.div.attr("coords", this.left + "," + this.top + "," + x2 + "," + x3)
                 .style("cursor", this.cursor);
+        this.txt = "";
+        opt.displayKey = opt.displayKey || id;
+        opt.cursorName = opt.cursorName || "";
+        opt.auditoryFeedback = (opt.auditoryFeedback) ? "enabled" : "disabled";
+        opt.touchscreenEnabledWhen = (opt.touchscreenEnabledWhen && opt.touchscreenEnabledWhen !== "") ? opt.touchscreenEnabledWhen : "false";
+        opt.touchscreenCommand = opt.touchscreenCommand || "";
+        this.displayKey = property.call(this, opt.displayKey);
+        this.cursorName = property.call(this, opt.cursorName);
+        this.auditoryFeedback = property.call(this, opt.auditoryFeedback);
+        this.touchscreenEnabled = property.call(this, false); // the first call to function render() will set the value of this property according to this.touchscreenEnabledWhen()
+        this.touchscreenEnabledWhen = property.call(this, opt.touchscreenEnabledWhen);
+        this.touchscreenCommand = property.call(this, opt.touchscreenCommand);
+        this.example = opt.example || ""; // this is used in the prototype builder to demonstrate the font style of the display
         if (opt.touchscreen) {
-            var touchID = this.id;
-            this.touchscreenBackgroundColor = opt.touchscreen.backgroundColor || "steelblue";
+            var touchID = id;
+            this.touchscreenBackgroundColor = opt.touchscreen.backgroundColor || "green";
             this.touchscreenFontColor = opt.touchscreen.fontColor || "white";
+            this.touchscreenCursor = opt.touchscreen.cursor || "pointer";
             this.touchscreen = new Button(touchID, {
                 left: this.left, top: this.top, height: this.height, width: this.width
             }, {
                 callback: opt.touchscreen.callback || function (err, res) {},
-                evts: opt.touchscreen.events || ['click'],
+                evts: ['click'],
                 area: this.div,
-                functionText: opt.functionText
+                functionText: opt.touchscreenCommand
             });
-            this.cursor = opt.cursor || "pointer";
-            this.div.style("cursor", this.cursor);
             var _this = this;
             this.div.on("mouseover", function() {
-                _this.div.style("background-color", _this.touchscreenBackgroundColor).style("color", _this.touchscreenFontColor);
+                if (_this.touchscreenEnabled()) {
+                    _this.div.style("cursor", _this.touchscreenCursor);
+                    _this.div.style("background-color", _this.touchscreenBackgroundColor).style("color", _this.touchscreenFontColor);
+                } else {
+                    _this.div.style("cursor", _this.cursor);
+                }
             }).on("mouseout", function() {
+                _this.div.style("cursor", _this.cursor);
                 _this.div.style("background-color", _this.backgroundColor).style("color", _this.fontColor);
             });
         }
-        this.txt = "";
         Widget.call(this, id, "display");
-        opt.displayKey = opt.displayKey || id;
-        opt.cursorName = opt.cursorName || "";
-        this.displayKey = property.call(this, opt.displayKey);
-        this.cursorName = property.call(this, opt.cursorName);
-        opt.auditoryFeedback = (opt.auditoryFeedback) ? "enabled" : "disabled";
-        this.auditoryFeedback = property.call(this, opt.auditoryFeedback);
-        this.example = opt.example || ""; // this is used in the prototype builder to demonstrate the font style of the display
         return this;
     }
     SingleDisplay.prototype = Object.create(Widget.prototype);
@@ -140,7 +150,9 @@ define(function (require, exports, module) {
             id: this.id(),
             displayKey: this.displayKey(),
             cursorName: this.cursorName(),
-            auditoryFeedback: this.auditoryFeedback()
+            auditoryFeedback: this.auditoryFeedback(),
+            touchscreenEnabledWhen: this.touchscreenEnabledWhen(),
+            touchscreenCommand: this.touchscreenCommand()
         };
     };
     /**
@@ -152,7 +164,7 @@ define(function (require, exports, module) {
         this.left = pos.x || 0;
         this.width = pos.width || 200;
         this.height = pos.height || 80;
-        this.fontsize = this.height;
+        this.fontsize = this.height * 0.9;
         this.font = [this.fontsize, "px ", this.fontfamily];
         this.smallFont = [(this.fontsize * 0.8), "px ", this.fontfamily];
         d3.select("div." + this.id()).style("left", this.left + "px").style("top", this.top + "px")
@@ -169,6 +181,18 @@ define(function (require, exports, module) {
         d3.select("div." + this.id()).remove();
     };
 
+
+    /**
+     * @function boundFunctions
+     * @returns {String} A comma separated string representing the PVS functions modelling actions over this button.
+     * @memberof module:SingleDisplay
+     */
+    SingleDisplay.prototype.boundFunctions = function () {
+        if (this.touchscreen) {
+            return this.touchscreen.boundFunctions();
+        }
+        return [];
+    };
 
     SingleDisplay.prototype.invertColors = function () {
         var tmp = this.backgroundColor;
@@ -305,9 +329,11 @@ define(function (require, exports, module) {
 
         opt = opt || {};
         txt = txt || "";
+        var _this = this;
+        var str = "";
         if (typeof txt === "object") {
             // txt in this case is a PVS state that needs to be parsed
-            var str = StateParser.resolve(txt, this.displayKey());
+            str = StateParser.resolve(txt, this.displayKey());
             if (str) {
                 this.txt = StateParser.evaluate(str);
                 if (typeof this.txt === "string") {
@@ -323,40 +349,62 @@ define(function (require, exports, module) {
         } else {
             this.txt = txt;
         }
-        var _this = this;
+        this.example = this.txt;
         // set blinking
         var elemClass = document.getElementById(this.id()).getAttribute("class");
-        if (opt.blinking || this.blinking) {
-            if (elemClass.indexOf("blink") < 0) {
-                elemClass = elemClass + " blink";
-            }
-        } else {
-            elemClass = elemClass.replace(" blink", "");
-        }
+        elemClass = (opt.blinking || this.blinking) ?
+                        ((elemClass.indexOf("blink") < 0) ? (elemClass + " blink") : elemClass)
+                        : elemClass.replace(" blink", "");
         document.getElementById(this.id()).setAttribute("class", elemClass);
         // render content
         var context = document.getElementById(this.id() + "_canvas").getContext("2d");
         context.textBaseline = this.textBaseline;
         var align = opt.align || this.align;
         context.font = this.font.join("");
-        this.example = this.txt;
-
         if (this.cursorName() !== "" && !isNaN(parseFloat(this.txt))) {
-            renderNumber({ numstr: parseFloat(this.txt).toString(), cursorpos: this.cursorpos, context: context, align: align, height: this.height, width: this.width }, opt);
+            renderNumber({
+                numstr: parseFloat(this.txt).toString(),
+                cursorpos: this.cursorpos,
+                context: context,
+                align: align,
+                height: this.height,
+                width: this.width
+            }, opt);
         } else {
-            renderln({ txt: this.txt, context: context, align: align, height: this.height, width: this.width }, opt);
+            renderln({
+                txt: this.txt,
+                context: context,
+                align: align,
+                height: this.height,
+                width: this.width
+            }, opt);
         }
         d3.select("#" + this.id() + "_canvas").style("display", "block");
         d3.select("#" + this.id() + "_span").style("display", "none");
+
         if (this.touchscreen) {
-            if (opt.disableTouch) {
-                this.div.style("cursor", "default");
-            } else {
-                this.div.style("cursor", this.cursor);
+            this.touchscreenEnabled(false);
+            if (this.touchscreenEnabledWhen() !== "") {
+                // we need to parse the expression touchscreenEnabledWhen() to understand if the touchscreeen is enabled or not
+                var expr = StateParser.simpleExpressionParser(this.touchscreenEnabledWhen());
+                if (expr && expr.res) {
+                    if (expr.res.type === "constexpr" && expr.res.constant === "true") {
+                        this.touchscreenEnabled(true);
+                    } else if (expr.res.type === "boolexpr" && expr.res.binop) {
+                        // txt in this case is a PVS state that needs to be parsed
+                        str = StateParser.resolve(txt, expr.res.attr);
+                        if (str) {
+                            str = StateParser.evaluate(str);
+                            if ((expr.res.binop === "=" && str === expr.res.constant) ||
+                                 (expr.res.binop === "!=" && str !== expr.res.constant)) {
+                                     this.touchscreenEnabled(true);
+                            }
+                        }
+                    }
+                }
             }
         }
-        this.reveal();
-        return this;
+        return this.reveal();
     };
 
     SingleDisplay.prototype.renderGlyphicon = function (icon, opt) {

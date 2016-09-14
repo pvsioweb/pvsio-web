@@ -11,6 +11,9 @@
                         <a href="#button" data-toggle="tab" id="buttonTab">Button</a>
                     </li>
                     <li>
+                        <a href="#softbutton" data-toggle="tab" id="buttonTab">SoftButton</a>
+                    </li>
+                    <li>
                         <a href="#led" data-toggle="tab" id="ledTab">LED</a>
                     </li>
                 </ul>
@@ -48,6 +51,20 @@
                                 <input type="checkbox" name="auditoryFeedback" value="auditoryFeedback"/>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label for="touchscreenEnabledWhen" class="col-sm-4 control-label">TouchScreen Enabled</label>
+                            <div class="col-sm-8" style="padding-top:6px;">
+                                <input type="text" name="touchscreenEnabledWhen" id="touchscreenEnabledWhen"
+                                       class="form-control" placeholder="Please enter enabling condition" value="{{touchscreenEnabledWhen}}" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="touchscreenCommand" class="col-sm-4 control-label">TouchScreen Command</label>
+                            <div class="col-sm-8" style="padding-top:6px;">
+                                <input type="text" name="touchscreenCommand" id="touchscreenCommand"
+                                       class="form-control" placeholder="Please enter command" value="{{touchscreenCommand}}" />
+                            </div>
+                        </div>
                     </div>
 
                     <div class="tab-pane" id="button">
@@ -60,14 +77,14 @@
                         </div>
                         <div class="form-group">
                             <label for="events" class="col-sm-4 control-label">User Actions</label>
-                            <div class="col-sm-8">
+                            <div class="col-sm-8" id="events">
                                 <label>
                                     Click
-                                    <input type="radio" name="events" value="click" checked />
+                                    <input type="radio" name="button_click_events" value="click" checked />
                                 </label>
                                 <label>
                                     Press and Release
-                                    <input type="radio" name="events" value="press/release" />
+                                    <input type="radio" name="button_press_release_events" value="press/release" />
                                 </label>
                             </div>
                         </div>
@@ -97,6 +114,51 @@
                             <div class="col-sm-8">
                                 <textarea id="boundFunctions" name="boundFunctions" type="text" readonly="true" class="form-control">
                                 </textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="softbutton">
+                        <div class="form-group">
+                            <label for="functionText" class="col-sm-4 control-label">Soft Button Name</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="functionText" id="functionText" required class="form-control"
+                                       value="" placeholder="Please enter button name (mandatory)"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="softLabel" class="col-sm-4 control-label">Soft Button Label</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="softLabel" id="softLabel" class="form-control"
+                                       value="{{softLabel}}" placeholder="Soft button label (optional)"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="enabledWhen" class="col-sm-4 control-label">Visible when...</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="enabledWhen" id="enabledWhen" class="form-control" placeholder="always visible" value="{{enabledWhen}}" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="buttonReadback" class="col-sm-4 control-label">Voice Readback</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="buttonReadback" id="buttonReadback" class="form-control"
+                                       value="{{buttonReadback}}" placeholder="Please enter readback text (optional)"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="events" class="col-sm-4 control-label">User Actions</label>
+                            <div class="col-sm-8" id="events">
+                                <label>
+                                    Click
+                                    <input type="radio" name="softbutton_click_events" value="click" checked />
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="boundFunctions" class="col-sm-4 control-label">Generated Events</label>
+                            <div class="col-sm-8">
+                                <textarea id="boundFunctions" name="boundFunctions" type="text" readonly="true" class="form-control">{{boundFunctions}}</textarea>
                             </div>
                         </div>
                     </div>
