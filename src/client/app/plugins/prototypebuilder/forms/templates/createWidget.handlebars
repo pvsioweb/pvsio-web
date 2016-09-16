@@ -2,72 +2,34 @@
     <form class="center form-horizontal" onsubmit="return false" role="form">
     <div class="panel panel-info shadow center dialog">
         <div class="panel-heading">Create Widget</div>
-        <div class="panel-body">
+        <div class="panel-body" style="min-height:420px">
                 <ul class="nav nav-tabs" id="tabHeaders">
                     <li>
-                        <a href="#display" data-toggle="tab" id="displayTab">Display</a>
+                        <a href="#button" data-toggle="tab" id="buttonTab" widgetType="button">Button</a>
                     </li>
                     <li>
-                        <a href="#button" data-toggle="tab" id="buttonTab">Button</a>
+                        <a href="#display" data-toggle="tab" id="displayTab" widgetType="display">Basic Display</a>
                     </li>
                     <li>
-                        <a href="#softbutton" data-toggle="tab" id="buttonTab">SoftButton</a>
+                        <a href="#numericdisplay" data-toggle="tab" id="numericdisplayTab" widgetType="numericdisplay">Numeric Display</a>
                     </li>
                     <li>
-                        <a href="#led" data-toggle="tab" id="ledTab">LED</a>
+                        <a href="#touchscreendisplay" data-toggle="tab" id="touchscreendisplayTab" widgetType="touchscreendisplay">Touchscreen Display</a>
+                    </li>
+                    <li>
+                        <a href="#touchscreenbutton" data-toggle="tab" id="touchscreenbuttonTab" widgetType="touchscreenbutton">Touchscreen Button</a>
+                    </li>
+                    <li>
+                        <a href="#led" data-toggle="tab" id="ledTab" widgetType="led">LED</a>
                     </li>
                 </ul>
-                <div class="tab-content">
-                    <div class="tab-pane active" id="display">
-                        <div class="form-group">
-                            <label for="displayKey" class="col-sm-4 control-label">Display Name</label>
-                            <div class="col-sm-8">
-                                <input type="text" name="displayKey" id="displayKey" required class="form-control" placeholder="Please enter display name (mandatory)" value="" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="cursorName" class="col-sm-4 control-label">Cursor Name</label>
-                            <div class="col-sm-8">
-                                <input type="text" name="cursorName" id="cursorName" class="form-control" placeholder="Please enter cursor name (optional)" value="" />
-                            </div>
-                        </div>
-<!--
-                        <div class="form-group">
-                            <label for="margin" class="col-sm-4 control-label" style="padding-top:30px;">Position (px)</label>
-                            <div class="col-sm-8" style="padding-top:6px;" name="margin">
-                                <div class="coordTable">Top corner: <input type="text" name="top" id="top" class="form-control numField" placeholder="{{top}}" value="{{top}}"/></div>
-                                <div class="coordTable">Left corner: <input type="text" name="left" id="left" class="form-control numField" placeholder="{{left}}" value="{{left}}"/></div>
-                            </div>
-                            <label for="size" class="col-sm-4 control-label" style="padding-top:30px;">Dimensions (px)</label>
-                            <div class="col-sm-8" style="padding-top:6px;" name="size">
-                                <div class="coordTable">Width: <input type="text" name="width" id="width" class="form-control numField" placeholder="{{width}}" value="{{width}}"/></div>
-                                <div class="coordTable">Height: <input type="text" name="height" id="height" class="form-control numField" placeholder="{{height}}" value="{{height}}"/></div>
-                            </div>
-                        </div>
--->
-                        <div class="form-group">
-                            <label for="auditoryFeedback" class="col-sm-4 control-label">Voice Readback</label>
-                            <div class="col-sm-8" style="padding-top:6px;">
-                                <input type="checkbox" name="auditoryFeedback" value="auditoryFeedback"/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="touchscreenEnabledWhen" class="col-sm-4 control-label">TouchScreen Enabled</label>
-                            <div class="col-sm-8" style="padding-top:6px;">
-                                <input type="text" name="touchscreenEnabledWhen" id="touchscreenEnabledWhen"
-                                       class="form-control" placeholder="Please enter enabling condition" value="{{touchscreenEnabledWhen}}" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="touchscreenCommand" class="col-sm-4 control-label">TouchScreen Command</label>
-                            <div class="col-sm-8" style="padding-top:6px;">
-                                <input type="text" name="touchscreenCommand" id="touchscreenCommand"
-                                       class="form-control" placeholder="Please enter command" value="{{touchscreenCommand}}" />
-                            </div>
-                        </div>
-                    </div>
+                <div class="tab-content col-sm-4 noselect">
+                    <div class="widgetPreview img-thumbnail" id="widgetPreview"></div>
+                    <div class="img-thumbnail" id="navkeys"><img src="projects/navkeys.png" usemap="#widgetPreviewMap"></img></div>
+                </div>
+                <div class="tab-content col-sm-8">
 
-                    <div class="tab-pane" id="button">
+                    <div class="tab-pane active" id="button">
                         <div class="form-group">
                             <label for="functionText" class="col-sm-4 control-label">Button Name</label>
                             <div class="col-sm-8">
@@ -77,23 +39,23 @@
                         </div>
                         <div class="form-group">
                             <label for="events" class="col-sm-4 control-label">User Actions</label>
-                            <div class="col-sm-8" id="events">
+                            <div class="col-sm-8" id="events" style="padding-top:5px;">
                                 <label>
                                     Click
                                     <input type="radio" name="button_click_events" value="click" checked />
                                 </label>
-                                <label>
+                                <label style="padding-left:25px;">
                                     Press and Release
                                     <input type="radio" name="button_press_release_events" value="press/release" />
                                 </label>
                             </div>
                         </div>
-                        <div class="form-group">
+<!--                        <div class="form-group">
                             <label for="recallRate" class="col-sm-4 control-label">Repeat Time (ms)</label>
                             <div class="col-sm-8">
                                 <input type="text" name="recallRate" id="recallRate" required class="form-control" value="250" pattern="\d{2,5}" />
                             </div>
-                        </div>
+                        </div>-->
                         <div class="form-group">
                             <label for="buttonReadback" class="col-sm-4 control-label">Voice Readback</label>
                             <div class="col-sm-8">
@@ -112,13 +74,108 @@
                         <div class="form-group">
                             <label for="boundFunctions" class="col-sm-4 control-label">Generated Events</label>
                             <div class="col-sm-8">
-                                <textarea id="boundFunctions" name="boundFunctions" type="text" readonly="true" class="form-control">
-                                </textarea>
+                                <textarea id="boundFunctions" name="boundFunctions" type="text" readonly="true" class="form-control" style="resize:none;"></textarea>
                             </div>
                         </div>
                     </div>
 
-                    <div class="tab-pane" id="softbutton">
+                    <div class="tab-pane" id="display">
+                        <div class="form-group">
+                            <label for="displayKey" class="col-sm-4 control-label">Display Name</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="displayKey" id="displayKey" required class="form-control" placeholder="Please enter display name (mandatory)" value="" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="auditoryFeedback" class="col-sm-4 control-label">Voice Readback</label>
+                            <div class="col-sm-8" style="padding-top:6px;">
+                                <input type="checkbox" name="auditoryFeedback" id="auditoryFeedback" value="auditoryFeedback"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="visibleWhen" class="col-sm-4 control-label">Visible when...</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="visibleWhen" id="visibleWhen" class="form-control" placeholder="always visible" value="{{visibleWhen}}" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="numericdisplay">
+                        <div class="form-group">
+                            <label for="displayKey" class="col-sm-4 control-label">Display Name</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="displayKey" id="displayKey" required class="form-control" placeholder="Please enter display name (mandatory)" value="" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cursorName" class="col-sm-4 control-label">Cursor Name</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="cursorName" id="cursorName" class="form-control" placeholder="Please enter cursor name (optional)" value="" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="visibleWhen" class="col-sm-4 control-label">Visible when...</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="visibleWhen" id="visibleWhen" class="form-control" placeholder="always visible" value="{{visibleWhen}}" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="auditoryFeedback" class="col-sm-4 control-label">Voice Readback</label>
+                            <div class="col-sm-8" style="padding-top:6px;">
+                                <input type="checkbox" name="auditoryFeedback" id="auditoryFeedback" value="auditoryFeedback"/>
+                            </div>
+                        </div>
+<!--                        <div class="form-group">
+                            <label for="touchscreenvisibleWhen" class="col-sm-4 control-label">TouchScreen Enabled</label>
+                            <div class="col-sm-8" style="padding-top:6px;">
+                                <input type="text" name="touchscreenvisibleWhen" id="touchscreenvisibleWhen"
+                                       class="form-control" placeholder="Please enter enabling condition" value="{{touchscreenvisibleWhen}}" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="touchscreenCommand" class="col-sm-4 control-label">TouchScreen Command</label>
+                            <div class="col-sm-8" style="padding-top:6px;">
+                                <input type="text" name="touchscreenCommand" id="touchscreenCommand"
+                                       class="form-control" placeholder="Please enter command" value="{{touchscreenCommand}}" />
+                            </div>
+                        </div>-->
+                    </div>
+
+                    <div class="tab-pane" id="touchscreendisplay">
+                        <div class="form-group">
+                            <label for="displayKey" class="col-sm-4 control-label">Display Name</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="displayKey" id="displayKey" required class="form-control" placeholder="Please enter display name (mandatory)" value="" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cursorName" class="col-sm-4 control-label">Cursor Name</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="cursorName" id="cursorName" class="form-control" placeholder="Please enter cursor name (optional)" value="" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="auditoryFeedback" class="col-sm-4 control-label">Voice Readback</label>
+                            <div class="col-sm-8" style="padding-top:6px;">
+                                <input type="checkbox" name="auditoryFeedback" id="auditoryFeedback" value="auditoryFeedback"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="visibleWhen" class="col-sm-4 control-label">Visible when...</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="visibleWhen" id="visibleWhen" class="form-control" placeholder="always visible" value="{{visibleWhen}}" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="touchscreenCommand" class="col-sm-4 control-label">TouchScreen Command</label>
+                            <div class="col-sm-8" style="padding-top:6px;">
+                                <input type="text" name="touchscreenCommand" id="touchscreenCommand"
+                                       class="form-control" placeholder="Please enter command" value="{{touchscreenCommand}}" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="touchscreenbutton">
                         <div class="form-group">
                             <label for="functionText" class="col-sm-4 control-label">Soft Button Name</label>
                             <div class="col-sm-8">
@@ -134,9 +191,9 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="enabledWhen" class="col-sm-4 control-label">Visible when...</label>
+                            <label for="visibleWhen" class="col-sm-4 control-label">Visible when...</label>
                             <div class="col-sm-8">
-                                <input type="text" name="enabledWhen" id="enabledWhen" class="form-control" placeholder="always visible" value="{{enabledWhen}}" />
+                                <input type="text" name="visibleWhen" id="visibleWhen" class="form-control" placeholder="always visible" value="{{visibleWhen}}" />
                             </div>
                         </div>
                         <div class="form-group">
@@ -148,17 +205,17 @@
                         </div>
                         <div class="form-group">
                             <label for="events" class="col-sm-4 control-label">User Actions</label>
-                            <div class="col-sm-8" id="events">
+                            <div class="col-sm-8" id="events" style="padding-top:5px;">
                                 <label>
                                     Click
-                                    <input type="radio" name="softbutton_click_events" value="click" checked />
+                                    <input type="radio" name="touchscreenbutton_click_events" value="click" checked />
                                 </label>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="boundFunctions" class="col-sm-4 control-label">Generated Events</label>
                             <div class="col-sm-8">
-                                <textarea id="boundFunctions" name="boundFunctions" type="text" readonly="true" class="form-control">{{boundFunctions}}</textarea>
+                                <textarea id="boundFunctions" name="boundFunctions" type="text" readonly="true" class="form-control" style="resize:none;">{{boundFunctions}}</textarea>
                             </div>
                         </div>
                     </div>
@@ -172,15 +229,15 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="ledON" class="col-sm-4 control-label">Powered ON when...</label>
-                            <div class="col-sm-8">
-                                <input type="text" name="ledON" id="ledON" class="form-control" placeholder="always ON" value="{{ledON}}" />
-                            </div>
-                        </div>
-                        <div class="form-group">
                             <label for="ledColor" class="col-sm-4 control-label">Color</label>
                             <div class="col-sm-8">
                                 <input type="text" name="ledColor" id="ledColor" class="form-control" placeholder="Please enter LED color (default: lightgreen)" value="{{ledColor}}" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="visibleWhen" class="col-sm-4 control-label">Visible when...</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="visibleWhen" id="visibleWhen" class="form-control" placeholder="always visible" value="{{visibleWhen}}" />
                             </div>
                         </div>
                     </div>

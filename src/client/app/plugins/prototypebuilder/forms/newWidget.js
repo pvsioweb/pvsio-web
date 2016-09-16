@@ -7,27 +7,65 @@
 /*global define, $, Handlebars*/
 define(function (require, exports, module) {
     "use strict";
-    var FormUtils					= require("./FormUtils"),
-        template					= require("text!./templates/createWidget.handlebars"),
-        BaseDialog = require("pvsioweb/forms/BaseDialog"),
-        d3							= require("d3/d3");
+    var FormUtils		= require("./FormUtils"),
+        template		= require("text!./templates/createWidget.handlebars"),
+        BaseDialog      = require("pvsioweb/forms/BaseDialog"),
+        widgetPreviewer = require("pvsioweb/forms/widgetPreviewer"),
+        d3				= require("d3/d3");
+
+    function getWidgetEvents(widgetType) {
+        var evts = [];
+        d3.select("#" + widgetType).select("#events").selectAll("input[type='radio']").each(function () {
+            if (this.checked) { evts = evts.concat(this.value.split("/")); }
+        });
+        return evts;
+    }
 
     function updateBoundFunctionsLabel() {
         var activeForm = d3.select("form").select(".active").node();
         if (activeForm) {
-            var tabName = activeForm.children[0].text.toLowerCase();
-            var f = d3.select("#" + tabName).select("#functionText").property("value"),
-                str = "",
-                events = [];
-            d3.select("#" + tabName).select("#events").selectAll("input[type='radio']").each(function () {
-                if (this.checked) {
-                    events = events.concat(this.value.split("/"));
-                }
-            });
-            str = events.map(function (d) {
-                return d + "_" + f;
-            }).join(", ");
-            d3.select("#" + tabName).select("#boundFunctions").text(str);
+            var widgetType = activeForm.children[0].getAttribute("widgetType");
+            var f = d3.select("#" + widgetType).select("#functionText").property("value"),
+                events = getWidgetEvents(widgetType),
+                str = (f && f !== "") ? events.map(function (d) {
+                    return d + "_" + f;
+                }).join(", ") : "";
+            d3.select("#" + widgetType).select("#boundFunctions").text(str);
+        }
+    }
+
+    function showWidgetPreview() {
+        var activeForm = d3.select("form").select(".active").node();
+        if (activeForm) {
+            var widgetType = activeForm.children[0].getAttribute("widgetType");
+            if (widgetType === "button") {
+                widgetPreviewer.preview(widgetType, {
+                    keyboardKey: d3.select("#" + widgetType).select("#keyCode").node().value,
+                    buttonReadback: d3.select("#" + widgetType).select("#buttonReadback").node().value,
+                    evts: getWidgetEvents(widgetType)
+                });
+            } else if (widgetType === "display") {
+                widgetPreviewer.preview(widgetType, {
+                    auditoryFeedback: d3.select("#" + widgetType).select("#auditoryFeedback").node().checked
+                });
+            } else if (widgetType === "numericdisplay") {
+                widgetPreviewer.preview(widgetType, {
+                    auditoryFeedback: d3.select("#" + widgetType).select("#auditoryFeedback").node().checked
+                });
+            } else if (widgetType === "touchscreenbutton") {
+                widgetPreviewer.preview(widgetType, {
+                    buttonReadback: d3.select("#" + widgetType).select("#buttonReadback").node().value
+                });
+            } else if (widgetType === "touchscreendisplay") {
+                widgetPreviewer.preview(widgetType, {
+                    auditoryFeedback: d3.select("#" + widgetType).select("#auditoryFeedback").node().checked
+                });
+            } else if (widgetType === "led") {
+                var color = d3.select("#" + widgetType).select("#ledColor").node().value;
+                widgetPreviewer.preview(widgetType, {
+                    color: color
+                });
+            }
         }
     }
 
@@ -36,20 +74,31 @@ define(function (require, exports, module) {
             var t = Handlebars.compile(template);
             this.$el.html(t(data));
             $("body").append(this.el);
-            $("#tabHeaders #displayTab").tab("show");
+            $("#tabHeaders #buttonTab").tab("show");
+            showWidgetPreview();
             return this;
         },
         events: {
-            "click #btnOk": "ok",
-            "click #btnCancel": "cancel",
-            "click #displayTab": "displayTabClicked",
-            "click #buttonTab": "buttonTabClicked",
-            "click #ledTab": "ledTabClicked",
+            "click #btnOk"                : "ok",
+            "click #btnCancel"            : "cancel",
+            "click #displayTab"           : "changeTab",
+            "click #numericdisplayTab"    : "changeTab",
+            "click #buttonTab"            : "changeTab",
+            "click #touchscreendisplayTab": "changeTab",
+            "click #touchscreenbuttonTab" : "changeTab",
+            "click #ledTab"               : "changeTab",
             "change input[type='radio'][name='events']": "eventsChanged",
-            "keyup #functionText": "eventsChanged"
+            "change input[type='checkbox']": "updatePreview",
+            "keyup #buttonReadback"       : "updatePreview",
+            "keyup #functionText"         : "eventsChanged",
+            "keyup #ledColor"             : "updatePreview"
         },
         eventsChanged: function (event) {
             updateBoundFunctionsLabel();
+            showWidgetPreview();
+        },
+        updatePreview: function (event) {
+            showWidgetPreview();
         },
         ok: function (event) {
             var form = d3.select(this.el).select("form");
@@ -69,17 +118,10 @@ define(function (require, exports, module) {
         cancel: function (event) {
             this.trigger("cancel", {el: this.el, event: event}, this);
         },
-        displayTabClicked: function (event) {
+        changeTab: function (event) {
             event.preventDefault();
             $(event.target).tab("show");
-        },
-        buttonTabClicked: function (event) {
-            event.preventDefault();
-            $(event.target).tab("show");
-        },
-        ledTabClicked: function (event) {
-            event.preventDefault();
-            $(event.target).tab("show");
+            showWidgetPreview();
         }
     });
 

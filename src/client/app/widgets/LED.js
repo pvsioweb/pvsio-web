@@ -48,8 +48,9 @@ define(function (require, exports, module) {
         this.color = opt.color || "#00FF66"; // default is bright   green
         this.blinking = opt.blinking || false;
         this.cursor = opt.cursor || "default";
+        opt.position = opt.position || "absolute";
         this.div = d3.select(this.parent)
-                        .append("div").style("position", "absolute")
+                        .append("div").style("position", opt.position)
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")
                         .style("margin", 0).style("padding", 0)
@@ -60,13 +61,13 @@ define(function (require, exports, module) {
                         .style("vertical-align", "top");
         this.div.style("cursor", this.cursor);
         this.isOn = false;
-        Widget.call(this, id, "led");
         opt.ledKey = opt.ledKey || id;
-        opt.ledON = opt.ledON || ""; // empty string means always on
+        opt.visibleWhen = opt.visibleWhen || "true"; // default: always on
         this.ledKey = property.call(this, opt.ledKey);
-        this.ledON = property.call(this, opt.ledON);
+        this.visibleWhen = property.call(this, opt.visibleWhen);
         this.ledColor = property.call(this, this.color);
         this.example = opt.example || ""; // this is used in the prototype builder to demonstrate the font style of the display
+        Widget.call(this, id, "led");
         return this;
     }
     LED.prototype = Object.create(Widget.prototype);
@@ -81,7 +82,7 @@ define(function (require, exports, module) {
         return {
             type: this.type(),
             id: this.id(),
-            ledON: this.ledON(),
+            visibleWhen: this.visibleWhen(),
             ledKey: this.ledKey(),
             ledColor: this.ledColor()
         };
@@ -135,18 +136,18 @@ define(function (require, exports, module) {
             _this.div.node().setAttribute("class", elemClass);
             return _this.reveal();
         }
-        if ((_this.ledKey() !== "" && _this.ledON() === "") || (typeof txt === "string" && txt === "")) {
-            return doRender();
-        } else if (typeof txt === "object") {
-            // txt in this case is a PVS state that needs to be parsed
-            var expr = StateParser.simpleExpressionParser(_this.ledON());
-            if (expr && expr.res) {
+
+        var expr = StateParser.simpleExpressionParser(this.visibleWhen());
+        if (expr && expr.res) {
+            if (expr.res.type === "constexpr" && expr.res.constant === "true") {
+                return doRender();
+            } else if (expr.res.type === "boolexpr" && expr.res.binop) {
                 var str = StateParser.resolve(txt, expr.res.attr);
                 if (str) {
                     str = StateParser.evaluate(str);
-                    if (expr.res.binop === "=" && str === expr.res.constant ||
-                            expr.res.binop === "!=" && str !== expr.res.constant) {
-                        return doRender();
+                    if ((expr.res.binop === "=" && str === expr.res.constant) ||
+                         (expr.res.binop === "!=" && str !== expr.res.constant)) {
+                             return doRender();
                     }
                 }
             }

@@ -62,7 +62,7 @@
   {
    "type": "led",
    "id": "led_1e4d2a41-2bcd-4413-c39b-9189fcc101b5",
-   "ledON": "",
+   "visibleWhen": "",
    "ledKey": "power_led",
    "ledColor": "lightgreen"
   }

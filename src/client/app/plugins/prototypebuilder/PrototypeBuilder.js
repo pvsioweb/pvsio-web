@@ -267,7 +267,7 @@ define(function (require, exports, module) {
                 // FIXME: Implement APIs to save the diagram in the EmuCharts module!
                 if (d3.select("#btn_menuSaveChart").node()) {
                     d3.select("#btn_menuSaveChart").node().click();
-                }            
+                }
             });
         });
 
@@ -365,7 +365,7 @@ define(function (require, exports, module) {
 //            WidgetManager.addTimer();
         });
         d3.select("#btnAddNewWidget").on("click", function () {
-            
+
         });
     }
 
@@ -530,7 +530,7 @@ define(function (require, exports, module) {
         updateImageAndLoadWidgets().then(function (res) {
             WidgetsListView.create();
         }).catch(function (err) { Logger.error(err); });
-        
+
         // add default tick timer
         WidgetManager.addWallClockTimer();
         //TimersListView.create();

@@ -23,8 +23,8 @@ require([
     "widgets/TripleDisplay",
     "widgets/SingleDisplay",
     "widgets/ButtonActionsQueue",
-    "widgets/TouchScreenButton"
-], function (PVSioWebClient, stateParser, NCDevice, NCMonitorCore, PatientMonitorDisplay, PumpMonitorDisplay, TripleDisplay, SingleDisplay, ButtonActionsQueue, TouchScreenButton) {
+    "widgets/TouchscreenButton"
+], function (PVSioWebClient, stateParser, NCDevice, NCMonitorCore, PatientMonitorDisplay, PumpMonitorDisplay, TripleDisplay, SingleDisplay, ButtonActionsQueue, TouchscreenButton) {
 
     var deviceID = "Supervisor";
     var deviceType = "Supervisor";

@@ -1,7 +1,7 @@
 {
  "widgetMaps": [
   {
-   "type": "display",
+   "type": "numericdisplay",
    "id": "Display1360334885958",
    "displayKey": "d",
    "auditoryFeedback": "disabled",

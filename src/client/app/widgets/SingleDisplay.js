@@ -60,7 +60,7 @@ define(function (require, exports, module) {
         this.fontsize = opt.fontsize || (this.height * 0.9);
         this.fontfamily = opt.fontfamily || "sans-serif";
         this.font = [this.fontsize, "px ", this.fontfamily];
-        this.smallFont = [(this.fontsize * 0.8), "px ", this.fontfamily];
+        this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
         this.align = opt.align || "center";
         this.backgroundColor = opt.backgroundColor || ""; //transparent
         this.fontColor = opt.fontColor || "#fff"; //white
@@ -75,8 +75,9 @@ define(function (require, exports, module) {
         var elemClass = id + " displayWidget" + " noselect ";
         if (opt.touchscreen && opt.touchscreen.classStyle) { elemClass += opt.touchscreen.classStyle; }
         if (this.blinking) { elemClass += " blink"; }
+        opt.position = opt.position || "absolute";
         this.div = d3.select(this.parent)
-                        .append("div").style("position", "absolute")
+                        .append("div").style("position", opt.position)
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")
                         .style("margin", 0).style("padding", 0).style("border-radius", "2px")
@@ -98,13 +99,13 @@ define(function (require, exports, module) {
         opt.displayKey = opt.displayKey || id;
         opt.cursorName = opt.cursorName || "";
         opt.auditoryFeedback = (opt.auditoryFeedback) ? "enabled" : "disabled";
-        opt.touchscreenEnabledWhen = (opt.touchscreenEnabledWhen && opt.touchscreenEnabledWhen !== "") ? opt.touchscreenEnabledWhen : "false";
+        opt.touchscreenvisibleWhen = (opt.touchscreenvisibleWhen && opt.touchscreenvisibleWhen !== "") ? opt.touchscreenvisibleWhen : "false";
         opt.touchscreenCommand = opt.touchscreenCommand || "";
         this.displayKey = property.call(this, opt.displayKey);
         this.cursorName = property.call(this, opt.cursorName);
         this.auditoryFeedback = property.call(this, opt.auditoryFeedback);
-        this.touchscreenEnabled = property.call(this, false); // the first call to function render() will set the value of this property according to this.touchscreenEnabledWhen()
-        this.touchscreenEnabledWhen = property.call(this, opt.touchscreenEnabledWhen);
+        this.touchscreenEnabled = property.call(this, false); // the first call to function render() will set the value of this property according to this.touchscreenvisibleWhen()
+        this.touchscreenvisibleWhen = property.call(this, opt.touchscreenvisibleWhen);
         this.touchscreenCommand = property.call(this, opt.touchscreenCommand);
         this.example = opt.example || ""; // this is used in the prototype builder to demonstrate the font style of the display
         if (opt.touchscreen) {
@@ -151,7 +152,7 @@ define(function (require, exports, module) {
             displayKey: this.displayKey(),
             cursorName: this.cursorName(),
             auditoryFeedback: this.auditoryFeedback(),
-            touchscreenEnabledWhen: this.touchscreenEnabledWhen(),
+            touchscreenvisibleWhen: this.touchscreenvisibleWhen(),
             touchscreenCommand: this.touchscreenCommand()
         };
     };
@@ -166,7 +167,7 @@ define(function (require, exports, module) {
         this.height = pos.height || 80;
         this.fontsize = this.height * 0.9;
         this.font = [this.fontsize, "px ", this.fontfamily];
-        this.smallFont = [(this.fontsize * 0.8), "px ", this.fontfamily];
+        this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
         d3.select("div." + this.id()).style("left", this.left + "px").style("top", this.top + "px")
             .style("width", this.width + "px").style("height", this.height + "px").style("font-size", this.fontsize + "px");
         d3.select("div." + this.id()).select("span").attr("width", this.width + "px").attr("height", this.height + "px");
@@ -345,7 +346,7 @@ define(function (require, exports, module) {
                 }
             }
             str = StateParser.resolve(txt, this.cursorName());
-            if (str) { this.cursorpos = StateParser.evaluate(str); }
+            this.cursorpos = StateParser.evaluate(str);
         } else {
             this.txt = txt;
         }
@@ -384,9 +385,9 @@ define(function (require, exports, module) {
 
         if (this.touchscreen) {
             this.touchscreenEnabled(false);
-            if (this.touchscreenEnabledWhen() !== "") {
-                // we need to parse the expression touchscreenEnabledWhen() to understand if the touchscreeen is enabled or not
-                var expr = StateParser.simpleExpressionParser(this.touchscreenEnabledWhen());
+            if (this.touchscreenvisibleWhen() !== "") {
+                // we need to parse the expression touchscreenvisibleWhen() to understand if the touchscreeen is enabled or not
+                var expr = StateParser.simpleExpressionParser(this.touchscreenvisibleWhen());
                 if (expr && expr.res) {
                     if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                         this.touchscreenEnabled(true);
@@ -421,7 +422,7 @@ define(function (require, exports, module) {
         span.style.borderRadius = "2px";
         span.style.width = this.width;
         span.style.height = this.height;
-        span.style.fontSize = 0.8 * this.height + "px";
+        span.style.fontSize = 0.7 * this.height + "px";
         d3.select("#" + this.id() + "_canvas").style("display", "none");
         d3.select("#" + this.id() + "_span").style("display", "block");
         this.reveal();

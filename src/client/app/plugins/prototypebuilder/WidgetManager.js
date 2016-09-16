@@ -14,13 +14,16 @@ define(function (require, exports, module) {
         uidGenerator    = require("util/uuidGenerator"),
         EditWidgetView  = require("pvsioweb/forms/editWidget"),
         Button          = require("widgets/Button"),
-        SoftButton      = require("widgets/SoftButton"),
+        TouchscreenButton  = require("widgets/TouchscreenButton"),
+        TouchscreenDisplay = require("widgets/TouchscreenDisplay"),
         LED             = require("widgets/LED"),
-        SingleDisplay   = require("widgets/SingleDisplay"),
+        BasicDisplay    = require("widgets/BasicDisplay"),
+        NumericDisplay  = require("widgets/NumericDisplay"),
         Storyboard      = require("pvsioweb/Storyboard"),
         EmuTimer        = require("widgets/EmuTimer"),
         NewWidgetView   = require("pvsioweb/forms/newWidget"),
         StateParser     = require("util/PVSioStateParser"),
+        ButtonActionsQueue = require("widgets/ButtonActionsQueue").getInstance(),
         PreferenceKeys  = require("preferences/PreferenceKeys"),
         Preferences     = require("preferences/PreferenceStorage").getInstance();
     var wm, mapCreator;
@@ -41,7 +44,7 @@ define(function (require, exports, module) {
             //     w.render(state);
             // });
             // //render soft buttons
-            // wm.getSoftButtonWidgets().forEach(function (w) {
+            // wm.getTouchscreenButtonWidgets().forEach(function (w) {
             //     w.render(state);
             // });
             // //render LEDs
@@ -161,6 +164,72 @@ define(function (require, exports, module) {
         eventDispatcher(this);
     }
 
+    function createWidget(w, opt) {
+        var widget = null;
+        var x = opt.x, y = opt.y, height = opt.height, width = opt.width, scale = opt.scale;
+        w.type = w.type.toLowerCase();
+        if (w.type === "button") {
+            widget = new Button(w.id,
+                { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                { callback: renderResponse,
+                  keyCode: w.keyCode,
+                  keyName: w.keyName,
+                  functionText: w.functionText,
+                  evts: w.evts,
+                  buttonReadback: w.buttonReadback });
+        } else if (w.type === "display") {
+            widget = new BasicDisplay(w.id,
+                { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                { displayKey: w.displayKey,
+                  auditoryFeedback: w.auditoryFeedback,
+                  visibleWhen: w.visibleWhen,
+                  parent: "imageDiv" });
+        } else if (w.type === "numericdisplay") {
+            widget = new NumericDisplay(w.id,
+                { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                { displayKey: w.displayKey,
+                  cursorName: w.cursorName,
+                  auditoryFeedback: w.auditoryFeedback,
+                  visibleWhen: w.visibleWhen,
+                  parent: "imageDiv" });
+        } else if (w.type === "touchscreendisplay") {
+            widget = new TouchscreenDisplay(w.id,
+                { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                { displayKey: w.displayKey,
+                  cursorName: w.cursorName,
+                  auditoryFeedback: w.auditoryFeedback,
+                  visibleWhen: w.visibleWhen,
+                  functionText: w.functionText,
+                  parent: "imageDiv" });
+        } else if (w.type === "touchscreenbutton") {
+            widget = new TouchscreenButton(w.id,
+                { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                { callback: renderResponse,
+                  functionText: w.functionText,
+                  softLabel: w.softLabel,
+                  auditoryFeedback: w.auditoryFeedback,
+                  visibleWhen: w.visibleWhen,
+                  parent: "imageDiv" });
+        } else if (w.type === "led") {
+            widget = new LED(w.id,
+                { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                { ledKey: w.ledKey,
+                  color: w.ledColor,
+                  visibleWhen: w.visibleWhen,
+                  parent: "imageDiv" });
+        } else if (w.type === "storyboard") {
+            widget = new Storyboard(w.id);
+        } else {
+            console.log("Warning: unrecognised widget type " + w.type);
+        }
+        return widget;
+    }
+
+    WidgetManager.prototype.initialiseWidgets = function () {
+        ButtonActionsQueue.sendINIT(renderResponse);
+        return this;
+    };
+
     /**
         Restores the widget definitions passed in the parameter.
         @param {Object} defs JSOn specification for the widget definitions to restore
@@ -173,7 +242,6 @@ define(function (require, exports, module) {
             wm._keyCode2widget = {};
             var widget;
             _.each(defs.widgetMaps, function (w, i) {
-                var restoreWidgetsFailed = false;
                 defs.regionDefs = defs.regionDefs || [];
                 var coords = ((i < defs.regionDefs.length) && defs.regionDefs[i].coords) ? defs.regionDefs[i].coords.split(",") : [0,0,0,0];
                 var height = parseFloat(coords[3]) - parseFloat(coords[1]),
@@ -182,58 +250,17 @@ define(function (require, exports, module) {
                          y = parseFloat(coords[1]);
                 var scale = (d3.select("svg > g").node()) ?
                              +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
-                w.type = w.type.toLowerCase();
-                if (w.type === "button") {
-                    widget = new Button(w.id,
-                        { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
-                        { callback: renderResponse,
-                          keyCode: w.keyCode,
-                          keyName: w.keyName,
-                          functionText: w.functionText,
-                          evts: w.evts,
-                          buttonReadback: w.buttonReadback });
-                    if (w.keyCode) {
-                        wm._keyCode2widget[w.keyCode] = widget;
-                    }
-                } else if (w.type === "softbutton") {
-                    widget = new SoftButton(w.id,
-                        { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
-                        { callback: renderResponse,
-                          functionText: w.functionText,
-                          softLabel: w.softLabel,
-                          auditoryFeedback: w.auditoryFeedback,
-                          enabledWhen: w.enabledWhen,
-                          parent: "imageDiv" });
-                } else if (w.type === "display") {
-                    widget = new SingleDisplay(w.id,
-                        { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
-                        { displayKey: w.displayKey,
-                          auditoryFeedback: w.auditoryFeedback,
-                          touchscreenEnabledWhen: w.touchscreenEnabledWhen,
-                          touchscreenCommand: w.touchscreenCommand,
-                          touchscreen: {
-                              callback: renderResponse,
-                              highlightOnMouseClick: true
-                          },
-                          parent: "imageDiv" });
-                } else if (w.type === "led") {
-                    widget = new LED(w.id,
-                        { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
-                        { ledKey: w.ledKey, ledON: w.ledON, color: w.ledColor,
-                          parent: "imageDiv" });
-                } else if (w.type === "storyboard") {
-                    widget = new Storyboard(w.id);
-                } else {
-                    console.log("Warning: unrecognised widget type " + w.type);
-                    restoreWidgetsFailed = true;
+                var widget = null;
+                try {
+                    widget = createWidget(w, { x:x, y:y, height: height, width: width, scale:scale });
+                } catch (e) {
+                    console.log(e);
                 }
-                if (!restoreWidgetsFailed) {
-                    // if (w.hasOwnProperty("events")) {
-                    //     w.evts = w.events;
-                    //     delete w.events;
-                    // }
-                    // widget.updateWithProperties(w);
+                if (widget) {
                     wm.addWidget(widget);
+                    if (typeof widget.keyCode === "function" && widget.keyCode() && widget.type() === "button") {
+                        wm._keyCode2widget[widget.keyCode()] = widget;
+                    }
                 }
             });
 
@@ -286,67 +313,26 @@ define(function (require, exports, module) {
                     .on("ok", function (e, view) {
                         view.remove();
                         var id = e.data.type + "_" + uidGenerator();
-                        var widget;
                         var scale = (d3.select("svg > g").node()) ?
                                         +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
                         var height = parseFloat(d3.select("#imageDiv .selected rect").attr("height")) * scale,
                             width = parseFloat(d3.select("#imageDiv .selected rect").attr("width")) * scale,
                             x = parseFloat(d3.select("#imageDiv .selected rect").attr("x")) * scale,
                             y = parseFloat(d3.select("#imageDiv .selected rect").attr("y")) * scale;
-                        if (e.data.type === "softbutton") {
-                            widget = new SoftButton(id,
-                                { top: y, left: x, width: width, height: height },
-                                { callback: renderResponse,
-                                  buttonReadback: e.data.buttonReadback,
-                                  functionText: e.data.functionText,
-                                  softLabel: e.data.softLabel,
-                                  auditoryFeedback: e.data.auditoryFeedback,
-                                  enabledWhen: e.data.enabledWhen,
-                                  parent: "imageDiv" });
-                        } else if (e.data.type === "button") {
-                                widget = new Button(id,
-                                    { top: y, left: x, width: width, height: height },
-                                    { callback: renderResponse,
-                                      buttonReadback: e.data.buttonReadback });
-                                widget.updateWithProperties(e.data); //TODO: remove this call, and use the constructor's parameters to update all relevant properties
-                                if (e.data.keyCode) {
-                                    wm._keyCode2widget[e.data.keyCode] = widget;
-                                }
-                        } else if (e.data.type === "display") {
-                            widget = new SingleDisplay(id,
-                                { top: y, left: x, width: width, height: height },
-                                { displayKey: e.data.displayKey,
-                                  auditoryFeedback: e.data.auditoryFeedback,
-                                  touchscreenEnabledWhen: e.data.touchscreenEnabledWhen,
-                                  touchscreenCommand: e.data.touchscreenCommand,
-                                  touchscreen: {
-                                      callback: renderResponse,
-                                      highlightOnMouseClick: true
-                                  },
-                                  parent: "imageDiv" });
-                        } else if (e.data.type === "led") {
-                            widget = new LED(id,
-                                { top: y, left: x, width: width, height: height },
-                                { ledKey: e.data.ledKey, ledON: e.data.ledON, color: e.data.ledColor,
-                                  parent: "imageDiv" });
-                        } else {
-                            console.log("warning: unrecognised widget type " + e.data.type);
-                            view.remove();
-                            d3.select(region.node().parentNode).remove();
-                            return;
+                        var widget = createWidget(e.data, { x:x, y:y, height: height, width: width, scale:scale });
+                        if (widget) {
+                            region.classed(widget.type(), true).attr("id", id);
+                            widget.element(region);
+                            createImageMap(widget);
+                            widget.updateLocationAndSize({ x: x, y: y, width: width, height: height });
+                            wm.addWidget(widget);
+                            if (typeof widget.keyCode === "function" && widget.keyCode() && widget.type() === "button") {
+                                wm._keyCode2widget[widget.keyCode()] = widget;
+                            }
+                            event.action = "create";
+                            event.widget = widget;
+                            wm.fire(event);
                         }
-                        region.classed(widget.type(), true).attr("id", id);
-                        if (e.data.hasOwnProperty("events")) {
-                            e.data.evts = e.data.events;
-                            delete e.data.events;
-                        }
-                        widget.element(region);
-                        createImageMap(widget);
-                        widget.updateLocationAndSize({ x: x, y: y, width: width, height: height });
-                        wm.addWidget(widget);
-                        event.action = "create";
-                        event.widget = widget;
-                        wm.fire(event);
                     }).on("cancel", function (e, view) {
                         view.remove();
                         d3.select(region.node().parentNode).remove();
@@ -454,6 +440,7 @@ define(function (require, exports, module) {
         _.each(this._timers, function (timer) {
             timer.start();
         });
+        this.initialiseWidgets();
     };
     WidgetManager.prototype.stopTimers = function () {
         _.each(this._timers, function (timer) {
@@ -471,12 +458,22 @@ define(function (require, exports, module) {
     };
     /**
         Gets a list of all display widgets loaded on the page.
-        @returns {Display[]}
+        @returns {BasicDisplay[]}
         @memberof module:WidgetManager
      */
     WidgetManager.prototype.getDisplayWidgets = function () {
         return _.filter(this._widgets, function (w) {
             return w.type() === "display";
+        });
+    };
+    /**
+        Gets a list of all display widgets loaded on the page.
+        @returns {NumericDisplay[]}
+        @memberof module:WidgetManager
+     */
+    WidgetManager.prototype.getNumericDisplayWidgets = function () {
+        return _.filter(this._widgets, function (w) {
+            return w.type() === "numericdisplay";
         });
     };
     /**
@@ -501,12 +498,22 @@ define(function (require, exports, module) {
     };
     /**
         Gets a list of all button widgets loaded on the page.
-        @returns {Button[]}
+        @returns {TouchscreenButton[]}
         @memberof WidgetManager
      */
-    WidgetManager.prototype.getSoftButtonWidgets = function () {
+    WidgetManager.prototype.getTouchscreenButtonWidgets = function () {
         return _.filter(this._widgets, function (w) {
-            return w.type() === "softbutton";
+            return w.type() === "touchscreenbutton";
+        });
+    };
+    /**
+        Gets a list of all button widgets loaded on the page.
+        @returns {TouchscreenDisplay[]}
+        @memberof WidgetManager
+     */
+    WidgetManager.prototype.getTouchscreenDisplayWidgets = function () {
+        return _.filter(this._widgets, function (w) {
+            return w.type() === "touchscreendisplay";
         });
     };
     /**
@@ -527,11 +534,9 @@ define(function (require, exports, module) {
         @memberof WidgetManager
     */
     WidgetManager.prototype.getAllWidgets = function () {
-        return this.getDisplayWidgets()
-                    .concat(this.getLEDWidgets())
-                    .concat(this.getButtonWidgets())
-                    .concat(this.getSoftButtonWidgets())
-                    .concat(this.getStoryboardWidgets());
+        return _.filter(this._widgets, function (w) {
+            return w.type() !== "timer";
+        });
     };
     WidgetManager.prototype.getAllTimers = function () {
         return _.filter(this._widgets, function (w) {

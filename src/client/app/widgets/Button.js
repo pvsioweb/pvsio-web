@@ -40,25 +40,28 @@ define(function (require, exports, module) {
         opt.keyCode = opt.keyCode || "";
         opt.keyName = opt.keyName || "";
         opt.animation = opt.animation || function () {};
-        opt.enabledWhen =  (opt.enabledWhen && opt.enabledWhen !== "") ? opt.enabledWhen : "false";
+        opt.visibleWhen =  (opt.visibleWhen && opt.visibleWhen !== "") ? opt.visibleWhen : "false";
         coords = coords || {};
-        this.evts = property.call(this, opt.evts);
-        this.recallRate = property.call(this, opt.recallRate);
         this.functionText = property.call(this, opt.functionText);
+        this.recallRate = property.call(this, opt.recallRate);
+        this.evts = property.call(this, opt.evts);
+        this.callback = opt.callback;
         this.imageMap = property.call(this);
         this.buttonReadback = property.call(this, opt.buttonReadback);
         this.keyCode = property.call(this, opt.keyCode);
         this.keyName = property.call(this, opt.keyName);
         this.animation = opt.animation;
-        this.enabledWhen = property.call(this, opt.enabledWhen);
+        this.visibleWhen = property.call(this, opt.visibleWhen);
         this.cursor = opt.cursor || "pointer";
 
         Widget.call(this, id, "button");
+        opt.parent = opt.parent || "prototype";
+        opt.prototypeMap = opt.prototypeMap || "prototypeMap";
 
-        var parent = d3.select("map#prototypeMap");
+        var parent = d3.select("map#" + opt.prototypeMap);
         if (parent.empty()) {
-            parent = d3.select("#prototype").append("map").attr("id", "prototypeMap")
-                .attr("name", "prototypeMap");
+            parent = d3.select("#" + opt.parent).append("map").attr("id", opt.prototypeMap)
+                .attr("name", opt.prototypeMap);
         }
 
         this.top = coords.top || 0;
@@ -66,13 +69,12 @@ define(function (require, exports, module) {
         this.width = coords.width || 32;
         this.height = coords.height || 32;
 
-        this.area = opt.area || parent.append("area");
+        this.area = (opt.area) ? opt.area.append("area") : parent.append("area");
         var x2 = this.left + this.width;
         var x3 = this.top + this.height;
         this.area.attr("shape", "rect").attr("id", id).attr("class", id)
                  .attr("coords", this.left + "," + this.top + "," + x2 + "," + x3)
                  .style("cursor", this.cursor);
-        this.callback = opt.callback;
 
         this.createImageMap({ area: this.area, callback: this.callback });
         if (opt.keyCode) {
@@ -122,7 +124,7 @@ define(function (require, exports, module) {
             buttonReadback: this.buttonReadback(),
             keyCode: this.keyCode(),
             keyName: this.keyName(),
-            enabledWhen: this.enabledWhen()
+            visibleWhen: this.visibleWhen()
         };
     };
 
@@ -135,6 +137,7 @@ define(function (require, exports, module) {
         opt = opt || {};
         var f = this.functionText();
         var anim = opt.animation || this.animation || function () {};
+        opt.callback = opt.callback || this.callback;
 
         ButtonActionsQueue.queueGUIAction("release_" + f, opt.callback);
         anim();
@@ -157,6 +160,7 @@ define(function (require, exports, module) {
         opt = opt || {};
         var f = this.functionText();
         var anim = opt.animation || this.animation || function () {};
+        opt.callback = opt.callback || this.callback;
 
         ButtonActionsQueue.queueGUIAction("press_" + f, opt.callback);
         anim();
@@ -179,6 +183,7 @@ define(function (require, exports, module) {
         var f = this.functionText(),
             widget = this;
         var anim = opt.animation || this.animation || function () {};
+        opt.callback = opt.callback || this.callback;
 
         this.press(opt);
         timerTickFunction = function () {
@@ -207,6 +212,8 @@ define(function (require, exports, module) {
         opt = opt || {};
         var f = this.functionText();
         var anim = opt.animation || this.animation || function () {};
+        opt.callback = opt.callback || this.callback;
+
         ButtonActionsQueue.queueGUIAction("click_" + f, opt.callback);
         anim();
         Recorder.addAction({
@@ -223,14 +230,14 @@ define(function (require, exports, module) {
 
     /**
      * @function render
-     * @description API for updating properties of the button, e.g., whether it's enabled/visible
+     * @description API for updating properties of the button, e.g., whether it's enabled
      * @memberof module:Button
      */
     Button.prototype.render = function (txt, opt) {
         opt = opt || {};
         txt = txt || "";
         if (typeof txt === "object") {
-            var expr = StateParser.simpleExpressionParser(this.enabledWhen());
+            var expr = StateParser.simpleExpressionParser(this.visibleWhen());
             if (expr && expr.res) {
                 if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                     return this.isEnabled(true);
@@ -256,14 +263,12 @@ define(function (require, exports, module) {
      * @description Creates an image map area for this button and binds functions in the button's events property with appropriate
      * calls to function in the PVS model. Whenever a response is returned from the PVS function call, the callback
      * function is invoked.
-     * @param {!pvsWSClient} ws A websocket client to use for sending gui actions to the server process
-     * @param {function} callback A callback function to invoke when the pvs function call on the server process is returned
      * @returns {d3.selection} The image map area created for the button
      * @memberof Button
      */
     Button.prototype.createImageMap = function (opt) {
         opt = opt || {};
-        opt.callback = opt.callback || function () {};
+        opt.callback = opt.callback || this.callback;
 
         var area = opt.area || Button.prototype.parentClass.createImageMap.apply(this, arguments),
             widget = this,

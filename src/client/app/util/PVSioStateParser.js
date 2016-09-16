@@ -38,13 +38,14 @@ define(function (require, exports, module) {
     */
     function evaluate(str) {
         if (typeof str === "string") {
+            str = str.trim();
             var args = str.split("/");
             if (args.length === 2 && !isNaN(+args[0]) && !isNaN(+args[1])) {
                 return +args[0] / +args[1];
             }
             if (!isNaN(+str)) { return +str; }
         }
-        return str.trim();
+        return str;
     }
 
     /**

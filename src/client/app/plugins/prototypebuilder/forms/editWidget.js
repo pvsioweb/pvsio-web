@@ -37,7 +37,7 @@ define(function (require, exports, module) {
             var widgetData = widget.toJSON();
             widgetData.isDisplay = widget.type() === "display";
             widgetData.isButton = widget.type() === "button";
-            widgetData.isSoftButton = widget.type() === "softbutton";
+            widgetData.isTouchscreenButton = widget.type() === "touchscreenbutton";
             widgetData.isLED = widget.type() === "led";
             widgetData.isTimer = widget.type() === "timer";
             this.$el.html(t(widgetData));
@@ -45,7 +45,7 @@ define(function (require, exports, module) {
             this.widget = widget;
 
             //update form
-            if (widgetData.isButton || widgetData.isSoftButton) {
+            if (widgetData.isButton || widgetData.isTouchscreenButton) {
                 widget.evts().forEach(function (e) {
                     d3.select("input[type='radio'][value='" + e + "']").property("checked", true);
                 });
@@ -76,7 +76,7 @@ define(function (require, exports, module) {
                 if (this.widget.auditoryFeedback) {
                     formdata.auditoryFeedback = (d3.select("input[type='checkbox'][name='auditoryFeedback']").property("checked")) ? "enabled" : "disabled";
                 }
-                if (this.widget.touchscreenEnabledWhen && formdata.touchscreenEnabledWhen && formdata.touchscreenEnabledWhen !== "") {
+                if (this.widget.touchscreenvisibleWhen && formdata.touchscreenvisibleWhen && formdata.touchscreenvisibleWhen !== "") {
                     formdata.touchscreenEnabled = true;
                 }
                 // group together style properties
