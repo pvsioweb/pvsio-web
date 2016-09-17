@@ -125,8 +125,11 @@ define(function (require, exports, module) {
     /**
     * Updates the location and size of the widget according to the given position and size
      */
-    BasicDisplay.prototype.updateLocationAndSize = function (pos) {
-        BasicDisplay.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
+    BasicDisplay.prototype.updateLocationAndSize = function (pos, opt) {
+        opt = opt || {};
+        if (opt.imageMap) {
+            BasicDisplay.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
+        }
         this.top = pos.y || 0;
         this.left = pos.x || 0;
         this.width = pos.width || 200;

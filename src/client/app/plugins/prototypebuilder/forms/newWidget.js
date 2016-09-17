@@ -101,16 +101,12 @@ define(function (require, exports, module) {
             showWidgetPreview();
         },
         ok: function (event) {
-            var form = d3.select(this.el).select("form");
-            var type = form.select("li.active a").html().toLowerCase();
-            var activeForm = form.select("#" + type).node();
-            if (FormUtils.validateForm(activeForm)) {
-                var formdata = FormUtils.serializeForm(activeForm, "input");
-                formdata.type = type;
-                // group together style properties
-                formdata.style = formdata.style || {};
-                formdata.style.fontsize = formdata.style.fontsize || formdata.fontsize;
-                formdata.style.backgroundColor = formdata.style.backgroundColor || formdata.backgroundColor;
+            var activeForm = d3.select("form").select(".active").node();
+            var widgetType = activeForm.children[0].getAttribute("widgetType");
+            var res = d3.select("#" + widgetType).node();
+            if (FormUtils.validateForm(res)) {
+                var formdata = FormUtils.serializeForm(res, "input");
+                formdata.type = widgetType;
                 // trigger event
                 this.trigger("ok", {data: formdata, el: this.el, event: event}, this);
             }

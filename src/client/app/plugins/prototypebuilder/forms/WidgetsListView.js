@@ -13,23 +13,15 @@ define(function (require, exports, module) {
         var el = d3.select("#widgetsList").html("").append("ul");
 
         function labelFunction(widget) {
-            var label = widget.type() + ": ";
-            if (widget.type() === "display") {
-                label += widget.displayKey();
-            } else if (widget.type() === "numericdisplay") {
-                label = "Numeric Display: " + widget.displayKey();
-            } else if (widget.type() === "led") {
-                label = "LED: " + widget.ledKey();
-            } else if (widget.type() === "button") {
-                label += widget.functionText();
-            } else if (widget.type() === "touchscreenbutton") {
-                label = "Touchscreen Button: " + widget.functionText();
-            } else if (widget.type() === "touchscreendisplay") {
-                label = "Touchscreen Display: " + widget.functionText();
-            } else {
-                label += widget.id();
+            switch (widget.type()) {
+                case "display"       : { return "Display: " + widget.displayKey(); }
+                case "numericdisplay": { return "Numeric Display: " + widget.displayKey(); }
+                case "led"           : { return "LED: " + widget.ledKey(); }
+                case "button"        : { return "Button: " + widget.functionText(); }
+                case "touchscreenbutton": { return "Touch-Button: " + widget.functionText(); }
+                case "touchscreendisplay": { return "Touch-Display: " + widget.displayKey(); }
+                default: { return widget.type() + ": " + widget.id(); }
             }
-            return label;
         }
 
         function update(data) {

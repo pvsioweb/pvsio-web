@@ -128,8 +128,11 @@ define(function (require, exports, module) {
     /**
     * Updates the location and size of the widget according to the given position and size
      */
-    NumericDisplay.prototype.updateLocationAndSize = function (pos) {
-        NumericDisplay.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
+    NumericDisplay.prototype.updateLocationAndSize = function (pos, opt) {
+        opt = opt || {};
+        if (opt.imageMap) {
+            NumericDisplay.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
+        }
         this.top = pos.y || 0;
         this.left = pos.x || 0;
         this.width = pos.width || 200;
@@ -212,7 +215,11 @@ define(function (require, exports, module) {
             var centerx = data.width / 2,
                 centery = data.height / 2,
                 txtmeasure;
-            data.num = parseFloat(data.num).toString();
+            data.num = (typeof data.num === "string") ? data.num : parseFloat(data.num).toString();
+            var nakedPoint = false;
+            if (data.num.indexOf(".") === (data.num.length - 1)) {
+                nakedPoint = true;
+            }
             var frac = data.num.split(".")[1],
                 whole = data.num.split(".")[0];
             //pad the string if necessary
@@ -227,8 +234,10 @@ define(function (require, exports, module) {
                     frac = frac.concat("0");
                 }
             }
-            if (frac !== undefined && frac.length > 0) {
+            if (nakedPoint || (frac !== undefined && frac.length > 0)) {
                 drawCircle(context, centerx, centery, decRadius(), _this.fontColor);
+            }
+            if (frac !== undefined && frac.length > 0) {
                 x = centerx + pad + decRadius();
                 context.textAlign = "left";
                 context.fillStyle = _this.fontColor;

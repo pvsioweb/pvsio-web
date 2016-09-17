@@ -74,11 +74,13 @@
              ((opt.auditoryFeedback.toString() === "enabled" || opt.auditoryFeedback.toString() === "true") ? "enabled" : "disabled") : "disabled";
          opt.visibleWhen = opt.visibleWhen || "true";
          opt.functionText = opt.functionText || "";
+         opt.evts = opt.evts || [ "click" ];
          this.displayKey = property.call(this, opt.displayKey);
          this.cursorName = property.call(this, opt.cursorName);
          this.auditoryFeedback = property.call(this, opt.auditoryFeedback);
          this.visibleWhen = property.call(this, opt.visibleWhen);
          this.functionText = property.call(this, opt.functionText);
+         this.evts = property.call(this, opt.evts);
 
          var _this = this;
          this.div = d3.select(this.parent)
@@ -193,16 +195,19 @@
              displayKey: this.displayKey(),
              evts: this.evts(),
              functionText: this.functionText(),
-             boundFunctions: this.boundFunctions(),
-             buttonReadback: this.buttonReadback(),
+             boundFunctions: this.overlayButton.boundFunctions(),
+             auditoryFeedback: this.auditoryFeedback(),
              visibleWhen: this.visibleWhen()
          };
      };
      /**
      * Updates the location and size of the widget according to the given position and size
       */
-     TouchscreenDisplay.prototype.updateLocationAndSize = function (pos) {
-         TouchscreenDisplay.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
+     TouchscreenDisplay.prototype.updateLocationAndSize = function (pos, opt) {
+         opt = opt || {};
+         if (opt.imageMap) {
+             TouchscreenDisplay.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
+         }
          this.top = pos.y || 0;
          this.left = pos.x || 0;
          this.width = pos.width || 200;
@@ -212,9 +217,10 @@
          this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
          d3.select("div." + this.id()).style("left", this.left + "px").style("top", this.top + "px")
              .style("width", this.width + "px").style("height", this.height + "px").style("font-size", this.fontsize + "px");
-         this.overlayDisplay.updateLocationAndSize(pos);
-         this.overlayDisplayNumeric.updateLocationAndSize(pos);
-         this.overlayButton.updateLocationAndSize(pos);
+         // only resize is needed, because we have already moved the div element containing the display and button areas
+         this.overlayDisplay.updateLocationAndSize({ width: pos.width, height: pos.height });
+         this.overlayNumericDisplay.updateLocationAndSize({ width: pos.width, height: pos.height });
+         this.overlayButton.updateLocationAndSize({ width: pos.width, height: pos.height });
          return this.render(this.example);
      };
      /**

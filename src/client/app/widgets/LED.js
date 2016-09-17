@@ -45,7 +45,7 @@ define(function (require, exports, module) {
         this.width = coords.width || 12;
         this.height = coords.height || 12;
         this.radius = opt.radius || (this.height / 4);
-        this.color = opt.color || "#00FF66"; // default is bright   green
+        this.color = opt.color || "#00FF66"; // default is bright green
         this.blinking = opt.blinking || false;
         this.cursor = opt.cursor || "default";
         opt.position = opt.position || "absolute";
@@ -90,8 +90,11 @@ define(function (require, exports, module) {
     /**
      * Updates the location and size of the widget according to the given position and size
      */
-    LED.prototype.updateLocationAndSize = function (pos) {
-        LED.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
+    LED.prototype.updateLocationAndSize = function (pos, opt) {
+        opt = opt || {};
+        if (opt.imageMap) {
+            LED.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
+        }
         this.top = pos.y || 0;
         this.left = pos.x || 0;
         this.width = pos.width || 200;
@@ -103,6 +106,8 @@ define(function (require, exports, module) {
         return this.render(this.example);
     };
     LED.prototype.updateWithProperties = function (props) {
+        props = props || {};
+        props.visibleWhen = props.visibleWhen || "true";
         LED.prototype.parentClass.updateWithProperties.apply(this, arguments);
         this.ledColor(props.ledColor);
         return this.render(this.example);

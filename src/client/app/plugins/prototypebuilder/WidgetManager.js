@@ -35,22 +35,6 @@ define(function (require, exports, module) {
             wm.getAllWidgets().forEach(function (w) {
                 w.render(state);
             });
-            // //render storyboard
-            // wm.getStoryboardWidgets().forEach(function (w) {
-            //     w.render(state);
-            // });
-            // //render displays
-            // wm.getDisplayWidgets().forEach(function (w) {
-            //     w.render(state);
-            // });
-            // //render soft buttons
-            // wm.getTouchscreenButtonWidgets().forEach(function (w) {
-            //     w.render(state);
-            // });
-            // //render LEDs
-            // wm.getLEDWidgets().forEach(function (w) {
-            //     w.render(state);
-            // });
         } else {
             if (err.failedCommand && err.failedCommand.indexOf("tick(") === 0) {
                 wm.stopTimers();
@@ -164,9 +148,9 @@ define(function (require, exports, module) {
         eventDispatcher(this);
     }
 
-    function createWidget(w, opt) {
+    function createWidget(w) {
         var widget = null;
-        var x = opt.x, y = opt.y, height = opt.height, width = opt.width, scale = opt.scale;
+        var x = w.x, y = w.y, height = w.height, width = w.width, scale = w.scale;
         w.type = w.type.toLowerCase();
         if (w.type === "button") {
             widget = new Button(w.id,
@@ -195,7 +179,8 @@ define(function (require, exports, module) {
         } else if (w.type === "touchscreendisplay") {
             widget = new TouchscreenDisplay(w.id,
                 { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
-                { displayKey: w.displayKey,
+                { callback: renderResponse,
+                  displayKey: w.displayKey,
                   cursorName: w.cursorName,
                   auditoryFeedback: w.auditoryFeedback,
                   visibleWhen: w.visibleWhen,
@@ -244,15 +229,15 @@ define(function (require, exports, module) {
             _.each(defs.widgetMaps, function (w, i) {
                 defs.regionDefs = defs.regionDefs || [];
                 var coords = ((i < defs.regionDefs.length) && defs.regionDefs[i].coords) ? defs.regionDefs[i].coords.split(",") : [0,0,0,0];
-                var height = parseFloat(coords[3]) - parseFloat(coords[1]),
-                    width  = parseFloat(coords[2]) - parseFloat(coords[0]),
-                         x = parseFloat(coords[0]),
-                         y = parseFloat(coords[1]);
-                var scale = (d3.select("svg > g").node()) ?
+                w.height = parseFloat(coords[3]) - parseFloat(coords[1]);
+                w.width  = parseFloat(coords[2]) - parseFloat(coords[0]);
+                w.x = parseFloat(coords[0]);
+                w.y = parseFloat(coords[1]);
+                w.scale = (d3.select("svg > g").node()) ?
                              +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
                 var widget = null;
                 try {
-                    widget = createWidget(w, { x:x, y:y, height: height, width: width, scale:scale });
+                    widget = createWidget(w);
                 } catch (e) {
                     console.log(e);
                 }
@@ -312,19 +297,19 @@ define(function (require, exports, module) {
                 NewWidgetView.create(coord)
                     .on("ok", function (e, view) {
                         view.remove();
-                        var id = e.data.type + "_" + uidGenerator();
-                        var scale = (d3.select("svg > g").node()) ?
+                        e.data.id = e.data.type + "_" + uidGenerator();
+                        e.data.scale = (d3.select("svg > g").node()) ?
                                         +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
-                        var height = parseFloat(d3.select("#imageDiv .selected rect").attr("height")) * scale,
-                            width = parseFloat(d3.select("#imageDiv .selected rect").attr("width")) * scale,
-                            x = parseFloat(d3.select("#imageDiv .selected rect").attr("x")) * scale,
-                            y = parseFloat(d3.select("#imageDiv .selected rect").attr("y")) * scale;
-                        var widget = createWidget(e.data, { x:x, y:y, height: height, width: width, scale:scale });
+                        e.data.height = parseFloat(d3.select("#imageDiv .selected rect").attr("height"));
+                        e.data.width = parseFloat(d3.select("#imageDiv .selected rect").attr("width"));
+                        e.data.x = parseFloat(d3.select("#imageDiv .selected rect").attr("x"));
+                        e.data.y = parseFloat(d3.select("#imageDiv .selected rect").attr("y"));
+                        var widget = createWidget(e.data);
                         if (widget) {
-                            region.classed(widget.type(), true).attr("id", id);
+                            region.classed(widget.type(), true).attr("id", widget.id());
                             widget.element(region);
                             createImageMap(widget);
-                            widget.updateLocationAndSize({ x: x, y: y, width: width, height: height });
+                            widget.updateLocationAndSize({ x: e.data.x, y: e.data.y, width: e.data.width, height: e.data.height }, { imageMap: true });
                             wm.addWidget(widget);
                             if (typeof widget.keyCode === "function" && widget.keyCode() && widget.type() === "button") {
                                 wm._keyCode2widget[widget.keyCode()] = widget;
@@ -440,7 +425,6 @@ define(function (require, exports, module) {
         _.each(this._timers, function (timer) {
             timer.start();
         });
-        this.initialiseWidgets();
     };
     WidgetManager.prototype.stopTimers = function () {
         _.each(this._timers, function (timer) {
@@ -534,9 +518,13 @@ define(function (require, exports, module) {
         @memberof WidgetManager
     */
     WidgetManager.prototype.getAllWidgets = function () {
-        return _.filter(this._widgets, function (w) {
-            return w.type() !== "timer";
-        });
+        // return an array sorted by widget type
+        return this.getDisplayWidgets()
+            .concat(this.getNumericDisplayWidgets())
+            .concat(this.getTouchscreenDisplayWidgets())
+            .concat(this.getTouchscreenButtonWidgets())
+            .concat(this.getButtonWidgets())
+            .concat(this.getLEDWidgets());
     };
     WidgetManager.prototype.getAllTimers = function () {
         return _.filter(this._widgets, function (w) {
@@ -559,7 +547,7 @@ define(function (require, exports, module) {
             pos.y *= scale;
             pos.width *= scale;
             pos.height *= scale;
-            widget.updateLocationAndSize(pos);
+            widget.updateLocationAndSize(pos, { imageMap: true });
         }
     };
     /**

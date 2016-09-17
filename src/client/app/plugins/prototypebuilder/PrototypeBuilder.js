@@ -234,6 +234,9 @@ define(function (require, exports, module) {
         d3.select("#btnSimulatorView").classed("selected", true);
         d3.selectAll("div.display,#controlsContainer button").classed("simulator", true);
         d3.selectAll("div.display,#controlsContainer button").classed("builder", false);
+        console.log("bootstrapping widgets with init(0)...");
+        WidgetManager.initialiseWidgets();
+        console.log("bootstrapping wallclock timers...");
         WidgetManager.startTimers();
     }
 

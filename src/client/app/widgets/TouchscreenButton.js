@@ -72,6 +72,8 @@ define(function (require, exports, module) {
 
         opt.functionText = opt.functionText || id;
         this.functionText = property.call(this, opt.functionText);
+        opt.evts = opt.evts || [ "click" ];
+        this.evts = property.call(this, opt.evts);
         opt.buttonReadback = opt.buttonReadback || "";
         this.buttonReadback = property.call(this, opt.buttonReadback);
         this.overlayButton = new Button(id + "_overlayButton", {
@@ -80,7 +82,7 @@ define(function (require, exports, module) {
             functionText: opt.functionText,
             callback: opt.callback,
             buttonReadback: opt.buttonReadback,
-            evts: opt.events || ['click'],
+            evts: opt.evts,
             area: this.div,
             parent: id
         });
@@ -127,6 +129,7 @@ define(function (require, exports, module) {
         opt.visibleWhen = opt.visibleWhen || "true"; // default: always enabled/visible
         this.visibleWhen = property.call(this, opt.visibleWhen);
         opt.softLabel = opt.softLabel || "";
+        this.softLabel = property.call(this, opt.softLabel);
         this.txt = opt.softLabel;
         Widget.call(this, id, "touchscreenbutton");
         return this;
@@ -143,17 +146,23 @@ define(function (require, exports, module) {
         return {
             type: this.type(),
             id: this.id(),
+            evts: this.evts(),
             displayKey: this.displayKey(),
             functionText: this.functionText(),
+            boundFunctions: this.overlayButton.boundFunctions(),
             buttonReadback: this.buttonReadback(),
-            visibleWhen: this.visibleWhen()
+            visibleWhen: this.visibleWhen(),
+            softLabel: this.softLabel()
         };
     };
     /**
     * Updates the location and size of the widget according to the given position and size
      */
-    TouchscreenButton.prototype.updateLocationAndSize = function (pos) {
-        TouchscreenButton.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
+    TouchscreenButton.prototype.updateLocationAndSize = function (pos, opt) {
+        opt = opt || {};
+        if (opt.imageMap) {
+            TouchscreenButton.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
+        }
         this.top = pos.y || 0;
         this.left = pos.x || 0;
         this.width = pos.width || 200;
@@ -163,8 +172,9 @@ define(function (require, exports, module) {
         this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
         d3.select("div." + this.id()).style("left", this.left + "px").style("top", this.top + "px")
             .style("width", this.width + "px").style("height", this.height + "px").style("font-size", this.fontsize + "px");
-//        this.overlayDisplay.updateLocationAndSize(pos);
-//        this.overlayButton.updateLocationAndSize(pos);
+        // only resize is needed, because we have already moved the div element containing the display and button areas
+        this.overlayDisplay.updateLocationAndSize({ width: pos.width, height: pos.height });
+        this.overlayButton.updateLocationAndSize({ width: pos.width, height: pos.height });
         return this.render(this.example);
     };
     /**
@@ -179,24 +189,25 @@ define(function (require, exports, module) {
     TouchscreenButton.prototype.render = function (state, opt) {
         // state is used to check whether the button is visible/enabled
         // the expression visibleWhen() is the condition we need to check on the state
-        var isEnabled = false;
+        var isVisible = false;
         var expr = StateParser.simpleExpressionParser(this.visibleWhen());
         if (expr && expr.res) {
             if (expr.res.type === "constexpr" && expr.res.constant === "true") {
-                isEnabled = true;
+                isVisible = true;
             } else if (expr.res.type === "boolexpr" && expr.res.binop) {
                 var str = StateParser.resolve(state, expr.res.attr);
                 if (str) {
                     str = StateParser.evaluate(str);
                     if ((expr.res.binop === "=" && str === expr.res.constant) ||
                          (expr.res.binop === "!=" && str !== expr.res.constant)) {
-                             isEnabled = true;
+                             isVisible = true;
                     }
                 }
             }
         }
-        if (isEnabled) {
+        if (isVisible) {
             this.overlayDisplay.render(this.txt, opt);
+            this.overlayButton.reveal(opt);
             return this.reveal();
         }
         return this.hide();
@@ -216,13 +227,18 @@ define(function (require, exports, module) {
     };
 
 
-    TouchscreenButton.prototype.hide = function () {
+    TouchscreenButton.prototype.hide = function (opt) {
+        opt = opt || {};
+        this.overlayButton.hide(); //FIXME: the mouse cursor is still a pointer when hovering the button area, because of map#prototypeMap
         this.div.style("display", "none");
+        this.cursor = opt.pointer || "default";
         return this;
     };
 
-    TouchscreenButton.prototype.reveal = function () {
+    TouchscreenButton.prototype.reveal = function (opt) {
+        opt = opt || {};
         this.div.style("display", "block");
+        this.cursor = opt.pointer || "pointer";
         return this;
     };
 

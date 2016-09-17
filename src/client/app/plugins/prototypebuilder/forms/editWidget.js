@@ -35,8 +35,10 @@ define(function (require, exports, module) {
         render: function (widget) {
             var t = Handlebars.compile(template);
             var widgetData = widget.toJSON();
-            widgetData.isDisplay = widget.type() === "display";
             widgetData.isButton = widget.type() === "button";
+            widgetData.isDisplay = widget.type() === "display";
+            widgetData.isNumericDisplay = widget.type() === "numericdisplay";
+            widgetData.isTouchscreenDisplay = widget.type() === "touchscreendisplay";
             widgetData.isTouchscreenButton = widget.type() === "touchscreenbutton";
             widgetData.isLED = widget.type() === "led";
             widgetData.isTimer = widget.type() === "timer";
@@ -49,6 +51,7 @@ define(function (require, exports, module) {
                 widget.evts().forEach(function (e) {
                     d3.select("input[type='radio'][value='" + e + "']").property("checked", true);
                 });
+                updateBoundFunctionsLabel();
             }
             if (widget.auditoryFeedback && widget.auditoryFeedback() === "enabled") {
                 d3.select("input[type='checkbox'][name='auditoryFeedback']").property("checked", true);
@@ -56,7 +59,8 @@ define(function (require, exports, module) {
             return this;
         },
         events: {
-            "change input[type='radio'][name='evts']": "eventsChanged",
+            "change input[type='radio'][name='button_events']": "eventsChanged",
+            "change input[type='radio'][name='touchscreenbutton_events']": "eventsChanged",
             "click #btnOk": "ok",
             "click #btnCancel": "cancel",
             "keyup #functionText": "eventsChanged",
@@ -76,13 +80,10 @@ define(function (require, exports, module) {
                 if (this.widget.auditoryFeedback) {
                     formdata.auditoryFeedback = (d3.select("input[type='checkbox'][name='auditoryFeedback']").property("checked")) ? "enabled" : "disabled";
                 }
-                if (this.widget.touchscreenvisibleWhen && formdata.touchscreenvisibleWhen && formdata.touchscreenvisibleWhen !== "") {
-                    formdata.touchscreenEnabled = true;
+                if (formdata.button_events) {
+                    formdata.evts = formdata.button_events;
+                    delete formdata.button_events;
                 }
-                // group together style properties
-                formdata.style = formdata.style || {};
-                formdata.style.fontsize = formdata.style.fontsize || formdata.fontsize;
-                formdata.style.backgroundColor = formdata.style.backgroundColor || formdata.backgroundColor;
                 // trigger event
                 this.trigger("ok", { data: formdata, el: this.el, event: event }, this);
             }

@@ -53,6 +53,7 @@ define(function (require, exports, module) {
         this.animation = opt.animation;
         this.visibleWhen = property.call(this, opt.visibleWhen);
         this.cursor = opt.cursor || "pointer";
+        this.isVisible = true;
 
         Widget.call(this, id, "button");
         opt.parent = opt.parent || "prototype";
@@ -115,9 +116,9 @@ define(function (require, exports, module) {
     */
     Button.prototype.toJSON = function () {
         return {
-            evts: this.evts(),
             id: this.id(),
             type: this.type(),
+            evts: this.evts(),
             recallRate: this.recallRate(),
             functionText: this.functionText(),
             boundFunctions: this.boundFunctions(),
@@ -148,6 +149,30 @@ define(function (require, exports, module) {
             ts: new Date().getTime()
         });
         mouseup(d3.event);
+        return this;
+    };
+
+    /**
+     * @function hide
+     * @description API to hide the button (disable actions & restore default mouse cursor)
+     * @memberof module:Button
+     */
+    Button.prototype.hide = function (opt) {
+        opt = opt || {};
+        this.cursor = opt.cursor || "default";
+        this.isVisible = false;
+        return this;
+    };
+
+    /**
+     * @function reveal
+     * @description API to reveal the button (disable actions & restore default mouse cursor)
+     * @memberof module:Button
+     */
+    Button.prototype.reveal = function (opt) {
+        opt = opt || {};
+        this.cursor = opt.cursor || "pointer";
+        this.isVisible = true;
         return this;
     };
 
@@ -276,23 +301,27 @@ define(function (require, exports, module) {
             evts;
 
         var onmouseup = function () {
-            if (evts && evts.indexOf("press/release") > -1) {
-                widget.release(opt);
+            if (widget.isVisible) {
+                if (evts && evts.indexOf("press/release") > -1) {
+                    widget.release(opt);
+                }
+                mouseup(d3.event);
+                area.on("mouseup", null);
             }
-            mouseup(d3.event);
-            area.on("mouseup", null);
         };
         area.on("mousedown", function () {
-            f = widget.functionText();
-            evts = widget.evts();
-            //perform the click event if there is one
-            if (evts && evts.indexOf('click') > -1) {
-                widget.click(opt);
-            } else if (evts && evts.indexOf("press/release") > -1) {
-                widget.pressAndHold(opt);
+            if (widget.isVisible) {
+                f = widget.functionText();
+                evts = widget.evts();
+                //perform the click event if there is one
+                if (evts && evts.indexOf('click') > -1) {
+                    widget.click(opt);
+                } else if (evts && evts.indexOf("press/release") > -1) {
+                    widget.pressAndHold(opt);
+                }
+                //register mouseup/out events here
+                area.on("mouseup", onmouseup);
             }
-            //register mouseup/out events here
-            area.on("mouseup", onmouseup);
         });
         widget.imageMap(area);
         return area;

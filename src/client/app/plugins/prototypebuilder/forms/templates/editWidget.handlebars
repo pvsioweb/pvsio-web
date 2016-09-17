@@ -3,37 +3,191 @@
     <div class="panel panel-info shadow center dialog">
         <div class="panel-heading">Edit {{type}}</div>
         <div class="panel-body">
-                {{#if isDisplay}}
+                {{#if isButton}}
                 <div class="form-group">
-                    <label for="prefix" class="col-sm-4 control-label">Display name</label>
+                    <label for="functionText" class="col-sm-4 control-label">Button Name</label>
                     <div class="col-sm-8">
-                        <input type="text" name="displayKey" id="displayKey" required class="form-control" value="{{displayKey}}" placeholder="Please enter display name (mandatory)"/>
+                        <input type="text" name="functionText" id="functionText" required class="form-control"
+                               value="{{functionText}}" placeholder="Please enter button name (mandatory)"/>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="cursorName" class="col-sm-4 control-label">Cursor name</label>
+                    <label for="events" class="col-sm-4 control-label">User Actions</label>
+                    <div class="col-sm-8" id="events" style="padding-top:5px;">
+                        <label>
+                            Click
+                            <input type="radio" name="button_events" value="click"/>
+                        </label>
+                        <label style="padding-left:25px;">
+                            Press and Release
+                            <input type="radio" name="button_events" value="press/release" />
+                        </label>
+                    </div>
+                </div>
+<!--                        <div class="form-group">
+                    <label for="recallRate" class="col-sm-4 control-label">Repeat Time (ms)</label>
                     <div class="col-sm-8">
-                        <input type="text" name="cursorName" id="cursorName" class="form-control" value="{{cursorName}}" placeholder="Please enter cursor name (optional)"/>
+                        <input type="text" name="recallRate" id="recallRate" required class="form-control" value="250" pattern="\d{2,5}" />
+                    </div>
+                </div>-->
+                <div class="form-group">
+                    <label for="buttonReadback" class="col-sm-4 control-label">Voice Readback</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="buttonReadback" id="buttonReadback" class="form-control"
+                               value="{{buttonReadback}}" placeholder="Please enter readback text (optional)"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="keyCode" class="col-sm-4 control-label">Keyboard Key</label>
+                    <div class="col-sm-8">
+                        <input onkeydown="uniKeyCode(event)" class="form-control"
+                               type="text" id="keyName" name="keyName" value="{{keyName}}" placeholder="Please choose keyboard key (optional)" />
+                        <input type="text" id="keyCode" name="keyCode" value="{{keyCode}}" readonly style="display:none"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="boundFunctions" class="col-sm-4 control-label">Generated Events</label>
+                    <div class="col-sm-8">
+                        <textarea id="boundFunctions" name="boundFunctions" type="text" readonly="true" class="form-control" style="resize:none;"></textarea>
+                    </div>
+                </div>
+                {{else}}{{#if isDisplay}}
+                <div class="form-group">
+                    <label for="displayKey" class="col-sm-4 control-label">Display Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="displayKey" id="displayKey" required class="form-control" placeholder="Please enter display name (mandatory)" value="{{displayKey}}" />
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="auditoryFeedback" class="col-sm-4 control-label">Voice Readback</label>
                     <div class="col-sm-8" style="padding-top:6px;">
-                        <input type="checkbox" name="auditoryFeedback" value="auditoryFeedback"/>
+                        <input type="checkbox" name="auditoryFeedback" id="auditoryFeedback" value="{{auditoryFeedback}}"/>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="touchscreenvisibleWhen" class="col-sm-4 control-label">TouchScreen Enabled</label>
-                    <div class="col-sm-8" style="padding-top:6px;">
-                        <input type="text" name="touchscreenvisibleWhen" id="touchscreenvisibleWhen"
-                               class="form-control" placeholder="Please enter enabling condition" value="{{touchscreenvisibleWhen}}" />
+                    <label for="visibleWhen" class="col-sm-4 control-label">Visible when...</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="visibleWhen" id="visibleWhen" class="form-control" placeholder="always visible" value="{{visibleWhen}}" />
+                    </div>
+                </div>
+                {{else}}{{#if isNumericDisplay}}
+                <div class="form-group">
+                    <label for="displayKey" class="col-sm-4 control-label">Display Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="displayKey" id="displayKey" required class="form-control" placeholder="Please enter display name (mandatory)" value="{{displayKey}}" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="touchscreenCommand" class="col-sm-4 control-label">TouchScreen Command</label>
+                    <label for="cursorName" class="col-sm-4 control-label">Cursor Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="cursorName" id="cursorName" class="form-control" placeholder="Please enter cursor name (optional)" value="{{cursorName}}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="visibleWhen" class="col-sm-4 control-label">Visible when...</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="visibleWhen" id="visibleWhen" class="form-control" placeholder="always visible" value="{{visibleWhen}}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="auditoryFeedback" class="col-sm-4 control-label">Voice Readback</label>
                     <div class="col-sm-8" style="padding-top:6px;">
-                        <input type="text" name="touchscreenCommand" id="touchscreenCommand"
-                               class="form-control" placeholder="Please enter command" value="{{touchscreenCommand}}" />
+                        <input type="checkbox" name="auditoryFeedback" id="auditoryFeedback" value="{{auditoryFeedback}}"/>
+                    </div>
+                </div>
+                {{else}}{{#if isTouchscreenDisplay}}
+                <div class="form-group">
+                    <label for="displayKey" class="col-sm-4 control-label">Display Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="displayKey" id="displayKey" required class="form-control" placeholder="Please enter display name (mandatory)" value="{{displayKey}}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cursorName" class="col-sm-4 control-label">Cursor Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="cursorName" id="cursorName" class="form-control" placeholder="Please enter cursor name (optional)" value="{{cursorName}}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="auditoryFeedback" class="col-sm-4 control-label">Voice Readback</label>
+                    <div class="col-sm-8" style="padding-top:6px;">
+                        <input type="checkbox" name="auditoryFeedback" id="auditoryFeedback" value="{{auditoryFeedback}}"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="visibleWhen" class="col-sm-4 control-label">Visible when...</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="visibleWhen" id="visibleWhen" class="form-control" placeholder="always visible" value="{{visibleWhen}}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="functionText" class="col-sm-4 control-label">Function</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="functionText" id="functionText"
+                               class="form-control" placeholder="Please enter function name" value="{{functionText}}" />
+                    </div>
+                </div>
+                {{else}}{{#if isTouchscreenButton}}
+                <div class="form-group">
+                    <label for="functionText" class="col-sm-4 control-label">Touchscreen Button Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="functionText" id="functionText" required class="form-control"
+                               value="{{functionText}}" placeholder="Please enter button name (mandatory)"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="softLabel" class="col-sm-4 control-label">Touchscreen Button Label</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="softLabel" id="softLabel" class="form-control"
+                               value="{{softLabel}}" placeholder="Soft button label (optional)"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="visibleWhen" class="col-sm-4 control-label">Visible when...</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="visibleWhen" id="visibleWhen" class="form-control" placeholder="always visible" value="{{visibleWhen}}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="buttonReadback" class="col-sm-4 control-label">Voice Readback</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="buttonReadback" id="buttonReadback" class="form-control"
+                               value="{{buttonReadback}}" placeholder="Please enter readback text (optional)"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="events" class="col-sm-4 control-label">User Actions</label>
+                    <div class="col-sm-8" id="events" style="padding-top:5px;">
+                        <label>
+                            Click
+                            <input type="radio" name="touchscreenbutton_events" value="click" checked />
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="boundFunctions" class="col-sm-4 control-label">Generated Events</label>
+                    <div class="col-sm-8">
+                        <textarea id="boundFunctions" name="boundFunctions" type="text" readonly="true" class="form-control" style="resize:none;">{{boundFunctions}}</textarea>
+                    </div>
+                </div>
+                {{else}}{{#if isLED}}
+                <div class="form-group">
+                    <label for="ledKey" class="col-sm-4 control-label">LED Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="ledKey" id="ledKey" required class="form-control"
+                               value="{{ledKey}}" placeholder="Please enter LED name (mandatory)"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="ledColor" class="col-sm-4 control-label">Color</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="ledColor" id="ledColor" class="form-control" placeholder="Please enter LED color (default: lightgreen)" value="{{ledColor}}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="visibleWhen" class="col-sm-4 control-label">Visible when...</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="visibleWhen" id="visibleWhen" class="form-control" placeholder="always visible" value="{{visibleWhen}}" />
                     </div>
                 </div>
                 {{else}}{{#if isTimer}}
@@ -55,115 +209,7 @@
                         <textarea id="timerFunction" name="timerFunction" type="text" readonly="true" class="form-control">{{timerFunction}}</textarea>
                     </div>
                 </div>
-                {{else}}{{#if isButton}}
-                <div class="form-group">
-                    <label for="functionText" class="col-sm-4 control-label">Button Name</label>
-                    <div class="col-sm-8">
-                        <input type="text" name="functionText" id="functionText" required class="form-control" value="{{functionText}}" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="evts" class="col-sm-4 control-label">User Actions</label>
-                    <div class="col-sm-8">
-                        <input type="radio" name="evts" value="click" />
-                        <label>
-                            Click
-                        </label>
-                        <input type="radio" name="evts" value="press/release" />
-                        <label>
-                            Press and Release
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="recallRate" class="col-sm-4 control-label">Repeat Time (ms)</label>
-                    <div class="col-sm-8">
-                        <input type="text" name="recallRate" id="recallRate" required class="form-control" value="{{recallRate}}" pattern="\d{2,5}" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="buttonReadback" class="col-sm-4 control-label">Voice Readback</label>
-                    <div class="col-sm-8">
-                        <input type="text" name="buttonReadback" id="buttonReadback" class="form-control"
-                               value="{{buttonReadback}}" placeholder="Please enter readback text (optional)" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="keyCode" class="col-sm-4 control-label">Keyboard Key</label>
-                    <div class="col-sm-8">
-                        <input onkeydown="uniKeyCode(event)" class="form-control"
-                               type="text" id="keyName" name="keyName" value="{{keyName}}" placeholder="Please choose keyboard key (optional)" />
-                        <input type="text" id="keyCode" name="keyCode" value="{{keyCode}}" readonly style="display:none"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="boundFunctions" class="col-sm-4 control-label">Generated Events</label>
-                    <div class="col-sm-8" id="events">
-                        <textarea id="boundFunctions" name="boundFunctions" type="text" readonly="true" class="form-control">{{boundFunctions}}</textarea>
-                    </div>
-                </div>
-                {{else}}{{#if isTouchscreenButton}}
-                <div class="form-group">
-                    <label for="functionText" class="col-sm-4 control-label">Soft Button Name</label>
-                    <div class="col-sm-8">
-                        <input type="text" name="functionText" id="functionText" required class="form-control" value="{{functionText}}" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="softLabel" class="col-sm-4 control-label">Soft Button Label</label>
-                    <div class="col-sm-8">
-                        <input type="text" name="softLabel" id="softLabel" class="form-control"
-                               value="{{softLabel}}" placeholder="Soft button label (optional)"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="visibleWhen" class="col-sm-4 control-label">Visible when...</label>
-                    <div class="col-sm-8">
-                        <input type="text" name="visibleWhen" id="visibleWhen" class="form-control" placeholder="always visible" value="{{visibleWhen}}" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="buttonReadback" class="col-sm-4 control-label">Voice Readback</label>
-                    <div class="col-sm-8">
-                        <input type="text" name="buttonReadback" id="buttonReadback" class="form-control"
-                               value="{{buttonReadback}}" placeholder="Please enter readback text (optional)" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="evts" class="col-sm-4 control-label">User Actions</label>
-                    <div class="col-sm-8">
-                        <input type="radio" name="evts" value="click" />
-                        <label>
-                            Click
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="boundFunctions" class="col-sm-4 control-label">Generated Events</label>
-                    <div class="col-sm-8" id="events">
-                        <textarea id="boundFunctions" name="boundFunctions" type="text" readonly="true" class="form-control">{{boundFunctions}}</textarea>
-                    </div>
-                </div>
-                {{else}}{{#if isLED}}
-                <div class="form-group">
-                    <label for="prefix" class="col-sm-4 control-label">LED name</label>
-                    <div class="col-sm-8">
-                        <input type="text" name="ledKey" id="ledKey" required class="form-control" value="{{ledKey}}" placeholder="Please enter LED name (mandatory)"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="visibleWhen" class="col-sm-4 control-label">Powered ON when...</label>
-                    <div class="col-sm-8">
-                        <input type="text" name="visibleWhen" id="visibleWhen" class="form-control" placeholder="always ON" value="{{visibleWhen}}" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="ledColor" class="col-sm-4 control-label">Color</label>
-                    <div class="col-sm-8">
-                        <input type="text" name="ledColor" id="ledColor" class="form-control" placeholder="Please enter LED color (default: lightgreen)" value="{{ledColor}}" />
-                    </div>
-                </div>
-                {{/if}}{{/if}}{{/if}}{{/if}}{{/if}}
+                {{/if}}{{/if}}{{/if}}{{/if}}{{/if}}{{/if}}{{/if}}
         </div>
         <div class="panel-footer">
             <button type="button" class="btn btn-danger left" id="btnCancel">Cancel</button>
