@@ -1,12 +1,16 @@
 #Changelog
+##2.1 (Sep 2016)
+    Added new widgets: Touchscreen elements
+    Improved Prototype Builder (live widgets preview, direct support for 6 types of widgets)
+    Refactored widgets library
 
 ##2.0.2 (April 2016)
     PVSio-web goes live on UMinho servers (http://pvsioweb.lsd.di.uminho.pt)
     Added new feature: physical keyboard keys can be linked to prototype keys
-    Added new feature: voice readback for button actions
+    Added new feature: voice readback for button widgets
     Added new feature: wallclock for automatic execution of tick transitions defined in the PVS model
     Improved Emucharts Editor
-    
+
 ##2.0.1b (Sep 2015)
     Added new modelling extension: Presentation Interaction Models (PIMs)
     Added PVSio-web network controller for distributed simulations
@@ -38,7 +42,7 @@
     Added support for logging/playback of user interactions
     Added voice feedback function for display widgets
     Added new protytpes (Arcomedical Syramed)
-    
+
 ##0.0.17 (Dec 2013)
     Added new tool: Emulink, for creating pvs models using Statechart-like graphical diagrams
     PVSio-web license changes from MIT to GPL3
