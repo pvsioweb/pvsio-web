@@ -36,7 +36,7 @@
    "visibleWhen": "current_state = STD",
    "fontsize": "16",
    "fontColor": "white",
-   "backgroundColor": "transparent"
+   "backgroundColor": "dimgray"
   },
   {
    "id": "button_cc7ca0a7-cc98-4419-df7b-1e6502c0be55",
@@ -242,7 +242,7 @@
    "visibleWhen": "current_state = STD",
    "fontsize": "12",
    "fontColor": "white",
-   "backgroundColor": "transparent"
+   "backgroundColor": "dimgray"
   },
   {
    "type": "led",
@@ -318,7 +318,7 @@
    "auditoryFeedback": "disabled",
    "visibleWhen": "current_state = QNH",
    "fontsize": "16",
-   "fontColor": "lightgreen",
+   "fontColor": "cyan",
    "backgroundColor": "black"
   },
   {
@@ -328,8 +328,8 @@
    "auditoryFeedback": "disabled",
    "visibleWhen": "current_state = EDIT_PRESSURE",
    "fontsize": "16",
-   "fontColor": "lightgreen",
-   "backgroundColor": "transparent"
+   "fontColor": "cyan",
+   "backgroundColor": "black"
   },
   {
    "type": "display",
@@ -338,8 +338,8 @@
    "auditoryFeedback": "disabled",
    "visibleWhen": "current_state = QNH",
    "fontsize": "12",
-   "fontColor": "lightgreen",
-   "backgroundColor": "transparent"
+   "fontColor": "steelblue",
+   "backgroundColor": "black"
   }
  ],
  "regionDefs": [

@@ -54,15 +54,25 @@ define(function (require, exports, module) {
             });
         } else if (widgetType === "numericdisplay") {
             widgetPreviewer.preview(widgetType, {
-                auditoryFeedback: d3.select("#auditoryFeedback").node().checked
+                auditoryFeedback: d3.select("#auditoryFeedback").node().checked,
+                fontsize: d3.select("#fontsize").node().value,
+                fontColor: d3.select("#fontColor").node().value,
+                backgroundColor: d3.select("#backgroundColor").node().value
             });
         } else if (widgetType === "touchscreenbutton") {
             widgetPreviewer.preview(widgetType, {
-                buttonReadback: d3.select("#buttonReadback").node().value
+                buttonReadback: d3.select("#buttonReadback").node().value,
+                fontsize: d3.select("#fontsize").node().value,
+                fontColor: d3.select("#fontColor").node().value,
+                backgroundColor: d3.select("#backgroundColor").node().value
             });
         } else if (widgetType === "touchscreendisplay") {
             widgetPreviewer.preview(widgetType, {
-                auditoryFeedback: d3.select("#auditoryFeedback").node().checked
+                auditoryFeedback: d3.select("#auditoryFeedback").node().checked,
+                cursorName: d3.select("#cursorName").node().value,
+                fontsize: d3.select("#fontsize").node().value,
+                fontColor: d3.select("#fontColor").node().value,
+                backgroundColor: d3.select("#backgroundColor").node().value
             });
         } else if (widgetType === "led") {
             var color = d3.select("#ledColor").node().value;
@@ -112,7 +122,8 @@ define(function (require, exports, module) {
             "keyup #ledColor"             : "updatePreview",
             "keyup #fontsize"             : "updatePreview",
             "keyup #fontColor"            : "updatePreview",
-            "keyup #backgroundColor"      : "updatePreview"
+            "keyup #backgroundColor"      : "updatePreview",
+            "keyup #cursorName"           : "updatePreview"
         },
         eventsChanged: function (event) {
             updateBoundFunctionsLabel();

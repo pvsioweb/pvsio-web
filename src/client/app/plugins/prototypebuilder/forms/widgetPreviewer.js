@@ -38,7 +38,7 @@ define(function (require, exports, module) {
             } else if (widgetType === "display") {
                 widgetPreview = new BasicDisplay("theWidget",
                     { width: maxWidth, height: 50 },
-                    { backgroundColor: (opt.backgroundColor) ? ((opt.backgroundColor === "transparent") ? "lightgrey" : opt.backgroundColor) : "black",
+                    { backgroundColor: (opt.backgroundColor === "transparent") ? "lightgrey" : opt.backgroundColor,
                       fontColor: opt.fontColor,
                       fontsize: opt.fontsize || 20,
                       auditoryFeedback: opt.auditoryFeedback,
@@ -49,16 +49,10 @@ define(function (require, exports, module) {
             } else if (widgetType === "numericdisplay") {
                 widgetPreview = new NumericDisplay("theWidget",
                     { width: maxWidth, height: 50 },
-                    { backgroundColor: "black",
-                      fontColor: "white",
-                      fontsize: 20,
+                    { backgroundColor: (opt.backgroundColor === "transparent") ? "lightgrey" : opt.backgroundColor,
+                      fontColor: opt.fontColor,
+                      fontsize: opt.fontsize || 20,
                       auditoryFeedback: opt.auditoryFeedback,
-                      touchscreenvisibleWhen: "false",
-                      touchscreenCommand: "",
-                      touchscreen: {
-                          backgroundColor: "green",
-                          highlightOnMouseClick: true
-                      },
                       displayKey: "d",
                       cursorName: "c",
                       position: "relative",
@@ -68,23 +62,29 @@ define(function (require, exports, module) {
             } else if (widgetType === "touchscreendisplay") {
                 widgetPreview = new TouchscreenDisplay("theWidget",
                     { width: maxWidth, height: 50 },
-                    { backgroundColor: "rgb(8, 88, 154)",
-                      fontsize: 20,
+                    { backgroundColor: (opt.backgroundColor === "transparent") ? "lightgrey" : opt.backgroundColor,
+                      fontColor: opt.fontColor,
+                      fontsize: opt.fontsize || 20,
                       auditoryFeedback: opt.auditoryFeedback,
-                      displayMode: "numeric",
+                      displayMode: (opt.cursorName) ? "numeric" : "standard",
                       displayKey: "d",
                       cursorName: "c",
                       position: "relative",
                       parent: "widgetPreview" });
-                widgetPreview.render({ d:2.01, c:0 });
+                if (opt.cursorName) {
+                    widgetPreview.render({ d:"Display 2.01", c:0 });
+                } else {
+                    widgetPreview.render({ d:"Display 2.01" });
+                }
                 d3.select("#widgetPreview").attr("style", "display: block;");
             } else if (widgetType === "touchscreenbutton") {
                 widgetPreview = new TouchscreenButton("theWidget",
                     { width: maxWidth, height: 50 },
                     { softLabel: "Touchscreen button",
                       buttonReadback: opt.buttonReadback,
-                      backgroundColor: "rgb(8, 88, 154)",
-                      fontsize: 20,
+                      backgroundColor: (opt.backgroundColor === "transparent") ? "lightgrey" : opt.backgroundColor,
+                      fontColor: opt.fontColor,
+                      fontsize: opt.fontsize || 20,
                       auditoryFeedback: false,
                       position: "relative",
                       parent: "widgetPreview" });

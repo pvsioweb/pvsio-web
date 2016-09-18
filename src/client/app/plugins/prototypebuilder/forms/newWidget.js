@@ -97,7 +97,8 @@ define(function (require, exports, module) {
             "keyup #ledColor"             : "updatePreview",
             "keyup #fontsize"             : "updatePreview",
             "keyup #fontColor"            : "updatePreview",
-            "keyup #backgroundColor"      : "updatePreview"
+            "keyup #backgroundColor"      : "updatePreview",
+            "keyup #cursorName"           : "updatePreview"
         },
         eventsChanged: function (event) {
             updateBoundFunctionsLabel();

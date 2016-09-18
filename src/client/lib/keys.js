@@ -122,7 +122,7 @@ function rgb2hex(col){
 }
 function dimColor(col, amt) {
     if (typeof col === "string") {
-        amt = amt || 20;
+        amt = amt || 48;
         col = rgb2hex(colorNameToHex(col)).slice(1) || "0";
         var num = parseInt(col,16);
 

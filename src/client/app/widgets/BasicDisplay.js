@@ -65,8 +65,8 @@ define(function (require, exports, module) {
         this.font = [this.fontsize, "px ", this.fontfamily];
         this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
         this.align = opt.align || "center";
-        this.backgroundColor = opt.backgroundColor || "transparent";
-        this.fontColor = opt.fontColor || "#fff"; //white
+        this.backgroundColor = opt.backgroundColor || "black";
+        this.fontColor = opt.fontColor || "white";
         this.cursor = opt.cursor || "default";
         if (opt.inverted) {
             var tmp = this.backgroundColor;
@@ -293,15 +293,15 @@ define(function (require, exports, module) {
     BasicDisplay.prototype.renderMultiline = function (txt, opt) {
         function clearContext(context, width, height) {
             context.save();
-            context.fillStyle = backgroundColor;
+            context.fillStyle = opt.backgroundColor;
             context.fillRect(0, 0, width, height);
             context.restore();
         }
         function renderln(data, opt) {
             opt = opt || {};
-            data.context.fillStyle = (opt.inverted) ? _this.fontColor : backgroundColor;
+            data.context.fillStyle = (opt.inverted) ? opt.fontColor : opt.backgroundColor;
             data.context.fillRect(0, data.y, data.width, data.height);
-            data.context.fillStyle = (opt.inverted) ? backgroundColor : _this.fontColor;
+            data.context.fillStyle = (opt.inverted) ? opt.backgroundColor : opt.fontColor;
             var y_offset = data.y || 0;
             if (data.align === "left") {
                 data.context.textAlign = "start";
@@ -315,10 +315,9 @@ define(function (require, exports, module) {
             }
         }
         opt = opt || {};
-        var _this = this;
+        opt.backgroundColor = opt.backgroundColor || this.backgroundColor;
+        opt.fontColor = opt.fontColor || this.fontColor;
         this.txt = txt;
-        var backgroundColor = (_this.backgroundColor !== "") ? _this.backgroundColor
-                                : (_this.fontColor !== "#000") ? "#000" : "#fff"; //default is black
         var context = document.getElementById(this.id() + "_canvas").getContext("2d");
         clearContext(context, this.width, this.height);
         context.textBaseline = this.textBaseline;

@@ -119,15 +119,27 @@ require([
                                 parent: "prototype",
                                 cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
-        fcu.display_val = new NumericDisplay("display_val",
+        fcu.display_val = new BasicDisplay("display_val",
                             { top: 333, left: 16, height: 28, width: 100 },
                             {
                                 displayKey: "data_entry.display",
                                 visibleWhen: "current_state = STD",
                                 fontsize: 16,
-                                fontColor: "steelblue",
+                                fontColor: "white",
+                                backgroundColor: "dimgray",
                                 parent: "prototype",
                                 cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
+                            });
+        fcu.display_units = new BasicDisplay("FCU_display_units",
+                            { top: 333, left: 112, height: 28, width: 36 },
+                            {
+                              displayKey: "data_entry.units",
+                              visibleWhen: "current_state = STD",
+                              fontsize: 14,
+                              fontColor: "white",
+                              backgroundColor: "dimgray",
+                              parent: "prototype",
+                              cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
         fcu.touchscreen_display = new TouchscreenDisplay("FCU_display",
                             { top: 333, left: 16, height: 28, width: 100 },
@@ -135,9 +147,22 @@ require([
                               displayKey: "data_entry.display",
                               visibleWhen: "current_state = QNH",
                               functionText: "editbox_pressure",
+                              fontColor: "cyan",
+                              backgroundColor: "black",
                               callback: onMessageReceived,
                               fontsize: 16,
-                              displayMode: "numeric",
+                              displayMode: "standard",
+                              parent: "prototype",
+                              cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
+                            });
+        fcu.notouchs_display_units = new BasicDisplay("FCU_notouch_display_units",
+                            { top: 333, left: 112, height: 28, width: 36 },
+                            {
+                              displayKey: "data_entry.units",
+                              visibleWhen: "current_state = QNH",
+                              fontColor: "steelblue",
+                              backgroundColor: "black",
+                              fontsize: 14,
                               parent: "prototype",
                               cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
@@ -146,17 +171,9 @@ require([
                             {
                               displayKey: "data_entry.display",
                               visibleWhen: "current_state = EDIT_PRESSURE",
+                              backgroundColor: "black",
+                              fontColor: "cyan",
                               fontsize: 16,
-                              parent: "prototype",
-                              cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
-                            });
-        fcu.display_units = new BasicDisplay("FCU_display_units",
-                            { top: 333, left: 112, height: 28, width: 36 },
-                            {
-                              displayKey: "data_entry.units",
-                              visibleWhen: "current_state != EDIT_PRESSURE",
-                              fontsize: 14,
-                              fontColor: "steelblue",
                               parent: "prototype",
                               cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
@@ -249,6 +266,7 @@ require([
             fcu.display_units.render(res);
             fcu.data_entry_display.render(res);
             fcu.display_val.render(res);
+            fcu.notouchs_display_units.render(res);
             fcu.btn_toHPA.render(res);
             fcu.btn_toINHG.render(res);
             fcu.btn_CLEAR.render(res);
