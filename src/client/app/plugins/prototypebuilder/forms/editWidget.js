@@ -7,11 +7,19 @@
 /*global define, Handlebars, $*/
 define(function (require, exports, module) {
     "use strict";
-    var FormUtils					= require("./FormUtils"),
-        template					= require("text!./templates/editWidget.handlebars"),
-        BaseDialog                  = require("pvsioweb/forms/BaseDialog"),
-        d3							= require("d3/d3");
+    var FormUtils		= require("./FormUtils"),
+        template		= require("text!./templates/editWidget.handlebars"),
+        BaseDialog      = require("pvsioweb/forms/BaseDialog"),
+        widgetPreviewer = require("pvsioweb/forms/widgetPreviewer"),
+        d3				= require("d3/d3");
 
+    function getWidgetEvents(widgetType) {
+        var evts = [];
+        d3.select("#events").selectAll("input[type='radio']").each(function () {
+            if (this.checked) { evts = evts.concat(this.value.split("/")); }
+        });
+        return evts;
+    }
     function updateBoundFunctionsLabel() {
         var f = d3.select("#functionText").property("value"),
             str = "",
@@ -29,6 +37,39 @@ define(function (require, exports, module) {
     function updateTimerEvent() {
         var f = d3.select("#timerEvent").property("value");
         d3.select("#timerFunction").text(f);
+    }
+    function showWidgetPreview(widgetType) {
+        if (widgetType === "button") {
+            widgetPreviewer.preview(widgetType, {
+                keyboardKey: d3.select("#keyCode").node().value,
+                buttonReadback: d3.select("#buttonReadback").node().value,
+                evts: getWidgetEvents(widgetType)
+            });
+        } else if (widgetType === "display") {
+            widgetPreviewer.preview(widgetType, {
+                auditoryFeedback: d3.select("#auditoryFeedback").node().checked,
+                fontsize: d3.select("#fontsize").node().value,
+                fontColor: d3.select("#fontColor").node().value,
+                backgroundColor: d3.select("#backgroundColor").node().value
+            });
+        } else if (widgetType === "numericdisplay") {
+            widgetPreviewer.preview(widgetType, {
+                auditoryFeedback: d3.select("#auditoryFeedback").node().checked
+            });
+        } else if (widgetType === "touchscreenbutton") {
+            widgetPreviewer.preview(widgetType, {
+                buttonReadback: d3.select("#buttonReadback").node().value
+            });
+        } else if (widgetType === "touchscreendisplay") {
+            widgetPreviewer.preview(widgetType, {
+                auditoryFeedback: d3.select("#auditoryFeedback").node().checked
+            });
+        } else if (widgetType === "led") {
+            var color = d3.select("#ledColor").node().value;
+            widgetPreviewer.preview(widgetType, {
+                color: color
+            });
+        }
     }
 
     var EditWidgetView	= BaseDialog.extend({
@@ -56,21 +97,32 @@ define(function (require, exports, module) {
             if (widget.auditoryFeedback && widget.auditoryFeedback() === "enabled") {
                 d3.select("input[type='checkbox'][name='auditoryFeedback']").property("checked", true);
             }
+            showWidgetPreview(widget.type());
             return this;
         },
         events: {
-            "change input[type='radio'][name='button_events']": "eventsChanged",
+            "click #btnOk"                : "ok",
+            "click #btnCancel"            : "cancel",
+            "change input[type='radio'][name='button_events']"           : "eventsChanged",
             "change input[type='radio'][name='touchscreenbutton_events']": "eventsChanged",
-            "click #btnOk": "ok",
-            "click #btnCancel": "cancel",
-            "keyup #functionText": "eventsChanged",
-            "keyup #timerEvent": "timerEventChanged"
+            "keyup #functionText"         : "eventsChanged",
+            "keyup #timerEvent"           : "timerEventChanged",
+            "change input[type='checkbox']": "updatePreview",
+            "keyup #buttonReadback"       : "updatePreview",
+            "keyup #ledColor"             : "updatePreview",
+            "keyup #fontsize"             : "updatePreview",
+            "keyup #fontColor"            : "updatePreview",
+            "keyup #backgroundColor"      : "updatePreview"
         },
         eventsChanged: function (event) {
             updateBoundFunctionsLabel();
+            showWidgetPreview(this.widget.type());
+        },
+        updatePreview: function (event) {
+            showWidgetPreview(this.widget.type());
         },
         timerEventChanged: function (event) {
-            updateTimerEvent();
+            updateTimerEvent(this.widget.type());
         },
         ok: function (event) {
             var form = this.el;

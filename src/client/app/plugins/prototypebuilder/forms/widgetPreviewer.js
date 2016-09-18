@@ -33,18 +33,18 @@ define(function (require, exports, module) {
                       buttonReadback: opt.buttonReadback,
                       prototypeMap: "widgetPreviewMap",
                       parent: "navkeys" });
-              widgetPreview.render();
-              d3.select("#navkeys").attr("style", "display: block;");
+                widgetPreview.render();
+                d3.select("#navkeys").attr("style", "display: block;");
             } else if (widgetType === "display") {
                 widgetPreview = new BasicDisplay("theWidget",
                     { width: maxWidth, height: 50 },
-                    { backgroundColor: "black",
-                      fontColor: "white",
-                      fontsize: 20,
+                    { backgroundColor: (opt.backgroundColor) ? ((opt.backgroundColor === "transparent") ? "lightgrey" : opt.backgroundColor) : "black",
+                      fontColor: opt.fontColor,
+                      fontsize: opt.fontsize || 20,
                       auditoryFeedback: opt.auditoryFeedback,
                       position: "relative",
                       parent: "widgetPreview" });
-                widgetPreview.render("Basic Display");
+                widgetPreview.render("Display 2.01");
                 d3.select("#widgetPreview").attr("style", "display: block;");
             } else if (widgetType === "numericdisplay") {
                 widgetPreview = new NumericDisplay("theWidget",
@@ -63,7 +63,7 @@ define(function (require, exports, module) {
                       cursorName: "c",
                       position: "relative",
                       parent: "widgetPreview" });
-                widgetPreview.render({ d:200.1, c:0 });
+                widgetPreview.render({ d:2.01, c:0 });
                 d3.select("#widgetPreview").attr("style", "display: block;");
             } else if (widgetType === "touchscreendisplay") {
                 widgetPreview = new TouchscreenDisplay("theWidget",
@@ -76,8 +76,8 @@ define(function (require, exports, module) {
                       cursorName: "c",
                       position: "relative",
                       parent: "widgetPreview" });
-              widgetPreview.render({ d:200.1, c:0 });
-              d3.select("#widgetPreview").attr("style", "display: block;");
+                widgetPreview.render({ d:2.01, c:0 });
+                d3.select("#widgetPreview").attr("style", "display: block;");
             } else if (widgetType === "touchscreenbutton") {
                 widgetPreview = new TouchscreenButton("theWidget",
                     { width: maxWidth, height: 50 },
@@ -88,8 +88,8 @@ define(function (require, exports, module) {
                       auditoryFeedback: false,
                       position: "relative",
                       parent: "widgetPreview" });
-              widgetPreview.render();
-              d3.select("#widgetPreview").attr("style", "display: block;");
+                widgetPreview.render();
+                d3.select("#widgetPreview").attr("style", "display: block;");
             } else if (widgetType === "led") {
                 var color = opt.color;
                 widgetPreview = new LED("theWidget",

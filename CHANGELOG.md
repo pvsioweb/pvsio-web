@@ -3,6 +3,7 @@
     Added new widgets: Touchscreen elements
     Improved Prototype Builder (live widgets preview, direct support for 6 types of widgets)
     Refactored widgets library
+    Added new example project: Flight Control Unit
 
 ##2.0.2 (April 2016)
     PVSio-web goes live on UMinho servers (http://pvsioweb.lsd.di.uminho.pt)

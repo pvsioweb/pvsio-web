@@ -33,7 +33,10 @@
    "id": "display_73c873ac-ea47-49b0-fe9a-1b5e3bd9b11d",
    "displayKey": "data_entry.display",
    "auditoryFeedback": "disabled",
-   "visibleWhen": "current_state = STD"
+   "visibleWhen": "current_state = STD",
+   "fontsize": "16",
+   "fontColor": "white",
+   "backgroundColor": "transparent"
   },
   {
    "id": "button_cc7ca0a7-cc98-4419-df7b-1e6502c0be55",
@@ -236,7 +239,10 @@
    "id": "display_1811a56b-b0df-4ccd-b27d-ef5bc079333b",
    "displayKey": "data_entry.units",
    "auditoryFeedback": "disabled",
-   "visibleWhen": "true"
+   "visibleWhen": "current_state = STD",
+   "fontsize": "12",
+   "fontColor": "white",
+   "backgroundColor": "transparent"
   },
   {
    "type": "led",
@@ -263,7 +269,10 @@
    "boundFunctions": "click_CLR",
    "buttonReadback": "",
    "visibleWhen": "true",
-   "softLabel": "CLR INFO"
+   "softLabel": "CLR INFO",
+   "fontsize": "16",
+   "fontColor": "white",
+   "backgroundColor": "black"
   },
   {
    "type": "touchscreenbutton",
@@ -276,7 +285,10 @@
    "boundFunctions": "click_hPa",
    "buttonReadback": "",
    "visibleWhen": "data_entry.units = inHg",
-   "softLabel": "INHG -> HPA"
+   "softLabel": "INHG -> HPA",
+   "fontsize": "16",
+   "fontColor": "#fff",
+   "backgroundColor": "black"
   },
   {
    "type": "touchscreenbutton",
@@ -289,7 +301,10 @@
    "boundFunctions": "click_inHg",
    "buttonReadback": "",
    "visibleWhen": "data_entry.units = hPa",
-   "softLabel": "HPA -> INHG"
+   "softLabel": "HPA -> INHG",
+   "fontsize": "16",
+   "fontColor": "#fff",
+   "backgroundColor": "black"
   },
   {
    "type": "touchscreendisplay",
@@ -301,15 +316,30 @@
    "functionText": "editbox_pressure",
    "boundFunctions": "click_editbox_pressure",
    "auditoryFeedback": "disabled",
-   "visibleWhen": "current_state = QNH"
+   "visibleWhen": "current_state = QNH",
+   "fontsize": "16",
+   "fontColor": "lightgreen",
+   "backgroundColor": "black"
   },
   {
-   "type": "numericdisplay",
-   "id": "numericdisplay_6fd7b234-8fb7-4fa3-e4b1-feaa68c953d2",
+   "type": "display",
+   "id": "display_536faac7-61a2-4b76-b819-ca1e580890e2",
    "displayKey": "data_entry.display",
-   "cursorName": "",
    "auditoryFeedback": "disabled",
-   "visibleWhen": "current_state = EDIT_PRESSURE"
+   "visibleWhen": "current_state = EDIT_PRESSURE",
+   "fontsize": "16",
+   "fontColor": "lightgreen",
+   "backgroundColor": "transparent"
+  },
+  {
+   "type": "display",
+   "id": "display_7e538b94-85a2-4bea-9596-be233ebdafbe",
+   "displayKey": "data_entry.units",
+   "auditoryFeedback": "disabled",
+   "visibleWhen": "current_state = QNH",
+   "fontsize": "12",
+   "fontColor": "lightgreen",
+   "backgroundColor": "transparent"
   }
  ],
  "regionDefs": [
@@ -328,7 +358,7 @@
   {
    "class": "display_73c873ac-ea47-49b0-fe9a-1b5e3bd9b11d",
    "shape": "rect",
-   "coords": "14.469361443492089,336.2008803846345,105.37910929728254,357.5313265519587",
+   "coords": "15.972216924031578,332.28623072306317,108.96529556802389,361.94998987866865",
    "href": null
   },
   {
@@ -340,7 +370,7 @@
   {
    "class": "button_6462c8d6-c273-406f-abbf-be7fb1691428",
    "shape": "rect",
-   "coords": "1073.9583740234377,281.64062500000006,1115.1910129123316,327.21354166666583",
+   "coords": "1073.9583740234377,281.64062500000006,1115.1910129123319,327.21354166666583",
    "href": null
   },
   {
@@ -400,7 +430,7 @@
   {
    "class": "button_7f2615b4-b7bd-48dc-f6cf-661f9b510bed",
    "shape": "rect",
-   "coords": "677.1267361111113,26.08507325914172,714.4097222222226,66.57986746893988",
+   "coords": "677.1267361111114,26.08507325914172,714.4097222222226,66.57986746893988",
    "href": null
   },
   {
@@ -418,49 +448,55 @@
   {
    "class": "display_1811a56b-b0df-4ccd-b27d-ef5bc079333b",
    "shape": "rect",
-   "coords": "109.81314152405673,339.3315682335254,151.12241303061515,354.92072058299846",
+   "coords": "109.72221692403158,332.28623072306317,149.98984020162678,362.4586998755147",
    "href": null
   },
   {
    "class": "led_8bb09b12-dc77-4de6-ccb6-e75dec226bc7",
    "shape": "rect",
-   "coords": "9.299154093943038,240.74448986943818,43.39600598286423,276.90784349433693",
+   "coords": "9.299154093943038,240.74448986943818,43.396005982864224,276.90784349433693",
    "href": null
   },
   {
    "class": "led_7805450b-0c67-4246-999e-f273ce1252ff",
    "shape": "rect",
-   "coords": "8.402777373663483,274.8600167764873,44.4027773736635,309.8600167764879",
+   "coords": "8.369545885128936,273.8600595368114,44.36954588512895,308.86005953681195",
    "href": null
   },
   {
    "class": "touchscreenbutton_e19eb7e6-7f73-41b2-bbaa-dbe7575f4119",
    "shape": "rect",
-   "coords": "2.091828905392461,763.4665700474301,83.32507085406775,780.2938298413658",
+   "coords": "2.0918281744584064,753.381341536922,84.62715812833585,793.6461425615935",
    "href": null
   },
   {
    "class": "touchscreenbutton_d351a132-4082-436e-ddbc-85a6d42e197e",
    "shape": "rect",
-   "coords": "15.498598257470166,384.36452181259625,147.7530256353962,406.0626043014387",
+   "coords": "15.498598257470166,384.3645218125963,147.7530256353962,406.0626043014387",
    "href": null
   },
   {
    "class": "touchscreenbutton_b48b96db-5aee-4c77-9fcf-566ea1504436",
    "shape": "rect",
-   "coords": "14.06174536528998,384.36446632582255,148.38264842856935,406.06252522767153",
+   "coords": "15.363827456386842,384.3644657363987,149.68473051966626,406.0625246382477",
    "href": null
   },
   {
    "class": "touchscreendisplay_1d1339a0-5e63-47f9-dbdd-dd893245ffb0",
    "shape": "rect",
-   "coords": "14.469366363214018,335.8022132166284,105.5242529748339,356.9642990249863",
+   "coords": "16.552718134250824,332.6772500920353,109.69094380124996,361.13102926994117",
    "href": null
   },
   {
-   "class": "numericdisplay_6fd7b234-8fb7-4fa3-e4b1-feaa68c953d2",
+   "class": "display_536faac7-61a2-4b76-b819-ca1e580890e2",
    "shape": "rect",
-   "coords": "15.498563483486649,336.83544637444317,148.25625252622018,355.3277944367609",
+   "coords": "15.094955059437517,332.9200177800567,143.93002485966633,361.5658776683276",
+   "href": null
+  },
+  {
+   "class": "display_7e538b94-85a2-4bea-9596-be233ebdafbe",
+   "shape": "rect",
+   "coords": "111.18610496926199,333.4313392563749,149.4159547808852,361.3287990580826",
    "href": null
   }
  ]

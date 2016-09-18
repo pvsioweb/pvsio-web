@@ -197,7 +197,10 @@
              functionText: this.functionText(),
              boundFunctions: this.overlayButton.boundFunctions(),
              auditoryFeedback: this.auditoryFeedback(),
-             visibleWhen: this.visibleWhen()
+             visibleWhen: this.visibleWhen(),
+             fontsize: this.fontsize,
+             fontColor: this.fontColor,
+             backgroundColor: this.backgroundColor
          };
      };
      /**
@@ -212,9 +215,9 @@
          this.left = pos.x || 0;
          this.width = pos.width || 200;
          this.height = pos.height || 80;
-         this.fontsize = this.height * 0.9;
-         this.font = [this.fontsize, "px ", this.fontfamily];
-         this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
+        //  this.fontsize = this.height * 0.9;
+        //  this.font = [this.fontsize, "px ", this.fontfamily];
+        //  this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
          d3.select("div." + this.id()).style("left", this.left + "px").style("top", this.top + "px")
              .style("width", this.width + "px").style("height", this.height + "px").style("font-size", this.fontsize + "px");
          // only resize is needed, because we have already moved the div element containing the display and button areas
@@ -222,6 +225,15 @@
          this.overlayNumericDisplay.updateLocationAndSize({ width: pos.width, height: pos.height });
          this.overlayButton.updateLocationAndSize({ width: pos.width, height: pos.height });
          return this.render(this.example);
+     };
+     TouchscreenDisplay.prototype.updateStyle = function (data) {
+         data = data || {};
+         this.fontsize = data.fontsize || this.fontsize;
+         this.font = [this.fontsize, "px ", this.fontfamily];
+         this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
+         this.fontColor = data.fontColor || this.fontColor;
+         this.backgroundColor = data.backgroundColor || this.backgroundColor;
+         return this;
      };
      /**
       * Removes the widget's div

@@ -4,65 +4,72 @@
    "type": "display",
    "id": "Display1360329548294",
    "displayKey": "display",
-   "cursorName": "",
-   "auditoryFeedback": false
+   "auditoryFeedback": "disabled",
+   "visibleWhen": "true",
+   "fontsize": "30",
+   "fontColor": "white",
+   "backgroundColor": "transparent"
   },
   {
+   "id": "Button1360329596458",
+   "type": "button",
    "evts": [
     "press/release"
    ],
-   "id": "Button1360329596458",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "UP",
    "boundFunctions": "press_UP, release_UP",
    "buttonReadback": "",
    "keyCode": "33",
-   "keyName": "page up"
+   "keyName": "page up",
+   "visibleWhen": "false"
   },
   {
+   "id": "Button1360329611671",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1360329611671",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "up",
    "boundFunctions": "click_up",
    "buttonReadback": "",
    "keyCode": "38",
-   "keyName": "up arrow"
+   "keyName": "up arrow",
+   "visibleWhen": "false"
   },
   {
+   "id": "Button1360329650659",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1360329650659",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "dn",
    "boundFunctions": "click_dn",
    "buttonReadback": "",
    "keyCode": "40",
-   "keyName": "down arrow"
+   "keyName": "down arrow",
+   "visibleWhen": "false"
   },
   {
+   "id": "Button1360329673407",
+   "type": "button",
    "evts": [
     "press/release"
    ],
-   "id": "Button1360329673407",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "DN",
    "boundFunctions": "press_DN, release_DN",
    "buttonReadback": "",
    "keyCode": "34",
-   "keyName": "page down"
+   "keyName": "page down",
+   "visibleWhen": "false"
   },
   {
    "type": "led",
    "id": "led_1e4d2a41-2bcd-4413-c39b-9189fcc101b5",
-   "visibleWhen": "",
+   "visibleWhen": "true",
    "ledKey": "power_led",
    "ledColor": "lightgreen"
   }

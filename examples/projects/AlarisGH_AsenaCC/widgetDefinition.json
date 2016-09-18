@@ -5,15 +5,18 @@
    "id": "Display1357494252462",
    "displayKey": "left_display",
    "auditoryFeedback": "disabled",
-   "visibleWhen": "true"
+   "visibleWhen": "true",
+   "fontsize": "42",
+   "fontColor": "white",
+   "backgroundColor": "transparent"
   },
   {
+   "id": "Button1357494276363",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1357494276363",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "UP",
    "boundFunctions": "click_UP",
    "buttonReadback": "",
@@ -22,12 +25,12 @@
    "visibleWhen": "false"
   },
   {
+   "id": "Button1357494286330",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1357494286330",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "up",
    "boundFunctions": "click_up",
    "buttonReadback": "",
@@ -36,12 +39,12 @@
    "visibleWhen": "false"
   },
   {
+   "id": "Button1357494295183",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1357494295183",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "dn",
    "boundFunctions": "click_dn",
    "buttonReadback": "",
@@ -50,12 +53,12 @@
    "visibleWhen": "false"
   },
   {
+   "id": "Button1357494307176",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1357494307176",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "DN",
    "boundFunctions": "click_DN",
    "buttonReadback": "",

@@ -55,6 +55,8 @@ define(function (require, exports, module) {
                 .on("ok", function (e, view) {
                     view.remove();
                     widget.updateWithProperties(e.data);
+                    widget.updateStyle(e.data);
+                    widget.render();
                     //create an interactive image area only if there isnt one already
                     createImageMap(widget);
                     if (e.data.keyCode) {
@@ -167,6 +169,9 @@ define(function (require, exports, module) {
                 { displayKey: w.displayKey,
                   auditoryFeedback: w.auditoryFeedback,
                   visibleWhen: w.visibleWhen,
+                  fontsize: w.fontsize,
+                  fontColor: w.fontColor,
+                  backgroundColor: w.backgroundColor,
                   parent: "imageDiv" });
         } else if (w.type === "numericdisplay") {
             widget = new NumericDisplay(w.id,
@@ -175,6 +180,9 @@ define(function (require, exports, module) {
                   cursorName: w.cursorName,
                   auditoryFeedback: w.auditoryFeedback,
                   visibleWhen: w.visibleWhen,
+                  fontsize: w.fontsize,
+                  fontColor: w.fontColor,
+                  backgroundColor: w.backgroundColor,
                   parent: "imageDiv" });
         } else if (w.type === "touchscreendisplay") {
             widget = new TouchscreenDisplay(w.id,
@@ -185,6 +193,9 @@ define(function (require, exports, module) {
                   auditoryFeedback: w.auditoryFeedback,
                   visibleWhen: w.visibleWhen,
                   functionText: w.functionText,
+                  fontsize: w.fontsize,
+                  fontColor: w.fontColor,
+                  backgroundColor: w.backgroundColor,
                   parent: "imageDiv" });
         } else if (w.type === "touchscreenbutton") {
             widget = new TouchscreenButton(w.id,
@@ -194,6 +205,9 @@ define(function (require, exports, module) {
                   softLabel: w.softLabel,
                   auditoryFeedback: w.auditoryFeedback,
                   visibleWhen: w.visibleWhen,
+                  fontsize: w.fontsize,
+                  fontColor: w.fontColor,
+                  backgroundColor: w.backgroundColor,
                   parent: "imageDiv" });
         } else if (w.type === "led") {
             widget = new LED(w.id,
@@ -235,12 +249,7 @@ define(function (require, exports, module) {
                 w.y = parseFloat(coords[1]);
                 w.scale = (d3.select("svg > g").node()) ?
                              +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
-                var widget = null;
-                try {
-                    widget = createWidget(w);
-                } catch (e) {
-                    console.log(e);
-                }
+                var widget = createWidget(w);
                 if (widget) {
                     wm.addWidget(widget);
                     if (typeof widget.keyCode === "function" && widget.keyCode() && widget.type() === "button") {
@@ -309,7 +318,9 @@ define(function (require, exports, module) {
                             region.classed(widget.type(), true).attr("id", widget.id());
                             widget.element(region);
                             createImageMap(widget);
-                            widget.updateLocationAndSize({ x: e.data.x, y: e.data.y, width: e.data.width, height: e.data.height }, { imageMap: true });
+                            // widget.updateLocationAndSize({ x: e.data.x, y: e.data.y, width: e.data.width, height: e.data.height }, { imageMap: true });
+                            // widget.updateStyle(e.data);
+                            widget.render();
                             wm.addWidget(widget);
                             if (typeof widget.keyCode === "function" && widget.keyCode() && widget.type() === "button") {
                                 wm._keyCode2widget[widget.keyCode()] = widget;
@@ -414,7 +425,6 @@ define(function (require, exports, module) {
         @memberof module:WidgetManager
      */
     WidgetManager.prototype.editWidget = function (widget) {
-        // widget types supported in the current implementation are Button, Display
         handleWidgetEdit(widget, wm);
     };
     WidgetManager.prototype.editTimer = function (emuTimer) {
@@ -533,8 +543,8 @@ define(function (require, exports, module) {
     };
 
     /**
-        Update the location of the widget by updating the image map coords to the position given.
-        @param {Widget} widget The widget to update
+        Update the location and size of the widget by updating the image map coords to the position given.
+        @param {Widget} widget The widget to be updated
         @param {{x: number, y: number, width: number, height: number}} pos The new position and size
         @param {Number?} scale a scale factor for the pos value. If not supplied defaults to 1
         @memberof WidgetManager

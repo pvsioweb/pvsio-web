@@ -46,7 +46,10 @@ define(function (require, exports, module) {
                 });
             } else if (widgetType === "display") {
                 widgetPreviewer.preview(widgetType, {
-                    auditoryFeedback: d3.select("#" + widgetType).select("#auditoryFeedback").node().checked
+                    auditoryFeedback: d3.select("#" + widgetType).select("#auditoryFeedback").node().checked,
+                    fontsize: d3.select("#" + widgetType).select("#fontsize").node().value,
+                    fontColor: d3.select("#" + widgetType).select("#fontColor").node().value,
+                    backgroundColor: d3.select("#" + widgetType).select("#backgroundColor").node().value
                 });
             } else if (widgetType === "numericdisplay") {
                 widgetPreviewer.preview(widgetType, {
@@ -88,10 +91,13 @@ define(function (require, exports, module) {
             "click #touchscreenbuttonTab" : "changeTab",
             "click #ledTab"               : "changeTab",
             "change input[type='radio'][name='events']": "eventsChanged",
+            "keyup #functionText"         : "eventsChanged",
             "change input[type='checkbox']": "updatePreview",
             "keyup #buttonReadback"       : "updatePreview",
-            "keyup #functionText"         : "eventsChanged",
-            "keyup #ledColor"             : "updatePreview"
+            "keyup #ledColor"             : "updatePreview",
+            "keyup #fontsize"             : "updatePreview",
+            "keyup #fontColor"            : "updatePreview",
+            "keyup #backgroundColor"      : "updatePreview"
         },
         eventsChanged: function (event) {
             updateBoundFunctionsLabel();
