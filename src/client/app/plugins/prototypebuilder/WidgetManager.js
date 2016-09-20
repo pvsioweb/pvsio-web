@@ -455,6 +455,16 @@ define(function (require, exports, module) {
         @returns {BasicDisplay[]}
         @memberof module:WidgetManager
      */
+    WidgetManager.prototype.getAllDisplays = function () {
+        return _.filter(this._widgets, function (w) {
+            return w.type() === "display" || w.type() === "numericdisplay" || w.type() === "touchscreendisplay";
+        });
+    };
+    /**
+        Gets a list of all display widgets loaded on the page.
+        @returns {BasicDisplay[]}
+        @memberof module:WidgetManager
+     */
     WidgetManager.prototype.getDisplayWidgets = function () {
         return _.filter(this._widgets, function (w) {
             return w.type() === "display";
