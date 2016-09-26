@@ -38,8 +38,8 @@ define(function (require, exports, module) {
             } else if (widgetType === "display") {
                 widgetPreview = new BasicDisplay("theWidget",
                     { width: maxWidth, height: 50 },
-                    { backgroundColor: (opt.backgroundColor === "transparent") ? "lightgrey" : opt.backgroundColor,
-                      fontColor: opt.fontColor,
+                    { backgroundColor: (opt.backgroundColor === "transparent") ? "lightgrey" : (opt.backgroundColor) ? opt.backgroundColor : "black",
+                      fontColor: opt.fontColor || "white",
                       fontsize: opt.fontsize || 20,
                       auditoryFeedback: opt.auditoryFeedback,
                       position: "relative",
@@ -49,8 +49,8 @@ define(function (require, exports, module) {
             } else if (widgetType === "numericdisplay") {
                 widgetPreview = new NumericDisplay("theWidget",
                     { width: maxWidth, height: 50 },
-                    { backgroundColor: (opt.backgroundColor === "transparent") ? "lightgrey" : opt.backgroundColor,
-                      fontColor: opt.fontColor,
+                    { backgroundColor: (opt.backgroundColor === "transparent") ? "lightgrey" : (opt.backgroundColor) ? opt.backgroundColor : "black",
+                      fontColor: opt.fontColor || "white",
                       fontsize: opt.fontsize || 20,
                       auditoryFeedback: opt.auditoryFeedback,
                       displayKey: "d",
@@ -62,8 +62,8 @@ define(function (require, exports, module) {
             } else if (widgetType === "touchscreendisplay") {
                 widgetPreview = new TouchscreenDisplay("theWidget",
                     { width: maxWidth, height: 50 },
-                    { backgroundColor: (opt.backgroundColor === "transparent") ? "lightgrey" : opt.backgroundColor,
-                      fontColor: opt.fontColor,
+                    { backgroundColor: (opt.backgroundColor === "transparent") ? "lightgrey" : (opt.backgroundColor) ? opt.backgroundColor : "black",
+                      fontColor: opt.fontColor || "white",
                       fontsize: opt.fontsize || 20,
                       auditoryFeedback: opt.auditoryFeedback,
                       displayMode: (opt.cursorName) ? "numeric" : "standard",

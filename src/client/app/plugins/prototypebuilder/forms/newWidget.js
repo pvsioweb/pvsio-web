@@ -53,15 +53,24 @@ define(function (require, exports, module) {
                 });
             } else if (widgetType === "numericdisplay") {
                 widgetPreviewer.preview(widgetType, {
-                    auditoryFeedback: d3.select("#" + widgetType).select("#auditoryFeedback").node().checked
+                    auditoryFeedback: d3.select("#" + widgetType).select("#auditoryFeedback").node().checked,
+                    fontsize: d3.select("#" + widgetType).select("#fontsize").node().value,
+                    fontColor: d3.select("#" + widgetType).select("#fontColor").node().value,
+                    backgroundColor: d3.select("#" + widgetType).select("#backgroundColor").node().value
                 });
             } else if (widgetType === "touchscreenbutton") {
                 widgetPreviewer.preview(widgetType, {
-                    buttonReadback: d3.select("#" + widgetType).select("#buttonReadback").node().value
+                    buttonReadback: d3.select("#" + widgetType).select("#buttonReadback").node().value,
+                    fontsize: d3.select("#" + widgetType).select("#fontsize").node().value,
+                    fontColor: d3.select("#" + widgetType).select("#fontColor").node().value,
+                    backgroundColor: d3.select("#" + widgetType).select("#backgroundColor").node().value
                 });
             } else if (widgetType === "touchscreendisplay") {
                 widgetPreviewer.preview(widgetType, {
-                    auditoryFeedback: d3.select("#" + widgetType).select("#auditoryFeedback").node().checked
+                    auditoryFeedback: d3.select("#" + widgetType).select("#auditoryFeedback").node().checked,
+                    fontsize: d3.select("#" + widgetType).select("#fontsize").node().value,
+                    fontColor: d3.select("#" + widgetType).select("#fontColor").node().value,
+                    backgroundColor: d3.select("#" + widgetType).select("#backgroundColor").node().value
                 });
             } else if (widgetType === "led") {
                 var color = d3.select("#" + widgetType).select("#ledColor").node().value;

@@ -405,7 +405,7 @@ define(function (require, exports, module) {
                 markDirty(selectedData);
             }
         });
-        editor.setSize("100%", "400px"); // width, height
+        editor.setSize("100%", "600px"); // width, height
         projectManager.addListener("SelectedFileChanged", onSelectedFileChanged);
 
         document.getElementById("model-editor-search-input").addEventListener("click", function () {
