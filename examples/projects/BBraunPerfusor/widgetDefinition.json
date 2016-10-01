@@ -4,80 +4,89 @@
    "type": "numericdisplay",
    "id": "Display1360334885958",
    "displayKey": "d",
+   "cursorName": "c",
    "auditoryFeedback": "disabled",
-   "cursorName": "c"
+   "visibleWhen": "true",
+   "fontsize": "31.934366307567753",
+   "fontColor": "white",
+   "backgroundColor": "black"
   },
   {
+   "id": "Button1360334897149",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1360334897149",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "up",
    "boundFunctions": "click_up",
    "buttonReadback": "",
    "keyCode": "38",
-   "keyName": "up arrow"
+   "keyName": "up arrow",
+   "visibleWhen": "false"
   },
   {
+   "id": "Button1360334906908",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1360334906908",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "lf",
    "boundFunctions": "click_lf",
    "buttonReadback": "",
    "keyCode": "37",
-   "keyName": "left arrow"
+   "keyName": "left arrow",
+   "visibleWhen": "false"
   },
   {
+   "id": "Button1360334916663",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1360334916663",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "dn",
    "boundFunctions": "click_dn",
    "buttonReadback": "",
    "keyCode": "40",
-   "keyName": "down arrow"
+   "keyName": "down arrow",
+   "visibleWhen": "false"
   },
   {
+   "id": "Button1360334930041",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1360334930041",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "rt",
    "boundFunctions": "click_rt",
    "buttonReadback": "",
    "keyCode": "39",
-   "keyName": "right arrow"
+   "keyName": "right arrow",
+   "visibleWhen": "false"
   },
   {
+   "id": "button_2287dcc5-2e6f-4138-e837-2780c2c267e3",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "button_2287dcc5-2e6f-4138-e837-2780c2c267e3",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "clear",
    "boundFunctions": "click_clear",
    "buttonReadback": "",
    "keyCode": "46",
-   "keyName": "delete"
+   "keyName": "delete",
+   "visibleWhen": "false"
   }
  ],
  "regionDefs": [
   {
    "class": "Display1360334885958",
    "shape": "rect",
-   "coords": "86.65963746586033,245.24918167838763,310.64398166954044,280.73181090901846",
+   "coords": "87,236,308.9843442036801,292.48262923063083",
    "href": null
   },
   {

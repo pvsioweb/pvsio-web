@@ -5,66 +5,74 @@
    "id": "Display1360333691427",
    "displayKey": "display",
    "cursorName": "cursor",
-   "auditoryFeedback": true
+   "auditoryFeedback": "enabled",
+   "visibleWhen": "true",
+   "fontsize": 50.385937500000004,
+   "fontColor": "#fff",
+   "backgroundColor": "black"
   },
   {
+   "id": "Button1360333703845",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1360333703845",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "up",
    "boundFunctions": "click_up",
    "buttonReadback": "",
    "keyCode": "38",
-   "keyName": "up arrow"
+   "keyName": "up arrow",
+   "visibleWhen": "false"
   },
   {
+   "id": "Button1360334003368",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1360334003368",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "dn",
    "boundFunctions": "click_dn",
    "buttonReadback": "",
    "keyCode": "40",
-   "keyName": "down arrow"
+   "keyName": "down arrow",
+   "visibleWhen": "false"
   },
   {
+   "id": "Button1360334013028",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1360334013028",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "lf",
    "boundFunctions": "click_lf",
    "buttonReadback": "",
    "keyCode": "37",
-   "keyName": "left arrow"
+   "keyName": "left arrow",
+   "visibleWhen": "false"
   },
   {
+   "id": "Button1360334022698",
+   "type": "button",
    "evts": [
     "click"
    ],
-   "id": "Button1360334022698",
-   "type": "button",
-   "recallRate": "250",
+   "recallRate": 250,
    "functionText": "rt",
    "boundFunctions": "click_rt",
    "buttonReadback": "",
    "keyCode": "39",
-   "keyName": "right arrow"
+   "keyName": "right arrow",
+   "visibleWhen": "false"
   }
  ],
  "regionDefs": [
   {
    "class": "Display1360333691427",
    "shape": "rect",
-   "coords": "48.850006103515625,64.80000305175781,388.8343849182129,120.78437805175781",
+   "coords": "48.850006103515625,52,386.8343849182129,137.984375",
    "href": null
   },
   {
