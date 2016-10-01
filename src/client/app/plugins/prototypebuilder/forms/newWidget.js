@@ -40,40 +40,41 @@ define(function (require, exports, module) {
             var widgetType = activeForm.children[0].getAttribute("widgetType");
             if (widgetType === "button") {
                 widgetPreviewer.preview(widgetType, {
-                    keyboardKey: d3.select("#" + widgetType).select("#keyCode").node().value,
-                    buttonReadback: d3.select("#" + widgetType).select("#buttonReadback").node().value,
+                    keyboardKey: d3.select("#" + widgetType).select("#keyCode").node().value.trim(),
+                    buttonReadback: d3.select("#" + widgetType).select("#buttonReadback").node().value.trim(),
                     evts: getWidgetEvents(widgetType)
                 });
             } else if (widgetType === "display") {
                 widgetPreviewer.preview(widgetType, {
                     auditoryFeedback: d3.select("#" + widgetType).select("#auditoryFeedback").node().checked,
-                    fontsize: d3.select("#" + widgetType).select("#fontsize").node().value,
-                    fontColor: d3.select("#" + widgetType).select("#fontColor").node().value,
-                    backgroundColor: d3.select("#" + widgetType).select("#backgroundColor").node().value
+                    fontsize: d3.select("#" + widgetType).select("#fontsize").node().value.trim(),
+                    fontColor: d3.select("#" + widgetType).select("#fontColor").node().value.trim(),
+                    backgroundColor: d3.select("#" + widgetType).select("#backgroundColor").node().value.trim()
                 });
             } else if (widgetType === "numericdisplay") {
                 widgetPreviewer.preview(widgetType, {
                     auditoryFeedback: d3.select("#" + widgetType).select("#auditoryFeedback").node().checked,
-                    fontsize: d3.select("#" + widgetType).select("#fontsize").node().value,
-                    fontColor: d3.select("#" + widgetType).select("#fontColor").node().value,
-                    backgroundColor: d3.select("#" + widgetType).select("#backgroundColor").node().value
+                    fontsize: d3.select("#" + widgetType).select("#fontsize").node().value.trim(),
+                    fontColor: d3.select("#" + widgetType).select("#fontColor").node().value.trim(),
+                    backgroundColor: d3.select("#" + widgetType).select("#backgroundColor").node().value.trim()
                 });
             } else if (widgetType === "touchscreenbutton") {
                 widgetPreviewer.preview(widgetType, {
-                    buttonReadback: d3.select("#" + widgetType).select("#buttonReadback").node().value,
-                    fontsize: d3.select("#" + widgetType).select("#fontsize").node().value,
-                    fontColor: d3.select("#" + widgetType).select("#fontColor").node().value,
-                    backgroundColor: d3.select("#" + widgetType).select("#backgroundColor").node().value
+                    buttonReadback: d3.select("#" + widgetType).select("#buttonReadback").node().value.trim(),
+                    fontsize: d3.select("#" + widgetType).select("#fontsize").node().value.trim(),
+                    fontColor: d3.select("#" + widgetType).select("#fontColor").node().value.trim(),
+                    backgroundColor: d3.select("#" + widgetType).select("#backgroundColor").node().value.trim()
                 });
             } else if (widgetType === "touchscreendisplay") {
                 widgetPreviewer.preview(widgetType, {
                     auditoryFeedback: d3.select("#" + widgetType).select("#auditoryFeedback").node().checked,
-                    fontsize: d3.select("#" + widgetType).select("#fontsize").node().value,
-                    fontColor: d3.select("#" + widgetType).select("#fontColor").node().value,
-                    backgroundColor: d3.select("#" + widgetType).select("#backgroundColor").node().value
+                    cursorName: d3.select("#" + widgetType).select("#cursorName").node().value.trim(),                    
+                    fontsize: d3.select("#" + widgetType).select("#fontsize").node().value.trim(),
+                    fontColor: d3.select("#" + widgetType).select("#fontColor").node().value.trim(),
+                    backgroundColor: d3.select("#" + widgetType).select("#backgroundColor").node().value.trim()
                 });
             } else if (widgetType === "led") {
-                var color = d3.select("#" + widgetType).select("#ledColor").node().value;
+                var color = d3.select("#" + widgetType).select("#ledColor").node().value.trim();
                 widgetPreviewer.preview(widgetType, {
                     color: color
                 });
@@ -100,14 +101,14 @@ define(function (require, exports, module) {
             "click #touchscreenbuttonTab" : "changeTab",
             "click #ledTab"               : "changeTab",
             "change input[type='radio'][name='events']": "eventsChanged",
-            "keyup #functionText"         : "eventsChanged",
-            "change input[type='checkbox']": "updatePreview",
-            "keyup #buttonReadback"       : "updatePreview",
-            "keyup #ledColor"             : "updatePreview",
-            "keyup #fontsize"             : "updatePreview",
-            "keyup #fontColor"            : "updatePreview",
-            "keyup #backgroundColor"      : "updatePreview",
-            "keyup #cursorName"           : "updatePreview"
+            "change input[type='checkbox']"            : "updatePreview",
+            "input #functionText"         : "eventsChanged",
+            "input #buttonReadback"       : "updatePreview",
+            "input #ledColor"             : "updatePreview",
+            "input #fontsize"             : "updatePreview",
+            "input #fontColor"            : "updatePreview",
+            "input #backgroundColor"      : "updatePreview",
+            "input #cursorName"           : "updatePreview"
         },
         eventsChanged: function (event) {
             updateBoundFunctionsLabel();

@@ -41,41 +41,41 @@ define(function (require, exports, module) {
     function showWidgetPreview(widgetType) {
         if (widgetType === "button") {
             widgetPreviewer.preview(widgetType, {
-                keyboardKey: d3.select("#keyCode").node().value,
-                buttonReadback: d3.select("#buttonReadback").node().value,
+                keyboardKey: d3.select("#keyCode").node().value.trim(),
+                buttonReadback: d3.select("#buttonReadback").node().value.trim(),
                 evts: getWidgetEvents(widgetType)
             });
         } else if (widgetType === "display") {
             widgetPreviewer.preview(widgetType, {
                 auditoryFeedback: d3.select("#auditoryFeedback").node().checked,
-                fontsize: d3.select("#fontsize").node().value,
-                fontColor: d3.select("#fontColor").node().value,
-                backgroundColor: d3.select("#backgroundColor").node().value
+                fontsize: d3.select("#fontsize").node().value.trim(),
+                fontColor: d3.select("#fontColor").node().value.trim(),
+                backgroundColor: d3.select("#backgroundColor").node().value.trim()
             });
         } else if (widgetType === "numericdisplay") {
             widgetPreviewer.preview(widgetType, {
                 auditoryFeedback: d3.select("#auditoryFeedback").node().checked,
-                fontsize: d3.select("#fontsize").node().value,
-                fontColor: d3.select("#fontColor").node().value,
-                backgroundColor: d3.select("#backgroundColor").node().value
+                fontsize: d3.select("#fontsize").node().value.trim(),
+                fontColor: d3.select("#fontColor").node().value.trim(),
+                backgroundColor: d3.select("#backgroundColor").node().value.trim()
             });
         } else if (widgetType === "touchscreenbutton") {
             widgetPreviewer.preview(widgetType, {
-                buttonReadback: d3.select("#buttonReadback").node().value,
-                fontsize: d3.select("#fontsize").node().value,
-                fontColor: d3.select("#fontColor").node().value,
-                backgroundColor: d3.select("#backgroundColor").node().value
+                buttonReadback: d3.select("#buttonReadback").node().value.trim(),
+                fontsize: d3.select("#fontsize").node().value.trim(),
+                fontColor: d3.select("#fontColor").node().value.trim(),
+                backgroundColor: d3.select("#backgroundColor").node().value.trim()
             });
         } else if (widgetType === "touchscreendisplay") {
             widgetPreviewer.preview(widgetType, {
                 auditoryFeedback: d3.select("#auditoryFeedback").node().checked,
-                cursorName: d3.select("#cursorName").node().value,
-                fontsize: d3.select("#fontsize").node().value,
-                fontColor: d3.select("#fontColor").node().value,
-                backgroundColor: d3.select("#backgroundColor").node().value
+                cursorName: d3.select("#cursorName").node().value.trim(),
+                fontsize: d3.select("#fontsize").node().value.trim(),
+                fontColor: d3.select("#fontColor").node().value.trim(),
+                backgroundColor: d3.select("#backgroundColor").node().value.trim()
             });
         } else if (widgetType === "led") {
-            var color = d3.select("#ledColor").node().value;
+            var color = d3.select("#ledColor").node().value.trim();
             widgetPreviewer.preview(widgetType, {
                 color: color
             });
@@ -115,15 +115,15 @@ define(function (require, exports, module) {
             "click #btnCancel"            : "cancel",
             "change input[type='radio'][name='button_events']"           : "eventsChanged",
             "change input[type='radio'][name='touchscreenbutton_events']": "eventsChanged",
-            "keyup #functionText"         : "eventsChanged",
-            "keyup #timerEvent"           : "timerEventChanged",
             "change input[type='checkbox']": "updatePreview",
-            "keyup #buttonReadback"       : "updatePreview",
-            "keyup #ledColor"             : "updatePreview",
-            "keyup #fontsize"             : "updatePreview",
-            "keyup #fontColor"            : "updatePreview",
-            "keyup #backgroundColor"      : "updatePreview",
-            "keyup #cursorName"           : "updatePreview"
+            "input #functionText"         : "eventsChanged",
+            "input #timerEvent"           : "timerEventChanged",
+            "input #buttonReadback"       : "updatePreview",
+            "input #ledColor"             : "updatePreview",
+            "input #fontsize"             : "updatePreview",
+            "input #fontColor"            : "updatePreview",
+            "input #backgroundColor"      : "updatePreview",
+            "input #cursorName"           : "updatePreview"
         },
         eventsChanged: function (event) {
             updateBoundFunctionsLabel();
