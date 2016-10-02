@@ -63,16 +63,17 @@ define(function (require, exports, module) {
                     scale = 1;
                 function resize() {
                     if (img) {
-                        var pbox = parent.node().getBoundingClientRect(),
+                        var //pbox = parent.node().getBoundingClientRect(),
                             adjustedWidth = img.width,
                             adjustedHeight = img.height;
                         scale = 1;
 
-                        if (img.width > pbox.width && pbox.width > 0 && pbox.height > 0) {
-                            adjustedWidth = pbox.width;
-                            scale = adjustedWidth / img.width;
-                            adjustedHeight = scale * img.height;
-                        }
+                        // FIXME: scaling is disabled for now, as it has introduced too many complications for resizing widgets style
+                        // if (img.width > pbox.width && pbox.width > 0 && pbox.height > 0) {
+                        //     adjustedWidth = pbox.width;
+                        //     scale = adjustedWidth / img.width;
+                        //     adjustedHeight = scale * img.height;
+                        // }
 
                         d3.select("#imageDiv").style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
                         d3.select("#imageDiv img").attr("src", img.src).attr("height", adjustedHeight).attr("width", adjustedWidth);
@@ -164,6 +165,12 @@ define(function (require, exports, module) {
         });
     }
 
+    function collapseWidgetsList() {
+        //d3.select("#builder-controls").style("display", "none");
+    }
+    function expandWidgetsList() {
+        //d3.select("#builder-controls").style("display", "block");
+    }
 
     /**
      * Switches the prototoyping layer to the builder layer
@@ -177,6 +184,7 @@ define(function (require, exports, module) {
         d3.selectAll("div.display,#controlsContainer button").classed("builder", true);
         d3.selectAll("div.display,#controlsContainer button").classed("simulator", false);
         WidgetManager.stopTimers();
+        expandWidgetsList();
     }
     function onProjectChanged(event) {
         var pvsioStatus = d3.select("#lblPVSioStatus");
@@ -234,7 +242,11 @@ define(function (require, exports, module) {
         d3.select("#btnSimulatorView").classed("selected", true);
         d3.selectAll("div.display,#controlsContainer button").classed("simulator", true);
         d3.selectAll("div.display,#controlsContainer button").classed("builder", false);
+        console.log("bootstrapping widgets with init(0)...");
+        WidgetManager.initialiseWidgets();
+        console.log("bootstrapping wallclock timers...");
         WidgetManager.startTimers();
+        collapseWidgetsList();
     }
 
     function bindListeners() {
@@ -267,7 +279,7 @@ define(function (require, exports, module) {
                 // FIXME: Implement APIs to save the diagram in the EmuCharts module!
                 if (d3.select("#btn_menuSaveChart").node()) {
                     d3.select("#btn_menuSaveChart").node().click();
-                }            
+                }
             });
         });
 
@@ -365,7 +377,7 @@ define(function (require, exports, module) {
 //            WidgetManager.addTimer();
         });
         d3.select("#btnAddNewWidget").on("click", function () {
-            
+
         });
     }
 
@@ -530,7 +542,7 @@ define(function (require, exports, module) {
         updateImageAndLoadWidgets().then(function (res) {
             WidgetsListView.create();
         }).catch(function (err) { Logger.error(err); });
-        
+
         // add default tick timer
         WidgetManager.addWallClockTimer();
         //TimersListView.create();

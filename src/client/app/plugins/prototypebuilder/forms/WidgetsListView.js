@@ -13,11 +13,15 @@ define(function (require, exports, module) {
         var el = d3.select("#widgetsList").html("").append("ul");
 
         function labelFunction(widget) {
-            var label = widget.type() + ": ";
-            if (widget.type() === "display") {
-                label += widget.displayKey();
-            } else { label += widget.functionText(); }
-            return label;
+            switch (widget.type()) {
+                case "display"       : { return "Display: " + widget.displayKey(); }
+                case "numericdisplay": { return "Numeric Display: " + widget.displayKey(); }
+                case "led"           : { return "LED: " + widget.ledKey(); }
+                case "button"        : { return "Button: " + widget.functionText(); }
+                case "touchscreenbutton": { return "Touch-Button: " + widget.functionText(); }
+                case "touchscreendisplay": { return "Touch-Display: " + widget.displayKey(); }
+                default: { return widget.type() + ": " + widget.id(); }
+            }
         }
 
         function update(data) {

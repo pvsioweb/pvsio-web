@@ -14,11 +14,16 @@ define(function (require, exports, module) {
         uidGenerator    = require("util/uuidGenerator"),
         EditWidgetView  = require("pvsioweb/forms/editWidget"),
         Button          = require("widgets/Button"),
-        Display         = require("pvsioweb/Display"),
+        TouchscreenButton  = require("widgets/TouchscreenButton"),
+        TouchscreenDisplay = require("widgets/TouchscreenDisplay"),
+        LED             = require("widgets/LED"),
+        BasicDisplay    = require("widgets/BasicDisplay"),
+        NumericDisplay  = require("widgets/NumericDisplay"),
         Storyboard      = require("pvsioweb/Storyboard"),
         EmuTimer        = require("widgets/EmuTimer"),
         NewWidgetView   = require("pvsioweb/forms/newWidget"),
         StateParser     = require("util/PVSioStateParser"),
+        ButtonActionsQueue = require("widgets/ButtonActionsQueue").getInstance(),
         PreferenceKeys  = require("preferences/PreferenceKeys"),
         Preferences     = require("preferences/PreferenceStorage").getInstance();
     var wm, mapCreator;
@@ -26,14 +31,8 @@ define(function (require, exports, module) {
    ///TODO this should be moved out of this file and promoted to a property, or a function parameter in createImageMap
     function renderResponse(err, res) {
         if (!err) {
-            var stateString = res.data[0];
-            var state = StateParser.parse(stateString);
-            //render storyboard
-            wm.getStoryboardWidgets().forEach(function (w) {
-                w.render(state);
-            });
-            //render displays
-            wm.getDisplayWidgets().forEach(function (w) {
+            var state = StateParser.parse(res.data[0]);
+            wm.getAllWidgets().forEach(function (w) {
                 w.render(state);
             });
         } else {
@@ -56,6 +55,8 @@ define(function (require, exports, module) {
                 .on("ok", function (e, view) {
                     view.remove();
                     widget.updateWithProperties(e.data);
+                    widget.updateStyle(e.data);
+                    widget.render();
                     //create an interactive image area only if there isnt one already
                     createImageMap(widget);
                     if (e.data.keyCode) {
@@ -89,7 +90,7 @@ define(function (require, exports, module) {
                     widget.click({ callback: renderResponse });
                     halo(widget.id());
                     d3.event.preventDefault();
-                    d3.event.stopPropagation();                    
+                    d3.event.stopPropagation();
                 } else if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
                     widget.pressAndHold({ callback: renderResponse });
                     halo(widget.id());
@@ -104,7 +105,7 @@ define(function (require, exports, module) {
                 var widget = wm._keyCode2widget[eventKeyCode];
                 if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
                     widget.release({ callback: renderResponse });
-                }            
+                }
                 haloOff();
             }
         });
@@ -112,7 +113,7 @@ define(function (require, exports, module) {
     function halo (buttonID) {
         var coords = d3.select("." + buttonID).attr("coords");
         coords = coords.split(",");
-        var pos = {x1: +coords[0], y1: +coords[1], x2: +coords[2], y2: coords[3]};        
+        var pos = {x1: +coords[0], y1: +coords[1], x2: +coords[2], y2: coords[3]};
         var w = pos.x2 - pos.x1, hrad = w / 2, h = pos.y2 - pos.y1, vrad = h / 2, brad = hrad + "px " + vrad + "px";
         var mark = d3.select(".animation-halo");
         if (mark.empty()) {
@@ -121,12 +122,12 @@ define(function (require, exports, module) {
         mark.style("top", pos.y1 + "px").style("left", pos.x1 + "px")
             .style("width", (pos.x2 - pos.x1) + "px").style("height", (pos.y2 - pos.y1) + "px")
             .style("border-top-left-radius", brad).style("border-top-right-radius", brad)
-            .style("border-bottom-left-radius", brad).style("border-bottom-right-radius", brad);        
+            .style("border-bottom-left-radius", brad).style("border-bottom-right-radius", brad);
     }
     function haloOff (buttonID) {
         d3.select(".animation-halo").remove();
     }
-        
+
     /**
         @class WidgetManager
         @classdesc WidgetManager deals with interacting with user interface widgets used for prototyping picture based uis.
@@ -149,6 +150,85 @@ define(function (require, exports, module) {
         eventDispatcher(this);
     }
 
+    function createWidget(w) {
+        var widget = null;
+        var x = w.x, y = w.y, height = w.height, width = w.width, scale = w.scale;
+        w.type = w.type.toLowerCase();
+        if (w.type === "button") {
+            widget = new Button(w.id,
+                { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                { callback: renderResponse,
+                  keyCode: w.keyCode,
+                  keyName: w.keyName,
+                  functionText: w.functionText,
+                  evts: w.evts,
+                  buttonReadback: w.buttonReadback });
+        } else if (w.type === "display") {
+            widget = new BasicDisplay(w.id,
+                { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                { displayKey: w.displayKey,
+                  auditoryFeedback: w.auditoryFeedback,
+                  visibleWhen: w.visibleWhen,
+                  fontsize: w.fontsize,
+                  fontColor: w.fontColor,
+                  backgroundColor: w.backgroundColor,
+                  parent: "imageDiv" });
+        } else if (w.type === "numericdisplay") {
+            widget = new NumericDisplay(w.id,
+                { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                { displayKey: w.displayKey,
+                  cursorName: w.cursorName,
+                  auditoryFeedback: w.auditoryFeedback,
+                  visibleWhen: w.visibleWhen,
+                  fontsize: w.fontsize,
+                  fontColor: w.fontColor,
+                  backgroundColor: w.backgroundColor,
+                  parent: "imageDiv" });
+        } else if (w.type === "touchscreendisplay") {
+            widget = new TouchscreenDisplay(w.id,
+                { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                { callback: renderResponse,
+                  displayKey: w.displayKey,
+                  cursorName: w.cursorName,
+                  auditoryFeedback: w.auditoryFeedback,
+                  visibleWhen: w.visibleWhen,
+                  functionText: w.functionText,
+                  fontsize: w.fontsize,
+                  fontColor: w.fontColor,
+                  backgroundColor: w.backgroundColor,
+                  parent: "imageDiv" });
+        } else if (w.type === "touchscreenbutton") {
+            widget = new TouchscreenButton(w.id,
+                { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                { callback: renderResponse,
+                  functionText: w.functionText,
+                  softLabel: w.softLabel,
+                  auditoryFeedback: w.auditoryFeedback,
+                  visibleWhen: w.visibleWhen,
+                  fontsize: w.fontsize,
+                  fontColor: w.fontColor,
+                  backgroundColor: w.backgroundColor,
+                  parent: "imageDiv" });
+        } else if (w.type === "led") {
+            widget = new LED(w.id,
+                { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
+                { ledKey: w.ledKey,
+                  color: w.ledColor,
+                  visibleWhen: w.visibleWhen,
+                  parent: "imageDiv" });
+        } else if (w.type === "storyboard") {
+            widget = new Storyboard(w.id);
+        } else {
+            console.log("Warning: unrecognised widget type " + w.type);
+        }
+        return widget;
+    }
+
+    WidgetManager.prototype.initialiseWidgets = function () {
+        ButtonActionsQueue.sendINIT(renderResponse);
+        return this;
+    };
+
     /**
         Restores the widget definitions passed in the parameter.
         @param {Object} defs JSOn specification for the widget definitions to restore
@@ -156,42 +236,26 @@ define(function (require, exports, module) {
      */
     WidgetManager.prototype.restoreWidgetDefinitions = function (defs) {
         var wm = this;
+        this.clearWidgets();
         if (defs) {
             wm._keyCode2widget = {};
             var widget;
             _.each(defs.widgetMaps, function (w, i) {
-                w.type = w.type.toLowerCase();
-                if (w.type === "button") {
-                    if (defs.regionDefs && defs.regionDefs[i].coords) {
-                        var coords = defs.regionDefs[i].coords;
-                        var height = coords[3] - coords[1], width = coords[2] - coords[0], x = coords[0], y = coords[1];
-                        widget = new Button(
-                            w.id,
-                            { top: y, left: x, width: width, height: height },
-                            { callback: renderResponse, buttonReadback: w.buttonReadback }
-                        );
-                    } else {
-                        widget = new Button(
-                            w.id,
-                            null,
-                            { callback: renderResponse, buttonReadback: w.buttonReadback,
-                              keyCode: w.keyCode, keyName: w.keyName }
-                        );
+                defs.regionDefs = defs.regionDefs || [];
+                var coords = ((i < defs.regionDefs.length) && defs.regionDefs[i].coords) ? defs.regionDefs[i].coords.split(",") : [0,0,0,0];
+                w.height = parseFloat(coords[3]) - parseFloat(coords[1]);
+                w.width  = parseFloat(coords[2]) - parseFloat(coords[0]);
+                w.x = parseFloat(coords[0]);
+                w.y = parseFloat(coords[1]);
+                w.scale = (d3.select("svg > g").node()) ?
+                             +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
+                var widget = createWidget(w);
+                if (widget) {
+                    wm.addWidget(widget);
+                    if (typeof widget.keyCode === "function" && widget.keyCode() && widget.type() === "button") {
+                        wm._keyCode2widget[widget.keyCode()] = widget;
                     }
-                    if (w.keyCode) {
-                        wm._keyCode2widget[w.keyCode] = widget;
-                    }                        
-                } else if (w.type === "display") {
-                    widget = new Display(w.id);
-                } else if (w.type === "storyboard") {
-                    widget = new Storyboard(w.id);
                 }
-                if (w.hasOwnProperty("events")) {
-                    w.evts = w.events;
-                    delete w.events;
-                }
-                widget.updateWithProperties(w);
-                wm.addWidget(widget);
             });
 
             //create div
@@ -201,7 +265,10 @@ define(function (require, exports, module) {
                     var coords = d.coords.split(",").map(function (d) {
                         return parseFloat(d);
                     });
-                    var h = coords[3] - coords[1], w = coords[2] - coords[0], x = coords[0], y = coords[1];
+                    var h = parseFloat(coords[3]) - parseFloat(coords[1]),
+                        w = parseFloat(coords[2]) - parseFloat(coords[0]),
+                        x = parseFloat(coords[0]),
+                        y = parseFloat(coords[1]);
                     var mark = mapCreator.restoreRectRegion({x: x, y: y, width: w, height: h});
                     mark.attr("id", widget.id()).classed(widget.type(), true);
                     widget.element(mark);
@@ -212,7 +279,6 @@ define(function (require, exports, module) {
                     });
                 });
             }
-            
             installKeypressHandler(this);
         }
     };
@@ -220,7 +286,7 @@ define(function (require, exports, module) {
     function round(v) {
         return Math.round(v * 10) / 10;
     }
-    
+
     WidgetManager.prototype.updateMapCreator = function (scale, cb) {
         scale = scale || 1;
         var wm = this, event = {type: "WidgetModified"};
@@ -240,35 +306,29 @@ define(function (require, exports, module) {
                 NewWidgetView.create(coord)
                     .on("ok", function (e, view) {
                         view.remove();
-                        var id = e.data.type + "_" + uidGenerator();
-                        var widget;
-                        if (e.data.type === "button") {
-                            widget = new Button(id,
-                                { top: d3.select("#imageDiv .selected rect").attr("y"),
-                                  left: d3.select("#imageDiv .selected rect").attr("x"),
-                                  width: d3.select("#imageDiv .selected rect").attr("width"),
-                                  height: d3.select("#imageDiv .selected rect").attr("height") },
-                                { callback: renderResponse,
-                                  buttonReadback: e.data.buttonReadback });
-                            if (e.data.keyCode) {
-                                wm._keyCode2widget[e.data.keyCode] = widget;
+                        e.data.id = e.data.type + "_" + uidGenerator();
+                        e.data.scale = (d3.select("svg > g").node()) ?
+                                        +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
+                        e.data.height = parseFloat(d3.select("#imageDiv .selected rect").attr("height"));
+                        e.data.width = parseFloat(d3.select("#imageDiv .selected rect").attr("width"));
+                        e.data.x = parseFloat(d3.select("#imageDiv .selected rect").attr("x"));
+                        e.data.y = parseFloat(d3.select("#imageDiv .selected rect").attr("y"));
+                        var widget = createWidget(e.data);
+                        if (widget) {
+                            region.classed(widget.type(), true).attr("id", widget.id());
+                            widget.element(region);
+                            createImageMap(widget);
+                            // widget.updateLocationAndSize({ x: e.data.x, y: e.data.y, width: e.data.width, height: e.data.height }, { imageMap: true });
+                            // widget.updateStyle(e.data);
+                            widget.render();
+                            wm.addWidget(widget);
+                            if (typeof widget.keyCode === "function" && widget.keyCode() && widget.type() === "button") {
+                                wm._keyCode2widget[widget.keyCode()] = widget;
                             }
-                        } else {
-                            widget = new Display(id);
+                            event.action = "create";
+                            event.widget = widget;
+                            wm.fire(event);
                         }
-                        region.classed(widget.type(), true)
-                            .attr("id", id);
-                        if (e.data.hasOwnProperty("events")) {
-                            e.data.evts = e.data.events;
-                            delete e.data.events;
-                        }
-                        widget.updateWithProperties(e.data);
-                        widget.element(region);
-                        createImageMap(widget);
-                        wm.addWidget(widget);
-                        event.action = "create";
-                        event.widget = widget;
-                        wm.fire(event);
                     }).on("cancel", function (e, view) {
                         view.remove();
                         d3.select(region.node().parentNode).remove();
@@ -358,14 +418,13 @@ define(function (require, exports, module) {
     WidgetManager.prototype.editTimer = function (emuTimer) {
         handleTimerEdit(emuTimer, wm);
     };
-    
+
     /**
         Edits the specified widget.
         @param {Widget} widget The widget to be edited.
         @memberof module:WidgetManager
      */
     WidgetManager.prototype.editWidget = function (widget) {
-        // widget types supported in the current implementation are Button, Display
         handleWidgetEdit(widget, wm);
     };
     WidgetManager.prototype.editTimer = function (emuTimer) {
@@ -392,8 +451,18 @@ define(function (require, exports, module) {
         delete this._widgets[widget.id()];
     };
     /**
-        Gets a list of all the display widgets loaded on the page.
-        @returns {Display[]}
+        Gets a list of all display widgets loaded on the page.
+        @returns {BasicDisplay[]}
+        @memberof module:WidgetManager
+     */
+    WidgetManager.prototype.getAllDisplays = function () {
+        return _.filter(this._widgets, function (w) {
+            return w.type() === "display" || w.type() === "numericdisplay" || w.type() === "touchscreendisplay";
+        });
+    };
+    /**
+        Gets a list of all display widgets loaded on the page.
+        @returns {BasicDisplay[]}
         @memberof module:WidgetManager
      */
     WidgetManager.prototype.getDisplayWidgets = function () {
@@ -402,13 +471,53 @@ define(function (require, exports, module) {
         });
     };
     /**
-        Gets a list of all the button widgets loaded on the page.
+        Gets a list of all display widgets loaded on the page.
+        @returns {NumericDisplay[]}
+        @memberof module:WidgetManager
+     */
+    WidgetManager.prototype.getNumericDisplayWidgets = function () {
+        return _.filter(this._widgets, function (w) {
+            return w.type() === "numericdisplay";
+        });
+    };
+    /**
+        Gets a list of all LED widgets loaded on the page.
+        @returns {LED[]}
+        @memberof module:WidgetManager
+     */
+    WidgetManager.prototype.getLEDWidgets = function () {
+        return _.filter(this._widgets, function (w) {
+            return w.type() === "led";
+        });
+    };
+    /**
+        Gets a list of all button widgets loaded on the page.
         @returns {Button[]}
         @memberof WidgetManager
      */
     WidgetManager.prototype.getButtonWidgets = function () {
         return _.filter(this._widgets, function (w) {
             return w.type() === "button";
+        });
+    };
+    /**
+        Gets a list of all button widgets loaded on the page.
+        @returns {TouchscreenButton[]}
+        @memberof WidgetManager
+     */
+    WidgetManager.prototype.getTouchscreenButtonWidgets = function () {
+        return _.filter(this._widgets, function (w) {
+            return w.type() === "touchscreenbutton";
+        });
+    };
+    /**
+        Gets a list of all button widgets loaded on the page.
+        @returns {TouchscreenDisplay[]}
+        @memberof WidgetManager
+     */
+    WidgetManager.prototype.getTouchscreenDisplayWidgets = function () {
+        return _.filter(this._widgets, function (w) {
+            return w.type() === "touchscreendisplay";
         });
     };
     /**
@@ -429,9 +538,13 @@ define(function (require, exports, module) {
         @memberof WidgetManager
     */
     WidgetManager.prototype.getAllWidgets = function () {
+        // return an array sorted by widget type
         return this.getDisplayWidgets()
-                    .concat(this.getButtonWidgets())
-                    .concat(this.getStoryboardWidgets());
+            .concat(this.getNumericDisplayWidgets())
+            .concat(this.getTouchscreenDisplayWidgets())
+            .concat(this.getTouchscreenButtonWidgets())
+            .concat(this.getButtonWidgets())
+            .concat(this.getLEDWidgets());
     };
     WidgetManager.prototype.getAllTimers = function () {
         return _.filter(this._widgets, function (w) {
@@ -440,8 +553,8 @@ define(function (require, exports, module) {
     };
 
     /**
-        Update  the location of the widget by updating the image map coords to the position given.
-        @param {Widget} widget The widget to update
+        Update the location and size of the widget by updating the image map coords to the position given.
+        @param {Widget} widget The widget to be updated
         @param {{x: number, y: number, width: number, height: number}} pos The new position and size
         @param {Number?} scale a scale factor for the pos value. If not supplied defaults to 1
         @memberof WidgetManager
@@ -454,7 +567,7 @@ define(function (require, exports, module) {
             pos.y *= scale;
             pos.width *= scale;
             pos.height *= scale;
-            widget.updateLocationAndSize(pos);
+            widget.updateLocationAndSize(pos, { imageMap: true });
         }
     };
     /**

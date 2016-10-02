@@ -21,6 +21,10 @@ define(function (require, exports, module) {
     "use strict";
 
     var d3 = require("d3/d3");
+    var Widget = require("widgets/Widget"),
+        StateParser = require("util/PVSioStateParser"),
+        property = require("util/property");
+
 
     /**
      * @function <a name="LED">LED</a>
@@ -29,7 +33,7 @@ define(function (require, exports, module) {
      * @param coords {Object} The four coordinates (x1,y1,x2,y2) of the display, specifying
      *        the left, top, right, bottom corner of the rectangle (for shape="rect")
      * @param opt {Object}
-     * @memberof module:SingleDisplay
+     * @memberof module:LED
      * @instance
      */
     function LED(id, coords, opt) {
@@ -38,18 +42,15 @@ define(function (require, exports, module) {
         this.parent = (opt.parent) ? ("#" + opt.parent) : "body";
         this.top = coords.top || 0;
         this.left = coords.left || 0;
-        this.width = coords.width || 10;
-        this.height = coords.height || 10;
-        this.font = [this.height, "px ", (opt.font || "sans-serif")];
-        this.smallFont = (this.height * 0.8) + "px " + (opt.font || "sans-serif");
-        this.align = opt.align || "center";
-        this.textBaseline = "middle";
-        this.radius = opt.radius || 3;
-        this.color = opt.color || "#00FF66"; // default is light green
+        this.width = coords.width || 12;
+        this.height = coords.height || 12;
+        this.radius = opt.radius || (this.height / 4);
+        this.color = opt.color || "#00FF66"; // default is bright green
         this.blinking = opt.blinking || false;
         this.cursor = opt.cursor || "default";
+        opt.position = opt.position || "absolute";
         this.div = d3.select(this.parent)
-                        .append("div").style("position", "absolute")
+                        .append("div").style("position", opt.position)
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")
                         .style("margin", 0).style("padding", 0)
@@ -60,27 +61,103 @@ define(function (require, exports, module) {
                         .style("vertical-align", "top");
         this.div.style("cursor", this.cursor);
         this.isOn = false;
+        opt.ledKey = opt.ledKey || id;
+        opt.visibleWhen = opt.visibleWhen || "true"; // default: always on
+        this.ledKey = property.call(this, opt.ledKey);
+        this.visibleWhen = property.call(this, opt.visibleWhen);
+        this.ledColor = property.call(this, this.color);
+        this.example = opt.example || ""; // this is used in the prototype builder to demonstrate the font style of the display
+        Widget.call(this, id, "led");
         return this;
     }
-
-    LED.prototype.render = function (opt) {
+    LED.prototype = Object.create(Widget.prototype);
+    LED.prototype.constructor = LED;
+    LED.prototype.parentClass = Widget.prototype;
+    /**
+     * Returns a JSON object representation of this Widget.
+     * @returns {object}
+     * @memberof module:LED
+    */
+    LED.prototype.toJSON = function () {
+        return {
+            type: this.type(),
+            id: this.id(),
+            visibleWhen: this.visibleWhen(),
+            ledKey: this.ledKey(),
+            ledColor: this.ledColor()
+        };
+    };
+    /**
+     * Updates the location and size of the widget according to the given position and size
+     */
+    LED.prototype.updateLocationAndSize = function (pos, opt) {
         opt = opt || {};
-        var context = document.getElementById(this.id + "_canvas").getContext("2d");
-        context.beginPath();
-        context.globalAlpha = 0.9;
-        context.arc(this.width / 2, this.height / 2, this.radius, 0, 2 * Math.PI, false);
-        context.fillStyle = opt.color || this.color;
-        context.fill();
-        if (!opt.noborder) { context.stroke(); }
-        var elemClass = this.div.node().getAttribute("class");
-        if (opt.blinking || this.blinking) {
-            elemClass += " blink";
-        } else {
-            elemClass = elemClass.replace(" blink", "");
+        if (opt.imageMap) {
+            LED.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
         }
-        this.div.node().setAttribute("class", elemClass);
-        this.reveal();
-        return this;
+        this.top = pos.y || 0;
+        this.left = pos.x || 0;
+        this.width = pos.width || 200;
+        this.height = pos.height || 80;
+        this.radius = this.height / 4;
+        d3.select("div." + this.id()).style("left", this.left + "px").style("top", this.top + "px")
+            .style("width", this.width + "px").style("height", this.height + "px");
+        d3.select("div." + this.id()).select("canvas").attr("width", this.width + "px").attr("height", this.height + "px");
+        return this.render(this.example);
+    };
+    LED.prototype.updateWithProperties = function (props) {
+        props = props || {};
+        props.visibleWhen = props.visibleWhen || "true";
+        LED.prototype.parentClass.updateWithProperties.apply(this, arguments);
+        this.ledColor(props.ledColor);
+        return this.render(this.example);
+    };
+    /**
+     * Removes the widget's div
+     */
+    LED.prototype.remove = function () {
+        LED.prototype.parentClass.remove.apply(this);
+        d3.select("div." + this.id()).remove();
+    };
+
+    LED.prototype.render = function (txt, opt) {
+        opt = opt || {};
+        txt = txt || "";
+        var _this = this;
+        function doRender() {
+            var context = document.getElementById(_this.id() + "_canvas").getContext("2d");
+            context.beginPath();
+            context.globalAlpha = 0.9;
+            context.arc(_this.width / 2, _this.height / 2, _this.radius, 0, 2 * Math.PI, false);
+            context.fillStyle = opt.color || _this.ledColor();
+            context.fill();
+            if (!opt.noborder) { context.stroke(); }
+            var elemClass = _this.div.node().getAttribute("class");
+            if (opt.blinking || _this.blinking) {
+                elemClass += " blink";
+            } else {
+                elemClass = elemClass.replace(" blink", "");
+            }
+            _this.div.node().setAttribute("class", elemClass);
+            return _this.reveal();
+        }
+
+        var expr = StateParser.simpleExpressionParser(this.visibleWhen());
+        if (expr && expr.res) {
+            if (expr.res.type === "constexpr" && expr.res.constant === "true") {
+                return doRender();
+            } else if (expr.res.type === "boolexpr" && expr.res.binop) {
+                var str = StateParser.resolve(txt, expr.res.attr);
+                if (str) {
+                    str = StateParser.evaluate(str);
+                    if ((expr.res.binop === "=" && str === expr.res.constant) ||
+                         (expr.res.binop === "!=" && str !== expr.res.constant)) {
+                             return doRender();
+                    }
+                }
+            }
+        }
+        return _this.hide();
     };
 
     LED.prototype.toggle = function (opt) {
@@ -94,7 +171,7 @@ define(function (require, exports, module) {
 
     LED.prototype.on = function (opt) {
         this.isOn = true;
-        this.render(opt);
+        this.render("", opt);
         return this;
     };
 

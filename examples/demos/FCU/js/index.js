@@ -23,7 +23,7 @@ require([
         "widgets/SingleDisplay",
         "widgets/DoubleDisplay",
         "widgets/LED",
-        "widgets/TouchScreenButton",
+        "widgets/TouchscreenButton",
         "plugins/graphbuilder/GraphBuilder",
         "stateParser",
         "PVSioWebClient"],
@@ -32,7 +32,7 @@ require([
               SingleDisplay,
               DoubleDisplay,
               LED,
-              TouchScreenButton,
+              TouchscreenButton,
               GraphBuilder,
               stateParser,
               PVSioWebClient) {

@@ -19,10 +19,11 @@ alarisGP: THEORY
   small_step: alaris_real = 1
   big_step: alaris_real = 10
   alaris_step: TYPE = {x: alaris_real | x = small_step OR x = big_step OR x = tiny_step}
-
-  state: TYPE = [# display: alaris_real, timer: alaris_timer, step: alaris_step #]
+  ledType: TYPE = { ON, OFF }
   
-  init(x: alaris_real): state = (# display := x, timer := max_timer, step := small_step #)
+  state: TYPE = [# display: alaris_real, timer: alaris_timer, step: alaris_step, power_led: ledType #]
+  
+  init(x: alaris_real): state = (# display := x, timer := max_timer, step := small_step, power_led := ON #)
   %----------------------------------------------------------------------------------------------------------------
 
 

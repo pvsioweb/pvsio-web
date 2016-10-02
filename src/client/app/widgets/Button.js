@@ -14,6 +14,7 @@ define(function (require, exports, module) {
         Timer	= require("util/Timer"),
         Recorder    = require("util/ActionRecorder"),
         Speaker  = require("widgets/TextSpeaker"),
+        StateParser = require("util/PVSioStateParser"),
         ButtonActionsQueue = require("widgets/ButtonActionsQueue").getInstance(),
         ButtonHalo = require("widgets/ButtonHalo").getInstance();
     //define timer for sensing hold down actions on buttons
@@ -39,23 +40,29 @@ define(function (require, exports, module) {
         opt.keyCode = opt.keyCode || "";
         opt.keyName = opt.keyName || "";
         opt.animation = opt.animation || function () {};
+        opt.visibleWhen =  (opt.visibleWhen && opt.visibleWhen !== "") ? opt.visibleWhen : "false";
         coords = coords || {};
-        this.evts = property.call(this, opt.evts);
-        this.recallRate = property.call(this, opt.recallRate);
         this.functionText = property.call(this, opt.functionText);
+        this.recallRate = property.call(this, opt.recallRate);
+        this.evts = property.call(this, opt.evts);
+        this.callback = opt.callback;
         this.imageMap = property.call(this);
         this.buttonReadback = property.call(this, opt.buttonReadback);
         this.keyCode = property.call(this, opt.keyCode);
         this.keyName = property.call(this, opt.keyName);
         this.animation = opt.animation;
+        this.visibleWhen = property.call(this, opt.visibleWhen);
         this.cursor = opt.cursor || "pointer";
+        this.isVisible = true;
 
         Widget.call(this, id, "button");
+        opt.parent = opt.parent || "prototype";
+        opt.prototypeMap = opt.prototypeMap || "prototypeMap";
 
-        var parent = d3.select("map#prototypeMap");
+        var parent = d3.select("map#" + opt.prototypeMap);
         if (parent.empty()) {
-            parent = d3.select("#prototype").append("map").attr("id", "prototypeMap")
-                .attr("name", "prototypeMap");
+            parent = d3.select("#" + opt.parent).append("map").attr("id", opt.prototypeMap)
+                .attr("name", opt.prototypeMap);
         }
 
         this.top = coords.top || 0;
@@ -63,18 +70,18 @@ define(function (require, exports, module) {
         this.width = coords.width || 32;
         this.height = coords.height || 32;
 
-        this.area = opt.area || parent.append("area");
-        var x2 = parseFloat(this.left) + parseFloat(this.width);
-        var x3 = parseFloat(this.top) + parseFloat(this.height);
+        this.area = (opt.area) ? opt.area.append("area") : parent.append("area");
+        var x2 = this.left + this.width;
+        var x3 = this.top + this.height;
         this.area.attr("shape", "rect").attr("id", id).attr("class", id)
                  .attr("coords", this.left + "," + this.top + "," + x2 + "," + x3)
                  .style("cursor", this.cursor);
-        this.callback = opt.callback;
 
         this.createImageMap({ area: this.area, callback: this.callback });
         if (opt.keyCode) {
             ButtonHalo.installKeypressHandler(this);
         }
+        this.isEnabled = property.call(this, true);
         return this;
     }
 
@@ -109,15 +116,16 @@ define(function (require, exports, module) {
     */
     Button.prototype.toJSON = function () {
         return {
-            evts: this.evts(),
             id: this.id(),
             type: this.type(),
+            evts: this.evts(),
             recallRate: this.recallRate(),
             functionText: this.functionText(),
             boundFunctions: this.boundFunctions(),
             buttonReadback: this.buttonReadback(),
             keyCode: this.keyCode(),
-            keyName: this.keyName()
+            keyName: this.keyName(),
+            visibleWhen: this.visibleWhen()
         };
     };
 
@@ -130,6 +138,7 @@ define(function (require, exports, module) {
         opt = opt || {};
         var f = this.functionText();
         var anim = opt.animation || this.animation || function () {};
+        opt.callback = opt.callback || this.callback;
 
         ButtonActionsQueue.queueGUIAction("release_" + f, opt.callback);
         anim();
@@ -144,6 +153,30 @@ define(function (require, exports, module) {
     };
 
     /**
+     * @function hide
+     * @description API to hide the button (disable actions & restore default mouse cursor)
+     * @memberof module:Button
+     */
+    Button.prototype.hide = function (opt) {
+        opt = opt || {};
+        this.cursor = opt.cursor || "default";
+        this.isVisible = false;
+        return this;
+    };
+
+    /**
+     * @function reveal
+     * @description API to reveal the button (disable actions & restore default mouse cursor)
+     * @memberof module:Button
+     */
+    Button.prototype.reveal = function (opt) {
+        opt = opt || {};
+        this.cursor = opt.cursor || "pointer";
+        this.isVisible = true;
+        return this;
+    };
+
+    /**
      * @function press
      * @description API to simulate a single press action on the button
      * @memberof module:Button
@@ -152,6 +185,7 @@ define(function (require, exports, module) {
         opt = opt || {};
         var f = this.functionText();
         var anim = opt.animation || this.animation || function () {};
+        opt.callback = opt.callback || this.callback;
 
         ButtonActionsQueue.queueGUIAction("press_" + f, opt.callback);
         anim();
@@ -174,6 +208,7 @@ define(function (require, exports, module) {
         var f = this.functionText(),
             widget = this;
         var anim = opt.animation || this.animation || function () {};
+        opt.callback = opt.callback || this.callback;
 
         this.press(opt);
         timerTickFunction = function () {
@@ -202,6 +237,8 @@ define(function (require, exports, module) {
         opt = opt || {};
         var f = this.functionText();
         var anim = opt.animation || this.animation || function () {};
+        opt.callback = opt.callback || this.callback;
+
         ButtonActionsQueue.queueGUIAction("click_" + f, opt.callback);
         anim();
         Recorder.addAction({
@@ -217,19 +254,46 @@ define(function (require, exports, module) {
     };
 
     /**
+     * @function render
+     * @description API for updating properties of the button, e.g., whether it's enabled
+     * @memberof module:Button
+     */
+    Button.prototype.render = function (txt, opt) {
+        opt = opt || {};
+        txt = txt || "";
+        if (typeof txt === "object") {
+            var expr = StateParser.simpleExpressionParser(this.visibleWhen());
+            if (expr && expr.res) {
+                if (expr.res.type === "constexpr" && expr.res.constant === "true") {
+                    return this.isEnabled(true);
+                } else if (expr.res.type === "boolexpr" && expr.res.binop) {
+                    // txt in this case is a PVS state that needs to be parsed
+                    var str = StateParser.resolve(txt, expr.res.attr);
+                    if (str) {
+                        str = StateParser.evaluate(str);
+                        if ((expr.res.binop === "=" && str === expr.res.constant) ||
+                             (expr.res.binop === "!=" && str !== expr.res.constant)) {
+                                 return this.isEnabled(true);
+                        }
+                    }
+                }
+            }
+        }
+        return this.isEnabled(false);
+    };
+
+    /**
      * @override
      * @function createImageMap
      * @description Creates an image map area for this button and binds functions in the button's events property with appropriate
      * calls to function in the PVS model. Whenever a response is returned from the PVS function call, the callback
      * function is invoked.
-     * @param {!pvsWSClient} ws A websocket client to use for sending gui actions to the server process
-     * @param {function} callback A callback function to invoke when the pvs function call on the server process is returned
      * @returns {d3.selection} The image map area created for the button
      * @memberof Button
      */
     Button.prototype.createImageMap = function (opt) {
         opt = opt || {};
-        opt.callback = opt.callback || function () {};
+        opt.callback = opt.callback || this.callback;
 
         var area = opt.area || Button.prototype.parentClass.createImageMap.apply(this, arguments),
             widget = this,
@@ -237,23 +301,27 @@ define(function (require, exports, module) {
             evts;
 
         var onmouseup = function () {
-            if (evts && evts.indexOf("press/release") > -1) {
-                widget.release(opt);
+            if (widget.isVisible) {
+                if (evts && evts.indexOf("press/release") > -1) {
+                    widget.release(opt);
+                }
+                mouseup(d3.event);
+                area.on("mouseup", null);
             }
-            mouseup(d3.event);
-            area.on("mouseup", null);
         };
         area.on("mousedown", function () {
-            f = widget.functionText();
-            evts = widget.evts();
-            //perform the click event if there is one
-            if (evts && evts.indexOf('click') > -1) {
-                widget.click(opt);
-            } else if (evts && evts.indexOf("press/release") > -1) {
-                widget.pressAndHold(opt);
+            if (widget.isVisible) {
+                f = widget.functionText();
+                evts = widget.evts();
+                //perform the click event if there is one
+                if (evts && evts.indexOf('click') > -1) {
+                    widget.click(opt);
+                } else if (evts && evts.indexOf("press/release") > -1) {
+                    widget.pressAndHold(opt);
+                }
+                //register mouseup/out events here
+                area.on("mouseup", onmouseup);
             }
-            //register mouseup/out events here
-            area.on("mouseup", onmouseup);
         });
         widget.imageMap(area);
         return area;

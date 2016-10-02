@@ -30,7 +30,7 @@ bbraun_space: THEORY
   CONVERSION int2boolean
 
   init(x: bbraun_real): State = (#
-            on := 0,
+            on := 1,
           inf:= 0,
           r  := 0,
           v  := 0,

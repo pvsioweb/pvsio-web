@@ -59,6 +59,15 @@ define(function (require, exports, module) {
         }
     };
     /**
+     * Removes the widget from the interface
+     * @memberof Widget
+     */
+    Widget.prototype.updateStyle = function (data) {
+        // this function is overloaded by widgets supporting style attributes, e.g., displays
+        // for widgets without style (e.g. buttons), the function does nothing
+        return this;
+    };
+    /**
         Gets the <g> or group layer on which this widget is drawn
         @memberof Widget
      */
@@ -102,7 +111,7 @@ define(function (require, exports, module) {
     Widget.prototype.updateWithProperties = function (props) {
         var w = this;
         _.each(props, function (val, key) {
-            if (w[key]) {
+            if (typeof w[key] === "function") {
                 w[key](val);
             }
         });
@@ -115,7 +124,10 @@ define(function (require, exports, module) {
         @memberof Widget
     */
     Widget.prototype.updateLocationAndSize = function (pos) {
-        this.imageMap().attr("coords", [pos.x, pos.y, pos.x + pos.width, pos.y + pos.height].join(","));
+        if (this.needsImageMap()) {
+            this.createImageMap();
+        }
+        return this.imageMap().attr("coords", [pos.x, pos.y, pos.x + pos.width, pos.y + pos.height].join(","));
     };
 
     module.exports = Widget;

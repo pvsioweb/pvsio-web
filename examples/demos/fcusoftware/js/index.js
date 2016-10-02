@@ -19,25 +19,26 @@ require.config({
 
 require([
         "widgets/Button",
-        "widgets/Knob",
-        "widgets/SingleDisplay",
-        "widgets/DoubleDisplay",
+        "widgets/TouchscreenButton",
+        "widgets/TouchscreenDisplay",
+        "widgets/BasicDisplay",
+        "widgets/NumericDisplay",
         "widgets/LED",
-        "widgets/TouchScreenButton",
         "plugins/graphbuilder/GraphBuilder",
         "stateParser",
-        "PVSioWebClient"],
-    function (Button,
-              Knob,
-              SingleDisplay,
-              DoubleDisplay,
-              LED,
-              TouchScreenButton,
-              GraphBuilder,
-              stateParser,
-              PVSioWebClient) {
+        "PVSioWebClient"
+    ], function (
+        Button,
+        TouchscreenButton,
+        TouchscreenDisplay,
+        BasicDisplay,
+        NumericDisplay,
+        LED,
+        GraphBuilder,
+        stateParser,
+        PVSioWebClient
+    ) {
         "use strict";
-
         var d3 = require("d3/d3");
         var serverLogs = [], maxLogSize = 40;
 
@@ -51,7 +52,9 @@ require([
             width: 1230
         }).style("position", "relative").style("width", "1230px");
         //insert the html into the panel (note that this could have used templates or whatever)
-        imageHolder.html('<img src="FCU-Software-ext.png" usemap="#prototypeMap"/>').attr("id", "prototype").attr("class", "fcusoftware").style("float", "left");
+        imageHolder.html('<img src="FCU-Software-ext.png" usemap="#prototypeMap"/>')
+                    .attr("id", "prototype").attr("class", "fcusoftware").style("float", "left")
+                    .append("map").attr("id", "prototypeMap").attr("name", "prototypeMap");
         //d3.select(".collapsible-panel-parent").append("div").attr("id", "kccu").attr("class", "kccu").html('<img src="KCCU.png" usemap="#prototypeMap"/>').style("float", "left");
 
         /**
@@ -106,123 +109,140 @@ require([
         var tick = null;
         var start_tick = null, stop_tick = null;
 
-        // append displays
         var fcu = {};
-        fcu.cursorOverlay = new SingleDisplay("cursorOverlay",
+        // append FCU widgets
+        fcu.cursorOverlay = new BasicDisplay("cursorOverlay",
                             {top: 0, left: 0, height: 800, width: 624 },
                             {
                                 backgroundColor: "transparent",
+                                //visibleWhen: "current_state != EDIT_PRESSURE",
                                 parent: "prototype",
                                 cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
-
-        fcu.editbox = new SingleDisplay("editbox_pressure",
-                            { top: 333, left: 16, height: 28, width: 100},
+        fcu.display_val = new BasicDisplay("display_val",
+                            { top: 333, left: 16, height: 28, width: 100 },
                             {
-                              backgroundColor: "black",
+                                displayKey: "data_entry.display",
+                                visibleWhen: "current_state = STD",
+                                fontsize: 16,
+                                fontColor: "white",
+                                backgroundColor: "dimgray",
+                                parent: "prototype",
+                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
+                            });
+        fcu.display_units = new BasicDisplay("FCU_display_units",
+                            { top: 333, left: 112, height: 28, width: 36 },
+                            {
+                              displayKey: "data_entry.units",
+                              visibleWhen: "current_state = STD",
+                              fontsize: 14,
                               fontColor: "white",
+                              backgroundColor: "dimgray",
                               parent: "prototype",
-                              touchscreen: {callback: onMessageReceived, backgroundColor: "green", highlightOnMouseClick: true},
-                              fontsize: 20,
                               cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
-        fcu.editbox_units = new SingleDisplay("FCU_editbox_units",
-                            { top: 333, left: 112, height: 28, width: 36},
+        fcu.touchscreen_display = new TouchscreenDisplay("FCU_display",
+                            { top: 333, left: 16, height: 28, width: 100 },
                             {
+                              displayKey: "data_entry.display",
+                              visibleWhen: "current_state = QNH",
+                              functionText: "editbox_pressure",
+                              fontColor: "cyan",
+                              backgroundColor: "black",
+                              callback: onMessageReceived,
+                              fontsize: 16,
+                              displayMode: "standard",
+                              parent: "prototype",
+                              cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
+                            });
+        fcu.notouchs_display_units = new BasicDisplay("FCU_notouch_display_units",
+                            { top: 333, left: 112, height: 28, width: 36 },
+                            {
+                              displayKey: "data_entry.units",
+                              visibleWhen: "current_state = QNH",
+                              fontColor: "steelblue",
+                              backgroundColor: "black",
+                              fontsize: 14,
+                              parent: "prototype",
+                              cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
+                            });
+        fcu.data_entry_display = new BasicDisplay("FCU_data_entry_display",
+                            { top: 333, left: 16, height: 28, width: 134 },
+                            {
+                              displayKey: "data_entry.display",
+                              visibleWhen: "current_state = EDIT_PRESSURE",
                               backgroundColor: "black",
                               fontColor: "cyan",
+                              fontsize: 16,
                               parent: "prototype",
-                              fontsize: 16
+                              cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
-
-        fcu.display = new SingleDisplay("FCU_display",
-                            { top: 333, left: 16, height: 28, width: 100},
+        fcu.btn_toHPA = new TouchscreenButton("tohPa",
+                            { top: 380, left: 12, height: 36, width: 140 },
                             {
-                              backgroundColor: "grey",
-                              fontColor: "white",
-                              parent: "prototype",
-                              fontsize: 20
-                            });
-        fcu.display_units = new SingleDisplay("FCU_display_units",
-                            { top: 333, left: 112, height: 28, width: 36},
-                            {
-                              backgroundColor: "grey",
-                              fontColor: "white",
-                              parent: "prototype",
-                              fontsize: 16
-                            });
-
-        fcu.btn_toHPA = new SingleDisplay("hPa",
-                            {top: 380, left: 12, height: 36, width: 140 },
-                            {
-                                backgroundColor: "black",
-                                fontColor: "white",
-                                parent: "prototype",
-                                touchscreen: {callback: onMessageReceived, backgroundColor: "green", highlightOnMouseClick: true},
-                                fontsize: 18,
-                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
-                            });
-        fcu.btn_toINHG = new SingleDisplay("inHg",
-                            {top: 380, left: 12, height: 36, width: 140 },
-                            {
-                                backgroundColor: "black",
-                                fontColor: "white",
-                                parent: "prototype",
-                                touchscreen: {callback: onMessageReceived, backgroundColor: "green", highlightOnMouseClick: true},
-                                fontsize: 18,
-                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
-                            });
-        fcu.btn_CLEAR = new SingleDisplay("CLEAR",
-                            {top: 752, left: 2, height: 45, width: 82 },
-                            {
-                                backgroundColor: "black",
-                                fontColor: "white",
-                                parent: "prototype",
-                                touchscreen: {callback: onMessageReceived, backgroundColor: "green", highlightOnMouseClick: true},
+                                softLabel: "INHG -> HPA",
+                                functionText: "hPa",
+                                visibleWhen: "data_entry.units = inHg",
+                                backgroundColor: "dimgray",
                                 fontsize: 16,
-                                functionText: "CLR",
-                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
+                                callback: onMessageReceived,
+                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto",
+                                parent: "prototype"
                             });
-
-
-        fcu.programmedValue = new SingleDisplay("programmedValue",
-                            { top: 44, left: 46, height: 9, width: 32},
+        fcu.btn_toINHG = new TouchscreenButton("toinHg",
+                            { top: 380, left: 12, height: 36, width: 140 },
                             {
-                              backgroundColor: "black",
-                              fontColor: "white",
-                              parent: "prototype"
+                                softLabel: "HPA -> INHG",
+                                functionText: "inHg",
+                                visibleWhen: "data_entry.units = hPa",
+                                backgroundColor: "dimgray",
+                                fontsize: 16,
+                                callback: onMessageReceived,
+                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto",
+                                parent: "prototype"
                             });
-
+        fcu.btn_CLEAR = new TouchscreenButton("CLR_INFO",
+                            { top: 752, left: 4, height: 42, width: 82 },
+                            {
+                                softLabel: "CLR INFO",
+                                functionText: "CLR",
+                                backgroundColor: "dimgray",
+                                fontsize: 16,
+                                callback: onMessageReceived,
+                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto",
+                                parent: "prototype"
+                            });
         fcu.STD_LED = new LED("STD_LED", {top: 243, left: 10, height: 32, width: 32},
                             {
                                 radius: 9,
+                                visibleWhen: "current_state = STD",
                                 parent: "prototype",
                                 cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
-        fcu.btn_STD_RADIO = new SingleDisplay("STD_RADIO",
-                            {top: 243, left: 10, height: 32, width: 72},
+        fcu.btn_STD_RADIO = new TouchscreenButton("STD_RADIO",
+                            { top: 243, left: 10, height: 32, width: 72 },
                             {
+                                callback: onMessageReceived,
+                                softLabel: "",
                                 backgroundColor: "transparent",
-                                parent: "prototype",
-                                touchscreen: {callback: onMessageReceived, backgroundColor: "transparent", highlightOnMouseClick: true},
-                                functionText: "STD_RADIO",
-                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
+                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto",
+                                parent: "prototype"
                             });
-
         fcu.QNH_LED = new LED("QNH_LED", {top: 275, left: 10, height: 32, width: 32},
                             {
                                 radius: 9,
+                                visibleWhen: "current_state != STD",
                                 parent: "prototype",
                                 cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
                             });
-        fcu.btn_QNH_RADIO = new SingleDisplay("QNH_RADIO",
-                            {top: 275, left: 10, height: 32, width: 72},
+        fcu.btn_QNH_RADIO = new TouchscreenButton("QNH_RADIO",
+                            { top: 275, left: 10, height: 32, width: 72 },
                             {
+                                callback: onMessageReceived,
+                                softLabel: "",
                                 backgroundColor: "transparent",
-                                parent: "prototype",
-                                touchscreen: {callback: onMessageReceived, backgroundColor: "transparent", highlightOnMouseClick: true},
-                                functionText: "QNH_RADIO",
-                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto"
+                                cursor: "url('./css/pilot_cursor.cur') 32 32, auto",
+                                parent: "prototype"
                             });
 
         fcu.btn_key1 = new Button("digit_1", {left: 1032, top: 294}, {callback: onMessageReceived, keyCode:49, keyName:"key 1"});
@@ -240,72 +260,22 @@ require([
         fcu.btn_ESC = new Button("ESC", {left: 680, top: 34}, {callback: onMessageReceived, keyCode:27, keyName:"esc"});
         fcu.btn_OK = new Button("OK", {left: 1110, top: 234}, {callback: onMessageReceived, keyCode:13, keyName:"enter"});
 
-        // utility functions
-        function evaluate(str) {
-            str = str.replace(/"/g, "");
-            var v = +str;
-            if (str.indexOf("/") >= 0) {
-                var args = str.split("/");
-                v = +args[0] / +args[1];
-            }
-            return Math.floor(v * 100) / 100;
-        }
-        function render_display(res) {
-            if (res.current_state.trim() !== "STD") {
-                var str = res.data_entry.display.replace(/"/g, "");
-                fcu.editbox.render(str);
-                if (res.current_state.trim() === "EDIT_PRESSURE") {
-                    fcu.editbox_units.hide();
-                } else {
-                    fcu.editbox_units.render(res.data_entry.units);
-                }
-                fcu.display.hide();
-                fcu.display_units.hide();
-            } else {
-                fcu.editbox.hide();
-                fcu.editbox_units.hide();
-                fcu.display.render(evaluate(res.data_entry.display));
-                fcu.display_units.render(res.data_entry.units);
-            }
-        }
-        function render_STD_QNH_buttons(res) {
-            if (res.current_state.trim() === "STD") {
-                fcu.STD_LED.on();
-                fcu.QNH_LED.off();
-            } else {
-                fcu.STD_LED.off();
-                fcu.QNH_LED.on();
-            }
-        }
-        function render_inHg_hPa_buttons(res) {
-            if (res.data_entry.units.trim() === "inHg") {
-                fcu.btn_toHPA.render("INHG -> HPA");
-                fcu.btn_toINHG.hide();
-            } else {
-                fcu.btn_toHPA.hide();
-                fcu.btn_toINHG.render("HPA -> INHG");
-            }
-        }
-        function render_cursorOverlay(res) {
-//            if (res.current_state.trim() === "EDIT_PRESSURE") {
-//                fcu.cursorOverlay.hide();
-//            } else {
-                fcu.cursorOverlay.render();
-//            }
-        }
-
-        // display
+        // render function
         function render(res) {
-            render_display(res);
-            render_STD_QNH_buttons(res);
-            render_inHg_hPa_buttons(res);
-            fcu.btn_CLEAR.render("CLR INFO");
-            fcu.btn_QNH_RADIO.render();
-            fcu.btn_STD_RADIO.render();
-            render_cursorOverlay(res);
+            fcu.touchscreen_display.render(res);
+            fcu.display_units.render(res);
+            fcu.data_entry_display.render(res);
+            fcu.display_val.render(res);
+            fcu.notouchs_display_units.render(res);
+            fcu.btn_toHPA.render(res);
+            fcu.btn_toINHG.render(res);
+            fcu.btn_CLEAR.render(res);
+            fcu.btn_QNH_RADIO.render(res);
+            fcu.btn_STD_RADIO.render(res);
+            fcu.STD_LED.render(res);
+            fcu.QNH_LED.render(res);
+            fcu.cursorOverlay.render(res);
         }
-
-
 
         //--- tick function -------------------
         start_tick = function () {
