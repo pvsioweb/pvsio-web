@@ -85,6 +85,7 @@ define(function (require, exports, module) {
         },
 
         showEditScreen: function () {
+            var _this = this;
             var screen = this.collection.getSelected();
 
             new EditScreenView({ model: screen })
@@ -92,6 +93,14 @@ define(function (require, exports, module) {
                     view.remove();
                 })
                 .on("ok", function(data, view) {
+                    var oldInitial = _this.collection.find(function(s) {
+                        return s.get("isInitial");
+                    });
+
+                    if (oldInitial != null) {
+                        oldInitial.set("isInitial", false);
+                    }
+
                     screen.set({
                         name: data.data.screenName,
                         isInitial: (!!data.data.isInitial)
