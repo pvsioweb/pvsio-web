@@ -43,6 +43,7 @@ define(function (require, exports, module) {
         FileSystem             = require("filesystem/FileSystem"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView"),
         PimTestGenerator       = require("plugins/emulink/models/pim/PIMTestGenerator"),
+        PMTextGenerator        = require("plugins/emulink/models/pim/PMTextGenerator"),
         PIMImporter            = require("plugins/emulink/models/pim/PIMImporter"),
         PIMEmulink             = require("plugins/emulink/models/pim/PIMEmulink"),
         ContextTable           = require("plugins/emulink/tools/ContextTable"),
@@ -1631,6 +1632,31 @@ define(function (require, exports, module) {
                 }
 
             }, { header: "Open PIM file..." });
+        });
+        d3.select("#btn_menuPMTextGenerator").on("click", function () {
+            if (!emuchartsManager.getIsPIM()) {
+                console.log("Warning, current emuchart is not a PIM.");
+                return;
+            }
+            var emuchart = {
+                pm: {
+                    name: projectManager.project().name(),
+                    widgets: [],
+                    components: emuchartsManager.getStates(),
+                    pmr: []
+                }
+            };
+
+            var text = PMTextGenerator.print(("emucharts_" + projectManager.project().name()), emuchart);
+            if (text.err) {
+                console.log(text.err);
+                return;
+            }
+            if (text.res) {
+                var name = text.file_name;
+                var content = text.res;
+                return projectManager.project().addFile(name, content, { overWrite: true });
+            }
         });
 	};
 
