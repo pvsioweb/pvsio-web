@@ -248,7 +248,7 @@
          * @param {event} e JavaScript event for the key press
          */
         function handleKeyEvent(e) {
-            if ((e.which === 46 || e.which === 8)) {
+            if ((e.which === 46 || e.which === 8) && e.target === d3.select("body").node()) {
                 ed.remove({regions: mapLayer.selectAll("g.selected rect.region")});
                 e.preventDefault();
                 e.stopPropagation();
