@@ -124,6 +124,26 @@ define(function (require, exports, module) {
     };
 
     /**
+     *
+     * Creates a new widget with the same attributes as the current widget
+     * @return {PIMWidget} The copy of the widget
+     */
+    PIMWidget.prototype.duplicate = function () {
+        var widget = new PIMWidget(this.id(), {
+            top: this.y,
+            left: this.x,
+            width: this.width,
+            height: this.height
+        }, {
+            name: this.name()
+        });
+
+        widget.targetScreen(this.targetScreen());
+
+        return widget;
+    };
+
+    /**
      * Creates a new widget from the data in the provided object.
      * @param {object} jsonObj JSON-style object with the data for the widget
      * @param {ScreenCollection} screens Collection of screens that the widget's targetScreen is contained within

@@ -1,8 +1,7 @@
 
 define(function (require, exports, module) {
 
-    var Screen = require("plugins/pimPrototyper/Screen"),
-        PIMWidget = require("plugins/pimPrototyper/PIMWidget");
+    var Screen = require("plugins/pimPrototyper/Screen");
 
     return function() {
         describe("the Screen class", function () {
@@ -56,6 +55,45 @@ define(function (require, exports, module) {
                     expect(deserializedScreen.get("name")).toBe(json.name);
                     expect(deserializedScreen.get("isInitial")).toBe(json.isInitial);
                     expect(deserializedScreen.get("image").name).toBe(json.image);
+                });
+            });
+
+            describe("duplicate function", function () {
+                it("creates a new screen", function () {
+                    var clone = scr.duplicate();
+                    expect(clone).not.toBe(scr);
+                    expect(clone.get("name")).toBe(scr.get("name"));
+                    expect(clone.get("isInitial")).toBe(scr.get("isInitial"));
+                    expect(clone.get("image")).toBe(scr.get("image"));
+                    expect(clone.get("id")).not.toEqual(scr.get("id"));
+                });
+
+                it("returns a screen with the same attributes", function () {
+                    var clone = scr.duplicate();
+                    expect(clone.get("name")).toBe(scr.get("name"));
+                    expect(clone.get("isInitial")).toBe(scr.get("isInitial"));
+                    expect(clone.get("image")).toBe(scr.get("image"));
+                    expect(clone.get("id")).not.toEqual(scr.get("id"));
+                });
+
+                it("returns a screen with a different ID", function () {
+                    var clone = scr.duplicate();
+                    expect(clone.get("id")).not.toEqual(scr.get("id"));
+                });
+
+                it("creates copies of the screen's widgets", function () {
+                    var widget = {
+                        id: function() { return "w"; },
+                        duplicate: function() {}
+                    };
+
+                    spyOn(widget, "duplicate");
+
+                    scr.set("widgets", { w: widget });
+
+                    var clone = scr.duplicate();
+                    expect(clone.get("widgets")).not.toBe(scr.get("widgets"));
+                    expect(widget.duplicate).toHaveBeenCalled();
                 });
             });
         });

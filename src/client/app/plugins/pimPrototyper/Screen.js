@@ -8,6 +8,7 @@ define(function (require, exports, module) {
     "use strict";
 
     var Descriptor = require("project/Descriptor"),
+        PIMWidget = require("./PIMWidget"),
         uuid = require("util/uuidGenerator");
 
     var Screen = Backbone.Model.extend({
@@ -40,6 +41,23 @@ define(function (require, exports, module) {
             json.widgets = flatWidgets;
 
             return json;
+        },
+
+        /**
+         * Creates a copy of the screen and all its widgets
+         * @return {Screen} The copy of the screen
+         */
+        duplicate: function () {
+            var clone = this.clone();
+            clone.initialize();
+            var originalWidgets = this.get("widgets");
+            var cloneWidgets = clone.get("widgets");
+
+            _.forEach(originalWidgets, function (w) {
+                cloneWidgets[w.id()] = w.duplicate();
+            });
+
+            return clone;
         }
     });
 

@@ -94,6 +94,40 @@ define(function (require, exports, module) {
                     expect(deserializedWidget.targetScreen()).toBe(widget.targetScreen());
                 });
             });
+
+            describe("duplicate function", function () {
+                var widget;
+                var clone;
+
+                beforeEach(function() {
+                    var inputCoords = {
+                        top: 50,
+                        left: 60,
+                        width: 70,
+                        height: 80
+                    };
+
+                    var id = 1;
+
+                    var opt = {
+                        name: "a widget"
+                    };
+
+                    widget = new PIMWidget(id, inputCoords, opt);
+                    clone = widget.duplicate();
+                });
+
+                it("creates a new widget", function() {
+                    expect(widget).not.toBe(clone);
+                });
+
+                it("copies the widget's attributes", function() {
+                    expect(widget.name()).toEqual(clone.name());
+                    expect(widget.targetScreen()).toEqual(clone.targetScreen());
+                    expect(widget.targetScreen()).toEqual(clone.targetScreen());
+                    expect(widget.getCoords()).toEqual(clone.getCoords());
+                });
+            });
         });
     };
 });

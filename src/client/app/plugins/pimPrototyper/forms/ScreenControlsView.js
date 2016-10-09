@@ -18,6 +18,7 @@ define(function (require, exports, module) {
 
         events: {
             "click .btn-screen-add": "showAddScreen",
+            "click .btn-screen-duplicate": "_duplicateScreen",
             "click .btn-screen-options": "showEditScreen",
             "click .btn-screen-image": "onClickChangeImage",
             "click .btn-screen-delete": "showDeleteConfirmation"
@@ -61,7 +62,8 @@ define(function (require, exports, module) {
             this._screenButtons = [
                 this.d3El.select(".btn-screen-options"),
                 this.d3El.select(".btn-screen-image"),
-                this.d3El.select(".btn-screen-delete")
+                this.d3El.select(".btn-screen-delete"),
+                this.d3El.select(".btn-screen-duplicate")
             ];
 
             this._screenDropdown.setElement(this.d3El.select(".dropdown-container").node()).render();
@@ -159,6 +161,16 @@ define(function (require, exports, module) {
             for (var index in this._screenButtons) {
                 this._screenButtons[index].attr("disabled", enabled ? null : "true");
             }
+        },
+
+        _duplicateScreen: function () {
+            var _this = this;
+            var screen = this.collection.getSelected();
+            var duplicate = screen.duplicate();
+            duplicate.set("name", "copy of " + screen.get("name"));
+            duplicate.set("isInitial", false); // don't allow more than one initial screen
+            _this.collection.add(duplicate);
+            _this.collection.setSelected(duplicate);
         }
     });
 
