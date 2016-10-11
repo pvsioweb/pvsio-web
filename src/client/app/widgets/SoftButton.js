@@ -138,7 +138,7 @@ define(function (require, exports, module) {
         opt.visibleWhen = (opt.visibleWhen && opt.visibleWhen !== "") ? opt.visibleWhen : "true";
         this.visibleWhen = property.call(this, opt.visibleWhen);
 
-        this.example = opt.example || ""; // this is used in the prototype builder to demonstrate the font style of the display
+        this.example = opt.example || "btn"; // this is used in the prototype builder to demonstrate the font style of the display
         Widget.call(this, id, "touchscreenbutton");
         return this;
     }
@@ -183,7 +183,7 @@ define(function (require, exports, module) {
             .style("width", this.width + "px").style("height", this.height + "px").style("font-size", this.fontsize + "px");
         d3.select("div." + this.id()).select("span").attr("width", this.width + "px").attr("height", this.height + "px");
         d3.select("div." + this.id()).select("canvas").attr("width", this.width + "px").attr("height", this.height + "px");
-        return this.render(this.example);
+        return this.render(this.example, opt);
     };
     /**
      * Removes the widget's div
@@ -275,7 +275,8 @@ define(function (require, exports, module) {
         }
 
         // we need to parse the expression visibleWhen() to understand if the widget is visible or not
-        var expr = StateParser.simpleExpressionParser(this.visibleWhen());
+        var visibleWhen = opt.visibleWhen || this.visibleWhen();
+        var expr = StateParser.simpleExpressionParser(visibleWhen);
         if (expr && expr.res) {
             if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                 return doRender();

@@ -131,6 +131,7 @@ define(function (require, exports, module) {
         opt.softLabel = opt.softLabel || "";
         this.softLabel = property.call(this, opt.softLabel);
         this.txt = opt.softLabel;
+        this.example = opt.example || "btn";
         Widget.call(this, id, "touchscreenbutton");
         return this;
     }
@@ -178,13 +179,13 @@ define(function (require, exports, module) {
         // only resize is needed (and not translation x y), because we have already moved the div element containing the display and button areas
         this.overlayDisplay.updateLocationAndSize({ width: pos.width, height: pos.height });
         this.overlayButton.updateLocationAndSize({ width: pos.width, height: pos.height });
-        return this.render(this.example);
+        return this.render(this.example, opt);
     };
     TouchscreenButton.prototype.updateStyle = function (data) {
         data = data || {};
         this.fontsize = data.fontsize || this.fontsize;
         this.font = [this.fontsize, "px ", this.fontfamily];
-        this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];        
+        this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
         this.fontColor = data.fontColor || this.fontColor;
         this.backgroundColor = data.backgroundColor || this.backgroundColor;
         return this;
@@ -201,8 +202,10 @@ define(function (require, exports, module) {
     TouchscreenButton.prototype.render = function (state, opt) {
         // state is used to check whether the button is visible/enabled
         // the expression visibleWhen() is the condition we need to check on the state
+        opt = opt || {};
         var isVisible = false;
-        var expr = StateParser.simpleExpressionParser(this.visibleWhen());
+        var visibleWhen = opt.visibleWhen || this.visibleWhen();
+        var expr = StateParser.simpleExpressionParser(visibleWhen);
         if (expr && expr.res) {
             if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                 isVisible = true;

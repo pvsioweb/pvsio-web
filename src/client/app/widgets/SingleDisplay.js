@@ -1,5 +1,5 @@
 /**
- * @module SingleDisplay
+ * @module SingleDisplay *** DEPRECATED: Replaced by BasicDisplay & NumericDisplay *****
  * @version 2.0
  * @description Renders a basic digital display.
  *              This module provide APIs for changing the look and feel of

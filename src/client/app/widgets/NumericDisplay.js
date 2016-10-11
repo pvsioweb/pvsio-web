@@ -147,13 +147,13 @@ define(function (require, exports, module) {
             .style("width", this.width + "px").style("height", this.height + "px").style("font-size", this.fontsize + "px");
         d3.select("div." + this.id()).select("span").attr("width", this.width + "px").attr("height", this.height + "px"); // used for glyphicon
         d3.select("div." + this.id()).select("canvas").attr("width", this.width + "px").attr("height", this.height + "px"); // used for standard text and numbers
-        return this.render(this.example);
+        return this.render(this.example, opt);
     };
     NumericDisplay.prototype.updateStyle = function (data) {
         data = data || {};
         this.fontsize = data.fontsize || this.fontsize;
         this.font = [this.fontsize, "px ", this.fontfamily];
-        this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];        
+        this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
         this.fontColor = data.fontColor || this.fontColor;
         this.backgroundColor = data.backgroundColor || this.backgroundColor;
         return this;
@@ -303,7 +303,8 @@ define(function (require, exports, module) {
         opt = opt || {};
         opt.auditoryFeedback = opt.auditoryFeedback || this.auditoryFeedback();
         var isEnabled = false;
-        var expr = StateParser.simpleExpressionParser(this.visibleWhen());
+        var visibleWhen = opt.visibleWhen || this.visibleWhen();
+        var expr = StateParser.simpleExpressionParser(visibleWhen);
         if (expr && expr.res) {
             if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                 isEnabled = true;

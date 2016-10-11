@@ -56,7 +56,7 @@ define(function (require, exports, module) {
                     view.remove();
                     widget.updateWithProperties(e.data);
                     widget.updateStyle(e.data);
-                    widget.render();
+                    widget.render("", { visibleWhen: "true" });
                     //create an interactive image area only if there isnt one already
                     createImageMap(widget);
                     if (e.data.keyCode) {
@@ -320,7 +320,7 @@ define(function (require, exports, module) {
                             createImageMap(widget);
                             // widget.updateLocationAndSize({ x: e.data.x, y: e.data.y, width: e.data.width, height: e.data.height }, { imageMap: true });
                             // widget.updateStyle(e.data);
-                            widget.render();
+                            widget.render("", { visibleWhen: "true" });
                             wm.addWidget(widget);
                             if (typeof widget.keyCode === "function" && widget.keyCode() && widget.type() === "button") {
                                 wm._keyCode2widget[widget.keyCode()] = widget;
@@ -567,7 +567,7 @@ define(function (require, exports, module) {
             pos.y *= scale;
             pos.width *= scale;
             pos.height *= scale;
-            widget.updateLocationAndSize(pos, { imageMap: true });
+            widget.updateLocationAndSize(pos, { imageMap: true, visibleWhen: "true" });
         }
     };
     /**

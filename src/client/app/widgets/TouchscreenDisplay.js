@@ -177,6 +177,7 @@
              }
          });
          this.txt = opt.softLabel || id;
+         this.example = opt.example || "touch";
          Widget.call(this, id, "touchscreendisplay");
          return this;
      }
@@ -224,7 +225,7 @@
          this.overlayDisplay.updateLocationAndSize({ width: pos.width, height: pos.height });
          this.overlayNumericDisplay.updateLocationAndSize({ width: pos.width, height: pos.height });
          this.overlayButton.updateLocationAndSize({ width: pos.width, height: pos.height });
-         return this.render(this.example);
+         return this.render(this.example, opt);
      };
      TouchscreenDisplay.prototype.updateStyle = function (data) {
          data = data || {};
@@ -250,7 +251,8 @@
          // state is used to check whether the button is visible/enabled
          // the expression visibleWhen() is the condition we need to check on the state
          var isEnabled = false;
-         var expr = StateParser.simpleExpressionParser(this.visibleWhen());
+         var visibleWhen = opt.visibleWhen || this.visibleWhen();
+         var expr = StateParser.simpleExpressionParser(visibleWhen);
          if (expr && expr.res) {
              if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                  isEnabled = true;
