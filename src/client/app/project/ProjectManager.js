@@ -373,7 +373,7 @@ define(function (require, exports, module) {
     function fireProjectChanged(event) {
         var project = event.current;
         document.title = "PVSio-Web -- " + event.current;
-        d3.select("#header #txtProjectName").html(event.current);        
+        d3.select("#header #txtProjectName").html(event.current);
         renderSourceFileList();
         _projectManager.selectFile(project.mainPVSFile() || project.pvsFilesList()[0] || project.name());
         _projectManager.fire(event);
@@ -481,9 +481,9 @@ define(function (require, exports, module) {
             var success = true;
             var descriptors = [];
             var pvsiowebJSON = {};
-            pvsiowebJSON.version = "2.0";
+            pvsiowebJSON.version = "2.1";
             function finalise(p) {
-                descriptors.push(project.addDescriptor("pvsioweb.json", JSON.stringify(pvsiowebJSON, null, " ")));
+                descriptors.push(project.addDescriptor(new Descriptor("pvsioweb.json", JSON.stringify(pvsiowebJSON, null, " "))));
                 var previous = _projectManager.project();
                 p.project.initFromJSON(p.descriptors);
                 _projectManager.project(p.project);

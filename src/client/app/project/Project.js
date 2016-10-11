@@ -322,8 +322,7 @@ define(function (require, exports, module) {
 //            console.log("Warning: Attempt to add a file with an existing path. '" +
 //                            newFile.path + "' already exists in the project");
         }
-        // suppress notifications for image files --- the image will change in the UI, and that's enough feedback
-        suppressEvent = suppressEvent || newFile.isImage();
+        suppressEvent = suppressEvent;
         if (!suppressEvent) {
             _this.fire({type: "FileAdded", file: newFile});
         }

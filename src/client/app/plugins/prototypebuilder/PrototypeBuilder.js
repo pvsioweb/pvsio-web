@@ -387,7 +387,7 @@ define(function (require, exports, module) {
 
     /**
         Change the image in the current project to the one specified in the parameter
-        @param {string} imagePath
+        @param {string} imagePath image name, including path name (given as relative path, where the base path is the project name)
         @param {string} imageData base64 encoded data
         @returns {Promise} a promise that resolves when the image change process has completed
     */
@@ -406,7 +406,8 @@ define(function (require, exports, module) {
                 WSManager.getWebSocket().send(token, function (err) {
                     //if there was no error update the main file else alert user
                     if (!err) {
-                        project.prototypeImage = newImage;
+                        //project.prototypeImage = newImage;
+                        project.prototypeImage = new Descriptor(project + "/" + imagePath, imageData, { encoding: "base64" }); //FIXME: in the current implementation project.prototypeImage needs to start with the project name -- we need to check whether this is actually needed, if not we should remove this prefix as this makes things easier when renaming projects.
                         resolve({
                             path: newImage.path,
                             content: newImage.content
@@ -434,7 +435,7 @@ define(function (require, exports, module) {
     /**
      * @function preparePageForUmageUpload
      * @description ...
-     * @memberof module:ProjectManager
+     * @memberof module:PrototypeBuilder
      * @instance
      */
     var preparePageForImageUpload = function () {

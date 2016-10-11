@@ -10,6 +10,7 @@ define(function (require, exports, module) {
     var ModelEditor = require("plugins/modelEditor/ModelEditor"),
         Emulink = require("plugins/emulink/Emulink"),
 //        SafetyTest = require("plugins/safetyTest/SafetyTest"),
+        PropertyTemplates = require("plugins/propertytemplates/PropertyTemplates"),
         GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
         Logger	= require("util/Logger"),
@@ -195,6 +196,7 @@ define(function (require, exports, module) {
                     PrototypeBuilder.getInstance(),
                     ModelEditor.getInstance(),
                     Emulink.getInstance(),
+                    PropertyTemplates.getInstance(),
                     GraphBuilder.getInstance()
             ];
             data = data || {

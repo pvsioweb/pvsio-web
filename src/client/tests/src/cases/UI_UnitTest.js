@@ -312,7 +312,7 @@ define(function (require, exports, module) {
                                 var desc = pm.project().getDescriptors()[pm.project().getDescriptors().length - 1];
                                 expect(desc.path.indexOf(pm.project().name()) === 0).toBeTruthy();
                                 done();
-                            }, 300);
+                            }, 1000);
                         }).catch(expectError(done));
                 });
 
