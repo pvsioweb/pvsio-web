@@ -4,10 +4,10 @@
  * @date Oct 4, 2016
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, Promise, Handlebars, d3 */
+/*global define, Promise, Handlebars */
 define(function (require, exports, module) {
     "use strict";
-    var	consistencyTemplate	= require("plugins/propertytemplates/consistency/consistencyTemplate"),
+    var	//consistencyTemplate	= require("plugins/propertytemplates/consistency/consistencyTemplate"),
         PVSioWebClient      = require("PVSioWebClient"),
         frontend            = require("text!plugins/propertytemplates/frontend.handlebars");
     var panel, instance;
@@ -30,7 +30,7 @@ define(function (require, exports, module) {
 
     PropertyTemplates.prototype.getName = function () {
         return "Property Templates";
-    }
+    };
 
     PropertyTemplates.prototype.unload = function () {
         PVSioWebClient.getInstance().removeCollapsiblePanel(panel);

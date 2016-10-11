@@ -170,7 +170,7 @@ define(function (require, exports, module) {
     /**
     * Updates the location and size of the widget according to the given position and size
      */
-    TouchscreenButton.prototype.updateLocationAndSize = function (pos) {
+    TouchscreenButton.prototype.updateLocationAndSize = function (pos, opt) {
         TouchscreenButton.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
         this.top = pos.y || 0;
         this.left = pos.x || 0;
