@@ -19,6 +19,40 @@ define(function (require, exports, module) {
     var img = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
 
     return function () {
+        function createScreens (done) {
+                var widget, widgetId;
+
+                var scrn = new Screen({
+                    name: "1",
+                    image: new Descriptor("test-img", img, { encoding: "base64" })
+                });
+
+                var coords = {
+                    top: 0,
+                    left: 0,
+                    width: 20,
+                    height: 20
+                };
+
+                PIMPrototyper.getInstance()._screens.add(scrn);
+                PIMPrototyper.getInstance()._screens.setSelected(scrn);
+                PIMPrototyper.getInstance()._widgetManager.addNewWidget({
+                    name: "widget"
+                }, coords, function(w) {
+                    widget = w;
+                    widgetId = w.id();
+                });
+
+                PIMPrototyper.getInstance()._screens.setSelected(null);
+                PIMPrototyper.getInstance()._screens.setSelected(scrn);
+
+                return {
+                    widget: widget,
+                    widgetId: widgetId,
+                    scrn: scrn
+                };
+            }
+
         beforeEach(function (done) {
             d3.select("div.overlay").remove();
             main.start({noSplash: true}).then(function () {
@@ -371,39 +405,16 @@ define(function (require, exports, module) {
 
         // https://github.com/nathanielw/pvsio-web/issues/9
         describe("Editing hotspots in the PIM prototype", function() {
-            var widgetId;
-            var scrn, widget;
+            var widgetId, scrn, widget;
 
             beforeEach(function (done) {
                 PluginManager.getInstance().enablePlugin(PIMPrototyper.getInstance()).then(function () {
-
-                    scrn = new Screen({
-                        name: "1",
-                        image: new Descriptor("test-img", img, { encoding: "base64" })
-                    });
-
-                    var coords = {
-                        top: 0,
-                        left: 0,
-                        width: 20,
-                        height: 20
-                    };
-
-                    PIMPrototyper.getInstance()._screens.add(scrn);
-                    PIMPrototyper.getInstance()._screens.setSelected(scrn);
-                    PIMPrototyper.getInstance()._widgetManager.addNewWidget({
-                        name: "widget"
-                    }, coords, function(w) {
-                        widget = w;
-                        widgetId = w.id();
-                    });
-
-                    PIMPrototyper.getInstance()._screens.setSelected(null);
-                    PIMPrototyper.getInstance()._screens.setSelected(scrn);
-
+                    var screenObj = createScreens();
+                    widget = screenObj.widget;
+                    widgetId = screenObj.widgetId;
+                    scrn = screenObj.scrn;
                     done();
-
-                }).catch(util.expectError(done));
+                });
             });
 
             it("shows an edit dialog when a hotspot is clicked", function() {
@@ -428,71 +439,95 @@ define(function (require, exports, module) {
                 expect(screenDropdown.empty()).toBe(false);
                 overlay.select(".btn-cancel").node().click();
             });
+        });
 
-            // https://github.com/nathanielw/pvsio-web/issues/10
-            describe("Setting a hotspot's behaviour", function() {
-                it("can set a hotspot to link to a screen", function() {
-                    /*
-                    Given a hotspot is being edited
-                    When a screen is selected from the dropdown
-                    And the hotspot settings are saved
-                    Then the hotspot's action is set to the screen that was selected
-                    */
+        // https://github.com/nathanielw/pvsio-web/issues/10
+        describe("Setting a hotspot's behaviour", function() {
+            var widgetId, scrn, widget;
 
-                    var svg = d3.select(".pim-prototyper .image-map-layer");
-                    var hotspot = svg.select("#" + widgetId);
-                    hotspot.node().dispatchEvent(new MouseEvent("dblclick"));
-
-                    var overlay = d3.select("div.overlay");
-
-                    var screenDropdownBtn = overlay.select(".btn-screen-dropdown");
-                    screenDropdownBtn.node().click();
-
-                    var screenDropdownItem = overlay.select(".screen-dropdown a");
-                    screenDropdownItem.node().click();
-
-                    overlay.select(".btn-create").node().click();
-
-                    expect(widget.targetScreen()).toBe(scrn);
+            beforeEach(function (done) {
+                PluginManager.getInstance().enablePlugin(PIMPrototyper.getInstance()).then(function () {
+                    var screenObj = createScreens();
+                    widget = screenObj.widget;
+                    widgetId = screenObj.widgetId;
+                    scrn = screenObj.scrn;
+                    done();
                 });
             });
 
-            // https://github.com/nathanielw/pvsio-web/issues/11
-            describe("Viewing a PIM prototype in the simulator", function() {
-                it("links hotspots between screens", function(done) {
-                    /*
-                    Given the PIM Simulator is the active mode
-                    And a PIM exists with hotspots linking multiple screens
-                    Then the same hotspots should be present in the simulator view
-                    When a hotspot is clicked
-                    Then the simulator switches to showing the linked screen's image
-                    And the hotspots from the previous screen are removed/hidden
-                    And the hotspots from the linked screen are shown
-                    */
-                    var img2 = "data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=";
+            it("can set a hotspot to link to a screen", function() {
+                /*
+                Given a hotspot is being edited
+                When a screen is selected from the dropdown
+                And the hotspot settings are saved
+                Then the hotspot's action is set to the screen that was selected
+                */
 
-                    var scrn2 = new Screen({
-                        name: "2",
-                        image: new Descriptor("test-img2", img2, { encoding: "base64" })
-                    });
+                var svg = d3.select(".pim-prototyper .image-map-layer");
+                var hotspot = svg.select("#" + widgetId);
+                hotspot.node().dispatchEvent(new MouseEvent("dblclick"));
 
-                    PIMPrototyper.getInstance()._screens.add(scrn2);
-                    widget.targetScreen(scrn2);
+                var overlay = d3.select("div.overlay");
 
-                    d3.select(".pim-prototyper .pim-mode-toggle .prototype-simulator-button").node().click();
-                    var areaMap = d3.select(".pim-prototyper .prototype-image-inner map");
-                    var areas = areaMap.selectAll("area");
-                    expect(areas.size()).toEqual(1); // checking the hotspots are present
+                var screenDropdownBtn = overlay.select(".btn-screen-dropdown");
+                screenDropdownBtn.node().click();
 
-                    areaMap.select("area").node().dispatchEvent(new MouseEvent("mousedown"));
+                var screenDropdownItem = overlay.select(".screen-dropdown a");
+                screenDropdownItem.node().click();
 
-                    util.wait(500)().then(function() {
-                        expect(d3.select(".pim-prototyper .prototype-image-inner img").attr("src")).toBe(img2);
-                        areas = areaMap.selectAll("area");
-                        expect(areas.size()).toEqual(0); // checking the hotspots have changed
+                overlay.select(".btn-create").node().click();
 
-                        done();
-                    });
+                expect(widget.targetScreen()).toBe(scrn);
+            });
+        });
+
+        // https://github.com/nathanielw/pvsio-web/issues/11
+        describe("Viewing a PIM prototype in the simulator", function() {
+            var widgetId, scrn, widget;
+
+            beforeEach(function (done) {
+                PluginManager.getInstance().enablePlugin(PIMPrototyper.getInstance()).then(function () {
+                    var screenObj = createScreens();
+                    widget = screenObj.widget;
+                    widgetId = screenObj.widgetId;
+                    scrn = screenObj.scrn;
+                    done();
+                });
+            });
+
+            it("links hotspots between screens", function(done) {
+                /*
+                Given the PIM Simulator is the active mode
+                And a PIM exists with hotspots linking multiple screens
+                Then the same hotspots should be present in the simulator view
+                When a hotspot is clicked
+                Then the simulator switches to showing the linked screen's image
+                And the hotspots from the previous screen are removed/hidden
+                And the hotspots from the linked screen are shown
+                */
+                var img2 = "data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=";
+
+                var scrn2 = new Screen({
+                    name: "2",
+                    image: new Descriptor("test-img2", img2, { encoding: "base64" })
+                });
+
+                PIMPrototyper.getInstance()._screens.add(scrn2);
+                widget.targetScreen(scrn2);
+
+                d3.select(".pim-prototyper .pim-mode-toggle .prototype-simulator-button").node().click();
+                var areaMap = d3.select(".pim-prototyper .prototype-image-inner map");
+                var areas = areaMap.selectAll("area");
+                expect(areas.size()).toEqual(1); // checking the hotspots are present
+
+                areaMap.select("area").node().dispatchEvent(new MouseEvent("mousedown"));
+
+                util.wait(500)().then(function() {
+                    expect(d3.select(".pim-prototyper .prototype-image-inner img").attr("src")).toBe(img2);
+                    areas = areaMap.selectAll("area");
+                    expect(areas.size()).toEqual(0); // checking the hotspots have changed
+
+                    done();
                 });
             });
         });
