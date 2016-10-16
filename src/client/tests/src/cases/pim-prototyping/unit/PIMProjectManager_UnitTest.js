@@ -2,7 +2,6 @@
 define(function (require, exports, module) {
 
     var PIMProjectManager = require("plugins/pimPrototyper/PIMProjectManager"),
-        ScreenCollection = require("plugins/pimPrototyper/ScreenCollection"),
         Project = require("project/Project");
 
     return function() {

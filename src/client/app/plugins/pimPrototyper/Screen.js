@@ -8,7 +8,6 @@ define(function (require, exports, module) {
     "use strict";
 
     var Descriptor = require("project/Descriptor"),
-        PIMWidget = require("./PIMWidget"),
         uuid = require("util/uuidGenerator");
 
     var Screen = Backbone.Model.extend({

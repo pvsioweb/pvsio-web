@@ -1710,7 +1710,7 @@ define(function (require, exports, module) {
             onProjectChanged({current: projectManager.project().name()})
                 .then(function () {
                     resolve(true);
-                })
+                });
         });
     };
 
