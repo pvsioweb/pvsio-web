@@ -7,6 +7,12 @@
     }
 }
 
+%clearfix {
+    content: "";
+    clear: both;
+    display: table;
+}
+
 .noselect {
     -webkit-touch-callout: none;
     -webkit-user-select: none;

@@ -18,6 +18,7 @@ define(function (require, exports, module) {
         Emulink        = require("plugins/emulink/Emulink"),
         SafetyTest     = require("plugins/safetyTest/SafetyTest"),
         GraphBuilder   = require("plugins/graphbuilder/GraphBuilder"),
+        PIMPrototyper  = require("plugins/pimPrototyper/PIMPrototyper"),
         ProjectAutoSaver = require("plugins/autoSaver/ProjectAutoSaver"),
         PluginManager  = require("plugins/PluginManager"),
         Constants      = require("util/Constants"),
@@ -106,6 +107,9 @@ define(function (require, exports, module) {
                         break;
                     case "Prototype Builder":
                         plugin = PrototypeBuilder.getInstance();
+                        break;
+                    case "PIM Prototyper":
+                        plugin = PIMPrototyper.getInstance();
                         break;
                     case "Property Templates":
                         plugin = PropertyTemplates.getInstance();
