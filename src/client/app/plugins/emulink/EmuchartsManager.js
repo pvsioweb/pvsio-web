@@ -651,6 +651,14 @@ define(function (require, exports, module) {
     };
 
     /**
+     * Utility function to refresh transition style (e.g., color)
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.refresh_transition = function (transitionID, opt) {
+        return _selectedEditor.refresh_transition(transitionID, opt);
+    };
+
+    /**
      * Utility function to rename initial transitions
      * @memberof EmuchartsManager
      */

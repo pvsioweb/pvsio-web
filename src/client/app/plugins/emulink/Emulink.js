@@ -250,6 +250,7 @@ define(function (require, exports, module) {
             transitionsTable.setTransitions(emuchartsManager.getTransitions());
         }).on("cancel", function (e, view) {
             // just remove rename window
+            emuchartsManager.refresh_transition(t.id, { color: "black" });
             view.remove();
         });
     }

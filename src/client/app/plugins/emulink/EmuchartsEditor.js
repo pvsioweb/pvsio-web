@@ -528,7 +528,8 @@ define(function (require, exports, module) {
      * @returns reference to the updated svg elements
      * @memberof EmuchartsEditor
      */
-    function refreshTransitions(transitions) {
+    function refreshTransitions(transitions, opt) {
+        opt = opt || {};
         transitions = transitions ||
             d3.select("#ContainerStateMachine svg").select("#Transitions").selectAll(".transition");
         var label;
@@ -569,6 +570,14 @@ define(function (require, exports, module) {
                     });
                     // clear the text of the other label
                     d3.select(this.parentNode.lastChild.firstChild).text(function (edge) { return ""; });
+                    // refresh color, if needed
+                    if (opt.color) {
+                        d3.select(this.parentNode.firstChild).style("stroke", opt.color);
+                        d3.select(this.parentNode.children[3]).style("fill", opt.color);
+                        d3.select(this.parentNode.children[4]).style("fill", opt.color);
+                        this.parentNode.firstChild.style.markerStart = this.parentNode.firstChild.style.markerStart.replace("-selected", "");
+                        this.parentNode.firstChild.style.markerEnd = this.parentNode.firstChild.style.markerEnd.replace("-selected", "");
+                    }
                     // refresh control points
                     cpoints = d3.select(this.parentNode).select(".cpoints");
                     cpoints.attr("cx", cp[2].x).attr("cy", cp[2].y);
@@ -608,6 +617,12 @@ define(function (require, exports, module) {
                                 return "";
                             } else { return "url(#end-arrow)"; }
                         });
+                    // refresh color, if needed
+                    if (opt.color) {
+                        d3.select(this.parentNode.firstChild).style("stroke", opt.color);
+                        d3.select(this.parentNode.children[3]).style("fill", opt.color);
+                        d3.select(this.parentNode.children[4]).style("fill", opt.color);
+                    }
                     // refresh path
                     return lineFunction(cp);
                 }
@@ -1088,30 +1103,32 @@ define(function (require, exports, module) {
         var mouseOut = function (edge) {
             if (!mouseOverControlPoint) {
                 d3.event.stopPropagation();
-                d3.select(this.firstChild)
-                    //.style("stroke-width", stroke_width_normal)
-                    .style("stroke", "black")
-                    .style("marker-end", function (edge) {
-                        if (edge.source.id === edge.target.id ||
-                                edge.source.x < edge.target.x) {
-                            return "url(#end-arrow)";
-                        } else { return ""; }
-                    })
-                    .style("marker-start", function (edge) {
-                        if (edge.source.id === edge.target.id) {
-                            return this.style.markerStart;
-                        } else if (edge.source.x < edge.target.x) {
-                            return "";
-                        } else { return "url(#end-arrow-rotated)"; }
-                    });
-                d3.select(this.childNodes[2]).attr("opacity", 0);
-                d3.select(this.children[3]).style("fill", "black");
-                d3.select(this.children[4]).style("fill", "black");
-                if (edge.source.id === edge.target.id) {
-                    d3.select(this).select(".tlabel").text(function (edge) {
-                        return labelToString(edge.name);
-                    });
+                if (!d3.select("#emuCharts_rename_dialog").node()) {
+                    d3.select(this.firstChild)
+                        //.style("stroke-width", stroke_width_normal)
+                        .style("stroke", "black")
+                        .style("marker-end", function (edge) {
+                            if (edge.source.id === edge.target.id ||
+                                    edge.source.x < edge.target.x) {
+                                return "url(#end-arrow)";
+                            } else { return ""; }
+                        })
+                        .style("marker-start", function (edge) {
+                            if (edge.source.id === edge.target.id) {
+                                return this.style.markerStart;
+                            } else if (edge.source.x < edge.target.x) {
+                                return "";
+                            } else { return "url(#end-arrow-rotated)"; }
+                        });
+                    d3.select(this.children[3]).style("fill", "black");
+                    d3.select(this.children[4]).style("fill", "black");
+                    if (edge.source.id === edge.target.id) {
+                        d3.select(this).select(".tlabel").text(function (edge) {
+                            return labelToString(edge.name);
+                        });
+                    }
                 }
+                d3.select(this.childNodes[2]).attr("opacity", 0);
             } else if (mouseOverControlPoint && mouseOverControlPoint.id === edge.id) {
                 var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
                 // update selected control point
@@ -1924,12 +1941,26 @@ define(function (require, exports, module) {
      * @memberof EmuchartsEditor
      */
     EmuchartsEditor.prototype.rename_transition = function (transitionID, newLabel) {
-        this.emucharts.rename_edge(transitionID, newLabel);
+        if (newLabel) { this.emucharts.rename_edge(transitionID, newLabel); }
         var transitions = d3.select("#ContainerStateMachine")
                         .select("#Transitions").selectAll(".transition")
                         .filter(function (transition) { return transition.id === transitionID; });
         // refresh transitions
-        refreshTransitions(transitions);
+        refreshTransitions(transitions, { color: "black"});
+        return this;
+    };
+
+    /**
+     * utility function to refresh transition style (e.g., color)
+     * @memberof EmuchartsEditor
+     */
+    EmuchartsEditor.prototype.refresh_transition = function (transitionID, opt) {
+        var transitions = d3.select("#ContainerStateMachine")
+                        .select("#Transitions").selectAll(".transition")
+                        .filter(function (transition) { return transition.id === transitionID; });
+        // refresh transitions
+        refreshTransitions(transitions, opt);
+        return this;
     };
 
     /**
