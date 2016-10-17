@@ -236,6 +236,11 @@
          this.backgroundColor = data.backgroundColor || this.backgroundColor;
          return this;
      };
+     TouchscreenDisplay.prototype.updateWithProperties = function (props) {
+         TouchscreenDisplay.prototype.parentClass.updateWithProperties.apply(this, arguments);
+         this.overlayButton.updateWithProperties(props);
+         return this;
+     };
      /**
       * Removes the widget's div
       */
