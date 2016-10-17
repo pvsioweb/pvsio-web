@@ -130,7 +130,6 @@ define(function (require, exports, module) {
         this.visibleWhen = property.call(this, opt.visibleWhen);
         opt.softLabel = opt.softLabel || "";
         this.softLabel = property.call(this, opt.softLabel);
-        this.txt = opt.softLabel;
         this.example = opt.example || "btn";
         Widget.call(this, id, "touchscreenbutton");
         return this;
@@ -221,12 +220,18 @@ define(function (require, exports, module) {
             }
         }
         if (isVisible) {
-            this.overlayDisplay.render(this.txt, opt);
+            this.overlayDisplay.render(this.softLabel(), opt);
             this.overlayButton.reveal(opt);
             return this.reveal();
         }
         return this.hide();
     };
+    TouchscreenButton.prototype.renderSample = function (opt) {
+        opt = opt || {};
+        var txt = opt.txt || this.softLabel();
+        return this.render(txt, { visibleWhen: "true" });
+    };
+
 
     TouchscreenButton.prototype.renderGlyphicon = function (icon, opt) {
         opt = opt || {};

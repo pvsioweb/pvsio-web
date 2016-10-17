@@ -291,6 +291,12 @@
          }
          return this.hide();
      };
+     TouchscreenDisplay.prototype.renderSample = function (opt) {
+         opt = opt || {};
+         var txt = opt.txt || this.example;
+         return this.render(txt, { visibleWhen: "true" });
+     };
+
 
      TouchscreenDisplay.prototype.hide = function () {
          this.div.style("display", "none");

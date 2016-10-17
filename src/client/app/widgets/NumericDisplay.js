@@ -363,6 +363,12 @@ define(function (require, exports, module) {
         }
         return this.hide();
     };
+    NumericDisplay.prototype.renderSample = function (opt) {
+        opt = opt || {};
+        var txt = opt.txt || this.example;
+        return this.render(txt, { visibleWhen: "true" });
+    };
+
 
     NumericDisplay.prototype.hide = function () {
         this.div.style("display", "none");

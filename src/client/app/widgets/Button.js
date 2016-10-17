@@ -281,6 +281,12 @@ define(function (require, exports, module) {
         }
         return this.isEnabled(false);
     };
+    Button.prototype.renderSample = function (opt) {
+        opt = opt || {};
+        var txt = opt.txt || this.example;
+        return this.render(txt, { visibleWhen: "true" });
+    };
+
 
     /**
      * @override

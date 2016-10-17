@@ -160,6 +160,12 @@ define(function (require, exports, module) {
         }
         return _this.hide();
     };
+    LED.prototype.renderSample = function (opt) {
+        opt = opt || {};
+        var txt = opt.txt || this.example;
+        return this.render(txt, { visibleWhen: "true" });
+    };
+
 
     LED.prototype.toggle = function (opt) {
         if (this.isOn === true) {

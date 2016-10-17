@@ -184,6 +184,11 @@ define(function (require, exports, module) {
         var elemIsBlinking = (document.getElementById(this.id()).getAttribute("class").indexOf("blink") >= 0);
         return this.renderGlyphicon(this.txt, { blinking: elemIsBlinking });
     };
+    BasicDisplay.prototype.renderSample = function (opt) {
+        opt = opt || {};
+        var txt = opt.txt || this.example;
+        return this.render(txt, { visibleWhen: "true" });
+    };
     BasicDisplay.prototype.render = function (txt, opt) {
         function renderln(data, opt) {
             opt = opt || {};
