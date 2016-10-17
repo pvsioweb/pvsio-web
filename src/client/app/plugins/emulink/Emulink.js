@@ -46,6 +46,7 @@ define(function (require, exports, module) {
         FileSystem             = require("filesystem/FileSystem"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView"),
         PimTestGenerator       = require("plugins/emulink/models/pim/PIMTestGenerator"),
+        PMTextGenerator        = require("plugins/emulink/models/pim/PMTextGenerator"),
         PIMImporter            = require("plugins/emulink/models/pim/PIMImporter"),
         PIMEmulink             = require("plugins/emulink/models/pim/PIMEmulink"),
         ContextTable           = require("plugins/emulink/tools/ContextTable"),
@@ -918,6 +919,14 @@ define(function (require, exports, module) {
                 view.remove();
             });
         });
+        d3.select("#btn_menuLayOutStates").on("click", function () {
+            console.log("layout");
+            var editor = emuchartsManager.getSelectedEditor();
+            if (editor) {
+                editor.emucharts.layOutChart();
+                emuchartsManager.render();
+            }
+        });
 
         //-- Transitions menu -----------------------------------------------------------
         d3.select("#menuTransitions").on("mouseover", function () {
@@ -1774,8 +1783,36 @@ define(function (require, exports, module) {
 
             }, { header: "Open PIM file..." });
         });
+        d3.select("#btn_menuPMTextGenerator").on("click", function () {
+            if (!emuchartsManager.getIsPIM()) {
+                console.log("Warning, current emuchart is not a PIM.");
+                return;
+            }
+            var emuchart = {
+                pm: {
+                    name: projectManager.project().name(),
+                    widgets: [],
+                    components: emuchartsManager.getStates(),
+                    pmr: []
+                }
+            };
+
+            var text = PMTextGenerator.print(("emucharts_" + projectManager.project().name()), emuchart);
+            if (text.err) {
+                console.log(text.err);
+                return;
+            }
+            if (text.res) {
+                var name = text.file_name;
+                var content = text.res;
+                return projectManager.project().addFile(name, content, { overWrite: true });
+            }
+        });
 	};
 
+    Emulink.prototype.getEmuchartsManager = function () {
+        return emuchartsManager;
+    };
 
     Emulink.prototype.getDependencies = function () {
         return [];
@@ -1784,7 +1821,7 @@ define(function (require, exports, module) {
     function onProjectChanged(event) {
         // try to open the default emuchart file associated with the project
         var defaultEmuchartFilePath = event.current + "/" + "emucharts_" + event.current + ".emdl";
-        fs.readFile(defaultEmuchartFilePath).then(function (res) {
+        return fs.readFile(defaultEmuchartFilePath).then(function (res) {
             res.content = JSON.parse(res.content);
             emuchartsManager.importEmucharts(res);
             // make svg visible and reset colors
@@ -1818,9 +1855,13 @@ define(function (require, exports, module) {
         projectManager.addListener("ProjectChanged", onProjectChanged);
         // create user interface elements
         this.createHtmlElements();
-        // try to load default emuchart for the current project
-        onProjectChanged({current: projectManager.project().name()});
-        return Promise.resolve(true);
+        return new Promise(function (resolve, reject) {
+            // try to load default emuchart for the current project
+            onProjectChanged({current: projectManager.project().name()})
+                .then(function () {
+                    resolve(true);
+                });
+        });
     };
 
     Emulink.prototype.unload = function () {
@@ -1834,6 +1875,10 @@ define(function (require, exports, module) {
                 instance = new Emulink();
             }
             return instance;
+        },
+
+        hasInstance: function () {
+            return !!instance;
         }
     };
 });

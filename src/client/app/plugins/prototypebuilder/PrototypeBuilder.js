@@ -7,38 +7,41 @@
 /*global define, Promise, layoutjs, d3*/
 define(function (require, exports, module) {
     "use strict";
-    var PVSioWebClient  = require("PVSioWebClient"),
-        WSManager       = require("websockets/pvs/WSManager"),
-        ProjectManager	= require("project/ProjectManager"),
-        WidgetManager   = require("pvsioweb/WidgetManager").getWidgetManager(),
-        Logger          = require("util/Logger"),
-        Recorder        = require("util/ActionRecorder"),
-        Prompt          = require("pvsioweb/forms/displayPrompt"),
-        WidgetsListView = require("pvsioweb/forms/WidgetsListView"),
-        TimersListView  = require("pvsioweb/forms/TimersListView"),
-        template		= require("text!pvsioweb/forms/templates/prototypeBuilderPanel.handlebars"),
-        ScriptPlayer    = require("util/ScriptPlayer"),
+    var PVSioWebClient      = require("PVSioWebClient"),
+        WSManager           = require("websockets/pvs/WSManager"),
+        ProjectManager	    = require("project/ProjectManager"),
+        WidgetManager       = require("pvsioweb/WidgetManager").getWidgetManager(),
+        Logger              = require("util/Logger"),
+        Recorder            = require("util/ActionRecorder"),
+        Prompt              = require("pvsioweb/forms/displayPrompt"),
+        PrototypeImageView = require("pvsioweb/forms/PrototypeImageView"),
+        WidgetsListView     = require("pvsioweb/forms/WidgetsListView"),
+        TimersListView      = require("pvsioweb/forms/TimersListView"),
+        NewWidgetView       = require("pvsioweb/forms/newWidget"),
+        EditWidgetView  = require("pvsioweb/forms/editWidget"),
+        template            = require("text!pvsioweb/forms/templates/prototypeBuilderPanel.handlebars"),
+        ScriptPlayer        = require("util/ScriptPlayer"),
 //        fs              = require("util/fileHandler"),
         FileSystem          = require("filesystem/FileSystem"),
         NotificationManager = require("project/NotificationManager"),
-        SaveProjectChanges = require("project/forms/SaveProjectChanges"),
-        Descriptor      = require("project/Descriptor"),
-        MIME            = require("util/MIME").getInstance();
+        SaveProjectChanges  = require("project/forms/SaveProjectChanges"),
+        Descriptor          = require("project/Descriptor"),
+        MIME                = require("util/MIME").getInstance();
 
     var instance;
     var currentProject,
         projectManager,
         pbContainer,
         pvsioWebClient;
-    var img; // this is the prototype image displayed in the PVSio-web user interface
     var _prototypeBuilder;
     var fs;
+    var widgetListView;
+    var prototypeImageView;
 
     function PrototypeBuilder() {
         pvsioWebClient = PVSioWebClient.getInstance();
         projectManager = ProjectManager.getInstance();
         currentProject = projectManager.project();
-        img = null;
         fs = new FileSystem();
         _prototypeBuilder = this;
     }
@@ -48,76 +51,51 @@ define(function (require, exports, module) {
     };
 
     /**
-     * @function renderImage
-     * @description Updates the project image with in the prototype builder
-     * @param image {Descriptor} Descriptor of the prototype picture.
-     * @returns {Promise(real)} A Promise that resolves to a real value that specifies the scale of the rendered image
-     * @memberof module:ProjectManager
+     * Switches the prototoyping layer to the builder layer
      * @private
      */
-    var renderImage = function (image) {
-        return new Promise(function (resolve, reject) {
-            function imageLoadComplete(res) {
-                //if the image width is more than the the containing element scale it down a little
-                var parent = d3.select("#prototype-builder-container"),
-                    scale = 1;
-                function resize() {
-                    if (img) {
-                        var //pbox = parent.node().getBoundingClientRect(),
-                            adjustedWidth = img.width,
-                            adjustedHeight = img.height;
-                        scale = 1;
+    function switchToBuilderView() {
+        d3.select("#prototype-builder-container .image-map-layer").style("opacity", 1).style("z-index", 190);
+        d3.select("#controlsContainer .active").classed("active", false);
+        d3.select("#btnBuilderView").classed('active', true);
+        WidgetManager.stopTimers();
+        expandWidgetsList();
+    }
 
-                        // FIXME: scaling is disabled for now, as it has introduced too many complications for resizing widgets style
-                        // if (img.width > pbox.width && pbox.width > 0 && pbox.height > 0) {
-                        //     adjustedWidth = pbox.width;
-                        //     scale = adjustedWidth / img.width;
-                        //     adjustedHeight = scale * img.height;
-                        // }
+    /** Switches the prototyping layer to the simulator/testing layer
+        @private
+    */
+    function switchToSimulatorView() {
+        d3.select("#prototype-builder-container .image-map-layer").style("opacity", 0.1).style("z-index", -2);
+        d3.select("#controlsContainer .active").classed("active", false);
+        d3.select("#btnSimulatorView").classed("active", true);
+        d3.select("#btnSimulatorView").classed("selected", true);
+        console.log("bootstrapping widgets with init(0)...");
+        WidgetManager.initialiseWidgets();
+        console.log("bootstrapping wallclock timers...");
+        WidgetManager.startTimers();
+        collapseWidgetsList();
+    }
 
-                        d3.select("#imageDiv").style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
-                        d3.select("#imageDiv img").attr("src", img.src).attr("height", adjustedHeight).attr("width", adjustedWidth);
-                        d3.select("#imageDiv svg").attr("height", adjustedHeight).attr("width", adjustedWidth);
-                        d3.select("#imageDiv svg > g").attr("transform", "scale(" + scale + ")");
-                        //hide the draganddrop stuff
-                        d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
-
-                        //update widgets maps after resizing
-                        d3.select("#builder-controls").style("height", (50 + adjustedHeight) + "px");
-                        WidgetManager.scaleAreaMaps(scale);
-                    }
-                }
-                if (parent.node()) {
-                    resize();
-                    parent.node().addEventListener("resize", resize);
-                }
-                resolve(scale);
-            }
-
-            img = new Image();
-            img.onload = imageLoadComplete;
-            img.onerror = function (res) {
-                alert("Failed to load picture " + image.name);
-                reject(res);
-            };
-            img.name = image.path;
-            img.src = image.content;
-        });
-    };
+    function updateControlsHeight() {
+        d3.select("#builder-controls").style("height", d3.select("#prototype-builder-container").node().getBoundingClientRect().height + "px");
+    }
 
     function updateImageAndLoadWidgets() {
         var p = projectManager.project();
         var image = p.getImage();
-        WidgetManager.clearWidgetAreas();
+        WidgetManager.clearWidgets();
+
+        if (prototypeImageView) {
+            prototypeImageView.clearWidgetAreas();
+        }
+
         d3.select("div#body").style("display", null);
         if (!image) {
             // remove previous image, if any
-            d3.select("#imageDiv img").attr("src", "").attr("height", "430").attr("width", "1128");
-            d3.select("#imageDiv svg").attr("height", "0").attr("width", "0");
-            d3.select("#imageDiv").attr("style", "");
-            d3.select("#body").attr("style", "height: 480px"); // 430 + 44 + 6
-            //show the image drag and drop div
-            d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
+            if (prototypeImageView) {
+                prototypeImageView.clearImage();
+            }
             return Promise.resolve();
         }
         // else
@@ -129,8 +107,9 @@ define(function (require, exports, module) {
         }
         function showImage() {
             return new Promise(function (resolve, reject) {
-                renderImage(image).then(function (scale) {
-                    WidgetManager.updateMapCreator(scale, function () {
+                prototypeImageView.setImage(image).then(function (scale) {
+                    updateControlsHeight();
+                    prototypeImageView.updateMapCreator(scale, function () {
                         var wdStr = p.getWidgetDefinitionFile().content;
                         if (wdStr && wdStr !== "") {
                             var wd = JSON.parse(p.getWidgetDefinitionFile().content);
@@ -142,11 +121,8 @@ define(function (require, exports, module) {
                         }
                         resolve();
                     });
-                    d3.select("#imageDragAndDrop.dndcontainer").style("display", "none");
                 }).catch(function (err) {
                     Logger.log(err);
-                    //show the image drag and drop div
-                    d3.select("#imageDragAndDrop.dndcontainer").style("display", null);
                     reject(err);
                 });
             });
@@ -165,6 +141,13 @@ define(function (require, exports, module) {
         });
     }
 
+    function onWidgetsFileChanged(event) {
+        updateImageAndLoadWidgets().then(function (res) {
+            widgetListView.update();
+        }).catch(function (err) { Logger.error(err); });
+        TimersListView.create(WidgetManager);
+    }
+
     function collapseWidgetsList() {
         //d3.select("#builder-controls").style("display", "none");
     }
@@ -172,20 +155,6 @@ define(function (require, exports, module) {
         //d3.select("#builder-controls").style("display", "block");
     }
 
-    /**
-     * Switches the prototoyping layer to the builder layer
-     * @private
-     */
-    function switchToBuilderView() {
-        d3.select(".image-map-layer").style("opacity", 1).style("z-index", 190);
-        d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
-        d3.select("#controlsContainer .active").classed("active", false);
-        d3.select("#btnBuilderView").classed('active', true);
-        d3.selectAll("div.display,#controlsContainer button").classed("builder", true);
-        d3.selectAll("div.display,#controlsContainer button").classed("simulator", false);
-        WidgetManager.stopTimers();
-        expandWidgetsList();
-    }
     function onProjectChanged(event) {
         var pvsioStatus = d3.select("#lblPVSioStatus");
         pvsioStatus.select("span").remove();
@@ -206,19 +175,10 @@ define(function (require, exports, module) {
         }
 
         switchToBuilderView();
-        WidgetManager.clearWidgetAreas();
+        WidgetManager.clearWidgets();
+        prototypeImageView.clearWidgetAreas();
         ScriptPlayer.clearView();
-        updateImageAndLoadWidgets().then(function (res) {
-            WidgetsListView.create();
-        }).catch(function (err) { Logger.error(err); });
-        TimersListView.create();
-    }
-
-    function onWidgetsFileChanged(event) {
-        updateImageAndLoadWidgets().then(function (res) {
-            WidgetsListView.create();
-        }).catch(function (err) { Logger.error(err); });
-        TimersListView.create();
+        onWidgetsFileChanged(event);
     }
 
     function onSelectedFileChanged(event) {
@@ -231,36 +191,18 @@ define(function (require, exports, module) {
             }
         }
     }
-    /** Switches the prototyping layer to the simulator/testing layer
-        @private
-    */
-    function switchToSimulatorView() {
-        d3.select(".image-map-layer").style("opacity", 0.1).style("z-index", -2);
-        d3.selectAll("#controlsContainer button, div.display").classed("selected", false);
-        d3.select("#controlsContainer .active").classed("active", false);
-        d3.select("#btnSimulatorView").classed("active", true);
-        d3.select("#btnSimulatorView").classed("selected", true);
-        d3.selectAll("div.display,#controlsContainer button").classed("simulator", true);
-        d3.selectAll("div.display,#controlsContainer button").classed("builder", false);
-        console.log("bootstrapping widgets with init(0)...");
-        WidgetManager.initialiseWidgets();
-        console.log("bootstrapping wallclock timers...");
-        WidgetManager.startTimers();
-        collapseWidgetsList();
-    }
 
     function bindListeners() {
         var actions, recStartState, recStartTime, scriptName;
         /**
          * Add event listener for toggling the prototyping layer and the interaction layer
          */
-        d3.select("#btnBuilderView").classed("selected", true).on("click", function () {
+        d3.select("#btnBuilderView").on("click", function () {
             switchToBuilderView();
         });
         d3.select("#btnSimulatorView").on("click", function () {
-            var img = d3.select("#imageDiv img");
             var msg = "";
-            if (!img || !img.attr("src") || img.attr("src") === "") {
+            if (!prototypeImageView.hasImage()) {
                 msg = "Please load a user interface picture before switching to Simulator View.\n\n " +
                         "This can be done from within Builder View, using the \"Load Picture\" button.";
                 return alert(msg);
@@ -434,7 +376,7 @@ define(function (require, exports, module) {
 
     /**
      * @function preparePageForUmageUpload
-     * @description ...
+     * @description Sets up the handlers for dealing with the user choosing to change the prototype image
      * @memberof module:PrototypeBuilder
      * @instance
      */
@@ -442,8 +384,7 @@ define(function (require, exports, module) {
         // FIXME: dont rely on extensions, use a "type" field in the Descriptor
         // to specify whether the file is an image or a text file
 
-        // add listener for upload button
-        d3.selectAll("#btnLoadPicture").on("click", function () {
+        prototypeImageView.on('loadImageClicked', function() {
             return new Promise(function (resolve, reject) {
                 if (PVSioWebClient.getInstance().serverOnLocalhost()) {
                     fs.readFileDialog({
@@ -452,11 +393,12 @@ define(function (require, exports, module) {
                         filter: MIME.imageFilter
                     }).then(function (descriptors) {
                         _prototypeBuilder.changeImage(descriptors[0].name, descriptors[0].content).then(function (res) {
-                            renderImage(res).then(function (res) {
+                            prototypeImageView.setImage(res).then(function (res) {
+                                updateControlsHeight();
                                 if (d3.select("#imageDiv svg").node() === null) {
                                     // we need to create the svg layer, as it's not there
                                     // this happens when a new project is created without selecting an image
-                                    WidgetManager.updateMapCreator();
+                                    prototypeImageView.updateMapCreator();
                                 }
                                 resolve(res);
                             });
@@ -468,22 +410,27 @@ define(function (require, exports, module) {
                 }
             });
         });
-        d3.selectAll("#btnEditStoryboard").on("click", function () {
-            WidgetManager.displayEditStoryboardDialog();
-        });
 
         function _updateImage(file) {
             return new Promise(function (resolve, reject) {
                 fs.readLocalFile(file).then(function (res) {
                     _prototypeBuilder.changeImage(res.name, res.content).then(function (res) {
-                        renderImage(res).then(function (res) {
-//                            projectManager.project().getImage();
+                        prototypeImageView.setImage(res).then(function (res) {
+                            updateControlsHeight();
                             resolve(res);
                         });
                     });
                 }).catch(function (err) { reject(err); });
             });
         }
+
+        prototypeImageView.on('imageDropped', function(file) {
+            _updateImage(file);
+        });
+
+        d3.selectAll("#btnEditStoryboard").on("click", function () {
+            WidgetManager.displayEditStoryboardDialog();
+        });
 
         d3.select("#btnSelectPicture").on("change", function () {
             var file = d3.event.currentTarget.files[0];
@@ -492,73 +439,144 @@ define(function (require, exports, module) {
                     if (d3.select("#imageDiv svg").node() === null) {
                         // we need to create the svg layer, as it's not there
                         // this happens when a new project is created without selecting an image
-                        WidgetManager.updateMapCreator();
+                        prototypeImageView.updateMapCreator();
                     }
                 });
             }
         });
+    };
 
-        var c = document.getElementById("imageDiv");
-        c.ondragover = function () {
-            d3.select(c).style("border", "5px dashed black");
-            return false;
-        };
-        c.ondragend = function (e) {
-            d3.select(c).style("border", null);
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        };
-        c.ondrop =  function (e) {
-            d3.select(c).style("border", null);
-            var file = e.dataTransfer.files[0];
-            _updateImage(file);
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        };
+    /**
+     * Sets up listeners on child views that are used to communicate between the children and back to this class
+     * @private
+     */
+    PrototypeBuilder.prototype._setUpChildListeners = function() {
+        prototypeImageView.on("WidgetRegionDrawn", function(coord, region) {
+            NewWidgetView.create(coord)
+                .on("ok", function (e, view) {
+                    view.remove();
+                    e.data.scale = prototypeImageView.resize();
+                    var widget = WidgetManager.addNewWidget(e.data, coord, function(w, renderResponse) {
+                        region.classed(w.type(), true)
+                            .attr("id", w.id());
+                        w.element(region);
+                        if (w.needsImageMap()) {
+                            w.createImageMap({ callback: renderResponse });
+                        }
+                        // w.updateLocationAndSize({ x: e.data.x, y: e.data.y, width: e.data.width, height: e.data.height }, { imageMap: true });
+                        // w.updateStyle(e.data);
+                        widget.render("", { visibleWhen: "true" });
+                    });
+
+                    widgetListView.selectWidget(widget, false);
+                }).on("cancel", function (e, view) {
+                    view.remove();
+                    d3.select(region.node().parentNode).remove();
+                });
+        });
+
+        prototypeImageView.on("WidgetEditRequested", function(widgetID) {
+            var widget = WidgetManager.getWidget(widgetID);
+
+            EditWidgetView.create(widget)
+                .on("ok", function (e, view) {
+                    view.remove();
+                    WidgetManager.editWidget(widget, e.data);
+                }).on("cancel", function (e, view) {
+                    view.remove();
+                });
+        });
+
+        prototypeImageView.on("WidgetSelected", function(widget, add) {
+            widgetListView.selectWidget(widget, add);
+        });
+
+        widgetListView.on("WidgetSelected", function(widget, add) {
+            prototypeImageView.selectWidget(widget, add);
+        });
     };
 
     /**
         @returns {Promise} a promise that resolves when the prototype builder has been initialised
     */
     PrototypeBuilder.prototype.initialise = function () {
+        var _this = this;
+        this.collapsed = false;
         pbContainer = pvsioWebClient.createCollapsiblePanel({
             headerText: "Prototype Builder",
-            showContent: true,
-            onClick: function () {
+            showContent: !this.collapsed,
+            ownerObject: this,
+            onClick: function (collapsed) {
                 if (pbContainer.style("display") !== "none" && pbContainer.select("svg").empty()) {
                     updateImageAndLoadWidgets();
                 }
+
+                _this.collapsed = collapsed;
             },
             parent: "#body",
             owner: this.getName()
         });
         pbContainer.html(template);
         layoutjs({el: "#body"});
-        preparePageForImageUpload();
         projectManager.addListener("ProjectChanged", onProjectChanged);
         projectManager.addListener("WidgetsFileChanged", onWidgetsFileChanged);
         projectManager.addListener("SelectedFileChanged", onSelectedFileChanged);
         updateImageAndLoadWidgets().then(function (res) {
-            WidgetsListView.create();
+            widgetListView.update();
         }).catch(function (err) { Logger.error(err); });
 
         // add default tick timer
         WidgetManager.addWallClockTimer();
         //TimersListView.create();
 
+        // Create child views
+        widgetListView = new WidgetsListView({
+            el: $("#widgetsList"),
+            widgetManager: WidgetManager,
+            labelFunction: function (widget) {
+                switch (widget.type()) {
+                    case "display"       : { return "Display: " + widget.displayKey(); }
+                    case "numericdisplay": { return "Numeric Display: " + widget.displayKey(); }
+                    case "led"           : { return "LED: " + widget.ledKey(); }
+                    case "button"        : { return "Button: " + widget.functionText(); }
+                    case "touchscreenbutton": { return "Touch-Button: " + widget.functionText(); }
+                    case "touchscreendisplay": { return "Touch-Display: " + widget.displayKey(); }
+                    default: { return widget.type() + ": " + widget.id(); }
+                }
+            }
+        });
+
+        prototypeImageView = new PrototypeImageView({
+            el: $("#imageDiv"),
+            widgetManager: WidgetManager,
+            mapID: "prototypeMap"
+        });
+
+        pbContainer.select(".ljs-hcontent").on("resize", function () {
+            prototypeImageView.resize();
+        });
+
+        preparePageForImageUpload();
+        this._setUpChildListeners();
         bindListeners();
         d3.select("#header #txtProjectName").html(projectManager.project().name());
         return updateImageAndLoadWidgets();
     };
 
     PrototypeBuilder.prototype.unload = function () {
+        widgetListView.remove();
+        prototypeImageView.remove();
         pvsioWebClient.removeCollapsiblePanel(pbContainer);
         projectManager.removeListener("ProjectChanged", onProjectChanged);
         projectManager.removeListener("WidgetsFileChanged", onWidgetsFileChanged);
         projectManager.removeListener("SelectedFileChanged", onSelectedFileChanged);
         return Promise.resolve(true);
+    };
+
+    PrototypeBuilder.prototype.handleKeyEvent = function (e) {
+        if (!this.collapsed) {
+            prototypeImageView._mapCreator.handleKeyEvent(e);
+        }
     };
 
     /**

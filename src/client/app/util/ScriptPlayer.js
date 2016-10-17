@@ -28,7 +28,7 @@ define(function (require, exports, module) {
         var w = pos.x2 - pos.x1, hrad = w / 2, h = pos.y2 - pos.y1, vrad = h / 2, brad = hrad + "px " + vrad + "px";
         var mark = d3.select(".animation-halo");
         if (mark.empty()) {
-            mark = d3.select("#imageDiv").append("div").attr("class", "animation-halo");
+            mark = d3.select("#imageDiv  .prototype-image-inner").append("div").attr("class", "animation-halo");
         }
         mark.style("top", pos.y1 + "px").style("left", pos.x1 + "px")
             .style("width", (pos.x2 - pos.x1) + "px").style("height", (pos.y2 - pos.y1) + "px")

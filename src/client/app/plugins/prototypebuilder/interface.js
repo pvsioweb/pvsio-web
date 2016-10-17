@@ -12,6 +12,7 @@ define(function (require, exports, module) {
 //        SafetyTest = require("plugins/safetyTest/SafetyTest"),
         PropertyTemplates = require("plugins/propertytemplates/PropertyTemplates"),
         GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
+        PIMPrototyper = require("plugins/pimPrototyper/PIMPrototyper"),
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
         Logger	= require("util/Logger"),
         PluginManager = require("plugins/PluginManager"),
@@ -196,6 +197,7 @@ define(function (require, exports, module) {
                     PrototypeBuilder.getInstance(),
                     ModelEditor.getInstance(),
                     Emulink.getInstance(),
+                    PIMPrototyper.getInstance(),
                     PropertyTemplates.getInstance(),
                     GraphBuilder.getInstance()
             ];
