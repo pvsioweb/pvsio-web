@@ -87,13 +87,16 @@ define(function (require, exports, module) {
     /**
         Creats and image map area for this widget using its position for the coords of the area.
         Adds the created area to the widget's imageMap property.
+        @param {(Element|String)} opt.map Element to use as the image map
         @returns {object} the area element created
         @memberof Widget
      */
-    Widget.prototype.createImageMap = function () {
+    Widget.prototype.createImageMap = function (opt) {
+        opt = opt || {};
+        opt.map = opt.map || d3.select("map#prototypeMap");
         var coords = getCoords(this.element());
         var widget = this, href = this.type() === "button" ? "#!" : null;
-        var area = d3.select("map#prototypeMap").append("area");
+        var area = opt.map.append("area");
         area.attr("class", this.id())
             .attr("shape", "rect")
             .attr("coords", coords)

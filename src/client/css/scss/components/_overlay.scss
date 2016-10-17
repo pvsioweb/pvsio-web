@@ -61,4 +61,9 @@
     .panel-heading {
         cursor: move;
     }
+
+    .panel-footer {
+        @extend %clearfix;
+        width: 100%;
+    }
 }

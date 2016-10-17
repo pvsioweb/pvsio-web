@@ -9,10 +9,9 @@
 define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
-        eventDispatcher = require("util/eventDispatcher"),
-        imageMapper     = require("imagemapper"),
         uidGenerator    = require("util/uuidGenerator"),
         EditWidgetView  = require("pvsioweb/forms/editWidget"),
+        BaseWidgetManager  = require("pvsioweb/BaseWidgetManager"),
         Button          = require("widgets/Button"),
         TouchscreenButton  = require("widgets/TouchscreenButton"),
         TouchscreenDisplay = require("widgets/TouchscreenDisplay"),
@@ -21,12 +20,11 @@ define(function (require, exports, module) {
         NumericDisplay  = require("widgets/NumericDisplay"),
         Storyboard      = require("pvsioweb/Storyboard"),
         EmuTimer        = require("widgets/EmuTimer"),
-        NewWidgetView   = require("pvsioweb/forms/newWidget"),
         StateParser     = require("util/PVSioStateParser"),
         ButtonActionsQueue = require("widgets/ButtonActionsQueue").getInstance(),
         PreferenceKeys  = require("preferences/PreferenceKeys"),
         Preferences     = require("preferences/PreferenceStorage").getInstance();
-    var wm, mapCreator;
+    var wm;
 
    ///TODO this should be moved out of this file and promoted to a property, or a function parameter in createImageMap
     function renderResponse(err, res) {
@@ -49,34 +47,14 @@ define(function (require, exports, module) {
             });
         }
     }
-    function handleWidgetEdit(widget, wm) {
-        if (widget) {
-            EditWidgetView.create(widget)
-                .on("ok", function (e, view) {
-                    view.remove();
-                    widget.updateWithProperties(e.data);
-                    widget.updateStyle(e.data);
-                    widget.render();
-                    //create an interactive image area only if there isnt one already
-                    createImageMap(widget);
-                    if (e.data.keyCode) {
-                        wm._keyCode2widget[e.data.keyCode] = widget;
-                    }
-                    // fire event widget modified
-                    wm.fire({type: "WidgetModified"});
-                }).on("cancel", function (e, view) {
-                    view.remove();
-                });
-        }
-    }
     function handleTimerEdit(emuTimer, wm) {
         EditWidgetView.create(emuTimer)
             .on("ok", function (e, view) {
                 view.remove();
                 emuTimer.updateWithProperties(e.data);
                 // fire event widget created
-                var event = { type: "TimerModified", action: "create", timer: emuTimer };
-                wm.fire(event);
+                var event = { action: "create", timer: emuTimer };
+                wm.trigger("TimerModified", event);
             }).on("cancel", function (e, view) {
                 view.remove();
             });
@@ -117,7 +95,7 @@ define(function (require, exports, module) {
         var w = pos.x2 - pos.x1, hrad = w / 2, h = pos.y2 - pos.y1, vrad = h / 2, brad = hrad + "px " + vrad + "px";
         var mark = d3.select(".animation-halo");
         if (mark.empty()) {
-            mark = d3.select("#imageDiv").append("div").attr("class", "animation-halo");
+            mark = d3.select("#imageDiv .prototype-image-inner").append("div").attr("class", "animation-halo");
         }
         mark.style("top", pos.y1 + "px").style("left", pos.x1 + "px")
             .style("width", (pos.x2 - pos.x1) + "px").style("height", (pos.y2 - pos.y1) + "px")
@@ -147,7 +125,6 @@ define(function (require, exports, module) {
                 console.log("tick timer interval updated to " + timerRate / 1000 + " secs");
             }
         });
-        eventDispatcher(this);
     }
 
     function createWidget(w) {
@@ -172,7 +149,7 @@ define(function (require, exports, module) {
                   fontsize: w.fontsize,
                   fontColor: w.fontColor,
                   backgroundColor: w.backgroundColor,
-                  parent: "imageDiv" });
+                  parent: "imageDiv .prototype-image-inner" });
         } else if (w.type === "numericdisplay") {
             widget = new NumericDisplay(w.id,
                 { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
@@ -183,7 +160,7 @@ define(function (require, exports, module) {
                   fontsize: w.fontsize,
                   fontColor: w.fontColor,
                   backgroundColor: w.backgroundColor,
-                  parent: "imageDiv" });
+                  parent: "imageDiv .prototype-image-inner" });
         } else if (w.type === "touchscreendisplay") {
             widget = new TouchscreenDisplay(w.id,
                 { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
@@ -196,7 +173,7 @@ define(function (require, exports, module) {
                   fontsize: w.fontsize,
                   fontColor: w.fontColor,
                   backgroundColor: w.backgroundColor,
-                  parent: "imageDiv" });
+                  parent: "imageDiv .prototype-image-inner" });
         } else if (w.type === "touchscreenbutton") {
             widget = new TouchscreenButton(w.id,
                 { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
@@ -208,14 +185,14 @@ define(function (require, exports, module) {
                   fontsize: w.fontsize,
                   fontColor: w.fontColor,
                   backgroundColor: w.backgroundColor,
-                  parent: "imageDiv" });
+                  parent: "imageDiv .prototype-image-inner" });
         } else if (w.type === "led") {
             widget = new LED(w.id,
                 { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
                 { ledKey: w.ledKey,
                   color: w.ledColor,
                   visibleWhen: w.visibleWhen,
-                  parent: "imageDiv" });
+                  parent: "imageDiv .prototype-image-inner" });
         } else if (w.type === "storyboard") {
             widget = new Storyboard(w.id);
         } else {
@@ -223,6 +200,8 @@ define(function (require, exports, module) {
         }
         return widget;
     }
+
+    WidgetManager.prototype = Object.create(BaseWidgetManager.prototype);
 
     WidgetManager.prototype.initialiseWidgets = function () {
         ButtonActionsQueue.sendINIT(renderResponse);
@@ -269,140 +248,14 @@ define(function (require, exports, module) {
                         w = parseFloat(coords[2]) - parseFloat(coords[0]),
                         x = parseFloat(coords[0]),
                         y = parseFloat(coords[1]);
-                    var mark = mapCreator.restoreRectRegion({x: x, y: y, width: w, height: h});
-                    mark.attr("id", widget.id()).classed(widget.type(), true);
-                    widget.element(mark);
+                    var coord = {x: x, y: y, width: w, height: h};
+                    wm.trigger("WidgetRegionRestored", widget, coord);
                     createImageMap(widget);
-                    //set the font-size of the mark to be 80% of the height and the id of the mark
-                    mark.on("dblclick", function () {
-                        handleWidgetEdit(wm.getWidget(mark.attr("id")), wm);
-                    });
                 });
             }
+
             installKeypressHandler(this);
         }
-    };
-
-    function round(v) {
-        return Math.round(v * 10) / 10;
-    }
-
-    WidgetManager.prototype.updateMapCreator = function (scale, cb) {
-        scale = scale || 1;
-        var wm = this, event = {type: "WidgetModified"};
-        imageMapper({scale: scale, element: "#imageDiv img", parent: "#imageDiv", onReady: function (mc) {
-            mapCreator = mc.on("create", function (e) {
-                var region = e.region;
-                region.on("dblclick", function () {
-                    handleWidgetEdit(wm.getWidget(region.attr("id")), wm);
-                });
-                //pop up the widget edit dialog
-                var coord = {
-                    top: round(e.pos.y),
-                    left: round(e.pos.x),
-                    width: round(e.pos.width),
-                    height: round(e.pos.height)
-                };
-                NewWidgetView.create(coord)
-                    .on("ok", function (e, view) {
-                        view.remove();
-                        e.data.id = e.data.type + "_" + uidGenerator();
-                        e.data.scale = (d3.select("svg > g").node()) ?
-                                        +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
-                        e.data.height = parseFloat(d3.select("#imageDiv .selected rect").attr("height"));
-                        e.data.width = parseFloat(d3.select("#imageDiv .selected rect").attr("width"));
-                        e.data.x = parseFloat(d3.select("#imageDiv .selected rect").attr("x"));
-                        e.data.y = parseFloat(d3.select("#imageDiv .selected rect").attr("y"));
-                        var widget = createWidget(e.data);
-                        if (widget) {
-                            region.classed(widget.type(), true).attr("id", widget.id());
-                            widget.element(region);
-                            createImageMap(widget);
-                            // widget.updateLocationAndSize({ x: e.data.x, y: e.data.y, width: e.data.width, height: e.data.height }, { imageMap: true });
-                            // widget.updateStyle(e.data);
-                            widget.render();
-                            wm.addWidget(widget);
-                            if (typeof widget.keyCode === "function" && widget.keyCode() && widget.type() === "button") {
-                                wm._keyCode2widget[widget.keyCode()] = widget;
-                            }
-                            event.action = "create";
-                            event.widget = widget;
-                            wm.fire(event);
-                        }
-                    }).on("cancel", function (e, view) {
-                        view.remove();
-                        d3.select(region.node().parentNode).remove();
-                    });
-            }).on("resize", function (e) {
-                wm.updateLocationAndSize(e.region.attr("id"), e.pos, e.scale);
-                event.action = "resize";
-                event.widget = wm.getWidget(e.region.attr("id"));
-                wm.fire(event);
-            }).on("move", function (e) {
-                wm.updateLocationAndSize(e.region.attr("id"), e.pos, e.scale);
-                event.action = "move";
-                event.widget = wm.getWidget(e.region.attr("id"));
-                wm.fire(event);
-            }).on("remove", function (e) {
-                event.widget = wm.getWidget(e.regions.node().id);
-                e.regions.each(function () {
-                    var w = wm.getWidget(d3.select(this).attr("id"));
-                    if (w) {
-                        wm.removeWidget(w);
-                        w.remove();
-                    } else {
-                        d3.select(this.parentNode).remove();
-                    }
-                });
-                event.action = "remove";
-                wm.fire(event);
-            }).on("select", function (e) {
-                wm.fire({type: "WidgetSelected", widget: wm.getWidget(e.region.attr("id")), event: e.event});
-            }).on("clearselection", function (e) {
-                var widgets = [];
-                e.regions.each(function () {
-                    widgets.push(wm.getWidget(d3.select(this).attr("id")));
-                });
-                wm.fire({type: "WidgetSelectionCleared", widgets: widgets, event: e.event});
-            });
-            if (cb) { cb(); }
-        }});
-    };
-
-    /**
-        Get the current map creator
-        @memberof WidgetManager
-     */
-    WidgetManager.prototype.mapCreator = function () {
-        return mapCreator;
-    };
-
-    /**
-        Clears the widget areas on the interface.
-        @memberof WidgetManager
-     */
-    WidgetManager.prototype.clearWidgetAreas = function () {
-        //clear old widhget maps and area def
-        if (this.mapCreator()) {
-            this.mapCreator().clear();
-        }
-        this.clearWidgets();
-    };
-    /**
-        Gets the widget with the specified id.
-        @param {string} id The html element id of the widget
-        @memberof module:WidgetManager
-     */
-    WidgetManager.prototype.getWidget = function (id) {
-        return this._widgets[id];
-    };
-    /**
-        Adds the specified widget to the list of widgets.
-        @param {Widget} widget The widget to be added.
-        @memberof module:WidgetManager
-     */
-    WidgetManager.prototype.addWidget = function (widget) {
-        this._widgets[widget.id()] = widget;
     };
     WidgetManager.prototype.addWallClockTimer = function () {
         //pop up the timer edit dialog
@@ -411,8 +264,8 @@ define(function (require, exports, module) {
         var emuTimer = new EmuTimer(id, { timerEvent: id, timerRate: timerRate, callback: renderResponse });
         this._timers[emuTimer.id()] = emuTimer;
         // fire event widget created
-        var event = { type: "TimerModified", action: "create", timer: emuTimer };
-        wm.fire(event);
+        var event = { action: "create", timer: emuTimer };
+        wm.trigger("TimerModified", event);
 
     };
     WidgetManager.prototype.editTimer = function (emuTimer) {
@@ -424,8 +277,17 @@ define(function (require, exports, module) {
         @param {Widget} widget The widget to be edited.
         @memberof module:WidgetManager
      */
-    WidgetManager.prototype.editWidget = function (widget) {
-        handleWidgetEdit(widget, wm);
+    WidgetManager.prototype.editWidget = function (widget, data) {
+        widget.updateWithProperties(data);
+        widget.updateStyle(data);
+        widget.render("", { visibleWhen: "true" });
+        //create an interactive image area only if there isnt one already
+        createImageMap(widget);
+        if (data.keyCode) {
+            wm._keyCode2widget[data.keyCode] = widget;
+        }
+        // fire event widget modified
+        wm.fire({type: "WidgetModified"});
     };
     WidgetManager.prototype.editTimer = function (emuTimer) {
         // the only timer type supported in the current implementation is EmuTimer
@@ -441,15 +303,54 @@ define(function (require, exports, module) {
             timer.stop();
         });
     };
+
     /**
-        Removes the specified widget from the list of widgets.
-        @param {Widget} widget The widget to remove.
-        @memberof module:WidgetManager
+     * Creates a new widget and adds it to the WidgetManager
+     * @param {object} data Data object from a NewWidgetView callback
+     * @param {object} coord Object with top, left, width, height properties specifying the widget position
+     * @param {function} onCreate Called once the widget has been created, but before it is added to the manager
+     * @return {Widget} The new widget
      */
-    WidgetManager.prototype.removeWidget = function (widget) {
-        widget.remove();
-        delete this._widgets[widget.id()];
+    WidgetManager.prototype.addNewWidget = function (data, coord, onCreate) {
+        data.id = data.type + "_" + uidGenerator();
+        data.height = coord.height;
+        data.width = coord.width;
+        data.x = coord.left;
+        data.y = coord.top;
+
+        var widget = createWidget(data);
+        if (widget) {
+            if (typeof widget.keyCode === "function" && widget.keyCode() && widget.type() === "button") {
+                wm._keyCode2widget[widget.keyCode()] = widget;
+            }
+
+            widget.updateWithProperties(data);
+            this.addWidget(widget);
+            this.trigger("WidgetModified", {action: "create", widget: widget});
+        }
+
+        if (onCreate) {
+            onCreate(widget, renderResponse);
+        }
+
+        if (data.hasOwnProperty("events")) {
+            data.evts = data.events;
+            delete data.events;
+        }
+
+        return widget;
     };
+
+    /**
+        Removes all the widgets on the interface
+     */
+    WidgetManager.prototype.clearWidgets = function () {
+        _.each(this._widgets, function (value) {
+            value.remove();//remove the widgets from the interface
+        });
+        this._widgets = {};
+    };
+
     /**
         Gets a list of all display widgets loaded on the page.
         @returns {BasicDisplay[]}
@@ -553,30 +454,12 @@ define(function (require, exports, module) {
     };
 
     /**
-        Update the location and size of the widget by updating the image map coords to the position given.
-        @param {Widget} widget The widget to be updated
-        @param {{x: number, y: number, width: number, height: number}} pos The new position and size
-        @param {Number?} scale a scale factor for the pos value. If not supplied defaults to 1
-        @memberof WidgetManager
-     */
-    WidgetManager.prototype.updateLocationAndSize = function (widget, pos, scale) {
-        scale = scale || 1;
-        if (typeof widget === "string") { widget = this.getWidget(widget); }
-        if (widget) {
-            pos.x *= scale;
-            pos.y *= scale;
-            pos.width *= scale;
-            pos.height *= scale;
-            widget.updateLocationAndSize(pos, { imageMap: true });
-        }
-    };
-    /**
      * Returns a JSON object representing widget definitions for the currently open project
        @memberof WidgetManager
      */
     WidgetManager.prototype.getWidgetDefinitions = function () {
-        var scale = (d3.select("svg > g").node()) ?
-                        +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
+        var scale = (d3.select("#imageDiv svg > g").node()) ?
+                        +(d3.select("#imageDiv svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
         var widgets = [], regionDefs = [];
         _.each(this._widgets, function (widget) {
             widgets.push(widget.toJSON());
@@ -593,31 +476,6 @@ define(function (require, exports, module) {
     };
 
     /**
-        Removes all the widgets on the interface
-     */
-    WidgetManager.prototype.clearWidgets = function () {
-        _.each(this._widgets, function (value) {
-            value.remove();//remove the widgets from the interface
-        });
-        this._widgets = {};
-    };
-    /**
-        update all the area maps attributed to all widgets on the project by the given scale factor
-        @param {Number} scale the scale to transform the maps by
-    */
-    WidgetManager.prototype.scaleAreaMaps = function (scale) {
-        var _this = this;
-        var widgets = _this.getAllWidgets();
-        function _getPos(el) {
-            return {x: el.attr("x"), y: el.attr("y"), height: el.attr("height"), width: el.attr("width")};
-        }
-        widgets.forEach(function (w) {
-            var pos = _getPos(w.element());
-            _this.updateLocationAndSize(w, pos, scale);
-        });
-    };
-
-    /**
      * @function addStoryboardImages
      * @memberof WidgetManager
      * @param descriptors {Array(Object)} Array of image descriptors. Each image descriptor has the following properties:
@@ -631,7 +489,7 @@ define(function (require, exports, module) {
         return new Promise(function (resolve, reject) {
             storyboard.addImages(descriptors).then(function (images) {
                 _this.addWidget(storyboard);
-                _this.fire({type: "WidgetModified"});
+                _this.trigger("WidgetModified");
                 resolve(images);
             }).catch(function (err) {
                 reject(err);
@@ -650,8 +508,8 @@ define(function (require, exports, module) {
             w.push(new Storyboard());
             w[0].addListener("EditStoryboardComplete", function (data) {
                 _this.addWidget(data.widget); // this overwrites the widget
-                _this.fire({type: "WidgetModified"}); // this marks the widget file as dirty
-                _this.fire({type: "StoryboardWidgetModified", widget: data.widget}); // this will trigger an event listener in Project that creates a directory with the storyboard image files
+                _this.trigger("WidgetModified"); // this marks the widget file as dirty
+                _this.trigger("StoryboardWidgetModified", {widget: data.widget}); // this will trigger an event listener in Project that creates a directory with the storyboard image files
             });
         }
         w[0].displayEditStoryboardDialog();

@@ -103,7 +103,7 @@ define(function (require, exports, module) {
         d3.select("div." + this.id()).style("left", this.left + "px").style("top", this.top + "px")
             .style("width", this.width + "px").style("height", this.height + "px");
         d3.select("div." + this.id()).select("canvas").attr("width", this.width + "px").attr("height", this.height + "px");
-        return this.render(this.example);
+        return this.render(this.example, opt);
     };
     LED.prototype.updateWithProperties = function (props) {
         props = props || {};
@@ -142,7 +142,8 @@ define(function (require, exports, module) {
             return _this.reveal();
         }
 
-        var expr = StateParser.simpleExpressionParser(this.visibleWhen());
+        var visibleWhen = opt.visibleWhen || this.visibleWhen();
+        var expr = StateParser.simpleExpressionParser(visibleWhen);
         if (expr && expr.res) {
             if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                 return doRender();
@@ -159,6 +160,12 @@ define(function (require, exports, module) {
         }
         return _this.hide();
     };
+    LED.prototype.renderSample = function (opt) {
+        opt = opt || {};
+        var txt = opt.txt || this.example;
+        return this.render(txt, { visibleWhen: "true" });
+    };
+
 
     LED.prototype.toggle = function (opt) {
         if (this.isOn === true) {

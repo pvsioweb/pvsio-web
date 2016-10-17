@@ -101,7 +101,7 @@ define(function (require, exports, module) {
         this.displayKey = property.call(this, opt.displayKey);
         this.auditoryFeedback = property.call(this, opt.auditoryFeedback);
         this.visibleWhen = property.call(this, opt.visibleWhen);
-        this.example = opt.example || ""; // example is used in the prototype builder to demonstrate the font style of the display
+        this.example = opt.example || "test"; // example is used in the prototype builder to demonstrate the font style of the display
         Widget.call(this, id, "display");
         return this;
     }
@@ -144,7 +144,7 @@ define(function (require, exports, module) {
             .style("width", this.width + "px").style("height", this.height + "px").style("font-size", this.fontsize + "px");
         d3.select("div." + this.id()).select("span").attr("width", this.width + "px").attr("height", this.height + "px"); // used for glyphicon
         d3.select("div." + this.id()).select("canvas").attr("width", this.width + "px").attr("height", this.height + "px"); // used for standard text and numbers
-        return this.render(this.example);
+        return this.render(this.example, opt);
     };
     BasicDisplay.prototype.updateStyle = function (data) {
         data = data || {};
@@ -184,6 +184,11 @@ define(function (require, exports, module) {
         var elemIsBlinking = (document.getElementById(this.id()).getAttribute("class").indexOf("blink") >= 0);
         return this.renderGlyphicon(this.txt, { blinking: elemIsBlinking });
     };
+    BasicDisplay.prototype.renderSample = function (opt) {
+        opt = opt || {};
+        var txt = opt.txt || this.example;
+        return this.render(txt, { visibleWhen: "true" });
+    };
     BasicDisplay.prototype.render = function (txt, opt) {
         function renderln(data, opt) {
             opt = opt || {};
@@ -208,7 +213,8 @@ define(function (require, exports, module) {
         opt = opt || {};
         opt.auditoryFeedback = opt.auditoryFeedback || this.auditoryFeedback();
         var isEnabled = false;
-        var expr = StateParser.simpleExpressionParser(this.visibleWhen());
+        var visibleWhen = opt.visibleWhen || this.visibleWhen();
+        var expr = StateParser.simpleExpressionParser(visibleWhen);
         if (expr && expr.res) {
             if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                 isEnabled = true;

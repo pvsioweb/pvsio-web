@@ -43,6 +43,15 @@ define(function (require, exports, module) {
 			}).addListener("processExited", function (e) {
 				_pvsioweb.isPVSProcessConnected(false).fire(e);
 			});
+
+        // Forward key events to the active panel. By using this instead of registering their own global key listeners,
+        // panels avoid breaking the functionality of other panels or causing behaviour that is confusing for the user.
+        d3.select("body").on("keydown.global", function () {
+            var e = d3.event;
+            if (_pvsioweb._activePanel && _pvsioweb._activePanel.handleKeyEvent) {
+                _pvsioweb._activePanel.handleKeyEvent(e);
+            }
+        });
 	}
     /**
      Get or set whether the client is connected to the server websocket
@@ -96,13 +105,18 @@ define(function (require, exports, module) {
 			{
 			headerText: string to display in panel header
 			owner: <string> the name of the plugin that owns the panel
-			onClick: function - handler to invoke when the panel is toggled
+			ownerObject: <object> Main class of the plugin that owns the panel. Used for forwarding key events.
+			onClick: function - handler to invoke when the panel is toggled. Argument passed to the function identifies
+            whether the panel is now collapsed (true) or not (false).
 			showContent: Whether the default initial state of the panel is open (showContent == true) or closed (showContent == true or undefined)
 			parent: the html element selector for the parent i.e., where the panel should be created
 			}
         @returns {d3.selection} The div created
     */
 	PVSioWeb.prototype.createCollapsiblePanel = function (options) {
+        var _this = this;
+        var collapsed;
+
 		options = options || {};
 		options.parent = options.parent || "#body";
 		var div = d3.select(options.parent).append("div").attr("class", "collapsible-panel-parent");
@@ -113,23 +127,34 @@ define(function (require, exports, module) {
             header.on("click", function () {
                 var icon = d3.select(this.firstChild);
                 var label = d3.select(this.lastChild);
+
                 if (content.attr("style") === null) {
                     content.attr("style", "display: none");
                     label.node().textContent += " (click to expand)";
                     icon.classed("glyphicon-plus-sign", true).classed("glyphicon-minus-sign", false);
+                    collapsed = true;
                 } else {
                     content.attr("style", null);
                     label.node().textContent = label.node().textContent.replace(" (click to expand)", "");
                     icon.classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
+                    collapsed = false;
                 }
                 if (options.onClick && typeof options.onClick === "function") {
-                    options.onClick();
+                    options.onClick(collapsed);
                 }
             });
         }
+
+        if (options.ownerObject) {
+            div.on("mouseover", function () {
+                _this._activePanel = options.ownerObject;
+            });
+        }
+
         if (options.width) {
             div.style("width", options.width + "px");
         }
+
 		header.append("span")
 			.attr("class", function () {
 				return options.showContent === true ? "toggle-collapse glyphicon glyphicon-minus-sign" :

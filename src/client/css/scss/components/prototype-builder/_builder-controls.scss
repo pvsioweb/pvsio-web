@@ -1,21 +1,26 @@
-#builder-controls.ljs-left {
+.prototype-sidebar.ljs-left {
     width: 20%;
     background: $color-bg-lighter;
     height: 480px;
     overflow-y: auto;
 }
 
-#widgetsList,
-#timersList {
+.prototype-list-container {
     padding: 0;
-    margin: 4 0 2;
     max-height: 50%;
-    margin-right: 6px;
+    margin-right: 5px;
 
-    li {
+    .list-group-item {
         @extend %dark-hover;
 
+        border-left: none;
+        border-right: none;
+        border-radius: 0;
         cursor: pointer;
+
+        &:first-child {
+            border-top: none;
+        }
 
         &.selected {
             background: $color-primary;
