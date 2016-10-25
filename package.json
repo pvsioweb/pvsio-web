@@ -6,8 +6,8 @@
       "name": "Paolo Masci"
     }
   ],
-  "description": "A javascript library to connect to and communicate with a pvsio process using websockets",
-  "version": "2.0.0",
+  "description": "A formal methods toolkit for model-based development of human-machine interfaces",
+  "version": "2.1.0",
   "preferGlobal": "true",
   "dependencies": {
     "body-parser": "~1.0.0",
@@ -26,8 +26,7 @@
     "grunt-postcss": "^0.8.0",
     "grunt-run": "^0.6.0",
     "grunt-sass": "^1.2.0",
-    "jasmine-node": "~1.14.3",
-    "open": "0.0.5"
+    "jasmine-node": "~1.14.3"
   },
   "scripts": {
     "test": "grunt test",
@@ -38,7 +37,7 @@
     "type": "git",
     "url": "https://github.com/thehogfather/pvsio-web"
   },
-  "license": "GPL3",
+  "license": "GPL-3.0",
   "engine": {
     "node": ">=0.8"
   }
