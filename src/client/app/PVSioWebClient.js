@@ -119,22 +119,28 @@ define(function (require, exports, module) {
 
 		options = options || {};
 		options.parent = options.parent || "#body";
-		var div = d3.select(options.parent).append("div").attr("class", "collapsible-panel-parent");
-		var header = div.append("div").classed("header", true);
-		var content = div.append("div").attr("class", "collapsible-panel");
+		var _div = d3.select(options.parent).append("div").attr("class", "collapsible-panel-parent");
+		var _header = _div.append("div").classed("header", true);
+		var _content = _div.append("div").attr("class", "collapsible-panel");
 
-        if (!options.isDemo) {
-            header.on("click", function () {
-                var icon = d3.select(this.firstChild);
-                var label = d3.select(this.lastChild);
+        _header.append("span")
+			.attr("class", function () {
+				return options.showContent === true ? "toggle-collapse glyphicon glyphicon-minus-sign" :
+						"toggle-collapse glyphicon glyphicon-plus-sign";
+            });
 
-                if (content.attr("style") === null) {
-                    content.attr("style", "display: none");
+        if (!options.isDemo && _header.node() && _header.node().firstChild) {
+            d3.select(_header.node().firstChild).on("click", function () {
+                var icon = d3.select(this.parentNode.firstChild);
+                var label = d3.select(this.parentNode.lastChild);
+
+                if (_content.attr("style") === null) {
+                    _content.attr("style", "display: none");
                     label.node().textContent += " (click to expand)";
                     icon.classed("glyphicon-plus-sign", true).classed("glyphicon-minus-sign", false);
                     collapsed = true;
                 } else {
-                    content.attr("style", null);
+                    _content.attr("style", null);
                     label.node().textContent = label.node().textContent.replace(" (click to expand)", "");
                     icon.classed("glyphicon-minus-sign", true).classed("glyphicon-plus-sign", false);
                     collapsed = false;
@@ -146,31 +152,26 @@ define(function (require, exports, module) {
         }
 
         if (options.ownerObject) {
-            div.on("mouseover", function () {
+            _div.on("mouseover", function () {
                 _this._activePanel = options.ownerObject;
             });
         }
 
         if (options.width) {
-            div.style("width", options.width + "px");
+            _div.style("width", options.width + "px");
         }
 
-		header.append("span")
-			.attr("class", function () {
-				return options.showContent === true ? "toggle-collapse glyphicon glyphicon-minus-sign" :
-						"toggle-collapse glyphicon glyphicon-plus-sign";
-            });
 		if (options.owner) {
-			div.attr("plugin-owner", options.owner);
+			_div.attr("plugin-owner", options.owner);
 		}
 		if (options.headerText) {
-			header.append("span").html(options.headerText).attr("class", "header");
+			_header.append("span").html(options.headerText).attr("class", "header");
 		}
 		if (!options.showContent && !options.isDemo) {
-            header.node().lastChild.textContent += " (click to expand)";
-            content.style("display", "none");
+            _header.node().lastChild.textContent += " (click to expand)";
+            _content.style("display", "none");
         }
-		return content;
+		return _content;
 	};
 
     /**

@@ -1,9 +1,10 @@
 #Changelog
-##2.1 (Sep 2016)
+##2.1 (Sep/Oct 2016)
     Added new widgets: Touchscreen elements
-    Improved Prototype Builder (live widgets preview, direct support for 6 types of widgets)
-    Refactored widgets library
+    Added new feature: Storyboard editor/simulator (PIM Prototyper)
     Added new example project: Flight Control Unit
+    Improved Prototype Builder (live widgets preview, direct support for different types of buttons, displays, LEDs)
+    Refactored widgets library
 
 ##2.0.2 (April 2016)
     PVSio-web goes live on UMinho servers (http://pvsioweb.lsd.di.uminho.pt)
