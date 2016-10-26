@@ -863,10 +863,13 @@ define(function (require, exports, module) {
                 overWrite: false, // we don't delete the content of the folder, but re-use it.
                 silentMode: true
             }).then(function (res) {
-                resolve(res);
+                finalise(res);
             }).catch(function (err) {
                 if (err.code === "EEXIST") {
-                    finalise(new Project(Constants.defaultProjectName));
+                    //finalise(new Project(Constants.defaultProjectName));
+                    _projectManager.openProject(Constants.defaultProjectName).then(function(res) {
+                        resolve(res);
+                    });
                 } else {
                     reject(err);
                 }
