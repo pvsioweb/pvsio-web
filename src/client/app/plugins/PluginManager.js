@@ -17,6 +17,13 @@ define(function (require, exports, module) {
         eventDispatcher(this);
     }
 
+    function jumpTo(h){
+        if (document.getElementById(h)) {
+            var top = document.getElementById(h).offsetTop;
+            window.scrollTo(0, top);
+        }
+    }
+
     /**
         Enables a plugin
         @param {object} plugin the plugin to enable
@@ -39,16 +46,19 @@ define(function (require, exports, module) {
                     return Promise.all(depPromises).then(function () {
                         plugin.initialise().then(function (res) {
                             resolve(res);
+                            jumpTo(plugin.getName());
                         }).catch(function (err) { reject(err); });
                     }).catch(function (err) { reject(err); });
                 } else {
                     plugin.initialise().then(function (res) {
                         resolve(res);
+                        jumpTo(plugin.getName());
                     }).catch(function (err) { reject(err); });
                 }
             } else {
                 //plugin is already enabled
                 resolve(true);
+                jumpTo(plugin.getName());
             }
         });
     };

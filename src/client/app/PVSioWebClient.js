@@ -163,6 +163,7 @@ define(function (require, exports, module) {
 
 		if (options.owner) {
 			_div.attr("plugin-owner", options.owner);
+            _header.attr("id", options.owner); //this is useful for scrolling the page to the panel
 		}
 		if (options.headerText) {
 			_header.append("span").html(options.headerText).attr("class", "header");
