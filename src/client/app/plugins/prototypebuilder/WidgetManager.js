@@ -61,7 +61,7 @@ define(function (require, exports, module) {
     }
     function installKeypressHandler(wm) {
         d3.select(document).on("keydown", function () {
-            if (d3.select("#btnSimulatorView").classed("active")) {
+            if (d3.select("#btnSimulatorView").node() && d3.select("#btnSimulatorView").classed("active")) {
                 var eventKeyCode = d3.event.which;
                 var widget = wm._keyCode2widget[eventKeyCode];
                 if (widget && typeof widget.evts === "function" && widget.evts().indexOf('click') > -1) {
@@ -78,7 +78,7 @@ define(function (require, exports, module) {
             }
         });
         d3.select(document).on("keyup", function () {
-            if (d3.select("#btnSimulatorView").classed("active")) {
+            if (d3.select("#btnSimulatorView").node() && d3.select("#btnSimulatorView").classed("active")) {
                 var eventKeyCode = d3.event.which;
                 var widget = wm._keyCode2widget[eventKeyCode];
                 if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {

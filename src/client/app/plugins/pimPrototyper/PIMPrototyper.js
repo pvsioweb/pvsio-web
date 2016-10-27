@@ -278,6 +278,8 @@ define(function (require, exports, module) {
             var image = selectedScreen.get("image");
             image.getContent().then(function () {
                 _this._prototypeImageView.setImage(image);
+            }).catch(function (err) {
+                console.error("Failed to select screen: " + err);
             });
         }
     };
