@@ -149,10 +149,19 @@ define(function (require, exports, module) {
     }
 
     function collapseWidgetsList() {
-        //d3.select("#builder-controls").style("display", "none");
+        var width = d3.select("#builder-controls").node().getBoundingClientRect().width;
+        if (width > 0) {
+            widgetListView.width = width;
+            d3.select("#builder-controls").transition().duration(300)
+                .styleTween("width", function() { return d3.interpolateString(widgetListView.width + "px", "0px"); });
+        }
     }
     function expandWidgetsList() {
-        //d3.select("#builder-controls").style("display", "block");
+        var width = d3.select("#builder-controls").node().getBoundingClientRect().width;
+        if (width === 0) {
+            d3.select("#builder-controls").transition().duration(300)
+                .styleTween("width", function() { return d3.interpolateString("0px", widgetListView.width + "px"); });
+        }
     }
 
     function onProjectChanged(event) {
