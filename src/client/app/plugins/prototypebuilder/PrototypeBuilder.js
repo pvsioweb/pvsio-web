@@ -525,8 +525,7 @@ define(function (require, exports, module) {
             parent: "#body",
             owner: this.getName()
         });
-        pbContainer = pbContainer.append("div").attr("style", "display: flex;");
-        pbContainer.html(template);
+        pbContainer.append("div").attr("style", "display: flex;").html(template);
         layoutjs({el: "#body"});
         projectManager.addListener("ProjectChanged", onProjectChanged);
         projectManager.addListener("WidgetsFileChanged", onWidgetsFileChanged);
