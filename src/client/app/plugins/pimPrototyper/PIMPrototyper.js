@@ -1,4 +1,4 @@
-/*global layoutjs */
+/*global layoutjs, console */
 define(function (require, exports, module) {
     "use strict";
     var PVSioWebClient = require("PVSioWebClient"),
