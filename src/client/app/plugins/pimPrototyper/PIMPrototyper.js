@@ -40,7 +40,7 @@ define(function (require, exports, module) {
         });
 
         var opts = {
-            headerText: "PIM Prototyper",
+            headerText: "Storyboard Editor",
             owner: this.getName(),
             ownerObject: this,
             showContent: !this.collapsed,
@@ -140,7 +140,7 @@ define(function (require, exports, module) {
     };
 
     PIMPrototyper.prototype.getName = function () {
-        return "PIM Prototyper";
+        return "Storyboard Editor";
     };
 
     PIMPrototyper.prototype.initialise = function () {

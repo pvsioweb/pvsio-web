@@ -119,7 +119,8 @@ define(function (require, exports, module) {
 
 		options = options || {};
 		options.parent = options.parent || "#body";
-		var _div = d3.select(options.parent).append("div").attr("class", "collapsible-panel-parent");
+        var _div = d3.select(options.parent).append("div").attr("class", "collapsible-panel-parent"); // use this to append
+		// var _div = d3.select(options.parent).insert("div",":first-child").attr("class", "collapsible-panel-parent"); // use this to pre-pend
 		var _header = _div.append("div").classed("header", true);
 		var _content = _div.append("div").attr("class", "collapsible-panel");
 

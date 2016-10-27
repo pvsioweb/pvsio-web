@@ -18,9 +18,20 @@ define(function (require, exports, module) {
     }
 
     function jumpTo(h){
+        // http://bl.ocks.org/mbostock/1649463
+        function scrollTween(offset) {
+          return function() {
+            var i = d3.interpolateNumber(window.pageYOffset || document.documentElement.scrollTop, offset);
+            return function(t) { scrollTo(0, i(t)); };
+          };
+        }
         if (document.getElementById(h)) {
-            var top = document.getElementById(h).offsetTop;
-            window.scrollTo(0, top);
+            var top = document.getElementById(h).offsetTop - 60; // 60 is the height of the PVSio-web tool bar
+            // window.scrollTo(0, top);
+            d3.transition()
+                .delay(100)
+                .duration(500)
+                .tween("scroll", scrollTween(top));
         }
     }
 

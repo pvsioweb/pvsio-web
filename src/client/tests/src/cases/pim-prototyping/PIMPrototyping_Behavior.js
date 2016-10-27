@@ -62,7 +62,7 @@ define(function (require, exports, module) {
 
         // https://github.com/nathanielw/pvsio-web/issues/2
         describe("Switching to PIM prototyping mode", function() {
-            var buttonSelector = ".plugin-box input[name='PIM Prototyper']";
+            var buttonSelector = ".plugin-box input[name='Storyboard Editor']";
 
             it("provides a button to switch to the mode", function() {
                 /*
@@ -76,12 +76,12 @@ define(function (require, exports, module) {
             it("switches to PIM mode correctly", function() {
                 /*
                 Given the prototyping module is visible
-                When the PIM Prototyper tab is clicked
+                When the Storyboard Editor tab is clicked
                 Then the PIM prototyping interface is shown
                  */
 
                 d3.select(buttonSelector).node().click();
-                expect(d3.select(".collapsible-panel-parent[plugin-owner='PIM Prototyper']").empty()).toBe(false);
+                expect(d3.select(".collapsible-panel-parent[plugin-owner='Storyboard Editor']").empty()).toBe(false);
             });
         });
 
@@ -339,7 +339,7 @@ define(function (require, exports, module) {
                 var emuPanel = d3.select(".collapsible-panel-parent[plugin-owner='EmuCharts Editor']");
                 expect(emuPanel.empty()).toBe(false);
 
-                util.wait(100)().then(function() {
+                util.wait(1000)().then(function() {
                     var states = d3.selectAll("#States .state");
                     expect(states.size()).toBe(scrns.length);
                     done();
@@ -356,7 +356,7 @@ define(function (require, exports, module) {
                 */
                 convertChart();
 
-                util.wait(100)().then(function() {
+                util.wait(1000)().then(function() {
                     var transitions = d3.selectAll("#Transitions .transition");
                     expect(transitions.size()).toBe(1);
                     done();

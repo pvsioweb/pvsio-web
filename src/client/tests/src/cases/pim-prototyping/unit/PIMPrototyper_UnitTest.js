@@ -5,7 +5,7 @@ define(function (require, exports, module) {
     Descriptor = require("project/Descriptor");
 
     return function() {
-        describe("the PIM Prototyper class", function () {
+        describe("the Storyboard Editor class", function () {
             var prototyper = PIMPrototyper.getInstance();
             var descriptor;
 

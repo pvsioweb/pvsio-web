@@ -96,7 +96,7 @@ define(function (require, exports, module) {
                     case "EmuCharts Editor":
                         plugin = Emulink.getInstance();
                         break;
-                    case "Graph Builder":
+                    case "State Machine Viewer":
                         plugin = GraphBuilder.getInstance();
                         break;
                     case "Safety Test":
@@ -108,7 +108,7 @@ define(function (require, exports, module) {
                     case "Prototype Builder":
                         plugin = PrototypeBuilder.getInstance();
                         break;
-                    case "PIM Prototyper":
+                    case "Storyboard Editor":
                         plugin = PIMPrototyper.getInstance();
                         break;
                     case "Property Templates":

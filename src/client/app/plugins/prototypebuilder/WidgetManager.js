@@ -280,7 +280,7 @@ define(function (require, exports, module) {
     WidgetManager.prototype.editWidget = function (widget, data) {
         widget.updateWithProperties(data);
         widget.updateStyle(data);
-        widget.render("", { visibleWhen: "true" });
+        widget.renderSample({ visibleWhen: "true" });
         //create an interactive image area only if there isnt one already
         createImageMap(widget);
         if (data.keyCode) {

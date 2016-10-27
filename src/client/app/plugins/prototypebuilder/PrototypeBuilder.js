@@ -465,8 +465,8 @@ define(function (require, exports, module) {
                         }
                         // w.updateLocationAndSize({ x: e.data.x, y: e.data.y, width: e.data.width, height: e.data.height }, { imageMap: true });
                         // w.updateStyle(e.data);
-                        widget.render("", { visibleWhen: "true" });
                     });
+                    widget.renderSample({ visibleWhen: "true" });
 
                     widgetListView.selectWidget(widget, false);
                 }).on("cancel", function (e, view) {

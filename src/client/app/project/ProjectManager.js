@@ -868,7 +868,7 @@ define(function (require, exports, module) {
                 if (err.code === "EEXIST") {
                     //finalise(new Project(Constants.defaultProjectName));
                     _projectManager.openProject(Constants.defaultProjectName).then(function(res) {
-                        resolve(res);
+                        finalise(res);
                     });
                 } else {
                     reject(err);

@@ -10,7 +10,7 @@ define(function (require, exports, module) {
     var ModelEditor = require("plugins/modelEditor/ModelEditor"),
         Emulink = require("plugins/emulink/Emulink"),
 //        SafetyTest = require("plugins/safetyTest/SafetyTest"),
-        PropertyTemplates = require("plugins/propertytemplates/PropertyTemplates"),
+        // PropertyTemplates = require("plugins/propertytemplates/PropertyTemplates"),
         GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
         PIMPrototyper = require("plugins/pimPrototyper/PIMPrototyper"),
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
@@ -195,10 +195,10 @@ define(function (require, exports, module) {
         init: function (data) {
             var plugins = [
                     PrototypeBuilder.getInstance(),
+                    PIMPrototyper.getInstance(),
                     ModelEditor.getInstance(),
                     Emulink.getInstance(),
-                    PIMPrototyper.getInstance(),
-                    PropertyTemplates.getInstance(),
+//                    PropertyTemplates.getInstance(),
                     GraphBuilder.getInstance()
             ];
             data = data || {
