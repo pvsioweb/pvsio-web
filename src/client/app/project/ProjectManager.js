@@ -479,6 +479,7 @@ define(function (require, exports, module) {
      * @instance
      */
     ProjectManager.prototype.createProject = function (data) {
+        data = data || {};
         return new Promise(function (resolve, reject) {
             var success = true;
             var descriptors = [];
@@ -527,24 +528,28 @@ define(function (require, exports, module) {
                         finalise({ project: project, descriptors: descriptors, success: false });
                     });
                 } else {
-                    project.importLocalFiles(data.localPVSSpec).then(function (res) {
-                        if (res) { descriptors = res; }
-                        return project.importLocalFiles(data.localPrototypeImage).then(function (res) {
-                            if (res && res.length > 0) {
-                                descriptors = descriptors.concat(res);
-                                descriptors.push(
-                                    project.addDescriptor(
-                                        new Descriptor(
-                                            "pvsioweb.json",
-                                            JSON.stringify({ prototypeImage: res[0].name })
+                    if (data.localPVSSpec) {
+                        project.importLocalFiles(data.localPVSSpec).then(function (res) {
+                            if (res) { descriptors = res; }
+                            return project.importLocalFiles(data.localPrototypeImage).then(function (res) {
+                                if (res && res.length > 0) {
+                                    descriptors = descriptors.concat(res);
+                                    descriptors.push(
+                                        project.addDescriptor(
+                                            new Descriptor(
+                                                "pvsioweb.json",
+                                                JSON.stringify({ prototypeImage: res[0].name })
+                                            )
                                         )
-                                    )
-                                );
-                            }
-                            finalise(project, descriptors);
-                            resolve(project);
+                                    );
+                                }
+                                finalise({ project: project, descriptors: descriptors, success: true });
+                                resolve(project);
+                            }).catch(function (err) { finalise(project, descriptors); console.log(err); reject(err); });
                         }).catch(function (err) { finalise(project, descriptors); console.log(err); reject(err); });
-                    }).catch(function (err) { finalise(project, descriptors); console.log(err); reject(err); });
+                    } else {
+                        finalise({ project: project, descriptors: descriptors, success: true });
+                    }
                 }
             }).catch(function (err) { reject(err); });
         });

@@ -79,7 +79,7 @@ define(function (require, exports, module) {
             _this.fire({type: "ProjectMainSpecFileChanged", previous: event.old, current: event.fresh});
         });
     }
-    
+
     /**
      * Sets up listeners for widget manager event for widget modification
      */
@@ -817,66 +817,64 @@ define(function (require, exports, module) {
      */
     Project.prototype.initFromJSON = function (descriptors) {
         var _this = this;
-        
-        if (descriptors) {
+
+        if (descriptors && descriptors.length) {
             var name = _this.name();
             var mainFileName, prototypeImage, fileVersion;
-            if (descriptors) {
-                var imageDescriptors = [];
-                descriptors.forEach(function (file) {
-                    if (file && file.path && file.name) {
-                        _this.addDescriptor(file);
-                        if (file.encoding === "base64") { imageDescriptors.push(file); }
-                        if (file.name === "pvsioweb.json" && file.content) {
-                            mainFileName = JSON.parse(file.content).mainPVSFile;
-                            fileVersion = JSON.parse(file.content).version;
-                            prototypeImage = JSON.parse(file.content).prototypeImage;
-                        }
+            var imageDescriptors = [];
+            descriptors.forEach(function (file) {
+                if (file && file.path && file.name) {
+                    _this.addDescriptor(file);
+                    if (file.encoding === "base64") { imageDescriptors.push(file); }
+                    if (file.name === "pvsioweb.json" && file.content) {
+                        mainFileName = JSON.parse(file.content).mainPVSFile;
+                        fileVersion = JSON.parse(file.content).version;
+                        prototypeImage = JSON.parse(file.content).prototypeImage;
                     }
-                });
-                if (fileVersion && parseFloat(fileVersion) >= 2) {
-                    // set the main pvs file descriptor
-                    if (mainFileName) {
-                        var main = _this.getDescriptor(name + "/" + mainFileName);
-                        if (main) { _this.mainPVSFile(main); }
-                    }
-                    // set the prototype image descriptor
-                    if (prototypeImage) {
-                        var image = _this.getDescriptor(name + "/" + prototypeImage);
-                        if (image) { _this.prototypeImage = image; }
-                    }
-                } else { // this code is for backwards compatibility
-                    if (mainFileName) {
-                        var mainX = _this.getDescriptor(name + "/" + mainFileName);
-                        if (mainX) {
-                            _this.mainPVSFile(mainX);
-                        } else if (_this.pvsFilesList()[0]) {
-                            _this.mainPVSFile(_this.pvsFilesList()[0]);
-                        }
+                }
+            });
+            if (fileVersion && parseFloat(fileVersion) >= 2) {
+                // set the main pvs file descriptor
+                if (mainFileName) {
+                    var main = _this.getDescriptor(name + "/" + mainFileName);
+                    if (main) { _this.mainPVSFile(main); }
+                }
+                // set the prototype image descriptor
+                if (prototypeImage) {
+                    var image = _this.getDescriptor(name + "/" + prototypeImage);
+                    if (image) { _this.prototypeImage = image; }
+                }
+            } else { // this code is for backwards compatibility
+                if (mainFileName) {
+                    var mainX = _this.getDescriptor(name + "/" + mainFileName);
+                    if (mainX) {
+                        _this.mainPVSFile(mainX);
                     } else if (_this.pvsFilesList()[0]) {
                         _this.mainPVSFile(_this.pvsFilesList()[0]);
                     }
-                    // set the prototype image descriptor
-                    if (prototypeImage) {
-                        var imageX = _this.getDescriptor(name + "/" + prototypeImage);
-                        if (imageX) {
-                            _this.prototypeImage = imageX;
-                        } else if (imageDescriptors.length > 0) { // this is for backwards compatibility with old projects
-                            _this.prototypeImage = imageDescriptors[0];
-                        }
+                } else if (_this.pvsFilesList()[0]) {
+                    _this.mainPVSFile(_this.pvsFilesList()[0]);
+                }
+                // set the prototype image descriptor
+                if (prototypeImage) {
+                    var imageX = _this.getDescriptor(name + "/" + prototypeImage);
+                    if (imageX) {
+                        _this.prototypeImage = imageX;
                     } else if (imageDescriptors.length > 0) { // this is for backwards compatibility with old projects
                         _this.prototypeImage = imageDescriptors[0];
                     }
+                } else if (imageDescriptors.length > 0) { // this is for backwards compatibility with old projects
+                    _this.prototypeImage = imageDescriptors[0];
                 }
             }
         }
         return _this;
     };
-    
+
     Project.prototype.cleanup = function () {
         WidgetManager.off(null, null, this);
     };
-    
+
     module.exports = Project;
 
     /**
