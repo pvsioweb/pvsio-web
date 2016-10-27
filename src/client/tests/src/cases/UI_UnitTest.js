@@ -113,8 +113,8 @@ define(function (require, exports, module) {
                         }).catch(util.expectError(done));
                 });
 
-                it("Graph Builder tool can be loaded", function (done) {
-                    var p = "Graph Builder";
+                it("State Machine Viewer tool can be loaded", function (done) {
+                    var p = "State Machine Viewer";
                     util.loadPlugin(p).then(function () {
                         var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='{}']".format(p));
                         expect(pluginPanel.empty()).toBeFalsy();
@@ -122,8 +122,8 @@ define(function (require, exports, module) {
                     }).catch(util.expectError(done));
                 });
 
-                it("Graph Builder tool can be unloaded", function (done) {
-                    var p = "Graph Builder";
+                it("State Machine Viewer tool can be unloaded", function (done) {
+                    var p = "State Machine Viewer";
                     util.unloadPlugin(p).then(function () {
                         var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='{}']".format(p));
                         expect(pluginPanel.empty()).toEqual(true);
@@ -186,13 +186,13 @@ define(function (require, exports, module) {
                 });
 
                 it("can add files to the project", function (done) {
-                    var filesLength = pm.project().getDescriptors().length;
+                    var filesLength = pm.project().pvsFilesList().length;
                     util.loadPlugin("Model Editor")
                         .then(util.listViewContextMenu("#pvsFiles", "#newfile"))
                         .then(function () {
                             setTimeout(function () {
-                                expect(pm.project().getDescriptors().length).toEqual(filesLength + 1);
-                                var desc = pm.project().getDescriptors()[pm.project().getDescriptors().length - 1];
+                                expect(pm.project().pvsFilesList().length).toEqual(filesLength + 1);
+                                var desc = pm.project().pvsFilesList()[pm.project().pvsFilesList().length - 1];
                                 expect(desc.path.indexOf(pm.project().name()) === 0).toBeTruthy();
                                 done();
                             }, 1000);
@@ -200,7 +200,7 @@ define(function (require, exports, module) {
                 });
 
                 it("can remove files from the project", function (done) {
-                    var filesLength = pm.project().getDescriptors().length;
+                    var filesLength = pm.project().pvsFilesList().length;
                     util.loadPlugin("Model Editor")
                         .then(util.listViewContextMenu("#pvsFiles", "#newfile"))
                         .then(util.click("#pvsFiles li:last-child"))
@@ -208,7 +208,7 @@ define(function (require, exports, module) {
                         .then(util.click("div.overlay #btnOk"))
                         .then(function () {
                             setTimeout(function () {
-                                expect(pm.project().getDescriptors().length).toEqual(filesLength);
+                                expect(pm.project().pvsFilesList().length).toEqual(filesLength);
                                 done();
                             }, 500);
                         }).catch(util.expectError(done));

@@ -149,10 +149,19 @@ define(function (require, exports, module) {
     }
 
     function collapseWidgetsList() {
-        //d3.select("#builder-controls").style("display", "none");
+        var width = d3.select("#builder-controls").node().getBoundingClientRect().width;
+        if (width > 0) {
+            widgetListView.width = width;
+            d3.select("#builder-controls").transition().duration(300)
+                .styleTween("width", function() { return d3.interpolateString(widgetListView.width + "px", "0px"); });
+        }
     }
     function expandWidgetsList() {
-        //d3.select("#builder-controls").style("display", "block");
+        var width = d3.select("#builder-controls").node().getBoundingClientRect().width;
+        if (width === 0) {
+            d3.select("#builder-controls").transition().duration(300)
+                .styleTween("width", function() { return d3.interpolateString("0px", widgetListView.width + "px"); });
+        }
     }
 
     function onProjectChanged(event) {
@@ -465,8 +474,8 @@ define(function (require, exports, module) {
                         }
                         // w.updateLocationAndSize({ x: e.data.x, y: e.data.y, width: e.data.width, height: e.data.height }, { imageMap: true });
                         // w.updateStyle(e.data);
-                        widget.render("", { visibleWhen: "true" });
                     });
+                    widget.renderSample({ visibleWhen: "true" });
 
                     widgetListView.selectWidget(widget, false);
                 }).on("cancel", function (e, view) {
@@ -516,6 +525,7 @@ define(function (require, exports, module) {
             parent: "#body",
             owner: this.getName()
         });
+        pbContainer.attr("style", "display: flex;");
         pbContainer.html(template);
         layoutjs({el: "#body"});
         projectManager.addListener("ProjectChanged", onProjectChanged);

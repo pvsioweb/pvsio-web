@@ -1,7 +1,7 @@
 #Changelog
 ##2.1 (Sep/Oct 2016)
     Added new widgets: Touchscreen elements
-    Added new feature: Storyboard editor/simulator (PIM Prototyper)
+    Added new feature: Storyboard editor/simulator
     Added new example project: Flight Control Unit
     Improved Prototype Builder (live widgets preview, direct support for different types of buttons, displays, LEDs)
     Refactored widgets library

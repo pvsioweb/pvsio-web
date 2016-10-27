@@ -1,4 +1,4 @@
-/*global layoutjs */
+/*global layoutjs, console */
 define(function (require, exports, module) {
     "use strict";
     var PVSioWebClient = require("PVSioWebClient"),
@@ -40,7 +40,7 @@ define(function (require, exports, module) {
         });
 
         var opts = {
-            headerText: "PIM Prototyper",
+            headerText: "Storyboard Editor",
             owner: this.getName(),
             ownerObject: this,
             showContent: !this.collapsed,
@@ -140,7 +140,7 @@ define(function (require, exports, module) {
     };
 
     PIMPrototyper.prototype.getName = function () {
-        return "PIM Prototyper";
+        return "Storyboard Editor";
     };
 
     PIMPrototyper.prototype.initialise = function () {
@@ -278,6 +278,8 @@ define(function (require, exports, module) {
             var image = selectedScreen.get("image");
             image.getContent().then(function () {
                 _this._prototypeImageView.setImage(image);
+            }).catch(function (err) {
+                console.error("Failed to select screen: " + err);
             });
         }
     };

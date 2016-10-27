@@ -17,6 +17,24 @@ define(function (require, exports, module) {
         eventDispatcher(this);
     }
 
+    function jumpTo(h){
+        // http://bl.ocks.org/mbostock/1649463
+        function scrollTween(offset) {
+          return function() {
+            var i = d3.interpolateNumber(window.pageYOffset || document.documentElement.scrollTop, offset);
+            return function(t) { scrollTo(0, i(t)); };
+          };
+        }
+        if (document.getElementById(h)) {
+            var top = document.getElementById(h).offsetTop - 60; // 60 is the height of the PVSio-web tool bar
+            // window.scrollTo(0, top);
+            d3.transition()
+                .delay(100)
+                .duration(500)
+                .tween("scroll", scrollTween(top));
+        }
+    }
+
     /**
         Enables a plugin
         @param {object} plugin the plugin to enable
@@ -39,16 +57,19 @@ define(function (require, exports, module) {
                     return Promise.all(depPromises).then(function () {
                         plugin.initialise().then(function (res) {
                             resolve(res);
+                            jumpTo(plugin.getName());
                         }).catch(function (err) { reject(err); });
                     }).catch(function (err) { reject(err); });
                 } else {
                     plugin.initialise().then(function (res) {
                         resolve(res);
+                        jumpTo(plugin.getName());
                     }).catch(function (err) { reject(err); });
                 }
             } else {
                 //plugin is already enabled
                 resolve(true);
+                jumpTo(plugin.getName());
             }
         });
     };
