@@ -59,7 +59,7 @@ define(function (require, exports, module) {
      */
     PIMProjectManager.prototype.serializeProject = function () {
         var screens = this.screens().toJSON();
-        return JSON.stringify(screens);
+        return JSON.stringify(screens, null, " ");
     };
 
     /**
@@ -98,11 +98,11 @@ define(function (require, exports, module) {
 
         // If the new project has a PIM prototype file, load it in, otherwise create an empty descriptor for it
         if (pimDescriptor) {
-                pimDescriptor.getContent().then(function (res) {
-                    var json = JSON.parse(res);
-                    _this.initFromJSON(json);
-                    _this.trigger("PIMProjectChanged");
-                });
+            pimDescriptor.getContent().then(function (res) {
+                var json = JSON.parse(res);
+                _this.initFromJSON(json);
+                _this.trigger("PIMProjectChanged");
+            });
         } else {
             pimDescriptor = new Descriptor(PIM_FILE_NAME, "[]", { encoding: "utf8" });
             this._project.addDescriptor(pimDescriptor);
