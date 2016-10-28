@@ -66,6 +66,7 @@ define(function (require, exports, module) {
 
         _updateSelectedText: function () {
             this.d3El.select(".btn-screen-dropdown_label").text(this._selected ? this._selected.get("name") : "Select a screen");
+            this.d3El.select("#btn-screen-dropdown_label_star").node().style.display = (this._selected && this._selected.attributes.isInitial) ? "block" : "none";
         },
 
         _updateScreenList: function () {
@@ -83,9 +84,17 @@ define(function (require, exports, module) {
                     _this.trigger("screenSelected", d);
                 });
 
-            selection.select("a").text(function(d) {
-                return d.get("name");
-            });
+            selection.select("a")
+                .attr("data-toggle", "popover").attr("data-trigger", "hover").attr("data-content", function (d) {
+                    return (d.attributes.isInitial) ? "Initial Screen" : "";
+                })
+                .append("span").attr("class", "glyphicon glyphicon-star").attr("style", function (d) {
+                    return (d.attributes.isInitial) ? "color: blue; width:20px;" : "color: transparent; width:20px;";
+                });
+
+            selection.select("a").append("span").text(function(d) {
+                    return d.get("name");
+                });
 
             selection.exit().remove();
         }

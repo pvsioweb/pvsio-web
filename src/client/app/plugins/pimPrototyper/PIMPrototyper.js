@@ -288,7 +288,13 @@ define(function (require, exports, module) {
         this._screens = this._projectManager.screens();
         this._screens.on("selectionChanged", this._onSelectedScreenChange, this);
         this._screenControlsView.setCollection(this._screens);
-        this._onSelectedScreenChange();
+        // when a project is loaded, automatically select the initial screen, if one has been set
+        var initialScreen = this._screens.models.filter(function (model) { return model.attributes.isInitial; });
+        if (initialScreen && initialScreen.length > 0) {
+            this._screens.setSelected(initialScreen[0]);
+        } else {
+            this._onSelectedScreenChange();
+        }
     };
 
     /**
