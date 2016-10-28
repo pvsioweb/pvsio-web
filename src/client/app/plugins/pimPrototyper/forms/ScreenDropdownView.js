@@ -75,7 +75,7 @@ define(function (require, exports, module) {
             this._updateSelectedText();
 
             var selection = this._dropdown.selectAll("li")
-                .data(this.collection.models);
+                .data(this.collection.models, function (screen) { return screen.attributes.name; });
 
             var listItemsEnter = selection.enter().append("li");
 
