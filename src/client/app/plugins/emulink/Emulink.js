@@ -924,8 +924,9 @@ define(function (require, exports, module) {
             console.log("layout");
             var editor = emuchartsManager.getSelectedEditor();
             if (editor) {
-                editor.emucharts.layOutChart();
-                emuchartsManager.render();
+                var trans = editor.getTransformation();
+                editor.layOutChart();
+                emuchartsManager.render({ trans: trans });
             }
         });
 

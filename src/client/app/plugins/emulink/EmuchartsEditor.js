@@ -1744,7 +1744,8 @@ define(function (require, exports, module) {
      * Interface function for rendering the emuchart
      * @memberof EmuchartsEditor
      */
-    EmuchartsEditor.prototype.render = function () {
+    EmuchartsEditor.prototype.render = function (opt) {
+        opt = opt || {};
         var container = "#ContainerStateMachine";
         if (d3.select(container + " svg").node()) {
             d3.select(container).node().removeChild(d3.select(container + " svg").node());
@@ -1752,11 +1753,128 @@ define(function (require, exports, module) {
         this.renderStates();
         this.renderTransitions();
         this.renderInitialTransitions();
+        if (opt.trans) {
+            d3.select(container + " svg").select("#States").attr("transform", opt.trans);
+            d3.select(container + " svg").select("#Transitions").attr("transform", opt.trans);
+            d3.select(container + " svg").select("#InitialTransitions").attr("transform", opt.trans);
+            d3.select(container + " svg").select("#dragline").attr("transform", opt.trans);
+        }
         refreshStates();
         refreshTransitions();
         refreshInitialTransitions();
         return this;
     };
+
+
+    EmuchartsEditor.prototype.getTransformation = function () {
+        if (!this.emucharts.nodes.empty()) {
+            return d3.select("#ContainerStateMachine").select("svg").select("#States").attr("transform");
+        }
+        return "";
+    };
+
+    EmuchartsEditor.prototype.layOutChart = function () {
+        var nodes = this.emucharts.nodes.values();
+        var links = this.emucharts.edges.values();
+        var width = 640;
+        var height = 640;
+
+        var extraNodes = [];
+        var extendedLinks = [];
+        links.forEach(function (link) {
+            if (link.controlPoint) {
+                // link.controlPoint.x = link.controlPoint.x || (link.target.x + link.source.x) / 2;
+                // link.controlPoint.y = link.controlPoint.y || (link.target.y + link.source.y) / 2;
+                extendedLinks = extendedLinks.concat({ source: link.source, target: link.controlPoint });
+                extendedLinks = extendedLinks.concat({ source: link.controlPoint, target: link.target });
+                extraNodes = extraNodes.concat(link.controlPoint);
+            }
+        });
+
+        var force = d3.layout.force()
+            .nodes(nodes.concat(extraNodes))
+            .links(extendedLinks)
+            .size([width, height])
+            .charge(-4096)
+            .gravity(1)
+            .linkDistance(48)
+            .on("tick", function() {
+                if (_this.initial_edge) {
+                    _this.initial_edge.target.y -= 8;
+                }
+            });
+
+        force.start();
+        for (var i = 0; i < 2048; i++) {
+            force.tick();
+        }
+        force.stop();
+        return this;
+        // d3.select("#ContainerStateMachine").select("svg").select("#States").attr("transform", trans);
+        // d3.select("#ContainerStateMachine").select("svg").select("#Transitions").attr("transform", trans);
+        // d3.select("#ContainerStateMachine").select("svg").select("#InitialTransitions").attr("transform", trans);
+
+    };
+    /**
+     * @function layOutChart
+     * @description Lays out the chart using a force-directed layout
+     * @memberof module:EmuchartsEditor
+     * @instance
+     */
+    EmuchartsEditor.prototype.layOutChart_nath = function () {
+        var nodes = this.emucharts.nodes.values();
+        var links = this.emucharts.edges.values();
+        var width = 500;
+        var height = 500;
+
+        var force = d3.layout.force()
+            .nodes(nodes)
+            .links(links)
+            .size([width, height])
+            .charge(-5000)
+            .gravity(0.4)
+            .linkDistance(function(d){
+                // Nodes with lots of links are put close to their siblings. Helps reduce crossings (a little)
+                return Math.max((1/d.target.weight)*600, 100);
+            })
+            .on("tick", function(e) {
+                // Push each node up or down depending on its balance of incoming and outgoing edges.
+                // This will push leaf nodes down and root nodes up, giving a slightly more logical layout
+                var dist = 50 * e.alpha;
+
+                links.forEach(function(link) {
+                    link.source.y -= dist;
+                    link.target.y += dist;
+                });
+            });
+
+        force.start();
+        for (var i = 0; i < 100; ++i) {
+            force.tick();
+        }
+        force.stop();
+
+        // Move the anchor point of each link to be more visually appealing
+        links.forEach(function(link) {
+            if (link.source !== link.target) {
+                if (!link.controlPoint) {
+                    link.controlPoint = {x: 0, y: 0};
+                }
+
+                var dx = link.target.x - link.source.x;
+                var dy = link.target.y - link.source.y;
+
+                link.controlPoint.x = link.source.x + (dx * 0.2);
+                link.controlPoint.y = link.target.y - (dy * 0.2);
+            } else {
+                // let self-loops deal with layout themselves
+                link.controlPoint = null;
+            }
+        });
+    };
+
+
+
 
     EmuchartsEditor.prototype.preview = function (container, scale_zoom, type) {
         if (container && d3.select(container).node()) {
