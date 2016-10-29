@@ -1783,24 +1783,29 @@ define(function (require, exports, module) {
         var extendedLinks = [];
         links.forEach(function (link) {
             if (link.controlPoint) {
-                // link.controlPoint.x = link.controlPoint.x || (link.target.x + link.source.x) / 2;
-                // link.controlPoint.y = link.controlPoint.y || (link.target.y + link.source.y) / 2;
                 extendedLinks = extendedLinks.concat({ source: link.source, target: link.controlPoint });
                 extendedLinks = extendedLinks.concat({ source: link.controlPoint, target: link.target });
                 extraNodes = extraNodes.concat(link.controlPoint);
             }
         });
 
+        var initial_edges = this.emucharts.getInitialEdges();
+
         var force = d3.layout.force()
             .nodes(nodes.concat(extraNodes))
             .links(extendedLinks)
             .size([width, height])
             .charge(-4096)
-            .gravity(1)
+            .gravity(0.8)
             .linkDistance(48)
             .on("tick", function() {
-                if (_this.initial_edge) {
-                    _this.initial_edge.target.y -= 8;
+                // pull initial state towards left-up
+                if (initial_edges.size() > 0) {
+                    initial_edges.values().forEach(function (initial_edge) {
+                        console.log("initial found1");
+                        initial_edge.target.y -= 1;
+                        initial_edge.target.x -= 2;
+                    });
                 }
             });
 
@@ -1809,11 +1814,38 @@ define(function (require, exports, module) {
             force.tick();
         }
         force.stop();
-        return this;
-        // d3.select("#ContainerStateMachine").select("svg").select("#States").attr("transform", trans);
-        // d3.select("#ContainerStateMachine").select("svg").select("#Transitions").attr("transform", trans);
-        // d3.select("#ContainerStateMachine").select("svg").select("#InitialTransitions").attr("transform", trans);
 
+        // Set control points of self-loops on a same node so the emucharts is more visually appealing
+        var offsetX = 48, offsetY = 200;
+        var done = d3.map();
+        links.forEach(function(link) {
+            if (link.source === link.target && !done.get(link.target)) {
+                // find all self-loops of the target node
+                var worklist = links.filter(function (l) {
+                    return l.target === link.target && l.source === l.target;
+                });
+                if (worklist.length === 1) {
+                    worklist[0].controlPoint.x = worklist[0].target.x + offsetX;
+                    worklist[0].controlPoint.y = worklist[0].target.y - offsetX * 2;
+                } else {
+                    // put control points on a diagonal line, evenly spaced
+                    var dx = 0, dy = 0, reversed = false;
+                    worklist.forEach(function (l) {
+                        l.controlPoint.x = l.target.x + dx + offsetX;
+                        l.controlPoint.y = l.target.y + dy - offsetY;
+
+                        if (!reversed && Math.abs(dy - offsetY) < 48) {
+                            dy += 64;
+                            reversed = true;
+                        }
+                        dy += 16;
+                        dx = (dy > offsetY) ? dx - 20 : dx + 20;
+                        done.set(l.target);
+                    });
+                }
+            }
+        });
+        return this;
     };
     /**
      * @function layOutChart
