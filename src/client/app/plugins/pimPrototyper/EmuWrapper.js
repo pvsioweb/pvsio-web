@@ -46,7 +46,7 @@ define(function (require, exports, module) {
             }
         });
 
-        this._emuchartsEditor.emucharts.layOutChart();
+        this._emuchartsEditor.layOutChart();
         this._emuchartsEditor.render();
     };
 

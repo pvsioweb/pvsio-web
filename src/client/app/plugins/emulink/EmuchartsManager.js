@@ -29,6 +29,10 @@ define(function (require, exports, module) {
         return this;
     }
 
+    EmuchartsManager.prototype.getTransformation = function () {
+        return _selectedEditor.getTransformation();
+    };
+
     EmuchartsManager.prototype.installHandlers = function (editor) {
         var _this = this;
         editor.addListener("emuCharts_editorModeChanged", function (event) { _this.fire(event); });
@@ -385,8 +389,8 @@ define(function (require, exports, module) {
      * Draws the diagrams stored in _emucharts.
      * @memberof EmuchartsManager
      */
-    EmuchartsManager.prototype.render = function () {
-        _selectedEditor.render();
+    EmuchartsManager.prototype.render = function (opt) {
+        _selectedEditor.render(opt);
         return this;
     };
 

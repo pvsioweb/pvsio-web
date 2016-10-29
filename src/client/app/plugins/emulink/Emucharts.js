@@ -523,64 +523,6 @@ define(function (require, exports, module) {
     };
 
     /**
-     * @function layOutChart
-     * @description Lays out the chart using a force-directed layout
-     * @memberof module:Emucharts
-     * @instance
-     */
-    Emucharts.prototype.layOutChart = function () {
-        var nodes = _this.nodes.values();
-        var links = _this.edges.values();
-        var width = 500;
-        var height = 500;
-
-        var force = d3.layout.force()
-            .nodes(nodes)
-            .links(links)
-            .size([width, height])
-            .charge(-5000)
-            .gravity(0.4)
-            .linkDistance(function(d){
-            // Nodes with lots of links are put close to their siblings. Helps reduce crossings (a little)
-            return Math.max((1/d.target.weight)*600, 100);
-        })
-        .on("tick", function(e) {
-            // Push each node up or down depending on its balance of incoming and outgoing edges.
-            // This will push leaf nodes down and root nodes up, giving a slightly more logical layout
-            var dist = 50 * e.alpha;
-
-            links.forEach(function(link) {
-                link.source.y -= dist;
-                link.target.y += dist;
-            });
-        });
-
-        force.start();
-        for (var i = 0; i < 100; ++i) {
-            force.tick();
-        }
-        force.stop();
-
-        // Move the anchor point of each link to be more visually appealing
-        links.forEach(function(link) {
-            if (link.source !== link.target) {
-                if (!link.controlPoint) {
-                    link.controlPoint = {x: 0, y: 0};
-                }
-
-                var dx = link.target.x - link.source.x;
-                var dy = link.target.y - link.source.y;
-
-                link.controlPoint.x = link.source.x + (dx * 0.2);
-                link.controlPoint.y = link.target.y - (dy * 0.2);
-            } else {
-                // let self-loops deal with layout themselves
-                link.controlPoint = null;
-            }
-        });
-    };
-
-    /**
      * @function getFreshStateName
      * @description Returns a fresh (i.e., not used by other nodes in the diagram) node name.
      * @returns {String} A fresh node name.

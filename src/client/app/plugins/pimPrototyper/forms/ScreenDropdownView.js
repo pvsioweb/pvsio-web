@@ -75,7 +75,9 @@ define(function (require, exports, module) {
             this._updateSelectedText();
 
             var selection = this._dropdown.selectAll("li")
-                .data(this.collection.models);//, function (screen) { return screen.attributes.name; });
+                .data(this.collection.models, function (screen) {
+                    return screen.attributes.id;
+                });
 
             var listItemsEnter = selection.enter().append("li");
 
@@ -84,13 +86,13 @@ define(function (require, exports, module) {
                     _this.trigger("screenSelected", d);
                 });
 
-            // selection.select("a")
-            //     .attr("data-toggle", "popover").attr("data-trigger", "hover").attr("data-content", function (d) {
-            //         return (d.attributes.isInitial) ? "Initial Screen" : "";
-            //     })
-            //     .append("span").attr("class", "glyphicon glyphicon-star").attr("style", function (d) {
-            //         return (d.attributes.isInitial) ? "color: blue; width:20px;" : "color: transparent; width:20px;";
-            //     });
+            selection.select("a")
+                .attr("data-toggle", "popover").attr("data-trigger", "hover").attr("data-content", function (d) {
+                    return (d.attributes.isInitial) ? "Initial Screen" : "";
+                })
+                .append("span").attr("class", "glyphicon glyphicon-star").attr("style", function (d) {
+                    return (d.attributes.isInitial) ? "color: blue; width:20px;" : "color: transparent; width:20px;";
+                });
 
             selection.select("a").append("span").text(function(d) {
                     return d.get("name");
