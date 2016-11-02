@@ -1,6 +1,7 @@
 {{&descriptor}}
 {{#each importings}}
 {{&.}}{{/each}}
+#include <jni.h>
 {{#if states}}
 /** 
  * Enumeration of state labels.
@@ -16,20 +17,6 @@ typedef enum {
 {{~#each constants}}
 extern const {{type}} {{name}};{{/each}}
 {{~/if}}
- 
-/**
- * Structure containing labelled states and variables
- */
-typedef struct{ {{#each structureVar}}
-    {{&.}}{{/each}}
-{{~#if input_variables}}
-    //input variables
-{{~#each input_variables}}
-    {{type}} {{name}};{{/each}}{{~/if}}{{~#if output_variables}}
-    //output variables
-{{~#each output_variables}}
-    {{type}} {{name}};{{/each}}{{~/if}}
-} state;
 
 {{#if transitions}}/** 'Enter' auxiliary function.
  *    \param newStateLabel label to update the current state.
@@ -37,39 +24,39 @@ typedef struct{ {{#each structureVar}}
  *    \return void
  *    \sa leave()
  */
-void enter(MachineState newStateLabel, state *st);
+void enter(const MachineState newStateLabel);
 /** 'Leave' auxiliary function.
  *    \param currentStateLabel label to update the previous state.
  *    \param st state structure pointer
  *    \return void
  *    \sa enter()
  */
-void leave(MachineState currentStateLabel, state *st);{{/if}}
+void leave(const MachineState currentStateLabel);{{/if}}
 
 {{#if initial_transitions}}/** Initialiser.
  *    \param st state structure pointer
- *    \return state structure
+ *    \return void 
  */
-state init(state *st);{{/if}}
+JNIEXPORT void JNICALL init(JNIEnv *env,jobject callingObject,jobject obj);{{/if}}
 {{#if transitions}}{{#each transitions}}
 {{#if id}}/** {{id}} transition function.
  *    It changes state from "{{source.name}}" to "{{target.name}}"{{~#if condition}} when condition [{{&condition}}] holds{{~/if}}.
  *    \param st state structure pointer
- *    \return state structure
+ *    \return void
  *    \pre function is called from the right state ("{{source.name}}")
  *    \post function is moving to the right state ("{{target.name}}")
  */
-state {{id}}(state *st);{{else}}/** {{0.id}} transition function.
+JNIEXPORT void JNICALL {{id}}(JNIEnv *env, jobject callingObject, jobject obj);{{else}}/** {{0.id}} transition function.
  * This function is generated merging two or more triggers with the same name.
  *    It changes state{{~#each .}} from "{{source.name}}" to "{{target.name}}"{{~#if condition}} when condition [{{&condition}}] holds{{~/if}}{{#unless @last}},{{/unless}}
  *
  *    {{/each}}
  *    \param st state structure pointer
- *    \return state structure
+ *    \return void
  *    \pre function is called from the right state ({{#each 0.listSources}}"{{&.}}" {{#unless @last}}or {{/unless}}{{/each}})
  *    \post function is moving to the right state ({{#each 0.listTargets}}"{{&.}}" {{#unless @last}}or {{/unless}}{{/each}})
  */
-state {{0.id}}(state *st);{{/if}}
+JNIEXPORT void JNICALL {{0.id}}(JNIEnv *env, jobject callingObject, jobject obj);{{/if}}
 {{/each}}{{/if}}
 {{#if transitions}}
 {{#each transitions}}{{#if id}}/** {{id}} permission function for transition.
@@ -78,13 +65,37 @@ state {{0.id}}(state *st);{{/if}}
  *    \param st state structure pointer
  *    \return boolean
  */
-UC_8 per_{{id}}(const state *st);{{else}}/** {{0.id}} permission function for transition.
+JNIEXPORT jboolean JNICALL per_{{id}}(JNIEnv *env, jobject callingObject, jobject obj);{{else}}/** {{0.id}} permission function for transition.
  * Use to check if functions can be performed, it controls if the current state is eligible.
  * (i.e., current state is {{#each 0.listSources}}"{{&.}}"{{#unless @last}} or {{/unless}}{{/each}})
  *    \param st state structure pointer
  *    \return boolean
  */
-UC_8 per_{{0.id}}(const state *st);{{/if}}
+JNIEXPORT jboolean JNICALL per_{{0.id}}(JNIEnv *env, jobject callingObject, jobject obj);{{/if}}
 
 {{/each}}{{/if}}
+
+{{~#if local_variables}}
+/* definition of utility functions */
+{{~#each local_variables}}
+/** Get {{name}} function.
+ *    \return {{type}}
+ */
+JNIEXPORT {{type}} JNICALL Get_1{{name}}(JNIEnv *env, jobject callingObject);
+{{/each}}{{~/if}}
+{{~#if input_variables}}
+{{~#each input_variables}}
+/** Get {{name}} function.
+ *    \return {{type}}
+ */
+JNIEXPORT {{type}} JNICALL Get_1{{name}}(JNIEnv *env, jobject callingObject);
+{{/each}}{{~/if}}
+{{~#if output_variables}}
+{{~#each output_variables}}
+/** Get {{name}} function.
+ *    \return {{type}}
+ */
+JNIEXPORT {{type}} JNICALL Get_1{{name}}(JNIEnv *env, jobject callingObject);
+{{/each}}{{~/if}}
+
 {{&disclaimer}}

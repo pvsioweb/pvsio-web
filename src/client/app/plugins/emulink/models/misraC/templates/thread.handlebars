@@ -11,18 +11,18 @@
 
 {{~#if constants}}
 /* constants variables */
-{{~#each constants}}{{!-- {{keyword static may be applied with respect to MISRA 1998 rule (Rule 23, advisory)}} --}}
+{{~#each constants}}
 const {{type}} {{name}}{{#if value}} = {{&value}}{{/if}};{{/each}}
 {{~/if}}
 {{#if transitions}}
 /* definition of auxiliary functions */
-void enter(const MachineState newStateLabel, state *st) {
+void enter(MachineState newStateLabel, state *st) {
 #ifdef DEBUG
     debug_print("Entering state nr. '%u'.\n", newStateLabel);
 #endif
     st->current_state = newStateLabel;
 }
-void leave(const MachineState currentStateLabel, state *st) {
+void leave(MachineState currentStateLabel, state *st) {
 #ifdef DEBUG    
     debug_print("Leaving state nr. '%u'.\n", currentStateLabel);
 #endif    
@@ -62,8 +62,6 @@ state init(state *st){
 {{#if transitions}}/* definition of transition functions */
 {{#each transitions}}{{#if id}}state {{id}}(state *st) {
     assert( st->current_state == {{source.name}});
-    {{~#if condition}}
-    assert( {{&condition}} );{{~/if}}
 {{~#if condition}}
     if ({{&condition}}) {
         leave({{source.name}}, st);
@@ -80,7 +78,7 @@ state init(state *st){
     {{&.}};
 #ifdef DEBUG    
     debug_print("Action {{&.}} issued.\n");
-#endiaaaf{{~/each}}
+#endif{{~/each}}
   
     enter({{target.name}}, st);
 {{~/if}}
@@ -119,16 +117,15 @@ state init(state *st){
 {{/each}}{{/if}}
 {{#if transitions}}/* definition of permission function for transition functions */
 {{#each transitions}}{{#if id}}UC_8 per_{{id}}(const state *st) {
-    if(st->current_state == {{source.name}}){
+    if (st->current_state == {{source.name}}){
         return true;
     }
     return false;
 }
 {{else}}UC_8 per_{{0.id}}(const state *st) {
-{{#each 0.listSources}}
-    if (st->current_state ==  {{&.}}){
+    if ({{#each 0.listSources}}st->current_state ==  {{&.}} {{#unless @last}}|| {{/unless}}{{/each}}){
         return true;
-    }{{/each}}
+    }
     return false;
 }
 {{/if}}

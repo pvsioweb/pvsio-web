@@ -1,10 +1,8 @@
 {{&descriptor}}
 #include "{{filename}}.h"
-#define STDIO_H
 #include <stdio.h>
 #include <string.h>
 #define NUM_OF_FUNC {{transitions.length}}
-#define NUM_OF_TESTS 20
 
 
 int main(){
@@ -17,24 +15,13 @@ int main(){
     printf("Initialised, current state: %s \n-------\n", MachineState[s.current_state]);
     
     /*
-     * It's recommended to call permission function before issuing the transition function as follow
-     *   if (per_{{#if transitions/0.id}}{{transitions/0.id}}{{else}}{{transitions/0.0.id}}{{/if}}(&s)){
-     *      {{#if transitions/0.id}}{{transitions/0.id}}{{else}}{{transitions/0.0.id}}{{/if}}(&s);
-     *      // Actions issued
-     *   }
-     *   else{
-     *      // Permission denied
-     *   }
-     */
-    
-    /*
-     * Example generated in order to call all the functions with a stochastic process
-     * (this example doesn't have the knowledge of the diagram, it's illustrative purposes only)
+     * Example generated in order to call all the functions
+     * with the use of a menu to select the required function
+     * (this example uses the standard output stream, it is illustrative purposes only)
      */
      
     char *function_name[] = { {{#each transitions}}"{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}"{{#unless @last}}, {{/unless}}{{/each}} };   ///< Useful for printf()
-    int t = NUM_OF_FUNC;
-    int i;
+    int t, i;
     printf("List of functions name\n");
     for(i = 1; i <= NUM_OF_FUNC; i++){
         printf("%d - %s\n", i, function_name[i-1]);
@@ -47,14 +34,14 @@ int main(){
         }
         t--;
         printf("\n");
-        if (t >= NUM_OF_FUNC){
+        if ( (t < 0) || (t >= NUM_OF_FUNC) ){
             printf("Wrong input\n");
-            continue;
+            return 1;
         }
-        if (t < 0){
-            break;
-        }
-        {{#each transitions}}if (strcmp(function_name[t], "{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}") == 0){
+        /*
+        * It's recommended to call permission function before issuing the transition function as follow
+        */
+        {{#each transitions}}else if (strcmp(function_name[t], "{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}") == 0){
             if (per_{{#if id}}{{id}}{{else}}{{0.id}}{{/if}}(&s)){
                 {{#if id}}{{id}}{{else}}{{0.id}}{{/if}}(&s);
                 printf("Press %s: current state: %s previous state: %s \n", function_name[t], MachineState[s.current_state], MachineState[s.previous_state]);
@@ -62,9 +49,11 @@ int main(){
             else{
                 printf("Permission to %s function denied\n", function_name[t]);
             }
-            continue;
         }
         {{/each}} 
+        else{
+            return 1;
+        }
     }    
     return 0;
 }
