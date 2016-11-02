@@ -44,6 +44,15 @@ clean:
 	-@rm -f -r ./*.o $(NAME) $(DEBUGFILES)
 	@echo $(OBJ) "removed successfully!"
 
+android:
+	@sed -i-e 's/st->//' Android_{{filename}}.c
+	@sed -i-e 's/st->//' Android_{{filename}}.h
+	@sed -i-e 's/JNICALL /JNICALL $(PROJECT)/' Android_{{filename}}.c
+	@sed -i-e 's/JNICALL /JNICALL $(PROJECT)/' Android_{{filename}}.h
+	@sed rm Android_{{filename}}.c-e
+	@sed rm Android_{{filename}}.h-e
+	@echo "Edited 'Android_{{filename}}.c' and 'Android_{{filename}}.h' in order to use them with NDK."
+
 help:
 	@echo
 	@echo "Makefile"
@@ -54,6 +63,8 @@ help:
 	@echo "uninstall        : remove tool from system. Root permission required"
 	@echo "clean            : remove all .o files and executable file"
 	@echo "NAME=yourname    : change program name, default is: 'main' "
+	@echo "android		    : edit Android files for an utilization with NDK"
+	@echo "PROJECT=your_android_project_path_and_activity"
 	@echo
 	@echo  "-------------------------------------------------------------"
 	@echo  "  Makefile generated using PVSio-web MisraCPrinter ver 0.1"

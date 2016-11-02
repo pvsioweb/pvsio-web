@@ -1,6 +1,6 @@
 /**
  * @author Gioacchino Mauro
- * @date Gio 31 Mar 2016 11:29:34 CEST
+ * @date Mer 11 Mag 2016 10:50:09 CEST
  *
  * MISRA C code printer for emucharts models.
  * Emuchart objects have the following structure:
@@ -39,15 +39,18 @@
                                 },
                                 listSources: (array of 
                                     :(string)       // sources state label list in case of homonymous transitions with different source
+                                                    // (this array is present only into the first object of the array with the same trigger name)
                                 ),
                                 listTargets: (array of 
                                     :(string)       // target state label list in case of homonymous transitions with different target
+                                                    // (this array is present only into the first object of the array with the same trigger name)
                                 ),
-                               (array of array in case of homonymous transitions),
                             }),
                 initial_transitions: (array of {
-                                name: (string), // the initial transition label
-                                id: (string),   // a unique identifier
+                                name: (string),         // the initial transition label
+                                id: (string),           // a unique identifier
+                                condition: (string),    // It is an optional, in case of multiple initial transitions
+                                actions: (string)       // It is an optional, in case of different expression, instead of initializations
                                 target: {
                                     name: (string), // the target state label
                                     id: (string)    // a unique identifier
@@ -61,6 +64,8 @@ define(function (require, exports, module) {
     var headerTemplate = require("text!plugins/emulink/models/misraC/templates/header.handlebars");
     var mainTemplate = require("text!plugins/emulink/models/misraC/templates/main.handlebars");
     var doxygenTemplate = require("text!plugins/emulink/models/misraC/templates/doxygen.handlebars");
+    var Android_threadTemplate = require("text!plugins/emulink/models/misraC/templates/threadAndroid.handlebars");
+    var Android_headerTemplate = require("text!plugins/emulink/models/misraC/templates/headerAndroid.handlebars");
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
     var _parser = new EmuchartsParser();
@@ -445,7 +450,7 @@ define(function (require, exports, module) {
                     return getExpression(a, emuchart);
                 });
             }
-            return {id: id.val, actions: actions, condition: condition, source: t.source, target: t.target, listSources: [], listTargets: []};
+            return {id: id.val, actions: actions, condition: condition, source: t.source, target: t.target };
         } else if (functionBody.err) {
             displayError(functionBody.err);
             return { erroneousLabel: name, parserError: functionBody.err };
@@ -677,7 +682,7 @@ define(function (require, exports, module) {
     
     Printer.prototype.print_disclaimer = function (emuchart) {
         this.model.disclaimer = "\n/** ---------------------------------------------------------------\n" +
-                    "*   C code generated using PVSio-web MisraCPrinter ver 0.1\n" +
+                    "*   C code generated using PVSio-web MisraCPrinter ver 1.0\n" +
                     "*   Tool freely available at http://www.pvsioweb.org" +
                     "\n*  --------------------------------------------------------------*/\n";
         this.model.makefile_disclaimer = this.model.disclaimer.replace(/\*|\//g,'#');
@@ -702,8 +707,10 @@ define(function (require, exports, module) {
         var header = Handlebars.compile(headerTemplate)(this.model);
         var main = Handlebars.compile(mainTemplate)(this.model);
         var doxygen = Handlebars.compile(doxygenTemplate)(this.model);
+        var Android_thread = Handlebars.compile(Android_threadTemplate)(this.model);
+        var Android_header = Handlebars.compile(Android_headerTemplate)(this.model);
         declarations = [];
-        return {makefile: makefile, thread: thread, header: header, main: main, doxygen: doxygen};
+        return {makefile: makefile, thread: thread, header: header, main: main, doxygen: doxygen, Android_thread: Android_thread, Android_header: Android_header};
     };
 
     module.exports = Printer;
