@@ -86,15 +86,6 @@ define(function (require, exports, module) {
                    " });" +
                    " $$ = $$.concat($3)";
         }
-        function exprModOp() {
-            return " if (!Array.isArray($$)) { $$ = []; }" +
-                   " Array.isArray($1) ? $$.concat($1) : $$.push($1);" +
-                   " $$.push({" +
-                   "      type: 'modop'," +
-                   "      val:  $2.toUpperCase()" +
-                   " });" +
-                   " $$ = $$.concat($3)";
-        }
         function exprWithUnaryOp() {
             return " if (!Array.isArray($$)) { $$ = []; }" +
                    " $$.push({" +

@@ -103,7 +103,7 @@ define(function (require, exports, module) {
             this.importEmucharts({ name: chart.chart_name, content: chart });
         }
         return this;
-    }
+    };
 
     /**
      * Imports the emuchart passed as argument.

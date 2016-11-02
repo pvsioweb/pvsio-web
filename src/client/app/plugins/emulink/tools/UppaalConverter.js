@@ -8,7 +8,7 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var uppaalParser = require("plugins/emulink/tools/UppaalParser");
+    var UppaalParser = require("plugins/emulink/tools/UppaalParser");
 
     var instance;
 
@@ -39,7 +39,7 @@ define(function (require, exports, module) {
                  transitions: transitions,
                  declarations: declarations,
                  parameters: parameters };
-    }
+    };
 
     /**
      * @function Uppaal2Emucharts
@@ -51,7 +51,7 @@ define(function (require, exports, module) {
      */
     UppaalConverter.prototype.Uppaal2Emucharts = function (uDesc) {
         if (!this._parser) {
-            this._parser = new uppaalParser();
+            this._parser = new UppaalParser();
         }
         var parser = this._parser;
         var emuDesc = {
@@ -72,7 +72,7 @@ define(function (require, exports, module) {
                 name: uDesc.locations[i].childNodes[0].childNodes[0].nodeValue,
                 x: parseFloat(uDesc.locations[i].getAttribute("x")),
                 y: parseFloat(uDesc.locations[i].getAttribute("y"))
-            })
+            });
         }
         //--- initial state
         emuDesc.states = states.values();
@@ -115,11 +115,10 @@ define(function (require, exports, module) {
         }
         //--- declarations
         for (i = 0; i < uDesc.declarations.length; i++) {
-            var tmp = "";
             var declarations = uDesc.declarations[i].childNodes[0].nodeValue.split("\n");
-            declarations = declarations.filter(function (dec) { return dec.indexOf("//") < 0 && dec.trim() !== ""; }) // this removes comments
-            declarations.forEach(function (declaration) {
-                var theDeclaration = parser.parseDeclaration(declaration);
+            declarations = declarations.filter(function (dec) { return dec.indexOf("//") < 0 && dec.trim() !== ""; }); // this is needed to skip comments in the Uppaal file
+            for (j = 0; j < declarations.length; j++) {
+                var theDeclaration = parser.parseDeclaration(declarations[j]);
                 if (theDeclaration.err) {
                     console.log(theDeclaration.err);
                 } else {
@@ -140,11 +139,11 @@ define(function (require, exports, module) {
                         emuDesc.variables.push(theVariable);
                     }
                 }
-            });
+            }
         }
         // return the emucharts descriptor
         return emuDesc;
-    }
+    };
 
     module.exports = {
         getInstance: function () {
@@ -153,5 +152,5 @@ define(function (require, exports, module) {
             }
             return instance;
         }
-    }
+    };
 });
