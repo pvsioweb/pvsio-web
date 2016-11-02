@@ -13,7 +13,8 @@ define(function (require, exports, module) {
     var Emucharts = require("plugins/emulink/Emucharts"),
         EmuchartsEditor = require("plugins/emulink/EmuchartsEditor"),
         eventDispatcher = require("util/eventDispatcher"),
-        Colors = require("plugins/emulink/tools/Colors");
+        Colors = require("plugins/emulink/tools/Colors"),
+        UppaalConverter = require("plugins/emulink/tools/UppaalConverter").getInstance();
 
     var _emuchartsEditors; // stores emucharts renderers
     var _selectedEditor; // this is the selected editor
@@ -86,6 +87,24 @@ define(function (require, exports, module) {
         } else { console.log("dbg: warning, undefined or null emuchart name"); }
     };
 
+    EmuchartsManager.prototype.importUppaalV4 = function (XMLFile) {
+        if (XMLFile && XMLFile.content) {
+            var uDesc = UppaalConverter.openUppaalV4(XMLFile);
+            var emuDesc = UppaalConverter.Uppaal2Emucharts(uDesc);
+            var chart = {
+                descriptor: {
+                    file_type: "emdl",
+                    version: "1.1",
+                    description: "emucharts model",
+                    chart_name: emuDesc.name
+                },
+                chart: emuDesc
+            };
+            this.importEmucharts({ name: chart.chart_name, content: chart });
+        }
+        return this;
+    };
+
     /**
      * Imports the emuchart passed as argument.
      * @memberof EmuchartsManager
@@ -106,6 +125,10 @@ define(function (require, exports, module) {
                         if (chart_reader.states) {
                             chart_reader.states.forEach(function (node) {
                                 node.color = node.color || Colors.getColor(node.id);
+                                node.width = node.width || 36;
+                                node.height = node.height || 36;
+                                node.x = node.x || 100;
+                                node.y = node.y || 100;
                                 chart.nodes.set(node.id, node);
                             });
                         }

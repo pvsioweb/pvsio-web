@@ -50,7 +50,7 @@ define(function (require, exports, module) {
  *       about the parsed tokens
  *   $1, $2, $3, etc... can be used in the production rules to obtain the value of the tokens specified in the rules
  *       alternatively, the name of the token preceded by $ can be used for the same purpose (i.e., the value
- *       or a token t is $t)
+ *       of a token t is $t)
  */
 define(function (require, exports, module) {
     "use strict";
