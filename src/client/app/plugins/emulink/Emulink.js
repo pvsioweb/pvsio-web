@@ -581,6 +581,7 @@ define(function (require, exports, module) {
 
         // bootstrap buttons
         function openChart(callback) {
+            //FIXME! move this function to EmuchartsManager
             function doOpen(err, res) {
                 if (res) {
                     if (res.name.lastIndexOf(".emdl") === res.name.length - 5) {
@@ -588,9 +589,13 @@ define(function (require, exports, module) {
                         emuchartsManager.importEmucharts(res);
                     } else if (res.name.lastIndexOf(".muz") === res.name.length - 4) {
                         emuchartsManager.importPIMChart(res);
-                    } else {
-                        // Try parse as PIM
+                    } else if (res.name.lastIndexOf(".pim") === res.name.length - 4) {
                         pimImporter.importPIM(res, emuchartsManager);
+                    } else if (res.name.lastIndexOf(".xml") === res.name.length - 4) {
+                        emuchartsManager.importUppaalV4(res);
+                    } else {
+                        err = "Unrecognised file extension (file: " + res.name + ")";
+                        console.log(err);
                     }
                     if (callback && typeof callback === "function") {
                         callback(err, res);
@@ -601,7 +606,7 @@ define(function (require, exports, module) {
             }
             var opt = {
                 header: "Open EmuChart file...",
-                extensions: ".emdl,.muz,.pim"
+                extensions: ".emdl,.muz,.pim,.xml"
             };
             if (PVSioWebClient.getInstance().serverOnLocalhost()) {
                 return new Promise(function (resolve, reject) {
@@ -626,7 +631,7 @@ define(function (require, exports, module) {
         function importChart(callback) {
             var opt = {
                 header: "Import Chart...",
-                extensions: ".muz,.pim"
+                extensions: ".muz,.pim,.xml"
             };
             // MUZ
             FileHandler.openLocalFileAsText(function (err, res) {
@@ -921,10 +926,10 @@ define(function (require, exports, module) {
             });
         });
         d3.select("#btn_menuLayOutStates").on("click", function () {
-            console.log("layout");
             var editor = emuchartsManager.getSelectedEditor();
             if (editor) {
                 var trans = editor.getTransformation();
+                editor.layOutChart_nath();
                 editor.layOutChart();
                 emuchartsManager.render({ trans: trans });
             }
