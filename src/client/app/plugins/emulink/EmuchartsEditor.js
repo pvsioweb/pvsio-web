@@ -1802,7 +1802,6 @@ define(function (require, exports, module) {
                 // pull initial state towards left-up
                 if (initial_edges.size() > 0) {
                     initial_edges.values().forEach(function (initial_edge) {
-                        console.log("initial found1");
                         initial_edge.target.y -= 1;
                         initial_edge.target.x -= 2;
                     });
@@ -1825,12 +1824,14 @@ define(function (require, exports, module) {
                     return l.target === link.target && l.source === l.target;
                 });
                 if (worklist.length === 1) {
+                    worklist[0].controlPoint = worklist[0].controlPoint || {};
                     worklist[0].controlPoint.x = worklist[0].target.x + offsetX;
                     worklist[0].controlPoint.y = worklist[0].target.y - offsetX * 2;
                 } else {
                     // put control points on a diagonal line, evenly spaced
                     var dx = 0, dy = 0, reversed = false;
                     worklist.forEach(function (l) {
+                        l.controlPoint = l.controlPoint || {};
                         l.controlPoint.x = l.target.x + dx + offsetX;
                         l.controlPoint.y = l.target.y + dy - offsetY;
 
