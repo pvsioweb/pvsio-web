@@ -8,13 +8,13 @@
  define(function (require, exports, module) {
      "use strict";
      var d3 = require("d3/d3"),
-         formTemplate = require("text!./consistency/frontend.handlebars"),
-         theoremTemplate = require("text!./consistency/consistency.handlebars"),
+         formTemplate = require("text!./reversibility/frontend.handlebars"),
+         theoremTemplate = require("text!./reversibility/reversibility.handlebars"),
          BaseDialog = require("pvsioweb/forms/BaseDialog"),
          FormUtils = require("plugins/emulink/forms/FormUtils");
 
-     var default_data = { actions: ["act"], R: "R", s: "s" };
-     var ConsistencyTemplateView = BaseDialog.extend({
+     var default_data = { actions: ["act"], reversingAction: "rev", s: "s" };
+     var ReversibilityTemplateView = BaseDialog.extend({
          initialize: function (data) {
              d3.select(this.el).attr("class", "overlay").style("top", self.scrollY + "px");
              this.render(data);
@@ -29,7 +29,7 @@
              return this;
          },
          events: {
-             "input #relation": "updateTheorem",
+             "input #reversingAction": "updateTheorem",
              "input #stateVariable": "updateTheorem",
              "input #transitions": "updateTheorem",
              "click #btnRight": "right",
@@ -37,8 +37,8 @@
              "keydown .panel": "keypress"
          },
          updateTheorem: function (event) {
-             var data = { actions: ["act"], R: "R", s: "s" };
-             var transitions = d3.select("#ConsistencyTemplate").select("#transitions").node();
+             var data = { actions: ["act"], reversingAction: "rev", s: "s" };
+             var transitions = d3.select("#ReversibilityTemplate").select("#transitions").node();
              if (transitions && transitions.selectedOptions && transitions.selectedOptions.length > 0) {
                  data.actions = [];
                  for (var i = 0; i < transitions.selectedOptions.length; i++) {
@@ -47,16 +47,16 @@
                      }
                  }
              }
-             var relation = d3.select("#ConsistencyTemplate").select("#relation").node();
-             if (relation && relation.selectedOptions && relation.selectedOptions.length > 0) {
-                 data.R = d3.select("#ConsistencyTemplate").select("#relation").node().selectedOptions[0].value || data.R;
+             var reversingAction = d3.select("#ReversibilityTemplate").select("#reversingAction").node();
+             if (reversingAction && reversingAction.selectedOptions && reversingAction.selectedOptions.length > 0) {
+                 data.reversingAction = d3.select("#ReversibilityTemplate").select("#reversingAction").node().selectedOptions[0].value || data.reversingAction;
              }
-             var attributes = d3.select("#ConsistencyTemplate").select("#stateVariable").node();
+             var attributes = d3.select("#ReversibilityTemplate").select("#stateVariable").node();
              if (attributes && attributes.selectedOptions && attributes.selectedOptions.length > 0) {
-                 data.s = d3.select("#ConsistencyTemplate").select("#stateVariable").node().selectedOptions[0].value.replace(/\./g, "`") || data.s;
+                 data.s = d3.select("#ReversibilityTemplate").select("#stateVariable").node().selectedOptions[0].value.replace(/\./g, "`") || data.s;
              }
-             //  d3.select("#pvs_theorem").html(Handlebars.compile(theoremTemplate)(data));
-             d3.select("#pvs_theorem").node().value = Handlebars.compile(theoremTemplate)(data);
+            //  d3.select("#pvs_theorem").html(Handlebars.compile(theoremTemplate)(data));
+            d3.select("#pvs_theorem").node().value = Handlebars.compile(theoremTemplate)(data);
          },
          right: function (event) {
              var form = this.el;
@@ -90,7 +90,7 @@
           * @param {header: {string}, textLines: {string}} data Data to use to render the form
           */
          create: function (data) {
-             return new ConsistencyTemplateView(data);
+             return new ReversibilityTemplateView(data);
          }
      };
  });

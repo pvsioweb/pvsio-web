@@ -42,7 +42,8 @@ define(function (require, exports, module) {
         EmuchartsAdaPrinter    = require("plugins/emulink/EmuchartsAdaPrinter"),
         EmuchartsBlessPrinter  = require("plugins/emulink/EmuchartsBlessPrinter"),
         EmuchartsMisraCPrinter = require("plugins/emulink/EmuchartsMisraCPrinter"),
-        ConsistencyTemplateView= require("plugins/emulink/tools/propertytemplates/ConsistencyTemplateView"),
+        ConsistencyTemplateView   = require("plugins/emulink/tools/propertytemplates/ConsistencyTemplateView"),
+        ReversibilityTemplateView = require("plugins/emulink/tools/propertytemplates/ReversibilityTemplateView"),
 //        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         EmuchartsParser        = require("plugins/emulink/EmuchartsParser"),
         pvsTheory              = require("text!./models/pvs/templates/pvsTheory.handlebars"),
@@ -1642,6 +1643,48 @@ define(function (require, exports, module) {
             });
         });
 
+        d3.select("#btn_menuReversibilityOfActions").on("click", function () {
+            // document.getElementById("menuVerification").children[1].style.display = "none";
+            var stateVariables = emuchartsManager.getVariables().map(function (variable) {
+                return variable.name;
+            });
+            var transitionLabels = emuchartsManager.getTransitions();
+            var transitions = d3.map();
+            var parser = new EmuchartsParser();
+            transitionLabels.forEach(function (label) {
+                var ans = parser.parseTransition(label.name);
+                if (ans.res) {
+                    transitions.set(ans.res.val.identifier.val);
+                }
+            });
+            transitions = transitions.keys();
+            ReversibilityTemplateView.create({
+                header: "Reversibility of user actions",
+                stateVariables: stateVariables,
+                transitions: transitions,
+                buttons: ["Cancel", "Create PVS Theory"]
+            }).on("create pvs theory", function (e, view) {
+                console.log(e.data);
+                // do something useful here.... like create a pvs file with the instantiated property
+                view.remove();
+                var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th";
+                var modelEditor = ModelEditor.getInstance();
+                (PluginManager.getInstance().isLoaded(modelEditor)
+                    ? Promise.resolve()
+                    : PluginManager.getInstance().enablePlugin(modelEditor))
+                .then(function () {
+
+                    var theTheory = Handlebars.compile(pvsTheory)(
+                        { name: "reversibility_th",
+                          body: e.data.get("pvs_theorem"),
+                          importing: emucharts_theory_name });
+                    projectManager.project().addFile("reversibility_th.pvs", theTheory, { overWrite: true });
+                });
+            }).on("cancel", function (e, view) {
+                // just remove window
+                view.remove();
+            });
+        });
 
         //-- Zoom menu -----------------------------------------------------------
         d3.select("#menuZoom").on("mouseover", function () {
