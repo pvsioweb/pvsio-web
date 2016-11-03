@@ -1,4 +1,0 @@
-FCU_properties: THEORY
- BEGIN IMPORTING emucharts_FCU_th
-
- END FCU_properties

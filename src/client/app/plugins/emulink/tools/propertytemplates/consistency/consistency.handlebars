@@ -1,0 +1,4 @@
+CONSISTENCY: THEOREM
+  FORALL (pre, post: State):{{#each actions}}
+    (per_{{{this}}}(pre) AND post = {{{this}}}(pre))
+      IMPLIES (post`{{{../s}}} {{{../R}}} pre`{{{../s}}}){{#unless @last}} AND{{/unless}}{{/each}}
