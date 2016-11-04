@@ -1,0 +1,6 @@
+FEEDBACK: THEOREM
+  FORALL (pre, post: State):
+    (post = action(pre) AND post`current_state /= pre`current_state)
+      IMPLIES
+    ({{#each disp}}post`{{{this}}} /= pre`{{{this}}}{{#unless @last}} OR
+     {{/unless}}{{/each}})

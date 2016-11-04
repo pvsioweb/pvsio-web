@@ -44,9 +44,11 @@ define(function (require, exports, module) {
         EmuchartsMisraCPrinter = require("plugins/emulink/EmuchartsMisraCPrinter"),
         ConsistencyTemplateView   = require("plugins/emulink/tools/propertytemplates/ConsistencyTemplateView"),
         ReversibilityTemplateView = require("plugins/emulink/tools/propertytemplates/ReversibilityTemplateView"),
+        FeedbackTemplateView      = require("plugins/emulink/tools/propertytemplates/FeedbackTemplateView"),
 //        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         EmuchartsParser        = require("plugins/emulink/EmuchartsParser"),
         pvsTheory              = require("text!./models/pvs/templates/pvsTheory.handlebars"),
+        pvsFunction            = require("text!./models/pvs/templates/pvsFunction.handlebars"),
         FileHandler            = require("filesystem/FileHandler"),
         FileSystem             = require("filesystem/FileSystem"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView"),
@@ -1630,7 +1632,6 @@ define(function (require, exports, module) {
                     ? Promise.resolve()
                     : PluginManager.getInstance().enablePlugin(modelEditor))
                 .then(function () {
-
                     var theTheory = Handlebars.compile(pvsTheory)(
                         { name: "consistency_th",
                           body: e.data.get("pvs_theorem"),
@@ -1673,7 +1674,6 @@ define(function (require, exports, module) {
                     ? Promise.resolve()
                     : PluginManager.getInstance().enablePlugin(modelEditor))
                 .then(function () {
-
                     var theTheory = Handlebars.compile(pvsTheory)(
                         { name: "reversibility_th",
                           body: e.data.get("pvs_theorem"),
@@ -1686,6 +1686,51 @@ define(function (require, exports, module) {
             });
         });
 
+        d3.select("#btn_menuVisibilityOfModes").on("click", function () {
+            // document.getElementById("menuVerification").children[1].style.display = "none";
+            var stateVariables = emuchartsManager.getVariables().map(function (variable) {
+                return variable.name;
+            });
+            var transitionLabels = emuchartsManager.getTransitions();
+            var transitions = d3.map();
+            var parser = new EmuchartsParser();
+            transitionLabels.forEach(function (label) {
+                var ans = parser.parseTransition(label.name);
+                if (ans.res) {
+                    transitions.set(ans.res.val.identifier.val);
+                }
+            });
+            transitions = transitions.keys();
+            FeedbackTemplateView.create({
+                header: "Visibility of modes",
+                stateVariables: stateVariables,
+                transitions: transitions,
+                buttons: ["Cancel", "Create PVS Theory"]
+            }).on("create pvs theory", function (e, view) {
+                console.log(e.data);
+                // do something useful here.... like create a pvs file with the instantiated property
+                view.remove();
+                var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th";
+                var modelEditor = ModelEditor.getInstance();
+                (PluginManager.getInstance().isLoaded(modelEditor)
+                    ? Promise.resolve()
+                    : PluginManager.getInstance().enablePlugin(modelEditor))
+                .then(function () {
+                    var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
+                        { name: "feedback_th",
+                          body: e.data.get("pvs_theorem"),
+                          definitions: Handlebars.compile(pvsFunction, { noEscape: true })({
+                              functionName: "action",
+                              transitions: transitions
+                          }),
+                          importing: emucharts_theory_name });
+                    projectManager.project().addFile("feedback_th.pvs", theTheory, { overWrite: true });
+                });
+            }).on("cancel", function (e, view) {
+                // just remove window
+                view.remove();
+            });
+        });
         //-- Zoom menu -----------------------------------------------------------
         d3.select("#menuZoom").on("mouseover", function () {
             document.getElementById("menuZoom").children[1].style.display = "block";

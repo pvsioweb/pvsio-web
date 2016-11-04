@@ -1,6 +1,7 @@
 {{{name}}}: THEORY
  BEGIN {{#if importing}}IMPORTING {{{importing}}}{{/if}}
-
-{{{body}}}
-
+{{#if definitions}}
+%-- useful definitions
+{{definitions}}
+{{/if}}{{{body}}}
  END {{{name}}}
