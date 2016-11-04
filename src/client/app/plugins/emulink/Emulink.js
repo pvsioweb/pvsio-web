@@ -48,7 +48,8 @@ define(function (require, exports, module) {
 //        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         EmuchartsParser        = require("plugins/emulink/EmuchartsParser"),
         pvsTheory              = require("text!./models/pvs/templates/pvsTheory.handlebars"),
-        pvsFunction            = require("text!./models/pvs/templates/pvsFunction.handlebars"),
+        pvsFunctionWithInit    = require("text!./models/pvs/templates/pvsFunctionWithInit.handlebars"),
+        pvsTheoremInduction    = require("text!./models/pvs/templates/pvsTheoremInduction.handlebars"),
         FileHandler            = require("filesystem/FileHandler"),
         FileSystem             = require("filesystem/FileSystem"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView"),
@@ -1621,24 +1622,34 @@ define(function (require, exports, module) {
                 header: "Consistency of user actions",
                 stateVariables: stateVariables,
                 transitions: transitions,
-                buttons: ["Cancel", "Create PVS Theory"]
+                buttons: ["Dismiss", "Create PVS Theory"]
             }).on("create pvs theory", function (e, view) {
-                console.log(e.data);
                 // do something useful here.... like create a pvs file with the instantiated property
-                view.remove();
                 var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th";
                 var modelEditor = ModelEditor.getInstance();
                 (PluginManager.getInstance().isLoaded(modelEditor)
                     ? Promise.resolve()
                     : PluginManager.getInstance().enablePlugin(modelEditor))
                 .then(function () {
-                    var theTheory = Handlebars.compile(pvsTheory)(
+                    var pvs_theorem = Handlebars.compile(pvsTheoremInduction, { noEscape: true })({
+                        name: "CONSISTENCY",
+                        property: "consistency",
+                        property_definition: e.data.get("pvs_property"),
+                        trans: "action",
+                        State: "State"
+                    });
+                    var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
                         { name: "consistency_th",
-                          body: e.data.get("pvs_theorem"),
+                          definitions: Handlebars.compile(pvsFunctionWithInit, { noEscape: true })({
+                            functionName: "action",
+                            transitions: transitions
+                          }),
+                          body: pvs_theorem,
                           importing: emucharts_theory_name });
                     projectManager.project().addFile("consistency_th.pvs", theTheory, { overWrite: true });
+                    projectManager.selectFile("consistency_th.pvs");
                 });
-            }).on("cancel", function (e, view) {
+            }).on("dismiss", function (e, view) {
                 // just remove window
                 view.remove();
             });
@@ -1663,24 +1674,34 @@ define(function (require, exports, module) {
                 header: "Reversibility of user actions",
                 stateVariables: stateVariables,
                 transitions: transitions,
-                buttons: ["Cancel", "Create PVS Theory"]
+                buttons: ["Dismiss", "Create PVS Theory"]
             }).on("create pvs theory", function (e, view) {
-                console.log(e.data);
                 // do something useful here.... like create a pvs file with the instantiated property
-                view.remove();
                 var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th";
                 var modelEditor = ModelEditor.getInstance();
                 (PluginManager.getInstance().isLoaded(modelEditor)
                     ? Promise.resolve()
                     : PluginManager.getInstance().enablePlugin(modelEditor))
                 .then(function () {
-                    var theTheory = Handlebars.compile(pvsTheory)(
+                    var pvs_theorem = Handlebars.compile(pvsTheoremInduction, { noEscape: true })({
+                        name: "REVERSIBILITY",
+                        property: "reversibility",
+                        property_definition: e.data.get("pvs_property"),
+                        trans: "action",
+                        State: "State"
+                    });
+                    var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
                         { name: "reversibility_th",
-                          body: e.data.get("pvs_theorem"),
+                          definitions: Handlebars.compile(pvsFunctionWithInit, { noEscape: true })({
+                            functionName: "action",
+                            transitions: transitions
+                          }),
+                          body: pvs_theorem,
                           importing: emucharts_theory_name });
                     projectManager.project().addFile("reversibility_th.pvs", theTheory, { overWrite: true });
+                    projectManager.selectFile("reversibility_th.pvs");
                 });
-            }).on("cancel", function (e, view) {
+            }).on("dismiss", function (e, view) {
                 // just remove window
                 view.remove();
             });
@@ -1705,28 +1726,33 @@ define(function (require, exports, module) {
                 header: "Visibility of modes",
                 stateVariables: stateVariables,
                 transitions: transitions,
-                buttons: ["Cancel", "Create PVS Theory"]
+                buttons: ["Dismiss", "Create PVS Theory"]
             }).on("create pvs theory", function (e, view) {
-                console.log(e.data);
                 // do something useful here.... like create a pvs file with the instantiated property
-                view.remove();
                 var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th";
                 var modelEditor = ModelEditor.getInstance();
                 (PluginManager.getInstance().isLoaded(modelEditor)
                     ? Promise.resolve()
                     : PluginManager.getInstance().enablePlugin(modelEditor))
                 .then(function () {
+                    var pvs_theorem = Handlebars.compile(pvsTheoremInduction, { noEscape: true })({
+                        name: "VISIBILITY",
+                        property: "visibility",
+                        property_definition: e.data.get("pvs_property"),
+                        trans: "trans",
+                        State: "State"
+                    });
                     var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
-                        { name: "feedback_th",
-                          body: e.data.get("pvs_theorem"),
-                          definitions: Handlebars.compile(pvsFunction, { noEscape: true })({
-                              functionName: "action",
-                              transitions: transitions
+                        { name: "visibility_th",
+                          definitions: Handlebars.compile(pvsFunctionWithInit, { noEscape: true })({
+                            transitions: transitions
                           }),
+                          body: pvs_theorem,
                           importing: emucharts_theory_name });
-                    projectManager.project().addFile("feedback_th.pvs", theTheory, { overWrite: true });
+                    projectManager.project().addFile("visibility_th.pvs", theTheory, { overWrite: true });
+                    projectManager.selectFile("visibility_th.pvs");
                 });
-            }).on("cancel", function (e, view) {
+            }).on("dismiss", function (e, view) {
                 // just remove window
                 view.remove();
             });

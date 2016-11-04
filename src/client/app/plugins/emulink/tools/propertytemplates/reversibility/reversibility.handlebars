@@ -1,4 +1,3 @@
-REVERSIBILITY: THEOREM
-  FORALL (pre, post: State):{{#each actions}}
-    (per_{{{this}}}(pre) AND post = {{{this}}}(pre))
-      IMPLIES (per_{{{../reversingAction}}}(post) AND {{{../reversingAction}}}(post)`{{{../s}}} = pre`{{{../s}}}){{#unless @last}} AND{{/unless}}{{/each}}
+reversibility(st: State): bool ={{#each actions}}
+    per_{{{this}}}(st) IMPLIES
+      (per_{{{../reversingAction}}}({{{this}}}(st)) AND {{{../reversingAction}}}({{{this}}}(st))`{{{../s}}} = st`{{{../s}}}){{#unless @last}} AND{{/unless}}{{/each}}

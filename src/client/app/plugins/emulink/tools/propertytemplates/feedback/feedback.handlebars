@@ -1,6 +1,7 @@
-FEEDBACK: THEOREM
-  FORALL (pre, post: State):
-    (post = action(pre) AND post`current_state /= pre`current_state)
-      IMPLIES
-    ({{#each disp}}post`{{{this}}} /= pre`{{{this}}}{{#unless @last}} OR
-     {{/unless}}{{/each}})
+feedback(st: State): bool ={{#each actions}}
+    (LET post = {{{this}}}(st)
+      IN (per_{{{this}}}(st) AND post`current_state /= st`current_state)
+          IMPLIES
+         ({{#each ../disp}}post`{{{this}}} /= st`{{{this}}}{{#unless @last}}
+          OR {{/unless}}{{/each}}))
+    {{#unless @last}}AND{{/unless}}{{/each}}

@@ -25,7 +25,7 @@
              var template = Handlebars.compile(formTemplate);
              this.$el.html(template(data));
              $("body").append(this.el);
-             d3.select("#pvs_theorem").html(Handlebars.compile(theoremTemplate)(default_data));
+             d3.select("#pvs_property").html(Handlebars.compile(theoremTemplate)(default_data));
              return this;
          },
          events: {
@@ -55,13 +55,13 @@
              if (attributes && attributes.selectedOptions && attributes.selectedOptions.length > 0) {
                  data.s = d3.select("#ConsistencyTemplate").select("#stateVariable").node().selectedOptions[0].value.replace(/\./g, "`") || data.s;
              }
-             //  d3.select("#pvs_theorem").html(Handlebars.compile(theoremTemplate)(data));
-             d3.select("#pvs_theorem").node().value = Handlebars.compile(theoremTemplate)(data);
+             //  d3.select("#pvs_property").html(Handlebars.compile(theoremTemplate)(data));
+             d3.select("#pvs_property").node().value = Handlebars.compile(theoremTemplate)(data);
          },
          right: function (event) {
              var form = this.el;
              if (FormUtils.validateForm(form)) {
-                 var selectors = [ "pvs_theorem" ];
+                 var selectors = [ "pvs_property" ];
                  var formdata = FormUtils.serializeForm(form, selectors);
                  this.trigger(this._data.buttons[1].toLowerCase(), {data: formdata.labels, el: this.el}, this);
              }
