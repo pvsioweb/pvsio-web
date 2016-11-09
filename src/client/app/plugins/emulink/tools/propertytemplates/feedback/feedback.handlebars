@@ -1,4 +1,4 @@
-feedback(st: State): bool ={{#each actions}}
+visibility(st: State): bool ={{#each actions}}
     (LET post = {{{this}}}(st)
       IN (per_{{{this}}}(st) AND post`current_state /= st`current_state)
           IMPLIES

@@ -1635,7 +1635,7 @@ define(function (require, exports, module) {
                         name: "CONSISTENCY",
                         property: "consistency",
                         property_definition: e.data.get("pvs_property"),
-                        trans: "action",
+                        trans: "trans",
                         State: "State"
                     });
                     var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
@@ -1687,7 +1687,7 @@ define(function (require, exports, module) {
                         name: "REVERSIBILITY",
                         property: "reversibility",
                         property_definition: e.data.get("pvs_property"),
-                        trans: "action",
+                        trans: "trans",
                         State: "State"
                     });
                     var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
