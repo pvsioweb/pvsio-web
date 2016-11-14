@@ -357,6 +357,10 @@ define(function (require, exports, module) {
     ProjectManager.prototype.selectFile = function (file) {
         // select item in filetree
         if (file) {
+            // FIXME: in the current implementation of FileTreeView, filenames should always start with the project name
+            if (typeof file === "string" && file.indexOf(_projectManager.project().name()) < 0) {
+                file = _projectManager.project().name() + "/" + file;
+            }
             return pvsFilesListView.selectItem(file);
         }
         console.log("Warning: " + file + " parameter passed to PrototypeManager.selectFile(...)");

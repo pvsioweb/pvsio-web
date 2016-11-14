@@ -12,7 +12,7 @@ define(function (require, exports, module) {
         Logger         = require("util/Logger"),
         ui             = require("plugins/prototypebuilder/interface"),
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
-        PropertyTemplates = require("plugins/propertytemplates/PropertyTemplates"),
+        // PropertyTemplates = require("plugins/propertytemplates/PropertyTemplates"),
         ProjectManager = require("project/ProjectManager"),
         ModelEditor    = require("plugins/modelEditor/ModelEditor"),
         Emulink        = require("plugins/emulink/Emulink"),
@@ -111,9 +111,9 @@ define(function (require, exports, module) {
                     case "Storyboard Editor":
                         plugin = PIMPrototyper.getInstance();
                         break;
-                    case "Property Templates":
-                        plugin = PropertyTemplates.getInstance();
-                        break;
+                    // case "Property Templates":
+                    //     plugin = PropertyTemplates.getInstance();
+                    //     break;
                     }
                     if (event.target.checked) {
                         pluginManager.enablePlugin(plugin);
