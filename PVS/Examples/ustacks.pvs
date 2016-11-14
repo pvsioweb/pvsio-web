@@ -1,8 +1,0 @@
-ustacks: THEORY
-BEGIN
- IMPORTING stacks[int], stacks[stack[int]]
-
- si  : stack[int]
- sos : stack[stack[int]] = push(si, empty)
-
-END ustacks
