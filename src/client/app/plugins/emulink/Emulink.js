@@ -31,16 +31,7 @@ define(function (require, exports, module) {
         displayEditDatatype    = require("plugins/emulink/forms/displayEditDatatype"),
         displaySelectDatatype  = require("plugins/emulink/forms/displaySelectDatatype"),
         QuestionForm           = require("pvsioweb/forms/displayQuestion"),
-        EmuchartsPVSPrinter    = require("plugins/emulink/EmuchartsPVSPrinter"),
-        EmuchartsLustrePrinter = require("plugins/emulink/EmuchartsLustrePrinter"),
-        EmuchartsPIMPrinter    = require("plugins/emulink/EmuchartsPIMPrinter"),
-        EmuchartsCppPrinter    = require("plugins/emulink/EmuchartsCppPrinter"),
-        EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter2"),
-        EmuchartsVDMPrinter    = require("plugins/emulink/EmuchartsVDMPrinter"),
-        EmuchartsJSPrinter     = require("plugins/emulink/EmuchartsJavaScriptPrinter"),
-        EmuchartsAdaPrinter    = require("plugins/emulink/EmuchartsAdaPrinter"),
-        EmuchartsBlessPrinter  = require("plugins/emulink/EmuchartsBlessPrinter"),
-        EmuchartsMisraCPrinter = require("plugins/emulink/EmuchartsMisraCPrinter"),
+        EmuchartsCodeGenerators = require("plugins/emulink/models/EmuchartsCodeGenerators"),
 //        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         FileHandler            = require("filesystem/FileHandler"),
         FileSystem             = require("filesystem/FileSystem"),
@@ -67,16 +58,7 @@ define(function (require, exports, module) {
 
     var emuchartsManager;
     var MODE;
-    var emuchartsPVSPrinter;
-    var emuchartsLustrePrinter;
-    var emuchartsPIMPrinter;
-    var emuchartsCppPrinter;
-    var emuchartsMALPrinter;
-    var emuchartsVDMPrinter;
-    var emuchartsJSPrinter;
-    var emuchartsAdaPrinter;
-    var emuchartsBlessPrinter;
-    var emuchartsMisraCPrinter;
+    var emuchartsCodeGenerators;
 
     var pimImporter;
     var pimTestGenerator;
@@ -335,18 +317,8 @@ define(function (require, exports, module) {
      * @memberof Emulink
      */
     function Emulink() {
-        emuchartsPVSPrinter = new EmuchartsPVSPrinter("emuchart_th");
-        emuchartsLustrePrinter = new EmuchartsLustrePrinter("emuchart_Lustre");
-        emuchartsPIMPrinter = new EmuchartsPIMPrinter("emuchart_PIM");
-        emuchartsCppPrinter = new EmuchartsCppPrinter("emuchart_Cpp");
-        emuchartsMALPrinter = new EmuchartsMALPrinter("emuchart_MAL");
-        emuchartsVDMPrinter = new EmuchartsVDMPrinter("emuchart_VDM");
-        emuchartsJSPrinter = new EmuchartsJSPrinter("emucharts_JS");
-        emuchartsAdaPrinter = new EmuchartsAdaPrinter("emucharts_Ada");
-        emuchartsBlessPrinter = new EmuchartsBlessPrinter("emucharts_Bless");
-        emuchartsMisraCPrinter = new EmuchartsMisraCPrinter("emucharts_MisraC");
-
         pvsioWebClient = PVSioWebClient.getInstance();
+        emuchartsCodeGenerators = EmuchartsCodeGenerators.getInstance();
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
         emuchartsManager.addListener("emuCharts_editorModeChanged", modeChange_callback);
@@ -1333,7 +1305,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsPVSPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsPVSPrinter.print(emucharts);
             if (model.err) {
                 console.log(model.err);
                 return;
@@ -1344,6 +1316,34 @@ define(function (require, exports, module) {
                 return projectManager.project().addFile(name, content, { overWrite: true });
             } else {
                 console.log("Warning, PVS model is undefined.");
+            }
+        });
+        d3.select("#btn_menuNuXMVPrinter").on("click", function () {
+            var emucharts = {
+                name: ("emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_SMV"),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: emuchartsManager.getVariables(),
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            var model = emuchartsCodeGenerators.emuchartsNuXMVPrinter.print(emucharts);
+            if (model.err) {
+                console.log(model.err);
+                return;
+            }
+            if (model.res) {
+                var name = emucharts.name + ".smv";
+                var content = model.res;
+                return projectManager.project().addFile(name, content, { overWrite: true });
+            } else {
+                console.log("Warning, NuXMV model is undefined.");
             }
         });
         d3.select("#btn_menuPIMPrinter").on("click", function () {
@@ -1361,7 +1361,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsPIMPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsPIMPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1390,7 +1390,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsPIMPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsPIMPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1419,7 +1419,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsMALPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsMALPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1448,7 +1448,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsVDMPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsVDMPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1478,7 +1478,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsJSPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsJSPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1508,7 +1508,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsAdaPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsAdaPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1541,7 +1541,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsBlessPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsBlessPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1573,7 +1573,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsMisraCPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsMisraCPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1587,7 +1587,7 @@ define(function (require, exports, module) {
                 projectManager.project().addFile(emucharts.name + ".h", model.header, overWrite);
                 projectManager.project().addFile("Android_" + emucharts.name + ".c", model.Android_thread, overWrite);
                 projectManager.project().addFile("Android_" + emucharts.name + ".h", model.Android_header, overWrite);
-                
+
                 projectManager.project().addFile("Doxyfile", model.doxygen, overWrite);
             } else {
                 console.log("Warning, MisraC code is undefined.");

@@ -56,7 +56,7 @@
  */
 define(function (require, exports, module) {
 
-    var AbstractPrinter = require("plugins/emulink/EmuchartsAbstractPrinter");
+    var AbstractPrinter = require("plugins/emulink/models/EmuchartsAbstractPrinter");
     var functionTemplate = require("text!plugins/emulink/models/javascript/templates/function.handlebars"),
         variablesTemplate = require("text!plugins/emulink/models/javascript/templates/variables.handlebars"),
         initialisationTemplate = require("text!plugins/emulink/models/javascript/templates/initial-transition.handlebars"),

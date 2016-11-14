@@ -1,0 +1,5 @@
+{{#if trans}}-- transitions{{#each trans}}
+TRANS
+{{../indent}}event = {{name}} {{#if cond}}& {{cond}}{{/if}}
+{{../indent}}   -> {{action}};{{/each}}
+{{/if}}
