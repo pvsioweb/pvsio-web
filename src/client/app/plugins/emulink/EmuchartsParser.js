@@ -497,14 +497,19 @@ if (ans.res) {
 
      */
     EmuchartsParser.prototype.parseTransition = function (label) {
-        label = (label === "" || label.trim().indexOf("[") === 0 || label.trim().indexOf("{") === 0) ?
-            ("tick " + label) : label;
-        console.log("Parsing transition " + label);
         var ans = { err: null, res: null };
-        try {
-            ans.res = this.parser.parse(label);
-        } catch (e) {
-            ans.err = e.message;
+        if (typeof label === "string") {
+            label = (label === "" || label.trim().indexOf("[") === 0 || label.trim().indexOf("{") === 0) ?
+                ("tick " + label) : label;
+            console.log("Parsing transition " + label);
+            try {
+                ans.res = this.parser.parse(label);
+            } catch (e) {
+                ans.err = e.message;
+            }
+        } else {
+            ans.err = "Erroneous argument type for string label: " + (typeof label);
+            console.error(ans.err);
         }
         return ans;
     };

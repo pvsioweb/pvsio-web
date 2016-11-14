@@ -1,0 +1,274 @@
+% The PVS grammar is given here in an Extended Backus-Naur Form (EBNF).
+% This consists of a set of rules of the form
+%    Symbol ::= expression
+% The symbol consists of an initial letter followed by any number of
+%   letters, underscores, or hyphens.
+% Literal strings appear in single quotes, and are case-insensitive.
+% Strings appear in double quotes; to include a double quote or a backslash
+%   precede with a backslash (e.g., "\"\\" is a string with the two
+%   characters '"' and '\'.
+% Comments start with '%' and go to the end of the line
+% The expression of a rule is interpreted as follows:
+%   A B    - A followed by B
+%   A | B  - A or B but not both
+%   [A]    - A is optional
+%   A+     - One or more occurrences of A
+%   A*     - Zero or more occurrences of A
+%   A++B   - One or more occurrences of A separated by occurrences of B
+%   A**B   - Zero or more occurrences of A separated by occurrences of B
+%   {A}    - A is treated as a unit; used for grouping
+
+Specification ::= {Theory | Datatype}+
+
+Theory ::= id [TheoryFormals] ':' 'THEORY'
+	     [Exporting]
+	     'BEGIN'
+             [AssumingPart]
+             [TheoryPart]
+	    'END' id
+
+TheoryFormals ::= '[' TheoryFormal++',' ']'
+
+TheoryFormal ::= ['(' Importing ')'] TheoryFormalDecl
+
+TheoryFormalDecl ::= TheoryFormalType | TheoryFormalConst
+
+TheoryFormalType ::= Ids ':' {'TYPE'|'NONEMPTY_TYPE'|'TYPE+'} ['FROM' TypeExpr]
+
+TheoryFormalConst ::= IdOps ':' TypeExpr
+
+Exporting ::= 'EXPORTING' ExportingNames ['WITH' ExportingTheories]
+
+ExportingNames ::= 'ALL' ['BUT' ExportingName++',']
+	         | ExportingName++','
+
+ExportingName ::= IdOp [':' {TypeExpr | 'TYPE' | 'FORMULA'}]
+
+ExportingTheories ::= 'ALL' | 'CLOSURE' | TheoryNames
+
+Importing ::= 'IMPORTING' TheoryNames
+
+AssumingPart ::= 'ASSUMING' {AssumingElement [';']}+ 'ENDASSUMING'
+
+AssumingElement ::= Importing
+		  | Assumption
+		  | TheoryDecl
+
+TheoryPart ::= {TheoryElement [';']}+
+
+TheoryElement ::= Importing | TheoryDecl
+
+%% Declarations
+
+TheoryDecl ::= LibDecl
+             | TheoryAbbrDecl
+	     | TypeDecl
+	     | VarDecl
+	     | ConstDecl
+             | RecursiveDecl
+	     | InductiveDecl
+	     | FormulaDecl
+	     | Judgement
+	     | Conversion
+	     | InlineDatatype
+
+LibDecl ::= Ids ':' 'LIBRARY' ['='] String
+
+TheoryAbbrDecl ::= Ids ':' 'THEORY' '=' TheoryName
+
+TypeDecl ::= Id [{',' Ids} | Bindings] ':'
+                {'TYPE'|'NONEMPTY_TYPE'|'TYPE+'}
+	        [{'='|'FROM'} TypeExpr ['CONTAINING' Expr]]
+
+VarDecl ::= IdOps ':' 'VAR' TypeExpr
+
+ConstDecl ::= IdOp [{',' IdOps} | Bindings+] ':' TypeExpr ['=' Expr]
+
+RecursiveDecl ::= IdOp [{',' IdOps} | Bindings+] ':'
+                    'RECURSIVE' TypeExpr '=' Expr
+	            'MEASURE' Expr ['BY' Expr]
+
+InductiveDecl ::= IdOp [{',' IdOps} | Bindings+] ':'
+                    'INDUCTIVE' TypeExpr '=' Expr
+		
+Assumption ::= Ids ':' 'ASSUMPTION' Expr
+
+FormulaDecl ::= Ids ':' FormulaName Expr
+
+Judgement ::= SubtypeJudgement | ConstantJudgement
+
+SubtypeJudgement ::= [IdOp ':'] 'JUDGEMENT' TypeExpr++','
+                                'SUBTYPE_OF' TypeExpr
+
+ConstantJudgement ::= [IdOp ':'] 'JUDGEMENT' ConstantReference++','
+		                 'HAS_TYPE' TypeExpr
+
+ConstantReference ::= Number | {Name Bindings*}
+
+Conversion ::= 'CONVERSION' {Name [':' TypeExpr]}++','
+
+
+%% Datatypes
+
+Datatype ::= Id [TheoryFormals] ':' 'DATATYPE' ['WITH' 'SUBTYPES' Ids]
+	       'BEGIN'
+	       [Importing [';']]
+	       [AssumingPart]
+	       DatatypePart
+	      'END' Id
+
+InlineDatatype ::= Id ':' 'DATATYPE' ['WITH' 'SUBTYPES' Ids]
+	       	       'BEGIN'
+		       [Importing [';']]
+		       [AssumingPart]
+		       DatatypePart
+		       'END' Id
+
+DatatypePart ::= {Constructor ':' IdOp [':' Id]}+
+
+Constructor ::= IdOp ['(' {IdOps ':' TypeExpr}++',' ')']
+
+
+%% Type Expressions
+
+TypeExpr ::= Name
+           | EnumerationType
+           | Subtype
+           | TypeApplication
+           | FunctionType
+           | TupleType
+           | RecordType
+
+TypeApplication ::= Name Arguments 
+
+EnumerationType ::= '{' IdOps '}'
+
+Subtype ::= {'{' SetBindings '|' Expr '}'}
+          | {'(' Expr ')'}
+
+FunctionType ::= ['FUNCTION'|'ARRAY']
+                      '[' {[IdOp ':'] TypeExpr}++',' '->' TypeExpr ']'
+
+TupleType ::= '[' {[IdOp ':'] TypeExpr}++',' ']'
+
+RecordType ::= '[#' FieldDecls++',' '#]'
+
+FieldDecls ::= Ids ':' TypeExpr
+
+
+%% Expressions
+
+Expr ::= Number
+       | String
+       | Name
+       | {Id '!' Number}
+       | {Expr Arguments}
+       | {Expr Binop Expr}
+       | {Unaryop Expr}
+       | {Expr '`' {Id | Number}}
+       | {'(' Expr++',' ')'}
+       | {'(:' Expr**',' ':)'}
+       | {'[|' Expr**',' '|]'}
+       | {'(#' Assignment++',' '#)'}
+       | {Expr '::' TypeExpr}
+       | IfExpr
+       | BindingExpr
+       | {'{' SetBindings '|' Expr '}'}
+       | {'LET' LetBinding++',' 'IN' Expr}
+       | {Expr 'WHERE' LetBinding++','}
+       | {Expr 'WITH' '[' Assignment++',' ']'}
+       | {'CASES' Expr 'OF' Selection++',' ['ELSE' Expr] 'ENDCASES'}
+       | {'COND' {Expr '->' Expr}++',' [',' 'ELSE' '->' Expr] 'ENDCOND'
+       | TableExpr
+
+IfExpr ::= 'IF' Expr 'THEN' Expr
+               {'ELSIF' Expr 'THEN' Expr}*
+               'ELSE' Expr 'ENDIF'
+
+BindingExpr ::= BindingOp LambdaBindings ':' Expr
+
+BindingOp ::= 'LAMBDA' | 'FORALL' | 'EXISTS' | {IdOp '!'}
+
+LambdaBindings ::= LambdaBinding [[','] LambdaBindings]
+
+LambdaBinding ::= IdOp | Bindings
+
+SetBindings ::= SetBinding [[','] SetBindings]
+
+SetBinding ::= {IdOp [':' TypeExpr]} | Bindings
+
+Bindings ::= '(' Binding++',' ')'
+
+Binding ::= TypedId | {'(' TypedIds ')'}
+
+Assignment ::= AssignArgs {':=' | '|->'} Expr
+
+AssignArgs ::= Id ['!' Number]
+	     | Number
+	     | AssignArg+
+
+AssignArg ::= {'(' Expr++',' ')'}
+	    | {'`' Id}
+	    | {'`' Number}
+
+Selection ::= IdOp ['(' IdOps ')'] ':' Expr
+
+TableExpr ::= 'TABLE' [Expr] [',' Expr]
+		[ColHeading]
+		TableEntry+ 'ENDTABLE'
+
+ColHeading ::= '|[' Expr {'|' {Expr | 'ELSE'}}+ ']|'
+
+TableEntry ::= {'|' [Expr | 'ELSE']}+ '||'
+
+LetBinding ::= {LetBind | '(' LetBind++',' ')'} '=' Expr
+
+LetBind ::= IdOp Bindings* [':' TypeExpr]
+
+Arguments ::= '(' Expr++',' ')'
+
+TypedIds ::= IdOps [':' TypeExpr] ['|' Expr]
+
+TypedId ::= Idop [':' TypeExpr] ['|' Expr] 
+
+TheoryNames ::= TheoryName++','
+
+TheoryName ::= [Id '@'] Id [Actuals]
+
+Names ::= Name++','
+
+Name ::= [Id '@'] IdOp [Actuals] ['.' IdOp]
+
+Actuals ::= '[' Actual++',' ']'
+
+Actual ::= Expr | TypeExpr
+
+IdOps ::= IdOp++','
+
+IdOp ::= Id | Opsym
+
+Ids ::= Id++','
+
+Opsym ::= BinOp | UnaryOp | 'IF' | 'TRUE' | 'FALSE' | '[||]'
+
+BinOp ::= 'o' | 'IFF' | '<=>' | 'IMPLIES' | '=>' | 'WHEN' | 'OR'
+        | '\/' | 'AND' | '/\' | '&' | 'XOR' | 'ANDTHEN' | 'ORELSE'
+        | '^' | '+' | '-' | '*' | '/' | '++' | '~' | '**' | '//' | '^^'
+        | '|-' | '|=' | '<|' | '|>' | '=' | '/=' | '==' | '<' | '<='
+        | '>' | '>=' | '<<' | '>>' | '<<=' | '>>=' | '#' | '@@' | '##'
+
+UnaryOp ::= 'NOT' | '~' | '[]' | '<>' | '-'
+
+FormulaName ::= 'AXIOM' | 'CHALLENGE' | 'CLAIM' | 'CONJECTURE' | 'COROLLARY'
+               | 'FACT' | 'FORMULA' | 'LAW' | 'LEMMA' | 'OBLIGATION'
+	       | 'POSTULATE' | 'PROPOSITION' | 'SUBLEMMA' | 'THEOREM'
+
+Id ::= Letter IdChar+
+
+Number ::= Digit+
+
+IdChar ::= Letter | Digit | '_' | '?'
+
+Letter ::= 'A' | ... | 'Z' | 'a' | ... | 'z'
+
+Digit ::= '0' | ... | '9'

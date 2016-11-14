@@ -1,0 +1,527 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html401/loose.dtd">
+<html>
+<!-- Created on January 14, 2013 by texi2html 1.82
+texi2html was written by: 
+            Lionel Cons <Lionel.Cons@cern.ch> (original author)
+            Karl Berry  <karl@freefriends.org>
+            Olaf Bachmann <obachman@mathematik.uni-kl.de>
+            and many others.
+Maintained by: Many creative people.
+Send bugs and suggestions to <texi2html-bug@nongnu.org>
+-->
+<head>
+<title>PVS Release Notes: PVS 4.0 Release Notes</title>
+
+<meta name="description" content="PVS Release Notes: PVS 4.0 Release Notes">
+<meta name="keywords" content="PVS Release Notes: PVS 4.0 Release Notes">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="texi2html 1.82">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+pre.display {font-family: serif}
+pre.format {font-family: serif}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: serif; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: serif; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.roman {font-family:serif; font-weight:normal;}
+span.sansserif {font-family:sans-serif; font-weight:normal;}
+ul.toc {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="pvs-release-notes_4.html#PVS-4_002e1-Release-Notes" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="pvs-release-notes_6.html#PVS-3_002e2-Release-Notes" title="Next chapter"> &gt;&gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="pvs-release-notes.html#Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="pvs-release-notes_toc.html#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[Index]</td>
+<td valign="middle" align="left">[<a href="pvs-release-notes_abt.html#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+
+<hr size="2">
+<a name="PVS-4_002e0-Release-Notes"></a>
+<a name="PVS-4_002e0-Release-Notes-1"></a>
+<h1 class="unnumbered">PVS 4.0 Release Notes</h1>
+
+<p>PVS 4.0 is available at <a href="http://pvs.csl.sri.com/download.shtml">http://pvs.csl.sri.com/download.shtml</a>.
+</p>
+<p>Release notes for PVS version 4.0.<a name="DOCF1" href="pvs-release-notes_fot.html#FOOT1">(1)</a>  The major difference from earlier
+versions of PVS is that this release is open source, under the
+<a href="http://www.gnu.org/copyleft/gpl.html">GPL license</a>.  In addition,
+there is now a <a href="http://pvs-wiki.csl.sri.com">PVS Wiki page</a>.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top"><a href="#g_t4_002e0-Installation-Notes">Installation Notes</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top"><a href="#g_t4_002e0-New-Features">New Features</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top"><a href="#g_t4_002e0-Bug-Fixes">Bug Fixes</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top"><a href="#g_t4_002e0-Incompatibilities">Incompatibilities</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+<hr size="6">
+<a name="g_t4_002e0-Installation-Notes"></a>
+<a name="Installation-Notes-4"></a>
+<h2 class="section">Installation Notes</h2>
+
+<p>Installation of binaries is the same as before; the only difference is
+that only one file needs to be downloaded.  This leads to slightly
+more overhead when downloading for multiple platforms, but simplifies
+the overall process.  Simply create a directory, untar the downloaded
+file(s) there, and run <code>bin/relocate</code>.
+</p>
+<p>If you have received patches from SRI that you have put into your
+<code>~/.pvs.lisp</code> file, they should be (re)moved.  If you anticipate
+wanting to try the newer and older versions together, you can do this
+by using <code>#-pvs4.0</code> in front of forms in your patches.  This is a
+directive to the Lisp reader, and causes the following s-expression to
+be ignored unless it is an earlier version of PVS.
+</p>
+<hr size="6">
+<a name="g_t4_002e0-New-Features"></a>
+<a name="New-Features-3"></a>
+<h2 class="section">New Features</h2>
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top"><a href="#Open-Source">Open Source</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top"><a href="#Record-and-Tuple-Type-Extensions">Record and Tuple Type Extensions</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top"><a href="#Structural-Subtypes">Structural Subtypes</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top"><a href="#Empty-and-Singleton-Record-and-Tuple-Types">Empty and Singleton Record and Tuple Types</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top"><a href="#PVSio">PVSio</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top"><a href="#Random-Testing">Random Testing</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top"><a href="#Yices">Yices</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top"><a href="#Recursive-Judgements-TCCs">Recursive Judgements TCCs</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top"><a href="#Prelude-Additions">Prelude Additions</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top"><a href="#Decimal-Representation-for-Numbers">Decimal Representation for Numbers</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top"><a href="#Unary-plus">Unary <code>+</code></a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+<hr size="6">
+<a name="Open-Source"></a>
+<a name="Open-Source-1"></a>
+<h3 class="subsection">Open Source</h3>
+
+<p>PVS is now open source, under the under the
+<a href="http://www.gnu.org/copyleft/gpl.html">GPL license</a>.  It
+currently builds with Allegro and CMU Common Lisps, and we are working
+on porting it to SBCL.  Feel free to join in if your favorite Lisp or
+platform is not yet supported.  See
+<a href="http://pvs-wiki.csl.sri.com">the PVS Wiki page</a> for details.
+</p>
+<hr size="6">
+<a name="Record-and-Tuple-Type-Extensions"></a>
+<a name="Record-and-Tuple-Type-Extensions-1"></a>
+<h3 class="subsection">Record and Tuple Type Extensions</h3>
+
+<p>Record and tuple types may now be extended using the <code>WITH</code>
+keyword.  Thus, one may create colored points and moving points from
+simple points as follows.
+</p><table><tr><td>&nbsp;</td><td><pre class="example">  point: TYPE = [<kbd>#</kbd> x, y: real <kbd>#</kbd>]
+  colored_point: TYPE = point WITH [# color: Color #]
+  moving_point: TYPE = point WITH [# vx, vy: real #]
+</pre></td></tr></table>
+<p>Similarly, tuples may be extended:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">  R3: TYPE = [real, real, real]
+  R5: TYPE = R3 WITH [real, real]
+</pre></td></tr></table>
+<p>For record types, it is an error to extend with new field names that
+match any field names in the base record type.  The extensions may not
+be dependent on the base type, though they may introduce dependencies
+within themselves.
+</p><table><tr><td>&nbsp;</td><td><pre class="example">  dep_bad: TYPE = point WITH [# z: {r: real | x*x + y*y &lt; 1} #]
+  dep_ok: TYPE = point WITH [# a: int, b: below(a) #]
+</pre></td></tr></table>
+<p>Note that the extension is a type expression, and may appear anywhere
+that a type is allowed.
+</p>
+
+<hr size="6">
+<a name="Structural-Subtypes"></a>
+<a name="Structural-Subtypes-1"></a>
+<h3 class="subsection">Structural Subtypes</h3>
+
+<p>PVS now has support for structural subtyping for record and tuple
+types.  A record type <code>S</code> is a structural subtype of record type
+<code>R</code> if every field of <code>R</code> occurs in <code>S</code>, and similarly,
+a tuple type <code>T</code> is a structural subtype of a tuple type forming
+a prefix of <code>T</code>.  Section <a href="#Record-and-Tuple-Type-Extensions">Record and Tuple Type Extensions</a> gives examples, as <code>colored_point</code> is a structural
+subtype of <code>point</code>, and <code>R5</code> is a structural subtype of
+<code>R3</code>.  Structural subtypes are akin to the class hierarchy of
+object-oriented systems, where the fields of a record can be viewed as
+the slots of a class instance.  The PVS equivalent of setting a slot
+value is the override expression (sometimes called update), and this
+has been modified to work with structural subtypes, allowing the
+equivalent of generic methods to be defined.  Here is an example.
+</p><table><tr><td>&nbsp;</td><td><pre class="example">points: THEORY
+BEGIN
+ point: TYPE+ = [# x, y: real #]
+END points
+
+genpoints[(IMPORTING points) gpoint: TYPE &lt;: point]: THEORY
+BEGIN
+ move(p: gpoint)(dx, dy: real): gpoint =
+  p WITH [`x := p`x + dx, `y := p`y + dy]
+END genpoints
+
+colored_points: THEORY
+BEGIN
+ IMPORTING points
+ Color: TYPE = {red, green, blue}
+ colored_point: TYPE = point WITH [# color: Color #]
+ IMPORTING genpoints[colored_point]
+ p: colored_point
+ move0: LEMMA move(p)(0, 0) = p
+END colored_points
+</pre></td></tr></table>
+<p>The declaration for <code>gpoint</code> uses the structural subtype operator
+<code>&lt;:</code>.  This is analogous to the <code>FROM</code> keyword, which
+introduces a (predicate) subtype.  This example also serves to explain
+why we chose to separate structural and predicate subtyping.  If they
+were treated uniformly, then <code>gpoint</code> could be instantiated with
+the unit disk; but in that case the <code>move</code> operator would not
+necessarily return a <code>gpoint</code>.  The TCC could not be generated
+for the <code>move</code> declaration, but would have to be generated when
+the <code>move</code> was referenced.  This both complicates typechecking,
+and makes TCCs and error messages more inscrutable.  If both are
+desired, simply include a structural subtype followed by a predicate
+subtype, for example:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">genpoints[(IMPORTING points) gpoint: TYPE &lt;: point,
+          spoint: TYPE FROM gpoint]: THEORY
+</pre></td></tr></table>
+<p>Now <code>move</code> may be applied to <code>gpoint</code>s, but if applied to a
+<code>spoint</code> an unprovable TCC will result.
+</p>
+<p>Structural subtypes are a work in progress.  In particular, structural
+subtyping could be extended to function and datatypes.  And to have
+real object-oriented PVS, we must be able to support a form of method
+invocation.
+</p>
+<hr size="6">
+<a name="Empty-and-Singleton-Record-and-Tuple-Types"></a>
+<a name="Empty-and-Singleton-Record-and-Tuple-Types-1"></a>
+<h3 class="subsection">Empty and Singleton Record and Tuple Types</h3>
+
+<p>Empty and singleton record and tuple types are now allowed in PVS.
+Thus the following are valid declarations:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">Tup0: TYPE = [ ]
+Tup1: TYPE = [int]
+Rec0: TYPE = [# #]
+</pre></td></tr></table>
+<p>Note that the space is important in the empty tuple type, as otherwise
+it is taken to be an operator (the box operator).
+</p>
+<hr size="6">
+<a name="PVSio"></a>
+<a name="PVSio-1"></a>
+<h3 class="subsection">PVSio</h3>
+
+<p>C&eacute;sar Mu&ntilde;oz has kindly provided lisp code for PVSio, which has
+been fully incorporated into PVS.  Thus for PVS 4.0 there is no need
+to download the package.  See the <code>doc/PVSio-2.d.pdf</code> manual for
+details, and the PVSio web page
+<a href="http://research.nianet.org/~munoz/PVSio/">http://research.nianet.org/~munoz/PVSio/</a> for updates.
+</p>
+<hr size="6">
+<a name="Random-Testing"></a>
+<a name="Random-Testing-1"></a>
+<h3 class="subsection">Random Testing</h3>
+
+<p>We have developed a capability for random test generation in PVS,
+based, in part, on work done in Haskell and Isabelle.  Random tests
+may be generated for universally quantified formulas in the ground
+evaluator or in the prover.  In each case, the purpose is to try and
+find a counter example to the given formula, by evaluating a number of
+instances until one of them returns <code>FALSE</code>.  The falsifying
+instance is then displayed.
+</p>
+<p>This is a good way to test a specification before attempting a proof.
+Unlike model checking, it is inherently incomplete; on the other hand,
+there is no requirement for all types to be finite, only that all involved
+types and constants have interpretations.
+</p>
+<p>For the prover, random testing is invoked with the <code>random-test</code> rule:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">  (random-test &amp;optional (fnum *) (count 10) (size 100)
+               (dtsize 10) all? verbose? instance
+               (subtype-gen-bound 1000))
+</pre></td></tr></table>
+
+<p>In the ground evaluator, we added the <code>test</code> command:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">  (test expr &amp;optional (count 10) (size 100) (dtsize 10)
+               all? verbose? instance)
+</pre></td></tr></table>
+<p>Note one important difference: the optional arguments in the
+<code>test</code> command are <strong>not</strong> keywords.  To set the <code>all?</code>
+flag you would need to invoke <code>test</code> as
+</p><table><tr><td>&nbsp;</td><td><pre class="example">  (test &quot;foo&quot; 10 100 10 t)
+</pre></td></tr></table>
+<p>In general, random testing is most easily used in the prover.  Note
+that you can get an arbitrary expression into the sequent by using the
+<code>case</code> command.
+</p>
+<p>The <code>count</code> argument controls how many random tests to try.
+The <code>size</code> and <code>dtsize</code> control the possible
+ranges of random values, as described below.  Normally the tests stop when
+a counter example is found; setting the <code>all?</code> flag to
+<code>t</code> causes further tests to be run until <code>count</code> is
+reached.  The <code>verbose?</code> flag indicates that all random
+test values should be displayed.  This is often useful to understand why a
+given test seems to always be true.  The <code>instance</code> argument
+allows formals and uninterpreted types and constants to be given as a
+theory instance with actuals and mappings.  The current theory may also be
+instantiated this way.  For example, <code>th[int, 0]{{T := bool, c :=
+true}}</code> may be a theory instance, providing actuals and mappings for the
+terms involved in the given formula.  The
+<code>subtype-gen-bound</code> is used to control how many random
+values to generate in attempting to satisfy a subtype predicate, as
+described below.
+</p>
+<p>In the prover, the universal formula is generated from the formulas
+specified by the <code>fnum</code> argument, first creating an implication from
+the conjunction of antecedents to the disjunction of consequents.  Any
+Skolem constants are then universally quantified and the result passed to
+the random tester.  This is useful for checking if the given sequent is
+worth proving; if it comes back with a counter example, then it may not be
+worth trying to prove.  Of course, it may just be that a lemma is needed,
+or relevant formulas were hidden, and that it isn&rsquo;t a real counter
+example.
+</p>
+<p>The random values are generated per type.  For numeric types, the builtin
+Lisp <code>random</code> function is used:
+</p><ul>
+<li>
+<code>nat</code> uses random(0..<code>size</code>)
+</li><li>
+<code>int</code> uses random(-<code>size</code>..<code>size</code>)
+</li><li>
+<code>rat</code> creates two random <code>int</code>s, the second nonzero,
+and returns the quotient
+</li><li>
+<code>real</code> and above just use <code>rat</code> values
+</li></ul>
+<p>All other subtypes create a random value for the supertype, and then check
+if it satisfies the subtype predicate.  It stops after
+<code>subtype-gen-bound</code> attempts.  Higher-order subtypes such as
+<code>surjective?</code> are not currently supported.  Function types
+generate a lazy function, so that, e.g.,
+</p><table><tr><td>&nbsp;</td><td><pre class="example">    FORALL (f: [int -&gt; int], x, y, z: int):
+       f(x) + f(f(y)) &gt; f(f(f(z)))
+</pre></td></tr></table>
+<p>creates a function that memoizes its values.
+Other types (e.g., record and tuple types) are built up recursively from
+their component types.
+</p>
+<p>Datatypes are controlled by <code>dtsize</code>.  For example, with
+<code>size</code> and <code>dtsize</code> set to their defaults (<code>100</code> and
+<code>10</code>, respectively), a variable of type <code>list[int]</code> will
+generate lists of length between 0 and 10, with integer values between
+-100 and 100.
+</p>
+<p>More details may be found in the paper
+<a href="http://fm.csl.sri.com/AFM06/papers/5-Owre.pdf">Random Testing in PVS</a>, which was presented at <a href="http://fm.csl.sri.com/AFM06/">AFM 2006</a>.
+</p>
+<hr size="6">
+<a name="Yices"></a>
+<a name="Yices-1"></a>
+<h3 class="subsection">Yices</h3>
+
+<p>New prover commands are available that invoke the Yices SMT solver.
+See <a href="http://yices.csl.sri.com">http://yices.csl.sri.com</a> for details on Yices and its
+capabilities.  You must download Yices from there and include it in
+your <code>PATH</code>, as it is not included with PVS.  You will get a
+warning on starting PVS if Yices is not found in your path, but this
+can safely be ignored if you will not be using Yices.
+</p>
+<p>The <code>yices</code> rule is an endgame solver; if it does not prove (the
+specified formulas of) the sequent, it acts as a <code>skip</code>.  In
+addition to the primitive <code>yices</code> rule, the strategies
+<code>yices-with-rewrites</code> and <code>ygrind</code> have been added.  Use
+<code>help</code> (e.g., <code>(help ygrind)</code>) for details.
+</p>
+
+<hr size="6">
+<a name="Recursive-Judgements-TCCs"></a>
+<a name="Recursive-Judgements-TCCs-1"></a>
+<h3 class="subsection">Recursive Judgements TCCs</h3>
+
+<p>Judgements on recursive functions often lead to difficult proofs, as
+one generally has to prove the resulting obligation using tedious
+induction.  For example, here is a definition of append on lists of
+integer, and a judgement that it is closed on lists of natural
+numbers (note that this example is artificial; append is defined
+polymorphically in the prelude):
+</p><table><tr><td>&nbsp;</td><td><pre class="example"> append_int(l1, l2: list[int]): RECURSIVE list[int] =
+    CASES l1 OF
+      null: l2,
+      cons(x, y): cons(x, append_int(y, l2))
+    ENDCASES
+    MEASURE length(l1)
+    
+ append_nat: JUDGEMENT append_int(a, b: list[nat]) HAS_TYPE list[nat]
+</pre></td></tr></table>
+<p>This yields the TCC
+</p><table><tr><td>&nbsp;</td><td><pre class="example">append_nat: OBLIGATION
+  FORALL (a, b: list[nat]):
+    every[int]({i: int | i &gt;= 0})(append_int(a, b));
+</pre></td></tr></table>
+<p>Which is difficult to prove automatically (or even manually).
+</p>
+<p>By adding the keyword <code>RECURSIVE</code> to the judgement, the TCCs are
+generated by
+</p><ul>
+<li> creating the predicate on the top-level call to the function,
+in this case <code>every({i: int | i &gt;= 0})(append_int(a, b))</code>.
+</li><li> substituting the variables into the body of the recursive
+definition
+</li><li> typechecking the substituted body against the expected result
+type (<code>list[nat]</code>), with the predicate as a condition.
+</li></ul>
+<p>With these changes, the TCC becomes
+</p><table><tr><td>&nbsp;</td><td><pre class="example">append_nat_TCC1: OBLIGATION
+  FORALL (a, b: list[nat], x: int, y: list[int]):
+    every({i: int | i &gt;= 0})(append_int(a, b)) AND a = cons(x, y)
+      IMPLIES
+     every[int]({i: int | i &gt;= 0})(cons[int](x, append_int(y, b)));
+</pre></td></tr></table>
+<p>and this is easily discharged automatically (e.g., with <code>grind</code>).
+</p>
+<p>Note that recursive judgements are used in exactly the same way as the
+non-recursive form; the only difference is in the generated TCCs.
+</p>
+<p>Recursive judgements are only allowed on recursive functions, and they
+are only for closure conditions (i.e., arguments must be provided).
+If a non-recursive judgement is given where a recursive judgement
+would apply, then a warning is output.  In general, recursive
+judgements are preferred.  In fact, we considered making it the
+default behavior for judgements on recursive functions, but this would
+make existing proofs fail.
+</p>
+
+
+
+<hr size="6">
+<a name="Prelude-Additions"></a>
+<a name="Prelude-Additions-1"></a>
+<h3 class="subsection">Prelude Additions</h3>
+
+<p>To support the Yices interface, several operators from the bitvector
+library have been moved to the prelude.  These are in the new theories
+<code>floor_div_props</code>, <code>mod</code>, <code>bv_arith_nat_defs</code>,
+<code>bv_int_defs</code>, <code>bv_arithmetic_defs</code>, and
+<code>bv_extend_defs</code>.  The <code>floor_div_props</code> and <code>mod</code>
+theories have been moved completely, the rest have only had the
+operators added to the prelude - the rest of the theory, along with
+lemmas and other useful declarations, is still in the bitvector
+library - just drop the <code>_def</code> for the corresponding theory.
+</p>
+<p>Note that this can have some side effects.  For example, the WIFT
+tutorial <code>adder</code> example expects conversions to be used in a
+certain way because there were no arithmetic operators on bit
+vectors.  Now that there are such operators, conversions no longer are
+needed, and proofs obviously fail.
+</p>
+<hr size="6">
+<a name="Decimal-Representation-for-Numbers"></a>
+<a name="Decimal-Representation-for-Numbers-1"></a>
+<h3 class="subsection">Decimal Representation for Numbers</h3>
+
+<p>PVS now has support for decimal representation of numbers, for
+example, <code>3.1416</code>.  Internally, this is treated as a fraction, in
+this case <code>31416/10000</code>.  So there is no floating point
+arithmetic involved, and the results are exact, since Common Lisp
+represents fractions exactly.  The decimal representation must start
+with an integer, i.e., <code>0.007</code> rather than <code>.007</code>.
+</p>
+<hr size="6">
+<a name="Unary-plus"></a>
+<a name="Unary-_002b"></a>
+<h3 class="subsection">Unary <code>+</code></h3>
+
+<p>The <code>+</code> operator may now be used as a unary operator.  Note that
+there is no definition for unary <code>+</code>, for example, <code>+1</code> will
+lead to a type error.  This was added primarily for user declarations.
+</p>
+
+<hr size="6">
+<a name="g_t4_002e0-Bug-Fixes"></a>
+<a name="Bug-Fixes-3"></a>
+<h2 class="section">Bug Fixes</h2>
+
+<p>This version fixes many (though not all) bugs.  Generally those marked as
+<code>analyzed</code> in the PVS bugs list have been fixed, and most have
+been incorporated into our validation suite.
+</p>
+<hr size="6">
+<a name="g_t4_002e0-Incompatibilities"></a>
+<a name="Incompatibilities-3"></a>
+<h2 class="section">Incompatibilities</h2>
+<p>There were some improvements made to judgements and TCC generation,
+that in some cases lead to different forms of TCCs.  In the validation
+suite, these were all easily detected and the proofs were not
+difficult to repair.
+</p>
+<p>It was noted in bug number 920 that the instantiator only looks for
+matches within the sequent, though often there are matches from the
+Skolem constants that are not visible.  The <code>inst?</code> command was
+modified to look in the Skolem constants as a last resort, so earlier
+proofs would still work.  Unfortunately, <code>grind</code> and similar
+strategies use <code>inst?</code> eagerly, and may now find a Skolem
+constant match that is incorrect, rather than waiting for a better
+match after further processing.  This is exactly the problem that
+<code>lazy-grind</code> was created for.  In our validation suite only a
+few formulas needed to be repaired, and those generally could be fixed
+simply by replacing <code>grind</code> by <code>lazy-grind</code>.  Since hidden
+Skolem constants are difficult for a new user to deal with, we feel
+that this is a worthwhile change.
+</p><hr size="6">
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#PVS-4_002e0-Release-Notes" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="pvs-release-notes_6.html#PVS-3_002e2-Release-Notes" title="Next chapter"> &gt;&gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="pvs-release-notes.html#Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="pvs-release-notes_toc.html#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[Index]</td>
+<td valign="middle" align="left">[<a href="pvs-release-notes_abt.html#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<p>
+ <font size="-1">
+  This document was generated by <em>Sam Owre</em> on <em>January 14, 2013</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+ </font>
+ <br>
+
+</p>
+</body>
+</html>

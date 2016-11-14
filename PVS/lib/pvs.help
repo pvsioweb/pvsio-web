@@ -1,0 +1,317 @@
+			PVS System Command List
+
+Commands appearing below are given with their abbreviations and alternate
+forms when they exist.  For example, the format "prove, pr (C-c p)"
+means that the prove command can be invoked by "M-x prove", the abbreviated
+form "M-x pr", or the key sequence "C-c p".  Most of these commands
+support completion on the arguments; hit the space bar at any point to
+see what the possible completions might be.
+
+To get help for a specific command, type C-h d followed by the command,
+or C-h k followed by the key sequence.
+
+Type C-v for next page, M-v for previous one, M-< to go to top, M-> to end.
+
+--------------------------------Exiting PVS-----------------------------------
+
+exit-pvs (C-x C-c)          Terminate the PVS session
+suspend-pvs (C-x C-z)       Suspend PVS
+
+------------------------------Getting Help------------------------------------
+
+help-pvs, pvs-help (C-c h)  - Display help for the PVS system commands
+help-pvs-bnf, pvs-help-bnf (C-c C-h b)
+                            - Display help for the PVS grammar
+help-pvs-language, pvs-help-language (C-c C-h l)
+                            - Display help for the PVS language
+help-pvs-prover, pvs-help-prover (C-c C-h p)
+                            - Display help for the PVS prover commands
+help-pvs-prover-command, pvs-help-prover-command (C-c C-h c)
+                            - Display help for the specified prover command
+help-pvs-prover-strategy, pvs-help-prover-strategy (C-c C-h s)
+                            - Display the specified strategy
+help-pvs-prover-emacs, pvs-help-prover-emacs (C-c C-h e)
+                            - Display help for the PVS prover Emacs commands
+pvs-release-notes (C-c C-h r)
+                            - Display the release notes			 
+x-prover-commands           - Display prover commands in a popup window
+
+---------------------------Editing PVS Files----------------------------------
+
+forward-theory (M-})       Move forward to the beginning of the next theory
+backward-theory (M-{)      Move backward to the beginning of previous theory
+find-unbalanced-pvs (C-c ]) Find unbalanced PVS delimiters
+comment-region (C-c ;)      Comment out all lines in the current region
+                            With arg, uncomments region
+
+------------------------Parsing and Typechecking------------------------------
+  With an argument, these will force reparsing/retypechecking.
+
+parse, pa                   Parse the PVS file in the current buffer
+typecheck, tc (C-c t)       Typecheck the PVS file in the current buffer
+typecheck-importchain, tci  Typecheck the importchain of all the theories in
+                            the current buffer
+typecheck-prove, tcp        Typecheck the PVS file in the current buffer,
+                            and attempts to prove the TCCs
+typecheck-prove-importchain, tcpi - Typecheck the importchain of all the
+                            theories in the current buffer, and attempts
+                            to prove the TCCs
+
+-----------------------Prover Invocation Commands-----------------------------
+
+prove,            pr  (C-c p)      Prove formula pointed to by cursor
+x-prove,          xpr (C-c C-p x)  Start proof along with X display
+step-proof,       prs (C-c C-p s)  Start proof and set up for stepping
+x-step-proof,     xsp (C-c C-p X)  Combines x-prove and step-proof
+redo-proof,       prr (C-c C-p r)  Redo proof of formula at cursor
+prove-next-unproved-formula        
+                  prnext (C-c C-p n) Start proof on next unproved formula
+prove-theory,     prt (C-c C-p t)  Do all proofs in specified theory
+prove-theories			   Do all proofs in specified theories
+prove-pvs-file,   prf (C-c C-p f)  Do all the proofs in current file
+prove-importchain,pri (C-c C-p i)  Do all proofs in IMPORT chain
+prove-importchain-subtree,pris     Do proofs in subtree of IMPORT chain
+prove-proofchain, prp (C-c C-p c)  Do all proofs in proofchain of formula
+prove-formulas-theory, prft        Try formulas with given strategy
+prove-formulas-pvs-file, prff      Try formulas with given strategy
+prove-formulas-importchain, prfi   Try formulas with given strategy
+prove-formulas-importchain-subtree, prfs
+                                   Try untried proofs with given strategy
+prove-tccs-theory, prtt            Try formulas with given strategy
+prove-tccs-pvs-file, prtf          Try formulas with given strategy
+prove-tccs-importchain, prti       Try formulas with given strategy
+prove-tccs-importchain-subtree, prts
+                                   Try untried proofs with given strategy
+prove-untried-theory, prut (C-c C-p u)
+                                   Try untried proofs with given strategy
+prove-untried-pvs-file, pruf (C-c C-p U)
+                                   Try untried proofs with given strategy
+prove-untried-importchain, prui    Try untried proofs with given strategy
+prove-untried-importchain-subtree, prus
+                                   Try untried proofs with given strategy
+set-decision-procedure		   Set the default decision procedures
+prove-theory-using-default-dp      Do proofs with default decision procedures
+prove-theories-using-default-dp    Do proofs with default decision procedures
+prove-pvs-file-using-default-dp    Do proofs with default decision procedures
+prove-importchain-using-default-dp Do proofs with default decision procedures
+prove-importchain-subtree-using-default-dp Do proofs with default dec. procs.
+prove-proofchain-using-default-dp  Do proofs with default decision procedures
+
+------------------------Proof Editing Commands--------------------------------
+
+edit-proof, show-proof      Edit the proof of the formula at cursor
+			      (C-c C-i) offers to rerun the proof
+install-proof, (C-c C-i)    Install the current proof at formula
+install-and-step-proof (C-c s)   Install the current proof at formula and step
+install-and-x-step-proof (C-c x) Install the current proof at formula and step
+revert-proof                Reverts the proof of the formula at cursor
+                              to the previous one (toggles)
+remove-proof                Removes the proof of the formula at cursor
+show-proof-file             Edit specified proof file
+show-orphaned-proofs        Edit orphaned proofs file
+show-proofs-theory	    Show the proof scripts of the specified theory
+show-proofs-pvs-file        Show the proof scripts of the specified file
+show-proofs-importchain     Show proof scripts of IMPORT chain of theory
+install-pvs-proof-file      Install a new proof file
+display-proofs-formula      Display the multiple proofs of formula
+display-proofs-theory       Display the multiple proofs of formulas of theory
+display-proofs-pvs-file     Display the multiple proofs of formulas of PVS file
+load-pvs-strategies         Load the pvs-strategies file(s)
+set-print-depth             Set the print depth for formulas of sequents
+set-print-length            Set the print length for formulas of sequents
+set-print-lines		    Set the number of lines to print for seq. formulas
+set-rewrite-depth           Set the print depth for displaying rewrites
+set-rewrite-length          Set the print length for displaying rewrites
+dump-sequents		    Indicate that unproved sequents go to a file
+toggle-proof-prettyprinting Toggles whether to prettyprint proof files
+pvs-set-proof-prompt-behavior Indicates the kind of prompting at the end of
+                              a proof; one of :ask, :overwrite, or :new
+pvs-set-proof-default-description Sets a default description string for saved
+                                  proofs			      
+
+-----------------------Proof Information Commands-----------------------------
+
+show-current-proof          Display the proof in progress
+show-last-proof             Brief display of the most recent proof
+set-proof-backup-number     Set the number of backups to keep for proof files
+show-proof-backup-number    Show the proof backup number
+ancestry                    Display the ancestry of the current sequent
+siblings                    Display the siblings of the current sequent
+show-hidden-formulas        Display the hidden formulas of the current sequent
+show-auto-rewrites          Display the currently used auto-rewrite rules
+show-expanded-sequent       Display the expansion of the current sequent
+show-skolem-constants       Display Skolem constants with types of sequent
+explain-tcc                 Explain why the TCC sequent was generated
+usedby-proofs               Display formulas whose proofs refer to the
+                              declaration at cursor
+pvs-set-proof-parens        Control parentheses display in proofs
+
+---------------------------Evaluation Commands--------------------------------
+
+pvs-lisp-theory             Generate lisp file for a theory
+pvs-ground-evaluator        Invoke the interactive ground evaluator
+
+-------------------Adding and Modifying Declarations--------------------------
+
+add-declaration             Add declarations to a theory
+modify-declaration          Modify the body of the indicated declaration
+
+--------------------------Prettyprint Commands--------------------------------
+
+prettyprint-theory,      ppt (C-c C-q t) Prettyprint theory in current buffer
+prettyprint-pvs-file,    ppf (C-c C-q f) Prettyprint file in current buffer
+prettyprint-declaration, ppd (C-c C-q d) Prettyprint the indicated declaration
+prettyprint-region,      ppr (C-c C-q r) Prettyprint region of current buffer
+prettyprint-theory-instance, ppti (C-c C-q i) Prettyprint the specified theory
+                                         instance, performing substitutions
+					 for actual parameters and mappings
+pvs-set-linelength                       Set the prettyprinter line length
+
+------------------------------Viewing TCCs------------------------------------
+
+prettyprint-expanded, ppe (C-c C-q e) Prettyprint expanded theory in ppe buffer
+show-tccs,            tccs (C-c C-q s) Show the TCCs of the indicated theory
+show-declaration-tccs                 Show TCCs of declaration at cursor
+
+------------------------File and Theory Commands------------------------------
+
+find-pvs-file, ff (C-c C-f) Find buffer containing named PVS file
+find-theory, ft             Find buffer containing named theory
+view-prelude-file, vpf      View the prelude file
+view-prelude-theory, vpt    View the specified prelude theory
+view-library-file,vlf       View named library file
+view-library-theory,vlt     View named library theory
+new-pvs-file, nf            Create PVS buffer containing named theory
+new-theory, nt              Create named theory in current buffer
+import-pvs-file, imf        Import a text file as a PVS file
+import-theory, imt          Import a theory from another PVS file
+delete-pvs-file, df         Delete PVS file
+delete-theory, dt           Delete theory from PVS file
+save-pvs-file, (C-x C-s)    Save file in current buffer
+save-some-pvs-files, ssf    Save modified PVS files
+save-pvs-buffer             Save buffer in file, without renaming
+smail-pvs-files             Mail files in IMPORT chain to specified address
+rmail-pvs-files             Read files sent by smail-pvs-files
+dump-pvs-files              Write files in IMPORT chain to file
+undump-pvs-files            Break dump file into separate PVS files
+edit-pvs-dump-file          Edit a pvs dump file using outline mode
+
+---------------------------Printing Commands----------------------------------
+
+pvs-print-buffer                   Send buffer to printer
+pvs-print-region                   Send region to printer
+print-theory, ptt                  Send theory to printer
+print-pvs-file, ptf                Send PVS file to printer
+print-importchain, pti             Send PVS files to printer
+alltt-theory, alt (C-c C-a t)      Format theory for LaTeX alltt environment
+alltt-pvs-file, alf (C-c C-a f)    Format theories of file for LaTeX alltt
+alltt-importchain, ali (C-c C-a i) Format IMPORT chain for LaTeX alltt
+alltt-proof, alp (C-c C-a p)       Format last proof for LaTeX alltt
+latex-theory, ltt (C-c C-l t)      Generate LaTeX text for theory
+latex-pvs-file, ltf (C-c C-l f)    Generate LaTeX text for PVS file
+latex-importchain, lti (C-c C-l i) Generate LaTeX text for IMPORT chain
+latex-proof, ltp (C-c C-l p)       Generate LaTeX text for last proof 
+latex-theory-view, ltv (C-c C-l v) Generates and views LaTeX for theory
+latex-proof-view, lpv (C-c C-l P)  Generates and views LaTeX for last proof
+latex-set-linelength, lts (C-c C-l s)  Set the linelength for LaTeX text
+html-pvs-file                      Generates HTML for PVS file
+html-pvs-files                     Generates HTML for PVS file and dependencies
+
+----------------------------Display Commands----------------------------------
+  All of these commands pop up a Tcl/Tk window
+
+x-theory-hierarchy         Display the theory hierarchy
+x-show-proof               Display proof of formula at cursor
+x-show-current-proof       Display proof in progress
+
+----------------------------Context Commands----------------------------------
+
+list-pvs-files, lf         Display a list of PVS files in current context
+list-theories, lt          Display a list of theories in current context
+change-context, cc         Switch to a new context
+save-context, sc           Save the current context
+pvs-remove-bin-files       Remove the .bin files
+pvs-dont-write-bin-files   Inhibit writing or loading of .bin files
+pvs-do-write-bin-files     Allows writing and loading of .bin files (default)
+context-path, cp           Display pathname of current context
+
+---------------------------Library Commands-----------------------------------
+
+load-prelude-library       Extend the prelude with the specified library
+list-prelude-libraries     List the files loaded by load-prelude-library
+remove-prelude-library     Undoes load-prelude-library
+
+---------------------------Browsing Commands----------------------------------
+
+show-declaration         (M-.)   Show declaration of symbol at cursor
+goto-declaration	 (C-M-.) Go to the declaration at cursor
+find-declaration         (M-,)   Search for declarations of given symbol
+whereis-declaration-used (M-;)   Search for declarations which reference decl
+whereis-identifier-used  (C-M-;) Search for declarations which reference symbol
+list-declarations        (M-:)   Show list of declarations of current context
+show-expanded-form       (C-.)   Show expanded form of term containing region
+
+----------------------------Status Commands-----------------------------------
+
+status-theory, stt (C-c C-s t)      Status of specified theory (parsed etc.)
+status-pvs-file, stf (C-c C-s f)    Status of theories of current file
+status-importchain, sti (C-c C-s i) Status of theories in import chain
+                                    With arg, prints just theory names
+status-importbychain, stb (C-c C-s b) Status of theories in imported-by chain
+show-theory-warnings                Show warnings for theory
+show-pvs-file-warnings              Show warnings for PVS file
+show-theory-messages                Show informational messages for theory
+show-pvs-file-messages              Show informational messages for PVS file
+show-theory-conversions             Show conversion messages for theory
+show-pvs-file-conversions           Show conversion messages for PVS file
+status-proof, sp (C-c C-s p)        Status of formula at cursor
+status-proof-theory, spt            Status of all formulas in theory
+status-proof-pvs-file, spf          Status of all formulas in PVS file
+status-proof-importchain, spi       Status of all formulas on IMPORT chain
+status-proofchain, spc              Analyze proof chain of formula at cursor
+status-proofchain-theory, spct      Analyze proof chain of specified theory
+status-proofchain-pvs-file, spcf    Analyze proof chain of current file
+status-proofchain-importchain, spci Analyze proof chain of import chain
+
+--------------------------Environment Commands--------------------------------
+
+whereis-pvs                         Display the root PVS directory
+pvs-version                         Display current version of PVS
+pvs-mode                            Put current buffer in PVS mode
+pvs-log                             Display the PVS Log buffer
+status-display                      Display the PVS Status buffer
+pvs-status                          Find out if Lisp is busy
+pvs                                 Start the PVS process
+pvs-load-patches, load-pvs-patches  Load new PVS patches
+pvs-interrupt-subjob (C-c C-c)      Interrupt PVS lisp process
+reset-pvs                           Interrupt PVS and resynchronize
+report-pvs-bug, pvs-report-bug      Mail a bug report to pvs-bugs@csl.sri.com
+
+
+========================LaTeX Substitution Files==============================
+
+Substitutions for file <filename>.pvs may come from any of the following
+files.
+
+	File name	Location
+	---------	--------
+	<filename>.sub	the directory of the current context
+	pvs-tex.sub	the directory of the current context
+	pvs-tex.sub	user's home directory
+	pvs-tex.sub	the main PVS directory
+
+
+Examples of substitution entries - numbers refer to the number of
+arguments; thus the third entry translates f2[3,G] but not f2[int], and
+the last entry translates, e.g., f4(G)(1,n).  Length is an estimation of
+the size of the translation in ens, ignoring the size of the arguments.
+Further examples may be found in pvs-tex.sub in the main PVS directory.
+
+	Identifier  Type  Length  Substitution
+	----------  ----  ------  ------------
+	THEORY      key     9     {\large\bf Theory}
+	f1          id      3     {\rm bar}
+	f2          id[2]   2     {#2_{#1}^{f}}
+	f3          2       2     {#1^#2}
+	f4          (1 2)   3     {\sum_{i=#2}^{#3}#1(i,#2)}
+
