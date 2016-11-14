@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html401/loose.dtd">
+<html>
+<!-- Created on January 14, 2013 by texi2html 1.82
+texi2html was written by: 
+            Lionel Cons <Lionel.Cons@cern.ch> (original author)
+            Karl Berry  <karl@freefriends.org>
+            Olaf Bachmann <obachman@mathematik.uni-kl.de>
+            and many others.
+Maintained by: Many creative people.
+Send bugs and suggestions to <texi2html-bug@nongnu.org>
+-->
+<head>
+<title>PVS Release Notes: PVS 3.1 Release Notes</title>
+
+<meta name="description" content="PVS Release Notes: PVS 3.1 Release Notes">
+<meta name="keywords" content="PVS Release Notes: PVS 3.1 Release Notes">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="texi2html 1.82">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+pre.display {font-family: serif}
+pre.format {font-family: serif}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: serif; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: serif; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.roman {font-family:serif; font-weight:normal;}
+span.sansserif {font-family:sans-serif; font-weight:normal;}
+ul.toc {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="pvs-release-notes_6.html#PVS-3_002e2-Release-Notes" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="pvs-release-notes_8.html#PVS-3_002e0-Release-Notes" title="Next chapter"> &gt;&gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="pvs-release-notes.html#Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="pvs-release-notes_toc.html#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[Index]</td>
+<td valign="middle" align="left">[<a href="pvs-release-notes_abt.html#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+
+<hr size="2">
+<a name="PVS-3_002e1-Release-Notes"></a>
+<a name="PVS-3_002e1-Release-Notes-1"></a>
+<h1 class="unnumbered">PVS 3.1 Release Notes</h1>
+
+<p>PVS 3.1 is primarily a bug fix release, there are no new features,
+although the prelude has been augmented.  Some of the changes do
+affect proofs, though our experience is that only a few proofs need
+adjustment, and most of these were quite easy to recognize and fix.
+</p>
+<p>The bugs that have been fixed in 3.1 are mostly those reported since
+December 2002.  Some of these fixes are to the judgement and TCC
+mechanism, so may have an impact on existing proofs.  As usual, if it
+is not obvious why a proof is failing, it is often easiest to run it
+in parallel on an earlier version to see where it differs.
+</p>
+<p>Some of the differences can be quite subtle, for example, one of the
+proofs that quit working used <code>induct-and-simplify</code>.  There were
+two possible instantiations found in an underlying <code>inst?</code>
+command, and in version 3.0 one of these led to a nontrivial TCC, so
+the other was chosen.  In version 3.1, a fix to the judgement
+mechanism meant that the TCC was no longer generated, resulting in a
+different instantiation.  In this case the proof was repaired using
+<code>:if-match all</code>.
+</p>
+<p>Most of the other incompatibilities are more obvious, and the proofs
+are easily repaired.  If you have difficulties understanding why a
+proof has failed, or want help fixing it, send it to
+<a href="mailto:pvs-bugs@csl.sri.com">PVS bugs</a>.
+</p>
+<p>Thanks to <a href="mailto:jamesj@acm.org">Jerry James</a>, a number of new
+theories and declarations have been added to the prelude.  Several
+judgments have been added.  Remember that these generally result in
+fewer TCCs, and could affect proofs as noted above.
+</p><hr size="6">
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="pvs-release-notes_6.html#PVS-3_002e2-Release-Notes" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="pvs-release-notes_8.html#PVS-3_002e0-Release-Notes" title="Next chapter"> &gt;&gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="pvs-release-notes.html#Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="pvs-release-notes_toc.html#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[Index]</td>
+<td valign="middle" align="left">[<a href="pvs-release-notes_abt.html#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<p>
+ <font size="-1">
+  This document was generated by <em>Sam Owre</em> on <em>January 14, 2013</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+ </font>
+ <br>
+
+</p>
+</body>
+</html>

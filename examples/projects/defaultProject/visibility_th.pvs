@@ -1,0 +1,26 @@
+visibility_th: THEORY
+ BEGIN IMPORTING emucharts_defaultProject_th
+
+%-- useful definitions
+init?(st: State): bool = (st = init(0))
+trans(pre, post: State): bool =
+   (per_tick(pre) IMPLIES post = tick(pre))
+   
+
+
+%-- visibility predicate
+visibility(st: State): bool =
+    (LET post = tick(st)
+      IN (per_tick(st) AND post`current_state /= st`current_state)
+          IMPLIES
+         (post`id /= st`id
+          OR post`x /= st`x))
+
+%-- PVS theorem based on the visibility predicate, formulated using structural induction
+VISIBILITY: THEOREM
+  FORALL (pre, post: State):
+    (init?(pre) IMPLIES visibility(pre))
+       AND
+    ((visibility(pre) AND trans(pre, post)) IMPLIES visibility(post))
+
+ END visibility_th

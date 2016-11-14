@@ -1,0 +1,263 @@
+\hypertarget{main_8c-example}{}\section{main.\+c}
+An example to test the C code generated.
+
+
+\begin{DoxyCodeInclude}
+
+\textcolor{preprocessor}{#include "\hyperlink{emucharts__fcusoftware___misra_c_8h}{emucharts\_fcusoftware\_MisraC.h}"}
+\textcolor{preprocessor}{#include <stdio.h>}
+\textcolor{preprocessor}{#include <string.h>}
+\textcolor{preprocessor}{#define NUM\_OF\_FUNC 20}
+
+
+\textcolor{keywordtype}{int} \hyperlink{main_8c_ae66f6b31b5ad750f1fe042a706a4e3d4}{main}()\{
+    \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} *\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9eb}{MachineState}[] = \{ (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8}*)\textcolor{stringliteral}{"EDIT\_PRESSURE"}, (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8}*)\textcolor{stringliteral}{"QNH"}, (
+      \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8}*)\textcolor{stringliteral}{"STD"} \};   \textcolor{comment}{// Useful for printf()}
+    \textcolor{comment}{/*}
+\textcolor{comment}{     * At first instantiate state variable and call init() in order to initialise it as follow: }
+\textcolor{comment}{     */}
+    \hyperlink{structstate}{state} s;
+    \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_a62175aaa12faf6b6a59271d6b3c6f1e3}{init}(&s);
+    printf(\textcolor{stringliteral}{"Initialised, current state: %s \(\backslash\)n-------\(\backslash\)n"}, MachineState[s.
+      \hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}]);
+    
+    \textcolor{comment}{/*}
+\textcolor{comment}{     * Example generated in order to call all the functions}
+\textcolor{comment}{     * with the use of a menu to select the required function}
+\textcolor{comment}{     * (this example uses the standard output stream, it is illustrative purposes only)}
+\textcolor{comment}{     */}
+     
+    \textcolor{keywordtype}{char} *function\_name[] = \{ \textcolor{stringliteral}{"click\_CLR"}, \textcolor{stringliteral}{"click\_digit\_0"}, \textcolor{stringliteral}{"click\_digit\_1"}, \textcolor{stringliteral}{"click\_digit\_2"}, \textcolor{stringliteral}{"
+      click\_digit\_3"}, \textcolor{stringliteral}{"click\_digit\_4"}, \textcolor{stringliteral}{"click\_digit\_5"}, \textcolor{stringliteral}{"click\_digit\_6"}, \textcolor{stringliteral}{"click\_digit\_7"}, \textcolor{stringliteral}{"click\_digit\_8"}, \textcolor{stringliteral}{"click\_digit\_9"}, \textcolor{stringliteral}{"
+      click\_editbox\_pressure"}, \textcolor{stringliteral}{"click\_ESC"}, \textcolor{stringliteral}{"click\_hPa"}, \textcolor{stringliteral}{"click\_inHg"}, \textcolor{stringliteral}{"click\_OK"}, \textcolor{stringliteral}{"click\_point"}, \textcolor{stringliteral}{"click\_QNH\_RADIO"}
+      , \textcolor{stringliteral}{"click\_STD\_RADIO"}, \textcolor{stringliteral}{"tick"} \};   
+    \textcolor{keywordtype}{int} t, i;
+    printf(\textcolor{stringliteral}{"List of functions name\(\backslash\)n"});
+    \textcolor{keywordflow}{for}(i = 1; i <= \hyperlink{main_8c_ad56a7df93e644a45226f0b7eab1982e9}{NUM\_OF\_FUNC}; i++)\{
+        printf(\textcolor{stringliteral}{"%d - %s\(\backslash\)n"}, i, function\_name[i-1]);
+    \}
+     \textcolor{keywordflow}{while}(1)\{    
+        printf(\textcolor{stringliteral}{"Enter number of transition to be issued (enter 0 to exit): "});
+        \textcolor{keywordflow}{if}( scanf(\textcolor{stringliteral}{"%d"},&t) != 1 )\{
+            fprintf( stderr, \textcolor{stringliteral}{"Expected a numbers as input\(\backslash\)n"});
+            \textcolor{keywordflow}{return} 1;
+        \}
+        t--;
+        printf(\textcolor{stringliteral}{"\(\backslash\)n"});
+        \textcolor{keywordflow}{if} ( (t < 0) || (t >= \hyperlink{main_8c_ad56a7df93e644a45226f0b7eab1982e9}{NUM\_OF\_FUNC}) )\{
+            printf(\textcolor{stringliteral}{"Wrong input\(\backslash\)n"});
+            \textcolor{keywordflow}{return} 1;
+        \}
+        \textcolor{comment}{/*}
+\textcolor{comment}{        * It's recommended to call permission function before issuing the transition function as follow}
+\textcolor{comment}{        */}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_CLR"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ad329c4b07c9204a806cc54cb350eb07a}{per\_click\_CLR}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_ab4fbabfae52be647df0ab5d68f3c0e35}{click\_CLR}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_digit\_0"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ab38e72d5641e3487cc8aca9d392b1702}{per\_click\_digit\_0}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_a50322d1a3923769aa88d571f732f9ea1}{click\_digit\_0}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_digit\_1"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a670776ef52f73d6cf1b47dd8804d18b0}{per\_click\_digit\_1}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_abeee28c651eb1b1345474eed600f96ff}{click\_digit\_1}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_digit\_2"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_af06ec493fae78973dbc6225bcc0140a3}{per\_click\_digit\_2}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_a95cb6331ec71225f73e207d0fe22648f}{click\_digit\_2}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_digit\_3"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a88305b837381a4def986cebf4394c3cc}{per\_click\_digit\_3}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_a77b411528e296d36eeb0af8cc4d6d758}{click\_digit\_3}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_digit\_4"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a6aeb2ae4a60b40b20cbe0668976da3ed}{per\_click\_digit\_4}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_a634b85002240ce6b5aca9a1f7820537e}{click\_digit\_4}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_digit\_5"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a0218a4008cc543ee1e8b79504f33f554}{per\_click\_digit\_5}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_a31307cd5d7f93298e4fffe4588a12292}{click\_digit\_5}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_digit\_6"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ab3278b7d79571766192c3eb9cbbd3e1f}{per\_click\_digit\_6}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_a2658f184c65107217d63e9eaa36476f8}{click\_digit\_6}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_digit\_7"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_af1f35d4ca1c16accee38082cd39ef115}{per\_click\_digit\_7}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_a9b1900468aa5de5817c428f072169d81}{click\_digit\_7}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_digit\_8"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a66a78f1a1f6f89036f84a7045e655949}{per\_click\_digit\_8}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_a3b910dcec80f4e35449882eb42e6a86f}{click\_digit\_8}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_digit\_9"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ac9444a2a0a61e83c0c7d8818da87d0e2}{per\_click\_digit\_9}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_ad4b49802c6796134fdd3b3b1c9b6185b}{click\_digit\_9}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_editbox\_pressure"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a49ee4063c990acdce13f993cccdd22e8}{per\_click\_editbox\_pressure}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_aa9a620f14ba3ed3d71f0ca65c7380551}{click\_editbox\_pressure}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_ESC"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a9f1df1938b52b09957bf83e20130bb88}{per\_click\_ESC}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_a74758b607d5cb39dff882412bcd72d68}{click\_ESC}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_hPa"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ac95f0937cde73a7e1ba5c2fac25307a0}{per\_click\_hPa}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_aaddce979aeec65fcae381207a9bcd264}{click\_hPa}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_inHg"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ae660a6cd4ee0b6eaf0ca97d1577a7e28}{per\_click\_inHg}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a1d2df2b22d455e00efdaac3f6c06093c}{click\_inHg}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_OK"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ab0a98c3da54dabd5123cda3cb3f09f4e}{per\_click\_OK}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ad74d9852baa9fb494f45eb1a8d0de6ae}{click\_OK}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_point"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80de691a6f68b7d88ef7e0daad933839}{per\_click\_point}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a8ee937bfbda1e2537b8291a04090bff9}{click\_point}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_QNH\_RADIO"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a3cfe798f70e60c8e44eea8aeae1f7eea}{per\_click\_QNH\_RADIO}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_aab7adbf6d1c25d97763ce6150f64d3a7}{click\_QNH\_RADIO}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"click\_STD\_RADIO"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ac7f69c7efcd34d5979511c4eb3da6d99}{per\_click\_STD\_RADIO}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a3d5a1e88f25a531848e28f9ea9c24c0c}{click\_STD\_RADIO}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+        \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (strcmp(function\_name[t], \textcolor{stringliteral}{"tick"}) == 0)\{
+            \textcolor{keywordflow}{if} (\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a871f9414f872b971cc9638353d78c908}{per\_tick}(&s))\{
+                \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ad98cf002f283affdec11de0f071c22a0}{tick}(&s);
+                printf(\textcolor{stringliteral}{"Press %s: current state: %s previous state: %s \(\backslash\)n"}, function\_name[t], MachineState[
+      s.\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state}], MachineState[s.\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state}]);
+            \}
+            \textcolor{keywordflow}{else}\{
+                printf(\textcolor{stringliteral}{"Permission to %s function denied\(\backslash\)n"}, function\_name[t]);
+            \}
+        \}
+         
+        \textcolor{keywordflow}{else}\{
+            \textcolor{keywordflow}{return} 1;
+        \}
+    \}    
+    \textcolor{keywordflow}{return} 0;
+\}
+
+\end{DoxyCodeInclude}
+ 

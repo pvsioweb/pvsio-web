@@ -1,0 +1,4 @@
+CONSISTENCY: THEOREM
+  FORALL (pre, post: State):
+    (per_act(pre) AND post = act(pre))
+      IMPLIES (post`s R pre`s)

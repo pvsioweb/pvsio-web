@@ -1,0 +1,26 @@
+reversibility_th: THEORY
+ BEGIN IMPORTING emucharts_defaultProject_th
+
+%-- useful definitions
+init?(st: State): bool = (st = init(0))
+trans(pre, post: State): bool =
+   (per_tick(pre) IMPLIES post = tick(pre)) AND
+   (per_act1(pre) IMPLIES post = act1(pre))
+   
+
+
+%-- reversibility predicate
+reversibility(st: State): bool =
+    (per_tick(st) IMPLIES
+      (per_tick(tick(st)) AND tick(tick(st))`id = st`id)) AND
+    (per_act1(st) IMPLIES
+      (per_tick(act1(st)) AND tick(act1(st))`id = st`id))
+
+%-- PVS theorem based on the reversibility predicate, formulated using structural induction
+REVERSIBILITY: THEOREM
+  FORALL (pre, post: State):
+    (init?(pre) IMPLIES reversibility(pre))
+       AND
+    ((reversibility(pre) AND trans(pre, post)) IMPLIES reversibility(post))
+
+ END reversibility_th

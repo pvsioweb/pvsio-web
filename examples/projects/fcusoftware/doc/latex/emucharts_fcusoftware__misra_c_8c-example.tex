@@ -1,0 +1,724 @@
+\hypertarget{emucharts_fcusoftware__misra_c_8c-example}{}\section{emucharts\+\_\+fcusoftware\+\_\+\+Misra\+C.\+c}
+
+\begin{DoxyCodeInclude}
+
+\textcolor{preprocessor}{#include "\hyperlink{emucharts__fcusoftware___misra_c_8h}{emucharts\_fcusoftware\_MisraC.h}"}
+\textcolor{preprocessor}{#include <assert.h>}
+
+\textcolor{preprocessor}{#ifdef DEBUG}
+\textcolor{preprocessor}{#include <stdio.h>}
+\textcolor{preprocessor}{#define debug\_print(fmt, args...) \(\backslash\)}
+\textcolor{preprocessor}{        do \{ fprintf(stderr, "%s:%d:%s(): " fmt, \(\backslash\)}
+\textcolor{preprocessor}{                \_\_FILE\_\_, \_\_LINE\_\_, \_\_FUNCTION\_\_, ##args); \} while (0)}
+\textcolor{preprocessor}{#endif}
+\textcolor{comment}{/* constants variables */}
+\textcolor{keyword}{const} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ad6a43be0be014a4a15c9ed13b9f0b3b6}{UI\_32} \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE} = 60u;
+
+\textcolor{comment}{/* definition of auxiliary functions */}
+\textcolor{keywordtype}{void} \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9eb}{MachineState} newStateLabel, \hyperlink{structstate}{state} *st) \{
+\textcolor{preprocessor}{#ifdef DEBUG}
+    debug\_print(\textcolor{stringliteral}{"Entering state nr. '%u'.\(\backslash\)n"}, newStateLabel);
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} = newStateLabel;
+\}
+\textcolor{keywordtype}{void} \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9eb}{MachineState} currentStateLabel, \hyperlink{structstate}{state} *st) \{
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Leaving state nr. '%u'.\(\backslash\)n"}, currentStateLabel);
+\textcolor{preprocessor}{#endif    }
+    st->\hyperlink{structstate_a5c3872ddbefc0dd4f0a5e8a6f8dfe9d1}{previous\_state} = currentStateLabel;
+\}
+
+\textcolor{comment}{/* definition of initialisation function */}
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_a870e1a2acc984a9c0f170dc808013aeb}{init}(\hyperlink{structstate}{state} *st)\{
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Initialisation of state variables.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif    }
+    st->data\_entry.\hyperlink{structstate_ae7318648ca1bb2d6477337b86090022a}{decimalDigits} = 0;
+    strcpy(st->data\_entry.\hyperlink{structstate_a6a18e3e28b7b18141f7c1afc1e8d36e1}{display}, \textcolor{stringliteral}{"STD\_INHG"});
+    st->data\_entry.\hyperlink{structstate_ae8964be364b75ddef3b2c84246098b89}{dispval} = STD\_INHG;
+    st->data\_entry.\hyperlink{structstate_a267c146c9bfe2a7e0cdf36d8d50e9a7e}{integerDigits} = 0;
+    strcpy(st->data\_entry.\hyperlink{structstate_a685a2a1db0b7be88bb2bd7ede1488b3e}{msg}, \textcolor{stringliteral}{""}\textcolor{stringliteral}{""});
+    st->data\_entry.\hyperlink{structstate_a1754500336f1e552a7345dedc8d26a7e}{pointEntered} = \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_aa93f0eb578d23995850d61f7d61c55c1}{FALSE};
+    st->data\_entry.\hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} = STD\_INHG;
+    st->data\_entry.\hyperlink{structstate_a432520cd6c29e82918b25bc99b0f1e9f}{units} = inHg;
+    st->\hyperlink{structstate_a01594636777fc241d60eeb6129b9ac4a}{editbox\_selected} = \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_aa93f0eb578d23995850d61f7d61c55c1}{FALSE};
+    st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD}, st);
+    
+    assert ( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\textcolor{comment}{/* definition of transition functions */}
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_ab7a7ee8e222d7c8c02fbc2b3899fe9ba}{click\_CLR}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->elapse = MAX\_ELAPSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_acf22d1079f293324f884cdad58ce3c1a}{click\_digit\_0}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->elapse = MAX\_ELAPSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_a90c6af1736817f47adcf3b3263991555}{click\_digit\_1}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->elapse = MAX\_ELAPSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_a8a01ae0baa834640ab1b571fcac2ef87}{click\_digit\_2}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->elapse = MAX\_ELAPSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_adb3a89686999d79f67257feff2735862}{click\_digit\_3}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->elapse = MAX\_ELAPSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_ad5f153f418ee4b8003a24101ce3728d7}{click\_digit\_4}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->elapse = MAX\_ELAPSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_ae3a312b356ac102dba4f5c29e865703c}{click\_digit\_5}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->elapse = MAX\_ELAPSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_a599a7680d063370c87c5969cefce319d}{click\_digit\_6}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->elapse = MAX\_ELAPSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_a6bad79edd594f0930804bf1e023e7c55}{click\_digit\_7}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->elapse = MAX\_ELAPSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_af6235b79611f7a9bb9b32fcb1e9a312b}{click\_digit\_8}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->elapse = MAX\_ELAPSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_aa501570372190855f7235158ef4c2194}{click\_digit\_9}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->elapse = MAX\_ELAPSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_a63ef12b2c050abef9112714de47604a1}{click\_editbox\_pressure}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH});
+    \textcolor{keywordflow}{if} (! st->\hyperlink{structstate_a01594636777fc241d60eeb6129b9ac4a}{editbox\_selected}) \{
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}, st);
+        st->\hyperlink{structstate_a01594636777fc241d60eeb6129b9ac4a}{editbox\_selected} = \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_aa8cecfc5c5c054d2875c03e77b7be15d}{TRUE};
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->editbox\_selected = TRUE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+        st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->elapse = MAX\_ELAPSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+        st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif       }
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    \}
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{emucharts__fcusoftware___misra_c_8c_a3d2bb147c2a6de20bf8faf1c3e20121c}{click\_ESC}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_a01594636777fc241d60eeb6129b9ac4a}{editbox\_selected} = \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_aa93f0eb578d23995850d61f7d61c55c1}{FALSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->editbox\_selected = FALSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{_android__emucharts__fcusoftware___misra_c_8c_aaddce979aeec65fcae381207a9bcd264}{click\_hPa}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH} || st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  
+      \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} || st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD} );
+
+    \textcolor{keywordflow}{if} ( (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}) && (st->data\_entry.\hyperlink{structstate_a432520cd6c29e82918b25bc99b0f1e9f}{units} != st->hPa) ) \{
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}, st);
+        st->data\_entry.\hyperlink{structstate_a432520cd6c29e82918b25bc99b0f1e9f}{units} = st->hPa;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.units = st->hPa issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif }
+        st->data\_entry.\hyperlink{structstate_ae8964be364b75ddef3b2c84246098b89}{dispval} = st->data\_entry.\hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} * 33.86f;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.dispval = st->data\_entry.programmedValue * 33.86f issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif }
+        st->data\_entry.\hyperlink{structstate_a6a18e3e28b7b18141f7c1afc1e8d36e1}{display} = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object],[\textcolor{keywordtype}{object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.display = [object Object],[object Object],[object
+       Object],[object Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif }
+        st->data\_entry.\hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} = st->data\_entry.
+      \hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} * 33.86f;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.programmedValue = st->data\_entry.programmedValue * 33.86f
+       issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif       }
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}, st);
+        assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH} );
+        \textcolor{keywordflow}{return} *st;
+    \}
+    \textcolor{keywordflow}{if} ( (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}) && (st->data\_entry.
+      \hyperlink{structstate_a432520cd6c29e82918b25bc99b0f1e9f}{units} != st->hPa) ) \{
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+        st->data\_entry.\hyperlink{structstate_a432520cd6c29e82918b25bc99b0f1e9f}{units} = st->hPa;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.units = st->hPa issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif }
+        st->data\_entry.\hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} = st->data\_entry.
+      \hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} * 33.86f;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.programmedValue = st->data\_entry.programmedValue * 33.86f
+       issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif       }
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+        assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+        \textcolor{keywordflow}{return} *st;
+    \}
+    \textcolor{keywordflow}{if} (current\_state == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD}) \{
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD}, st);
+        st->data\_entry.\hyperlink{structstate_a432520cd6c29e82918b25bc99b0f1e9f}{units} = st->hPa;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.units = st->hPa issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+        st->data\_entry.\hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} = st->STD\_HPA;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.programmedValue = st->STD\_HPA issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+        st->data\_entry.\hyperlink{structstate_ae8964be364b75ddef3b2c84246098b89}{dispval} = st->STD\_HPA;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.dispval = st->STD\_HPA issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+        st->data\_entry.\hyperlink{structstate_a6a18e3e28b7b18141f7c1afc1e8d36e1}{display} = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.display = [object Object],[object Object],[object
+       Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif       }
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD}, st);
+        assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD} );
+        \textcolor{keywordflow}{return} *st;
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a1d2df2b22d455e00efdaac3f6c06093c}{click\_inHg}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH} || st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  
+      \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} || st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD} );
+
+    \textcolor{keywordflow}{if} ( (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}) && (st->data\_entry.\hyperlink{structstate_a432520cd6c29e82918b25bc99b0f1e9f}{units} != st->inHg) ) \{
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}, st);
+        st->data\_entry.\hyperlink{structstate_a432520cd6c29e82918b25bc99b0f1e9f}{units} = st->inHg;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.units = st->inHg issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif }
+        st->data\_entry.\hyperlink{structstate_ae8964be364b75ddef3b2c84246098b89}{dispval} = st->data\_entry.\hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} / 33.86f;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.dispval = st->data\_entry.programmedValue / 33.86f issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif }
+        st->data\_entry.\hyperlink{structstate_a6a18e3e28b7b18141f7c1afc1e8d36e1}{display} = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object],[\textcolor{keywordtype}{object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.display = [object Object],[object Object],[object
+       Object],[object Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif }
+        st->data\_entry.\hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} = st->data\_entry.
+      \hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} / 33.86f;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.programmedValue = st->data\_entry.programmedValue / 33.86f
+       issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif       }
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}, st);
+        assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH} );
+        \textcolor{keywordflow}{return} *st;
+    \}
+    \textcolor{keywordflow}{if} ( (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}) && (st->data\_entry.
+      \hyperlink{structstate_a432520cd6c29e82918b25bc99b0f1e9f}{units} != st->inHg) ) \{
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+        st->data\_entry.\hyperlink{structstate_a432520cd6c29e82918b25bc99b0f1e9f}{units} = st->inHg;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.units = st->inHg issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif }
+        st->data\_entry.\hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} = st->data\_entry.
+      \hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} / 33.46f;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.programmedValue = st->data\_entry.programmedValue / 33.46f
+       issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif       }
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+        assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+        \textcolor{keywordflow}{return} *st;
+    \}
+    \textcolor{keywordflow}{if} (current\_state == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD}) \{
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD}, st);
+        st->data\_entry.\hyperlink{structstate_a432520cd6c29e82918b25bc99b0f1e9f}{units} = st->inHg;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.units = st->inHg issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+        st->data\_entry.\hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} = st->STD\_INHG;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.programmedValue = st->STD\_INHG issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+        st->data\_entry.\hyperlink{structstate_ae8964be364b75ddef3b2c84246098b89}{dispval} = st->STD\_INHG;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.dispval = st->STD\_INHG issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+        st->data\_entry.\hyperlink{structstate_a6a18e3e28b7b18141f7c1afc1e8d36e1}{display} = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.display = [object Object],[object Object],[object
+       Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif       }
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD}, st);
+        assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD} );
+        \textcolor{keywordflow}{return} *st;
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ad74d9852baa9fb494f45eb1a8d0de6ae}{click\_OK}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_a01594636777fc241d60eeb6129b9ac4a}{editbox\_selected} = \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_aa93f0eb578d23995850d61f7d61c55c1}{FALSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->editbox\_selected = FALSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a8ee937bfbda1e2537b8291a04090bff9}{click\_point}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = \hyperlink{emucharts__fcusoftware___misra_c_8c_a9cc84e401fa457a43d190c05ce9833c4}{MAX\_ELAPSE};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->elapse = MAX\_ELAPSE issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_aab7adbf6d1c25d97763ce6150f64d3a7}{click\_QNH\_RADIO}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD});
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD}, st);
+    st->data\_entry.\hyperlink{structstate_ae8964be364b75ddef3b2c84246098b89}{dispval} = st->data\_entry.\hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue};
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.dispval = st->data\_entry.programmedValue issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+    st->data\_entry.\hyperlink{structstate_a6a18e3e28b7b18141f7c1afc1e8d36e1}{display} = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG    }
+    debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.display = [object Object],[object Object],[object Object],[object
+       Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif}
+  
+    \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}, st);
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH} );
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a3d5a1e88f25a531848e28f9ea9c24c0c}{click\_STD\_RADIO}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH} );
+
+    \textcolor{keywordflow}{if} ( (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}) && (st->data\_entry.\hyperlink{structstate_a432520cd6c29e82918b25bc99b0f1e9f}{units} == st->hPa) ) \{
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}, st);
+        st->data\_entry.\hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} = st->STD\_HPA;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.programmedValue = st->STD\_HPA issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif }
+        st->data\_entry.\hyperlink{structstate_ae8964be364b75ddef3b2c84246098b89}{dispval} = st->STD\_HPA;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.dispval = st->STD\_HPA issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif }
+        st->data\_entry.\hyperlink{structstate_a6a18e3e28b7b18141f7c1afc1e8d36e1}{display} = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.display = [object Object],[object Object],[object
+       Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif       }
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD}, st);
+        assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD} );
+        \textcolor{keywordflow}{return} *st;
+    \}
+    \textcolor{keywordflow}{if} ( (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}) && (st->data\_entry.\hyperlink{structstate_a432520cd6c29e82918b25bc99b0f1e9f}{units} == st->inHg) ) \{
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}, st);
+        st->data\_entry.\hyperlink{structstate_af8641ad0a4a4d007541ee08a327c76ce}{programmedValue} = st->STD\_INHG;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.programmedValue = st->STD\_INHG issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif }
+        st->data\_entry.\hyperlink{structstate_ae8964be364b75ddef3b2c84246098b89}{dispval} = st->STD\_INHG;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.dispval = st->STD\_INHG issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif }
+        st->data\_entry.\hyperlink{structstate_a6a18e3e28b7b18141f7c1afc1e8d36e1}{display} = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry.display = [object Object],[object Object],[object
+       Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif       }
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD}, st);
+        assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD} );
+        \textcolor{keywordflow}{return} *st;
+    \}
+    \textcolor{keywordflow}{return} *st;
+\}
+
+\hyperlink{structstate}{state} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ad98cf002f283affdec11de0f071c22a0}{tick}(\hyperlink{structstate}{state} *st) \{
+    assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+
+    \textcolor{keywordflow}{if} ( (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}) && (st->
+      \hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} == 0) ) \{
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+        st->data\_entry = [\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{object} Object],[\textcolor{keywordtype}{
+      object} Object];
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->data\_entry = [object Object],[object Object],[object Object],[object
+       Object],[object Object],[object Object] issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif       }
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH}, st);
+        assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH} );
+        \textcolor{keywordflow}{return} *st;
+    \}
+    \textcolor{keywordflow}{if} ( (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}) && (st->
+      \hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} > 0) ) \{
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac21c7cc77d5c602968ea63aa1f7447ac}{leave}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+        st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} = st->\hyperlink{structstate_ae0c79ae121fc470f945cc03b29c2ab0b}{elapse} - 1u;
+\textcolor{preprocessor}{#ifdef DEBUG        }
+        debug\_print(\textcolor{stringliteral}{"Action st->elapse = st->elapse - 1u issued.\(\backslash\)n"});
+\textcolor{preprocessor}{#endif       }
+        \hyperlink{emucharts__fcusoftware___misra_c_8c_ac495f86a9b30372647a2756520517a48}{enter}(\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE}, st);
+        assert( st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} );
+        \textcolor{keywordflow}{return} *st;
+    \}
+    \textcolor{keywordflow}{return} *st;
+\}
+
+
+\textcolor{comment}{/* definition of permission function for transition functions */}
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ad329c4b07c9204a806cc54cb350eb07a}{per\_click\_CLR}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ab38e72d5641e3487cc8aca9d392b1702}{per\_click\_digit\_0}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a670776ef52f73d6cf1b47dd8804d18b0}{per\_click\_digit\_1}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_af06ec493fae78973dbc6225bcc0140a3}{per\_click\_digit\_2}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a88305b837381a4def986cebf4394c3cc}{per\_click\_digit\_3}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a6aeb2ae4a60b40b20cbe0668976da3ed}{per\_click\_digit\_4}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a0218a4008cc543ee1e8b79504f33f554}{per\_click\_digit\_5}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ab3278b7d79571766192c3eb9cbbd3e1f}{per\_click\_digit\_6}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_af1f35d4ca1c16accee38082cd39ef115}{per\_click\_digit\_7}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a66a78f1a1f6f89036f84a7045e655949}{per\_click\_digit\_8}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ac9444a2a0a61e83c0c7d8818da87d0e2}{per\_click\_digit\_9}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a49ee4063c990acdce13f993cccdd22e8}{per\_click\_editbox\_pressure}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a9f1df1938b52b09957bf83e20130bb88}{per\_click\_ESC}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ac95f0937cde73a7e1ba5c2fac25307a0}{per\_click\_hPa}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH} || st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  
+      \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} || st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD} )\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ae660a6cd4ee0b6eaf0ca97d1577a7e28}{per\_click\_inHg}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH} || st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  
+      \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} || st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD} )\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ab0a98c3da54dabd5123cda3cb3f09f4e}{per\_click\_OK}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80de691a6f68b7d88ef7e0daad933839}{per\_click\_point}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a3cfe798f70e60c8e44eea8aeae1f7eea}{per\_click\_QNH\_RADIO}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} == \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab92ba587835f1b1a50a2ab206326a3ab}{STD})\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_ac7f69c7efcd34d5979511c4eb3da6d99}{per\_click\_STD\_RADIO}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebab02d8460216e77dc42e69293764aaedc}{QNH} )\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+\hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a39890fc8a4a6975a2740fb6b03da879d}{UC\_8} \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a871f9414f872b971cc9638353d78c908}{per\_tick}(\textcolor{keyword}{const} \hyperlink{structstate}{state} *st) \{
+    \textcolor{keywordflow}{if} (st->\hyperlink{structstate_a1275dae91d699a4d9330ad05e5c43bdf}{current\_state} ==  \hyperlink{_android__emucharts__fcusoftware___misra_c_8h_a80b08f71210afe16038e904a656ed9ebabbe66130458983657692b11665a39f19}{EDIT\_PRESSURE} )\{
+        \textcolor{keywordflow}{return} \textcolor{keyword}{true};
+    \}
+    \textcolor{keywordflow}{return} \textcolor{keyword}{false};
+\}
+
+
+\end{DoxyCodeInclude}
+ 

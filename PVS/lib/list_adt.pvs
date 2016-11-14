@@ -1,0 +1,193 @@
+%%% ADT file generated from NIL
+
+list_adt[T: TYPE]: THEORY
+ BEGIN
+
+  list: TYPE
+
+  null?, cons?: [list -> boolean]
+
+  car: [(cons?) -> T]
+
+  cdr: [(cons?) -> list]
+
+  null: (null?)
+
+  cons: [[T, list] -> (cons?)]
+
+  list_ord: [list -> upto(1)]
+
+  list_ord_defaxiom: AXIOM
+    list_ord(null) = 0 AND
+     (FORALL (car: T, cdr: list): list_ord(cons(car, cdr)) = 1);
+
+  ord(x: list): [list -> upto(1)] =
+      CASES x OF null: 0, cons(cons1_var, cons2_var): 1 ENDCASES
+
+  list_null_extensionality: AXIOM
+    FORALL (null?_var: (null?), null?_var2: (null?)):
+      null?_var = null?_var2;
+
+  list_cons_extensionality: AXIOM
+    FORALL (cons?_var: (cons?), cons?_var2: (cons?)):
+      car(cons?_var) = car(cons?_var2) AND cdr(cons?_var) = cdr(cons?_var2)
+       IMPLIES cons?_var = cons?_var2;
+
+  list_cons_eta: AXIOM
+    FORALL (cons?_var: (cons?)):
+      cons(car(cons?_var), cdr(cons?_var)) = cons?_var;
+
+  list_car_cons: AXIOM
+    FORALL (cons1_var: T, cons2_var: list):
+      car(cons(cons1_var, cons2_var)) = cons1_var;
+
+  list_cdr_cons: AXIOM
+    FORALL (cons1_var: T, cons2_var: list):
+      cdr(cons(cons1_var, cons2_var)) = cons2_var;
+
+  list_inclusive: AXIOM
+    FORALL (list_var: list): null?(list_var) OR cons?(list_var);
+
+  list_induction: AXIOM
+    FORALL (p: [list -> boolean]):
+      (p(null) AND
+        (FORALL (cons1_var: T, cons2_var: list):
+           p(cons2_var) IMPLIES p(cons(cons1_var, cons2_var))))
+       IMPLIES (FORALL (list_var: list): p(list_var));
+
+  every(p: PRED[T])(a: list):  boolean =
+      CASES a
+        OF null: TRUE,
+           cons(cons1_var, cons2_var): p(cons1_var) AND every(p)(cons2_var)
+        ENDCASES;
+
+  every(p: PRED[T], a: list):  boolean =
+      CASES a
+        OF null: TRUE,
+           cons(cons1_var, cons2_var): p(cons1_var) AND every(p, cons2_var)
+        ENDCASES;
+
+  some(p: PRED[T])(a: list):  boolean =
+      CASES a
+        OF null: FALSE,
+           cons(cons1_var, cons2_var): p(cons1_var) OR some(p)(cons2_var)
+        ENDCASES;
+
+  some(p: PRED[T], a: list):  boolean =
+      CASES a
+        OF null: FALSE,
+           cons(cons1_var, cons2_var): p(cons1_var) OR some(p, cons2_var)
+        ENDCASES;
+
+  subterm(x: list, y: list):  boolean =
+      x = y OR
+       CASES y
+         OF null: FALSE, cons(cons1_var, cons2_var): subterm(x, cons2_var)
+         ENDCASES;
+
+  <<:  (strict_well_founded?[list]) =
+      LAMBDA (x, y: list):
+        CASES y
+          OF null: FALSE,
+             cons(cons1_var, cons2_var): x = cons2_var OR x << cons2_var
+          ENDCASES;
+
+  list_well_founded: AXIOM strict_well_founded?[list](<<);
+
+  reduce_nat(null?_fun: nat, cons?_fun: [[T, nat] -> nat]):
+        [list -> nat] =
+      LAMBDA (list_adtvar: list):
+        LET red: [list -> nat] = reduce_nat(null?_fun, cons?_fun) IN
+          CASES list_adtvar
+            OF null: null?_fun,
+               cons(cons1_var, cons2_var):
+                 cons?_fun(cons1_var, red(cons2_var))
+            ENDCASES;
+
+  REDUCE_nat(null?_fun: [list -> nat],
+             cons?_fun: [[T, nat, list] -> nat]):
+        [list -> nat] =
+      LAMBDA (list_adtvar: list):
+        LET red: [list -> nat] = REDUCE_nat(null?_fun, cons?_fun) IN
+          CASES list_adtvar
+            OF null: null?_fun(list_adtvar),
+               cons(cons1_var, cons2_var):
+                 cons?_fun(cons1_var, red(cons2_var), list_adtvar)
+            ENDCASES;
+
+  reduce_ordinal(null?_fun: ordinal,
+                 cons?_fun: [[T, ordinal] -> ordinal]):
+        [list -> ordinal] =
+      LAMBDA (list_adtvar: list):
+        LET red: [list -> ordinal] = reduce_ordinal(null?_fun, cons?_fun)
+          IN
+          CASES list_adtvar
+            OF null: null?_fun,
+               cons(cons1_var, cons2_var):
+                 cons?_fun(cons1_var, red(cons2_var))
+            ENDCASES;
+
+  REDUCE_ordinal(null?_fun: [list -> ordinal],
+                 cons?_fun: [[T, ordinal, list] -> ordinal]):
+        [list -> ordinal] =
+      LAMBDA (list_adtvar: list):
+        LET red: [list -> ordinal] = REDUCE_ordinal(null?_fun, cons?_fun)
+          IN
+          CASES list_adtvar
+            OF null: null?_fun(list_adtvar),
+               cons(cons1_var, cons2_var):
+                 cons?_fun(cons1_var, red(cons2_var), list_adtvar)
+            ENDCASES;
+ END list_adt
+
+list_adt_map[T: TYPE, T1: TYPE]: THEORY
+ BEGIN
+
+  IMPORTING list_adt
+
+  map(f: [T -> T1])(a: list[T]):  list[T1] =
+      CASES a
+        OF null: null,
+           cons(cons1_var, cons2_var):
+             cons(f(cons1_var), map(f)(cons2_var))
+        ENDCASES;
+
+  map(f: [T -> T1], a: list[T]):  list[T1] =
+      CASES a
+        OF null: null,
+           cons(cons1_var, cons2_var):
+             cons(f(cons1_var), map(f, cons2_var))
+        ENDCASES;
+
+  every(R: [[T, T1] -> boolean])(x: list[T], y: list[T1]):  boolean =
+      null?(x) AND null?(y) OR
+       cons?(x) AND
+        cons?(y) AND R(car(x), car(y)) AND every(R)(cdr(x), cdr(y));
+ END list_adt_map
+
+list_adt_reduce[T: TYPE, range: TYPE]: THEORY
+ BEGIN
+
+  IMPORTING list_adt[T]
+
+  reduce(null?_fun: range, cons?_fun: [[T, range] -> range]):
+        [list[T] -> range] =
+      LAMBDA (list_adtvar: list[T]):
+        LET red: [list[T] -> range] = reduce(null?_fun, cons?_fun) IN
+          CASES list_adtvar
+            OF null: null?_fun,
+               cons(cons1_var, cons2_var):
+                 cons?_fun(cons1_var, red(cons2_var))
+            ENDCASES;
+
+  REDUCE(null?_fun: [list[T] -> range],
+         cons?_fun: [[T, range, list[T]] -> range]):
+        [list[T] -> range] =
+      LAMBDA (list_adtvar: list[T]):
+        LET red: [list[T] -> range] = REDUCE(null?_fun, cons?_fun) IN
+          CASES list_adtvar
+            OF null: null?_fun(list_adtvar),
+               cons(cons1_var, cons2_var):
+                 cons?_fun(cons1_var, red(cons2_var), list_adtvar)
+            ENDCASES;
+ END list_adt_reduce

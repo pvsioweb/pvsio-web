@@ -1,0 +1,28 @@
+consistency_th: THEORY
+ BEGIN IMPORTING emucharts_defaultProject_th
+
+%-- useful definitions
+init?(st: State): bool = (st = init(0))
+trans(pre, post: State): bool =
+   (per_tick(pre) IMPLIES post = tick(pre)) AND
+   (per_act1(pre) IMPLIES post = act1(pre))
+   
+
+
+%-- consistency predicate
+consistency(st: State): bool =
+    (LET post = tick(st)
+      IN per_tick(st) IMPLIES
+         (post`id = st`id)) AND
+    (LET post = act1(st)
+      IN per_act1(st) IMPLIES
+         (post`id = st`id))
+
+%-- PVS theorem based on the consistency predicate, formulated using structural induction
+CONSISTENCY: THEOREM
+  FORALL (pre, post: State):
+    (init?(pre) IMPLIES consistency(pre))
+       AND
+    ((consistency(pre) AND trans(pre, post)) IMPLIES consistency(post))
+
+ END consistency_th
