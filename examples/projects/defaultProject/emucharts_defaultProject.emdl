@@ -1,0 +1,78 @@
+{
+ "descriptor": {
+  "file_type": "emdl",
+  "version": "1.3",
+  "description": "emucharts model",
+  "chart_name": "emucharts_defaultProject"
+ },
+ "chart": {
+  "states": [
+   {
+    "name": "locked",
+    "id": "X1",
+    "x": 163.27272033691406,
+    "y": 191.08953857421875,
+    "width": 36,
+    "height": 36,
+    "color": "#1f77b4"
+   },
+   {
+    "name": "unlocked",
+    "id": "X2",
+    "x": 438.2727355957031,
+    "y": 197.99578857421875,
+    "width": 36,
+    "height": 36,
+    "color": "#ff7f0e"
+   }
+  ],
+  "transitions": [
+   {
+    "name": "unlock",
+    "id": "T1",
+    "source": {
+     "name": "locked",
+     "id": "X1"
+    },
+    "target": {
+     "name": "unlocked",
+     "id": "X2"
+    },
+    "controlPoint": {
+     "x": 296.05094164094623,
+     "y": 172.7170403365595
+    }
+   },
+   {
+    "name": "unlock",
+    "id": "T3",
+    "source": {
+     "name": "unlocked",
+     "id": "X2"
+    },
+    "target": {
+     "name": "unlocked",
+     "id": "X2"
+    },
+    "controlPoint": {
+     "x": 499,
+     "y": 151
+    }
+   }
+  ],
+  "initial_transitions": [
+   {
+    "name": "IT1",
+    "id": "IT1",
+    "target": {
+     "name": "locked",
+     "id": "X1"
+    }
+   }
+  ],
+  "constants": [],
+  "variables": [],
+  "pmr": {},
+  "isPIM": false
+ }
+}

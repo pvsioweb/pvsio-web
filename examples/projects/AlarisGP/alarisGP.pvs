@@ -23,7 +23,7 @@ alarisGP: THEORY
   
   state: TYPE = [# display: alaris_real, timer: alaris_timer, step: alaris_step, power_led: ledType #]
   
-  init(x: alaris_real): state = (# display := x, timer := max_timer, step := small_step, power_led := OFF #)
+  init(x: alaris_real): state = (# display := x, timer := max_timer, step := small_step, power_led := ON #)
   %----------------------------------------------------------------------------------------------------------------
 
 
@@ -86,7 +86,7 @@ alarisGP: THEORY
   % This is the behaviour of the old firmware. In the new firmware, the current step depends on the previous step.
   press_up(st: state): state =
       LET d: alaris_real = alaris_up(small_step, display(st))
-        IN st WITH [ display := d, power_led := ON ]
+        IN st WITH [ display := d ]
 
   release_up(st: state): state = release_key(st)
 

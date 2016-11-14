@@ -1,0 +1,13 @@
+MODULE main
+VAR event : { unlock, unlock };
+
+
+-- transitions
+TRANS
+ event = unlock 
+    -> ;
+TRANS
+ event = unlock 
+    -> ;
+
+

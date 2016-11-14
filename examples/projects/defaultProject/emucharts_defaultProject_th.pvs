@@ -1,68 +1,41 @@
 % ---------------------------------------------------------------
 %  Theory: emucharts_defaultProject_th
-%  Author: xxxx
-%          xxxx
-%          xxx
+%  Author: Paolo Masci
+%          Queen Mary University of London, United Kingdom
+%          http://www.eecs.qmul.ac.uk/~masci/
 % ---------------------------------------------------------------
 
 emucharts_defaultProject_th: THEORY
  BEGIN
 
   %-- machine states
-  MachineState: TYPE = { A, cs, req, wait }
-  clock: TYPE = real
-  pid: int
-  k: real
+  MachineState: TYPE = { locked, unlocked }
 
   %-- emuchart state
   State: TYPE = [#
     current_state: MachineState,
-    previous_state: MachineState,
-    id: int,
-    x: clock
+    previous_state: MachineState
   #]
 
   %-- initial state
   init(x: real): State = (#
-    current_state := A,
-    previous_state := A,
-    id := 0,
-    x := 0
+    current_state := locked,
+    previous_state := locked
   #)
   %-- utility functions
   enter_into(ms: MachineState)(st: State): State = st WITH [ current_state := ms ]
   leave_state(ms: MachineState)(st: State): State = st WITH [ previous_state := ms ]
 
   %-- transition functions
-  per_tick(st: State): bool = ((current_state(st) = A) AND (id(st) = 0)) OR ((current_state(st) = req) AND (x(st) <= k)) OR ((current_state(st) = wait) AND (x(st) > k AND id(st) = pid)) OR ((current_state(st) = cs))
-  tick(st: (per_tick)): State =
+  per_unlock(st: State): bool = ((current_state(st) = locked)) OR ((current_state(st) = unlocked))
+  unlock(st: (per_unlock)): State =
     COND
-    (current_state(st) = A) AND (id(st) = 0)
-     -> LET new_st = leave_state(A)(st),
-            new_st = new_st WITH [ x := 0 ]
-         IN enter_into(req)(new_st),
-    (current_state(st) = req) AND (x(st) <= k)
-     -> LET new_st = leave_state(req)(st),
-            new_st = new_st WITH [ x := 0 ],
-            new_st = new_st WITH [ id := pid ]
-         IN enter_into(wait)(new_st),
-    (current_state(st) = wait) AND (x(st) > k AND id(st) = pid)
-     -> LET new_st = leave_state(wait)(st)
-         IN enter_into(cs)(new_st),
-    (current_state(st) = cs)
-     -> LET new_st = leave_state(cs)(st),
-            new_st = new_st WITH [ id := 0 ]
-         IN enter_into(A)(new_st),
-    ELSE -> st
-    ENDCOND
-
-  per_act1(st: State): bool = ((current_state(st) = wait) AND (id(st) = 0))
-  act1(st: (per_act1)): State =
-    COND
-    (current_state(st) = wait) AND (id(st) = 0)
-     -> LET new_st = leave_state(wait)(st),
-            new_st = new_st WITH [ x := 0 ]
-         IN enter_into(req)(new_st),
+    (current_state(st) = locked)
+     -> LET new_st = leave_state(locked)(st)
+         IN enter_into(unlocked)(new_st),
+    (current_state(st) = unlocked)
+     -> LET new_st = leave_state(unlocked)(st)
+         IN enter_into(unlocked)(new_st),
     ELSE -> st
     ENDCOND
 
