@@ -37,7 +37,7 @@
 define(function (require, exports, module) {
     var specTemplate = require("text!plugins/emulink/models/ada/templates/spec.handlebars");
     var bodyTemplate = require("text!plugins/emulink/models/ada/templates/body.handlebars");
-    var AbstractPrinter = require("plugins/emulink/EmuchartsAbstractPrinter");
+    var AbstractPrinter = require("plugins/emulink/models/EmuchartsAbstractPrinter");
 
     var typeMaps = {
         "real": "Integer"

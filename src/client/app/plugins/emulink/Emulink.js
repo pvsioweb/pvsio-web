@@ -8,6 +8,7 @@
 define(function (require, exports, module) {
     "use strict";
     var ProjectManager		= require("project/ProjectManager"),
+        PluginManager       = require("plugins/PluginManager"),
         ModelEditor         = require("plugins/modelEditor/ModelEditor"),
         PVSioWebClient      = require("PVSioWebClient"),
         EditorModeUtils     = require("plugins/emulink/EmuchartsEditorModes"),
@@ -31,17 +32,15 @@ define(function (require, exports, module) {
         displayEditDatatype    = require("plugins/emulink/forms/displayEditDatatype"),
         displaySelectDatatype  = require("plugins/emulink/forms/displaySelectDatatype"),
         QuestionForm           = require("pvsioweb/forms/displayQuestion"),
-        EmuchartsPVSPrinter    = require("plugins/emulink/EmuchartsPVSPrinter"),
-        EmuchartsLustrePrinter = require("plugins/emulink/EmuchartsLustrePrinter"),
-        EmuchartsPIMPrinter    = require("plugins/emulink/EmuchartsPIMPrinter"),
-        EmuchartsCppPrinter    = require("plugins/emulink/EmuchartsCppPrinter"),
-        EmuchartsMALPrinter    = require("plugins/emulink/EmuchartsMALPrinter2"),
-        EmuchartsVDMPrinter    = require("plugins/emulink/EmuchartsVDMPrinter"),
-        EmuchartsJSPrinter     = require("plugins/emulink/EmuchartsJavaScriptPrinter"),
-        EmuchartsAdaPrinter    = require("plugins/emulink/EmuchartsAdaPrinter"),
-        EmuchartsBlessPrinter  = require("plugins/emulink/EmuchartsBlessPrinter"),
-        EmuchartsMisraCPrinter = require("plugins/emulink/EmuchartsMisraCPrinter"),
+        EmuchartsCodeGenerators = require("plugins/emulink/models/EmuchartsCodeGenerators"),
+        ConsistencyTemplateView = require("plugins/emulink/tools/propertytemplates/ConsistencyTemplateView"),
+        FeedbackTemplateView = require("plugins/emulink/tools/propertytemplates/FeedbackTemplateView"),
+        ReversibilityTemplateView = require("plugins/emulink/tools/propertytemplates/ReversibilityTemplateView"),
 //        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
+        EmuchartsParser        = require("plugins/emulink/EmuchartsParser"),
+        pvsTheory              = require("text!./models/pvs/templates/pvsTheory.handlebars"),
+        pvsFunctionWithInit    = require("text!./models/pvs/templates/pvsFunctionWithInit.handlebars"),
+        pvsTheoremInduction    = require("text!./models/pvs/templates/pvsTheoremInduction.handlebars"),
         FileHandler            = require("filesystem/FileHandler"),
         FileSystem             = require("filesystem/FileSystem"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView"),
@@ -67,16 +66,7 @@ define(function (require, exports, module) {
 
     var emuchartsManager;
     var MODE;
-    var emuchartsPVSPrinter;
-    var emuchartsLustrePrinter;
-    var emuchartsPIMPrinter;
-    var emuchartsCppPrinter;
-    var emuchartsMALPrinter;
-    var emuchartsVDMPrinter;
-    var emuchartsJSPrinter;
-    var emuchartsAdaPrinter;
-    var emuchartsBlessPrinter;
-    var emuchartsMisraCPrinter;
+    var emuchartsCodeGenerators;
 
     var pimImporter;
     var pimTestGenerator;
@@ -335,18 +325,8 @@ define(function (require, exports, module) {
      * @memberof Emulink
      */
     function Emulink() {
-        emuchartsPVSPrinter = new EmuchartsPVSPrinter("emuchart_th");
-        emuchartsLustrePrinter = new EmuchartsLustrePrinter("emuchart_Lustre");
-        emuchartsPIMPrinter = new EmuchartsPIMPrinter("emuchart_PIM");
-        emuchartsCppPrinter = new EmuchartsCppPrinter("emuchart_Cpp");
-        emuchartsMALPrinter = new EmuchartsMALPrinter("emuchart_MAL");
-        emuchartsVDMPrinter = new EmuchartsVDMPrinter("emuchart_VDM");
-        emuchartsJSPrinter = new EmuchartsJSPrinter("emucharts_JS");
-        emuchartsAdaPrinter = new EmuchartsAdaPrinter("emucharts_Ada");
-        emuchartsBlessPrinter = new EmuchartsBlessPrinter("emucharts_Bless");
-        emuchartsMisraCPrinter = new EmuchartsMisraCPrinter("emucharts_MisraC");
-
         pvsioWebClient = PVSioWebClient.getInstance();
+        emuchartsCodeGenerators = EmuchartsCodeGenerators.getInstance();
         MODE = new EditorModeUtils();
         emuchartsManager = new EmuchartsManager();
         emuchartsManager.addListener("emuCharts_editorModeChanged", modeChange_callback);
@@ -1322,9 +1302,9 @@ define(function (require, exports, module) {
             var emucharts = {
                 name: ("emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th"),
                 author: {
-                    name: "Paolo Masci",
-                    affiliation: "Queen Mary University of London, United Kingdom",
-                    contact: "http://www.eecs.qmul.ac.uk/~masci/"
+                    name: "xxxx",
+                    affiliation: "xxxx",
+                    contact: "xxx"
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
@@ -1333,7 +1313,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsPVSPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsPVSPrinter.print(emucharts);
             if (model.err) {
                 console.log(model.err);
                 return;
@@ -1344,6 +1324,34 @@ define(function (require, exports, module) {
                 return projectManager.project().addFile(name, content, { overWrite: true });
             } else {
                 console.log("Warning, PVS model is undefined.");
+            }
+        });
+        d3.select("#btn_menuNuXMVPrinter").on("click", function () {
+            var emucharts = {
+                name: ("emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_SMV"),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: emuchartsManager.getVariables(),
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            var model = emuchartsCodeGenerators.emuchartsNuXMVPrinter.print(emucharts);
+            if (model.err) {
+                console.log(model.err);
+                return;
+            }
+            if (model.res) {
+                var name = emucharts.name + ".smv";
+                var content = model.res;
+                return projectManager.project().addFile(name, content, { overWrite: true });
+            } else {
+                console.log("Warning, NuXMV model is undefined.");
             }
         });
         d3.select("#btn_menuPIMPrinter").on("click", function () {
@@ -1361,7 +1369,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsPIMPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsPIMPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1390,7 +1398,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsPIMPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsPIMPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1419,7 +1427,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsMALPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsMALPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1448,7 +1456,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsVDMPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsVDMPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1478,7 +1486,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsJSPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsJSPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1508,7 +1516,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsAdaPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsAdaPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1541,7 +1549,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsBlessPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsBlessPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1573,7 +1581,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsMisraCPrinter.print(emucharts);
+            var model = emuchartsCodeGenerators.emuchartsMisraCPrinter.print(emucharts);
             console.log(model);
             if (model.err) {
                 console.log(model.err);
@@ -1587,11 +1595,167 @@ define(function (require, exports, module) {
                 projectManager.project().addFile(emucharts.name + ".h", model.header, overWrite);
                 projectManager.project().addFile("Android_" + emucharts.name + ".c", model.Android_thread, overWrite);
                 projectManager.project().addFile("Android_" + emucharts.name + ".h", model.Android_header, overWrite);
-                
+
                 projectManager.project().addFile("Doxyfile", model.doxygen, overWrite);
             } else {
                 console.log("Warning, MisraC code is undefined.");
             }
+        });
+
+        //-- Verification menu ---------------------------------------------------
+        d3.select("#btn_menuConsistencyOfActions").on("click", function () {
+            // document.getElementById("menuVerification").children[1].style.display = "none";
+            var stateVariables = emuchartsManager.getVariables().map(function (variable) {
+                return variable.name;
+            });
+            var transitionLabels = emuchartsManager.getTransitions();
+            var transitions = d3.map();
+            var parser = new EmuchartsParser();
+            transitionLabels.forEach(function (label) {
+                var ans = parser.parseTransition(label.name);
+                if (ans.res) {
+                    transitions.set(ans.res.val.identifier.val);
+                }
+            });
+            transitions = transitions.keys();
+            ConsistencyTemplateView.create({
+                header: "Consistency of user actions",
+                stateVariables: stateVariables,
+                transitions: transitions,
+                buttons: ["Dismiss", "Create PVS Theory"]
+            }).on("create pvs theory", function (e, view) {
+                // do something useful here.... like create a pvs file with the instantiated property
+                var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th";
+                var modelEditor = ModelEditor.getInstance();
+                (PluginManager.getInstance().isLoaded(modelEditor)
+                    ? Promise.resolve()
+                    : PluginManager.getInstance().enablePlugin(modelEditor))
+                .then(function () {
+                    var pvs_theorem = Handlebars.compile(pvsTheoremInduction, { noEscape: true })({
+                        name: "CONSISTENCY",
+                        property: "consistency",
+                        property_definition: e.data.get("pvs_property"),
+                        trans: "trans",
+                        State: "State"
+                    });
+                    var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
+                        { name: "consistency_th",
+                          definitions: Handlebars.compile(pvsFunctionWithInit, { noEscape: true })({
+                            functionName: "action",
+                            transitions: transitions
+                          }),
+                          body: pvs_theorem,
+                          importing: emucharts_theory_name });
+                    projectManager.project().addFile("consistency_th.pvs", theTheory, { overWrite: true });
+                    projectManager.selectFile("consistency_th.pvs");
+                });
+            }).on("dismiss", function (e, view) {
+                // just remove window
+                view.remove();
+            });
+        });
+
+        d3.select("#btn_menuReversibilityOfActions").on("click", function () {
+            // document.getElementById("menuVerification").children[1].style.display = "none";
+            var stateVariables = emuchartsManager.getVariables().map(function (variable) {
+                return variable.name;
+            });
+            var transitionLabels = emuchartsManager.getTransitions();
+            var transitions = d3.map();
+            var parser = new EmuchartsParser();
+            transitionLabels.forEach(function (label) {
+                var ans = parser.parseTransition(label.name);
+                if (ans.res) {
+                    transitions.set(ans.res.val.identifier.val);
+                }
+            });
+            transitions = transitions.keys();
+            ReversibilityTemplateView.create({
+                header: "Reversibility of user actions",
+                stateVariables: stateVariables,
+                transitions: transitions,
+                buttons: ["Dismiss", "Create PVS Theory"]
+            }).on("create pvs theory", function (e, view) {
+                // do something useful here.... like create a pvs file with the instantiated property
+                var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th";
+                var modelEditor = ModelEditor.getInstance();
+                (PluginManager.getInstance().isLoaded(modelEditor)
+                    ? Promise.resolve()
+                    : PluginManager.getInstance().enablePlugin(modelEditor))
+                .then(function () {
+                    var pvs_theorem = Handlebars.compile(pvsTheoremInduction, { noEscape: true })({
+                        name: "REVERSIBILITY",
+                        property: "reversibility",
+                        property_definition: e.data.get("pvs_property"),
+                        trans: "trans",
+                        State: "State"
+                    });
+                    var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
+                        { name: "reversibility_th",
+                          definitions: Handlebars.compile(pvsFunctionWithInit, { noEscape: true })({
+                            functionName: "action",
+                            transitions: transitions
+                          }),
+                          body: pvs_theorem,
+                          importing: emucharts_theory_name });
+                    projectManager.project().addFile("reversibility_th.pvs", theTheory, { overWrite: true });
+                    projectManager.selectFile("reversibility_th.pvs");
+                });
+            }).on("dismiss", function (e, view) {
+                // just remove window
+                view.remove();
+            });
+        });
+
+        d3.select("#btn_menuVisibilityOfModes").on("click", function () {
+            // document.getElementById("menuVerification").children[1].style.display = "none";
+            var stateVariables = emuchartsManager.getVariables().map(function (variable) {
+                return variable.name;
+            });
+            var transitionLabels = emuchartsManager.getTransitions();
+            var transitions = d3.map();
+            var parser = new EmuchartsParser();
+            transitionLabels.forEach(function (label) {
+                var ans = parser.parseTransition(label.name);
+                if (ans.res) {
+                    transitions.set(ans.res.val.identifier.val);
+                }
+            });
+            transitions = transitions.keys();
+            FeedbackTemplateView.create({
+                header: "Visibility of modes",
+                stateVariables: stateVariables,
+                transitions: transitions,
+                buttons: ["Dismiss", "Create PVS Theory"]
+            }).on("create pvs theory", function (e, view) {
+                // do something useful here.... like create a pvs file with the instantiated property
+                var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th";
+                var modelEditor = ModelEditor.getInstance();
+                (PluginManager.getInstance().isLoaded(modelEditor)
+                    ? Promise.resolve()
+                    : PluginManager.getInstance().enablePlugin(modelEditor))
+                .then(function () {
+                    var pvs_theorem = Handlebars.compile(pvsTheoremInduction, { noEscape: true })({
+                        name: "VISIBILITY",
+                        property: "visibility",
+                        property_definition: e.data.get("pvs_property"),
+                        trans: "trans",
+                        State: "State"
+                    });
+                    var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
+                        { name: "visibility_th",
+                          definitions: Handlebars.compile(pvsFunctionWithInit, { noEscape: true })({
+                            transitions: transitions
+                          }),
+                          body: pvs_theorem,
+                          importing: emucharts_theory_name });
+                    projectManager.project().addFile("visibility_th.pvs", theTheory, { overWrite: true });
+                    projectManager.selectFile("visibility_th.pvs");
+                });
+            }).on("dismiss", function (e, view) {
+                // just remove window
+                view.remove();
+            });
         });
         //-- Zoom menu -----------------------------------------------------------
         d3.select("#menuZoom").on("mouseover", function () {

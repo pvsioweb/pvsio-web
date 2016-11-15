@@ -317,6 +317,7 @@ define(function (require, exports, module) {
         data.width = coord.width;
         data.x = coord.left;
         data.y = coord.top;
+        data.visibleWhen = (!data.visibleWhen || data.visibleWhen.length === 0) ? "true" : data.visibleWhen;
 
         var widget = createWidget(data);
         if (widget) {

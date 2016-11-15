@@ -130,7 +130,8 @@ define(function (require, exports, module) {
                             scope: "Local"
                         };
                     if (theDeclaration.res.type === "TypeDeclaration") {
-                        // TODO
+                        // if (theDeclaration.res.val.type && theDeclaration.res.val.type.typeID && theDeclaration.res.val.type.typeID.val)
+                        // TODO: we are missing a field to encode this information in the emucharts descriptor
                     } else if (theDeclaration.res.type === "VariableDeclaration") {
                         theVariable.type = theDeclaration.res.val.type.typeID.val;
                         theVariable.name = theDeclaration.res.val.variableID.val;
