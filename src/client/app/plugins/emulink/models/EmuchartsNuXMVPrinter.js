@@ -165,10 +165,6 @@ define(function (require, exports, module) {
                 name: predefined_variables.previous_state.name,
                 value: trans.target.name
             });
-            init.push({
-                name: "event",
-                value: trans.name || "tick"
-            });
         });
         return Handlebars.compile(var_init, { noEscape: true })({
             init: init,
@@ -269,7 +265,7 @@ define(function (require, exports, module) {
 
     EmuchartsNuXMVPrinter.prototype.print_descriptor = function (emuchart) {
         var ans = "-- ---------------------------------------------------------------" +
-                    "\n--  Theory: " + emuchart.name;
+                    "\n--  Module: " + emuchart.name;
         if (emuchart.author) {
             ans += "\n--  Author: " + emuchart.author.name +
                     "\n--          " + emuchart.author.affiliation +
@@ -285,7 +281,7 @@ define(function (require, exports, module) {
 
     EmuchartsNuXMVPrinter.prototype.print_disclaimer = function () {
         var ans = "\n-- ---------------------------------------------------------------\n" +
-                    "--  PVS theory generated using PVSio-web NuXMVPrinter ver 0.1\n" +
+                    "--  NuXMV model generated using PVSio-web NuXMVPrinter ver 0.1\n" +
                     "--  Tool freely available at http://www.pvsioweb.org" +
                     "\n-- ---------------------------------------------------------------\n";
         return ans;
