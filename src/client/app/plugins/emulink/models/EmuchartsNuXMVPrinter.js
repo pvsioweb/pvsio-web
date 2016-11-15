@@ -10,12 +10,14 @@ define(function (require, exports, module) {
     "use strict";
 
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
-    // var version = 0.1;
+    var version = 0.1;
 
     var var_declarations = require("text!plugins/emulink/models/nuxmv/templates/var_declarations.handlebars"),
         var_init = require("text!plugins/emulink/models/nuxmv/templates/var_init.handlebars"),
         transitions = require("text!plugins/emulink/models/nuxmv/templates/transitions.handlebars"),
-        nuxmv_module = require("text!plugins/emulink/models/nuxmv/templates/nuxmv_module.handlebars");
+        nuxmv_module = require("text!plugins/emulink/models/nuxmv/templates/nuxmv_module.handlebars"),
+        disclaimer = require("text!plugins/emulink/models/nuxmv/templates/nuxmv_disclaimer.handlebars"),
+        descriptor = require("text!plugins/emulink/models/nuxmv/templates/nuxmv_descriptor.handlebars");
 
     var parser;
     var model_name;
@@ -94,12 +96,19 @@ define(function (require, exports, module) {
                 }
             } else if (term.type === "function") {
                 term.val = printFunction(term);
+            } else if (term.type === "constant") {
+                if (term.val.toUpperCase() === "FALSE" || term.val.toUpperCase() === "TRUE") {
+                    term.val = term.val.toUpperCase();
+                }
             }
         }
         return term;
     };
 
-
+    var typeMap = {
+        bool: "boolean",
+        int: "integer"
+    };
 
     EmuchartsNuXMVPrinter.prototype.print_declarations = function (emuchart) {
         // Example use of the template:
@@ -114,7 +123,7 @@ define(function (require, exports, module) {
         //     ]
         // });
         var theDeclarations = emuchart.variables.map(function (variable) {
-            return { name: variable.name, type: variable.type};
+            return { name: variable.name, type: (typeMap[variable.type] || variable.type)};
         });
         // add the definitions of the pre-defined variables (current_state and previous_state)
         var machineStateType = "{ " + emuchart.states.map(function (state) {
@@ -152,7 +161,10 @@ define(function (require, exports, module) {
         //     indent: " "
         // });
         var init = emuchart.variables.map(function (variable) {
-            return { name: variable.name, value: variable.value };
+            return {
+                name: variable.name,
+                value: preProcess({ type: "constant", val: variable.value }, emuchart).val
+            };
         });
         // add the initialisation for the pre-defined variables (current_state and previous_state)
         // FIXME: investigate how to express conditional initialisation, e.g., c = if disp < 10 then 0 else 1 endif
@@ -264,27 +276,18 @@ define(function (require, exports, module) {
     };
 
     EmuchartsNuXMVPrinter.prototype.print_descriptor = function (emuchart) {
-        var ans = "-- ---------------------------------------------------------------" +
-                    "\n--  Module: " + emuchart.name;
-        if (emuchart.author) {
-            ans += "\n--  Author: " + emuchart.author.name +
-                    "\n--          " + emuchart.author.affiliation +
-                    "\n--          " + emuchart.author.contact;
-        }
-        if (emuchart.description) {
-            ans += "\n-- ---------------------------------------------------------------" +
-                    "\n--  " + emuchart.description;
-        }
-        ans += "\n-- ---------------------------------------------------------------\n";
-        return ans;
+        return Handlebars.compile(descriptor, { noEscape: true })({
+            name: emuchart.name,
+            author: (emuchart.author) ? emuchart.author.name : "<author>",
+            affiliation: (emuchart.author) ? emuchart.author.affiliation : "<affiliation>",
+            contact: (emuchart.author) ? emuchart.author.contact : "<email>"
+        });
     };
 
     EmuchartsNuXMVPrinter.prototype.print_disclaimer = function () {
-        var ans = "\n-- ---------------------------------------------------------------\n" +
-                    "--  NuXMV model generated using PVSio-web NuXMVPrinter ver 0.1\n" +
-                    "--  Tool freely available at http://www.pvsioweb.org" +
-                    "\n-- ---------------------------------------------------------------\n";
-        return ans;
+        return Handlebars.compile(disclaimer, { noEscape: true })({
+            version: version
+        });
     };
 
     /**
