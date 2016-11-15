@@ -99,66 +99,7 @@ define(function (require, exports, module) {
         return term;
     };
 
-    function from_emucharts_transition(trans, emuchart) {
-        var t = parser.parseTransition(trans.name);
-        var cond = [];
-        if (t.res && t.res.val.cond) {
-            t.res.val.cond.val.forEach(function (term) {
-                if (term.type === "identifier") {
-                    preProcess(term, emuchart);
-                    if (isVariable(term.val, emuchart)) {
-                        if (term.val.indexOf(".") >= 0) {
-                            var v = term.val.split(".");
-                            term.val = v.join("_");
-                        }
-                    }
-                    cond.push(term.val);
-                } else {
-                    preProcess(term, emuchart);
-                    cond.push(term.val);
-                }
-            });
-        }
-        var actions = [];
-        if (trans.source && (!trans.target || trans.source.name !== trans.target.name)) {
-            actions.push(
-                "next(" + predefined_variables.previous_state.name + ") = " + trans.source.name
-            );
-        }
-        if (trans.target && (!trans.source || trans.source.name !== trans.target.name)) {
-            actions.push(
-                "next(" + predefined_variables.current_state.name + ") = " + trans.target.name
-            );
-        }
-        if (t.res && t.res.val.actions) {
-            t.res.val.actions.val.forEach(function (action) {
-                var expr = [];
-                if (action.type === "assignment") {
-                    action.val.expression.val.forEach(function (term) {
-                        if (term.type === "identifier") {
-                            preProcess(term, emuchart);
-                            if (isVariable(term.val, emuchart)) {
-                                if (term.val.indexOf(".") >= 0) {
-                                    var v = term.val.split(".");
-                                    term.val = v.join("_");
-                                }
-                            }
-                            expr.push(term.val);
-                        } else {
-                            preProcess(term, emuchart);
-                            expr.push(term.val);
-                        }
-                    });
-                    actions.push("next(" + preProcess(action.val.identifier.val) + ") = " + expr.join(" "));
-                }
-            });
-        }
-        return {
-            name: (t.res.val.identifier) ? t.res.val.identifier.val : "tick",
-            cond: cond.join(" "),
-            action: actions.join(" & ")
-        };
-    }
+
 
     EmuchartsNuXMVPrinter.prototype.print_declarations = function (emuchart) {
         // Example use of the template:
@@ -187,8 +128,13 @@ define(function (require, exports, module) {
         ]);
         var theTransitions = new d3.map(); // this is necessary to avoid duplicate transition names
         emuchart.transitions.forEach(function (trans) {
-            var t = from_emucharts_transition(trans, emuchart);
-            theTransitions.set(t.name);
+            var t = parser.parseTransition(trans.name);
+            if (t.res) {
+                var name = (t.res.val.identifier.val.length > 0) ? t.res.val.identifier.val : "tick";
+                theTransitions.set(name);
+            } else {
+                console.log("WARNING: failed to parse transition " + trans.name);
+            }
         });
         return Handlebars.compile(var_declarations, { noEscape: true })({
             declarations: theDeclarations,
@@ -239,11 +185,84 @@ define(function (require, exports, module) {
         //     ],
         //     indent: " "
         // });
+        function process_emucharts_transition(trans, emuchart) {
+            var cond = [];
+            var actions = [];
+            var keep = [];
+            var t = parser.parseTransition(trans.name);
+            if (t.res && t.res.val.cond) {
+                t.res.val.cond.val.forEach(function (term) {
+                    preProcess(term, emuchart);
+                    cond.push(term.val);
+                });
+            } else {
+                console.log("WARNNG: failed to parse transition " + trans.name);
+            }
+            // current_state
+            if (trans.target && (!trans.source || trans.source.name !== trans.target.name)) {
+                actions.push({
+                    identifier: predefined_variables.current_state.name,
+                    expression: trans.target.name
+                });
+            } else {
+                keep.push({
+                    identifier: predefined_variables.current_state.name
+                });
+            }
+            // previous_state
+            if (trans.source && (!trans.target || trans.source.name !== trans.target.name)) {
+                actions.push({
+                    identifier: predefined_variables.previous_state.name,
+                    expression: trans.source.name
+                });
+            } else {
+                keep.push({
+                    identifier: predefined_variables.previous_state.name
+                });
+            }
+            // all other state variables
+            if (t.res && t.res.val.actions) {
+                t.res.val.actions.val.forEach(function (action) {
+                    var expr = [];
+                    if (action.type === "assignment") {
+                        action.val.expression.val.forEach(function (term) {
+                            preProcess(term, emuchart);
+                            expr.push(term.val);
+                        });
+                        actions.push({
+                            identifier: preProcess(action.val.identifier.val),
+                            expression: expr.join(" ")
+                        });
+                    }
+                });
+            }
+            emuchart.variables.forEach(function (variable) {
+                var primed = actions.filter(function (v) {
+                    return v.identifier === variable.name;
+                });
+                if (primed.length === 0) {
+                    keep.push({
+                        identifier: variable.name
+                    });
+                }
+            });
+            return {
+                name: (t.res.val.identifier) ? t.res.val.identifier.val : "tick",
+                current_state: (trans.source) ? trans.source.name : null,
+                cond: cond.join(" "),
+                action: actions,
+                keep: keep
+            };
+        }
         var theTransitions = emuchart.transitions.map(function (trans) {
-            return from_emucharts_transition(trans, emuchart);
+            return process_emucharts_transition(trans, emuchart);
         });
         return Handlebars.compile(transitions, { noEscape: true })({
             trans: theTransitions,
+            variables: emuchart.variables.concat([
+                predefined_variables.current_state,
+                predefined_variables.previous_state
+            ]),
             indent: " "
         });
     };
