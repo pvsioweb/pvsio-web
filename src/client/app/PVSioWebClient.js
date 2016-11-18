@@ -49,7 +49,13 @@ define(function (require, exports, module) {
         d3.select("body").on("keydown.global", function () {
             var e = d3.event;
             if (_pvsioweb._activePanel && _pvsioweb._activePanel.handleKeyEvent) {
-                _pvsioweb._activePanel.handleKeyEvent(e);
+                _pvsioweb._activePanel.handleKeyDownEvent(e);
+            }
+        });
+        d3.select("body").on("keyup.global", function () {
+            var e = d3.event;
+            if (_pvsioweb._activePanel && _pvsioweb._activePanel.handleKeyEvent) {
+                _pvsioweb._activePanel.handleKeyUpEvent(e);
             }
         });
 	}

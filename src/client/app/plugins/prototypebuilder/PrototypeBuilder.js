@@ -14,12 +14,13 @@ define(function (require, exports, module) {
         Logger              = require("util/Logger"),
         Recorder            = require("util/ActionRecorder"),
         Prompt              = require("pvsioweb/forms/displayPrompt"),
-        PrototypeImageView = require("pvsioweb/forms/PrototypeImageView"),
+        PrototypeImageView  = require("pvsioweb/forms/PrototypeImageView"),
         WidgetsListView     = require("pvsioweb/forms/WidgetsListView"),
         TimersListView      = require("pvsioweb/forms/TimersListView"),
         NewWidgetView       = require("pvsioweb/forms/newWidget"),
-        EditWidgetView  = require("pvsioweb/forms/editWidget"),
+        EditWidgetView      = require("pvsioweb/forms/editWidget"),
         template            = require("text!pvsioweb/forms/templates/prototypeBuilderPanel.handlebars"),
+        toolbar             = require("text!pvsioweb/forms/templates/prototypeBuilderToolbar.handlebars"),
         ScriptPlayer        = require("util/ScriptPlayer"),
 //        fs              = require("util/fileHandler"),
         FileSystem          = require("filesystem/FileSystem"),
@@ -56,8 +57,9 @@ define(function (require, exports, module) {
      */
     function switchToBuilderView() {
         d3.select("#prototype-builder-container .image-map-layer").style("opacity", 1).style("z-index", 190);
-        d3.select("#controlsContainer .active").classed("active", false);
-        d3.select("#btnBuilderView").classed('active', true);
+        d3.select("#btnBuilderView").classed("btn-default", false).classed("btn-primary", true);
+        d3.select("#btnSimulatorView").classed("btn-default", true).classed("btn-primary", false);
+        d3.select("#btnRebootPrototype").classed("disabled", true);
         WidgetManager.stopTimers();
         expandWidgetsList();
     }
@@ -67,9 +69,9 @@ define(function (require, exports, module) {
     */
     function switchToSimulatorView() {
         d3.select("#prototype-builder-container .image-map-layer").style("opacity", 0.1).style("z-index", -2);
-        d3.select("#controlsContainer .active").classed("active", false);
-        d3.select("#btnSimulatorView").classed("active", true);
-        d3.select("#btnSimulatorView").classed("selected", true);
+        d3.select("#btnBuilderView").classed("btn-default", true).classed("btn-primary", false);
+        d3.select("#btnSimulatorView").classed("btn-default", false).classed("btn-primary", true);
+        d3.select("#btnRebootPrototype").classed("disabled", false);
         console.log("bootstrapping widgets with init(0)...");
         WidgetManager.initialiseWidgets();
         console.log("bootstrapping wallclock timers...");
@@ -164,12 +166,10 @@ define(function (require, exports, module) {
         }
     }
 
-    function onProjectChanged(event) {
-        var pvsioStatus = d3.select("#lblPVSioStatus");
-        pvsioStatus.select("span").remove();
-        var project = event.current;
+    function restartPVSio() {
         var ws = WSManager.getWebSocket();
         ws.lastState("init(0)");
+        var project = projectManager.project();
         if (project.mainPVSFile()) {
             // the main file can be in a subfolder: we need to pass information about directories!
             var mainFile = project.mainPVSFile().path.replace(project.name() + "/", "");
@@ -182,7 +182,12 @@ define(function (require, exports, module) {
                 }
             });
         }
+    }
 
+    function onProjectChanged(event) {
+        var pvsioStatus = d3.select("#lblPVSioStatus");
+        pvsioStatus.select("span").remove();
+        restartPVSio();
         switchToBuilderView();
         WidgetManager.clearWidgets();
         prototypeImageView.clearWidgetAreas();
@@ -323,6 +328,11 @@ define(function (require, exports, module) {
         });
         d3.select("#btnReconnect").on("click", function () {
             projectManager.reconnectToServer();
+        });
+        d3.select("#btnRebootPrototype").on("click", function (){
+            //reboot is emulated by restarting the pvsioweb process on the server
+            restartPVSio();
+            switchToSimulatorView();
         });
         d3.select("#btnAddNewTimer").on("click", function () {
 //            WidgetManager.addTimer();
@@ -524,6 +534,7 @@ define(function (require, exports, module) {
             parent: "#body",
             owner: this.getName()
         });
+        pbContainer.append("div").html(toolbar);
         pbContainer.append("div").attr("style", "display: flex;").html(template);
         layoutjs({el: "#body"});
         projectManager.addListener("ProjectChanged", onProjectChanged);
@@ -581,7 +592,7 @@ define(function (require, exports, module) {
         return Promise.resolve(true);
     };
 
-    PrototypeBuilder.prototype.handleKeyEvent = function (e) {
+    PrototypeBuilder.prototype.handleKeyDownEvent = function (e) {
         if (!this.collapsed) {
             prototypeImageView._mapCreator.handleKeyEvent(e);
         }
