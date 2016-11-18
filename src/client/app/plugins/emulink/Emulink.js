@@ -701,6 +701,9 @@ define(function (require, exports, module) {
         d3.select("#btn_toolbarZoomReset").on("click", function () {
             emuchartsManager.zoom_reset();
         });
+        // bootstrap tooltip
+        $('[data-toggle="tooltip"]').tooltip();
+
 
         //-- Emuchart menu -----------------------------------------------------------
         d3.select("#menuEmuchart").on("mouseover", function () {
