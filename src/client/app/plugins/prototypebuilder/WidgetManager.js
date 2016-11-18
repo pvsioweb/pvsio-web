@@ -60,35 +60,6 @@ define(function (require, exports, module) {
                 view.remove();
             });
     }
-    function installKeypressHandler(wm) {
-        d3.select(document).on("keydown", function () {
-            if (d3.select("#btnSimulatorView").node() && d3.select("#btnSimulatorView").classed("active")) {
-                var eventKeyCode = d3.event.which;
-                var widget = wm._keyCode2widget[eventKeyCode];
-                if (widget && typeof widget.evts === "function" && widget.evts().indexOf('click') > -1) {
-                    widget.click({ callback: renderResponse });
-                    halo(widget.id());
-                    d3.event.preventDefault();
-                    d3.event.stopPropagation();
-                } else if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
-                    widget.pressAndHold({ callback: renderResponse });
-                    halo(widget.id());
-                    d3.event.preventDefault();
-                    d3.event.stopPropagation();
-                }
-            }
-        });
-        d3.select(document).on("keyup", function () {
-            if (d3.select("#btnSimulatorView").node() && d3.select("#btnSimulatorView").classed("active")) {
-                var eventKeyCode = d3.event.which;
-                var widget = wm._keyCode2widget[eventKeyCode];
-                if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
-                    widget.release({ callback: renderResponse });
-                }
-                haloOff();
-            }
-        });
-    }
     function halo (buttonID) {
         var coords = d3.select("." + buttonID).attr("coords");
         coords = coords.split(",");
@@ -287,9 +258,38 @@ define(function (require, exports, module) {
                     createImageMap(widget);
                 });
             }
-
-            installKeypressHandler(this);
         }
+    };
+    WidgetManager.prototype.handleKeyDownEvent = function (e) {
+        // d3.select(document).on("keydown", function () {
+        if (d3.select("#btnSimulatorView").node() && d3.select("#btnSimulatorView").classed("active")) {
+            var eventKeyCode = d3.event.which;
+            var widget = wm._keyCode2widget[eventKeyCode];
+            if (widget && typeof widget.evts === "function" && widget.evts().indexOf('click') > -1) {
+                widget.click({ callback: renderResponse });
+                halo(widget.id());
+                d3.event.preventDefault();
+                d3.event.stopPropagation();
+            } else if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
+                widget.pressAndHold({ callback: renderResponse });
+                halo(widget.id());
+                d3.event.preventDefault();
+                d3.event.stopPropagation();
+            }
+        }
+        // });
+    };
+    WidgetManager.prototype.handleKeyUpEvent = function (e) {
+        // d3.select(document).on("keyup", function () {
+        if (d3.select("#btnSimulatorView").node() && d3.select("#btnSimulatorView").classed("active")) {
+            var eventKeyCode = d3.event.which;
+            var widget = wm._keyCode2widget[eventKeyCode];
+            if (widget && typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
+                widget.release({ callback: renderResponse });
+            }
+            haloOff();
+        }
+        // });
     };
     WidgetManager.prototype.addWallClockTimer = function () {
         //pop up the timer edit dialog
