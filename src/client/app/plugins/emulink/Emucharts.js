@@ -16,7 +16,6 @@ define(function (require, exports, module) {
         PIMs = require("plugins/emulink/models/pim/PIMs"),
         d3 = require("d3/d3"),
         Colors = require("plugins/emulink/tools/Colors");
-    var _this;
 
     var defaultValues = {
             x: 100,
@@ -27,7 +26,7 @@ define(function (require, exports, module) {
             color: Colors.getColor
     };
 
-    var getFreshNodeID = function () {
+    var getFreshNodeID = function (_this) {
         function newNodeID () {
             var i = 1;
             while(_this.nodes && _this.nodes.get("X" + i)) { i++; }
@@ -35,7 +34,7 @@ define(function (require, exports, module) {
         }
         return "X" + newNodeID();
     };
-    var getFreshEdgeID = function () {
+    var getFreshEdgeID = function (_this) {
         function newEdgeID () {
             var i = 1;
             while(_this.edges && _this.edges.get("T" + i)) { i++; }
@@ -43,7 +42,7 @@ define(function (require, exports, module) {
         }
         return "T" + newEdgeID();
     };
-    var getFreshInitialEdgeID = function () {
+    var getFreshInitialEdgeID = function (_this) {
         function newInitialEdgeID () {
             var i = 1;
             while(_this.initial_edges && _this.initial_edges.get("IT" + i)) { i++; }
@@ -65,6 +64,7 @@ define(function (require, exports, module) {
         return id;
     };
 
+
     /**
      * @function Emucharts
      * @description Constructor.
@@ -72,15 +72,112 @@ define(function (require, exports, module) {
      * @instance
      */
     function Emucharts(emuchart) {
+        function cloneChart(c) {
+            var chart = { nodes: d3.map(), edges: d3.map(), initial_edges: d3.map(),
+                          variables: d3.map(), constants: d3.map() };
+            if (c.states) {
+                c.states.forEach(function (state) {
+                    chart.nodes.set(state.id, {
+                        id:     state.id,
+                        name:   state.name,
+                        color:  state.color || Colors.getColor(state.id),
+                        width:  state.width || 36,
+                        height: state.height || 36,
+                        x:      state.x || 100,
+                        y:      state.y || 100,
+                    });
+                });
+            }
+            if (c.transitions) {
+                c.transitions.forEach(function (trans) {
+                    var source = null, target = null;
+                    if (trans.source) {
+                        source = chart.nodes.get(trans.source.id);
+                        if (!source) {
+                            console.error("WARNING: corrupted emucharts file, edge " + trans.name +
+                                            " points to a node" + trans.source.id +
+                                            " that is not part of the set of nodes listed in the emucharts.");
+                        }
+                    }
+                    if (trans.target) {
+                        target = chart.nodes.get(trans.target.id);
+                        if (!target) {
+                            console.error("WARNING: corrupted emucharts file, edge " + trans.name +
+                                            " points to a node" + trans.target.id +
+                                            " that is not part of the set of nodes listed in the emucharts.");
+                        }
+                    }
+                    chart.edges.set(trans.id, {
+                        id:     trans.id,
+                        name:   trans.name,
+                        source: source,
+                        target: target,
+                        controlPoint: (trans.controlPoint) ? { x: trans.controlPoint.x, y: trans.controlPoint.y } : null
+                    });
+                });
+            }
+            if (c.initial_transitions) {
+                c.initial_transitions.forEach(function (trans) {
+                    if (trans.target) {
+                        var initialNode = chart.nodes.get(trans.target.id);
+                        if (!initialNode) {
+                            console.error("WARNING: corrupted emucharts file, edge " + trans.name +
+                                            " points to a node" + trans.target.id +
+                                            " that is not part of the set of nodes listed in the emucharts.");
+                        }
+                        chart.initial_edges.set(trans.id,{
+                            id:     trans.id,
+                            name:   trans.name,
+                            target: initialNode
+                        });
+                    }
+                });
+            }
+            if (c.variables) {
+                c.variables.forEach(function (variable) {
+                    chart.variables.set(variable.id, {
+                        id: variable.id,
+                        name: variable.name,
+                        type: variable.type,
+                        value: variable.value,
+                        scope: variable.scope
+                    });
+                });
+            }
+            if (c.constants) {
+                c.constants.forEach(function (constant) {
+                    chart.constants.set(constant.id, {
+                        id: constant.id,
+                        name: constant.name,
+                        type: constant.type,
+                        value: constant.value
+                    });
+                });
+            }
+            //TODO: check if the following copy of pmr is a deep copy
+            if (c.pmr) {
+                chart.pmr = d3.map();
+                for (var behaviour in c.pmr) {
+                    if (c.pmr.hasOwnProperty(behaviour)) {
+                        chart.pmr.set(behaviour, c.pmr[behaviour]);
+                    }
+                }
+            }
+            if (c.isPIM) {
+                chart.isPIM = true;
+            }
+            return chart;
+        }
         if (emuchart) {
-            this.nodes = emuchart.nodes || d3.map();
-            this.edges = emuchart.edges || d3.map();
-            this.initial_edges = emuchart.initial_edges || d3.map();
-            this.constants = emuchart.constants || d3.map();
-            this.variables = emuchart.variables || d3.map();
-            this.datatypes = emuchart.datatypes || d3.map();
-            this.pmr = emuchart.pmr || d3.map();
-            this.isPIM = emuchart.isPIM && emuchart.isPIM === true;
+            var clone = cloneChart(emuchart);
+            this.nodes = clone.nodes || d3.map();
+            this.edges = clone.edges || d3.map();
+            this.initial_edges = clone.initial_edges || d3.map();
+            this.constants = clone.constants || d3.map();
+            this.variables = clone.variables || d3.map();
+            this.datatypes = clone.datatypes || d3.map();
+            this.pmr = clone.pmr || d3.map();
+            this.isPIM = clone.isPIM && clone.isPIM === true;
             this.pim = new PIMs(this.isPIM);
         } else {
             this.nodes = d3.map();
@@ -94,24 +191,22 @@ define(function (require, exports, module) {
             this.pim = new PIMs();
         }
         eventDispatcher(this);
-        _this = this;
         return this;
     }
 
     Emucharts.prototype.getEdges = function () {
-        return _this.edges;
+        return this.edges;
     };
     Emucharts.prototype.getInitialEdges = function () {
-        return _this.initial_edges;
+        return this.initial_edges;
     };
     Emucharts.prototype.getNodes = function () {
-        return _this.nodes;
+        return this.nodes;
     };
 
     Emucharts.prototype.getDefaultValues = function () {
         return defaultValues;
     };
-
 
     /**
      * @function edit_node
@@ -125,6 +220,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.edit_node = function (id, data) {
+        var _this = this;
         if (!id || !_this.nodes || !_this.nodes.get(id)) { return false; }
         // get node and rename it
         var node = _this.nodes.get(id);
@@ -181,7 +277,7 @@ define(function (require, exports, module) {
     Emucharts.prototype.add_node = function (node) {
         if (!node) { return null; }
         // create a new node with a unique ID
-        var id = node.id || getFreshNodeID();
+        var id = node.id || getFreshNodeID(this);
         var name = node.name || id;
         var estimatedTextWidth = name.length * defaultValues.fontSize / 4;
         var width = (estimatedTextWidth < defaultValues.width) ? defaultValues.width : estimatedTextWidth;
@@ -195,15 +291,15 @@ define(function (require, exports, module) {
                 color: node.color || defaultValues.color(id)
             };
 
-        if (_this.getIsPIM()) {
-            newNode = _this.pim.getState(newNode);
+        if (this.getIsPIM()) {
+            newNode = this.pim.getState(newNode);
             newNode.color = newNode.color || defaultValues.color(newNode.id);
         }
 
         // add the new node to the diagram
-        _this.nodes.set(newNode.id, newNode);
+        this.nodes.set(newNode.id, newNode);
         // fire event
-        _this.fire({
+        this.fire({
             type: "emuCharts_stateAdded",
             state: {
                 id: newNode.id,
@@ -223,10 +319,10 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.remove_node = function (node) {
-        var rem = _this.nodes.get(node);
-        if (rem && _this.nodes.remove(node)) {
+        var rem = this.nodes.get(node);
+        if (rem && this.nodes.remove(node)) {
             // fire event
-            _this.fire({
+            this.fire({
                 type: "emuCharts_stateRemoved",
                 state: {
                     id: rem.id,
@@ -248,10 +344,10 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.move_node = function (node, new_pos) {
-        var move = _this.nodes.get(node);
+        var move = this.nodes.get(node);
         if (move) {
             // fire event
-            _this.fire({
+            this.fire({
                 type: "emuCharts_stateMoved",
                 state: {
                     id: move.id,
@@ -264,7 +360,7 @@ define(function (require, exports, module) {
             });
             move.x = new_pos.x;
             move.y = new_pos.y;
-            _this.nodes.set(move.id, move);
+            this.nodes.set(move.id, move);
             return true;
         }
         return false;
@@ -280,13 +376,13 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.rename_edge = function (id, newName) {
-        if (!id || !_this.edges || !_this.edges.get(id)) { return false; }
+        if (!id || !this.edges || !this.edges.get(id)) { return false; }
         // get edge and rename it
-        var edge = _this.edges.get(id);
+        var edge = this.edges.get(id);
         edge.name = newName;
-        _this.edges.set(edge.id, edge);
+        this.edges.set(edge.id, edge);
         // fire event
-        _this.fire({
+        this.fire({
             type: "emuCharts_transitionRenamed",
             transition: {
                 id: edge.id,
@@ -314,13 +410,13 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.rename_initial_edge = function (id, newName) {
-        if (!id || !_this.initial_edges || !_this.initial_edges.get(id)) { return false; }
+        if (!id || !this.initial_edges || !this.initial_edges.get(id)) { return false; }
         // get edge and rename it
-        var initial_edge = _this.initial_edges.get(id);
+        var initial_edge = this.initial_edges.get(id);
         initial_edge.name = newName;
-        _this.initial_edges.set(initial_edge.id, initial_edge);
+        this.initial_edges.set(initial_edge.id, initial_edge);
         // fire event
-        _this.fire({
+        this.fire({
             type: "emuCharts_initialTransitionRenamed",
             transition: {
                 id: initial_edge.id,
@@ -345,10 +441,10 @@ define(function (require, exports, module) {
      */
     Emucharts.prototype.set_controlPoint = function (edge, cp) {
         if (!edge || !cp) { return false; }
-        var ed = _this.edges.get(edge.id);
+        var ed = this.edges.get(edge.id);
         if (ed) {
             ed.controlPoint = cp;
-            _this.edges.set(edge.id, ed);
+            this.edges.set(edge.id, ed);
             return true;
         } else {
             console.log("dbg: warning - control point associated to unknown edge");
@@ -377,15 +473,15 @@ define(function (require, exports, module) {
         if (!edge || !edge.target) {
             return null;
         }
-        if (!_this.nodes.has(edge.target.id)) {
+        if (!this.nodes.has(edge.target.id)) {
             console.log("dbg: warning, target ID not found in emuchart data. New transitions not added.");
             return null;
         }
 
-        var target = _this.nodes.get(edge.target.id);
-        var source = (edge.source) ? _this.nodes.get(edge.source.id) : null;
+        var target = this.nodes.get(edge.target.id);
+        var source = (edge.source) ? this.nodes.get(edge.source.id) : null;
         // create a new node with a unique ID
-        var id = getFreshEdgeID();
+        var id = getFreshEdgeID(this);
         var newEdge = {
                 id  : id, // nodes have unique IDs
                 name: edge.name || id,
@@ -394,9 +490,9 @@ define(function (require, exports, module) {
                 controlPoint: edge.controlPoint
             };
         // add the new edge to the diagram
-        _this.edges.set(newEdge.id, newEdge);
+        this.edges.set(newEdge.id, newEdge);
         // fire event
-        _this.fire({
+        this.fire({
             type: "emuCharts_transitionAdded",
             transition: {
                 id: newEdge.id,
@@ -433,23 +529,23 @@ define(function (require, exports, module) {
         if (!edge || !edge.target) {
             return null;
         }
-        if (!_this.nodes.has(edge.target.id)) {
+        if (!this.nodes.has(edge.target.id)) {
             console.log("dbg: warning, target ID not found in emuchart data. New transitions not added.");
             return null;
         }
 
-        var target = _this.nodes.get(edge.target.id);
+        var target = this.nodes.get(edge.target.id);
         // create a new node with a unique ID
-        var id = getFreshInitialEdgeID();
+        var id = getFreshInitialEdgeID(this);
         var newEdge = {
                 id  : id, // nodes have unique IDs
                 name: edge.name || id,
                 target: target
             };
         // add the new edge to the diagram
-        _this.initial_edges.set(newEdge.id, newEdge);
+        this.initial_edges.set(newEdge.id, newEdge);
         // fire event
-        _this.fire({
+        this.fire({
             type: "emuCharts_initialTransitionAdded",
             transition: {
                 id: newEdge.id,
@@ -471,10 +567,10 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.remove_edge = function (edge) {
-        var rem = _this.edges.get(edge);
-        if (rem && _this.edges.remove(edge)) {
+        var rem = this.edges.get(edge);
+        if (rem && this.edges.remove(edge)) {
             // fire event
-            _this.fire({
+            this.fire({
                 type: "emuCharts_transitionRemoved",
                 transition: {
                     id: rem.id,
@@ -503,10 +599,10 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.remove_initial_edge = function (initial_edge) {
-        var rem = _this.initial_edges.get(initial_edge);
-        if (rem && _this.initial_edges.remove(initial_edge)) {
+        var rem = this.initial_edges.get(initial_edge);
+        if (rem && this.initial_edges.remove(initial_edge)) {
             // fire event
-            _this.fire({
+            this.fire({
                 type: "emuCharts_initialTransitionRemoved",
                 transition: {
                     id: rem.id,
@@ -530,7 +626,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getFreshStateName = function () {
-        return getFreshNodeID();
+        return getFreshNodeID(this);
     };
 
     /**
@@ -540,7 +636,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getFreshTransitionName = function () {
-        return getFreshEdgeID();
+        return getFreshEdgeID(this);
     };
 
     /**
@@ -550,7 +646,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getFreshInitialTransitionName = function () {
-        return getFreshInitialEdgeID();
+        return getFreshInitialEdgeID(this);
     };
 
     /**
@@ -562,8 +658,9 @@ define(function (require, exports, module) {
      */
     Emucharts.prototype.getStates = function () {
         // If this emuchart is a pim return the pim combatable transition.
-        if (_this.getIsPIM()) {
-            var ans = _this.pim.getStates(this.nodes) || [];
+        var _this = this;
+        if (this.getIsPIM()) {
+            var ans = this.pim.getStates(_this.nodes) || [];
             ans.forEach(function (state) {
                 state.color = state.color || defaultValues.color(state.id);
             });
@@ -596,15 +693,15 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getState = function (id) {
-        if (_this.getIsPIM()) {
-            var state = _this.pim.getState(this.nodes.get(id));
+        if (this.getIsPIM()) {
+            var state = this.pim.getState(this.nodes.get(id));
             if (state) {
                 state.color = state.color || defaultValues.color(state.id);
             }
             return state;
         }
         // The state should already be a PIM state if required.
-        return _this.nodes.get(id);
+        return this.nodes.get(id);
     };
 
     /**
@@ -616,10 +713,10 @@ define(function (require, exports, module) {
      */
     Emucharts.prototype.getTransition = function (id) {
         // If this emuchart is a pim return the pim combatable transition.
-        if (_this.getIsPIM()) {
-            return _this.pim.getTransition(this.edges.get(id));
+        if (this.getIsPIM()) {
+            return this.pim.getTransition(this.edges.get(id));
         }
-        return _this.edges.get(id);
+        return this.edges.get(id);
     };
 
     /**
@@ -631,11 +728,11 @@ define(function (require, exports, module) {
      */
     Emucharts.prototype.getTransitions = function () {
         // If this emuchart is a pim return the pim combatable transition.
-        if (_this.getIsPIM()) {
-            return _this.pim.getTransitions(this.edges);
+        if (this.getIsPIM()) {
+            return this.pim.getTransitions(this.edges);
         }
 
-        var transitions = [];
+        var transitions = [], _this = this;
         _this.edges.forEach(function (key) {
             var trans = _this.edges.get(key);
             transitions.push({
@@ -669,7 +766,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getInitialTransition = function (id) {
-        return _this.initial_edges.get(id);
+        return this.initial_edges.get(id);
     };
 
     /**
@@ -680,7 +777,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getInitialTransitions = function () {
-        var initial_transitions = [];
+        var initial_transitions = [], _this = this;
         _this.initial_edges.forEach(function (key) {
             var trans = _this.initial_edges.get(key);
             initial_transitions.push({
@@ -716,9 +813,9 @@ define(function (require, exports, module) {
             type: constant.type,
             value: constant.value
         };
-        _this.constants.set(id, newConstant);
+        this.constants.set(id, newConstant);
         // fire event
-        _this.fire({
+        this.fire({
             type: "emuCharts_constantAdded",
             constant: {
                 id: id,
@@ -747,9 +844,9 @@ define(function (require, exports, module) {
             constructors: datatype.constructors,
             value: datatype.value
         };
-        _this.datatypes.set(id, newDatatype);
+        this.datatypes.set(id, newDatatype);
         // fire event
-        _this.fire({
+        this.fire({
             type: "emuCharts_datatypeAdded",
             constant: {
                 id: id,
@@ -780,9 +877,9 @@ define(function (require, exports, module) {
             value: variable.value,
             scope: variable.scope
         };
-        _this.variables.set(id, newVariable);
+        this.variables.set(id, newVariable);
         // fire event
-        _this.fire({
+        this.fire({
             type: "emuCharts_variableAdded",
             variable: {
                 id: id,
@@ -804,10 +901,10 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.remove_constant = function (constantID) {
-        var rem = _this.constants.get(constantID);
-        if (rem && _this.constants.remove(constantID)) {
+        var rem = this.constants.get(constantID);
+        if (rem && this.constants.remove(constantID)) {
             // fire event
-            _this.fire({
+            this.fire({
                 type: "emuCharts_constantRemoved",
                 constant: rem
             });
@@ -825,10 +922,10 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.remove_datatype = function (datatypeID) {
-        var rem = _this.datatypes.get(datatypeID);
-        if (rem && _this.datatypes.remove(datatypeID)) {
+        var rem = this.datatypes.get(datatypeID);
+        if (rem && this.datatypes.remove(datatypeID)) {
             // fire event
-            _this.fire({
+            this.fire({
                 type: "emuCharts_datatypeRemoved",
                 constant: rem
             });
@@ -846,10 +943,10 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.remove_variable = function (variableID) {
-        var rem = _this.variables.get(variableID);
-        if (rem && _this.variables.remove(variableID)) {
+        var rem = this.variables.get(variableID);
+        if (rem && this.variables.remove(variableID)) {
             // fire event
-            _this.fire({
+            this.fire({
                 type: "emuCharts_variableRemoved",
                 variable: rem
             });
@@ -871,11 +968,11 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.rename_constant = function (constantID, newData) {
-        if (!constantID || !_this.constants || !_this.constants.get(constantID)) { return false; }
+        if (!constantID || !this.constants || !this.constants.get(constantID)) { return false; }
         // get the constant, delete it from the constants list,
         // rename fields, and put it back in the constants list
-        var theConstant = _this.constants.get(constantID);
-        _this.constants.remove(constantID);
+        var theConstant = this.constants.get(constantID);
+        this.constants.remove(constantID);
         var newConstant = {
             type: newData.type || theConstant.type,
             name: newData.name || theConstant.name,
@@ -884,8 +981,8 @@ define(function (require, exports, module) {
         // update constantID
         var newConstantID = createConstantID(newConstant);
         newConstant.id = newConstantID;
-        _this.constants.set(newConstantID, newConstant);
-        _this.fire({
+        this.constants.set(newConstantID, newConstant);
+        this.fire({
             type: "emuCharts_constantRenamed",
             pre: {
                 id: theConstant.id,
@@ -916,11 +1013,11 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.rename_datatype = function (datatypeID, newData) {
-        if (!datatypeID || !_this.datatypes || !_this.datatypes.get(datatypeID)) { return false; }
+        if (!datatypeID || !this.datatypes || !this.datatypes.get(datatypeID)) { return false; }
         // get the datatype, delete it from the datatype list,
         // rename fields, and put it back in the datatypes list
-        var theDatatype = _this.datatypes.get(datatypeID);
-        _this.datatypes.remove(datatypeID);
+        var theDatatype = this.datatypes.get(datatypeID);
+        this.datatypes.remove(datatypeID);
         var newDatatype = {
             name: newData.name || theDatatype.name,
             constructors: newData.constructors || theDatatype.constructors,
@@ -929,8 +1026,8 @@ define(function (require, exports, module) {
         // update datatypeID
         var newDatatypeID = createDatatypeID(newDatatype);
         newDatatype.id = newDatatypeID;
-        _this.datatypes.set(newDatatypeID, newDatatype);
-        _this.fire({
+        this.datatypes.set(newDatatypeID, newDatatype);
+        this.fire({
             type: "emuCharts_datatypeRenamed",
             pre: {
                 id: theDatatype.id,
@@ -958,11 +1055,11 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.rename_variable = function (variableID, newData) {
-        if (!variableID || !_this.variables || !_this.variables.get(variableID)) { return false; }
+        if (!variableID || !this.variables || !this.variables.get(variableID)) { return false; }
         // get the varable, delete it from the variables list,
         // rename fields, and put it back in the variables list
-        var theVariable = _this.variables.get(variableID);
-        _this.variables.remove(variableID);
+        var theVariable = this.variables.get(variableID);
+        this.variables.remove(variableID);
         var newVariable = {
             type: newData.type || theVariable.type,
             name: newData.name || theVariable.name,
@@ -972,8 +1069,8 @@ define(function (require, exports, module) {
         // update variableID
         var newVariableID = createVariableID(newVariable);
         newVariable.id = newVariableID;
-        _this.variables.set(newVariableID, newVariable);
-        _this.fire({
+        this.variables.set(newVariableID, newVariable);
+        this.fire({
             type: "emuCharts_variableRenamed",
             pre: {
                 id: theVariable.id,
@@ -1001,7 +1098,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getConstants = function () {
-        var ans = [];
+        var ans = [], _this = this;
         _this.constants.forEach(function (key) {
             var c = _this.constants.get(key);
             ans.push({
@@ -1025,7 +1122,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getConstant = function (constantID) {
-        return _this.constants.get(constantID);
+        return this.constants.get(constantID);
     };
 
 
@@ -1037,7 +1134,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getDatatypes = function () {
-        var ans = [];
+        var ans = [], _this = this;
         _this.datatypes.forEach(function (key) {
             var c = _this.datatypes.get(key);
             ans.push({
@@ -1061,7 +1158,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getDatatype = function (datatypeID) {
-        return _this.datatypes.get(datatypeID);
+        return this.datatypes.get(datatypeID);
     };
 
     /**
@@ -1072,7 +1169,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getVariables = function (scope) {
-        var ans = [];
+        var ans = [], _this = this;
         _this.variables.forEach(function (key) {
             var v = _this.variables.get(key);
             if (!scope || scope === v.scope) {
@@ -1099,7 +1196,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getVariable = function (variableID) {
-        return _this.variables.get(variableID);
+        return this.variables.get(variableID);
     };
 
     /**
@@ -1110,7 +1207,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getInputVariables = function () {
-        return _this.getVariables("Input");
+        return this.getVariables("Input");
     };
 
     /**
@@ -1121,7 +1218,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getOutputVariables = function () {
-        return _this.getVariables("Output");
+        return this.getVariables("Output");
     };
 
     /**
@@ -1132,7 +1229,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.getLocalVariables = function () {
-        return _this.getVariables("Local");
+        return this.getVariables("Local");
     };
 
     /**
@@ -1153,7 +1250,7 @@ define(function (require, exports, module) {
      * @instance
      */
     Emucharts.prototype.empty = function () {
-        return _this.nodes.empty() && _this.edges.empty();
+        return this.nodes.empty() && this.edges.empty();
     };
 
     /** PIM **/
@@ -1163,7 +1260,7 @@ define(function (require, exports, module) {
      * @returns {boolean} True Emuchart became a PIM or a PIM became an Emuchart.
      */
     Emucharts.prototype.toPIM = function (toPIM) {
-        return _this.pim && _this.pim.toPIM ? _this.pim.toPIM(toPIM) : false;
+        return this.pim && this.pim.toPIM ? this.pim.toPIM(toPIM) : false;
     };
 
     /**
@@ -1171,7 +1268,7 @@ define(function (require, exports, module) {
      * @returns {boolean} If this emuchart is a PIM.
      */
     Emucharts.prototype.getIsPIM = function () {
-        return _this.pim && _this.pim.getIsPIM ? _this.pim.getIsPIM() : false;
+        return this.pim && this.pim.getIsPIM ? this.pim.getIsPIM() : false;
     };
 
     /**
@@ -1182,7 +1279,7 @@ define(function (require, exports, module) {
      * else returns null.
      */
     Emucharts.prototype.getPMR = function (behaviour, isSave) {
-        return _this.pim && _this.pim.getPMR ? _this.pim.getPMR(_this.pmr, behaviour, isSave) : d3.map();
+        return this.pim && this.pim.getPMR ? this.pim.getPMR(this.pmr, behaviour, isSave) : d3.map();
     };
 
     /**
@@ -1192,7 +1289,7 @@ define(function (require, exports, module) {
      * @returns boolean true if successfully added.
      */
     Emucharts.prototype.addPMR = function (pmr) {
-        return _this.pim && _this.pim.addPMR ? _this.pim.addPMR(_this.pmr, pmr) : false;
+        return this.pim && this.pim.addPMR ? this.pim.addPMR(this.pmr, pmr) : false;
     };
 
     /**
@@ -1201,7 +1298,7 @@ define(function (require, exports, module) {
      * @returns {boolean}
      */
     Emucharts.prototype.mergePMR = function (newPMRs) {
-        return _this.pim.mergePMR ? _this.pim.mergePMR(_this.pmr, newPMRs) : false;
+        return this.pim.mergePMR ? this.pim.mergePMR(this.pmr, newPMRs) : false;
     };
 
     module.exports = Emucharts;

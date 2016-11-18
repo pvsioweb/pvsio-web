@@ -85,25 +85,14 @@ define(function (require, exports, module) {
      */
     Project.prototype.setUpListeners = function() {
         var _this = this;
-        WidgetManager.on("WidgetModified", function (e) {
+        WidgetManager.addListener("WidgetModified", function (e) {
             _this._dirty(true);
             var newWDStr = JSON.stringify(WidgetManager.getWidgetDefinitions(), null, " ");
             //get the widget definitions and update the widgetDefinition file
             var wdf = _this.getWidgetDefinitionFile();
             wdf.content = newWDStr;
             wdf.dirty(true);
-        }, this);
-        WidgetManager.on("StoryboardWidgetModified", function (data) {
-            var filenames = Object.keys(data.widget.images);
-            filenames.forEach(function (key) {
-                var imagePath = _this.name() + "/" + key;
-                _this.fileExists(imagePath).then(function (res) {
-                    if (res === false) {
-                        var imageData = data.widget.images[key].imageData;
-                        _this.addFile(imagePath, imageData, { encoding: "base64" });
-                    }
-                });
-            });
+            _this.fire({type: "WidgetsFileChanged"});
         }, this);
     };
 

@@ -83,8 +83,10 @@ define(function (require, exports, module) {
 
         if (widgets) {
             widgets.forEach(function (w) {
-                var pos = _getPos(w.element());
-                _this.updateLocationAndSize(w, pos, scale);
+                if (w.element()) {
+                    var pos = _getPos(w.element());
+                    _this.updateLocationAndSize(w, pos, scale);
+                }
             });
         }
     };

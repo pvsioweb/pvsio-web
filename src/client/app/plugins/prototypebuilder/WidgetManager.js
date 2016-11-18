@@ -5,11 +5,12 @@
  * @date 10/30/13 21:42:56 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
-/*global define, _, Promise */
+/*global define, _ */
 define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
         uidGenerator    = require("util/uuidGenerator"),
+        eventDispatcher     = require("util/eventDispatcher"),
         EditWidgetView  = require("pvsioweb/forms/editWidget"),
         BaseWidgetManager  = require("pvsioweb/BaseWidgetManager"),
         Button          = require("widgets/Button"),
@@ -125,6 +126,8 @@ define(function (require, exports, module) {
                 console.log("tick timer interval updated to " + timerRate / 1000 + " secs");
             }
         });
+        eventDispatcher(this);
+        return this;
     }
 
     function createWidget(w) {
@@ -216,7 +219,38 @@ define(function (require, exports, module) {
     WidgetManager.prototype.restoreWidgetDefinitions = function (defs) {
         var wm = this;
         this.clearWidgets();
-        if (defs) {
+        if (defs && defs.widgetMaps && defs.regionDefs) {
+            // sanity check
+            if (defs.widgetMaps.length !== defs.regionDefs.length) {
+                // there's an issue with the file -- a widget is not associated to any region
+                console.log("WARNING: Corrupted widgets definition file. Fixing the definitions...");
+                var curruptedRegionDefs = [];
+                defs.regionDefs.forEach(function (regionDef) {
+                    if (defs.widgetMaps.filter(function (map) { return map.id === regionDef.class; }).length === 0) {
+                        console.log("Found corrupted region definition: " + regionDef.class);
+                        curruptedRegionDefs.push(regionDef.class);
+                    }
+                });
+                var curruptedWidgetMaps = [];
+                defs.widgetMaps.forEach(function (map) {
+                    if (defs.regionDefs.filter(function (def) { return def.class === map.id; }).length === 0) {
+                        console.log("Found corrupted widget map: " + map.displayKey + " (id: " + map.id + ")");
+                        curruptedWidgetMaps.push(map.id);
+                    }
+                });
+                // removing corrupted elements
+                curruptedRegionDefs.forEach(function (x) {
+                    defs.regionDefs = defs.regionDefs.filter(function (d) { return d.class !== x; });
+                });
+                curruptedWidgetMaps.forEach(function (x) {
+                    defs.widgetMaps = defs.widgetMaps.filter(function (d) { return d.id !== x; });
+                });
+                if (defs.widgetMaps.length === defs.regionDefs.length) {
+                    console.log("Definitions fixed successfully!");
+                } else {
+                    console.error("Failed to fixed definitions :((");
+                }
+            }
             wm._keyCode2widget = {};
             var widget;
             _.each(defs.widgetMaps, function (w, i) {
@@ -327,7 +361,7 @@ define(function (require, exports, module) {
 
             widget.updateWithProperties(data);
             this.addWidget(widget);
-            this.trigger("WidgetModified", {action: "create", widget: widget});
+            this.fire("WidgetModified", {action: "create", widget: widget});
         }
 
         if (onCreate) {
@@ -476,45 +510,6 @@ define(function (require, exports, module) {
         return {widgetMaps: widgets, regionDefs: regionDefs};
     };
 
-    /**
-     * @function addStoryboardImages
-     * @memberof WidgetManager
-     * @param descriptors {Array(Object)} Array of image descriptors. Each image descriptor has the following properties:
-     *        <li> type: (String), defines the MIME type of the image. The string starts with "image/", e.g., "image/jpeg" </li>
-     *        <li> imagePath: (String), defines the path of the image. The path is relative to the current project folder </li>
-     * @returns {Promise(Array({image}))}
-     */
-    WidgetManager.prototype.addStoryboardImages = function (descriptors) {
-        var _this = this;
-        var storyboard = this.getStoryboardWidgets() || new Storyboard();
-        return new Promise(function (resolve, reject) {
-            storyboard.addImages(descriptors).then(function (images) {
-                _this.addWidget(storyboard);
-                _this.trigger("WidgetModified");
-                resolve(images);
-            }).catch(function (err) {
-                reject(err);
-            });
-        });
-    };
-
-    /**
-     * @function displayEditStoryboardDialog
-     * @memberof WidgetManager
-     */
-    WidgetManager.prototype.displayEditStoryboardDialog = function () {
-        var _this = this;
-        var w = this.getStoryboardWidgets() || [];
-        if (w.length === 0) {
-            w.push(new Storyboard());
-            w[0].addListener("EditStoryboardComplete", function (data) {
-                _this.addWidget(data.widget); // this overwrites the widget
-                _this.trigger("WidgetModified"); // this marks the widget file as dirty
-                _this.trigger("StoryboardWidgetModified", {widget: data.widget}); // this will trigger an event listener in Project that creates a directory with the storyboard image files
-            });
-        }
-        w[0].displayEditStoryboardDialog();
-    };
 
     module.exports = {
         /**

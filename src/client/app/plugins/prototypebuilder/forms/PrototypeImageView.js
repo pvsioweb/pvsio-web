@@ -239,12 +239,12 @@ define(function (require, exports, module) {
                     wm.updateLocationAndSize(e.region.attr("id"), e.pos, e.scale);
                     event.action = "resize";
                     event.widget = wm.getWidget(e.region.attr("id"));
-                    wm.trigger("WidgetModified", event);
+                    wm.fire("WidgetModified", event);
                 }).on("move", function (e) {
                     wm.updateLocationAndSize(e.region.attr("id"), e.pos, e.scale);
                     event.action = "move";
                     event.widget = wm.getWidget(e.region.attr("id"));
-                    wm.trigger("WidgetModified", event);
+                    wm.fire("WidgetModified", event);
                 }).on("remove", function (e) {
                     event.widget = wm.getWidget(e.regions.node().id);
                     e.regions.each(function () {
@@ -257,7 +257,7 @@ define(function (require, exports, module) {
                         }
                     });
                     event.action = "remove";
-                    wm.trigger("WidgetModified", event);
+                    wm.fire("WidgetModified", event);
                 }).on("select", function (e) {
                     _this.trigger("WidgetSelected", wm.getWidget(e.region.attr("id")), e.event.shiftKey);
                 }).on("clearselection", function (e) {
