@@ -122,14 +122,14 @@ define(function (require, exports, module) {
                 grabPosition[0] = posX;
                 grabPosition[1] = posY;
             } else {
-                return false;    
+                return false;
             }
-            
+
         },
         handleDragStart: function(event) {
-            
+
             document.getElementById(event.currentTarget.id).classList.add("opacity");
-            
+
             source = event.currentTarget;
             event.originalEvent.dataTransfer.effectAllowed = "move";
             event.originalEvent.dataTransfer.setData('text', event.currentTarget.innerHTML);
@@ -144,7 +144,7 @@ define(function (require, exports, module) {
             if (event.currentTarget.id.indexOf("bookmark-list") > -1) {
                 if (source !== event.currentTarget) {
                     document.getElementById(event.currentTarget.id).classList.add("over");
-                }   
+                }
             }
             return false;
         },
@@ -161,7 +161,7 @@ define(function (require, exports, module) {
             }
 
             event.originalEvent.dataTransfer.effectAllowed = "move";
-           
+
             return false;
         },
         handleDragOverLine: function(event) {
@@ -180,7 +180,7 @@ define(function (require, exports, module) {
             return false;
         },
         handleDragLeaveLine: function(event) {
-            
+
             if (event.preventDefault()) {
                 event.preventDefault();
             }
@@ -226,7 +226,7 @@ define(function (require, exports, module) {
 
                 paths[key] = path;
                 PreferenceStorage.set(PreferenceKeys.BOOKMARKS,paths);
-                
+
             }
 
             if (source.id.indexOf("bookmark-list") > -1) {
@@ -293,12 +293,12 @@ define(function (require, exports, module) {
 
                 paths[key] = path;
                 PreferenceStorage.set(PreferenceKeys.BOOKMARKS,paths);
-                
+
             }
 
             document.getElementById("file-bookmarks").classList.remove("over");
             document.getElementById(event.currentTarget.id).classList.remove("opacity");
-            
+
             return false;
         },
         handleMouseEnter: function(event) {
@@ -311,13 +311,15 @@ define(function (require, exports, module) {
             if (MIME.isEmucharts(path)) {
                 WSManager.getWebSocket().readFile({path: path}, function (err, res) {
                     if (!err) {
-                        var preview = { name: "preview", content: JSON.parse(res.content) };
-                        rfb.emuchartsManager.importEmucharts(preview);
-                        rfb.emuchartsManager.preview("#svg-preview-zoom", 0.6, "zoom");
+                        rfb.emuchartsManager.preview(JSON.parse(res.content), {
+                            container: "#svg-preview-zoom",
+                            scale_zoom: 0.6,
+                            type: "zoom"
+                        });
                     }
-                });                    
+                });
             }
-                     
+
         },
         handleMouseLeave: function(event) {
             event.preventDefault();
@@ -400,7 +402,7 @@ define(function (require, exports, module) {
     function RemoteFileBrowser(filterFunc) {
         rfb = this;
         timer = null;
-        this.emuchartsManager = new EmuchartsManager();
+        this.emuchartsManager = EmuchartsManager.getInstance();
         this.filterFunc = filterFunc || function (d) { return true; };
     }
 
@@ -516,7 +518,7 @@ define(function (require, exports, module) {
                     d3.select("#file-size").html(size.value);
                     d3.select("#file-size-unit").html(size.unit);
                     d3.select("#file-last-modified").html(modified);
-                    
+
                     //if the file is an image retrieve a preview
                     if (MIME.isImage(data.path)) {
                         WSManager.getWebSocket().readFile({path: data.path, encoding: "base64"}, function (err, res) {
@@ -528,10 +530,15 @@ define(function (require, exports, module) {
                     if (MIME.isEmucharts(data.path)) {
                         WSManager.getWebSocket().readFile({path: data.path}, function (err, res) {
                             if (!err) {
-                                var preview = { name: "preview", content: JSON.parse(res.content) };
-                                rfb.emuchartsManager.importEmucharts(preview);
-                                rfb.emuchartsManager.preview("#svg-preview", 0.3, "preview");
-                                d3.select("#file-preview").style("display", "block");
+                                var tmp = JSON.parse(res.content);
+                                if (tmp && tmp.chart) {
+                                    rfb.emuchartsManager.preview(tmp.chart, {
+                                        container: "#svg-preview",
+                                        scale_zoom: 0.3,
+                                        type: "zoom"
+                                    });
+                                    d3.select("#file-preview").style("display", "block");
+                                }
                             }
                         });
                     }

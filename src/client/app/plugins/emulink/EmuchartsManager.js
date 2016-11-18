@@ -16,19 +16,34 @@ define(function (require, exports, module) {
         Colors = require("plugins/emulink/tools/Colors"),
         UppaalConverter = require("plugins/emulink/tools/UppaalConverter").getInstance();
 
-    var _emuchartsEditors; // stores emucharts renderers
+    var _emuchartsDescriptors; // stores emucharts descriptors & data opened in the tool
     var _selectedEditor; // this is the selected editor
+    var _previewer; // this is for used for previewing emucharts, e.g., in the file browser
+
+    var instance; // instance of the EmuchartsManager
 
     /**
      * Constructor
      * @memberof EmuchartsManager
      */
     function EmuchartsManager() {
-        _emuchartsEditors = d3.map();
+        _emuchartsDescriptors = d3.map();
+        _selectedEditor = null;
+        _previewer = null;
         eventDispatcher(this);
-        this.newEmucharts("foo");
+        // this.newEmucharts("foo");
         return this;
     }
+
+    var uniqueEmuchartsID = function () {
+        // function newEmuchartsID () {
+        //     var i = 0;
+        //     while(_emuchartsDescriptors.get("EMUCHART__" + i)) { i++; }
+        //     return i;
+        // }
+        // return "EMUCHART__" + newEmuchartsID();
+        return "EMUCHART__0";
+    };
 
     EmuchartsManager.prototype.getTransformation = function () {
         return _selectedEditor.getTransformation();
@@ -64,27 +79,37 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_stateRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_newEmuchartsLoaded", function (event) { _this.fire(event); });
     };
 
     /**
      * Creates a new empty emuchart using the data passed as argument.
      * @memberof EmuchartsManager
      */
-    EmuchartsManager.prototype.newEmucharts = function (emuchartsName) {
-        if (emuchartsName) {
-            // create an editor for an empty chart
-            var emucharts = new Emucharts({
-                nodes: d3.map(),
-                edges: d3.map(),
-                initial_edges: d3.map(),
-                variables: d3.map(),
-                constants: d3.map()
-            });
-            var newEmuchartsEditor = new EmuchartsEditor(emucharts);
-            this.installHandlers(newEmuchartsEditor);
-            _emuchartsEditors.set(name, newEmuchartsEditor);
-            _selectedEditor = newEmuchartsEditor;
-        } else { console.log("dbg: warning, undefined or null emuchart name"); }
+    EmuchartsManager.prototype.newEmucharts = function () {
+        // create an editor for an empty chart
+        var emucharts = new Emucharts({
+            nodes: d3.map(),
+            edges: d3.map(),
+            initial_edges: d3.map(),
+            variables: d3.map(),
+            constants: d3.map()
+        });
+        _selectedEditor = new EmuchartsEditor(emucharts);
+        this.installHandlers(_selectedEditor);
+        _emuchartsDescriptors.set(uniqueEmuchartsID(), emucharts);
+    };
+
+    EmuchartsManager.prototype.selectEmucharts = function (id) {
+        // load the emucharts in the editor
+        _selectedEditor.set_emucharts(_emuchartsDescriptors.get(id));
+        // render the emucharts
+        _selectedEditor.render();
+        return this;
+    };
+
+    EmuchartsManager.prototype.getEmuchartsIDs = function (id) {
+        return _emuchartsDescriptors.keys();
     };
 
     EmuchartsManager.prototype.importUppaalV4 = function (XMLFile) {
@@ -105,6 +130,7 @@ define(function (require, exports, module) {
         return this;
     };
 
+
     /**
      * Imports the emuchart passed as argument.
      * @memberof EmuchartsManager
@@ -119,91 +145,10 @@ define(function (require, exports, module) {
                 if (emuchartsFile.content && emuchartsFile.content.descriptor) {
                     var version = emuchartsFile.content.descriptor.version;
                     if (version && parseFloat(version) >= 1.1) {
-                        var chart = { nodes: d3.map(), edges: d3.map(), initial_edges: d3.map(),
-                                      variables: d3.map(), constants: d3.map() };
-                        var chart_reader = emuchartsFile.content.chart;
-                        if (chart_reader.states) {
-                            chart_reader.states.forEach(function (node) {
-                                node.color = node.color || Colors.getColor(node.id);
-                                node.width = node.width || 36;
-                                node.height = node.height || 36;
-                                node.x = node.x || 100;
-                                node.y = node.y || 100;
-                                chart.nodes.set(node.id, node);
-                            });
-                        }
-                        if (chart_reader.transitions) {
-                            chart_reader.transitions.forEach(function (edge) {
-                                if (edge.source) {
-                                    var source = chart_reader.states.filter(function (node) {
-                                        return node.id === edge.source.id;
-                                    });
-                                    if (source && source[0]) {
-                                        edge.source = source[0];
-                                    } else { console.log("dbg: warning, node " + edge.source.id + " not found while loading emdl file."); }
-                                }
-                                if (edge.target) {
-                                    var target = chart_reader.states.filter(function (node) {
-                                        return node.id === edge.target.id;
-                                    });
-                                    if (target && target[0]) {
-                                        edge.target = target[0];
-                                    } else { console.log("dbg: warning, node " + edge.target.id + " not found while loading emdl file."); }
-                                }
-                                chart.edges.set(edge.id, edge);
-                            });
-                        }
-                        if (chart_reader.initial_transitions) {
-                            chart_reader.initial_transitions.forEach(function (edge) {
-                                if (edge.target) {
-                                    var target = chart_reader.states.filter(function (node) {
-                                        return node.id === edge.target.id;
-                                    });
-                                    if (target && target[0]) {
-                                        edge.target = target[0];
-                                    } else { console.log("dbg: warning, node " + edge.target.id + " not found while loading emdl file."); }
-                                }
-                                chart.initial_edges.set(edge.id, edge);
-                            });
-                        }
-                        if (chart_reader.variables) {
-                            chart_reader.variables.forEach(function (variable) {
-                                chart.variables.set(variable.id, variable);
-                            });
-                        }
-                        if (chart_reader.constants) {
-                            chart_reader.constants.forEach(function (constant) {
-                                chart.constants.set(constant.id, constant);
-                            });
-                        }
-                        if (chart_reader.pmr) {
-                            chart.pmr = d3.map();
-                            for (var behaviour in chart_reader.pmr) {
-                                if (chart_reader.pmr.hasOwnProperty(behaviour)) {
-                                    chart.pmr.set(behaviour, chart_reader.pmr[behaviour]);
-                                }
-                            }
-                        }
-                        // associate an editor to the created emuchart
-                        // FIXME: Improve the constructor and this importEmuchart function
-                        var emuchart = {
-                            nodes:  chart.nodes,
-                            edges: chart.edges,
-                            initial_edges: chart.initial_edges,
-                            variables: chart.variables,
-                            constants: chart.constants
-                        };
-                        if (chart.pmr !== 'undefined') {
-                            emuchart.pmr = chart.pmr;
-                        }
-                        if (chart_reader.isPIM && chart_reader.isPIM === true) {
-                            emuchart.isPIM = true;
-                        }
-                        var emucharts = new Emucharts(emuchart);
-                        var newEmuchartsEditor = new EmuchartsEditor(emucharts);
-                        _this.installHandlers(newEmuchartsEditor);
-                        _emuchartsEditors.set(emuchartsFile.content.descriptor.chart_name, newEmuchartsEditor);
-                        _selectedEditor = newEmuchartsEditor;
+                        var emucharts = new Emucharts(emuchartsFile.content.chart);
+                        _selectedEditor = new EmuchartsEditor(emucharts);
+                        _this.installHandlers(_selectedEditor);
+                        _emuchartsDescriptors.set(uniqueEmuchartsID(), emucharts);
                     } else {
                         alert("Error while importing emuchart file: unsupported file version " + version);
                     }
@@ -229,10 +174,9 @@ define(function (require, exports, module) {
                             edges: chart.edges,
                             initial_edges: chart.initial_edges
                         });
-                        var newEmuchartsEditor = new EmuchartsEditor(emucharts);
-                        _this.installHandlers(newEmuchartsEditor);
-                        _emuchartsEditors.set(name, newEmuchartsEditor);
-                        _selectedEditor = newEmuchartsEditor;
+                        _selectedEditor = new EmuchartsEditor(emucharts);
+                        _this.installHandlers(_selectedEditor);
+                        _emuchartsDescriptors.set(uniqueEmuchartsID(), emucharts);
                     });
                 }
             }
@@ -409,7 +353,7 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Draws the diagrams stored in _emucharts.
+     * Draws the diagrams stored in _emuchartsDescriptors.
      * @memberof EmuchartsManager
      */
     EmuchartsManager.prototype.render = function (opt) {
@@ -419,11 +363,15 @@ define(function (require, exports, module) {
 
     /**
      * Draws the a preview of the diagram in the div element passed as parameter
-     * @param container DIV element that will contain the preview
+     * @param chart JSON Object representing an emuchart
      * @memberof EmuchartsManager
      */
-    EmuchartsManager.prototype.preview = function (container, scale_zoom, type) {
-        _selectedEditor.preview(container, scale_zoom, type);
+    EmuchartsManager.prototype.preview = function (chart, opt) {
+        opt = opt || {};
+        if (chart) {
+            _previewer = new EmuchartsEditor(new Emucharts(chart), { container: opt.container, prefix: "preview-" });
+            _previewer.preview(opt);
+        }
         return this;
     };
 
@@ -859,5 +807,17 @@ define(function (require, exports, module) {
         return _selectedEditor.mergePMR ? _selectedEditor.mergePMR(newPMRs) : false;
     };
 
-    module.exports = EmuchartsManager;
+    EmuchartsManager.prototype.layOutChart = function () {
+        return _selectedEditor.layOutChart();
+    };
+
+
+    module.exports = {
+        getInstance: function () {
+            if (!instance) {
+                instance = new EmuchartsManager();
+            }
+            return instance;
+        }
+    };
 });

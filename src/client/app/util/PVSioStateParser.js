@@ -182,7 +182,7 @@ define(function (require, exports, module) {
             }
         } else {
             token = readUntil(value, token.index, function (ch, prev) {
-                return wordChar(ch, prev) || num(ch) || (/[\/\.\-\"\'\s\_\:]/).test(ch);
+                return wordChar(ch, prev) || num(ch) || (/[\/\.\-\"\'\s\_\:\?\!\@\$\^\&\(\)\%<>\;]/).test(ch);
             });
             return {
                 value: token.word,

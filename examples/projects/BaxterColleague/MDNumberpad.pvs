@@ -52,7 +52,7 @@ MDNumberpad: THEORY
 	if(NOT rejectKeys(st)) %{
 	then	if(dispval(st) >= MIN_RATE) %{
 		then	st WITH [ programmedValue := dispval(st),
-			   	  display := "Value accepted" ]
+			   	  display := "Starting..." ]
 		%}
 		else %{
 			st WITH [ display := message(OUT_OF_RANGE),

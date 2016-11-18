@@ -876,6 +876,15 @@ fileListItem.hide {
 #stateMachineMenu .tobeimplemented {
   color: #808080; }
 
+#EmuchartsSelector {
+  position: absolute;
+  right: 16px;
+  top: 29px;
+  opacity: 0.9; }
+  #EmuchartsSelector ul li :hover {
+    background: #76b900;
+    color: black; }
+
 #StateAttributes,
 #MachineStates,
 #TransitionsTable,
@@ -1263,7 +1272,7 @@ ul.dropdown ul ul {
 ul.dropdown li:hover > ul {
   visibility: visible; }
 
-/** 
+/**
  * NVIDIA CSS Drop-Down Menu Theme
  *
  * @file		default.css

@@ -86,7 +86,7 @@ define(function (require, exports, module) {
                     _this.trigger("screenSelected", d);
                 });
 
-            selection.select("a")
+            listItemsEnter.select("a")
                 .attr("data-toggle", "popover").attr("data-trigger", "hover").attr("data-content", function (d) {
                     return (d.attributes.isInitial) ? "Initial Screen" : "";
                 })
@@ -94,7 +94,7 @@ define(function (require, exports, module) {
                     return (d.attributes.isInitial) ? "color: blue; width:20px;" : "color: transparent; width:20px;";
                 });
 
-            selection.select("a").append("span").text(function(d) {
+            listItemsEnter.select("a").append("span").text(function(d) {
                     return d.get("name");
                 });
 

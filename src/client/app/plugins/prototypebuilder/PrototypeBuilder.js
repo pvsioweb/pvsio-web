@@ -135,7 +135,7 @@ define(function (require, exports, module) {
             }).then(function (res) {
                 resolve(image);
             }).catch(function (err) {
-                console.log(err);
+                console.error(err);
                 reject(err);
             });
         });
@@ -335,7 +335,6 @@ define(function (require, exports, module) {
     /////These are the api methods that the prototype builder plugin exposes
     PrototypeBuilder.prototype.getDependencies = function () { return []; };
 
-
     /**
         Change the image in the current project to the one specified in the parameter
         @param {string} imagePath image name, including path name (given as relative path, where the base path is the project name)
@@ -486,12 +485,12 @@ define(function (require, exports, module) {
 
         prototypeImageView.on("WidgetEditRequested", function(widgetID) {
             var widget = WidgetManager.getWidget(widgetID);
-
             EditWidgetView.create(widget)
                 .on("ok", function (e, view) {
                     view.remove();
                     WidgetManager.editWidget(widget, e.data);
                 }).on("cancel", function (e, view) {
+                    // remove dialog
                     view.remove();
                 });
         });

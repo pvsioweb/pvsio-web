@@ -226,7 +226,6 @@ define(function (require, exports, module) {
             pimEmulink.editTransition(t);
             return;
         }
-
         displayRename.create({
             header: "Renaming transition " + t.name.substring(0, maxLen) + "...",
             required: false,
@@ -328,7 +327,7 @@ define(function (require, exports, module) {
         pvsioWebClient = PVSioWebClient.getInstance();
         emuchartsCodeGenerators = EmuchartsCodeGenerators.getInstance();
         MODE = new EditorModeUtils();
-        emuchartsManager = new EmuchartsManager();
+        emuchartsManager = EmuchartsManager.getInstance();
         emuchartsManager.addListener("emuCharts_editorModeChanged", modeChange_callback);
         emuchartsManager.addListener("emuCharts_addState", addState_handler);
 //        emuchartsManager.addListener("emuCharts_d3ZoomTranslate", d3ZoomTranslate_handler);
@@ -358,6 +357,13 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_initialTransitionRemoved", initialTransitionRemoved_handler);
         emuchartsManager.addListener("emuCharts_stateRenamed", stateRenamed_handler);
         emuchartsManager.addListener("emuCharts_stateColorChanged", stateColorChanged_handler);
+        emuchartsManager.addListener("emuCharts_newEmuchartsLoaded", function (event) {
+            // update tables
+            contextTable.setContextVariables(emuchartsManager.getVariables());
+            machineStatesTable.setMachineStates(emuchartsManager.getStates());
+            transitionsTable.setTransitions(emuchartsManager.getTransitions());
+            constantsTable.setConstants(emuchartsManager.getConstants());
+        });
         fs = new FileSystem();
 
         // PIM objects.
@@ -738,23 +744,23 @@ define(function (require, exports, module) {
         d3.select("#btn_menuOpenChart").on("click", function () {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
             // we need to delete the current chart because we handle one chart at the moment
-            if (!emuchartsManager.empty_chart()) {
-                QuestionForm.create({
-                    header: "Warning: unsaved changes will be discarded.",
-                    question: "Unsaved changes in the current chart will be discarded."
-                                + "Would you like continue?",
-                    buttons: ["Cancel", "Ok"]
-                }).on("ok", function (e, view) {
-                    emuchartsManager.delete_chart();
-                    document.getElementById("btnLoadEmuchart").click();
-                    view.remove();
-                }).on("cancel", function (e, view) {
-                    view.remove();
-                });
-            } else {
-                emuchartsManager.delete_chart();
+            // if (!emuchartsManager.empty_chart()) {
+            //     QuestionForm.create({
+            //         header: "Warning: unsaved changes will be discarded.",
+            //         question: "Unsaved changes in the current chart will be discarded."
+            //                     + "Would you like continue?",
+            //         buttons: ["Cancel", "Ok"]
+            //     }).on("ok", function (e, view) {
+            //         emuchartsManager.delete_chart();
+            //         document.getElementById("btnLoadEmuchart").click();
+            //         view.remove();
+            //     }).on("cancel", function (e, view) {
+            //         view.remove();
+            //     });
+            // } else {
+            //     emuchartsManager.delete_chart();
                 document.getElementById("btnLoadEmuchart").click();
-            }
+            // }
         });
         d3.select("#btn_menuImportChart").on("click", function () {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
@@ -909,7 +915,7 @@ define(function (require, exports, module) {
             var editor = emuchartsManager.getSelectedEditor();
             if (editor) {
                 var trans = editor.getTransformation();
-                editor.layOutChart_nath();
+                // editor.layOutChart_nath();
                 editor.layOutChart();
                 emuchartsManager.render({ trans: trans });
             }
@@ -1781,6 +1787,17 @@ define(function (require, exports, module) {
                 editor._nodeFilter = d3.select("input#filter").property("value");
                 emuchartsManager.render();
             }
+        });
+
+        //-- Emuchart Selector  -----------------------------------------------------------
+        d3.select("#btn_emucharts_1").on("click", function () {
+            emuchartsManager.selectEmucharts("EMUCHART__0");
+        });
+        d3.select("#btn_emucharts_2").on("click", function () {
+            emuchartsManager.selectEmucharts("EMUCHART__1");
+        });
+        d3.select("#btn_emucharts_3").on("click", function () {
+            emuchartsManager.selectEmucharts("EMUCHART__2");
         });
 
         //-- tables
