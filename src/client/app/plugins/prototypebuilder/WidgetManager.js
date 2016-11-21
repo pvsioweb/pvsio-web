@@ -112,6 +112,7 @@ define(function (require, exports, module) {
                   keyCode: w.keyCode,
                   keyName: w.keyName,
                   functionText: w.functionText,
+                  customFunctionText: w.customFunctionText,
                   evts: w.evts,
                   buttonReadback: w.buttonReadback });
         } else if (w.type === "display") {
@@ -198,14 +199,14 @@ define(function (require, exports, module) {
                 var curruptedRegionDefs = [];
                 defs.regionDefs.forEach(function (regionDef) {
                     if (defs.widgetMaps.filter(function (map) { return map.id === regionDef.class; }).length === 0) {
-                        console.log("Found corrupted region definition: " + regionDef.class);
+                        console.log("Found offending region definition: " + regionDef.class);
                         curruptedRegionDefs.push(regionDef.class);
                     }
                 });
                 var curruptedWidgetMaps = [];
                 defs.widgetMaps.forEach(function (map) {
                     if (defs.regionDefs.filter(function (def) { return def.class === map.id; }).length === 0) {
-                        console.log("Found corrupted widget map: " + map.displayKey + " (id: " + map.id + ")");
+                        console.log("Found offending widget map: " + map.displayKey + " (id: " + map.id + ")");
                         curruptedWidgetMaps.push(map.id);
                     }
                 });
@@ -219,7 +220,7 @@ define(function (require, exports, module) {
                 if (defs.widgetMaps.length === defs.regionDefs.length) {
                     console.log("Definitions fixed successfully!");
                 } else {
-                    console.error("Failed to fixed definitions :((");
+                    console.error("Failed to fix the widget definitions :((");
                 }
             }
             wm._keyCode2widget = {};
@@ -346,7 +347,8 @@ define(function (require, exports, module) {
      * @return {Widget} The new widget
      */
     WidgetManager.prototype.addNewWidget = function (data, coord, onCreate) {
-        data.id = data.type + "_" + uidGenerator();
+        var name = data.functionText || data.displayKey || data.ledKey || "";
+        data.id = data.type + "_" + name + "_" + uidGenerator();
         data.height = coord.height;
         data.width = coord.width;
         data.x = coord.left;

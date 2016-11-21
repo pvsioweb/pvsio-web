@@ -1,6 +1,6 @@
 /**
  * Create the widgets form using backbonejs and handlebars
- * @author Patrick Oladimeji
+ * @author Patrick Oladimeji, Paolo Masci
  * @date 11/4/13 22:12:09 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
@@ -25,12 +25,17 @@ define(function (require, exports, module) {
         var activeForm = d3.select("form").select(".active").node();
         if (activeForm) {
             var widgetType = activeForm.children[0].getAttribute("widgetType");
-            var f = d3.select("#" + widgetType).select("#functionText").property("value"),
-                events = getWidgetEvents(widgetType),
-                str = (f && f !== "") ? events.map(function (d) {
-                    return d + "_" + f;
-                }).join(", ") : "";
-            d3.select("#" + widgetType).select("#boundFunctions").text(str);
+            if (d3.select("#custom_event").node().checked) {
+                d3.select("#boundFunctions").attr("readonly", null);
+            } else {
+                var f = d3.select("#" + widgetType).select("#functionText").property("value"),
+                    events = getWidgetEvents(widgetType),
+                    str = (f && f !== "") ? events.map(function (d) {
+                        return d + "_" + f;
+                    }).join(", ") : "";
+                document.getElementById("boundFunctions").value = str;
+                d3.select("#boundFunctions").attr("readonly", true);
+            }
         }
     }
 
@@ -41,8 +46,7 @@ define(function (require, exports, module) {
             if (widgetType === "button") {
                 widgetPreviewer.preview(widgetType, {
                     keyboardKey: d3.select("#" + widgetType).select("#keyCode").node().value.trim(),
-                    buttonReadback: d3.select("#" + widgetType).select("#buttonReadback").node().value.trim(),
-                    evts: getWidgetEvents(widgetType)
+                    buttonReadback: d3.select("#" + widgetType).select("#buttonReadback").node().value.trim()
                 });
             } else if (widgetType === "display") {
                 widgetPreviewer.preview(widgetType, {
@@ -68,7 +72,7 @@ define(function (require, exports, module) {
             } else if (widgetType === "touchscreendisplay") {
                 widgetPreviewer.preview(widgetType, {
                     auditoryFeedback: d3.select("#" + widgetType).select("#auditoryFeedback").node().checked,
-                    cursorName: d3.select("#" + widgetType).select("#cursorName").node().value.trim(),                    
+                    cursorName: d3.select("#" + widgetType).select("#cursorName").node().value.trim(),
                     fontsize: d3.select("#" + widgetType).select("#fontsize").node().value.trim(),
                     fontColor: d3.select("#" + widgetType).select("#fontColor").node().value.trim(),
                     backgroundColor: d3.select("#" + widgetType).select("#backgroundColor").node().value.trim()
@@ -124,6 +128,19 @@ define(function (require, exports, module) {
             if (FormUtils.validateForm(res)) {
                 var formdata = FormUtils.serializeForm(res, "input");
                 formdata.type = widgetType;
+                // update auditory feedback and touchscreen properties if the properties are supported by the widget
+                if (formdata.auditoryFeedback) {
+                    formdata.auditoryFeedback = (d3.select("input[type='checkbox'][name='auditoryFeedback']").property("checked")) ? "enabled" : "disabled";
+                }
+                if (formdata.button_events) {
+                    formdata.evts = formdata.button_events;
+                    delete formdata.button_events;
+                    if (formdata.evts[0] === "custom") {
+                        formdata.customFunctionText = document.getElementById("boundFunctions").value;
+                    } else {
+                        formdata.customFunctionText = null;
+                    }
+                }
                 // trigger event
                 this.trigger("ok", {data: formdata, el: this.el, event: event}, this);
             }

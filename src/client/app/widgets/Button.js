@@ -43,6 +43,7 @@ define(function (require, exports, module) {
         opt.visibleWhen =  (opt.visibleWhen && opt.visibleWhen !== "") ? opt.visibleWhen : "false";
         coords = coords || {};
         this.functionText = property.call(this, opt.functionText);
+        this.customFunctionText = property.call(this, opt.customFunctionText);
         this.recallRate = property.call(this, opt.recallRate);
         this.evts = property.call(this, opt.evts);
         this.callback = opt.callback;
@@ -96,16 +97,21 @@ define(function (require, exports, module) {
      */
     Button.prototype.boundFunctions = function () {
         var o = this;
-        var res = o.evts().map(function (d) {
-            if (d.indexOf("/") > -1) {
-                return d.split("/").map(function (a) {
-                    return a + "_" + o.functionText();
-                }).join(", ");
+        var res = "";
+        if (o.evts() && o.evts().length === 1 && o.evts()[0] === "custom") {
+            res = o.customFunctionText();
+        } else {
+            res = o.evts().map(function (d) {
+                if (d.indexOf("/") > -1) {
+                    return d.split("/").map(function (a) {
+                        return a + "_" + o.functionText();
+                    }).join(", ");
 
-            } else {
-                return d + "_" + o.functionText();
-            }
-        }).join(", ");
+                } else {
+                    return d + "_" + o.functionText();
+                }
+            }).join(", ");
+        }
         return res;
     };
 
@@ -121,6 +127,7 @@ define(function (require, exports, module) {
             evts: this.evts(),
             recallRate: this.recallRate(),
             functionText: this.functionText(),
+            customFunctionText: this.customFunctionText(),
             boundFunctions: this.boundFunctions(),
             buttonReadback: this.buttonReadback(),
             keyCode: this.keyCode(),
@@ -235,11 +242,14 @@ define(function (require, exports, module) {
      */
     Button.prototype.click = function (opt) {
         opt = opt || {};
-        var f = this.functionText();
         var anim = opt.animation || this.animation || function () {};
         opt.callback = opt.callback || this.callback;
 
-        ButtonActionsQueue.queueGUIAction("click_" + f, opt.callback);
+        if (this.customFunctionText()) {
+            ButtonActionsQueue.queueGUIAction(this.customFunctionText(), opt.callback);
+        } else {
+            ButtonActionsQueue.queueGUIAction("click_" + this.functionText(), opt.callback);
+        }
         anim();
         Recorder.addAction({
             id: this.id(),
@@ -320,7 +330,7 @@ define(function (require, exports, module) {
                 f = widget.functionText();
                 evts = widget.evts();
                 //perform the click event if there is one
-                if (evts && evts.indexOf('click') > -1) {
+                if (evts && (evts.indexOf('click') >= 0 || evts.indexOf("custom") >= 0)) {
                     widget.click(opt);
                 } else if (evts && evts.indexOf("press/release") > -1) {
                     widget.pressAndHold(opt);

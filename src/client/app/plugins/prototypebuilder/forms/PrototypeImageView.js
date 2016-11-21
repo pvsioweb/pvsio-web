@@ -185,7 +185,7 @@ define(function (require, exports, module) {
          */
         clearImage: function () {
             this._innerContainer.attr("style", null);
-            this.d3El.select("img").attr("src", "").attr("height", "430").attr("width", "1128");
+            this.d3El.select("img").attr("src", "");
             this.img = null;
             this.d3El.select("svg").attr("height", "0").attr("width", "0");
             this.d3El.attr("style", "");
@@ -265,7 +265,7 @@ define(function (require, exports, module) {
                     e.regions.each(function () {
                         widgets.push(wm.getWidget(d3.select(this).attr("id")));
                     });
-                    wm.trigger("WidgetSelectionCleared", {widgets: widgets, event: e.event});
+                    wm.fire("WidgetSelectionCleared", {widgets: widgets, event: e.event});
                 });
                 if (cb) { cb(); }
             }});

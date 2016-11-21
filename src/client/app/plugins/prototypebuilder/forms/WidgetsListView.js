@@ -29,11 +29,11 @@ define(function (require, exports, module) {
 
             _this = this;
 
-            this._widgetManager.on("WidgetModified", _this.update);
-            this._widgetManager.on("WidgetSelected", function (event) {
+            this._widgetManager.addListener("WidgetModified", _this.update);
+            this._widgetManager.addListener("WidgetSelected", function (event) {
                 _this.selectWidget(event.widget, event.add);
             });
-            this._widgetManager.on("WidgetSelectionCleared", function (event) {
+            this._widgetManager.addListener("WidgetSelectionCleared", function (event) {
                 _this.d3ListElement.selectAll("li").classed("selected", false);
             });
             this.render();

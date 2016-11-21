@@ -743,7 +743,7 @@ fileListItem.hide {
   width: 100%;
   z-index: 2000000; }
   .overlay .panel {
-    width: 800px; }
+    width: 920px; }
   .overlay .panel.panelWide {
     width: 705px; }
   .overlay .panel-heading {
@@ -1059,7 +1059,8 @@ label[for=selectPicture] {
   border-right: 70px solid transparent;
   border-bottom: 40px solid #4c4c4c;
   height: 0;
-  line-height: 40px; }
+  line-height: 40px;
+  min-width: 240px; }
 
 .newTimer,
 .newWidget {
@@ -1113,7 +1114,8 @@ label[for=selectPicture] {
   height: 100%;
   width: 100%;
   z-index: 191;
-  min-width: 400px; }
+  min-height: 480px;
+  min-width: 600px; }
   .dndcontainer span {
     display: block;
     margin-top: 150px;
@@ -1272,7 +1274,7 @@ ul.dropdown ul ul {
 ul.dropdown li:hover > ul {
   visibility: visible; }
 
-/**
+/** 
  * NVIDIA CSS Drop-Down Menu Theme
  *
  * @file		default.css

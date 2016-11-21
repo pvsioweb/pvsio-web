@@ -29,7 +29,7 @@ define(function (require, exports, module) {
                 widgetPreview = new Button("theWidget",
                     { left: 16, top: 32, width: 64, height: 52 },
                     { keyCode: opt.keyCode, keyName: displayKeyCode(opt.keyCode),
-                      evts: opt.evts,
+                      evts: [],
                       buttonReadback: opt.buttonReadback,
                       prototypeMap: "widgetPreviewMap",
                       parent: "navkeys" });
