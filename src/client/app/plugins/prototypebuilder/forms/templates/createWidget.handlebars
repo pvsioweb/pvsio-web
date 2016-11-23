@@ -28,7 +28,6 @@
                     <div class="img-thumbnail" id="navkeys"><img src="projects/navkeys.png" usemap="#widgetPreviewMap"></img></div>
                 </div>
                 <div class="tab-content col-sm-8">
-
                     <div class="tab-pane active" id="button">
                         <div class="form-group">
                             <label for="functionText" class="col-sm-4 control-label noselect">Button Name</label>
@@ -37,6 +36,12 @@
                                        value="" placeholder="Please enter button name (mandatory)"/>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label for="visibleWhen" class="col-sm-4 control-label noselect">Active when...</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="visibleWhen" id="visibleWhen" class="form-control" placeholder="always active" value="{{visibleWhen}}" />
+                            </div>
+                        </div>                        
                         <div class="form-group">
                             <label for="events" class="col-sm-4 control-label noselect">User Actions</label>
                             <div class="col-sm-8" id="events" style="padding-top:5px;">
@@ -47,6 +52,10 @@
                                 <label style="padding-left:25px;">
                                     Press and Release
                                     <input type="radio" name="button_events" value="press/release" />
+                                </label>
+                                <label style="padding-left:25px;">
+                                    Custom
+                                    <input type="radio" name="button_events" id="custom_event" value="custom" />
                                 </label>
                             </div>
                         </div>

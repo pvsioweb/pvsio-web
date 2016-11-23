@@ -134,7 +134,6 @@ define(function (require, exports, module) {
     /**
      * Imports the emuchart passed as argument.
      * @memberof EmuchartsManager
-     * FIXME: improve this function!
      */
     EmuchartsManager.prototype.importEmucharts = function (emuchartsFile) {
         var _this = this;

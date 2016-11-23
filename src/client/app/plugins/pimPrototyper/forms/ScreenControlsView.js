@@ -107,6 +107,7 @@ define(function (require, exports, module) {
                         name: data.data.screenName,
                         isInitial: (!!data.data.isInitial)
                     });
+                    _this._screenDropdown._updateInitialScreen();
                     view.remove();
                 });
         },
@@ -140,19 +141,21 @@ define(function (require, exports, module) {
         },
 
         _setupCollectionListeners: function () {
-            var _this = this;
-            this.collection.on("selectionChanged", function (newSelection, oldSelection) {
-                _this._screenDropdown.setSelected(newSelection);
-                if (newSelection == null) {
-                    _this._setButtonStates(false);
-                } else if (oldSelection == null) {
-                    _this._setButtonStates(true);
-                }
-            });
+            this.listenTo(this.collection, "selectionChanged", this._onSelectionChanged);
         },
 
         onClickChangeImage: function () {
             this.trigger("changeImageClicked");
+        },
+
+        _onSelectionChanged: function (newSelection, oldSelection) {
+            this._screenDropdown.setSelected(newSelection);
+
+            if (newSelection == null) {
+                this._setButtonStates(false);
+            } else if (oldSelection == null) {
+                this._setButtonStates(true);
+            }
         },
 
         _setButtonStates: function (enabled) {

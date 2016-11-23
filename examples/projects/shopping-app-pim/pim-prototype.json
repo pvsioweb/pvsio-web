@@ -1,6 +1,6 @@
 [
  {
-  "id": "6101c65f-f879-474f-da42-76ad775ea4bd",
+  "id": "list",
   "name": "list",
   "isInitial": true,
   "widgets": [
@@ -52,7 +52,6 @@
     "id": "pimwidget_a27a15de-3ad9-4680-e1a3-406afb1e57c7",
     "type": "pim-button",
     "name": "back",
-    "targetScreen": "6101c65f-f879-474f-da42-76ad775ea4bd",
     "coords": {
      "x": 9.8,
      "y": 9.5,
@@ -148,7 +147,6 @@
     "id": "pimwidget_c567c148-467b-4283-b58e-c8f28293f9da",
     "type": "pim-button",
     "name": "home",
-    "targetScreen": "6101c65f-f879-474f-da42-76ad775ea4bd",
     "coords": {
      "x": 5.8,
      "y": 9.5,
@@ -339,7 +337,6 @@
     "id": "pimwidget_3ae02986-792f-4e7c-8a74-68697be04a5a",
     "type": "pim-button",
     "name": "home",
-    "targetScreen": "6101c65f-f879-474f-da42-76ad775ea4bd",
     "coords": {
      "x": 15.45001220703125,
      "y": 12,
@@ -359,7 +356,7 @@
     "id": "pimwidget_b6c86d7f-832f-4c8a-fe1c-34d5c0c38621",
     "type": "pim-button",
     "name": "continue",
-    "targetScreen": "6101c65f-f879-474f-da42-76ad775ea4bd",
+    "targetScreen": "list",
     "coords": {
      "x": 75.8,
      "y": 221.5,
@@ -371,7 +368,7 @@
     "id": "pimwidget_d9a40339-561f-4f3c-c999-129c82aa8dc9",
     "type": "pim-button",
     "name": "home",
-    "targetScreen": "6101c65f-f879-474f-da42-76ad775ea4bd",
+    "targetScreen": "list",
     "coords": {
      "x": 11.8,
      "y": 7.5,
@@ -391,7 +388,6 @@
     "id": "pimwidget_a14e21f3-0151-46b4-b367-48210f7c75b3",
     "type": "pim-button",
     "name": "back",
-    "targetScreen": "6101c65f-f879-474f-da42-76ad775ea4bd",
     "coords": {
      "x": 9.8,
      "y": 13.5,

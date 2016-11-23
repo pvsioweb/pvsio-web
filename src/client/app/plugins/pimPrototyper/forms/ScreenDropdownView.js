@@ -64,6 +64,13 @@ define(function (require, exports, module) {
             this.listenTo(this.collection, "add remove change:name", this._updateScreenList); // TODO: don't re-render the list when a single item changes
         },
 
+        _updateInitialScreen: function () {
+            this._dropdown.selectAll("li a").select("span").attr("style", function (d) {
+                return (d.attributes.isInitial) ? "color: blue; width:20px;" : "color: transparent; width:20px;";
+            });
+            this._updateSelectedText();
+        },
+
         _updateSelectedText: function () {
             this.d3El.select(".btn-screen-dropdown_label").text(this._selected ? this._selected.get("name") : "Select a screen");
             this.d3El.select("#btn-screen-dropdown_label_star").node().style.display = (this._selected && this._selected.attributes.isInitial) ? "block" : "none";

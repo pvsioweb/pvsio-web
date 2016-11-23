@@ -12,7 +12,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_9ade229c-9bd8-4dfe-e963-8298f716bbdb",
@@ -26,7 +26,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_6a4a60fa-017d-4b77-8176-059ddf5e7180",
@@ -40,7 +40,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_5c3b2632-7484-4abb-8331-369d5019a192",
@@ -54,7 +54,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_8a3e37d3-84c4-4c06-b6c4-56c8636b6ef0",
@@ -68,7 +68,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_7ac91954-d30f-44b3-f2fd-2e2a236c5e66",
@@ -82,7 +82,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_de559053-f65a-4e99-aae2-120b75571d09",
@@ -96,7 +96,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_ad9e8f7f-4db8-49cd-a964-2dadd0a92448",
@@ -110,7 +110,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_261e1112-7b6f-4a77-c7a2-c786bcc29f6e",
@@ -124,7 +124,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_4a652519-8bba-45bb-e4a9-efe2d7e075dc",
@@ -138,7 +138,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_5eb291a6-e571-435b-a117-b933e946fa9a",
@@ -152,7 +152,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_10e4428c-0d39-4f82-9bde-68c6ed3788de",
@@ -166,7 +166,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_84376598-a7a1-43bb-95f0-9d1f688deebf",
@@ -180,7 +180,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_01d690b1-648f-4419-95cf-0183872d1a44",
@@ -194,7 +194,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_2e046920-c887-4ff4-b0e7-dc04cedf6119",
@@ -208,7 +208,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_58f066eb-882e-4579-a1cc-2b55a3c1db41",
@@ -222,7 +222,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "type": "display",
@@ -266,7 +266,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "type": "display",

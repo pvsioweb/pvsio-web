@@ -159,9 +159,9 @@ define(function (require, exports, module) {
         return [];
     };
 
-    PIMPrototyper.prototype.handleKeyEvent = function (e) {
+    PIMPrototyper.prototype.handleKeyDownEvent = function (e) {
         if (!this.collapsed) {
-            this._prototypeImageView._mapCreator.handleKeyEvent(e);
+            this._prototypeImageView._mapCreator.handleKeyDownEvent(e);
         }
     };
 

@@ -1,6 +1,6 @@
 /**
  * Edit widget
- * @author Patrick Oladimeji
+ * @author Patrick Oladimeji, Paolo Masci
  * @date 11/5/13 13:16:05 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
@@ -20,19 +20,20 @@ define(function (require, exports, module) {
         });
         return evts;
     }
-    function updateBoundFunctionsLabel() {
-        var f = d3.select("#functionText").property("value"),
-            str = "",
-            events = [];
-        d3.select("#events").selectAll("input[type='radio']").each(function () {
-            if (this.checked) {
-                events = events.concat(this.value.split("/"));
-            }
-        });
-        str = events.map(function (d) {
-            return d + "_" + f;
-        }).join(", ");
-        d3.select("#boundFunctions").text(str);
+    function updateBoundFunctionsLabel(widgetType) {
+        if (d3.select("#custom_event").node().checked) {
+            d3.select("#boundFunctions").attr("readonly", null);
+        } else {
+            var f = d3.select("#functionText").property("value"),
+                str = "",
+                evts = [];
+            evts = getWidgetEvents(widgetType);
+            str = evts.map(function (d) {
+                return d + "_" + f;
+            }).join(", ");
+            document.getElementById("boundFunctions").value = str;
+            d3.select("#boundFunctions").attr("readonly", true);
+        }
     }
     function updateTimerEvent() {
         var f = d3.select("#timerEvent").property("value");
@@ -42,8 +43,7 @@ define(function (require, exports, module) {
         if (widgetType === "button") {
             widgetPreviewer.preview(widgetType, {
                 keyboardKey: d3.select("#keyCode").node().value.trim(),
-                buttonReadback: d3.select("#buttonReadback").node().value.trim(),
-                evts: getWidgetEvents(widgetType)
+                buttonReadback: d3.select("#buttonReadback").node().value.trim()
             });
         } else if (widgetType === "display") {
             widgetPreviewer.preview(widgetType, {
@@ -99,10 +99,15 @@ define(function (require, exports, module) {
 
             //update form
             if (widgetData.isButton || widgetData.isTouchscreenButton) {
-                widget.evts().forEach(function (e) {
-                    d3.select("input[type='radio'][value='" + e + "']").property("checked", true);
-                });
-                updateBoundFunctionsLabel();
+                if (widget.customFunctionText()) {
+                    d3.select("#custom_event").attr("checked", true);
+                    document.getElementById("boundFunctions").value = widget.customFunctionText();
+                } else {
+                    widget.evts().forEach(function (e) {
+                        d3.select("input[type='radio'][value='" + e + "']").property("checked", true);
+                    });
+                }
+                updateBoundFunctionsLabel(widget.type());
             }
             if (widget.auditoryFeedback && widget.auditoryFeedback() === "enabled") {
                 d3.select("input[type='checkbox'][name='auditoryFeedback']").property("checked", true);
@@ -126,7 +131,7 @@ define(function (require, exports, module) {
             "input #cursorName"           : "updatePreview"
         },
         eventsChanged: function (event) {
-            updateBoundFunctionsLabel();
+            updateBoundFunctionsLabel(this.widget.type());
             showWidgetPreview(this.widget.type());
         },
         updatePreview: function (event) {
@@ -146,6 +151,11 @@ define(function (require, exports, module) {
                 if (formdata.button_events) {
                     formdata.evts = formdata.button_events;
                     delete formdata.button_events;
+                    if (formdata.evts[0] === "custom") {
+                        formdata.customFunctionText = document.getElementById("boundFunctions").value;
+                    } else {
+                        formdata.customFunctionText = null;
+                    }
                 }
                 // trigger event
                 this.trigger("ok", { data: formdata, el: this.el, event: event }, this);

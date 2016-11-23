@@ -23,7 +23,7 @@
    "buttonReadback": "",
    "keyCode": "38",
    "keyName": "up arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_507a79a0-6e31-4eab-8ac3-36fdb836c68c",
@@ -37,7 +37,7 @@
    "buttonReadback": "",
    "keyCode": "40",
    "keyName": "down arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_c44134ef-8992-4735-fbd2-b59ac293e9bc",
@@ -51,7 +51,7 @@
    "buttonReadback": "",
    "keyCode": "37",
    "keyName": "left arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_4260ecb6-cd35-4aa4-a9b7-f2928905a792",
@@ -65,7 +65,7 @@
    "buttonReadback": "",
    "keyCode": "39",
    "keyName": "right arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_dbd14fbb-433a-48d5-f31f-2b664ccdf07e",
@@ -79,7 +79,7 @@
    "buttonReadback": "",
    "keyCode": "46",
    "keyName": "delete",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   }
  ],
  "regionDefs": [

@@ -12,7 +12,7 @@
    "buttonReadback": "Standard mode",
    "keyCode": "83",
    "keyName": "key S",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_f2c32896-85ab-47e1-9a7c-6eb1e66149e3",
@@ -26,7 +26,7 @@
    "buttonReadback": "Regional pressure mode",
    "keyCode": "81",
    "keyName": "key Q",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "type": "display",
@@ -50,7 +50,7 @@
    "buttonReadback": "",
    "keyCode": "49",
    "keyName": "key 1",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_6462c8d6-c273-406f-abbf-be7fb1691428",
@@ -64,7 +64,7 @@
    "buttonReadback": "",
    "keyCode": "50",
    "keyName": "key 2",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_fbfd71c7-7a1f-4aac-a5ac-07ba4e57afd5",
@@ -78,7 +78,7 @@
    "buttonReadback": "",
    "keyCode": "51",
    "keyName": "key 3",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_ac5d92e3-7b14-480d-a094-3d68b78c1b82",
@@ -92,7 +92,7 @@
    "buttonReadback": "",
    "keyCode": "52",
    "keyName": "key 4",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_0ef90664-2d33-4f82-e481-832596c8f9c4",
@@ -106,7 +106,7 @@
    "buttonReadback": "",
    "keyCode": "53",
    "keyName": "key 5",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_0775b486-5a32-4dcb-f0c5-9f130aabadba",
@@ -120,7 +120,7 @@
    "buttonReadback": "",
    "keyCode": "54",
    "keyName": "key 6",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_42ce1155-eb17-4c00-f213-0a6f224458dd",
@@ -134,7 +134,7 @@
    "buttonReadback": "",
    "keyCode": "55",
    "keyName": "key 7",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_a773e830-fd41-4384-c54c-9d807361d4b5",
@@ -148,7 +148,7 @@
    "buttonReadback": "",
    "keyCode": "56",
    "keyName": "key 8",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_2a58692a-ee5f-40aa-a7fe-4a3171e7d744",
@@ -162,7 +162,7 @@
    "buttonReadback": "",
    "keyCode": "57",
    "keyName": "key 9",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_4006d7ac-17cd-40cb-fe60-3d94ba922024",
@@ -176,7 +176,7 @@
    "buttonReadback": "",
    "keyCode": "190",
    "keyName": ".",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_3df21e88-5857-4a5b-ddfe-98132ac19886",
@@ -190,7 +190,7 @@
    "buttonReadback": "",
    "keyCode": "48",
    "keyName": "key 0",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_7f2615b4-b7bd-48dc-f6cf-661f9b510bed",
@@ -204,7 +204,7 @@
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_0db5a615-2f31-4e48-f3e4-12427536b017",
@@ -218,7 +218,7 @@
    "buttonReadback": "",
    "keyCode": "46",
    "keyName": "delete",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_4bedc30a-ca5c-4055-c67c-b14bf9c0d553",
@@ -232,7 +232,7 @@
    "buttonReadback": "",
    "keyCode": "13",
    "keyName": "enter",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "type": "display",

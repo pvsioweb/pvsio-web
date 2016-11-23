@@ -18,11 +18,12 @@
    ],
    "recallRate": 250,
    "functionText": "UP",
+   "customFunctionText": null,
    "boundFunctions": "click_UP",
    "buttonReadback": "",
    "keyCode": "33",
    "keyName": "page up",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "Button1357494286330",
@@ -32,11 +33,12 @@
    ],
    "recallRate": 250,
    "functionText": "up",
+   "customFunctionText": null,
    "boundFunctions": "click_up",
    "buttonReadback": "",
    "keyCode": "38",
    "keyName": "up arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "Button1357494295183",
@@ -46,11 +48,12 @@
    ],
    "recallRate": 250,
    "functionText": "dn",
+   "customFunctionText": null,
    "boundFunctions": "click_dn",
    "buttonReadback": "",
    "keyCode": "40",
    "keyName": "down arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "Button1357494307176",
@@ -60,11 +63,12 @@
    ],
    "recallRate": 250,
    "functionText": "DN",
+   "customFunctionText": null,
    "boundFunctions": "click_DN",
    "buttonReadback": "",
    "keyCode": "34",
    "keyName": "page down",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   }
  ],
  "regionDefs": [
