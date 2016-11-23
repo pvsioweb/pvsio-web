@@ -40,7 +40,7 @@ define(function (require, exports, module) {
         opt.keyCode = opt.keyCode || "";
         opt.keyName = opt.keyName || "";
         opt.animation = opt.animation || function () {};
-        opt.visibleWhen =  (opt.visibleWhen && opt.visibleWhen !== "") ? opt.visibleWhen : "false";
+        opt.visibleWhen =  (!opt.visibleWhen || opt.visibleWhen === "") ? "true" : opt.visibleWhen;
         coords = coords || {};
         this.functionText = property.call(this, opt.functionText);
         this.customFunctionText = property.call(this, opt.customFunctionText);
@@ -54,7 +54,6 @@ define(function (require, exports, module) {
         this.animation = opt.animation;
         this.visibleWhen = property.call(this, opt.visibleWhen);
         this.cursor = opt.cursor || "pointer";
-        this.isVisible = true;
 
         Widget.call(this, id, "button");
         opt.parent = opt.parent || "prototype";
@@ -65,6 +64,7 @@ define(function (require, exports, module) {
             parent = d3.select("#" + opt.parent).append("map").attr("id", opt.prototypeMap)
                 .attr("name", opt.prototypeMap);
         }
+        this.prototypeMap = opt.prototypeMap;
 
         this.top = coords.top || 0;
         this.left = coords.left || 0;
@@ -80,9 +80,8 @@ define(function (require, exports, module) {
 
         this.createImageMap({ area: this.area, callback: this.callback });
         if (opt.keyCode) {
-            ButtonHalo.installKeypressHandler(this);
+            ButtonHalo.installKeypressHandler(this, opt.keyCode);
         }
-        this.isEnabled = property.call(this, true);
         return this;
     }
 
@@ -166,9 +165,9 @@ define(function (require, exports, module) {
      */
     Button.prototype.hide = function (opt) {
         opt = opt || {};
+        opt.prototypeMap = opt.prototypeMap || this.prototypeMap;
         this.cursor = opt.cursor || "default";
-        this.isVisible = false;
-        return this;
+        return this.removeImageMap();
     };
 
     /**
@@ -178,9 +177,12 @@ define(function (require, exports, module) {
      */
     Button.prototype.reveal = function (opt) {
         opt = opt || {};
+        opt.prototypeMap = opt.prototypeMap || this.prototypeMap;
         this.cursor = opt.cursor || "pointer";
-        this.isVisible = true;
-        return this;
+        if (d3.select("#" + opt.prototypeMap).node() && d3.select("#" + opt.prototypeMap).select("." + this.id()).node()) {
+            return this;
+        }
+        return this.createImageMap({ area: this.area, callback: this.callback });
     };
 
     /**
@@ -231,7 +233,6 @@ define(function (require, exports, module) {
             });
         };
         btnTimer.interval(this.recallRate()).start();
-
         return this;
     };
 
@@ -275,7 +276,7 @@ define(function (require, exports, module) {
             var expr = StateParser.simpleExpressionParser(this.visibleWhen());
             if (expr && expr.res) {
                 if (expr.res.type === "constexpr" && expr.res.constant === "true") {
-                    return this.isEnabled(true);
+                    return this.reveal();
                 } else if (expr.res.type === "boolexpr" && expr.res.binop) {
                     // txt in this case is a PVS state that needs to be parsed
                     var str = StateParser.resolve(txt, expr.res.attr);
@@ -283,13 +284,13 @@ define(function (require, exports, module) {
                         str = StateParser.evaluate(str);
                         if ((expr.res.binop === "=" && str === expr.res.constant) ||
                              (expr.res.binop === "!=" && str !== expr.res.constant)) {
-                                 return this.isEnabled(true);
+                                 return this.reveal();
                         }
                     }
                 }
             }
         }
-        return this.isEnabled(false);
+        return this.hide();
     };
     Button.prototype.renderSample = function (opt) {
         opt = opt || {};
@@ -300,16 +301,34 @@ define(function (require, exports, module) {
 
     /**
      * @override
+     * @function removeImageMap
+     * @description Removes the image map area for this button
+     * @returns this
+     * @memberof Button
+     */
+    Button.prototype.removeImageMap = function (opt) {
+        opt = opt || {};
+        opt.prototypeMap = opt.prototypeMap || this.prototypeMap;
+        if (d3.select("#" + opt.prototypeMap).node() && d3.select("#" + opt.prototypeMap).select("." + this.id()).node()) {
+            d3.select("#" + opt.prototypeMap).select("." + this.id()).node().remove();
+        }
+        return this;
+    };
+
+
+    /**
+     * @override
      * @function createImageMap
      * @description Creates an image map area for this button and binds functions in the button's events property with appropriate
      * calls to function in the PVS model. Whenever a response is returned from the PVS function call, the callback
      * function is invoked.
-     * @returns {d3.selection} The image map area created for the button
+     * @returns this
      * @memberof Button
      */
     Button.prototype.createImageMap = function (opt) {
         opt = opt || {};
         opt.callback = opt.callback || this.callback;
+        opt.prototypeMap = opt.prototypeMap || this.prototypeMap;
 
         var area = opt.area || Button.prototype.parentClass.createImageMap.apply(this, arguments),
             widget = this,
@@ -317,27 +336,23 @@ define(function (require, exports, module) {
             evts;
 
         var onmouseup = function () {
-            if (widget.isVisible) {
-                if (evts && evts.indexOf("press/release") > -1) {
-                    widget.release(opt);
-                }
-                mouseup(d3.event);
-                area.on("mouseup", null);
+            if (evts && evts.indexOf("press/release") > -1) {
+                widget.release(opt);
             }
+            mouseup(d3.event);
+            area.on("mouseup", null);
         };
         area.on("mousedown", function () {
-            if (widget.isVisible) {
-                f = widget.functionText();
-                evts = widget.evts();
-                //perform the click event if there is one
-                if (evts && (evts.indexOf('click') >= 0 || evts.indexOf("custom") >= 0)) {
-                    widget.click(opt);
-                } else if (evts && evts.indexOf("press/release") > -1) {
-                    widget.pressAndHold(opt);
-                }
-                //register mouseup/out events here
-                area.on("mouseup", onmouseup);
+            f = widget.functionText();
+            evts = widget.evts();
+            //perform the click event if there is one
+            if (evts && (evts.indexOf('click') >= 0 || evts.indexOf("custom") >= 0)) {
+                widget.click(opt);
+            } else if (evts && evts.indexOf("press/release") > -1) {
+                widget.pressAndHold(opt);
             }
+            //register mouseup/out events here
+            area.on("mouseup", onmouseup);
         });
         widget.imageMap(area);
         return area;

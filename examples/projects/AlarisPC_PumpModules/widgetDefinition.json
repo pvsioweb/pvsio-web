@@ -8,11 +8,12 @@
    ],
    "recallRate": 250,
    "functionText": "1",
+   "customFunctionText": null,
    "boundFunctions": "click_1",
    "buttonReadback": "",
    "keyCode": "49",
    "keyName": "key 1",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_52d65e42-5b37-49c0-9dad-7876caedd05e",
@@ -22,11 +23,12 @@
    ],
    "recallRate": 250,
    "functionText": "2",
+   "customFunctionText": null,
    "boundFunctions": "click_2",
    "buttonReadback": "",
    "keyCode": "50",
    "keyName": "key 2",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_f346c83e-6a7a-416f-bd18-005ab947ff83",
@@ -36,11 +38,12 @@
    ],
    "recallRate": 250,
    "functionText": "3",
+   "customFunctionText": null,
    "boundFunctions": "click_3",
    "buttonReadback": "",
    "keyCode": "51",
    "keyName": "key 3",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_4ca1b715-9f91-4a58-8f01-1bd0ab3abf43",
@@ -50,11 +53,12 @@
    ],
    "recallRate": 250,
    "functionText": "4",
+   "customFunctionText": null,
    "boundFunctions": "click_4",
    "buttonReadback": "",
    "keyCode": "52",
    "keyName": "key 4",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_d7d58b2b-dbd3-4a92-b5f0-ae7ad7b638f7",
@@ -64,11 +68,12 @@
    ],
    "recallRate": 250,
    "functionText": "5",
+   "customFunctionText": null,
    "boundFunctions": "click_5",
    "buttonReadback": "",
    "keyCode": "53",
    "keyName": "key 5",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_5aceedec-4a00-4e59-adca-ae553935d7d4",
@@ -78,11 +83,12 @@
    ],
    "recallRate": 250,
    "functionText": "6",
+   "customFunctionText": null,
    "boundFunctions": "click_6",
    "buttonReadback": "",
    "keyCode": "54",
    "keyName": "key 6",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_add56f65-db55-4c78-d863-d5d96842e654",
@@ -92,11 +98,12 @@
    ],
    "recallRate": 250,
    "functionText": "7",
+   "customFunctionText": null,
    "boundFunctions": "click_7",
    "buttonReadback": "",
    "keyCode": "55",
    "keyName": "key 7",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_6d75b964-65e5-4b4d-fc55-880f83bc69f6",
@@ -106,11 +113,12 @@
    ],
    "recallRate": 250,
    "functionText": "8",
+   "customFunctionText": null,
    "boundFunctions": "click_8",
    "buttonReadback": "",
    "keyCode": "56",
    "keyName": "key 8",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_f0a53060-0e41-4e5e-a71f-a922d5185d2b",
@@ -120,11 +128,12 @@
    ],
    "recallRate": 250,
    "functionText": "9",
+   "customFunctionText": null,
    "boundFunctions": "click_9",
    "buttonReadback": "",
    "keyCode": "57",
    "keyName": "key 9",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_bd0a9b1e-b177-4a41-9942-37d645217e0a",
@@ -134,11 +143,12 @@
    ],
    "recallRate": 250,
    "functionText": "0",
+   "customFunctionText": null,
    "boundFunctions": "click_0",
    "buttonReadback": "",
    "keyCode": "48",
    "keyName": "key 0",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_4fb484f6-bf29-44d8-8a8f-a11ac1b31a59",
@@ -148,11 +158,12 @@
    ],
    "recallRate": 250,
    "functionText": "POINT",
+   "customFunctionText": null,
    "boundFunctions": "click_POINT",
    "buttonReadback": "",
    "keyCode": "190",
    "keyName": ".",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_00228a8a-3a61-4118-bb8c-e378356b2ee7",
@@ -162,11 +173,12 @@
    ],
    "recallRate": 250,
    "functionText": "CLEAR",
+   "customFunctionText": null,
    "boundFunctions": "click_CLEAR",
    "buttonReadback": "",
    "keyCode": "46",
    "keyName": "delete",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_fe636ae1-2f52-4eeb-f7d3-57f83cbd1e57",
@@ -176,11 +188,12 @@
    ],
    "recallRate": 250,
    "functionText": "CANCEL",
+   "customFunctionText": null,
    "boundFunctions": "click_CANCEL",
    "buttonReadback": "",
    "keyCode": "",
    "keyName": "",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_4f9be94e-dd07-423f-a1e5-8daf2e914058",
@@ -190,11 +203,12 @@
    ],
    "recallRate": 250,
    "functionText": "ENTER",
+   "customFunctionText": null,
    "boundFunctions": "click_ENTER",
    "buttonReadback": "",
    "keyCode": "13",
    "keyName": "enter",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "type": "display",
@@ -234,11 +248,12 @@
    ],
    "recallRate": 250,
    "functionText": "SELECT_RATE",
+   "customFunctionText": null,
    "boundFunctions": "click_SELECT_RATE",
    "buttonReadback": "",
    "keyCode": "82",
    "keyName": "key R",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_dee77f4b-3592-4ea5-9dd1-4c5565126328",
@@ -248,11 +263,12 @@
    ],
    "recallRate": 250,
    "functionText": "SELECT_VTBI",
+   "customFunctionText": null,
    "boundFunctions": "click_SELECT_VTBI",
    "buttonReadback": "",
    "keyCode": "86",
    "keyName": "key V",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   }
  ],
  "regionDefs": [

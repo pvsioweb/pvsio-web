@@ -18,7 +18,7 @@ define(function (require, exports, module) {
 
         initialize: function (opts) {
             this.set("widgets", {});
-            var id = (opts && opts.id != null) ? opts.id : uuid();
+            var id = (opts && opts.id != null) ? opts.id : "SCREEN_" + uuid();
             this.set("id", id);
         },
 

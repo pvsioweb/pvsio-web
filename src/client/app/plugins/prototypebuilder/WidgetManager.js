@@ -10,7 +10,6 @@ define(function (require, exports, module) {
     "use strict";
     var d3 = require("d3/d3"),
         uidGenerator    = require("util/uuidGenerator"),
-        eventDispatcher     = require("util/eventDispatcher"),
         EditWidgetView  = require("pvsioweb/forms/editWidget"),
         BaseWidgetManager  = require("pvsioweb/BaseWidgetManager"),
         Button          = require("widgets/Button"),
@@ -19,7 +18,7 @@ define(function (require, exports, module) {
         LED             = require("widgets/LED"),
         BasicDisplay    = require("widgets/BasicDisplay"),
         NumericDisplay  = require("widgets/NumericDisplay"),
-        Storyboard      = require("pvsioweb/Storyboard"),
+        // Storyboard      = require("pvsioweb/Storyboard"),
         EmuTimer        = require("widgets/EmuTimer"),
         StateParser     = require("util/PVSioStateParser"),
         ButtonActionsQueue = require("widgets/ButtonActionsQueue").getInstance(),
@@ -54,8 +53,7 @@ define(function (require, exports, module) {
                 view.remove();
                 emuTimer.updateWithProperties(e.data);
                 // fire event widget created
-                var event = { action: "create", timer: emuTimer };
-                wm.trigger("TimerModified", event);
+                wm.trigger("TimerModified", { action: "create", timer: emuTimer });
             }).on("cancel", function (e, view) {
                 view.remove();
             });
@@ -97,7 +95,6 @@ define(function (require, exports, module) {
                 console.log("tick timer interval updated to " + timerRate / 1000 + " secs");
             }
         });
-        eventDispatcher(this);
         return this;
     }
 
@@ -113,6 +110,7 @@ define(function (require, exports, module) {
                   keyName: w.keyName,
                   functionText: w.functionText,
                   customFunctionText: w.customFunctionText,
+                  visibleWhen: w.visibleWhen,
                   evts: w.evts,
                   buttonReadback: w.buttonReadback });
         } else if (w.type === "display") {
@@ -168,8 +166,6 @@ define(function (require, exports, module) {
                   color: w.ledColor,
                   visibleWhen: w.visibleWhen,
                   parent: "imageDiv .prototype-image-inner" });
-        } else if (w.type === "storyboard") {
-            widget = new Storyboard(w.id);
         } else {
             console.log("Warning: unrecognised widget type " + w.type);
         }
@@ -299,8 +295,7 @@ define(function (require, exports, module) {
         var emuTimer = new EmuTimer(id, { timerEvent: id, timerRate: timerRate, callback: renderResponse });
         this._timers[emuTimer.id()] = emuTimer;
         // fire event widget created
-        var event = { action: "create", timer: emuTimer };
-        wm.trigger("TimerModified", event);
+        wm.trigger("TimerModified", { action: "create", timer: emuTimer });
 
     };
     WidgetManager.prototype.editTimer = function (emuTimer) {
@@ -322,7 +317,7 @@ define(function (require, exports, module) {
             wm._keyCode2widget[data.keyCode] = widget;
         }
         // fire event widget modified
-        wm.fire({type: "WidgetModified"});
+        wm.trigger("WidgetModified");
     };
     WidgetManager.prototype.editTimer = function (emuTimer) {
         // the only timer type supported in the current implementation is EmuTimer
@@ -363,7 +358,7 @@ define(function (require, exports, module) {
 
             widget.updateWithProperties(data);
             this.addWidget(widget);
-            this.fire("WidgetModified", {action: "create", widget: widget});
+            this.trigger("WidgetModified", {action: "create", widget: widget});
         }
 
         if (onCreate) {
@@ -386,6 +381,7 @@ define(function (require, exports, module) {
             value.remove();//remove the widgets from the interface
         });
         this._widgets = {};
+        require("widgets/ButtonHalo").getInstance().removeKeypressHandlers();
     };
 
     /**
@@ -458,16 +454,16 @@ define(function (require, exports, module) {
             return w.type() === "touchscreendisplay";
         });
     };
-    /**
-        Gets a list of storyboard widgets
-        @returns {Storyboard}
-        @memberof WidgetManager
-     */
-    WidgetManager.prototype.getStoryboardWidgets = function () {
-        return _.filter(this._widgets, function (w) {
-            return w.type() === "storyboard";
-        });
-    };
+    // /**
+    //     Gets a list of storyboard widgets
+    //     @returns {Storyboard}
+    //     @memberof WidgetManager
+    //  */
+    // WidgetManager.prototype.getStoryboardWidgets = function () {
+    //     return _.filter(this._widgets, function (w) {
+    //         return w.type() === "storyboard";
+    //     });
+    // };
 
     /**
         Gets a list of all the widgets loaded on the page. The returned array contains all

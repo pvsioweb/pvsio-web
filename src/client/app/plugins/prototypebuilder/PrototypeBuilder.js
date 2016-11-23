@@ -57,8 +57,8 @@ define(function (require, exports, module) {
      */
     function switchToBuilderView() {
         d3.select("#prototype-builder-container .image-map-layer").style("opacity", 1).style("z-index", 190);
-        d3.select("#btnBuilderView").classed("btn-default", false).classed("btn-primary", true);
-        d3.select("#btnSimulatorView").classed("btn-default", true).classed("btn-primary", false);
+        d3.select("#btnBuilderView").classed("btn-default", false).classed("btn-primary", true).classed("active", true);
+        d3.select("#btnSimulatorView").classed("btn-default", true).classed("btn-primary", false).classed("active", false);
         d3.select("#btnRebootPrototype").classed("disabled", true);
         WidgetManager.stopTimers();
         expandWidgetsList();
@@ -69,8 +69,8 @@ define(function (require, exports, module) {
     */
     function switchToSimulatorView() {
         d3.select("#prototype-builder-container .image-map-layer").style("opacity", 0.1).style("z-index", -2);
-        d3.select("#btnBuilderView").classed("btn-default", true).classed("btn-primary", false);
-        d3.select("#btnSimulatorView").classed("btn-default", false).classed("btn-primary", true);
+        d3.select("#btnBuilderView").classed("btn-default", true).classed("btn-primary", false).classed("active", false);
+        d3.select("#btnSimulatorView").classed("btn-default", false).classed("btn-primary", true).classed("active", true);
         d3.select("#btnRebootPrototype").classed("disabled", false);
         console.log("bootstrapping widgets with init(0)...");
         WidgetManager.initialiseWidgets();
@@ -114,7 +114,7 @@ define(function (require, exports, module) {
                     prototypeImageView.updateMapCreator(scale, function () {
                         var wdStr = p.getWidgetDefinitionFile().content;
                         if (wdStr && wdStr !== "") {
-                            var wd = JSON.parse(p.getWidgetDefinitionFile().content);
+                            var wd = JSON.parse(wdStr);
                             WidgetManager.restoreWidgetDefinitions(wd);
                             //update the widget area map scales
                             WidgetManager.scaleAreaMaps(scale);
@@ -589,15 +589,22 @@ define(function (require, exports, module) {
         projectManager.removeListener("ProjectChanged", onProjectChanged);
         projectManager.removeListener("WidgetsFileChanged", onWidgetsFileChanged);
         projectManager.removeListener("SelectedFileChanged", onSelectedFileChanged);
+        require("widgets/ButtonHalo").getInstance().removeKeypressHandlers();
         return Promise.resolve(true);
     };
 
     PrototypeBuilder.prototype.handleKeyDownEvent = function (e) {
         if (!this.collapsed) {
-            prototypeImageView._mapCreator.handleKeyEvent(e);
+            prototypeImageView._mapCreator.handleKeyDownEvent(e);
+            require("widgets/ButtonHalo").getInstance().handleKeyDownEvent(e);
         }
     };
 
+    PrototypeBuilder.prototype.handleKeyUpEvent = function (e) {
+        if (!this.collapsed) {
+            require("widgets/ButtonHalo").getInstance().handleKeyUpEvent(e);
+        }
+    };
     /**
         Gets an instance of the project manager
         @deprecated use ProjectManager.getInstance()

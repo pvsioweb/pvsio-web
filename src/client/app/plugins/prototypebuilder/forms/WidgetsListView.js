@@ -7,8 +7,6 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var _this;
-
     var WidgetsListView = Backbone.View.extend({
         /**
          * @function initialize
@@ -27,15 +25,18 @@ define(function (require, exports, module) {
             this.$el.append(list);
             this.d3ListElement = d3.select(list);
 
-            _this = this;
+            var _this = this;
 
-            this._widgetManager.addListener("WidgetModified", _this.update);
-            this._widgetManager.addListener("WidgetSelected", function (event) {
+            this.listenTo(this._widgetManager, "WidgetModified", _this.update);
+
+            this.listenTo(this._widgetManager, "WidgetSelected", function (event) {
                 _this.selectWidget(event.widget, event.add);
             });
-            this._widgetManager.addListener("WidgetSelectionCleared", function (event) {
+
+            this.listenTo(this._widgetManager, "WidgetSelectionCleared", function (event) {
                 _this.d3ListElement.selectAll("li").classed("selected", false);
             });
+
             this.render();
         },
 
@@ -45,8 +46,8 @@ define(function (require, exports, module) {
          * @return {PrototypeImageView} The view
          */
         render: function () {
-            _this.update();
-            return _this;
+            this.update();
+            return this;
         },
 
         /**
@@ -57,8 +58,12 @@ define(function (require, exports, module) {
          * be selected.
          */
         selectWidget: function(widget, add) {
-            var element = _this.listItems.filter(function (d) { return d.id === widget.id; });
-            if (!add) { _this.listItems.classed("selected", false); }
+            var element = this.listItems.filter(function (d) { return d.id === widget.id; });
+
+            if (!add) {
+                this.listItems.classed("selected", false);
+            }
+
             element.classed("selected", true);
         },
 
@@ -68,18 +73,20 @@ define(function (require, exports, module) {
         * //FIXME: when updating the widget list, we should keep the list ordered by widget type. At the moment, the new widget is always appended at the end of the list.
          */
         update: function () {
-            _this.listItems = _this.d3ListElement.selectAll("li.list-group-item").data(_this._widgetManager.getAllWidgets(), function (widget) {
+            var _this = this;
+
+            this.listItems = this.d3ListElement.selectAll("li.list-group-item").data(this._widgetManager.getAllWidgets(), function (widget) {
                 return widget.id();
             });
-            var enteredItems = _this.listItems.enter();
-            var exitedItems = _this.listItems.exit();
+            var enteredItems = this.listItems.enter();
+            var exitedItems = this.listItems.exit();
 
             enteredItems.append("li").attr("class", "list-group-item")
                 .attr("widget-id", function (w) {
                     _this.d3ListElement.selectAll("ul li").classed("selected", false);
                     return w.id();
                 }).classed("selected", false)
-                .text(_this._labelFunction)
+                .text(this._labelFunction)
                 .on("click", function (w) {
                     var add = d3.event.shiftKey;
                     _this.selectWidget(w, add);
@@ -93,7 +100,7 @@ define(function (require, exports, module) {
                     event.preventDefault();
                     event.stopPropagation();
                 });
-            _this.listItems.text(_this._labelFunction);
+            this.listItems.text(this._labelFunction);
             exitedItems.transition().duration(220).style("opacity", 0).remove();
         }
     });

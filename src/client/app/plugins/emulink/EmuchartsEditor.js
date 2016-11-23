@@ -1187,6 +1187,22 @@ define(function (require, exports, module) {
             }
             if (dbg) { console.log("Transitions.mouseDoubleClick"); }
         };
+        var mouseDown = function (edge) {
+            d3.event.stopPropagation();
+            // correct handling of mouse events requires moving the selected transition on top of the others
+            if (svg.node().children.length > 0) {
+                var g = d3.select("#" + edge.id).remove();
+                var transitions = d3.select("#ContainerStateMachine #Transitions").node();
+                var i = 0, len = transitions.children.length, others = [];
+                for(i = 0; i < len; i++) {
+                    others.push(d3.select(transitions.firstChild).remove());
+                }
+                for(i = 0; i < len; i++) {
+                    transitions.appendChild(others[i].node());
+                }
+                transitions.appendChild(g.node()); // append the selected transition at the end, so the node is on top of the others in the DOM
+            }
+        };
         var dragStart = function (node) {
             if (dbg) { console.log("Transitions.dragStart"); }
             // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
@@ -1234,6 +1250,7 @@ define(function (require, exports, module) {
                     .on("drag", dragEdge)
                     .on("dragend", dragEnd);
                 enteredTransitions.call(drag)
+                    .on("mousedown", mouseDown)
                     .on("mouseover", mouseOver)
                     .on("mouseout", mouseOut)
                     .on("click", mouseClick)
@@ -1763,9 +1780,10 @@ define(function (require, exports, module) {
     EmuchartsEditor.prototype.render = function (opt) {
         opt = opt || {};
         var container = opt.container || this.container || "#ContainerStateMachine";
-        // if (d3.select(container + " svg").node()) {
-        //     d3.select(container).node().removeChild(d3.select(container + " svg").node());
-        // }
+        if (d3.select(container + " svg").node()) {
+            // FIXME! investigate why this is needed! with storyboard editor, if the emuchart is generated twice, the second time the emuchart is not visible without the following instruction
+            d3.select(container).node().removeChild(d3.select(container + " svg").node());
+        }
         this.renderStates();
         this.renderTransitions(opt);
         this.renderInitialTransitions();

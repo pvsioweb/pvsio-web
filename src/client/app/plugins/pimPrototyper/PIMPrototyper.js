@@ -159,9 +159,9 @@ define(function (require, exports, module) {
         return [];
     };
 
-    PIMPrototyper.prototype.handleKeyEvent = function (e) {
+    PIMPrototyper.prototype.handleKeyDownEvent = function (e) {
         if (!this.collapsed) {
-            this._prototypeImageView._mapCreator.handleKeyEvent(e);
+            this._prototypeImageView._mapCreator.handleKeyDownEvent(e);
         }
     };
 
@@ -260,40 +260,40 @@ define(function (require, exports, module) {
         });
     };
 
+    PIMPrototyper.prototype._onSelectedScreenChange = function (selectedScreen) {
+        var _this = this;
+        this._prototypeImageView.softClearWidgetAreas();
+        this._widgetManager.setScreen(
+            selectedScreen,
+            function(widget) {
+                _this._onWidgetClicked(widget);
+            },
+            this._prototypeImageView.getImageMap()
+        );
+        this._widgetListView.update();
+
+        if (selectedScreen == null || selectedScreen.get("image") == null) {
+            this._prototypeImageView.clearImage();
+        } else {
+            var image = selectedScreen.get("image");
+            image.getContent().then(function () {
+                _this._prototypeImageView.setImage(image);
+            }).catch(function (err) {
+                console.error("Failed to select screen: " + err);
+            });
+        }
+    };
 
     PIMPrototyper.prototype._onProjectChanged = function () {
-        var _this = this;
-        function _onSelectedScreenChange (selectedScreen) {
-            _this._prototypeImageView.softClearWidgetAreas();
-            _this._widgetManager.setScreen(
-                selectedScreen,
-                function(widget) {
-                    _this._onWidgetClicked(widget);
-                },
-                _this._prototypeImageView.getImageMap()
-            );
-            _this._widgetListView.update();
-
-            if (selectedScreen == null || selectedScreen.get("image") == null) {
-                _this._prototypeImageView.clearImage();
-            } else {
-                var image = selectedScreen.get("image");
-                image.getContent().then(function () {
-                    _this._prototypeImageView.setImage(image);
-                }).catch(function (err) {
-                    console.error("Failed to select screen: " + err);
-                });
-            }
-        }
         this._screens = this._projectManager.screens();
-        this._screens.on("selectionChanged", _onSelectedScreenChange, this);
+        this._screens.on("selectionChanged", this._onSelectedScreenChange, this);
         this._screenControlsView.setCollection(this._screens);
         // when a project is loaded, automatically select the initial screen, if one has been set
         var initialScreen = this._screens.models.filter(function (model) { return model.attributes.isInitial; });
         if (initialScreen && initialScreen.length > 0) {
             this._screens.setSelected(initialScreen[0]);
         } else {
-            _onSelectedScreenChange();
+            this._onSelectedScreenChange();
         }
     };
 
@@ -348,7 +348,7 @@ define(function (require, exports, module) {
             })
             .on("ok", function(data, view) {
                 widget.updateWithProperties(data.data);
-                _this._widgetManager.fire("WidgetModified");
+                _this._widgetManager.trigger("WidgetModified");
                 view.remove();
             });
         });

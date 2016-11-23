@@ -98,6 +98,7 @@ define(function (require, exports, module) {
         var widget = this, href = this.type() === "button" ? "#!" : null;
         var area = opt.map.append("area");
         area.attr("class", this.id())
+            .attr("id", this.id())
             .attr("shape", "rect")
             .attr("coords", coords)
             .attr("href", href);

@@ -12,7 +12,7 @@
    "buttonReadback": "",
    "keyCode": "38",
    "keyName": "up arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_24b88be8-e2db-4268-bfb9-70a10533cbec",
@@ -26,7 +26,7 @@
    "buttonReadback": "",
    "keyCode": "40",
    "keyName": "down arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "type": "numericdisplay",

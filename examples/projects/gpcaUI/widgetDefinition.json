@@ -23,7 +23,7 @@
    "buttonReadback": "",
    "keyCode": "38",
    "keyName": "up arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "Button1360334003368",
@@ -37,7 +37,7 @@
    "buttonReadback": "",
    "keyCode": "40",
    "keyName": "down arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "Button1360334013028",
@@ -51,7 +51,7 @@
    "buttonReadback": "",
    "keyCode": "37",
    "keyName": "left arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "Button1360334022698",
@@ -65,7 +65,7 @@
    "buttonReadback": "",
    "keyCode": "39",
    "keyName": "right arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   }
  ],
  "regionDefs": [

@@ -9,12 +9,10 @@
 define(function (require, exports, module) {
     var BaseWidgetManager = require("pvsioweb/BaseWidgetManager"),
         PIMWidget  = require("./PIMWidget"),
-        uidGenerator = require("util/uuidGenerator"),
-        eventDispatcher     = require("util/eventDispatcher");
+        uidGenerator = require("util/uuidGenerator");
 
     var PIMWidgetManager = function() {
         this._widgets = {};
-        eventDispatcher(this);
     };
 
     PIMWidgetManager.prototype = Object.create(BaseWidgetManager.prototype);
@@ -69,7 +67,7 @@ define(function (require, exports, module) {
 
         widget.updateWithProperties(data);
         this.addWidget(widget);
-        this.fire("WidgetModified", {action: "create", widget: widget});
+        this.trigger("WidgetModified", {action: "create", widget: widget});
 
         return widget;
     };

@@ -85,7 +85,7 @@ define(function (require, exports, module) {
      */
     Project.prototype.setUpListeners = function() {
         var _this = this;
-        WidgetManager.addListener("WidgetModified", function (e) {
+        function onWidgetModified() {
             _this._dirty(true);
             var newWDStr = JSON.stringify(WidgetManager.getWidgetDefinitions(), null, " ");
             //get the widget definitions and update the widgetDefinition file
@@ -93,7 +93,8 @@ define(function (require, exports, module) {
             wdf.content = newWDStr;
             wdf.dirty(true);
             _this.fire({type: "WidgetsFileChanged"});
-        }, this);
+        }
+        WidgetManager.on("WidgetModified", onWidgetModified, _this); // NB: this third argument is important for getting the context variable right!
     };
 
     /**

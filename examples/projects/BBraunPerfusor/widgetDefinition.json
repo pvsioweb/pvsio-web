@@ -19,11 +19,12 @@
    ],
    "recallRate": 250,
    "functionText": "up",
+   "customFunctionText": null,
    "boundFunctions": "click_up",
    "buttonReadback": "",
    "keyCode": "38",
    "keyName": "up arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "Button1360334906908",
@@ -33,11 +34,12 @@
    ],
    "recallRate": 250,
    "functionText": "lf",
+   "customFunctionText": null,
    "boundFunctions": "click_lf",
    "buttonReadback": "",
    "keyCode": "37",
    "keyName": "left arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "Button1360334916663",
@@ -47,11 +49,12 @@
    ],
    "recallRate": 250,
    "functionText": "dn",
+   "customFunctionText": null,
    "boundFunctions": "click_dn",
    "buttonReadback": "",
    "keyCode": "40",
    "keyName": "down arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "Button1360334930041",
@@ -61,11 +64,12 @@
    ],
    "recallRate": 250,
    "functionText": "rt",
+   "customFunctionText": null,
    "boundFunctions": "click_rt",
    "buttonReadback": "",
    "keyCode": "39",
    "keyName": "right arrow",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   },
   {
    "id": "button_2287dcc5-2e6f-4138-e837-2780c2c267e3",
@@ -75,11 +79,12 @@
    ],
    "recallRate": 250,
    "functionText": "clear",
+   "customFunctionText": null,
    "boundFunctions": "click_clear",
    "buttonReadback": "",
    "keyCode": "46",
    "keyName": "delete",
-   "visibleWhen": "false"
+   "visibleWhen": "true"
   }
  ],
  "regionDefs": [
