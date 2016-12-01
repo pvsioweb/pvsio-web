@@ -1445,7 +1445,7 @@ define(function (require, exports, module) {
         enteredStates.append("svg:rect").classed("state_box", true)
             .attr("id", function (node) { return "box_" + node.id; })
             .attr("width", function (node) { return nodeWidth(node); })
-            .attr("height", function (node) { return nodeWidth(node); })
+            .attr("height", function (node) { return nodeHeight(node); })
             // translate x,y so that the box is centered there
             .attr("x", function (node) { return -(nodeWidth(node) / 2); })
             .attr("y", function (node) { return -(nodeHeight(node) / 2); })
