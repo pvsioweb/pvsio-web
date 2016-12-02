@@ -65,6 +65,10 @@ define(function (require, exports, module) {
     PIMWidget.prototype.removeImageMap = function () {
         if (this.imageMap()) {
             this.imageMap().remove();
+            // FIXME! duplicated area maps are erroneously created when imagemapper redraws the areas to pull the selected region on top.
+            if (d3.select(".image-map-layer").select("#" + this.imageMap().node().id).node()) {
+                d3.select(".image-map-layer").select("#" + this.imageMap().node().id).node().parentNode.remove();
+            }
         }
     };
 
