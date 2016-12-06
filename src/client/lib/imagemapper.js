@@ -40,17 +40,12 @@
         var g = d3.select(region.node().parentNode);
 
         // correct handling of mouse events requires moving the selected region on top of the others
-        if (svg.node().children.length > 0) {
-            g = d3.select(region.node().parentNode).remove();
-            var first = svg.node().firstChild, i = 0, len = first.children.length, others = [];
-            for(i = 0; i < len; i++) {
-                others.push(d3.select(first.firstChild).remove());
-            }
-            for(i = 0; i < len; i++) {
-                svg.node().appendChild(others[i].node());
-            }
-            svg.node().appendChild(g.node()); // append the selected node at the end, so the node is on top of the others in the DOM
-        }
+        d3.selection.prototype.moveToFront = function() {
+          return this.each(function(){
+            this.parentNode.appendChild(this);
+          });
+        };
+        g.moveToFront();
 
         //remove previous selections if shift key wasnt pressed and we are not selecting a previously selected region
         if (!add && !g.classed("selected")) {
@@ -208,7 +203,7 @@
     }
 
     function booya(config) {
-        if (!config || !config.element) { throw new Error("element prpoerty of config must be set"); }
+        if (!config || !config.element) { throw new Error("element property of config must be set"); }
         config.parent = config.parent || "body";
         config.scale = config.scale || 1;
         //clear any previous svgs

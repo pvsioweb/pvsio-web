@@ -99,7 +99,7 @@ define(function (require, exports, module) {
 
             //update form
             if (widgetData.isButton || widgetData.isTouchscreenButton) {
-                if (widget.customFunctionText()) {
+                if (widget.customFunctionText && typeof widget.customFunctionText === "function" && widget.customFunctionText()) {
                     d3.select("#custom_event").attr("checked", true);
                     document.getElementById("boundFunctions").value = widget.customFunctionText();
                 } else {
