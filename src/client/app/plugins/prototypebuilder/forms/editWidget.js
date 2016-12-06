@@ -21,9 +21,11 @@ define(function (require, exports, module) {
         return evts;
     }
     function updateBoundFunctionsLabel(widgetType) {
-        if (d3.select("#custom_event").node().checked) {
-            d3.select("#boundFunctions").attr("readonly", null);
-        } else {
+        if (d3.select("#custom_event").node()) {
+            if (d3.select("#custom_event").node().checked) {
+                d3.select("#boundFunctions").attr("readonly", null);
+            }
+        } else if (d3.select("#functionText").node()) {
             var f = d3.select("#functionText").property("value"),
                 str = "",
                 evts = [];
