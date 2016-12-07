@@ -238,7 +238,6 @@ define(function (require, exports, module) {
                 }
             });
         });
-
         d3.select("#btnSaveProjectAs").on("click", function () {
             if (d3.select("#btn_menuSaveChart").node()) {
                 d3.select("#btn_menuSaveChart").node().click();
@@ -283,7 +282,9 @@ define(function (require, exports, module) {
                 Logger.log(notification);
             });
         });
-
+        d3.select("#btnLoadPicture").on("click", function () {
+            prototypeImageView.onClickLoad();
+        });
         d3.select("#btnRecord").on("click", function () {
             if (!d3.select("#btnRecord").attr("active")) {
                 d3.select("#btnRecord")
@@ -345,6 +346,10 @@ define(function (require, exports, module) {
     /////These are the api methods that the prototype builder plugin exposes
     PrototypeBuilder.prototype.getDependencies = function () { return []; };
 
+    PrototypeBuilder.prototype.updateImageAndLoadWidgets = function () {
+        return updateImageAndLoadWidgets();
+    };
+
     /**
         Change the image in the current project to the one specified in the parameter
         @param {string} imagePath image name, including path name (given as relative path, where the base path is the project name)
@@ -380,10 +385,11 @@ define(function (require, exports, module) {
             }
             if (oldImage) {
                 pm.project().removeFile(oldImage.path).then(function (res) {
-                    pm.project().addFile(newImage.path, newImage.content, { encoding: "base64", overWrite: true });
-                }).then(function (res) {
-                    done();
-                }).catch(function (err) { console.log(err); reject(err); });
+                    pm.project().addFile(newImage.path, newImage.content, { encoding: "base64", overWrite: true })
+                        .then(function (res) {
+                            done();
+                        }).catch(function (err) { console.log(err); reject(err); });
+                    }).catch(function (err) { console.log(err); reject(err); });
             } else {
                 pm.project().addFile(newImage.path, newImage.content, { encoding: "base64", overWrite: true }).then(function (res) {
                     done();

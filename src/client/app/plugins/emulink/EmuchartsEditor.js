@@ -1191,16 +1191,13 @@ define(function (require, exports, module) {
             d3.event.stopPropagation();
             // correct handling of mouse events requires moving the selected transition on top of the others
             if (svg.node().children.length > 0) {
-                var g = d3.select("#" + edge.id).remove();
-                var transitions = d3.select("#ContainerStateMachine #Transitions").node();
-                var i = 0, len = transitions.children.length, others = [];
-                for(i = 0; i < len; i++) {
-                    others.push(d3.select(transitions.firstChild).remove());
-                }
-                for(i = 0; i < len; i++) {
-                    transitions.appendChild(others[i].node());
-                }
-                transitions.appendChild(g.node()); // append the selected transition at the end, so the node is on top of the others in the DOM
+                var g = d3.select("#" + edge.id);
+                d3.selection.prototype.moveToFront = function() {
+                  return this.each(function(){
+                    this.parentNode.appendChild(this);
+                  });
+                };
+                g.moveToFront();
             }
         };
         var dragStart = function (node) {
