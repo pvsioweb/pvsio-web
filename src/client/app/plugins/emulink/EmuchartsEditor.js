@@ -965,6 +965,96 @@ define(function (require, exports, module) {
         return d3.select(container).select("svg");
     };
 
+    function moveToFront(id) {
+        var g = d3.select("#" + id);
+        if (g.node()) {
+            d3.selection.prototype.moveToFront = function() {
+              return this.each(function(){
+                this.parentNode.appendChild(this);
+              });
+            };
+            g.moveToFront();
+        }
+    }
+
+    EmuchartsEditor.prototype.select_transition = function (id) {
+        var g = d3.select("#" + id).node();
+        if (g) {
+            d3.select(g.firstChild)
+                //.style("stroke-width", stroke_width_highlighted)
+                .style("stroke", "green")
+                .style("marker-end", function (edge) {
+                    if (edge.source.id === edge.target.id ||
+                            edge.source.x < edge.target.x) {
+                        return "url(#end-arrow-selected)";
+                    } else { return ""; }
+                })
+                .style("marker-start", function (edge) {
+                    if (edge.source.id === edge.target.id) {
+                        return g.style.markerStart;
+                    } else if (edge.source.x < edge.target.x) {
+                        return "";
+                    } else { return "url(#end-arrow-rotated-selected)"; }
+                });
+            d3.select(g.children[2]).attr("opacity", 0.6);
+            d3.select(g.children[3]).style("fill", "green");
+            d3.select(g.children[4]).style("fill", "green");
+            var edge = this.emucharts.edges.get(id);
+            if (edge.source && edge.target && edge.source.id === edge.target.id) {
+                d3.select(g).select(".tlabel").text(function (edge) {
+                    return edge.name;
+                });
+            }
+            moveToFront(id);
+        }
+        return this;
+    };
+
+    EmuchartsEditor.prototype.deselect_transition = function (id) {
+        var g = d3.select("#" + id).node();
+        if (g) {
+            d3.select(g.firstChild)
+                //.style("stroke-width", stroke_width_normal)
+                .style("stroke", "black")
+                .style("marker-end", function (edge) {
+                    if (edge.source.id === edge.target.id ||
+                            edge.source.x < edge.target.x) {
+                        return "url(#end-arrow)";
+                    } else { return ""; }
+                })
+                .style("marker-start", function (edge) {
+                    if (edge.source.id === edge.target.id) {
+                        return g.style.markerStart;
+                    } else if (edge.source.x < edge.target.x) {
+                        return "";
+                    } else { return "url(#end-arrow-rotated)"; }
+                });
+            d3.select(g.children[2]).attr("opacity", 0);
+            d3.select(g.children[3]).style("fill", "black");
+            d3.select(g.children[4]).style("fill", "black");
+            var edge = this.emucharts.edges.get(id);
+            if (edge.source && edge.target && edge.source.id === edge.target.id) {
+                d3.select(g).select(".tlabel").text(function (edge) {
+                    return labelToString(edge.name);
+                });
+            }
+        }
+    };
+
+    EmuchartsEditor.prototype.deselect_all_transition = function () {
+        if (this.emucharts.edges && this.emucharts.edges.keys().length > 0) {
+            var _this = this;
+            this.emucharts.edges.keys().forEach(function (key) {
+                _this.deselect_transition(key);
+            });
+        }
+    };
+
+    EmuchartsEditor.prototype.select_node = function (id) {
+        moveToFront(id);
+        return this;
+    };
+
     /**
      * Utility function for drawing transitions
      * @memberof EmuchartsEditor
@@ -1088,30 +1178,11 @@ define(function (require, exports, module) {
         var mouseOver = function (edge) {
             if (!_this.mousedrag.edge && (!mouseOverControlPoint || mouseOverControlPoint.id === edge)) {
                 d3.event.stopPropagation();
-                d3.select(this.firstChild)
-                    //.style("stroke-width", stroke_width_highlighted)
-                    .style("stroke", "green")
-                    .style("marker-end", function (edge) {
-                        if (edge.source.id === edge.target.id ||
-                                edge.source.x < edge.target.x) {
-                            return "url(#end-arrow-selected)";
-                        } else { return ""; }
-                    })
-                    .style("marker-start", function (edge) {
-                        if (edge.source.id === edge.target.id) {
-                            return this.style.markerStart;
-                        } else if (edge.source.x < edge.target.x) {
-                            return "";
-                        } else { return "url(#end-arrow-rotated-selected)"; }
-                    });
-                d3.select(this.childNodes[2]).attr("opacity", 0.6);
-                d3.select(this.children[3]).style("fill", "green");
-                d3.select(this.children[4]).style("fill", "green");
-                if (edge.source.id === edge.target.id) {
-                    d3.select(this).select(".tlabel").text(function (edge) {
-                        return edge.name;
-                    });
-                }
+                _this.select_transition(edge.id);
+                _this.fire({
+                    type: "emuCharts_selectTransition",
+                    edge: edge
+                });
             }
             if (dbg) { console.log("Transitions.mouseOver"); }
         };
@@ -1119,31 +1190,12 @@ define(function (require, exports, module) {
             if (!mouseOverControlPoint) {
                 d3.event.stopPropagation();
                 if (!d3.select("#emuCharts_rename_dialog").node()) {
-                    d3.select(this.firstChild)
-                        //.style("stroke-width", stroke_width_normal)
-                        .style("stroke", "black")
-                        .style("marker-end", function (edge) {
-                            if (edge.source.id === edge.target.id ||
-                                    edge.source.x < edge.target.x) {
-                                return "url(#end-arrow)";
-                            } else { return ""; }
-                        })
-                        .style("marker-start", function (edge) {
-                            if (edge.source.id === edge.target.id) {
-                                return this.style.markerStart;
-                            } else if (edge.source.x < edge.target.x) {
-                                return "";
-                            } else { return "url(#end-arrow-rotated)"; }
-                        });
-                    d3.select(this.children[3]).style("fill", "black");
-                    d3.select(this.children[4]).style("fill", "black");
-                    if (edge.source.id === edge.target.id) {
-                        d3.select(this).select(".tlabel").text(function (edge) {
-                            return labelToString(edge.name);
-                        });
-                    }
+                    _this.deselect_transition(edge.id);
+                    _this.fire({
+                        type: "emuCharts_deselectTransition",
+                        edge: edge
+                    });
                 }
-                d3.select(this.childNodes[2]).attr("opacity", 0);
             } else if (mouseOverControlPoint && mouseOverControlPoint.id === edge.id) {
                 var m = d3.mouse(d3.select("#ContainerStateMachine svg").select("#States").node());
                 // update selected control point
@@ -1191,13 +1243,7 @@ define(function (require, exports, module) {
             d3.event.stopPropagation();
             // correct handling of mouse events requires moving the selected transition on top of the others
             if (svg.node().children.length > 0) {
-                var g = d3.select("#" + edge.id);
-                d3.selection.prototype.moveToFront = function() {
-                  return this.each(function(){
-                    this.parentNode.appendChild(this);
-                  });
-                };
-                g.moveToFront();
+                _this.select(edge.id);
             }
         };
         var dragStart = function (node) {
@@ -1577,8 +1623,12 @@ define(function (require, exports, module) {
 
             if (editor_mode !== MODE.ADD_TRANSITION() && editor_mode !== MODE.DELETE() &&
                     editor_mode !== MODE.RENAME()) {
-                // update node position
+                // correct handling of mouse events requires moving the selected transition on top of the others
+                if (svg.node().children.length > 0) {
+                    _this.select(node.id);
+                }
                 var draggedNode = _this.emucharts.nodes.get(node.id);
+                // update node position
                 draggedNode.x = node.x + d3.event.dx;
                 draggedNode.y = node.y + d3.event.dy;
                 _this.emucharts.nodes.set(node.id, draggedNode);
