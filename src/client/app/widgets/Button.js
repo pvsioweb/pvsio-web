@@ -179,10 +179,14 @@ define(function (require, exports, module) {
         opt = opt || {};
         opt.prototypeMap = opt.prototypeMap || this.prototypeMap;
         this.cursor = opt.cursor || "pointer";
-        if (d3.select("#" + opt.prototypeMap).node() && d3.select("#" + opt.prototypeMap).select("." + this.id()).node()) {
-            return this;
+        if (d3.select("#" + opt.prototypeMap) && d3.select("#" + opt.prototypeMap).node()) {
+            if (!d3.select("#" + opt.prototypeMap).select("." + this.id()).node()) {
+                // else, re-attach map area and event listeners
+                d3.select("#" + opt.prototypeMap).node().append(this.area.node());
+                return this.createImageMap({ area: this.area, callback: this.callback });
+            }
         }
-        return this.createImageMap({ area: this.area, callback: this.callback });
+        return this;
     };
 
     /**

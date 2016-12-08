@@ -25,7 +25,8 @@ define(function (require, exports, module) {
             if (d3.select("#custom_event").node().checked) {
                 d3.select("#boundFunctions").attr("readonly", null);
             }
-        } else if (d3.select("#functionText").node()) {
+        }
+        if (d3.select("#functionText").node()) {
             var f = d3.select("#functionText").property("value"),
                 str = "",
                 evts = [];

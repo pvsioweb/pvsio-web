@@ -248,6 +248,14 @@ define(function (require, exports, module) {
         editTransition(event.edge);
     }
 
+    function selectTransition_handler(event) {
+        transitionsTable.selectTransition(event.edge.id);
+    }
+
+    function deselectTransition_handler(event) {
+        transitionsTable.deselectTransition(event.edge.id);
+    }
+
     // rename dialog window for initial transitions
     function editInitialTransition(t) {
         displayRename.create({
@@ -337,6 +345,8 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_renameState", renameState_handler);
         emuchartsManager.addListener("emuCharts_changeStateColor", changeStateColor_handler);
         emuchartsManager.addListener("emuCharts_renameTransition", renameTransition_handler);
+        emuchartsManager.addListener("emuCharts_selectTransition", selectTransition_handler);
+        emuchartsManager.addListener("emuCharts_deselectTransition", deselectTransition_handler);
         emuchartsManager.addListener("emuCharts_renameInitialTransition", renameInitialTransition_handler);
         emuchartsManager.addListener("emuCharts_addTransition", addTransition_handler);
         emuchartsManager.addListener("emuCharts_addInitialTransition", addInitialTransition_handler);
@@ -541,7 +551,18 @@ define(function (require, exports, module) {
             });
             transitionsTable.addListener("TransitionsTable_renameTransition", function(event) {
                 var theTransition = emuchartsManager.getTransition(event.transition.id);
-                editTransition(theTransition);
+                if (theTransition) {
+                    editTransition(theTransition);
+                }
+            });
+            transitionsTable.addListener("TransitionsTable_selectTransition", function(event) {
+                var theTransition = emuchartsManager.getTransition(event.transition.id);
+                if (theTransition) {
+                    emuchartsManager.select_transition(theTransition.id);
+                }
+            });
+            transitionsTable.addListener("TransitionsTable_deselectAllTransition", function(event) {
+                emuchartsManager.deselect_all_transition();
             });
         }
         if (document.getElementById("ConstantsTable")) {

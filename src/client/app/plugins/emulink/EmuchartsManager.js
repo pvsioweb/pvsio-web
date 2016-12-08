@@ -80,6 +80,9 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_newEmuchartsLoaded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_selectTransition", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_deselectTransition", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_deselectAllTransitions", function (event) { _this.fire(event); });
     };
 
     /**
@@ -614,6 +617,30 @@ define(function (require, exports, module) {
      */
     EmuchartsManager.prototype.getInitialTransitions = function () {
         return _selectedEditor.getInitialTransitions();
+    };
+
+    /**
+     * Utility function to select (i.e., highlight) transitions
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.select_transition = function (transitionID) {
+        return _selectedEditor.select_transition(transitionID);
+    };
+
+    /**
+     * Utility function to deselect (i.e., remove highlight from) transitions
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.deselect_transition = function (transitionID) {
+        return _selectedEditor.deselect_transition(transitionID);
+    };
+
+    /**
+     * Utility function to deselect (i.e., remove highlight from) all transitions
+     * @memberof EmuchartsManager
+     */
+    EmuchartsManager.prototype.deselect_all_transition = function () {
+        return _selectedEditor.deselect_all_transition();
     };
 
     /**
