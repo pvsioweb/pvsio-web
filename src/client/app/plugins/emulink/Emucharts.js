@@ -74,7 +74,7 @@ define(function (require, exports, module) {
     function Emucharts(emuchart) {
         function cloneChart(c) {
             var chart = { nodes: d3.map(), edges: d3.map(), initial_edges: d3.map(),
-                          variables: d3.map(), constants: d3.map() };
+                          variables: d3.map(), constants: d3.map(), datatypes: d3.map() };
             if (c.states) {
                 c.states.forEach(function (state) {
                     chart.nodes.set(state.id, {
@@ -151,6 +151,19 @@ define(function (require, exports, module) {
                         name: constant.name,
                         type: constant.type,
                         value: constant.value
+                    });
+                });
+            }
+            if (c.datatypes) {
+                c.datatypes.forEach(function (datatype) {
+                    var cons = [];
+                    datatype.constructors.forEach(function (c) {
+                        cons.push(c);
+                    });
+                    chart.datatypes.set(datatype.id, {
+                        id: datatype.id,
+                        name: datatype.name,
+                        constructors: cons
                     });
                 });
             }
@@ -841,8 +854,7 @@ define(function (require, exports, module) {
         var newDatatype = {
             id: id,
             name: datatype.name,
-            constructors: datatype.constructors,
-            value: datatype.value
+            constructors: datatype.constructors
         };
         this.datatypes.set(id, newDatatype);
         // fire event
@@ -851,8 +863,7 @@ define(function (require, exports, module) {
             constant: {
                 id: id,
                 name: datatype.name,
-                constructors: datatype.constructors,
-                value: datatype.value
+                constructors: datatype.constructors
             }
         });
         return newDatatype;
@@ -1020,8 +1031,7 @@ define(function (require, exports, module) {
         this.datatypes.remove(datatypeID);
         var newDatatype = {
             name: newData.name || theDatatype.name,
-            constructors: newData.constructors || theDatatype.constructors,
-            value: newData.value || theDatatype.value
+            constructors: newData.constructors || theDatatype.constructors
         };
         // update datatypeID
         var newDatatypeID = createDatatypeID(newDatatype);
@@ -1032,14 +1042,12 @@ define(function (require, exports, module) {
             pre: {
                 id: theDatatype.id,
                 constructors: theDatatype.constructors,
-                name: theDatatype.name,
-                value: theDatatype.value
+                name: theDatatype.name
             },
             post: {
                 id: newDatatype.id,
                 constructors: newDatatype.type,
-                name: newDatatype.name,
-                value: newDatatype.value
+                name: newDatatype.name
             }
         });
         return true;

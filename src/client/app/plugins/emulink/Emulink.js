@@ -373,6 +373,7 @@ define(function (require, exports, module) {
             machineStatesTable.setMachineStates(emuchartsManager.getStates());
             transitionsTable.setTransitions(emuchartsManager.getTransitions());
             constantsTable.setConstants(emuchartsManager.getConstants());
+            datatypesTable.setDatatypes(emuchartsManager.getDatatypes());
         });
         fs = new FileSystem();
 
@@ -478,29 +479,25 @@ define(function (require, exports, module) {
             header: "Editing datatype " + theDatatype.name,
             textLabel: {
                 newDatatypeName: "Datatype name",
-                newDatatypeConstructor1: "Constructor 1",
-                newDatatypeConstructor2: "Constructor 2",
+                newDatatypeConstructor1: "Datatype constants",
                 newDatatypeValue: "Initial value"
             },
             placeholder: {
                 newDatatypeName: theDatatype.name,
-                newDatatypeConstructor1: theDatatype.constructors[0],
-                newDatatypeConstructor2: theDatatype.constructors[1],
+                newDatatypeConstructor1: theDatatype.constructors.join(", "),
                 newDatatypeValue: theDatatype.value
             },
             buttons: ["Cancel", "Ok"]
         }).on("ok", function (e, view) {
             var newDatatypeName = e.data.labels.get("newDatatypeName");
             var newDatatypeConstructor1 = e.data.labels.get("newDatatypeConstructor1");
-            var newDatatypeConstructor2 = e.data.labels.get("newDatatypeConstructor2");
             var newDatatypeValue = e.data.labels.get("newDatatypeValue");
             if (newDatatypeName && newDatatypeName.value !== ""
-                    && newDatatypeConstructor1 && newDatatypeConstructor1.value !== ""
-                    && newDatatypeConstructor2 && newDatatypeConstructor2.value !== "") {
+                    && newDatatypeConstructor1 && newDatatypeConstructor1.value !== "") {
                 emuchartsManager.rename_datatype(
                     theDatatype.id,
                     {   name: newDatatypeName,
-                        constructors: [ newDatatypeConstructor1, newDatatypeConstructor2 ],
+                        constructors: newDatatypeConstructor1.split(",").map(function (c) { return c.trim(); }),
                         value: newDatatypeValue   }
                 );
                 view.remove();
@@ -837,7 +834,7 @@ define(function (require, exports, module) {
                 var emuchart = {
                     descriptor: {
                         file_type: "emdl",
-                        version: "1.3",
+                        version: "1.4",
                         description: "emucharts model",
                         chart_name: ("emucharts_" + projectManager.project().name())
                     },
@@ -845,6 +842,7 @@ define(function (require, exports, module) {
                         states: emuchartsManager.getStates(),
                         transitions: emuchartsManager.getTransitions(),
                         initial_transitions: emuchartsManager.getInitialTransitions(),
+                        datatypes: emuchartsManager.getDatatypes(),
                         constants: emuchartsManager.getConstants(),
                         variables: emuchartsManager.getVariables()
                     }
@@ -1262,28 +1260,24 @@ define(function (require, exports, module) {
                 header: "Please enter new datatype...",
                 textLabel: {
                     newDatatypeName: "Datatype name",
-                    newDatatypeConstructor1: "Constructor 1",
-                    newDatatypeConstructor2: "Constructor 2",
+                    newDatatypeConstructor1: "Datatype constants",
                     newDatatypeValue: "Initial value" // initial value
                 },
                 placeholder: {
                     newDatatypeName: "Name, e.g., MultiDisplay",
-                    newDatatypeConstructor1: "Constructor, e.g., rate(x: real)",
-                    newDatatypeConstructor2: "Constructor, e.g., vtbi(x: real)",
-                    newDatatypeValue: "Initial value, e.g., rate(0)"
+                    newDatatypeConstructor1: "Comma-separated list of constants, e.g., RATE, VTBI",
+                    newDatatypeValue: "Initial value, e.g., RATE"
                 },
                 buttons: ["Cancel", "Create datatype"]
             }).on("create_datatype", function (e, view) {
                 var newDatatypeName = e.data.labels.get("newDatatypeName");
                 var newDatatypeConstructor1 = e.data.labels.get("newDatatypeConstructor1");
-                var newDatatypeConstructor2 = e.data.labels.get("newDatatypeConstructor2");
                 var newDatatypeValue = e.data.labels.get("newDatatypeValue");
                 if (newDatatypeName && newDatatypeName.value !== ""
-                        && newDatatypeConstructor1 && newDatatypeConstructor1.value !== ""
-                        && newDatatypeConstructor2 && newDatatypeConstructor2.value !== "") {
+                        && newDatatypeConstructor1 && newDatatypeConstructor1.value !== "") {
                     emuchartsManager.add_datatype({
                         name: newDatatypeName,
-                        constructors: [ newDatatypeConstructor1, newDatatypeConstructor2 ],
+                        constructors: newDatatypeConstructor1.split(",").map(function (c){ return c.trim(); }),
                         value: newDatatypeValue
                     });
                     view.remove();
@@ -1296,7 +1290,7 @@ define(function (require, exports, module) {
 
         d3.select("#btn_menuEditDatatype").on("click", function () {
             document.getElementById("menuContext").children[1].style.display = "none";
-            // step 1: ask to select the variable that needs to be edited
+            // step 1: ask to select the datatype that needs to be edited
             var datatypes = emuchartsManager.getDatatypes();
             var labels = [];
             var data = [];
@@ -1324,13 +1318,44 @@ define(function (require, exports, module) {
             });
         });
 
+        d3.select("#btn_menuDeleteDatatype").on("click", function () {
+            document.getElementById("menuContext").children[1].style.display = "none";
+            // step 1: ask to select the datatype that needs to be edited
+            var datatypes = emuchartsManager.getDatatypes();
+            var labels = [];
+            var data = [];
+            datatypes.forEach(function (datatype) {
+                var l = datatype.name;
+                labels.push(l);
+                data.push(datatype);
+            });
+            displaySelectDatatype.create({
+                header: "Delete datatype",
+                message: "Please select a datatype",
+                datatypes: labels,
+                buttons: ["Cancel", "Delete Datatype"]
+            }).on("delete_datatype", function (e, view) {
+                if (datatypes.length > 0) {
+                    var c = e.data.options.get("selectedDatatype");
+                    var theDatatype = data[c];
+                    view.remove();
+                    emuchartsManager.delete_datatype(theDatatype.id);
+                }
+            }).on("cancel", function (e, view) {
+                // just remove window
+                view.remove();
+                return;
+            });
+        });
+
         //-- Code generators menu -----------------------------------------------------------
         d3.select("#menuCodeGenenerators").on("mouseover", function () {
             document.getElementById("menuCodeGenenerators").children[1].style.display = "block";
         });
-        d3.select("#btn_menuPVSPrinter").on("click", function () {
+
+        function printer_template(printer_name, file_extension) {
             var emucharts = {
-                name: ("emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th"),
+                name: ("emucharts_" + projectManager.project().name().replace(/-/g, "_")),
                 author: {
                     name: "xxxx",
                     affiliation: "xxxx",
@@ -1338,51 +1363,57 @@ define(function (require, exports, module) {
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
+                datatypes: emuchartsManager.getDatatypes(),
                 variables: emuchartsManager.getVariables(),
                 states: emuchartsManager.getStates(),
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsCodeGenerators.emuchartsPVSPrinter.print(emucharts);
+            var model = printer_name.print(emucharts);
             if (model.err) {
                 console.log(model.err);
                 return;
             }
             if (model.res) {
-                var name = emucharts.name + ".pvs";
+                var name = emucharts.name + file_extension;
                 var content = model.res;
                 return projectManager.project().addFile(name, content, { overWrite: true });
             } else {
-                console.log("Warning, PVS model is undefined.");
+                console.log("Warning, " + file_extension.replace(".","") + " model is undefined.");
             }
+        }
+
+        d3.select("#btn_menuPVSPrinter").on("click", function () {
+            printer_template(emuchartsCodeGenerators.emuchartsPVSPrinter, ".pvs");
         });
         d3.select("#btn_menuNuXMVPrinter").on("click", function () {
-            var emucharts = {
-                name: ("emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_SMV"),
-                author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
-                },
-                importings: [],
-                constants: emuchartsManager.getConstants(),
-                variables: emuchartsManager.getVariables(),
-                states: emuchartsManager.getStates(),
-                transitions: emuchartsManager.getTransitions(),
-                initial_transitions: emuchartsManager.getInitialTransitions()
-            };
-            var model = emuchartsCodeGenerators.emuchartsNuXMVPrinter.print(emucharts);
-            if (model.err) {
-                console.log(model.err);
-                return;
-            }
-            if (model.res) {
-                var name = emucharts.name + ".smv";
-                var content = model.res;
-                return projectManager.project().addFile(name, content, { overWrite: true });
-            } else {
-                console.log("Warning, NuXMV model is undefined.");
-            }
+            printer_template(emuchartsCodeGenerators.emuchartsNuXMVPrinter, ".smv");
+            // var emucharts = {
+            //     name: ("emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_SMV"),
+            //     author: {
+            //         name: "<author name>",
+            //         affiliation: "<affiliation>",
+            //         contact: "<contact>"
+            //     },
+            //     importings: [],
+            //     constants: emuchartsManager.getConstants(),
+            //     variables: emuchartsManager.getVariables(),
+            //     states: emuchartsManager.getStates(),
+            //     transitions: emuchartsManager.getTransitions(),
+            //     initial_transitions: emuchartsManager.getInitialTransitions()
+            // };
+            // var model = emuchartsCodeGenerators.emuchartsNuXMVPrinter.print(emucharts);
+            // if (model.err) {
+            //     console.log(model.err);
+            //     return;
+            // }
+            // if (model.res) {
+            //     var name = emucharts.name + ".smv";
+            //     var content = model.res;
+            //     return projectManager.project().addFile(name, content, { overWrite: true });
+            // } else {
+            //     console.log("Warning, NuXMV model is undefined.");
+            // }
         });
         d3.select("#btn_menuPIMPrinter").on("click", function () {
             var emucharts = {
@@ -2053,6 +2084,8 @@ define(function (require, exports, module) {
             transitionsTable.setTransitions(emuchartsManager.getTransitions());
             // set Constants Table
             constantsTable.setConstants(emuchartsManager.getConstants());
+            // set Datatypes Table
+            datatypesTable.setDatatypes(emuchartsManager.getDatatypes());
         }).catch(function (err) {
             // if the default emuchart file is not in the project, then just clear the current diagram
             d3.select("#btnNewEmuchart").node().click();

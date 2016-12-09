@@ -15,6 +15,8 @@ define(function (require, exports, module) {
     var theory_name;
     var parser;
 
+    var pvs_enumeration_type_template = require("text!plugins/emulink/models/pvs/templates/pvs_enumeration_type.handlebars");
+
     var initialMachineState = "initialMachineState";
     var machineStateType = "MachineState";
 
@@ -76,6 +78,21 @@ define(function (require, exports, module) {
         ans += pvsEnumeratedTypePrinter.fromArray("MachineState", tmp);
         return ans;
     };
+
+    /**
+     * Prints PVS definitions for Emuchart states
+     */
+    EmuchartsPVSPrinter.prototype.print_datatypes = function (emuchart) {
+        if (emuchart && emuchart.datatypes) {
+            return Handlebars.compile(pvs_enumeration_type_template, { noEscape: true })({
+                comment: "user defined datatypes",
+                indent: "  ",
+                datatypes: emuchart.datatypes
+            });
+        }
+        return "";
+    };
+
 
 
     /**
@@ -527,6 +544,7 @@ define(function (require, exports, module) {
         var ans = this.print_descriptor(emuchart) + "\n";
         ans += emuchart.name + ": THEORY\n BEGIN\n";
         ans += this.print_importings(emuchart);
+        ans += this.print_datatypes(emuchart); // -- done using handlebars library
         ans += this.print_constants(emuchart);
         ans += this.print_states(emuchart);    // -- done using handlebars library
         ans += this.print_variables(emuchart); // -- done using handlebars library
