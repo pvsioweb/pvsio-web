@@ -1243,7 +1243,7 @@ define(function (require, exports, module) {
             d3.event.stopPropagation();
             // correct handling of mouse events requires moving the selected transition on top of the others
             if (svg.node().children.length > 0) {
-                _this.select(edge.id);
+                _this.select_transition(edge.id);
             }
         };
         var dragStart = function (node) {
