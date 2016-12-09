@@ -7,16 +7,16 @@
 /*global define, d3*/
 define(function (require, exports, module) {
     "use strict";
-    
+
     var _this,
         eventDispatcher = require("util/eventDispatcher");
-    
+
     function ConstantsTable() {
         eventDispatcher(this);
         _this = this;
         return this;
     }
-    
+
     ConstantsTable.prototype.addConstant = function(tableElements) {
         function installTableHandlers() {
             d3.selectAll("#RemoveConstant").on("click", function () {
@@ -28,11 +28,12 @@ define(function (require, exports, module) {
             d3.selectAll("#EditConstant").on("click", function () {
                 _this.editConstant(this.parentElement.parentElement.id);
             });
-        }        
+        }
         function addElement(e) {
             var newConstant = d3.select("#ConstantsTemplate").node().cloneNode(true);
             newConstant.children[0].innerHTML = newConstant.name = e.name;
-            newConstant.children[1].innerHTML = newConstant.value = e.value;
+            newConstant.children[1].innerHTML = newConstant.name = e.type;
+            newConstant.children[2].innerHTML = newConstant.value = e.value;
             newConstant.type = e.type;
             newConstant.id = e.id;
             newConstant.scope = e.scope;
@@ -44,7 +45,7 @@ define(function (require, exports, module) {
         installTableHandlers();
         return _this;
     };
-    
+
     ConstantsTable.prototype.removeConstant = function(elementID) {
         var table = d3.select("#ConstantsTable").select("tbody").node();
         var theConstant = document.getElementById(elementID);
@@ -57,7 +58,7 @@ define(function (require, exports, module) {
         });
         return _this;
     };
-        
+
     ConstantsTable.prototype.editConstant = function(elementID) {
         var theConstant = document.getElementById(elementID);
         _this.fire({
@@ -68,7 +69,7 @@ define(function (require, exports, module) {
         });
         return _this;
     };
-    
+
     ConstantsTable.prototype.setConstants = function(tableElements) {
         function clearTable() {
             var table = d3.select("#ConstantsTable").select("tbody").node();
@@ -76,11 +77,11 @@ define(function (require, exports, module) {
                 table.removeChild(table.lastChild);
             }
             return _this;
-        }        
+        }
         clearTable();
         this.addConstant(tableElements);
         return _this;
     };
-    
+
     module.exports = ConstantsTable;
 });
