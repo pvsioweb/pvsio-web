@@ -80,6 +80,7 @@ define(function (require, exports, module) {
         editor.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_newEmuchartsLoaded", function (event) { _this.fire(event); });
+        editor.addListener("emuCharts_highlightTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_selectTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deselectTransition", function (event) { _this.fire(event); });
         editor.addListener("emuCharts_deselectAllTransitions", function (event) { _this.fire(event); });

@@ -145,5 +145,25 @@ define(function (require, exports, module) {
         return this;
     };
 
+    TransitionsTable.prototype.scrollTop = function (id) {
+        function getPosition(id) {
+            var children = d3.select("#TransitionsTable").select("tbody").node().children;
+            for (var i = 0; i < children.length; i++) {
+                if (children[i].id === id) {
+                    return i;
+                }
+            }
+        }
+        function getScrollHeight() {
+            // return d3.select("#TransitionsTable").select("tbody").node().scrollHeight / d3.select("#TransitionsTable").select("tbody").node().children.length;
+            return 41;
+        }
+        var pos = getPosition(id);
+        if (pos > 0) {
+            d3.select("#TransitionsTable").node().scrollTop = pos * getScrollHeight();
+        }
+        return this.selectTransition(id);
+    };
+
     module.exports = TransitionsTable;
 });

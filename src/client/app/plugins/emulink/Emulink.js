@@ -248,10 +248,12 @@ define(function (require, exports, module) {
         editTransition(event.edge);
     }
 
-    function selectTransition_handler(event) {
+    function highlightTransition_handler(event) {
         transitionsTable.selectTransition(event.edge.id);
     }
-
+    function selectTransition_handler(event) {
+        transitionsTable.scrollTop(event.edge.id);
+    }
     function deselectTransition_handler(event) {
         transitionsTable.deselectTransition(event.edge.id);
     }
@@ -345,6 +347,7 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_renameState", renameState_handler);
         emuchartsManager.addListener("emuCharts_changeStateColor", changeStateColor_handler);
         emuchartsManager.addListener("emuCharts_renameTransition", renameTransition_handler);
+        emuchartsManager.addListener("emuCharts_highlightTransition", highlightTransition_handler);
         emuchartsManager.addListener("emuCharts_selectTransition", selectTransition_handler);
         emuchartsManager.addListener("emuCharts_deselectTransition", deselectTransition_handler);
         emuchartsManager.addListener("emuCharts_renameInitialTransition", renameInitialTransition_handler);
