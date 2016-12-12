@@ -148,15 +148,22 @@ define(function (require, exports, module) {
     TransitionsTable.prototype.scrollTop = function (id) {
         function getPosition(id) {
             var children = d3.select("#TransitionsTable").select("tbody").node().children;
-            for (var i = 0; i < children.length; i++) {
+            for (var i = 1; i < children.length; i++) { // the first child is always the header
                 if (children[i].id === id) {
                     return i;
                 }
             }
         }
-        function getScrollHeight() {
-            // return d3.select("#TransitionsTable").select("tbody").node().scrollHeight / d3.select("#TransitionsTable").select("tbody").node().children.length;
-            return 41;
+        function getScrollHeight(id) {
+            var height = 0;
+            var children = d3.select("#TransitionsTable").select("tbody").node().children;
+            for (var i = 1; i < children.length; i++) { // the first child is always the header
+                if (children[i].id === id) {
+                    return height;
+                }
+                height += children[i].scrollHeight;
+            }
+            return height;
         }
         function scrollTopTween(scrollTop) {
             return function() {
@@ -164,12 +171,9 @@ define(function (require, exports, module) {
                 return function(t) { this.scrollTop = i(t); };
             };
         }
-        var pos = getPosition(id);
-        if (pos > 0) {
-            d3.select("#TransitionsTable").transition()
-                .duration(500)
-                .tween("TTScrollTop", scrollTopTween(pos * getScrollHeight()));
-        }
+        d3.select("#TransitionsTable").transition()
+            .duration(500)
+            .tween("TTScrollTop", scrollTopTween(getScrollHeight(id)));
         return this;
     };
 
