@@ -158,11 +158,19 @@ define(function (require, exports, module) {
             // return d3.select("#TransitionsTable").select("tbody").node().scrollHeight / d3.select("#TransitionsTable").select("tbody").node().children.length;
             return 41;
         }
+        function scrollTopTween(scrollTop) {
+            return function() {
+                var i = d3.interpolateNumber(this.scrollTop, scrollTop);
+                return function(t) { this.scrollTop = i(t); };
+            };
+        }
         var pos = getPosition(id);
         if (pos > 0) {
-            d3.select("#TransitionsTable").node().scrollTop = pos * getScrollHeight();
+            d3.select("#TransitionsTable").transition()
+                .duration(500)
+                .tween("TTScrollTop", scrollTopTween(pos * getScrollHeight()));
         }
-        return this.selectTransition(id);
+        return this;
     };
 
     module.exports = TransitionsTable;

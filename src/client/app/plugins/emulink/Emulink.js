@@ -253,6 +253,7 @@ define(function (require, exports, module) {
     }
     function selectTransition_handler(event) {
         transitionsTable.scrollTop(event.edge.id);
+        transitionsTable.selectTransition(event.edge.id);
     }
     function deselectTransition_handler(event) {
         transitionsTable.deselectTransition(event.edge.id);
