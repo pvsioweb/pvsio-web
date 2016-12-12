@@ -1180,7 +1180,7 @@ define(function (require, exports, module) {
                 d3.event.stopPropagation();
                 _this.select_transition(edge.id);
                 _this.fire({
-                    type: "emuCharts_selectTransition",
+                    type: "emuCharts_highlightTransition",
                     edge: edge
                 });
             }
@@ -1223,6 +1223,11 @@ define(function (require, exports, module) {
             } else if (editor_mode === MODE.DELETE()) {
                 _this.fire({
                     type: "emuCharts_deleteTransition",
+                    edge: edge
+                });
+            } else {
+                _this.fire({
+                    type: "emuCharts_selectTransition",
                     edge: edge
                 });
             }

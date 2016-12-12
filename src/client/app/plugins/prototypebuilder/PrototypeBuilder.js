@@ -23,6 +23,7 @@ define(function (require, exports, module) {
         toolbar             = require("text!pvsioweb/forms/templates/prototypeBuilderToolbar.handlebars"),
         ScriptPlayer        = require("util/ScriptPlayer"),
 //        fs              = require("util/fileHandler"),
+        PluginManager       = require("plugins/PluginManager"),
         FileSystem          = require("filesystem/FileSystem"),
         NotificationManager = require("project/NotificationManager"),
         SaveProjectChanges  = require("project/forms/SaveProjectChanges"),
@@ -600,14 +601,14 @@ define(function (require, exports, module) {
     };
 
     PrototypeBuilder.prototype.handleKeyDownEvent = function (e) {
-        if (!this.collapsed) {
+        if (PluginManager.getInstance().isLoaded(this) && !this.collapsed) {
             prototypeImageView._mapCreator.handleKeyDownEvent(e);
             require("widgets/ButtonHalo").getInstance().handleKeyDownEvent(e);
         }
     };
 
     PrototypeBuilder.prototype.handleKeyUpEvent = function (e) {
-        if (!this.collapsed) {
+        if (PluginManager.getInstance().isLoaded(this) && !this.collapsed) {
             require("widgets/ButtonHalo").getInstance().handleKeyUpEvent(e);
         }
     };
