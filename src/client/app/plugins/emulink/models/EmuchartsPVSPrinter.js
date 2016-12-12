@@ -65,13 +65,17 @@ define(function (require, exports, module) {
         return this;
     };
 
+    function safeName(s) {
+        return s.replace(/-/g, "_");
+    }
+
     /**
      * Prints PVS definitions for Emuchart states
      */
     EmuchartsPVSPrinter.prototype.print_states = function (emuchart) {
         var tmp = [];
         emuchart.states.forEach(function (state) {
-            tmp.push(state.name);
+            tmp.push(safeName(state.name));
         });
 
         var ans = "\n  %-- machine states\n";
@@ -83,7 +87,7 @@ define(function (require, exports, module) {
      * Prints PVS definitions for Emuchart states
      */
     EmuchartsPVSPrinter.prototype.print_datatypes = function (emuchart) {
-        if (emuchart && emuchart.datatypes) {
+        if (emuchart && emuchart.datatypes && emuchart.datatypes.length > 0) {
             return Handlebars.compile(pvs_enumeration_type_template, { noEscape: true })({
                 comment: "user defined datatypes",
                 indent: "  ",
@@ -232,8 +236,8 @@ define(function (require, exports, module) {
             var code = "  %-- initial state\n  ";
             code += pvsFunction.signature;
             var variables = [];
-            predefined_variables.current_state.value = theTransition.to;
-            predefined_variables.previous_state.value = theTransition.to;
+            predefined_variables.current_state.value = safeName(theTransition.to);
+            predefined_variables.previous_state.value = safeName(theTransition.to);
             variables.push(predefined_variables.current_state);
             variables.push(predefined_variables.previous_state);
             variables = variables.concat(emuchart.variables);
@@ -352,7 +356,7 @@ define(function (require, exports, module) {
                     // transitions with the same name can start from different states and have different conditions
                     if (transition.identifier.val === theTransition.identifier.val) {
                         // the final expression for pre is the conjunction of all expressions
-                        var cond = [ ("(current_state(st) = " + transition.from + ")") ];
+                        var cond = [ ("(current_state(st) = " + safeName(transition.from) + ")") ];
                         if (transition.cond && transition.cond.type === "expression" &&
                                 transition.cond.val && transition.cond.val.length > 0) {
                             var tmp = [];
@@ -379,7 +383,7 @@ define(function (require, exports, module) {
                         }
                         // the final expression for post is a LET-IN expression
                         // given by the sequence of collected statements separated by commas
-                        var letExpr = [ ("LET new_st = leave_state(" + transition.from + ")(st)") ];
+                        var letExpr = [ ("LET new_st = leave_state(" + safeName(transition.from) + ")(st)") ];
                         var inExpr = "";
                         if (transition.actions && transition.actions.val &&
                                 transition.actions.val.length > 0) {
@@ -412,7 +416,7 @@ define(function (require, exports, module) {
                                 letExpr.push(expr);
                             });
                         }
-                        inExpr = "IN enter_into(" + transition.to + ")(new_st)";
+                        inExpr = "IN enter_into(" + safeName(transition.to) + ")(new_st)";
 
                         permissionFunction.cases.push("(" + cond.join(" AND ") + ")");
                         transitionFunction.cases.push({ cond: cond, letExpr: letExpr, inExpr: inExpr });
