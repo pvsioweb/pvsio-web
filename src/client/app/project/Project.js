@@ -85,7 +85,7 @@ define(function (require, exports, module) {
      */
     Project.prototype.setUpListeners = function() {
         var _this = this;
-        function onWidgetModified() {
+        function onWidgetModified(opt) {
             _this._dirty(true);
             var newWDStr = JSON.stringify(WidgetManager.getWidgetDefinitions(), null, " ");
             //get the widget definitions and update the widgetDefinition file

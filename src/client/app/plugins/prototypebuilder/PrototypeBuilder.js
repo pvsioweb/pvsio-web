@@ -482,8 +482,7 @@ define(function (require, exports, module) {
                     view.remove();
                     e.data.scale = prototypeImageView.resize();
                     var widget = WidgetManager.addNewWidget(e.data, coord, function(w, renderResponse) {
-                        region.classed(w.type(), true)
-                            .attr("id", w.id());
+                        region.classed(w.type(), true).attr("id", w.id());
                         w.element(region);
                         if (w.needsImageMap()) {
                             w.createImageMap({ callback: renderResponse });
