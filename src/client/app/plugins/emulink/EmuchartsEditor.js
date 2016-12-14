@@ -1050,7 +1050,7 @@ define(function (require, exports, module) {
         }
     };
 
-    EmuchartsEditor.prototype.select_node = function (id) {
+    EmuchartsEditor.prototype.select_state = function (id) {
         moveToFront(id);
         return this;
     };
@@ -1630,7 +1630,7 @@ define(function (require, exports, module) {
                     editor_mode !== MODE.RENAME()) {
                 // correct handling of mouse events requires moving the selected transition on top of the others
                 if (svg.node().children.length > 0) {
-                    _this.select(node.id);
+                    _this.select_node(node.id);
                 }
                 var draggedNode = _this.emucharts.nodes.get(node.id);
                 // update node position
