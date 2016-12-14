@@ -1630,7 +1630,7 @@ define(function (require, exports, module) {
                     editor_mode !== MODE.RENAME()) {
                 // correct handling of mouse events requires moving the selected transition on top of the others
                 if (svg.node().children.length > 0) {
-                    _this.select_node(node.id);
+                    _this.select_state(node.id);
                 }
                 var draggedNode = _this.emucharts.nodes.get(node.id);
                 // update node position
