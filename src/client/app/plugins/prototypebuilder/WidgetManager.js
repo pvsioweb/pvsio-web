@@ -352,24 +352,16 @@ define(function (require, exports, module) {
 
         var widget = createWidget(data);
         if (widget) {
+            if (onCreate) {
+                onCreate(widget, renderResponse);
+            }
+            widget.updateWithProperties(data);
+            this.addWidget(widget);
             if (typeof widget.keyCode === "function" && widget.keyCode() && widget.type() === "button") {
                 wm._keyCode2widget[widget.keyCode()] = widget;
             }
-
-            widget.updateWithProperties(data);
-            this.addWidget(widget);
             this.trigger("WidgetModified", {action: "create", widget: widget});
         }
-
-        if (onCreate) {
-            onCreate(widget, renderResponse);
-        }
-
-        if (data.hasOwnProperty("events")) {
-            data.evts = data.events;
-            delete data.events;
-        }
-
         return widget;
     };
 

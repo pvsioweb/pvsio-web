@@ -107,9 +107,9 @@ define(function (require, exports, module) {
     };
     LED.prototype.updateWithProperties = function (props) {
         props = props || {};
+        props.ledColor = props.ledColor || "#00FF66"; // default is bright green
         props.visibleWhen = props.visibleWhen || "true";
         LED.prototype.parentClass.updateWithProperties.apply(this, arguments);
-        this.ledColor(props.ledColor);
         return this.render(this.example);
     };
     /**

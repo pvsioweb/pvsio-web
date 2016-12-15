@@ -146,14 +146,6 @@ define(function (require, exports, module) {
     };
 
     TransitionsTable.prototype.scrollTop = function (id) {
-        function getPosition(id) {
-            var children = d3.select("#TransitionsTable").select("tbody").node().children;
-            for (var i = 1; i < children.length; i++) { // the first child is always the header
-                if (children[i].id === id) {
-                    return i;
-                }
-            }
-        }
         function getScrollHeight(id) {
             var height = 0;
             var children = d3.select("#TransitionsTable").select("tbody").node().children;
