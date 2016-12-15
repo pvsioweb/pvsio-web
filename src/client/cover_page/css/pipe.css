@@ -9,7 +9,7 @@ html {
 
 
 #coverpage .container {
-    width: 800px;
+    min-width: 1024px;
     margin-right: auto;
     margin-left: auto;
 }
@@ -153,7 +153,7 @@ ul {
     top: -16px;
     height: 16px;
     width: 100%;
-    box-shadow: 0px 0px 16px rgba(0,0,0,.7);  
+    box-shadow: 0px 0px 16px rgba(0,0,0,.7);
     z-index: 2;
 }
 .screenshots:after {
@@ -163,7 +163,7 @@ ul {
     position: absolute;
     height: 16px;
     width: 100%;
-    box-shadow: 0px 0px 16px rgba(0,0,0,.7);  
+    box-shadow: 0px 0px 16px rgba(0,0,0,.7);
     z-index: 2;
 }
 
@@ -232,7 +232,7 @@ ul {
 }
 
 #footer a {
-    color:   rgb(124, 169, 206) 
+    color:   rgb(124, 169, 206)
 }
 #footer p {
     padding: 0;
