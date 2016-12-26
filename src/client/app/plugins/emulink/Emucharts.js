@@ -72,11 +72,28 @@ define(function (require, exports, module) {
      * @instance
      */
     function Emucharts(emuchart) {
+        function cloneWidgets(widgets) {
+            var widgetsClone = [];
+            widgets.forEach(function (widget) {
+                var w = {
+                    category: widget.category,
+                    name: widget.name,
+                    behaviours: []
+                };
+                widget.behaviours.forEach(function (b) {
+                    w.behaviours.push(b);
+                });
+                widgetsClone.push(w);
+            });
+            return widgetsClone;
+        }
         function cloneChart(c) {
             var chart = { nodes: d3.map(), edges: d3.map(), initial_edges: d3.map(),
                           variables: d3.map(), constants: d3.map(), datatypes: d3.map() };
             if (c.states) {
+                var widgets = [];
                 c.states.forEach(function (state) {
+                    widgets = cloneWidgets(state.widgets);
                     chart.nodes.set(state.id, {
                         id:     state.id,
                         name:   state.name,
@@ -85,6 +102,10 @@ define(function (require, exports, module) {
                         height: state.height || 36,
                         x:      state.x || 100,
                         y:      state.y || 100,
+                        // the following elements are for PIMs
+                        pmr:    state.pmr || [],
+                        widgets: widgets,
+                        components: state.components || []
                     });
                 });
             }
