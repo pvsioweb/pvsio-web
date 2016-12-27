@@ -243,8 +243,12 @@ define(function (require, exports, module) {
             if (d3.select("#btn_menuSaveChart").node()) {
                 d3.select("#btn_menuSaveChart").node().click();
             }
-            var name = projectManager.project().name() + "_" + (new Date().getFullYear()) + "." +
+            var name = projectManager.project().name();
+            var date = (new Date().getFullYear()) + "." +
                             (new Date().getMonth() + 1) + "." + (new Date().getDate());
+            if (!name.endsWith(date)) {
+                name += "_" + date;
+            }
             projectManager.saveProjectDialog(name);
         });
         d3.select("#openProject").on("click", function () {

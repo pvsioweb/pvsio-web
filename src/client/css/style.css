@@ -1062,6 +1062,15 @@ label[for=selectPicture] {
   line-height: 40px;
   min-width: 240px; }
 
+.btn-primary-outline {
+  background-color: transparent;
+  border-color: transparent; }
+
+.btn-primary-outline-white {
+  background-color: transparent;
+  border-color: transparent;
+  color: white; }
+
 .newTimer,
 .newWidget {
   float: right;

@@ -637,10 +637,33 @@ define(function (require, exports, module) {
     };
 
     /**
-     * @function <a name="saveProjectDialog">saveProjectDialog</a>
+     * @function <a name="saveProjectAs">saveProjectAs</a>
      * @description This function is a variant of <a href="#saveProject">saveProject</a>
+     *              that allows users to specify a name for the project that shall be saved.
+     * @param projectName {?String} New name for the project.
+     * @returns {Promise(Project)} A Promise that resolves to the descriptor of the saved project.
+     *    The descriptor has the following format:
+     *    <li> projectName is a String defining the project name. </li>
+     *    <li> prototypeImage is an Array of Strings; each string is the path of an image filename ?? </li>
+     *    <li> pvsSpec is an Array of Strings; each string is the path of a txt file containing a model.</li>
+     * @memberof module:ProjectManager
+     * @instance
+     */
+    ProjectManager.prototype.saveProjectAs = function (projectName) {
+        return _projectManager.backupProject(projectName, { overWrite: true }).then(function (res) {
+            _projectManager.openProject(projectName);
+        }).catch(function (err) {
+            var msg = "Error: project could not be saved as " + projectName;
+            console.log(msg + err);
+            window.alert(msg);
+        });
+    };
+
+    /**
+     * @function <a name="saveProjectDialog">saveProjectDialog</a>
+     * @description This function is a variant of <a href="#saveProjectAs">saveProjectAs</a>
      *              that shows a dialog that allows users to enter the details of the project that shall be saved.
-     * @param projectName {?String} Default name for the project. If this parameter is non-null,
+     * @param projectName {?String} New name for the project. If this parameter is non-null,
      *                             the name is shown in the dialog presented to the user.
      * @returns {Promise(Project)} A Promise that resolves to the descriptor of the saved project.
      *    The descriptor has the following format:
@@ -652,32 +675,6 @@ define(function (require, exports, module) {
      */
     ProjectManager.prototype.saveProjectDialog = function (projectName) {
         return new Promise(function (resolve, reject) {
-            function saveProject(newName) {
-                _projectManager.saveProject().then(function (res) {
-                    var oldName = _projectManager.project().name();
-                    res.renameProject(newName, function (err, res) {
-                        if (err) {
-                            // alert user
-                            if (err.message === "ENOTEMPTY") {
-                                alert("Error: the folder could not be renamed into " +
-                                      err.newPath + " (another folder with the same name already exists)." +
-                                      " Please choose a different name");
-                            } else { alert(err.message); }
-                            reject(err);
-                        } else {
-                            _projectManager.project(res);
-                            //fire project changed event -- this will trigger updates in the UI
-                            var evt = {
-                                type: "ProjectChanged",
-                                current: _projectManager.project(),
-                                previous: oldName
-                            };
-                            fireProjectChanged(evt);
-                            resolve(_projectManager.project());
-                        }
-                    });
-                }).catch(function (err) { reject(err); });
-            }
             WSManager.getWebSocket().send({type: "listProjects"}, function (err, res) {
                 var projects = [];
                 if (!err) {
@@ -697,24 +694,35 @@ define(function (require, exports, module) {
                     if (projects.indexOf(e.data.projectName) >= 0) {
                         displayQuestion.create({question: "Project " + e.data.projectName +
                                                 " already exists. Overwrite project?"})
-                            .on("ok", function (e, view) {
-                                e.data.overWrite = true;
-                                // remove existing folder, save project and then rename folder
-                                fs.rmDir(e.data.projectName).then(function (res) {
-                                    saveProject(e.data.projectName);
-                                }).catch(function (err) {
-                                    console.log("Warning: Error while trying to remove project folder. " + err);
-                                    saveProject(e.data.projectName);
-                                });
+                            .on("ok", function (ev, view) {
+                                if (e.data.projectName === _projectManager.project().name()) {
+                                    _projectManager.saveProject();
+                                } else {
+                                    e.data.overWrite = true;
+                                    fs.rmDir(e.data.projectName).then(function (res) {
+                                        _projectManager.saveProjectAs(e.data.projectName);
+                                    }).catch(function (err) {
+                                        view.remove();
+                                        var msg = "Error: project could not be saved as " + e.data.projectName;
+                                        console.log(msg + err);
+                                        window.alert(msg);
+                                        reject({
+                                            code: "EEXISTS",
+                                            message: msg
+                                        });
+                                    });
+                                }
                                 view.remove();
-                            }).on("cancel", function (e, view) {
+                                resolve(_projectManager.project());
+                            }).on("Cancel", function (ev, view) {
                                 reject({
                                     code: "EEXISTS",
                                     message: "Operation cancelled by the user"
                                 });
                             });
                     } else {
-                        saveProject(e.data.projectName);
+                        _projectManager.saveProjectAs(e.data.projectName);
+                        resolve(_projectManager.project());
                     }
                     formView.remove();
                 });
