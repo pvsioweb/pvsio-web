@@ -52,6 +52,10 @@ define(function (require, exports, module) {
         return "Prototype Builder";
     };
 
+    PrototypeBuilder.prototype.getId = function () {
+        return "PrototypeBuilder";
+    };
+
     /**
      * Switches the prototoyping layer to the builder layer
      * @private
@@ -531,7 +535,7 @@ define(function (require, exports, module) {
         var _this = this;
         this.collapsed = false;
         pbContainer = pvsioWebClient.createCollapsiblePanel({
-            headerText: "Prototype Builder",
+            headerText: this.getName(),
             showContent: !this.collapsed,
             ownerObject: this,
             onClick: function (collapsed) {
@@ -542,7 +546,7 @@ define(function (require, exports, module) {
                 _this.collapsed = collapsed;
             },
             parent: "#body",
-            owner: this.getName()
+            owner: this.getId()
         });
         pbContainer.append("div").html(toolbar);
         pbContainer.append("div").attr("style", "display: flex;").html(template);

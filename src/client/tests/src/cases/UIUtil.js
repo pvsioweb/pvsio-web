@@ -98,13 +98,13 @@ define(function (require, exports, module) {
                     .then(clickProject);
         },
 
-        loadPlugin: function (pluginName) {
-            var clickPlugin = util.click("input[name='{}']".format(pluginName));
+        loadPlugin: function (pluginId) {
+            var clickPlugin = util.click("#plugin_{}".format(pluginId));
             return clickPlugin();
         },
 
-        unloadPlugin: function (pluginName) {
-            var clickPlugin = util.click("input[name='{}']".format(pluginName));
+        unloadPlugin: function (pluginId) {
+            var clickPlugin = util.click("#plugin_{}".format(pluginId));
             return clickPlugin()//to load
                     .then(clickPlugin);
         },

@@ -56,14 +56,38 @@
                 <div class="plugins">PVSio-web Tools</div>
                 <ul>
                     {{#each plugins}}
-                    <li class="list-group-item plugin-box"
-                        id="pluginBox_{{id}}">
-                        <input type="checkbox"
-                               name="{{label}}"
-                               id="plugin_{{id}}">
-                        <label for="{{label}}">{{label}}</label>
+                    <li class="list-group-item plugin-box" id="pluginBox_{{id}}" style="display:flex;">
+                        <div class="toggle toggle-modern plugin-toggle" style="width:80px; height: 32px;" id="pluginToggle_{{id}}"></div>
+                        <label for="{{label}}" id="pluginLabel_{{id}}" style="margin: 6px 0 0 10px;">
+                            <input type="checkbox"
+                                   name="{{label}}"
+                                   id="plugin_{{id}}"
+                                   style="display:none;">
+                                   {{label}}
+                        </label>
+                        <script>
+                            $('#pluginToggle_{{id}}').on('toggle', function (e, active) {
+                                if (active) {
+                                    $('#plugin_{{id}}').get(0).checked = true;
+                                } else {
+                                    $('#plugin_{{id}}').get(0).checked = false;
+                                }
+                            });
+                            $('#plugin_{{id}}').change(function() {
+                              if (this.checked) {
+                                $('#pluginToggle_{{id}}').data('toggles').toggle(true);
+                              } else {
+                                $('#pluginToggle_{{id}}').data('toggles').toggle(false);
+                              }
+                            });
+                        </script>
                     </li>
                     {{/each}}
+                    <script>
+                        // bootstrap toggle buttons
+                        //$('[data-toggle="toggle"]').bootstrapToggle();
+                        $('.toggle').toggles();
+                    </script>
                 </ul>
             </div>
             <div class="expandable-panel">

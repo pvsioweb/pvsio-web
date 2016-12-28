@@ -31,7 +31,7 @@ define(function (require, exports, module) {
     var name = "State Machine Viewer";
 
     GraphBuilder.prototype._init = function () {
-        canvas = PVSioWebClient.getInstance().createCollapsiblePanel({ headerText: name, owner: this.getName(), showContent: true });
+        canvas = PVSioWebClient.getInstance().createCollapsiblePanel({ headerText: name, owner: this.getId(), showContent: true });
         canvas.classed("graph-container", true);
         var svg = canvas.append("svg").attr("width", w).attr("height", h).append("g")
             .call(d3.behavior.zoom().scaleExtent([0.4, 10]).on("zoom", function () {
@@ -124,6 +124,10 @@ define(function (require, exports, module) {
 
     GraphBuilder.prototype.getName = function () {
         return name;
+    };
+
+    GraphBuilder.prototype.getId = function () {
+        return name.replace(/\s/g, "");
     };
 
     GraphBuilder.prototype.reInitialise = function () {
