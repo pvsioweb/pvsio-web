@@ -40,8 +40,8 @@ define(function (require, exports, module) {
         });
 
         var opts = {
-            headerText: "Storyboard Editor",
-            owner: this.getName(),
+            headerText: this.getName(),
+            owner: this.getId(),
             ownerObject: this,
             showContent: !this.collapsed,
             onClick: function (collapsed) {
@@ -141,6 +141,10 @@ define(function (require, exports, module) {
 
     PIMPrototyper.prototype.getName = function () {
         return "Storyboard Editor";
+    };
+
+    PIMPrototyper.prototype.getId = function () {
+        return "StoryboardEditor";
     };
 
     PIMPrototyper.prototype.initialise = function () {

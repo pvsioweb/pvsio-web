@@ -175,6 +175,11 @@ define(function (require, exports, module) {
     ModelEditor.prototype.getName = function () {
         return "Model Editor";
     };
+
+    ModelEditor.prototype.getId = function () {
+        return "ModelEditor";
+    };
+
     /////These are the api methods that the prototype builder plugin exposes
     ModelEditor.prototype.getDependencies = function () { return []; };
 
@@ -325,12 +330,12 @@ define(function (require, exports, module) {
     */
     ModelEditor.prototype.initialise = function () {
         editorContainer = pvsioWebClient.createCollapsiblePanel({
-            headerText: "Model Editor",
+            headerText: this.getName(),
             showContent: true,
             onClick: function () {
                 editor.refresh();
             },
-            owner: this.getName()
+            owner: this.getId()
         });
         editorContainer.append("div").html(sourceCodeTemplate);
 

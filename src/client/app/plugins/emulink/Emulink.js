@@ -393,6 +393,10 @@ define(function (require, exports, module) {
         return "EmuCharts Editor";
     };
 
+    Emulink.prototype.getId = function () {
+        return this.getName().replace(/\s/g, "");
+    };
+
     function editVariable (variableID) {
         var variableScopes = emuchartsManager.getVariableScopes();
         var theVariable = emuchartsManager.getVariable(variableID);
@@ -517,9 +521,9 @@ define(function (require, exports, module) {
         var _this = this;
         var content = require("text!plugins/emulink/forms/maincontent.handlebars");
         canvas = pvsioWebClient.createCollapsiblePanel({
-            headerText: "EmuCharts Editor",
+            headerText: _this.getName(),
             showContent: true,
-            owner: _this.getName()
+            owner: _this.getId()
         });
         canvas = canvas.html(content);
         if (document.getElementById("StateAttributes")) {

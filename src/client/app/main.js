@@ -12,7 +12,6 @@ define(function (require, exports, module) {
         Logger         = require("util/Logger"),
         ui             = require("plugins/prototypebuilder/interface"),
         PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
-        // PropertyTemplates = require("plugins/propertytemplates/PropertyTemplates"),
         ProjectManager = require("project/ProjectManager"),
         ModelEditor    = require("plugins/modelEditor/ModelEditor"),
         Emulink        = require("plugins/emulink/Emulink"),
@@ -92,33 +91,36 @@ define(function (require, exports, module) {
             ui.init()
                 .on("pluginToggled", function (event) {
                     var plugin;
-                    switch (event.target.getAttribute("name")) {
-                    case "EmuCharts Editor":
-                        plugin = Emulink.getInstance();
-                        break;
-                    case "State Machine Viewer":
-                        plugin = GraphBuilder.getInstance();
-                        break;
-                    case "Safety Test":
-                        plugin = SafetyTest.getInstance();
-                        break;
-                    case "Model Editor":
-                        plugin = ModelEditor.getInstance();
-                        break;
-                    case "Prototype Builder":
-                        plugin = PrototypeBuilder.getInstance();
-                        break;
-                    case "Storyboard Editor":
-                        plugin = PIMPrototyper.getInstance();
-                        break;
-                    // case "Property Templates":
-                    //     plugin = PropertyTemplates.getInstance();
-                    //     break;
-                    }
-                    if (event.target.checked) {
-                        pluginManager.enablePlugin(plugin);
-                    } else {
-                        pluginManager.disablePlugin(plugin);
+                    if (event && event.target && typeof event.target.id === "string") {
+                        var name = event.target.id.split("_")[1];
+                        switch (name) {
+                        case "EmuChartsEditor":
+                        case "Emulink":
+                            plugin = Emulink.getInstance();
+                            break;
+                        case "StateMachineViewer":
+                        case "GraphBuilder":
+                            plugin = GraphBuilder.getInstance();
+                            break;
+                        case "SafetyTest":
+                            plugin = SafetyTest.getInstance();
+                            break;
+                        case "ModelEditor":
+                            plugin = ModelEditor.getInstance();
+                            break;
+                        case "PrototypeBuilder":
+                            plugin = PrototypeBuilder.getInstance();
+                            break;
+                        case "StoryboardEditor":
+                        case "PIMPrototyper":
+                            plugin = PIMPrototyper.getInstance();
+                            break;
+                        }
+                        if (event.target.checked) {
+                            pluginManager.enablePlugin(plugin);
+                        } else {
+                            pluginManager.disablePlugin(plugin);
+                        }
                     }
                 });
             return Promise.resolve(true);

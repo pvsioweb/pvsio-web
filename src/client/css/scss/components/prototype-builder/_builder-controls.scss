@@ -50,6 +50,11 @@
     min-width: 240px;
 }
 
+.btn-primary-outline {
+    background-color: transparent;
+    border-color: transparent;
+}
+
 // TODO: are these classes actually used?
 .newTimer,
 .newWidget {

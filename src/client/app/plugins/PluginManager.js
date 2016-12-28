@@ -36,6 +36,21 @@ define(function (require, exports, module) {
     }
 
     /**
+        Selects a plugin (i.e., scrolls the page down to the plugin)
+        @param {object} plugin the plugin to select
+    */
+    PluginManager.prototype.selectPlugin = function (plugin) {
+        if (plugin) {
+            if (typeof plugin === "string") {
+                jumpTo(plugin);
+            } else if (typeof plugin.getName === "function") {
+                jumpTo(plugin.getName());
+            }
+        }
+        return this;
+    };
+
+    /**
         Enables a plugin
         @param {object} plugin the plugin to enable
         @returns {Promise} a promise that resolves when the plugin has been enabled
@@ -57,19 +72,19 @@ define(function (require, exports, module) {
                     return Promise.all(depPromises).then(function () {
                         plugin.initialise().then(function (res) {
                             resolve(res);
-                            jumpTo(plugin.getName());
+                            jumpTo(plugin.getId());
                         }).catch(function (err) { reject(err); });
                     }).catch(function (err) { reject(err); });
                 } else {
                     plugin.initialise().then(function (res) {
                         resolve(res);
-                        jumpTo(plugin.getName());
+                        jumpTo(plugin.getId());
                     }).catch(function (err) { reject(err); });
                 }
             } else {
                 //plugin is already enabled
                 resolve(true);
-                jumpTo(plugin.getName());
+                jumpTo(plugin.getId());
             }
         });
     };
