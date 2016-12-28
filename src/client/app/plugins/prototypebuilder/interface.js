@@ -162,7 +162,7 @@ define(function (require, exports, module) {
         },
         pluginClicked: function (event) {
             if (event.target.tagName.toLowerCase() === "li") {
-                d3.select(event.target).select("input[type='checkbox']").node().click();
+                PluginManager.getInstance().selectPlugin(event.target.id.split("_")[1]);
             } else if (event.target.tagName.toLowerCase() === "div") {
                 event.target.id = d3.select(event.target).node().parentNode.parentNode.parentNode.id;
                 event.target.checked = d3.select(d3.select(event.target).node().parentNode.parentNode.parentNode.parentNode).select("input").node().checked;
