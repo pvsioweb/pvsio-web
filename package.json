@@ -7,7 +7,7 @@
     }
   ],
   "description": "A formal methods toolkit for model-based development of human-machine interfaces",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "preferGlobal": "true",
   "dependencies": {
     "body-parser": "~1.0.0",
