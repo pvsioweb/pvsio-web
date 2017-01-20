@@ -226,7 +226,7 @@
    "displayKey": "displayError",
    "auditoryFeedback": "disabled",
    "visibleWhen": "true",
-   "fontsize": 17.1,
+   "fontsize": "14",
    "fontColor": "#fff",
    "backgroundColor": "transparent"
   },
