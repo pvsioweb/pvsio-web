@@ -125,7 +125,10 @@ bbraun_space: THEORY
                 val + pow10(i) >= 100 AND val + pow10(i) < 1000 -> floor((val + pow10(i)) * 10) / 10,
                 val + pow10(i) >= 1000                          -> floor(val + pow10(i))
               ENDCOND,
-            new_mem = mem(val)
+            new_mem = mem(val),
+	    new_i = IF i = -2 AND new_val = 100 THEN -1
+	            ELSIF i = -1 AND new_val = 1000 THEN 0
+		    ELSE i ENDIF
           IN
           COND val = max -> st,
                val < max ->
@@ -136,7 +139,7 @@ bbraun_space: THEORY
                    ENDIF,
                  new_val <= max ->
                    IF valid?(mem) THEN st WITH [ d := value(mem), c := i, m := NA ]
-                   ELSE st WITH [ d := new_val, c := i, m := NA ]
+                   ELSE st WITH [ d := new_val, c := new_i, m := NA ]
                    ENDIF
                ENDCOND
           ENDCOND
