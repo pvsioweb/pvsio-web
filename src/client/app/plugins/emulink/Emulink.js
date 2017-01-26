@@ -1394,6 +1394,9 @@ define(function (require, exports, module) {
         d3.select("#btn_menuPVSPrinter").on("click", function () {
             printer_template(emuchartsCodeGenerators.emuchartsPVSPrinter, ".pvs");
         });
+        d3.select("#btn_menuAlloyPrinter").on("click", function () {
+            printer_template(emuchartsCodeGenerators.emuchartsAlloyPrinter, ".alloy");
+        });
         d3.select("#btn_menuNuXMVPrinter").on("click", function () {
             printer_template(emuchartsCodeGenerators.emuchartsNuXMVPrinter, ".smv");
             // var emucharts = {

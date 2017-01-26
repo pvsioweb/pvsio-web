@@ -21,7 +21,8 @@ define(function (require, exports, module) {
         EmuchartsAdaPrinter    = require("plugins/emulink/models/EmuchartsAdaPrinter"),
         EmuchartsBlessPrinter  = require("plugins/emulink/models/EmuchartsBlessPrinter"),
         EmuchartsMisraCPrinter = require("plugins/emulink/models/EmuchartsMisraCPrinter"),
-        EmuchartsNuXMVPrinter  = require("plugins/emulink/models/EmuchartsNuXMVPrinter");
+        EmuchartsNuXMVPrinter  = require("plugins/emulink/models/EmuchartsNuXMVPrinter"),
+        EmuchartsAlloyPrinter  = require("plugins/emulink/models/EmuchartsAlloyPrinter");
 
     function EmuchartsCodeGenerators() {
         this.emuchartsPVSPrinter = new EmuchartsPVSPrinter("emuchart_th");
@@ -35,6 +36,7 @@ define(function (require, exports, module) {
         this.emuchartsBlessPrinter = new EmuchartsBlessPrinter("emucharts_Bless");
         this.emuchartsMisraCPrinter = new EmuchartsMisraCPrinter("emucharts_MisraC");
         this.emuchartsNuXMVPrinter = new EmuchartsNuXMVPrinter("emucharts_NuXMV");
+        this.emuchartsAlloyPrinter = new EmuchartsAlloyPrinter("emucharts_Alloy");
         return this;
     }
 

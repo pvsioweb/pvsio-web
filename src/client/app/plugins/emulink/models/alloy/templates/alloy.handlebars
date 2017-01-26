@@ -1,0 +1,7 @@
+{{descriptor}}
+
+Variables: {{#each variables}}{{name}}: {{type}}{{#unless @last}}, {{/unless}}{{/each}}
+States: {{#each states}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+Transitions: {{#each transitions}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+
+{{disclaimer}}
