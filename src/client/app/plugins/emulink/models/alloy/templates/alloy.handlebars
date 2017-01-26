@@ -1,7 +1,10 @@
 {{descriptor}}
 
-Variables: {{#each variables}}{{name}}: {{type}}{{#unless @last}}, {{/unless}}{{/each}}
-States: {{#each states}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
-Transitions: {{#each transitions}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+abstract sig State {}
+one sig {{#each states}}{{this}}{{#unless @last}}, {{/unless}}{{/each}} extends State {}
+
+sig Time {
+state : one State,{{#each variables}}
+{{name}} :one {{type}}{{#unless @last}}, {{/unless}}{{/each}} }
 
 {{disclaimer}}
