@@ -1,3 +1,7 @@
-{{{indent}}}%-- utility functions
-{{{indent}}}enter_into(ms: {{{current_state.type}}})(st: State): State = st WITH [ {{{current_state.name}}} := ms ];
-{{{indent}}}leave_state(ms: {{{previous_state.type}}})(st: State): State = st WITH [ {{{previous_state.name}}} := ms ];
+{{#if template_description}}
+%
+%   Description: This template generates PVS utility functions used in the body of transition functions for leaving and entering system modes.
+%
+{{/if}}  %-- utility functions
+  enter_into(ms: {{{current_state.type}}})(st: State): State = st WITH [ {{{current_state.name}}} := ms ]
+  leave_state(ms: {{{previous_state.type}}})(st: State): State = st WITH [ {{{previous_state.name}}} := ms ]

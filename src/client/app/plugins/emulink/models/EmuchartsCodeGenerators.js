@@ -11,7 +11,7 @@ define(function (require, exports, module) {
 
     var instance;
 
-    var EmuchartsPVSPrinter    = require("plugins/emulink/models/EmuchartsPVSPrinter"),
+    var EmuchartsPVSPrinter    = require("plugins/emulink/models/EmuchartsPVSPrinter2"),
         EmuchartsLustrePrinter = require("plugins/emulink/models/EmuchartsLustrePrinter"),
         EmuchartsPIMPrinter    = require("plugins/emulink/models/EmuchartsPIMPrinter"),
         EmuchartsCppPrinter    = require("plugins/emulink/models/EmuchartsCppPrinter"),
