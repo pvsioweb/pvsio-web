@@ -1,0 +1,11 @@
+{{#if template_description}}
+%
+%   Description: This template generates a library of PVS utility functions. The library includes:
+%                - real2string(x: real): string -- this function automatically converts real numbers into strings
+%
+{{/if}}  %-- utility functions
+  %-- automatic conversion from real to string
+  real2string(x: real): string = "" + x
+  CONVERSION real2string
+  %-- get date and time in compact format DD.MM.YYYY hh:mm
+  get_todays_date: string = get_time`day + "." + get_time`month + "." + get_time`year + " " + get_time`hour + ":" + get_time`minute

@@ -12,7 +12,8 @@
 {{/if}}{{descriptor}}
 {{name}}: THEORY
  BEGIN{{#if importings}} IMPORTING{{#each importings}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}
-{{#if constants}}{{constants}}
+{{#if extras}}{{extras}}
+{{/if}}{{#if constants}}{{constants}}
 {{/if}}{{#if datatypes}}{{datatypes}}
 {{/if}}{{modes}}
 {{state_variables}}

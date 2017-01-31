@@ -64,7 +64,8 @@ define(function (require, exports, module) {
         constants_type_template = require("text!plugins/emulink/models/pvs/templates/pvs_constants_type.handlebars"),
         pvs_theory_template = require("text!plugins/emulink/models/pvs/templates/pvs_theory.handlebars"),
         pvs_descriptor_template = require("text!plugins/emulink/models/pvs/templates/pvs_descriptor.handlebars"),
-        pvs_disclaimer_template = require("text!plugins/emulink/models/pvs/templates/pvs_disclaimer.handlebars");
+        pvs_disclaimer_template = require("text!plugins/emulink/models/pvs/templates/pvs_disclaimer.handlebars"),
+        pvs_utils_template = require("text!plugins/emulink/models/pvs/templates/pvs_utils.handlebars");
 
     var theory_name;
     var parser;
@@ -197,7 +198,6 @@ define(function (require, exports, module) {
      */
     EmuchartsPVSPrinter.prototype.print_utils = function (emuchart) {
         return Handlebars.compile(leave_enter_function_template, { noEscape: true })({
-            indent: "  ",
             current_state: predefined_variables.current_state,
             previous_state: predefined_variables.previous_state
         });
@@ -489,7 +489,8 @@ define(function (require, exports, module) {
             });
             var data = {
                 comment: "transition functions",
-                functions: pvsFunctions
+                functions: pvsFunctions,
+                full_coverage: true
             };
             ans = Handlebars.compile(transition_functions_template, { noEscape: true })(data);
         }
@@ -513,7 +514,7 @@ define(function (require, exports, module) {
 
     EmuchartsPVSPrinter.prototype.print_descriptor = function (emuchart) {
         return Handlebars.compile(pvs_descriptor_template, { noEscape: true })({
-            name: theory_name,
+            name: emuchart.name,
             author: emuchart.author,
             description: emuchart.description
         });
@@ -534,15 +535,16 @@ define(function (require, exports, module) {
 
         var model = {
             descriptor: this.print_descriptor(emuchart),
-            name: theory_name,
+            name: emuchart.name, // Note: it is important to have the theory name identical to the file name -- otherwise PVSio refuses to evaluate commands!
             importings: emuchart.importings,
-            utils: this.print_utils(emuchart), // -- uses handlebars library
-            constants: this.print_constants(emuchart), // -- uses handlebars library
-            modes: this.print_states(emuchart),    // -- uses handlebars library
-            datatypes: this.print_datatypes(emuchart), // -- uses handlebars library
-            state_variables: this.print_variables(emuchart), // -- uses handlebars library
-            init: this.print_initial_transition(emuchart), // -- uses handlebars library
-            transitions: this.print_transitions(emuchart), // -- uses handlebars library
+            utils: this.print_utils(emuchart),
+            extras: Handlebars.compile(pvs_utils_template, { noEscape: true })(),
+            constants: this.print_constants(emuchart),
+            modes: this.print_states(emuchart),
+            datatypes: this.print_datatypes(emuchart),
+            state_variables: this.print_variables(emuchart),
+            init: this.print_initial_transition(emuchart),
+            transitions: this.print_transitions(emuchart),
             disclaimer: this.print_disclaimer()
         };
 
