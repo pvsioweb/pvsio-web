@@ -1,7 +1,7 @@
 {
  "descriptor": {
   "file_type": "emdl",
-  "version": "1.3",
+  "version": "1.4",
   "description": "emucharts model",
   "chart_name": "emucharts_NikiT34"
  },
@@ -105,20 +105,11 @@
     "width": 36,
     "height": 36,
     "color": "#2ca02c"
-   },
-   {
-    "name": "set_rate",
-    "id": "X2",
-    "x": 2181.6666870117188,
-    "y": 219.82293701171875,
-    "width": 36,
-    "height": 36,
-    "color": "#ff7f0e"
    }
   ],
   "transitions": [
    {
-    "name": "[ !syringe_loaded && time_to_load = 0 ]\n{ syringe_loaded := true; }",
+    "name": "[ !syringeOK && plunger <= syringeSize ]\n{ syringeOK := true; }",
     "id": "T21",
     "source": {
      "name": "preloading",
@@ -134,7 +125,7 @@
     }
    },
    {
-    "name": "[ !syringe_loaded && time_to_load > 0 ]\n{ time_to_load := time_to_load - 1; }",
+    "name": "[ !syringeOK && plunger > syringeSize ]\n{ plunger := plunger - plungerStep; }",
     "id": "T20",
     "source": {
      "name": "preloading",
@@ -150,7 +141,7 @@
     }
    },
    {
-    "name": "[ syringe_loaded ]\n{ display := \"10ml BD Plastipak\"; \n  topline := \"\";\n  disp_message_1 := \"\";\n  disp_message_1 := \"\";\n  botline := \"Press YES\"; }",
+    "name": "[ syringeOK ]\n{ display := syringeSize + volumeUnits + \" \" + syringeBrand; \n  topline := blank;\n  disp_message_1 := blank;\n  disp_message_1 := blank;\n  botline := PressYes; }",
     "id": "T16",
     "source": {
      "name": "preloading",
@@ -166,7 +157,7 @@
     }
    },
    {
-    "name": "[ volume = 0 ]\n{ display := \"Infusion Complete!\";\n  disp_message_1 := \"\";\n  disp_message_2 := \"\";\n  topline := \"\";\n  botline := \"Press OFF\"; }",
+    "name": "[ volumeLeft = 0 ]\n{ display := InfusionComplete;\n  disp_message_1 := blank;\n  disp_message_2 := blank;\n  topline := blank;\n  botline := PressOff; }",
     "id": "T26",
     "source": {
      "name": "infusing",
@@ -182,7 +173,7 @@
     }
    },
    {
-    "name": "[ volume = 0 ]\n{ display := \"Infusion Complete!\";\n  disp_message_1 := \"\";\n  disp_message_2 := \"\";\n  topline := \"\";\n  botline := \"Press OFF\"; }",
+    "name": "[ volumeLeft = 0 ]\n{ display := InfusionComplete;\n  disp_message_1 := blank;\n  disp_message_2 := blank;\n  topline := blank;\n  botline := PressOff; }",
     "id": "T27",
     "source": {
      "name": "infusing_disp_syringe",
@@ -198,7 +189,7 @@
     }
    },
    {
-    "name": "[ volume > 0 ]\n{ volume := volume - (rate * timetick);\n  botline := \"<<<<< Pump Delivering\"; }",
+    "name": "[ volumeLeft > 0 ]\n{ topline := \"Time Remaining: \" + hoursduration + \":\" + minutesduration;\n  volumeLeft := volumeLeft - (infusionrate * timetick);\n  hoursduration := floor(volumeLeft / infusionrate);\n  botline := PumpDelivering; }",
     "id": "T25",
     "source": {
      "name": "infusing_disp_syringe",
@@ -214,7 +205,7 @@
     }
    },
    {
-    "name": "[ volume > 0 ]\n{ volume := volume - (rate * timetick);\n  botline := \"10ml BD Plastipak\"; }",
+    "name": "[ volumeLeft > 0 ]\n{ topline := \"Time Remaining: \" + hoursduration + \":\" + minutesduration;\n  volumeLeft := volumeLeft - (infusionrate * timetick);\n  hoursduration := floor(volumeLeft / infusionrate);\n  botline := PumpDelivering; }",
     "id": "T24",
     "source": {
      "name": "infusing",
@@ -230,55 +221,7 @@
     }
    },
    {
-    "name": "click_down [ disp_numeric = 0 ] { disp_numeric := 0 }",
-    "id": "T7",
-    "source": {
-     "name": "set_rate",
-     "id": "X2"
-    },
-    "target": {
-     "name": "set_rate",
-     "id": "X2"
-    },
-    "controlPoint": {
-     "x": 2231.8333435058594,
-     "y": 277.8333282470703
-    }
-   },
-   {
-    "name": "click_down [ disp_numeric > 0 && disp_numeric <= 100 ] { disp_numeric := disp_numeric - 0.1; }",
-    "id": "T3",
-    "source": {
-     "name": "set_rate",
-     "id": "X2"
-    },
-    "target": {
-     "name": "set_rate",
-     "id": "X2"
-    },
-    "controlPoint": {
-     "x": 2222.8333435058594,
-     "y": 305.8333282470703
-    }
-   },
-   {
-    "name": "click_down [ disp_numeric > 100 && disp_numeric <= 1000 ] { disp_numeric := disp_numeric - 1; }",
-    "id": "T13",
-    "source": {
-     "name": "set_rate",
-     "id": "X2"
-    },
-    "target": {
-     "name": "set_rate",
-     "id": "X2"
-    },
-    "controlPoint": {
-     "x": 2071.5,
-     "y": 336.5
-    }
-   },
-   {
-    "name": "click_info\n{ display := \"Battery Level: 50%\";\n  topline := \"\";\n  disp_message_1 := \"\";\n  disp_message_2 := \"\";\n  botline := \"Press YES\"; }",
+    "name": "click_info\n{ display := \"Battery Level: \" + batteryCharge + \"%\";\n  topline := blank;\n  disp_message_1 := blank;\n  disp_message_2 := blank;\n  botline := PressYes; }",
     "id": "T9",
     "source": {
      "name": "on",
@@ -294,7 +237,7 @@
     }
    },
    {
-    "name": "click_no\n{ display := \"Ready!\";\n  topline := \"\";\n  disp_message_1 := \"\";\n  disp_message_2 := \"\";\n  botline := \"Press YES\"; }",
+    "name": "click_no\n{ display := Ready;\n  topline := blank;\n  disp_message_1 := blank;\n  disp_message_2 := blank;\n  botline := PressYes; }",
     "id": "T12",
     "source": {
      "name": "preloading",
@@ -310,23 +253,7 @@
     }
    },
    {
-    "name": "click_no\n{ topline := \"Volume  12.0 ml\";\n  disp_message_1 := \"Duration 24:00\";\n  disp_message_2 := \"Rate     0.50ml/h\";\n  botline := \"Confirm Press YES\";\n  display := \"\"; }",
-    "id": "T19",
-    "source": {
-     "name": "ask_resume",
-     "id": "X9"
-    },
-    "target": {
-     "name": "new_regime",
-     "id": "X10"
-    },
-    "controlPoint": {
-     "x": 1539.407069923821,
-     "y": 203.50981423778885
-    }
-   },
-   {
-    "name": "click_no\n{ topline := \"Volume  12.0 ml\";\n  disp_message_1 := \"Duration 24:00\";\n  disp_message_2 := \"Rate     0.50ml/h\";\n  botline := \"Confirm, Press YES\";\n  display := \"\"; }",
+    "name": "click_no\n{ topline := \"Volume \" + volume + \" \" + volumeUnits;\n  disp_message_1 := \"Duration \" + hoursduration + \":\" + minutesduration;\n  disp_message_2 := \"Rate \" + infusionrate + \" \" + rateUnits;\n  botline := ConfirmPressYes;\n  display := blank; }",
     "id": "T29",
     "source": {
      "name": "ready",
@@ -342,19 +269,19 @@
     }
    },
    {
-    "name": "click_on_off",
-    "id": "T28",
+    "name": "click_no\n{ topline := \"Volume \" + volume + \" \" + volumeUnits;\n  disp_message_1 := \"Duration \" + hoursduration + \":\" + minutesduration;\n  disp_message_2 := \"Rate \" + infusionrate + \" \" + rateUnits;\n  botline := ConfirmPressYes;\n  display := blank; }",
+    "id": "T19",
     "source": {
-     "name": "infusion_complete",
-     "id": "X14"
+     "name": "ask_resume",
+     "id": "X9"
     },
     "target": {
-     "name": "off",
-     "id": "X1"
+     "name": "new_regime",
+     "id": "X10"
     },
     "controlPoint": {
-     "x": 122.84090423583984,
-     "y": 334.4389343261719
+     "x": 1539.407069923821,
+     "y": 203.50981423778885
     }
    },
    {
@@ -374,7 +301,23 @@
     }
    },
    {
-    "name": "click_on_off\n{ display := \"\";\n  topline := \"Event No. : 2635\";\n  disp_message_1 := \"04.03.2005 17:08\";\n  disp_message_2 := \"Switched ON\";\n  botline := \"Press INFO - Details\"; }",
+    "name": "click_on_off",
+    "id": "T28",
+    "source": {
+     "name": "infusion_complete",
+     "id": "X14"
+    },
+    "target": {
+     "name": "off",
+     "id": "X1"
+    },
+    "controlPoint": {
+     "x": 122.84090423583984,
+     "y": 334.4389343261719
+    }
+   },
+   {
+    "name": "click_on_off\n{ display := blank;\n  topline := Event2635;\n  disp_message_1 := get_todays_date;\n  disp_message_2 := SwitchedOn;\n  botline := PressInfo; }",
     "id": "T1",
     "source": {
      "name": "off",
@@ -390,55 +333,7 @@
     }
    },
    {
-    "name": "click_up [ disp_numeric < 100 ] { disp_numeric := disp_numeric + 0.1; }",
-    "id": "T4",
-    "source": {
-     "name": "set_rate",
-     "id": "X2"
-    },
-    "target": {
-     "name": "set_rate",
-     "id": "X2"
-    },
-    "controlPoint": {
-     "x": 2244.8333435058594,
-     "y": 165.8333282470703
-    }
-   },
-   {
-    "name": "click_up [ disp_numeric = 1000 ] { disp_numeric := 1000 }",
-    "id": "T8",
-    "source": {
-     "name": "set_rate",
-     "id": "X2"
-    },
-    "target": {
-     "name": "set_rate",
-     "id": "X2"
-    },
-    "controlPoint": {
-     "x": 2235.8333435058594,
-     "y": 132.8333282470703
-    }
-   },
-   {
-    "name": "click_up [ disp_numeric >= 100 && disp_numeric < 1000 ] { disp_numeric := disp_numeric + 1; }",
-    "id": "T14",
-    "source": {
-     "name": "set_rate",
-     "id": "X2"
-    },
-    "target": {
-     "name": "set_rate",
-     "id": "X2"
-    },
-    "controlPoint": {
-     "x": 2104.5,
-     "y": 81.5
-    }
-   },
-   {
-    "name": "click_yes\n[ !end_program_reached ]\n{ disp_message_1 := \"Press YES to Resume\";\n  disp_message_2 := \"NO for New Program\";\n  display := \"\";\n  topline := \"\";\n  botline := \"\"; }",
+    "name": "click_yes\n[ !end_program_reached ]\n{ disp_message_1 := PressYesToResume;\n  disp_message_2 := NoForNewProgram;\n  display := blank;\n  topline := blank;\n  botline := blank; }",
     "id": "T17",
     "source": {
      "name": "check_syringe",
@@ -454,7 +349,7 @@
     }
    },
    {
-    "name": "click_yes\n[ end_program_reached ]\n{ topline := \"Volume  12.0 ml\";\n  disp_message_1 := \"Duration 24:00\";\n  disp_message_2 := \"Rate     0.50ml/h\";\n  botline := \"Confirm Press YES\";\n  display := \"\"; }",
+    "name": "click_yes\n[ end_program_reached ]\n{ topline := \"Volume \" + volume + \" \" + volumeUnits;\n  disp_message_1 := \"Duration \" + hoursduration + \":\" + minutesduration;\n  disp_message_2 := \"Rate \" + infusionrate + \" \" + rateUnits;\n  botline := ConfirmPressYes;\n  display := blank; }",
     "id": "T18",
     "source": {
      "name": "check_syringe",
@@ -470,7 +365,7 @@
     }
    },
    {
-    "name": "click_yes\n{ display := \"Pre-Loading\";\n  topline := \"\";\n  disp_message_1 := \"\";\n  disp_message_2 := \"\";\n  botline := \"Use NO to Interrupt...\";\n  time_to_load := 1; }",
+    "name": "click_yes\n{ display := Preloading;\n  topline := blank;\n  disp_message_1 := blank;\n  disp_message_2 := blank;\n  botline := UseNoToInterrupt; }",
     "id": "T11",
     "source": {
      "name": "on",
@@ -486,7 +381,7 @@
     }
    },
    {
-    "name": "click_yes\n{ display := \"Ready!\";\n  topline := \"\";\n  disp_message_1 := \"\";\n  disp_message_2 := \"\";\n  botline := \"Press YES\"; }",
+    "name": "click_yes\n{ display := Ready;\n  topline := blank;\n  disp_message_1 := blank;\n  disp_message_2 := blank;\n  botline := PressYes; }",
     "id": "T10",
     "source": {
      "name": "info",
@@ -502,7 +397,7 @@
     }
    },
    {
-    "name": "click_yes\n{ display := \"Start infusion?\";\n  topline := \"\";\n  botline := \"\";\n  disp_message_1 := \"\";\n  disp_message_2 := \"\";\n  end_program_reached := false; }",
+    "name": "click_yes\n{ display := StartInfusion;\n  topline := blank;\n  botline := blank;\n  disp_message_1 := blank;\n  disp_message_2 := blank;\n  end_program_reached := false; }",
     "id": "T22",
     "source": {
      "name": "new_regime",
@@ -518,7 +413,7 @@
     }
    },
    {
-    "name": "click_yes\n{ topline := \"Time Remaining: 23:57\";\n  display := \"Rate 0.5ml/hr\";\n  botline := \"<<<<< Pump Delivering\";\n  disp_message_1 := \"\";\n  disp_message_2 := \"\"; }",
+    "name": "click_yes\n{ topline := \"Time Remaining: \" + hoursduration + \":\" + minutesduration;\n  display := \"Rate \" + infusionrate + \" \" + rateUnits;\n  botline := PumpDelivering;\n  disp_message_1 := blank;\n  disp_message_2 := blank;\n  volumeLeft := volume; }",
     "id": "T23",
     "source": {
      "name": "ready",
@@ -529,8 +424,8 @@
      "id": "X11"
     },
     "controlPoint": {
-     "x": 949.0908813476562,
-     "y": 502.734375
+     "x": 951.7777709960938,
+     "y": 501.78118896484375
     }
    }
   ],
@@ -544,27 +439,156 @@
     }
    }
   ],
-  "constants": [],
+  "datatypes": [],
+  "constants": [
+   {
+    "id": "CONST_blank:string",
+    "name": "blank",
+    "type": "string",
+    "value": "\"\""
+   },
+   {
+    "id": "CONST_ConfirmPressYes:string",
+    "name": "ConfirmPressYes",
+    "type": "string",
+    "value": "\"Confirm; Press YES\""
+   },
+   {
+    "id": "CONST_Event2635:string",
+    "name": "Event2635",
+    "type": "string",
+    "value": "\"Event No. : 2635\""
+   },
+   {
+    "id": "CONST_InfusionComplete:string",
+    "name": "InfusionComplete",
+    "type": "string",
+    "value": "\"Infusion Complete!\""
+   },
+   {
+    "id": "CONST_NoForNewProgram:string",
+    "name": "NoForNewProgram",
+    "type": "string",
+    "value": "\"NO for New Program\""
+   },
+   {
+    "id": "CONST_plungerStep:int",
+    "name": "plungerStep",
+    "type": "int",
+    "value": "45"
+   },
+   {
+    "id": "CONST_Preloading:string",
+    "name": "Preloading",
+    "type": "string",
+    "value": "\"Pre-Loading\""
+   },
+   {
+    "id": "CONST_PressInfo:string",
+    "name": "PressInfo",
+    "type": "string",
+    "value": "\"Press INFO - Details\""
+   },
+   {
+    "id": "CONST_PressOff:string",
+    "name": "PressOff",
+    "type": "string",
+    "value": "\"Press OFF\""
+   },
+   {
+    "id": "CONST_PressYes:string",
+    "name": "PressYes",
+    "type": "string",
+    "value": "\"Press YES\""
+   },
+   {
+    "id": "CONST_PressYesToResume:string",
+    "name": "PressYesToResume",
+    "type": "string",
+    "value": "\"Press YES to Resume\""
+   },
+   {
+    "id": "CONST_PumpDelivering:string",
+    "name": "PumpDelivering",
+    "type": "string",
+    "value": "\"<<<<< Pump Delivering\""
+   },
+   {
+    "id": "CONST_rateUnits:string",
+    "name": "rateUnits",
+    "type": "string",
+    "value": "\"ml/h\""
+   },
+   {
+    "id": "CONST_Ready:string",
+    "name": "Ready",
+    "type": "string",
+    "value": "\"Ready!\""
+   },
+   {
+    "id": "CONST_StartInfusion:string",
+    "name": "StartInfusion",
+    "type": "string",
+    "value": "\"Start infusion?\""
+   },
+   {
+    "id": "CONST_SwitchedOn:string",
+    "name": "SwitchedOn",
+    "type": "string",
+    "value": "\"Switched ON\""
+   },
+   {
+    "id": "CONST_syringeBrand:string",
+    "name": "syringeBrand",
+    "type": "string",
+    "value": "\"BD Plastipak\""
+   },
+   {
+    "id": "CONST_syringeSize:int",
+    "name": "syringeSize",
+    "type": "int",
+    "value": "10"
+   },
+   {
+    "id": "CONST_UseNoToInterrupt:string",
+    "name": "UseNoToInterrupt",
+    "type": "string",
+    "value": "\"Use NO to Interrupt...\""
+   },
+   {
+    "id": "CONST_volumeUnits:string",
+    "name": "volumeUnits",
+    "type": "string",
+    "value": "\"ml\""
+   }
+  ],
   "variables": [
+   {
+    "id": "VAR_batteryCharge:int(Local)",
+    "name": "batteryCharge",
+    "type": "int",
+    "value": "90",
+    "scope": "Local"
+   },
    {
     "id": "VAR_botline:string(Local)",
     "name": "botline",
     "type": "string",
-    "value": "\"\"",
+    "value": "blank",
     "scope": "Local"
    },
    {
     "id": "VAR_disp_message_1:string(Local)",
     "name": "disp_message_1",
     "type": "string",
-    "value": "\"\"",
+    "value": "blank",
     "scope": "Local"
    },
    {
     "id": "VAR_disp_message_2:string(Local)",
     "name": "disp_message_2",
     "type": "string",
-    "value": "\"\"",
+    "value": "blank",
     "scope": "Local"
    },
    {
@@ -578,7 +602,7 @@
     "id": "VAR_display:string(Local)",
     "name": "display",
     "type": "string",
-    "value": "\"\"",
+    "value": "blank",
     "scope": "Local"
    },
    {
@@ -589,24 +613,38 @@
     "scope": "Local"
    },
    {
+    "id": "VAR_hoursduration:int(Local)",
+    "name": "hoursduration",
+    "type": "int",
+    "value": "0",
+    "scope": "Local"
+   },
+   {
     "id": "VAR_rate:real(Local)",
-    "name": "rate",
+    "name": "infusionrate",
     "type": "real",
     "value": "0.5",
     "scope": "Local"
    },
    {
-    "id": "VAR_syringe_loaded:bool(Local)",
-    "name": "syringe_loaded",
-    "type": "bool",
-    "value": "false",
+    "id": "VAR_minutesduration:int(Local)",
+    "name": "minutesduration",
+    "type": "int",
+    "value": "0",
     "scope": "Local"
    },
    {
-    "id": "VAR_time_to_load:int(Local)",
-    "name": "time_to_load",
+    "id": "VAR_plunger:int(Local)",
+    "name": "plunger",
     "type": "int",
-    "value": "2",
+    "value": "100",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_syringeOK:bool(Local)",
+    "name": "syringeOK",
+    "type": "bool",
+    "value": "false",
     "scope": "Local"
    },
    {
@@ -620,7 +658,7 @@
     "id": "VAR_topline:string(Local)",
     "name": "topline",
     "type": "string",
-    "value": "\"\"",
+    "value": "blank",
     "scope": "Local"
    },
    {
@@ -628,6 +666,13 @@
     "name": "volume",
     "type": "real",
     "value": "12",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_volumeLeft:real(Local)",
+    "name": "volumeLeft",
+    "type": "real",
+    "value": "0",
     "scope": "Local"
    }
   ],
