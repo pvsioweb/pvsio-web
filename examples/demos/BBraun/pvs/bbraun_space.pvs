@@ -15,26 +15,28 @@ bbraun_space: THEORY
      NA: NA?   
    END Memory
 
-  State: TYPE =
-        [# on: int,
-           inf: int,
-           r: bbraun_real,
-           v: bbraun_real,
-           d: bbraun_real,
-           c: Cursor,
-           m: Memory #]
+  State: TYPE = [#
+     on    : int, % on flag
+     inf   : int, % infusing flag
+     r     : bbraun_real, % rate
+     v     : bbraun_real, % vtbi
+     %-- data etry state
+     d     : bbraun_real, % display
+     c     : Cursor, % cursor
+     m     : Memory  % memory
+   #]
 
   int2boolean(i: int): boolean = IF i > 0 THEN TRUE ELSE FALSE ENDIF
   CONVERSION int2boolean
 
   init(x: bbraun_real): State = (#
-  	  on := 0,
-	  inf:= 0,
-	  r  := 0,
-	  v  := 0,
-	  d  := x,
-	  c  := 0,
-	  m  := NA
+            on := 1,
+          inf:= 0,
+          r  := 0,
+          v  := 0,
+          d  := x,
+          c  := 0,
+          m  := NA
   #)
   CONVERSION init
   
@@ -60,7 +62,7 @@ bbraun_space: THEORY
      THEN  IF d(st) > 0 AND v(st) > 0 AND r(st) > 0
            THEN  LET new_vtbi: real = IF v(st) - r(st) > 0 THEN v(st) - r(st) ELSE 0 ENDIF %floor(v(st) - r(st) / 100)
                   IN st WITH [ v := new_vtbi, d := new_vtbi, inf := IF new_vtbi = 0 THEN false ELSE inf(st) ENDIF ]
-	   ELSE st WITH [ inf := false ] ENDIF
+           ELSE st WITH [ inf := false ] ENDIF
     ELSE  st ENDIF
 
   
@@ -123,7 +125,10 @@ bbraun_space: THEORY
                 val + pow10(i) >= 100 AND val + pow10(i) < 1000 -> floor((val + pow10(i)) * 10) / 10,
                 val + pow10(i) >= 1000                          -> floor(val + pow10(i))
               ENDCOND,
-            new_mem = mem(val)
+            new_mem = mem(val),
+	    new_i = IF i = -2 AND new_val = 100 THEN -1
+	            ELSIF i = -1 AND new_val = 1000 THEN 0
+		    ELSE i ENDIF
           IN
           COND val = max -> st,
                val < max ->
@@ -134,7 +139,7 @@ bbraun_space: THEORY
                    ENDIF,
                  new_val <= max ->
                    IF valid?(mem) THEN st WITH [ d := value(mem), c := i, m := NA ]
-                   ELSE st WITH [ d := new_val, c := i, m := NA ]
+                   ELSE st WITH [ d := new_val, c := new_i, m := NA ]
                    ENDIF
                ENDCOND
           ENDCOND
@@ -197,5 +202,5 @@ bbraun_space: THEORY
   click_rt(st: State): State = release_rt(press_rt(st))
 
   click_clear(st: State): State = init(0) WITH [ on := 1 ]
- END bbraun_space
 
+ END bbraun_space

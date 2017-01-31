@@ -39,8 +39,8 @@ define(function (require, exports, module) {
 //        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
         EmuchartsParser        = require("plugins/emulink/EmuchartsParser"),
         pvsTheory              = require("text!./models/pvs/templates/pvsTheory.handlebars"),
-        pvsFunctionWithInit    = require("text!./models/pvs/templates/pvsFunctionWithInit.handlebars"),
-        pvsTheoremInduction    = require("text!./models/pvs/templates/pvsTheoremInduction.handlebars"),
+        pvs_transition_system  = require("text!./models/pvs/templates/pvs_transition_system.handlebars"),
+        pvs_theorem_induction  = require("text!./models/pvs/templates/pvs_theorem_induction.handlebars"),
         FileHandler            = require("filesystem/FileHandler"),
         FileSystem             = require("filesystem/FileSystem"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView"),
@@ -1394,6 +1394,9 @@ define(function (require, exports, module) {
         d3.select("#btn_menuPVSPrinter").on("click", function () {
             printer_template(emuchartsCodeGenerators.emuchartsPVSPrinter, ".pvs");
         });
+        d3.select("#btn_menuAlloyPrinter").on("click", function () {
+            printer_template(emuchartsCodeGenerators.emuchartsAlloyPrinter, ".alloy");
+        });
         d3.select("#btn_menuNuXMVPrinter").on("click", function () {
             printer_template(emuchartsCodeGenerators.emuchartsNuXMVPrinter, ".smv");
             // var emucharts = {
@@ -1700,7 +1703,7 @@ define(function (require, exports, module) {
                     ? Promise.resolve()
                     : PluginManager.getInstance().enablePlugin(modelEditor))
                 .then(function () {
-                    var pvs_theorem = Handlebars.compile(pvsTheoremInduction, { noEscape: true })({
+                    var pvs_theorem = Handlebars.compile(pvs_theorem_induction, { noEscape: true })({
                         name: "CONSISTENCY",
                         property: "consistency",
                         property_definition: e.data.get("pvs_property"),
@@ -1709,7 +1712,7 @@ define(function (require, exports, module) {
                     });
                     var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
                         { name: "consistency_th",
-                          definitions: Handlebars.compile(pvsFunctionWithInit, { noEscape: true })({
+                          definitions: Handlebars.compile(pvs_transition_system, { noEscape: true })({
                             functionName: "action",
                             transitions: transitions
                           }),
@@ -1752,7 +1755,7 @@ define(function (require, exports, module) {
                     ? Promise.resolve()
                     : PluginManager.getInstance().enablePlugin(modelEditor))
                 .then(function () {
-                    var pvs_theorem = Handlebars.compile(pvsTheoremInduction, { noEscape: true })({
+                    var pvs_theorem = Handlebars.compile(pvs_theorem_induction, { noEscape: true })({
                         name: "REVERSIBILITY",
                         property: "reversibility",
                         property_definition: e.data.get("pvs_property"),
@@ -1761,7 +1764,7 @@ define(function (require, exports, module) {
                     });
                     var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
                         { name: "reversibility_th",
-                          definitions: Handlebars.compile(pvsFunctionWithInit, { noEscape: true })({
+                          definitions: Handlebars.compile(pvs_transition_system, { noEscape: true })({
                             functionName: "action",
                             transitions: transitions
                           }),
@@ -1804,7 +1807,7 @@ define(function (require, exports, module) {
                     ? Promise.resolve()
                     : PluginManager.getInstance().enablePlugin(modelEditor))
                 .then(function () {
-                    var pvs_theorem = Handlebars.compile(pvsTheoremInduction, { noEscape: true })({
+                    var pvs_theorem = Handlebars.compile(pvs_theorem_induction, { noEscape: true })({
                         name: "VISIBILITY",
                         property: "visibility",
                         property_definition: e.data.get("pvs_property"),
@@ -1813,7 +1816,7 @@ define(function (require, exports, module) {
                     });
                     var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
                         { name: "visibility_th",
-                          definitions: Handlebars.compile(pvsFunctionWithInit, { noEscape: true })({
+                          definitions: Handlebars.compile(pvs_transition_system, { noEscape: true })({
                             transitions: transitions
                           }),
                           body: pvs_theorem,
