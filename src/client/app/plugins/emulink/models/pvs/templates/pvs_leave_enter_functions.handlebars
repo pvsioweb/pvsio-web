@@ -1,7 +1,20 @@
 {{#if template_description}}
 %
-%   Description: This template generates PVS utility functions used in the body of transition functions for leaving and entering system modes.
+%   Description: This template generates PVS utility functions for entering and exiting modes.
+%                  The enter_into function includes also a block A COND-ENDCOND encoding state entry actions for each state
 %
 {{/if}}  %-- utility functions
-  enter_into(ms: {{{current_state.type}}})(st: State): State = st WITH [ {{{current_state.name}}} := ms ]
-  leave_state(ms: {{{previous_state.type}}})(st: State): State = st WITH [ {{{previous_state.name}}} := ms ]
+  enter_into(ms: {{{current_state.type}}})(st: State): State = {{#if entry_actions}}
+    LET st = st WITH [ {{{current_state.name}}} := ms ]
+     IN COND %-- entry actions{{#each entry_actions}}
+         current_state(st) = {{state}} -> st WITH [ {{#if l1_name}}{{l1_name}} := {{l1_name}}(st) WITH [ {{l2_name}} := {{value}} ]]{{
+                                                             else}}{{name}} := {{value}} ]{{/if}}{{#unless @last}},{{/unless}}{{/each}}
+        ENDCOND{{else
+  }}st WITH [ {{{current_state.name}}} := ms ]{{/if}}
+  leave_state(ms: {{{previous_state.type}}})(st: State): State = {{#if exit_actions}}
+    LET st = st WITH [ {{{previous_state.name}}} := ms ]
+     IN COND %-- exit actions{{#each exit_actions}}
+         previous_state(st) = {{state}} -> st WITH [ {{#if l1_name}}{{l1_name}} := {{l1_name}}(st) WITH [ {{l2_name}} := {{value}} ]]{{
+                                                             else}}{{name}} := {{value}} ]{{/if}}{{#unless @last}},{{/unless}}{{/each}}
+        ENDCOND{{else
+  }}st WITH [ {{{previous_state.name}}} := ms ]{{/if}}

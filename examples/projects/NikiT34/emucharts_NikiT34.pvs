@@ -8,13 +8,13 @@
 emucharts_NikiT34: THEORY
  BEGIN
   %-- utility functions
-  %-- automatic conversion from real to string
+  %- automatic conversion from real to string
   real2string(x: real): string = "" + x
   CONVERSION real2string
-  %-- get date and time in compact format DD.MM.YYYY hh:mm
+  %- get today's date and time in compact format DD.MM.YYYY hh:mm
   get_todays_date: string = get_time`day + "." + get_time`month + "." + get_time`year + " " + get_time`hour + ":" + get_time`minute
 
-  %--  user-defined constants
+  %-- user defined constants
   blank: string = ""
   ConfirmPressYes: string = "Confirm; Press YES"
   Event2635: string = "Event No. : 2635"

@@ -2,7 +2,7 @@
     <div class="panel panel-info shadow center">
         <div class="panel-heading">{{header}}</div>
         <form class="center form-horizontal" onsubmit="return false">
-            <div class="panel-body" style="overflow-y: scroll; height: 140px;">
+            <div class="panel-body" style="overflow-y: scroll; height: 240px;">
                 <div class="form-group">
                     <label class="control-label col-sm-4"
                            for="newStateName">{{textLabel.newStateName}}</label>
@@ -28,7 +28,33 @@
                                required="true"
                                style="padding: 6px 12px;"/>
                     </div>
-                </div>            
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-4"
+                           for="newStateEnter">{{textLabel.newStateEnter}}</label>
+                    <div class="col-sm-8">
+                        <textarea rows="1" cols="61" class="form-control"
+                                  style="resize:vertical; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;"
+                                  id="newStateEnter"
+                                   type="text"
+                                   value="{{placeholder.newStateEnter}}"
+                                   name="newStateEnter"
+                                   placeholder="{{placeholder.newStateEnter}}">{{placeholder.newStateEnter}}</textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-4"
+                           for="newStateExit">{{textLabel.newStateExit}}</label>
+                    <div class="col-sm-8">
+                        <textarea rows="1" cols="61" class="form-control"
+                                  style="resize:vertical; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;"
+                                  id="newStateExit"
+                                   type="text"
+                                   value="{{placeholder.newStateExit}}"
+                                   name="newStateExit"
+                                   placeholder="{{placeholder.newStateExit}}">{{placeholder.newStateExit}}</textarea>
+                    </div>
+                </div>
             </div>
             <div class="panel-footer">
                 <button type="button"

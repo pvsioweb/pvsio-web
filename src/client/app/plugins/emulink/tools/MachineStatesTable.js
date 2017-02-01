@@ -34,15 +34,27 @@ define(function (require, exports, module) {
             d3.selectAll("#MachineStateColor").on("click", function () {
                 _this.changeStateColor(this.parentElement.parentElement.id);
             });
+            d3.selectAll("#MachineStateEntryActions").on("click", function () {
+                _this.renameMachineState(this.parentElement.parentElement.id);
+            });
+            d3.selectAll("#MachineStateExitActions").on("click", function () {
+                _this.renameMachineState(this.parentElement.parentElement.id);
+            });
         }
         function addElement(e) {
             var newState = d3.select("#MachineStateTemplate").node().cloneNode(true);
             newState.name = e.name;
             newState.color = e.color;
+            newState.enter = e.enter;
+            newState.exit = e.exit;
             newState.id = e.id;
             newState.children[0].children[0].innerHTML = newState.name;
 //            newState.children[0].children[0].style.width = (newState.name.length * 10) + "px";
             newState.children[1].children[0].style.backgroundColor = newState.color;
+            newState.children[2].children[0].innerHTML = newState.enter;
+            newState.children[2].children[0].style.color = newState.color;
+            newState.children[3].children[0].innerHTML = newState.exit;
+            newState.children[3].children[0].style.color = newState.color;
             d3.select("#MachineStates").select("tbody").node().appendChild(newState);
         }
         tableElements.forEach(function (e) {

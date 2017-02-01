@@ -196,8 +196,54 @@ define(function (require, exports, module) {
     /**
      * Prints PVS definitions of utility functions used in Emuchart
      */
-    EmuchartsPVSPrinter.prototype.print_utils = function (emuchart) {
+    EmuchartsPVSPrinter.prototype.print_enter_exit = function (emuchart) {
+        function process_actions(actions, state, opt) {
+            opt = opt || [];
+            var x = (opt.enter) ? state.enter : state.exit;
+            var ans = parser.parseTransition("{" + x + "}");
+            if (ans.res && ans.res.type === "transition") {
+                ans.res.val.actions.val.forEach(function (action) {
+                    var tmp = action.val.identifier.val.split(".");
+                    // this printer supports up to 2 hierarchical levels
+                    if (tmp.length === 2) {
+                        actions.push({
+                            state: state.name,
+                            l1_name: tmp[0], // variable name in the form l1_name.l2_name
+                            l2_name: tmp[1],
+                            value: print_expression(action.val.expression.val, emuchart, { attach_state: true }) // variable value
+                        });
+                    } else {
+                        actions.push({
+                            state: state.name,
+                            name: tmp[0], // variable name
+                            value: print_expression(action.val.expression.val, emuchart, { attach_state: true }) // variable value
+                        });
+                    }
+                });
+            }
+        }
+        var entry_actions = null, exit_actions = null;
+        var states_with_entry_actions = emuchart.states.filter(function (state) {
+            return state.enter && state.enter !== "";
+        });
+        if (states_with_entry_actions.length > 0) {
+            entry_actions = [];
+            states_with_entry_actions.forEach(function (state) {
+                process_actions(entry_actions, state, { enter: true });
+            });
+        }
+        var states_with_exit_actions = emuchart.states.filter(function (state) {
+            return state.exit && state.exit !== "";
+        });
+        if (states_with_exit_actions.length > 0) {
+            exit_actions = [];
+            states_with_exit_actions.forEach(function (state) {
+                process_actions(exit_actions, state, { exit: true });
+            });
+        }
         return Handlebars.compile(leave_enter_function_template, { noEscape: true })({
+            entry_actions: entry_actions,
+            exit_actions: exit_actions,
             current_state: predefined_variables.current_state,
             previous_state: predefined_variables.previous_state
         });
@@ -505,7 +551,7 @@ define(function (require, exports, module) {
         var ans = "";
         if (emuchart.constants && emuchart.constants.length > 0) {
             ans = Handlebars.compile(constants_type_template, { noEscape: true })({
-                comment: " user-defined constants",
+                comment: "user defined constants",
                 constants: emuchart.constants
             });
         }
@@ -537,7 +583,7 @@ define(function (require, exports, module) {
             descriptor: this.print_descriptor(emuchart),
             name: emuchart.name, // Note: it is important to have the theory name identical to the file name -- otherwise PVSio refuses to evaluate commands!
             importings: emuchart.importings,
-            utils: this.print_utils(emuchart),
+            utils: this.print_enter_exit(emuchart),
             extras: Handlebars.compile(pvs_utils_template, { noEscape: true })(),
             constants: this.print_constants(emuchart),
             modes: this.print_states(emuchart),

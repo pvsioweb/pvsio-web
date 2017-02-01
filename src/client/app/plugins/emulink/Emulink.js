@@ -149,26 +149,33 @@ define(function (require, exports, module) {
         if (emuchartsManager.getIsPIM()) {
             return pimEmulink.editState(theState);
         }
-
         displayRenameState.create({
             header: "Renaming state " + theState.name.substring(0, maxLen) + "...",
             textLabel: {
                 newStateName: "State name",
-                newStateColor: "State color"
+                newStateColor: "State color",
+                newStateEnter: "State entry actions",
+                newStateExit:  "State exit actions"
             },
             placeholder: {
                 newStateName: theState.name,
-                newStateColor: theState.color
+                newStateColor: theState.color,
+                newStateEnter: theState.enter,
+                newStateExit: theState.exit
             },
             buttons: ["Cancel", "Ok"]
         }).on("ok", function (e, view) {
             var newStateName = e.data.labels.get("newStateName");
             var newStateColor = e.data.labels.get("newStateColor");
+            var newStateEnter = e.data.labels.get("newStateEnter");
+            var newStateExit = e.data.labels.get("newStateExit");
             if (newStateName && newStateName.value !== "") {
                 emuchartsManager.edit_state(
                     theState.id,
                     { name: newStateName,
-                      color: newStateColor }
+                      color: newStateColor,
+                      enter: newStateEnter,
+                      exit: newStateExit }
                 );
                 view.remove();
                 machineStatesTable.setMachineStates(emuchartsManager.getStates());
@@ -183,26 +190,33 @@ define(function (require, exports, module) {
         if (emuchartsManager.getIsPIM()) {
             return pimEmulink.editState(theState);
         }
-
         displayChangeStateColor.create({
             header: "Renaming state " + theState.name.substring(0, maxLen) + "...",
             textLabel: {
                 newStateName: "State name",
-                newStateColor: "State color"
+                newStateColor: "State color",
+                newStateEnter: "State entry actions",
+                newStateExit:  "State exit actions"
             },
             placeholder: {
                 newStateName: theState.name,
-                newStateColor: theState.color
+                newStateColor: theState.color,
+                newStateEnter: theState.enter,
+                newStateExit: theState.exit
             },
             buttons: ["Cancel", "Ok"]
         }).on("ok", function (e, view) {
             var newStateName = e.data.labels.get("newStateName");
             var newStateColor = e.data.labels.get("newStateColor");
+            var newStateEnter = e.data.labels.get("newStateEnter");
+            var newStateExit = e.data.labels.get("newStateExit");
             if (newStateColor && newStateColor.value !== "") {
                 emuchartsManager.edit_state(
                     theState.id,
                     { name: newStateName,
-                      color: newStateColor }
+                      color: newStateColor,
+                      enter: newStateEnter,
+                      exit: newStateExit }
                 );
                 view.remove();
                 machineStatesTable.setMachineStates(emuchartsManager.getStates());
@@ -214,10 +228,12 @@ define(function (require, exports, module) {
     }
 
     function renameState_handler(event) {
-        renameState(event.node);
+        var theState = emuchartsManager.getState(event.node.id);
+        renameState(theState);
     }
     function changeStateColor_handler(event) {
-        changeStateColor(event.node);
+        var theState = emuchartsManager.getState(event.node.id);
+        changeStateColor(theState);
     }
 
     // rename dialog window for transitions
@@ -842,7 +858,7 @@ define(function (require, exports, module) {
                 var emuchart = {
                     descriptor: {
                         file_type: "emdl",
-                        version: "1.4",
+                        version: emuchartsManager.getEmuchartsVersion(),
                         description: "emucharts model",
                         chart_name: ("emucharts_" + projectManager.project().name())
                     },
