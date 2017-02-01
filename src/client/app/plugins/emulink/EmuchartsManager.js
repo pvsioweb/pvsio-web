@@ -838,6 +838,9 @@ define(function (require, exports, module) {
         return _selectedEditor.layOutChart();
     };
 
+    EmuchartsManager.prototype.getEmuchartsVersion = function () {
+        return _selectedEditor.getEmuchartsVersion();
+    };
 
     module.exports = {
         getInstance: function () {

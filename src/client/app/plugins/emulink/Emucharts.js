@@ -1,6 +1,6 @@
 /**
  * @module Emucharts
- * @version 1.0
+ * @version 2.0
  * @description
  * Emucharts encodes an emuchart diagram into a graphs. This is code is a re-engineered
  * version of stateMachine.js implemented in branch emulink-commented
@@ -16,6 +16,8 @@ define(function (require, exports, module) {
         PIMs = require("plugins/emulink/models/pim/PIMs"),
         d3 = require("d3/d3"),
         Colors = require("plugins/emulink/tools/Colors");
+
+    var emuchartsVersion = "2.0";
 
     var defaultValues = {
             x: 100,
@@ -102,6 +104,8 @@ define(function (require, exports, module) {
                         height: state.height || 36,
                         x:      state.x || 100,
                         y:      state.y || 100,
+                        enter:  state.enter || "",
+                        exit:   state.exit || "",
                         // the following elements are for PIMs
                         pmr:    state.pmr || [],
                         widgets: cloneWidgets(state.widgets),
@@ -260,6 +264,8 @@ define(function (require, exports, module) {
         var node = _this.nodes.get(id);
         node.name = data.name || node.name || "X" + node.id;
         node.color = data.color || node.color || defaultValues.color(id);
+        node.enter = data.enter || node.enter || "";
+        node.exit = data.exit || node.exit || "";
         _this.nodes.set(node.id, node);
         // we need to rename also nodes cached in the edge structure
         // this can be quite expensive in term of time, but renaming is unlikely to be a frequent operation
@@ -284,7 +290,9 @@ define(function (require, exports, module) {
             state: {
                 id: node.id,
                 name: node.name,
-                color: node.color
+                color: node.color,
+                enter: node.enter,
+                exit: node.exit
             }
         });
         return true;
@@ -313,11 +321,15 @@ define(function (require, exports, module) {
         // create a new node with a unique ID
         var id = node.id || getFreshNodeID(this);
         var name = node.name || id;
+        var enter = node.enter || "";
+        var exit = node.exit || "";
         var estimatedTextWidth = name.length * defaultValues.fontSize / 4;
         var width = (estimatedTextWidth < defaultValues.width) ? defaultValues.width : estimatedTextWidth;
         var newNode = {
                 id  : id, // nodes have unique IDs
                 name: name,
+                enter: enter,
+                exit: exit,
                 x: node.x || defaultValues.x,
                 y: node.y || defaultValues.y,
                 width : width,
@@ -338,7 +350,9 @@ define(function (require, exports, module) {
             state: {
                 id: newNode.id,
                 name: newNode.name,
-                color: newNode.color
+                color: newNode.color,
+                enter: newNode.enter,
+                exit: newNode.exit
             }
         });
         return newNode;
@@ -711,7 +725,9 @@ define(function (require, exports, module) {
                 y: node.y,
                 width : node.width,
                 height: node.height,
-                color: node.color
+                color: node.color,
+                enter: node.enter,
+                exit: node.exit
             });
         });
         return states.sort(function (a, b) {
@@ -1328,6 +1344,10 @@ define(function (require, exports, module) {
      */
     Emucharts.prototype.mergePMR = function (newPMRs) {
         return this.pim.mergePMR ? this.pim.mergePMR(this.pmr, newPMRs) : false;
+    };
+
+    Emucharts.prototype.getEmuchartsVersion = function () {
+        return emuchartsVersion;
     };
 
     module.exports = Emucharts;

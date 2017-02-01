@@ -2522,5 +2522,10 @@ define(function (require, exports, module) {
         return this.emucharts.mergePMR ? this.emucharts.mergePMR(newPMRs) : false;
     };
 
+    EmuchartsEditor.prototype.getEmuchartsVersion = function (newPMRs) {
+        return this.emucharts.getEmuchartsVersion();
+    };
+
+
     module.exports = EmuchartsEditor;
 });
