@@ -2,7 +2,7 @@
     <div class="panel panel-info shadow center">
         <div class="panel-heading">{{header}}</div>
         <form class="center form-horizontal" onsubmit="return false">
-            <div class="panel-body" style="overflow-y:scroll; height:720px; width:800px;">
+            <div class="panel-body" style="overflow-y:scroll; max-height:720px; min-width:800px;">
                 <div class="form-group" style="margin-bottom: 0 !important">
 
 					<div id="PropertyTemplates">
@@ -23,13 +23,13 @@
 								<hr>
 								<div id="templatePameters" style="margin-left:10px; margin-top:20px;">
                                     <ul style="white-space:normal"><b>State variables</b></ul>
-									<select multiple id="stateVariable" name="stateVariable" style="width:300px">
+									<select multiple size="8" id="stateVariable" name="stateVariable" style="width:300px">
 										<!-- <option value="">Please choose a state variable</option> -->
 										{{#each stateVariables}}
 										  <option value={{this}}>{{this}}</option>
 										{{/each}}
 									</select><br>
-                                    <em>(Hold down the Ctrl (Linux/Windows) / Command (Mac) button to select multiple actions)</em><br><br>
+                                    <em>(Hold down the Ctrl (Linux/Windows) / Command (Mac) button to select multiple state variables)</em><br>
                                     <!-- <ul style="white-space:normal"><b>Action</b></ul> -->
 									<!-- <select multiple id="transitions" name="transitions" style="width:300px" style="display:none;">
 										{{#each transitions}}
@@ -37,15 +37,36 @@
 										{{/each}}
 									</select> -->
 									<hr>
-									<ul style="white-space:normal"><b>PVS THEOREM</b></ul>
-									<!-- <div id="pvs_property" style="margin-left:10px;"> -->
+                                    <ul style="white-space:normal"><b>PVS PROPERTY</b></ul>
                                     <div>
                                         <textarea
-                                            rows="10" cols="88" id="pvs_property"
-                                            style="font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;"
+                                            rows="8" cols="102" id="pvs_property"
+                                            style="resize:vertical; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;"
                                             type ="text"
                                             value=""
                                             name ="pvs_property"
+                                            <!--  -->
+                                        </textarea>
+                                    </div><br>
+									<ul style="white-space:normal"><b>PVS THEOREM</b></ul>
+                                    <div>
+                                        <textarea
+                                            rows="7" cols="102" id="pvs_theorem"
+                                            style="resize:vertical; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;"
+                                            type ="text"
+                                            value=""
+                                            name ="pvs_theorem"
+                                            <!--  -->
+                                        </textarea>
+                                    </div><br>
+                                    <ul style="white-space:normal"><b>PVS STRATEGY (ProofLite)</b></ul>
+                                    <div>
+                                        <textarea
+                                            rows="8" cols="102" id="prooflite_strategy"
+                                            style="resize:vertical; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;"
+                                            type ="text"
+                                            value=""
+                                            name ="prooflite_strategy"
                                             <!--  -->
                                         </textarea>
                                     </div>
