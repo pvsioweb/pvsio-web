@@ -273,7 +273,13 @@ define(function (require, exports, module) {
             function preprocessFunction(term, emuchart) {
                 if (term.type === "identifier") {
                     if (isVariable(term.val, emuchart)) {
-                        term.val += "(st)";
+                        if (term.val.indexOf(".") >= 0) {
+                            var v = term.val.split(".");
+                            v[0] += "(st)";
+                            term.val = v.join("`");
+                        } else {
+                            term.val += "(st)";
+                        }
                     }
                     return term.val;
                 } else if (typeof term.val === "string") {

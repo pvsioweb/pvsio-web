@@ -37,10 +37,12 @@ define(function (require, exports, module) {
         FeedbackTemplateView = require("plugins/emulink/tools/propertytemplates/FeedbackTemplateView"),
         ReversibilityTemplateView = require("plugins/emulink/tools/propertytemplates/ReversibilityTemplateView"),
 //        EmuchartsTextEditor    = require("plugins/emulink/EmuchartsTextEditor"),
+
         EmuchartsParser        = require("plugins/emulink/EmuchartsParser"),
-        pvsTheory              = require("text!./models/pvs/templates/pvsTheory.handlebars"),
-        pvs_transition_system  = require("text!./models/pvs/templates/pvs_transition_system.handlebars"),
-        pvs_theorem_induction  = require("text!./models/pvs/templates/pvs_theorem_induction.handlebars"),
+        pvs_theory             = require("text!./tools/propertytemplates/pvs_theory.handlebars"),
+        pvs_transition_system  = require("text!./tools/propertytemplates/pvs_transition_system.handlebars"),
+        pvs_guard              = require("text!./tools/propertytemplates/pvs_guard.handlebars"),
+
         FileHandler            = require("filesystem/FileHandler"),
         FileSystem             = require("filesystem/FileSystem"),
         displayNotificationView  = require("plugins/emulink/forms/displayNotificationView"),
@@ -1695,7 +1697,7 @@ define(function (require, exports, module) {
             // document.getElementById("menuVerification").children[1].style.display = "none";
             var stateVariables = emuchartsManager.getVariables().map(function (variable) {
                 return variable.name;
-            });
+            }).concat([ "current_state", "previous_state" ]);
             var transitionLabels = emuchartsManager.getTransitions();
             var transitions = d3.map();
             var parser = new EmuchartsParser();
@@ -1713,29 +1715,32 @@ define(function (require, exports, module) {
                 buttons: ["Dismiss", "Create PVS Theory"]
             }).on("create pvs theory", function (e, view) {
                 // do something useful here.... like create a pvs file with the instantiated property
-                var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th";
+                var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_");
+                var pvs_property = e.data.get("pvs_property");
+                var pvs_theorem = e.data.get("pvs_theorem");
+                var prooflite_strategy = e.data.get("prooflite_strategy");
                 var modelEditor = ModelEditor.getInstance();
                 (PluginManager.getInstance().isLoaded(modelEditor)
                     ? Promise.resolve()
                     : PluginManager.getInstance().enablePlugin(modelEditor))
                 .then(function () {
-                    var pvs_theorem = Handlebars.compile(pvs_theorem_induction, { noEscape: true })({
-                        name: "CONSISTENCY",
-                        property: "consistency",
-                        property_definition: e.data.get("pvs_property"),
-                        trans: "trans",
-                        State: "State"
-                    });
-                    var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
-                        { name: "consistency_th",
-                          definitions: Handlebars.compile(pvs_transition_system, { noEscape: true })({
+                    var theTheory = Handlebars.compile(pvs_theory, { noEscape: true })({
+                        theory_name: "consistency",
+                        importing: emucharts_theory_name,
+                        transition_system: Handlebars.compile(pvs_transition_system, { noEscape: true })({
                             functionName: "action",
                             transitions: transitions
-                          }),
-                          body: pvs_theorem,
-                          importing: emucharts_theory_name });
-                    projectManager.project().addFile("consistency_th.pvs", theTheory, { overWrite: true });
-                    projectManager.selectFile("consistency_th.pvs");
+                        }),
+                        pvs_property: pvs_property,
+                        pvs_guard: Handlebars.compile(pvs_guard, { noEscape: true })({
+                            guard_name: "guard",
+                            state: "State"
+                        }),
+                        pvs_theorem: pvs_theorem,
+                        prooflite_strategy: prooflite_strategy
+                    });
+                    projectManager.project().addFile("consistency.pvs", theTheory, { overWrite: true });
+                    projectManager.selectFile("consistency.pvs");
                 });
             }).on("dismiss", function (e, view) {
                 // just remove window
@@ -1747,7 +1752,7 @@ define(function (require, exports, module) {
             // document.getElementById("menuVerification").children[1].style.display = "none";
             var stateVariables = emuchartsManager.getVariables().map(function (variable) {
                 return variable.name;
-            });
+            }).concat([ "current_state", "previous_state" ]);
             var transitionLabels = emuchartsManager.getTransitions();
             var transitions = d3.map();
             var parser = new EmuchartsParser();
@@ -1765,29 +1770,32 @@ define(function (require, exports, module) {
                 buttons: ["Dismiss", "Create PVS Theory"]
             }).on("create pvs theory", function (e, view) {
                 // do something useful here.... like create a pvs file with the instantiated property
-                var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th";
+                var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_");
+                var pvs_property = e.data.get("pvs_property");
+                var pvs_theorem = e.data.get("pvs_theorem");
+                var prooflite_strategy = e.data.get("prooflite_strategy");
                 var modelEditor = ModelEditor.getInstance();
                 (PluginManager.getInstance().isLoaded(modelEditor)
                     ? Promise.resolve()
                     : PluginManager.getInstance().enablePlugin(modelEditor))
                 .then(function () {
-                    var pvs_theorem = Handlebars.compile(pvs_theorem_induction, { noEscape: true })({
-                        name: "REVERSIBILITY",
-                        property: "reversibility",
-                        property_definition: e.data.get("pvs_property"),
-                        trans: "trans",
-                        State: "State"
-                    });
-                    var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
-                        { name: "reversibility_th",
-                          definitions: Handlebars.compile(pvs_transition_system, { noEscape: true })({
+                    var theTheory = Handlebars.compile(pvs_theory, { noEscape: true })({
+                        theory_name: "reversibility",
+                        importing: emucharts_theory_name,
+                        transition_system: Handlebars.compile(pvs_transition_system, { noEscape: true })({
                             functionName: "action",
                             transitions: transitions
-                          }),
-                          body: pvs_theorem,
-                          importing: emucharts_theory_name });
-                    projectManager.project().addFile("reversibility_th.pvs", theTheory, { overWrite: true });
-                    projectManager.selectFile("reversibility_th.pvs");
+                        }),
+                        pvs_property: pvs_property,
+                        pvs_guard: Handlebars.compile(pvs_guard, { noEscape: true })({
+                            guard_name: "guard",
+                            state: "State"
+                        }),
+                        pvs_theorem: pvs_theorem,
+                        prooflite_strategy: prooflite_strategy
+                    });
+                    projectManager.project().addFile("reversibility.pvs", theTheory, { overWrite: true });
+                    projectManager.selectFile("reversibility.pvs");
                 });
             }).on("dismiss", function (e, view) {
                 // just remove window
@@ -1799,7 +1807,7 @@ define(function (require, exports, module) {
             // document.getElementById("menuVerification").children[1].style.display = "none";
             var stateVariables = emuchartsManager.getVariables().map(function (variable) {
                 return variable.name;
-            });
+            }).concat([ "current_state", "previous_state" ]);
             var transitionLabels = emuchartsManager.getTransitions();
             var transitions = d3.map();
             var parser = new EmuchartsParser();
@@ -1817,28 +1825,32 @@ define(function (require, exports, module) {
                 buttons: ["Dismiss", "Create PVS Theory"]
             }).on("create pvs theory", function (e, view) {
                 // do something useful here.... like create a pvs file with the instantiated property
-                var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_th";
+                var emucharts_theory_name = "emucharts_" + projectManager.project().name().replace(/-/g, "_");
+                var pvs_property = e.data.get("pvs_property");
+                var pvs_theorem = e.data.get("pvs_theorem");
+                var prooflite_strategy = e.data.get("prooflite_strategy");
                 var modelEditor = ModelEditor.getInstance();
                 (PluginManager.getInstance().isLoaded(modelEditor)
                     ? Promise.resolve()
                     : PluginManager.getInstance().enablePlugin(modelEditor))
                 .then(function () {
-                    var pvs_theorem = Handlebars.compile(pvs_theorem_induction, { noEscape: true })({
-                        name: "VISIBILITY",
-                        property: "visibility",
-                        property_definition: e.data.get("pvs_property"),
-                        trans: "trans",
-                        State: "State"
-                    });
-                    var theTheory = Handlebars.compile(pvsTheory, { noEscape: true })(
-                        { name: "visibility_th",
-                          definitions: Handlebars.compile(pvs_transition_system, { noEscape: true })({
+                    var theTheory = Handlebars.compile(pvs_theory, { noEscape: true })({
+                        theory_name: "visibility",
+                        importing: emucharts_theory_name,
+                        transition_system: Handlebars.compile(pvs_transition_system, { noEscape: true })({
+                            functionName: "action",
                             transitions: transitions
-                          }),
-                          body: pvs_theorem,
-                          importing: emucharts_theory_name });
-                    projectManager.project().addFile("visibility_th.pvs", theTheory, { overWrite: true });
-                    projectManager.selectFile("visibility_th.pvs");
+                        }),
+                        pvs_property: pvs_property,
+                        pvs_guard: Handlebars.compile(pvs_guard, { noEscape: true })({
+                            guard_name: "guard",
+                            state: "State"
+                        }),
+                        pvs_theorem: pvs_theorem,
+                        prooflite_strategy: prooflite_strategy
+                    });
+                    projectManager.project().addFile("visibility.pvs", theTheory, { overWrite: true });
+                    projectManager.selectFile("visibility.pvs");
                 });
             }).on("dismiss", function (e, view) {
                 // just remove window
