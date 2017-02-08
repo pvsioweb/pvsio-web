@@ -102,7 +102,7 @@ define(function (require, exports, module) {
     ContextTable.prototype.setContextVariables = function(tableElements) {
         function clearTable() {
             var table = d3.select("#StateAttributes").select("tbody").node();
-            while (table.lastChild && table.lastChild.id !== "heading") {
+            while (table && table.lastChild && table.lastChild.id !== "heading") {
                 table.removeChild(table.lastChild);
             }
             return _this;

@@ -22,9 +22,8 @@ define(function (require, exports, module) {
         template            = require("text!pvsioweb/forms/templates/prototypeBuilderPanel.handlebars"),
         toolbar             = require("text!pvsioweb/forms/templates/prototypeBuilderToolbar.handlebars"),
         ScriptPlayer        = require("util/ScriptPlayer"),
-//        fs              = require("util/fileHandler"),
         PluginManager       = require("plugins/PluginManager"),
-        FileSystem          = require("filesystem/FileSystem"),
+        fs                  = require("filesystem/FileSystem").getInstance(),
         NotificationManager = require("project/NotificationManager"),
         SaveProjectChanges  = require("project/forms/SaveProjectChanges"),
         Descriptor          = require("project/Descriptor"),
@@ -36,7 +35,6 @@ define(function (require, exports, module) {
         pbContainer,
         pvsioWebClient;
     var _prototypeBuilder;
-    var fs;
     var widgetListView;
     var prototypeImageView;
 
@@ -44,7 +42,6 @@ define(function (require, exports, module) {
         pvsioWebClient = PVSioWebClient.getInstance();
         projectManager = ProjectManager.getInstance();
         currentProject = projectManager.project();
-        fs = new FileSystem();
         _prototypeBuilder = this;
     }
 

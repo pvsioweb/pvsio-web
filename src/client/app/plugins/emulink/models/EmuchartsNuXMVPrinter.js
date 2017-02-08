@@ -286,7 +286,8 @@ define(function (require, exports, module) {
 
     EmuchartsNuXMVPrinter.prototype.print_disclaimer = function () {
         return Handlebars.compile(disclaimer, { noEscape: true })({
-            version: version
+            version: version,
+            www: "http://www.pvsioweb.org"
         });
     };
 

@@ -56,7 +56,6 @@ define(function (require, exports, module) {
      */
     EmuWrapper.prototype.addScreenState = function (scr) {
         this._addScreenState(scr);
-        this._emuchartsEditor.renderStates();
     };
 
     /**

@@ -12,15 +12,32 @@ define(function (require, exports, module) {
     "use strict";
     var Emucharts = require("plugins/emulink/Emucharts"),
         EmuchartsEditor = require("plugins/emulink/EmuchartsEditor"),
+        PVSioWebClient = require("PVSioWebClient"),
         eventDispatcher = require("util/eventDispatcher"),
         Colors = require("plugins/emulink/tools/Colors"),
-        UppaalConverter = require("plugins/emulink/tools/UppaalConverter").getInstance();
+        PIMImporter = require("plugins/emulink/models/pim/PIMImporter"),
+        UppaalConverter = require("plugins/emulink/tools/UppaalConverter").getInstance(),
+        FileHandler = require("filesystem/FileHandler"),
+        MIME = require("util/MIME").getInstance();
 
     var _emuchartsDescriptors; // stores emucharts descriptors & data opened in the tool
     var _selectedEditor; // this is the selected editor
+    var _selectedEmuchart; // this is the selected emuchart ID
     var _previewer; // this is for used for previewing emucharts, e.g., in the file browser
 
     var instance; // instance of the EmuchartsManager
+
+    var displayNotification = function (msg, title) {
+        title = title || "Notification";
+        require("plugins/emulink/forms/displayNotificationView").create({
+            header: title,
+            message: msg,
+            buttons: ["Ok"]
+        }).on("ok", function (e, view) {
+            view.remove();
+        });
+    };
+
 
     /**
      * Constructor
@@ -29,20 +46,76 @@ define(function (require, exports, module) {
     function EmuchartsManager() {
         _emuchartsDescriptors = d3.map();
         _selectedEditor = null;
+        _selectedEmuchart = null;
         _previewer = null;
         eventDispatcher(this);
         // this.newEmucharts("foo");
         return this;
     }
 
-    var uniqueEmuchartsID = function () {
-        // function newEmuchartsID () {
-        //     var i = 0;
-        //     while(_emuchartsDescriptors.get("EMUCHART__" + i)) { i++; }
-        //     return i;
-        // }
-        // return "EMUCHART__" + newEmuchartsID();
-        return "EMUCHART__0";
+    EmuchartsManager.prototype.uniqueEmuchartsID = function () {
+        function newEmuchartsID () {
+            var i = 0;
+            while(_emuchartsDescriptors.get("EMUCHART__" + i)) { i++; }
+            return i;
+        }
+        return "EMUCHART__" + newEmuchartsID();
+        // return "EMUCHART__0";
+    };
+
+    EmuchartsManager.prototype.closeAllCharts = function () {
+        _emuchartsDescriptors = d3.map();
+        _selectedEditor = null;
+        _selectedEmuchart = null;
+        _previewer = null;
+        return this;
+    };
+
+    EmuchartsManager.prototype.closeChart = function () {
+        _emuchartsDescriptors.remove(_selectedEmuchart);
+        var keys = _emuchartsDescriptors.keys();
+        if (keys.length > 0) {
+            this.loadEmucharts(keys[keys.length - 1]);
+        } else {
+            this.newChart();
+        }
+    };
+
+    /**
+     * @function <a name="deleteChartDialog">deleteChartDialog</a>
+     * @description Deletes the chart selected in the editor.
+     *              The ID of the selected chart is stored in variable _selectedEmuchart
+     *              The function asks for confirmation before deleting the file.
+     * @returns  Promise, which resolves into true if the file has been deleted, false otherwise.
+     * @memberof module:EmuchartsManager
+     * @instance
+     */
+    EmuchartsManager.prototype.deleteChartDialog = function () {
+        if (PVSioWebClient.getInstance().serverOnLocalhost()) {
+            var emuDesc = _emuchartsDescriptors.get(_selectedEmuchart);
+            var _this = this;
+            if (emuDesc) {
+                var path = emuDesc.emuchart_path;
+                var fs = require("filesystem/FileSystem").getInstance();
+                return new Promise(function (resolve, reject) {
+                    fs.deleteFileDialog(path).then(function () {
+                        _emuchartsDescriptors.remove(_selectedEmuchart);
+                        var keys = _emuchartsDescriptors.keys();
+                        if (keys && keys.length > 0) {
+                            _this.loadEmucharts(keys[0]);
+                        } else {
+                            _this.newChart();
+                        }
+                        resolve(true);
+                    }).catch(function (err) {
+                        reject(err);
+                    });
+                });
+            } else {
+                console.error("[EmuchartsManager.deleteChartDialog] Error: Cannot delete Emuchart open in the editor (could not find descriptor).");
+            }
+        }
+        Promise.resolve(false);
     };
 
     EmuchartsManager.prototype.getTransformation = function () {
@@ -90,30 +163,55 @@ define(function (require, exports, module) {
      * Creates a new empty emuchart using the data passed as argument.
      * @memberof EmuchartsManager
      */
-    EmuchartsManager.prototype.newEmucharts = function () {
+    EmuchartsManager.prototype.newChart = function (filename) {
         // create an editor for an empty chart
-        var emucharts = new Emucharts({
-            nodes: d3.map(),
-            edges: d3.map(),
-            initial_edges: d3.map(),
-            variables: d3.map(),
-            constants: d3.map()
+        var id = this.uniqueEmuchartsID();
+        filename = filename || (id + ".emdl");
+        _emuchartsDescriptors.set(id, {
+            emuchart_name: filename.split(".")[0],
+            emuchart_content: new Emucharts({
+                nodes: d3.map(),
+                edges: d3.map(),
+                initial_edges: d3.map(),
+                variables: d3.map(),
+                constants: d3.map(),
+                datatypes: d3.map()
+            }),
+            emuchart_path: filename
         });
-        _selectedEditor = new EmuchartsEditor(emucharts);
-        this.installHandlers(_selectedEditor);
-        _emuchartsDescriptors.set(uniqueEmuchartsID(), emucharts);
+        return this.loadEmucharts(id);
     };
 
-    EmuchartsManager.prototype.selectEmucharts = function (id) {
+    EmuchartsManager.prototype.loadEmucharts = function (id) {
         // load the emucharts in the editor
-        _selectedEditor.set_emucharts(_emuchartsDescriptors.get(id));
-        // render the emucharts
-        _selectedEditor.render();
+        var emuDesc = _emuchartsDescriptors.get(id);
+        if (emuDesc && emuDesc.emuchart_name && emuDesc.emuchart_content) {
+            console.log("Selecting emuchart " + emuDesc.emuchart_name + "...");
+            _selectedEditor = new EmuchartsEditor(emuDesc.emuchart_content);
+            this.installHandlers(_selectedEditor);
+            _selectedEmuchart = id;
+            // render the emucharts
+            _selectedEditor.render();
+        }
         return this;
     };
 
-    EmuchartsManager.prototype.getEmuchartsIDs = function (id) {
+    EmuchartsManager.prototype.getEmuchartsIDs = function () {
         return _emuchartsDescriptors.keys();
+    };
+
+    EmuchartsManager.prototype.getEmuchartsDescriptors = function () {
+        var emuDesc = [];
+        _emuchartsDescriptors.keys().forEach(function (key) {
+            emuDesc.push({
+                emuchart_id: key,
+                emuchart_name: _emuchartsDescriptors.get(key).emuchart_name,
+                emuchart_content: _emuchartsDescriptors.get(key).emuchart_content,
+                emuchart_path: _emuchartsDescriptors.get(key).emuchart_path,
+                is_selected: (key === _selectedEmuchart)
+            });
+        });
+        return emuDesc;
     };
 
     EmuchartsManager.prototype.importUppaalV4 = function (XMLFile) {
@@ -129,17 +227,25 @@ define(function (require, exports, module) {
                 },
                 chart: emuDesc
             };
-            this.importEmucharts({ name: chart.chart_name, content: chart });
+            this.importEmucharts({
+                name: chart.chart_name,
+                content: chart,
+                path: XMLFile.path
+            });
         }
         return this;
     };
 
-
     /**
      * Imports the emuchart passed as argument.
+     * @param emuchartsFile {Object} Has three attributes:
+     *           - name (string), representing the human-readable emucharts name;
+     *           - content (Object), an emuchart object, with attributes descriptor and chart
+     *           - path (string), the file path (relative to the current project folder)
      * @memberof EmuchartsManager
      */
-    EmuchartsManager.prototype.importEmucharts = function (emuchartsFile) {
+    EmuchartsManager.prototype.importEmucharts = function (emuchartsFile, opt) {
+        opt = opt || {};
         var _this = this;
         if (emuchartsFile && emuchartsFile.content) {
             var keys = Object.keys(emuchartsFile.content);
@@ -148,10 +254,13 @@ define(function (require, exports, module) {
                 if (emuchartsFile.content && emuchartsFile.content.descriptor) {
                     var version = emuchartsFile.content.descriptor.version;
                     if (version && parseFloat(version) >= 1.1) {
-                        var emucharts = new Emucharts(emuchartsFile.content.chart);
-                        _selectedEditor = new EmuchartsEditor(emucharts);
-                        _this.installHandlers(_selectedEditor);
-                        _emuchartsDescriptors.set(uniqueEmuchartsID(), emucharts);
+                        var id = emuchartsFile.name;
+                        _emuchartsDescriptors.set(id, {
+                            emuchart_name: emuchartsFile.name.split(".")[0],
+                            emuchart_content: new Emucharts(emuchartsFile.content.chart),
+                            emuchart_path: emuchartsFile.path
+                        });
+                        _this.loadEmucharts(id);
                     } else {
                         alert("Error while importing emuchart file: unsupported file version " + version);
                     }
@@ -172,18 +281,143 @@ define(function (require, exports, module) {
                                 chart.initial_edges.set(initial_edge.id, initial_edge);
                             });
                         // associate an editor to the created emuchart
-                        var emucharts = new Emucharts({
+                        var content = new Emucharts({
                             nodes: chart.nodes,
                             edges: chart.edges,
                             initial_edges: chart.initial_edges
                         });
-                        _selectedEditor = new EmuchartsEditor(emucharts);
-                        _this.installHandlers(_selectedEditor);
-                        _emuchartsDescriptors.set(uniqueEmuchartsID(), emucharts);
+                        var id = emuchartsFile.name;
+                        _emuchartsDescriptors.set(id, {
+                            emuchart_name: emuchartsFile.name.split(".")[0],
+                            emuchart_content: content,
+                            emuchart_path: emuchartsFile.path
+                        });
+                        _this.loadEmucharts(id);
                     });
                 }
             }
         } else { console.log("dbg: warning, undefined or null emuchart"); }
+    };
+
+    EmuchartsManager.prototype.openChart = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            function doOpen(err, res) {
+                if (res) {
+                    if (res.name.lastIndexOf(".emdl") === res.name.length - 5) {
+                        res.content = JSON.parse(res.content);
+                        _this.importEmucharts(res);
+                    } else if (res.name.lastIndexOf(".muz") === res.name.length - 4) {
+                        _this.importPIMChart(res);
+                    } else if (res.name.lastIndexOf(".pim") === res.name.length - 4) {
+                        new PIMImporter().importPIM(res, _this);
+                    } else if (res.name.lastIndexOf(".xml") === res.name.length - 4) {
+                        _this.importUppaalV4(res);
+                    } else {
+                        err = "Unrecognised file extension (file: " + res.name + ")";
+                        console.log(err);
+                    }
+                    resolve(_this);
+                } else {
+                    console.log("Error while opening file (" + err + ")");
+                    reject(_this);
+                }
+            }
+            var opt = {
+                header: "Open EmuChart file...",
+                extensions: ".emdl,.muz,.pim,.xml"
+            };
+            if (PVSioWebClient.getInstance().serverOnLocalhost()) {
+                var fs = require("filesystem/FileSystem").getInstance();
+                return new Promise(function (resolve, reject) {
+                    fs.readFileDialog({
+                        encoding: "utf8",
+                        title: opt.header,
+                        filter: MIME.filter(opt.extensions.split(","))
+                    }).then(function (descriptors) {
+                        doOpen(null, descriptors[0]);
+                        resolve(descriptors[0]);
+                    }).catch(function (err) {
+                        doOpen(err, null);
+                        reject(err);
+                    });
+                });
+            } else {
+                FileHandler.openLocalFileAsText(function (err, res) {
+                    doOpen(err, res);
+                }, opt);
+            }
+        });
+    };
+
+    function saveAs(_this, id, name, opt) {
+        opt = opt || {};
+        if (name) {
+            var projectManager = require("project/ProjectManager").getInstance();
+            var emuDesc = _emuchartsDescriptors.get(id);
+            var emuchart = {
+                descriptor: {
+                    file_type: "emdl",
+                    version: _this.getEmuchartsVersion(),
+                    description: "emucharts model",
+                    chart_name: name
+                },
+                chart: {
+                    states: emuDesc.emuchart_content.nodes.values(),
+                    transitions: emuDesc.emuchart_content.edges.values(),
+                    initial_transitions: emuDesc.emuchart_content.initial_edges.values(),
+                    datatypes: emuDesc.emuchart_content.datatypes.values(),
+                    constants: emuDesc.emuchart_content.constants.values(),
+                    variables: emuDesc.emuchart_content.variables.values()
+                }
+            };
+            // PIM.
+            emuchart.chart.pmr = _this.getPMR(null, true);
+            emuchart.chart.isPIM = _this.getIsPIM();
+
+            var content = JSON.stringify(emuchart, null, " ");
+            projectManager.project().addFile(name + ".emdl", content, { overWrite: opt.overWrite }).then(function (res) {
+                //displayNotification("File " + name + " saved successfully!");
+                _this.fire({
+                    type: "EmuchartsManager.saveChart",
+                    emuchartDescriptor: emuDesc
+                });
+            }).catch(function (err) {
+                var msg = "Error while saving file " + name + " (" + JSON.stringify(err) + ")";
+                console.log(msg);
+                displayNotification(msg);
+            });
+        }
+    }
+
+    EmuchartsManager.prototype.saveChart = function () {
+        var selected = this.getEmuchartsDescriptors().filter(function (desc) {
+            return desc.is_selected === true;
+        });
+        if (selected.length === 1) {
+            saveAs(this, selected[0].emuchart_id, selected[0].emuchart_name, {
+                overWrite: true
+            });
+        }
+        return this;
+    };
+
+    EmuchartsManager.prototype.saveAllCharts = function () {
+        var emuDesc = this.getEmuchartsDescriptors();
+        if (emuDesc && emuDesc.length > 0) {
+            var _this = this;
+            emuDesc.forEach(function (desc) {
+                saveAs(_this, desc.emuchart_id, desc.emuchart_name, {
+                    overWrite: true
+                });
+            });
+        }
+        return this;
+    };
+
+    EmuchartsManager.prototype.saveChartAs = function (name) {
+        saveAs(this, this.uniqueEmuchartsID(), name, { overWrite: false });
+        return this;
     };
 
     /**
@@ -351,8 +585,15 @@ define(function (require, exports, module) {
                     variables: null
                 }
             };
-            this.importEmucharts({ name: chartName.trim(), content: chart });
-        } else { console.log("dbg: warning, undefined or null MUZFile"); }
+            this.importEmucharts({
+                name: chartName.trim(),
+                content: chart,
+                path: MUZFile.path
+            });
+        } else {
+            console.log("dbg: warning, undefined or null MUZFile");
+        }
+        return this;
     };
 
     /**
@@ -775,7 +1016,7 @@ define(function (require, exports, module) {
      * @memberof EmuchartsManager
      */
     EmuchartsManager.prototype.empty_chart = function () {
-        return _selectedEditor.empty_chart();
+        return !_selectedEditor || _selectedEditor.empty_chart();
     };
 
 //    /**

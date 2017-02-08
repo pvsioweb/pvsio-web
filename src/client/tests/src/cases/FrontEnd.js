@@ -22,7 +22,6 @@ define(function (require, exports, module) {
     UI_UnitTest.run();
     PIMPrototyping.run();
     EmuchartsParser_UnitTest.run();
-
     //var NetworkController_UnitTest = require("test/NetworkController_UnitTest").getInstance();
     //NetworkController_UnitTest.run();
 });

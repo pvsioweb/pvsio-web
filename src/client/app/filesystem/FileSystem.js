@@ -21,8 +21,11 @@ define(function (require, exports, module) {
         Descriptor            = require("project/Descriptor"),
         WSManager             = require("websockets/pvs/WSManager");
 
+    var instance;
+
     function FileSystem() {
         eventDispatcher(this);
+        return this;
     }
 
     /**
@@ -332,10 +335,9 @@ define(function (require, exports, module) {
 
     /**
      * @function <hr><a name="deleteFile">deleteFile</a>
-     * @description Deletes a file from disk.
+     * @description Deletes a file from a project folder.
      * @param path {!String} The path of the file that shall be deleted.
-     *              The provided file path is used as a relative path from the project folder
-     *              of the PVSio-web installation (i.e., pvsio-web/examples/projects/).
+     *              The provided path must start with the name of the project folder (e.g., "AlarisGP/alaris.pvs").
      * @returns {Promise(String)} A Promise that resolves to the name of the deleted file.
      * @memberof module:FileSystem
      * @instance
@@ -380,22 +382,21 @@ define(function (require, exports, module) {
 
     /**
      * @function <hr><a name="deleteFileDialog">deleteFileDialog</a>
-     * @description Deletes a file from disk. This function is a variant of <a href="#deleteFile">deleteFile</a>
+     * @description Deletes a file from the projects folder. This function is a variant of <a href="#deleteFile">deleteFile</a>
      *              designed to show a confirmation dialog before deleting files.
      * @param path {!String} The path of the file that shall be deleted.
-     *              The provided file path is used as a relative path from the project folder
-     *              of the PVSio-web installation (i.e., pvsio-web/examples/projects/).
+     *              The provided path must start with the name of the project folder (e.g., "AlarisGP/alaris.pvs").
      * @returns {Promise(String)} A Promise that resolves to the name of the deleted file.
      * @memberof module:FileSystem
      * @instance
      *
      */
-    FileSystem.prototype.deleteFileDialog = function (path, content, opt) {
+    FileSystem.prototype.deleteFileDialog = function (path) {
         var fs = this;
         return new Promise(function (resolve, reject) {
             displayQuestion.create({question: "Delete file " + path + "?"})
                 .on("ok", function (e, view) {
-                    fs.deleteFile(path, content, opt).then(function (res) {
+                    fs.deleteFile(path).then(function (res) {
                         resolve(res);
                     }).catch(function (err) { reject(err); });
                     view.remove();
@@ -589,5 +590,12 @@ define(function (require, exports, module) {
         });
     };
 
-    module.exports = FileSystem;
+    module.exports = {
+        getInstance: function () {
+            if (!instance) {
+                instance = new FileSystem();
+            }
+            return instance;
+        }
+    };
 });

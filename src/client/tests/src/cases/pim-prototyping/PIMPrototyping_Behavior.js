@@ -381,7 +381,7 @@ define(function (require, exports, module) {
                 */
                 var scrn = new Screen({
                     name: "1",
-                    image: new Descriptor("test-img", "", { encoding: "base64" })
+                    image: new Descriptor("test-img", img, { encoding: "base64" })
                 });
 
                 PIMPrototyper.getInstance()._screens.add(scrn);

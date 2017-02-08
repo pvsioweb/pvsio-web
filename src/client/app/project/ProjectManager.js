@@ -58,11 +58,10 @@ define(function (require, exports, module) {
         Constants             = require("util/Constants"),
         MIME                  = require("util/MIME"),
         PVSioWebClient        = require("PVSioWebClient").getInstance(),
-        FileSystem            = require("filesystem/FileSystem");
+        fs                    = require("filesystem/FileSystem").getInstance();
 
     var pvsFilesListView; // This is the PVSio-web file browser instance ** TODO: create a separate module **
     var _projectManager; // Project Manager instance ("this" pointer)
-    var fs;
 
     //----------------------------------------------------------------------------------------
     //     These are the APIs of the pvsio-web file browser embedded within ProjectManager
@@ -271,7 +270,6 @@ define(function (require, exports, module) {
                 console.log("Project saved!");
             }
         };
-        fs = new FileSystem();
         return this;
     }
 

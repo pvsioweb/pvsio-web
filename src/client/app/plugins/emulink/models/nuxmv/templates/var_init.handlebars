@@ -1,4 +1,4 @@
 {{#if init}}-- initialisation
 ASSIGN{{#each init}}
-{{../indent}}init({{name}}) := {{value}};{{/each}}
+  init({{name}}) := {{value}};{{/each}}
 {{/if}}
