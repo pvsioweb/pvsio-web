@@ -228,8 +228,8 @@ define(function (require, exports, module) {
                 w.width  = parseFloat(coords[2]) - parseFloat(coords[0]);
                 w.x = parseFloat(coords[0]);
                 w.y = parseFloat(coords[1]);
-                w.scale = (d3.select("svg > g").node()) ?
-                             +(d3.select("svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
+                w.scale = (d3.select("#imageDiv svg > g").node()) ?
+                             +(d3.select("#imageDiv svg > g").attr("transform").replace("scale(", "").replace(")", "")) || 1 : 1;
                 var widget = createWidget(w);
                 if (widget) {
                     wm.addWidget(widget);

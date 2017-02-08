@@ -9,7 +9,7 @@
 define(function (require, exports, module) {
     "use strict";
     var eventDispatcher = require("util/eventDispatcher"),
-        FileSystem      = require("filesystem/FileSystem"),
+        fs              = require("filesystem/FileSystem").getInstance(),
         QuestionForm    = require("pvsioweb/forms/displayQuestion"),
         NotificationManager = require("project/NotificationManager"),
         TreeList        = require("./TreeList");
@@ -17,13 +17,11 @@ define(function (require, exports, module) {
     var elementId, project, projectManager, folderCounter = 0,
         unSavedFileName = "untitled_file", unSavedFolderName = "untitled_folder", treeList;
 
-    var fs;
     ///FIXME Sort out the use of alert dialogs to notify errors here --
     ///also are there client side checks we can do to prevent some errors
     function FileTreeView(_elId, folderData, _projectManager) {
         eventDispatcher(this);
         var ftv = this;
-        fs = new FileSystem();
         elementId = _elId;
         project = _projectManager.project();
         projectManager = _projectManager;

@@ -73,7 +73,7 @@ define(function (require, exports, module) {
     ConstantsTable.prototype.setConstants = function(tableElements) {
         function clearTable() {
             var table = d3.select("#ConstantsTable").select("tbody").node();
-            while (table.lastChild && table.lastChild.id !== "heading") {
+            while (table && table.lastChild && table.lastChild.id !== "heading") {
                 table.removeChild(table.lastChild);
             }
             return _this;

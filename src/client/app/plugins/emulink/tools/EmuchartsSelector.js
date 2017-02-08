@@ -2,77 +2,53 @@
 /**
  *
  * @author Paolo Masci
- * @date Nov 17, 2016
+ * @date Feb 03, 2017
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
 /*global define, d3*/
 define(function (require, exports, module) {
     "use strict";
 
-    var _this,
-        eventDispatcher = require("util/eventDispatcher");
+    var instance = null,
+        eventDispatcher = require("util/eventDispatcher"),
+        selector_template = require("text!./emuchartselector/selector_template.handlebars");
 
     function EmuchartsSelector() {
         eventDispatcher(this);
-        _this = this;
         return this;
     }
 
-    EmuchartsSelector.prototype.addItem = function(toolbar) {
-        function installSelectionHandlers() {
-            d3.selectAll("#RemoveItem").on("click", function () {
-                _this.removeDatatype(this.parentElement.parentElement.id);
+    EmuchartsSelector.prototype.render = function(emucharts) {
+        var _this = this;
+        if (emucharts) {
+            emucharts = emucharts.sort(function (a,b) {
+                return a.emuchart_name < b.emuchart_name;
+            });
+            var html_element = Handlebars.compile(selector_template, { noEscape: true })({
+                emucharts: emucharts.reverse()
+            });
+            d3.select("#EmuchartsSelector").html(html_element);
+            // install handlers
+            d3.select("#EmuchartsSelector").selectAll("a").on("click", function () {
+                if (this.getAttribute("class") !== "selected") {
+                    _this.fire({
+                        type: "EmuchartsSelector_select",
+                        emuchart: {
+                            id: this.id
+                        }
+                    });
+                }
             });
         }
-        function addElement(e) {
-            var newItem = d3.select("#SelectorTemplate").node().cloneNode(true);
-            newItem.children[1].innerHTML = newItem.value = e.value;
-            newItem.id = e.id;
-            d3.select("#EmuchartsSelector").select("tbody").node().appendChild(newItem);
+        return this;
+    };
+
+    module.exports = {
+        getInstance: function () {
+            if (!instance) {
+                instance = new EmuchartsSelector();
+            }
+            return instance;
         }
-        toolbar.forEach(function (e) {
-            addElement(e);
-        });
-        installSelectionHandlers();
-        return _this;
     };
-
-    EmuchartsSelector.prototype.removeDatatype = function(elementID) {
-        var table = d3.select("#EmuchartsSelector").select("tbody").node();
-        var theDatatype = document.getElementById(elementID);
-        table.removeChild(theDatatype);
-        _this.fire({
-            type: "EmuchartsSelector_deleteDatatype",
-            datatype: {
-                id: theDatatype.id
-            }
-        });
-        return _this;
-    };
-
-    EmuchartsSelector.prototype.editDatatype = function(elementID) {
-        var theDatatype = document.getElementById(elementID);
-        _this.fire({
-            type: "EmuchartsSelector_editDatatype",
-            datatype: {
-                id: theDatatype.id
-            }
-        });
-        return _this;
-    };
-
-    EmuchartsSelector.prototype.setDatatypes = function(tableElements) {
-        function clearTable() {
-            var table = d3.select("#EmuchartsSelector").select("tbody").node();
-            while (table.lastChild && table.lastChild.id !== "heading") {
-                table.removeChild(table.lastChild);
-            }
-            return _this;
-        }
-        clearTable();
-        this.addDatatype(tableElements);
-        return _this;
-    };
-
-    module.exports = EmuchartsSelector;
 });

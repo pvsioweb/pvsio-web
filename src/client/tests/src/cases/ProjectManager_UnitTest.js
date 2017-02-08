@@ -9,23 +9,20 @@
 /*global define, describe, expect, it, Promise, d3, beforeAll, afterAll*///, xdescribe*/
 define(function (require, exports, module) {
     "use strict";
-    var FileSystem = require("filesystem/FileSystem");
-    var instance;
-    var main;
-    var pm;
-    var fs;
+    var fs = require("filesystem/FileSystem").getInstance();
+    var main = require("main");
+    var pm = require("project/ProjectManager").getInstance();
 
+    var instance;
     var success, fail, cTest, fTest;
     var header, summary;
     var txt;
 
     function ProjectManager_UnitTest() {
-        main = require("main");
-        pm = require("project/ProjectManager").getInstance();
         pm.addListener("ProjectChanged", function (event) {
-            console.log("Intercepted new ProjectChanged event " + JSON.stringify(event));
+            //console.log("Intercepted new ProjectChanged event " + JSON.stringify(event));
+            console.log("Intercepted new ProjectChanged event " + event.type);
         });
-        fs = new FileSystem();
         success = fail = cTest = fTest = 0;
         header = "\n------ Console log for ProjectManager UnitTest -------------------";
         summary = "\n------ Unit test for ProjectManager --------------------";

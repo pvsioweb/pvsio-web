@@ -16,16 +16,15 @@ define(function (require, exports, module) {
         NotificationManager = require("project/NotificationManager"),
         Notification        = require("pvsioweb/forms/displayNotification"),
         WSManager           = require("websockets/pvs/WSManager"),
-        FileSystem          = require("filesystem/FileSystem");
+        fs                  = require("filesystem/FileSystem").getInstance();
 //        MIME                = require("util/MIME");
     var instance,
-        fs;
-    var currentProject,
+        currentProject,
         projectManager,
         editor,
         editorContainer,
-        pvsioWebClient;
-    var undoHistory;
+        pvsioWebClient,
+        undoHistory;
 
     require("cm/addon/fold/foldcode");
     require("cm/addon/fold/foldgutter");
@@ -169,7 +168,6 @@ define(function (require, exports, module) {
                 }
             }
         };
-        fs = new FileSystem();
     }
 
     ModelEditor.prototype.getName = function () {

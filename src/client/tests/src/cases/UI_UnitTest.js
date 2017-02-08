@@ -14,15 +14,13 @@ define(function (require, exports, module) {
 
     module.exports = {
         run: function () {
-            var pm = ProjectManager.getInstance(),
-                p;
+            var pm = ProjectManager.getInstance();
 
             describe("User interface Elements", function () {
                 beforeEach(function (done) {
                     d3.select("div.overlay").remove();
                     pm = ProjectManager.getInstance();
                     main.start({noSplash: true}).then(function () {
-                        p = pm.project();
                         done();
                     }).catch(util.expectError(done));
                 });
@@ -77,11 +75,13 @@ define(function (require, exports, module) {
                 });
 
                 it("EmuCharts tool can be loaded", function (done) {
-                    util.loadPlugin("EmuChartsEditor").then(function () {
-                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='EmuChartsEditor']");
-                        expect(pluginPanel.empty()).toBeFalsy();
-                        done();
-                    }).catch(util.expectError(done));
+                    setTimeout(function () {
+                        util.loadPlugin("EmuChartsEditor").then(function () {
+                            var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='EmuChartsEditor']");
+                            expect(pluginPanel.empty()).toBeFalsy();
+                            done();
+                        }).catch(util.expectError(done));
+                    }, 1000);
                 });
 
                 it("EmuCharts tool can be unloaded", function (done) {
@@ -139,9 +139,13 @@ define(function (require, exports, module) {
                     d3.select("div.overlay").remove();
                     pm = ProjectManager.getInstance();
                     main.start({noSplash: true}).then(function () {
-                        p = pm.project();
-                        editorPanel = "div.collapsible-panel-parent[plugin-owner='PrototypeBuilder'] .collapsible-panel";
-                        done();
+                        // open the unit_test project
+                        pm.createProject({ projectName: 'unit_test/test', overWrite: true }).then(function (res) {
+                            pm.openProject("unit_test/test").then(function (res) {
+                                editorPanel = "div.collapsible-panel-parent[plugin-owner='PrototypeBuilder'] .collapsible-panel";
+                                done();
+                            }).catch(util.expectError(done));
+                        }).catch(util.expectError(done));
                     }).catch(util.expectError(done));
                 });
 
@@ -181,8 +185,13 @@ define(function (require, exports, module) {
                     d3.select("div.overlay").remove();
                     pm = ProjectManager.getInstance();
                     main.start({noSplash: true}).then(function () {
-                        setTimeout(done, 0);//using a timeout to push this to the end of the event queue so any files are added and project is ready before performing tests
-                    });
+                        // open the unit_test project
+                        pm.createProject({ projectName: 'unit_test/test', overWrite: true }).then(function (res) {
+                            pm.openProject("unit_test/test").then(function (res) {
+                                done();
+                            }).catch(util.expectError(done));
+                        }).catch(util.expectError(done));
+                    }).catch(util.expectError(done));
                 });
 
                 it("can add files to the project", function (done) {

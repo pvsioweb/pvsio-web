@@ -2,7 +2,7 @@
  * @author Paolo Masci
  * @date 04 September 2015
  *
- * ADA printer for emucharts models.
+ * Bless printer for emucharts models.
  * Emuchart objects have the following structure:
       emuchart = {
                 name: (string),
@@ -53,7 +53,7 @@ define(function (require, exports, module) {
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
     var _parser = new EmuchartsParser();
-    
+
     var displayNotification = function (msg, title) {
         title = title || "Notification";
         displayNotificationView.create({
@@ -74,7 +74,7 @@ define(function (require, exports, module) {
         previous_state: { name: "previous_state", type: machineStateType, value: initialMachineState },
         current_state: { name: "current_state", type: machineStateType, value: initialMachineState }
     };
-    
+
     function getType (type) {
         var typeMaps = {
             "Time": "BLESS_Types::Time",
@@ -89,7 +89,7 @@ define(function (require, exports, module) {
 //    var constantsMap = {
 //        "Initialization_Timeout": "Iso_Properties::Initialization_Timeout"
 //    };
-    
+
     function isLocalVariable(name, emuchart) {
         if (name === predefined_variables.current_state.name ||
                 name === predefined_variables.previous_state.name) {
@@ -127,7 +127,7 @@ define(function (require, exports, module) {
         }
         return false;
     }
-    
+
     function getTerm(term, emuchart) {
         if (isInputVariable(term, emuchart)) {
             term = term + "?";
@@ -137,7 +137,7 @@ define(function (require, exports, module) {
         return term;
     }
 
-    function parseTransition(t, emuchart) {        
+    function parseTransition(t, emuchart) {
         function getExpression(expression, emuchart) {
             var complexActions = ["expression", "assignment", "function"];
             if (expression === undefined || expression === null) {
@@ -147,7 +147,7 @@ define(function (require, exports, module) {
                 var name = expression.val.identifier.val;
                 if (isLocalVariable(name, emuchart)) {
                     return getTerm(name, emuchart) + " := " +
-                            getExpression(expression.val.expression, emuchart);                
+                            getExpression(expression.val.expression, emuchart);
                 }
                 return getTerm(name, emuchart) + "(" +
                         getExpression(expression.val.expression, emuchart) + ")";
@@ -169,7 +169,7 @@ define(function (require, exports, module) {
                     }
                 }
             }
-        }        
+        }
         var name = t.name;
         var functionBody = _parser.parseTransition(name);
         if (functionBody.res) {
@@ -193,7 +193,7 @@ define(function (require, exports, module) {
             return { erroneousLabel: name, parserError: functionBody.err };
         }
     }
-    
+
     function Printer(name) {
         this.modelName = name;
         this.model = {modelName: name, transitions: []};
@@ -230,7 +230,7 @@ define(function (require, exports, module) {
             this.model.transitions = this.model.transitions.concat(transitions);
         }
     };
-    
+
     Printer.prototype.print_initial_transition = function (emuchart) {
         var initial_transitions = emuchart.initial_transitions,
             transitions = [];
@@ -244,7 +244,7 @@ define(function (require, exports, module) {
             this.model.initial_transitions = transitions;
         }
     };
-    
+
 
     Printer.prototype.print_types = function (emuchart) {
     };
@@ -252,33 +252,33 @@ define(function (require, exports, module) {
     Printer.prototype.print_states = function (emuchart) {
         this.model.states = emuchart.states;
     };
-    
+
     Printer.prototype.print_descriptor = function (emuchart) {
-        this.model.descriptor = 
+        this.model.descriptor =
             "-- ---------------------------------------------------------------" +
             "\n--  Model: " + emuchart.name;
         if (emuchart.author) {
-            this.model.descriptor += 
+            this.model.descriptor +=
                 "\n--  Author: " + emuchart.author.name +
                 "\n--          " + emuchart.author.affiliation +
                 "\n--          " + emuchart.author.contact;
         }
         if (emuchart.description) {
-            this.model.descriptor += 
+            this.model.descriptor +=
                 "\n-- ---------------------------------------------------------------" +
                 "\n--  " + emuchart.description;
         }
-        this.model.descriptor += 
+        this.model.descriptor +=
             "\n-- ---------------------------------------------------------------\n";
     };
-    
+
     Printer.prototype.print_disclaimer = function (emuchart) {
         this.model.disclaimer = "\n-- ---------------------------------------------------------------\n" +
                     "--  Bless/AADL model generated using PVSio-web BlessPrinter ver 0.1\n" +
                     "--  Tool freely available at http://www.pvsioweb.org" +
                     "\n-- ---------------------------------------------------------------\n";
     };
-    
+
 
     Printer.prototype.print = function (emuchart) {
         this.model.transitions = [];

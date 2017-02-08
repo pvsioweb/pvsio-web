@@ -10,7 +10,6 @@ define(function (require, exports, module) {
         WidgetsListView = require("pvsioweb/forms/WidgetsListView"),
         WidgetConfigView = require("./forms/WidgetConfigView"),
         template = require("text!./forms/templates/PIMPrototyperPanel.handlebars"),
-        FileSystem = require("filesystem/FileSystem"),
         ProjectManager = require("project/ProjectManager"),
         PIMProjectManager = require("./PIMProjectManager"),
         PluginManager = require("plugins/PluginManager"),
@@ -107,7 +106,7 @@ define(function (require, exports, module) {
                 });
         });
 
-        this._fileSystem = new FileSystem();
+        this._fileSystem = require("filesystem/FileSystem").getInstance();
         this._widgetManager = new PIMWidgetManager();
 
         this._screenControlsView = new ScreenControlsView({
