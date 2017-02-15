@@ -1344,25 +1344,27 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsCodeGenerators.emuchartsMisraCPrinter.print(emucharts);
-            console.log(model);
-            if (model.err) {
-                console.log(model.err);
-                return;
-            }
-            if (model.thread && model.header) {
-                var overWrite = {overWrite: true};
-                projectManager.project().addFile("Makefile", model.makefile, overWrite);
-                projectManager.project().addFile("main.c", model.main, overWrite);
-                projectManager.project().addFile(emucharts.name + ".c", model.thread, overWrite);
-                projectManager.project().addFile(emucharts.name + ".h", model.header, overWrite);
-                projectManager.project().addFile("Android_" + emucharts.name + ".c", model.Android_thread, overWrite);
-                projectManager.project().addFile("Android_" + emucharts.name + ".h", model.Android_header, overWrite);
-
-                projectManager.project().addFile("Doxyfile", model.doxygen, overWrite);
-            } else {
-                console.log("Warning, MisraC code is undefined.");
-            }
+            emuchartsCodeGenerators.emuchartsMisraCPrinter.print(emucharts, { interactive: true }).then(function (model) {
+                // console.log(model);
+                if (model.err) {
+                    console.log(model.err);
+                    return;
+                }
+                if (model.thread && model.header) {
+                    var overWrite = {overWrite: true};
+                    projectManager.project().addFile("Makefile", model.makefile, overWrite);
+                    projectManager.project().addFile("main.c", model.main, overWrite);
+                    projectManager.project().addFile(emucharts.name + ".c", model.thread, overWrite);
+                    projectManager.project().addFile(emucharts.name + ".h", model.header, overWrite);
+                    projectManager.project().addFile("Android_" + emucharts.name + ".c", model.Android_thread, overWrite);
+                    projectManager.project().addFile("Android_" + emucharts.name + ".h", model.Android_header, overWrite);
+                    projectManager.project().addFile("Doxyfile", model.doxygen, overWrite);
+                } else {
+                    console.log("Warning, MisraC code is undefined.");
+                }
+            }).catch(function (err) {
+                console.log(err);
+            });
         });
 
         //-- Verification menu ---------------------------------------------------
