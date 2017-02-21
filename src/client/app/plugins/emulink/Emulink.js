@@ -345,6 +345,13 @@ define(function (require, exports, module) {
         contextTable.setContextVariables(emuchartsManager.getVariables());
     }
 
+    function updateContextTables() {
+        contextTable.setContextVariables(emuchartsManager.getVariables());
+        machineStatesTable.setMachineStates(emuchartsManager.getStates());
+        transitionsTable.setTransitions(emuchartsManager.getTransitions());
+        constantsTable.setConstants(emuchartsManager.getConstants());
+        datatypesTable.setDatatypes(emuchartsManager.getDatatypes());
+    }
 
     /**
      * Constructor
@@ -388,18 +395,15 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_stateRenamed", stateRenamed_handler);
         emuchartsManager.addListener("emuCharts_stateColorChanged", stateColorChanged_handler);
         emuchartsManager.addListener("emuCharts_newEmuchartsLoaded", function (event) {
-            // update tables
-            contextTable.setContextVariables(emuchartsManager.getVariables());
-            machineStatesTable.setMachineStates(emuchartsManager.getStates());
-            transitionsTable.setTransitions(emuchartsManager.getTransitions());
-            constantsTable.setConstants(emuchartsManager.getConstants());
-            datatypesTable.setDatatypes(emuchartsManager.getDatatypes());
+            updateContextTables();
         });
 
         EmuchartsSelector.addListener("EmuchartsSelector_select", function (event) {
             if (event && event.emuchart) {
                 emuchartsManager.loadEmucharts(event.emuchart.id);
                 EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+                // update tables
+                updateContextTables();
             }
         });
 
