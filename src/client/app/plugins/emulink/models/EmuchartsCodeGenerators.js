@@ -21,6 +21,7 @@ define(function (require, exports, module) {
         EmuchartsAdaPrinter    = require("plugins/emulink/models/EmuchartsAdaPrinter"),
         EmuchartsBlessPrinter  = require("plugins/emulink/models/EmuchartsBlessPrinter"),
         EmuchartsMisraCPrinter = require("plugins/emulink/models/EmuchartsMisraCPrinter"),
+        EmuchartsAndroidPrinter  = require("plugins/emulink/models/EmuchartsAndroidPrinter"),
         EmuchartsNuXMVPrinter  = require("plugins/emulink/models/EmuchartsNuXMVPrinter"),
         EmuchartsAlloyPrinter  = require("plugins/emulink/models/EmuchartsAlloyPrinter");
 
@@ -35,6 +36,7 @@ define(function (require, exports, module) {
         this.emuchartsAdaPrinter = new EmuchartsAdaPrinter("emucharts_Ada");
         this.emuchartsBlessPrinter = new EmuchartsBlessPrinter("emucharts_Bless");
         this.emuchartsMisraCPrinter = new EmuchartsMisraCPrinter("emucharts_MisraC");
+        this.emuchartsAndroidPrinter = new EmuchartsAndroidPrinter("emucharts_Android");
         this.emuchartsNuXMVPrinter = new EmuchartsNuXMVPrinter("emucharts_NuXMV");
         this.emuchartsAlloyPrinter = new EmuchartsAlloyPrinter("emucharts_Alloy");
         return this;

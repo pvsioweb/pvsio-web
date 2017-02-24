@@ -1057,8 +1057,12 @@ define(function (require, exports, module) {
         });
 
         function printer_template(printer_name, file_extension) {
+            var desc = emuchartsManager.getSelectedEmuchartsDescriptor();
+            var filename = (desc && desc.emuchart_name) ? desc.emuchart_name
+                                : ("emucharts_" + projectManager.project().name());
+            filename = filename.replace(/-/g, "_");
             var emucharts = {
-                name: ("emucharts_" + projectManager.project().name().replace(/-/g, "_")),
+                name: filename,
                 author: {
                     name: "xxxx",
                     affiliation: "xxxx",
@@ -1369,6 +1373,27 @@ define(function (require, exports, module) {
             }).catch(function (err) {
                 console.log(err);
             });
+        });
+        d3.select("#btn_menuAndroidPrinter").on("click", function () {
+            var emucharts = {
+                name: projectManager.project().name(),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: {
+                    input: emuchartsManager.getInputVariables(),
+                    output: emuchartsManager.getOutputVariables(),
+                    local: emuchartsManager.getLocalVariables()
+                },
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            emuchartsCodeGenerators.emuchartsAndroidPrinter.print(emucharts);
         });
 
         //-- Verification menu ---------------------------------------------------

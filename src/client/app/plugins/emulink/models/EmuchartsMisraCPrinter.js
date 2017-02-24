@@ -790,7 +790,7 @@ define(function (require, exports, module) {
                     reject(err);
                 });
             }
-            return resolve(finalize());
+            return resolve(finalize(opt));
         });
     };
 
