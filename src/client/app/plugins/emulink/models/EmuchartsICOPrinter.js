@@ -48,8 +48,8 @@ define(function (require, exports, module) {
             transition.y = parseInt(transition.y);
             transition.controlPoint = transition.controlPoint || {};
             transition.controlPoint = {
-                x: transition.controlPoint.x || 100,
-                y: transition.controlPoint.y || 100,
+                x: parseInt(transition.controlPoint.x) || 100,
+                y: parseInt(transition.controlPoint.y) || 100,
             };
             return transition;
         });

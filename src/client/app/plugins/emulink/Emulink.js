@@ -1395,6 +1395,27 @@ define(function (require, exports, module) {
             };
             emuchartsCodeGenerators.emuchartsAndroidPrinter.print(emucharts);
         });
+        d3.select("#btn_menuICOPrinter").on("click", function () {
+            var emucharts = {
+                name: projectManager.project().name(),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: {
+                    input: emuchartsManager.getInputVariables(),
+                    output: emuchartsManager.getOutputVariables(),
+                    local: emuchartsManager.getLocalVariables()
+                },
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            emuchartsCodeGenerators.emuchartsICOPrinter.print(emucharts);
+        });
 
         //-- Verification menu ---------------------------------------------------
         d3.select("#btn_menuConsistencyOfActions").on("click", function () {
