@@ -23,7 +23,7 @@ alarisGP: THEORY
   
   state: TYPE = [# display: alaris_real, timer: alaris_timer, step: alaris_step, power_led: ledType #]
   
-  init(x: alaris_real): state = (# display := x, timer := max_timer, step := small_step, power_led := ON #)
+  init(x: alaris_real): state = (# display := x, timer := max_timer, step := small_step, power_led := OFF #)
   %----------------------------------------------------------------------------------------------------------------
 
 
@@ -90,7 +90,7 @@ alarisGP: THEORY
 
   release_up(st: state): state = release_key(st)
 
-  click_up(st: state): state = release_key(press_up(st))
+  click_up(st: state): state = release_key(press_up(st)) WITH [ power_led := ON ]
   %----------------------------------------------------------------------------------------------------------------
 
 
