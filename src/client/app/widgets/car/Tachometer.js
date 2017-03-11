@@ -43,11 +43,11 @@ define(function (require, exports, module) {
                 min: opt.min,
                 max: opt.max,
                 initial: opt.initial,
-                majorTicks: 11,
+                majorTicks: 6,
                 transitionDuration: 300,
                 greenZones: [ ],
                 yellowZones: [ ],
-                redZones: [ { from: (opt.max - (opt.max * 0.1)), to: opt.max } ]
+                redZones: [ { from: (opt.max - (opt.max * 0.2)), to: opt.max } ]
             };
             return new d3_gauge_plus.Gauge(id, config);
         }

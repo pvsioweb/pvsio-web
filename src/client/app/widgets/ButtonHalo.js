@@ -11,6 +11,10 @@ define(function (require, exports, module) {
         return this;
     }
 
+    ButtonHalo.prototype.removeKeypressHandlers = function () {
+        instance._keyCode2widget = {};
+    };
+
     ButtonHalo.prototype.installKeypressHandler = function (w) {
         function halo (buttonID) {
             if (d3.select("." + buttonID).node()) {
