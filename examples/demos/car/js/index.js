@@ -102,13 +102,13 @@ require([
         // ---------------- SPEEDOMETER ----------------
         car.speedometerGauge = new Speedometer('speedometer-gauge', {
             label: "kmh",
-            max: 200,
+            max: 260,
             min: 0
         });
         // ---------------- TACHOMETER ----------------
         car.tachometerGauge = new Tachometer('tachometer-gauge', {
-            min: 0,
             max: 9,
+            min: 0,
             label: "x1000/min"
         });
         /*

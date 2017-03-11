@@ -134,7 +134,7 @@ main: THEORY
 				  ELSE 0 ENDIF ]] ENDIF,
 	new_rpm = getRPM(st),
         st = st WITH [ rpm := new_rpm ]
-     IN IF rpm(st) < 1 THEN gearDOWN(st) ELSE st ENDIF
+     IN IF rpm(st) < 4 THEN gearDOWN(st) ELSE st ENDIF
 
   FRICTION: Speed_Val = 0.6
   tick(st: state): state =
