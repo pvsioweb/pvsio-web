@@ -57,6 +57,8 @@ define(function (require, exports, module) {
         this.left = coords.left || 0;
         this.width = coords.width || 200;
         this.height = coords.height || 80;
+        opt.visibleWhen = opt.visibleWhen || "true"; // default: always enabled/visible
+        this.visibleWhen = property.call(this, opt.visibleWhen);
         this.fontsize = opt.fontsize || (this.height * 0.9);
         this.fontfamily = opt.fontfamily || "sans-serif";
         this.font = [this.fontsize, "px ", this.fontfamily];
@@ -65,6 +67,7 @@ define(function (require, exports, module) {
         this.backgroundColor = opt.backgroundColor || ""; //transparent
         this.fontColor = opt.fontColor || "#fff"; //white
         this.cursor = opt.cursor || "default";
+        this.borderStyle = opt.borderStyle || "none";
         if (opt.inverted) {
             var tmp = this.backgroundColor;
             this.backgroundColor = this.fontColor;
@@ -82,6 +85,7 @@ define(function (require, exports, module) {
                         .style("width", this.width + "px").style("height", this.height + "px")
                         .style("margin", 0).style("padding", 0).style("border-radius", "2px")
                         .style("background-color", this.backgroundColor)
+                        .style("border-style", this.borderStyle)
                         .style("display", "none").attr("id", id).attr("class", elemClass);
         this.div.append("span").attr("id", id + "_span").attr("class", id + "_span")
                         .attr("width", this.width).attr("height", this.height)
@@ -151,6 +155,7 @@ define(function (require, exports, module) {
             id: this.id(),
             displayKey: this.displayKey(),
             cursorName: this.cursorName(),
+            visibleWhen: this.visibleWhen(),
             auditoryFeedback: this.auditoryFeedback(),
             touchscreenvisibleWhen: this.touchscreenvisibleWhen(),
             touchscreenCommand: this.touchscreenCommand()
@@ -215,6 +220,7 @@ define(function (require, exports, module) {
     };
 
     SingleDisplay.prototype.render = function (txt, opt) {
+        var _this = this;
         function renderln(data, opt) {
             opt = opt || {};
             data.context.clearRect(0, 0, data.width, data.height);
@@ -333,23 +339,43 @@ define(function (require, exports, module) {
 
         opt = opt || {};
         txt = txt || "";
-        var _this = this;
-        var str = "";
+        var str = "", expr = "";
         if (typeof txt === "object") {
             // txt in this case is a PVS state that needs to be parsed
-            str = StateParser.resolve(txt, this.displayKey());
-            if (str) {
-                this.txt = StateParser.evaluate(str);
-                if (typeof this.txt === "string") {
-                    this.txt = this.txt.replace(new RegExp("\"", "g"), "");
-                }
-                //read out the display if audio is enabled for this display widget
-                if (this.auditoryFeedback() === "enabled") {
-                    Speaker.speak(this.txt.toString());
+            var isVisible = false;
+            var visibleWhen = opt.visibleWhen || this.visibleWhen();
+            expr = StateParser.simpleExpressionParser(visibleWhen);
+            if (expr && expr.res) {
+                if (expr.res.type === "constexpr" && expr.res.constant === "true") {
+                    isVisible = true;
+                } else if (expr.res.type === "boolexpr" && expr.res.binop) {
+                    str = StateParser.resolve(txt, expr.res.attr);
+                    if (str) {
+                        str = StateParser.evaluate(str);
+                        if ((expr.res.binop === "=" && str === expr.res.constant) ||
+                             (expr.res.binop === "!=" && str !== expr.res.constant)) {
+                                 isVisible = true;
+                        }
+                    }
                 }
             }
-            str = StateParser.resolve(txt, this.cursorName());
-            this.cursorpos = StateParser.evaluate(str);
+            if (isVisible) {
+                str = StateParser.resolve(txt, this.displayKey());
+                if (str) {
+                    this.txt = StateParser.evaluate(str);
+                    if (typeof this.txt === "string") {
+                        this.txt = this.txt.replace(new RegExp("\"", "g"), "");
+                    }
+                    //read out the display if audio is enabled for this display widget
+                    if (this.auditoryFeedback() === "enabled") {
+                        Speaker.speak(this.txt.toString());
+                    }
+                }
+                str = StateParser.resolve(txt, this.cursorName());
+                this.cursorpos = StateParser.evaluate(str);
+            } else {
+                return this.hide();
+            }
         } else {
             this.txt = txt;
         }
@@ -390,7 +416,7 @@ define(function (require, exports, module) {
             this.touchscreenEnabled(false);
             if (this.touchscreenvisibleWhen() !== "") {
                 // we need to parse the expression touchscreenvisibleWhen() to understand if the touchscreeen is enabled or not
-                var expr = StateParser.simpleExpressionParser(this.touchscreenvisibleWhen());
+                expr = StateParser.simpleExpressionParser(this.touchscreenvisibleWhen());
                 if (expr && expr.res) {
                     if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                         this.touchscreenEnabled(true);

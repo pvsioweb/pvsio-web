@@ -345,6 +345,13 @@ define(function (require, exports, module) {
         contextTable.setContextVariables(emuchartsManager.getVariables());
     }
 
+    function updateContextTables() {
+        contextTable.setContextVariables(emuchartsManager.getVariables());
+        machineStatesTable.setMachineStates(emuchartsManager.getStates());
+        transitionsTable.setTransitions(emuchartsManager.getTransitions());
+        constantsTable.setConstants(emuchartsManager.getConstants());
+        datatypesTable.setDatatypes(emuchartsManager.getDatatypes());
+    }
 
     /**
      * Constructor
@@ -388,18 +395,15 @@ define(function (require, exports, module) {
         emuchartsManager.addListener("emuCharts_stateRenamed", stateRenamed_handler);
         emuchartsManager.addListener("emuCharts_stateColorChanged", stateColorChanged_handler);
         emuchartsManager.addListener("emuCharts_newEmuchartsLoaded", function (event) {
-            // update tables
-            contextTable.setContextVariables(emuchartsManager.getVariables());
-            machineStatesTable.setMachineStates(emuchartsManager.getStates());
-            transitionsTable.setTransitions(emuchartsManager.getTransitions());
-            constantsTable.setConstants(emuchartsManager.getConstants());
-            datatypesTable.setDatatypes(emuchartsManager.getDatatypes());
+            updateContextTables();
         });
 
         EmuchartsSelector.addListener("EmuchartsSelector_select", function (event) {
             if (event && event.emuchart) {
                 emuchartsManager.loadEmucharts(event.emuchart.id);
                 EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+                // update tables
+                updateContextTables();
             }
         });
 
@@ -1053,8 +1057,12 @@ define(function (require, exports, module) {
         });
 
         function printer_template(printer_name, file_extension) {
+            var desc = emuchartsManager.getSelectedEmuchartsDescriptor();
+            var filename = (desc && desc.emuchart_name) ? desc.emuchart_name
+                                : ("emucharts_" + projectManager.project().name());
+            filename = filename.replace(/-/g, "_");
             var emucharts = {
-                name: ("emucharts_" + projectManager.project().name().replace(/-/g, "_")),
+                name: filename,
                 author: {
                     name: "xxxx",
                     affiliation: "xxxx",
@@ -1344,25 +1352,69 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsCodeGenerators.emuchartsMisraCPrinter.print(emucharts);
-            console.log(model);
-            if (model.err) {
-                console.log(model.err);
-                return;
-            }
-            if (model.thread && model.header) {
-                var overWrite = {overWrite: true};
-                projectManager.project().addFile("Makefile", model.makefile, overWrite);
-                projectManager.project().addFile("main.c", model.main, overWrite);
-                projectManager.project().addFile(emucharts.name + ".c", model.thread, overWrite);
-                projectManager.project().addFile(emucharts.name + ".h", model.header, overWrite);
-                projectManager.project().addFile("Android_" + emucharts.name + ".c", model.Android_thread, overWrite);
-                projectManager.project().addFile("Android_" + emucharts.name + ".h", model.Android_header, overWrite);
-
-                projectManager.project().addFile("Doxyfile", model.doxygen, overWrite);
-            } else {
-                console.log("Warning, MisraC code is undefined.");
-            }
+            emuchartsCodeGenerators.emuchartsMisraCPrinter.print(emucharts, { interactive: true }).then(function (model) {
+                // console.log(model);
+                if (model.err) {
+                    console.log(model.err);
+                    return;
+                }
+                if (model.thread && model.header) {
+                    var overWrite = {overWrite: true};
+                    projectManager.project().addFile("Makefile", model.makefile, overWrite);
+                    projectManager.project().addFile("main.c", model.main, overWrite);
+                    projectManager.project().addFile(emucharts.name + ".c", model.thread, overWrite);
+                    projectManager.project().addFile(emucharts.name + ".h", model.header, overWrite);
+                    projectManager.project().addFile("Android_" + emucharts.name + ".c", model.Android_thread, overWrite);
+                    projectManager.project().addFile("Android_" + emucharts.name + ".h", model.Android_header, overWrite);
+                    projectManager.project().addFile("Doxyfile", model.doxygen, overWrite);
+                } else {
+                    console.log("Warning, MisraC code is undefined.");
+                }
+            }).catch(function (err) {
+                console.log(err);
+            });
+        });
+        d3.select("#btn_menuAndroidPrinter").on("click", function () {
+            var emucharts = {
+                name: projectManager.project().name(),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: {
+                    input: emuchartsManager.getInputVariables(),
+                    output: emuchartsManager.getOutputVariables(),
+                    local: emuchartsManager.getLocalVariables()
+                },
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            emuchartsCodeGenerators.emuchartsAndroidPrinter.print(emucharts);
+        });
+        d3.select("#btn_menuICOPrinter").on("click", function () {
+            var emucharts = {
+                name: projectManager.project().name(),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: {
+                    input: emuchartsManager.getInputVariables(),
+                    output: emuchartsManager.getOutputVariables(),
+                    local: emuchartsManager.getLocalVariables()
+                },
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            emuchartsCodeGenerators.emuchartsICOPrinter.print(emucharts);
         });
 
         //-- Verification menu ---------------------------------------------------

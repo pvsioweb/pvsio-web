@@ -14,7 +14,7 @@ define(function (require, exports, module) {
         "(:": ":)",
         "#)": "(#",
         ")": "(",
-        ":)": "):"
+        ":)": "(:"
     };
 
     /** matches a numeric character */
@@ -145,7 +145,7 @@ define(function (require, exports, module) {
                         key.word = key.word.substr(0, key.word.length - 1); //removing spaces and last char ":"
                         key.index = key.index + 1;
                         val = parseValue(subValue.word.substring(key.index));
-                        res[key.word] = val.value;
+                        res[key.word] = (typeof val.value === "string") ? val.value.trim() : val.value;
                         index = (val.index + key.index);
                     } while (subValue.word[index] === ",");
 
@@ -184,6 +184,9 @@ define(function (require, exports, module) {
             token = readUntil(value, token.index, function (ch, prev) {
                 return wordChar(ch, prev) || num(ch) || (/[\/\.\-\"\'\s\_\:\?\!\@\$\^\&\(\)\%<>\;]/).test(ch);
             });
+            if (token.word.endsWith(":")) { // this happens with list types
+                token.word = token.word.substr(0, token.word.length - 1).trim();
+            }
             return {
                 value: token.word,
                 index: token.index

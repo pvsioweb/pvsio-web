@@ -214,6 +214,10 @@ define(function (require, exports, module) {
         return emuDesc;
     };
 
+    EmuchartsManager.prototype.getSelectedEmuchartsDescriptor = function () {
+        return _emuchartsDescriptors.get(_selectedEmuchart);
+    };
+
     EmuchartsManager.prototype.importUppaalV4 = function (XMLFile) {
         if (XMLFile && XMLFile.content) {
             var uDesc = UppaalConverter.openUppaalV4(XMLFile);

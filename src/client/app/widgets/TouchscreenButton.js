@@ -80,6 +80,7 @@ define(function (require, exports, module) {
             left: this.left, top: this.top, height: this.height, width: this.width
         }, {
             functionText: opt.functionText,
+            customFunctionText: opt.customFunctionText,
             callback: opt.callback,
             buttonReadback: opt.buttonReadback,
             evts: opt.evts,
@@ -193,7 +194,7 @@ define(function (require, exports, module) {
         TouchscreenButton.prototype.parentClass.updateWithProperties.apply(this, arguments);
         this.overlayButton.updateWithProperties(props);
         return this;
-    };    
+    };
     /**
      * Removes the widget's div
      */

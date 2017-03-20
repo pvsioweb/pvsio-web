@@ -20,7 +20,8 @@
                 variables: (array of {
                                 name: (string), // the variable identifier
                                 type: (string), // the variable type
-                                scope: (string) // the variable scope, either local or input or output
+                                scope: (string),// the variable scope, either local or input or output
+                                value: (string) // the initial value of the variable
                             }),
                 states: (array of {
                                 name: (string), // the state label
@@ -37,11 +38,11 @@
                                     name: (string), // the target state label
                                     id: (string)    // a unique identifier
                                 },
-                                listSources: (array of 
+                                listSources: (array of
                                     :(string)       // sources state label list in case of homonymous transitions with different source
                                                     // (this array is present only into the first object of the array with the same trigger name)
                                 ),
-                                listTargets: (array of 
+                                listTargets: (array of
                                     :(string)       // target state label list in case of homonymous transitions with different target
                                                     // (this array is present only into the first object of the array with the same trigger name)
                                 ),
@@ -68,8 +69,9 @@ define(function (require, exports, module) {
     var Android_headerTemplate = require("text!plugins/emulink/models/misraC/templates/headerAndroid.handlebars");
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
+    var displayAskParameters = require("plugins/emulink/forms/displayAskParameters");
     var _parser = new EmuchartsParser();
-    
+
     var displayNotification = function (msg, title) {
         title = title || "Notification";
         displayNotificationView.create({
@@ -92,7 +94,7 @@ define(function (require, exports, module) {
     };
     var declarations = [];
     var string_length = 0;  //MAX stringh length for strings variables
-    
+
     var operatorOverrides = {
         ":="    : "=",
         "AND"   : "&&",
@@ -105,7 +107,7 @@ define(function (require, exports, module) {
         "not"   : "!",
         "="     : "=="
     };
-    
+
     var typeMaps = {
         "Time"  : "Time",    //Iachino: Serve??
         "bool"  : "UC_8",
@@ -114,14 +116,14 @@ define(function (require, exports, module) {
         "int"   : "UI_32",
         "Sint"  : "SI_32",
         "float" : "F_32",
-        "double": "D_64"                      
+        "double": "D_64"
     };
-    
+
     var Ints = ["int", "unsigned int", "long", "unsigned long"];
-    
+
     /**
      * Specific-length equivalents should be typedefd for the specific compile, with respect to MISRA 1998 rule (Rule 13, advisory)
-     */   
+     */
     function getType(type) {
         if ((type.toLowerCase() === "bool") || (type.toLowerCase() === "boolean")) {
             type = typeMaps.bool;
@@ -131,7 +133,7 @@ define(function (require, exports, module) {
             //     declarations.push("#define TRUE 1");
             //     declarations.push("#define FALSE 0");
             //     declarations.push("typedef unsigned char " + type + ";");
-            // }    
+            // }
         } else if ((type.toLowerCase() === "char") || (type.toLowerCase() === "unsigned char")) {
             //The type char shall always be declared as unsigned char or signed char
             //see MISRA 1998 rules (Rule 14, required)
@@ -155,7 +157,7 @@ define(function (require, exports, module) {
                 declarations.push("typedef float " + type + ";");
             }
         } else if ((type.toLowerCase() === "real") || (type.toLowerCase() === "double") ||
-                   (type.toLowerCase() === "itimes") || (type.toLowerCase() === "pausetime") || (type.toLowerCase() === "irates") || (type.toLowerCase() === "ivols")   //ONLY FOR TESTING with Alaris GP model 
+                   (type.toLowerCase() === "itimes") || (type.toLowerCase() === "pausetime") || (type.toLowerCase() === "irates") || (type.toLowerCase() === "ivols")   //ONLY FOR TESTING with Alaris GP model
                     ) {
             type = typeMaps.double;
             if(!isInArray(declarations, type)){
@@ -170,7 +172,7 @@ define(function (require, exports, module) {
         }
         return typeMaps[type] || type;
     }
-    
+
     /**
      * Set a number with the properly value's suffix, useful for parsing declaration's variable, with respect to MISRA 1998 rule (Rule 18, advisory)
      * Parameter is current value
@@ -189,7 +191,7 @@ define(function (require, exports, module) {
         }
         return v.value;
     }
-    
+
     /**
      * Set a number with the properly value's suffix, useful for parsing actions's transations, with respect to MISRA 1998 rule (Rule 18, advisory)
      * Parameters are variable definitions, current value to analize and emucharts structure
@@ -206,18 +208,18 @@ define(function (require, exports, module) {
                         val += "f";
                     }
                 }
-            } 
+            }
         });
         return val;
     }
-    
+
     /**
      * Change operator sintax from Emucharts to C code
      */
     function getOperator(op, emuchart) {
         return operatorOverrides[op] || op;
     }
-    
+
     /**
      * Checks if a value is in an array
      * Returns a boolean
@@ -226,7 +228,7 @@ define(function (require, exports, module) {
         var arrayJoin = array.join();
         return arrayJoin.indexOf(search) >= 0;
     }
-    
+
     /**
      * Checks if a value is a float or a finite number
      * Returns a boolean
@@ -234,7 +236,7 @@ define(function (require, exports, module) {
     function isNumber(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     }
-        
+
     /**
      * Checks if a value is a local variable in the emuchart structure
      * Returns a boolean
@@ -276,7 +278,7 @@ define(function (require, exports, module) {
     //     }
     //     return false;
     // }
-    
+
     /**
      * Checks if a value is a constant in the emuchart structure
      * Returns a boolean
@@ -292,7 +294,7 @@ define(function (require, exports, module) {
         }
         return false;
     }
-    
+
     /**
      * Splice method for strings
      * Returns the new string
@@ -300,7 +302,7 @@ define(function (require, exports, module) {
     function spliceSlice(str, index, count, add) {
         return str.slice(0, index) + (add || "") + str.slice(index + count);
     }
-    
+
     function parseTransition(t, emuchart) {
         function getExpression(expression, emuchart) {
             var complexActions = ["expression", "assignment", "function"];
@@ -311,7 +313,7 @@ define(function (require, exports, module) {
                 //handling modulo operator in condition forms, it's valid only for integer values
                 expression.val = '%';
             }
-            /** 
+            /**
              * Managing modulo operator in expression forms:
              * 1. check if type is 'modop' (and include math.h library so we can use fmod())
              * 2. move 'fmod' string back to the last parenthesis of the expression and introduce a comma to separate two parameters of fmod function
@@ -372,7 +374,7 @@ define(function (require, exports, module) {
                     } else {
                         return "st->" + name + " = " +
                             getExpression(expression.val.expression, emuchart);
-                    }                
+                    }
                 }
                 //same treatment of LocalVariables, left the prototype intentionally in case of different choice
                 if (isstring) {
@@ -380,7 +382,7 @@ define(function (require, exports, module) {
                 } else {
                     return "st->" + name + " = " +
                         getExpression(expression.val.expression, emuchart);
-                }  
+                }
             } else {
                 if (expression.type === 'identifier'){
                     if(isLocalVariable(expression.val, emuchart)) {
@@ -407,7 +409,7 @@ define(function (require, exports, module) {
                     }
                 }
             }
-        }        
+        }
         var name = t.name;
         var functionBody = _parser.parseTransition(name);
         if (functionBody.res) {
@@ -419,7 +421,7 @@ define(function (require, exports, module) {
                 condition = condition.val.map(function (token) {
                     return getExpression(token, emuchart);
                 }).join(" ");
-                /** 
+                /**
                  * Handling logical operators, according to MISRA C rule 34 (The operands of a logical && or || shall be primary expressions)
                  * Adding ') ' and ' (' before and after logical operators
                  * With a flag it checks if it's the first logical operator, in order to add '( ' and ' )' as well to the beginning and to the end of the string
@@ -444,7 +446,7 @@ define(function (require, exports, module) {
                 actions = actions.val.map(function (a) {
                     a.val.expression.val.map(function(b){
                         if(b.type === "number"){
-                            b.val = setSuffixInActions(a, b.val, emuchart);                         
+                            b.val = setSuffixInActions(a, b.val, emuchart);
                         }
                     });
                     return getExpression(a, emuchart);
@@ -456,7 +458,7 @@ define(function (require, exports, module) {
             return { erroneousLabel: name, parserError: functionBody.err };
         }
     }
-    
+
     function Printer(name) {
         this.modelName = name;
         this.model = {modelName: name, transitions: []};
@@ -535,7 +537,7 @@ define(function (require, exports, module) {
         if (emuchart.variables) {
             this.model.structureVar = emuchart.variables.local.map(function (v) {
                 v.type = getType(v.type);
-                if (v.isstring === true) { 
+                if (v.isstring === true) {
                     return (v.type + " "+ v.name + "[STRING_LENGTH];");
                 }
                 return (v.type + " "+ v.name + ";");
@@ -544,7 +546,7 @@ define(function (require, exports, module) {
         this.model.structureVar.push(machineStateType + " " + predefined_variables.current_state.name + ";  //  Predefined variable for current state.");
         this.model.structureVar.push(machineStateType + " " + predefined_variables.previous_state.name + ";  //  Predefined variable for previous state.");
     };
-    
+
     Printer.prototype.print_transitions = function (emuchart) {
         var transitions = [];
         var functionsName = [];
@@ -553,7 +555,7 @@ define(function (require, exports, module) {
             var parsedTransition  = parseTransition(t, emuchart);
             if (parsedTransition) {
                  if(!isInArray(functionsName, parsedTransition.id)){
-                     //first insertion of a new transition  
+                     //first insertion of a new transition
                      functionsName.push(parsedTransition.id);
                      parsedTransition.listSources = [];
                      parsedTransition.listSources.push(parsedTransition.source.name);
@@ -561,7 +563,7 @@ define(function (require, exports, module) {
                      parsedTransition.listTargets.push(parsedTransition.target.name);
                      transitions.push(parsedTransition);
                  } else {
-                     //transition name is already in the list                  
+                     //transition name is already in the list
                      var i, tmp;
                      for (i = 0; i < transitions.length; i++) {
                          if (transitions[i].id !== 'undefined') {
@@ -574,7 +576,7 @@ define(function (require, exports, module) {
                             } else {
                                 var j;
                                 for (j = 0; j < transitions[i].length; j++) {
-                                    //from third case on, scroll through the proper list and push the new transition 
+                                    //from third case on, scroll through the proper list and push the new transition
                                     if (transitions[i][j].id === parsedTransition.id) {
                                         tmp = [];
                                         var k;
@@ -592,8 +594,8 @@ define(function (require, exports, module) {
                                     }
                                 }
                             }
-                            
-                            //adding current source and target into the proper list, the lists (listSources and listTargest) are in the first element of the proper transition array (transitions[i][0]) 
+
+                            //adding current source and target into the proper list, the lists (listSources and listTargest) are in the first element of the proper transition array (transitions[i][0])
                             if(!transitions[i].listSources){
                                 //control in transitions list
                                 if(!isInArray(transitions[i][0].listSources, parsedTransition.source.name) &&
@@ -609,7 +611,7 @@ define(function (require, exports, module) {
                                     transitions[i].listSources.push(parsedTransition.source.name);
                                 }
                             }
-                            
+
                             if(!transitions[i].listTargets) {
                                 //control in transitions list
                                 if(!isInArray(transitions[i][0].listTargets, parsedTransition.target.name) &&
@@ -634,7 +636,7 @@ define(function (require, exports, module) {
             this.model.transitions = this.model.transitions.concat(transitions);
         }
     };
-    
+
     Printer.prototype.print_initial_transition = function (emuchart) {
         var initial_transitions = emuchart.initial_transitions,
             transitions = [];
@@ -648,7 +650,7 @@ define(function (require, exports, module) {
             this.model.initial_transitions = transitions;
         }
     };
-    
+
 
     Printer.prototype.print_types = function (emuchart) {
     };
@@ -656,30 +658,30 @@ define(function (require, exports, module) {
     Printer.prototype.print_states = function (emuchart) {
         this.model.states = emuchart.states;
     };
-    
+
     Printer.prototype.print_descriptor = function (emuchart) {
-        this.model.descriptor = 
+        this.model.descriptor =
             "/**---------------------------------------------------------------" +
             "\n*   Model: " + emuchart.name;
         Handlebars.registerHelper('filename', function() {
                 return emuchart.name;
         });
         if (emuchart.author) {
-            this.model.descriptor += 
+            this.model.descriptor +=
                 "\n*   Author: " + emuchart.author.name +
                 "\n*           " + emuchart.author.affiliation +
                 "\n*           " + emuchart.author.contact;
         }
         if (emuchart.description) {
-            this.model.descriptor += 
+            this.model.descriptor +=
                 "\n*  ---------------------------------------------------------------" +
                 "\n*   " + emuchart.description;
         }
-        this.model.descriptor += 
+        this.model.descriptor +=
             "\n*  ---------------------------------------------------------------*/\n";
         this.model.makefile_descriptor = this.model.descriptor.replace(/\*|\//g,'#');
     };
-    
+
     Printer.prototype.print_disclaimer = function (emuchart) {
         this.model.disclaimer = "\n/** ---------------------------------------------------------------\n" +
                     "*   C code generated using PVSio-web MisraCPrinter ver 1.0\n" +
@@ -689,28 +691,107 @@ define(function (require, exports, module) {
         this.model.makefile_disclaimer = this.model.makefile_disclaimer.replace(/C code/g, "Makefile");
     };
 
-    Printer.prototype.print = function (emuchart) {
-        this.model.transitions = [];
-        this.print_variables(emuchart);
-        this.print_constants(emuchart);
-        this.print_transitions(emuchart);
-        this.print_initial_transition(emuchart);
-        this.print_states(emuchart);
-        this.print_declarations(emuchart);
-        this.print_disclaimer(emuchart);
-        this.print_descriptor(emuchart);
-        
-        console.log(this.model);//Iachino: TO debug
-        
-        var makefile = Handlebars.compile(makefileTemplate)(this.model);
-        var thread = Handlebars.compile(threadTemplate)(this.model);
-        var header = Handlebars.compile(headerTemplate)(this.model);
-        var main = Handlebars.compile(mainTemplate)(this.model);
-        var doxygen = Handlebars.compile(doxygenTemplate)(this.model);
-        var Android_thread = Handlebars.compile(Android_threadTemplate)(this.model);
-        var Android_header = Handlebars.compile(Android_headerTemplate)(this.model);
-        declarations = [];
-        return {makefile: makefile, thread: thread, header: header, main: main, doxygen: doxygen, Android_thread: Android_thread, Android_header: Android_header};
+    // printer options
+    var platforms = {
+        android: "Android",
+        win: "Windows",
+        linux: "Linux"
+    };
+    var wordsize = {
+        w8: "8",
+        w16: "16",
+        w32: "32",
+        w64: "64"
+    };
+    // utility function for getting the parameters from the user
+    function get_params() {
+        return new Promise (function (resolve, reject) {
+            displayAskParameters.create({
+                header: "MisraC Printer Paramters",
+                params: [{
+                    id: "platform",
+                    name: "Platform",
+                    options: [
+                        { value: platforms.android, selected: true },
+                        { value: platforms.win },
+                        { value: platforms.linux }
+                    ]
+                }, {
+                    id: "wordsize",
+                    name: "Word Size",
+                    options: [
+                        { value: wordsize.w8, selected: true },
+                        { value: wordsize.w16 },
+                        { value: wordsize.w32 },
+                        { value: wordsize.w64 }
+                    ]
+                }],
+                buttons: ["Cancel", "Ok"]
+            }).on("ok", function (e, view) {
+                view.remove();
+                resolve({
+                    platform: e.data.options.get("platform"),
+                    wordsize: e.data.options.get("wordsize")
+                });
+            }).on("cancel", function (e, view) {
+                // just remove window
+                view.remove();
+            });
+        });
+    }
+
+    // when opt.interactive is true, a dialog is shown to the user to select compilation parameters.
+    Printer.prototype.print = function (emuchart, opt) {
+        opt = opt || {};
+        var _this = this;
+        function finalize(par) {
+            par = par || {};
+            par.platform = platforms.android;
+            par.wordsize = wordsize.w8;
+            // TODO: use the above parameters in the handlebars template!
+            console.log(par);
+
+            _this.model.transitions = [];
+            _this.print_variables(emuchart);
+            _this.print_constants(emuchart);
+            _this.print_transitions(emuchart);
+            _this.print_initial_transition(emuchart);
+            _this.print_states(emuchart);
+            _this.print_declarations(emuchart);
+            _this.print_disclaimer(emuchart);
+            _this.print_descriptor(emuchart);
+
+            console.log(_this.model);
+
+            var makefile = Handlebars.compile(makefileTemplate)(_this.model);
+            var thread = Handlebars.compile(threadTemplate)(_this.model);
+            var header = Handlebars.compile(headerTemplate)(_this.model);
+            var main = Handlebars.compile(mainTemplate)(_this.model);
+            var doxygen = Handlebars.compile(doxygenTemplate)(_this.model);
+            var Android_thread = Handlebars.compile(Android_threadTemplate)(_this.model);
+            var Android_header = Handlebars.compile(Android_headerTemplate)(_this.model);
+            declarations = [];
+            return {
+                makefile: makefile,
+                thread: thread,
+                header: header,
+                main: main,
+                doxygen: doxygen,
+                Android_thread: Android_thread,
+                Android_header: Android_header
+            };
+        }
+        return new Promise (function (resolve, reject) {
+            if (opt.interactive) {
+                return get_params().then(function (par) {
+                    resolve(finalize(par));
+                }).catch(function (err) {
+                    console.log(err);
+                    reject(err);
+                });
+            }
+            return resolve(finalize(opt));
+        });
     };
 
     module.exports = Printer;
