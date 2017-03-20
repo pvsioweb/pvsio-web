@@ -53,8 +53,9 @@ define(function (require, exports, module) {
             };
             return transition;
         });
+        emuchart.filename = emuchart.name + "_ICO";
         var filecontent = Handlebars.compile(icoTemplate, { noEscape: true })(emuchart);
-        return write_ICO_file(emuchart.name + "_ICO.xml", filecontent);
+        return write_ICO_file(emuchart.filename + ".xml", filecontent);
     };
 
     module.exports = EmuchartsICOPrinter;
