@@ -185,7 +185,7 @@ define(function (require, exports, module) {
                 return wordChar(ch, prev) || num(ch) || (/[\/\.\-\"\'\s\_\:\?\!\@\$\^\&\(\)\%<>\;]/).test(ch);
             });
             if (token.word.endsWith(":")) { // this happens with list types
-                token.word = token.word.substr(0, token.word.length - 1).trim()
+                token.word = token.word.substr(0, token.word.length - 1).trim();
             }
             return {
                 value: token.word,

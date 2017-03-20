@@ -339,17 +339,17 @@ define(function (require, exports, module) {
 
         opt = opt || {};
         txt = txt || "";
-        var str = "";
+        var str = "", expr = "";
         if (typeof txt === "object") {
             // txt in this case is a PVS state that needs to be parsed
             var isVisible = false;
             var visibleWhen = opt.visibleWhen || this.visibleWhen();
-            var expr = StateParser.simpleExpressionParser(visibleWhen);
+            expr = StateParser.simpleExpressionParser(visibleWhen);
             if (expr && expr.res) {
                 if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                     isVisible = true;
                 } else if (expr.res.type === "boolexpr" && expr.res.binop) {
-                    var str = StateParser.resolve(txt, expr.res.attr);
+                    str = StateParser.resolve(txt, expr.res.attr);
                     if (str) {
                         str = StateParser.evaluate(str);
                         if ((expr.res.binop === "=" && str === expr.res.constant) ||
@@ -416,7 +416,7 @@ define(function (require, exports, module) {
             this.touchscreenEnabled(false);
             if (this.touchscreenvisibleWhen() !== "") {
                 // we need to parse the expression touchscreenvisibleWhen() to understand if the touchscreeen is enabled or not
-                var expr = StateParser.simpleExpressionParser(this.touchscreenvisibleWhen());
+                expr = StateParser.simpleExpressionParser(this.touchscreenvisibleWhen());
                 if (expr && expr.res) {
                     if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                         this.touchscreenEnabled(true);

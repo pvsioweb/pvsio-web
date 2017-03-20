@@ -13,7 +13,7 @@ define(function (require, exports, module) {
         Logger				= require("util/Logger"),
         PVSioStateParser	= require("util/PVSioStateParser"),
         wsSingleton,
-        keepAlive = true;
+        keepAlive = false;
 
     function createWebSocket() {
         var wscBase = wsclient();
@@ -38,7 +38,7 @@ define(function (require, exports, module) {
             }
             return wscBase.port();
         };
-        
+
         /**
             Get or set the last state of the model being executed in pvsio
         */

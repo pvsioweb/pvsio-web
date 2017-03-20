@@ -112,7 +112,8 @@ module.exports = function () {
 	function write(msg, cb) {
 		cbQueue.push(cb);
         //msg = msg.replace(/\s+/g, ""); // this reduces the message size -- this may create issues when using string constants tho
-		var ok = proc.stdin.write(new Buffer(msg));
+		//var ok =
+        proc.stdin.write(msg);
 		// if (!ok) {
 			// wait for drain event before writing another command
 			// proc.stdin.once("drain", (function (m) {
