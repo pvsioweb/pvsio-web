@@ -61,9 +61,9 @@ require([
         var pause_simulation = false;
         var content = imageHolder.append("div").style("position", "absolute").style("top", "0px").style("left", "1250px")
             .style("height", "40px").style("width", "800px").attr("class", "dbgbuttons");
-        content.append("button").text("Pause Simulation").attr("id", "pause_simulation").attr("style", "margin:0 20px 0 20px;");
-        content.append("span").attr("id", "simulation_status").text("Ready!");
-        content.append("button").text("Resume Simulation").attr("id", "resume_simulation").attr("style", "margin:0 20px 0 20px;");
+        // content.append("button").text("Pause Simulation").attr("id", "pause_simulation").attr("style", "margin:0 20px 0 20px;");
+        // content.append("span").attr("id", "simulation_status").text("Ready!");
+        // content.append("button").text("Resume Simulation").attr("id", "resume_simulation").attr("style", "margin:0 20px 0 20px;");
 
         content = imageHolder.append("div").style("position", "absolute").style("top", "40px").style("left", "1250px")
             .style("height", "900px").style("width", "800px").attr("class", "dbg");
@@ -104,6 +104,9 @@ require([
         }
 
         var tick;
+        function single_tick() {
+            ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
+        }
         function start_tick() {
             if (!tick && !pause_simulation) {
                 tick = setInterval(function () {
@@ -444,10 +447,13 @@ require([
 
         function render(res) {
             if (res.action.tick === "TRUE") {
-                start_tick();
-            } else {
-                stop_tick();
+                single_tick();
             }
+            // if (res.action.tick === "TRUE") {
+            //     start_tick();
+            // } else {
+            //     stop_tick();
+            // }
             // function keys
             pillbox.key1.render(res);
             pillbox.key2.render(res);
