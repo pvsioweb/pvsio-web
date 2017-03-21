@@ -8,7 +8,7 @@ main :THEORY
      IN init_pillbox(0)
 
   autocomplete_password(st: state): state =
-    IF mode(st) = pwd THEN
+    IF mode(st) = pwd OR mode(st) = db_pwd THEN
       st
         WITH [field
                 := LAMBDA (x: fields_type):
