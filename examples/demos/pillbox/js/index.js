@@ -108,7 +108,7 @@ require([
             if (!tick && !pause_simulation) {
                 tick = setInterval(function () {
                     ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
-                }, 1000);
+                }, 2000);
             }
         }
         function stop_tick() {
@@ -140,7 +140,7 @@ require([
                     var data = stateParser.parse(res);
                     render(data);
                     log({ data: JSON.stringify(data, null, " "), date: new Date(), id: event.id, type: "frompvs" });
-                    console.log(res);
+                    //console.log(res);
                 }
             } else {
                 console.log(err);
@@ -149,28 +149,118 @@ require([
 
         var patients = [
             {
-                name: "Kylie Minogue"
+                name: "Kylie Minogue",
+                dob: "May 28, 1968",
+                id_card: "PT-123-456-789",
+                carer: "+33 099 566 299",
+                mob: "+44 823 394 111"
             },
             {
-                name: "Bruce Willis"
+                name: "Bruce Willis",
+                dob: "Mar 19, 1955",
+                id_card: "AS-523-235-21",
+                carer: "+33 099 566 299",
+                mob: "+44 823 394 111"
             },
             {
-                name: "Chris Bale"
+                name: "Chris Bale",
+                dob: "Jan 30, 1974",
+                id_card: "SAR-13-12-789",
+                carer: "+33 099 566 299",
+                mob: "+44 823 394 111"
             },
             {
-                name: "Charlize Theron"
+                name: "Charlize Theron",
+                dob: "Aug 7, 1975",
+                id_card: "LA-222-466-789",
+                carer: "+33 099 566 299",
+                mob: "+44 823 394 111"
             },
             {
-                name: "Natalie Portman"
+                name: "Natalie Portman",
+                dob: "Jun 9, 1981",
+                id_card: "US-155-46-589",
+                carer: "+33 099 566 299",
+                mob: "+44 823 394 111"
             },
             {
-                name: "Emma Stone"
+                name: "Emma Stone",
+                dob: "Nov 6, 1988",
+                id_card: "GE-121-234-739",
+                carer: "+33 099 566 299",
+                mob: "+44 823 394 111"
             },
             {
-                name: "Scarlett Johansson"
+                name: "Scarlett Johansson",
+                dob: "Nov 22, 1984",
+                id_card: "FA-21-045-345",
+                carer: "+33 099 566 299",
+                mob: "+44 823 394 111"
             },
             {
-                name: "Mila Kunis"
+                name: "Mila Kunis",
+                dob: "Aug 14, 1983",
+                id_card: "GN-552-436-779",
+                carer: "+33 099 566 299",
+                mob: "+44 823 394 111"
+            },
+        ];
+        var meds = [
+            {
+                medicine: "Lisinopril",
+                dosage: "2.5mg",
+                validity: "Dec 2018",
+                quantity: "32",
+                column: "1"
+            },
+            {
+                medicine: "Bystolic",
+                dosage: "5mg",
+                validity: "Jan 2019",
+                quantity: "16",
+                column: "2"
+            },
+            {
+                medicine: "Norvasc",
+                dosage: "2.5mg",
+                validity: "Nov 2019",
+                quantity: "30",
+                column: "3"
+            },
+            {
+                medicine: "Diovan",
+                dosage: "10mg",
+                validity: "Jun 2019",
+                quantity: "10",
+                column: "4"
+            },
+            {
+                medicine: "Azor",
+                dosage: "5mg",
+                validity: "Jan 2019",
+                quantity: "20",
+                column: "5"
+            },
+            {
+                medicine: "Benicar",
+                dosage: "5mg",
+                validity: "Jun 2019",
+                quantity: "10",
+                column: "6"
+            },
+            {
+                medicine: "Coreg",
+                dosage: "10mg",
+                validity: "Nov 2019",
+                quantity: "30",
+                column: "7"
+            },
+            {
+                medicine: "Lopressor",
+                dosage: "2.5mg",
+                validity: "Nov 2019",
+                quantity: "30",
+                column: "8"
             },
         ];
         var pillbox = {}; // this variable collects references to buttons and displays
@@ -249,6 +339,17 @@ require([
                                 fontsize: 16,
                                 parent: "prototype"
                             });
+        pillbox.medicines = new TouchscreenButton("medicines",
+                            { top: 75, left: 360, height: 32, width: 200 },
+                            {
+                                softLabel: "medicines",
+                                visibleWhen: "action.medicines = TRUE",
+                                fontColor: "white",
+                                backgroundColor: "#8c3434",
+                                callback: onMessageReceived,
+                                fontsize: 16,
+                                parent: "prototype"
+                            });
         // FIXME: introduce z-index
         pillbox.patients_db = new SingleDisplay("patients_db",
                             { top: 200, left: 360, height: 240, width: 350 },
@@ -256,7 +357,19 @@ require([
                                 //backgroundColor: "grey",
                                 parent: "prototype"
                             });
+        pillbox.meds_db = new SingleDisplay("meds_db",
+                            { top: 200, left: 360, height: 240, width: 350 },
+                            {
+                                //backgroundColor: "grey",
+                                parent: "prototype"
+                            });
         pillbox.fields_new_patient = new SingleDisplay("fields_new_patient",
+                            { top: 226, left: 360, height: 170, width: 350 },
+                            {
+                                //backgroundColor: "grey",
+                                parent: "prototype"
+                            });
+        pillbox.fields_new_med = new SingleDisplay("fields_new_med",
                             { top: 226, left: 360, height: 170, width: 350 },
                             {
                                 //backgroundColor: "grey",
@@ -286,7 +399,7 @@ require([
         pillbox.scan_ok = new TouchscreenButton("scan_ok",
                             { top: 300, left: 400, height: 32, width: 456 },
                             {
-                                softLabel: "Scan Ok",
+                                softLabel: "Scan Ok, please wait...",
                                 customFunctionText: "",
                                 visibleWhen: "mode = scan_enabled",
                                 fontColor: "white",
@@ -352,7 +465,7 @@ require([
                 var p = res.patients_db;
                 for (var i = 0; i < p.length; i++) {
                     if (p[i].val.name.visible === "TRUE") {
-                        db.push(i + ": " + patients[0].name);
+                        db.push(i + ": " + patients[i].name);
                     } else {
                         db.push(i + ": ----- ");
                     }
@@ -368,27 +481,50 @@ require([
                 }
             }
             render_patients_db(res);
+            //---
+            function render_meds_db(res) {
+                var db = [];
+                var sel = [];
+                var m = res.meds_db;
+                for (var i = 0; i < m.length; i++) {
+                    if (m[i].val.medicine.visible === "TRUE") {
+                        db.push(i + ": " + meds[i].medicine);
+                    } else {
+                        db.push(i + ": ----- ");
+                    }
+                    sel.push(m[i].val.medicine.selected);
+                    // the following is for interline spacing
+                    db.push("");
+                    sel.push(false);
+                }
+                if (res.mode === "db_med_list") {
+                    pillbox.meds_db.renderMultiline(db, { selected: sel, align: "left" });
+                } else {
+                    pillbox.meds_db.hide();
+                }
+            }
+            render_meds_db(res);
             // new patient
             function render_fields_new_patient(res) {
                 var record = [];
                 if (res.field.name.entered === "TRUE") {
-                    record.push("Name: " + patients[0].name);
+                    record.push("Name: " + patients[parseInt(res.p_max)].name);
                 } else { record.push("Name: ____________"); }
                 record.push(""); // this is for interline spacing
                 if (res.field.dob.entered === "TRUE") {
-                    record.push("Date of birth: Jan 1, 1962");
+                    record.push("Date of birth: " + patients[parseInt(res.p_max)].dob);
                 } else { record.push("Date of birth: ____________"); }
                 record.push(""); // this is for interline spacing
                 if (res.field.id_card.entered === "TRUE") {
-                    record.push("Identity card number: PT-123-456-789");
+                    record.push("Identity card number: " + patients[parseInt(res.p_max)].id_card);
                 } else { record.push("Identity card number: ____________"); }
                 record.push(""); // this is for interline spacing
                 if (res.field.carer.entered === "TRUE") {
-                    record.push("Caretaker phone: +33 099 566 299");
+                    record.push("Caretaker phone: " + patients[parseInt(res.p_max)].carer);
                 } else { record.push("Caretaker phone: ____________"); }
                 record.push(""); // this is for interline spacing
                 if (res.field.mob.entered === "TRUE") {
-                    record.push("Patient phone: +44 823 394 111");
+                    record.push("Patient phone: " + patients[parseInt(res.p_max)].mob);
                 } else { record.push("Patient phone: ____________"); }
                 if (res.mode === "new_patient_details") {
                     pillbox.fields_new_patient.renderMultiline(record, { align: "left" });
@@ -397,6 +533,35 @@ require([
                 }
             }
             render_fields_new_patient(res);
+            // new medicine
+            function render_fields_new_medicine(res) {
+                var record = [];
+                if (res.field.medicine.entered === "TRUE") {
+                    record.push("Medicine: " + meds[parseInt(res.m_max)].medicine);
+                } else { record.push("Medicine: ____________"); }
+                record.push(""); // this is for interline spacing
+                if (res.field.dosage.entered === "TRUE") {
+                    record.push("Dosage: " + meds[parseInt(res.m_max)].dosage);
+                } else { record.push("Dosage: ____________"); }
+                record.push(""); // this is for interline spacing
+                if (res.field.validity.entered === "TRUE") {
+                    record.push("Validity: " + meds[parseInt(res.m_max)].validity);
+                } else { record.push("Validity: ____________"); }
+                record.push(""); // this is for interline spacing
+                if (res.field.quantity.entered === "TRUE") {
+                    record.push("Quantity: " + meds[parseInt(res.m_max)].quantity);
+                } else { record.push("Quantity: ____________"); }
+                record.push(""); // this is for interline spacing
+                if (res.field.column.entered === "TRUE") {
+                    record.push("Column: " + meds[parseInt(res.m_max)].column);
+                } else { record.push("Column: ____________"); }
+                if (res.mode === "new_med") {
+                    pillbox.fields_new_med.renderMultiline(record, { align: "left" });
+                } else {
+                    pillbox.fields_new_med.hide();
+                }
+            }
+            render_fields_new_medicine(res);
             // fingerprint scanner
             pillbox.scan_LED.render(res);
             pillbox.scan_message.render(res);
@@ -404,6 +569,8 @@ require([
             pillbox.creation_success.render(res);
             pillbox.scan_success_LED.render(res);
             pillbox.fingerprint_scanner.render(res);
+            // medicines
+            pillbox.medicines.render(res);
         }
 
         //register event listener for websocket connection from the client

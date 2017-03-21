@@ -4,7 +4,7 @@ pilldispenser_th: THEORY
  BEGIN
 
   %IMPORTING pd_t_and_c_th[5, 20, 20, 5]
-  IMPORTING pd_t_and_c_th[2, 7, 3, 2] % framedepth: posnat,p_limit: posnat, m_limit: posnat, s_limit: posnat
+  IMPORTING pd_t_and_c_th[2, 3, 3, 2] % framedepth: posnat,p_limit: posnat, m_limit: posnat, s_limit: posnat
 
   state: TYPE = [#
    mode: mode_type,
@@ -332,7 +332,11 @@ new_med_screen(st: state): state =
 		      x = quit OR x = confirm,
         field := LAMBDA(x: fields_type):
 	           COND
-		     (x = name) OR (x = dosage) OR (x = validity) OR
+		     %-- EDITED BY PAOLO
+		     %(x = name) I believe you meant medicine?
+                     (x = medicine)
+		     %-------
+		     OR (x = dosage) OR (x = validity) OR
 		     (x = quantity) OR (x = column) ->
 		         (# visible := true, selected := false,
 		                             entered := false #),
@@ -355,6 +359,9 @@ db_med_list_screen(st: state): state =
        action :=
             LAMBDA (x: actions_type):
                (x= key1) OR (x=key2) OR (x=create)
+	       %--- EDITED BY PAOLO
+	       OR x = key3
+	       %------
 		    ]      
 
 
@@ -434,6 +441,9 @@ per_act_confirm(st: state): boolean =
     (mode(st) = pwd) OR (mode(st) = db_pwd) OR (mode(st) = new_patient_details) OR
     (mode(st) = patient_script) OR (mode(st) = dose) OR
     (mode(st) = patient_details)
+    %--- EDITED BY PAOLO
+    OR mode(st) = new_med
+    %--------
     
 
 act_confirm(st : (per_act_confirm)): state =
@@ -457,7 +467,9 @@ act_confirm(st : (per_act_confirm)): state =
        field(st)(id_card)`entered AND field(st)(carer)`entered AND
        field(st)(mob)`entered) ->
           LET st1 = st WITH [ scan_counter := max_scan,
-	                      p_max := next_pid(st`p_max, st),
+	      	       	      %--- EDITED BY PAOLO
+	                      % p_max := next_pid(st`p_max, st), -- you need to execute next_pid when storing the record in the database (i.e., in act_quit), otherwise you will select the wrong index
+			      %--------
 			      new_patient_record := field(st)]
                                        IN scan_screen(st1),
      (mode(st) = patient_script) AND
@@ -503,7 +515,11 @@ act_confirm(st : (per_act_confirm)): state =
 		      ENDCOND
 		    ] IN script_list_screen(st1),
     (mode(st) = new_med) AND
-      (field(st)(name)`entered AND field(st)(dosage)`entered AND
+      %--- EDITED BY PAOLO
+      % (field(st)(name)`entered -- I believe you meant medicine?
+      (field(st)(medicine)`entered
+      %----
+      AND field(st)(dosage)`entered AND
        field(st)(validity)`entered AND field(st)(quantity)`entered AND
        field(st)(column)`entered) ->
           LET st1 = st WITH [ m_max := next_mid(st`m_max, st),
@@ -602,6 +618,9 @@ COND
 		      p = st`p_max -> true,
 		      ELSE -> patient_id_line(st)(p)
 		     ENDCOND,
+		    %-- EDITED BY PAOLO
+		    p_max := next_pid(st`p_max, st),
+		    %----
 		    patients_db :=
 		     LAMBDA(p: p_index):
 		     COND
