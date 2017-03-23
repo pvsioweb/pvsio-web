@@ -8,7 +8,7 @@ main: THEORY
  BEGIN
 
   Gear: TYPE = { P, N, R, GEAR_1, GEAR_2, GEAR_3, GEAR_4, GEAR_5, GEAR_6 }
-  gear2int(g: Gear): int =
+  gear2real(g: Gear): real =
     COND
      g = P OR g = N -> 0,
      g = R -> 3.67,
@@ -19,7 +19,7 @@ main: THEORY
      g = GEAR_5 -> 0.7,
      g = GEAR_6 -> 0.6
     ENDCOND
-  CONVERSION gear2int
+  CONVERSION gear2real
   
   MAX_SPEED: real = 220
   Speed_Unit: TYPE = { kpm, mph }
@@ -43,6 +43,7 @@ main: THEORY
   #]
 
   Action: TYPE = { idle, acc, brake }
+  Time: TYPE = [# hour: int, min: int #]
   
   state: TYPE = [#
     speed: Speed, % Km/h
@@ -50,8 +51,11 @@ main: THEORY
     rpm: Rpm, % x1000/min
     odo: Odo, % Km
     temp: Temp,
+    time: Time,
     action: Action
   #]
+
+  get_current_time: Time = (# hour := get_time`hour, min := get_time`minute #)
 
   %-- initial state
   init(x: real): state = (#
@@ -60,6 +64,7 @@ main: THEORY
     rpm := 0,
     odo := 0,
     temp := (# val := TEMP_AMB, units := C #),
+    time := get_current_time,
     action := idle
   #)
 
@@ -137,12 +142,20 @@ main: THEORY
      IN IF rpm(st) < 4 THEN gearDOWN(st) ELSE st ENDIF
 
   FRICTION: Speed_Val = 0.6
+  inc(odo: Odo, speed: Speed): Odo =
+    LET step = speed`val / 60 * 1
+     IN IF step >= 0
+        THEN IF odo + step <= MAX_ODO THEN odo + step ELSE odo + step - MAX_ODO ENDIF
+	ELSE IF odo + step <= 0 THEN 0 ELSE odo + step ENDIF ENDIF
+     
   tick(st: state): state =
+   LET st = st WITH [ time := get_current_time ] IN
     IF action(st) = idle
     THEN IF speed(st)`val > 0
          THEN LET new_speed = IF speed(st)`val - FRICTION > 0 THEN speed(st)`val - FRICTION ELSE 0 ENDIF,
 	          st = st WITH [ speed := speed(st) WITH [ val := new_speed ]]
-	       IN st WITH [ rpm := getRPM(st) ]
+	       IN st WITH [ rpm := getRPM(st),
+	       	            odo := inc(odo(st), speed(st)) ]
          ELSE st ENDIF
     ELSE st ENDIF
 
