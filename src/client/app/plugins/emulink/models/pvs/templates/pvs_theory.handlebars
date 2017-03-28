@@ -9,16 +9,15 @@
 %                - Init function
 %                - Transition functions
 %
-{{/if}}{{descriptor}}
-{{name}}: THEORY
- BEGIN{{#if importings}} IMPORTING{{#each importings}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}
+{{/if}}{{descriptor}}{{name}}: THEORY
+ BEGIN{{#if importings}} IMPORTING {{#each importings}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}
 {{#if extras}}{{extras}}
 {{/if}}{{#if constants}}{{constants}}
 {{/if}}{{#if datatypes}}{{datatypes}}
-{{/if}}{{modes}}
-{{state_variables}}
-{{init}}
-{{utils}}
-{{transitions}}
- END {{name}}
-{{disclaimer}}
+{{/if}}{{#if modes}}{{modes}}
+{{/if}}{{#if state_variables}}{{state_variables}}
+{{/if}}{{#if init}}{{init}}
+{{/if}}{{#if utils}}{{utils}}
+{{/if}}{{#if transitions}}{{transitions}}
+{{/if}} END {{name}}{{#if disclaimer}}
+{{disclaimer}}{{/if}}

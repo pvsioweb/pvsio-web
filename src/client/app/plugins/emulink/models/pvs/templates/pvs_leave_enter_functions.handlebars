@@ -3,7 +3,7 @@
 %   Description: This template generates PVS utility functions for entering and exiting modes.
 %                  The enter_into function includes also a block A COND-ENDCOND encoding state entry actions for each state
 %
-{{/if}}  %-- utility functions
+{{/if}}  %-- leave/enter functions
   enter_into(ms: {{{current_state.type}}})(st: State): State = {{#if entry_actions}}
     LET st = st WITH [ {{{current_state.name}}} := ms ]
      IN COND %-- entry actions{{#each entry_actions}}
