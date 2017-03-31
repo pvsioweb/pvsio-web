@@ -13,7 +13,7 @@ define(function (require, exports, module) {
         Logger				= require("util/Logger"),
         PVSioStateParser	= require("util/PVSioStateParser"),
         wsSingleton,
-        keepAlive = false;
+        keepAlive = true;
 
     function createWebSocket() {
         var wscBase = wsclient();
