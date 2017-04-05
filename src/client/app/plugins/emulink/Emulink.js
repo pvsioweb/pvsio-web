@@ -1091,7 +1091,26 @@ define(function (require, exports, module) {
         }
 
         d3.select("#btn_menuPVSPrinter").on("click", function () {
-            printer_template(emuchartsCodeGenerators.emuchartsPVSPrinter, ".pvs");
+            var desc = emuchartsManager.getSelectedEmuchartsDescriptor();
+            var filename = (desc && desc.emuchart_name) ? desc.emuchart_name
+                                : ("emucharts_" + projectManager.project().name());
+            filename = filename.replace(/-/g, "_");
+            var emucharts = {
+                name: filename,
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                datatypes: emuchartsManager.getDatatypes(),
+                variables: emuchartsManager.getVariables(),
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            emuchartsCodeGenerators.emuchartsPVSPrinter.print(emucharts);
         });
         d3.select("#btn_menuAlloyPrinter").on("click", function () {
             printer_template(emuchartsCodeGenerators.emuchartsAlloyPrinter, ".alloy");

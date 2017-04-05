@@ -53,8 +53,9 @@
 /*global define, d3*/
 define(function (require, exports, module) {
     "use strict";
-    var printer_version = "2.0";
+    var printer_version = "2.1";
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
+    var projectManager = require("project/ProjectManager").getInstance();
 
     var leave_enter_function_template = require("text!plugins/emulink/models/pvs/templates/pvs_leave_enter_functions.handlebars"),
         init_function_template = require("text!plugins/emulink/models/pvs/templates/pvs_init_function.handlebars"),
@@ -583,25 +584,51 @@ define(function (require, exports, module) {
      * Prints the entire PVS theory
      */
     EmuchartsPVSPrinter.prototype.print = function (emuchart) {
-        var ret = { err: null, res: null };
+        var _this = this;
+        var extras_theory_name = "pvsioweb_utils";
+        return new Promise(function (resolve, reject) {
+            var model = {
+                descriptor: _this.print_descriptor(emuchart),
+                name: emuchart.name, // Note: it is important to have the theory name identical to the file name -- otherwise PVSio refuses to evaluate commands!
+                importings: emuchart.importings.concat(extras_theory_name),
+                utils: _this.print_enter_exit(emuchart),
+                //extras: Handlebars.compile(pvs_utils_template, { noEscape: true })(),
+                constants: _this.print_constants(emuchart),
+                modes: _this.print_states(emuchart),
+                datatypes: _this.print_datatypes(emuchart),
+                state_variables: _this.print_variables(emuchart),
+                init: _this.print_initial_transition(emuchart),
+                transitions: _this.print_transitions(emuchart),
+                disclaimer: _this.print_disclaimer()
+            };
+            var theory = Handlebars.compile(pvs_theory_template, { noEscape: true })(model);
 
-        var model = {
-            descriptor: this.print_descriptor(emuchart),
-            name: emuchart.name, // Note: it is important to have the theory name identical to the file name -- otherwise PVSio refuses to evaluate commands!
-            importings: emuchart.importings,
-            utils: this.print_enter_exit(emuchart),
-            extras: Handlebars.compile(pvs_utils_template, { noEscape: true })(),
-            constants: this.print_constants(emuchart),
-            modes: this.print_states(emuchart),
-            datatypes: this.print_datatypes(emuchart),
-            state_variables: this.print_variables(emuchart),
-            init: this.print_initial_transition(emuchart),
-            transitions: this.print_transitions(emuchart),
-            disclaimer: this.print_disclaimer()
-        };
+            var model_extras = {
+                name: extras_theory_name, // Note: it is important to have the theory name identical to the file name -- otherwise PVSio refuses to evaluate commands!
+                extras: Handlebars.compile(pvs_utils_template, { noEscape: true })()
+            };
+            var extras = Handlebars.compile(pvs_theory_template, { noEscape: true })(model_extras);
 
-        ret.res = Handlebars.compile(pvs_theory_template, { noEscape: true })(model);
-        return ret;
+            if (theory) {
+                var overWrite = {overWrite: true};
+                projectManager.project().addFile(emuchart.name + ".pvs", theory, overWrite).then(function (res){
+                    projectManager.project().addFile(extras_theory_name + ".pvs", extras, overWrite).then(function (res) {
+                        resolve(true);
+                    }).catch(function (err) {
+                        console.log(err);
+                        reject(err);
+                    });
+                }).catch(function (err) {
+                    console.log(err);
+                    reject(err);
+                });
+            } else {
+                console.log("Warning, PVS model could not be generated.");
+                reject(null);
+            }
+        }).catch(function (err) {
+            console.log(err);
+        });
     };
 
     module.exports = EmuchartsPVSPrinter;

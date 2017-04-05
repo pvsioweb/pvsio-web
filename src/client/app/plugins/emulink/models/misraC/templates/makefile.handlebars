@@ -1,5 +1,5 @@
 {{&makefile_descriptor}}
-NAME = main
+NAME = main.exe
 CC = gcc
 CFLAGS = -Wall -O2 -Werror -Wmissing-noreturn -Wpacked -Wunreachable-code
 LDFLAGS= -lm
@@ -12,7 +12,7 @@ DEBUGFILES = main.dSYM
 .PHONY : clean help install uninstall
 
 %.o: %.c $(HEAD)
-	@$(CC) $(CFLAGS) -c $< -o $@ 
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 build: $(NAME)
 
@@ -21,16 +21,14 @@ debug:$(OBJ)
 	-@rm -r main.o
 	@echo " "
 	@echo "\033[1m$(OBJ)\033[0m compiled successfully in debug mode"
-	@echo "executable file (main) was generated for illustrative purposes"
-	
+	@echo "You can execute ./main.exe for testing the generated code."
+
 $(NAME): $(OBJ)
 	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 	-@rm -r main.o
 	@echo " "
 	@echo "\033[1m$(OBJ)\033[0m compiled successfully!"
-	@echo "executable file (main) was generated for illustrative purposes"
-	@echo " "
-	@echo "Edit 'main.c' file and compile again if you want to try to interact with the generated functions."
+	@echo "You can execute ./main.exe for testing the generated code."
 
 install:
 	-@cp ./$(OBJ) /usr/bin
@@ -69,7 +67,7 @@ help:
 	@echo  "-------------------------------------------------------------"
 	@echo  "  Makefile generated using PVSio-web MisraCPrinter ver 0.1"
 	@echo  "  Tool freely available at http:##www.pvsioweb.org"
-	@echo  "-------------------------------------------------------------" 
+	@echo  "-------------------------------------------------------------"
 	@echo
 
 {{&makefile_disclaimer}}
