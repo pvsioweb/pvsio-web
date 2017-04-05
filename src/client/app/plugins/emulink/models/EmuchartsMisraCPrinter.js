@@ -61,7 +61,12 @@
  */
 define(function (require, exports, module) {
     var makefileTemplate = require("text!plugins/emulink/models/misraC/templates/makefile.handlebars");
-    var threadTemplate = require("text!plugins/emulink/models/misraC/templates/thread.handlebars");
+
+    var threadTemplate_preamble = require("text!plugins/emulink/models/misraC/templates/thread-preamble.handlebars");
+    var threadTemplate_initial_transitions = require("text!plugins/emulink/models/misraC/templates/thread-initial_transitions.handlebars");
+    var threadTemplate_transitions = require("text!plugins/emulink/models/misraC/templates/thread-transitions.handlebars");
+    var threadTemplate_epilogue = require("text!plugins/emulink/models/misraC/templates/thread-epilogue.handlebars");
+
     var headerTemplate = require("text!plugins/emulink/models/misraC/templates/header.handlebars");
     var mainTemplate = require("text!plugins/emulink/models/misraC/templates/main.handlebars");
     var doxygenTemplate = require("text!plugins/emulink/models/misraC/templates/doxygen.handlebars");
@@ -764,7 +769,10 @@ define(function (require, exports, module) {
             console.log(_this.model);
 
             var makefile = Handlebars.compile(makefileTemplate)(_this.model);
-            var thread = Handlebars.compile(threadTemplate)(_this.model);
+            var thread = Handlebars.compile(threadTemplate_preamble)(_this.model) +
+                            Handlebars.compile(threadTemplate_initial_transitions)(_this.model) +
+                            Handlebars.compile(threadTemplate_transitions)(_this.model) +
+                            Handlebars.compile(threadTemplate_epilogue)(_this.model);
             var header = Handlebars.compile(headerTemplate)(_this.model);
             var main = Handlebars.compile(mainTemplate)(_this.model);
             var doxygen = Handlebars.compile(doxygenTemplate)(_this.model);
