@@ -13,6 +13,15 @@ define(function (require, exports, module) {
 
     ButtonHalo.prototype.installKeypressHandler = function (widget, eventKeyCode) {
         instance._keyCode2widget[eventKeyCode] = widget;
+        if (! (d3.select("#btnSimulatorView").node() && d3.select("#btnSimulatorView").classed("active"))) {
+            var _this = this;
+            d3.select(document).on("keydown", function () {
+                _this.handleKeyDownEvent(d3.event);
+            });
+            d3.select(document).on("keyup", function () {
+                _this.handleKeyUpEvent(d3.event);
+            });
+        }
     };
 
     ButtonHalo.prototype.removeKeypressHandlers = function () {
@@ -44,7 +53,7 @@ define(function (require, exports, module) {
     ButtonHalo.prototype.handleKeyDownEvent = function (e) {
         var eventKeyCode = e.which;
         if (eventKeyCode) {
-            if (d3.select("#btnSimulatorView").classed("active")) {
+            if (!d3.select("#btnSimulatorView").node() || d3.select("#btnSimulatorView").classed("active")) {
                 var widget = instance._keyCode2widget[eventKeyCode];
                 if (widget && typeof widget.evts === "function" && widget.evts().indexOf('click') > -1) {
                     widget.click({ callback: widget.callback });
@@ -65,7 +74,7 @@ define(function (require, exports, module) {
     ButtonHalo.prototype.handleKeyUpEvent = function (e) {
         var eventKeyCode = e.which;
         if (eventKeyCode) {
-            if (d3.select("#btnSimulatorView").classed("active")) {
+            if (!d3.select("#btnSimulatorView").node() || d3.select("#btnSimulatorView").classed("active")) {
                 var widget = instance._keyCode2widget[eventKeyCode];
                 if (widget) {
                     if (typeof widget.evts === "function" && widget.evts().indexOf("press/release") > -1) {
