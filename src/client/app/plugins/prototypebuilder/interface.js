@@ -212,6 +212,7 @@ define(function (require, exports, module) {
                     return { label: label, id: id, plugin: p };
                 })
             };
+            data.version = PVSioWeb.version();
 
             PluginManager.getInstance().init();
             PluginManager.getInstance().addListener("PluginEnabled", function (event) {

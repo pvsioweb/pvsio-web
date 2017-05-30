@@ -1,4 +1,5 @@
 /**
+ *
  * @author Paolo Masci
  * @date May 13, 2017
  */
@@ -11,27 +12,29 @@ define(function (require, exports, module) {
         table_element = require("text!plugins/emulink/tools/tables/table_element.handlebars");
 
     var table;
-    var table_name = "Datatypes";
+    var table_name = "StateVariables";
     var attributes = [
-        { name: "Datatype Name" },
-        { name: "Datatype Constants" }
+        { name: "Variable Name" },
+        { name: "Variable Type" },
+        { name: "Initial Value" }
     ];
     function add(e) {
         return Handlebars.compile(table_element, { noEscape: true })({
             table_name: table_name,
             attributes: [
                 { name: e.name },
-                { name: e.constructors.join(", ") }
+                { name: e.type },
+                { name: e.value }
             ]
         });
     }
 
-    function DatatypesTable(div) {
+    function StateVariablesTable(div) {
         if (!table) {
             table = new Table(table_name, div, attributes, add);
         }
         return table;
     }
 
-    module.exports = DatatypesTable;
+    module.exports = StateVariablesTable;
 });

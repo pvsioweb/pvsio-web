@@ -1,6 +1,6 @@
 /**
  * @module EmuchartsParser
- * @version 0.3
+ * @version 0.4
  * @description
  * EmuchartsParser is a parser for the Emucharts language.
  * The main API of the parser is function parseTransition(label); it can be used to parse
@@ -59,7 +59,7 @@ define(function (require, exports, module) {
 
     var lexerRules = [
         { rule: ["\\s+",                    "/* skip whitespace */"], type: "whitespace" },
-        { rule: ["(?!(?:IMPLIES|implies|AND|and|OR|or|NOT|not|TRUE|true|FALSE|false|MOD|mod))"
+        { rule: ["(?!(?:IMPLIES|implies|AND|and|OR|or|NOT|not|TRUE|true|FALSE|false|MOD|mod|RETURN|return))"
                  + // keywords shall not be used as identifiers
                 "([a-zA-Z][a-zA-Z0-9_]*)",  "return 'IDENTIFIER'"],   type: "variable" },
         { rule: ["[0-9]+(?:\\.[0-9]+)?\\b", "return 'NUMBER'"],       type: "number"  },
@@ -86,6 +86,7 @@ define(function (require, exports, module) {
         { rule: ["(TRUE|true)",             "return 'TRUE'"],         type: "builtin" },
         { rule: ["(FALSE|false)",           "return 'FALSE'"],        type: "builtin" },
         { rule: ["(MOD|mod)",               "return 'MOD'"],          type: "builtin" },
+        { rule: ["(RETURN|return)",         "return 'return'"],       type: "builtin" },
         { rule: ["\\(",                     "return '('"],            type: "builtin" },
         { rule: ["\\)",                     "return ')'"],            type: "builtin" },
         { rule: ["\\[",                     "return '['"],            type: "builtin" },
@@ -147,6 +148,14 @@ define(function (require, exports, module) {
                    "       identifier: $1," +
                    "       binop: { type: 'binop', val: $2 }," +
                    "       expression: $3 " +
+                   "    }" +
+                   " };";
+        }
+        function returnExpr() {
+            return " $$ = {" +
+                   "    type: 'return'," +
+                   "    val: {" +
+                   "       expression: $2 " +
                    "    }" +
                    " };";
         }
@@ -248,10 +257,15 @@ define(function (require, exports, module) {
                 "a": [
                     ["assignment",     "if (!Array.isArray($$)) { $$ = []; } $$.push($assignment);"],
                     ["assignment ;",   "if (!Array.isArray($$)) { $$ = []; } $$.push($assignment);"],
-                    ["assignment ; a", "if (!Array.isArray($$)) { $$ = []; } $$.push($1); $$ = $$.concat($3);"]
+                    ["assignment ; a", "if (!Array.isArray($$)) { $$ = []; } $$.push($1); $$ = $$.concat($3);"],
+                    ["r",         "if (!Array.isArray($$)) { $$ = []; } $$.push($r);"],
+                    ["r ;",       "if (!Array.isArray($$)) { $$ = []; } $$.push($r);"]
                 ],
                 "assignment": [
                     ["id := expression", assignmentExpr()]
+                ],
+                "r": [
+                    ["return expression", returnExpr()]
                 ],
                 "id": [
                     ["IDENTIFIER", "$$ = { type: 'identifier', val: $IDENTIFIER }"],

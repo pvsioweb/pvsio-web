@@ -77,6 +77,9 @@ define(function (require, exports, module) {
         function getFolderChildren(files, parentPath) {
             var tree = {};
             files.forEach(function (f) {
+                if (f.path.startsWith("/")) {
+                    f.path = f.path.substring(1, f.length);
+                }
                 var args = f.path.split("/");
                 var ptr = tree;
                 args.forEach(function (a) {

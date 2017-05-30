@@ -54,7 +54,7 @@
                           style="font-size: 1.2em;">
                     </span></a>
                 <hr>
-                <a href="#!" data-toggle="tooltip" data-placement="right" title="Add states" id="btn_toolbarAddState">
+                <a href="#!" data-toggle="tooltip" data-placement="right" title="Add modes" id="btn_toolbarAddState">
                     <span class="glyphicon glyphicon-stop"
                           style="font-size: 1.2em
                                  transform: scale(1.4,1);
@@ -63,15 +63,15 @@
                                  -o-transform: scale(1.4,1); /* Opera */
                                  -moz-transform: scale(1.4,1); /* Firefox */">
                     </span></a>
-                <a href="#!" data-toggle="tooltip" data-placement="right" title="Add transitions" id="btn_toolbarAddTransition">
+                <a href="#!" data-toggle="tooltip" data-placement="right" title="Add trigger" id="btn_toolbarAddTransition">
                     <span class="glyphicon glyphicon-new-window"
                           style="font-size: 1.2em">
                     </span></a>
-                <a href="#!" data-toggle="tooltip" data-placement="right" title="Rename states/transitions" id="btn_toolbarRename">
+                <a href="#!" data-toggle="tooltip" data-placement="right" title="Rename modes/trigger" id="btn_toolbarRename">
                     <span class="glyphicon glyphicon-font"
                           style="font-size: 1.2em">
                     </span></a>
-                <a href="#!" data-toggle="tooltip" data-placement="right" title="Delete states/transitions" id="btn_toolbarDelete">
+                <a href="#!" data-toggle="tooltip" data-placement="right" title="Delete modes/triggers" id="btn_toolbarDelete">
                     <span class="glyphicon glyphicon-remove"
                           style="font-size: 1.2em">
                     </span></a>
@@ -96,27 +96,28 @@
                     <li><a href='#!' id="btn_menuExportAsImage"><span>Export Chart as Image</span></a></li>
                     <li class="divider"></li>
                     <li><a href='#!' id="btn_menuDeleteCurrentChart"><span>Delete Chart</span></a></li>
+                    <li class="divider"></li>
                     <li><a href='#!' id="btn_menuCloseCurrentChart"><span>Close Chart</span></a></li>
                     <li class="divider"></li>
                 </ul>
             </li>
-            <li class='active has-sub' id="menuStates"><a href='#!'><span>States</span></a>
+            <li class='active has-sub' id="menuStates"><a href='#!'><span>Modes</span></a>
                 <ul>
                     <li class="divider"></li>
-                    <li><a href='#!' id="btn_menuNewState"><span>New state</span></a></li>
-                    <li><a href='#!' id="btn_menuRenameState"><span>Edit state</span></a></li>
-                    <li><a href='#!' id="btn_menuDeleteState"><span>Delete state</span></a></li>
+                    <li><a href='#!' id="btn_menuNewState"><span>New system mode</span></a></li>
+                    <li><a href='#!' id="btn_menuRenameState"><span>Edit system mode</span></a></li>
+                    <li><a href='#!' id="btn_menuDeleteState"><span>Delete system mode</span></a></li>
                     <li class="divider"></li>
-                    <li><a href='#!' id="btn_menuLayOutStates"><span>Lay out states</span></a></li>
+                    <li><a href='#!' id="btn_menuLayOutStates"><span>Lay out system modes</span></a></li>
                     <li class="divider"></li>
                 </ul>
             </li>
-            <li class='active has-sub' id="menuTransitions"><a href='#!'><span>Transitions</span></a>
+            <li class='active has-sub' id="menuTransitions"><a href='#!'><span>Triggers</span></a>
                 <ul>
                     <li class="divider"></li>
-                    <li><a href='#!' id="btn_menuNewTransition"><span>New transition</span></a></li>
-                    <li><a href='#!' id="btn_menuRenameTransition"><span>Rename transition</span></a></li>
-                    <li><a href='#!' id="btn_menuDeleteTransition"><span>Delete transition</span></a></li>
+                    <li><a href='#!' id="btn_menuNewTransition"><span>New trigger</span></a></li>
+                    <li><a href='#!' id="btn_menuRenameTransition"><span>Edit trigger</span></a></li>
+                    <li><a href='#!' id="btn_menuDeleteTransition"><span>Delete trigger</span></a></li>
                     <li class="divider"></li>
                 </ul>
             </li>
@@ -127,13 +128,13 @@
                     <li><a href='#!' id="btn_menuEditVariable"><span>Edit variable</span></a></li>
                     <li><a href='#!' id="btn_menuDeleteVariable"><span>Delete variable</span></a></li>
                     <li class="divider"></li>
-                    <li><a href='#!' id="btn_menuNewConstant"><span>New constant</span></a></li>
-                    <li><a href='#!' id="btn_menuEditConstant"><span>Edit constant</span></a></li>
-                    <li><a href='#!' id="btn_menuDeleteConstant"><span>Delete constant</span></a></li>
-                    <li class="divider"></li>
                     <li><a href='#!' id="btn_menuNewDatatype"><span>New datatype</span></a></li>
                     <li><a href='#!' id="btn_menuEditDatatype"><span>Edit datatype</span></a></li>
                     <li><a href='#!' id="btn_menuDeleteDatatype"><span>Delete datatype</span></a></li>
+                    <li class="divider"></li>
+                    <li><a href='#!' id="btn_menuNewConstant"><span>New constant</span></a></li>
+                    <li><a href='#!' id="btn_menuEditConstant"><span>Edit constant</span></a></li>
+                    <li><a href='#!' id="btn_menuDeleteConstant"><span>Delete constant</span></a></li>
                     <li class="divider"></li>
                 </ul>
             </li>
@@ -216,7 +217,7 @@
     </div>-->
     <div id="MouseOverlay">
         <a href="#!" class="toolbar-tooltip" placeholder="addStates" id="MouseOverlayIcon">
-            <span title="Add states"
+            <span title="Add modes"
                   class="glyphicon glyphicon-stop"
                   style="font-size: 1.2em
                          transform: scale(1.4,1);
@@ -226,17 +227,17 @@
                          -moz-transform: scale(1.4,1); /* Firefox */">
             </span></a>
         <a href="#!" class="toolbar-tooltip" placeholder="addTransitions" id="MouseOverlayIcon">
-            <span title="Add transitions"
+            <span title="Add triggers"
                   class="glyphicon glyphicon-new-window"
                   style="font-size: 1.2em">
             </span></a>
         <a href="#!" class="toolbar-tooltip" placeholder="rename" id="MouseOverlayIcon">
-            <span title="Rename states/transitions"
+            <span title="Rename modes/triggers"
                   class="glyphicon glyphicon-font"
                   style="font-size: 1.2em">
             </span></a>
         <a href="#!" class="toolbar-tooltip" placeholder="delete" id="MouseOverlayIcon">
-            <span title="Delete states/transitions"
+            <span title="Delete modes/triggers"
                   class="glyphicon glyphicon-remove"
                   style="font-size: 1.2em">
             </span></a>
@@ -244,190 +245,33 @@
     <div id="ContainerStateMachine" ></div>
     <div id="ContainerStateMachineImage"></div>
     <div id="EmuchartsFloatTable">
-        <div id="NewStateAttributes" style="display:none;">
-            <table class="table">
-              <!-- This is our clonable table line template -->
-              <tr id="StateVariableTemplate">
-                <td contenteditable="false" style="background-color:white; cursor: default;">Name</td>
-                <td contenteditable="false" style="background-color:white; cursor: default;">Type</td>
-                <td contenteditable="false" style="background-color:white; cursor: default;">Value</td>
-                <td style="background-color:white; width:48px;">
-                  <span id="RemoveStateAttribute" class="table-remove glyphicon glyphicon-remove"></span>
-                </td>
-                <td style="background-color:white;">
-                  <!--<span id="StateAttributeUP" class="table-up glyphicon glyphicon-arrow-up"></span>
-                  <span id="StateAttributeDOWN" class="table-down glyphicon glyphicon-arrow-down"></span>-->
-                    <span id="EditStateAttribute" class="table-up glyphicon glyphicon-pencil">
-                </td>
-              </tr>
-              <!-- -->
-            </table>
-        </div>
-        <div id="NewConstant" style="display:none;">
-            <table class="table">
-              <!-- This is our clonable table line template -->
-              <tr id="ConstantsTemplate">
-                <td contenteditable="false" style="background-color:white; cursor: default;">Name</td>
-                <td contenteditable="false" style="background-color:white; cursor: default;">Type</td>
-                <td contenteditable="false" style="background-color:white; cursor: default;">Value</td>
-                <td style="background-color:white; width:48px;">
-                  <span id="RemoveConstant" class="table-remove glyphicon glyphicon-remove"></span>
-                </td>
-                <td style="background-color:white;">
-                    <span id="EditConstant" class="table-up glyphicon glyphicon-pencil">
-                </td>
-              </tr>
-              <!-- -->
-            </table>
-        </div>
-        <div id="NewDatatype" style="display:none;">
-            <table class="table">
-              <!-- This is our clonable table line template -->
-              <tr id="DatatypeTemplate">
-                <td contenteditable="false" style="background-color:white; cursor: default;">Name</td>
-                <td contenteditable="false" style="background-color:white; cursor: default;">Constructors</td>
-                <td style="background-color:white; width:48px;">
-                  <span id="RemoveDatatype" class="table-remove glyphicon glyphicon-remove"></span>
-                </td>
-                <td style="background-color:white;">
-                    <span id="EditDatatype" class="table-up glyphicon glyphicon-pencil">
-                </td>
-              </tr>
-              <!-- -->
-            </table>
-        </div>
-        <div id="NewMachineState" style="display:none;">
-            <table class="table">
-              <!-- This is our clonable table line template -->
-              <tr id="MachineStateTemplate">
-                <td contenteditable="false" style="background-color:white; cursor: default;">
-                    <div id="MachineStateName" style="overflow: hidden; cursor: pointer;">Name</div>
-                </td>
-                <td style="background-color:white;">
-                    <div id="MachineStateColor" style="width:20px; border: 1px solid; cursor: pointer;">&nbsp;</div>
-                </td>
-                <td style="background-color:white;">
-                    <div id="MachineStateEntryActions" style="cursor: pointer;">&nbsp;</div>
-                </td>
-                <td style="background-color:white;">
-                    <div id="MachineStateExitActions" style="cursor: pointer;">&nbsp;</div>
-                </td>
-                <td style="background-color:white; width:48px;">
-                    <span id="RemoveMachineState" class="table-remove glyphicon glyphicon-remove"></span>
-                </td>
-                <td style="background-color:white;">
-                    <span id="RenameMachineState" class="table-up glyphicon glyphicon-pencil">
-                </td>
-              </tr>
-              <!-- -->
-            </table>
-        </div>
         <div id="EmuchartsFloatTableMenu">
             <ul class="table-tab-container" role="tablist">
-                <li id="btnStates" class="active table-tab"><a href="#!">States</a>
+                <li id="btnStates" class="active table-tab"><a href="#!">Modes</a>
                 </li>
-                <li id="btnTransitions" class="table-tab"><a href="#!">Transitions</a>
+                <li id="btnTransitions" class="table-tab"><a href="#!">Triggers</a>
                 </li>
-                <li id="btnVariables" class="table-tab"><a href="#!">Context Variables</a>
-                </li>
-                <li id="btnConstants" class="table-tab"><a href="#!">Constants</a>
+                <li id="btnVariables" class="table-tab"><a href="#!">Variables</a>
                 </li>
                 <li id="btnDatatypes" class="table-tab"><a href="#!">Datatypes</a>
                 </li>
+                <li id="btnConstants" class="table-tab"><a href="#!">Constants</a>
+                </li>
             </ul>
             <ul class="table-toggle-container" role="tablist">
-                <li id="btnViewHideTable" class="table-toggle-visible" style="margin-right:76px;">
-                    <span class="glyphicon glyphicon-triangle-bottom"></span>
+                <li id="btn_incTableHeight" class="table-toggle-visible">
+                    <!-- <span class="glyphicon glyphicon-triangle-top" style="margin-left:28px; margin-right:28px;"></span> -->
+                    <span class="glyphicon glyphicon-resize-full" style="margin-left:12px; margin-right:12px;"></span>
                 </li>
-                <li id="btnViewRevealTable" class="table-toggle-visible" style="display:none">
-                    <span class="glyphicon glyphicon-triangle-top" style="margin-left:28px; margin-right:28px;"></span>
+            </ul>
+            <ul class="table-toggle-container" role="tablist" style="opacity:0.6;">
+                <li id="btn_decTableHeight" class="table-toggle-visible">
+                    <!-- <span class="glyphicon glyphicon-triangle-bottom" style="margin-left:28px; margin-right:28px;"></span> -->
+                    <span class="glyphicon glyphicon-resize-small" style="margin-left:12px; margin-right:12px;"></span>
                 </li>
             </ul>
         </div>
-        <div id="EmuchartsFloatTableContent">
-            <div id="NewTransition" style="display:none;">
-                <table class="table">
-                  <!-- This is our clonable table line template -->
-                  <tr id="TransitionTemplate">
-                    <td contenteditable="false" style="background-color:white; cursor: default;">
-                        <div id="TransitionLabel" style="cursor: pointer;">Name</div>
-                    </td>
-                    <td style="background-color:white;">
-                        <div id="TransitionSource" style="cursor: pointer;">&nbsp;</div>
-                    </td>
-                    <td style="background-color:white;">
-                        <div id="TransitionTarget" style="cursor: pointer;">&nbsp;</div>
-                    </td>
-                    <td style="background-color:white; width:48px;">
-                        <span id="RemoveTransition" class="table-remove glyphicon glyphicon-remove"></span>
-                    </td>
-                    <td style="background-color:white;">
-                        <span id="RenameTransition" class="table-up glyphicon glyphicon-pencil">
-                    </td>
-                  </tr>
-                  <!-- -->
-                </table>
-            </div>
-            <div id="MachineStates" class="table-editable floating-table" style="display:block;">
-                <div class="EmuchartTableHeader" style="cursor: default;"><span>Machine States</span></div>
-                <table class="table" style="margin-bottom:0 !important;">
-                  <tr id="heading" class="TableHeading">
-                    <th style="cursor: default;">Name</th>
-                    <th style="cursor: default;">Color Code</th>
-                    <th style="cursor: default;">Entry Actions</th>
-                    <th style="cursor: default;">Exit Actions</th>
-                    <th></th>
-                    <th class="width32"><span id="AddMachineState" class="table-add glyphicon glyphicon-plus"></span></th>
-                  </tr>
-                </table>
-            </div>
-            <div id="TransitionsTable" class="table-editable floating-table" style="display:none;">
-                <div class="EmuchartTableHeader" style="cursor: default;"><span>Transitions</span></div>
-                <table class="table" style="margin-bottom:0 !important;">
-                  <tr id="heading" class="TableHeading">
-                    <th style="cursor: default;">Transition Label</th>
-                    <th style="cursor: default;">Source</th>
-                    <th style="cursor: default;">Target</th>
-                    <th></th>
-                    <th class="width32"><span id="AddTransition" class="table-add glyphicon glyphicon-plus"></span></th>
-                  </tr>
-                </table>
-            </div>
-            <div id="StateAttributes" class="table-editable floating-table" style="display:none;">
-                <div class="EmuchartTableHeader" style="cursor: default;"><span>Context Variables</span></div>
-                <table class="table" style="margin-bottom:0 !important;">
-                  <tr id="heading" class="TableHeading" style="margin-left:0">
-                    <th style="cursor: default;">Variable Name</th>
-                    <th style="cursor: default;">Variable Type</th>
-                    <th style="cursor: default;">Initial Value</th>
-                    <th></th>
-                    <th class="width32"><span id="AddStateAttribute" class="table-add glyphicon glyphicon-plus"></span></th>
-                  </tr>
-                </table>
-            </div>
-            <div id="ConstantsTable" class="table-editable floating-table" style="display:none;">
-                <div class="EmuchartTableHeader" style="cursor: default;"><span>Constants</span></div>
-                <table class="table" style="margin-bottom:0 !important;">
-                  <tr id="heading" class="TableHeading" style="margin-left:0">
-                    <th style="cursor: default;">Constant Name</th>
-                    <th style="cursor: default;">Constant Type</th>
-                    <th style="cursor: default;">Initial Value</th>
-                    <th></th>
-                    <th class="width32"><span id="AddConstant" class="table-add glyphicon glyphicon-plus"></span></th>
-                  </tr>
-                </table>
-            </div>
-            <div id="DatatypesTable" class="table-editable floating-table" style="display:none;">
-                <div class="EmuchartTableHeader" style="cursor: default;"><span>Datatypes</span></div>
-                <table class="table" style="margin-bottom:0 !important;">
-                  <tr id="heading" class="TableHeading" style="margin-left:0">
-                    <th style="cursor: default;">Datatype Name</th>
-                    <th style="cursor: default;">Datatype Constants</th>
-                    <th></th>
-                    <th class="width32"><span id="AddDatatype" class="table-add glyphicon glyphicon-plus"></span></th>
-                  </tr>
-                </table>
-            </div>
+        <div id="EmuchartsFloatTableContent" class="EmuchartsTableContent">
         </div>
         <!--<textarea id="infoBoxModifiable" readonly >This space is for the Advanced Diagram Editor (this plugin will be implemented soon!)
         </textarea>-->

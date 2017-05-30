@@ -1,16 +1,33 @@
 /**
  * Utility library for creating image map regions for interactive prototyping
- * @author Patrick Oladimeji
- * @contributors Paolo Masci
- * @date 10/21/13 21:42:17 PM
+ * @author Patrick Oladimeji, Paolo Masci
+ * @date May 14, 2017
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3, require, $, module, self, window, MouseEvent, setInterval, clearInterval*/
 (function () {
     "use strict";
-    var helperPos = ['tl', 'tr', 'br', 'bl'], hw = 5, cornerOffset = hw / 2,
+    var helperPos = ['tl', 'tr', 'br', 'bl'], hw = 10, cornerOffset = hw / 2,
         helperData = helperPos.map(function (d) {return {x: cornerOffset, y: cornerOffset, align: d}; });
     var imageIsLoaded = false;
+
+    var mouse_over_region = false; // this is used to choose between create & edit handlers
+    var edit_timer = {
+        timer: null,
+        active: false,
+        max: 500 // 0.5 seconds max timeout
+    }; // this variable is used to detect double clicks for edit
+    function stop_edit_timer() {
+        edit_timer.active = false;
+        clearTimeout(edit_timer.timer);
+    }
+    function start_edit_timer() {
+        edit_timer.active = true;
+        edit_timer.time = setTimeout(function () {
+            edit_timer.active = false;
+        }, edit_timer.max);
+    }
+
     /**
         get client rect for the given element
     */
@@ -31,31 +48,44 @@
     */
     function scale(svgel) {
         var s = svgel.attr("transform");
-        if (s.indexOf("scale") > -1) {
+        if (s && s.indexOf("scale") > -1) {
             return +(s.replace("scale", "").replace("(", "").replace(")", ""));
         } else { return 1; }
     }
 
     function select(region, svg, add, dispatcher) {
+        //clear highlighted regions
+        var currentSelections = svg.selectAll("g.selected");
+        if (!currentSelections.empty()) {
+            dispatcher.clearselection({regions: currentSelections});
+            currentSelections.classed("selected", false);
+        }
+        svg.selectAll("g.subselected").classed("subselected", false);
+        //highlight the region show it has been selected
         var g = d3.select(region.node().parentNode);
+        g.classed("subselected", true);
+        g.classed("selected", true);
 
         // correct handling of mouse events requires moving the selected region on top of the others
+        // svg does not support z-index, so we need this workaround
         d3.selection.prototype.moveToFront = function() {
           return this.each(function(){
             this.parentNode.appendChild(this);
           });
         };
         g.moveToFront();
+        // re-attach mouse up handler to the highlighted region
+        region.on("mouseup", function () {
+            svg.on("mousemove.region", null);
+            dispatcher.move({ region: region, pos: pos(region), scale: scale(svg.select("g")) });
+        });
+        //create move listener for region
+        enableRegionDrag(region, svg, dispatcher);
+        //create listener for corners
+        enableRegionResize(region, svg, dispatcher);
+        //create listener for editing
+        enableRegionEdit(region, svg, dispatcher);
 
-        //remove previous selections if shift key wasnt pressed and we are not selecting a previously selected region
-        if (!add && !g.classed("selected")) {
-            svg.selectAll("g.selected").classed("selected", false);
-        } else if (g.classed("selected")) {
-            svg.selectAll("g.subselected").classed("subselected", false);
-            g.classed("subselected", true);
-        }
-        //higlight the region show it has been selected
-        g.classed("selected", true);
         dispatcher.select({region: region, event: d3.event});
     }
 
@@ -78,35 +108,35 @@
 
     function enableRegionDrag(region, svg, dispatcher) {
         region.on("mousedown", function () {
-            var _scale = scale(svg.select("g"));
-            var mdPos = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]},
-                rxStart = +region.attr("x"),
-                ryStart = +region.attr("y");
-            region.attr("startx", rxStart).attr("starty", ryStart);
-            //cache the start pos in each element
-            svg.selectAll("g.selected .region").attr("startx", function () {
-                return d3.select(this).attr("x");
-            }).attr("starty", function () {
-                return d3.select(this).attr("y");
-            });
-            d3.event.stopPropagation();
-            d3.event.preventDefault();
-            //register mousemove for the svg when moused down on the region
-            svg.on("mousemove.region", function () {
-                var e = {x: d3.mouse(this)[0] / _scale, y: d3.mouse(this)[1] / _scale};
-                var delta = {x: (e.x - mdPos.x), y: (e.y - mdPos.y)};
-                svg.selectAll("g.selected .region").each(function (d) {
-                    var r = d3.select(this);
-                    updateRegion(r, {x: (+r.attr("startx") + delta.x), y: (+r.attr("starty") + delta.y)}, false);
+            if (mouse_over_region) {
+                var _scale = scale(svg.select("g"));
+                var mdPos = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]},
+                    rxStart = +region.attr("x"),
+                    ryStart = +region.attr("y");
+                region.attr("startx", rxStart).attr("starty", ryStart);
+                //cache the start pos in each element
+                svg.selectAll("g.selected .region").attr("startx", function () {
+                    return d3.select(this).attr("x");
+                }).attr("starty", function () {
+                    return d3.select(this).attr("y");
                 });
-            });
-
-            region.on("mouseup", function () {
-                svg.on("mousemove.region", null);
-                dispatcher.move({region: region, pos: pos(region), scale: _scale});
-            });
-
-            select(region, svg, d3.event.shiftKey, dispatcher);
+                //register mousemove for the svg when moused down on the region
+                svg.on("mousemove.region", function () {
+                    var e = {x: d3.mouse(this)[0] / _scale, y: d3.mouse(this)[1] / _scale};
+                    var delta = {x: (e.x - mdPos.x), y: (e.y - mdPos.y)};
+                    svg.selectAll("g.selected .region").each(function (d) {
+                        var r = d3.select(this);
+                        updateRegion(r, {x: (+r.attr("startx") + delta.x), y: (+r.attr("starty") + delta.y)}, false);
+                    });
+                });
+                select(region, svg, d3.event.shiftKey, dispatcher);
+            }
+        }).on("mouseover", function () {
+            // select(region, svg, d3.event.shiftKey, dispatcher);
+            mouse_over_region = true;
+        }).on("mouseout", function () {
+            mouse_over_region = false;
+            stop_edit_timer();
         });
     }
 
@@ -157,7 +187,22 @@
                 dispatcher.resize({region: region, old: {x: rx, y: ry, width: rw, height: rh},
                                 pos: pos(region), scale: _scale});
             });
-        });
+        });//.on("mouseover", function (d, i) {
+            // select(region, svg, d3.event.shiftKey, dispatcher);
+        //});
+    }
+
+    function enableRegionEdit(region, svg, dispatcher) {
+        var g = d3.select(region.node().parentNode);
+        if (mouse_over_region) {
+            if (edit_timer.active) {
+                stop_edit_timer();
+                svg.on("mousemove.region", null);
+                dispatcher.edit({ region: region });
+            } else {
+                start_edit_timer();
+            }
+        }
     }
 
     function createRegion(svg, startPos, dispatcher) {
@@ -171,6 +216,7 @@
         var region = g.append("rect").attr("x", startPos.x).attr("y", startPos.y).attr("class", "region");
         var corners = g.selectAll("rect.corner").data(helperData).enter()
             .append("rect").attr("class", function (d) { return d.align + " corner"; })
+            .attr("x", -10).attr("y", -10)
             .attr("width", hw).attr("height", hw);
 
         function sortPoints(a, b) { return a.y === b.y ? a.x - b.x : a.y - b.y; }
@@ -199,6 +245,8 @@
         enableRegionDrag(region, svg, dispatcher);
         //create listener for corners
         enableRegionResize(region, svg, dispatcher);
+        //create listener for editing
+        enableRegionEdit(region, svg, dispatcher);
         return region;
     }
 
@@ -209,7 +257,7 @@
         //clear any previous svgs
         d3.select(config.parent).select("svg").remove();
         var imageEl = d3.select(config.element), props, mapLayer, svg,
-            ed = d3.dispatch("create", "remove", "resize", "move", "select", "clearselection"), initTimer;
+            ed = d3.dispatch("create", "remove", "resize", "move", "select", "clearselection", "edit"), initTimer;
         props = cr(imageEl);
 
         function initialiseSVGLayer() {
@@ -260,6 +308,8 @@
         function handleKeyDownEvent(e) {
             if ((e.which === 46 || e.which === 8) && e.target === d3.select("body").node()) {
                 ed.remove({regions: mapLayer.selectAll("g.selected rect.region")});
+                stop_edit_timer();
+                mouse_over_region = false;
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -283,10 +333,12 @@
         var loadImage = function () {
             initialiseSVGLayer();
             svg.on("mousedown", function () {
-                var e = d3.event;
-                var _scale = scale(svg.select("g"));
-                createRegion(svg, {x: d3.mouse(this)[0] / _scale, y: d3.mouse(this)[1] / _scale}, ed);
-                e.preventDefault();
+                if (!mouse_over_region) {
+                    var e = d3.event;
+                    var _scale = scale(svg.select("g"));
+                    createRegion(svg, {x: d3.mouse(this)[0] / _scale, y: d3.mouse(this)[1] / _scale}, ed);
+                    e.preventDefault();
+                }
             });
             //initialisation complete
             if (config.onReady) {

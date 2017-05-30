@@ -99,6 +99,9 @@ define(function (require, exports, module) {
             backgroundColor: this.backgroundColor,
             cursor: this.cursor,
             position: "relative",
+            borderRadius: opt.borderRadius,
+            opacity: opt.opacity,
+            blinking: opt.blinking,
             parent: id
         });
         var _this = this;

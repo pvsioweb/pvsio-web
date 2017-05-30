@@ -13,22 +13,14 @@ define(function (require, exports, module) {
         ModelEditor         = require("plugins/modelEditor/ModelEditor"),
         PVSioWebClient      = require("PVSioWebClient"),
         EmuchartsEditorModes= require("plugins/emulink/EmuchartsEditorModes"),
-        displayAddState        = require("plugins/emulink/forms/displayAddState"),
-        displayRenameState     = require("plugins/emulink/forms/displayRenameState"),
-        displayChangeStateColor= require("plugins/emulink/forms/displayChangeStateColor"),
-        displayAddTransition   = require("plugins/emulink/forms/displayAddTransition"),
-        displayRename          = require("plugins/emulink/forms/displayRename"),
+
         displayDelete          = require("plugins/emulink/forms/displayDelete"),
 //        displayAddExpression   = require("plugins/emulink/forms/displayAddExpression"),
-        displayEditVariable     = require("plugins/emulink/forms/displayEditVariable"),
-        displayEditConstant     = require("plugins/emulink/forms/displayEditConstant"),
-        displayEditDatatype     = require("plugins/emulink/forms/displayEditDatatype"),
-        displaySelectState      = require("plugins/emulink/forms/displaySelectState"),
-        displaySelectTransition = require("plugins/emulink/forms/displaySelectTransition"),
         QuestionForm            = require("pvsioweb/forms/displayQuestion"),
         SaveAsView              = require("project/forms/SaveAsView"),
 
-        EmuchartsSelector       = require("plugins/emulink/tools/EmuchartsSelector").getInstance(),
+        emuchartsSelector       = require("plugins/emulink/tools/EmuchartsSelector").getInstance(),
+        emuchartsTables         = require("plugins/emulink/tools/EmuchartsTables").getInstance(),
         EmuchartsCodeGenerators = require("plugins/emulink/models/EmuchartsCodeGenerators"),
         ConsistencyTemplateView = require("plugins/emulink/tools/propertytemplates/ConsistencyTemplateView"),
         FeedbackTemplateView    = require("plugins/emulink/tools/propertytemplates/FeedbackTemplateView"),
@@ -47,13 +39,8 @@ define(function (require, exports, module) {
         PimTestGenerator       = require("plugins/emulink/models/pim/PIMTestGenerator"),
         PMTextGenerator        = require("plugins/emulink/models/pim/PMTextGenerator"),
         PIMImporter            = require("plugins/emulink/models/pim/PIMImporter"),
-        PIMEmulink             = require("plugins/emulink/models/pim/PIMEmulink"),
-        ContextTable           = require("plugins/emulink/tools/ContextTable"),
-        MachineStatesTable     = require("plugins/emulink/tools/MachineStatesTable"),
-        TransitionsTable       = require("plugins/emulink/tools/TransitionsTable"),
-        ConstantsTable         = require("plugins/emulink/tools/ConstantsTable"),
-        DatatypesTable         = require("plugins/emulink/tools/DatatypesTable"),
-        EmuchartsManager       = require("plugins/emulink/EmuchartsManager"),
+
+        emuchartsManager       = require("plugins/emulink/EmuchartsManager").getInstance(),
         ExportDiagram          = require("plugins/emulink/tools/ExportDiagram");
 
     var instance;
@@ -63,18 +50,12 @@ define(function (require, exports, module) {
     var pvsioWebClient;
     var canvas;
 
-    var emuchartsManager;
     var MODE;
     var emuchartsCodeGenerators;
 
     var pimImporter;
     var pimTestGenerator;
-    var pimEmulink;
-    var contextTable;
-    var machineStatesTable;
-    var transitionsTable;
-    var constantsTable;
-    var datatypesTable;
+
     var exportDiagram;
 
     var options = { autoinit: true };
@@ -142,158 +123,31 @@ define(function (require, exports, module) {
         emuchartsManager.delete_state(stateID);
     }
 
-    var maxLen = 48;
-
-    // rename dialog window for states
-    function renameState(theState) {
-        if (emuchartsManager.getIsPIM()) {
-            return pimEmulink.editState(theState);
-        }
-        displayRenameState.create({
-            header: "Renaming state " + theState.name.substring(0, maxLen) + "...",
-            textLabel: {
-                newStateName: "State name",
-                newStateColor: "State color",
-                newStateEnter: "State entry actions",
-                newStateExit:  "State exit actions"
-            },
-            placeholder: {
-                newStateName: theState.name,
-                newStateColor: theState.color,
-                newStateEnter: theState.enter,
-                newStateExit: theState.exit
-            },
-            buttons: ["Cancel", "Ok"]
-        }).on("ok", function (e, view) {
-            var newStateName = e.data.labels.get("newStateName");
-            var newStateColor = e.data.labels.get("newStateColor");
-            var newStateEnter = e.data.labels.get("newStateEnter");
-            var newStateExit = e.data.labels.get("newStateExit");
-            if (newStateName && newStateName.value !== "") {
-                emuchartsManager.edit_state(
-                    theState.id,
-                    { name: newStateName,
-                      color: newStateColor,
-                      enter: newStateEnter,
-                      exit: newStateExit }
-                );
-                view.remove();
-                machineStatesTable.setMachineStates(emuchartsManager.getStates());
-            }
-        }).on("cancel", function (e, view) {
-            // just remove window
-            view.remove();
-        });
-    }
-    // change state color dialog
-    function changeStateColor(theState) {
-        if (emuchartsManager.getIsPIM()) {
-            return pimEmulink.editState(theState);
-        }
-        displayChangeStateColor.create({
-            header: "Renaming state " + theState.name.substring(0, maxLen) + "...",
-            textLabel: {
-                newStateName: "State name",
-                newStateColor: "State color",
-                newStateEnter: "State entry actions",
-                newStateExit:  "State exit actions"
-            },
-            placeholder: {
-                newStateName: theState.name,
-                newStateColor: theState.color,
-                newStateEnter: theState.enter,
-                newStateExit: theState.exit
-            },
-            buttons: ["Cancel", "Ok"]
-        }).on("ok", function (e, view) {
-            var newStateName = e.data.labels.get("newStateName");
-            var newStateColor = e.data.labels.get("newStateColor");
-            var newStateEnter = e.data.labels.get("newStateEnter");
-            var newStateExit = e.data.labels.get("newStateExit");
-            if (newStateColor && newStateColor.value !== "") {
-                emuchartsManager.edit_state(
-                    theState.id,
-                    { name: newStateName,
-                      color: newStateColor,
-                      enter: newStateEnter,
-                      exit: newStateExit }
-                );
-                view.remove();
-                machineStatesTable.setMachineStates(emuchartsManager.getStates());
-            }
-        }).on("cancel", function (e, view) {
-            // just remove window
-            view.remove();
-        });
-    }
-
     function renameState_handler(event) {
         var theState = emuchartsManager.getState(event.node.id);
-        renameState(theState);
+        emuchartsTables.edit({ machinestate: theState });
     }
     function changeStateColor_handler(event) {
         var theState = emuchartsManager.getState(event.node.id);
-        changeStateColor(theState);
-    }
-
-    // rename dialog window for transitions
-    function editTransition(t) {
-        if (emuchartsManager.getIsPIM()) {
-            pimEmulink.editTransition(t);
-            return;
-        }
-        displayRename.create({
-            header: "Renaming transition " + t.name.substring(0, maxLen) + "...",
-            required: false,
-            currentLabel: t.name, // this dialog will show just one transition
-            buttons: ["Cancel", "Rename"]
-        }).on("rename", function (e, view) {
-            var transitionLabel = e.data.labels.get("newLabel");
-            if (!transitionLabel) { transitionLabel = ""; }
-            emuchartsManager.rename_transition(t.id, transitionLabel);
-            view.remove();
-            transitionsTable.setTransitions(emuchartsManager.getTransitions());
-        }).on("cancel", function (e, view) {
-            // just remove rename window
-            emuchartsManager.refresh_transition(t.id, { color: "black" });
-            view.remove();
-        });
+        emuchartsTables.set({ machinestate_color: theState });
     }
 
     function renameTransition_handler(event) {
-        editTransition(event.edge);
+        emuchartsTables.edit({ transition: event.edge });
     }
 
     function highlightTransition_handler(event) {
-        transitionsTable.selectTransition(event.edge.id);
+        emuchartsTables.highlight({ transition: event.edge.id });
     }
     function selectTransition_handler(event) {
-        transitionsTable.scrollTop(event.edge.id);
-        transitionsTable.selectTransition(event.edge.id);
+        emuchartsTables.highlight({ transition: event.edge.id });
     }
     function deselectTransition_handler(event) {
-        transitionsTable.deselectTransition(event.edge.id);
+        emuchartsTables.deselect({ transition: event.edge.id });
     }
 
-    // rename dialog window for initial transitions
-    function editInitialTransition(t) {
-        displayRename.create({
-            header: "Renaming initial transition " + t.name.substring(0, maxLen) + "...",
-            required: false,
-            currentLabel: t.name,
-            buttons: ["Cancel", "Rename"]
-        }).on("rename", function (e, view) {
-            var transitionLabel = e.data.labels.get("newLabel");
-            if (!transitionLabel) { transitionLabel = ""; }
-            emuchartsManager.rename_initial_transition(t.id, transitionLabel);
-            view.remove();
-        }).on("cancel", function (e, view) {
-            // just remove rename window
-            view.remove();
-        });
-    }
     function renameInitialTransition_handler(event) {
-        editInitialTransition(event.edge);
+        emuchartsTables.edit({ initialtransition: event.edge });
     }
 
     function addTransition_handler(event) {
@@ -309,48 +163,50 @@ define(function (require, exports, module) {
     }
 
     function stateAdded_handler(event) {
-        machineStatesTable.setMachineStates(emuchartsManager.getStates());
+        emuchartsTables.set({ machinestates: emuchartsManager.getStates() });
     }
     function stateRemoved_handler(event) {
-        machineStatesTable.setMachineStates(emuchartsManager.getStates());
+        emuchartsTables.set({ machinestates: emuchartsManager.getStates() });
     }
     function stateRenamed_handler(event) { }//print_theory(); print_node(); }
     function stateColorChanged_handler(event) { }//print_theory(); print_node(); }
     function transitionAdded_handler(event) {
-        transitionsTable.setTransitions(emuchartsManager.getTransitions());
+        emuchartsTables.set({ transitions: emuchartsManager.getTransitions() });
     }
     function transitionRemoved_handler(event) {
-        transitionsTable.setTransitions(emuchartsManager.getTransitions());
+        emuchartsTables.set({ transitions: emuchartsManager.getTransitions() });
     }
     function transitionRenamed_handler(event) { }//print_theory(); print_node(); }
     function initialTransitionAdded_handler(event) { }//console.log("initial transition added"); }//print_theory(); print_node(); }
     function initialTransitionRemoved_handler(event) { }//console.log("initial transition removed"); }//print_theory(); print_node(); }
     function initialTransitionRenamed_handler(event) { }//console.log("initial transition renamed"); }//print_theory(); print_node(); }
     function constantAdded_handler(event) {
-        constantsTable.setConstants(emuchartsManager.getConstants());
+        emuchartsTables.set({ constants: emuchartsManager.getConstants() });
     }
     function constantRemoved_handler(event) {
-        constantsTable.setConstants(emuchartsManager.getConstants());
+        emuchartsTables.set({ constants: emuchartsManager.getConstants() });
     }
     function datatypeAdded_handler(event) {
-        datatypesTable.setDatatypes(emuchartsManager.getDatatypes());
+        emuchartsTables.set({ datatypes: emuchartsManager.getDatatypes() });
     }
     function datatypeRemoved_handler(event) {
-        datatypesTable.setDatatypes(emuchartsManager.getDatatypes());
+        emuchartsTables.set({ datatypes: emuchartsManager.getDatatypes() });
     }
     function variableAdded_handler(event) {
-        contextTable.setContextVariables(emuchartsManager.getVariables());
+        emuchartsTables.set({ statevariables: emuchartsManager.getVariables() });
     }
     function variableRemoved_handler(event) {
-        contextTable.setContextVariables(emuchartsManager.getVariables());
+        emuchartsTables.set({ statevariables: emuchartsManager.getVariables() });
     }
 
     function updateContextTables() {
-        contextTable.setContextVariables(emuchartsManager.getVariables());
-        machineStatesTable.setMachineStates(emuchartsManager.getStates());
-        transitionsTable.setTransitions(emuchartsManager.getTransitions());
-        constantsTable.setConstants(emuchartsManager.getConstants());
-        datatypesTable.setDatatypes(emuchartsManager.getDatatypes());
+        emuchartsTables.set({
+            statevariables: emuchartsManager.getVariables(),
+            machinestates: emuchartsManager.getStates(),
+            transitions: emuchartsManager.getTransitions(),
+            constants: emuchartsManager.getConstants(),
+            datatypes: emuchartsManager.getDatatypes()
+        });
     }
 
     /**
@@ -361,7 +217,6 @@ define(function (require, exports, module) {
         pvsioWebClient = PVSioWebClient.getInstance();
         emuchartsCodeGenerators = EmuchartsCodeGenerators.getInstance();
         MODE = new EmuchartsEditorModes();
-        emuchartsManager = EmuchartsManager.getInstance();
         emuchartsManager.addListener("emuCharts_editorModeChanged", modeChange_callback);
         emuchartsManager.addListener("emuCharts_addState", addState_handler);
 //        emuchartsManager.addListener("emuCharts_d3ZoomTranslate", d3ZoomTranslate_handler);
@@ -398,10 +253,10 @@ define(function (require, exports, module) {
             updateContextTables();
         });
 
-        EmuchartsSelector.addListener("EmuchartsSelector_select", function (event) {
+        emuchartsSelector.addListener("emuchartsSelector_select", function (event) {
             if (event && event.emuchart) {
                 emuchartsManager.loadEmucharts(event.emuchart.id);
-                EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+                emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
                 // update tables
                 updateContextTables();
             }
@@ -409,7 +264,7 @@ define(function (require, exports, module) {
 
         // PIM objects.
         pimImporter = new PIMImporter();
-        pimEmulink = new PIMEmulink(emuchartsManager);
+
         pimTestGenerator = new PimTestGenerator("pim_Test_Gen");
 
         exportDiagram = new ExportDiagram();
@@ -424,121 +279,61 @@ define(function (require, exports, module) {
         return this.getName().replace(/\s/g, "");
     };
 
-    function editVariable (theVariable) {
-        var variableScopes = emuchartsManager.getVariableScopes();
-        var scopeOptions = [];
-        variableScopes.forEach(function (option) {
-            if (option === theVariable.scope) {
-                scopeOptions.push({ value: option, selected: true});
-            } else {
-                scopeOptions.push({ value: option, selected: false});
-            }
-        });
-        displayEditVariable.create({
-            header: "Editing variable " + theVariable.name,
-            textLabel: {
-                newVariableName: "Variable name",
-                newVariableType: "Variable type",
-                newVariableValue: "Initial value",
-                newVariableScope: "Variable scope"
-            },
-            placeholder: {
-                newVariableName: theVariable.name,
-                newVariableType: theVariable.type,
-                newVariableValue: theVariable.value,
-                newVariableScope: theVariable.scope
-            },
-            scopeOptions: scopeOptions,
-            buttons: ["Cancel", "Ok"]
-        }).on("ok", function (e, view) {
-            var newVariableName = e.data.labels.get("newVariableName");
-            var newVariableType = e.data.labels.get("newVariableType");
-            var newVariableValue = e.data.labels.get("newVariableValue");
-            var newVariableScope = variableScopes[e.data.options.get("newVariableScope")];
-            if (newVariableName && newVariableName.value !== "" &&
-                    newVariableType && newVariableType.value !== "" &&
-                    newVariableValue && newVariableValue.value !== "") {
-                emuchartsManager.rename_variable(
-                    theVariable.id,
-                    {   name: newVariableName,
-                        type: newVariableType,
-                        value: newVariableValue,
-                        scope: newVariableScope   }
-                );
-                view.remove();
-                contextTable.setContextVariables(emuchartsManager.getVariables());
-            }
-        }).on("cancel", function (e, view) {
-            // just remove window
-            view.remove();
-        });
-    }
-    function editConstant (theConstant) {
-        displayEditConstant.create({
-            header: "Editing constant " + theConstant.name,
-            textLabel: {
-                newConstantName: "Constant name",
-                newConstantType: "Constant type",
-                newConstantValue: "Constant value"
-            },
-            placeholder: {
-                newConstantName: theConstant.name,
-                newConstantType: theConstant.type,
-                newConstantValue: theConstant.value
-            },
-            buttons: ["Cancel", "Ok"]
-        }).on("ok", function (e, view) {
-            var newConstantName = e.data.labels.get("newConstantName");
-            var newConstantType = e.data.labels.get("newConstantType");
-            var newConstantValue = e.data.labels.get("newConstantValue");
-            if (newConstantName && newConstantName.value !== ""
-                    && newConstantType && newConstantType.value !== "") {
-                emuchartsManager.rename_constant(
-                    theConstant.id,
-                    {   name: newConstantName,
-                        type: newConstantType,
-                        value: newConstantValue   }
-                );
-                view.remove();
-                constantsTable.setConstants(emuchartsManager.getConstants());
-            }
-        }).on("cancel", function (e, view) {
-            // just remove window
-            view.remove();
-        });
-    }
 
-    function editDatatype (theDatatype) {
-        displayEditDatatype.create({
-            header: "Editing datatype " + theDatatype.name,
-            textLabel: {
-                newDatatypeName: "Datatype name",
-                newDatatypeConstructor1: "Datatype constants",
-                newDatatypeValue: "Initial value"
-            },
-            placeholder: {
-                newDatatypeName: theDatatype.name,
-                newDatatypeConstructor1: theDatatype.constructors.join(", "),
-                newDatatypeValue: theDatatype.value
-            },
-            buttons: ["Cancel", "Ok"]
-        }).on("ok", function (e, view) {
-            var newDatatypeName = e.data.labels.get("newDatatypeName");
-            var newDatatypeConstructor1 = e.data.labels.get("newDatatypeConstructor1");
-            var newDatatypeValue = e.data.labels.get("newDatatypeValue");
-            if (newDatatypeName && newDatatypeName.value !== ""
-                    && newDatatypeConstructor1 && newDatatypeConstructor1.value !== "") {
-                emuchartsManager.rename_datatype(
-                    theDatatype.id,
-                    {   name: newDatatypeName,
-                        constructors: newDatatypeConstructor1.split(",").map(function (c) { return c.trim(); }),
-                        value: newDatatypeValue   }
-                );
-                view.remove();
-                datatypesTable.setDatatypes(emuchartsManager.getDatatypes());
+    function delete_transition() {
+        document.getElementById("menuTransitions").children[1].style.display = "none";
+        var transitions = emuchartsManager.getTransitions();
+        var initialTransitions = emuchartsManager.getInitialTransitions();
+        initialTransitions.forEach(function (it) {
+            transitions.push(it);
+        });
+        var labels = [];
+        transitions.forEach(function (transition) {
+            if (transition.source) {
+                labels.push(transition.name + "  ("
+                            + transition.source.name + "->"
+                            + transition.target.name + ")");
+            } else {
+                labels.push(transition.name + "  ("
+                            + "INIT" + "->"
+                            + transition.target.name + ")");
             }
+        });
+        displayDelete.create({
+            header: "Please select trigger to be deleted...",
+            textLabel: "Transition to be deleted",
+            currentLabels: labels,
+            buttons: ["Cancel", "Delete"]
+        }).on("delete", function (e, view) {
+            var t = e.data.options.get("currentLabel");
+            var transitionID = transitions[t].id;
+            emuchartsManager.delete_transition(transitionID);
+            emuchartsManager.delete_initial_transition(transitionID);
+            view.remove();
         }).on("cancel", function (e, view) {
-            // just remove window
+            // just remove rename window
+            view.remove();
+        });
+    }
+    function delete_mode() {
+        document.getElementById("menuStates").children[1].style.display = "none";
+        var states = emuchartsManager.getStates();
+        var labels = [];
+        states.forEach(function (state) {
+            labels.push(state.name + "  (id: " + state.id + ")");
+        });
+        displayDelete.create({
+            header: "Please select state to be deleted...",
+            textLabel: "State to be deleted",
+            currentLabels: labels,
+            buttons: ["Cancel", "Delete"]
+        }).on("delete", function (e, view) {
+            var s = e.data.options.get("currentLabel");
+            var stateID = states[s].id;
+            emuchartsManager.delete_state(stateID);
+            view.remove();
+        }).on("cancel", function (e, view) {
+            // just remove rename window
             view.remove();
         });
     }
@@ -594,118 +389,26 @@ define(function (require, exports, module) {
             owner: _this.getId()
         });
         canvas = canvas.html(content);
-        if (document.getElementById("StateAttributes")) {
-            contextTable = new ContextTable();
-            contextTable.addListener("ContextTable_deleteVariable", function(evt) {
-                emuchartsManager.delete_variable(evt.variable.id);
-            });
-            contextTable.addListener("ContextTable_editVariable", function(evt) {
-                var theVariable = emuchartsManager.getVariable(evt.variable.id);
-                editVariable(theVariable);
-            });
-        }
-        if (document.getElementById("MachineStates")) {
-            machineStatesTable = new MachineStatesTable();
-            machineStatesTable.addListener("MachineStatesTable_deleteState", function(event) {
-                emuchartsManager.delete_state(event.state.id);
-            });
-            machineStatesTable.addListener("MachineStatesTable_renameState", function(event) {
-                var theState = emuchartsManager.getState(event.state.id);
-                renameState(theState);
-            });
-            machineStatesTable.addListener("MachineStatesTable_changeStateColor", function(event) {
-                var theState = emuchartsManager.getState(event.state.id);
-                changeStateColor(theState);
-            });
-        }
-        if (document.getElementById("TransitionsTable")) {
-            transitionsTable = new TransitionsTable();
-            transitionsTable.addListener("TransitionsTable_deleteTransition", function(event) {
-                emuchartsManager.delete_transition(event.transition.id);
-            });
-            transitionsTable.addListener("TransitionsTable_renameTransition", function(event) {
-                var theTransition = emuchartsManager.getTransition(event.transition.id);
-                if (theTransition) {
-                    editTransition(theTransition);
-                }
-            });
-            transitionsTable.addListener("TransitionsTable_selectTransition", function(event) {
-                var theTransition = emuchartsManager.getTransition(event.transition.id);
-                if (theTransition) {
-                    emuchartsManager.select_transition(theTransition.id);
-                }
-            });
-            transitionsTable.addListener("TransitionsTable_deselectAllTransition", function(event) {
-                emuchartsManager.deselect_all_transition();
-            });
-        }
-        if (document.getElementById("ConstantsTable")) {
-            constantsTable = new ConstantsTable();
-            constantsTable.addListener("ConstantsTable_deleteConstant", function(event) {
-                emuchartsManager.delete_constant(event.constant.id);
-            });
-            constantsTable.addListener("ConstantsTable_editConstant", function(event) {
-                var theConstant = emuchartsManager.getConstant(event.constant.id);
-                editConstant(theConstant);
-            });
-        }
-        if (document.getElementById("DatatypesTable")) {
-            datatypesTable = new DatatypesTable();
-            datatypesTable.addListener("DatatypesTable_deleteDatatype", function(event) {
-                emuchartsManager.delete_datatype(event.datatype.id);
-            });
-            datatypesTable.addListener("DatatypesTable_editDatatype", function(evt) {
-                var theDatatype = emuchartsManager.getDatatype(evt.datatype.id);
-                editDatatype(theDatatype);
-            });
-        }
 
-        // function importChart(callback) {
-        //     var opt = {
-        //         header: "Import Chart...",
-        //         extensions: ".muz,.pim,.xml"
-        //     };
-        //     // MUZ
-        //     FileHandler.openLocalFileAsText(function (err, res) {
-        //         if (res) {
-        //             if (res.name.lastIndexOf(".muz") === res.name.length - 4) {
-        //                 emuchartsManager.importPIMChart(res);
-        //             }
-        //             else {
-        //                 pimImporter.importPIM(res, emuchartsManager);
-        //             }
-        //             if (callback && typeof callback === "function") {
-        //                 callback(err, res);
-        //             }
-        //         }
-        //     }, opt);
-        // }
+        emuchartsTables.createHtmlElements();
 
         function restartEditor() {
             // set initial editor mode
             _this.changeMode(MODE.BROWSE());
             // render emuchart
             emuchartsManager.render();
-            // set Variables Table
-            contextTable.setContextVariables(emuchartsManager.getVariables());
-            // set Machine States Table
-            machineStatesTable.setMachineStates(emuchartsManager.getStates());
-            // set Transitions Table
-            transitionsTable.setTransitions(emuchartsManager.getTransitions());
-            // set Constants
-            constantsTable.setConstants(emuchartsManager.getConstants());
-            // set Datatypes
-            datatypesTable.setDatatypes(emuchartsManager.getDatatypes());
+            // update tables
+            updateContextTables();
         }
 
         d3.select("#btnLoadEmuchart").on("click", function () {
             emuchartsManager.openChart().then(function (res) {
                 emuchartsManager.saveChart();
-                EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+                emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
                 restartEditor();
             }).catch(function (err) {
                 console.log(err);
-                EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+                emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
                 restartEditor();
             });
         });
@@ -744,19 +447,19 @@ define(function (require, exports, module) {
         contextMenus.addListener("ContextMenus.editVariable", function (evt) {
             if (evt && evt.variable) {
                 var theVariable = emuchartsManager.getVariable(evt.variable.id);
-                editVariable(theVariable);
+                emuchartsTables.edit({ statevariable: theVariable });
             }
         });
         contextMenus.addListener("ContextMenus.editConstant", function (evt) {
             if (evt && evt.constant) {
                 var theConstant = emuchartsManager.getConstant(evt.constant.id);
-                editConstant(theConstant);
+                emuchartsTables.edit({ constant: theConstant });
             }
         });
         contextMenus.addListener("ContextMenus.setDatatypes", function (evt) {
             if (evt && evt.datatype) {
                 var theDatatype = emuchartsManager.getDatatype(evt.datatype.id);
-                editDatatype(theDatatype);
+                emuchartsTables.edit({ datatype: theDatatype });
             }
         });
 
@@ -772,7 +475,7 @@ define(function (require, exports, module) {
                 formView.remove();
             }).on("ok", function (e, formView) {
                 emuchartsManager.newChart(e.data.name);
-                EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+                emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
                 restartEditor();
                 formView.remove();
             });
@@ -802,17 +505,17 @@ define(function (require, exports, module) {
             document.getElementById("menuEmuchart").children[1].style.display = "none";
             emuchartsManager.openChart().then(function (res) {
                 emuchartsManager.saveChart();
-                EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+                emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
                 restartEditor();
             }).catch(function (err) {
                 console.log(err);
-                EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+                emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
                 restartEditor();
             });
         });
 
         emuchartsManager.addListener("EmuchartsManager.saveChart", function (evt) {
-            EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+            emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
             restartEditor();
         });
 
@@ -847,14 +550,14 @@ define(function (require, exports, module) {
         });
         d3.select("#btn_menuCloseCurrentChart").on("click", function () {
             emuchartsManager.closeChart();
-            EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+            emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
             restartEditor();
         });
         d3.select("#btn_menuDeleteCurrentChart").on("click", function () {
             emuchartsManager.deleteChartDialog().then(function (res) {
                 if (res) {
                     // the file has been deleted, we need to update the Emucharts Editor front-end
-                    EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+                    emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
                     restartEditor();
                 }
             });
@@ -864,69 +567,14 @@ define(function (require, exports, module) {
         d3.select("#menuStates").on("mouseover", function () {
             document.getElementById("menuStates").children[1].style.display = "block";
         });
-
         d3.select("#btn_menuNewState").on("click", function () {
-            document.getElementById("menuStates").children[1].style.display = "none";
-            var label = emuchartsManager.getFreshStateName();
-            displayAddState.create({
-                header: "Please enter a label for the new machine state",
-                textLabel: label,
-                buttons: ["Cancel", "Create"]
-            }).on("create", function (e, view) {
-                var nodeLabel = e.data.labels.get("newLabel");
-                emuchartsManager.add_state(nodeLabel);
-                view.remove();
-            }).on("cancel", function (e, view) {
-                // just remove window
-                view.remove();
-            });
+            emuchartsTables.add({ machinestate: true });
         });
         d3.select("#btn_menuRenameState").on("click", function () {
-            document.getElementById("menuStates").children[1].style.display = "none";
-            var states = emuchartsManager.getStates();
-            var labels = [];
-            states.forEach(function (state) {
-                labels.push(state.name + "  (id: " + state.id + ")");
-            });
-            displaySelectState.create({
-                header: "Editing states...",
-                message: "Please select a state",
-                transitions: labels,
-                buttons: ["Cancel", "Select"]
-            }).on("select", function (e, view) {
-                if (states.length > 0) {
-                    var v = e.data.options.get("selectedState");
-                    var theState = states[v];
-                    view.remove();
-                    renameState(theState);
-                }
-            }).on("cancel", function (e, view) {
-                // just remove window
-                view.remove();
-                return;
-            });
+            emuchartsTables.edit({ machinestate: true, aux: true });
         });
         d3.select("#btn_menuDeleteState").on("click", function () {
-            document.getElementById("menuStates").children[1].style.display = "none";
-            var states = emuchartsManager.getStates();
-            var labels = [];
-            states.forEach(function (state) {
-                labels.push(state.name + "  (id: " + state.id + ")");
-            });
-            displayDelete.create({
-                header: "Please select state to be deleted...",
-                textLabel: "State to be deleted",
-                currentLabels: labels,
-                buttons: ["Cancel", "Delete"]
-            }).on("delete", function (e, view) {
-                var s = e.data.options.get("currentLabel");
-                var stateID = states[s].id;
-                emuchartsManager.delete_state(stateID);
-                view.remove();
-            }).on("cancel", function (e, view) {
-                // just remove rename window
-                view.remove();
-            });
+            delete_mode();
         });
         d3.select("#btn_menuLayOutStates").on("click", function () {
             var editor = emuchartsManager.getSelectedEditor();
@@ -943,110 +591,13 @@ define(function (require, exports, module) {
             document.getElementById("menuTransitions").children[1].style.display = "block";
         });
         d3.select("#btn_menuNewTransition").on("click", function () {
-            document.getElementById("menuTransitions").children[1].style.display = "none";
-//            var newTransitionName = emuchartsManager.getFreshTransitionName();
-            var states = emuchartsManager.getStates();
-            var labels = [];
-            states.forEach(function (state) {
-                labels.push(state.name + "  (id: " + state.id + ")");
-            });
-            displayAddTransition.create({
-                header: "Please enter label for new transition",
-                textLabel: "New transition",
-                sourceNodes: labels,
-                targetNodes: labels,
-                buttons: ["Cancel", "Create"]
-            }).on("create", function (e, view) {
-                var transitionLabel = e.data.labels.get("newLabel");
-                if (transitionLabel && transitionLabel.value !== "") {
-                    var sourceNode = e.data.options.get("sourceNode");
-                    var sourceNodeID = states[sourceNode].id;
-                    var targetNode = e.data.options.get("targetNode");
-                    var targetNodeID = states[targetNode].id;
-                    emuchartsManager.add_transition(transitionLabel, sourceNodeID, targetNodeID);
-                    view.remove();
-                }
-            }).on("cancel", function (e, view) {
-                // just remove window
-                view.remove();
-            });
+            emuchartsTables.add({ transition: true, aux: true });
         });
         d3.select("#btn_menuRenameTransition").on("click", function () {
-            document.getElementById("menuTransitions").children[1].style.display = "none";
-            var transitions = emuchartsManager.getTransitions();
-            var nTransitions = transitions.length;
-            var initialTransitions = emuchartsManager.getInitialTransitions();
-            initialTransitions.forEach(function (it) {
-                transitions.push(it);
-            });
-            var labels = [];
-            transitions.forEach(function (transition) {
-                if (transition.source) {
-                    labels.push(transition.name + "  ("
-                                + transition.source.name + "->"
-                                + transition.target.name + ")");
-                } else {
-                    labels.push(transition.name + "  ("
-                                + "INIT" + "->"
-                                + transition.target.name + ")");
-                }
-            });
-            displaySelectTransition.create({
-                header: "Editing transitions...",
-                message: "Please select a transition",
-                transitions: labels,
-                buttons: ["Cancel", "Select"]
-            }).on("select", function (e, view) {
-                if (transitions.length > 0) {
-                    var v = e.data.options.get("selectedTransition");
-                    var theTransition = transitions[v];
-                    view.remove();
-                    if (v < nTransitions) {
-                        editTransition(theTransition);
-                    } else {
-                        editInitialTransition(theTransition);
-                    }
-                }
-            }).on("cancel", function (e, view) {
-                // just remove window
-                view.remove();
-                return;
-            });
+            emuchartsTables.edit({ transition: true, aux: true });
         });
         d3.select("#btn_menuDeleteTransition").on("click", function () {
-            document.getElementById("menuTransitions").children[1].style.display = "none";
-            var transitions = emuchartsManager.getTransitions();
-            var initialTransitions = emuchartsManager.getInitialTransitions();
-            initialTransitions.forEach(function (it) {
-                transitions.push(it);
-            });
-            var labels = [];
-            transitions.forEach(function (transition) {
-                if (transition.source) {
-                    labels.push(transition.name + "  ("
-                                + transition.source.name + "->"
-                                + transition.target.name + ")");
-                } else {
-                    labels.push(transition.name + "  ("
-                                + "INIT" + "->"
-                                + transition.target.name + ")");
-                }
-            });
-            displayDelete.create({
-                header: "Please select transition to be deleted...",
-                textLabel: "Transition to be deleted",
-                currentLabels: labels,
-                buttons: ["Cancel", "Delete"]
-            }).on("delete", function (e, view) {
-                var t = e.data.options.get("currentLabel");
-                var transitionID = transitions[t].id;
-                emuchartsManager.delete_transition(transitionID);
-                emuchartsManager.delete_initial_transition(transitionID);
-                view.remove();
-            }).on("cancel", function (e, view) {
-                // just remove rename window
-                view.remove();
-            });
+            delete_transition();
         });
 
 
@@ -1110,7 +661,7 @@ define(function (require, exports, module) {
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            emuchartsCodeGenerators.emuchartsPVSPrinter.print(emucharts);
+            emuchartsCodeGenerators.emuchartsPVSPrinter.print(emucharts, { interactive: true });
         });
         d3.select("#btn_menuAlloyPrinter").on("click", function () {
             printer_template(emuchartsCodeGenerators.emuchartsAlloyPrinter, ".alloy");
@@ -1628,83 +1179,10 @@ define(function (require, exports, module) {
         });
 
         //-- Emuchart Selector  -----------------------------------------------------------
-        EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+        emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
         // d3.select("#btn_emucharts_1").on("click", function () {
         //     emuchartsManager.loadEmucharts("EMUCHART__0");
         // });
-
-        //-- tables
-        // TODO: Just passing by, but this should really be generalised to a function
-        d3.select("#btnStates").on("click", function () {
-            d3.select("#btnStates").classed("active", true);
-            d3.select("#btnTransitions").classed("active", false);
-            d3.select("#btnVariables").classed("active", false);
-            d3.select("#btnConstants").classed("active", false);
-            d3.select("#btnDatatypes").classed("active", false);
-            d3.select("#MachineStates").style("display", "block");
-            d3.select("#TransitionsTable").style("display", "none");
-            d3.select("#StateAttributes").style("display", "none");
-            d3.select("#ConstantsTable").style("display", "none");
-            d3.select("#DatatypesTable").style("display", "none");
-        });
-        d3.select("#btnTransitions").on("click", function () {
-            d3.select("#btnStates").classed("active", false);
-            d3.select("#btnTransitions").classed("active", true);
-            d3.select("#btnVariables").classed("active", false);
-            d3.select("#btnConstants").classed("active", false);
-            d3.select("#btnDatatypes").classed("active", false);
-            d3.select("#MachineStates").style("display", "none");
-            d3.select("#TransitionsTable").style("display", "block").classed("active");
-            d3.select("#StateAttributes").style("display", "none");
-            d3.select("#ConstantsTable").style("display", "none");
-            d3.select("#DatatypesTable").style("display", "none");
-        });
-        d3.select("#btnVariables").on("click", function () {
-            d3.select("#btnStates").classed("active", false);
-            d3.select("#btnTransitions").classed("active", false);
-            d3.select("#btnVariables").classed("active", true);
-            d3.select("#btnConstants").classed("active", false);
-            d3.select("#btnDatatypes").classed("active", false);
-            d3.select("#MachineStates").style("display", "none");
-            d3.select("#TransitionsTable").style("display", "none");
-            d3.select("#StateAttributes").style("display", "block").classed("active");
-            d3.select("#ConstantsTable").style("display", "none");
-            d3.select("#DatatypesTable").style("display", "none");
-        });
-        d3.select("#btnConstants").on("click", function () {
-            d3.select("#btnStates").classed("active", false);
-            d3.select("#btnTransitions").classed("active", false);
-            d3.select("#btnVariables").classed("active", false);
-            d3.select("#btnConstants").classed("active", true);
-            d3.select("#btnDatatypes").classed("active", false);
-            d3.select("#MachineStates").style("display", "none");
-            d3.select("#TransitionsTable").style("display", "none");
-            d3.select("#StateAttributes").style("display", "none");
-            d3.select("#ConstantsTable").style("display", "block").classed("active");
-            d3.select("#DatatypesTable").style("display", "none");
-        });
-        d3.select("#btnDatatypes").on("click", function () {
-            d3.select("#btnStates").classed("active", false);
-            d3.select("#btnTransitions").classed("active", false);
-            d3.select("#btnVariables").classed("active", false);
-            d3.select("#btnConstants").classed("active", false);
-            d3.select("#btnDatatypes").classed("active", true);
-            d3.select("#MachineStates").style("display", "none");
-            d3.select("#TransitionsTable").style("display", "none");
-            d3.select("#StateAttributes").style("display", "none");
-            d3.select("#ConstantsTable").style("display", "none");
-            d3.select("#DatatypesTable").style("display", "block").classed("active");
-        });
-        d3.select("#btnViewHideTable").on("click", function () {
-            d3.select("#EmuchartsFloatTable").style("top", "814px");
-            d3.select("#btnViewHideTable").style("display", "none");
-            d3.select("#btnViewRevealTable").style("display", "block");
-        });
-        d3.select("#btnViewRevealTable").on("click", function () {
-            d3.select("#EmuchartsFloatTable").style("top", "614px");
-            d3.select("#btnViewHideTable").style("display", "block");
-            d3.select("#btnViewRevealTable").style("display", "none");
-        });
 
         //-- PIM -----------------------------------------------------------------
         d3.select("#btn_toPIM").on("click", function () {
@@ -1834,6 +1312,8 @@ define(function (require, exports, module) {
         });
 	};
 
+
+
     Emulink.prototype.getEmuchartsManager = function () {
         return emuchartsManager;
     };
@@ -1854,29 +1334,20 @@ define(function (require, exports, module) {
             // set initial editor mode
             var _this = require("plugins/emulink/Emulink").getInstance();
             _this.browseMode();
-            //set Variables Table
-            contextTable.setContextVariables(emuchartsManager.getVariables());
-            // set Machine States Table
-            machineStatesTable.setMachineStates(emuchartsManager.getStates());
-            // set Transitions Table
-            transitionsTable.setTransitions(emuchartsManager.getTransitions());
-            // set Constants Table
-            constantsTable.setConstants(emuchartsManager.getConstants());
-            // set Datatypes Table
-            datatypesTable.setDatatypes(emuchartsManager.getDatatypes());
+            updateContextTables();
         }
         function readFile(file, opt) {
             fs.readFile(file.path).then(function (res) {
                 res.content = JSON.parse(res.content);
                 emuchartsManager.importEmucharts(res, opt);
-                EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+                emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
                 finalize();
             }).catch(function (err) {
                 // log any error
                 console.log(err);
                 // open an empty chart and give it the same name of the corrupted emuchart
                 emuchartsManager.newChart(file.name);
-                EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+                emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
             });
         }
         var path = event.current.name();
@@ -1915,7 +1386,7 @@ define(function (require, exports, module) {
                         // if the emuchart files are not in the project, then just create an empty emuchart
                         emuchartsManager.closeAllCharts();
                         emuchartsManager.newChart();
-                        EmuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
+                        emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
                         finalize();
                     }
                     resolve(emuchartsFiles);
@@ -1933,15 +1404,20 @@ define(function (require, exports, module) {
         // listen to ProjectChanged events so that we can update the editor when a new project is opened
         projectManager.addListener("ProjectChanged", onProjectChanged);
         // create user interface elements
-        this.createHtmlElements();
-        return new Promise(function (resolve, reject) {
-            onProjectChanged({ current: projectManager.project() }).then(function () {
-                resolve(true);
-            }).catch(function (err) {
-                console.log(err);
-                reject(err);
+        try {
+            this.createHtmlElements();
+        } catch (err_html) {
+            console.error(err_html);
+        } finally {
+            return new Promise(function (resolve, reject) {
+                onProjectChanged({ current: projectManager.project() }).then(function () {
+                    resolve(true);
+                }).catch(function (err) {
+                    console.log(err);
+                    reject(err);
+                });
             });
-        });
+        }
     };
 
     Emulink.prototype.unload = function () {

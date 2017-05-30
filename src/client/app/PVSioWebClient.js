@@ -10,6 +10,8 @@
 
 define(function (require, exports, module) {
     "use strict";
+    var pvsioweb_version = "2.2";
+
     var pvsws                   = require("websockets/pvs/pvsWSClient"),
 		eventDispatcher			= require("util/eventDispatcher"),
 		d3						= require("d3/d3"),
@@ -206,6 +208,10 @@ define(function (require, exports, module) {
         }).on("error", function () {
             cb("error");
         });
+    };
+
+    PVSioWeb.prototype.version = function () {
+        return pvsioweb_version;
     };
 
 	module.exports = {
