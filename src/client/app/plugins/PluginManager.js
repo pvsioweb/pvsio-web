@@ -73,13 +73,22 @@ define(function (require, exports, module) {
                         plugin.initialise().then(function (res) {
                             resolve(res);
                             jumpTo(plugin.getId());
-                        }).catch(function (err) { reject(err); });
-                    }).catch(function (err) { reject(err); });
+                        }).catch(function (err) {
+                            console.error(err);
+                            reject(err);
+                        });
+                    }).catch(function (err) {
+                        console.error(err);
+                        reject(err);
+                    });
                 } else {
                     plugin.initialise().then(function (res) {
                         resolve(res);
                         jumpTo(plugin.getId());
-                    }).catch(function (err) { reject(err); });
+                    }).catch(function (err) {
+                        console.error(err);
+                        reject(err);
+                    });
                 }
             } else {
                 //plugin is already enabled

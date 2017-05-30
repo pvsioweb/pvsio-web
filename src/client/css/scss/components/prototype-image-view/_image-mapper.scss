@@ -2,7 +2,8 @@
     z-index: 190;
 
     rect.corner {
-        fill: black;
+        fill: transparent;
+        opacity: 0.5;
         stroke: #0bc95b;
     }
 
@@ -32,8 +33,12 @@
     }
 
     .region {
-        fill: rgba(35, 101, 32, 0.2);
+        fill: rgba(35, 101, 32, 0.3);
         stroke: rgba(35, 101, 32, 0.7);
         cursor: move;
+        &:hover {
+            fill: rgba(#0bc829, 0.5);
+        }
     }
+
 }

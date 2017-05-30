@@ -47,6 +47,11 @@ define(function (require, exports, module) {
                         }
                     }
                 });
+                formdata.labels.keys().forEach(function (key) {
+                    if (formdata.labels.get(key) && formdata.labels.get(key) === "") {
+                        formdata.labels.remove(key);
+                    }
+                });
                 this.trigger(this._data.buttons[1].toLowerCase().replace(new RegExp(" ", "g"), "_"),
                              {data: formdata, el: this.el}, this);
             }

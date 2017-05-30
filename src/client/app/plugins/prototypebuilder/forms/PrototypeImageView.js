@@ -48,13 +48,14 @@ define(function (require, exports, module) {
                 widget.element(mark);
 
                 // Reattach the widget's area map if it isn't already attached to the DOM
+                // FIXME: this should never be necessary
                 if (widget.imageMap() && widget.imageMap().node().parentNode == null) {
                     this._map.node().appendChild(widget.imageMap().node());
                 }
 
-                mark.on("dblclick", function () {
-                    _this.trigger("WidgetEditRequested", mark.attr("id"));
-                });
+                // mark.on("dblclick", function () {
+                //     _this.trigger("WidgetEditRequested", mark.attr("id"));
+                // });
             });
 
             nextID++;
@@ -222,9 +223,9 @@ define(function (require, exports, module) {
             imageMapper({scale: scale, element: _this.d3El.select("img").node(), parent: _this._innerContainer.node(), onReady: function (mc) {
                 _this._mapCreator = mc.on("create", function (e) {
                     var region = e.region;
-                    region.on("dblclick", function () {
-                        _this.trigger("WidgetEditRequested", region.attr("id"));
-                    });
+                    // region.on("dblclick", function () {
+                    //     _this.trigger("WidgetEditRequested", region.attr("id"));
+                    // });
 
                     //pop up the widget edit dialog
                     var coord = {
@@ -235,6 +236,8 @@ define(function (require, exports, module) {
                     };
 
                     _this.trigger("WidgetRegionDrawn", coord, region);
+                }).on("edit", function (e) {
+                    _this.trigger("WidgetEditRequested", e.region.attr("id"));
                 }).on("resize", function (e) {
                     wm.updateLocationAndSize(e.region.attr("id"), e.pos, e.scale);
                     event.action = "resize";

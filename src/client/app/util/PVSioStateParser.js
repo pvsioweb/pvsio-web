@@ -141,11 +141,11 @@ define(function (require, exports, module) {
                     //parse the key and recursively call parseValue to parse the value
                     do {
                         var key = readUntil(subValue.word, index + 1, wordBeforeEqual);
-                        key.word = key.word.trim();
+                        key.word = key.word;
                         key.word = key.word.substr(0, key.word.length - 1); //removing spaces and last char ":"
                         key.index = key.index + 1;
                         val = parseValue(subValue.word.substring(key.index));
-                        res[key.word] = (typeof val.value === "string") ? val.value.trim() : val.value;
+                        res[key.word.trim()] = (typeof val.value === "string") ? val.value.trim() : val.value;
                         index = (val.index + key.index);
                     } while (subValue.word[index] === ",");
 

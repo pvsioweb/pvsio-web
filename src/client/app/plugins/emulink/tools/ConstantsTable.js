@@ -1,87 +1,39 @@
 /**
- *
  * @author Paolo Masci
- * @date 28/10/15
+ * @date May 12, 2017
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
-/*global define, d3*/
+/*global define*/
 define(function (require, exports, module) {
     "use strict";
 
-    var _this,
-        eventDispatcher = require("util/eventDispatcher");
+    var Table = require("plugins/emulink/tools/GenericTable"),
+        table_element = require("text!plugins/emulink/tools/tables/table_element.handlebars");
 
-    function ConstantsTable() {
-        eventDispatcher(this);
-        _this = this;
-        return this;
+    var table;
+    var table_name = "Constants";
+    var attributes = [
+        { name: "Constant Name" },
+        { name: "Constant Type" },
+        { name: "Initial Value" }
+    ];
+    function add(e) {
+        return Handlebars.compile(table_element, { noEscape: true })({
+            table_name: table_name,
+            attributes: [
+                { name: e.name },
+                { name: e.type },
+                { name: e.value }
+            ]
+        });
     }
 
-    ConstantsTable.prototype.addConstant = function(tableElements) {
-        function installTableHandlers() {
-            d3.selectAll("#RemoveConstant").on("click", function () {
-                _this.removeConstant(this.parentElement.parentElement.id);
-            });
-            d3.select("#AddConstant").on("click", function () {
-                d3.select("#btn_menuNewConstant").node().click();
-            });
-            d3.selectAll("#EditConstant").on("click", function () {
-                _this.editConstant(this.parentElement.parentElement.id);
-            });
+    function ConstantsTable(div) {
+        if (!table) {
+            table = new Table(table_name, div, attributes, add);
         }
-        function addElement(e) {
-            var newConstant = d3.select("#ConstantsTemplate").node().cloneNode(true);
-            newConstant.children[0].innerHTML = newConstant.name = e.name;
-            newConstant.children[1].innerHTML = newConstant.name = e.type;
-            newConstant.children[2].innerHTML = newConstant.value = e.value;
-            newConstant.type = e.type;
-            newConstant.id = e.id;
-            newConstant.scope = e.scope;
-            d3.select("#ConstantsTable").select("tbody").node().appendChild(newConstant);
-        }
-        tableElements.forEach(function (e) {
-            addElement(e);
-        });
-        installTableHandlers();
-        return _this;
-    };
-
-    ConstantsTable.prototype.removeConstant = function(elementID) {
-        var table = d3.select("#ConstantsTable").select("tbody").node();
-        var theConstant = document.getElementById(elementID);
-        table.removeChild(theConstant);
-        _this.fire({
-            type: "ConstantsTable_deleteConstant",
-            constant: {
-                id: theConstant.id
-            }
-        });
-        return _this;
-    };
-
-    ConstantsTable.prototype.editConstant = function(elementID) {
-        var theConstant = document.getElementById(elementID);
-        _this.fire({
-            type: "ConstantsTable_editConstant",
-            constant: {
-                id: theConstant.id
-            }
-        });
-        return _this;
-    };
-
-    ConstantsTable.prototype.setConstants = function(tableElements) {
-        function clearTable() {
-            var table = d3.select("#ConstantsTable").select("tbody").node();
-            while (table && table.lastChild && table.lastChild.id !== "heading") {
-                table.removeChild(table.lastChild);
-            }
-            return _this;
-        }
-        clearTable();
-        this.addConstant(tableElements);
-        return _this;
-    };
+        return table;
+    }
 
     module.exports = ConstantsTable;
 });

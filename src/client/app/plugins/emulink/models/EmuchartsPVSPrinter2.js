@@ -53,9 +53,10 @@
 /*global define, d3*/
 define(function (require, exports, module) {
     "use strict";
-    var printer_version = "2.1";
+    var printer_version = "2.2";
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var projectManager = require("project/ProjectManager").getInstance();
+    var displayAskParameters = require("plugins/emulink/forms/displayAskParameters");
 
     var leave_enter_function_template = require("text!plugins/emulink/models/pvs/templates/pvs_leave_enter_functions.handlebars"),
         init_function_template = require("text!plugins/emulink/models/pvs/templates/pvs_init_function.handlebars"),
@@ -173,7 +174,9 @@ define(function (require, exports, module) {
     EmuchartsPVSPrinter.prototype.print_variables = function (emuchart) {
         var variables = [];
         variables.push({ name: predefined_variables.current_state.name, type: predefined_variables.current_state.type });
-        variables.push({ name: predefined_variables.previous_state.name, type: predefined_variables.previous_state.type });
+        if (predefined_variables.previous_state) {
+            variables.push({ name: predefined_variables.previous_state.name, type: predefined_variables.previous_state.type });
+        }
         var x = split_variables(emuchart);
         x.basic.forEach(function (basic) {
             variables.push({ name: basic.name, type: basic.type });
@@ -203,23 +206,26 @@ define(function (require, exports, module) {
             var x = (opt.enter) ? state.enter : state.exit;
             var ans = parser.parseTransition("{" + x + "}");
             if (ans.res && ans.res.type === "transition") {
+                var action_sequence = [];
                 ans.res.val.actions.val.forEach(function (action) {
                     var tmp = action.val.identifier.val.split(".");
                     // this printer supports up to 2 hierarchical levels
                     if (tmp.length === 2) {
-                        actions.push({
-                            state: state.name,
+                        action_sequence.push({
                             l1_name: tmp[0], // variable name in the form l1_name.l2_name
                             l2_name: tmp[1],
                             value: print_expression(action.val.expression.val, emuchart, { attach_state: true }) // variable value
                         });
                     } else {
-                        actions.push({
-                            state: state.name,
+                        action_sequence.push({
                             name: tmp[0], // variable name
                             value: print_expression(action.val.expression.val, emuchart, { attach_state: true }) // variable value
                         });
                     }
+                });
+                actions.push({
+                    state: state.name,
+                    action_sequence: action_sequence
                 });
             }
         }
@@ -242,18 +248,22 @@ define(function (require, exports, module) {
                 process_actions(exit_actions, state, { exit: true });
             });
         }
-        return Handlebars.compile(leave_enter_function_template, { noEscape: true })({
+        var data = {
             entry_actions: entry_actions,
             exit_actions: exit_actions,
             current_state: predefined_variables.current_state,
-            previous_state: predefined_variables.previous_state
-        });
+            full_coverage: true
+        };
+        if (predefined_variables.previous_state) {
+            data.previous_state = predefined_variables.previous_state;
+        }
+        return Handlebars.compile(leave_enter_function_template, { noEscape: true })(data);
     };
 
     // utility function for recognising pvs state variables
     function isVariable(name, emuchart) {
-        if (name === predefined_variables.current_state.name ||
-                name === predefined_variables.previous_state.name) {
+        if ((predefined_variables.current_state && name === predefined_variables.current_state.name) ||
+                (predefined_variables.previous_state && name === predefined_variables.previous_state.name)) {
             return true;
         }
         if (emuchart.variables) {
@@ -273,7 +283,7 @@ define(function (require, exports, module) {
         function preProcess (term, emuchart) {
             function preprocessFunction(term, emuchart) {
                 if (term.type === "identifier") {
-                    if (isVariable(term.val, emuchart)) {
+                    if (isVariable(term.val, emuchart) && !opt.return_expression) {
                         if (term.val.indexOf(".") >= 0) {
                             var v = term.val.split(".");
                             v[0] += "(st)";
@@ -410,15 +420,18 @@ define(function (require, exports, module) {
                 init: theTransition.init,
                 override: theTransition.override,
                 variables: [{
+                    name: predefined_variables.current_state.name,
+                    type: predefined_variables.current_state.type,
+                    value: (emuchart.initial_transitions.length === 1) ? emuchart.initial_transitions[0].target.name : predefined_variables.current_state.value
+                }].concat(theTransition.variables)
+            };
+            if (predefined_variables.previous_state) {
+                data.variables = [{
                     name: predefined_variables.previous_state.name,
                     type: predefined_variables.previous_state.type,
                     value: predefined_variables.current_state.value
-                }, {
-                    name: predefined_variables.current_state.name,
-                    type: predefined_variables.current_state.type,
-                    value: (emuchart.initial_transitions.length === 1) ? emuchart.initial_transitions[0].target.name : predefined_variables.previous_state.value
-                }].concat(theTransition.variables)
-            };
+                }].concat(data.variables);
+            }
             if (emuchart.initial_transitions.length === 1 && theTransition.override.length === 0) {
                 data.DEFAULT_INIT = true;
             } else if (theTransition.override.length > 0 && !has_cond) {
@@ -434,7 +447,8 @@ define(function (require, exports, module) {
     /**
      * Prints PVS definitions for Emuchart transitions given in the form transition [condition] {actions}
      */
-    EmuchartsPVSPrinter.prototype.print_transitions = function (emuchart) {
+    EmuchartsPVSPrinter.prototype.print_transitions = function (emuchart, opt) {
+        opt = opt || {};
         var ans = "";
         // multiple transitions can have the same identifier
         // (because the same transition can originate from different nodes)
@@ -456,8 +470,9 @@ define(function (require, exports, module) {
                         to:   t.target.name
                     });
                 } else {
+                    console.error("COULD NOT PARSE " + t.name + " SOURCE:" + t.source.name + " TARGET:" + t.target.name + " ERROR:" + ans.err);
                     transitions.push({
-                        identifier: "COULD NOT PARSE " + ans.res.val.identifier,
+                        identifier: "COULD_NOT_PARSE_" + t.name,
                         from: t.source.name,
                         to:   t.target.name
                     });
@@ -487,7 +502,7 @@ define(function (require, exports, module) {
                     if (transition.identifier.val === theTransition.identifier.val) {
                         // First, collect the information necessary to print the permission function, i.e.,
                         // which state is left by the transition, and any guard in the transition label
-                        var cond = [ ("(current_state(st) = " + transition.from + ")") ];
+                        var cond = [ ("(" + predefined_variables.current_state.name + "(st) = " + transition.from + ")") ];
                         if (transition.cond && transition.cond.type === "expression" &&
                                 transition.cond.val && transition.cond.val.length > 0) {
                             var tmp = print_expression(transition.cond.val, emuchart, { attach_state: true });
@@ -500,22 +515,38 @@ define(function (require, exports, module) {
                         // Second, collect the information necessary to print the body of the transition function, i.e.,
                         // the actions indicated in the transition label
                         var actions = [];//("LET new_st = leave_state(" + transition.from + ")(st)") ];
+                        var return_expression = null;
                         if (transition.actions && transition.actions.val &&
                                 transition.actions.val.length > 0) {
                             transition.actions.val.forEach(function (action) {
-                                var tmp = action.val.identifier.val.split(".");
-                                // this printer supports up to 2 hierarchical levels
-                                if (tmp.length === 2) {
-                                    actions.push({
-                                        l1_name: tmp[0],
-                                        l2_name: tmp[1],
-                                        value: print_expression(action.val.expression.val, emuchart, { attach_state: true }),
-                                    });
-                                } else {
-                                    actions.push({
-                                        name: tmp[0],
-                                        value: print_expression(action.val.expression.val, emuchart, { attach_state: true }),
-                                    });
+                                if (action.type === "assignment") {
+                                    if (isVariable(action.val.identifier.val, emuchart)) {
+                                        // the action is an assignment in the form var := expr
+                                        var tmp = action.val.identifier.val.split(".");
+                                        // this printer supports up to 2 hierarchical levels
+                                        if (tmp.length === 2) {
+                                            actions.push({
+                                                l1_name: tmp[0],
+                                                l2_name: tmp[1],
+                                                value: print_expression(action.val.expression.val, emuchart, { attach_state: true }),
+                                            });
+                                        } else {
+                                            actions.push({
+                                                name: tmp[0],
+                                                value: print_expression(action.val.expression.val, emuchart, { attach_state: true }),
+                                            });
+                                        }
+                                    } else {
+                                        // the action is a local binding
+                                        actions.push({
+                                            local_binding: true,
+                                            name: action.val.identifier.val,
+                                            value: print_expression(action.val.expression.val, emuchart, { attach_state: true }),
+                                        });
+                                    }
+                                } else if (action.type === "return") {
+                                    // the action is a return statement -- this type of action should only be used in utility functions
+                                    return_expression = print_expression(action.val.expression.val, emuchart, { return_expression: true });
                                 }
                             });
                         }
@@ -524,16 +555,10 @@ define(function (require, exports, module) {
                         var data = {
                             cond: cond,
                             actions: actions,
+                            return_expr: return_expression,
                             from: transition.from,
                             to: transition.to
                         };
-                        if (transition.from !== transition.to) {
-                            data.MODECHANGE = true;
-                        } else if (actions.length > 1) {
-                            data.SELF_MULTI = true;
-                        } else {
-                            data.BASIC_CASE = true;
-                        }
                         transitionFunction.cases.push(data);
                     }
                 });
@@ -580,13 +605,70 @@ define(function (require, exports, module) {
         });
     };
 
+
+    // printer options
+    var modes = {
+        current_state: predefined_variables.current_state.name,
+        previous_state: predefined_variables.previous_state.name,
+        type: machineStateType
+    };
+    // utility function for getting the parameters from the user
+    function get_params() {
+        return new Promise (function (resolve, reject) {
+            displayAskParameters.create({
+                header: "PVS Printer Options",
+                params: [{
+                    id: "current_state",
+                    name: "Current system mode",
+                    value: modes.current_state,
+                    inputbox: true
+                },{
+                    id: "previous_state",
+                    name: "Previous system mode",
+                    value: modes.previous_state,
+                    inputbox: true
+                },{
+                    id: "state_type",
+                    name: "System mode type",
+                    value: modes.type,
+                    inputbox: true
+                }],
+                buttons: ["Cancel", "Ok"]
+            }).on("ok", function (e, view) {
+                view.remove();
+                resolve({
+                    current_state: e.data.labels.get("current_state"),
+                    previous_state: e.data.labels.get("previous_state"),
+                    state_type: e.data.labels.get("state_type")
+                });
+            }).on("cancel", function (e, view) {
+                // just remove window
+                view.remove();
+            });
+        });
+    }
+
     /**
      * Prints the entire PVS theory
+     * When opt.interactive is true, a dialog is shown to the user to select compilation parameters.
      */
-    EmuchartsPVSPrinter.prototype.print = function (emuchart) {
+    EmuchartsPVSPrinter.prototype.print = function (emuchart, opt) {
+        opt = opt || {};
         var _this = this;
-        var extras_theory_name = "pvsioweb_utils";
-        return new Promise(function (resolve, reject) {
+        function finalize(resolve, reject, par) {
+            par = par || {};
+            if (par.current_state) {
+                predefined_variables.current_state.name = par.current_state;
+            }
+            if (par.previous_state) {
+                predefined_variables.previous_state.name = par.previous_state;
+            } else {
+                predefined_variables.previous_state = null; // this will disable the creation of this state attribute
+            }
+            if (par.state_type) {
+                machineStateType = par.state_type;
+            }
+            var extras_theory_name = "pvsioweb_utils";
             var model = {
                 descriptor: _this.print_descriptor(emuchart),
                 name: emuchart.name, // Note: it is important to have the theory name identical to the file name -- otherwise PVSio refuses to evaluate commands!
@@ -608,11 +690,11 @@ define(function (require, exports, module) {
                 extras: Handlebars.compile(pvs_utils_template, { noEscape: true })()
             };
             var extras = Handlebars.compile(pvs_theory_template, { noEscape: true })(model_extras);
-
             if (theory) {
                 var overWrite = {overWrite: true};
-                projectManager.project().addFile(emuchart.name + ".pvs", theory, overWrite).then(function (res){
-                    projectManager.project().addFile(extras_theory_name + ".pvs", extras, overWrite).then(function (res) {
+                var folder = "/pvs";
+                projectManager.project().addFile(folder + "/" + emuchart.name + ".pvs", theory, overWrite).then(function (res){
+                    projectManager.project().addFile(folder + "/" + extras_theory_name + ".pvs", extras, overWrite).then(function (res) {
                         resolve(true);
                     }).catch(function (err) {
                         console.log(err);
@@ -623,11 +705,19 @@ define(function (require, exports, module) {
                     reject(err);
                 });
             } else {
-                console.log("Warning, PVS model could not be generated.");
-                reject(null);
+                console.error("Warning, PVS model could not be generated.");
             }
-        }).catch(function (err) {
-            console.log(err);
+        }
+        return new Promise (function (resolve, reject) {
+            if (opt.interactive) {
+                return get_params().then(function (par) {
+                    resolve(finalize(resolve, reject, par));
+                }).catch(function (err) {
+                    console.log(err);
+                    reject(err);
+                });
+            }
+            return resolve(finalize(opt));
         });
     };
 

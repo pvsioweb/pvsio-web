@@ -264,8 +264,8 @@ define(function (require, exports, module) {
         var node = _this.nodes.get(id);
         node.name = data.name || node.name || "X" + node.id;
         node.color = data.color || node.color || defaultValues.color(id);
-        node.enter = data.enter || node.enter || "";
-        node.exit = data.exit || node.exit || "";
+        node.enter = data.enter || "";
+        node.exit = data.exit || "";
         _this.nodes.set(node.id, node);
         // we need to rename also nodes cached in the edge structure
         // this can be quite expensive in term of time, but renaming is unlikely to be a frequent operation

@@ -871,7 +871,8 @@ fileListItem.hide {
 #EmuchartToolbar {
   float: left;
   position: absolute;
-  margin-top: 8px; }
+  margin-top: 8px;
+  z-index: 0; }
 
 #stateMachineMenu .tobeimplemented {
   color: #808080; }
@@ -885,11 +886,7 @@ fileListItem.hide {
     background: #76b900;
     color: black; }
 
-#StateAttributes,
-#MachineStates,
-#TransitionsTable,
-#ConstantsTable,
-#DatatypesTable {
+.EmuchartsTableContent {
   position: relative;
   top: 0;
   width: 100%;
@@ -909,7 +906,8 @@ fileListItem.hide {
   margin: 1px;
   background: #f5f5f5;
   overflow: auto;
-  float: right; }
+  float: right;
+  opacity: 0.98; }
 
 .table-tab-container {
   list-style: none;
@@ -991,10 +989,6 @@ fileListItem.hide {
   color: #0b0;
   background-color: #f5f5f5; }
 
-.floating-table {
-  position: absolute;
-  margin-right: 20px; }
-
 .TableHeading {
   background-color: #f5f5f5; }
 
@@ -1066,11 +1060,6 @@ label[for=selectPicture] {
   background-color: transparent;
   border-color: transparent; }
 
-.btn-primary-outline-white {
-  background-color: transparent;
-  border-color: transparent;
-  color: white; }
-
 .newTimer,
 .newWidget {
   float: right;
@@ -1088,7 +1077,8 @@ label[for=selectPicture] {
 .image-map-layer {
   z-index: 190; }
   .image-map-layer rect.corner {
-    fill: black;
+    fill: transparent;
+    opacity: 0.5;
     stroke: #0bc95b; }
   .image-map-layer .tr {
     cursor: ne-resize; }
@@ -1104,9 +1094,11 @@ label[for=selectPicture] {
   .image-map-layer g.selected.subselected .region {
     stroke-width: 2.5px; }
   .image-map-layer .region {
-    fill: rgba(35, 101, 32, 0.2);
+    fill: rgba(35, 101, 32, 0.3);
     stroke: rgba(35, 101, 32, 0.7);
     cursor: move; }
+    .image-map-layer .region:hover {
+      fill: rgba(11, 200, 41, 0.5); }
 
 .prototype-image-container {
   position: relative; }

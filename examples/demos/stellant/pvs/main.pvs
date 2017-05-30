@@ -1,0 +1,208 @@
+main: THEORY
+ BEGIN
+
+  Mode: TYPE = { OFF, INIT, AUTO, %ADVANCE_PISTONS, MANUAL,
+  	       	 PRIME, CONFIRM, ENGAGE, READY }
+
+  MAX_VOLUME: nat = 999 %-- mL
+  Volume: TYPE = upto(MAX_VOLUME) %-- mL
+  Button: TYPE = { BLINKING, DARK, LIGHT }
+
+  DEFAULT_VOLUME: Volume = 1
+
+  state: TYPE = [#
+    mode: Mode,
+    vol_saline: Volume,
+    vol_contrast: Volume,
+    vol_saline_visible: bool,
+    vol_contrast_visible: bool,
+    vol_saline_confirmed: bool,
+    vol_contrast_confirmed: bool,    
+    btn_fill_saline: Button,
+    btn_fill_contrast: Button,
+    btn_auto: Button,
+    btn_prime: Button,
+    btn_confirm: Button,
+    btn_engage: Button
+  #]
+
+  init(x: real): state = (#
+    mode := INIT,
+    vol_saline := DEFAULT_VOLUME,
+    vol_contrast := DEFAULT_VOLUME,
+    vol_saline_visible := FALSE,
+    vol_contrast_visible := FALSE,
+    vol_saline_confirmed := FALSE,
+    vol_contrast_confirmed := FALSE,    
+    btn_fill_saline := DARK,
+    btn_fill_contrast := DARK,
+    btn_auto := BLINKING,
+    btn_prime := DARK,
+    btn_confirm := DARK,
+    btn_engage := DARK
+  #)
+
+  step: Volume = 1
+  inc(x: Volume): Volume =
+   COND
+    x + step <= MAX_VOLUME -> x + step,
+    ELSE -> MAX_VOLUME
+   ENDCOND
+  dec(x: Volume): Volume =
+   COND
+    x - step >= 0 -> x - step,
+    ELSE -> 0
+   ENDCOND
+
+  %-- contrast
+  per_inc_contrast(st: state): bool = (mode(st) = AUTO AND NOT vol_contrast_confirmed(st))
+  inc_contrast(st: (per_inc_contrast)): state = st WITH [ vol_contrast := inc(vol_contrast(st)) ]
+  click_inc_contrast(st: state): state =
+    COND
+      per_inc_contrast(st) -> inc_contrast(st),
+      ELSE -> st
+    ENDCOND
+
+  per_dec_contrast(st: state): bool = (mode(st) = AUTO AND NOT vol_contrast_confirmed(st))
+  dec_contrast(st: (per_inc_contrast)): state = st WITH [ vol_contrast := dec(vol_contrast(st)) ]
+  click_dec_contrast(st: state): state =
+    COND
+      per_dec_contrast(st) -> dec_contrast(st),
+      ELSE -> st
+    ENDCOND
+
+  %--saline
+  per_inc_saline(st: state): bool = (mode(st) = AUTO AND NOT vol_saline_confirmed(st))
+  inc_saline(st: (per_inc_saline)): state = st WITH [ vol_saline := inc(vol_saline(st)) ]
+  click_inc_saline(st: state): state =
+    COND
+      per_inc_saline(st) -> inc_saline(st),
+      ELSE -> st
+    ENDCOND
+
+  per_dec_saline(st: state): bool = (mode(st) = AUTO AND NOT vol_saline_confirmed(st))
+  dec_saline(st: (per_inc_saline)): state = st WITH [ vol_saline := dec(vol_saline(st)) ]
+  click_dec_saline(st: (per_inc_saline)): state =
+    COND
+      per_dec_saline(st) -> dec_saline(st),
+      ELSE -> st
+    ENDCOND
+
+  volumes_confirmed?(st: state): bool = vol_saline_confirmed(st) AND vol_contrast_confirmed(st)
+  set_btn_colors(st: state): state =
+    COND
+     mode(st) = OFF -> st WITH [
+    	btn_fill_contrast := DARK,
+      	btn_fill_saline := DARK,
+      	btn_auto := DARK,
+      	btn_prime := DARK,
+      	btn_confirm := DARK,
+	btn_engage := DARK ],
+     mode(st) = INIT -> st WITH [
+    	btn_fill_contrast := DARK,
+      	btn_fill_saline := DARK,
+      	btn_auto := BLINKING,
+      	btn_prime := DARK,
+      	btn_confirm := DARK,
+	btn_engage := DARK ],
+     mode(st) = AUTO -> st WITH [
+    	btn_fill_contrast := IF vol_contrast_confirmed(st) THEN LIGHT ELSE BLINKING ENDIF,
+      	btn_fill_saline := IF vol_saline_confirmed(st) THEN LIGHT ELSE BLINKING ENDIF,
+      	btn_auto := IF volumes_confirmed?(st) THEN DARK ELSE LIGHT ENDIF,
+      	btn_prime := DARK,
+      	btn_confirm := DARK,
+	btn_engage := DARK ],
+    mode(st) = PRIME -> st WITH [
+    	btn_fill_contrast := DARK,
+      	btn_fill_saline := DARK,
+      	btn_auto := DARK,
+      	btn_prime := BLINKING,
+      	btn_confirm := DARK,
+	btn_engage := DARK ],
+    mode(st) = CONFIRM -> st WITH [
+    	btn_fill_contrast := DARK,
+      	btn_fill_saline := DARK,
+      	btn_auto := DARK,
+      	btn_prime := DARK,
+      	btn_confirm := BLINKING,
+	btn_engage := DARK ],
+    mode(st) = ENGAGE -> st WITH [
+    	btn_fill_contrast := DARK,
+      	btn_fill_saline := DARK,
+      	btn_auto := DARK,
+      	btn_prime := DARK,
+      	btn_confirm := DARK,
+	btn_engage := BLINKING ],
+    mode(st) = READY -> st WITH [
+    	btn_fill_contrast := DARK,
+      	btn_fill_saline := DARK,
+      	btn_auto := DARK,
+      	btn_prime := DARK,
+      	btn_confirm := DARK,
+	btn_engage := DARK ]	
+    ENDCOND
+
+
+
+  %-- auto load
+  per_btn_auto(st: state): bool = true
+  click_btn_auto(st: (per_btn_auto)): state =
+   COND
+    per_btn_auto(st)
+      -> LET st = st WITH [ mode := AUTO,
+      		            vol_saline_visible := TRUE,
+      			    vol_contrast_visible := TRUE,
+      			    vol_saline_confirmed := FALSE,
+      			    vol_contrast_confirmed := FALSE ]
+	  IN set_btn_colors(st),
+    ELSE -> st
+   ENDCOND
+  
+  per_btn_fill_saline(st: state): bool = mode(st) = AUTO
+  click_btn_fill_saline(st: (per_btn_fill_saline)): state =
+   COND
+    per_btn_fill_saline(st)
+     -> LET st = st WITH [ vol_saline_confirmed := TRUE ],
+            st = st WITH [ mode := IF volumes_confirmed?(st) THEN PRIME ELSE mode(st) ENDIF ]
+          IN set_btn_colors(st),
+    ELSE -> st
+   ENDCOND
+   
+  per_btn_fill_contrast(st: state): bool = mode(st) = AUTO
+  click_btn_fill_contrast(st: (per_btn_fill_contrast)): state =
+   COND
+    per_btn_fill_contrast(st)
+      -> LET st = st WITH [ vol_contrast_confirmed := TRUE ],
+	     st = st WITH [ mode := IF volumes_confirmed?(st) THEN PRIME ELSE mode(st) ENDIF ]
+          IN set_btn_colors(st),
+    ELSE -> st
+   ENDCOND
+
+  per_btn_prime(st: state): bool = (mode(st) = PRIME)
+  click_btn_prime(st: (per_btn_prime)): state =
+   COND
+    per_btn_prime(st)
+      -> LET st = st WITH [ mode := CONFIRM ]
+          IN set_btn_colors(st),
+    ELSE -> st
+   ENDCOND
+
+  per_btn_confirm(st: state): bool = (mode(st) = CONFIRM)
+  click_btn_confirm(st: (per_btn_confirm)): state =
+   COND
+    per_btn_confirm(st)
+      -> LET st = st WITH [ mode := ENGAGE ]
+          IN set_btn_colors(st),
+    ELSE -> st
+   ENDCOND
+
+  per_btn_engage(st: state): bool = (mode(st) = ENGAGE)
+  click_btn_engage(st: (per_btn_engage)): state =
+   COND
+    per_btn_engage(st)
+      -> LET st = st WITH [ mode := READY ]
+          IN set_btn_colors(st),
+    ELSE -> st
+   ENDCOND
+
+ END main

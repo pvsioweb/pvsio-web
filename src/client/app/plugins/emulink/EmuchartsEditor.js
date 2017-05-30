@@ -973,7 +973,8 @@ define(function (require, exports, module) {
                 this.parentNode.appendChild(this);
               });
             };
-            g.moveToFront();
+            // FIXME: this is disabled, because in some browsers, including Chrome 58.0.3029.96 (64-bit) event handlers for dblclick get lost
+            //g.moveToFront();
         }
     }
 
@@ -1000,7 +1001,7 @@ define(function (require, exports, module) {
             d3.select(g.children[3]).style("fill", "green");
             d3.select(g.children[4]).style("fill", "green");
             var edge = this.emucharts.edges.get(id);
-            if (edge.source && edge.target && edge.source.id === edge.target.id) {
+            if (edge && edge.source && edge.target && edge.source.id === edge.target.id) {
                 d3.select(g).select(".tlabel").text(function (edge) {
                     return edge.name;
                 });
@@ -1033,7 +1034,7 @@ define(function (require, exports, module) {
             d3.select(g.children[3]).style("fill", "black");
             d3.select(g.children[4]).style("fill", "black");
             var edge = this.emucharts.edges.get(id);
-            if (edge.source && edge.target && edge.source.id === edge.target.id) {
+            if (edge && edge.source && edge.target && edge.source.id === edge.target.id) {
                 d3.select(g).select(".tlabel").text(function (edge) {
                     return labelToString(edge.name);
                 });

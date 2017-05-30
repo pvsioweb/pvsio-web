@@ -75,13 +75,13 @@ define(function (require, exports, module) {
                 });
 
                 it("EmuCharts tool can be loaded", function (done) {
-                    setTimeout(function () {
-                        util.loadPlugin("EmuChartsEditor").then(function () {
+                    util.loadPlugin("EmuChartsEditor").then(function () {
+                        setTimeout(function () {
                             var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='EmuChartsEditor']");
                             expect(pluginPanel.empty()).toBeFalsy();
                             done();
-                        }).catch(util.expectError(done));
-                    }, 1000);
+                        }, 4000);
+                    }).catch(util.expectError(done));
                 });
 
                 it("EmuCharts tool can be unloaded", function (done) {

@@ -414,6 +414,8 @@ define(function (require, exports, module) {
                     widgetId = screenObj.widgetId;
                     scrn = screenObj.scrn;
                     done();
+                }).catch(function (err) {
+                    console.error(err);
                 });
             });
 
