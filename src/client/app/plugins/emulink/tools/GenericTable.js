@@ -32,6 +32,7 @@ define(function (require, exports, module) {
 
     GenericTable.prototype.createHtmlElements = function () {
         var _this = this;
+        _this.clearListeners();
         if (!d3.select("#" + _this.table_name + "Table").node()) {
             var table = Handlebars.compile(table_template, { noEscape: true })({
                 table_name: _this.table_name,
@@ -57,6 +58,11 @@ define(function (require, exports, module) {
             });
             d3.selectAll("#Edit" + _this.table_name).on("click", function () {
                 _this.editElement(this.parentElement.parentElement.id.replace(_this.table_name, ""));
+            });
+            d3.select("#Add" + _this.table_name).on("click", function () {
+                return _this.fire({
+                    type: _this.table_name + "Table_add"
+                });
             });
         }
         tableElements.forEach(function (e) {
@@ -95,6 +101,8 @@ define(function (require, exports, module) {
     GenericTable.prototype.setElements = function(tableElements) {
         var _this = this;
         function clearTable() {
+            // d3.selectAll("#Remove" + _this.table_name).on("click", null);
+            // d3.selectAll("#Edit" + _this.table_name).on("click", null);
             var table = d3.select("#" + _this.table_name + "Table tbody").node();
             while (table && table.lastChild && table.lastChild.id !== "heading") {
                 table.removeChild(table.lastChild);
