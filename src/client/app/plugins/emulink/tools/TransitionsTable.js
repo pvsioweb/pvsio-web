@@ -36,5 +36,9 @@ define(function (require, exports, module) {
         return table;
     }
 
+    TransitionsTable.prototype.createHtmlElements = function () {
+        table.createHtmlElements();
+    };
+
     module.exports = TransitionsTable;
 });

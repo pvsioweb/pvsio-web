@@ -35,5 +35,9 @@ define(function (require, exports, module) {
         return table;
     }
 
+    ConstantsTable.prototype.createHtmlElements = function () {
+        table.createHtmlElements();
+    };
+
     module.exports = ConstantsTable;
 });

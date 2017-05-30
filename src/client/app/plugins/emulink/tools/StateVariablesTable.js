@@ -36,5 +36,9 @@ define(function (require, exports, module) {
         return table;
     }
 
+    StateVariablesTable.prototype.createHtmlElements = function () {
+        table.createHtmlElements();
+    };
+
     module.exports = StateVariablesTable;
 });
