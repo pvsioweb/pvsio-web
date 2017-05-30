@@ -38,5 +38,9 @@ define(function (require, exports, module) {
         return table;
     }
 
+    MachineStatesTable.prototype.createHtmlElements = function () {
+        table.createHtmlElements();
+    };
+
     module.exports = MachineStatesTable;
 });

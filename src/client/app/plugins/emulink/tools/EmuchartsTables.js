@@ -36,6 +36,11 @@ define(function (require, exports, module) {
     var instance;
     function EmuchartsTables () {
         pimEmulink = new PIMEmulink(emuchartsManager);
+        this.stateVariablesTable = new StateVariablesTable("EmuchartsFloatTableContent");
+        this.machineStatesTable = new MachineStatesTable("EmuchartsFloatTableContent");
+        this.transitionsTable = new TransitionsTable("EmuchartsFloatTableContent");
+        this.constantsTable = new ConstantsTable("EmuchartsFloatTableContent");
+        this.datatypesTable = new DatatypesTable("EmuchartsFloatTableContent");
         eventDispatcher(this);
         return this;
     }
@@ -238,11 +243,12 @@ define(function (require, exports, module) {
     }
 
     EmuchartsTables.prototype.createHtmlElements = function () {
-        this.stateVariablesTable = new StateVariablesTable("EmuchartsFloatTableContent");
-        this.machineStatesTable = new MachineStatesTable("EmuchartsFloatTableContent");
-        this.transitionsTable = new TransitionsTable("EmuchartsFloatTableContent");
-        this.constantsTable = new ConstantsTable("EmuchartsFloatTableContent");
-        this.datatypesTable = new DatatypesTable("EmuchartsFloatTableContent");
+        this.stateVariablesTable.createHtmlElements();
+        this.stateVariablesTable.createHtmlElements();
+        this.machineStatesTable.createHtmlElements();
+        this.transitionsTable.createHtmlElements();
+        this.constantsTable.createHtmlElements();
+        this.datatypesTable.createHtmlElements();
         installTableHandlers(this);
     };
 

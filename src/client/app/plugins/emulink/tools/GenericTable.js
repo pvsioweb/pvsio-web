@@ -22,27 +22,32 @@ define(function (require, exports, module) {
      */
     function GenericTable(name, div, attributes, add, opt) {
         opt = opt || {};
-        var _this = this;
         this.table_name = name;
+        this.div = div;
+        this.attributes = attributes;
         this.add = add;
-        eventDispatcher(this);
+        this.opt = opt;
+        return eventDispatcher(this);
+    }
+
+    GenericTable.prototype.createHtmlElements = function () {
+        var _this = this;
         if (!d3.select("#" + _this.table_name + "Table").node()) {
             var table = Handlebars.compile(table_template, { noEscape: true })({
                 table_name: _this.table_name,
-                attributes: attributes
+                attributes: _this.attributes
             });
-            d3.select("#" + div).append("div")
+            d3.select("#" + _this.div).append("div")
                 .attr("id", _this.table_name + "Table")
                 .attr("class", "table-editable EmuchartsTableContent")
-                .style("display", (opt.isVisible)? "block" : "none").html(table);
+                .style("display", (_this.opt.isVisible)? "block" : "none").html(table);
             d3.select("#Add" + _this.table_name).on("click", function () {
                 return _this.fire({
                     type: _this.table_name + "Table_add"
                 });
             });
         }
-        return this;
-    }
+    };
 
     GenericTable.prototype.addElement = function(tableElements) {
         var _this = this;

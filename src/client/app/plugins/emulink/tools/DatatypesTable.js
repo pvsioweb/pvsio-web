@@ -33,5 +33,9 @@ define(function (require, exports, module) {
         return table;
     }
 
+    DatatypesTable.prototype.createHtmlElements = function () {
+        table.createHtmlElements();
+    };
+    
     module.exports = DatatypesTable;
 });
