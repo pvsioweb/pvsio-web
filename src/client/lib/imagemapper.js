@@ -187,9 +187,13 @@
                 dispatcher.resize({region: region, old: {x: rx, y: ry, width: rw, height: rh},
                                 pos: pos(region), scale: _scale});
             });
-        });//.on("mouseover", function (d, i) {
+        }).on("mouseover", function (d, i) {
             // select(region, svg, d3.event.shiftKey, dispatcher);
-        //});
+            mouse_over_region = true;
+        }).on("mouseout", function (d, i) {
+            // select(region, svg, d3.event.shiftKey, dispatcher);
+            mouse_over_region = false;
+        });
     }
 
     function enableRegionEdit(region, svg, dispatcher) {
