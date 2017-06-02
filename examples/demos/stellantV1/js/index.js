@@ -543,7 +543,7 @@ require([
         client.addListener('WebSocketConnectionOpened', function (e) {
             console.log("web socket connected");
             //start pvs process
-            client.getWebSocket().startPVSProcess({name: "main.pvs", demoName: "stellant/pvs"}, function (err, event) {
+            client.getWebSocket().startPVSProcess({name: "main.pvs", demoName: "stellantV1/pvs"}, function (err, event) {
                 client.getWebSocket().sendGuiAction("init(0);", onMessageReceived);
                 d3.select(".demo-splash").style("display", "none");
                 d3.select(".content").style("display", "inline-flex");
