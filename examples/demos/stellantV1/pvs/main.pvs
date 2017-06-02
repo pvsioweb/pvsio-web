@@ -249,15 +249,28 @@ main: THEORY
    ENDCOND
 
   %-- these utility functions automatically stop pulling the plunger when the target volume has been reached
-  auto_pull_plunger_saline(step: Volume)(st: state): state =
-    IF plunger_saline(st) + step <= MAX_VOLUME
-    THEN st WITH [ plunger_saline := IF plunger_saline(st) + step <= vol_saline(st) THEN plunger_saline(st) + step ELSE vol_saline(st) ENDIF ] ELSE st ENDIF
-  auto_pull_plunger_contrast(step: Volume)(st: state): state =
-    IF plunger_contrast(st) + step <= MAX_VOLUME
-    THEN st WITH [ plunger_contrast := IF plunger_contrast(st) + step <= vol_contrast(st) THEN plunger_contrast(st) + step ELSE vol_contrast(st) ENDIF ] ELSE st ENDIF
-  manual_pull_plunger_saline(step: Volume)(st: state): state =
+  auto_plunger_saline(step: Volume)(st: state): state =
+    COND
+     plunger_saline(st) <= vol_saline(st)
+        -> st WITH [ plunger_saline := IF plunger_saline(st) + step <= vol_saline(st)
+	                               THEN plunger_saline(st) + step ELSE vol_saline(st) ENDIF ],
+     plunger_saline(st) > vol_saline(st)
+        -> st WITH [ plunger_saline := IF plunger_saline(st) - step > vol_saline(st)
+	                               THEN plunger_saline(st) - step ELSE vol_saline(st) ENDIF ]
+    ENDCOND
+  auto_plunger_contrast(step: Volume)(st: state): state =
+    COND
+     plunger_contrast(st) <= vol_contrast(st)
+        -> st WITH [ plunger_contrast := IF plunger_contrast(st) + step <= vol_contrast(st)
+	                                 THEN plunger_contrast(st) + step ELSE vol_contrast(st) ENDIF ],
+     plunger_contrast(st) > vol_contrast(st)
+        -> st WITH [ plunger_contrast := IF plunger_contrast(st) - step > vol_contrast(st)
+	                                 THEN plunger_contrast(st) - step ELSE vol_contrast(st) ENDIF ]
+    ENDCOND
+    
+  pull_plunger_saline(step: Volume)(st: state): state =
     st WITH [ plunger_saline := IF plunger_saline(st) + step <= MAX_VOLUME THEN plunger_saline(st) + step ELSE MAX_VOLUME ENDIF ]
-  manual_pull_plunger_contrast(step: Volume)(st: state): state =
+  pull_plunger_contrast(step: Volume)(st: state): state =
     st WITH [ plunger_contrast := IF plunger_contrast(st) + step <= MAX_VOLUME THEN plunger_contrast(st) + step ELSE MAX_VOLUME ENDIF ]
   push_plunger_saline(step: Volume)(st: state): state =
     st WITH [ plunger_saline := IF plunger_saline(st) - step >= 0 THEN plunger_saline(st) - step ELSE 0 ENDIF ]
@@ -269,10 +282,10 @@ main: THEORY
   tick(st: (per_tick)): state =
     COND
      mode(st) = PULL_PLUNGER ->
-       LET st = IF vol_saline_confirmed(st) THEN auto_pull_plunger_saline(FAST)(st) ELSE st ENDIF,
-	   st = IF vol_contrast_confirmed(st) THEN auto_pull_plunger_contrast(FAST)(st) ELSE st ENDIF,
+       LET st = IF vol_saline_confirmed(st) THEN auto_plunger_saline(FAST)(st) ELSE st ENDIF,
+	   st = IF vol_contrast_confirmed(st) THEN auto_plunger_contrast(FAST)(st) ELSE st ENDIF,
 	   st = IF vol_saline_confirmed(st) AND vol_contrast_confirmed(st) AND
-	            plunger_saline(st) >= vol_saline(st) AND plunger_contrast(st) >= vol_contrast(st) THEN st WITH [ mode := READY_TO_PRIME ] ELSE st ENDIF
+	            plunger_saline(st) = vol_saline(st) AND plunger_contrast(st) = vol_contrast(st) THEN st WITH [ mode := READY_TO_PRIME ] ELSE st ENDIF
 	IN set_btn_colors(st),
      mode(st) = PRIMING ->
        LET st = st WITH [ mode := CONFIRM ]
@@ -310,7 +323,7 @@ main: THEORY
 
   per_sDOWN_saline(st: state): bool = mode(st) = MANUAL
   sDOWN_saline(st: (per_sDOWN_saline)): state =
-   LET st = manual_pull_plunger_saline(SLOW)(st)
+   LET st = pull_plunger_saline(SLOW)(st)
     IN st WITH [ vol_saline := plunger_saline(st),
 		 vol_contrast := plunger_contrast(st) ]
 
@@ -324,7 +337,7 @@ main: THEORY
   
   per_fDOWN_saline(st: state): bool = mode(st) = MANUAL
   fDOWN_saline(st: (per_fDOWN_saline)): state =
-   LET st = manual_pull_plunger_saline(FAST)(st)
+   LET st = pull_plunger_saline(FAST)(st)
     IN st WITH [ vol_saline := plunger_saline(st),
 		 vol_contrast := plunger_contrast(st) ]
 
@@ -365,7 +378,7 @@ main: THEORY
 
   per_sDOWN_contrast(st: state): bool = mode(st) = MANUAL
   sDOWN_contrast(st: (per_sDOWN_contrast)): state =
-   LET st = manual_pull_plunger_contrast(SLOW)(st)
+   LET st = pull_plunger_contrast(SLOW)(st)
     IN st WITH [ vol_saline := plunger_saline(st),
 		 vol_contrast := plunger_contrast(st) ]   
   click_btn_sDOWN_contrast(st: state): state =
@@ -378,7 +391,7 @@ main: THEORY
   
   per_fDOWN_contrast(st: state): bool = mode(st) = MANUAL
   fDOWN_contrast(st: (per_fDOWN_contrast)): state =
-   LET st = manual_pull_plunger_contrast(FAST)(st)
+   LET st = pull_plunger_contrast(FAST)(st)
     IN st WITH [ vol_saline := plunger_saline(st),
 		 vol_contrast := plunger_contrast(st) ]   
   click_btn_fDOWN_contrast(st: state): state =

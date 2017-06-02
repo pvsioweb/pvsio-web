@@ -71,10 +71,11 @@ define(function (require, exports, module) {
     var large_syringe_style = "translate(-82,0) scale(0.2,0.1)";
 
     var needle_style = {
-        blue: "url(#linearGradient1990)",
-        green: "url(#linearGradient2706)",
-        red: "url(#linearGradient1268)",
-        yellow: "url(#linearGradient550)"
+        blue: "url(#linearGradientBlue)",
+        green: "url(#linearGradientGreen)",
+        red: "url(#linearGradientRed)",
+        yellow: "url(#linearGradientGreen)",
+        orange: "url(#linearGradientOrange)"
     };
 
     /**
@@ -113,7 +114,6 @@ define(function (require, exports, module) {
                         .style("display", "none").attr("id", id).attr("class", elemClass);
 
         this.syringe = this.div.append("div").attr("id", "syringe").html(syringe_data);
-        this.syringe.select("svg").attr("height", this.height).attr("viewBox", "100 40 691 " + this.height);
         this.fluid_color = opt.fluid_color || '#0fe95d'; // bright green
         this.fluid = this.div.select("svg g#fluid");
         this.fluid.select("path").style("fill",this.fluid_color);
@@ -148,8 +148,8 @@ define(function (require, exports, module) {
         // - vial
         this.vial = this.div.append("div").attr("id", "vial").html(vial_data);
         this.vial.attr("style", "transform: rotate(180deg);")
-                 .style("margin-top", "-540px")
-                 .style("margin-right", "-15px");
+                 .style("margin-top", "-600px")
+                 .style("margin-right", "-8px");
         if (this.fittings && this.fittings === "vial") {
             this.vial.style("display", "block");
         } else {
@@ -157,7 +157,7 @@ define(function (require, exports, module) {
         }
         // spring infusion set
         this.infusionSet = this.div.append("div").attr("id", "infusionSet").html(infusions_set_data);
-        this.infusionSet.attr("style", "margin-top:-560px; margin-left:-42px;");
+        this.infusionSet.attr("style", "margin-top:-718px; margin-left:-45px;");
         if (this.fittings && this.fittings === "infusionSet") {
             this.infusionSet.style("display", "block");
             this.shaft.style("display", "none");

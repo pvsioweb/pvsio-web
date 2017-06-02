@@ -281,7 +281,7 @@ require([
             callback: onMessageReceived,
             backgroundColor: "transparent",
             borderRadius: 20,
-            opacity: 0.5
+            opacity: 0.6
         });
         device.btn_fill_contrast = new TouchscreenButton("btn_fill_contrast", {
             top: 627,
@@ -293,7 +293,7 @@ require([
             callback: onMessageReceived,
             backgroundColor: "transparent",
             borderRadius: 20,
-            opacity: 0.5
+            opacity: 0.6
         });
 
         device.btn_prime_LED = new LED2("btn_prime_LED", {
