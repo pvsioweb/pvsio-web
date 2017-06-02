@@ -165,7 +165,7 @@
        clipPathUnits="userSpaceOnUse"><path
          id="path548"
          d="m 1055.61,3870.67 -97.505,0 14.86,339.53 69.645,0 13,-339.53 z" /></clipPath><linearGradient
-       id="linearGradient550"
+       id="linearGradientOrange"
        spreadMethod="pad"
        gradientTransform="matrix(97.5049,0,0,-97.5049,958.105,4040.43)"
        gradientUnits="userSpaceOnUse"
@@ -2551,7 +2551,7 @@
            clip-path="url(#clipPath546)"
            id="g544"><path
              id="path558"
-             style="fill:url(#linearGradient550);fill-opacity:1;fill-rule:nonzero;stroke:none"
+             style="fill:url(#linearGradientOrange);fill-opacity:1;fill-rule:nonzero;stroke:none"
              d="m 1055.61,3870.67 -97.505,0 14.86,339.53 69.645,0 13,-339.53" /></g></g><g
          id="g560"><g
            clip-path="url(#clipPath564)"
