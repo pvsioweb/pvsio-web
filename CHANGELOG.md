@@ -1,4 +1,12 @@
 #Changelog
+##2.2 (June 2017)
+    Added new demo: Medrad Stellant CT Injection System
+    Added new demo: Pillbox device prototype
+    Added new prototype: Niki T34 syringe driver
+    Added new widget: Syringe, featuring: moving plunger, fittings (needle, spiral infusion set, vial), two size (20mL, 200mL)
+    Added proof strategies for Emucharts verification templates
+    Improved Emucharts Editor user interface
+
 ##2.1.1 (Dec 2016)
     Added new feature: PVS verification templates for Emucharts
     Added new feature: UPPAAL file importer for Emucharts
