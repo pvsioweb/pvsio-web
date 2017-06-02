@@ -120,6 +120,9 @@ define(function (require, exports, module) {
                     fontColor: "white"
                 });
             }
+            if (_this.evts() && _this.evts()[0] === "press/release") {
+                _this.overlayButton.pressAndHold();
+            }
         }).on("mouseup", function () {
             if (_this.backgroundColor !== "transparent") {
                 _this.overlayDisplay.setColors({
@@ -127,7 +130,11 @@ define(function (require, exports, module) {
                     fontColor: _this.fontColor
                 });
             }
-            _this.overlayButton.click();
+            if (_this.evts() && _this.evts()[0] === "press/release") {
+                _this.overlayButton.release();
+            } else {
+                _this.overlayButton.click();
+            }
         });
 
         opt.visibleWhen = opt.visibleWhen || "true"; // default: always enabled/visible
