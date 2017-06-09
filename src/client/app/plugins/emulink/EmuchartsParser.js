@@ -57,6 +57,8 @@ define(function (require, exports, module) {
 
     var Parser = require("lib/jison/jison");
 
+    var instance;
+
     var lexerRules = [
         { rule: ["\\s+",                    "/* skip whitespace */"], type: "whitespace" },
         { rule: ["(?!(?:IMPLIES|implies|AND|and|OR|or|NOT|not|TRUE|true|FALSE|false|MOD|mod|RETURN|return))"
@@ -667,5 +669,12 @@ if (ans.res) {
         return ans;
     };
 
-    module.exports = EmuchartsParser;
+    module.exports = {
+        getInstance: function () {
+            if (!instance) {
+                instance = new EmuchartsParser();
+            }
+            return instance;
+        }
+    };
 });

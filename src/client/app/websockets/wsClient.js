@@ -47,8 +47,8 @@ define(function (require, exports, module) {
                         var token = JSON.parse(event.data);
                         //if token has an id check if there is a function to be called in the registry
                         if (token.id && typeof callbackRegistry[token.id] === "function") {
-                            var time = new Date().getTime() - token.time.client.sent;
-                            console.log("Time to response for " + token.type + "  " + (time));
+                            // var time = new Date().getTime() - token.time.client.sent;
+                            // console.log("Time to response for " + token.type + "  " + (time));
                             if (token.type.indexOf("_error") >= 0 && dbg) {
                                 console.error(token); // errors should always be reported in the browser console
                             }
