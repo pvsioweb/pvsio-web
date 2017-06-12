@@ -6,7 +6,7 @@
  */
 define(function (require, exports, module) {
     "use strict";
-    var printer_version = "2.0";
+    // var printer_version = "2.0";
 
     var GenericPrinter = require("plugins/emulink/models/EmuchartsGenericPrinter");
     var projectManager = require("project/ProjectManager").getInstance();
