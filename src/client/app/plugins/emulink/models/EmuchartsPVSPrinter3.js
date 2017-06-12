@@ -140,7 +140,13 @@ define(function (require, exports, module) {
     function print_pvs_expression(expr, emuchart, opt) {
         function preProcess (term, emuchart) {
             function preprocessFunction(term, emuchart) {
-                if (term.type === "identifier") {
+                if (term.type === "function") {
+                    var ans = "";
+                    for (var i = 0; i < term.val.length; i++) {
+                        ans += preprocessFunction(term.val[i], emuchart);
+                    }
+                    return ans;
+                } else if (term.type === "identifier") {
                     if (term.isVariable) {
                         if (term.val.indexOf(".") >= 0) {
                             var v = term.val.split(".");
@@ -151,14 +157,10 @@ define(function (require, exports, module) {
                         }
                     }
                     return term.val;
+                } else if (term.type === "binop") {
+                    return " " + term.val + " ";
                 } else if (typeof term.val === "string") {
                     return term.val;
-                } else if (term.type === "function") {
-                    var ans = "", i = 0;
-                    for (i = 0; i < term.val.length; i++) {
-                        ans += preprocessFunction(term.val[i], emuchart);
-                    }
-                    return ans;
                 }
                 return term;
             }
@@ -361,13 +363,13 @@ define(function (require, exports, module) {
         return new Promise (function (resolve, reject) {
             if (opt.interactive) {
                 return _this.genericPrinter.get_params().then(function (par) {
-                    resolve(finalize(resolve, reject));
+                    finalize(resolve, reject);
                 }).catch(function (err) {
                     console.log(err);
                     reject(err);
                 });
             }
-            return resolve(finalize(opt));
+            return finalize(resolve, reject);
         });
     };
 

@@ -26,12 +26,15 @@ define(function (require, exports, module) {
         syringe_data = require("text!widgets/med/Syringe/syringe_data.svg"),
         vial_data = require("text!widgets/med/Syringe/vial_data.svg"),
         infusions_set_data = require("text!widgets/med/Syringe/springs.svg"),
+        lateral_connection_line_data = require("text!widgets/med/Syringe/connection-line.svg"),
         StateParser = require("util/PVSioStateParser"),
         property = require("util/property");
 
     // range goes from 0 to 20
-    var FULL = 20;
-    // var EMPTY = 0;
+    var FULLY_RETRACTED = 22;
+    // var FULLY_PUSHED = 0;
+
+    var animation_duration = 250; //ms
 
     function getLevel(val, opt) {
         opt = opt || {};
@@ -56,13 +59,15 @@ define(function (require, exports, module) {
             { level: 17, fluid: "scale(1,1.64) translate(0,-1430)", plunger: "translate(0,-340)", plunger_stick: "translate(0,1900) scale(1,0.4)" },
             { level: 18, fluid: "scale(1,1.74) translate(0,-1560)", plunger: "translate(0,-390)", plunger_stick: "translate(0,2150) scale(1,0.3)" },
             { level: 19, fluid: "scale(1,1.83) translate(0,-1660)", plunger: "translate(0,-450)", plunger_stick: "translate(0,2350) scale(1,0.2)" },
-            { level: 20, fluid: "scale(1,1.91) translate(0,-1750)", plunger: "translate(0,-500)", plunger_stick: "translate(0,2350) scale(1,0.2)" }
+            { level: 20, fluid: "scale(1,1.91) translate(0,-1750)", plunger: "translate(0,-500)", plunger_stick: "translate(0,2350) scale(1,0.2)" },
+            { level: 21, fluid: "scale(1,1.91) translate(0,-1830)", plunger: "translate(0,-650)", plunger_stick: "translate(0,2650) scale(1,0.13)" },
+            { level: 22, fluid: "scale(1,1.91) translate(0,-1860)", plunger: "translate(0,-750)", plunger_stick: "translate(0,2750) scale(1,0.1)" }
         ];
         var x = 0;
         if (opt.large_syringe) {
             x = parseInt(val/10);
         }
-        x = (x > 20) ? 20
+        x = (x > 22) ? 22
             : (x < 0) ? 0
             : x;
         return levels[x];
@@ -103,7 +108,7 @@ define(function (require, exports, module) {
         opt.opacity = opt.opacity || 1;
         opt.visibleWhen = opt.visibleWhen || "true";
         this.visibleWhen = property.call(this, opt.visibleWhen);
-        this.example = opt.example || FULL; // example is used in the prototype builder to demonstrate the font style of the display
+        this.example = opt.example || FULLY_RETRACTED; // example is used in the prototype builder to demonstrate the font style of the display
 
         var elemClass = id + " syringeWidget" + " noselect ";
         this.div = d3.select(this.parent)
@@ -117,14 +122,16 @@ define(function (require, exports, module) {
         this.fluid_color = opt.fluid_color || '#0fe95d'; // bright green
         this.fluid = this.div.select("svg g#fluid");
         this.fluid.select("path").style("fill",this.fluid_color);
+        this.contains_fluid = opt.contains_fluid || false;
         this.plunger = this.div.select("svg g#plunger");
         this.plunger_stick = this.div.select("svg g#plunger #stick");
         this.plunger_tail = this.div.select("svg g#plunger #tail");
+        this.plunger_head = this.div.select("svg g#plunger #head");
         this.automatic_plunger = opt.automatic_plunger || false;
         if (this.automatic_plunger) {
             this.plunger_tail.attr("style", "display:none;");
         }
-        this.plungerLevel = opt.plungerLevel || FULL;
+        this.plungerLevel = opt.plungerLevel || FULLY_RETRACTED;
         this.large_syringe = opt.large_syringe;
         this.syringe = this.div.select("svg g#syringe");
         this.graduation_marks = d3.select(this.syringe.node().parentNode).select("g#graduation_marks");
@@ -140,6 +147,7 @@ define(function (require, exports, module) {
             this.needle_color = needle_style[opt.needle_style];
         }
         this.needle_base.selectAll("path").style("fill", this.needle_color);
+        this.has_needle = opt.has_needle || false;
 
         this.fittings = opt.fittings || null;
         // -- the following fittingss are available in the current implementation;
@@ -157,13 +165,25 @@ define(function (require, exports, module) {
         }
         // spring infusion set
         this.infusionSet = this.div.append("div").attr("id", "infusionSet").html(infusions_set_data);
-        this.infusionSet.attr("style", "margin-top:-718px; margin-left:-45px;");
+        this.infusionSet.attr("style", "margin-top:-664px; margin-left:-30px; transform:scale(0.6,0.6)");
         if (this.fittings && this.fittings === "infusionSet") {
             this.infusionSet.style("display", "block");
             this.shaft.style("display", "none");
         } else {
             this.infusionSet.style("display", "none");
         }
+        // lateral connection line
+        this.lateralConnectionLine = this.div.append("div").attr("id", "lateralConnectionLine").html(lateral_connection_line_data);
+        this.lateralConnectionLine.attr("style", "margin-top:-467px; margin-left:-130px; transform:scale(0.85,0.5)");
+        if (this.fittings && this.fittings === "lateralConnectionLine") {
+            this.lateralConnectionLine.style("display", "block");
+            this.shaft.style("display", "none");
+        } else {
+            this.lateralConnectionLine.style("display", "none");
+        }
+
+        this.plunger.attr("transform", getLevel(this.plungerLevel, { large_syringe: this.large_syringe }).plunger);
+        this.fluid.attr("transform", getLevel(this.plungerLevel, { large_syringe: this.large_syringe }).fluid);
 
         Widget.call(this, id, "syringe");
         return this;
@@ -242,16 +262,30 @@ define(function (require, exports, module) {
                 this.plungerLevel = parseInt(level);
             }
             // render content
-            this.shaft.style("display", "block");
-            this.needle_color = opt.needle_color || this.needle_color || "url(#linearGradient550)";
-            if (opt.needle_style && needle_style[opt.needle_style]) {
-                this.needle_color = needle_style[opt.needle_style];
+            if (opt.has_needle || this.has_needle) {
+                this.shaft.style("display", "block");
+                this.needle_color = opt.needle_color || this.needle_color || "url(#linearGradient550)";
+                if (opt.needle_style && needle_style[opt.needle_style]) {
+                    this.needle_color = needle_style[opt.needle_style];
+                }
+                this.needle_base.selectAll("path").style("fill", this.needle_color);
+            } else {
+                this.shaft.style("display", "none");
             }
-            this.needle_base.selectAll("path").style("fill", this.needle_color);
-            this.plunger.transition().duration(250).attr("transform", getLevel(this.plungerLevel, { large_syringe: this.large_syringe }).plunger);
-            this.fluid.transition().duration(250).attr("transform", getLevel(this.plungerLevel, { large_syringe: this.large_syringe }).fluid);
+            if (opt.contains_fluid === true ||this.contains_fluid === true) {
+                this.fluid.attr("display", "block");
+                this.fluid.transition().duration(animation_duration).attr("transform", getLevel(this.plungerLevel, { large_syringe: this.large_syringe }).fluid);
+            } else {
+                this.fluid.attr("display", "none");
+            }
             if (this.automatic_plunger) {
-                this.plunger_stick.transition().duration(250).attr("transform", getLevel(this.plungerLevel, { large_syringe: this.large_syringe }).plunger_stick);
+                if (this.div.style("display") === "none") {
+                    this.plunger.attr("transform", getLevel(this.plungerLevel, { large_syringe: this.large_syringe }).plunger);
+                    this.plunger_stick.attr("transform", getLevel(this.plungerLevel, { large_syringe: this.large_syringe }).plunger_stick);
+                } else {
+                    this.plunger.transition().duration(animation_duration).attr("transform", getLevel(this.plungerLevel, { large_syringe: this.large_syringe }).plunger);
+                    this.plunger_stick.transition().duration(animation_duration).attr("transform", getLevel(this.plungerLevel, { large_syringe: this.large_syringe }).plunger_stick);
+                }
                 this.plunger_tail.attr("style", "display:none;");
             }
             if (this.fittings === "vial" || opt.fittings === "vial") {
@@ -259,11 +293,18 @@ define(function (require, exports, module) {
             } else if (this.fittings === "infusionSet" || opt.fittings === "infusionSet") {
                 this.vial.style("display", "none");
                 this.shaft.style("display", "none");
-                this.needle_base.selectAll("path").style("fill", "gray");
+                // this.needle_base.selectAll("path").style("fill", "gray");
                 this.infusionSet.style("display", "block");
+            } else if (this.fittings === "lateralConnectionLine" || opt.fittings === "lateralConnectionLine") {
+                this.vial.style("display", "none");
+                this.infusionSet.style("display", "none");
+                this.lateralConnectionLine.style("display", "block");
+                this.shaft.style("display", "none");
+                // this.needle_base.selectAll("path").style("fill", "gray");
             } else {
                 this.vial.style("display", "none");
                 this.infusionSet.style("display", "none");
+                this.lateralConnectionLine.style("display", "none");
             }
             return this.reveal();
         }
@@ -282,6 +323,21 @@ define(function (require, exports, module) {
     };
     Syringe.prototype.removeInfusionSet = function () {
         return this.removeFittings();
+    };
+    Syringe.prototype.plugLateralConnectionLine = function () {
+        this.fittings = "lateralConnectionLine";
+        return this.render();
+    };
+    Syringe.prototype.removeLateralConnectionLine = function () {
+        return this.removeFittings();
+    };
+    Syringe.prototype.containsFluid = function () {
+        this.contains_fluid = true;
+        return this.render();
+    };
+    Syringe.prototype.noFluid = function () {
+        this.contains_fluid = false;
+        return this.render();
     };
     Syringe.prototype.removeFittings = function () {
         this.fittings = null;

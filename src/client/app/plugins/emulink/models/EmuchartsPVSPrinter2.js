@@ -104,7 +104,7 @@ define(function (require, exports, module) {
      */
     function EmuchartsPVSPrinter(name) {
         theory_name = name;
-        parser = new EmuchartsParser();
+        parser = EmuchartsParser.getInstance();
         return this;
     }
 

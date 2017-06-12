@@ -1,53 +1,8 @@
-/** @module EmuchartsMALPrinter */
+/** @module EmuchartsMALPrinter v3.0*/
 /**
  * EmuchartsMALPrinter provides functions to generate MAL models from Emucharts
  * @authors: Paolo Masci, Rui Couto
- * @date 2014/22/10 11:00:21 AM
- *
- * Emuchart objects have the following structure:
-      emuchart = {
-                name: (string),
-                author: {
-                    name: (string),
-                    affiliation: (string),
-                    contact: (string)
-                },
-                importings: (not used for now),
-                constants: (array of {
-                                name: (string), // the constant identifier
-                                type: (string), // the constant type
-                                value: (string) // the constant value (can be undefined)
-                            }),
-                variables: (array of {
-                                name: (string), // the variable identifier
-                                type: (string), // the variable type
-                                scope: (string) // the variable scope, either local or global
-                            }),
-                states: (array of {
-                                name: (string), // the state label
-                                id: (string),   // a unique identifier
-                            }),
-                transitions: (array of {
-                                name: (string), // the transition label
-                                id: (string),   // a unique identifier
-                                source: {
-                                    name: (string), // the source state label
-                                    id: (string)    // a unique identifier
-                                },
-                                target: {
-                                    name: (string), // the target state label
-                                    id: (string)    // a unique identifier
-                                },
-                            }),
-                initial_transitions: (array of {
-                                name: (string), // the initial transition label
-                                id: (string),   // a unique identifier
-                                target: {
-                                    name: (string), // the target state label
-                                    id: (string)    // a unique identifier
-                                },
-                            })
-      }
+ * @date June 9, 2017
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3 */

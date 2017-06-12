@@ -18,7 +18,7 @@ define(function (require, exports, module) {
     }
 
     Printer.prototype.modelName = undefined;
-    Printer.prototype._parser = new EmuchartsParser();
+    Printer.prototype._parser = EmuchartsParser.getInstance();
 
     Printer.prototype.getExpression = function (expression, emuchart) {
         var _this = this;

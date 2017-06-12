@@ -75,7 +75,7 @@ define(function (require, exports, module) {
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
     var displayAskParameters = require("plugins/emulink/forms/displayAskParameters");
-    var _parser = new EmuchartsParser();
+    var _parser = EmuchartsParser.getInstance();
 
     var displayNotification = function (msg, title) {
         title = title || "Notification";

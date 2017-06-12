@@ -54,7 +54,7 @@ define(function (require, exports, module) {
     function EmuchartsVDMPrinter(name) {
         theory_name = name;
         automaticConstants = [];
-        parser = new EmuchartsParser();
+        parser = EmuchartsParser.getInstance();
         vdmRecordTypePrinter = vdmRecordTypePrinter.create();
         vdmStateTypePrinter = vdmStateTypePrinter.create();
         vdmEnumeratedTypePrinter = vdmEnumeratedTypePrinter.create();

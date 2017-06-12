@@ -115,20 +115,22 @@ define(function (require, exports, module) {
         var basic = [];
         var records = d3.map(); //hashtable used for grouping together variables in the form l1.a l1.b --- these will be part of the same record type.
                                 //   key: name (string); value: Array of { l1_name: (string), l2_name: (string), type: (string) }
-        emuchart.variables.forEach(function (variable) {
-            var tmp = variable.name.split(".");
-            if (tmp.length === 2) {
-                var l1 = records.get(tmp[0]) || [];
-                l1.push({
-                    name: tmp[1],
-                    type: variable.type,
-                    value: variable.value
-                });
-                records.set(tmp[0], l1);
-            } else {
-                basic.push({ name: variable.name, type: variable.type, value: variable.value });
-            }
-        });
+        if (emuchart.variables) {
+            emuchart.variables.forEach(function (variable) {
+                var tmp = variable.name.split(".");
+                if (tmp.length === 2) {
+                    var l1 = records.get(tmp[0]) || [];
+                    l1.push({
+                        name: tmp[1],
+                        type: variable.type,
+                        value: variable.value
+                    });
+                    records.set(tmp[0], l1);
+                } else {
+                    basic.push({ name: variable.name, type: variable.type, value: variable.value });
+                }
+            });
+        }
         return {
             basic: basic,
             records: records
@@ -229,31 +231,34 @@ define(function (require, exports, module) {
     };
 
     function setVariables (parser, emuchart) {
-        var variables = [ predefined_variables.current_mode.name ]
-                .concat(emuchart.variables.map(function (v) { return v.name; }));
+        var variables = [ { name: predefined_variables.current_mode.name, type: predefined_variables.current_mode.type } ]
+                .concat(emuchart.variables.map(function (v) { return { name: v.name, type: v.type }; }));
         if (predefined_variables.previous_mode) {
-            variables.concat(predefined_variables.previous_mode);
+            variables.concat({ name: predefined_variables.previous_mode.name, type: predefined_variables.previous_mode.type });
         }
         parser.setVariables(variables);
     }
 
-    function shapeAction (action) {
+    function shapeAction (action, emuchart) {
         if (action) {
             if (action.identifier.isVariable) {
                 var x = action.identifier.val.split(".");
                 if (x.length === 2) {
                     return {
+                        variable_type: action.identifier.variableType,
                         variable_name: x[0],
                         variable_name_l2: x[1],
                         override_expression: action.expression.val
                     };
                 }
                 return {
+                    variable_type: action.identifier.variableType,
                     variable_name: x[0],
                     override_expression: action.expression.val
                 };
             } else {
                 return {
+                    // variable_type: getVariableType(action.identifier), FIXME: need to find a way to identify the type, e.g., use the type of the first term in the override expression
                     local_binding: true,
                     variable_name: action.identifier.val,
                     override_expression: action.expression.val
@@ -287,7 +292,7 @@ define(function (require, exports, module) {
                     var ans = parser2.parseTrigger(initial_transition.name);
                     if (ans.res) {
                         var actions = (ans.res.val.actions) ? ans.res.val.actions.val.map(function (action) {
-                            return shapeAction(action.val);
+                            return shapeAction(action.val, emuchart);
                         }) : null;
                         if (ans.res.val.cond) {
                             if (emuchart.initial_transitions.length > 1) {
@@ -384,7 +389,7 @@ define(function (require, exports, module) {
                                     if (a.err) {
                                         trigger_actions.push(a.err);
                                     } else if (a.res && a.res.val && a.res.val){
-                                        trigger_actions.push(shapeAction(a.res.val.val));
+                                        trigger_actions.push(shapeAction(a.res.val.val, emuchart));
                                     }
                                 }
                             }

@@ -904,8 +904,12 @@ define(function (require, exports, module) {
             }
         });
         d3.select("#btn_menuMisraCPrinter").on("click", function () {
+            var desc = emuchartsManager.getSelectedEmuchartsDescriptor();
+            var filename = (desc && desc.emuchart_name) ? desc.emuchart_name
+                                : ("emucharts_" + projectManager.project().name());
+            filename = filename.replace(/-/g, "_");
             var emucharts = {
-                name: ("emucharts_" + projectManager.project().name() + "_MisraC"),
+                name: filename,
                 author: {
                     name: "<author name>",
                     affiliation: "<affiliation>",
@@ -913,11 +917,7 @@ define(function (require, exports, module) {
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
-                variables: {
-                    input: emuchartsManager.getInputVariables(),
-                    output: emuchartsManager.getOutputVariables(),
-                    local: emuchartsManager.getLocalVariables()
-                },
+                variables: emuchartsManager.getVariables(),
                 states: emuchartsManager.getStates(),
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()

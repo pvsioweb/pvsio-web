@@ -105,8 +105,8 @@ define(function (require, exports, module) {
         }
     }
 
-    EmuchartsParser2.prototype.setVariables = function (v) {
-        this.variables = v;
+    EmuchartsParser2.prototype.setVariables = function (emuchart_variables) {
+        this.variables = emuchart_variables;
     };
 
     /**
@@ -125,24 +125,43 @@ define(function (require, exports, module) {
     };
 
     function identifyVariables (_this, term) {
+        function equalsName (name, variableName) {
+            return name === variableName
+                    || variableName.indexOf(name + ".") >= 0;
+        }
         function isVariable (name) {
             if (_this.variables) {
                 for (var i = 0; i < _this.variables.length; i++) {
-                    if (name === _this.variables[i] ||
-                            _this.variables[i].indexOf(name + ".") >= 0 ) {
+                    if (equalsName(name, _this.variables[i].name)) {
                         return true;
                     }
                 }
             }
             return false;
         }
+        function getVariableType (name) {
+            if (_this.variables) {
+                for (var i = 0; i < _this.variables.length; i++) {
+                    if (equalsName(name, _this.variables[i].name)) {
+                        return _this.variables[i].type;
+                    }
+                }
+            }
+            return null;
+        }
         if (term.type === "identifier") {
             term.isVariable = isVariable(term.val);
+            if (term.isVariable) {
+                term.variableType = getVariableType(term.val);
+            }
         } else if (term.type === "function" && term.val.length > 1) {
             // term.val[0] is the function name
             for (var j = 1; j < term.val.length; j++) {
                 if (term.val[j].type === "identifier") {
                     term.val[j].isVariable = isVariable(term.val[j].val);
+                    if (term.val[j].isVariable) {
+                        term.val[j].variableType = getVariableType(term.val[j].val);
+                    }
                 }
             }
         }

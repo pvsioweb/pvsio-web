@@ -1,0 +1,608 @@
+main: THEORY
+ BEGIN
+
+  Mode: TYPE = { OFF, INIT, INIT_SYRINGE, INIT_COMPLETE, AUTO, MANUAL,
+  	       	 READY_TO_PRIME, PRIMING, CONFIRM_PRIME, LOCKED }
+  AutoloadMode: TYPE = { LOAD20, MAKE_EMPTY, FILL_VOLUME, FINALIZE, DONE }
+
+  ConsoleScreen: TYPE = { CONSOLE_INIT, CONSOLE_SECURITY, CONSOLE_PROTOCOL }
+  Protocol: TYPE = { TOTAL_BODY_BARG }
+
+  Led: TYPE = { ORANGE, GREEN, LED_OFF }
+
+  MAX_VOLUME: nat = 230 %-- mL
+  VOL_BUFFER: nat = 12 %-- mL
+  Volume: TYPE = upto(MAX_VOLUME) %-- mL
+  MAX_RATE: nat = 200 %-- mL/sec
+  Rate: TYPE = { x: nonneg_real | x < MAX_RATE } %-- mL/sec
+  Time: TYPE = nonneg_real %-- sec
+  Button: TYPE = { BLINKING, DARK, LIGHT }
+  ConsoleButton: TYPE = { PRESSED, IDLE }
+
+  PlungerLevel: upto(MAX_VOLUME)
+  % plunger speed
+  FAST: Volume = 10
+  SLOW: Volume = 1
+
+  Display: TYPE = { DISP_OFF, DISP_INIT, MIRROR_PLUNGER_LEVEL, MIRROR_TARGET_VOLUME }
+
+  DEFAULT_VOLUME_SALINE: Volume = 224
+  DEFAULT_VOLUME_CONTRAST: Volume = 224
+  AUTOLOAD_STEP: Volume = 4
+  PRIME_VOLUME: Volume = 3
+  
+  tick_step: posreal = 250 %-- millis
+  BTN_ACC_TIMEOUT: posreal = 750 %-- millis
+  BTN_MANUAL_TIMEOUT: posreal = 3000 %-- millis
+
+  state: TYPE = [#
+    mode: Mode,
+    autoload_mode_saline: AutoloadMode,
+    autoload_mode_contrast: AutoloadMode,
+    syringe_saline_present: bool,
+    syringe_contrast_present: bool,
+    plunger_saline: Volume,
+    plunger_contrast: Volume,
+    display_saline: Display,
+    display_contrast: Display,
+    vol_saline: Volume,
+    vol_contrast: Volume,
+    vol_saline_confirmed: bool,
+    vol_contrast_confirmed: bool,
+    btn_fill_saline: Button,
+    btn_fill_contrast: Button,
+    btn_auto: Button,
+    btn_manual: Button,
+    btn_prime: Button,
+    btn_confirm: Button,
+    btn_engage: Button,
+    btn_manual_timeout: nonneg_real,
+    prime_confirmed: bool,
+    %-- console
+    console_btn_timeout: nonneg_real, % millis
+    console_btn_ACC: ConsoleButton,
+    console_LED_ACC: Led,
+    console_screen: ConsoleScreen,
+    console_protocol: Protocol,
+    console_vol_saline: Volume, % mL
+    console_vol_contrast: Volume, % mL
+    console_rate_saline: Rate, % mL/sec
+    console_rate_contrast: Rate, % mL/sec
+    console_time_saline: Time, % sec
+    console_time_contrast: Time, % sec
+    %-- bags
+    bag_saline_present: bool,
+    bag_contrast_present: bool
+  #]
+
+  init(x: real): state = (#
+    mode := OFF,
+    autoload_mode_saline := LOAD20,
+    autoload_mode_contrast := LOAD20,
+    syringe_saline_present := FALSE,
+    syringe_contrast_present := FALSE,
+    plunger_saline := DEFAULT_VOLUME_SALINE,
+    plunger_contrast := DEFAULT_VOLUME_SALINE,
+    display_saline := DISP_OFF,
+    display_contrast := DISP_OFF,
+    vol_saline := 0,
+    vol_contrast := 0,
+    vol_saline_confirmed := FALSE,
+    vol_contrast_confirmed := FALSE,    
+    btn_fill_saline := DARK,
+    btn_fill_contrast := DARK,
+    btn_auto := DARK,
+    btn_manual := DARK,
+    btn_prime := DARK,
+    btn_confirm := DARK,
+    btn_engage := DARK,
+    btn_manual_timeout := 0,
+    prime_confirmed := FALSE,
+    console_btn_timeout := 0,
+    console_btn_ACC := IDLE,
+    console_LED_ACC := ORANGE,
+    console_screen := CONSOLE_INIT,
+    console_protocol := TOTAL_BODY_BARG,
+    console_vol_saline := 45,
+    console_vol_contrast := 100,
+    console_rate_saline := 4,
+    console_rate_contrast := 4,
+    console_time_saline := 45/4,
+    console_time_contrast := 100/4,
+    bag_saline_present := FALSE,
+    bag_contrast_present := FALSE
+  #)
+
+  step: Volume = 1
+  inc(x: Volume): Volume =
+   COND
+    x + step <= MAX_VOLUME -> x + step,
+    ELSE -> MAX_VOLUME
+   ENDCOND
+  dec(x: Volume): Volume =
+   COND
+    x - step >= 0 -> x - step,
+    ELSE -> 0
+   ENDCOND
+
+  %-- contrast
+  per_inc_contrast(st: state): bool = (NOT vol_contrast_confirmed(st))
+  inc_contrast(st: (per_inc_contrast)): state = st WITH [ vol_contrast := inc(vol_contrast(st)) ]
+  click_inc_contrast(st: state): state =
+    COND
+      per_inc_contrast(st) -> inc_contrast(st),
+      ELSE -> st
+    ENDCOND
+  press_inc_contrast(st: state): state = click_inc_contrast(st)
+  release_inc_contrast(st: state): state = st
+  
+  per_dec_contrast(st: state): bool = (NOT vol_contrast_confirmed(st))
+  dec_contrast(st: (per_inc_contrast)): state = st WITH [ vol_contrast := dec(vol_contrast(st)) ]
+  click_dec_contrast(st: state): state =
+    COND
+      per_dec_contrast(st) -> dec_contrast(st),
+      ELSE -> st
+    ENDCOND
+  press_dec_contrast(st: state): state = click_dec_contrast(st)
+  release_dec_contrast(st: state): state = st
+
+  %--saline
+  per_inc_saline(st: state): bool = (NOT vol_saline_confirmed(st))
+  inc_saline(st: (per_inc_saline)): state = st WITH [ vol_saline := inc(vol_saline(st)) ]
+  click_inc_saline(st: state): state =
+    COND
+      per_inc_saline(st) -> inc_saline(st),
+      ELSE -> st
+    ENDCOND
+  press_inc_saline(st: state): state = click_inc_saline(st)
+  release_inc_saline(st: state): state = st
+
+  per_dec_saline(st: state): bool = (NOT vol_saline_confirmed(st))
+  dec_saline(st: (per_inc_saline)): state = st WITH [ vol_saline := dec(vol_saline(st)) ]
+  click_dec_saline(st: state): state =
+    COND
+      per_dec_saline(st) -> dec_saline(st),
+      ELSE -> st
+    ENDCOND
+  press_dec_saline(st: state): state = click_dec_saline(st)
+  release_dec_saline(st: state): state = st
+
+  volumes_confirmed?(st: state): bool = vol_saline_confirmed(st) AND vol_contrast_confirmed(st)
+  set_btn_colors(st: state): state =
+    COND
+     mode(st) = OFF OR mode(st) = LOCKED OR mode(st) = INIT_SYRINGE OR
+       mode(st) = INIT OR mode(st) = INIT_COMPLETE OR
+         mode(st) = READY_TO_PRIME -> st WITH [
+    	btn_fill_contrast := DARK,
+      	btn_fill_saline := DARK,
+      	btn_auto := DARK,
+      	btn_manual := DARK,
+      	btn_prime := DARK,
+      	btn_confirm := IF prime_confirmed(st) THEN LIGHT ELSE DARK ENDIF,
+	btn_engage := DARK ],
+     mode(st) = AUTO -> st WITH [
+    	btn_fill_contrast := IF vol_contrast_confirmed(st) THEN LIGHT ELSE BLINKING ENDIF,
+      	btn_fill_saline := IF vol_saline_confirmed(st) THEN LIGHT ELSE BLINKING ENDIF,
+      	btn_auto := LIGHT,
+      	btn_manual := DARK,
+      	btn_prime := DARK,
+      	btn_confirm := DARK,
+	btn_engage := DARK ],
+     mode(st) = MANUAL -> st WITH [
+    	btn_fill_contrast := DARK,
+      	btn_fill_saline := DARK,
+      	btn_auto := DARK,
+	btn_manual := LIGHT,
+      	btn_prime := DARK,
+      	btn_confirm := IF prime_confirmed(st) THEN LIGHT ELSE DARK ENDIF,
+	btn_engage := DARK ],
+    mode(st) = PRIMING -> st WITH [
+    	btn_fill_contrast := DARK,
+      	btn_fill_saline := DARK,
+      	btn_auto := DARK,
+	btn_manual := DARK,
+      	btn_prime := DARK,
+      	btn_confirm := DARK,
+	btn_engage := DARK ],
+    mode(st) = CONFIRM_PRIME -> st WITH [
+    	btn_fill_contrast := DARK,
+      	btn_fill_saline := DARK,
+      	btn_auto := DARK,
+	btn_manual := DARK,
+      	btn_prime := DARK,
+      	btn_confirm := IF prime_confirmed(st) THEN LIGHT ELSE DARK ENDIF,
+	btn_engage := DARK ]	
+    ENDCOND
+
+
+
+  %-- auto load
+  per_btn_auto(st: state): bool = (mode(st) = INIT_COMPLETE OR mode(st) = CONFIRM_PRIME)
+  click_btn_auto(st: (per_btn_auto)): state =
+   COND
+    per_btn_auto(st)
+      -> LET st = st WITH [ mode := AUTO,
+      	     	     	    vol_saline := console_vol_saline(st),
+			    vol_contrast := console_vol_contrast(st),
+      			    vol_saline_confirmed := FALSE,
+      			    vol_contrast_confirmed := FALSE,
+                            display_saline := MIRROR_TARGET_VOLUME,
+			    display_contrast := MIRROR_TARGET_VOLUME ]
+	  IN set_btn_colors(st),
+    ELSE -> st
+   ENDCOND
+  
+  per_btn_manual(st: state): bool = (mode(st) /= LOCKED)
+  click_btn_manual(st: (per_btn_manual)): state =
+   COND
+    per_btn_manual(st)
+      -> LET st = st WITH [ mode := MANUAL,
+      	     	     	    vol_saline := plunger_saline(st),
+			    vol_contrast := plunger_contrast(st),
+      			    vol_saline_confirmed := FALSE,
+      			    vol_contrast_confirmed := FALSE,
+			    btn_manual_timeout := BTN_MANUAL_TIMEOUT ]
+	  IN set_btn_colors(st),
+    ELSE -> st
+   ENDCOND
+ 
+  per_btn_fill_saline(st: state): bool = (mode(st) = AUTO)
+  click_btn_fill_saline(st: (per_btn_fill_saline)): state =
+   COND
+    per_btn_fill_saline(st)
+     -> LET st = st WITH [ vol_saline_confirmed := TRUE ]
+          IN set_btn_colors(st),
+    ELSE -> st
+   ENDCOND
+   
+  per_btn_fill_contrast(st: state): bool = (mode(st) = AUTO)
+  click_btn_fill_contrast(st: (per_btn_fill_contrast)): state =
+   COND
+    per_btn_fill_contrast(st)
+      -> LET st = st WITH [ vol_contrast_confirmed := TRUE ]
+          IN set_btn_colors(st),
+    ELSE -> st
+   ENDCOND
+
+  per_btn_prime(st: state): bool = (mode(st) = READY_TO_PRIME OR mode(st) = CONFIRM_PRIME OR mode(st) = MANUAL)
+  click_btn_prime(st: (per_btn_prime)): state =
+   COND
+    per_btn_prime(st)
+      -> LET st = st WITH [ mode := PRIMING ]
+          IN set_btn_colors(st),
+    ELSE -> st
+   ENDCOND
+
+  per_btn_confirm(st: state): bool = per_btn_prime(st)
+  click_btn_confirm(st: (per_btn_confirm)): state =
+   COND
+    per_btn_confirm(st)
+      -> LET st = st WITH [ prime_confirmed := NOT prime_confirmed(st) ]
+          IN set_btn_colors(st),
+    ELSE -> st
+   ENDCOND
+
+  per_btn_engage(st: state): bool = per_btn_prime(st)
+  click_btn_engage(st: (per_btn_engage)): state =
+   COND
+    per_btn_engage(st)
+      -> st WITH [ btn_confirm := IF NOT prime_confirmed(st) THEN BLINKING ELSE btn_confirm(st) ENDIF ],
+    ELSE -> st
+   ENDCOND
+
+  per_btn_console_lock(st: state): bool = prime_confirmed(st)
+  click_btn_console_lock(st: (per_btn_console_lock)): state =
+   COND
+    per_btn_console_lock(st) ->
+      st WITH [ mode := IF prime_confirmed(st) THEN LOCKED ELSE mode(st) ENDIF ],
+    ELSE -> st
+   ENDCOND
+
+  %-- these utility functions automatically stop pulling the plunger when the target volume has been reached
+  per_empty_saline(st: state): bool = (mode(st) = INIT_SYRINGE)
+  empty_saline(step: Volume)(st: state): state =
+    COND
+      per_empty_saline(st) ->
+        st WITH [ plunger_saline := IF plunger_saline(st) - step > 0
+	                            THEN plunger_saline(st) - step
+				    ELSE 0 ENDIF ],
+      ELSE -> st
+    ENDCOND
+  per_empty_contrast(st: state): bool = (mode(st) = INIT_SYRINGE)
+  empty_contrast(step: Volume)(st: state): state =
+    COND
+      per_empty_contrast(st) ->
+        st WITH [ plunger_contrast := IF plunger_contrast(st) - step > 0
+	                              THEN plunger_contrast(st) - step
+				      ELSE 0 ENDIF ],
+      ELSE -> st
+    ENDCOND
+
+  per_auto(st: state): bool = (mode(st) = AUTO)
+  auto_plunger_saline(step: Volume)(st: (per_auto)): state =
+    LET st = st WITH [ display_saline := MIRROR_PLUNGER_LEVEL ] IN
+    COND
+      per_auto(st) ->
+       COND
+	autoload_mode_saline(st) = LOAD20 ->
+ 	  IF plunger_saline(st) + AUTOLOAD_STEP <= 20 THEN st WITH [ plunger_saline := plunger_saline(st) + AUTOLOAD_STEP ]
+          ELSE st WITH [ autoload_mode_saline := MAKE_EMPTY ] ENDIF,
+        autoload_mode_saline(st) = MAKE_EMPTY ->
+          IF plunger_saline(st) - AUTOLOAD_STEP >= 0 THEN st WITH [ plunger_saline := plunger_saline(st) - AUTOLOAD_STEP ]
+	  ELSE st WITH [ autoload_mode_saline := FILL_VOLUME ] ENDIF,
+        autoload_mode_saline(st) = FILL_VOLUME ->
+          LET target_vol: Volume = IF vol_saline(st) + VOL_BUFFER < MAX_VOLUME THEN vol_saline(st) + VOL_BUFFER ELSE MAX_VOLUME ENDIF
+           IN IF plunger_saline(st) + step <= target_vol THEN st WITH [ plunger_saline := plunger_saline(st) + step ]
+	      ELSE st WITH [ autoload_mode_saline := FINALIZE ] ENDIF,
+        autoload_mode_saline(st) = FINALIZE ->
+          LET st = st WITH [ plunger_saline := IF plunger_saline(st) - step >= vol_saline(st) THEN plunger_saline(st) - step ELSE vol_saline(st) ENDIF ]
+	   IN st WITH [ autoload_mode_saline := IF plunger_saline(st) = vol_saline(st) THEN DONE ELSE FINALIZE ENDIF ],
+	autoload_mode_saline(st) = DONE ->
+	  st
+       ENDCOND,
+      ELSE -> st
+    ENDCOND
+  auto_plunger_contrast(step: Volume)(st: (per_auto)): state =
+    LET st = st WITH [ display_contrast := MIRROR_PLUNGER_LEVEL ] IN
+    COND
+      autoload_mode_contrast(st) = LOAD20 ->
+        IF plunger_contrast(st) + AUTOLOAD_STEP <= 20 THEN st WITH [ plunger_contrast := plunger_contrast(st) + AUTOLOAD_STEP ]
+        ELSE st WITH [ autoload_mode_contrast := MAKE_EMPTY ] ENDIF,
+      autoload_mode_contrast(st) = MAKE_EMPTY ->
+        IF plunger_contrast(st) - AUTOLOAD_STEP >= 0 THEN st WITH [ plunger_contrast := plunger_contrast(st) - AUTOLOAD_STEP ]
+	ELSE st WITH [ autoload_mode_contrast := FILL_VOLUME ] ENDIF,
+      autoload_mode_contrast(st) = FILL_VOLUME ->
+        LET target_vol: Volume = IF vol_contrast(st) + VOL_BUFFER < MAX_VOLUME THEN vol_contrast(st) + VOL_BUFFER ELSE MAX_VOLUME ENDIF
+         IN IF plunger_contrast(st) + step <= target_vol THEN st WITH [ plunger_contrast := plunger_contrast(st) + step ]
+	    ELSE st WITH [ autoload_mode_contrast := FINALIZE ] ENDIF,
+      autoload_mode_contrast(st) = FINALIZE ->
+        LET st = st WITH [ plunger_contrast := IF plunger_contrast(st) - step >= vol_contrast(st) THEN plunger_contrast(st) - step ELSE vol_contrast(st) ENDIF ]
+	 IN st WITH [ autoload_mode_contrast := IF plunger_contrast(st) = vol_contrast(st) THEN DONE ELSE FINALIZE ENDIF ],
+      ELSE -> st
+    ENDCOND
+
+  per_prime_syringes(st: state): bool = (mode(st) = PRIMING)
+  prime_syringes(st: (per_prime_syringes)): state =
+    COND
+      per_prime_syringes(st) ->
+        LET target_prime_saline: Volume = IF vol_saline(st) - PRIME_VOLUME > 0 THEN vol_saline(st) - PRIME_VOLUME ELSE 0 ENDIF,
+	    target_prime_contrast: Volume = IF vol_contrast(st) - PRIME_VOLUME > 0 THEN vol_contrast(st) - PRIME_VOLUME ELSE 0 ENDIF,
+            st = st WITH [ plunger_saline := IF plunger_saline(st) - 1 > target_prime_saline THEN plunger_saline(st) - 1 ELSE target_prime_saline ENDIF ],
+	    st = st WITH [ plunger_contrast := IF plunger_contrast(st) - 1 > target_prime_contrast THEN plunger_contrast(st) - 1 ELSE target_prime_contrast ENDIF ]
+	 IN st WITH [ mode := IF plunger_saline(st) = target_prime_saline AND
+	                          plunger_contrast(st) = target_prime_contrast THEN CONFIRM_PRIME ELSE PRIMING ENDIF ],
+      ELSE -> st
+    ENDCOND
+    
+  pull_plunger_saline(step: Volume)(st: state): state =
+    st WITH [ plunger_saline := IF plunger_saline(st) + step <= MAX_VOLUME THEN plunger_saline(st) + step ELSE MAX_VOLUME ENDIF ]
+  pull_plunger_contrast(step: Volume)(st: state): state =
+    st WITH [ plunger_contrast := IF plunger_contrast(st) + step <= MAX_VOLUME THEN plunger_contrast(st) + step ELSE MAX_VOLUME ENDIF ]
+  push_plunger_saline(step: Volume)(st: state): state =
+    st WITH [ plunger_saline := IF plunger_saline(st) - step >= 0 THEN plunger_saline(st) - step ELSE 0 ENDIF ]
+  push_plunger_contrast(step: Volume)(st: state): state =
+    st WITH [ plunger_contrast := IF plunger_contrast(st) - step > 0 THEN plunger_contrast(st) - step ELSE 0 ENDIF ]
+  
+  %-- this is for the automatic mode
+  per_tick(st: state): bool = (mode(st) = INIT OR mode(st) = INIT_SYRINGE OR mode(st) = MANUAL OR mode(st) = PRIMING)
+  tick(st: (per_tick)): state =
+    COND
+     mode(st) = INIT ->
+       LET st = IF syringe_saline_present(st) OR syringe_contrast_present(st)
+                THEN st WITH [ mode := INIT_SYRINGE ] ELSE st ENDIF
+	IN set_btn_colors(st),
+     mode(st) = INIT_SYRINGE ->
+       LET st = IF syringe_saline_present(st) THEN empty_saline(FAST)(st) ELSE st ENDIF,
+           st = IF syringe_contrast_present(st) THEN empty_contrast(FAST)(st) ELSE st ENDIF,
+	   st = IF plunger_saline(st) = vol_saline(st) AND plunger_contrast(st) = vol_contrast(st)
+	        THEN st WITH [ mode := INIT_COMPLETE ] ELSE st ENDIF
+	IN set_btn_colors(st),
+     mode(st) = MANUAL ->
+       LET st = st WITH [ btn_manual_timeout := IF btn_manual_timeout(st) - tick_step > 0
+                   	  		     	THEN btn_manual_timeout(st) - tick_step
+						ELSE 0 ENDIF],
+	   st = IF btn_manual_timeout(st) = 0 THEN st WITH [ mode := READY_TO_PRIME ] ELSE st ENDIF
+	IN set_btn_colors(st),
+     mode(st) = AUTO ->
+       LET st = IF vol_saline_confirmed(st) THEN auto_plunger_saline(FAST)(st) ELSE st ENDIF,
+	   st = IF vol_contrast_confirmed(st) THEN auto_plunger_contrast(FAST)(st) ELSE st ENDIF,
+	   st = IF vol_saline_confirmed(st) AND vol_contrast_confirmed(st) AND
+	            plunger_saline(st) = vol_saline(st) AND plunger_contrast(st) = vol_contrast(st) AND
+		     autoload_mode_saline(st) = DONE AND autoload_mode_contrast(st) = DONE
+		THEN st WITH [ mode := READY_TO_PRIME, autoload_mode_saline := FILL_VOLUME, autoload_mode_contrast := FILL_VOLUME ] ELSE st ENDIF
+	IN set_btn_colors(st),
+     mode(st) = PRIMING ->
+       LET st = prime_syringes(st)
+        IN set_btn_colors(st),
+     ELSE -> st
+    ENDCOND
+
+  %-- manual saline
+  per_sUP_saline(st: state): bool = mode(st) = MANUAL
+  sUP_saline(st: (per_sUP_saline)): state =
+   LET st = push_plunger_saline(SLOW)(st)
+    IN st WITH [ vol_saline := plunger_saline(st),
+	         vol_contrast := plunger_contrast(st),
+		 btn_manual_timeout := BTN_MANUAL_TIMEOUT ]
+  click_btn_sUP_saline(st: state): state =
+   COND
+     per_sUP_saline(st) -> sUP_saline(st),
+     ELSE -> st
+   ENDCOND
+  press_btn_sUP_saline(st: state): state = click_btn_sUP_saline(st)
+  release_btn_sUP_saline(st: state): state = st
+
+  per_fUP_saline(st: state): bool = mode(st) = MANUAL
+  fUP_saline(st: (per_fUP_saline)): state =
+   LET st = push_plunger_saline(FAST)(st)
+    IN st WITH [ vol_saline := plunger_saline(st),
+		 vol_contrast := plunger_contrast(st),
+		 btn_manual_timeout := BTN_MANUAL_TIMEOUT ]
+
+  click_btn_fUP_saline(st: state): state =
+   COND
+     per_fUP_saline(st) -> fUP_saline(st),
+     ELSE -> st
+   ENDCOND
+  press_btn_fUP_saline(st: state): state = click_btn_fUP_saline(st)
+  release_btn_fUP_saline(st: state): state = st
+
+  per_sDOWN_saline(st: state): bool = mode(st) = MANUAL
+  sDOWN_saline(st: (per_sDOWN_saline)): state =
+   LET st = pull_plunger_saline(SLOW)(st)
+    IN st WITH [ vol_saline := plunger_saline(st),
+		 vol_contrast := plunger_contrast(st),
+		 btn_manual_timeout := BTN_MANUAL_TIMEOUT ]
+
+  click_btn_sDOWN_saline(st: state): state =
+   COND
+     per_sDOWN_saline(st) -> sDOWN_saline(st),
+     ELSE -> st
+   ENDCOND
+  press_btn_sDOWN_saline(st: state): state = click_btn_sDOWN_saline(st)
+  release_btn_sDOWN_saline(st: state): state = st
+  
+  per_fDOWN_saline(st: state): bool = mode(st) = MANUAL
+  fDOWN_saline(st: (per_fDOWN_saline)): state =
+   LET st = pull_plunger_saline(FAST)(st)
+    IN st WITH [ vol_saline := plunger_saline(st),
+		 vol_contrast := plunger_contrast(st),
+		 btn_manual_timeout := BTN_MANUAL_TIMEOUT ]
+
+  click_btn_fDOWN_saline(st: state): state =
+   COND
+     per_fDOWN_saline(st) -> fDOWN_saline(st),
+     ELSE -> st
+   ENDCOND
+  press_btn_fDOWN_saline(st: state): state = click_btn_fDOWN_saline(st)
+  release_btn_fDOWN_saline(st: state): state = st
+
+  %-- manual contrast
+  per_sUP_contrast(st: state): bool = mode(st) = MANUAL
+  sUP_contrast(st: (per_sUP_contrast)): state =
+   LET st = push_plunger_contrast(SLOW)(st)
+    IN st WITH [ vol_saline := plunger_saline(st),
+		 vol_contrast := plunger_contrast(st),
+		 btn_manual_timeout := BTN_MANUAL_TIMEOUT ]
+  click_btn_sUP_contrast(st: state): state =
+   COND
+     per_sUP_contrast(st) -> sUP_contrast(st),
+     ELSE -> st
+   ENDCOND
+  press_btn_sUP_contrast(st: state): state = click_btn_sUP_contrast(st)
+  release_btn_sUP_contrast(st: state): state = st
+
+  per_fUP_contrast(st: state): bool = mode(st) = MANUAL
+  fUP_contrast(st: (per_fUP_contrast)): state =
+   LET st = push_plunger_contrast(FAST)(st)
+    IN st WITH [ vol_saline := plunger_saline(st),
+		 vol_contrast := plunger_contrast(st),
+		 btn_manual_timeout := BTN_MANUAL_TIMEOUT ]
+  click_btn_fUP_contrast(st: state): state =
+   COND
+     per_fUP_contrast(st) -> fUP_contrast(st),
+     ELSE -> st
+   ENDCOND
+  press_btn_fUP_contrast(st: state): state = click_btn_fUP_contrast(st)
+  release_btn_fUP_contrast(st: state): state = st
+
+  per_sDOWN_contrast(st: state): bool = mode(st) = MANUAL
+  sDOWN_contrast(st: (per_sDOWN_contrast)): state =
+   LET st = pull_plunger_contrast(SLOW)(st)
+    IN st WITH [ vol_saline := plunger_saline(st),
+		 vol_contrast := plunger_contrast(st),
+		 btn_manual_timeout := BTN_MANUAL_TIMEOUT ]
+  click_btn_sDOWN_contrast(st: state): state =
+   COND
+     per_sDOWN_contrast(st) -> sDOWN_contrast(st),
+     ELSE -> st
+   ENDCOND
+  press_btn_sDOWN_contrast(st: state): state = click_btn_sDOWN_contrast(st)
+  release_btn_sDOWN_contrast(st: state): state = st
+  
+  per_fDOWN_contrast(st: state): bool = mode(st) = MANUAL
+  fDOWN_contrast(st: (per_fDOWN_contrast)): state =
+   LET st = pull_plunger_contrast(FAST)(st)
+    IN st WITH [ vol_saline := plunger_saline(st),
+		 vol_contrast := plunger_contrast(st),
+		 btn_manual_timeout := BTN_MANUAL_TIMEOUT ]
+  click_btn_fDOWN_contrast(st: state): state =
+   COND
+     per_fDOWN_contrast(st) -> fDOWN_contrast(st),
+     ELSE -> st
+   ENDCOND
+  press_btn_fDOWN_contrast(st: state): state = click_btn_fDOWN_contrast(st)
+  release_btn_fDOWN_contrast(st: state): state = st
+
+  %-- the device does not have these buttons, but these definitions are useful to keep the model more compact
+  per_btn_on(st: state): bool = (mode(st) = OFF)
+  click_btn_on(st: (per_btn_on)): state =
+   COND
+     per_btn_on(st) ->
+       st WITH [ mode := INIT, display_contrast := DISP_INIT, display_saline := DISP_INIT ],
+     ELSE -> st
+   ENDCOND
+  %--
+
+  plug_syringe_saline(st: state): state =
+    LET st = st WITH [ syringe_saline_present := TRUE ]
+     IN IF per_tick(st) THEN tick(st) ELSE st ENDIF
+  plug_syringe_contrast(st: state): state =
+    LET st = st WITH [ syringe_contrast_present := TRUE ]
+     IN IF per_tick(st) THEN tick(st) ELSE st ENDIF
+  unplug_syringe_saline(st: state): state =
+    LET st = st WITH [ syringe_saline_present := FALSE ]
+     IN IF per_tick(st) THEN tick(st) ELSE st ENDIF
+  unplug_syringe_contrast(st: state): state =
+    LET st = st WITH [ syringe_contrast_present := FALSE ]
+     IN IF per_tick(st) THEN tick(st) ELSE st ENDIF
+     
+  plug_bag_saline(st: state): state =
+    LET st = st WITH [ bag_saline_present := TRUE ]
+     IN st
+  plug_bag_contrast(st: state): state =
+    LET st = st WITH [ bag_contrast_present := TRUE ]
+     IN st
+  unplug_bag_saline(st: state): state =
+    LET st = st WITH [ bag_saline_present := FALSE ]
+     IN st
+  unplug_bag_contrast(st: state): state =
+    LET st = st WITH [ bag_contrast_present := FALSE ]
+     IN st
+
+  restart_simulation(st: state): state = init(0);
+
+  %-- console commands
+  per_press_btn_ACC(st: state): bool = (console_screen(st) = CONSOLE_INIT)
+  press_btn_ACC(st: (per_press_btn_ACC)): state =
+   COND
+     console_screen(st) = CONSOLE_INIT AND console_btn_ACC(st) /= PRESSED AND mode(st) = OFF ->
+       st WITH [ console_btn_ACC := PRESSED,
+                 console_btn_timeout := BTN_ACC_TIMEOUT ],
+     console_screen(st) = CONSOLE_INIT AND console_btn_ACC(st) = PRESSED AND console_btn_timeout(st) > 0 AND mode(st) = OFF ->
+       st WITH [ console_btn_timeout := IF console_btn_timeout(st) - tick_step > 0
+	                                THEN console_btn_timeout(st) - tick_step
+					ELSE 0 ENDIF ],
+     console_screen(st) = CONSOLE_INIT AND console_btn_ACC(st) = PRESSED AND console_btn_timeout(st) = 0 AND mode(st) = OFF ->
+       LET st = st WITH [ console_screen := CONSOLE_SECURITY, console_LED_ACC := GREEN ]
+        IN click_btn_on(st),
+     ELSE -> st
+   ENDCOND
+  per_release_btn_ACC(st: state): bool = (console_btn_ACC(st) = PRESSED)
+  release_btn_ACC(st: (per_release_btn_ACC)): state =
+   COND
+     per_release_btn_ACC(st) -> st WITH [ console_btn_ACC := IDLE, console_btn_timeout := 0 ],
+     ELSE -> st
+   ENDCOND
+
+  per_click_btn_confirm_security(st: state): bool = (console_screen(st) = CONSOLE_SECURITY AND mode(st) = INIT)
+  click_btn_confirm_security(st: (per_click_btn_confirm_security)): state =
+   COND
+     per_click_btn_confirm_security(st) ->
+       LET st = st WITH [ console_screen := CONSOLE_PROTOCOL ],
+           st = st WITH [ display_saline := MIRROR_PLUNGER_LEVEL, display_contrast := MIRROR_PLUNGER_LEVEL ]
+	IN tick(st),
+     ELSE -> st
+   ENDCOND
+
+ END main

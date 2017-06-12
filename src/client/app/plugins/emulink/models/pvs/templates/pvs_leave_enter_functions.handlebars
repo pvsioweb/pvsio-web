@@ -7,7 +7,7 @@
   {{enter}}(m: {{{current_mode.type}}})(st: {{state_type}}): {{state_type}} = {{#if entry_actions}}
     LET st = st WITH [ {{{current_mode.name}}} := m ]
      IN COND %-- entry actions{{#each entry_actions}}
-         current_mode(st) = {{state}} -> st WITH [ {{#each action_sequence}}{{#if l1_name}}{{l1_name}} := {{l1_name}}(st) WITH [ {{l2_name}} := {{value}} ]{{
+         {{{current_mode.name}}}(st) = {{state}} -> st WITH [ {{#each action_sequence}}{{#if l1_name}}{{l1_name}} := {{l1_name}}(st) WITH [ {{l2_name}} := {{value}} ]{{
                                                              else}}{{name}} := {{value}}{{#unless @last}}, {{/unless}}{{/if}}{{/each}}]{{#unless @last}},{{/unless}}{{/each}}{{#if ../full_coverage}},
          ELSE -> st{{/if}}
         ENDCOND{{else
@@ -15,7 +15,7 @@
   {{leave}}(m: {{{previous_mode.type}}})(st: {{state_type}}): {{state_type}} = {{#if exit_actions}}
     LET st = st WITH [ {{{previous_mode.name}}} := m ]
      IN COND %-- exit actions{{#each exit_actions}}
-         previous_mode(st) = {{state}} -> st WITH [ {{#each action_sequence}}{{#if l1_name}}{{l1_name}} := {{l1_name}}(st) WITH [ {{l2_name}} := {{value}} ]{{
+         {{{previous_mode.name}}}(st) = {{state}} -> st WITH [ {{#each action_sequence}}{{#if l1_name}}{{l1_name}} := {{l1_name}}(st) WITH [ {{l2_name}} := {{value}} ]{{
                                                              else}}{{name}} := {{value}}{{#unless @last}}, {{/unless}}{{/if}}{{/each}}]{{#unless @last}},{{/unless}}{{/each}}{{#if ../full_coverage}},
          ELSE -> st{{/if}}
         ENDCOND{{else

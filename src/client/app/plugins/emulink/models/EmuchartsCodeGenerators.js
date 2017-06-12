@@ -11,7 +11,7 @@ define(function (require, exports, module) {
 
     var instance;
 
-    var EmuchartsPVSPrinter    = require("plugins/emulink/models/EmuchartsPVSPrinter2"),
+    var EmuchartsPVSPrinter    = require("plugins/emulink/models/EmuchartsPVSPrinter3"),
         EmuchartsLustrePrinter = require("plugins/emulink/models/EmuchartsLustrePrinter"),
         EmuchartsPIMPrinter    = require("plugins/emulink/models/EmuchartsPIMPrinter"),
         EmuchartsCppPrinter    = require("plugins/emulink/models/EmuchartsCppPrinter"),
@@ -20,7 +20,7 @@ define(function (require, exports, module) {
         EmuchartsJSPrinter     = require("plugins/emulink/models/EmuchartsJavaScriptPrinter"),
         EmuchartsAdaPrinter    = require("plugins/emulink/models/EmuchartsAdaPrinter"),
         EmuchartsBlessPrinter  = require("plugins/emulink/models/EmuchartsBlessPrinter"),
-        EmuchartsMisraCPrinter = require("plugins/emulink/models/EmuchartsMisraCPrinter"),
+        EmuchartsMisraCPrinter = require("plugins/emulink/models/EmuchartsMisraCPrinter2"),
         EmuchartsAndroidPrinter  = require("plugins/emulink/models/EmuchartsAndroidPrinter"),
         EmuchartsNuXMVPrinter  = require("plugins/emulink/models/EmuchartsNuXMVPrinter"),
         EmuchartsICOPrinter    = require("plugins/emulink/models/EmuchartsICOPrinter"),

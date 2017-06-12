@@ -1,0 +1,11 @@
+{{#if template_description}}
+%
+%   Description: This template generates the file with function definitions
+%
+{{/if}}{{descriptor}}{{#if importings}}{{#each importings}}
+#include "{{this}}"{{/each}}
+{{/if}}{{#if init}}{{init}}
+{{/if}}{{#if utils}}{{utils}}
+{{/if}}{{#if transitions}}{{transitions}}
+{{/if}}{{#if disclaimer}}
+{{disclaimer}}{{/if}}

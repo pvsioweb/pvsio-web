@@ -111,7 +111,14 @@ define(function (require, exports, module) {
             }
         }).on("mouseout", function () {
             if (_this.backgroundColor !== "transparent") {
-                _this.overlayDisplay.setColors({ backgroundColor: _this.backgroundColor });
+                _this.overlayDisplay.setColors({
+                    backgroundColor: _this.backgroundColor,
+                    fontColor: _this.fontColor
+                });
+            }
+            if (_this.is_pressed && _this.evts() && _this.evts()[0] === "press/release") {
+                _this.overlayButton.release();
+                _this.is_pressed = false;
             }
         }).on("mousedown", function () {
             if (_this.backgroundColor !== "transparent") {
@@ -122,6 +129,7 @@ define(function (require, exports, module) {
             }
             if (_this.evts() && _this.evts()[0] === "press/release") {
                 _this.overlayButton.pressAndHold();
+                _this.is_pressed = true;
             }
         }).on("mouseup", function () {
             if (_this.backgroundColor !== "transparent") {
@@ -132,10 +140,14 @@ define(function (require, exports, module) {
             }
             if (_this.evts() && _this.evts()[0] === "press/release") {
                 _this.overlayButton.release();
+                _this.is_pressed = false;
             } else {
                 _this.overlayButton.click();
             }
         });
+        if (_this.evts() && _this.evts()[0] === "press/release") {
+            this.is_pressed = false;
+        }
 
         opt.visibleWhen = opt.visibleWhen || "true"; // default: always enabled/visible
         this.visibleWhen = property.call(this, opt.visibleWhen);
@@ -236,7 +248,9 @@ define(function (require, exports, module) {
             }
         }
         if (isVisible) {
-            this.overlayDisplay.render(this.softLabel(), opt);
+            if (this.div.style("display") === "none" || !opt.blinking || (opt.blinking && !this.div.selectAll("div").classed("blink"))) {
+                this.overlayDisplay.render(this.softLabel(), opt);
+            }
             this.overlayButton.reveal(opt);
             return this.reveal();
         }
