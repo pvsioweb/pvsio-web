@@ -179,6 +179,7 @@ define(function (require, exports, module) {
 
     LED2.prototype.blink = function () {
         this.div.attr("class", this.id() + " noselect blink");
+        this.reveal();
         return this;
     };
 

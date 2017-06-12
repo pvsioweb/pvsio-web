@@ -253,7 +253,7 @@ define(function (require, exports, module) {
             updateContextTables();
         });
 
-        emuchartsSelector.addListener("emuchartsSelector_select", function (event) {
+        emuchartsSelector.addListener("EmuchartsSelector_select", function (event) {
             if (event && event.emuchart) {
                 emuchartsManager.loadEmucharts(event.emuchart.id);
                 emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
@@ -904,8 +904,12 @@ define(function (require, exports, module) {
             }
         });
         d3.select("#btn_menuMisraCPrinter").on("click", function () {
+            var desc = emuchartsManager.getSelectedEmuchartsDescriptor();
+            var filename = (desc && desc.emuchart_name) ? desc.emuchart_name
+                                : ("emucharts_" + projectManager.project().name());
+            filename = filename.replace(/-/g, "_");
             var emucharts = {
-                name: ("emucharts_" + projectManager.project().name() + "_MisraC"),
+                name: filename,
                 author: {
                     name: "<author name>",
                     affiliation: "<affiliation>",
@@ -913,11 +917,7 @@ define(function (require, exports, module) {
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
-                variables: {
-                    input: emuchartsManager.getInputVariables(),
-                    output: emuchartsManager.getOutputVariables(),
-                    local: emuchartsManager.getLocalVariables()
-                },
+                variables: emuchartsManager.getVariables(),
                 states: emuchartsManager.getStates(),
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
@@ -995,7 +995,7 @@ define(function (require, exports, module) {
             }).concat([ "current_state", "previous_state" ]);
             var transitionLabels = emuchartsManager.getTransitions();
             var transitions = d3.map();
-            var parser = new EmuchartsParser();
+            var parser = EmuchartsParser.getInstance();
             transitionLabels.forEach(function (label) {
                 var ans = parser.parseTransition(label.name);
                 if (ans.res) {
@@ -1050,7 +1050,7 @@ define(function (require, exports, module) {
             }).concat([ "current_state", "previous_state" ]);
             var transitionLabels = emuchartsManager.getTransitions();
             var transitions = d3.map();
-            var parser = new EmuchartsParser();
+            var parser = EmuchartsParser.getInstance();
             transitionLabels.forEach(function (label) {
                 var ans = parser.parseTransition(label.name);
                 if (ans.res) {
@@ -1105,7 +1105,7 @@ define(function (require, exports, module) {
             }).concat([ "current_state", "previous_state" ]);
             var transitionLabels = emuchartsManager.getTransitions();
             var transitions = d3.map();
-            var parser = new EmuchartsParser();
+            var parser = EmuchartsParser.getInstance();
             transitionLabels.forEach(function (label) {
                 var ans = parser.parseTransition(label.name);
                 if (ans.res) {

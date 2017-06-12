@@ -83,6 +83,7 @@ define(function (require, exports, module) {
         opt.position = opt.position || "absolute";
         opt.borderRadius = opt.borderRadius || 2;
         opt.opacity = opt.opacity || 1;
+        this.format = opt.format;
         this.div = d3.select(this.parent)
                         .append("div").style("position", opt.position)
                         .style("top", this.top + "px").style("left", this.left + "px")
@@ -253,9 +254,23 @@ define(function (require, exports, module) {
             } else {
                 this.txt = txt;
             }
+            if (this.format === "mm:ss" && !isNaN(parseFloat(this.txt))) {
+                // value represents seconds, and format to be displayed is mm:ss
+                var val = parseFloat(this.txt);
+                var minutes = Math.floor(val / 60);
+                var seconds = Math.floor(val - (minutes * 60));
+                var minutes_txt = (minutes < 10)? "0" + minutes : minutes;
+                var seconds_txt = (seconds < 10)? "0" + seconds : seconds;
+                this.text2speech = minutes + " minutes and " + seconds + " seconds";
+                this.txt = minutes_txt + ":" + seconds_txt;
+            }
             //read out the display value if audio is enabled for this display widget
             if (opt.auditoryFeedback === "enabled") {
-                Speaker.speak(this.txt.toString());
+                if (this.format === "mm:ss") {
+                    Speaker.speak(this.text2speech);
+                } else {
+                    Speaker.speak(this.txt.toString());
+                }
             }
             this.example = this.txt;
             // set blinking

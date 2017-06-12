@@ -32,7 +32,7 @@ define(function (require, exports, module) {
      */
     function EmuchartsNuXMVPrinter(name) {
         model_name = name;
-        parser = new EmuchartsParser();
+        parser = EmuchartsParser.getInstance();
         return this;
     }
 

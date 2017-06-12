@@ -161,8 +161,7 @@ define(function (require, exports, module) {
                             pvsFilesListView.getTreeList().refreshSelectedItem();
 //                            NotificationManager.show("Another application changed " + event.path +
 //                                                     ". PVSio-web has reloaded the file content from disk.");
-                            console.log("Another application changed " + event.path +
-                                                     ". PVSio-web has reloaded the file content from disk.");
+                            console.log("File " + event.path + " automatically reloaded from disk.");
                         }
                     }).catch(function (err) { console.log(err); });
                 }

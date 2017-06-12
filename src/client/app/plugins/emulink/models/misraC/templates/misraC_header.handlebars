@@ -1,0 +1,24 @@
+{{#if template_description}}
+%
+%   Description: This template generates the header file, which includes the following elements:
+%                - Constant definitions (optional)
+%                - User-defined enumerated datatypes (optional)
+%                - Enumerated type defined the system modes
+%                - Struct type defining the attributes of the system state
+%                - Init function declaration
+%                - Transition functions declarations
+%
+{{/if}}{{descriptor}}
+#include <assert.h>
+#include <stdio.h>{{#if importings_declarations}}{{#each importings_declarations}}
+#include "{{this}}"{{/each}}
+{{/if}}{{#if extras}}{{extras}}
+{{/if}}{{#if constants}}{{constants}}
+{{/if}}{{#if datatypes}}{{datatypes}}
+{{/if}}{{#if modes}}{{modes}}
+{{/if}}{{#if state_variables}}{{state_variables}}
+{{/if}}{{#if init_declaration}}{{init_declaration}}
+{{/if}}{{#if utils_declarations}}{{utils_declarations}}
+{{/if}}{{#if transitions_declarations}}{{transitions_declarations}}
+{{/if}}{{#if disclaimer}}
+{{disclaimer}}{{/if}}

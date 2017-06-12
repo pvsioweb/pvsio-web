@@ -54,7 +54,7 @@ define(function (require, exports, module) {
 
     // utility functions
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
-    var _parser = new EmuchartsParser();
+    var _parser = EmuchartsParser.getInstance();
 
     // constructor
     function Printer(name) {

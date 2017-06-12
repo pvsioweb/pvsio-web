@@ -52,7 +52,7 @@ define(function (require, exports, module) {
     var threadTemplate = require("text!plugins/emulink/models/bless/templates/thread.handlebars");
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var displayNotificationView  = require("plugins/emulink/forms/displayNotificationView");
-    var _parser = new EmuchartsParser();
+    var _parser = EmuchartsParser.getInstance();
 
     var displayNotification = function (msg, title) {
         title = title || "Notification";

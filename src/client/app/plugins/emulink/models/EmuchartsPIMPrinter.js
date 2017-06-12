@@ -8,9 +8,9 @@
 /*global define*/
 define(function (require, exports, module) {
     "use strict";
-    
+
     var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
-    
+
     var PIM_model;
     var parser;
 
@@ -19,7 +19,7 @@ define(function (require, exports, module) {
      */
     function EmuchartsPIMPrinter(name) {
         PIM_model = name;
-        parser = new EmuchartsParser();
+        parser = EmuchartsParser.getInstance();
         return this;
     }
 

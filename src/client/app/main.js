@@ -67,6 +67,7 @@ define(function (require, exports, module) {
         return function (res) {
             return new Promise(function (resolve, reject) {
                 console.log("Browser version: " + BrowserUtils.getVersion());
+                console.log("Toolkit version: PVSio-web " + client.version());
                 if (BrowserUtils.isBrowserSupported() === false) {
                     var msg = BrowserUtils.requiredBrowserWarning();
                     d3.select(".warnings").style("display", "block").append("p").html(msg);
