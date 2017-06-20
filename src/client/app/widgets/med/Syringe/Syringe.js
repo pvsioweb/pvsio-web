@@ -116,9 +116,9 @@ define(function (require, exports, module) {
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")
                         .style("margin", 0).style("padding", 0).style("opacity", opt.opacity)
-                        .style("display", "none").attr("id", id).attr("class", elemClass);
+                        .style("display", "block").attr("id", id).attr("class", elemClass);
 
-        this.syringe = this.div.append("div").attr("id", "syringe").html(syringe_data);
+        this.syringe = this.div.append("div").attr("id", id + "_syringe").html(syringe_data);
         this.fluid_color = opt.fluid_color || '#0fe95d'; // bright green
         this.fluid = this.div.select("svg g#fluid");
         this.fluid.select("path").style("fill",this.fluid_color);
@@ -154,18 +154,19 @@ define(function (require, exports, module) {
         // shaft
         this.shaft.style("display", "block");
         // - vial
-        this.vial = this.div.append("div").attr("id", "vial").html(vial_data);
+        this.vial = this.div.append("div").attr("id", id + "_vial").html(vial_data);
         this.vial.attr("style", "transform: rotate(180deg);")
                  .style("margin-top", "-600px")
                  .style("margin-right", "-8px");
         if (this.fittings && this.fittings === "vial") {
-            this.vial.style("display", "block");
+            this.vial.select("svg g").style("display", "block");
         } else {
-            this.vial.style("display", "none");
+            this.vial.select("svg g").style("display", "none");
         }
         // spring infusion set
-        this.infusionSet = this.div.append("div").attr("id", "infusionSet").html(infusions_set_data);
-        this.infusionSet.attr("style", "margin-top:-664px; margin-left:-30px; transform:scale(0.6,0.6)");
+        this.infusionSet = this.div.append("div").attr("id", id + "_infusionSet").html(infusions_set_data);
+        //this.infusionSet.attr("style", "margin-top:-664px; margin-left:-30px; transform:scale(0.6,0.6)");
+        this.infusionSet.attr("style", "margin-top:-204px; margin-left:7px; transform:scale(0.6,0.6)");
         if (this.fittings && this.fittings === "infusionSet") {
             this.infusionSet.style("display", "block");
             this.shaft.style("display", "none");
@@ -173,8 +174,9 @@ define(function (require, exports, module) {
             this.infusionSet.style("display", "none");
         }
         // lateral connection line
-        this.lateralConnectionLine = this.div.append("div").attr("id", "lateralConnectionLine").html(lateral_connection_line_data);
-        this.lateralConnectionLine.attr("style", "margin-top:-467px; margin-left:-130px; transform:scale(0.85,0.5)");
+        this.lateralConnectionLine = this.div.append("div").attr("id", id + "_lateralConnectionLine").html(lateral_connection_line_data);
+        //this.lateralConnectionLine.attr("style", "margin-top:-467px; margin-left:-130px; transform:scale(0.85,0.5)");
+        this.lateralConnectionLine.attr("style", "margin-top:-39px; margin-left:-130px; transform:scale(0.85,0.7)");
         if (this.fittings && this.fittings === "lateralConnectionLine") {
             this.lateralConnectionLine.style("display", "block");
             this.shaft.style("display", "none");
@@ -273,13 +275,13 @@ define(function (require, exports, module) {
                 this.shaft.style("display", "none");
             }
             if (opt.contains_fluid === true ||this.contains_fluid === true) {
-                this.fluid.attr("display", "block");
+                this.fluid.select("svg g").attr("display", "block");
                 this.fluid.transition().duration(animation_duration).attr("transform", getLevel(this.plungerLevel, { large_syringe: this.large_syringe }).fluid);
             } else {
-                this.fluid.attr("display", "none");
+                this.fluid.select("svg g").attr("display", "none");
             }
             if (this.automatic_plunger) {
-                if (this.div.style("display") === "none") {
+                if (this.div.select("svg g").style("display") === "none") {
                     this.plunger.attr("transform", getLevel(this.plungerLevel, { large_syringe: this.large_syringe }).plunger);
                     this.plunger_stick.attr("transform", getLevel(this.plungerLevel, { large_syringe: this.large_syringe }).plunger_stick);
                 } else {
@@ -289,20 +291,20 @@ define(function (require, exports, module) {
                 this.plunger_tail.attr("style", "display:none;");
             }
             if (this.fittings === "vial" || opt.fittings === "vial") {
-                this.vial.style("display", "block");
+                this.vial.select("svg g").style("display", "block");
             } else if (this.fittings === "infusionSet" || opt.fittings === "infusionSet") {
-                this.vial.style("display", "none");
+                this.vial.select("svg g").style("display", "none");
                 this.shaft.style("display", "none");
                 // this.needle_base.selectAll("path").style("fill", "gray");
                 this.infusionSet.style("display", "block");
             } else if (this.fittings === "lateralConnectionLine" || opt.fittings === "lateralConnectionLine") {
-                this.vial.style("display", "none");
+                this.vial.select("svg g").style("display", "none");
                 this.infusionSet.style("display", "none");
                 this.lateralConnectionLine.style("display", "block");
                 this.shaft.style("display", "none");
                 // this.needle_base.selectAll("path").style("fill", "gray");
             } else {
-                this.vial.style("display", "none");
+                this.vial.select("svg g").style("display", "none");
                 this.infusionSet.style("display", "none");
                 this.lateralConnectionLine.style("display", "none");
             }
@@ -344,11 +346,11 @@ define(function (require, exports, module) {
         return this.render();
     };
     Syringe.prototype.hide = function () {
-        this.div.style("display", "none");
+        this.div.select("svg g").style("display", "none");
         return this;
     };
     Syringe.prototype.reveal = function () {
-        this.div.style("display", "block");
+        this.div.select("svg g").style("display", "block");
         return this;
     };
     Syringe.prototype.move = function (data) {
