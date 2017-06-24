@@ -1,0 +1,80 @@
+main: THEORY
+ BEGIN IMPORTING display, utils
+
+  MAX_LEN1: posnat = 16
+  MAX_LEN2: posnat = 8
+  MAX_DISP2: posnat = 999999999
+  MAX_DISP3: posnat = 9999999999999999
+  
+  state: TYPE = [#
+    % displays
+    disp1: Display[MAX_LEN1],
+    disp2: upto(MAX_DISP2),
+    disp3: upto(MAX_DISP3),
+    % shift introduced in display 1
+    shift: upto(MAX_LEN2)
+  #]
+
+  init: state = (#
+    disp1 := init_display,
+    disp2 := 0,
+    disp3 := 0,
+    shift := 0
+  #)
+
+  click_reset1(st: state): state = st WITH [ disp1 := init_display, shift := 0 ]
+  click_reset2(st: state): state = st WITH [ disp2 := 0 ]
+  click_reset3(st: state): state = st WITH [ disp3 := 0 ]
+
+  per_digit(st: state): bool = (shift(st) = 0 AND disp2(st) = 0)
+  digit(x: upto(9))(st: (per_digit)): state =
+    COND
+     per_digit(st) -> st WITH [ disp1 := concat_digit(x)(disp1(st)) ],
+     ELSE -> st
+    ENDCOND
+  click_key0(st: (per_digit)): state = digit(0)(st)
+  click_key1(st: (per_digit)): state = digit(1)(st)
+  click_key2(st: (per_digit)): state = digit(2)(st)
+  click_key3(st: (per_digit)): state = digit(3)(st)
+  click_key4(st: (per_digit)): state = digit(4)(st)
+  click_key5(st: (per_digit)): state = digit(5)(st)
+  click_key6(st: (per_digit)): state = digit(6)(st)
+  click_key7(st: (per_digit)): state = digit(7)(st)
+  click_key8(st: (per_digit)): state = digit(8)(st)
+  click_key9(st: (per_digit)): state = digit(9)(st)
+
+  click_shift_left(st: state): state =
+    COND
+      disp1(st)`len < MAX_LEN1 %-- disp1 must not overflow
+       AND disp1(st)`len > 0 %-- disp1 must have at least a digit before enabling left shifting
+         AND shift(st) < MAX_LEN2 %-- shift register must not overflow
+       -> st WITH [ shift := shift(st) + 1, disp1 := concat_digit(0)(disp1(st)) ],
+      ELSE -> st
+    ENDCOND
+  
+  click_shift_right(st: state): state =
+    COND
+       shift(st) > 0
+        -> st WITH [ shift := shift(st) - 1, disp1 := remove_digit(disp1(st)) ],
+      ELSE -> st
+    ENDCOND
+
+  click_mul(st: state): state =
+   LET new_d2 = disp2(st) + pow10(shift(st)),
+       new_d3 = floor((disp1(st)`val * new_d2) / pow10(shift(st))) IN
+    COND
+       new_d2 < MAX_DISP2 AND new_d3 <= MAX_DISP3
+         -> st WITH [ disp3 := new_d3, disp2 := new_d2 ],
+       ELSE -> st
+    ENDCOND
+   
+  click_sub(st: state): state =
+   LET new_d2 = disp2(st) - pow10(shift(st)),
+       new_d3 = floor((disp1(st)`val * new_d2) / pow10(shift(st))) IN
+    COND
+       new_d2 >= 0 AND new_d3 <= MAX_DISP3 AND new_d3 >= 0
+         -> st WITH [ disp3 := new_d3, disp2 := new_d2 ],
+       ELSE -> st
+    ENDCOND
+
+ END main
