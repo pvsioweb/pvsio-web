@@ -84,6 +84,7 @@ define(function (require, exports, module) {
             callback: opt.callback,
             buttonReadback: opt.buttonReadback,
             evts: opt.evts,
+            keyCode: opt.keyCode,
             area: this.div,
             parent: id
         });
@@ -160,6 +161,10 @@ define(function (require, exports, module) {
     TouchscreenButton.prototype = Object.create(Widget.prototype);
     TouchscreenButton.prototype.constructor = TouchscreenButton;
     TouchscreenButton.prototype.parentClass = Widget.prototype;
+
+    TouchscreenButton.prototype.click = function () {
+        this.overlayButton.click();
+    };
     /**
      * Returns a JSON object representation of this Widget.
      * @returns {object}

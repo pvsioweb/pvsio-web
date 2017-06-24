@@ -37,6 +37,7 @@ define(function (require, exports, module) {
             var mark = d3.select(".animation-halo");
             if (mark.empty()) {
                 mark = d3.select("#imageDiv .prototype-image-inner").append("div").attr("class", "animation-halo");
+                // mark = d3.select("body").append("div").attr("class", "animation-halo");
             }
             mark.style("top", pos.y1 + "px").style("left", pos.x1 + "px")
                 .style("width", (pos.x2 - pos.x1) + "px").style("height", (pos.y2 - pos.y1) + "px")

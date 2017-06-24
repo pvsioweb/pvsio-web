@@ -80,7 +80,7 @@ define(function (require, exports, module) {
 
         this.createImageMap({ area: this.area, callback: this.callback });
         if (opt.keyCode) {
-            ButtonHalo.installKeypressHandler(this, opt.keyCode);
+            ButtonHalo.installKeypressHandler(this, opt.keyCode, { noHalo: opt.noHalo });
         }
         return this;
     }
