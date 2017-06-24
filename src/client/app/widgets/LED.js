@@ -150,7 +150,7 @@ define(function (require, exports, module) {
             } else if (expr.res.type === "boolexpr" && expr.res.binop) {
                 var str = StateParser.resolve(txt, expr.res.attr);
                 if (str) {
-                    str = StateParser.evaluate(str);
+                    str = StateParser.evaluate(str).toString();
                     if ((expr.res.binop === "=" && str === expr.res.constant) ||
                          (expr.res.binop === "!=" && str !== expr.res.constant)) {
                              return doRender();

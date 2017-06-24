@@ -1,0 +1,36 @@
+display[N: posnat]: THEORY
+  BEGIN IMPORTING utils
+
+  Display: TYPE = [#
+    d: string,   % actual content of the display
+    val: nat,    % display value
+    len: upto(N) % max number of digits
+  #]
+  init_display: Display = (# d := "", val := 0, len := 0 #)
+
+  %-- concatenates a digit to the current display value
+  concat_digit(x: upto(9))(disp: Display): Display =
+      COND len(disp) < N ->
+             (# d := d(disp) + x,
+                val := val(disp) * 10 + x,
+                len := len(disp) + 1 #),
+           ELSE -> disp
+      ENDCOND
+
+  %-- removes the rightmost digit
+  remove_digit(disp: Display): Display =
+      COND
+       len(disp) = 0 -> disp,
+       len(disp) = 1 ->
+             (# d := "",
+                val := floor(val(disp) / 10),
+                len := len(disp) - 1 #),
+       len(disp) > 1 ->
+             LET dd = substr(d(disp), 0, len(disp) - 2) IN
+             (# d := dd,
+                val := floor(val(disp) / 10),
+                len := len(disp) - 1 #),
+       ELSE -> disp
+      ENDCOND
+
+ END display

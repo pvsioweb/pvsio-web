@@ -20,7 +20,7 @@
     COND{{#each cases}}
      {{cond}}
       -> LET st = {{../../leave}}({{from}})(st){{#if actions}},{{#each actions}}{{#if local_binding}}
-             {{name}} = {{value}}{{#unless @last}},{{/unless}} %-- local binding{{else}}
+             {{variable_name}} = {{value}}{{#unless @last}},{{/unless}} %-- local binding{{else}}
              st = st WITH [ {{#if variable_name_l2}}{{variable_name}} := {{variable_name}}(st) WITH [ {{variable_name_l2}} := {{value}} ]]{{
                                else}}{{variable_name}} := {{value}} ]{{/if}}{{#unless @last}},{{/unless}}{{/if}}{{/each}}{{/if}}
           IN {{../../enter}}({{to}})(st){{#unless @last}},{{/unless}}{{/each}}{{#if ../full_coverage}},
