@@ -503,8 +503,7 @@ define(function (require, exports, module) {
                     d3.select(region.node().parentNode).remove();
                 });
         });
-
-        prototypeImageView.on("WidgetEditRequested", function(widgetID) {
+        function widgetEditRequest_handler(widgetID) {
             var widget = WidgetManager.getWidget(widgetID);
             EditWidgetView.create(widget)
                 .on("ok", function (e, view) {
@@ -514,12 +513,17 @@ define(function (require, exports, module) {
                     // remove dialog
                     view.remove();
                 });
+        }
+        prototypeImageView.on("WidgetEditRequested", function(widgetID) {
+            widgetEditRequest_handler(widgetID);
+        });
+        widgetListView.on("WidgetEditRequested", function(widgetID) {
+            widgetEditRequest_handler(widgetID);
         });
 
         prototypeImageView.on("WidgetSelected", function(widget, add) {
             widgetListView.selectWidget(widget, add);
         });
-
         widgetListView.on("WidgetSelected", function(widget, add) {
             prototypeImageView.selectWidget(widget, add);
         });

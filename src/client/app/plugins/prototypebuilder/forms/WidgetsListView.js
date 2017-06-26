@@ -94,11 +94,13 @@ define(function (require, exports, module) {
                     d3.event.preventDefault();
                     d3.event.stopPropagation();
                 }).on("dblclick", function (w) {
-                    var event = d3.event;
-                    var dblclick = new Event("dblclick");
-                    w.element().node().dispatchEvent(dblclick);
-                    event.preventDefault();
-                    event.stopPropagation();
+                    _this.selectWidget(w);
+                    _this.trigger("WidgetEditRequested", w.id());
+                    // var event = d3.event;
+                    // var dblclick = new Event("dblclick");
+                    // w.element().node().dispatchEvent(dblclick);
+                    d3.event.preventDefault();
+                    d3.event.stopPropagation();
                 });
             this.listItems.text(this._labelFunction);
             exitedItems.transition().duration(220).style("opacity", 0).remove();
