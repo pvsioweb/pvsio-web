@@ -396,7 +396,7 @@ define(function (require, exports, module) {
             // set initial editor mode
             _this.changeMode(MODE.BROWSE());
             // render emuchart
-            emuchartsManager.render();
+            emuchartsManager.render({ keep_transformations: true });
             // update tables
             updateContextTables();
         }
