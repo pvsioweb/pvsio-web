@@ -50,13 +50,13 @@ define(function (require, exports, module) {
         // panels avoid breaking the functionality of other panels or causing behaviour that is confusing for the user.
         d3.select("body").on("keydown.global", function () {
             var e = d3.event;
-            if (_pvsioweb._activePanel && _pvsioweb._activePanel.handleKeyDownEvent && typeof _pvsioweb._activePanel.handleKeyDownEvent === "function") {
+            if (d3.select("form").empty() && _pvsioweb._activePanel && typeof _pvsioweb._activePanel.handleKeyDownEvent === "function") {
                 _pvsioweb._activePanel.handleKeyDownEvent(e);
             }
         });
         d3.select("body").on("keyup.global", function () {
             var e = d3.event;
-            if (_pvsioweb._activePanel && _pvsioweb._activePanel.handleKeyUpEvent && typeof _pvsioweb._activePanel.handleKeyUpEvent === "function") {
+            if (d3.select("form").empty() && _pvsioweb._activePanel && typeof _pvsioweb._activePanel.handleKeyUpEvent === "function") {
                 _pvsioweb._activePanel.handleKeyUpEvent(e);
             }
         });

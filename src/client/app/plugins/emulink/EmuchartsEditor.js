@@ -1825,13 +1825,15 @@ define(function (require, exports, module) {
         }
     };
 
-
     /**
      * Interface function for rendering the emuchart
      * @memberof EmuchartsEditor
      */
     EmuchartsEditor.prototype.render = function (opt) {
         opt = opt || {};
+        if (opt.keep_transformations) {
+            opt.trans = "translate(" + this.d3EventTranslate + ") scale(" + this.d3EventScale + ")";
+        }
         var container = opt.container || this.container || "#ContainerStateMachine";
         if (d3.select(container + " svg").node()) {
             // FIXME! investigate why this is needed! with storyboard editor, if the emuchart is generated twice, the second time the emuchart is not visible without the following instruction

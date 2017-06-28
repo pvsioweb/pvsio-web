@@ -13,7 +13,7 @@ define(function (require, exports, module) {
 
     ButtonHalo.prototype.installKeypressHandler = function (widget, eventKeyCode) {
         instance._keyCode2widget[eventKeyCode] = widget;
-        if (! (d3.select("#btnSimulatorView").node() && d3.select("#btnSimulatorView").classed("active"))) {
+        if (d3.select("#btnSimulatorView").empty()) {
             var _this = this;
             d3.select(document).on("keydown", function () {
                 _this.handleKeyDownEvent(d3.event);
