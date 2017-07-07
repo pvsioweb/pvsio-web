@@ -258,9 +258,9 @@ define(function (require, exports, module) {
                 if (emuchartsFile.content && emuchartsFile.content.descriptor) {
                     var version = emuchartsFile.content.descriptor.version;
                     if (version && parseFloat(version) >= 1.1) {
-                        var id = emuchartsFile.name;
+                        var id = emuchartsFile.name.split(".")[0];
                         _emuchartsDescriptors.set(id, {
-                            emuchart_name: emuchartsFile.name.split(".")[0],
+                            emuchart_name: id,
                             emuchart_content: new Emucharts(emuchartsFile.content.chart),
                             emuchart_path: emuchartsFile.path
                         });
@@ -290,9 +290,9 @@ define(function (require, exports, module) {
                             edges: chart.edges,
                             initial_edges: chart.initial_edges
                         });
-                        var id = emuchartsFile.name;
+                        var id = emuchartsFile.name.split(".")[0];
                         _emuchartsDescriptors.set(id, {
-                            emuchart_name: emuchartsFile.name.split(".")[0],
+                            emuchart_name: id,
                             emuchart_content: content,
                             emuchart_path: emuchartsFile.path
                         });
@@ -379,8 +379,10 @@ define(function (require, exports, module) {
             emuchart.chart.pmr = _this.getPMR(null, true);
             emuchart.chart.isPIM = _this.getIsPIM();
 
-            var content = JSON.stringify(emuchart, null, " ");
-            projectManager.project().addFile(name + ".emdl", content, { overWrite: opt.overWrite }).then(function (res) {
+            emuDesc.emuchart_name = name;
+            emuDesc.emuchart_content = JSON.stringify(emuchart, null, " ");
+            emuDesc.emuchart_path = emuDesc.emuchart_path.split("/").splice(-2, 1) + emuDesc.emuchart_name + ".emdl";
+            projectManager.project().addFile(emuDesc.emuchart_name + ".emdl", emuDesc.emuchart_content, { overWrite: opt.overWrite }).then(function (res) {
                 //displayNotification("File " + name + " saved successfully!");
                 _this.fire({
                     type: "EmuchartsManager.saveChart",
@@ -420,7 +422,10 @@ define(function (require, exports, module) {
     };
 
     EmuchartsManager.prototype.saveChartAs = function (name) {
-        saveAs(this, this.uniqueEmuchartsID(), name, { overWrite: false });
+        var selected = this.getEmuchartsDescriptors().filter(function (desc) {
+            return desc.is_selected === true;
+        });
+        saveAs(this, selected[0].emuchart_id, name, { overWrite: false });
         return this;
     };
 
