@@ -359,40 +359,47 @@ define(function (require, exports, module) {
         if (name) {
             var projectManager = require("project/ProjectManager").getInstance();
             var emuDesc = _emuchartsDescriptors.get(id);
-            var emuchart = {
-                descriptor: {
-                    file_type: "emdl",
-                    version: _this.getEmuchartsVersion(),
-                    description: "emucharts model",
-                    chart_name: name
-                },
-                chart: {
-                    states: emuDesc.emuchart_content.nodes.values(),
-                    transitions: emuDesc.emuchart_content.edges.values(),
-                    initial_transitions: emuDesc.emuchart_content.initial_edges.values(),
-                    datatypes: emuDesc.emuchart_content.datatypes.values(),
-                    constants: emuDesc.emuchart_content.constants.values(),
-                    variables: emuDesc.emuchart_content.variables.values()
-                }
-            };
-            // PIM.
-            emuchart.chart.pmr = _this.getPMR(null, true);
-            emuchart.chart.isPIM = _this.getIsPIM();
-
-            emuDesc.emuchart_name = name;
-            emuDesc.emuchart_content = JSON.stringify(emuchart, null, " ");
-            emuDesc.emuchart_path = emuDesc.emuchart_path.split("/").splice(-2, 1) + emuDesc.emuchart_name + ".emdl";
-            projectManager.project().addFile(emuDesc.emuchart_name + ".emdl", emuDesc.emuchart_content, { overWrite: opt.overWrite }).then(function (res) {
-                //displayNotification("File " + name + " saved successfully!");
-                _this.fire({
-                    type: "EmuchartsManager.saveChart",
-                    emuchartDescriptor: emuDesc
+            if (emuDesc) {
+                var emuchart = {
+                    descriptor: {
+                        file_type: "emdl",
+                        version: _this.getEmuchartsVersion(),
+                        description: "emucharts model",
+                        chart_name: name
+                    },
+                    chart: {
+                        states: emuDesc.emuchart_content.nodes.values(),
+                        transitions: emuDesc.emuchart_content.edges.values(),
+                        initial_transitions: emuDesc.emuchart_content.initial_edges.values(),
+                        variables: emuDesc.emuchart_content.variables.values(),
+                        constants: emuDesc.emuchart_content.constants.values(),
+                        datatypes: emuDesc.emuchart_content.datatypes.values()
+                    }
+                };
+                // PIM-related fields
+                emuchart.chart.pmr = _this.getPMR(null, true);
+                emuchart.chart.isPIM = _this.getIsPIM();
+                // create the new emuchart descriptor
+                var new_emuDesc = {};
+                new_emuDesc.emuchart_name = name;
+                new_emuDesc.emuchart_path = emuDesc.emuchart_path.split("/").splice(-2, 1).join("/") + "/" + name + ".emdl";
+                new_emuDesc.emuchart_content = new Emucharts(emuchart.chart);
+                var filename = new_emuDesc.emuchart_name + ".emdl";
+                var content = JSON.stringify(emuchart, null, " ");
+                projectManager.project().addFile(filename, content, { overWrite: opt.overWrite }).then(function (res) {
+                    _emuchartsDescriptors.set(new_emuDesc.emuchart_name, new_emuDesc);
+                    _this.fire({
+                        type: "EmuchartsManager.saveChart",
+                        emuchartDescriptor: new_emuDesc
+                    });
+                }).catch(function (err) {
+                    var msg = "Error while saving file " + name + " (" + err.message + ")";
+                    console.log(msg);
+                    displayNotification(msg);
                 });
-            }).catch(function (err) {
-                var msg = "Error while saving file " + name + " (" + JSON.stringify(err) + ")";
-                console.log(msg);
-                displayNotification(msg);
-            });
+            } else {
+                console.error("emucharts descriptor error for emuchart id " + id);
+            }
         }
     }
 
