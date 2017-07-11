@@ -304,7 +304,7 @@ define(function (require, exports, module) {
 
     Printer.prototype.print_main = function (emuchart) {
         var data = {};
-        data.triggers = this.genericPrinter.get_transitions(emuchart)
+        data.triggers = this.genericPrinter.get_transitions(emuchart);
         if (data.trigger && data.trigger.functions) {
             var i = 0; // this is used to associate an index to each trigger
             data.triggers = data.triggers.functions.map(function (f) { return { name: f.name, id: i++ }; });
