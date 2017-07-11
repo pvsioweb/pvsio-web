@@ -66,7 +66,10 @@ define(function (require, exports, module) {
             var ans = this.genericPrinter.get_modes(emuchart);
             return Handlebars.compile(enumerated_type_template, { noEscape: true })({
                 comment: ans.comment,
-                enumtype: ans.modes
+                enumtype: [{
+                    name: ans.type,
+                    constructors: ans.modes
+                }]
             });
         }
         return "";
@@ -92,11 +95,11 @@ define(function (require, exports, module) {
      */
     EmuchartsPVSPrinter.prototype.print_variables = function (emuchart) {
         if (emuchart) {
-            var ans = this.genericPrinter.get_variables(emuchart);
+            var data = {};
+            data.variables = this.genericPrinter.get_variables(emuchart);
             return Handlebars.compile(record_type_template, { noEscape: true })({
                 comment: "emuchart state",
-                indent: "  ",
-                recordtype: ans.variables
+                recordtype: data
             });
         }
         return "";
