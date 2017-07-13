@@ -8,11 +8,11 @@
 %                - Init function declaration
 %                - Transition functions declarations
 %
-{{/if}}{{descriptor}}
+{{/if}}{{descriptor}}#ifndef _misraC_{{model_name}}_
+#define _misraC_{{model_name}}_
 #include <assert.h>
 #include <stdio.h>{{#if importings_declarations}}{{#each importings_declarations}}
 #include "{{this}}"{{/each}}
-{{/if}}{{#if extras}}{{extras}}
 {{/if}}{{#if constants}}{{constants}}
 {{/if}}{{#if datatypes}}{{datatypes}}
 {{/if}}{{#if modes}}{{modes}}
@@ -22,3 +22,4 @@
 {{/if}}{{#if transitions_declarations}}{{transitions_declarations}}
 {{/if}}{{#if disclaimer}}
 {{disclaimer}}{{/if}}
+#endif

@@ -1,5 +1,5 @@
-{{&makefile_descriptor}}
-NAME = main.exe
+{{#if makefile_descriptor}}{{&makefile_descriptor}}
+{{/if}}NAME = main.exe
 CC = gcc
 CFLAGS = -Wall -O2 -Werror -Wmissing-noreturn -Wpacked -Wunreachable-code
 LDFLAGS= -lm
@@ -65,7 +65,7 @@ help:
 	@echo "PROJECT=your_android_project_path_and_activity"
 	@echo
 	@echo  "-------------------------------------------------------------"
-	@echo  "  Makefile generated using PVSio-web MisraCPrinter ver 0.1"
+	@echo  "  Makefile generated using PVSio-web MisraCPrinter ver {{version}}"
 	@echo  "  Tool freely available at http:##www.pvsioweb.org"
 	@echo  "-------------------------------------------------------------"
 	@echo

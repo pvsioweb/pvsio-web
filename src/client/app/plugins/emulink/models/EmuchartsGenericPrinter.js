@@ -80,6 +80,24 @@ define(function (require, exports, module) {
         return this;
     }
 
+    function get_current_mode(emuchart) {
+        return {
+            name: predefined_variables.current_mode.name,
+            type: predefined_variables.current_mode.type,
+            value: (emuchart.initial_transitions.length === 1) ? emuchart.initial_transitions[0].target.name : predefined_variables.current_mode.value
+        };
+    }
+    function get_previous_mode(emuchart) {
+        if (predefined_variables && predefined_variables.previous_mode) {
+            return {
+                name: predefined_variables.previous_mode.name,
+                type: predefined_variables.previous_mode.type,
+                value: (emuchart.initial_transitions.length === 1) ? emuchart.initial_transitions[0].target.name : predefined_variables.current_mode.value
+            };
+        }
+        return null;
+    }
+
     /**
      * Gets Emuchart modes
      */
@@ -87,12 +105,10 @@ define(function (require, exports, module) {
         if (emuchart && emuchart.states) {
             return {
                 comment: "modes of operation",
-                modes: [{
-                    name: mode_type,
-                    constructors: emuchart.states.map(function (state) {
-                        return state.name;
-                    })
-                }]
+                type: mode_type,
+                modes: emuchart.states.map(function (state) {
+                    return state.name;
+                })
             };
         }
         return null;
@@ -142,9 +158,9 @@ define(function (require, exports, module) {
      */
     EmuchartsGenericPrinter.prototype.get_variables = function (emuchart) {
         var variables = [];
-        variables.push({ name: predefined_variables.current_mode.name, type: predefined_variables.current_mode.type });
+        variables.push(get_current_mode(emuchart));
         if (predefined_variables.previous_mode) {
-            variables.push({ name: predefined_variables.previous_mode.name, type: predefined_variables.previous_mode.type });
+            variables.push(get_previous_mode(emuchart));
         }
         var x = split_variables(emuchart);
         x.basic.forEach(function (basic) {
@@ -158,11 +174,8 @@ define(function (require, exports, module) {
         });
         return {
             comment: "state attributes",
-            indent: "  ",
-            variables: [{
-                name: state_type,
-                variables: variables
-            }]
+            state_type: state_type,
+            variables: variables
         };
     };
 
@@ -218,10 +231,11 @@ define(function (require, exports, module) {
             });
         }
         var data = {
+            comment: "entry/leave actions",
             entry_actions: entry_actions || [],
             leave_actions: leave_actions || [],
-            current_mode: predefined_variables.current_mode,
-            previous_mode: predefined_variables.previous_mode,
+            current_mode: get_current_mode(emuchart),
+            previous_mode: get_previous_mode(emuchart),
             state_type: state_type
         };
         if (predefined_variables.previous_mode) {
@@ -231,7 +245,7 @@ define(function (require, exports, module) {
     };
 
     function setVariables (parser, emuchart) {
-        var variables = [ { name: predefined_variables.current_mode.name, type: predefined_variables.current_mode.type } ]
+        var variables = [ get_current_mode(emuchart) ]
                 .concat(emuchart.variables.map(function (v) { return { name: v.name, type: v.type }; }));
         if (predefined_variables.previous_mode) {
             variables.concat({ name: predefined_variables.previous_mode.name, type: predefined_variables.previous_mode.type });
@@ -330,18 +344,10 @@ define(function (require, exports, module) {
                 // args: [{ name: "x",type: "real"}],
                 init: theTransition.init,
                 override: theTransition.override,
-                variables: [{
-                    name: predefined_variables.current_mode.name,
-                    type: predefined_variables.current_mode.type,
-                    value: (emuchart.initial_transitions.length === 1) ? emuchart.initial_transitions[0].target.name : predefined_variables.current_mode.value
-                }].concat(theTransition.variables)
+                variables: [get_current_mode(emuchart)].concat(theTransition.variables)
             };
             if (predefined_variables.previous_mode) {
-                data.variables = [{
-                    name: predefined_variables.previous_mode.name,
-                    type: predefined_variables.previous_mode.type,
-                    value: (emuchart.initial_transitions.length === 1) ? emuchart.initial_transitions[0].target.name : predefined_variables.current_mode.value
-                }].concat(data.variables);
+                data.variables = [get_previous_mode(emuchart)].concat(data.variables);
             }
             if (emuchart.initial_transitions.length === 1 && theTransition.override.length === 0) {
                 data.DEFAULT_INIT = true;
