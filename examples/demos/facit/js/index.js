@@ -200,7 +200,7 @@ require([
             top: 684,
             left: 312,
             width: 40,
-            height: 30
+            height: 60
         }, {
             parent: "numberpad",
             callback: onMessageReceived,
@@ -211,16 +211,27 @@ require([
             top: 684,
             left: 374,
             width: 40,
-            height: 30
+            height: 60
         }, {
             parent: "numberpad",
             callback: onMessageReceived,
             backgroundColor: "transparent",
             keyCode: 39 // arrow right
         });
+        device.shift_max = new TouchscreenButton("shift_max", {
+            top: 684,
+            left: 701,
+            width: 40,
+            height: 60
+        }, {
+            parent: "numberpad",
+            callback: onMessageReceived,
+            backgroundColor: "transparent"
+            //keyCode: ...//
+        });
         device.mul = new TouchscreenButton("mul", {
-            top: 568,
-            left: 1050,
+            top: 398,
+            left: 1080,
             width: 90,
             height: 100
         }, {
@@ -230,8 +241,8 @@ require([
             keyCode: 38 // arrow up
         });
         device.sub = new TouchscreenButton("sub", {
-            top: 328,
-            left: 1050,
+            top: 568,
+            left: 1080,
             width: 90,
             height: 110
         }, {
@@ -242,31 +253,31 @@ require([
         });
         device.reset3 = new TouchscreenButton("reset3", {
             top: 682,
-            left: 34,
-            width: 40,
+            left: 24,
+            width: 60,
             height: 165
         }, {
             parent: "facit",
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            keyCode: 90 // z
+            keyCode: 17 // ctrl
         });
         device.reset2 = new TouchscreenButton("reset2", {
             top: 682,
-            left: 118,
-            width: 40,
+            left: 108,
+            width: 60,
             height: 165
         }, {
             parent: "facit",
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            keyCode: 88 // x
+            keyCode: 18 // alt
         });
         device.reset1 = new TouchscreenButton("reset1", {
             top: 680,
-            left: 1144,
-            width: 30,
-            height: 170
+            left: 1134,
+            width: 50,
+            height: 190
         }, {
             parent: "facit",
             callback: onMessageReceived,
@@ -372,6 +383,16 @@ require([
             callback: onMessageReceived,
             color: "white" // does this button light up?
         });
+        device.direction = new BasicDisplay("direction", {
+            top: 266,
+            left: 666,
+            width: 10,
+            height: 16
+        }, {
+            parent: "facit",
+            backgroundColor: "red"
+        });
+        device.bell = d3.select("#bell");
 
 
 
@@ -408,6 +429,7 @@ require([
                 device.key9.render();
                 device.shift_left.render();
                 device.shift_right.render();
+                device.shift_max.render();
                 device.mul.render();
                 device.sub.render();
                 device.reset3.render();
@@ -419,6 +441,17 @@ require([
                         device.disp1.render(res.disp1.d.replace(/"/g, ""));
                         device.disp2.render(zeropad(res.disp2, 9));
                         device.disp3.render(zeropad(res.disp3, 16));
+                        if (parseInt(res.direction) === -1) {
+                            device.direction.render();
+                        } else {
+                            device.direction.hide();
+                        }
+                        if (res.bell === "TRUE") {
+                            device.bell.classed("animated shake", true);
+                            window.setTimeout(function() {
+                                device.bell.classed("animated shake", false);
+                            }, 400);
+                        }
                         //...
                         device.shift_LED0.render(res);
                         device.shift_LED1.render(res);

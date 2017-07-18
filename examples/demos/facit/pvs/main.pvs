@@ -2,32 +2,43 @@ main: THEORY
  BEGIN IMPORTING display, utils
 
   MAX_LEN1: posnat = 16
+  MAX_DIGITS: posnat = 11
   MAX_LEN2: posnat = 8
   MAX_DISP2: posnat = 999999999
   MAX_DISP3: posnat = 9999999999999999
+  Direction: TYPE = { x: real | x = -1 OR x = 0 OR x = 1 }
   
   state: TYPE = [#
     % displays
-    disp1: Display[MAX_LEN1],
+    disp1: Display[MAX_LEN1, MAX_DIGITS],
     disp2: upto(MAX_DISP2),
     disp3: upto(MAX_DISP3),
     % shift introduced in display 1
-    shift: upto(MAX_LEN2)
+    shift: upto(MAX_LEN2),
+    digits_enabled: bool,
+    direction: Direction,
+    bell: bool
   #]
 
   init: state = (#
     disp1 := init_display,
     disp2 := 0,
     disp3 := 0,
-    shift := 0
+    shift := 0,
+    digits_enabled := TRUE,
+    direction := 0,
+    bell := FALSE
   #)
 
-  click_reset1(st: state): state = st WITH [ disp1 := init_display, shift := 0 ]
-  click_reset2(st: state): state = st WITH [ disp2 := 0 ]
-  click_reset3(st: state): state = st WITH [ disp3 := 0 ]
+  reset_bell(st: state): state = st WITH [ bell := FALSE ]
 
-  per_digit(st: state): bool = (shift(st) = 0 AND disp2(st) = 0)
+  click_reset1(st: state): state = reset_bell(st) WITH [ disp1 := init_display, shift := 0, digits_enabled := TRUE ]
+  click_reset2(st: state): state = reset_bell(st) WITH [ disp2 := 0, direction := 0 ]
+  click_reset3(st: state): state = reset_bell(st) WITH [ disp3 := 0 ]
+
+  per_digit(st: state): bool = (digits_enabled(st) = TRUE)
   digit(x: upto(9))(st: (per_digit)): state =
+   LET st = reset_bell(st) IN
     COND
      per_digit(st) -> st WITH [ disp1 := concat_digit(x)(disp1(st)) ],
      ELSE -> st
@@ -44,37 +55,52 @@ main: THEORY
   click_key9(st: (per_digit)): state = digit(9)(st)
 
   click_shift_left(st: state): state =
+   LET st = reset_bell(st) IN
     COND
-      disp1(st)`len < MAX_LEN1 %-- disp1 must not overflow
-       AND disp1(st)`len > 0 %-- disp1 must have at least a digit before enabling left shifting
-         AND shift(st) < MAX_LEN2 %-- shift register must not overflow
+%      disp1(st)`len < MAX_DIGITS %-- disp1 must not overflow
+%       AND disp1(st)`len > 0 %-- disp1 must have at least a digit before enabling left shifting
+%         AND
+       shift(st) < MAX_LEN2 %-- shift register must not overflow
        -> st WITH [ shift := shift(st) + 1, disp1 := concat_digit(0)(disp1(st)) ],
-      ELSE -> st
+             ELSE -> st
     ENDCOND
   
   click_shift_right(st: state): state =
+   LET st = reset_bell(st) IN
     COND
        shift(st) > 0
         -> st WITH [ shift := shift(st) - 1, disp1 := remove_digit(disp1(st)) ],
       ELSE -> st
     ENDCOND
 
+  %-- crank forward
   click_mul(st: state): state =
-   LET new_d2 = disp2(st) + pow10(shift(st)),
-       new_d3 = floor((disp1(st)`val * new_d2) / pow10(shift(st))) IN
+   LET st = st WITH [ direction := IF direction(st) = 0 THEN 1 ELSE direction(st) ENDIF ],
+       tmp_d2 = disp2(st) + direction(st) * pow10(shift(st)),
+       new_d2 = mod(tmp_d2, pow10(9)),
+       tmp_d3 = disp3(st) + disp1(st)`val, %floor((disp1(st)`val * new_d2) / pow10(shift(st))),
+       new_d3 = mod(tmp_d3, pow10(16)),
+       st = st WITH [ bell := new_d3 < tmp_d3 ] IN
     COND
-       new_d2 < MAX_DISP2 AND new_d3 <= MAX_DISP3
-         -> st WITH [ disp3 := new_d3, disp2 := new_d2 ],
+       new_d2 <= MAX_DISP2 AND new_d3 <= MAX_DISP3
+         -> st WITH [ disp3 := new_d3, disp2 := new_d2, digits_enabled := FALSE ],
        ELSE -> st
     ENDCOND
    
   click_sub(st: state): state =
-   LET new_d2 = disp2(st) - pow10(shift(st)),
-       new_d3 = floor((disp1(st)`val * new_d2) / pow10(shift(st))) IN
+   LET st = st WITH [ direction := IF direction(st) = 0 THEN -1 ELSE direction(st) ENDIF ],
+       tmp_d2 = disp2(st) - direction(st) * pow10(shift(st)),
+       new_d2 = mod(tmp_d2, pow10(9)),
+       tmp_d3 = disp3(st) - disp1(st)`val, %floor((disp1(st)`val * new_d2) / pow10(shift(st))),
+       new_d3 = mod(tmp_d3, pow10(16)),
+       st = st WITH [ bell := new_d3 > tmp_d3 ] IN
     COND
        new_d2 >= 0 AND new_d3 <= MAX_DISP3 AND new_d3 >= 0
-         -> st WITH [ disp3 := new_d3, disp2 := new_d2 ],
+         -> st WITH [ disp3 := new_d3, disp2 := new_d2, digits_enabled := FALSE ],
        ELSE -> st
     ENDCOND
+
+  click_shift_max(st: state): state =
+    reset_bell(st) WITH [ disp1 := concat_blank(MAX_LEN1 - disp1(st)`len)(disp1(st)), digits_enabled := FALSE, shift := MAX_LEN2 ]
 
  END main

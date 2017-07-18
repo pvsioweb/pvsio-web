@@ -1,4 +1,4 @@
-display[N: posnat]: THEORY
+display[N: posnat, MAX_DIGITS: upto(N)]: THEORY
   BEGIN IMPORTING utils
 
   Display: TYPE = [#
@@ -17,6 +17,18 @@ display[N: posnat]: THEORY
            ELSE -> disp
       ENDCOND
 
+  %-- concatenates a blank space to the current display value
+  concat_blank(n: nat)(disp: Display): RECURSIVE Display =
+    COND n = 0 OR len(disp) >= N -> disp,
+         ELSE ->
+           LET new_disp =
+                 (# d := d(disp) + IF len(disp) < MAX_DIGITS THEN "0"ELSE " " ENDIF,
+                    val := val(disp) * 10,
+                    len := len(disp) + 1 #)
+             IN concat_blank(n - 1)(new_disp)
+    ENDCOND
+     MEASURE n
+      
   %-- removes the rightmost digit
   remove_digit(disp: Display): Display =
       COND
