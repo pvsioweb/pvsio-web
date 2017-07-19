@@ -681,6 +681,42 @@ require([
                 d3.select("#date").html(getDate());
             }
             function render_syringes(res) {
+                if (res.console_screen === "CONSOLE_PROTOCOL") {
+                    // adjust simulation buttons
+                    if (res.syringe_contrast_present === "FALSE") {
+                        d3.select("#plug_syringe_contrast").attr("style", "opacity:1;");
+                    } else {
+                        d3.select("#plug_syringe_contrast").attr("style", "opacity:0.1;");
+                        if (res.bag_contrast_present === "FALSE") {
+                            if (res.plunger_contrast === "0") {
+                                d3.select("#spike_contrast_bag").attr("style", "opacity:1;");
+                            }
+                        } else {
+                            d3.select("#spike_contrast_bag").attr("style", "opacity:0.1;");
+                            device.syringe_contrast.plugVial();
+                        }
+                    }
+                    if (res.syringe_saline_present === "FALSE") {
+                        d3.select("#plug_syringe_saline").attr("style", "opacity:1;");
+                    } else {
+                        d3.select("#plug_syringe_saline").attr("style", "opacity:0.1;");
+                        if (res.bag_saline_present === "FALSE") {
+                            if (res.plunger_saline === "0") {
+                                d3.select("#spike_saline_bag").attr("style", "opacity:1;");
+                            }
+                        } else {
+                            d3.select("#spike_saline_bag").attr("style", "opacity:0.1;");
+                            device.syringe_saline.plugVial();
+                        }
+                    }
+                    if (res.bag_contrast_present === "TRUE" && res.bag_saline_present === "TRUE") {
+                        if (res.connect_infusion_set === "FALSE") {
+                            d3.select("#connect_infusion_set").attr("style", "opacity:1;");
+                        } else {
+                            d3.select("#connect_infusion_set").attr("style", "opacity:0.1;");
+                        }
+                    }
+                }
                 if (res.syringe_saline_present === "TRUE") {
                     if (res.bag_saline_present === "TRUE") {
                         device.syringe_saline.containsFluid();
@@ -799,58 +835,20 @@ require([
             connect_infusion_set: false
         }
         d3.select("#plug_syringe_saline").on("click", function () {
-            if (sim.plug_syringe_saline) {
-                ButtonActionsQueue.getInstance().queueGUIAction("plug_syringe_saline", onMessageReceived);
-                d3.select("#plug_syringe_saline").attr("style", "opacity:0.1;");
-                d3.select("#spike_saline_bag").attr("style", "opacity:1;");
-                sim.plug_syringe_saline = false;
-                sim.spike_saline_bag = true;
-            }
+            ButtonActionsQueue.getInstance().queueGUIAction("plug_syringe_saline", onMessageReceived);
         });
         d3.select("#spike_saline_bag").on("click", function () {
-            if (sim.spike_saline_bag) {
-                ButtonActionsQueue.getInstance().queueGUIAction("plug_bag_saline", onMessageReceived);
-                device.syringe_saline.plugVial();
-                d3.select("#spike_saline_bag").attr("style", "opacity:0.1;");
-                sim.spike_saline_bag = false;
-                sim.saline_ready = true;
-                if (sim.contrast_ready) {
-                    d3.select("#connect_infusion_set").attr("style", "opacity:1;");
-                    sim.connect_infusion_set = true;
-                }
-            }
+            ButtonActionsQueue.getInstance().queueGUIAction("plug_bag_saline", onMessageReceived);
         });
         d3.select("#plug_syringe_contrast").on("click", function () {
-            if (sim.plug_syringe_contrast) {
-                ButtonActionsQueue.getInstance().queueGUIAction("plug_syringe_contrast", onMessageReceived);
-                d3.select("#plug_syringe_contrast").attr("style", "opacity:0.1;");
-                d3.select("#spike_contrast_bag").attr("style", "opacity:1;");
-                sim.plug_syringe_contrast = false;
-                sim.spike_contrast_bag = true;
-            }
+            ButtonActionsQueue.getInstance().queueGUIAction("plug_syringe_contrast", onMessageReceived);
         });
         d3.select("#spike_contrast_bag").on("click", function () {
-            if (sim.spike_contrast_bag) {
-                ButtonActionsQueue.getInstance().queueGUIAction("plug_bag_contrast", onMessageReceived);
-                device.syringe_contrast.plugVial();
-                d3.select("#spike_contrast_bag").attr("style", "opacity:0.1;");
-                sim.spike_contrast_bag = false;
-                sim.contrast_ready = true;
-                if (sim.saline_ready) {
-                    d3.select("#connect_infusion_set").attr("style", "opacity:1;");
-                    sim.connect_infusion_set = true;
-                }
-            }
+            ButtonActionsQueue.getInstance().queueGUIAction("plug_bag_contrast", onMessageReceived);
         });
         d3.select("#connect_infusion_set").on("click", function () {
-            if (sim.connect_infusion_set) {
-                device.syringe_saline.plugInfusionSet();
-                device.syringe_contrast.plugLateralConnectionLine();
-                d3.select("#connect_infusion_set").attr("style", "opacity:0.1;");
-                sim.connect_infusion_set = false;
-            }
+            ButtonActionsQueue.getInstance().queueGUIAction("connect_infusion_set", onMessageReceived);
         });
-
         d3.select("#restart_simulation").on("click", function () {
             ButtonActionsQueue.getInstance().queueGUIAction("restart_simulation", onMessageReceived);
         });
