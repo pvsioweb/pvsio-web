@@ -709,16 +709,20 @@ require([
                             device.syringe_saline.plugVial();
                         }
                     }
-                    if (res.bag_contrast_present === "TRUE" && res.bag_saline_present === "TRUE") {
-                        if (res.connect_infusion_set === "FALSE") {
+                    if (res.mode === "READY_TO_PRIME" || res.mode === "MANUAL") {
+                        if (res.infusion_set_present === "FALSE") {
                             d3.select("#connect_infusion_set").attr("style", "opacity:1;");
                         } else {
+                            device.syringe_saline.plugInfusionSet();
+                            device.syringe_contrast.plugLateralConnectionLine();
+                            device.syringe_saline.containsFluid();
+                            device.syringe_contrast.containsFluid();
                             d3.select("#connect_infusion_set").attr("style", "opacity:0.1;");
                         }
                     }
                 }
                 if (res.syringe_saline_present === "TRUE") {
-                    if (res.bag_saline_present === "TRUE") {
+                    if (res.bag_saline_present === "TRUE" || res.infusion_set_present === "TRUE") {
                         device.syringe_saline.containsFluid();
                         device.syringe_saline.render(res.plunger_saline);
                     } else {
@@ -727,7 +731,7 @@ require([
                     }
                 } else { device.syringe_saline.hide(); }
                 if (res.syringe_contrast_present === "TRUE") {
-                    if (res.bag_contrast_present === "TRUE") {
+                    if (res.bag_contrast_present === "TRUE"  || res.infusion_set_present === "TRUE") {
                         device.syringe_contrast.containsFluid();
                         device.syringe_contrast.render(res.plunger_contrast);
                     } else {
@@ -825,15 +829,6 @@ require([
         }
 
 
-        var sim = {
-            plug_syringe_saline: true,
-            plug_syringe_contrast: true,
-            spike_saline_bag: false,
-            spike_contrast_bag: false,
-            saline_ready: false,
-            contrast_ready: false,
-            connect_infusion_set: false
-        }
         d3.select("#plug_syringe_saline").on("click", function () {
             ButtonActionsQueue.getInstance().queueGUIAction("plug_syringe_saline", onMessageReceived);
         });
