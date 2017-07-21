@@ -827,4 +827,9 @@ main: THEORY
 
   rotate_injector(st: state): state = st WITH [ injector_rotated := NOT injector_rotated(st) ]
 
+  %---
+  init_precache: state =
+   LET cache = click_btn_confirm_security(init(0))
+    IN init(0)
+
  END main
