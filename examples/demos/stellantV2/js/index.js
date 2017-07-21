@@ -734,6 +734,9 @@ require([
          if the first parameter is truthy, then an error occured in the process of evaluating the gui action sent
          */
         function onMessageReceived(err, event) {
+            d3.select(".demo-splash").style("display", "none");
+            d3.select(".content").style("display", "inline-flex");
+            
             function prettyprint(v) {
                 var x = parseInt(v);
                 if (x < 10 ) {
@@ -1054,9 +1057,7 @@ require([
             console.log("web socket connected");
             //start pvs process
             client.getWebSocket().startPVSProcess({name: "main.pvs", demoName: "stellantV2/pvs"}, function (err, event) {
-                client.getWebSocket().sendGuiAction("init(0);", onMessageReceived);
-                d3.select(".demo-splash").style("display", "none");
-                d3.select(".content").style("display", "inline-flex");
+                client.getWebSocket().sendGuiAction("init_precache;", onMessageReceived);
             });
         }).addListener("WebSocketConnectionClosed", function (e) {
             console.log("web socket closed");
