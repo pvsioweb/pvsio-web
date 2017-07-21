@@ -8,7 +8,7 @@ main: THEORY
   ConsoleScreen: TYPE = { CONSOLE_INIT, CONSOLE_SECURITY, CONSOLE_PROTOCOL }
   Protocol: TYPE = { TOTAL_BODY_BARG }
 
-  Led: TYPE = { ORANGE, GREEN, LED_OFF }
+  ConsoleLED: TYPE = { ORANGE, GREEN, LED_OFF }
 
   MAX_VOLUME: nat = 230 %-- mL
   VOL_BUFFER: nat = 10 %-- mL
@@ -16,7 +16,7 @@ main: THEORY
   MAX_RATE: nat = 200 %-- mL/sec
   Rate: TYPE = { x: nonneg_real | x < MAX_RATE } %-- mL/sec
   Time: TYPE = nonneg_real %-- sec
-  Button: TYPE = { BLINKING, DARK, LIGHT }
+  LED: TYPE = { BLINKING, DARK, LIGHT, BLINK3 }
   ConsoleButton: TYPE = { PRESSED, IDLE }
 
   PlungerLevel: upto(MAX_VOLUME)
@@ -37,6 +37,9 @@ main: THEORY
   BTN_MANUAL_TIMEOUT: posreal = 3000 %-- millis
   BTN_AUTO_TIMEOUT: posreal = 8000 %-- millis
 
+  ConsoleCMD: TYPE = { LOCK, ENGAGE, DISENGAGE }
+  ConsoleDLG: TYPE = { NIL, ASK_CONFIRM_AIR_CHECK, VOLUME_WARNING }
+
   state: TYPE = [#
     mode: Mode,
     autoload_mode_saline: AutoloadMode,
@@ -51,24 +54,30 @@ main: THEORY
     vol_contrast: Volume,
     vol_saline_confirmed: bool,
     vol_contrast_confirmed: bool,
-    btn_fill_saline: Button,
-    btn_fill_contrast: Button,
-    btn_auto: Button,
-    btn_manual: Button,
-    btn_prime: Button,
-    btn_confirm: Button,
-    btn_engage: Button,
+    lock_LED: LED,
+    btn_fill_saline: LED,
+    btn_fill_contrast: LED,
+    btn_auto: LED,
+    btn_manual: LED,
+    btn_prime: LED,
+    btn_confirm: LED,
+    btn_engage: LED,
     btn_manual_timeout: nonneg_real,
-    btn_auto_timeout: real, %-- -1 disables the timeout
+    btn_auto_timeout_saline: real, %-- -1 disables the timeout
+    btn_auto_timeout_contrast: real, %-- -1 disables the timeout
     timeout_autoload_saline: nonneg_real,
     timeout_autoload_contrast: nonneg_real,
     prime_confirmed: bool,
     prime_volume_saline: Volume,
     prime_volume_contrast: Volume,
+    prime_warning: bool, %-- this is used to handle the warning given by the injector when trying to arm without activating the air-in-line check button first
+    lock_warning: bool,
+    armed: bool,
+    injector_rotated: bool,
     %-- console
     console_btn_timeout: nonneg_real, % millis
     console_btn_ACC: ConsoleButton,
-    console_LED_ACC: Led,
+    console_LED_ACC: ConsoleLED,
     console_screen: ConsoleScreen,
     console_protocol: Protocol,
     console_vol_saline: Volume, % mL
@@ -77,6 +86,8 @@ main: THEORY
     console_rate_contrast: Rate, % mL/sec
     console_time_saline: Time, % sec
     console_time_contrast: Time, % sec
+    console_cmd: ConsoleCMD,
+    console_dlg: ConsoleDLG,
     %-- bags
     bag_saline_present: bool,
     bag_contrast_present: bool,
@@ -97,7 +108,8 @@ main: THEORY
     vol_saline := 0,
     vol_contrast := 0,
     vol_saline_confirmed := FALSE,
-    vol_contrast_confirmed := FALSE,    
+    vol_contrast_confirmed := FALSE,
+    lock_LED := DARK,
     btn_fill_saline := DARK,
     btn_fill_contrast := DARK,
     btn_auto := DARK,
@@ -106,12 +118,17 @@ main: THEORY
     btn_confirm := DARK,
     btn_engage := DARK,
     btn_manual_timeout := 0,
-    btn_auto_timeout := 0,
+    btn_auto_timeout_saline := 0,
+    btn_auto_timeout_contrast := 0,
     timeout_autoload_saline := 0,
     timeout_autoload_contrast := 0,
     prime_confirmed := FALSE,
     prime_volume_saline := 0,
     prime_volume_contrast := 0,
+    prime_warning := FALSE,
+    lock_warning := FALSE,
+    armed := FALSE,
+    injector_rotated := FALSE,
     console_btn_timeout := 0,
     console_btn_ACC := IDLE,
     console_LED_ACC := ORANGE,
@@ -123,12 +140,14 @@ main: THEORY
     console_rate_contrast := 4,
     console_time_saline := 45/4,
     console_time_contrast := 100/4,
+    console_cmd := LOCK,
+    console_dlg := NIL,
     bag_saline_present := FALSE,
     bag_contrast_present := FALSE,
     infusion_set_present := FALSE
   #)
 
-  step: Volume = 1
+  step: Volume = 5
   inc(x: Volume): Volume =
    COND
     x + step <= MAX_VOLUME -> x + step,
@@ -183,7 +202,7 @@ main: THEORY
   release_dec_saline(st: state): state = st
 
   volumes_confirmed?(st: state): bool = vol_saline_confirmed(st) AND vol_contrast_confirmed(st)
-  set_btn_colors(st: state): state =
+  set_LED_state(st: state): state =
     COND
      mode(st) = OFF -> st WITH [
     	btn_fill_contrast := DARK,
@@ -192,25 +211,35 @@ main: THEORY
       	btn_manual := DARK,
       	btn_prime := DARK,
       	btn_confirm := DARK,
-	btn_engage := DARK ],
+	btn_engage := DARK,
+	lock_LED := DARK ],
      mode(st) = LOCKED OR mode(st) = INIT_SYRINGE OR
-       mode(st) = INIT OR mode(st) = INIT_COMPLETE OR
-         mode(st) = READY_TO_PRIME -> st WITH [
+       mode(st) = INIT OR mode(st) = INIT_COMPLETE -> st WITH [
     	btn_fill_contrast := DARK,
       	btn_fill_saline := DARK,
       	btn_auto := DARK,
       	btn_manual := DARK,
       	btn_prime := DARK,
       	btn_confirm := IF prime_confirmed(st) THEN LIGHT ELSE DARK ENDIF,
-	btn_engage := DARK ],
+	btn_engage := DARK,
+	lock_LED := IF mode(st) = LOCKED THEN LIGHT ELSE DARK ENDIF ],
      mode(st) = AUTO -> st WITH [
-    	btn_fill_contrast := IF vol_contrast_confirmed(st) THEN LIGHT ELSE BLINKING ENDIF,
-      	btn_fill_saline := IF vol_saline_confirmed(st) THEN LIGHT ELSE BLINKING ENDIF,
-      	btn_auto := LIGHT,
+    	btn_fill_contrast := IF vol_contrast_confirmed(st)
+			     THEN IF autoload_mode_contrast(st) = DONE OR btn_auto_timeout_contrast(st) = 0
+			     	  THEN DARK
+			     	  ELSE LIGHT ENDIF
+			     ELSE BLINKING ENDIF,
+      	btn_fill_saline := COND
+			     vol_saline_confirmed(st) AND autoload_mode_saline(st) /= DONE -> LIGHT,
+			     NOT vol_saline_confirmed(st) AND btn_auto_timeout_saline(st) > 0 -> BLINKING,
+	                     ELSE -> DARK
+			   ENDCOND,
+      	btn_auto := DARK,
       	btn_manual := DARK,
       	btn_prime := DARK,
       	btn_confirm := DARK,
-	btn_engage := DARK ],
+	btn_engage := DARK,
+	lock_LED := DARK ],
      mode(st) = MANUAL -> st WITH [
     	btn_fill_contrast := DARK,
       	btn_fill_saline := DARK,
@@ -219,6 +248,18 @@ main: THEORY
       	btn_prime := DARK,
       	btn_confirm := IF prime_confirmed(st) THEN LIGHT ELSE DARK ENDIF,
 	btn_engage := DARK ],
+    mode(st) = READY_TO_PRIME -> st WITH [
+    	btn_fill_contrast := DARK,
+      	btn_fill_saline := DARK,
+      	btn_auto := DARK,
+	btn_manual := DARK,
+      	btn_prime := DARK,
+        btn_confirm := IF prime_warning(st)
+	               THEN BLINK3
+		       ELSE IF prime_confirmed(st) THEN LIGHT ELSE DARK ENDIF ENDIF,
+        lock_LED := IF lock_warning(st)
+	            THEN BLINK3
+		    ELSE DARK ENDIF ],
     mode(st) = PRIMING -> st WITH [
     	btn_fill_contrast := DARK,
       	btn_fill_saline := DARK,
@@ -226,21 +267,25 @@ main: THEORY
 	btn_manual := DARK,
       	btn_prime := DARK,
       	btn_confirm := IF prime_confirmed(st) THEN LIGHT ELSE DARK ENDIF,
-	btn_engage := DARK ],
+	btn_engage := DARK,
+	lock_LED := DARK ],
     mode(st) = CONFIRM_PRIME -> st WITH [
     	btn_fill_contrast := DARK,
       	btn_fill_saline := DARK,
       	btn_auto := DARK,
 	btn_manual := DARK,
       	btn_prime := DARK,
-      	btn_confirm := IF prime_confirmed(st) THEN LIGHT ELSE DARK ENDIF,
-	btn_engage := DARK ]	
+        btn_confirm := IF prime_warning(st)
+	               THEN BLINK3
+		       ELSE IF prime_confirmed(st) THEN LIGHT ELSE DARK ENDIF ENDIF,
+	btn_engage := DARK,
+	lock_LED := DARK ]
     ENDCOND
 
 
 
   %-- auto load
-  per_btn_auto(st: state): bool = (mode(st) = INIT_COMPLETE OR mode(st) = CONFIRM_PRIME OR mode(st) = READY_TO_PRIME OR mode(st) = MANUAL)
+  per_btn_auto(st: state): bool = (mode(st) = INIT_COMPLETE OR mode(st) = CONFIRM_PRIME OR mode(st) = READY_TO_PRIME)
   click_btn_auto(st: (per_btn_auto)): state =
    COND
     per_btn_auto(st)
@@ -251,11 +296,14 @@ main: THEORY
       			    vol_contrast_confirmed := FALSE,
                             display_saline := MIRROR_TARGET_VOLUME,
 			    display_contrast := MIRROR_TARGET_VOLUME,
+			    autoload_mode_contrast := IF plunger_contrast(st) > 0 THEN FILL_VOLUME ELSE LOAD30 ENDIF,
+			    autoload_mode_saline := IF plunger_saline(st) > 0 THEN FILL_VOLUME ELSE LOAD30 ENDIF,
 			    prime_volume_saline := 0,
 			    prime_volume_contrast := 0,
-			    prime_confirmed := FALSE,
-			    btn_auto_timeout := BTN_AUTO_TIMEOUT ]
-	  IN set_btn_colors(st),
+			    %prime_confirmed := FALSE,
+			    btn_auto_timeout_saline := BTN_AUTO_TIMEOUT,
+			    btn_auto_timeout_contrast := BTN_AUTO_TIMEOUT ]
+	  IN set_LED_state(st),
     ELSE -> st
    ENDCOND
   
@@ -269,7 +317,7 @@ main: THEORY
       			    vol_saline_confirmed := FALSE,
       			    vol_contrast_confirmed := FALSE,
 			    btn_manual_timeout := BTN_MANUAL_TIMEOUT ]
-	  IN set_btn_colors(st),
+	  IN set_LED_state(st),
     ELSE -> st
    ENDCOND
  
@@ -277,9 +325,9 @@ main: THEORY
   click_btn_fill_saline(st: (per_btn_fill_saline)): state =
    COND
     per_btn_fill_saline(st)
-     -> LET st = st WITH [ vol_saline_confirmed := TRUE ],
-            st = st WITH [ btn_auto_timeout := IF btn_auto_timeout(st) > 0 THEN -1 ELSE btn_auto_timeout(st) ENDIF ] %-- disables timeout for auto button
-          IN set_btn_colors(st),
+     -> LET st = st WITH [ vol_saline_confirmed := TRUE,
+                           btn_auto_timeout_saline := -1 ] %-- disables timeout for saline auto button
+          IN set_LED_state(st),
     ELSE -> st
    ENDCOND
    
@@ -287,20 +335,20 @@ main: THEORY
   click_btn_fill_contrast(st: (per_btn_fill_contrast)): state =
    COND
     per_btn_fill_contrast(st)
-      -> LET st = st WITH [ vol_contrast_confirmed := TRUE ],
-            st = st WITH [ btn_auto_timeout := IF btn_auto_timeout(st) > 0 THEN -1 ELSE btn_auto_timeout(st) ENDIF ] %-- disables timeout for auto button
-          IN set_btn_colors(st),
+      -> LET st = st WITH [ vol_contrast_confirmed := TRUE,
+                            btn_auto_timeout_contrast := -1 ] %-- disables timeout for contrast auto button
+          IN set_LED_state(st),
     ELSE -> st
    ENDCOND
 
-  per_btn_prime(st: state): bool = (mode(st) = READY_TO_PRIME OR mode(st) = CONFIRM_PRIME OR mode(st) = MANUAL)
+  per_btn_prime(st: state): bool = (mode(st) = READY_TO_PRIME OR mode(st) = CONFIRM_PRIME)
   click_btn_prime(st: (per_btn_prime)): state =
    COND
     per_btn_prime(st)
       -> LET st = st WITH [ prime_volume_saline := PRIME_VOLUME_SALINE,
       	     	     	    prime_volume_contrast := PRIME_VOLUME_CONTRAST,
 			    mode := PRIMING ]
-          IN set_btn_colors(st),
+          IN set_LED_state(st),
     ELSE -> st
    ENDCOND
 
@@ -309,27 +357,63 @@ main: THEORY
    COND
     per_btn_confirm(st)
       -> LET st = st WITH [ prime_confirmed := NOT prime_confirmed(st) ]
-          IN set_btn_colors(st),
+          IN set_LED_state(st),
     ELSE -> st
    ENDCOND
 
-  per_btn_engage(st: state): bool = per_btn_prime(st)
-  click_btn_engage(st: (per_btn_engage)): state =
-   COND
-    per_btn_engage(st)
-      -> st WITH [ btn_confirm := IF NOT prime_confirmed(st) THEN BLINKING ELSE btn_confirm(st) ENDIF ],
-    ELSE -> st
-   ENDCOND
-
-  per_btn_console_lock(st: state): bool = prime_confirmed(st)
+  per_btn_console_lock(st: state): bool = (mode(st) = CONFIRM_PRIME OR mode(st) = READY_TO_PRIME)
   click_btn_console_lock(st: (per_btn_console_lock)): state =
    COND
-    per_btn_console_lock(st) ->
-      st WITH [ mode := IF prime_confirmed(st) THEN LOCKED ELSE mode(st) ENDIF ],
+    per_btn_console_lock(st) AND prime_confirmed(st) ->
+      LET st = st WITH [ mode := IF prime_confirmed(st) THEN LOCKED ELSE mode(st) ENDIF,
+	                 console_cmd := ENGAGE ] %-- this is the next command that can be sent from the console (a cyclic pattern LOCK -> ENGAGE -> DISENGAGE is followed)
+       IN set_LED_state(st),
+    per_btn_console_lock(st) AND NOT prime_confirmed(st) ->
+      st WITH [ console_dlg := ASK_CONFIRM_AIR_CHECK ],
     ELSE -> st
    ENDCOND
 
-  %-- these utility functions automatically stop pulling the plunger when the target volume has been reached
+  per_btn_console_engage(st: state): bool = (console_cmd(st) = ENGAGE)
+  click_btn_console_engage(st: (per_btn_console_engage)): state =
+   COND
+    per_btn_console_engage(st) ->
+      COND
+        vol_saline(st) > plunger_saline(st)
+	  OR vol_contrast(st) > plunger_contrast(st)
+           -> st WITH [ console_dlg := VOLUME_WARNING ],
+	ELSE -> st WITH [ console_cmd := DISENGAGE, %-- this is the next command that can be sent from the console (a cyclic pattern LOCK -> ENGAGE -> DISENGAGE is followed)
+	                  armed := TRUE ]
+      ENDCOND,
+    ELSE -> st
+   ENDCOND
+
+  per_btn_engage(st: state): bool = mode(st) /= OFF AND (console_cmd(st) = ENGAGE OR console_cmd(st) = LOCK)
+  click_btn_engage(st: (per_btn_engage)): state =
+    COND
+     per_btn_engage(st)
+       -> COND
+            console_cmd(st) = ENGAGE -> click_btn_console_engage(st), %-- the behavior of the button on the injector mirrors the behavior of the corresponding button on the console
+            console_cmd(st) = LOCK -> IF prime_confirmed(st) = FALSE
+       	    		              THEN st WITH [ btn_confirm := BLINK3, prime_warning := TRUE ]
+       				      ELSE st WITH [ lock_LED := BLINK3, lock_warning := TRUE ] ENDIF,
+     	    ELSE -> st
+	  ENDCOND,
+	ELSE -> st
+   ENDCOND
+
+
+  per_btn_console_disengage(st: state): bool = console_cmd(st) = DISENGAGE
+  click_btn_console_disengage(st: (per_btn_console_disengage)): state =
+   COND
+    per_btn_console_disengage(st) ->
+      LET st = st WITH [ mode := CONFIRM_PRIME,
+	                 console_cmd := LOCK, %-- this is the next command that can be sent from the console (a cyclic pattern LOCK -> ENGAGE -> DISENGAGE is followed)
+	                 armed := FALSE]
+       IN set_LED_state(st),		     
+    ELSE -> st
+   ENDCOND
+
+%-- these utility functions automatically stop pulling the plunger when the target volume has been reached
   per_empty_saline(st: state): bool = (mode(st) = INIT_SYRINGE)
   empty_saline(step: Volume)(st: state): state =
     COND
@@ -425,49 +509,78 @@ main: THEORY
     st WITH [ plunger_contrast := IF plunger_contrast(st) - step > 0 THEN plunger_contrast(st) - step ELSE 0 ENDIF ]
   
   %-- this is for the automatic mode
-  per_tick(st: state): bool = (mode(st) = INIT OR mode(st) = INIT_SYRINGE OR mode(st) = MANUAL OR mode(st) = PRIMING)
+  per_tick(st: state): bool = (mode(st) = INIT OR mode(st) = INIT_SYRINGE OR mode(st) = MANUAL OR mode(st) = READY_TO_PRIME OR mode(st) = CONFIRM_PRIME OR mode(st) = PRIMING)
   tick(st: (per_tick)): state =
     COND
      mode(st) = INIT ->
        LET st = IF syringe_saline_present(st) OR syringe_contrast_present(st)
                 THEN st WITH [ mode := INIT_SYRINGE ] ELSE st ENDIF
-	IN set_btn_colors(st),
+	IN set_LED_state(st),
      mode(st) = INIT_SYRINGE ->
        LET st = IF syringe_saline_present(st) THEN empty_saline(FAST)(st) ELSE st ENDIF,
            st = IF syringe_contrast_present(st) THEN empty_contrast(FAST)(st) ELSE st ENDIF,
 	   st = IF plunger_saline(st) = vol_saline(st) AND plunger_contrast(st) = vol_contrast(st)
 	        THEN st WITH [ mode := INIT_COMPLETE ] ELSE st ENDIF
-	IN set_btn_colors(st),
+	IN set_LED_state(st),
      mode(st) = MANUAL ->
        LET st = st WITH [ btn_manual_timeout := IF btn_manual_timeout(st) - tick_step > 0
                    	  		     	THEN btn_manual_timeout(st) - tick_step
 						ELSE 0 ENDIF],
 	   st = IF btn_manual_timeout(st) = 0 THEN st WITH [ mode := READY_TO_PRIME ] ELSE st ENDIF
-	IN set_btn_colors(st),
+	IN set_LED_state(st),
      mode(st) = AUTO ->
-       COND
-         btn_auto_timeout(st) /= 0 ->
-	   LET st = IF btn_auto_timeout(st) > 0
-	            THEN st WITH [ btn_auto_timeout := IF btn_auto_timeout(st) - tick_step > 0 THEN btn_auto_timeout(st) - tick_step ELSE 0 ENDIF ]
-		    ELSE st ENDIF, %-- btn_auto_timeout is < 0, which means the timeout is disabled
-	       st = IF vol_saline_confirmed(st) THEN auto_plunger_saline(FAST)(st) ELSE st ENDIF,
-	       st = IF vol_contrast_confirmed(st) THEN auto_plunger_contrast(FAST)(st) ELSE st ENDIF,
-	       st = IF vol_saline_confirmed(st) AND vol_contrast_confirmed(st) AND
-	                plunger_saline(st) = vol_saline(st) AND plunger_contrast(st) = vol_contrast(st) AND
-		         autoload_mode_saline(st) = DONE AND autoload_mode_contrast(st) = DONE
-		    THEN st WITH [ mode := READY_TO_PRIME, autoload_mode_saline := FILL_VOLUME, autoload_mode_contrast := FILL_VOLUME ] ELSE st ENDIF
-            IN set_btn_colors(st),
-	  btn_auto_timeout(st) = 0 ->
-	   LET st = st WITH [ mode := IF plunger_contrast(st) = 0 AND plunger_saline(st) = 0 THEN INIT_COMPLETE ELSE READY_TO_PRIME ENDIF,
-	       	       	      vol_contrast := plunger_contrast(st),
-			      vol_saline := plunger_saline(st),
-                              display_saline := MIRROR_PLUNGER_LEVEL,
-			      display_contrast := MIRROR_PLUNGER_LEVEL ]
-	    IN set_btn_colors(st)
-	ENDCOND,
+                LET %-- saline
+		         st = IF btn_auto_timeout_saline(st) /= 0
+                              THEN LET st = IF vol_saline_confirmed(st)
+                                            THEN auto_plunger_saline(FAST)(st) ELSE st ENDIF
+		                    IN st WITH [ btn_auto_timeout_saline := COND btn_auto_timeout_saline(st) > 0
+									            -> IF btn_auto_timeout_saline(st) - tick_step > 0
+		                                                                       THEN btn_auto_timeout_saline(st) - tick_step
+							                               ELSE 0 ENDIF,
+									         ELSE -> btn_auto_timeout_saline(st) ENDCOND ]
+	                      ELSE %-- timeout expired for auto_saline
+		                   st WITH [ vol_saline := plunger_saline(st),
+                                             display_saline := MIRROR_PLUNGER_LEVEL ] ENDIF,
+			 %-- contrast
+                         st = IF btn_auto_timeout_contrast(st) /= 0
+                      	      THEN LET st = IF vol_contrast_confirmed(st)
+                              	       	    THEN auto_plunger_contrast(FAST)(st) ELSE st ENDIF
+		      	            IN st WITH [ btn_auto_timeout_contrast := COND btn_auto_timeout_contrast(st) > 0
+				                                                      -> IF btn_auto_timeout_contrast(st) - tick_step > 0
+		                                                	      	         THEN btn_auto_timeout_contrast(st) - tick_step
+									                 ELSE 0 ENDIF,
+									           ELSE -> btn_auto_timeout_contrast(st) ENDCOND ]
+	                      ELSE %-- timeout expired for auto_contrast
+		                   st WITH [ vol_contrast := plunger_contrast(st),
+                               	      	     display_contrast := MIRROR_PLUNGER_LEVEL ] ENDIF,
+			 %-- we decide here the next operating mode
+			 st = COND
+                                btn_auto_timeout_saline(st) <= 0 AND btn_auto_timeout_contrast(st) <= 0
+				 AND autoload_mode_saline(st) = DONE AND autoload_mode_contrast(st) = DONE
+			          AND plunger_saline(st) > 0 AND plunger_contrast(st) > 0
+				-> st WITH [ mode := READY_TO_PRIME,
+				       	     display_saline := MIRROR_PLUNGER_LEVEL,
+					     display_contrast := MIRROR_PLUNGER_LEVEL],
+					     
+				(btn_auto_timeout_saline(st) = 0 AND plunger_saline(st) = 0 AND autoload_mode_contrast(st) = DONE)
+ 			         OR (btn_auto_timeout_contrast(st) = 0 AND plunger_contrast(st) = 0 AND autoload_mode_saline(st) = DONE)
+				  OR (btn_auto_timeout_saline(st) = 0 AND btn_auto_timeout_contrast(st) = 0)
+				-> st WITH [ mode := INIT_COMPLETE,
+				   	     display_saline := MIRROR_PLUNGER_LEVEL,
+					     display_contrast := MIRROR_PLUNGER_LEVEL],
+			        ELSE -> st ENDCOND
+        IN set_LED_state(st),
+     mode(st) = READY_TO_PRIME OR mode(st) = CONFIRM_PRIME ->
+       LET st = IF prime_warning(st)
+                THEN st WITH [ prime_warning := FALSE ] %-- btn engage was blinking
+		ELSE st ENDIF,
+	   st = IF lock_warning(st)
+	        THEN st WITH [ lock_warning := FALSE ] %-- lock LED was blinking
+		ELSE st ENDIF
+	IN set_LED_state(st),
      mode(st) = PRIMING ->
        LET st = prime_syringes(st)
-        IN set_btn_colors(st),
+        IN set_LED_state(st),
      ELSE -> st
     ENDCOND
 
@@ -569,7 +682,7 @@ main: THEORY
 	   	      vol_contrast := plunger_contrast(st),
 		      btn_manual_timeout := BTN_MANUAL_TIMEOUT,
 		      prime_confirmed := FALSE ]
-    IN set_btn_colors(st)
+    IN set_LED_state(st)
   click_btn_sDOWN_contrast(st: state): state =
    COND
      per_sDOWN_contrast(st) -> sDOWN_contrast(st),
@@ -585,7 +698,7 @@ main: THEORY
 		      vol_contrast := plunger_contrast(st),
 		      btn_manual_timeout := BTN_MANUAL_TIMEOUT,
 		      prime_confirmed := FALSE ]
-    IN set_btn_colors(st)		 
+    IN set_LED_state(st)		 
   click_btn_fDOWN_contrast(st: state): state =
    COND
      per_fDOWN_contrast(st) -> fDOWN_contrast(st),
@@ -639,7 +752,7 @@ main: THEORY
         ELSE -> st ENDCOND
 
   connect_infusion_set(st: state): state =
-   COND (mode(st) = READY_TO_PRIME OR mode(st) = MANUAL) AND bag_contrast_present(st) AND bag_saline_present(st) ->
+   COND (mode(st) = READY_TO_PRIME OR (mode(st) = MANUAL AND plunger_contrast(st) > 0 AND plunger_saline(st) > 0)) AND bag_contrast_present(st) AND bag_saline_present(st) ->
    	st WITH [ infusion_set_present := TRUE,
 	   	  bag_contrast_present := FALSE,
 		  bag_saline_present := FALSE ],
@@ -679,5 +792,39 @@ main: THEORY
 	IN tick(st),
      ELSE -> st
    ENDCOND
+
+  per_confirm_air_check(st: state): bool = (per_btn_confirm(st) AND console_dlg(st) = ASK_CONFIRM_AIR_CHECK)
+  click_btn_confirm_air_check_ok(st: (per_confirm_air_check)): state =
+   COND
+     per_confirm_air_check(st) ->
+       LET st = click_btn_confirm(st)
+        IN click_btn_console_lock(st) WITH [ console_dlg := NIL ],
+     ELSE -> st
+   ENDCOND
+
+  click_btn_confirm_air_check_fail(st: (per_confirm_air_check)): state =
+   COND
+     per_confirm_air_check(st) -> st WITH [ console_dlg := NIL ],
+     ELSE -> st
+   ENDCOND
+
+  per_volume_warning(st: state): bool = (console_dlg(st) = VOLUME_WARNING)
+  click_btn_confirm_volume_warning_ok(st: (per_volume_warning)): state =
+   COND
+     per_volume_warning(st) -> st WITH [ console_cmd := DISENGAGE, %-- this is the next command that can be sent from the console (a cyclic pattern LOCK -> ENGAGE -> DISENGAGE is followed)
+	                                 armed := TRUE,
+					 console_dlg := NIL ],
+     ELSE -> st
+   ENDCOND
+   
+  click_btn_confirm_volume_warning_fail(st: (per_volume_warning)): state =
+   COND
+     per_volume_warning(st) -> st WITH [ console_cmd := ENGAGE, %-- the button on the console stays at 'engage'
+                                         armed := FALSE,
+                                         console_dlg := NIL ],
+     ELSE -> st
+   ENDCOND
+
+  rotate_injector(st: state): state = st WITH [ injector_rotated := NOT injector_rotated(st) ]
 
  END main

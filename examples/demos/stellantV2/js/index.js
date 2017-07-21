@@ -179,7 +179,7 @@ require([
             parent: "stellant",
             callback: onMessageReceived,
             backgroundColor: "transparent", // does this button light up?
-            borderRadius: 20,
+            borderRadius: "20px",
             opacity: 0.5
         });
 
@@ -200,7 +200,7 @@ require([
             parent: "stellant",
             callback: onMessageReceived,
             backgroundColor: "transparent", // does this button light up?
-            borderRadius: 20,
+            borderRadius: "20px",
             opacity: 0.5
         });
         device.btn_fUP_saline = new TouchscreenButton("btn_fUP_saline", {
@@ -213,7 +213,7 @@ require([
             evts: ["press/release"],
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            borderRadius: 20
+            borderRadius: "20px"
         });
         device.btn_fUP_contrast = new TouchscreenButton("btn_fUP_contrast", {
             top: 700,
@@ -225,7 +225,7 @@ require([
             evts: ["press/release"],
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            borderRadius: 20
+            borderRadius: "20px"
         });
         device.btn_sUP_saline = new TouchscreenButton("btn_sUP_saline", {
             top: 780,
@@ -237,7 +237,7 @@ require([
             evts: ["press/release"],
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            borderRadius: 20
+            borderRadius: "20px"
         });
         device.btn_sUP_contrast = new TouchscreenButton("btn_sUP_contrast", {
             top: 780,
@@ -249,7 +249,7 @@ require([
             evts: ["press/release"],
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            borderRadius: 20
+            borderRadius: "20px"
         });
         device.btn_sDOWN_saline = new TouchscreenButton("btn_sDOWN_saline", {
             top: 845,
@@ -261,7 +261,7 @@ require([
             evts: ["press/release"],
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            borderRadius: 20
+            borderRadius: "20px"
         });
         device.btn_sDOWN_contrast = new TouchscreenButton("btn_sDOWN_contrast", {
             top: 845,
@@ -273,7 +273,7 @@ require([
             evts: ["press/release"],
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            borderRadius: 20
+            borderRadius: "20px"
         });
         device.btn_fDOWN_saline = new TouchscreenButton("btn_fDOWN_saline", {
             top: 900,
@@ -285,7 +285,7 @@ require([
             evts: ["press/release"],
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            borderRadius: 20
+            borderRadius: "20px"
         });
         device.btn_fDOWN_contrast = new TouchscreenButton("btn_fDOWN_contrast", {
             top: 900,
@@ -297,7 +297,7 @@ require([
             evts: ["press/release"],
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            borderRadius: 20
+            borderRadius: "20px"
         });
 
 
@@ -310,7 +310,7 @@ require([
             parent: "stellant",
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            borderRadius: 20,
+            borderRadius: "20px",
             opacity: 0.6
         });
         device.btn_fill_contrast = new TouchscreenButton("btn_fill_contrast", {
@@ -322,7 +322,7 @@ require([
             parent: "stellant",
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            borderRadius: 20,
+            borderRadius: "20px",
             opacity: 0.6
         });
 
@@ -343,7 +343,7 @@ require([
             parent: "stellant",
             callback: onMessageReceived,
             backgroundColor: "transparent", // does this button light up?
-            borderRadius: 20,
+            borderRadius: "20px",
             opacity: 0.5
         });
 
@@ -364,7 +364,7 @@ require([
             parent: "stellant",
             callback: onMessageReceived,
             backgroundColor: "transparent", // does this button light up?
-            borderRadius: 20,
+            borderRadius: "20px",
             opacity: 0.5
         });
 
@@ -385,7 +385,7 @@ require([
             parent: "stellant",
             callback: onMessageReceived,
             backgroundColor: "transparent", // does this button light up?
-            borderRadius: 20,
+            borderRadius: "20px",
             opacity: 0.5
         });
         // device.lock = new BasicDisplay("lock", {
@@ -399,14 +399,13 @@ require([
         //     fontColor: "black",
         //     backgroundColor: "transparent" // does this button light up?
         // });
-        device.ready_LED = new LED("ready_LED", {
+        device.lock_LED = new LED("lock_LED", {
             top: 916,
             left: 221,
             width: 13,
             height: 13
         }, {
             parent: "stellant",
-            visibleWhen: "mode = LOCKED",
             callback: onMessageReceived,
             backgroundColor: "transparent" // does this button light up?
         });
@@ -472,7 +471,7 @@ require([
             height: 38
         }, {
             parent: "security_screen",
-            softLabel: "Continue",
+            softLabel: "Continua",
             fontsize: "14",
             fontColor: "black",
             callback: onMessageReceived,
@@ -565,8 +564,39 @@ require([
             fontsize: "14",
             fontColor: "black",
             callback: onMessageReceived,
-            borderRadius: 20,
-            backgroundColor: "gold"
+            borderRadius: "20px",
+            backgroundColor: "gold",
+            visibleWhen: "console_cmd = LOCK"
+        });
+        device.console.btn_console_engage = new TouchscreenButton("btn_console_engage", {
+            top: 945,
+            left: 1180,
+            width: 160,
+            height: 38
+        }, {
+            parent: "protocol_screen",
+            softLabel: "Arma",
+            fontsize: "14",
+            fontColor: "black",
+            callback: onMessageReceived,
+            borderRadius: "20px",
+            backgroundColor: "gold",
+            visibleWhen: "console_cmd = ENGAGE"
+        });
+        device.console.btn_console_disengage = new TouchscreenButton("btn_console_disengage", {
+            top: 945,
+            left: 1180,
+            width: 160,
+            height: 38
+        }, {
+            parent: "protocol_screen",
+            softLabel: "Disarma",
+            fontsize: "14",
+            fontColor: "black",
+            callback: onMessageReceived,
+            borderRadius: "20px",
+            backgroundColor: "gold",
+            visibleWhen: "console_cmd = DISENGAGE"
         });
         device.console.btn_console_manage_protocol = new TouchscreenButton("btn_console_manage_protocol", {
             top: 416,
@@ -581,6 +611,111 @@ require([
             callback: onMessageReceived,
             backgroundColor: "whitesmoke"
         });
+        device.console.btn_confirm_air_check_ok = new TouchscreenButton("btn_confirm_air_check_ok", {
+            top: 383,
+            left: 366,
+            width: 130,
+            height: 38
+        }, {
+            parent: "confirm_air_check_dialog",
+            softLabel: "Si",
+            fontsize: "14",
+            fontColor: "black",
+            callback: onMessageReceived,
+            backgroundColor: "steelblue"
+        });
+        device.console.btn_confirm_air_check_fail = new TouchscreenButton("btn_confirm_air_check_fail", {
+            top: 383,
+            left: 537,
+            width: 130,
+            height: 38
+        }, {
+            parent: "confirm_air_check_dialog",
+            softLabel: "No",
+            fontsize: "14",
+            fontColor: "black",
+            callback: onMessageReceived,
+            backgroundColor: "steelblue"
+        });
+        device.console.click_btn_confirm_volume_warning_ok = new TouchscreenButton("btn_confirm_volume_warning_ok", {
+            top: 470,
+            left: 288,
+            width: 130,
+            height: 38
+        }, {
+            parent: "insufficient_volume_dialog",
+            softLabel: "Si",
+            fontsize: "14",
+            fontColor: "black",
+            callback: onMessageReceived,
+            backgroundColor: "steelblue"
+        });
+        device.console.click_btn_confirm_volume_warning_fail = new TouchscreenButton("btn_confirm_volume_warning_fail", {
+            top: 470,
+            left: 450,
+            width: 130,
+            height: 38
+        }, {
+            parent: "insufficient_volume_dialog",
+            softLabel: "No",
+            fontsize: "14",
+            fontColor: "black",
+            callback: onMessageReceived,
+            backgroundColor: "steelblue"
+        });
+        device.console.big_LED_contrast = new BasicDisplay("big_LED_contrast", {
+            top: 1164,
+            left: 223,
+            width: 127,
+            height: 28
+        }, {
+            parent: "stellant",
+            backgroundColor: "#7FE817", // bright green
+            fontColor: "black",
+            opacity: 0.6,
+            borderRadius: "2px 2px 20px",
+            blinking: true
+        });
+        device.console.big_LED_contrast_2 = new BasicDisplay("big_LED_contrast2", {
+            top: 1127,
+            left: 365,
+            width: 27,
+            height: 28
+        }, {
+            parent: "stellant",
+            backgroundColor: "#7FE817", // bright green
+            fontColor: "black",
+            opacity: 0.9,
+            borderRadius: "20px 2px 20px",
+            blinking: true
+        });
+        device.console.big_LED_saline = new BasicDisplay("big_LED_saline", {
+            top: 1164,
+            left: 94,
+            width: 130,
+            height: 28
+        }, {
+            parent: "stellant",
+            backgroundColor: "blue", // bright blue
+            fontColor: "black",
+            opacity: 0.6,
+            borderRadius: "2px 2px 2px 20px",
+            blinking: true
+        });
+        device.console.big_LED_saline_2 = new BasicDisplay("big_LED_saline_2", {
+            top: 1127,
+            left: 54,
+            width: 27,
+            height: 28
+        }, {
+            parent: "stellant",
+            backgroundColor: "blue", // bright blue
+            fontColor: "black",
+            opacity: 0.6,
+            borderRadius: "2px 20px 2px 20px",
+            blinking: true
+        });
+
 
 
 
@@ -658,6 +793,8 @@ require([
                 if (device[b + "_LED"]) {
                     if (res[b] === "BLINKING") {
                         device[b + "_LED"].blink();
+                    } else if (res[b] === "BLINK3") {
+                        device[b + "_LED"].blink(3);
                     } else if (res[b] === "LIGHT") {
                         device[b + "_LED"].on();
                     } else {
@@ -666,11 +803,14 @@ require([
                 }
             }
             function render_lock(res) {
-                // if (res.mode === "READY") {
-                //     device.lock.renderGlyphicon("glyphicon-lock");
-                // } else {
-                //     device.lock.hide();
-                // }
+                device.lock_LED.render();
+                if (res.lock_LED === "DARK") {
+                    device.lock_LED.off();
+                } else if (res.lock_LED === "LIGHT") {
+                    device.lock_LED.render();
+                } else if (res.lock_LED === "BLINK3") {
+                    device.lock_LED.blink(3);
+                }
             }
             function render_protocol(res) {
                 if (res.console_protocol === "TOTAL_BODY_BARG") {
@@ -683,9 +823,7 @@ require([
             function render_syringes(res) {
                 if (res.console_screen === "CONSOLE_PROTOCOL") {
                     // adjust simulation buttons
-                    if (res.syringe_contrast_present === "FALSE") {
-                        d3.select("#plug_syringe_contrast").attr("style", "opacity:1;");
-                    } else {
+                    if (res.syringe_contrast_present === "TRUE") {
                         d3.select("#plug_syringe_contrast").attr("style", "opacity:0.1;");
                         if (res.bag_contrast_present === "FALSE") {
                             if (res.plunger_contrast === "0") {
@@ -695,10 +833,11 @@ require([
                             d3.select("#spike_contrast_bag").attr("style", "opacity:0.1;");
                             device.syringe_contrast.plugVial();
                         }
-                    }
-                    if (res.syringe_saline_present === "FALSE") {
-                        d3.select("#plug_syringe_saline").attr("style", "opacity:1;");
                     } else {
+                        d3.select("#plug_syringe_contrast").attr("style", "opacity:1;");
+                    }
+
+                    if (res.syringe_saline_present === "TRUE") {
                         d3.select("#plug_syringe_saline").attr("style", "opacity:0.1;");
                         if (res.bag_saline_present === "FALSE") {
                             if (res.plunger_saline === "0") {
@@ -708,8 +847,12 @@ require([
                             d3.select("#spike_saline_bag").attr("style", "opacity:0.1;");
                             device.syringe_saline.plugVial();
                         }
+                    } else {
+                        d3.select("#plug_syringe_saline").attr("style", "opacity:1;");
                     }
-                    if (res.mode === "READY_TO_PRIME" || res.mode === "MANUAL") {
+
+                    if (res.mode === "READY_TO_PRIME" ||
+                            (res.mode === "MANUAL" && parseFloat(res.plunger_saline) > 0 && parseFloat(res.plunger_contrast) > 0)) {
                         if (res.infusion_set_present === "FALSE") {
                             d3.select("#connect_infusion_set").attr("style", "opacity:1;");
                         } else {
@@ -743,11 +886,31 @@ require([
                 if (res.mode === "INIT_SYRINGE" || res.mode === "AUTO" || res.mode === "PRIMING" || res.mode === "MANUAL") {
                     stop_tick_time();
                     start_tick_plunger();
+                } else if (res.prime_warning === "TRUE") {
+                    // this is an optimisation for handling case 'prime warning' in the PVS model (see tick function)
+                    console.log("prime warning");
+                    window.setTimeout(function () {
+                        ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived); // single tick after 3 seconds
+                        console.log("tick");
+                    }, 3000);
                 } else if (res.console_screen === "CONSOLE_PROTOCOL") {
                     stop_tick_plunger();
                     start_tick_time();
                 } else {
                     stop_tick();
+                }
+            }
+            function render_big_LEDs(res) {
+                if (res.armed === "TRUE") {
+                    device.console.big_LED_contrast.render();
+                    device.console.big_LED_contrast_2.render();
+                    device.console.big_LED_saline.render();
+                    device.console.big_LED_saline_2.render();
+                } else {
+                    device.console.big_LED_contrast.hide();
+                    device.console.big_LED_contrast_2.hide();
+                    device.console.big_LED_saline.hide();
+                    device.console.big_LED_saline_2.hide();
                 }
             }
             if (!err) {
@@ -770,8 +933,8 @@ require([
                         render_button("btn_prime", res);
                         render_button("btn_confirm", res);
                         render_button("btn_engage", res);
-                        device.ready_LED.render(res);
                         render_lock(res);
+                        render_big_LEDs(res);
 
                         render_syringes(res);
 
@@ -806,7 +969,27 @@ require([
                             device.console.time_contrast.render(res);
                             device.console.time_saline.render(res);
                             device.console.btn_console_lock.render(res);
+                            device.console.btn_console_engage.render(res);
+                            device.console.btn_console_disengage.render(res);
                             device.console.btn_console_manage_protocol.render(res);
+                            if (res.console_dlg === "ASK_CONFIRM_AIR_CHECK") {
+                                d3.select("#confirm_air_check_dialog").attr("style", "display:block;")
+                                device.console.btn_confirm_air_check_ok.render(res);
+                                device.console.btn_confirm_air_check_fail.render(res);
+                            } else {
+                                d3.select("#confirm_air_check_dialog").attr("style", "display:none;")
+                                device.console.btn_confirm_air_check_ok.hide();
+                                device.console.btn_confirm_air_check_fail.hide();
+                            }
+                            if (res.console_dlg === "VOLUME_WARNING") {
+                                d3.select("#insufficient_volume_dialog").attr("style", "display:block;")
+                                device.console.click_btn_confirm_volume_warning_ok.render(res);
+                                device.console.click_btn_confirm_volume_warning_fail.render(res);
+                            } else {
+                                d3.select("#insufficient_volume_dialog").attr("style", "display:none;")
+                                device.console.click_btn_confirm_volume_warning_ok.hide();
+                                device.console.click_btn_confirm_volume_warning_fail.hide();
+                            }
                             render_protocol(res);
                             render_date();
                         } else {
@@ -819,7 +1002,22 @@ require([
                             device.console.time_saline.hide();
                             device.console.protocol.hide();
                             device.console.btn_console_lock.hide();
+                            device.console.btn_console_engage.hide();
+                            device.console.btn_console_disengage.hide();
                             device.console.btn_console_manage_protocol.hide();
+                            device.console.btn_confirm_air_check_ok.hide();
+                            device.console.btn_confirm_air_check_fail.hide();
+                        }
+                        if (res.injector_rotated === "TRUE") {
+                            d3.select("#stellant")
+                                .style("transition-duration", '400ms').style("transform", "rotateZ(-180deg)translateY(-25px)");
+                            //     .style("transition-duration", '200ms').style("transform", "rotateX(90deg)translateY(-25px)");
+                            // window.setTimeout(function () {
+                            //     d3.select("#stellant")
+                            //         .style("transition-duration", '400ms').style("transform", "rotateX(180deg)translateY(-25px)rotateY(180deg)");
+                            // }, 200);
+                        } else {
+                            d3.select("#stellant").style("transition-duration", '400ms').style("transform", "rotateX(0deg)rotateY(0deg)translateY(0px)");
                         }
                     }
                 }
@@ -846,6 +1044,9 @@ require([
         });
         d3.select("#restart_simulation").on("click", function () {
             ButtonActionsQueue.getInstance().queueGUIAction("restart_simulation", onMessageReceived);
+        });
+        d3.select("#rotate_injector").on("click", function () {
+            ButtonActionsQueue.getInstance().queueGUIAction("rotate_injector", onMessageReceived);
         });
 
         //register event listener for websocket connection from the client

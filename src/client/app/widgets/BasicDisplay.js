@@ -82,14 +82,14 @@ define(function (require, exports, module) {
         var elemClass = id + " displayWidget" + " noselect ";
         if (this.blinking) { elemClass += " blink"; }
         opt.position = opt.position || "absolute";
-        opt.borderRadius = opt.borderRadius || 2;
+        opt.borderRadius = opt.borderRadius || "2px";
         opt.opacity = opt.opacity || 1;
         this.format = opt.format;
         this.div = d3.select(this.parent)
                         .append("div").style("position", opt.position)
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", (this.width+this.borderWidth) + "px").style("height", (this.height+this.borderWidth) + "px")
-                        .style("margin", 0).style("padding", 0).style("border-radius", opt.borderRadius + "px").style("opacity", opt.opacity)
+                        .style("margin", 0).style("padding", 0).style("border-radius", opt.borderRadius).style("opacity", opt.opacity)
                         .style("background-color", this.backgroundColor)
                         .style("border-width", this.borderWidth + "px")
                         .style("border-style", this.borderStyle)
@@ -98,10 +98,10 @@ define(function (require, exports, module) {
         this.div.append("span").attr("id", id + "_span").attr("class", id + "_span")
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0)
-                        .style("vertical-align", "top").style("border-radius", opt.borderRadius + "px").style("opacity", opt.opacity);
+                        .style("vertical-align", "top").style("border-radius", opt.borderRadius).style("opacity", opt.opacity);
         this.div.append("canvas").attr("id", id + "_canvas").attr("class", id + "_canvas")
                         .attr("width", (this.width-this.borderWidth)).attr("height", (this.height-this.borderWidth))
-                        .style("margin", 0).style("padding", 0).style("border-radius", opt.borderRadius + "px").style("opacity", opt.opacity)
+                        .style("margin", 0).style("padding", 0).style("border-radius", opt.borderRadius).style("opacity", opt.opacity)
                         .style("vertical-align", "top");
         var x2 = this.left + this.width;
         var x3 = this.top + this.height;

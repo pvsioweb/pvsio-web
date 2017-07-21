@@ -292,6 +292,8 @@ define(function (require, exports, module) {
             }
             if (this.fittings === "vial" || opt.fittings === "vial") {
                 this.vial.select("svg g").style("display", "block");
+                this.infusionSet.style("display", "none");
+                this.lateralConnectionLine.style("display", "none");
             } else if (this.fittings === "infusionSet" || opt.fittings === "infusionSet") {
                 this.vial.select("svg g").style("display", "none");
                 this.shaft.style("display", "none");

@@ -77,7 +77,8 @@ define(function (require, exports, module) {
         opt.buttonReadback = opt.buttonReadback || "";
         this.buttonReadback = property.call(this, opt.buttonReadback);
         this.overlayButton = new Button(id + "_overlayButton", {
-            left: this.left, top: this.top, height: this.height, width: this.width
+            //left: this.left, top: this.top, height: this.height, width: this.width
+            left: 0, top: 0, height: 0, width: 0
         }, {
             functionText: opt.functionText,
             customFunctionText: opt.customFunctionText,

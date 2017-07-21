@@ -7,6 +7,28 @@
     border:solid;
     background-color:gold;
 }
+.small_dialog {
+    margin-top:248px;
+    margin-left:355px;
+    height:184px;
+    width:322px;
+    z-index:2;
+    border:solid;
+    background-color:white;
+    text-align: center;
+    opacity: 1;
+}
+.large_dialog {
+    margin-top:53px;
+    margin-left:123px;
+    height:474px;
+    width:614px;
+    z-index:2;
+    border:solid;
+    background-color:white;
+    text-align: center;
+    opacity: 1;
+}
 .protocol_screen {
     height: 100%;
     z-index:2;
@@ -18,7 +40,6 @@
     width:320px;
     height:40px;
     left:850px;
-    z-index:2;
     border: solid;
     border-width:1px;
     opacity:0.2;
