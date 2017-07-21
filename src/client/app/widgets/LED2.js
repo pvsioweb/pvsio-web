@@ -177,7 +177,17 @@ define(function (require, exports, module) {
         return this;
     };
 
-    LED2.prototype.blink = function () {
+    LED2.prototype.blink = function (n) {
+        if (n && typeof n === "number") {
+            var wasOn = this.isOn;
+            var _this = this;
+            window.setTimeout(function () {
+                _this.div.attr("class", _this.id() + " noselect");
+                if (!wasOn) {
+                    _this.off();
+                }
+            }, n * 1000);
+        }
         this.div.attr("class", this.id() + " noselect blink");
         this.reveal();
         return this;

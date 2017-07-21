@@ -15,15 +15,18 @@
     <body class="noselect">
         <!-- IMPORTANT: div content must be the first one from the top, otherwise the coordinates of the buttons are not computed correctly -->
         <div id="content" class="content" style="display:none;">
-            <div id="stellant" class="stellant" style="display:block; z-index:0;">
-                <img src="stellant.png" usemap="#prototypeMap" id="stellant_device"/>
+            <map id="prototypeMap" name="prototypeMap"></map>
+            <div style="display:block; z-index:-1; margin-right:-460px;">
+                <img src="background.png"/>
+            </div>
+            <div id="stellant" style="display:block; z-index:0;">
+                <img src="injector.png" usemap="#prototypeMap" id="stellant_device" style="margin-top:260px;"/>
                 <div id="display_saline" style="position: absolute; left: 114px; top: 534px; width: 100px; height: 50px">
                   <canvas id="vol_saline" width="90" height="32"></canvas>
                 </div>
                 <div id="display_contrast" style="position: absolute; left: 260px; top: 534px; width: 100px; height: 50px">
                   <canvas id="vol_contrast" width="90" height="32"></canvas>
                 </div>
-                <map id="prototypeMap" name="prototypeMap"></map>
             </div>
             <div>
                 <div id="simulation_control_panel" class="simulation_control_panel">
@@ -44,6 +47,9 @@
                         </div>
                         <div style="position: absolute; left:1150px; display:none;">
                             <button id="restart_simulation" type="button" class="btn btn-danger" style="width:200px;">Restart simulation</button><br><br>
+                        </div>
+                        <div style="position: absolute; left:260px; top:-100px; width: 420px;">
+                            <button id="rotate_injector" type="button" class="btn btn-danger" style="width:440px;">Rotate injector</button><br><br>
                         </div>
                     </div>
                 </div>
@@ -66,7 +72,7 @@
                                 <div>Prima di iniettare, verificare le impostazioni dell'iniettore.</div><br>
                             </div>
                         </div>
-                        <div id="protocol_screen" class="protocol_screen">
+                        <div id="protocol_screen" class="protocol_screen" style="display:none;">
                             <div id="labels" class="labels">
                                 <div id="source_label" class="label" style="left:10px;"><b>Sorgente fluido</b><br>ml</div>
                                 <div id="rate_label" class="label" style="left:214px;"><b>Flusso</b><br>ml/s</div>
@@ -101,6 +107,23 @@
                             <div id="time_contrast_background" class="time" style="top:505px;"></div>
                             <div id="time_saline_background" class="time" style="top:544px;"></div>
                             <div id="date_background" class="step" style="top:935px; left:700px; width:145px; height:35px;"></div>
+                        </div>
+                        <div id="dialogs" style="position:absolute; top:408px; z-index:3;">
+                            <div id="confirm_air_check_dialog" class="small_dialog" style="display:none;">
+                                <div style="margin:15px 5px;">
+                                    <b>Confermare che il controllo aria e' stato eseguito?</b>
+                                </div>
+                            </div>
+                            <div id="insufficient_volume_dialog" class="large_dialog" style="display:none;">
+                                <div style="margin:15px 5px;">
+                                    <b>Volume insufficiente</b>
+                                    <div style="height:350px;">
+                                        <div id="prot_orig"></div>
+                                        <div id="new_prot"></div>
+                                    </div>
+                                    <div>Accettare le modifiche al protocollo?</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div id="stellant_console_base" style="margin-left:230px; width:468px; height:148px; z-index:1; border:solid; background-color:darkgray;">
