@@ -260,7 +260,7 @@ require([
             parent: "facit",
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            keyCode: 17 // ctrl
+            keyCode: 65 // A
         });
         device.reset2 = new TouchscreenButton("reset2", {
             top: 682,
@@ -271,7 +271,7 @@ require([
             parent: "facit",
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            keyCode: 18 // alt
+            keyCode: 83 // S
         });
         device.reset1 = new TouchscreenButton("reset1", {
             top: 680,
@@ -282,7 +282,7 @@ require([
             parent: "facit",
             callback: onMessageReceived,
             backgroundColor: "transparent",
-            keyCode: 46 // delete
+            keyCode: 68 // D
         });
         device.shift_LED0 = new LED("shift_LED0", {
             top: 241,
