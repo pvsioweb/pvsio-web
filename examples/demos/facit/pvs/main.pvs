@@ -6,7 +6,7 @@ main: THEORY
   MAX_LEN2: posnat = 8
   MAX_DISP2: posnat = 999999999
   MAX_DISP3: posnat = 9999999999999999
-  Direction: TYPE = { x: real | x = -1 OR x = 0 OR x = 1 }
+  Direction: TYPE = { x: int | x = -1 OR x = 0 OR x = 1 }
   
   state: TYPE = [#
     % displays

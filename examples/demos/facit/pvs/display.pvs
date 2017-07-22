@@ -10,7 +10,7 @@ display[N: posnat, MAX_DIGITS: upto(N)]: THEORY
 
   %-- concatenates a digit to the current display value
   concat_digit(x: upto(9))(disp: Display): Display =
-      COND len(disp) < N ->
+      COND len(disp) < MAX_DIGITS ->
              (# d := d(disp) + x,
                 val := val(disp) * 10 + x,
                 len := len(disp) + 1 #),
