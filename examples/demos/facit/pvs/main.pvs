@@ -36,7 +36,7 @@ main: THEORY
   click_reset2(st: state): state = reset_bell(st) WITH [ disp2 := 0, direction := 0 ]
   click_reset3(st: state): state = reset_bell(st) WITH [ disp3 := 0 ]
 
-  per_digit(st: state): bool = (digits_enabled(st) = TRUE)
+  per_digit(st: state): bool = (digits_enabled(st) = TRUE AND shift(st) = 0)
   digit(x: upto(9))(st: (per_digit)): state =
    LET st = reset_bell(st) IN
     COND
@@ -57,10 +57,9 @@ main: THEORY
   click_shift_left(st: state): state =
    LET st = reset_bell(st) IN
     COND
-%      disp1(st)`len < MAX_DIGITS %-- disp1 must not overflow
-%       AND disp1(st)`len > 0 %-- disp1 must have at least a digit before enabling left shifting
-%         AND
-       shift(st) < MAX_LEN2 %-- shift register must not overflow
+      disp1(st)`len < MAX_DIGITS %-- disp1 must not overflow
+       AND disp1(st)`len > 0 %-- disp1 must have at least a digit before enabling left shifting
+         AND shift(st) < MAX_LEN2 %-- shift register must not overflow
        -> st WITH [ shift := shift(st) + 1, disp1 := concat_digit(0)(disp1(st)) ],
              ELSE -> st
     ENDCOND
