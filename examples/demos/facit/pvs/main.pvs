@@ -57,10 +57,12 @@ main: THEORY
   click_shift_left(st: state): state =
    LET st = reset_bell(st) IN
     COND
-      disp1(st)`len < MAX_DIGITS %-- disp1 must not overflow
-       AND disp1(st)`len > 0 %-- disp1 must have at least a digit before enabling left shifting
+      disp1(st)`len < MAX_LEN1 AND %-- disp1 must not overflow
+       disp1(st)`len > 0 %-- disp1 must have at least a digit before enabling left shifting
          AND shift(st) < MAX_LEN2 %-- shift register must not overflow
-       -> st WITH [ shift := shift(st) + 1, disp1 := concat_digit(0)(disp1(st)) ],
+       -> st WITH [ shift := shift(st) + 1, disp1 := IF disp1(st)`len < MAX_DIGITS
+       	     	    	     	       	             THEN concat_digit(0)(disp1(st))
+						     ELSE concat_blank(1)(disp1(st)) ENDIF ],
              ELSE -> st
     ENDCOND
   
