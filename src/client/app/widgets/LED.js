@@ -132,13 +132,9 @@ define(function (require, exports, module) {
             context.fillStyle = opt.color || _this.ledColor();
             context.fill();
             if (!opt.noborder) { context.stroke(); }
-            var elemClass = _this.div.node().getAttribute("class");
-            if (opt.blinking || _this.blinking) {
-                elemClass += " blink";
-            } else {
-                elemClass = elemClass.replace(" blink", "");
+            if (opt.blinking && !_this.blinking) {
+                _this.div.attr("class", _this.div.attr("class") + " blink");
             }
-            _this.div.node().setAttribute("class", elemClass);
             return _this.reveal();
         }
 

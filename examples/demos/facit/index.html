@@ -17,7 +17,7 @@
         <!-- IMPORTANT: div content must be the first one from the top, otherwise the coordinates of the buttons are not computed correctly -->
         <div id="content" class="content" style="display:none;">
             <div id="facit" class="facit" style="display:block; z-index:1; position:absolute; top:0px; left:0px; width:1200px; height:954px;">
-                <img src="image.jpg" usemap="#prototypeMap" id="facit_image"/>
+                <img src="image-1.jpg" usemap="#prototypeMap" id="facit_image"/>
                 <map id="prototypeMap" name="prototypeMap"></map>
                 <div id="imageDiv" style="display:block; z-index:1; position:absolute; top:0px; left:0px; width:1200px; height:954px;">
                     <div class="prototype-image-inner">
@@ -29,12 +29,20 @@
                         </div>
                     </div>
                 </div>
-                <div id="handles" style="display:block; z-index:1;position:absolute;top:0;left:0;">
+                <div class="buttons" style="display:block; z-index:2;position:absolute;top:0;left:0;">
+                    <img src="btn3_down.png" id="btn3_down" style="position:absolute; top:558px; left:44px; opacity:0"/>
+                    <img src="btn3_up.png" id="btn3_up" style="position:absolute; top:542px; left:22px;"/>
+                    <img src="btn2_down.png" id="btn2_down" style="position:absolute; top:490px; left:108px; opacity:0;"/>
+                    <img src="btn2_up.png" id="btn2_up" style="position:absolute; top:543px; left:95px;"/>
+                    <img src="btn1_forward.png" id="btn1_forward" style="position:absolute; top:617px; left:1007px; opacity:0;"/>
+                    <img src="btn1.png" id="btn1" style="position:absolute; top:720px; left:1007px;"/>
+                </div>
+                <div id="handles" style="display:block; z-index:2;position:absolute;top:0;left:0;">
                     <img src="push_dn.png" class="handle" usemap="#prototypeMap" id="rotate_ccw" style="position:absolute; top:524px; left:1095px; padding-bottom:80px; transform:scale(0.7,0.5);"/>
                     <img src="push_up.png" class="handle" usemap="#prototypeMap" id="rotate_cw" style="position:absolute; top:334px; left:1095px; padding-top:40px; transform:scale(0.7,0.5);"/>
                     <img src="push_fw.png" class="handle" usemap="#prototypeMap" id="push_fw" style="position:absolute; top:656px; left:1002px; padding-left:110px;"/>
-                    <img src="push_dn.png" class="handle" usemap="#prototypeMap" id="push_dn2" style="position:absolute; top:576px; left:110px; padding-top:106px;"/>
-                    <img src="push_dn.png" class="handle" usemap="#prototypeMap" id="push_dn3" style="position:absolute; top:576px; left:26px; padding-top:106px;"/>
+                    <img src="push_dn_short.png" class="handle" usemap="#prototypeMap" id="push_dn2" style="position:absolute; top:576px; left:110px; padding-top:106px;"/>
+                    <img src="push_dn_short.png" class="handle" usemap="#prototypeMap" id="push_dn3" style="position:absolute; top:576px; left:26px; padding-top:106px;"/>
                     <div class="handle" style="position:absolute; top:797px; left:1044px; padding-left:110px; font-weight:bold;">D</div>
                     <div class="handle" style="position:absolute; top:710px; left:134px; padding-top:106px; font-weight:bold;">S</div>
                     <div class="handle" style="position:absolute; top:710px; left:48px; padding-top:106px; font-weight:bold;">A</div>

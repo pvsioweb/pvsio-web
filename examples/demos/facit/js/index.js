@@ -46,6 +46,42 @@ require([
             return str;
         }
 
+        function animate_reset1 () {
+            d3.select("#btn1").transition().duration(200).style("opacity", 0.2);
+            d3.select("#btn1_forward").transition().duration(200).style("opacity", 1);
+            window.setTimeout(function () {
+                d3.select("#btn1").transition().duration(200).style("opacity", 1);
+                d3.select("#btn1_forward").transition().duration(200).style("opacity", 0);
+            }, 200);
+        }
+        function animate_reset2 () {
+            d3.select("#btn2_up").transition().duration(200).style("opacity", 0.2);
+            d3.select("#btn2_down").transition().duration(200).style("opacity", 1);
+            window.setTimeout(function () {
+                d3.select("#btn2_up").transition().duration(200).style("opacity", 1);
+                d3.select("#btn2_down").transition().duration(200).style("opacity", 0);
+            }, 200);
+        }
+        function animate_reset3 () {
+            d3.select("#btn3_up").transition().duration(200).style("opacity", 0.2);
+            d3.select("#btn3_down").transition().duration(200).style("opacity", 1);
+            window.setTimeout(function () {
+                d3.select("#btn3_up").transition().duration(200).style("opacity", 1);
+                d3.select("#btn3_down").transition().duration(200).style("opacity", 0);
+            }, 200);
+        }
+        function onMessageReceived_reset3 (err, res) {
+            animate_reset3();
+            onMessageReceived(err, res);
+        }
+        function onMessageReceived_reset2 (err, res) {
+            animate_reset2();
+            onMessageReceived(err, res);
+        }
+        function onMessageReceived_reset1 (err, res) {
+            animate_reset1();
+            onMessageReceived(err, res);
+        }
 
         var device = { };
 
@@ -258,8 +294,9 @@ require([
             height: 165
         }, {
             parent: "facit",
-            callback: onMessageReceived,
+            callback: onMessageReceived_reset3,
             backgroundColor: "transparent",
+            noHalo: true,
             keyCode: 65 // A
         });
         device.reset2 = new TouchscreenButton("reset2", {
@@ -269,8 +306,9 @@ require([
             height: 165
         }, {
             parent: "facit",
-            callback: onMessageReceived,
+            callback: onMessageReceived_reset2,
             backgroundColor: "transparent",
+            noHalo: true,
             keyCode: 83 // S
         });
         device.reset1 = new TouchscreenButton("reset1", {
@@ -280,8 +318,9 @@ require([
             height: 190
         }, {
             parent: "facit",
-            callback: onMessageReceived,
+            callback: onMessageReceived_reset1,
             backgroundColor: "transparent",
+            noHalo: true,
             keyCode: 68 // D
         });
         device.shift_LED0 = new LED("shift_LED0", {
@@ -471,9 +510,18 @@ require([
 
         d3.select("#rotate_cw").on("click", function () { device.mul.click(); });
         d3.select("#rotate_ccw").on("click", function () { device.sub.click(); });
-        d3.select("#push_fw").on("click", function () { device.reset1.click(); });
-        d3.select("#push_dn2").on("click", function () { device.reset2.click(); });
-        d3.select("#push_dn3").on("click", function () { device.reset3.click(); });
+        d3.select("#push_fw").on("click", function () {
+            device.reset1.click();
+            animate_reset1();
+        });
+        d3.select("#push_dn2").on("click", function () {
+            device.reset2.click();
+            animate_reset2();
+        });
+        d3.select("#push_dn3").on("click", function () {
+            device.reset3.click();
+            animate_reset3();
+        });
 
         //register event listener for websocket connection from the client
         client.addListener('WebSocketConnectionOpened', function (e) {

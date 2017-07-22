@@ -131,6 +131,11 @@ define(function (require, exports, module) {
         var visibleWhen = opt.visibleWhen || this.visibleWhen();
         var expr = StateParser.simpleExpressionParser(visibleWhen);
         if (expr && expr.res) {
+            //-- handles blinking option
+            if (opt.blinking && !this.blinking) {
+                this.div.attr("class", this.div.attr("class") + " blink");
+            }
+
             if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                 return this.reveal();
             } else if (expr.res.type === "boolexpr" && expr.res.binop) {

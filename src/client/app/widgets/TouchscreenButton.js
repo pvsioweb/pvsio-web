@@ -26,6 +26,7 @@ define(function (require, exports, module) {
         StateParser = require("util/PVSioStateParser"),
         Widget = require("widgets/Widget"),
         Button = require("widgets/Button"),
+        ButtonHalo2 = require("widgets/ButtonHalo2"),
         BasicDisplay = require("widgets/BasicDisplay");
 
     /**
@@ -76,9 +77,9 @@ define(function (require, exports, module) {
         this.evts = property.call(this, opt.evts);
         opt.buttonReadback = opt.buttonReadback || "";
         this.buttonReadback = property.call(this, opt.buttonReadback);
+
         this.overlayButton = new Button(id + "_overlayButton", {
-            left: this.left, top: this.top, height: this.height, width: this.width
-            //left: 0, top: 0, height: 0, width: 0
+            left: 0, top: 0, height: 0, width: 0
         }, {
             functionText: opt.functionText,
             customFunctionText: opt.customFunctionText,
@@ -88,6 +89,13 @@ define(function (require, exports, module) {
             keyCode: opt.keyCode,
             area: this.div,
             parent: id
+        });
+
+        ButtonHalo2.getInstance().installKeypressHandler(this, {
+            keyCode: opt.keyCode,
+            coords: { left: this.left, top: this.top, height: this.height, width: this.width },
+            evts: opt.evts,
+            noHalo: opt.noHalo
         });
 
         opt.displayKey = opt.displayKey || id;
@@ -165,6 +173,12 @@ define(function (require, exports, module) {
 
     TouchscreenButton.prototype.click = function () {
         this.overlayButton.click();
+    };
+    TouchscreenButton.prototype.release = function () {
+        this.overlayButton.release();
+    };
+    TouchscreenButton.prototype.pressAndHold = function () {
+        this.overlayButton.pressAndHold();
     };
     /**
      * Returns a JSON object representation of this Widget.
