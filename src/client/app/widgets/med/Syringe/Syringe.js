@@ -349,6 +349,10 @@ define(function (require, exports, module) {
     };
     Syringe.prototype.hide = function () {
         this.div.select("svg g").style("display", "none");
+        this.shaft.style("display", "none");
+        this.infusionSet.style("display", "none");
+        this.lateralConnectionLine.style("display", "none");
+        this.vial.select("svg g").style("display", "none");
         return this;
     };
     Syringe.prototype.reveal = function () {
