@@ -254,17 +254,17 @@ require([
             backgroundColor: "transparent",
             keyCode: 39 // arrow right
         });
-        device.shift_max = new TouchscreenButton("shift_max", {
-            top: 684,
-            left: 701,
-            width: 40,
-            height: 60
-        }, {
-            parent: "numberpad",
-            callback: onMessageReceived,
-            backgroundColor: "transparent"
-            //keyCode: ...//
-        });
+        // device.shift_max = new TouchscreenButton("shift_max", {
+        //     top: 684,
+        //     left: 701,
+        //     width: 40,
+        //     height: 60
+        // }, {
+        //     parent: "numberpad",
+        //     callback: onMessageReceived,
+        //     backgroundColor: "transparent"
+        //     //keyCode: ...//
+        // });
         device.mul = new TouchscreenButton("mul", {
             top: 398,
             left: 1080,
@@ -468,7 +468,7 @@ require([
                 device.key9.render();
                 device.shift_left.render();
                 device.shift_right.render();
-                device.shift_max.render();
+                // device.shift_max.render();
                 device.mul.render();
                 device.sub.render();
                 device.reset3.render();
