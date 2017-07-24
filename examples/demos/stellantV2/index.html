@@ -27,6 +27,12 @@
                 <div id="display_contrast" style="position: absolute; left: 260px; top: 534px; width: 100px; height: 50px">
                   <canvas id="vol_contrast" width="90" height="32"></canvas>
                 </div>
+                <div id="infusion_contrast_LED" style="position: absolute; left:223px; top:1124px; opacity:0;">
+                  <img src="contrast_LED.png"></img>
+                </div>
+                <div id="infusion_saline_LED" style="position: absolute; left:39px; top:1112px; opacity:0;">
+                  <img src="saline_LED.png"></img>
+                </div>
             </div>
             <div>
                 <div id="simulation_control_panel" class="simulation_control_panel">
@@ -122,6 +128,11 @@
                                         <div id="new_prot"></div>
                                     </div>
                                     <div>Accettare le modifiche al protocollo?</div>
+                                </div>
+                            </div>
+                            <div id="infusion_complete_dialog" class="small_dialog" style="display:none; background-color:greenyellow;">
+                                <div style="margin:15px 5px;">
+                                    <b>Infusion complete!</b>
                                 </div>
                             </div>
                         </div>

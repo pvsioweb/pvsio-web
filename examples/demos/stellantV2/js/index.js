@@ -179,8 +179,7 @@ require([
             parent: "stellant",
             callback: onMessageReceived,
             backgroundColor: "transparent", // does this button light up?
-            borderRadius: "20px",
-            opacity: 0.5
+            borderRadius: "20px"
         });
 
         device.btn_manual_LED = new LED2("btn_manual_LED", {
@@ -200,8 +199,7 @@ require([
             parent: "stellant",
             callback: onMessageReceived,
             backgroundColor: "transparent", // does this button light up?
-            borderRadius: "20px",
-            opacity: 0.5
+            borderRadius: "20px"
         });
         device.btn_fUP_saline = new TouchscreenButton("btn_fUP_saline", {
             top: 700,
@@ -311,7 +309,8 @@ require([
             callback: onMessageReceived,
             backgroundColor: "transparent",
             borderRadius: "20px",
-            opacity: 0.6
+            opacity: 0.6,
+            keyCode: 65 // A
         });
         device.btn_fill_contrast = new TouchscreenButton("btn_fill_contrast", {
             top: 627,
@@ -323,7 +322,8 @@ require([
             callback: onMessageReceived,
             backgroundColor: "transparent",
             borderRadius: "20px",
-            opacity: 0.6
+            opacity: 0.6,
+            keyCode: 83 // S
         });
 
         device.btn_prime_LED = new LED2("btn_prime_LED", {
@@ -388,17 +388,30 @@ require([
             borderRadius: "20px",
             opacity: 0.5
         });
-        // device.lock = new BasicDisplay("lock", {
-        //     top: 913,
-        //     left: 220,
-        //     width: 24,
-        //     height: 24
-        // }, {
-        //     parent: "stellant",
-        //     callback: onMessageReceived,
-        //     fontColor: "black",
-        //     backgroundColor: "transparent" // does this button light up?
-        // });
+        device.btn_stop = new TouchscreenButton("btn_stop", {
+            top: 1022,
+            left: 120,
+            width: 85,
+            height: 38
+        }, {
+            parent: "stellant",
+            callback: onMessageReceived,
+            backgroundColor: "transparent",
+            borderRadius: "20px",
+            opacity: 0.5
+        });
+        device.btn_start = new TouchscreenButton("btn_start", {
+            top: 1022,
+            left: 245,
+            width: 85,
+            height: 38
+        }, {
+            parent: "stellant",
+            callback: onMessageReceived,
+            backgroundColor: "transparent",
+            borderRadius: "20px",
+            opacity: 0.5
+        });
         device.lock_LED = new LED("lock_LED", {
             top: 916,
             left: 221,
@@ -443,7 +456,7 @@ require([
         });
         device.console.LED_ACC = new LED("console_LED_ACC", {
             top: 1060,
-            left: 886,
+            left: 888,
             width: 20,
             height: 20
         }, {
@@ -663,60 +676,28 @@ require([
             callback: onMessageReceived,
             backgroundColor: "steelblue"
         });
-        device.console.big_LED_contrast = new BasicDisplay("big_LED_contrast", {
-            top: 1164,
-            left: 223,
-            width: 127,
-            height: 28
+        device.console.btn_start = new TouchscreenButton("btn_console_start", {
+            top: 1069,
+            left: 1008,
+            width: 115,
+            height: 38
         }, {
-            parent: "stellant",
-            backgroundColor: "#7FE817", // bright green
-            fontColor: "black",
-            opacity: 0.6,
-            borderRadius: "2px 2px 20px",
-            blinking: true
+            parent: "stellant_console_screen",
+            callback: onMessageReceived,
+            backgroundColor: "transparent",
+            borderRadius: "20px"
         });
-        device.console.big_LED_contrast_2 = new BasicDisplay("big_LED_contrast2", {
-            top: 1127,
-            left: 365,
-            width: 27,
-            height: 28
+        device.console.btn_stop = new TouchscreenButton("btn_console_stop", {
+            top: 1069,
+            left: 737,
+            width: 115,
+            height: 38
         }, {
-            parent: "stellant",
-            backgroundColor: "#7FE817", // bright green
-            fontColor: "black",
-            opacity: 0.9,
-            borderRadius: "20px 2px 20px",
-            blinking: true
+            parent: "stellant_console_screen",
+            callback: onMessageReceived,
+            backgroundColor: "transparent",
+            borderRadius: "20px"
         });
-        device.console.big_LED_saline = new BasicDisplay("big_LED_saline", {
-            top: 1164,
-            left: 94,
-            width: 130,
-            height: 28
-        }, {
-            parent: "stellant",
-            backgroundColor: "blue", // bright blue
-            fontColor: "black",
-            opacity: 0.6,
-            borderRadius: "2px 2px 2px 20px",
-            blinking: true
-        });
-        device.console.big_LED_saline_2 = new BasicDisplay("big_LED_saline_2", {
-            top: 1127,
-            left: 54,
-            width: 27,
-            height: 28
-        }, {
-            parent: "stellant",
-            backgroundColor: "blue", // bright blue
-            fontColor: "black",
-            opacity: 0.6,
-            borderRadius: "2px 20px 2px 20px",
-            blinking: true
-        });
-
-
 
 
         // utility function
@@ -736,7 +717,7 @@ require([
         function onMessageReceived(err, event) {
             d3.select(".demo-splash").style("display", "none");
             d3.select(".content").style("display", "inline-flex");
-            
+
             function prettyprint(v) {
                 var x = parseInt(v);
                 if (x < 10 ) {
@@ -824,12 +805,22 @@ require([
                 d3.select("#date").html(getDate());
             }
             function render_syringes(res) {
-                if (res.console_screen === "CONSOLE_PROTOCOL") {
+                if (res.mode === "OFF") {
+                    // reset simulation buttons
+                    d3.select("#plug_syringe_contrast").attr("style", "opacity:0.1;");
+                    d3.select("#spike_contrast_bag").attr("style", "opacity:0.1;");
+                    d3.select("#plug_syringe_saline").attr("style", "opacity:0.1;");
+                    d3.select("#spike_saline_bag").attr("style", "opacity:0.1;");
+                    d3.select("#connect_infusion_set").attr("style", "opacity:0.1;");
+                    // remove all fittings attached to syringes
+                    device.syringe_saline.removeFittings();
+                    device.syringe_contrast.removeFittings();
+                } else if (res.console_screen === "CONSOLE_PROTOCOL") {
                     // adjust simulation buttons
                     if (res.syringe_contrast_present === "TRUE") {
                         d3.select("#plug_syringe_contrast").attr("style", "opacity:0.1;");
                         if (res.bag_contrast_present === "FALSE") {
-                            if (res.plunger_contrast === "0") {
+                            if (res.plunger_contrast === "0" && res.mode === "INIT_COMPLETE") {
                                 d3.select("#spike_contrast_bag").attr("style", "opacity:1;");
                             }
                         } else {
@@ -843,7 +834,7 @@ require([
                     if (res.syringe_saline_present === "TRUE") {
                         d3.select("#plug_syringe_saline").attr("style", "opacity:0.1;");
                         if (res.bag_saline_present === "FALSE") {
-                            if (res.plunger_saline === "0") {
+                            if (res.plunger_saline === "0" && res.mode === "INIT_COMPLETE") {
                                 d3.select("#spike_saline_bag").attr("style", "opacity:1;");
                             }
                         } else {
@@ -861,14 +852,12 @@ require([
                         } else {
                             device.syringe_saline.plugInfusionSet();
                             device.syringe_contrast.plugLateralConnectionLine();
-                            device.syringe_saline.containsFluid();
-                            device.syringe_contrast.containsFluid();
                             d3.select("#connect_infusion_set").attr("style", "opacity:0.1;");
                         }
                     }
                 }
                 if (res.syringe_saline_present === "TRUE") {
-                    if (res.bag_saline_present === "TRUE" || res.infusion_set_present === "TRUE") {
+                    if (res.fluid_in_saline_syringe === "TRUE") {
                         device.syringe_saline.containsFluid();
                         device.syringe_saline.render(res.plunger_saline);
                     } else {
@@ -877,7 +866,7 @@ require([
                     }
                 } else { device.syringe_saline.hide(); }
                 if (res.syringe_contrast_present === "TRUE") {
-                    if (res.bag_contrast_present === "TRUE"  || res.infusion_set_present === "TRUE") {
+                    if (res.fluid_in_contrast_syringe === "TRUE") {
                         device.syringe_contrast.containsFluid();
                         device.syringe_contrast.render(res.plunger_contrast);
                     } else {
@@ -886,12 +875,14 @@ require([
                     }
                 } else { device.syringe_contrast.hide(); }
 
-                if (res.mode === "INIT_SYRINGE" || res.mode === "AUTO" || res.mode === "PRIMING" || res.mode === "MANUAL") {
+                if (res.mode === "INIT_SYRINGE" || res.mode === "AUTO" || res.mode === "PRIMING"
+                        || res.mode === "MANUAL" //|| res.mode === "CONFIRM_PRIME"
+                        || res.mode === "INFUSING") {
                     stop_tick_time();
                     start_tick_plunger();
-                } else if (res.prime_warning === "TRUE") {
+                } else if (res.prime_warning === "TRUE" || res.lock_warning === "TRUE") {
                     // this is an optimisation for handling case 'prime warning' in the PVS model (see tick function)
-                    console.log("prime warning");
+                    stop_tick();
                     window.setTimeout(function () {
                         ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived); // single tick after 3 seconds
                         console.log("tick");
@@ -903,17 +894,21 @@ require([
                     stop_tick();
                 }
             }
-            function render_big_LEDs(res) {
-                if (res.armed === "TRUE") {
-                    device.console.big_LED_contrast.render();
-                    device.console.big_LED_contrast_2.render();
-                    device.console.big_LED_saline.render();
-                    device.console.big_LED_saline_2.render();
+            function render_infusion_LEDs(res) {
+                if (res.infusion_contrast_LED === "LIGHT") {
+                    d3.select("#infusion_contrast_LED").classed("blink", false).style("opacity", "0.7");
+                } else if (res.infusion_contrast_LED === "BLINKING") {
+                    d3.select("#infusion_contrast_LED").classed("blink", true).style("opacity", "0.7");
                 } else {
-                    device.console.big_LED_contrast.hide();
-                    device.console.big_LED_contrast_2.hide();
-                    device.console.big_LED_saline.hide();
-                    device.console.big_LED_saline_2.hide();
+                    d3.select("#infusion_contrast_LED").classed("blink", false).style("opacity", "0");
+                }
+
+                if (res.infusion_saline_LED === "LIGHT") {
+                    d3.select("#infusion_saline_LED").classed("blink", false).style("opacity", "0.9");
+                } else if (res.infusion_saline_LED === "BLINKING") {
+                    d3.select("#infusion_saline_LED").classed("blink", true).style("opacity", "0.9");
+                } else {
+                    d3.select("#infusion_saline_LED").classed("blink", false).style("opacity", "0");
                 }
             }
             if (!err) {
@@ -936,8 +931,11 @@ require([
                         render_button("btn_prime", res);
                         render_button("btn_confirm", res);
                         render_button("btn_engage", res);
+                        render_button("btn_start", res);
+                        render_button("btn_stop", res);
+
                         render_lock(res);
-                        render_big_LEDs(res);
+                        render_infusion_LEDs(res);
 
                         render_syringes(res);
 
@@ -951,6 +949,8 @@ require([
                         device.btn_fDOWN_contrast.render();
                         //-- console buttons & LEDs
                         device.console.btn_ACC.render();
+                        device.console.btn_start.render();
+                        device.console.btn_stop.render();
                         if (res.console_LED_ACC === "GREEN") {
                             device.console.LED_ACC.render(res, { color: "#5cb85c" }); // bright green
                         } else {
@@ -993,10 +993,17 @@ require([
                                 device.console.click_btn_confirm_volume_warning_ok.hide();
                                 device.console.click_btn_confirm_volume_warning_fail.hide();
                             }
+                            if (res.console_dlg === "MSG_INFUSION_COMPLETE") {
+                                d3.select("#infusion_complete_dialog").attr("style", "display:block;")
+                            } else {
+                                d3.select("#infusion_complete_dialog").attr("style", "display:none;")
+                            }
                             render_protocol(res);
                             render_date();
                         } else {
                             d3.select("#protocol_screen").attr("style", "display:none");
+                            d3.select("#insufficient_volume_dialog").attr("style", "display:none;")
+                            d3.select("#infusion_complete_dialog").attr("style", "display:none;")
                             device.console.vol_contrast.hide();
                             device.console.vol_saline.hide();
                             device.console.rate_contrast.hide();
