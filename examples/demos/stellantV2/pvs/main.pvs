@@ -325,24 +325,12 @@ main: THEORY
     ELSE -> st
    ENDCOND
 
-  per_btn_confirm(st: state): bool = per_btn_prime(st)
-  click_btn_confirm(st: (per_btn_confirm)): state =
-   COND
-    per_btn_confirm(st)
-      -> LET st = st WITH [ prime_confirmed := NOT prime_confirmed(st) ]
-          IN set_LED_state(st),
-    ELSE -> st
-   ENDCOND
-
   per_btn_console_lock(st: state): bool = per_btn_prime(st)
   click_btn_console_lock(st: (per_btn_console_lock)): state =
    COND
-    per_btn_console_lock(st) AND prime_confirmed(st) ->
-      LET st = st WITH [ console_locked := prime_confirmed(st),
+    per_btn_console_lock(st) ->
+      LET st = st WITH [ console_locked := TRUE,
 	                 console_cmd := ENGAGE ] %-- this is the next command that can be sent from the console (a cyclic pattern LOCK -> ENGAGE -> DISENGAGE is followed)
-       IN set_LED_state(st),
-    per_btn_console_lock(st) AND NOT prime_confirmed(st) ->
-      LET st = st WITH [ console_dlg := ASK_CONFIRM_AIR_CHECK ]
        IN set_LED_state(st),
     ELSE -> st
    ENDCOND
@@ -350,7 +338,7 @@ main: THEORY
   per_btn_console_engage(st: state): bool = (console_cmd(st) = ENGAGE)
   click_btn_console_engage(st: (per_btn_console_engage)): state =
    COND
-    per_btn_console_engage(st) ->
+    per_btn_console_engage(st) AND prime_confirmed(st) ->
       COND
         console_vol_saline(st) > plunger_saline(st)
 	  OR console_vol_contrast(st) > plunger_contrast(st)
@@ -361,6 +349,9 @@ main: THEORY
 				   infuse_mode := READY ]
 		 IN set_LED_state(st)
       ENDCOND,
+    per_btn_console_engage(st) AND NOT prime_confirmed(st) ->
+      LET st = st WITH [ console_dlg := ASK_CONFIRM_AIR_CHECK ]
+       IN set_LED_state(st),    
     ELSE -> st
    ENDCOND
 
@@ -379,6 +370,15 @@ main: THEORY
      	    ELSE -> st
 	  ENDCOND,
 	ELSE -> st
+   ENDCOND
+
+  per_btn_confirm(st: state): bool = per_btn_engage(st)
+  click_btn_confirm(st: (per_btn_confirm)): state =
+   COND
+    per_btn_confirm(st)
+      -> LET st = st WITH [ prime_confirmed := NOT prime_confirmed(st) ]
+          IN set_LED_state(st),
+    ELSE -> st
    ENDCOND
 
 
@@ -811,7 +811,7 @@ main: THEORY
    COND
      per_confirm_air_check(st) ->
        LET st = click_btn_confirm(st)
-        IN click_btn_console_lock(st) WITH [ console_dlg := NIL ],
+        IN click_btn_engage(st) WITH [ console_dlg := NIL ],
      ELSE -> st
    ENDCOND
 
