@@ -810,8 +810,9 @@ main: THEORY
   click_btn_confirm_air_check_ok(st: (per_confirm_air_check)): state =
    COND
      per_confirm_air_check(st) ->
-       LET st = click_btn_confirm(st)
-        IN click_btn_engage(st) WITH [ console_dlg := NIL ],
+       LET st = click_btn_confirm(st),
+           st = click_btn_engage(st)
+	IN st WITH [ console_dlg := IF console_dlg(st) = ASK_CONFIRM_AIR_CHECK THEN NIL ELSE console_dlg(st) ENDIF ],
      ELSE -> st
    ENDCOND
 
