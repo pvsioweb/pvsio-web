@@ -759,7 +759,7 @@ main: THEORY
         ELSE -> st ENDCOND
 
   connect_infusion_set(st: state): state =
-   COND (mode(st) = READY_TO_PRIME OR (mode(st) = MANUAL AND plunger_contrast(st) > 0 AND plunger_saline(st) > 0)) AND bag_contrast_present(st) AND bag_saline_present(st) ->
+   COND (mode(st) = READY_TO_PRIME OR mode(st) = CONFIRM_PRIME OR (mode(st) = MANUAL AND plunger_contrast(st) > 0 AND plunger_saline(st) > 0)) AND bag_contrast_present(st) AND bag_saline_present(st) ->
    	st WITH [ infusion_set_present := TRUE,
 	   	  bag_contrast_present := FALSE,
 		  bag_saline_present := FALSE ],
