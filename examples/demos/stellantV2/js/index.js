@@ -845,7 +845,7 @@ require([
                         d3.select("#plug_syringe_saline").attr("style", "opacity:1;");
                     }
 
-                    if (res.mode === "READY_TO_PRIME" ||
+                    if (res.mode === "READY_TO_PRIME" || res.mode === "CONFIRM_PRIME" ||
                             (res.mode === "MANUAL" && parseFloat(res.plunger_saline) > 0 && parseFloat(res.plunger_contrast) > 0)) {
                         if (res.infusion_set_present === "FALSE") {
                             d3.select("#connect_infusion_set").attr("style", "opacity:1;");
