@@ -164,11 +164,11 @@ define(function (require, exports, module) {
 
         this.mtouch = mtouchEvents()
             .on("taphold", function (d) {
+                console.log("taphold");
                 mousedown_handler();
-                console.log("taphold")
             }).on("release", function (d) {
-                console.log("release")
-                mouseup_handler()
+                console.log("release");
+                mouseup_handler();
             });
         d3.select("#" + id + "_overlayDisplay").call(this.mtouch);
 
