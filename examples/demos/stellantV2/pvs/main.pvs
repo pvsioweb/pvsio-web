@@ -627,7 +627,8 @@ main: THEORY
    LET st = pull_plunger_saline(SLOW)(st)
     IN st WITH [ vol_saline := plunger_saline(st),
 		 vol_contrast := plunger_contrast(st),
-		 btn_manual_timeout := BTN_MANUAL_TIMEOUT ]
+		 btn_manual_timeout := BTN_MANUAL_TIMEOUT,
+		 prime_confirmed := FALSE ]
 
   click_btn_sDOWN_saline(st: state): state =
    COND
