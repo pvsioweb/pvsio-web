@@ -5,7 +5,7 @@ CFLAGS = -Wall -O2 -Werror -Wmissing-noreturn -Wpacked -Wunreachable-code
 LDFLAGS= -lm
 DEBUG = -Wall -O2 -Werror -Wmissing-noreturn -Wpacked -Wunreachable-code -D DEBUG
 HEAD = {{filename}}.h
-SOURCES = {{filename}}.c dbg_utils.c pvsioweb_utils.c main.c
+SOURCES = {{filename}}.c main.c
 OBJ = $(SOURCES:.c=.o)
 DEBUGFILES = main.dSYM
 

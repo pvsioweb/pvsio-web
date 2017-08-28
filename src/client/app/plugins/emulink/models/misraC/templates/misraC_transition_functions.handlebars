@@ -13,13 +13,9 @@
 %                is not covered by any case in the COND-ENDCOND construct.) With the full_coverage flag enabled, however, the typechecker
 %                won't be able to check coverage of conditions.
 %
-{{/if}}{{#if comment}}/*
+{{/if}}{{#if comment}}/**
  * {{comment}}
  */{{/if}}
-#ifdef DBG
-#include "dbg_utils.h"
-#endif
-
 {{#each functions}}bool per_{{name}}(State* st){{#if ../is_header_file}};{{else}} {
     return {{#each cases}}({{cond}}){{#unless @last}}
             || {{/unless}}{{/each}};

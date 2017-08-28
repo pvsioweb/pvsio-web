@@ -1,9 +1,9 @@
 /** @module EmuchartsGenericPrinter */
 /**
- * EmuchartsGenericPrinter provides utility functions that can be used by other printers for creating the data structures necessary to all printers
+ * EmuchartsGenericPrinter processes an emucharts diagram and creates the data structures necessary for code/model generation
  * @author Paolo Masci
  * @date May 29, 2017
- * Emuchart objects have the following structure:
+ * Emucharts objects have the following structure:
       emuchart = {
                 name: (string),
                 author: {
@@ -12,6 +12,10 @@
                     contact: (string)
                 },
                 importings: (not used for now),
+                datatypes: (array of { -- only enumerated types are supported for now
+                                name: (string), // the datatype identifier
+                                constructors: array of { string }, // the datatype constructors
+                            }),
                 constants: (array of {
                                 name: (string), // the constant identifier
                                 type: (string), // the constant type
@@ -48,6 +52,221 @@
                                 },
                             })
       }
+
+The model printed by the Generic Printer has the following structure (the emuchart structure
+is mostly maintained, the main different is that triggers are now integrated into a hierarchy,
+variables are properly flagged (using a boolean isVariable), and expressions, and constants
+are post-processed using specific functions provided by language-specific printers):
+
+ model = {
+    enter_leave: {
+        current_mode: {
+            name: (string),
+            type: (string),
+            value: (string)
+        },
+        previous_mode: {
+            name: (string),
+            type: (string),
+            value: (string)
+        },
+        entry_actions: array of actions --- TODO
+        exit_actions: array of actions --- TODO
+    }
+    constants: array of {
+        name: (string)
+        type: (string)
+        value: (string)
+    }
+    modes: {
+        type: (string), -- type of the state attribute used for storing mode information
+        modes: array of { string } -- enumerated constants listing possible modes
+    }
+    datatypes: array of {
+        name: (string) -- name of the datatype
+        constructors: array of { string } -- enumerated constants listing the datatype constructors
+    }
+    state_variables: array of {
+        name: (string), -- the variable identifier
+        type: (string), -- the variable type
+        value: (string) -- the initial value of the variable
+    },
+    init: {
+        name: (string)
+        override: array of {
+            cond: expression -- this expression is generated from the transition label using emuchartsParser2.parseCondition
+            actions: array of {
+              variable_type: (string))
+              variable_name: (string)
+              override_expression: expression -- this expression is generated from the transition label using emuchartsParser2.parseAction
+            }
+    },
+    triggers: {
+        functions: {
+            name: (string) -- the function name
+            cases: array of {
+            cond: expression -- this expression is generated from the transition label using emuchartsParser2.parseCondition
+            actions: array of { actions } -- the actions are generated from the transition label using emuchartsParser2.parseAction
+            from: (string) -- mode name from which the transition originates
+            to: (string) -- mode name where the transition goes
+        }
+    }
+    model_name: emuchart.name
+    // disclaimer: this.print_disclaimer()
+};
+
+***
+An example generic model printed by the Generic Printer is as follows:
+
+{
+ "enter_leave": {
+  "comment": "entry/leave actions",
+  "entry_actions": [],
+  "leave_actions": [],
+  "current_mode": {
+   "name": "mode",
+   "type": "Mode",
+   "value": "off"
+  },
+  "previous_mode": {
+   "name": "previous_mode",
+   "type": "Mode",
+   "value": "off"
+  },
+  "state_type": "State",
+  "enter": "enter",
+  "leave": "leave"
+ },
+ "constants": [
+  {
+   "name": "maxDisp",
+   "type": "real",
+   "value": "10"
+  },
+  {
+   "name": "minDisp",
+   "type": "real",
+   "value": "0"
+  }
+ ],
+ "modes": {
+  "comment": "modes of operation",
+  "type": "Mode",
+  "modes": [
+   "off",
+   "on"
+  ]
+ },
+ "datatypes": {
+  "comment": "user defined datatypes",
+  "datatypes": [
+   {
+    "id": "DATATYPE_LED",
+    "name": "LED",
+    "constructors": [
+     "green",
+     "yellow",
+     "red"
+    ]
+   },
+   {
+    "id": "DATATYPE_Power",
+    "name": "Power",
+    "constructors": [
+     "ON",
+     "OFF"
+    ]
+   }
+  ]
+ },
+ "state_variables": {
+  "comment": "state attributes",
+  "state_type": "State",
+  "variables": [
+   {
+    "name": "mode",
+    "type": "Mode",
+    "value": "off"
+   },
+   {
+    "name": "previous_mode",
+    "type": "Mode",
+    "value": "off"
+   },
+   {
+    "name": "display",
+    "type": "real"
+   }
+  ]
+ },
+ "init": {
+  "comment": "initialisation function",
+  "name": "init",
+  "override": [
+   {
+    "cond": "",
+    "actions": [
+     {
+      "variable_type": "real",
+      "variable_name": "display",
+      "override_expression": "1"
+     }
+    ]
+   }
+  ],
+  "variables": [
+   {
+    "name": "previous_mode",
+    "type": "Mode",
+    "value": "off"
+   },
+   {
+    "name": "mode",
+    "type": "Mode",
+    "value": "off"
+   },
+   {
+    "name": "display",
+    "type": "real",
+    "value": "0"
+   }
+  ],
+  "INIT_WITH_OVERRIDES": true
+ },
+ "triggers": {
+  "comment": "triggers",
+  "functions": [
+   {
+    "name": "tick",
+    "cases": [
+     {
+      "identifier": "tick",
+      "cond": "mode(st) = off",
+      "actions": [],
+      "label": "tick",
+      "from": "off",
+      "to": "on"
+     }
+    ]
+   },
+   {
+    "name": "turn_off",
+    "cases": [
+     {
+      "identifier": "turn_off",
+      "cond": "mode(st) = on",
+      "actions": [],
+      "label": "turn_off",
+      "from": "on",
+      "to": "off"
+     }
+    ]
+   }
+  ]
+ },
+ "model_name": "emucharts_MedtronicMinimed530GSafe"
+}
+
 */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, d3*/
@@ -62,13 +281,14 @@ define(function (require, exports, module) {
     var parser;
     var parser2;
 
-    var undef = "ERROR_MODE_UNINITIALIZED";
+    var undef = "UNINITIALIZED";
     var mode_type = "Mode";
     var state_type = "State";
     var predefined_variables = {
         previous_mode: { name: "previous_mode", type: mode_type, value: undef },
         current_mode: { name: "mode", type: mode_type, value: undef }
     };
+    var predefined_functions = { leave: "leave", enter: "enter" };
 
     /**
      * Constructor
@@ -156,7 +376,8 @@ define(function (require, exports, module) {
     /**
      * Gets Emuchart variables
      */
-    EmuchartsGenericPrinter.prototype.get_variables = function (emuchart) {
+    EmuchartsGenericPrinter.prototype.get_variables = function (emuchart, opt) {
+        opt = opt || {};
         var variables = [];
         variables.push(get_current_mode(emuchart));
         if (predefined_variables.previous_mode) {
@@ -172,19 +393,26 @@ define(function (require, exports, module) {
                 children: x.records.get(key)
             });
         });
-        return {
+        var data = {
             comment: "state attributes",
             state_type: state_type,
             variables: variables
         };
+        // post-processing
+        if (opt.convert_variable && typeof opt.convert_variable === "function") {
+            data.variables = data.variables.map(function (v) {
+                return opt.convert_variable(v);
+            });
+        }
+        return data;
     };
 
     /**
      * Gets utility functions used in Emuchart
      */
-    EmuchartsGenericPrinter.prototype.get_enter_leave = function (emuchart) {
+    EmuchartsGenericPrinter.prototype.get_enter_leave = function (emuchart, opt) {
         function process_actions(actions, state, opt) {
-            opt = opt || [];
+            opt = opt || {};
             var x = (opt.enter) ? state.enter : state.leave;
             var ans = parser2.parseTrigger("{" + x + "}");
             if (ans.res && ans.res.type === "transition") {
@@ -236,7 +464,9 @@ define(function (require, exports, module) {
             leave_actions: leave_actions || [],
             current_mode: get_current_mode(emuchart),
             previous_mode: get_previous_mode(emuchart),
-            state_type: state_type
+            state_type: state_type,
+            enter: (opt.enter) ? opt.enter : predefined_functions.enter,
+            leave: (opt.leave) ? opt.leave : predefined_functions.leave
         };
         if (predefined_variables.previous_mode) {
             data.previous_mode = predefined_variables.previous_mode;
@@ -285,11 +515,12 @@ define(function (require, exports, module) {
     /**
      * Prints PVS definitions for Emuchart initial transitions
      */
-    EmuchartsGenericPrinter.prototype.get_initial_transition = function (emuchart) {
+    EmuchartsGenericPrinter.prototype.get_initial_transition = function (emuchart, opt) {
+        opt = opt || {};
         if (emuchart.initial_transitions && emuchart.initial_transitions.length > 0) {
             setVariables(parser2, emuchart);
             // the name of the initial transition is always init, regardless of what the emucharts says
-            var theTransition = { name: "init", init: [], override: [], variables: [] };
+            var theTransition = { name: "init", override: [], variables: [] };
             // the initial part of the init function is the initialisation of the state variables
             var x = split_variables(emuchart);
             theTransition.variables = x.basic;
@@ -303,11 +534,22 @@ define(function (require, exports, module) {
             var has_cond = false;
             emuchart.initial_transitions.forEach(function (initial_transition) {
                 if (initial_transition && initial_transition.name && initial_transition.name !== "") {
+                    if (initial_transition.name.trim().startsWith("[") === false ||
+                            initial_transition.name.trim().startsWith("{") === false) {
+                        // assume it's a sequence of actions, we need to adorn them with curly braces
+                        initial_transition.name = "{" + initial_transition.name + "}";
+                    }
                     var ans = parser2.parseTrigger(initial_transition.name);
                     if (ans.res) {
-                        var actions = (ans.res.val.actions) ? ans.res.val.actions.val.map(function (action) {
-                            return shapeAction(action.val, emuchart);
-                        }) : null;
+                        var actions = [];
+                        if (ans.res.val && ans.res.val.actions) {
+                            ans.res.val.actions.trim().split(";").forEach(function (action) {
+                                var action_data = parser2.parseAction(action);
+                                if (action_data.res && action_data.res.val && action_data.res.val.type === "assignment") {
+                                    actions.push(shapeAction(action_data.res.val.val));
+                                }
+                            });
+                        }
                         if (ans.res.val.cond) {
                             if (emuchart.initial_transitions.length > 1) {
                                 // we need to force the override of current_mode when the emuchart has multiple initial transitions
@@ -318,8 +560,8 @@ define(function (require, exports, module) {
                                     override_expression: initial_transition.target.name
                                 });
                             }
-                            // print_expression will take care of printing variable names and operators according to the pvs syntax
-                            // option attach_state instructs print_expression to concatenate (st) to variable names
+                            // convert_expression will take care of printing variable names and operators according to the pvs syntax
+                            // option attach_state instructs convert_expression to concatenate (st) to variable names
                             theTransition.override.push({
                                 cond: ans.res.val.cond.val,
                                 actions: actions
@@ -328,7 +570,7 @@ define(function (require, exports, module) {
                         } else {
                             if (actions) {
                                 theTransition.override.push({
-                                    cond: "true",
+                                    cond: ["true"],
                                     actions: actions
                                 });
                             }
@@ -341,8 +583,6 @@ define(function (require, exports, module) {
             var data = {
                 comment: "initialisation function",
                 name: theTransition.name,
-                // args: [{ name: "x",type: "real"}],
-                init: theTransition.init,
                 override: theTransition.override,
                 variables: [get_current_mode(emuchart)].concat(theTransition.variables)
             };
@@ -355,6 +595,22 @@ define(function (require, exports, module) {
                 data.INIT_WITH_OVERRIDES = true;
             } else {
                 data.INIT_MULTI = true;
+            }
+            // post-processing
+            if (opt.convert_expression && typeof opt.convert_expression === "function") {
+                data.override = data.override.map(function (override) {
+                    override.cond = opt.convert_expression(override.cond, emuchart);
+                    override.actions = override.actions.map(function (action) {
+                        action.override_expression = opt.convert_expression(action.override_expression, emuchart, { variable_type: action.variable_type });
+                        return action;
+                    });
+                    return override;
+                });
+            }
+            if (opt.convert_variable && typeof opt.convert_variable === "function") {
+                data.variables = data.variables.map(function (v) {
+                    return opt.convert_variable(v);
+                });
             }
             return data;
         }
@@ -453,22 +709,66 @@ define(function (require, exports, module) {
                 comment: "triggers",
                 functions: theFunction
             };
+            if (opt.convert_expression && typeof opt.convert_expression === "function") {
+                data.functions = data.functions.map(function(f) {
+                    f.cases = f.cases.map(function (cc) {
+                        cc.cond = opt.convert_expression(cc.cond, emuchart);
+                        cc.actions = cc.actions.map(function (action) {
+                            action.value = opt.convert_expression(action.override_expression, emuchart, { variable_type: action.variable_type });
+                            return action;
+                        });
+                        return cc;
+                    });
+                    return f;
+                });
+            }
             return data;
         }
         return null;
+    };
+    EmuchartsGenericPrinter.prototype.get_triggers = function (emuchart, opt) {
+        return this.get_transitions(emuchart, opt);
     };
 
     /**
      * Gets Emuchart constants
      */
-    EmuchartsGenericPrinter.prototype.get_constants = function (emuchart) {
+    EmuchartsGenericPrinter.prototype.get_constants = function (emuchart, opt) {
+        opt = opt || {};
         if (emuchart.constants && emuchart.constants.length > 0) {
-            return {
-                comment: "user defined constants",
-                constants: emuchart.constants
-            };
+            var data = emuchart.constants.map(function (c) {
+                return {
+                    name: c.name,
+                    type: c.type,
+                    value: c.value
+                };
+            });
+            // post-processing
+            if (opt.convert_constant) {
+                data = emuchart.constants.map(function (c) {
+                    return opt.convert_constant(c);
+                });
+            }
+            return data;
         }
         return null;
+    };
+
+    EmuchartsGenericPrinter.prototype.print = function (emuchart, opt) {
+        opt = opt || {};
+        var model = {
+            enter_leave: this.get_enter_leave(emuchart, opt),
+            constants: this.get_constants(emuchart, opt),
+            modes: this.get_modes(emuchart, opt),
+            datatypes: this.get_datatypes(emuchart, opt),
+            state_variables: this.get_variables(emuchart, opt),
+            init: this.get_initial_transition(emuchart, opt),
+            triggers: this.get_transitions(emuchart, opt),
+            model_name: emuchart.name
+            // disclaimer: this.print_disclaimer()
+        };
+        console.log(JSON.stringify(model, null, " "));
+        return model;
     };
 
     // utility function for getting basic printer options

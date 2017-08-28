@@ -8,5 +8,5 @@
 void {{name}}(State* st{{#if args}}{{#each args}}, {{type}} {{name}}{{/each}}{{/if}}){{#if is_header_file}};{{else}} { {{#each variables}}
     st->{{name}} = {{value}};{{/each}}{{#if override}}
     // overrides{{#each override}}{{#each actions}}
-    st->{{variable_name_L1}}{{#if variable_name_l2}}.{{variable_name_l2}}{{/if}} = {{override_expression}};{{/each}}{{/each}}{{/if}}
+    st->{{variable_name}}{{#if variable_name_l2}}.{{variable_name_l2}}{{/if}} = {{override_expression}};{{/each}}{{/each}}{{/if}}
 }{{/if}}

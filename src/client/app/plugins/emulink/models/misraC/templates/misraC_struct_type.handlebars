@@ -10,4 +10,4 @@ typedef {{#if variables}}struct { {{#each variables}}
     {{#if children}}struct { {{#each children}}
         {{type}} {{name}};{{#if originalType}} //-- {{originalType}}{{/if}}{{/each}} } {{name}}{{
        else}}{{type}} {{name}};{{#if originalType}} //-- {{originalType}}{{/if}}{{/if}}{{/each}}
-} {{/if}}{{name}};{{/each}}
+} {{/if}}{{state_type}};{{/each}}
