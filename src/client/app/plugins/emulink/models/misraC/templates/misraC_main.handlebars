@@ -28,7 +28,7 @@ int main() {
     State s;
     init(&s);
 
-    printf("Initialised, current state: %s \n-------\n", mode_names[s.mode]);
+    printf("Initialised, current mode: %s \n-------\n", mode_names[s.mode]);
 
     while(true){
         print_menu();
@@ -40,9 +40,9 @@ int main() {
                 case ({{id}}): {
                     if (per_{{name}}(&s)) {
                         {{name}}(&s);
-                        printf("Function %s: current mode: %s \n\n", function_names[t], mode_names[s.mode]);
+                        printf("Function %s executed!\nCurrent system mode: %s \n\n", function_names[t], mode_names[s.mode]);
                     } else {
-                        printf("Function %s cannot be executed on the current system state.\n\n", function_names[t]);
+                        printf("Function %s cannot be executed in the current system mode.\n\n", function_names[t]);
                     }
                     break;
                 }{{/each}}

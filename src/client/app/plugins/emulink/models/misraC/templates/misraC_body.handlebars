@@ -2,9 +2,11 @@
 %
 %   Description: This template generates the file with function definitions
 %
-{{/if}}{{descriptor}}{{#if importings}}{{#each importings}}#include "{{this}}"
-{{/each}}{{/if}}{{#if init}}{{init}}
+{{/if}}{{descriptor}}{{#if includes}}{{#each includes}}#include "{{this}}"
+{{/each}}{{/if}}{{#if constants}}{{constants}}
+{{/if}}{{#if init}}{{init}}
 {{/if}}{{#if utils}}{{utils}}
-{{/if}}{{#if transitions}}{{transitions}}
+{{/if}}{{#if enter_leave}}{{enter_leave}}
+{{/if}}{{#if triggers}}{{triggers}}
 {{/if}}{{#if disclaimer}}
 {{disclaimer}}{{/if}}

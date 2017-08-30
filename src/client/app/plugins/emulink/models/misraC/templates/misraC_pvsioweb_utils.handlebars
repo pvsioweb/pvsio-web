@@ -7,25 +7,22 @@
  */
 {{#if is_header_file}}#include <math.h>
 #include <time.h>
-
-typedef double D_64;
-typedef unsigned char UC_8;
-#define true 1
-#define false 0
-#define TRUE 1
-#define FALSE 0
-typedef int bool;
+#include "misraC_basic_types.h"
+{{else}}
+#include "pvsioweb_utils.h"
 {{/if}}
 //- get today's date and time in compact format DD.MM.YYYY hh:mm
 UC_8* get_todays_date(){{#if is_header_file}};{{else}} {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
     return tm.tm_mday + "." + (tm.tm_mon + 1) + "." + (tm.tm_year + 1900) + " " + tm.tm_hour + ":" + tm.tm_min;
-}{{/if}}
+}
+{{/if}}
 //- C has a built-in function pow10, which computes 10^i -- no need to define it
 //- trims the fractional number to the number of digits indicated as argument
 D_64 trim(double x, int n){{#if is_header_file}};{{else}} {
-    if (n = 0) { return floor(x); }
+    if (n == 0) { return floor(x); }
     D_64 div = pow10(n);
     return floor(x * div) / div;
-}{{/if}}
+}
+{{/if}}

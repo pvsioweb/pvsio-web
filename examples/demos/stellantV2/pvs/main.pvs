@@ -784,7 +784,7 @@ main: THEORY
        LET st = st WITH [ console_screen := CONSOLE_SECURITY, console_LED_ACC := GREEN, console_btn_ACC := IDLE ]
         IN click_btn_on(st),
      %-- OFF
-     console_btn_ACC(st) = PRESSED AND console_btn_timeout(st) = 0 AND mode(st) /= OFF AND mode(st) /= INFUSING ->
+     console_btn_ACC(st) = PRESSED AND console_btn_timeout(st) = 0 AND mode(st) /= OFF AND console_screen(st) /= CONSOLE_SECURITY AND mode(st) /= INFUSING ->
        init(0) WITH [
          injector_rotated := injector_rotated(st)
        ],

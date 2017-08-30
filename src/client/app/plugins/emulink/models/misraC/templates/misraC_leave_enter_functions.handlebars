@@ -3,10 +3,10 @@
 %   Description: This template generates utility functions for entering and exiting modes,
 %                including the execution of actions performed when entering or exiting a mode
 %
-{{/if}}/*
+{{/if}}/**
  * leave/enter functions
  */
-void {{enter}}({{current_mode.type}} m, {{state_type}}* st){{#if is_header_file}};{{else}} { {{#if entry_actions}}
+void {{enter}}({{./current_mode.type}} m, {{state_type}}* st){{#if is_header_file}};{{else}} { {{#if entry_actions}}
     st->{{current_mode.name}} = m;
     //-- entry actions
     switch(st->{{current_mode.name}}) { {{#each entry_actions}}
@@ -26,5 +26,5 @@ void {{leave}}({{current_mode.type}} m, {{state_type}}* st){{#if is_header_file}
          default: st;{{/if}}
     }{{/if}}{{#if previous_mode}}
     st->{{{previous_mode.name}}} = m;{{else}}
-    //-- keep state{{/if}}
+    //-- nothing to do, previous state is not part of the state variables{{/if}}
 }{{/if}}

@@ -26,6 +26,7 @@ define(function (require, exports, module) {
         StateParser = require("util/PVSioStateParser"),
         Widget = require("widgets/Widget"),
         Button = require("widgets/Button"),
+        mtouchEvents = require("widgets/mtouchEvents"),
         ButtonHalo2 = require("widgets/ButtonHalo2"),
         BasicDisplay = require("widgets/BasicDisplay");
 
@@ -115,6 +116,32 @@ define(function (require, exports, module) {
             parent: id
         });
         var _this = this;
+        function mousedown_handler () {
+            if (_this.backgroundColor !== "transparent") {
+                _this.overlayDisplay.setColors({
+                    backgroundColor: "black",
+                    fontColor: "white"
+                });
+            }
+            if (_this.evts() && _this.evts()[0] === "press/release") {
+                _this.overlayButton.pressAndHold();
+                _this.is_pressed = true;
+            }
+        }
+        function mouseup_handler () {
+            if (_this.backgroundColor !== "transparent") {
+                _this.overlayDisplay.setColors({
+                    backgroundColor: _this.backgroundColor,
+                    fontColor: _this.fontColor
+                });
+            }
+            if (_this.evts() && _this.evts()[0] === "press/release") {
+                _this.overlayButton.release();
+                _this.is_pressed = false;
+            } else {
+                _this.overlayButton.click();
+            }
+        }
         d3.select("#" + id + "_overlayDisplay").on("mouseover", function () {
             if (_this.backgroundColor !== "transparent") {
                 _this.overlayDisplay.setColors({ backgroundColor: dimColor(_this.backgroundColor) });
@@ -130,31 +157,21 @@ define(function (require, exports, module) {
                 _this.overlayButton.release();
                 _this.is_pressed = false;
             }
-        }).on("mousedown", function () {
-            if (_this.backgroundColor !== "transparent") {
-                _this.overlayDisplay.setColors({
-                    backgroundColor: "black",
-                    fontColor: "white"
-                });
-            }
-            if (_this.evts() && _this.evts()[0] === "press/release") {
-                _this.overlayButton.pressAndHold();
-                _this.is_pressed = true;
-            }
-        }).on("mouseup", function () {
-            if (_this.backgroundColor !== "transparent") {
-                _this.overlayDisplay.setColors({
-                    backgroundColor: _this.backgroundColor,
-                    fontColor: _this.fontColor
-                });
-            }
-            if (_this.evts() && _this.evts()[0] === "press/release") {
-                _this.overlayButton.release();
-                _this.is_pressed = false;
-            } else {
-                _this.overlayButton.click();
-            }
         });
+        // -- the following events are replaced by taphold and release
+        //.on("mousedown", mousedown_handler)
+        //.on("mouseup", mouseup_handler);
+
+        this.mtouch = mtouchEvents()
+            .on("taphold", function (d) {
+                console.log("taphold");
+                mousedown_handler();
+            }).on("release", function (d) {
+                console.log("release");
+                mouseup_handler();
+            });
+        d3.select("#" + id + "_overlayDisplay").call(this.mtouch);
+
         if (_this.evts() && _this.evts()[0] === "press/release") {
             this.is_pressed = false;
         }
