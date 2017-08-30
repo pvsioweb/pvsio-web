@@ -38,7 +38,7 @@ require([
     //create a collapsible panel using the pvsiowebclient instance
     var imageHolder = client.createCollapsiblePanel({
         parent: "#content",
-        headerText: "Simulation of the data entry system of a medical infusion pump. Please use the navigation keys of the medical device to interact with the device (greyed out keys are disabled keys).",
+        headerText: "Simulation of a medical infusion pump. Please use the navigation keys to interact with the device (greyed out keys are disabled).",
         showContent: true,
         isDemo: true
     }).style("position", "relative");
