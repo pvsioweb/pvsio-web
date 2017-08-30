@@ -141,11 +141,14 @@ define(function (require, exports, module) {
                     //parse the key and recursively call parseValue to parse the value
                     do {
                         var key = readUntil(subValue.word, index + 1, wordBeforeEqual);
-                        key.word = key.word;
+                        key.word = key.word.trim();
                         key.word = key.word.substr(0, key.word.length - 1); //removing spaces and last char ":"
                         key.index = key.index + 1;
                         val = parseValue(subValue.word.substring(key.index));
-                        res[key.word.trim()] = (typeof val.value === "string") ? val.value.trim() : val.value;
+			if (val && val.value && typeof val.value === "string") {
+				val.value = val.value.trim();
+			}
+                        res[key.word] = val.value;
                         index = (val.index + key.index);
                     } while (subValue.word[index] === ",");
 
@@ -184,7 +187,7 @@ define(function (require, exports, module) {
             token = readUntil(value, token.index, function (ch, prev) {
                 return wordChar(ch, prev) || num(ch) || (/[\/\.\-\"\'\s\_\:\?\!\@\$\^\&\(\)\%<>\;]/).test(ch);
             });
-            if (token.word.endsWith(":")) { // this happens with list types
+            if (token && token.word && typeof token.word === "string" && token.word[token.word.length - 1] === ":") { // this happens with list types
                 token.word = token.word.substr(0, token.word.length - 1).trim();
             }
             return {
