@@ -18,7 +18,7 @@
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, document */
+/*global define, document, Slider */
 define(function (require, exports, module) {
     "use strict";
 
@@ -100,7 +100,6 @@ define(function (require, exports, module) {
                         min: this.min,
                         step: 1,
                         ticks_snap_bounds: 10,
-                        orientation: this.orientation,
                         handle: "bar",
                         ticks: this.ticks,
                         ticks_labels: this.ticks,
