@@ -249,12 +249,9 @@ define(function (require, exports, module) {
         opt = opt || {};
         var anim = opt.animation || this.animation || function () {};
         opt.callback = opt.callback || this.callback;
-
-        if (this.customFunctionText()) {
-            ButtonActionsQueue.queueGUIAction(this.customFunctionText(), opt.callback);
-        } else {
-            ButtonActionsQueue.queueGUIAction("click_" + this.functionText(), opt.callback);
-        }
+        var functionText = opt.functionText || this.customFunctionText() || ("click_" + this.functionText());
+        ButtonActionsQueue.queueGUIAction(functionText, opt.callback);
+        
         anim();
         Recorder.addAction({
             id: this.id(),

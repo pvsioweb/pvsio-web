@@ -188,8 +188,8 @@ define(function (require, exports, module) {
     TouchscreenButton.prototype.constructor = TouchscreenButton;
     TouchscreenButton.prototype.parentClass = Widget.prototype;
 
-    TouchscreenButton.prototype.click = function () {
-        this.overlayButton.click();
+    TouchscreenButton.prototype.click = function (opt) {
+        this.overlayButton.click(opt);
     };
     TouchscreenButton.prototype.release = function () {
         this.overlayButton.release();
