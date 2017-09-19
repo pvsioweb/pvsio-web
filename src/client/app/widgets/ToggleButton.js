@@ -70,7 +70,7 @@ define(function (require, exports, module) {
                         .style("height", (this.height + this.borderWidth) + "px")
                         .style("margin", 0).style("padding", 0).style("border-radius", opt.borderRadius).style("opacity", opt.opacity)
                         .style("background-color", this.backgroundColor)
-                        .style("display", "block").attr("id", id).attr("class", elemClass);
+                        .attr("id", id).attr("class", elemClass);
         this.toggle_elem = this.div.append("div").attr("id", id + "_elem")
                         .style("width", (this.width) + "px")
                         .style("height", (this.height) + "px")
@@ -90,6 +90,7 @@ define(function (require, exports, module) {
         });
         Widget.call(this, id, "toggle_button");
         $('.toggle').toggles();
+        d3.selectAll(".toggle-inner").style("display", "inline-flex"); // this fixes a bug in jquery toggles, which does not render correctly when the browser page is zoomed at 80% zoom
         return this;
     }
     ToggleButton.prototype = Object.create(Widget.prototype);
