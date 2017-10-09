@@ -15,7 +15,7 @@
     "express": "~4.0.0",
     "open": "0.0.5",
     "tracer": "0.7.1",
-    "ws": "0.4.x"
+    "ws": ">=2"
   },
   "devDependencies": {
     "autoprefixer": "^6.3.6",

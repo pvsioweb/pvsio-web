@@ -24,6 +24,8 @@ define(function (require, exports, module) {
         this.name = property.call(this, opt.name || "New widget");
         this.targetScreen = property.call(this, opt.targetScreen);
 
+        this.image = opt.image; // this is a path relative to the project folder
+
         return this;
     };
 
@@ -55,8 +57,23 @@ define(function (require, exports, module) {
                 y: this.y,
                 width: this.width,
                 height: this.height
-            }
+            },
+            image: (this.image) ? this.image.split("/").splice(1).join("/") : null // the image path starts with the project name, we need to remove it
         };
+    };
+
+    /**
+     * Removes the widget from the interface
+     * @memberof PIMWidget
+     */
+    PIMWidget.prototype.remove = function () {
+        if (this.image && d3.select(".pim-prototyper .overlay-images").node()) {
+            var img = d3.select(".pim-prototyper .overlay-images").select("#" + this.name()).remove();
+            if (img && img.node()) {
+                img.remove();
+            }
+        }
+        PIMWidget.prototype.parentClass.remove.apply(this, arguments);
     };
 
     /**
@@ -70,6 +87,7 @@ define(function (require, exports, module) {
                 d3.select(".image-map-layer").select("#" + this.imageMap().node().id).node().parentNode.remove();
             }
         }
+        this.remove();
     };
 
     /**
@@ -87,6 +105,32 @@ define(function (require, exports, module) {
     };
 
     /**
+     * @function createWidgetImage
+     * @description Creates the DOM element that embeds the widget image
+     * @returns this
+     * @memberof PIMWidget
+     */
+    PIMWidget.prototype.createWidgetImage = function () {
+        if(!d3.select(".pim-prototyper .overlay-images").node()) {
+            d3.select(".pim-prototyper .prototype-image-inner")
+                .append("div").classed("overlay-images", true).attr("style", "position:absolute; top:0; left:0; z-index:90;");
+        }
+        if (!d3.select(".pim-prototyper .overlay-images #" + this.name()).node()) {
+            d3.select(".pim-prototyper .overlay-images")
+                .append("img")
+                .style("position", "absolute")
+                .style("max-height", this.height + "px")
+                .style("max-width", this.width +"px")
+                .style("left", this.x + "px")
+                .style("top", this.y + "px")
+                .attr("id", this.name())
+                .attr("src", "projects/" + this.image);
+        }
+        return this;
+    };
+
+
+    /**
      * @override
      * @function createImageMap
      * @description Creates an image map area for this widget, which is used by the simulator mode
@@ -99,6 +143,10 @@ define(function (require, exports, module) {
 
         var area = opt.area || PIMWidget.prototype.parentClass.createImageMap.apply(this, arguments);
         var _this = this;
+
+        if (this.image) {
+            this.createWidgetImage();
+        }
 
         area.on("mousedown", function (e) {
             opt.onClick(_this, e);
@@ -113,6 +161,17 @@ define(function (require, exports, module) {
         this.y = pos.y;
         this.width = pos.width;
         this.height = pos.height;
+
+        if (this.image && d3.select(".pim-prototyper .overlay-images").node()) {
+            var img = d3.select(".pim-prototyper .overlay-images").select("#" + this.name());
+            if (img && img.node()) {
+                img.style("position", "absolute")
+                    .style("max-height", pos.height + "px")
+                    .style("max-width", pos.width +"px")
+                    .style("left", pos.x + "px")
+                    .style("top", pos.y + "px");
+            }
+        }
 
         PIMWidget.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
     };
@@ -153,14 +212,15 @@ define(function (require, exports, module) {
      * @param {ScreenCollection} screens Collection of screens that the widget's targetScreen is contained within
      * @return {Widget} The new widget
      */
-    PIMWidget.initFromJSON = function (jsonObj, screens) {
+    PIMWidget.initFromJSON = function (jsonObj, screens, projectFolder) {
         var widget = new PIMWidget(jsonObj.id, {
             top: jsonObj.coords.y,
             left: jsonObj.coords.x,
             width: jsonObj.coords.width,
             height: jsonObj.coords.height
         }, {
-            name: jsonObj.name
+            name: jsonObj.name,
+            image: (jsonObj.image) ? projectFolder + jsonObj.image : null
         });
 
         if (jsonObj.targetScreen) {

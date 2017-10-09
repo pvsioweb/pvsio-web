@@ -21,7 +21,13 @@ define(function (require, exports, module) {
             "click .btn-screen-duplicate": "_duplicateScreen",
             "click .btn-screen-options": "showEditScreen",
             "click .btn-screen-image": "onClickChangeImage",
-            "click .btn-screen-delete": "showDeleteConfirmation"
+            "click .btn-screen-delete": "showDeleteConfirmation",
+
+            "click .btn-playback-open": "_openScript",
+            "click .btn-playback-play": "_playScript",
+            "click .btn-playback-pause": "_pauseScript",
+            "click .btn-playback-step-forward": "_stepForward",
+            "click .btn-playback-step-backward": "_stepBackward"
         },
 
         /**
@@ -49,6 +55,16 @@ define(function (require, exports, module) {
             this.render();
 
             return this;
+        },
+
+        toEditMode: function () {
+            d3.select(".panel-footer").selectAll(".view").transition().duration(200).style("opacity", 0).style("display", "none");
+            d3.select(".panel-footer").selectAll(".edit").transition().duration(200).style("opacity", 1).style("display", "block");
+        },
+
+        toViewMode: function () {
+            d3.select(".panel-footer").selectAll(".view").transition().duration(200).style("opacity", 1).style("display", "block");
+            d3.select(".panel-footer").selectAll(".edit").transition().duration(200).style("opacity", 0).style("display", "none");
         },
 
         /**
@@ -172,7 +188,24 @@ define(function (require, exports, module) {
             duplicate.set("isInitial", false); // don't allow more than one initial screen
             _this.collection.add(duplicate);
             _this.collection.setSelected(duplicate);
+        },
+
+        _openScript: function () {
+            require("./AlloyScriptPlayer").getInstance().openScriptDialog();
+        },
+        _stepForward: function () {
+            require("./AlloyScriptPlayer").getInstance().stepForward();
+        },
+        _stepBackward: function () {
+            require("./AlloyScriptPlayer").getInstance().stepBackward();
+        },
+        _pauseScript: function () {
+            require("./AlloyScriptPlayer").getInstance().pause();
+        },
+        _playScript: function () {
+            require("./AlloyScriptPlayer").getInstance().play();
         }
+
     });
 
     return ScreenControlsView;
