@@ -1,18 +1,38 @@
 /**
  * @module TouchscreenButton
  * @version 2.0
- * @description Renders a touchscreen button using bootstrap styles
+ * @description Renders a touchscreen button. The button label is static, and defined when the button is created.
+ *              This module provide APIs for setting up user interactions captured by the button,
+ *              as well as the visual appearance of the button.
+ *              Note that the button can also be transparent and without label: this is useful for creating
+ *              interactive areas over pictures of a user interface.
  * @author Paolo Masci
  * @date May 24, 2015
  *
- * @example <caption>Typical use of TouchscreenButton APIs within a PVSio-web plugin module.</caption>
- * // Example module that uses SingleDisplay.
- * define(function (require, exports, module) {
- *     "use strict";
- *     var touchscreen = {};
- *     touchscreen.ok_btn = new TouchscreenButton("ok");
- *     touchscreen.render(); // the display renders 10
- * });
+ * @example <caption>Example use of the widget.</caption>
+ // Example pvsio-web demo that uses TouchscreenButton
+ // The following configuration assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demo/
+ require.config({
+     baseUrl: "../../client/app",
+     paths: {
+         d3: "../lib/d3",
+         lib: "../lib"
+     }
+ });
+ require(["widgets/TouchscreenButton"], function (TouchscreenButton) {
+      "use strict";
+      var device = {};
+      device.touchscreenOk = new TouchscreenButton("touchscreenOk", {
+        top: 200, left: 120, height: 24, width: 120
+      }, {
+        softLabel: "Ok",
+        fontColor: "black",
+        backgroundColor: "blue",
+        fontsize: 16,
+        callback: function (err, data) { console.log("Ok button clicked"); console.log(data); }
+      });
+     device.touchscreenOk.render(); // The touchscreen button is rendered. Clicking the button has the effect of sending a command "click_touchscreenOk(<current state>)" to the pvs back-end
+ });
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
@@ -38,8 +58,14 @@ define(function (require, exports, module) {
      *        the left, top corner, and the width and height of the (rectangular) display.
      *        Default is { top: 0, left: 0, width: 32, height: 20 }.
      * @param opt {Object} Options:
+     *          <li>softLabel (string): the button label (default is blank).
+     *          <li>fontfamily (String): font type (default is "sans-serif")</li>
+     *          <li>fontsize (Number): font size (default is 0.8 * height)</li>
+     *          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
+     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
+     *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
-     * @memberof module:SingleDisplay
+     * @memberof module:TouchscreenButton
      * @instance
      */
     function TouchscreenButton(id, coords, opt) {
@@ -188,20 +214,53 @@ define(function (require, exports, module) {
     TouchscreenButton.prototype.constructor = TouchscreenButton;
     TouchscreenButton.prototype.parentClass = Widget.prototype;
 
+    /**
+     * @function <a name="click">click</a>
+     * @description Clicks the button -- useful to trigger button events programmaticaly.
+     * @memberof module:TouchscreenButton
+     * @instance
+     */
     TouchscreenButton.prototype.click = function (opt) {
         this.overlayButton.click(opt);
     };
+    /**
+     * @function <a name="release">release</a>
+     * @description Releases the button -- useful to trigger button events programmaticaly.
+     * @memberof module:TouchscreenButton
+     * @instance
+     */
     TouchscreenButton.prototype.release = function () {
         this.overlayButton.release();
     };
+    /**
+     * @function <a name="pressAndHold">pressAndHold</a>
+     * @description Press and Holds down the button -- useful to trigger button events programmaticaly.
+     * @memberof module:TouchscreenButton
+     * @instance
+     */
     TouchscreenButton.prototype.pressAndHold = function () {
         this.overlayButton.pressAndHold();
     };
+
     /**
-     * Returns a JSON object representation of this Widget.
-     * @returns {object}
-     * @memberof module:BasicDisplay
-    */
+     * @function <a name="toJSON">toJSON</a>
+     * @description Returns a serialised version of the widget in JSON format.
+     *              This is useful for saving/loading a specific instance of the widget.
+     *              In the current implementation, the following attributes are included in the JSON object:
+     *              <li> type (string): widget type, i.e., "touchscreenbutton" in this case
+     *              <li> id (string): the unique identifier of the widget instance
+     *              <li> softLabel (string): the label of the button
+     *              <li> evts (array of strings): the type of events generated by the button (click, press/release)
+     *              <li> fontsize (string): the font size of the button
+     *              <li> fontColor (string): the font color of the button
+     *              <li> backgroundColor (string): the background color of the button
+     *              <li> boundFunctions (string): the name of the command that will be sent to the pvs back-end when the button is pressed.
+     *              <li> visibleWhen (string): a booloan expression defining when the condition under which the widget is visible
+     *              <li> auditoryFeedback (string): whether auditory feedback is enabled
+     * @returns JSON object
+     * @memberof module:TouchscreenButton
+     * @instance
+     */
     TouchscreenButton.prototype.toJSON = function () {
         return {
             type: this.type(),
@@ -262,7 +321,17 @@ define(function (require, exports, module) {
         d3.select("div." + this.id()).remove();
     };
 
-
+    /**
+     * @function <a name="render">render</a>
+     * @param data {Object} JSON object representing the touchscreen button to be rendered.
+     * @param opt {Object} Override options for the display style, useful to dynamically change the display style during simulations. Available options include:
+     *              <li> fontsize (string): the font size of the display
+     *              <li> fontColor (string): the font color of the display
+     *              <li> backgroundColor (string): the background color of the display
+     *              <li> blinking (Bool): true means the text is blinking
+     * @memberof module:TouchscreenButton
+     * @instance
+     */
     TouchscreenButton.prototype.render = function (state, opt) {
         // state is used to check whether the button is visible/enabled
         // the expression visibleWhen() is the condition we need to check on the state
@@ -313,7 +382,12 @@ define(function (require, exports, module) {
         return this.reveal();
     };
 
-
+    /**
+     * @function <a name="hide">hide</a>
+     * @description Hides the widget
+     * @memberof module:TouchscreenButton
+     * @instance
+     */
     TouchscreenButton.prototype.hide = function (opt) {
         opt = opt || {};
         this.overlayButton.hide(); //FIXME: the mouse cursor is still a pointer when hovering the button area, because of map#prototypeMap
@@ -322,6 +396,12 @@ define(function (require, exports, module) {
         return this;
     };
 
+    /**
+     * @function <a name="reveal">reveal</a>
+     * @description Makes the widget visible
+     * @memberof module:TouchscreenButton
+     * @instance
+     */
     TouchscreenButton.prototype.reveal = function (opt) {
         opt = opt || {};
         this.div.style("display", "block");
@@ -329,6 +409,13 @@ define(function (require, exports, module) {
         return this;
     };
 
+    /**
+     * @function <a name="move">move</a>
+     * @description Changes the position of the widget according to the coordinates given as parameter.
+     * @param data {Object} Coordinates indicating the new position of the widget. The coordinates are given in the form { top: (number), left: (number) }
+     * @memberof module:TouchscreenButton
+     * @instance
+     */
     TouchscreenButton.prototype.move = function (data) {
         data = data || {};
         if (data.top) {

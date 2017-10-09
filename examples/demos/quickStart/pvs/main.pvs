@@ -1,0 +1,22 @@
+% ---------------------------------------------------------------
+%  Theory: simple main demo
+%  Author: Paolo Masci
+%          INESC TEC and Universidade do Minho
+% ---------------------------------------------------------------
+
+main: THEORY
+ BEGIN
+
+  state: TYPE = [#
+    disp: real
+  #]
+  init: state = (#
+    disp := 0
+  #)
+
+  click_touchscreenOk(st: state): state = st
+  click_touchdisp_overlayButton(st: state): state = st
+  togglebtn(st: state): state = st
+  slider(x: real)(st: state): state = st
+
+END main

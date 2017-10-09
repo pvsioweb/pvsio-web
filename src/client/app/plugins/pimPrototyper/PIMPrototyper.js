@@ -225,6 +225,11 @@ define(function (require, exports, module) {
             .each("end", function () {
                 _this._prototypeImageView.resize();
             });
+        if (toViewMode) {
+            this._screenControlsView.toViewMode();
+        } else {
+            this._screenControlsView.toEditMode();
+        }
     };
 
     PIMPrototyper.prototype._onWidgetClicked = function (widget) {

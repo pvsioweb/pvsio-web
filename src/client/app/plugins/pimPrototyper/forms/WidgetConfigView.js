@@ -10,11 +10,14 @@ define(function (require, exports, module) {
 		FormUtils = require("pvsioweb/forms/FormUtils"),
         template = require("text!./templates/WidgetConfigView.handlebars");
 
+    var WIDGET_IMAGES_FOLDER = "widget-images/";
+
     var WidgetConfigView = BaseDialog.extend({
 
         events: {
             "click .btn-cancel": "cancel",
-            "click .btn-create": "ok"
+            "click .btn-create": "ok",
+            "click .btn-choose-widget-image": "onChooseImage"
         },
 
         /**
@@ -58,12 +61,45 @@ define(function (require, exports, module) {
             return this;
         },
 
+        onChooseImage: function () {
+            return new Promise (function (resolve, reject) {
+                require("filesystem/FileSystem").getInstance().readFileDialog({
+                    encoding: "base64",
+                    title: "Select a picture",
+                    filter: require("util/MIME").imageFilter
+                }).then(function (descriptors) {
+                    if (descriptors && descriptors[0] && descriptors[0].content) {
+                        d3.select(".widget-image-alt").style("display", "none");
+                        d3.select(".widget-image")
+                            .attr("path", descriptors[0].path)
+                            .attr("name", descriptors[0].name)
+                            .attr("src", descriptors[0].content)
+                            .style("height", "20px");
+                    }
+                    resolve(descriptors);
+                }).catch(function (err) { reject(err); });
+            });
+        },
+
         ok: function (event) {
             if (this._validate()) {
-				var form = this.el;
+                var _this = this;
+				var form = _this.el;
                 var formdata = FormUtils.serializeForm(form);
-				formdata.targetScreen = this._screen;
-                this.trigger("ok", {data: formdata, el: this.el, event: event}, this);
+				formdata.targetScreen = _this._screen;
+                var img = d3.select(form).select(".widget-image").node();
+                if (img && img.src) {
+                    var name = formdata.name + img.name.substring(img.name.lastIndexOf("."));
+                    require("project/ProjectManager").getInstance().project()
+                        .addFile(WIDGET_IMAGES_FOLDER + name, img.src, { overWrite: true, encoding: "base64" }).then(function (image) {
+                            formdata.image = image.path;
+                            _this.trigger("ok", {data: formdata, el: _this.el, event: event}, _this);
+                        }).catch(function (err) {
+                            _this.trigger("ok", {data: formdata, el: _this.el, event: event}, _this);
+                        });
+                } else {
+                    _this.trigger("ok", {data: formdata, el: _this.el, event: event}, _this);
+                }
             }
         },
 

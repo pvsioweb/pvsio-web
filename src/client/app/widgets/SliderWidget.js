@@ -7,14 +7,29 @@
  * @author Paolo Masci
  * @date Sep 15, 2017
  *
- * @example <caption>Typical use of SliderWidget APIs within a PVSio-web plugin module.</caption>
- * // Example module that uses SliderWidget.
- * define(function (require, exports, module) {
- *     "use strict";
- *     var device = {};
- *     device.slider = new SliderWidget("slider", { top: 222, left: 96, height: 8, width: 38 }, { orientation: vertical });
- *     device.slider.render(); // the slider is rendered
- * });
+ * @example <caption>Example use of the widget.</caption>
+ // Example pvsio-web demo that uses SliderWidget
+ // The following configuration assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demo/
+ require.config({
+     baseUrl: "../../client/app",
+     paths: {
+         d3: "../lib/d3",
+         lib: "../lib"
+     }
+ });
+ require(["widgets/SliderWidget"], function (SliderWidget) {
+     "use strict";
+     var device = {};
+     device.slider = new SliderWidget("slider", {
+       top: 350, left: 120, width: 120
+     }, {
+       max: 340,
+       min: 0,
+       init: 100, // initial value selected by the slider
+       callback: function (err, data) { console.log("adjusting slider"); console.log(data); }
+    });
+    device.slider.render(); // The slider is rendered. Adjusting the slider has the effect of sending a command "slide(<current val>)(<current state>)" to the pvs back-end
+});
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
@@ -27,7 +42,7 @@ define(function (require, exports, module) {
         TouchscreenButton = require("widgets/TouchscreenButton"),
         property = require("util/property");
 
-    var init_done = false;
+    // var init_done = false;
 
     /**
      * @function <a name="SliderWidget">SliderWidget</a>
@@ -38,7 +53,10 @@ define(function (require, exports, module) {
      *        Default is { top: 0, left: 0, width: 104, height: 250 }.
      * @param opt {Object} Options:
      *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
-     *          <li>orientation (String): "vertical" | "horizontal" (default is "vertical")</li>
+     *          <li>orientation (String): either "vertical" or "horizontal" (default is "vertical")</li>
+     *          <li>max (Number): maximum value selectable with the slider
+     *          <li>min (Number): minimum value selectable with the slider
+     *          <li>init (init): initial value selected by the slider
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
      * @memberof module:SliderWidget
      * @instance
@@ -110,6 +128,8 @@ define(function (require, exports, module) {
             left: 0,
             width: 0,
             height: 0
+        }, {
+            callback: opt.callback
         });
         opt.functionText = opt.functionText || id;
         this.functionText = property.call(this, opt.functionText);
@@ -120,17 +140,25 @@ define(function (require, exports, module) {
         this.div.selectAll(".slider-track-high").style("background-color", "#337ab7");
         this.div.selectAll(".slider-selection").style("opacity", "0");
         this.slider.relayout();
-        Widget.call(this, id, "slider");
+        Widget.call(this, id, "sliderwidget");
         return this;
     }
     SliderWidget.prototype = Object.create(Widget.prototype);
     SliderWidget.prototype.constructor = SliderWidget;
     SliderWidget.prototype.parentClass = Widget.prototype;
     /**
-     * Returns a JSON object representation of this Widget.
-     * @returns {object}
+     * @function <a name="toJSON">toJSON</a>
+     * @description Returns a serialised version of the widget in JSON format.
+     *              This is useful for saving/loading a specific instance of the widget.
+     *              In the current implementation, the following attributes are included in the JSON object:
+     *              <li> type (string): widget type, i.e., "sliderwidget" in this case
+     *              <li> id (string): the unique identifier of the widget instance
+     *              <li> backgroundColor (string): the background color of the button
+     *              <li> orientation (string): either horizontal or vertical
+     * @returns JSON object
      * @memberof module:SliderWidget
-    */
+     * @instance
+     */
     SliderWidget.prototype.toJSON = function () {
         return {
             type: this.type(),
@@ -140,7 +168,7 @@ define(function (require, exports, module) {
         };
     };
     SliderWidget.prototype.slide = function (val) {
-        this.button.click({ functionText: this.functionText() + "(" + val + ")" });
+        return this.button.click({ functionText: this.functionText() + "(" + val + ")" });
     };
     /**
     * Updates the location and size of the widget according to the given position and size
@@ -205,21 +233,48 @@ define(function (require, exports, module) {
         opt = opt || {};
         return this.render();
     };
+
+    /**
+     * @function <a name="render">render</a>
+     * @memberof module:SliderWidget
+     * @instance
+     */
     SliderWidget.prototype.render = function (txt, opt) {
-        if (!init_done) {
-            this.slide(d3.select("#" + this.id() + "_slider_data").node().value);
-            init_done = true;
-        }
+        // if (!init_done) {
+        //     this.slide(d3.select("#" + this.id() + "_slider_data").node().value);
+        //     init_done = true;
+        // }
         return this.reveal();
     };
+
+    /**
+     * @function <a name="hide">hide</a>
+     * @description Hides the widget
+     * @memberof module:SliderWidget
+     * @instance
+     */
     SliderWidget.prototype.hide = function () {
         return this.div.style("display", "none");
     };
+
+    /**
+     * @function <a name="reveal">reveal</a>
+     * @description Makes the widget visible
+     * @memberof module:SliderWidget
+     * @instance
+     */
     SliderWidget.prototype.reveal = function () {
         this.div.style("display", "block");
         return this;
     };
 
+    /**
+     * @function <a name="move">move</a>
+     * @description Changes the position of the widget according to the coordinates given as parameter.
+     * @param data {Object} Coordinates indicating the new position of the widget. The coordinates are given in the form { top: (number), left: (number) }
+     * @memberof module:SliderWidget
+     * @instance
+     */
     SliderWidget.prototype.move = function (data) {
         data = data || {};
         if (data.top) {

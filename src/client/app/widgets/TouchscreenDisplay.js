@@ -1,20 +1,36 @@
 /**
  * @module TouchscreenDisplay
  * @version 2.0
- * @description Renders a touchscreen display, combining three elements: button, basic display, and numeric display.
+ * @description Renders a touchscreen display.
  *              This module provide APIs for changing the look and feel of
  *              the rendered text, including: cursors, background color, font, size, alignment.
  * @author Paolo Masci, Patrick Oladimeji
  * @date Apr 1, 2015
  *
- * @example <caption>Typical use of TouchscreenDisplay APIs within a PVSio-web plugin module.</caption>
- * // Example module that uses TouchscreenDisplay.
- * define(function (require, exports, module) {
- *     "use strict";
- *     var device = {};
- *     device.disp = new TouchscreenDisplay("disp", { top: 222, left: 96, height: 8, width: 38 });
- *     device.disp.render(10); // the display renders 10
- * });
+ * @example <caption>Example use of the widget.</caption>
+ // Example pvsio-web demo that uses TouchscreenDisplay
+ // The following configuration assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demo/
+ require.config({
+     baseUrl: "../../client/app",
+     paths: {
+         d3: "../lib/d3",
+         lib: "../lib"
+     }
+ });
+ require(["widgets/TouchscreenDisplay"], function (TouchscreenDisplay) {
+      "use strict";
+      var device = {};
+      device.touchdisp = new TouchscreenDisplay("touchdisp", {
+        top: 250, left: 120, height: 24, width: 120
+      }, {
+        displayKey: "touchdisp",
+        fontColor: "yellow",
+        backgroundColor: "black",
+        fontsize: 12,
+        callback: function (err, data) { console.log("Touchscreen display touched"); console.log(data); }
+      });
+     device.touchdisp.render({ touchdisp: "touch display" }); // The touchscreen display is rendered. Clicking the button has the effect of sending a command "click_touchdisp(<current state>)" to the pvs back-end
+ });
  *
  */
  /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
@@ -39,8 +55,17 @@
       *        the left, top corner, and the width and height of the (rectangular) display.
       *        Default is { top: 0, left: 0, width: 32, height: 20 }.
       * @param opt {Object} Options:
+      *          <li>displayKey (string): the name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.
+      *          <li>fontfamily (String): font type (default is "sans-serif")</li>
+      *          <li>fontsize (Number): font size (default is 0.8 * height)</li>
+      *          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
+      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
+      *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
+      *          <li>align (String): text alignment (available options are "left", "right", anc "center". Default is "center")</li>
+      *          <li>cursor (String): cursor style, must be a valid HTML5 cursor style, e.g., "pointer", "crosshair", etc. (default is "default")</li>
+      *          <li>blinking (Bool): true means the text is blinking (default is false, i.e., not blinking)</li>
       *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
-      * @memberof module:SingleDisplay
+      * @memberof module:TouchscreenDisplay
       * @instance
       */
      function TouchscreenDisplay(id, coords, opt) {
@@ -184,11 +209,25 @@
      TouchscreenDisplay.prototype = Object.create(Widget.prototype);
      TouchscreenDisplay.prototype.constructor = TouchscreenDisplay;
      TouchscreenDisplay.prototype.parentClass = Widget.prototype;
+
      /**
-      * Returns a JSON object representation of this Widget.
-      * @returns {object}
-      * @memberof module:BasicDisplay
-     */
+      * @function <a name="toJSON">toJSON</a>
+      * @description Returns a serialised version of the widget in JSON format.
+      *              This is useful for saving/loading a specific instance of the widget.
+      *              In the current implementation, the following attributes are included in the JSON object:
+      *              <li> type (string): widget type, i.e., "touchscreendisplay" in this case
+      *              <li> id (string): the unique identifier of the widget instance
+      *              <li> displayKey (string): the name of the state attribute defining the display content.
+      *              <li> fontsize (string): the font size of the button
+      *              <li> fontColor (string): the font color of the button
+      *              <li> backgroundColor (string): the background color of the button
+      *              <li> boundFunctions (string): the name of the command that will be sent to the pvs back-end when the display is touched.
+      *              <li> visibleWhen (string): a booloan expression defining when the condition under which the widget is visible
+      *              <li> auditoryFeedback (string): whether display readback is enabled
+      * @returns JSON object
+      * @memberof module:TouchscreenDisplay
+      * @instance
+      */
      TouchscreenDisplay.prototype.toJSON = function () {
          return {
              type: this.type(),
@@ -250,6 +289,19 @@
      };
 
 
+     /**
+      * @function <a name="render">render</a>
+      * @param data {Object} JSON object representing the touchscreen display to be rendered.
+      *                      The display value is specified in the attribute <displayKey>
+      *                      (the actual value of <displayKey> is instantiated when creating the widget, see constructor's options)
+      * @param opt {Object} Override options for the display style, useful to dynamically change the display style during simulations. Available options include:
+      *              <li> fontsize (string): the font size of the display
+      *              <li> fontColor (string): the font color of the display
+      *              <li> backgroundColor (string): the background color of the display
+      *              <li> blinking (Bool): true means the text is blinking
+      * @memberof module:TouchscreenDisplay
+      * @instance
+      */
      TouchscreenDisplay.prototype.render = function (state, opt) {
          opt = opt || {};
 
@@ -303,16 +355,35 @@
      };
 
 
+     /**
+      * @function <a name="hide">hide</a>
+      * @description Hides the widget
+      * @memberof module:TouchscreenDisplay
+      * @instance
+      */
      TouchscreenDisplay.prototype.hide = function () {
          this.div.style("display", "none");
          return this;
      };
 
+     /**
+      * @function <a name="reveal">reveal</a>
+      * @description Makes the widget visible
+      * @memberof module:TouchscreenDisplay
+      * @instance
+      */
      TouchscreenDisplay.prototype.reveal = function () {
          this.div.style("display", "block");
          return this;
      };
 
+     /**
+      * @function <a name="move">move</a>
+      * @description Changes the position of the widget according to the coordinates given as parameter.
+      * @param data {Object} Coordinates indicating the new position of the widget. The coordinates are given in the form { top: (number), left: (number) }
+      * @memberof module:TouchscreenDisplay
+      * @instance
+      */
      TouchscreenDisplay.prototype.move = function (data) {
          data = data || {};
          if (data.top) {

@@ -54,7 +54,8 @@ define(function (require, exports, module) {
                         },
                         targetScreen: opt.targetScreen.id,
                         name: opt.name,
-                        type: "pim-button"
+                        type: "pim-button",
+                        image: null
                     });
                 });
             });

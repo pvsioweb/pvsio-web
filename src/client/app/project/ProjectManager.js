@@ -629,7 +629,9 @@ define(function (require, exports, module) {
                 NotificationManager.show(notification);
                 resolve(res);
             }).catch(function (err) {
-                var msg = "There was an error saving the project: " + JSON.stringify(err);
+                var msg = "There was an error saving the project: ";
+                msg += (err.message) ? err.message : JSON.stringify(err);
+                console.log(err);
                 NotificationManager.error(msg);
                 reject(err);
             });

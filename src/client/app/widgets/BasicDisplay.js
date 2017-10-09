@@ -7,14 +7,26 @@
  * @author Paolo Masci, Patrick Oladimeji, Henrique Pacheco
  * @date May 12, 2017
  *
- * @example <caption>Typical use of BasicDisplay APIs within a PVSio-web plugin module.</caption>
- * // Example module that uses BasicDisplay.
- * define(function (require, exports, module) {
- *     "use strict";
- *     var device = {};
- *     device.disp = new BasicDisplay("disp", { top: 222, left: 96, height: 8, width: 38 });
- *     device.disp.render(10); // the display renders 10
- * });
+ * @example <caption>Example use of the widget.</caption>
+ // Example pvsio-web demo that uses BasicDisplay
+ // The following configuration assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demo/
+ require.config({
+     baseUrl: "../../client/app",
+     paths: {
+         d3: "../lib/d3",
+         lib: "../lib"
+     }
+ });
+ require(["widgets/BasicDisplay"], function (BasicDisplay) {
+      "use strict";
+      var device = {};
+      device.disp = new BasicDisplay("disp", {
+        top: 100, left: 120, height: 24, width: 120
+      }, {
+        displayKey: "disp"
+      });
+      device.disp.render( { disp: 10.5 }); // the display renders 10.5
+ });
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
@@ -37,12 +49,22 @@ define(function (require, exports, module) {
      *        the left, top corner, and the width and height of the (rectangular) display.
      *        Default is { top: 0, left: 0, width: 200, height: 80 }.
      * @param opt {Object} Options:
+     *          <li>displayKey (string): the name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.
+     *          <li>fontfamily (String): font type (default is "sans-serif")</li>
+     *          <li>fontsize (Number): font size (default is 0.8 * height)</li>
+     *          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
+     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
      *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
-     *          <li>fontfamily (String): display font type (default is "sans-serif")</li>
-     *          <li>fontColor (String): display font color (default is white, "#fff")</li>
-     *          <li>align (String): text alignment (default is "center")</li>
+     *          <li>align (String): text alignment (available options are "left", "right", anc "center". Default is "center")</li>
+     *          <li>letterSpacing (Number): spacing between characters, in pixels (default is 0)</li>
      *          <li>inverted (Bool): if true, the text has inverted colors,
      *              i.e., fontColor becomes backgroundColor, and backgroundColor becomes fontColor (default is false)</li>
+     *          <li>borderWidth (Number): border width (default is 0, i.e., no border)</li>
+     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
+     *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "black")</li>
+     *          <li>cursor (String): cursor style, must be a valid HTML5 cursor style, e.g., "pointer", "crosshair", etc. (default is "default")</li>
+     *          <li>blinking (Bool): true means the text is blinking (default is false, i.e., not blinking)</li>
+     *          <li>format (String): sets the display format. When this option is set to "mm:ss", the display value represents seconds, and format to be displayed is mm:ss</li>
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
      * @memberof module:BasicDisplay
      * @instance
@@ -118,11 +140,24 @@ define(function (require, exports, module) {
     BasicDisplay.prototype = Object.create(Widget.prototype);
     BasicDisplay.prototype.constructor = BasicDisplay;
     BasicDisplay.prototype.parentClass = Widget.prototype;
+
     /**
-     * Returns a JSON object representation of this Widget.
-     * @returns {object}
+     * @function <a name="toJSON">toJSON</a>
+     * @description Returns a serialised version of the widget in JSON format.
+     *              This is useful for saving/loading a specific instance of the widget.
+     *              In the current implementation, the following attributes are included in the JSON object:
+     *              <li> type (string): widget type, i.e., "display" in this case
+     *              <li> id (string): the unique identifier of the widget instance
+     *              <li> fontsize (string): the font size of the display
+     *              <li> fontColor (string): the font color of the display
+     *              <li> backgroundColor (string): the background color of the display
+     *              <li> displayKey (string): the name of the state attribute defining the display content.
+     *              <li> visibleWhen (string): a booloan expression defining when the condition under which the widget is visible
+     *              <li> auditoryFeedback (string): whether display readback is enabled
+     * @returns JSON object
      * @memberof module:BasicDisplay
-    */
+     * @instance
+     */
     BasicDisplay.prototype.toJSON = function () {
         return {
             type: this.type(),
@@ -199,7 +234,20 @@ define(function (require, exports, module) {
         var txt = opt.txt || this.example;
         return this.render(txt, { visibleWhen: "true" });
     };
-    BasicDisplay.prototype.render = function (txt, opt) {
+    /**
+     * @function <a name="render">render</a>
+     * @param data {Object} JSON object representing the display to be rendered.
+     *                      The display value is specified in the attribute <displayKey>
+     *                      (the actual value of <displayKey> is instantiated when creating the widget, see constructor's options)
+     * @param opt {Object} Override options for the display style, useful to dynamically change the display style during simulations. Available options include:
+     *              <li> fontsize (string): the font size of the display
+     *              <li> fontColor (string): the font color of the display
+     *              <li> backgroundColor (string): the background color of the display
+     *              <li> blinking (Bool): true means the text is blinking
+     * @memberof module:BasicDisplay
+     * @instance
+     */
+    BasicDisplay.prototype.render = function (txt, opt) { // todo: refactor param names: txt --> data
         var _this = this;
         function renderln(data, opt) {
             function filltext (data, txt, align) {
@@ -411,16 +459,35 @@ define(function (require, exports, module) {
         return this;
     };
 
+    /**
+     * @function <a name="hide">hide</a>
+     * @description Hides the widget
+     * @memberof module:BasicDisplay
+     * @instance
+     */
     BasicDisplay.prototype.hide = function () {
         this.div.style("display", "none");
         return this;
     };
 
+    /**
+     * @function <a name="reveal">reveal</a>
+     * @description Makes the widget visible
+     * @memberof module:BasicDisplay
+     * @instance
+     */
     BasicDisplay.prototype.reveal = function () {
         this.div.style("display", "block");
         return this;
     };
 
+    /**
+     * @function <a name="move">move</a>
+     * @description Changes the position of the widget according to the coordinates given as parameter.
+     * @param data {Object} Coordinates indicating the new position of the widget. The coordinates are given in the form { top: (number), left: (number) }
+     * @memberof module:BasicDisplay
+     * @instance
+     */
     BasicDisplay.prototype.move = function (data) {
         data = data || {};
         if (data.top) {

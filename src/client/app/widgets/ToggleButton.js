@@ -1,18 +1,30 @@
 /**
  * @module ToggleButton
  * @version 1.0
- * @description Renders a toggle button. Uses jquery-toggles
+ * @description Renders an ON/OFF toggle button. Please note that the current implementation supports only click events (slide events will be added in future releases).
  * @author Paolo Masci
  * @date Sep 15, 2017
  *
- * @example <caption>Typical use of ToggleButton APIs within a PVSio-web plugin module.</caption>
- * // Example module that uses ToggleButton.
- * define(function (require, exports, module) {
- *     "use strict";
- *     var device = {};
- *     device.toggleBTN = new ToggleButton("tgl", { top: 222, left: 96, height: 8, width: 38 });
- *     device.toggleBTN.render(); // the toggle button is rendered
- * });
+ * @example <caption>Example use of the widget.</caption>
+ // Example pvsio-web demo that uses ToggleButton
+ // The following configuration assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demo/
+ require.config({
+     baseUrl: "../../client/app",
+     paths: {
+         d3: "../lib/d3",
+         lib: "../lib"
+     }
+ });
+ require(["widgets/ToggleButton"], function (ToggleButton) {
+     "use strict";
+     var device = {};
+     device.togglebtn = new ToggleButton("togglebtn", {
+       top: 350, left: 120, width: 120
+     }, {
+       callback: function (err, data) { console.log("toggle button clicked"); console.log(data); }
+    });
+    device.togglebtn.on(); // The toggle button is rendered. The state is On. Clicking the button has the effect of sending a command "togglebtn(<current state>)" to the pvs back-end
+});
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
@@ -34,7 +46,7 @@ define(function (require, exports, module) {
      *        Default is { top: 0, left: 0, width: 104, height: 32 }.
      * @param opt {Object} Options:
      *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
-     *          <li>orientation (String): "vertical" | "horizontal" (default is "vertical")</li>
+     *          <li>orientation (String): either "horizontal" or "vertical" (default is "vertical")</li>
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
      * @memberof module:ToggleButton
      * @instance
@@ -81,6 +93,8 @@ define(function (require, exports, module) {
             left: 0,
             width: 0,
             height: 0
+        }, {
+            callback: opt.callback
         });
         opt.functionText = opt.functionText || id;
         this.functionText = property.call(this, opt.functionText);
@@ -88,7 +102,7 @@ define(function (require, exports, module) {
         this.div.on("click", function (val) {
             _this.toggle();
         });
-        Widget.call(this, id, "toggle_button");
+        Widget.call(this, id, "togglebutton");
         $('.toggle').toggles();
         d3.selectAll(".toggle-inner").style("display", "inline-flex"); // this fixes a bug in jquery toggles, which does not render correctly when the browser page is zoomed at 80% zoom
         return this;
@@ -97,10 +111,18 @@ define(function (require, exports, module) {
     ToggleButton.prototype.constructor = ToggleButton;
     ToggleButton.prototype.parentClass = Widget.prototype;
     /**
-     * Returns a JSON object representation of this Widget.
-     * @returns {object}
-     * @memberof module:ToggleButton
-    */
+     * @function <a name="toJSON">toJSON</a>
+     * @description Returns a serialised version of the widget in JSON format.
+     *              This is useful for saving/loading a specific instance of the widget.
+     *              In the current implementation, the following attributes are included in the JSON object:
+     *              <li> type (string): widget type, i.e., "togglebutton" in this case
+     *              <li> id (string): the unique identifier of the widget instance
+     *              <li> backgroundColor (string): the background color of the button
+     *              <li> orientation (string): either horizontal or vertical
+     * @returns JSON object
+     * @memberof module:TouchscreenDisplay
+     * @instance
+     */
     ToggleButton.prototype.toJSON = function () {
         return {
             type: this.type(),
@@ -109,16 +131,41 @@ define(function (require, exports, module) {
             orientation: this.orientation
         };
     };
+
+    /**
+     * @function <a name="toggle">toggle</a>
+     * @description Toggles the button -- useful to trigger button events programmaticaly.
+     * @memberof module:ToggleButton
+     * @instance
+     */
     ToggleButton.prototype.toggle = function () {
         return this.button.click({ functionText: this.functionText() });
     };
+    /**
+     * @function <a name="isOn">isOn</a>
+     * @description Returns true if the button state to "On"
+     * @memberof module:ToggleButton
+     * @instance
+     */
     ToggleButton.prototype.isOn = function () {
         return this.toggle_elem.select(".toggle-on").classed("active");
     };
+    /**
+     * @function <a name="isOn">isOn</a>
+     * @description Sets the button state to "Off"
+     * @memberof module:ToggleButton
+     * @instance
+     */
     ToggleButton.prototype.off = function () {
         $("#" + this.id() + "_elem").data('toggles').toggle(false);
         // return this.toggle(false);
     };
+    /**
+     * @function <a name="isOn">isOn</a>
+     * @description Sets the button state to "On"
+     * @memberof module:ToggleButton
+     * @instance
+     */
     ToggleButton.prototype.on = function () {
         $("#" + this.id() + "_elem").data('toggles').toggle(true);
         // return this.toggle(true);
@@ -186,17 +233,43 @@ define(function (require, exports, module) {
         opt = opt || {};
         return this.render();
     };
-    ToggleButton.prototype.render = function (txt, opt) {
+    /**
+     * @function <a name="render">render</a>
+     * @memberof module:ToggleButton
+     * @instance
+     */
+    ToggleButton.prototype.render = function (data, opt) {
         return this.reveal();
     };
+
+    /**
+     * @function <a name="hide">hide</a>
+     * @description Hides the widget
+     * @memberof module:ToggleButton
+     * @instance
+     */
     ToggleButton.prototype.hide = function () {
         return this.div.style("display", "none");
     };
+
+    /**
+     * @function <a name="reveal">reveal</a>
+     * @description Makes the widget visible
+     * @memberof module:ToggleButton
+     * @instance
+     */
     ToggleButton.prototype.reveal = function () {
         this.div.style("display", "block");
         return this;
     };
 
+    /**
+     * @function <a name="move">move</a>
+     * @description Changes the position of the widget according to the coordinates given as parameter.
+     * @param data {Object} Coordinates indicating the new position of the widget. The coordinates are given in the form { top: (number), left: (number) }
+     * @memberof module:ToggleButton
+     * @instance
+     */
     ToggleButton.prototype.move = function (data) {
         data = data || {};
         if (data.top) {

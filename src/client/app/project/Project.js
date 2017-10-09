@@ -389,7 +389,8 @@ define(function (require, exports, module) {
         var _this = this;
         if (!name) {
             return new Promise(function (resolve, reject) {
-                reject({ type: "ERROR", msg: "Incorrect file name " + name});
+                console.log("ERROR while adding file: Incorrect file name (" + name + ")");
+                reject({ type: "ERROR", msg: "Incorrect file name (" + name + ")"});
             });
         }
         var token = {

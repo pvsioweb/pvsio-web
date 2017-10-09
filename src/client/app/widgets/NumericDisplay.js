@@ -1,20 +1,33 @@
 /**
  * @module NumericDisplay
  * @version 2.0
- * @description Renders a basic digital display.
+ * @description Renders a basic digital display for rendering numbers. Uses different font size for integer and fractional parts. A cursor can be used to highlight specific digits.
  *              This module provide APIs for changing the look and feel of
  *              the rendered text, including: cursors, background color, font, size, alignment.
  * @author Paolo Masci, Patrick Oladimeji
  * @date Apr 1, 2015
  *
- * @example <caption>Typical use of NumericDisplay APIs within a PVSio-web plugin module.</caption>
- * // Example module that uses NumericDisplay.
- * define(function (require, exports, module) {
- *     "use strict";
- *     var device = {};
- *     device.disp = new NumericDisplay("disp", { top: 222, left: 96, height: 8, width: 38 });
- *     device.disp.render(10); // the display renders 10
- * });
+ * @example <caption>Example use of the widget.</caption>
+ // Example pvsio-web demo that uses NumericDisplay
+ // The following configuration assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demo/
+ require.config({
+     baseUrl: "../../client/app",
+     paths: {
+         d3: "../lib/d3",
+         lib: "../lib"
+     }
+ });
+ require(["widgets/NumericDisplay"], function (NumericDisplay) {
+      "use strict";
+      var device = {};
+      device.dispNumeric = new NumericDisplay("dispNumeric", {
+        top: 150, left: 120, height: 24, width: 120
+      }, {
+        displayKey: "disp",
+        cursorName: "cur"
+      });
+      device.dispNumeric.render({ disp: 10.5, cur: -1 }); // the display value is 10.5 and the cursor highlights the first fractional digit
+ });
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
@@ -37,10 +50,15 @@ define(function (require, exports, module) {
      *        the left, top corner, and the width and height of the (rectangular) display.
      *        Default is { top: 0, left: 0, width: 200, height: 80 }.
      * @param opt {Object} Options:
+     *          <li> displayKey (string): the name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.
+     *          <li> cursorName (string): the name of the state attribute defining the cursor position. This information will be used by the render method. If this options is not specified, the cursor will not be displayed.
+     *          <li>fontfamily (String): font type (default is "sans-serif")</li>
+     *          <li>fontsize (Number): font size (default is 0.8 * height)</li>
+     *          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
+     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
      *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
-     *          <li>fontfamily (String): display font type (default is "sans-serif")</li>
-     *          <li>fontColor (String): display font color (default is white, "#fff")</li>
-     *          <li>align (String): text alignment (default is "center")</li>
+     *          <li>align (String): text alignment (available options are "left", "right", anc "center". Default is "center")</li>
+     *          <li>letterSpacing (Number): spacing between characters, in pixels (default is 0)</li>
      *          <li>inverted (Bool): if true, the text has inverted colors,
      *              i.e., fontColor becomes backgroundColor, and backgroundColor becomes fontColor (default is false)</li>
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
@@ -110,11 +128,25 @@ define(function (require, exports, module) {
     NumericDisplay.prototype = Object.create(Widget.prototype);
     NumericDisplay.prototype.constructor = NumericDisplay;
     NumericDisplay.prototype.parentClass = Widget.prototype;
+
     /**
-     * Returns a JSON object representation of this Widget.
-     * @returns {object}
+     * @function <a name="toJSON">toJSON</a>
+     * @description Returns a serialised version of the widget in JSON format.
+     *              This is useful for saving/loading a specific instance of the widget.
+     *              In the current implementation, the following attributes are included in the JSON object:
+     *              <li> type (string): widget type, i.e., "numericdisplay" in this case
+     *              <li> id (string): the unique identifier of the widget instance
+     *              <li> fontsize (string): the font size of the display
+     *              <li> fontColor (string): the font color of the display
+     *              <li> backgroundColor (string): the background color of the display
+     *              <li> displayKey (string): the name of the state attribute defining the display content.
+     *              <li> cursorName (string): the name of the state attribute defining the cursor position.
+     *              <li> visibleWhen (string): a booloan expression defining when the condition under which the widget is visible
+     *              <li> auditoryFeedback (string): whether display readback is enabled
+     * @returns JSON object
      * @memberof module:NumericDisplay
-    */
+     * @instance
+     */
     NumericDisplay.prototype.toJSON = function () {
         return {
             type: this.type(),
@@ -187,7 +219,21 @@ define(function (require, exports, module) {
         var elemIsBlinking = (document.getElementById(this.id()).getAttribute("class").indexOf("blink") >= 0);
         return this.renderGlyphicon(this.txt, { blinking: elemIsBlinking });
     };
-    NumericDisplay.prototype.render = function (txt, opt) {
+    /**
+     * @function <a name="render">render</a>
+     * @description Renders the widget (i.e., sets the content according to the parameters and makes the widget visible)
+     * @param data {Object} JSON object representing the touchscreen display to be rendered.
+     *                      The display value is specified in the attributes <displayKey> and <cursorName>
+     *                      (the actual values of <displayKey> and <cursorName> are instantiated when creating the widget, see constructor's options)
+     * @param opt {Object} Override options for the display style, useful to dynamically change the display style during simulations. Available options include:
+     *              <li> fontsize (string): the font size of the display
+     *              <li> fontColor (string): the font color of the display
+     *              <li> backgroundColor (string): the background color of the display
+     *              <li> blinking (Bool): true means the text is blinking
+     * @memberof module:NumericDisplay
+     * @instance
+     */
+    NumericDisplay.prototype.render = function (txt, opt) { // TODO: refactor parameter name: txt --> data
         function renderNumber(data, opt) {
             function drawCircle(context, x, y, r, fillStyle) {
                 context.save();
@@ -370,16 +416,35 @@ define(function (require, exports, module) {
     };
 
 
+    /**
+     * @function <a name="hide">hide</a>
+     * @description Hides the widget
+     * @memberof module:NumericDisplay
+     * @instance
+     */
     NumericDisplay.prototype.hide = function () {
         this.div.style("display", "none");
         return this;
     };
 
+    /**
+     * @function <a name="reveal">reveal</a>
+     * @description Makes the widget visible
+     * @memberof module:NumericDisplay
+     * @instance
+     */
     NumericDisplay.prototype.reveal = function () {
         this.div.style("display", "block");
         return this;
     };
 
+    /**
+     * @function <a name="move">move</a>
+     * @description Changes the position of the widget according to the coordinates given as parameter.
+     * @param data {Object} Coordinates indicating the new position of the widget. The coordinates are given in the form { top: (number), left: (number) }
+     * @memberof module:NumericDisplay
+     * @instance
+     */
     NumericDisplay.prototype.move = function (data) {
         data = data || {};
         if (data.top) {

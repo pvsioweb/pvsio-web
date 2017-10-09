@@ -68,7 +68,9 @@ define(function (require, exports, module) {
      * @param {object} json JSON-style object to restore from
      */
     PIMProjectManager.prototype.initFromJSON = function (json) {
-        var pimImageFolder = this._project.name() + "/" + PIM_IMAGES_FOLDER;
+        var projectFolder = this._project.name() + "/";
+        var pimImageFolder = projectFolder + PIM_IMAGES_FOLDER;
+
 
         var screens = new ScreenCollection();
         _.forEach(json, function (scr) {
@@ -81,7 +83,7 @@ define(function (require, exports, module) {
             var widgets = {};
 
             _.forEach(scr.widgets, function (w) {
-                widgets[w.id] = PIMWidget.initFromJSON(w, screens);
+                widgets[w.id] = PIMWidget.initFromJSON(w, screens, projectFolder);
             });
 
             screens.get(scr.id).set("widgets", widgets);

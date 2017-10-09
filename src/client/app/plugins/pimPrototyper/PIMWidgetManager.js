@@ -43,6 +43,9 @@ define(function (require, exports, module) {
                         map: widgetImageMap
                     });
                 }
+                if (widget.image) {
+                    widget.createWidgetImage();
+                }
             });
         } else {
             this._widgets = {};
