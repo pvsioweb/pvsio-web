@@ -23,7 +23,7 @@ require([
         "widgets/TouchscreenDisplay",
         "widgets/BasicDisplay",
         "widgets/NumericDisplay",
-        "widgets/Slider",
+        "widgets/SliderWidget",
         "widgets/ToggleButton",
 
         "widgets/car/Gauge",
