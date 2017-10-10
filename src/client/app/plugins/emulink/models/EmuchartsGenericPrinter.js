@@ -536,8 +536,10 @@ define(function (require, exports, module) {
                 if (initial_transition && initial_transition.name && initial_transition.name !== "") {
                     if (initial_transition.name.trim().startsWith("[") === false ||
                             initial_transition.name.trim().startsWith("{") === false) {
-                        // assume it's a sequence of actions, we need to adorn them with curly braces
-                        initial_transition.name = "{" + initial_transition.name + "}";
+                        if (initial_transition.name.indexOf(";") > 0){
+                            // it's a sequence of actions, we need to adorn them with curly braces
+                            initial_transition.name = "{" + initial_transition.name + "}";
+                        }
                     }
                     var ans = parser2.parseTrigger(initial_transition.name);
                     if (ans.res) {
@@ -568,7 +570,7 @@ define(function (require, exports, module) {
                             });
                             has_cond = true;
                         } else {
-                            if (actions) {
+                            if (actions && actions.length > 0) {
                                 theTransition.override.push({
                                     cond: ["true"],
                                     actions: actions
@@ -633,10 +635,11 @@ define(function (require, exports, module) {
             // parse transition labels, to extract transition name, guard, and actions
             emuchart.transitions.forEach(function (t) {
                 // add here mode updates
+                if (!t.name) { t.name = "tick"; }
                 var trigger = parser2.parseTrigger(t.name);
                 if (trigger.res && trigger.res.val) {
                     trigger = trigger.res.val;
-                    var trigger_id = { type: "identifier", val: trigger.identifier || "tick" };
+                    var trigger_id = { type: "identifier", val: trigger.identifier };
                     var trigger_cond = predefined_variables.current_mode.name + "=" + t.source.name;
                     if (trigger.cond) {
                         trigger_cond += " AND (" + trigger.cond.trim() + ")";

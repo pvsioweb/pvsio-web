@@ -98,7 +98,7 @@ define(function (require, exports, module) {
                 c.states.forEach(function (state) {
                     chart.nodes.set(state.id, {
                         id:     state.id,
-                        name:   state.name,
+                        name:   state.name || state.id,
                         color:  state.color || Colors.getColor(state.id),
                         width:  state.width || 36,
                         height: state.height || 36,
@@ -134,7 +134,7 @@ define(function (require, exports, module) {
                     }
                     chart.edges.set(trans.id, {
                         id:     trans.id,
-                        name:   trans.name,
+                        name:   trans.name || "",
                         source: source,
                         target: target,
                         controlPoint: (trans.controlPoint) ? { x: trans.controlPoint.x, y: trans.controlPoint.y } : null
