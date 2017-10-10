@@ -1063,7 +1063,7 @@ require([
         client.addListener('WebSocketConnectionOpened', function (e) {
             console.log("web socket connected");
             //start pvs process
-            client.getWebSocket().startPVSProcess({name: "main.pvs", demoName: "stellantV2/pvs"}, function (err, event) {
+            client.getWebSocket().startPVSProcess({name: "main.pvs", demoName: "stellantV2PISA/pvs"}, function (err, event) {
                 client.getWebSocket().sendGuiAction("init_precache;", onMessageReceived);
             });
         }).addListener("WebSocketConnectionClosed", function (e) {

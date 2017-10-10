@@ -31,7 +31,7 @@ main: THEORY
   DEFAULT_VOLUME_SALINE: Volume = 224
   DEFAULT_VOLUME_CONTRAST: Volume = 224
   AUTOLOAD_STEP: Volume = 6
-  PRIME_VOLUME_SALINE: Volume = 3
+  PRIME_VOLUME_SALINE: Volume = 4
   PRIME_VOLUME_CONTRAST: Volume = 1
   
   tick_step: posreal = 250 %-- millis
@@ -263,8 +263,8 @@ main: THEORY
    COND
     per_btn_auto(st)
       -> LET st = st WITH [ mode := AUTO,
-      	     	     	    vol_saline := console_vol_saline(st),
-			    vol_contrast := console_vol_contrast(st),
+      	     	     	    vol_saline := IF console_vol_saline(st) + PRIME_VOLUME_SALINE < MAX_VOLUME THEN console_vol_saline(st) + PRIME_VOLUME_SALINE ELSE MAX_VOLUME ENDIF,
+			    vol_contrast := IF console_vol_contrast(st) + PRIME_VOLUME_CONTRAST < MAX_VOLUME THEN console_vol_contrast(st) + PRIME_VOLUME_CONTRAST ELSE MAX_VOLUME ENDIF,
       			    vol_saline_confirmed := FALSE,
       			    vol_contrast_confirmed := FALSE,
                             display_saline := MIRROR_TARGET_VOLUME,
