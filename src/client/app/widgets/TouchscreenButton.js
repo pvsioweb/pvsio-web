@@ -64,6 +64,9 @@ define(function (require, exports, module) {
      *          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
      *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
+     *          <li>borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)</li>
+     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
+     *          <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
      * @memberof module:TouchscreenButton
      * @instance
@@ -134,6 +137,9 @@ define(function (require, exports, module) {
             fontsize: this.fontsize,
             fontColor: this.fontColor,
             backgroundColor: this.backgroundColor,
+            borderWidth: opt.borderWidth,
+            borderStyle: opt.borderStyle,
+            borderColor: opt.borderColor,            
             cursor: this.cursor,
             position: "relative",
             borderRadius: opt.borderRadius,

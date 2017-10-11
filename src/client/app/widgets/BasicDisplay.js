@@ -59,10 +59,9 @@ define(function (require, exports, module) {
      *          <li>letterSpacing (Number): spacing between characters, in pixels (default is 0)</li>
      *          <li>inverted (Bool): if true, the text has inverted colors,
      *              i.e., fontColor becomes backgroundColor, and backgroundColor becomes fontColor (default is false)</li>
-     *          <li>borderWidth (Number): border width (default is 0, i.e., no border)</li>
+     *          <li>borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)</li>
      *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
-     *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "black")</li>
-     *          <li>cursor (String): cursor style, must be a valid HTML5 cursor style, e.g., "pointer", "crosshair", etc. (default is "default")</li>
+     *          <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
      *          <li>blinking (Bool): true means the text is blinking (default is false, i.e., not blinking)</li>
      *          <li>format (String): sets the display format. When this option is set to "mm:ss", the display value represents seconds, and format to be displayed is mm:ss</li>
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
@@ -90,9 +89,9 @@ define(function (require, exports, module) {
         this.align = opt.align || "center";
         this.backgroundColor = opt.backgroundColor || "black";
         this.fontColor = opt.fontColor || "white";
-        this.borderWidth = opt.borderWidth || 0;
-        this.borderStyle = opt.borderStyle || "none";
         this.borderColor = opt.borderColor || "inherit";
+        this.borderWidth = (opt.borderColor) ? ((opt.borderWidth) ? parseFloat(opt.borderWidth) : 2) : 0;
+        this.borderStyle = (opt.borderColor) ? ((opt.borderStyle) ? opt.borderStyle : "solid") : "none";
         this.cursor = opt.cursor || "default";
         if (opt.inverted) {
             var tmp = this.backgroundColor;
@@ -110,7 +109,7 @@ define(function (require, exports, module) {
         this.div = d3.select(this.parent)
                         .append("div").style("position", opt.position)
                         .style("top", this.top + "px").style("left", this.left + "px")
-                        .style("width", (this.width+this.borderWidth) + "px").style("height", (this.height+this.borderWidth) + "px")
+                        .style("width", (this.width + this.borderWidth) + "px").style("height", (this.height + this.borderWidth) + "px")
                         .style("margin", 0).style("padding", 0).style("border-radius", opt.borderRadius).style("opacity", opt.opacity)
                         .style("background-color", this.backgroundColor)
                         .style("border-width", this.borderWidth + "px")
@@ -122,7 +121,7 @@ define(function (require, exports, module) {
                         .style("margin", 0).style("padding", 0)
                         .style("vertical-align", "top").style("border-radius", opt.borderRadius).style("opacity", opt.opacity);
         this.div.append("canvas").attr("id", id + "_canvas").attr("class", id + "_canvas")
-                        .attr("width", (this.width-this.borderWidth)).attr("height", (this.height-this.borderWidth))
+                        .attr("width", (this.width - this.borderWidth)).attr("height", (this.height - this.borderWidth))
                         .style("margin", 0).style("padding", 0).style("border-radius", opt.borderRadius).style("opacity", opt.opacity)
                         .style("vertical-align", "top");
         var x2 = this.left + this.width;
@@ -243,6 +242,9 @@ define(function (require, exports, module) {
      *              <li> fontsize (string): the font size of the display
      *              <li> fontColor (string): the font color of the display
      *              <li> backgroundColor (string): the background color of the display
+     *              <li> borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)</li>
+     *              <li> borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
+     *              <li> borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
      *              <li> blinking (Bool): true means the text is blinking
      * @memberof module:BasicDisplay
      * @instance
@@ -313,6 +315,13 @@ define(function (require, exports, module) {
         }
 
         if (isEnabled) {
+            opt.borderWidth = opt.borderWidth || this.borderWidth;
+            opt.borderStyle = opt.borderStyle || this.borderStyle;
+            opt.borderColor = opt.borderColor || this.borderColor;
+            this.div.style("border-width", opt.borderWidth + "px")
+                    .style("border-style", opt.borderStyle)
+                    .style("border-color", opt.borderColor);
+
             txt = txt || "";
             if (typeof txt === "object") {
                 // txt in this case is a PVS state that needs to be parsed

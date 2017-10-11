@@ -17,18 +17,27 @@ function (PVSioWebClient,
      device.disp = new BasicDisplay("disp", {
        top: 100, left: 120, height: 24, width: 120
      }, {
-       displayKey: "disp"
+       displayKey: "disp",
+       borderColor: "blue",
+       borderWidth: 2
      });
-     device.disp.render( { disp: 10.5 }); // the display renders 10.5
+     device.disp.render( { disp: 10.5 }, {
+         borderColor: "green" // you can temporarily override the initial color of the border
+     }); // the display renders 10.5
      console.log(device.disp.toJSON());
 
      device.dispNumeric = new NumericDisplay("dispNumeric", {
        top: 150, left: 120, height: 24, width: 120
      }, {
-       displayKey: "disp",
-       cursorName: "cur"
+         displayKey: "disp",
+         cursorName: "cur",
+         borderColor: "blue",
+         borderWidth: 2,
+         align: "right"
      });
-     device.dispNumeric.render({ disp: 10.5, cur: -1 }); // the display value is 10.5 and the cursor highlights the first fractional digit
+     device.dispNumeric.render({ disp: "B 10.5", cur: 0 }, {
+         borderColor: "yellow"
+     }); // the display value is "B 10.5" and the cursor highlights the first fractional digit of the number
      console.log(device.dispNumeric.toJSON());
 
      device.touchscreenOk = new TouchscreenButton("touchscreenOk", {
@@ -37,6 +46,7 @@ function (PVSioWebClient,
        softLabel: "Ok",
        fontColor: "black",
        backgroundColor: "blue",
+       borderColor: "purple",
        fontsize: 16,
        callback: function (err, data) { console.log("Ok button clicked"); console.log(data); }
      });
@@ -49,6 +59,7 @@ function (PVSioWebClient,
        displayKey: "touchdisp",
        fontColor: "yellow",
        backgroundColor: "black",
+       borderColor: "blue",
        fontsize: 12,
        callback: function (err, data) { console.log("Touchscreen display touched"); console.log(data); }
      });

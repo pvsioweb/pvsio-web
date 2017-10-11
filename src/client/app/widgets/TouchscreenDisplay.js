@@ -61,6 +61,9 @@
       *          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
       *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
       *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
+      *          <li>borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)</li>
+      *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
+      *          <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>      
       *          <li>align (String): text alignment (available options are "left", "right", anc "center". Default is "center")</li>
       *          <li>cursor (String): cursor style, must be a valid HTML5 cursor style, e.g., "pointer", "crosshair", etc. (default is "default")</li>
       *          <li>blinking (Bool): true means the text is blinking (default is false, i.e., not blinking)</li>
@@ -121,6 +124,9 @@
              fontsize: this.fontsize,
              fontColor: this.fontColor,
              backgroundColor: this.backgroundColor,
+             borderWidth: opt.borderWidth,
+             borderStyle: opt.borderStyle,
+             borderColor: opt.borderColor,
              cursor: this.cursor,
              displayKey: this.displayKey(),
              auditoryFeedback: this.auditoryFeedback(),
@@ -133,6 +139,9 @@
              fontsize: this.fontsize,
              fontColor: this.fontColor,
              backgroundColor: this.backgroundColor,
+             borderWidth: opt.borderWidth,
+             borderStyle: opt.borderStyle,
+             borderColor: opt.borderColor,
              cursor: this.cursor,
              cursorName: this.cursorName(),
              displayKey: this.displayKey(),
