@@ -52,6 +52,7 @@ define(function (require, exports, module) {
      *        Default is { top: 0, left: 0, width: 200, height: 80 }.
      * @param opt {Object} Options:
      *          <li> displayKey (string): the name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.
+     *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).     
      *          <li> cursorName (string): the name of the state attribute defining the cursor position. This information will be used by the render method. If this options is not specified, the cursor will not be displayed.
      *          <li>fontfamily (String): font type (default is "sans-serif")</li>
      *          <li>fontsize (Number): font size (default is 0.8 * height)</li>

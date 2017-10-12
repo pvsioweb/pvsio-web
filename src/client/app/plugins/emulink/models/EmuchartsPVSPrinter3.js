@@ -204,9 +204,9 @@ define(function (require, exports, module) {
 
             //-- write data to disk
             var overWrite = {overWrite: true};
-            var folder = "/pvs";
-            projectManager.project().addFile(folder + "/" + emuchart.name + ".pvs", theory, overWrite);
-            projectManager.project().addFile(folder + "/" + pvsioweb_utils_theory + ".pvs", extras, overWrite);
+            var folder = "pvs/";
+            projectManager.project().addFile(folder + emuchart.name + ".pvs", theory, overWrite);
+            projectManager.project().addFile(folder + pvsioweb_utils_theory + ".pvs", extras, overWrite);
             resolve(true);
         }
         return new Promise (function (resolve, reject) {

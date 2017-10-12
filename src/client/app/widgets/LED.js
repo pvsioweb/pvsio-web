@@ -30,9 +30,14 @@ define(function (require, exports, module) {
      * @function <a name="LED">LED</a>
      * @description Constructor.
      * @param id {String} The ID of the HTML element where the display will be rendered.
-     * @param coords {Object} The four coordinates (x1,y1,x2,y2) of the display, specifying
-     *        the left, top, right, bottom corner of the rectangle (for shape="rect")
-     * @param opt {Object}
+     * @param coords {Object} The four coordinates (top, left, width, height) of the display, specifying
+     *        the left, top corner, and the width and height of the (rectangular) display.
+     *        Default is { top: 0, left: 0, width: 12, height: 12 }.
+     * @param opt {Object} Rendering options:
+     *        <li>radius (Number) Radius of the LED</li>
+     *        <li>color (String) Color of the LED (must be a valid HTML color. Default is bright green "#00FF66")</li>
+     *        <li>blinking (Bool) Whether the LED is blinking (default: false, i.e., not blinking)</li>
+     *        <li>ledKey (string) The name of the state attribute defining the color of the display. This information will be used by the render method. Default is the ID of the display.</li>
      * @memberof module:LED
      * @instance
      */

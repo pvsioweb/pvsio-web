@@ -24,7 +24,7 @@ define(function (require, exports, module) {
         EmuchartsAndroidPrinter  = require("plugins/emulink/models/EmuchartsAndroidPrinter"),
         EmuchartsNuXMVPrinter  = require("plugins/emulink/models/EmuchartsNuXMVPrinter"),
         EmuchartsICOPrinter    = require("plugins/emulink/models/EmuchartsICOPrinter"),
-        EmuchartsAlloyPrinter  = require("plugins/emulink/models/EmuchartsAlloyPrinter");
+        EmuchartsAlloyPrinter  = require("plugins/emulink/models/EmuchartsAlloyPrinter2");
 
     function EmuchartsCodeGenerators() {
         this.emuchartsPVSPrinter = new EmuchartsPVSPrinter("emuchart_th");

@@ -642,7 +642,7 @@ define(function (require, exports, module) {
                     var trigger_id = { type: "identifier", val: trigger.identifier };
                     var trigger_cond = predefined_variables.current_mode.name + "=" + t.source.name;
                     if (trigger.cond) {
-                        trigger_cond += " AND (" + trigger.cond.trim() + ")";
+                        trigger_cond += " && (" + trigger.cond.trim() + ")";
                     }
                     trigger_cond = parser2.parseCondition(trigger_cond);
                     var trigger_actions = [];
@@ -712,14 +712,17 @@ define(function (require, exports, module) {
                 comment: "triggers",
                 functions: theFunction
             };
-            if (opt.convert_expression && typeof opt.convert_expression === "function") {
+            if (opt.convert_condition && typeof opt.convert_condition === "function"
+                 || opt.convert_expression && typeof opt.convert_expression === "function") {
                 data.functions = data.functions.map(function(f) {
                     f.cases = f.cases.map(function (cc) {
-                        cc.cond = opt.convert_expression(cc.cond, emuchart);
-                        cc.actions = cc.actions.map(function (action) {
-                            action.value = opt.convert_expression(action.override_expression, emuchart, { variable_type: action.variable_type });
-                            return action;
-                        });
+                        cc.cond = (opt.convert_condition) ? opt.convert_condition(cc.cond, emuchart) : opt.convert_expression(cc.cond, emuchart);
+                        if (opt.convert_expression) {
+                            cc.actions = cc.actions.map(function (action) {
+                                action.value = opt.convert_expression(action.override_expression, emuchart, { variable_type: action.variable_type });
+                                return action;
+                            });
+                        }
                         return cc;
                     });
                     return f;
@@ -774,11 +777,18 @@ define(function (require, exports, module) {
         return model;
     };
 
+    EmuchartsGenericPrinter.prototype.parseCondition = function (cond) {
+        return parser2.parseCondition(cond);
+    };
+    EmuchartsGenericPrinter.prototype.parseAction = function (cond) {
+        return parser2.parseAction(cond);
+    };
+
     // utility function for getting basic printer options
     EmuchartsGenericPrinter.prototype.get_params = function() {
         return new Promise (function (resolve, reject) {
             displayAskParameters.create({
-                header: "PVS Printer Options",
+                header: "Printer Options",
                 params: [{
                     id: "current_mode",
                     name: "Current system mode",

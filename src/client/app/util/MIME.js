@@ -10,7 +10,7 @@ define(function (require, exports, module) {
 
     var instance = null,
         imageExts = [".jpg", ".jpeg", ".png"],
-        modelExts = [".pvs", ".muz", ".tex", ".i", ".emdl", ".vdmsl", ".aadl", ".adb", ".ads", ".c", ".h", ".smv"],
+        modelExts = [".pvs", ".muz", ".tex", ".i", ".emdl", ".vdmsl", ".aadl", ".adb", ".ads", ".c", ".h", ".smv", ".als"],
         otherExts = [".txt", ".json"];
 
     function MIME() { return this; }
