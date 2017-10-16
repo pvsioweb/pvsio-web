@@ -162,6 +162,8 @@ define(function (require, exports, module) {
                     if (term.val[j].isVariable) {
                         term.val[j].variableType = getVariableType(term.val[j].val);
                     }
+                } else if (term.val[j].type === "function") {
+                    identifyVariables(_this, term.val[j]);
                 }
             }
         }

@@ -88,6 +88,11 @@ define(function (require, exports, module) {
                     }
                     return ans;
                 } else if (term.type === "identifier") {
+                    if (term.isVariable) {
+                        term.val = "st->" + term.val;
+                        // carry on the type while parsing the expression -- useful to understand the type of the variable later on
+                        opt.variable_type = term.variableType;
+                    }
                     return term.val;
                 } else if (term.type === "number") {
                     return (term.val + getSuffix(term.val, opt.variable_type));
@@ -124,7 +129,7 @@ define(function (require, exports, module) {
         expr.forEach(function (term) {
             if (term.isVariable) {
                 term.val = "st->" + term.val;
-                // carry on the type while parsing the expression -- useful to understand the type of constants
+                // carry on the type while parsing the expression -- useful to understand the type of the variable later on
                 opt.variable_type = term.variableType;
             } else {
                 term = preProcess(term, emuchart, opt);
