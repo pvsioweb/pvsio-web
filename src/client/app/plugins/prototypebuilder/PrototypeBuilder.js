@@ -235,8 +235,8 @@ define(function (require, exports, module) {
         d3.select("#btnSaveProject").on("click", function () {
             projectManager.saveProject().then(function (res) {
                 // FIXME: Implement APIs to save the diagram in the EmuCharts module!
-                if (d3.select("#btn_menuSaveChart").node()) {
-                    d3.select("#btn_menuSaveChart").node().click();
+                if (d3.select("#btn_menuSaveAllCharts").node()) {
+                    d3.select("#btn_menuSaveAllCharts").node().click();
                 }
             });
         });
