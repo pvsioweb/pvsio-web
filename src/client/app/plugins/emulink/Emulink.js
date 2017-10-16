@@ -380,6 +380,20 @@ define(function (require, exports, module) {
         return this;
     };
 
+    Emulink.prototype.saveAllCharts = function () {
+        if (emuchartsManager) {
+            return emuchartsManager.saveAllCharts();
+        }
+        return Promise.resolve();
+    };
+
+    Emulink.prototype.saveChart = function () {
+        if (emuchartsManager) {
+            return emuchartsManager.saveChart();
+        }
+        return Promise.resolve();
+    };
+
     Emulink.prototype.createHtmlElements = function () {
         var _this = this;
         var content = require("text!plugins/emulink/forms/maincontent.handlebars");
@@ -924,6 +938,27 @@ define(function (require, exports, module) {
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
             emuchartsCodeGenerators.emuchartsMisraCPrinter.print(emucharts, { interactive: true });
+        });
+        d3.select("#btn_menuFMIPVSPrinter").on("click", function () {
+            var emucharts = {
+                name: projectManager.project().name(),
+                author: {
+                    name: "<author name>",
+                    affiliation: "<affiliation>",
+                    contact: "<contact>"
+                },
+                importings: [],
+                constants: emuchartsManager.getConstants(),
+                variables: {
+                    input: emuchartsManager.getInputVariables(),
+                    output: emuchartsManager.getOutputVariables(),
+                    local: emuchartsManager.getLocalVariables()
+                },
+                states: emuchartsManager.getStates(),
+                transitions: emuchartsManager.getTransitions(),
+                initial_transitions: emuchartsManager.getInitialTransitions()
+            };
+            emuchartsCodeGenerators.emuchartsFMIPVSPrinter.print(emucharts);
         });
         d3.select("#btn_menuAndroidPrinter").on("click", function () {
             var emucharts = {

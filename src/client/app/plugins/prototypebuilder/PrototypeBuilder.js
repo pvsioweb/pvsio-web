@@ -233,12 +233,18 @@ define(function (require, exports, module) {
             switchToSimulatorView();
         });
         d3.select("#btnSaveProject").on("click", function () {
-            projectManager.saveProject().then(function (res) {
-                // FIXME: Implement APIs to save the diagram in the EmuCharts module!
-                if (d3.select("#btn_menuSaveAllCharts").node()) {
-                    d3.select("#btn_menuSaveAllCharts").node().click();
-                }
-            });
+            var emulink = require("plugins/PluginManager").getInstance().getEnabledPlugins().filter(function (p) { return p.getId() === "EmuChartsEditor"; });
+            if (emulink && emulink[0]) {
+                emulink[0].saveAllCharts().then(function (res) {
+                    projectManager.saveProject();
+                }).catch(function (err) {
+                    console.log("ERROR WHILE SAVING EMUCHARTS FILES (see error below) ");
+                    console.log(err);
+                    projectManager.saveProject();
+                });
+            } else {
+                projectManager.saveProject();
+            }
         });
         d3.select("#btnSaveProjectAs").on("click", function () {
             if (d3.select("#btn_menuSaveChart").node()) {
