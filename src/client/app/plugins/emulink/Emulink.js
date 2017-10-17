@@ -663,9 +663,9 @@ define(function (require, exports, module) {
             var emucharts = {
                 name: filename,
                 author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
+                    name: "..author name..",
+                    affiliation: "..affiliation..",
+                    contact: "..contact.."
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
@@ -685,9 +685,9 @@ define(function (require, exports, module) {
             // var emucharts = {
             //     name: ("emucharts_" + projectManager.project().name().replace(/-/g, "_") + "_SMV"),
             //     author: {
-            //         name: "<author name>",
-            //         affiliation: "<affiliation>",
-            //         contact: "<contact>"
+            //         name: "..author name..",
+            //         affiliation: "..affiliation..",
+            //         contact: "..contact.."
             //     },
             //     importings: [],
             //     constants: emuchartsManager.getConstants(),
@@ -713,9 +713,9 @@ define(function (require, exports, module) {
             var emucharts = {
                 name: ("emucharts_" + projectManager.project().name() + "_PIM"),
                 author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
+                    name: "..author name..",
+                    affiliation: "..affiliation..",
+                    contact: "..contact.."
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
@@ -742,9 +742,9 @@ define(function (require, exports, module) {
             var emucharts = {
                 name: ("emucharts_" + projectManager.project().name()),
                 author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
+                    name: "..author name..",
+                    affiliation: "..affiliation..",
+                    contact: "..contact.."
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
@@ -771,9 +771,9 @@ define(function (require, exports, module) {
             var emucharts = {
                 name: ("emucharts_" + projectManager.project().name() + "_MAL"),
                 author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
+                    name: "..author name..",
+                    affiliation: "..affiliation..",
+                    contact: "..contact.."
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
@@ -800,9 +800,9 @@ define(function (require, exports, module) {
             var emucharts = {
                 name: ("emucharts_" + projectManager.project().name() + "_VDM"),
                 author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
+                    name: "..author name..",
+                    affiliation: "..affiliation..",
+                    contact: "..contact.."
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
@@ -830,9 +830,9 @@ define(function (require, exports, module) {
             var emucharts = {
                 name: ("emucharts_" + projectManager.project().name() + "_JS"),
                 author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
+                    name: "..author name..",
+                    affiliation: "..affiliation..",
+                    contact: "..contact.."
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
@@ -860,9 +860,9 @@ define(function (require, exports, module) {
             var emucharts = {
                 name: ("emucharts_" + projectManager.project().name() + "_ADA"),
                 author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
+                    name: "..author name..",
+                    affiliation: "..affiliation..",
+                    contact: "..contact.."
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
@@ -889,17 +889,13 @@ define(function (require, exports, module) {
             var emucharts = {
                 name: ("emucharts_" + projectManager.project().name() + "_Bless"),
                 author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
+                    name: "..author name..",
+                    affiliation: "..affiliation..",
+                    contact: "..contact.."
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
-                variables: {
-                    input: emuchartsManager.getInputVariables(),
-                    output: emuchartsManager.getOutputVariables(),
-                    local: emuchartsManager.getLocalVariables()
-                },
+                variables: emuchartsManager.getVariables(),
                 states: emuchartsManager.getStates(),
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
@@ -925,9 +921,9 @@ define(function (require, exports, module) {
             var emucharts = {
                 name: filename,
                 author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
+                    name: "..author name..",
+                    affiliation: "..affiliation..",
+                    contact: "..contact.."
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
@@ -943,17 +939,13 @@ define(function (require, exports, module) {
             var emucharts = {
                 name: projectManager.project().name(),
                 author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
+                    name: "..author name..",
+                    affiliation: "..affiliation..",
+                    contact: "..contact.."
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
-                variables: {
-                    input: emuchartsManager.getInputVariables(),
-                    output: emuchartsManager.getOutputVariables(),
-                    local: emuchartsManager.getLocalVariables()
-                },
+                variables: emuchartsManager.getVariables(),
                 states: emuchartsManager.getStates(),
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
@@ -964,17 +956,13 @@ define(function (require, exports, module) {
             var emucharts = {
                 name: projectManager.project().name(),
                 author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
+                    name: "..author name..",
+                    affiliation: "..affiliation..",
+                    contact: "..contact.."
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
-                variables: {
-                    input: emuchartsManager.getInputVariables(),
-                    output: emuchartsManager.getOutputVariables(),
-                    local: emuchartsManager.getLocalVariables()
-                },
+                variables: emuchartsManager.getVariables(),
                 states: emuchartsManager.getStates(),
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
@@ -985,17 +973,13 @@ define(function (require, exports, module) {
             var emucharts = {
                 name: projectManager.project().name(),
                 author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
+                    name: "..author name..",
+                    affiliation: "..affiliation..",
+                    contact: "..contact.."
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
-                variables: {
-                    input: emuchartsManager.getInputVariables(),
-                    output: emuchartsManager.getOutputVariables(),
-                    local: emuchartsManager.getLocalVariables()
-                },
+                variables: emuchartsManager.getVariables(),
                 states: emuchartsManager.getStates(),
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
@@ -1234,9 +1218,9 @@ define(function (require, exports, module) {
             var emuchart = {
                 name: ("emucharts_" + projectManager.project().name()),
                 author: {
-                    name: "<author name>",
-                    affiliation: "<affiliation>",
-                    contact: "<contact>"
+                    name: "..author name..",
+                    affiliation: "..affiliation..",
+                    contact: "..contact.."
                 },
                 //constants: emuchartsManager.getConstants(),
                 //variables: emuchartsManager.getVariables(),

@@ -9,9 +9,7 @@
  * 		FmiBuffer
  * 			This structure maintains all the variables that are accessed by means of fmi2GetXXX and fmi2SetXXX
  *
- *
- * The commented structures and functions are refuses of the Overture Fmu.h file that might be used in future version of the FMU
- * */
+ **/
 #ifndef FMU_H
 #define FMU_H
 
@@ -19,7 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-/*#include <iostream>*/
+#include <iostream>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "err.h"
@@ -27,26 +25,28 @@
 #include <signal.h>
 #include <stdlib.h>
 
-#define BOOL_COUNT {{variables.bool_count}}
-#define REAL_COUNT {{variables.real_count}}
-#define INT_COUNT {{variables.int_count}}
+#define BOOL_COUNT {{count.bool}}
+#define INT_COUNT {{count.int}}
+#define REAL_COUNT {{count.real}}
+#define STRING_COUNT {{count.string}}
 #define FMI_COSIMULATION
 
-struct FmiBuffer{
-	 fmi2Boolean booleanBuffer[BOOL_COUNT];
-	 fmi2Real realBuffer[REAL_COUNT];
-	 fmi2Integer intBuffer[INT_COUNT];
+struct FmiBuffer {
+     fmi2Boolean {{buffer_names.bool}}[BOOL_COUNT];
+     fmi2Integer {{buffer_names.int}}[INT_COUNT];
+     fmi2Real {{buffer_names.real}}[REAL_COUNT];
+     fmi2String {{buffer_names.string}}[STRING_COUNT];
 };
 
 extern struct FmiBuffer fmiBuffer;
 
-void initialize(fmi2String );
+void initialize(fmi2String);
 int open_websocket();
 void close_websocket();
 void sendToPVS(const char*);
 void terminate();
 int findVariable(const char*, const char*);
-void convertStringtoDouble(int , int);
-void convertDoubletoString(int , double, int);
+void convertStringtoDouble(int, int);
+void convertDoubletoString(int, double, int);
 
 #endif // FMU_H

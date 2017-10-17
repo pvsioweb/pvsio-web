@@ -82,25 +82,25 @@ extern "C" fmi2Status fmi2SetDebugLogging(fmi2Component c, fmi2Boolean loggingOn
 }
 
 extern "C" fmi2Status fmi2GetReal(fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Real value[]) {
-for (int i = 0; i < nvr; i++) {
+for (size_t i = 0; i < nvr; i++) {
 		fmi2ValueReference vRef = vr[i];
-		value[i] = fmiBuffer.realBuffer[vRef];
+		value[i] = fmiBuffer.{{buffer_names.real}}[vRef];
 	}
 	return fmi2OK;
 }
 
 extern "C" fmi2Status fmi2GetInteger(fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Integer value[]) {
-for (int i = 0; i < nvr; i++) {
+for (size_t i = 0; i < nvr; i++) {
 		fmi2ValueReference vRef = vr[i];
-		value[i] = fmiBuffer.intBuffer[vRef];
+		value[i] = fmiBuffer.{{buffer_names.int}}[vRef];
 	}
 	return fmi2OK;
 }
 
 extern "C" fmi2Status fmi2GetBoolean(fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Boolean value[]) {
-	for (int i = 0; i < nvr; i++) {
+	for (size_t i = 0; i < nvr; i++) {
 		fmi2ValueReference vRef = vr[i];
-		value[i] = fmiBuffer.booleanBuffer[vRef];
+		value[i] = fmiBuffer.{{buffer_names.bool}}[vRef];
 	}
 	return fmi2OK;
 }
@@ -110,30 +110,30 @@ extern "C" fmi2Status fmi2GetString(fmi2Component c, const fmi2ValueReference vr
 }
 
 extern "C" fmi2Status fmi2SetReal(fmi2Component c, const fmi2ValueReference vr[], size_t nvr, const fmi2Real value[]) {
-	for (int i = 0; i < nvr; i++) {
+	for (size_t i = 0; i < nvr; i++) {
 		fmi2ValueReference vRef = vr[i];
-		fmiBuffer.realBuffer[vRef] = value[i];
-	//	printf("FMI real id=%d set to: %f\n", vRef, fmiBuffer.realBuffer[vRef]);
+		fmiBuffer.{{buffer_names.real}}[vRef] = value[i];
+	//	printf("FMI real id=%d set to: %f\n", vRef, fmiBuffer.{{buffer_names.real}}[vRef]);
 	}
 	return fmi2OK;
 }
 
 extern "C" fmi2Status fmi2SetInteger(fmi2Component c, const fmi2ValueReference vr[], size_t nvr,
 		const fmi2Integer value[]) {
-	for (int i = 0; i < nvr; i++) {
+	for (size_t i = 0; i < nvr; i++) {
 		fmi2ValueReference vRef = vr[i];
-		fmiBuffer.intBuffer[vRef] = value[i];
-    //	printf("FMI real id=%d set to: %f\n", vRef, fmiBuffer.intBuffer[vRef]);
+		fmiBuffer.{{buffer_names.int}}[vRef] = value[i];
+    //	printf("FMI real id=%d set to: %f\n", vRef, fmiBuffer.{{buffer_names.int}}[vRef]);
 	}
 	return fmi2OK;
 }
 
 extern "C" fmi2Status fmi2SetBoolean(fmi2Component c, const fmi2ValueReference vr[], size_t nvr,
 		const fmi2Boolean value[]) {
-    for (int i = 0; i < nvr; i++) {
+    for (size_t i = 0; i < nvr; i++) {
     		fmi2ValueReference vRef = vr[i];
-    		fmiBuffer.booleanBuffer[vRef] = value[i];
-    //		printf("FMI real id=%d set to: %f\n", vRef, fmiBuffer.boolBuffer[vRef]);
+    		fmiBuffer.{{buffer_names.bool}}[vRef] = value[i];
+    //		printf("FMI real id=%d set to: %f\n", vRef, fmiBuffer.{{buffer_names.bool}}[vRef]);
 	}
 	return fmi2OK;
 }

@@ -385,12 +385,13 @@ define(function (require, exports, module) {
         }
         var x = split_variables(emuchart);
         x.basic.forEach(function (basic) {
-            variables.push({ name: basic.name, type: basic.type });
+            variables.push({ name: basic.name, type: basic.type, value: basic.value });
         });
         x.records.keys().forEach(function (key) {
             variables.push({
                 name: key,
-                children: x.records.get(key)
+                children: x.records.get(key),
+                type: "record"
             });
         });
         var data = {
