@@ -12,7 +12,7 @@ define(function (require, exports, module) {
 
     var d3 = require("d3/d3"),
         eventDispatcher = require("util/eventDispatcher"),
-        Emucharts = require("plugins/emulink/Emucharts"),
+        //Emucharts = require("plugins/emulink/Emucharts"),
         EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes");
 
     var dbg = false;
@@ -55,7 +55,9 @@ define(function (require, exports, module) {
         _this.emucharts.addListener("emuCharts_variableRenamed", function (event) { _this.fire(event); });
         _this.emucharts.addListener("emuCharts_transitionAdded", function (event) { _this.fire(event); });
         _this.emucharts.addListener("emuCharts_transitionRemoved", function (event) { _this.fire(event); });
-        _this.emucharts.addListener("emuCharts_transitionRenamed", function (event) { _this.fire(event); });
+        _this.emucharts.addListener("emuCharts_transitionRenamed", function (event) {
+            _this.fire(event);
+        });
         _this.emucharts.addListener("emuCharts_initialTransitionAdded", function (event) { _this.fire(event); });
         _this.emucharts.addListener("emuCharts_initialTransitionRemoved", function (event) { _this.fire(event); });
         _this.emucharts.addListener("emuCharts_initialTransitionRenamed", function (event) { _this.fire(event); });
@@ -79,7 +81,10 @@ define(function (require, exports, module) {
             previousScreen: { x: 0, y: 0 },
             currentScreen: { x: 0, y: 0 }
         };
-        this.emucharts = emucharts || new Emucharts();
+        if (!emucharts) {
+            console.log("[Emucharts Editor] ERROR: null emucharts passed to constructor");
+        }
+        this.emucharts = emucharts;// || new Emucharts();
         this.dragged = false;
         this.SVGdragged = null;
         // mouse event vars used for identifying gestures like creating a new transition or dragging nodes/transitions/canvas
@@ -2165,7 +2170,9 @@ define(function (require, exports, module) {
      */
     EmuchartsEditor.prototype.rename_transition = function (transitionID, newLabel) {
         var _this = this;
-        if (newLabel) { this.emucharts.rename_edge(transitionID, newLabel); }
+        if (newLabel !== null && newLabel !== undefined) {
+            this.emucharts.rename_edge(transitionID, newLabel);
+        }
         var transitions = d3.select("#ContainerStateMachine")
                         .select("#Transitions").selectAll(".transition")
                         .filter(function (transition) { return transition.id === transitionID; });

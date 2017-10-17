@@ -24,9 +24,10 @@
         top: 150, left: 120, height: 24, width: 120
       }, {
         displayKey: "disp",
-        cursorName: "cur"
+        cursorName: "cur",
+        align: "right"
       });
-      device.dispNumeric.render({ disp: 10.5, cur: -1 }); // the display value is 10.5 and the cursor highlights the first fractional digit
+      device.dispNumeric.render({ disp: "B 10.5", cur: -1 }); // the display value is "B 10.5" and the cursor highlights the first fractional digit of the number
  });
  *
  */
@@ -51,12 +52,16 @@ define(function (require, exports, module) {
      *        Default is { top: 0, left: 0, width: 200, height: 80 }.
      * @param opt {Object} Options:
      *          <li> displayKey (string): the name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.
+     *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).     
      *          <li> cursorName (string): the name of the state attribute defining the cursor position. This information will be used by the render method. If this options is not specified, the cursor will not be displayed.
      *          <li>fontfamily (String): font type (default is "sans-serif")</li>
      *          <li>fontsize (Number): font size (default is 0.8 * height)</li>
      *          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
      *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
+     *          <li>borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)</li>
+     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
+     *          <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
      *          <li>align (String): text alignment (available options are "left", "right", anc "center". Default is "center")</li>
      *          <li>letterSpacing (Number): spacing between characters, in pixels (default is 0)</li>
      *          <li>inverted (Bool): if true, the text has inverted colors,
@@ -86,6 +91,9 @@ define(function (require, exports, module) {
         this.align = opt.align || "center";
         this.backgroundColor = opt.backgroundColor || "black";
         this.fontColor = opt.fontColor || "#fff"; //white
+        this.borderColor = opt.borderColor || "inherit";
+        this.borderWidth = (opt.borderColor) ? ((opt.borderWidth) ? parseFloat(opt.borderWidth) : 2) : 0;
+        this.borderStyle = (opt.borderColor) ? ((opt.borderStyle) ? opt.borderStyle : "solid") : "none";
         this.cursor = opt.cursor || "default";
         if (opt.inverted) {
             var tmp = this.backgroundColor;
@@ -97,19 +105,23 @@ define(function (require, exports, module) {
         var elemClass = id + " displayWidget" + " noselect ";
         if (this.blinking) { elemClass += " blink"; }
         opt.position = opt.position || "absolute";
+        opt.borderRadius = opt.borderRadius || "2px";
         this.div = d3.select(this.parent)
                         .append("div").style("position", opt.position)
                         .style("top", this.top + "px").style("left", this.left + "px")
-                        .style("width", this.width + "px").style("height", this.height + "px")
-                        .style("margin", 0).style("padding", 0).style("border-radius", "2px")
+                        .style("width", (this.width + this.borderWidth) + "px").style("height", (this.height + this.borderWidth) + "px")
+                        .style("margin", 0).style("padding", 0).style("border-radius", opt.borderRadius)
                         .style("background-color", this.backgroundColor)
+                        .style("border-width", this.borderWidth + "px")
+                        .style("border-style", this.borderStyle)
+                        .style("border-color", this.borderColor)
                         .style("display", "none").attr("id", id).attr("class", elemClass);
         this.div.append("span").attr("id", id + "_span").attr("class", id + "_span")
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0)
                         .style("vertical-align", "top").style("border-radius", "2px");
         this.div.append("canvas").attr("id", id + "_canvas").attr("class", id + "_canvas")
-                        .attr("width", this.width).attr("height", this.height)
+                        .attr("width", (this.width - this.borderWidth)).attr("height", (this.height - this.borderWidth))
                         .style("margin", 0).style("padding", 0).style("border-radius", "2px")
                         .style("vertical-align", "top");
         var x2 = this.left + this.width;
@@ -234,6 +246,7 @@ define(function (require, exports, module) {
      * @instance
      */
     NumericDisplay.prototype.render = function (txt, opt) { // TODO: refactor parameter name: txt --> data
+        var _this = this;
         function renderNumber(data, opt) {
             function drawCircle(context, x, y, r, fillStyle) {
                 context.save();
@@ -259,13 +272,6 @@ define(function (require, exports, module) {
                 data.context.fillRect(0, 0, data.width, data.height);
             }
             data.context.fillStyle = opt.fontColor || _this.fontColor;
-            if (data.align === "left") {
-                data.context.textAlign = "start";
-            } else if (data.align === "right") {
-                data.context.textAlign = "end";
-            } else {
-                data.context.textAlign = "center";
-            }
             var th = 28,
                 x,
                 y,
@@ -281,6 +287,19 @@ define(function (require, exports, module) {
             var frac = data.num.split(".")[1],
                 whole = data.num.split(".")[0];
             //pad the string if necessary
+            if (data.align === "left") {
+                data.context.textAlign = "start";
+                centerx = (whole && whole.length) ?
+                            _this.fontsize * whole.length / 1.5 - (_this.borderWidth * 1.5)
+                            : (_this.borderWidth * 1.5);
+            } else if (data.align === "right") {
+                data.context.textAlign = "end";
+                centerx = (frac && frac.length) ?
+                            data.width - (_this.fontsize * frac.length / 1.8) - (_this.borderWidth * 1.5)
+                            : data.width - (_this.borderWidth * 1.5);
+            } else {
+                data.context.textAlign = "center";
+            }
             var i;
             if (data.cursorPos >= whole.length - 1) {
                 for (i = data.cursorPos - (whole.length - 1); i > 0; i--) {
@@ -367,8 +386,14 @@ define(function (require, exports, module) {
         }
 
         if (isEnabled) {
+            opt.borderWidth = opt.borderWidth || this.borderWidth;
+            opt.borderStyle = opt.borderStyle || this.borderStyle;
+            opt.borderColor = opt.borderColor || this.borderColor;
+            this.div.style("border-width", opt.borderWidth + "px")
+                    .style("border-style", opt.borderStyle)
+                    .style("border-color", opt.borderColor);
+
             txt = txt || "";
-            var _this = this;
             var dispVal = txt, cursorPos = 0;
             if (typeof txt === "object") {
                 // txt in this case is a PVS state that needs to be parsed

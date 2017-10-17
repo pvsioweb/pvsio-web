@@ -56,11 +56,15 @@
       *        Default is { top: 0, left: 0, width: 32, height: 20 }.
       * @param opt {Object} Options:
       *          <li>displayKey (string): the name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.
+      *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).      
       *          <li>fontfamily (String): font type (default is "sans-serif")</li>
       *          <li>fontsize (Number): font size (default is 0.8 * height)</li>
       *          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
       *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
       *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
+      *          <li>borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)</li>
+      *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
+      *          <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
       *          <li>align (String): text alignment (available options are "left", "right", anc "center". Default is "center")</li>
       *          <li>cursor (String): cursor style, must be a valid HTML5 cursor style, e.g., "pointer", "crosshair", etc. (default is "default")</li>
       *          <li>blinking (Bool): true means the text is blinking (default is false, i.e., not blinking)</li>
@@ -121,6 +125,9 @@
              fontsize: this.fontsize,
              fontColor: this.fontColor,
              backgroundColor: this.backgroundColor,
+             borderWidth: opt.borderWidth,
+             borderStyle: opt.borderStyle,
+             borderColor: opt.borderColor,
              cursor: this.cursor,
              displayKey: this.displayKey(),
              auditoryFeedback: this.auditoryFeedback(),
@@ -133,6 +140,9 @@
              fontsize: this.fontsize,
              fontColor: this.fontColor,
              backgroundColor: this.backgroundColor,
+             borderWidth: opt.borderWidth,
+             borderStyle: opt.borderStyle,
+             borderColor: opt.borderColor,
              cursor: this.cursor,
              cursorName: this.cursorName(),
              displayKey: this.displayKey(),

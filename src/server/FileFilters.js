@@ -12,7 +12,8 @@ var imageExts = [".jpg", ".jpeg", ".png"],
                    ".ads",  //-- ADA
                    ".c",    //-- C
                    ".h",    //-- C
-                   ".smv"   //-- NuXMV
+                   ".smv",  //-- NuXMV
+                   ".als"   //-- Alloy
                   ].concat(imageExts);
 
 module.exports = filesFilter;
