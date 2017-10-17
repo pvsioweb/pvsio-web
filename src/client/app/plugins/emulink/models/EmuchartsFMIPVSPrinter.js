@@ -35,14 +35,14 @@ define(function (require, exports, module) {
         int: "intBuffer",
         real: "realBuffer",
         string: "stringBuffer"
-    }
+    };
 
     function get_buffer(t, count) {
         switch (t) {
-            case "int" : count.int++;  return { printf_type: "%i", buffer_name: buffer_names["int"], descriptor: "Int" };
-            case "real": count.real++; return { printf_type: "%f", buffer_name: buffer_names["real"], descriptor: "Real" };
-            case "bool": count.bool++; return { printf_type: "%i", buffer_name: buffer_names["bool"], descriptor: "Bool"};
-            case "string": count.string++; return { printf_type: "%s", buffer_name: buffer_names["string"], descriptor: "String"};
+            case "int" : count.int++;  return { printf_type: "%i", buffer_name: buffer_names.int, descriptor: "Int" };
+            case "real": count.real++; return { printf_type: "%f", buffer_name: buffer_names.real, descriptor: "Real" };
+            case "bool": count.bool++; return { printf_type: "%i", buffer_name: buffer_names.bool, descriptor: "Bool"};
+            case "string": count.string++; return { printf_type: "%s", buffer_name: buffer_names.string, descriptor: "String"};
             default: return null;
         }
         return null;
@@ -68,7 +68,7 @@ define(function (require, exports, module) {
                 "bool": 0,
                 "real": 0,
                 "string": 0
-            }
+            };
             var skeleton_cpp = "";
             var fmu_h = "";
             var fmu_cpp = "";
