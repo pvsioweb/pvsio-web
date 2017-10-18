@@ -470,7 +470,7 @@ define(function (require, exports, module) {
                 emuchartsTables.edit({ constant: theConstant });
             }
         });
-        contextMenus.addListener("ContextMenus.setDatatypes", function (evt) {
+        contextMenus.addListener("ContextMenus.editDatatype", function (evt) {
             if (evt && evt.datatype) {
                 var theDatatype = emuchartsManager.getDatatype(evt.datatype.id);
                 emuchartsTables.edit({ datatype: theDatatype });
