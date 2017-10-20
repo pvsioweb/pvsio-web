@@ -1328,9 +1328,12 @@ define(function (require, exports, module) {
 
     function onProjectChanged(event) {
         // try to open all emucharts files of the project
-        function finalize() {
-            // render emuchart
-            emuchartsManager.render();
+        function finalize(opt) {
+            opt = opt || {};
+            if (!opt.loadOnly) {
+                // render emuchart
+                emuchartsManager.render();
+            }
             // set initial editor mode
             var _this = require("plugins/emulink/Emulink").getInstance();
             _this.browseMode();
@@ -1341,7 +1344,7 @@ define(function (require, exports, module) {
                 res.content = JSON.parse(res.content);
                 emuchartsManager.importEmucharts(res, opt);
                 emuchartsSelector.render(emuchartsManager.getEmuchartsDescriptors());
-                finalize();
+                finalize(opt);
             }).catch(function (err) {
                 // log any error
                 console.log(err);
@@ -1365,6 +1368,7 @@ define(function (require, exports, module) {
                     if (emuchartsFiles && emuchartsFiles.length > 0) {
                         var promises = [];
                         var isFirst = true;
+                        var i = 0;
                         emuchartsFiles.forEach(function (file) {
                             promises.push(new Promise(function (resolve, reject) {
                                 // Defer loading of files to avoid unresponsive user interfaces
@@ -1374,8 +1378,9 @@ define(function (require, exports, module) {
                                     readFile(file);
                                 } else {
                                     setTimeout(function () {
-                                        readFile(file, { select: false });
-                                    }, 1000);
+                                        readFile(file, { loadOnly: true });
+                                    }, 600 + i * 200);
+                                    i++;
                                 }
                             }));
                         });

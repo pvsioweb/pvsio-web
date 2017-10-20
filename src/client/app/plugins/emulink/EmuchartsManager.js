@@ -183,16 +183,19 @@ define(function (require, exports, module) {
         return this.loadEmucharts(id);
     };
 
-    EmuchartsManager.prototype.loadEmucharts = function (id) {
-        // load the emucharts in the editor
-        var emuDesc = _emuchartsDescriptors.get(id);
-        if (emuDesc && emuDesc.emuchart_name && emuDesc.emuchart_content) {
-            console.log("Selecting emuchart " + emuDesc.emuchart_name + "...");
-            _selectedEditor = new EmuchartsEditor(emuDesc.emuchart_content);
-            this.installHandlers(_selectedEditor);
-            _selectedEmuchart = id;
-            // render the emucharts
-            _selectedEditor.render();
+    EmuchartsManager.prototype.loadEmucharts = function (id, opt) {
+        opt = opt || {};
+        if (!opt.loadOnly) {
+            // load the emucharts in the editor
+            var emuDesc = _emuchartsDescriptors.get(id);
+            if (emuDesc && emuDesc.emuchart_name && emuDesc.emuchart_content) {
+                console.log("Selecting emuchart " + emuDesc.emuchart_name + "...");
+                _selectedEditor = new EmuchartsEditor(emuDesc.emuchart_content);
+                this.installHandlers(_selectedEditor);
+                _selectedEmuchart = id;
+                // render the emucharts
+                _selectedEditor.render();
+            }
         }
         return this;
     };
@@ -265,7 +268,7 @@ define(function (require, exports, module) {
                             emuchart_content: new Emucharts(emuchartsFile.content.chart),
                             emuchart_path: emuchartsFile.path
                         });
-                        _this.loadEmucharts(id);
+                        _this.loadEmucharts(id, opt);
                     } else {
                         alert("Error while importing emuchart file: unsupported file version " + version);
                     }
@@ -297,7 +300,7 @@ define(function (require, exports, module) {
                             emuchart_content: content,
                             emuchart_path: emuchartsFile.path
                         });
-                        _this.loadEmucharts(id);
+                        _this.loadEmucharts(id, opt);
                     });
                 }
             }

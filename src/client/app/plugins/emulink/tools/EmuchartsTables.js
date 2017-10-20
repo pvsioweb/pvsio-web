@@ -131,12 +131,11 @@ define(function (require, exports, module) {
         });
         var dragResize = d3.behavior.drag()
                             .origin(function () {
-                                var origin = d3.select("#EmuchartsFloatTable").node().parentNode.getBoundingClientRect();
+                                var origin = d3.select("#EmuchartsFloatTable").node().getBoundingClientRect();
                                 console.log(origin);
                                 return { x: 0, y: origin.top };
                             })
                             .on("drag", function () {
-                                // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
                                 d3.event.sourceEvent.stopPropagation();
                                 var m = d3.mouse(d3.select("#btn_resizeTableHeight").node());
                                 // update table height
