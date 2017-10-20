@@ -158,7 +158,7 @@
                     <li><a href='#!' id="btn_menuJavaScriptPrinter" class="tobeimplemented"><span>JavaScript Code</span></a></li>
                     <li><a href='#!' id="btn_menuAdaPrinter" class="tobeimplemented"><span>Ada Code</span></a></li>
                     <li class="divider"></li>
-                    <li><a href='#!' id="btn_menuFMIPVSPrinter"><span>FMI Package</span></a></li>                    
+                    <li><a href='#!' id="btn_menuFMIPVSPrinter"><span>FMI Package</span></a></li>
                     <li><a href='#!' id="btn_menuAndroidPrinter"><span>Android App</span></a></li>
                     <li class="divider"></li>
                 </ul>
@@ -260,21 +260,23 @@
                 </li>
             </ul>
             <ul class="table-toggle-container" role="tablist">
-                <li id="btn_incTableHeight" class="table-toggle-visible">
+                <li id="btn_resizeTableHeight" class="table-toggle-visible">
                     <!-- <span class="glyphicon glyphicon-triangle-top" style="margin-left:28px; margin-right:28px;"></span> -->
-                    <span class="glyphicon glyphicon-collapse-up"
-                          style="margin-left:12px; margin-right:12px;display:inline-block;transform:scale(1.6,1.5);
+                    <span class="glyphicon glyphicon-resize-vertical"
+                          style="margin-left:24px; margin-right:24px;display:inline-block;transform:scale(1.6,1.5);
                                  padding-top:8px; padding-bottom:9px;"></span>
                 </li>
             </ul>
             <ul class="table-toggle-container" role="tablist" style="opacity:0.6;">
-                <li id="btn_decTableHeight" class="table-toggle-visible">
+                <li id="btn_minimizeTable" class="table-toggle-visible">
                     <!-- <span class="glyphicon glyphicon-triangle-bottom" style="margin-left:28px; margin-right:28px;"></span> -->
-                    <span class="glyphicon glyphicon-collapse-down" style="margin-left:12px; margin-right:12px;"></span>
+                    <span class="glyphicon glyphicon-collapse-down"
+                          style="margin-left:24px; margin-right:24px;transform:scale(1.6,1.5);
+                                 padding-top:8.5px; padding-bottom:8.5px;"></span>
                 </li>
             </ul>
         </div>
-        <div id="EmuchartsFloatTableContent" class="EmuchartsTableContent">
+        <div id="EmuchartsFloatTableContent" class="EmuchartsTableContent" style="overflow:hidden;">
         </div>
         <!--<textarea id="infoBoxModifiable" readonly >This space is for the Advanced Diagram Editor (this plugin will be implemented soon!)
         </textarea>-->

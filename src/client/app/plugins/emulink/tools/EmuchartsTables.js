@@ -45,50 +45,8 @@ define(function (require, exports, module) {
         return this;
     }
 
-    var top = {
-        index: 2,
-        max_index: 3,
-        val: [
-            28, //min
-            416, //mid
-            614, // std
-            814 //max
-        ]
-    };
-    var height = {
-        index: 1,
-        max_index: 3,
-        val: [
-            0, //min
-            196, //std
-            394, //mid
-            782 //max
-        ]
-    };
-    function inc_table_height() {
-        if (height.index < height.max_index) {
-            height.index++;
-        }
-        return height.val[height.index];
-    }
-    function dec_table_height() {
-        if (height.index > 0) {
-            height.index--;
-        }
-        return height.val[height.index];
-    }
-    function inc_table_top() {
-        if (top.index < top.max_index) {
-            top.index++;
-        }
-        return top.val[top.index];
-    }
-    function dec_table_top() {
-        if (top.index > 0) {
-            top.index--;
-        }
-        return top.val[top.index];
-    }
+    var minimized_table = { top: 814, height: 0 };
+    var maximised_table = { top: 26, height: 784 };
 
     function installTableHandlers (_this) {
         if (document.getElementById("StateVariablesTable")) {
@@ -167,18 +125,35 @@ define(function (require, exports, module) {
             });
         }
         // handlers for resizing table
-        d3.select("#btn_incTableHeight").on("click", function () {
-            var top = dec_table_top();
-            var height = inc_table_height();
-            d3.selectAll(".EmuchartsTableContent").style("height", height + "px");
-            d3.select("#EmuchartsFloatTable").transition().duration(200).style("top", top + "px");
+        d3.select("#btn_minimizeTable").on("click", function () {
+            d3.select("#EmuchartsFloatTable").transition().duration(200).style("top", minimized_table.top + "px");
+            d3.selectAll(".EmuchartsTableContent").style("width", "100% ").transition().duration(200).style("height", minimized_table.height + "px");
         });
-        d3.select("#btn_decTableHeight").on("click", function () {
-            var top = inc_table_top();
-            var height = dec_table_height();
-            d3.select("#EmuchartsFloatTable").transition().duration(200).style("top", top + "px");
-            d3.selectAll(".EmuchartsTableContent").style("width", "100% ").transition().duration(200).style("height", height + "px");
-        });
+        var dragResize = d3.behavior.drag()
+                            .origin(function () {
+                                var origin = d3.select("#EmuchartsFloatTable").node().getBoundingClientRect();
+                                console.log(origin);
+                                return { x: 0, y: origin.top };
+                            })
+                            .on("drag", function () {
+                                d3.event.sourceEvent.stopPropagation();
+                                var m = d3.mouse(d3.select("#btn_resizeTableHeight").node());
+                                // update table height
+                                if (m && m.length > 1) {
+                                    var top = parseFloat(d3.select("#EmuchartsFloatTable").style("top")) + m[1];
+                                    var height = parseFloat(d3.select(".EmuchartsTableContent").style("height")) - m[1];
+                                    top = (top < maximised_table.top) ? maximised_table.top
+                                            : (top > minimized_table.top) ? minimized_table.top
+                                            : top;
+                                    height = (height < minimized_table.height) ? minimized_table.height
+                                            : (height > maximised_table.height) ? maximised_table.height
+                                            : height;
+                                    d3.select("#EmuchartsFloatTable").style("top", top + "px");
+                                    d3.selectAll(".EmuchartsTableContent").style("width", "100% ").style("height", height + "px");
+                                }
+                            });
+        d3.select("#btn_resizeTableHeight").call(dragResize);
+
         // table selectors
         d3.select("#btnStates").on("click", function () {
             d3.select("#btnStates").classed("active", true);
