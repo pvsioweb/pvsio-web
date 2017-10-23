@@ -1,0 +1,169 @@
+MT32: THEORY
+ BEGIN %IMPORTING pvsioweb_utils
+  %-- operating modes
+  Mode: TYPE = { CENTRAL, CHECK_PATIENT, DATA, EXAMS, HOME, INTERPRETATION, MONITORING, RECORDING, RESULTS, SETTINGS, TEST }
+
+  %-- state attributes
+  State: TYPE = [#
+    mode: Mode,
+    previous_mode: Mode
+  #]
+
+  %-- init function
+  init: State = (#
+    previous_mode := HOME, 
+    mode := HOME
+  #)
+
+  %-- leave/enter functions
+  enter(m: Mode)(st: State): State = st WITH [ mode := m ]
+  leave(m: Mode)(st: State): State = st WITH [ previous_mode := m ]
+
+  %-- triggers
+  per_click_back(st: State): bool = (mode(st) = CHECK_PATIENT)
+    OR (mode(st) = INTERPRETATION)
+    OR (mode(st) = CENTRAL)
+    OR (mode(st) = EXAMS)
+    OR (mode(st) = SETTINGS)
+    OR (mode(st) = TEST)
+  click_back(st: (per_click_back)): State =
+    COND
+     mode(st) = CHECK_PATIENT
+      -> LET st = leave(CHECK_PATIENT)(st)
+          IN enter(EXAMS)(st),
+     mode(st) = INTERPRETATION
+      -> LET st = leave(INTERPRETATION)(st)
+          IN enter(RESULTS)(st),
+     mode(st) = CENTRAL
+      -> LET st = leave(CENTRAL)(st)
+          IN enter(HOME)(st),
+     mode(st) = EXAMS
+      -> LET st = leave(EXAMS)(st)
+          IN enter(HOME)(st),
+     mode(st) = SETTINGS
+      -> LET st = leave(SETTINGS)(st)
+          IN enter(HOME)(st),
+     mode(st) = TEST
+      -> LET st = leave(TEST)(st)
+          IN enter(EXAMS)(st),
+     ELSE -> st
+    ENDCOND
+
+  per_click_cancel(st: State): bool = (mode(st) = DATA)
+  click_cancel(st: (per_click_cancel)): State =
+    COND
+     mode(st) = DATA
+      -> LET st = leave(DATA)(st)
+          IN enter(RESULTS)(st),
+     ELSE -> st
+    ENDCOND
+
+  per_click_central(st: State): bool = (mode(st) = HOME)
+  click_central(st: (per_click_central)): State =
+    COND
+     mode(st) = HOME
+      -> LET st = leave(HOME)(st)
+          IN enter(CENTRAL)(st),
+     ELSE -> st
+    ENDCOND
+
+  per_click_confirm(st: State): bool = (mode(st) = CHECK_PATIENT)
+  click_confirm(st: (per_click_confirm)): State =
+    COND
+     mode(st) = CHECK_PATIENT
+      -> LET st = leave(CHECK_PATIENT)(st)
+          IN enter(MONITORING)(st),
+     ELSE -> st
+    ENDCOND
+
+  per_click_ecg12d(st: State): bool = (mode(st) = EXAMS)
+  click_ecg12d(st: (per_click_ecg12d)): State =
+    COND
+     mode(st) = EXAMS
+      -> LET st = leave(EXAMS)(st)
+          IN enter(CHECK_PATIENT)(st),
+     ELSE -> st
+    ENDCOND
+
+  per_click_new_exam(st: State): bool = (mode(st) = HOME)
+  click_new_exam(st: (per_click_new_exam)): State =
+    COND
+     mode(st) = HOME
+      -> LET st = leave(HOME)(st)
+          IN enter(EXAMS)(st),
+     ELSE -> st
+    ENDCOND
+
+  per_click_quit(st: State): bool = (mode(st) = MONITORING)
+  click_quit(st: (per_click_quit)): State =
+    COND
+     mode(st) = MONITORING
+      -> LET st = leave(MONITORING)(st)
+          IN enter(CHECK_PATIENT)(st),
+     ELSE -> st
+    ENDCOND
+
+  per_click_rec(st: State): bool = (mode(st) = MONITORING)
+  click_rec(st: (per_click_rec)): State =
+    COND
+     mode(st) = MONITORING
+      -> LET st = leave(MONITORING)(st)
+          IN enter(RECORDING)(st),
+     ELSE -> st
+    ENDCOND
+
+  per_click_repeat(st: State): bool = (mode(st) = RESULTS)
+  click_repeat(st: (per_click_repeat)): State =
+    COND
+     mode(st) = RESULTS
+      -> LET st = leave(RESULTS)(st)
+          IN enter(MONITORING)(st),
+     ELSE -> st
+    ENDCOND
+
+  per_click_settings(st: State): bool = (mode(st) = HOME)
+  click_settings(st: (per_click_settings)): State =
+    COND
+     mode(st) = HOME
+      -> LET st = leave(HOME)(st)
+          IN enter(SETTINGS)(st),
+     ELSE -> st
+    ENDCOND
+
+  per_click_test_electrodes(st: State): bool = (mode(st) = EXAMS)
+  click_test_electrodes(st: (per_click_test_electrodes)): State =
+    COND
+     mode(st) = EXAMS
+      -> LET st = leave(EXAMS)(st)
+          IN enter(TEST)(st),
+     ELSE -> st
+    ENDCOND
+
+  per_click_view_data(st: State): bool = (mode(st) = RESULTS)
+  click_view_data(st: (per_click_view_data)): State =
+    COND
+     mode(st) = RESULTS
+      -> LET st = leave(RESULTS)(st)
+          IN enter(DATA)(st),
+     ELSE -> st
+    ENDCOND
+
+  per_click_view_interpretation(st: State): bool = (mode(st) = RESULTS)
+  click_view_interpretation(st: (per_click_view_interpretation)): State =
+    COND
+     mode(st) = RESULTS
+      -> LET st = leave(RESULTS)(st)
+          IN enter(INTERPRETATION)(st),
+     ELSE -> st
+    ENDCOND
+
+  per_ready(st: State): bool = (mode(st) = RECORDING)
+  ready(st: (per_ready)): State =
+    COND
+     mode(st) = RECORDING
+      -> LET st = leave(RECORDING)(st)
+          IN enter(RESULTS)(st),
+     ELSE -> st
+    ENDCOND
+
+ END MT32

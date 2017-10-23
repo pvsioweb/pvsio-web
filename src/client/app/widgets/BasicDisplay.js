@@ -120,10 +120,10 @@ define(function (require, exports, module) {
         this.div.append("span").attr("id", id + "_span").attr("class", id + "_span")
                         .attr("width", this.width).attr("height", this.height)
                         .style("margin", 0).style("padding", 0)
-                        .style("vertical-align", "top").style("border-radius", opt.borderRadius).style("opacity", opt.opacity);
+                        .style("vertical-align", "top").style("border-radius", opt.borderRadius);//.style("opacity", opt.opacity);
         this.div.append("canvas").attr("id", id + "_canvas").attr("class", id + "_canvas")
                         .attr("width", (this.width - this.borderWidth)).attr("height", (this.height - this.borderWidth))
-                        .style("margin", 0).style("padding", 0).style("border-radius", opt.borderRadius).style("opacity", opt.opacity)
+                        .style("margin", 0).style("padding", 0).style("border-radius", opt.borderRadius)//.style("opacity", opt.opacity)
                         .style("vertical-align", "top");
         var x2 = this.left + this.width;
         var x3 = this.top + this.height;
