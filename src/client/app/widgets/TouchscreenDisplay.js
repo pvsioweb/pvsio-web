@@ -56,7 +56,7 @@
       *        Default is { top: 0, left: 0, width: 32, height: 20 }.
       * @param opt {Object} Options:
       *          <li>displayKey (string): the name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.
-      *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).      
+      *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).
       *          <li>fontfamily (String): font type (default is "sans-serif")</li>
       *          <li>fontsize (Number): font size (default is 0.8 * height)</li>
       *          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>

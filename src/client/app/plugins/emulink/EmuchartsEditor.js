@@ -82,7 +82,8 @@ define(function (require, exports, module) {
             currentScreen: { x: 0, y: 0 }
         };
         if (!emucharts) {
-            console.log("[Emucharts Editor] ERROR: null emucharts passed to constructor");
+            console.error("[Emucharts Editor] ERROR: null emucharts passed to constructor");
+            return;
         }
         this.emucharts = emucharts;// || new Emucharts();
         this.dragged = false;

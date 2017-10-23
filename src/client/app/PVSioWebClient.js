@@ -159,6 +159,42 @@ define(function (require, exports, module) {
                 }
             });
         }
+        // var _resizebar = _div.append("div").style("width", "100%").style("height", "16px").attr("id", "resizebar")
+        //                         .style("border", "solid 1px #08589a")
+        //                         .style("opacity", 0.4).style("background-color", "gray").style("cursor", "ns-resize");
+        // var dragResize = d3.behavior.drag()
+        //                     // .origin(function () {
+        //                     //     var origin = _div.node().parentNode.getBoundingClientRect();
+        //                     //     console.log(origin);
+        //                     //     return { x: 0, y: origin.top };
+        //                     // })
+        //                     .on("dragstart", function () {
+        //                         d3.event.sourceEvent.stopPropagation();
+        //                         _this.mtop = parseFloat(_resizebar.style("margin-top"));
+        //                         console.log(_this.mtop);
+        //                     })
+        //                     .on("drag", function () {
+        //                         d3.event.sourceEvent.stopPropagation();
+        //                         var m = d3.mouse(_resizebar.node());
+        //                         // update panel height
+        //                         if (m && m.length > 1) {
+        //                             console.log(parseFloat(_this.mtop + m[1]));
+        //                             // var height = parseFloat(_div.style("height")) - m[1];
+        //                             _resizebar.style("margin-top", (_this.mtop + m[1]) + "px");
+        //                             // _div.style("height", height + "px");
+        //                             // console.log(height);
+        //                             // top = (top < maximised_table.top) ? maximised_table.top
+        //                             //         : (top > minimized_table.top) ? minimized_table.top
+        //                             //         : top;
+        //                             // height = (height < minimized_table.height) ? minimized_table.height
+        //                             //         : (height > maximised_table.height) ? maximised_table.height
+        //                             //         : height;
+        //                             // d3.select("#EmuchartsFloatTable").style("top", top + "px");
+        //                             // d3.selectAll(".EmuchartsTableContent").style("width", "100% ").style("height", height + "px");
+        //                         }
+        //                     });
+        // _resizebar.call(dragResize);
+
 
         if (options.ownerObject) {
             _div.on("mouseover", function () {

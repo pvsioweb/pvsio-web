@@ -39,9 +39,9 @@ define(function (require, exports, module) {
      *          <li>font (String): display font type (default is "sans-serif")</li>
      *          <li>fontColor (String): display font color (default is white, "#fff")</li>
      *          <li>align (String): text alignment (default is "center")</li>
-     *          <li>inverted (Bool): if true, the text has inverted colors, 
+     *          <li>inverted (Bool): if true, the text has inverted colors,
      *              i.e., fontColor becomes backgroundColor, and backgroundColor becomes fontColor (default is false)</li>
-     *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>                
+     *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
      * @memberof module:TracingsDisplay
      * @instance
      */
@@ -91,13 +91,13 @@ define(function (require, exports, module) {
         return this;
     }
 
-    TracingsDisplay.prototype.render = function (val, opt) {    
+    TracingsDisplay.prototype.render = function (val, opt) {
         function clearContext() {
             context.save();
             context.fillStyle = _this.backgroundColor;
             context.fillRect(0, 0, _this.width, _this.height);
             context.restore();
-        }        
+        }
         function render_aux() {
             _this.px += _this.speed;
             context.clearRect(_this.px, 0, _this.scanBar.width, _this.height);
@@ -113,6 +113,7 @@ define(function (require, exports, module) {
         }
         var _this = this;
         opt = opt || {};
+        val = val || 0;
         opt.range = opt.range || { };
         opt.range.max = opt.range.max || _this.range.max;
         opt.range.min = opt.range.min || _this.range.min;
@@ -134,7 +135,7 @@ define(function (require, exports, module) {
         }
         return this;
     };
-    
+
     TracingsDisplay.prototype.renderGlyphicon = function (icon, opt) {
         opt = opt || {};
         var span = document.getElementById(this.id + "_span");
@@ -142,7 +143,7 @@ define(function (require, exports, module) {
         span.style.color = opt.fontColor || this.fontColor;
         this.reveal();
         return this;
-    };    
+    };
 
     TracingsDisplay.prototype.hide = function () {
         this.div.style("display", "none");
@@ -157,7 +158,7 @@ define(function (require, exports, module) {
         this.div.style("display", "block");
         return this;
     };
-    
+
     TracingsDisplay.prototype.pauseTrace = function () {
         if (this.loop) {
             clearInterval(this.loop);
@@ -165,7 +166,7 @@ define(function (require, exports, module) {
         }
         return this;
     };
-    
+
     TracingsDisplay.prototype.move = function (data) {
         data = data || {};
         if (data.top) {

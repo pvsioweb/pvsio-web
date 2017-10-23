@@ -54,9 +54,11 @@ define(function (require, exports, module) {
     }
 
     EmuchartsManager.prototype.uniqueEmuchartsID = function () {
+        // all IDs stored in memory start with the project name
+        var prefix = require("project/ProjectManager").getInstance().project().name() + "/";
         function newEmuchartsID () {
             var i = 0;
-            while(_emuchartsDescriptors.get("EMUCHART__" + i)) { i++; }
+            while(_emuchartsDescriptors.get(prefix + "EMUCHART__" + i)) { i++; }
             return i;
         }
         return "EMUCHART__" + newEmuchartsID();
@@ -262,9 +264,10 @@ define(function (require, exports, module) {
                 if (emuchartsFile.content && emuchartsFile.content.descriptor) {
                     var version = emuchartsFile.content.descriptor.version;
                     if (version && parseFloat(version) >= 1.1) {
-                        var id = emuchartsFile.name.split(".")[0];
+                        var filename = emuchartsFile.name.split(".")[0];
+                        var id = require("project/ProjectManager").getInstance().project().name() + "/" + filename;
                         _emuchartsDescriptors.set(id, {
-                            emuchart_name: id,
+                            emuchart_name: filename,
                             emuchart_content: new Emucharts(emuchartsFile.content.chart),
                             emuchart_path: emuchartsFile.path
                         });
@@ -294,7 +297,8 @@ define(function (require, exports, module) {
                             edges: chart.edges,
                             initial_edges: chart.initial_edges
                         });
-                        var id = emuchartsFile.name.split(".")[0];
+                        var filename = emuchartsFile.name.split(".")[0];
+                        var id = require("project/ProjectManager").getInstance().project().name() + "/" + filename;
                         _emuchartsDescriptors.set(id, {
                             emuchart_name: id,
                             emuchart_content: content,
@@ -362,51 +366,60 @@ define(function (require, exports, module) {
         opt = opt || {};
         return new Promise(function (resolve, reject) {
             if (name) {
-                var projectManager = require("project/ProjectManager").getInstance();
-                var emuDesc = _emuchartsDescriptors.get(id);
-                if (emuDesc) {
-                    var emuchart = {
-                        descriptor: {
-                            file_type: "emdl",
-                            version: _this.getEmuchartsVersion(),
-                            description: "emucharts model",
-                            chart_name: name
-                        },
-                        chart: {
-                            states: emuDesc.emuchart_content.nodes.values(),
-                            transitions: emuDesc.emuchart_content.edges.values(),
-                            initial_transitions: emuDesc.emuchart_content.initial_edges.values(),
-                            variables: emuDesc.emuchart_content.variables.values(),
-                            constants: emuDesc.emuchart_content.constants.values(),
-                            datatypes: emuDesc.emuchart_content.datatypes.values()
+                try {
+                    var projectManager = require("project/ProjectManager").getInstance();
+                    var emuDesc = _emuchartsDescriptors.get(id);
+                    if (emuDesc) {
+                        var emuchart = {
+                            descriptor: {
+                                file_type: "emdl",
+                                version: _this.getEmuchartsVersion(),
+                                description: "emucharts model",
+                                chart_name: name
+                            },
+                            chart: {
+                                states: emuDesc.emuchart_content.nodes.values(),
+                                transitions: emuDesc.emuchart_content.edges.values(),
+                                initial_transitions: emuDesc.emuchart_content.initial_edges.values(),
+                                variables: emuDesc.emuchart_content.variables.values(),
+                                constants: emuDesc.emuchart_content.constants.values(),
+                                datatypes: emuDesc.emuchart_content.datatypes.values()
+                            }
+                        };
+                        // PIM-related fields
+                        emuchart.chart.pmr = _this.getPMR(null, true);
+                        emuchart.chart.isPIM = _this.getIsPIM();
+                        // create the new emuchart descriptor only if the id of the descriptor is different from the current descriptor
+                        var theDescriptor = {};
+                        if (opt.alias) {
+                            theDescriptor = emuDesc;
+                        } else {
+                            theDescriptor.emuchart_name = name;
+                            theDescriptor.emuchart_path = emuDesc.emuchart_path.split("/").splice(-2, 1).join("/") + "/" + name + ".emdl";
+                            theDescriptor.emuchart_content = new Emucharts(emuchart.chart);
                         }
-                    };
-                    // PIM-related fields
-                    emuchart.chart.pmr = _this.getPMR(null, true);
-                    emuchart.chart.isPIM = _this.getIsPIM();
-                    // create the new emuchart descriptor
-                    var new_emuDesc = {};
-                    new_emuDesc.emuchart_name = name;
-                    new_emuDesc.emuchart_path = emuDesc.emuchart_path.split("/").splice(-2, 1).join("/") + "/" + name + ".emdl";
-                    new_emuDesc.emuchart_content = new Emucharts(emuchart.chart);
-                    var filename = new_emuDesc.emuchart_name + ".emdl";
-                    var content = JSON.stringify(emuchart, null, " ");
-                    projectManager.project().addFile(filename, content, { overWrite: opt.overWrite }).then(function (res) {
-                        _emuchartsDescriptors.set(new_emuDesc.emuchart_name, new_emuDesc);
-                        _this.fire({
-                            type: "EmuchartsManager.saveChart",
-                            emuchartDescriptor: new_emuDesc
+                        var filename = theDescriptor.emuchart_name + ".emdl";
+                        var content = JSON.stringify(emuchart, null, " ");
+                        projectManager.project().addFile(filename, content, { overWrite: opt.overWrite }).then(function (res) {
+                            // _emuchartsDescriptors.set(theDescriptor.emuchart_name, theDescriptor);
+                            _emuchartsDescriptors.set(id, theDescriptor);
+                            _this.fire({
+                                type: "EmuchartsManager.saveChart",
+                                emuchartDescriptor: theDescriptor
+                            });
+                            resolve(_this);
+                        }).catch(function (err) {
+                            var msg = "Error while saving file " + filename + " (" + err.message + ")";
+                            console.log(msg);
+                            displayNotification(msg);
+                            reject(_this);
                         });
-                        resolve(_this);
-                    }).catch(function (err) {
-                        var msg = "Error while saving file " + name + " (" + err.message + ")";
-                        console.log(msg);
-                        displayNotification(msg);
+                    } else {
+                        console.error("emucharts descriptor error for emuchart id " + id);
                         reject(_this);
-                    });
-                } else {
-                    console.error("emucharts descriptor error for emuchart id " + id);
-                    reject(_this);
+                    }
+                } catch (saveError) {
+                    console.error(saveError);
                 }
             }
         });
@@ -418,7 +431,8 @@ define(function (require, exports, module) {
         });
         if (selected.length === 1) {
             return saveAs(this, selected[0].emuchart_id, selected[0].emuchart_name, {
-                overWrite: true
+                overWrite: true,
+                alias: true
             });
         }
         return Promise.resolve();
@@ -432,7 +446,8 @@ define(function (require, exports, module) {
             return new Promise(function (resolve, reject) {
                 emuDesc.forEach(function (desc) {
                     promises.push(saveAs(_this, desc.emuchart_id, desc.emuchart_name, {
-                        overWrite: true
+                        overWrite: true,
+                        alias: true
                     }));
                 });
                 Promise.all(promises).then(function (res) {
