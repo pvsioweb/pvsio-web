@@ -175,16 +175,9 @@ define(function (require, exports, module) {
             }
         }
         d3.select("#" + id + "_overlayDisplay").on("mouseover", function () {
-            if (_this.backgroundColor !== "transparent") {
-                _this.overlayDisplay.setColors({ backgroundColor: dimColor(_this.backgroundColor) });
-            }
+            _this.select();
         }).on("mouseout", function () {
-            if (_this.backgroundColor !== "transparent") {
-                _this.overlayDisplay.setColors({
-                    backgroundColor: _this.backgroundColor,
-                    fontColor: _this.fontColor
-                });
-            }
+            _this.deselect();
             if (_this.is_pressed && _this.evts() && _this.evts()[0] === "press/release") {
                 _this.overlayButton.release();
                 _this.is_pressed = false;
@@ -219,6 +212,29 @@ define(function (require, exports, module) {
     TouchscreenButton.prototype.constructor = TouchscreenButton;
     TouchscreenButton.prototype.parentClass = Widget.prototype;
 
+    TouchscreenButton.prototype.select = function (opt) {
+        opt = opt || {};
+        var color = opt.backgroundColor || this.backgroundColor;
+        if (this.backgroundColor !== "transparent") {
+            this.overlayDisplay.setColors({ backgroundColor: dimColor(color) });
+        }
+        if (opt.borderColor) {
+            this.div.style("border", "solid 2px " + opt.borderColor);
+        }
+        return this;
+    };
+
+    TouchscreenButton.prototype.deselect = function () {
+        if (this.backgroundColor !== "transparent") {
+            this.overlayDisplay.setColors({
+                backgroundColor: this.backgroundColor,
+                fontColor: this.fontColor
+            });
+        }
+        this.div.style("border", "");
+        return this;
+    };
+
     /**
      * @function <a name="click">click</a>
      * @description Clicks the button -- useful to trigger button events programmaticaly.
@@ -227,6 +243,7 @@ define(function (require, exports, module) {
      */
     TouchscreenButton.prototype.click = function (opt) {
         this.overlayButton.click(opt);
+        this.deselect();
     };
     /**
      * @function <a name="release">release</a>
@@ -236,6 +253,7 @@ define(function (require, exports, module) {
      */
     TouchscreenButton.prototype.release = function () {
         this.overlayButton.release();
+        this.deselect();
     };
     /**
      * @function <a name="pressAndHold">pressAndHold</a>

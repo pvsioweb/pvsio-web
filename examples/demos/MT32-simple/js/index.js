@@ -26,6 +26,7 @@ require([
         "widgets/SliderWidget",
         "widgets/ToggleButton",
 
+        "util/playback/Player",
         "widgets/ButtonActionsQueue",
         "stateParser",
         "PVSioWebClient"
@@ -38,6 +39,7 @@ require([
         Slider,
         ToggleButton,
 
+        Player,
         ButtonActionsQueue,
         stateParser,
         PVSioWebClient
@@ -490,6 +492,19 @@ require([
         }
 
         var demoFolder = "MT32-simple";
+
+        function start_playback() {
+            // var playlist = require("text!" + demoFolder + "/playback/ex1.json");
+            var playlist = [
+                { button: home.new_exam, timeStamp: 2000 },
+                { button: exams.ecg12d, timeStamp: 4000 },
+                { button: check.confirm, timeStamp: 6000 }
+            ];
+            var player = new Player();
+            player.load(playlist);
+            player.play();
+        }
+
         //register event listener for websocket connection from the client
         client.addListener('WebSocketConnectionOpened', function (e) {
             console.log("web socket connected");
@@ -499,8 +514,8 @@ require([
                 client.getWebSocket().sendGuiAction("init;", onMessageReceived);
                 d3.select(".demo-splash").style("display", "none");
                 d3.select(".content").style("display", "block");
-                // start the simulation
-                // start_tick();
+                // start playback
+                // start_playback();
             });
         }).addListener("WebSocketConnectionClosed", function (e) {
             console.log("web socket closed");
