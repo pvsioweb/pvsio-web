@@ -640,7 +640,9 @@ define(function (require, exports, module) {
                 var trigger = parser2.parseTrigger(t.name);
                 if (trigger.res && trigger.res.val) {
                     trigger = trigger.res.val;
-                    var trigger_id = { type: "identifier", val: trigger.identifier };
+                    var trigger_id = (trigger.identifier.type === "identifier") ?
+                                        trigger.identifier
+                                        : { type: "identifier", val: trigger.identifier };
                     var trigger_cond = predefined_variables.current_mode.name + "=" + t.source.name;
                     if (trigger.cond) {
                         trigger_cond += " && (" + trigger.cond.trim() + ")";
