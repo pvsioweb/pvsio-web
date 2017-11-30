@@ -239,7 +239,7 @@ define(function (require, exports, module) {
     TouchscreenButton.prototype.select = function (opt) {
         opt = opt || {};
         var color = opt.backgroundColor || this.backgroundColor;
-        if (color == "transparent" || this.opacity < 0.4 ) {
+        if (color === "transparent" || this.opacity < 0.4 ) {
             this.overlayDisplay.setColors({ backgroundColor: dimColor("steelblue"), opacity: 0.4 });
         } else {
             this.overlayDisplay.setColors({ backgroundColor: dimColor(color) });

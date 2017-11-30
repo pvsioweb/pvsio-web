@@ -24,6 +24,8 @@
  * @author Paolo Masci
  * @date Nov 5, 2017
  */
+ /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+ /*global SpeechSynthesisUtterance */
 define(function (require, exports, module) {
     "use strict";
     var SELECT_TIMEOUT = 800; //msec
@@ -122,7 +124,6 @@ define(function (require, exports, module) {
         opt = opt || {};
         if (val && typeof val === "string") {
             var current_value = d3.select(id).attr("value");
-            var i = 1;
             var elapse = opt.delay || 250;
             val.split("").forEach(function (c) {
                 setTimeout(function () {
