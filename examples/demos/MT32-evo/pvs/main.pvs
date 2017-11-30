@@ -1,0 +1,273 @@
+main: THEORY
+ BEGIN IMPORTING MT32, CT64
+
+  Demo: TYPE = { STD, ACCESS_HOME_PAGE, AUTHENTICATION, HUB_KNOWN_PT, HUB_NEW_PT, HOLTER, TERMINATE_HUB_MODE, TERMINATE_HOLTER_MODE,
+                 NEW_EXAM_HUB_MODE, NEW_EXAM_HOLTER_MODE, TEST_ELECTRODES_HUB, VIEW_EXAMS_HUB, VIEW_INTERPRETATION_HUB }
+
+  state: TYPE = [#
+    demo: Demo,
+    mt32: MTState,
+    ct64: CTState
+  #]
+
+  init(dd: Demo): state =
+   COND
+     dd = ACCESS_HOME_PAGE
+       -> (# demo := dd,
+       	     mt32 := mtinit WITH [ mo := HUB ],
+             ct64 := ctinit WITH [ mode := google, known_patient := TRUE ] #),
+     dd = AUTHENTICATION
+       -> (# demo := dd, mt32 := mtinit, ct64 := ctinit #),
+     dd = HUB_KNOWN_PT
+       -> (# demo := dd,
+       	     mt32 := mtinit WITH [ mo := NONE ],
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+     dd = HUB_NEW_PT
+       -> (# demo := dd,
+       	     mt32 := mtinit WITH [ mo := NONE ],
+             ct64 := login(ctinit WITH [ known_patient := FALSE ]) #),
+     dd = HOLTER
+       -> (# demo := dd,
+       	     mt32 := mtinit WITH [ mo := NONE ],
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+     dd = TERMINATE_HUB_MODE
+       -> (# demo := dd,
+       	     mt32 := mtinit WITH [ mo := HUB ],
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+     dd = TERMINATE_HOLTER_MODE
+       -> (# demo := dd,
+       	     mt32 := mtinit WITH [ mo := HOLTER ],
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+     dd = NEW_EXAM_HUB_MODE
+       -> (# demo := dd,
+       	     mt32 := mtinit WITH [ mo := HUB ],
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+     dd = NEW_EXAM_HOLTER_MODE
+       -> (# demo := dd,
+       	     mt32 := mtinit WITH [ mo := HOLTER ],
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+     dd = TEST_ELECTRODES_HUB
+       -> (# demo := dd,
+       	     mt32 := mtinit WITH [ mo := HUB ],
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+     dd = VIEW_EXAMS_HUB OR dd = VIEW_INTERPRETATION_HUB
+       -> (# demo := dd,
+       	     mt32 := mtinit WITH [ mo := HUB ],
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+     ELSE -> (# demo := dd, mt32 := mtinit, ct64 := ctinit WITH [ known_patient := TRUE ] #)
+   ENDCOND
+
+  %-- mt32
+  click_back(st: state): state =
+   COND
+    per_mt32_back(st`mt32) -> st WITH [ mt32 := mt32_back(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_cancel(st: state): state =
+   COND
+    per_mt32_cancel(st`mt32) -> st WITH [ mt32 := mt32_cancel(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_central(st: state): state =
+   COND
+    per_mt32_central(st`mt32) -> st WITH [ mt32 := mt32_central(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_confirm(st: state): state =
+   COND
+    per_mt32_confirm(st`mt32) -> st WITH [ mt32 := mt32_confirm(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_ecg12d(st: state): state =
+   COND
+    per_mt32_ecg12d(st`mt32) -> st WITH [ mt32 := mt32_ecg12d(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_new_exam(st: state): state =
+   COND
+    per_mt32_new_exam(st`mt32) -> st WITH [ mt32 := mt32_new_exam(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_quit(st: state): state =
+   COND
+    per_mt32_quit(st`mt32) -> st WITH [ mt32 := mt32_quit(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_mt32_results_ready(st: state): state =
+   COND
+    per_mt32_results_ready(st`mt32) -> st WITH [ mt32 := mt32_results_ready(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_rec(st: state): state =
+   COND
+    per_mt32_rec(st`mt32) -> st WITH [ mt32 := mt32_rec(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_repeat(st: state): state =
+   COND
+    per_mt32_repeat(st`mt32) -> st WITH [ mt32 := mt32_repeat(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_settings(st: state): state =
+   COND
+    per_mt32_settings(st`mt32) -> st WITH [ mt32 := mt32_settings(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_test_electrodes(st: state): state =
+   COND
+    per_mt32_test_electrodes(st`mt32) -> st WITH [ mt32 := mt32_test_electrodes(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_view_data(st: state): state =
+   COND
+    per_mt32_view_data(st`mt32) -> st WITH [ mt32 := mt32_view_data(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_view_interpretation(st: state): state =
+   COND
+    per_mt32_view_interpretation(st`mt32) -> st WITH [ mt32 := mt32_view_interpretation(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_terminate_operating_mode(st: state): state =
+   COND
+    per_terminate_operating_mode(st`mt32) -> st WITH [ mt32 := terminate_operating_mode(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_holter(st: state): state =
+   COND
+    per_mt32_holter(st`mt32) -> st WITH [ mt32 := mt32_holter(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+
+  %-- ct64
+  click_login(st: state): state =
+   COND
+    per_login(st`ct64) -> st WITH [ ct64 := login(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_select_patient(st: state): state =
+   COND
+    per_select_patient(st`ct64) -> st WITH [ ct64 := select_patient(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_new_ecg(st: state): state =
+   COND
+    per_new_ecg(st`ct64) -> st WITH [ ct64 := new_ecg(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_select_device(st: state): state =
+   COND
+    per_select_device(st`ct64) -> st WITH [ ct64 := select_device(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_continue(st: state): state =
+   COND
+    per_continue(st`ct64) -> st WITH [ ct64 := continue(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  tick(st: state): state =
+   COND
+    per_ct64_tick(st`ct64) ->
+    	LET st = st WITH [ ct64 := ct64_tick(st`ct64) ]
+	 IN COND
+	      mt32_mode(st`ct64) = MT32_HUB -> st WITH [ mt32 := mt32(st) WITH [ mo := HUB ]],
+	      mt32_mode(st`ct64) = MT32_HOLTER -> st WITH [ mt32 := mt32(st) WITH [ mo := HOLTER ]],
+	      mt32_mode(st`ct64) = MT32_NONE -> st WITH [ mt32 := mt32(st) WITH [ mo := NONE ]]
+	    ENDCOND,
+    ELSE -> st
+   ENDCOND
+
+  click_monitoring(st: state): state =
+   COND
+    per_monitoring(st`ct64) -> st WITH [ ct64 := monitoring(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_new_monitoring_session(st: state): state =
+   COND
+    per_new_monitoring_session(st`ct64) -> st WITH [ ct64 := new_monitoring_session(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_select_visit(st: state): state =
+   COND
+    per_select_visit(st`ct64) -> st WITH [ ct64 := select_visit(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_select_ecg2d_new_pt(st: state): state =
+   COND
+    per_select_ecg2d_new_pt(st`ct64) -> st WITH [ ct64 := select_ecg2d_new_pt(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_select_exam_data_hub(st: state): state =
+   COND
+    per_select_exam_data_hub(st`ct64) -> st WITH [ ct64 := select_exam_data_hub(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_browse_medicaltech(st: state): state =
+   COND
+    per_browse_medicaltech(st`ct64) -> st WITH [ ct64 := browse_medicaltech(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_new_holter(st: state): state =
+   COND
+    per_new_holter(st`ct64) -> st WITH [ ct64 := new_holter(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_select_duration(st: state): state =
+   COND
+    per_select_duration(st`ct64) -> st WITH [ ct64 := select_duration(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_select_derivation(st: state): state =
+   COND
+    per_select_derivation(st`ct64) -> st WITH [ ct64 := select_derivation(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_toggle_accelerometer(st: state): state =
+   COND
+    per_toggle_accelerometer(st`ct64) -> st WITH [ ct64 := toggle_accelerometer(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_HES(st: state): state =
+   COND
+    per_HES(st`ct64) -> st WITH [ ct64 := HES(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_view_physio(st: state): state =
+   COND
+    per_view_physio(st`ct64) -> st WITH [ ct64 := view_physio(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+END main
