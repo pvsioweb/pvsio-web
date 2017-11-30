@@ -51,22 +51,22 @@ define(function (require, exports, module) {
      *        the left, top corner, and the width and height of the (rectangular) display.
      *        Default is { top: 0, left: 0, width: 200, height: 80 }.
      * @param opt {Object} Options:
-     *          <li> displayKey (string): the name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.
-     *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).     
-     *          <li> cursorName (string): the name of the state attribute defining the cursor position. This information will be used by the render method. If this options is not specified, the cursor will not be displayed.
-     *          <li>fontfamily (String): font type (default is "sans-serif")</li>
-     *          <li>fontsize (Number): font size (default is 0.8 * height)</li>
-     *          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
-     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
+     *          <li>align (String): text alignment (available options are "left", "right", anc "center". Default is "center")</li>
      *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
      *          <li>borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)</li>
      *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
      *          <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
-     *          <li>align (String): text alignment (available options are "left", "right", anc "center". Default is "center")</li>
-     *          <li>letterSpacing (Number): spacing between characters, in pixels (default is 0)</li>
+     *          <li>cursorName (string): the name of the state attribute defining the cursor position. This information will be used by the render method. If this options is not specified, the cursor will not be displayed.
+     *          <li>displayKey (string): the name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.
+     *          <li>fontfamily (String): font type (default is "sans-serif")</li>
+     *          <li>fontsize (Number): font size (default is 0.8 * height)</li>
+     *          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
+     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
      *          <li>inverted (Bool): if true, the text has inverted colors,
      *              i.e., fontColor becomes backgroundColor, and backgroundColor becomes fontColor (default is false)</li>
+     *          <li>letterSpacing (Number): spacing between characters, in pixels (default is 0)</li>
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
+     *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).
      * @memberof module:NumericDisplay
      * @instance
      */
@@ -203,12 +203,27 @@ define(function (require, exports, module) {
         return this;
     };
     /**
-     * Removes the widget's div
+     * @function <a name="remove">remove</a>
+     * @description Removes the div elements of the widget from the html page -- useful to programmaticaly remove widgets from a page.
+     * @memberof module:NumericDisplay
+     * @instance
      */
     NumericDisplay.prototype.remove = function () {
         NumericDisplay.prototype.parentClass.remove.apply(this);
         d3.select("div." + this.id()).remove();
     };
+    /**
+     * @function <a name="setColors">setColors</a>
+     * @description Sets the font color and background color.
+     * @param colors {Object} Font color and background color. Attributed of the object are fontColor: (string) and backgroundColor (string).
+     * @param opt {Object} Override options for the display style, useful to dynamically change the display style during a simulation. Available options include:
+     *              <li> fontsize (string): the font size of the display
+     *              <li> fontColor (string): the font color of the display
+     *              <li> backgroundColor (string): the background color of the display
+     *              <li> blinking (Bool): true means the text is blinking
+     * @memberof module:NumericDisplay
+     * @instance
+     */
     NumericDisplay.prototype.setColors = function (colors, opt) {
         colors = colors || {};
         opt = opt || {};
@@ -217,19 +232,18 @@ define(function (require, exports, module) {
         this.backgroundColor = colors.backgroundColor || this.backgroundColor;
         return this.render(this.txt, opt);
     };
+    /**
+     * @function <a name="invertColors">invertColors</a>
+     * @description Inverts the colors of the display (as in a negative).
+     * @memberof module:NumericDisplay
+     * @instance
+     */
     NumericDisplay.prototype.invertColors = function () {
         var tmp = this.backgroundColor;
         this.backgroundColor = this.fontColor;
         this.fontColor = tmp;
         var elemIsBlinking = (document.getElementById(this.id()).getAttribute("class").indexOf("blink") >= 0);
         return this.render(this.txt, { blinking: elemIsBlinking });
-    };
-    NumericDisplay.prototype.invertGlyphiconColors = function () {
-        var tmp = this.backgroundColor;
-        this.backgroundColor = this.fontColor;
-        this.fontColor = tmp;
-        var elemIsBlinking = (document.getElementById(this.id()).getAttribute("class").indexOf("blink") >= 0);
-        return this.renderGlyphicon(this.txt, { blinking: elemIsBlinking });
     };
     /**
      * @function <a name="render">render</a>
