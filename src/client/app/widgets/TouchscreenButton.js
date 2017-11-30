@@ -107,6 +107,8 @@ define(function (require, exports, module) {
         this.evts = property.call(this, opt.evts);
         opt.buttonReadback = opt.buttonReadback || "";
         this.buttonReadback = property.call(this, opt.buttonReadback);
+        this.toggleButton = opt.toggleButton;
+        this.pushButton = opt.pushButton;
 
         this.overlayButton = new Button(id + "_overlayButton", {
             left: 0, top: 0, height: 0, width: 0
@@ -130,6 +132,7 @@ define(function (require, exports, module) {
 
         opt.displayKey = opt.displayKey || id;
         this.displayKey = property.call(this, opt.displayKey);
+        this.opacity = opt.opacity;
         this.overlayDisplay = new BasicDisplay(id + "_overlayDisplay", {
             height: this.height, width: this.width
         }, {
@@ -148,6 +151,7 @@ define(function (require, exports, module) {
             parent: id
         });
         var _this = this;
+        _this.hover = false;
         function mousedown_handler () {
             if (_this.backgroundColor !== "transparent") {
                 _this.overlayDisplay.setColors({
@@ -159,12 +163,21 @@ define(function (require, exports, module) {
                 _this.overlayButton.pressAndHold();
                 _this.is_pressed = true;
             }
+            if (_this.toggleButton || _this.pushButton) {
+                _this.isSelected = (_this.pushButton)? true : !_this.isSelected;
+                if (_this.isSelected) {
+                    _this.select();
+                } else {
+                    _this.deselect();
+                }
+            }
         }
         function mouseup_handler () {
             if (_this.backgroundColor !== "transparent") {
                 _this.overlayDisplay.setColors({
                     backgroundColor: _this.backgroundColor,
-                    fontColor: _this.fontColor
+                    fontColor: _this.fontColor,
+                    opacity: _this.opacity
                 });
             }
             if (_this.evts() && _this.evts()[0] === "press/release") {
@@ -173,15 +186,26 @@ define(function (require, exports, module) {
             } else {
                 _this.overlayButton.click();
             }
+            if (_this.isSelected || (_this.hover && !_this.toggleButton)) {
+                _this.select();
+            } else {
+                _this.deselect();
+            }
         }
         d3.select("#" + id + "_overlayDisplay").on("mouseover", function () {
-            _this.select();
+            if (!(_this.toggleButton || _this.pushButton)) {
+                _this.select();
+            }
+            _this.hover = true;
         }).on("mouseout", function () {
-            _this.deselect();
+            if (!_this.isSelected) {
+                _this.deselect();
+            }
             if (_this.is_pressed && _this.evts() && _this.evts()[0] === "press/release") {
                 _this.overlayButton.release();
                 _this.is_pressed = false;
             }
+            _this.hover = false;
         })// -- the following events will eventually be replaced by taphold and release
         .on("mousedown", mousedown_handler)
         .on("mouseup", mouseup_handler);
@@ -215,11 +239,16 @@ define(function (require, exports, module) {
     TouchscreenButton.prototype.select = function (opt) {
         opt = opt || {};
         var color = opt.backgroundColor || this.backgroundColor;
-        if (this.backgroundColor !== "transparent") {
+        if (color == "transparent" || this.opacity < 0.4 ) {
+            this.overlayDisplay.setColors({ backgroundColor: dimColor("steelblue"), opacity: 0.4 });
+        } else {
             this.overlayDisplay.setColors({ backgroundColor: dimColor(color) });
         }
         if (opt.borderColor) {
             this.div.style("border", "solid 2px " + opt.borderColor);
+        }
+        if (opt.classed) {
+            this.div.classed(opt.classed, true);
         }
         return this;
     };
@@ -228,7 +257,8 @@ define(function (require, exports, module) {
         if (this.backgroundColor !== "transparent") {
             this.overlayDisplay.setColors({
                 backgroundColor: this.backgroundColor,
-                fontColor: this.fontColor
+                fontColor: this.fontColor,
+                opacity: this.opacity
             });
         }
         this.div.style("border", "");
@@ -243,7 +273,11 @@ define(function (require, exports, module) {
      */
     TouchscreenButton.prototype.click = function (opt) {
         this.overlayButton.click(opt);
-        this.deselect();
+        if ((this.toggleButton || this.pushButton) && this.isSelected) {
+            this.select();
+        } else {
+            this.deselect();
+        }
     };
     /**
      * @function <a name="release">release</a>

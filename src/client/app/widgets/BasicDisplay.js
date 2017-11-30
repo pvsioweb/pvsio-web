@@ -213,6 +213,9 @@ define(function (require, exports, module) {
         opt.auditoryFeedback = opt.auditoryFeedback || "disabled";
         this.fontColor = colors.fontColor || this.fontColor;
         this.backgroundColor = colors.backgroundColor || this.backgroundColor;
+        if (colors.opacity) {
+            this.div.style("opacity", colors.opacity);
+        }
         return this.render(this.txt, opt);
     };
     BasicDisplay.prototype.invertColors = function () {
