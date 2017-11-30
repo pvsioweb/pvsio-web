@@ -4,6 +4,7 @@
  * @description Renders a basic digital display.
  *              This module provide APIs for changing the look and feel of
  *              the rendered text, including: cursors, background color, font, size, alignment.
+ *              Uses http://seiyria.com/bootstrap-slider/
  * @author Paolo Masci
  * @date Sep 15, 2017
  *
@@ -102,27 +103,35 @@ define(function (require, exports, module) {
                         .style("border-width", this.borderWidth + "px")
                         .style("border-style", this.borderStyle)
                         .style("border-color", this.borderColor)
-                        .style("padding-left", (this.width - this.barwidth) / 2 + "px")
-                        .style("padding-top", (this.paddingTop) + "px")
-                        .style("border", "solid").style("border-color", "black").style("border-width", "1px")
-                        .style("display", "block").attr("id", id).attr("class", elemClass);
+                        .style("padding-left", (opt.zero_padding) ? "10px" : (this.width - this.barwidth) / 2 + "px")
+                        .style("padding-top", (opt.zero_padding) ? "0px" : (this.paddingTop) + "px")
+                        .style("border", "solid").style("border-color", this.borderColor).style("border-width", "1px")
+                        .attr("id", id).attr("class", elemClass);
         this.div.append("input").attr("id", id + "_slider_data")
                         .attr("type", "text");
 
+        opt.tooltip_position = opt.tooltip_position || (this.orientation === "horizontal") ? "bottom" : "left";
         this.slider = new Slider("#" + id + "_slider_data", {
                         reversed: true,
                         orientation: this.orientation,
-                        tooltip_position: "left",
+                        tooltip_position: opt.tooltip_position,
                         tooltip: "always",
                         max: this.max,
                         min: this.min,
                         step: 1,
                         ticks_snap_bounds: 10,
-                        handle: "bar",
+                        handle: opt.handle || "bar",
                         ticks: this.ticks,
-                        ticks_labels: this.ticks,
-                        value: this.init
+                        ticks_labels: (opt.hide_labels) ? null : this.ticks,
+                        value: this.init,
+                        enabled: !opt.readonly,
+                        formatter: opt.labelFormat || function(value) {
+                    		return value;
+                    	}
                     });
+        if (opt.readonly) {
+            d3.select(".slider-track").style("cursor", "default");
+        }
         this.button = new TouchscreenButton(id + "_button", {
             top: 0,
             left: 0,
@@ -137,9 +146,36 @@ define(function (require, exports, module) {
         this.slider.on("slide", function (val) {
             _this.slide(val);
         });
-        this.div.selectAll(".slider-track-high").style("background-color", "#337ab7");
+        opt.sliderColor = opt.sliderColor || "#337ab7";
+        this.div.selectAll(".slider-track-high").style("background-color", opt.sliderColor);
         this.div.selectAll(".slider-selection").style("opacity", "0");
+
+        var margin = 8;
+        if (this.orientation === "horizontal") {
+            this.div.select(".slider-horizontal").style("width", (this.width - (margin * 4)) + "px").style("margin-left", margin + "px");
+        }
+        if (this.orientation === "vertical") {
+            this.div.select(".slider-vertical").style("height", (this.height - (margin * 4)) + "px");
+        }
+        if (opt.handle === "none") {
+            this.div.select(".slider-handle").style("display", "none");
+            if (opt.orientation === "horizontal") {
+                this.div.select(".tooltip").style("top", "12px");
+            }
+        }
+        if (opt.tooltipColor) {
+            this.div.select(".tooltip-inner").style("color", opt.tooltipColor);
+        }
+        if (opt.tooltipBackgroundColor) {
+            this.div.select(".tooltip-inner").style("background-color", opt.tooltipBackgroundColor);
+        }
+        if (opt.tooltipArrowColor) {
+            this.div.select(".tooltip-arrow").style("border-left-color", opt.tooltipArrowColor);
+        }
+
         this.slider.relayout();
+        this.div.select(".slider").style("opacity", 0);
+
         Widget.call(this, id, "sliderwidget");
         return this;
     }
@@ -240,10 +276,9 @@ define(function (require, exports, module) {
      * @instance
      */
     SliderWidget.prototype.render = function (txt, opt) {
-        // if (!init_done) {
-        //     this.slide(d3.select("#" + this.id() + "_slider_data").node().value);
-        //     init_done = true;
-        // }
+        if (txt) {
+            this.slider.setValue(txt);
+        }
         return this.reveal();
     };
 
@@ -264,6 +299,7 @@ define(function (require, exports, module) {
      * @instance
      */
     SliderWidget.prototype.reveal = function () {
+        this.div.select(".slider").style("opacity", "1");
         this.div.style("display", "block");
         return this;
     };

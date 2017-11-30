@@ -58,16 +58,28 @@ define(function (require, exports, module) {
      *        the left, top corner, and the width and height of the (rectangular) display.
      *        Default is { top: 0, left: 0, width: 32, height: 20 }.
      * @param opt {Object} Options:
-     *          <li>softLabel (string): the button label (default is blank).
+     *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
+     *          <li>blinking (bool): whether the button blinks (default is false, i.e., does not blink)</li>
+     *          <li>borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)</li>
+     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
+     *          <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
+     *          <li>buttonReadback (String): playback text reproduced with synthesised voice wheneven an action is performed with the button.</li>
+     *          <li>displayKey (String): name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.</li>
+     *          <li>evts (Array[String]): events triggered by the widget. Can be either "click", or "press/release" (default is "click").
+     *                                    The PVS function associated with the widget is given by the widget name prefixed with the event name.
+     *                                    In the case of "press/release", the widget is associated to two PVS functions,
+     *                                    one modelling the button being pressed, the other modelling the button being released.</li>
      *          <li>fontfamily (String): font type (default is "sans-serif")</li>
      *          <li>fontsize (Number): font size (default is 0.8 * height)</li>
      *          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
-     *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
-     *          <li>borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)</li>
-     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
-     *          <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
+     *          <li>functionText (String): option for overriding the default binding with PVS functions.
+     *                                     Note that this option requires the specification of the full name of the PVS function (e.g., click_ok).</li>
+     *          <li>keyCode (Number): binds the widget to keyboard keyCodes. Use e.g., http://keycode.info/, to see keyCodes</li>
+     *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is opaque)</li>
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
+     *          <li>softLabel (String): the button label (default is blank).
+     *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
      * @memberof module:TouchscreenButton
      * @instance
      */
@@ -83,7 +95,6 @@ define(function (require, exports, module) {
         this.fontfamily = opt.fontfamily || "sans-serif";
         this.font = [this.fontsize, "px ", this.fontfamily];
         this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
-        this.align = opt.align || "center";
         this.backgroundColor = opt.backgroundColor || "black";
         this.fontColor = opt.fontColor || "#fff"; //white
         this.cursor = opt.cursor || "pointer";
@@ -107,6 +118,8 @@ define(function (require, exports, module) {
         this.evts = property.call(this, opt.evts);
         opt.buttonReadback = opt.buttonReadback || "";
         this.buttonReadback = property.call(this, opt.buttonReadback);
+        this.toggleButton = opt.toggleButton;
+        this.pushButton = opt.pushButton;
 
         this.overlayButton = new Button(id + "_overlayButton", {
             left: 0, top: 0, height: 0, width: 0
@@ -130,6 +143,7 @@ define(function (require, exports, module) {
 
         opt.displayKey = opt.displayKey || id;
         this.displayKey = property.call(this, opt.displayKey);
+        this.opacity = opt.opacity;
         this.overlayDisplay = new BasicDisplay(id + "_overlayDisplay", {
             height: this.height, width: this.width
         }, {
@@ -148,6 +162,7 @@ define(function (require, exports, module) {
             parent: id
         });
         var _this = this;
+        _this.hover = false;
         function mousedown_handler () {
             if (_this.backgroundColor !== "transparent") {
                 _this.overlayDisplay.setColors({
@@ -159,12 +174,21 @@ define(function (require, exports, module) {
                 _this.overlayButton.pressAndHold();
                 _this.is_pressed = true;
             }
+            if (_this.toggleButton || _this.pushButton) {
+                _this.isSelected = (_this.pushButton)? true : !_this.isSelected;
+                if (_this.isSelected) {
+                    _this.select();
+                } else {
+                    _this.deselect();
+                }
+            }
         }
         function mouseup_handler () {
             if (_this.backgroundColor !== "transparent") {
                 _this.overlayDisplay.setColors({
                     backgroundColor: _this.backgroundColor,
-                    fontColor: _this.fontColor
+                    fontColor: _this.fontColor,
+                    opacity: _this.opacity
                 });
             }
             if (_this.evts() && _this.evts()[0] === "press/release") {
@@ -173,22 +197,26 @@ define(function (require, exports, module) {
             } else {
                 _this.overlayButton.click();
             }
+            if (_this.isSelected || (_this.hover && !_this.toggleButton)) {
+                _this.select();
+            } else {
+                _this.deselect();
+            }
         }
         d3.select("#" + id + "_overlayDisplay").on("mouseover", function () {
-            if (_this.backgroundColor !== "transparent") {
-                _this.overlayDisplay.setColors({ backgroundColor: dimColor(_this.backgroundColor) });
+            if (!(_this.toggleButton || _this.pushButton)) {
+                _this.select();
             }
+            _this.hover = true;
         }).on("mouseout", function () {
-            if (_this.backgroundColor !== "transparent") {
-                _this.overlayDisplay.setColors({
-                    backgroundColor: _this.backgroundColor,
-                    fontColor: _this.fontColor
-                });
+            if (!_this.isSelected) {
+                _this.deselect();
             }
             if (_this.is_pressed && _this.evts() && _this.evts()[0] === "press/release") {
                 _this.overlayButton.release();
                 _this.is_pressed = false;
             }
+            _this.hover = false;
         })// -- the following events will eventually be replaced by taphold and release
         .on("mousedown", mousedown_handler)
         .on("mouseup", mouseup_handler);
@@ -220,6 +248,52 @@ define(function (require, exports, module) {
     TouchscreenButton.prototype.parentClass = Widget.prototype;
 
     /**
+     * @function <a name="select">select</a>
+     * @description Selects the widget -- useful to highlight the widget programmaticaly.
+     * @param opt {Object} Options:
+     *          <li>backgroundColor (String): background color when the button is selected. Overrides the default background color of the widget.</li>
+     *          <li>borderColor (String): border color when the button is selected. Overrides the default border color of the widget.</li>
+     *          <li>classed (String): CSS style to be assigned to the widget to customise its visual appearance.
+     *                                The CSS stylesheet needs to be included in the html file of the pvsio-web prototype.</li>
+     * @memberof module:TouchscreenButton
+     * @instance
+     */
+    TouchscreenButton.prototype.select = function (opt) {
+        opt = opt || {};
+        var color = opt.backgroundColor || this.backgroundColor;
+        if (color === "transparent" || this.opacity < 0.4 ) {
+            this.overlayDisplay.setColors({ backgroundColor: dimColor("steelblue"), opacity: 0.4 });
+        } else {
+            this.overlayDisplay.setColors({ backgroundColor: dimColor(color) });
+        }
+        if (opt.borderColor) {
+            this.div.style("border", "solid 2px " + opt.borderColor);
+        }
+        if (opt.classed) {
+            this.div.classed(opt.classed, true);
+        }
+        return this;
+    };
+
+    /**
+     * @function <a name="deselect">deselect</a>
+     * @description Deselects the widget -- useful to highlight the widget programmaticaly.
+     * @memberof module:TouchscreenButton
+     * @instance
+     */
+    TouchscreenButton.prototype.deselect = function () {
+        if (this.backgroundColor !== "transparent") {
+            this.overlayDisplay.setColors({
+                backgroundColor: this.backgroundColor,
+                fontColor: this.fontColor,
+                opacity: this.opacity
+            });
+        }
+        this.div.style("border", "");
+        return this;
+    };
+
+    /**
      * @function <a name="click">click</a>
      * @description Clicks the button -- useful to trigger button events programmaticaly.
      * @memberof module:TouchscreenButton
@@ -227,6 +301,11 @@ define(function (require, exports, module) {
      */
     TouchscreenButton.prototype.click = function (opt) {
         this.overlayButton.click(opt);
+        if ((this.toggleButton || this.pushButton) && this.isSelected) {
+            this.select();
+        } else {
+            this.deselect();
+        }
     };
     /**
      * @function <a name="release">release</a>
@@ -236,6 +315,7 @@ define(function (require, exports, module) {
      */
     TouchscreenButton.prototype.release = function () {
         this.overlayButton.release();
+        this.deselect();
     };
     /**
      * @function <a name="pressAndHold">pressAndHold</a>
@@ -319,7 +399,10 @@ define(function (require, exports, module) {
         return this;
     };
     /**
-     * Removes the widget's div
+     * @function <a name="remove">remove</a>
+     * @description Removes the div elements of the widget from the html page -- useful to programmaticaly remove widgets from a page.
+     * @memberof module:TouchscreenButton
+     * @instance
      */
     TouchscreenButton.prototype.remove = function () {
         TouchscreenButton.prototype.parentClass.remove.apply(this);
