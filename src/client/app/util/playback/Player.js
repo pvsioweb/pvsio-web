@@ -109,9 +109,20 @@ define(function (require, exports, module) {
             }
             if (action.input) {
                 _this.timer = window.setTimeout(function () {
-                    if (d3.select(action.input).node() && d3.select(action.input).node().value === "") {
+                    if (d3.select(action.input).node()) {
                         fill(action.input, action.value, action.timeStamp);
+                        if (action.scroll) {
+                            scrollTop(action.scroll.id, action.scroll.offset);
+                        }
                     }
+                    _this.now = action.timeStamp;
+                    _this.actions.curr++;
+                    _this.play(opt);
+                }, when);
+            }
+            if (action.scroll) {
+                _this.timer = window.setTimeout(function () {
+                    scrollTop(action.scroll, action.offset);
                     _this.now = action.timeStamp;
                     _this.actions.curr++;
                     _this.play(opt);
@@ -120,14 +131,29 @@ define(function (require, exports, module) {
         }
     };
 
+    function scrollTop(id, scrollHeight) {
+        function scrollTopTween(scrollTop) {
+            return function() {
+                var i = d3.interpolateNumber(this.scrollTop, scrollTop);
+                return function(t) { this.scrollTop = i(t); };
+            };
+        }
+        d3.select(id).transition()
+            .duration(500)
+            .tween("PlayerScroller", scrollTopTween(scrollHeight));
+    }
+
     function fill(id, val, opt) {
         opt = opt || {};
         if (val && typeof val === "string") {
-            var current_value = d3.select(id).attr("value");
+            var current_value = d3.select(id).attr("value") || d3.select(id).text();
             var elapse = opt.delay || 250;
             val.split("").forEach(function (c) {
                 setTimeout(function () {
+                    // for input fields
                     d3.select(id).attr("value", current_value + c);
+                    // for text areas
+                    d3.select(id).text(current_value + c);
                     // console.log(current_value);
                     current_value = d3.select(id).attr("value");
                 }, elapse);

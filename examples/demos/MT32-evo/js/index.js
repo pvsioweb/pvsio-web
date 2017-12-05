@@ -18,26 +18,14 @@ require.config({
 });
 
 require([
-        "widgets/Button",
         "widgets/TouchscreenButton",
-        "widgets/TouchscreenDisplay",
-        "widgets/BasicDisplay",
-        "widgets/NumericDisplay",
-        "widgets/SliderWidget",
-        "widgets/ToggleButton",
 
         "util/playback/Player",
         "widgets/ButtonActionsQueue",
         "stateParser",
         "PVSioWebClient"
     ], function (
-        Button,
         TouchscreenButton,
-        TouchscreenDisplay,
-        BasicDisplay,
-        NumericDisplay,
-        Slider,
-        ToggleButton,
 
         Player,
         ButtonActionsQueue,
@@ -86,6 +74,84 @@ require([
                 console.log(err);
             }
         }
+
+        var mt32_settings = {};
+        mt32_settings.mt32_off = new TouchscreenButton("mt32_off", {
+            width: 0,
+            height: 0,
+            top: 0,
+            left: 0
+        }, {
+            softLabel: "",
+            customFunctionText: "set_mt32_off",
+            backgroundColor: "steelblue",
+            opacity: "0.2",
+            borderColor: "blue",
+            parent: "device",
+            visibleWhen: "false",
+            callback: onMessageReceived
+        });
+        mt32_settings.mt32_on_battery = new TouchscreenButton("mt32_on_battery", {
+            width: 0,
+            height: 0,
+            top: 0,
+            left: 0
+        }, {
+            softLabel: "",
+            customFunctionText: "set_mt32_on_battery",
+            backgroundColor: "steelblue",
+            opacity: "0.2",
+            borderColor: "blue",
+            parent: "device",
+            visibleWhen: "false",
+            callback: onMessageReceived
+        });
+        mt32_settings.mt32_charging = new TouchscreenButton("mt32_charging", {
+            width: 0,
+            height: 0,
+            top: 0,
+            left: 0
+        }, {
+            softLabel: "",
+            customFunctionText: "set_mt32_charging",
+            backgroundColor: "steelblue",
+            opacity: "0.2",
+            borderColor: "blue",
+            parent: "device",
+            visibleWhen: "false",
+            callback: onMessageReceived
+        });
+        mt32_settings.mt32_fully_charged = new TouchscreenButton("mt32_fully_charged", {
+            width: 0,
+            height: 0,
+            top: 0,
+            left: 0
+        }, {
+            softLabel: "",
+            customFunctionText: "set_mt32_fully_charged",
+            backgroundColor: "steelblue",
+            opacity: "0.2",
+            borderColor: "blue",
+            parent: "device",
+            visibleWhen: "false",
+            callback: onMessageReceived
+        });
+        mt32_settings.mt32_charging_error = new TouchscreenButton("mt32_charging_error", {
+            width: 0,
+            height: 0,
+            top: 0,
+            left: 0
+        }, {
+            softLabel: "",
+            customFunctionText: "set_mt32_charging_error",
+            backgroundColor: "steelblue",
+            opacity: "0.2",
+            borderColor: "blue",
+            parent: "device",
+            visibleWhen: "false",
+            callback: onMessageReceived
+        });
+
 
         var leftpanel = {};
         leftpanel.umts = new TouchscreenButton("umts", {
@@ -485,9 +551,12 @@ require([
                 reset_tracing_display();
             }
             hide("#leftPanel");
+            d3.selectAll(".led").style("display", "none");
 
             // ct64
             d3.selectAll(".CT64frame").style("display", "none");
+            d3.selectAll(".CT64frame_inner").style("display", "none");
+            d3.selectAll(".CT64Menu").style("display", "none");
             d3.selectAll(".monitorData").style("display", "none");
             d3.selectAll(".ptData").style("display", "none");
         }
@@ -599,6 +668,21 @@ require([
             parent: "holterConfigScreen",
             callback: onMessageReceived
         });
+        ct64.new_patient = new TouchscreenButton("new_patient", {
+            width: 85,
+            height: 36,
+            top: 323,
+            left: 1250
+        }, {
+            softLabel: "",
+            backgroundColor: "steelblue",
+            opacity: "0",
+            borderColor: "#000066",
+            borderRadius: "6px",
+            borderWidth: "4px",
+            parent: "patientsScreen",
+            callback: onMessageReceived
+        });
         ct64.monitoring = new TouchscreenButton("monitoring", {
             width: 107,
             height: 46,
@@ -611,6 +695,34 @@ require([
             borderColor: "#000066",
             borderRadius: "6px",
             parent: "patientsScreen",
+            callback: onMessageReceived
+        });
+        ct64.upload_exams = new TouchscreenButton("upload_exams", {
+            width: 124,
+            height: 46,
+            top: 10,
+            left: 462
+        }, {
+            softLabel: "",
+            backgroundColor: "steelblue",
+            opacity: "0",
+            borderColor: "#000066",
+            borderRadius: "6px",
+            parent: "patientsScreen",
+            callback: onMessageReceived
+        });
+        ct64.choose_exams_to_be_uploaded = new TouchscreenButton("choose_exams_to_be_uploaded", {
+            width: 137,
+            height: 38,
+            top: 181,
+            left: 32
+        }, {
+            softLabel: "",
+            backgroundColor: "steelblue",
+            opacity: "0",
+            borderColor: "#000066",
+            borderRadius: "6px",
+            parent: "uploadExamsScreen",
             callback: onMessageReceived
         });
         ct64.new_monitoring_session = new TouchscreenButton("new_monitoring_session", {
@@ -655,6 +767,20 @@ require([
             parent: "ct64-monitoringScreen",
             callback: onMessageReceived
         });
+        ct64.view_ecg = new TouchscreenButton("view_ecg", {
+            width: 155,
+            height: 44,
+            top: 263,
+            left: 33
+        }, {
+            softLabel: "",
+            backgroundColor: "steelblue",
+            opacity: "0",
+            borderColor: "#000066",
+            borderRadius: "6px",
+            parent: "ecgMonitoringMenu",
+            callback: onMessageReceived
+        });
         ct64.HES = new TouchscreenButton("HES", {
             width: 84,
             height: 44,
@@ -666,7 +792,7 @@ require([
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
-            parent: "ecgAnalysisResultsScreen",
+            parent: "ecgMonitoringMenu",
             callback: onMessageReceived
         });
         ct64.view_physio = new TouchscreenButton("view_physio", {
@@ -680,7 +806,35 @@ require([
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
-            parent: "ecgResultsInterpretationScreen",
+            parent: "ecgMonitoringMenu",
+            callback: onMessageReceived
+        });
+        ct64.write_report = new TouchscreenButton("write_report", {
+            width: 134,
+            height: 44,
+            top: 263,
+            left: 416
+        }, {
+            softLabel: "",
+            backgroundColor: "steelblue",
+            opacity: "0",
+            borderColor: "#000066",
+            borderRadius: "6px",
+            parent: "ecgMonitoringMenu",
+            callback: onMessageReceived
+        });
+        ct64.select_doctor = new TouchscreenButton("select_doctor", {
+            width: 1017,
+            height: 36,
+            top: 390,
+            left: 274
+        }, {
+            softLabel: "",
+            backgroundColor: "steelblue",
+            opacity: "0.1",
+            borderColor: "#000066",
+            borderRadius: "6px",
+            parent: "requestReportScreen",
             callback: onMessageReceived
         });
         ct64.select_exam_data_holter = new TouchscreenButton("select_exam_data_holter", {
@@ -795,6 +949,91 @@ require([
             parent: "browser-navbar",
             callback: onMessageReceived
         });
+        ct64.select_report_status = new TouchscreenButton("select_report_status", {
+            width: 1019,
+            height: 36,
+            top: 1160,
+            left: 274
+        }, {
+            softLabel: "",
+            backgroundColor: "steelblue",
+            opacity: "0",
+            borderColor: "#000066",
+            borderRadius: "6px",
+            parent: "compileReportScreen",
+            callback: onMessageReceived
+        });
+        ct64.save_report = new TouchscreenButton("save_report", {
+            width: 62,
+            height: 36,
+            top: 1340,
+            left: 1235
+        }, {
+            softLabel: "",
+            backgroundColor: "steelblue",
+            opacity: "0.1",
+            borderColor: "#000066",
+            borderRadius: "6px",
+            parent: "compileReportScreen",
+            callback: onMessageReceived
+        });
+        ct64.view_patient_profile = new TouchscreenButton("view_patient_profile", {
+            width: 144,
+            height: 44,
+            top: 145,
+            left: 34
+        }, {
+            softLabel: "",
+            backgroundColor: "steelblue",
+            opacity: "0",
+            borderColor: "#000066",
+            borderRadius: "6px",
+            parent: "patientMenu",
+            callback: onMessageReceived
+        });
+        ct64.view_medical_report = new TouchscreenButton("view_medical_report", {
+            width: 118,
+            height: 44,
+            top: 145,
+            left: 275
+        }, {
+            softLabel: "",
+            backgroundColor: "steelblue",
+            opacity: "0",
+            borderColor: "#000066",
+            borderRadius: "6px",
+            parent: "patientMenu",
+            callback: onMessageReceived
+        });
+        ct64.view_archived_medical_reports = new TouchscreenButton("view_archived_medical_reports", {
+            width: 172,
+            height: 44,
+            top: 145,
+            left: 390
+        }, {
+            softLabel: "",
+            backgroundColor: "steelblue",
+            opacity: "0",
+            borderColor: "#000066",
+            borderRadius: "6px",
+            parent: "patientMenu",
+            callback: onMessageReceived
+        });
+        ct64.ct64_back = new TouchscreenButton("ct64_back", {
+            width: 156,
+            height: 34,
+            top: 145,
+            left: 32
+        }, {
+            softLabel: "",
+            backgroundColor: "steelblue",
+            opacity: "0",
+            borderColor: "#000066",
+            borderRadius: "6px",
+            parent: "medicalReportScreen",
+            callback: onMessageReceived
+        });
+
 
         function render_ct64_widgets (res) {
             ct64.login.render(res);
@@ -808,21 +1047,39 @@ require([
             ct64.continue.render(res);
             ct64.continue_holter_config.render(res);
             ct64.monitoring.render(res);
+            ct64.upload_exams.render(res);
+            ct64.choose_exams_to_be_uploaded.render(res);
+            ct64.new_patient.render(res);
             ct64.new_monitoring_session.render(res);
             ct64.date_time_filters.render(res);
             ct64.select_exam_data_hub.render(res);
             ct64.HES.render(res);
+            ct64.view_ecg.render(res);
             ct64.view_physio.render(res);
+            ct64.write_report.render(res);
+            ct64.select_doctor.render(res);
             ct64.select_exam_data_holter.render(res);
             ct64.select_visit.render(res);
             ct64.select_ecg2d_new_pt.render(res);
             ct64.continue_yes_no.render(res);
             ct64.browse_medicaltech.render(res);
+            ct64.select_report_status.render(res);
+            ct64.save_report.render(res);
+            ct64.view_medical_report.render(res);
+            ct64.ct64_back.render(res);
+            ct64.view_archived_medical_reports.render(res);
+            ct64.view_patient_profile.render(res);
         }
 
+
+
         var Demo = { NONE: 0, ACCESS_HOME_PAGE: 1, HUB_NEW_PT: 2, HUB_KNOWN_PT: 3, HOLTER: 4, TERMINATE_HUB_MODE: 5, TERMINATE_HOLTER_MODE: 6,
-                     NEW_EXAM_HUB_MODE: 7, TEST_ELECTRODES_HUB: 8, VIEW_EXAMS_HUB: 9, VIEW_INTERPRETATION_HUB: 10 };
-        var demo = Demo.VIEW_INTERPRETATION_HUB;
+                     NEW_EXAM_HUB_MODE: 7, TEST_ELECTRODES_HUB: 8, VIEW_EXAMS_HUB: 9, VIEW_INTERPRETATION_HUB: 10, VIEW_INTERPRETATION_HOLTER: 11,
+                     REQUEST_REPORT: 12, WRITE_REPORT: 13, VIEW_MEDICAL_REPORT: 14, VIEW_ARCHIVED_MEDICAL_REPORTS: 15,
+                     MT32_LED: 16, CREATE_NEW_PATIENT: 17, TRANSFER_DATA_MICROSD: 18 };
+        var demo = Demo.TRANSFER_DATA_MICROSD;
+
+
 
         var player = new Player({ lang: "it-IT" });
         if (demo === Demo.ACCESS_HOME_PAGE) {
@@ -980,13 +1237,116 @@ require([
                 { button: ct64.monitoring, timeStamp: 10000, timeout: 2000, borderColor: "black", classed: "blink" },
                 { speak: "Clicca sull'esame ECG di interesse.", timeStamp: 14000 },
                 { button: ct64.select_exam_data_hub, timeStamp: 16000, timeout: 2000, borderColor: "black", classed: "blink2" },
-                { speak: "Apparirà la schermata di analisi esame ECG12D, dove puoi selezionare i parametri di interesse da visualizzare.", timeStamp: 19000 },
+                { speak: "Apparirà la schermata di analisi esame ECG, dove puoi selezionare i parametri di interesse da visualizzare.", timeStamp: 19000 },
                 { speak: "Cliccando su H E S, puoi visualizzare il risultato interpretativo.", timeStamp: 27000 },
                 { button: ct64.HES, timeStamp: 28000, timeout: 2000, borderColor: "black", classed: "blink2" },
                 { speak: "Cliccando su Dati Fisiologici, puoi vedere i dati fisiologici del paziente raccolti precedentemente.", timeStamp: 34000 },
                 { button: ct64.view_physio, timeStamp: 36000, timeout: 2000, borderColor: "black", classed: "blink2" }
             ]).play();
+        } else if (demo === Demo.VIEW_INTERPRETATION_HOLTER) {
+            player.load([
+                { speak: "Instruzioni per visualizzare l'analisi di un esame Hólter.", timeStamp: 1000 },
+                { speak: "Clicca Monitoraggi nel Pannello di Navigazione della centrale CT64.", timeStamp: 6000 },
+                { button: ct64.monitoring, timeStamp: 10000, timeout: 2000, borderColor: "black", classed: "blink" },
+                { speak: "Clicca sull'esame Hólter di interesse.", timeStamp: 14000 },
+                { button: ct64.select_exam_data_holter, timeStamp: 16000, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { speak: "Apparirà la schermata di analisi esame Hólter, dove puoi selezionare i vari parametri di interesse.", timeStamp: 19000 }
+            ]).play();
+        } else if (demo === Demo.REQUEST_REPORT) {
+            player.load([
+                { speak: "Istruzioni per richiedere la refertazione di un esame ECG.", timeStamp: 1000 },
+                { speak: "Questa procedura va utilizzata quando l'operatore non ha l'autorizzazione per refertare.", timeStamp: 4500},
+                { speak: "Clicca Monitoraggi nel Pannello di Navigazione della centrale CT64.", timeStamp: 12000 },
+                { button: ct64.monitoring, timeStamp: 16000, timeout: 2000, borderColor: "black", classed: "blink" },
+                { speak: "Clicca sull'esame ECG di interesse.", timeStamp: 20000 },
+                { button: ct64.select_exam_data_hub, timeStamp: 22000, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { speak: "Poi, clicca Refertazione.", timeStamp: 24000 },
+                { button: ct64.write_report, timeStamp: 26000, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { speak: "Infine, seleziona il medico al quale vuoi richiedere la refertazione.", timeStamp: 28000 },
+                { button: ct64.select_doctor, timeStamp: 32000, timeout: 2000, borderColor: "black", classed: "blink" }
+            ]).play();
+        } else if (demo === Demo.WRITE_REPORT) {
+            player.load([
+                { speak: "Istruzioni per effettuare la refertazione di un esame ECG.", timeStamp: 1000 },
+                { speak: "Clicca Monitoraggi nel Pannello di Navigazione della centrale CT64.", timeStamp: 5500 },
+                { button: ct64.monitoring, timeStamp: 8500, timeout: 2000, borderColor: "black", classed: "blink" },
+                { speak: "Clicca sull'esame ECG di interesse.", timeStamp: 12500 },
+                { button: ct64.select_exam_data_hub, timeStamp: 14500, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { speak: "Poi, clicca Refertazione.", timeStamp: 16500 },
+                { button: ct64.write_report, timeStamp: 18500, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { speak: "Compila la diagnosi del paziente.", timeStamp: 20500 },
+                { input: "#diagnosis", value: "Nella norma", timeStamp: 21000 },
+                { scroll: "#MONITORING_SCREENS", timeStamp: 23500, offset: 300 },
+                { speak: "Indica, la terapia consigliata.", timeStamp: 24500 },
+                { input: "#therapy", value: "Nessuna", timeStamp: 27000 },
+                { scroll: "#MONITORING_SCREENS", timeStamp: 28000, offset: 700 },
+                { speak: "Indica, gli esami consigliati.", timeStamp: 28500 },
+                { input: "#recommended_exams", value: "Nessuno", timeStamp: 29000 },
+                { speak: "Seleziona lo stato appropriato del referto dal menu a tendina.", timeStamp: 30000 },
+                { button: ct64.select_report_status, timeStamp: 32000, timeout: 2500, borderColor: "black", classed: "blink2" },
+                { speak: "In fine, clicca su Salva per salvare il referto.", timeStamp: 35000 },
+                { button: ct64.save_report, timeStamp: 37000, timeout: 2000, borderColor: "black", classed: "blink" },
+                { speak: "Comparirà una schermàta riassuntiva che mostra il referto salvato.", timeStamp: 40000 },
+                { scroll: "#MONITORING_SCREENS", timeStamp: 40500, offset: 0 }
+            ]).play();
+        } else if (demo === Demo.VIEW_MEDICAL_REPORT) {
+            player.load([
+                { speak: "Istruzioni per consultare l'anamnesi del paziente.", timeStamp: 1000 },
+                { speak: "Nell'home page della centrale, fai doppio click sull'anagrafe desiderata.", timeStamp: 5000 },
+                { button: ct64.select_patient, timeStamp: 10500, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { speak: "Poi, nella pagina Gestione Paziente, clicca Anamnesi.", timeStamp: 12500 },
+                { button: ct64.view_medical_report, timeStamp: 15000, timeout: 2500, borderColor: "black", classed: "blink2" },
+                { speak: "Verrà visualizzata l'anamnesi del paziente selezionato.", timeStamp: 18000 }
+            ]).play();
+        } else if (demo === Demo.VIEW_ARCHIVED_MEDICAL_REPORTS) {
+            player.load([
+                { speak: "Istruzioni per consultare l'archivio di anamnesi del paziente.", timeStamp: 1000 },
+                { speak: "Nell'home page della centrale, fai doppio click sull'anagrafe desiderata.", timeStamp: 6000 },
+                { button: ct64.select_patient, timeStamp: 10500, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { speak: "Clicca Archivio Anamnesi.", timeStamp: 13000 },
+                { button: ct64.view_archived_medical_reports, timeStamp: 15000, timeout: 2500, borderColor: "black", classed: "blink2" },
+                { speak: "Verrà visualizzato l'elenco delle anamnesi archiviate.", timeStamp: 18000 }
+            ]).play();
+        } else if (demo === Demo.MT32_LED) {
+            player.load([
+                { speak: "Istruzioni per comprendere le segnalazioni fornite dal dispositivo MT32 attraverso il led frontale.", timeStamp: 1000 },
+                { speak: "Se il led frontale è blu lampeggiante, il dispositivo MT32 è acceso.", timeStamp: 8000 },
+                { button: mt32_settings.mt32_charging, timeStamp: 18000 },
+                { speak: "Led arancione fisso, indica che il dispositivo MT32 è in carica.", timeStamp: 18500 },
+                { button: mt32_settings.mt32_fully_charged, timeStamp: 27000 },
+                { speak: "Led verde fisso, indica che il dispositivo MT32 ha concluso con esito positivo il processo di ricarica.", timeStamp: 27500 },
+                { button: mt32_settings.mt32_charging_error, timeStamp: 36000 },
+                { speak: "Led arancione lampeggiante indica una anomalia nel processo di ricarica.", timeStamp: 36500 },
+                { speak: "L'anomalia può essere dovuta al superamento del tempo massimo previsto per la ricarica.", timeStamp: 40000 },
+                { speak: "Oppure ad un malfunzionamento dell'hardware del dispositivo, ad esempio un guasto all'alimentatore o alla batteria interna.", timeStamp: 46000 },
+                { speak: "Per escludere che l'anomalia sia dovuta a problemi hardware, si consiglia  di scollegare l'alimentatore per qualche minuto", timeStamp: 50000 },
+                { speak: "E successivamente ripetere l'intero ciclo di carica a dispositivo spento, monitorando lo stato della batteria.", timeStamp: 56000 },
+                { speak: "Se l'anomalia persiste, è necessario contattare l'assistenza.", timeStamp: 63000 }
+            ]).play();
+        } else if (demo === Demo.CREATE_NEW_PATIENT) {
+            player.load([
+                { speak: "Istruzioni per creare il profilo di un nuovo paziente nella centrale CT64.", timeStamp: 1000 },
+                { speak: "Nella pagina Pazienti, fai click su Nuovo.", timeStamp: 7000 },
+                { button: ct64.new_patient, timeStamp: 10000, timeout: 2500, borderColor: "black", classed: "blink2" },
+                { speak: "Verrà visualizzata una schermata che consente l'inserimento dei dati del nuovo paziente.", timeStamp: 11000 }
+            ]).play();
+        } else if (demo === Demo.TRANSFER_DATA_MICROSD) {
+            player.load([
+                { speak: "Istruzioni per caricare gli esami ECG tramite la centrale CT64.", timeStamp: 1000 },
+                { speak: "Estrai la scheda micro-SD dal dispositivo MT32.", timeStamp: 7000 },
+                { speak: "Inserisci la scheda nel lettore SD del computer usato per connetterti alla centrale CT64.", timeStamp: 12000 },
+                { speak: "Connettiti alla centrale CT64 con le tue credenziali.", timeStamp: 20000 },
+                { input: "#email", value: "mario.rossi@medicaltech.it", timeStamp: 20500 },
+                { input: "#password", value: "mylongsecretpassword", timeStamp: 24000 },
+                { button: ct64.login, timeStamp: 26000, timeout: 1600, borderColor: "blue", classed: "blink" },
+                { speak: "Clicca Upload Esami nel pannello di navigazione.", timeStamp: 29000 },
+                { button: ct64.upload_exams, timeStamp: 32000, timeout: 3000, borderColor: "blue", classed: "blink" },
+                { speak: "In fine, clicca il pulsante Upload Esami.", timeStamp: 35000 },
+                { button: ct64.choose_exams_to_be_uploaded, timeStamp: 36000, timeout: 3000, borderColor: "blue", classed: "blink" },
+                { speak: "Comparirà una schermata che ti permetterà di selezionare gli esami che vuoi caricare sulla centrale CT64.", timeStamp: 39000 }
+            ]).play();
         }
+
 
 
         function render(res) {
@@ -1002,6 +1362,12 @@ require([
             }
 
             //-- mt32
+            mt32_settings.mt32_off.render(res);
+            mt32_settings.mt32_on_battery.render(res);
+            mt32_settings.mt32_charging.render(res);
+            mt32_settings.mt32_fully_charged.render(res);
+            mt32_settings.mt32_charging_error.render(res);
+
             if (res.mt32.mode === "HOME") {
                 viz("#homeScreen");
                 home.new_exam.render();
@@ -1084,6 +1450,8 @@ require([
                 exams.confirm.render();
             }
 
+            // render mt32 LED
+            render_mt32_led(res);
             // render mt32 mode
             if (res.demo === "TERMINATE_HUB_MODE" || res.demo === "TERMINATE_HOLTER_MODE") {
                 render_mt32_mode(res, { flash: true });
@@ -1125,33 +1493,32 @@ require([
                 viz("#ct64AccessHomePage");
             // }
                 if (res.ct64.mode === "google") {
-                    // stop_tick();
                     viz("#ct64google", { fade: true });
                 } else if (res.ct64.mode === "LOGIN") {
-                    // stop_tick();
                     viz("#ct64LoginScreen", { fade: true });
                 } else if (res.ct64.mode === "PATIENTS_SCREEN") {
-                    // stop_tick();
                     viz("#ct64homePage", { fade: true });
-                } else {
-                    // stop_tick();
                 }
             // else if (res.demo === "HUB_KNOWN_PT" || res.demo === "HOLTER" || res.demo === "HUB_NEW_PT") {
                 d3.select("#ct64_address").attr("value", "http://www.medicaltech.it");
                 if (res.ct64.mode === "PATIENTS_SCREEN") {
-                    // stop_tick();
+                    viz("#PATIENT_SCREENS");
                     viz("#patientsScreen");
                     if (res.ct64.known_patient === "TRUE") {
                         d3.selectAll(".ptData").style("display", "block");
                     } else { d3.selectAll(".ptData").style("display", "none"); }
                 } else if (res.ct64.mode === "PATIENT_MANAGEMENT") {
-                    // stop_tick();
-                    viz("#patientMGMScreen");
+                    viz("#PATIENT_SCREENS");
+                    viz("#patientMenu");
+                    if (res.ct64.patient_management_tab === "ARCHIVED_MEDICAL_REPORTS") {
+                        viz("#archiveMedicalReportsScreen");
+                    } else {
+                        viz("#patientMGMScreen");
+                    }
                 } else if (res.ct64.mode === "MONITORING") {
                     stop_tick();
                     viz("#ct64-monitoringScreen");
                 } else if (res.ct64.mode === "NEW_MONITORING_SESSION") {
-                    // stop_tick();
                     viz("#newMonitoringSessionScreen", { flash: true });
                     if (res.ct64.known_patient === "TRUE") {
                        viz("#knownPT");
@@ -1165,7 +1532,6 @@ require([
                        ct64.select_device.deselect();
                     }
                 } else if (res.ct64.mode === "SHOW_MENU_VISITS") {
-                    // stop_tick();
                     viz("#newMonSessionScreen");
                     viz("#visits_menu");
                     if (res.ct64.visit === "VISIT_ECG2D_NEW_PT") {
@@ -1174,7 +1540,6 @@ require([
                         hide("#the_visit");
                     }
                 } else if (res.ct64.mode === "NEW_MONITORING_SESSION_ECG2D_NEW_PT") {
-                    // stop_tick();
                     viz("#newMonSessionScreen");
                     hide("#visits_menu");
                     if (res.ct64.visit === "VISIT_ECG2D_NEW_PT") {
@@ -1183,10 +1548,8 @@ require([
                         hide("#the_visit");
                     }
                 } else if (res.ct64.mode === "HOLTER_CONFIG") {
-                    // stop_tick();
                     viz("#holterConfigScreen");
                 } else if (res.ct64.mode === "SELECT_HOLTER_DEVICE") {
-                    // stop_tick();
                     viz("#newMonitoringSessionScreen", { flash: true });
                     viz("#holterSession");
                     hide("#hubSession");
@@ -1205,18 +1568,45 @@ require([
                     viz("#mariabianchi");
                     if (res.ct64.mode === "WAITING_RESULTS") {
                         viz("#waiting_device");
-                        // start_tick();
                     } else {
                         viz("#deviceID");
                         hide("#waiting_device");
-                        // stop_tick();
                     }
                 } else if (res.ct64.mode === "ECG_ANALYSIS_RESULTS") {
+                    viz("#MONITORING_SCREENS")
                     viz("#ecgAnalysisResultsScreen")
+                    viz("#ecgMonitoringMenu");
+                } else if (res.ct64.mode === "HOLTER_ANALYSIS_RESULTS") {
+                    viz("#MONITORING_SCREENS")
+                    viz("#holterAnalysisResultsScreen")
                 } else if (res.ct64.mode === "ECG_RESULTS_INTERPRETATION") {
+                    viz("#MONITORING_SCREENS")
                     viz("#ecgResultsInterpretationScreen")
+                    viz("#ecgMonitoringMenu");
                 } else if (res.ct64.mode === "ECG_PHYSIO") {
                     viz("#ecgResultsPhysioScreen")
+                    viz("#ecgMonitoringMenu");
+                } else if (res.ct64.mode === "REPORT") {
+                    viz("#MONITORING_SCREENS")
+                    if (res.ct64.report_auth === "TRUE") {
+                        if (res.ct64.ecg_report_saved === "TRUE") {
+                            viz("#reportSavedScreen")
+                        } else {
+                            viz("#compileReportScreen");
+                        }
+                    } else {
+                        viz("#requestReportScreen");
+                    }
+                    viz("#ecgMonitoringMenu");
+                } else if (res.ct64.mode === "MEDICAL_REPORT") {
+                    viz("#PATIENT_SCREENS");
+                    viz("#medicalReportScreen");
+                } else if (res.ct64.mode === "CREATE_NEW_PATIENT") {
+                    viz("#PATIENT_SCREENS");
+                    viz("#createNewPatientScreen");
+                } else if (res.ct64.mode === "UPLOAD_EXAMS") {
+                    viz("#PATIENT_SCREENS");
+                    viz("#uploadExamsScreen");
                 }
             // }
         }
@@ -1268,6 +1658,18 @@ require([
                 run_trace_cursor_position = 0;
             }
             run_trace_cursor.transition().duration(duration/2).style("margin-left", run_trace_cursor_position + "px");
+        }
+        function render_mt32_led(res) {
+            viz("#mt32_off");
+            if (res.mt32.battery_status === "ON_BATTERY") {
+                viz("#mt32_on");
+            } else if (res.mt32.battery_status === "CHARGING") {
+                viz("#mt32_charging");
+            } else if (res.mt32.battery_status === "FULLY_CHARGED") {
+                viz("#mt32_fully_charged");
+            } else if (res.mt32.battery_status === "CHARGING_ERROR") {
+                viz("#mt32_charging_error");
+            }
         }
         function render_mt32_mode(res, opt) {
             opt = opt || {};
@@ -1326,24 +1728,6 @@ require([
 
         var demoFolder = "MT32-evo";
 
-        function start_playback() {
-            // var playlist = require("text!" + demoFolder + "/playback/ex1.json");
-            var playlist = [
-                { speak: "Istruzioni per creare un nuovo esame con MT-32.", timeStamp: 10 },
-                { speak: "Clicca Nuovo Esame.", timeStamp: 4400 },
-                { button: home.new_exam, timeStamp: 6000 },
-                { speak: "Clicca ECG12D.", timeStamp: 6800 },
-                { button: exams.ecg12d, timeStamp: 9000 },
-                { speak: "Verifica i dati del paziente. Poi, clicca Conferma.", timeStamp: 9800 },
-                { button: check.confirm, timeStamp: 14000 },
-                { speak: "Aspetta qualche secondo che il filtro sia a regime.", timeStamp: 14800 },
-                { speak: "Poi, clicca rec per registrare il segnale.", timeStamp: 21000 }
-            ];
-            var player = new Player({ lang: "it-IT", pitch: 1.04, rate: 1.03 });
-            player.load(playlist);
-            player.play();
-        }
-
         //register event listener for websocket connection from the client
         client.addListener('WebSocketConnectionOpened', function (e) {
             console.log("web socket connected");
@@ -1372,14 +1756,79 @@ require([
                         client.getWebSocket().sendGuiAction("init(VIEW_EXAMS_HUB);", onMessageReceived);
                     } else if (demo === Demo.VIEW_INTERPRETATION_HUB) {
                         client.getWebSocket().sendGuiAction("init(VIEW_INTERPRETATION_HUB);", onMessageReceived);
+                    } else if (demo === Demo.VIEW_INTERPRETATION_HOLTER) {
+                        client.getWebSocket().sendGuiAction("init(VIEW_INTERPRETATION_HOLTER);", onMessageReceived);
+                    } else if (demo === Demo.REQUEST_REPORT) {
+                        client.getWebSocket().sendGuiAction("init(REQUEST_REPORT);", onMessageReceived);
+                    } else if (demo === Demo.WRITE_REPORT) {
+                        client.getWebSocket().sendGuiAction("init(WRITE_REPORT);", onMessageReceived);
+                    } else if (demo === Demo.VIEW_MEDICAL_REPORT) {
+                        client.getWebSocket().sendGuiAction("init(VIEW_MEDICAL_REPORT);", onMessageReceived);
+                    } else if (demo === Demo.VIEW_ARCHIVED_MEDICAL_REPORTS) {
+                        client.getWebSocket().sendGuiAction("init(VIEW_ARCHIVED_MEDICAL_REPORTS);", onMessageReceived);
+                    } else if (demo === Demo.MT32_LED) {
+                        client.getWebSocket().sendGuiAction("init(MT32_LED);", onMessageReceived);
+                        setTimeout(function () {
+                            d3.select("#device").style("transition-duration", "1000ms").style("transform", "translate(1200px,-1300px)scale(2,2)");
+                        }, 9000);
+                    } else if (demo === Demo.CREATE_NEW_PATIENT) {
+                        client.getWebSocket().sendGuiAction("init(CREATE_NEW_PATIENT);", onMessageReceived);
+                    } else if (demo === Demo.TRANSFER_DATA_MICROSD) {
+                        client.getWebSocket().sendGuiAction("init(TRANSFER_DATA_MICROSD);", onMessageReceived);
+
+                        // slide everything to the right
+                        setTimeout(function () {
+                            d3.select("#content").style("transition-duration", "1000ms").style("margin-left", "200px");
+                        }, 5000);
+
+                        // rotate MT32 on the side
+                        setTimeout(function () {
+                            d3.select("#MT32-screens").style("transition-duration", "1600ms")
+                                                        .style("transform", "rotateY(22deg)translateZ(-423px)translateY(212px)translateX(140px)skewY(10deg)");
+                            d3.select("#MT32-sdcard").style("transition-duration", "1600ms")
+                                                        .style("transform", "rotateY(22deg)translateZ(-36px)translateY(15px)translateX(-2px)skewY(10deg)");
+                            d3.selectAll(".MT32-case-leftside")
+                                .style("transition-duration", "1600ms")
+                                .style("transform", "rotateY(0deg)translateZ(0px)translateY(8px)translateX(0px)skewY(0deg)scaleY(1.01)");
+                            d3.select("#MT32-sdcard-cover")
+                                .style("transition-duration", "1600ms")
+                                .style("transform", "rotateY(0deg)translateZ(0px)translateY(0px)translateX(0px)skewY(0deg)scaleY(1.04)");
+
+                        }, 6000);
+
+                        // remove SD panel
+                        setTimeout(function () {
+                            d3.select("#MT32-sdcard-cover").transition().duration(1000).style("opacity", "0");
+                        }, 7000);
+
+                        // extract SD card
+                        setTimeout(function () {
+                            d3.select("#MT32-sdcard").style("display", "block");
+                            setTimeout(function () {
+                                d3.select("#MT32-sdcard").style("display", "block");
+                                d3.select("#MT32-sdcard").style("transition-duration", "1600ms")
+                                    .style("transform", "rotateY(22deg)translateZ(-170px)translateY(170px)translateX(-200px)skewY(10deg)");
+                            }, 1000);
+                        }, 7500);
+
+                        // show SD card reader
+                        setTimeout(function () {
+                            d3.selectAll(".card-reader").style("display", "block").style("opacity", 0).transition().duration(1000).style("opacity", 0.8);
+                            d3.select("#MT32-sdcard").style("z-index", 2).style("transition-duration", "2600ms")
+                                    .style("transform", "translateX(980px)translateY(360px)rotateX(17deg)rotateZ(-108deg)skewX(-13deg)scale(0.3,0.5)");
+                        }, 10000);
+
+                        // insert card in the reader
+                        setTimeout(function () {
+                            d3.select("#MT32-sdcard").style("z-index", 2).style("transition-duration", "1600ms")
+                                    .style("transform", "translateX(1132px) translateY(421px) rotateX(26deg) rotateZ(-104deg) skewX(-13deg) translateZ(-300px) scale(0.2, 0.5)");
+                        }, 12000);
                     }
                     else {
                         client.getWebSocket().sendGuiAction("init(STD);", onMessageReceived);
                     }
                 d3.select(".demo-splash").style("display", "none");
                 d3.select(".content").style("display", "block");
-                // start playback
-                // start_playback();
             });
         }).addListener("WebSocketConnectionClosed", function (e) {
             console.log("web socket closed");

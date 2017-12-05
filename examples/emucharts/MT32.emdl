@@ -1,0 +1,1059 @@
+{
+ "descriptor": {
+  "file_type": "emdl",
+  "version": "2.0",
+  "description": "emucharts model",
+  "chart_name": "MT32"
+ },
+ "chart": {
+  "states": [
+   {
+    "id": "X1",
+    "name": "HOME",
+    "color": "#1f77b4",
+    "width": 36,
+    "height": 36,
+    "x": 152,
+    "y": 181.60000610351562,
+    "enter": "",
+    "exit": "",
+    "pmr": [],
+    "widgets": [],
+    "components": []
+   },
+   {
+    "id": "X2",
+    "name": "EXAMS",
+    "color": "#ff7f0e",
+    "width": 36,
+    "height": 36,
+    "x": 378,
+    "y": 179.60000610351562,
+    "enter": "",
+    "exit": "",
+    "pmr": [],
+    "widgets": [],
+    "components": []
+   },
+   {
+    "id": "X3",
+    "name": "CENTRAL",
+    "color": "#2ca02c",
+    "width": 36,
+    "height": 36,
+    "x": 271,
+    "y": 311.6000213623047,
+    "enter": "",
+    "exit": "",
+    "pmr": [],
+    "widgets": [],
+    "components": []
+   },
+   {
+    "id": "X4",
+    "name": "SETTINGS",
+    "color": "#d62728",
+    "width": 36,
+    "height": 36,
+    "x": 82.99999237060547,
+    "y": 317.6000061035156,
+    "enter": "",
+    "exit": "",
+    "pmr": [],
+    "widgets": [],
+    "components": []
+   },
+   {
+    "id": "X5",
+    "name": "TEST",
+    "color": "#9467bd",
+    "width": 36,
+    "height": 36,
+    "x": 597,
+    "y": 180.59999084472656,
+    "enter": "",
+    "exit": "",
+    "pmr": [],
+    "widgets": [],
+    "components": []
+   },
+   {
+    "id": "X6",
+    "name": "CHECK_PATIENT",
+    "color": "#8c564b",
+    "width": 36,
+    "height": 36,
+    "x": 515,
+    "y": 315.6000061035156,
+    "enter": "",
+    "exit": "",
+    "pmr": [],
+    "widgets": [],
+    "components": []
+   },
+   {
+    "id": "X7",
+    "name": "MONITORING",
+    "color": "#e377c2",
+    "width": 36,
+    "height": 36,
+    "x": 727,
+    "y": 317.6000061035156,
+    "enter": "",
+    "exit": "",
+    "pmr": [],
+    "widgets": [],
+    "components": []
+   },
+   {
+    "id": "X8",
+    "name": "RESULTS",
+    "color": "#7f7f7f",
+    "width": 36,
+    "height": 36,
+    "x": 918.5,
+    "y": 490.7666473388672,
+    "enter": "",
+    "exit": "",
+    "pmr": [],
+    "widgets": [],
+    "components": []
+   },
+   {
+    "id": "X9",
+    "name": "RECORDING",
+    "color": "#1f77b4",
+    "width": 36,
+    "height": 36,
+    "x": 902,
+    "y": 168.6000213623047,
+    "enter": "",
+    "exit": "",
+    "pmr": [],
+    "widgets": [],
+    "components": []
+   },
+   {
+    "id": "X10",
+    "name": "DATA",
+    "color": "#1f77b4",
+    "width": 36,
+    "height": 36,
+    "x": 1131.8333740234375,
+    "y": 556.0999755859375,
+    "enter": "",
+    "exit": "",
+    "pmr": [],
+    "widgets": [],
+    "components": []
+   },
+   {
+    "id": "X11",
+    "name": "INTERPRETATION",
+    "color": "#ff7f0e",
+    "width": 36,
+    "height": 36,
+    "x": 1208,
+    "y": 311.6000061035156,
+    "enter": "",
+    "exit": "",
+    "pmr": [],
+    "widgets": [],
+    "components": []
+   },
+   {
+    "id": "X13",
+    "name": "CONFIRM_REC",
+    "color": "white",
+    "width": 36,
+    "height": 36,
+    "x": 720,
+    "y": 78.66666412353516,
+    "enter": "",
+    "exit": "",
+    "pmr": [],
+    "widgets": [],
+    "components": []
+   }
+  ],
+  "transitions": [
+   {
+    "id": "T1",
+    "name": "mt32_new_exam",
+    "source": {
+     "id": "X1",
+     "name": "HOME",
+     "color": "#1f77b4",
+     "width": 36,
+     "height": 36,
+     "x": 152,
+     "y": 181.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X2",
+     "name": "EXAMS",
+     "color": "#ff7f0e",
+     "width": 36,
+     "height": 36,
+     "x": 378,
+     "y": 179.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 317,
+     "y": 140.60000610351562
+    }
+   },
+   {
+    "id": "T2",
+    "name": "mt32_back",
+    "source": {
+     "id": "X2",
+     "name": "EXAMS",
+     "color": "#ff7f0e",
+     "width": 36,
+     "height": 36,
+     "x": 378,
+     "y": 179.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X1",
+     "name": "HOME",
+     "color": "#1f77b4",
+     "width": 36,
+     "height": 36,
+     "x": 152,
+     "y": 181.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": null
+   },
+   {
+    "id": "T3",
+    "name": "mt32_central",
+    "source": {
+     "id": "X1",
+     "name": "HOME",
+     "color": "#1f77b4",
+     "width": 36,
+     "height": 36,
+     "x": 152,
+     "y": 181.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X3",
+     "name": "CENTRAL",
+     "color": "#2ca02c",
+     "width": 36,
+     "height": 36,
+     "x": 271,
+     "y": 311.6000213623047,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 306,
+     "y": 262.6000061035156
+    }
+   },
+   {
+    "id": "T4",
+    "name": "mt32_back",
+    "source": {
+     "id": "X3",
+     "name": "CENTRAL",
+     "color": "#2ca02c",
+     "width": 36,
+     "height": 36,
+     "x": 271,
+     "y": 311.6000213623047,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X1",
+     "name": "HOME",
+     "color": "#1f77b4",
+     "width": 36,
+     "height": 36,
+     "x": 152,
+     "y": 181.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": null
+   },
+   {
+    "id": "T5",
+    "name": "mt32_settings",
+    "source": {
+     "id": "X1",
+     "name": "HOME",
+     "color": "#1f77b4",
+     "width": 36,
+     "height": 36,
+     "x": 152,
+     "y": 181.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X4",
+     "name": "SETTINGS",
+     "color": "#d62728",
+     "width": 36,
+     "height": 36,
+     "x": 82.99999237060547,
+     "y": 317.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 40.999996185302734,
+     "y": 264.6000061035156
+    }
+   },
+   {
+    "id": "T6",
+    "name": "mt32_back",
+    "source": {
+     "id": "X4",
+     "name": "SETTINGS",
+     "color": "#d62728",
+     "width": 36,
+     "height": 36,
+     "x": 82.99999237060547,
+     "y": 317.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X1",
+     "name": "HOME",
+     "color": "#1f77b4",
+     "width": 36,
+     "height": 36,
+     "x": 152,
+     "y": 181.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 100.99999237060547,
+     "y": 261.6000061035156
+    }
+   },
+   {
+    "id": "T7",
+    "name": "mt32_test_electrodes",
+    "source": {
+     "id": "X2",
+     "name": "EXAMS",
+     "color": "#ff7f0e",
+     "width": 36,
+     "height": 36,
+     "x": 378,
+     "y": 179.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X5",
+     "name": "TEST",
+     "color": "#9467bd",
+     "width": 36,
+     "height": 36,
+     "x": 597,
+     "y": 180.59999084472656,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 548,
+     "y": 141.59999084472656
+    }
+   },
+   {
+    "id": "T8",
+    "name": "mt32_back",
+    "source": {
+     "id": "X5",
+     "name": "TEST",
+     "color": "#9467bd",
+     "width": 36,
+     "height": 36,
+     "x": 597,
+     "y": 180.59999084472656,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X2",
+     "name": "EXAMS",
+     "color": "#ff7f0e",
+     "width": 36,
+     "height": 36,
+     "x": 378,
+     "y": 179.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": null
+   },
+   {
+    "id": "T9",
+    "name": "mt32_ecg12d",
+    "source": {
+     "id": "X2",
+     "name": "EXAMS",
+     "color": "#ff7f0e",
+     "width": 36,
+     "height": 36,
+     "x": 378,
+     "y": 179.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X6",
+     "name": "CHECK_PATIENT",
+     "color": "#8c564b",
+     "width": 36,
+     "height": 36,
+     "x": 515,
+     "y": 315.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 505,
+     "y": 248.59999084472656
+    }
+   },
+   {
+    "id": "T10",
+    "name": "mt32_back",
+    "source": {
+     "id": "X6",
+     "name": "CHECK_PATIENT",
+     "color": "#8c564b",
+     "width": 36,
+     "height": 36,
+     "x": 515,
+     "y": 315.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X2",
+     "name": "EXAMS",
+     "color": "#ff7f0e",
+     "width": 36,
+     "height": 36,
+     "x": 378,
+     "y": 179.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": null
+   },
+   {
+    "id": "T11",
+    "name": "mt32_confirm",
+    "source": {
+     "id": "X6",
+     "name": "CHECK_PATIENT",
+     "color": "#8c564b",
+     "width": 36,
+     "height": 36,
+     "x": 515,
+     "y": 315.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X7",
+     "name": "MONITORING",
+     "color": "#e377c2",
+     "width": 36,
+     "height": 36,
+     "x": 727,
+     "y": 317.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 657,
+     "y": 286.6000061035156
+    }
+   },
+   {
+    "id": "T12",
+    "name": "mt32_quit",
+    "source": {
+     "id": "X7",
+     "name": "MONITORING",
+     "color": "#e377c2",
+     "width": 36,
+     "height": 36,
+     "x": 727,
+     "y": 317.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X6",
+     "name": "CHECK_PATIENT",
+     "color": "#8c564b",
+     "width": 36,
+     "height": 36,
+     "x": 515,
+     "y": 315.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 623.4327707743093,
+     "y": 316.3895895383856
+    }
+   },
+   {
+    "id": "T13",
+    "name": "mt32_rec\n[ mo = HUB ]",
+    "source": {
+     "id": "X7",
+     "name": "MONITORING",
+     "color": "#e377c2",
+     "width": 36,
+     "height": 36,
+     "x": 727,
+     "y": 317.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X9",
+     "name": "RECORDING",
+     "color": "#1f77b4",
+     "width": 36,
+     "height": 36,
+     "x": 902,
+     "y": 168.6000213623047,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 816.1874483606399,
+     "y": 257.71638098187674
+    }
+   },
+   {
+    "id": "T14",
+    "name": "mt32_results_ready",
+    "source": {
+     "id": "X9",
+     "name": "RECORDING",
+     "color": "#1f77b4",
+     "width": 36,
+     "height": 36,
+     "x": 902,
+     "y": 168.6000213623047,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X8",
+     "name": "RESULTS",
+     "color": "#7f7f7f",
+     "width": 36,
+     "height": 36,
+     "x": 918.5,
+     "y": 490.7666473388672,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 911.5613809620066,
+     "y": 324.6732533295901
+    }
+   },
+   {
+    "id": "T15",
+    "name": "mt32_view_data",
+    "source": {
+     "id": "X8",
+     "name": "RESULTS",
+     "color": "#7f7f7f",
+     "width": 36,
+     "height": 36,
+     "x": 918.5,
+     "y": 490.7666473388672,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X10",
+     "name": "DATA",
+     "color": "#1f77b4",
+     "width": 36,
+     "height": 36,
+     "x": 1131.8333740234375,
+     "y": 556.0999755859375,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 1075.852783203125,
+     "y": 523.4049072265625
+    }
+   },
+   {
+    "id": "T16",
+    "name": "mt32_view_interpretation",
+    "source": {
+     "id": "X8",
+     "name": "RESULTS",
+     "color": "#7f7f7f",
+     "width": 36,
+     "height": 36,
+     "x": 918.5,
+     "y": 490.7666473388672,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X11",
+     "name": "INTERPRETATION",
+     "color": "#ff7f0e",
+     "width": 36,
+     "height": 36,
+     "x": 1208,
+     "y": 311.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 1069.8935560021591,
+     "y": 388.14236016824884
+    }
+   },
+   {
+    "id": "T17",
+    "name": "mt32_repeat",
+    "source": {
+     "id": "X8",
+     "name": "RESULTS",
+     "color": "#7f7f7f",
+     "width": 36,
+     "height": 36,
+     "x": 918.5,
+     "y": 490.7666473388672,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X7",
+     "name": "MONITORING",
+     "color": "#e377c2",
+     "width": 36,
+     "height": 36,
+     "x": 727,
+     "y": 317.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 819.5374509395408,
+     "y": 392.03080595762265
+    }
+   },
+   {
+    "id": "T18",
+    "name": "mt32_back",
+    "source": {
+     "id": "X11",
+     "name": "INTERPRETATION",
+     "color": "#ff7f0e",
+     "width": 36,
+     "height": 36,
+     "x": 1208,
+     "y": 311.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X8",
+     "name": "RESULTS",
+     "color": "#7f7f7f",
+     "width": 36,
+     "height": 36,
+     "x": 918.5,
+     "y": 490.7666473388672,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 1045.0927668755535,
+     "y": 455.08349675301696
+    }
+   },
+   {
+    "id": "T19",
+    "name": "mt32_cancel",
+    "source": {
+     "id": "X10",
+     "name": "DATA",
+     "color": "#1f77b4",
+     "width": 36,
+     "height": 36,
+     "x": 1131.8333740234375,
+     "y": 556.0999755859375,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X8",
+     "name": "RESULTS",
+     "color": "#7f7f7f",
+     "width": 36,
+     "height": 36,
+     "x": 918.5,
+     "y": 490.7666473388672,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 970.852783203125,
+     "y": 541.7382202148438
+    }
+   },
+   {
+    "id": "T20",
+    "name": "terminate_operating_mode\n{ mo := NONE; }",
+    "source": {
+     "id": "X3",
+     "name": "CENTRAL",
+     "color": "#2ca02c",
+     "width": 36,
+     "height": 36,
+     "x": 271,
+     "y": 311.6000213623047,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X3",
+     "name": "CENTRAL",
+     "color": "#2ca02c",
+     "width": 36,
+     "height": 36,
+     "x": 271,
+     "y": 311.6000213623047,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 359.9999694824219,
+     "y": 433.6666564941406
+    }
+   },
+   {
+    "id": "T21",
+    "name": "mt32_holter",
+    "source": {
+     "id": "X2",
+     "name": "EXAMS",
+     "color": "#ff7f0e",
+     "width": 36,
+     "height": 36,
+     "x": 378,
+     "y": 179.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X6",
+     "name": "CHECK_PATIENT",
+     "color": "#8c564b",
+     "width": 36,
+     "height": 36,
+     "x": 515,
+     "y": 315.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 406.9999694824219,
+     "y": 337.6666564941406
+    }
+   },
+   {
+    "id": "T22",
+    "name": "mt32_rec [ mo = HOLTER ]",
+    "source": {
+     "id": "X7",
+     "name": "MONITORING",
+     "color": "#e377c2",
+     "width": 36,
+     "height": 36,
+     "x": 727,
+     "y": 317.6000061035156,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X13",
+     "name": "CONFIRM_REC",
+     "color": "white",
+     "width": 36,
+     "height": 36,
+     "x": 720,
+     "y": 78.66666412353516,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 728.4689087124574,
+     "y": 199.17700153148664
+    }
+   },
+   {
+    "id": "T23",
+    "name": "mt32_confirm",
+    "source": {
+     "id": "X13",
+     "name": "CONFIRM_REC",
+     "color": "white",
+     "width": 36,
+     "height": 36,
+     "x": 720,
+     "y": 78.66666412353516,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X9",
+     "name": "RECORDING",
+     "color": "#1f77b4",
+     "width": 36,
+     "height": 36,
+     "x": 902,
+     "y": 168.6000213623047,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 803.9999389648438,
+     "y": 120.66666412353516
+    }
+   }
+  ],
+  "initial_transitions": [
+   {
+    "id": "IT1",
+    "name": "",
+    "target": {
+     "id": "X1",
+     "name": "HOME",
+     "color": "#1f77b4",
+     "width": 36,
+     "height": 36,
+     "x": 152,
+     "y": 181.60000610351562,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    }
+   }
+  ],
+  "variables": [
+   {
+    "id": "VAR_mo:OperatingMode(Local)",
+    "name": "mo",
+    "type": "OperatingMode",
+    "value": "NONE",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_battery_status:BatteryStatus(Local)",
+    "name": "battery_status",
+    "type": "BatteryStatus",
+    "value": "ON_BATTERY",
+    "scope": "Local"
+   }
+  ],
+  "constants": [],
+  "datatypes": [
+   {
+    "id": "DATATYPE_OperatingMode",
+    "name": "OperatingMode",
+    "constructors": [
+     "NONE",
+     "HUB",
+     "HOLTER"
+    ]
+   },
+   {
+    "id": "DATATYPE_BatteryStatus",
+    "name": "BatteryStatus",
+    "constructors": [
+     "ON_BATTERY",
+     "CHARGING",
+     "FULLY_CHARGED",
+     "CHARGING_ERROR",
+     "OFF"
+    ]
+   }
+  ],
+  "pmr": {},
+  "isPIM": false
+ }
+}

@@ -1,11 +1,41 @@
 @keyframes blinker {
   50% { opacity: 0; }
 }
+.monitorData {
+    display: none;
+}
+.ptData {
+    display: none;
+}
 .blink {
   animation: blinker 1s linear infinite;
 }
 .blink2 {
   animation: blinker 1s linear;
+}
+@keyframes simple-blinker {
+  0% { opacity: 0; }
+  10% { opacity: 0; }
+  20% { opacity: 0; }
+  30% { opacity: 0; }
+  40% { opacity: 1; }
+  50% { opacity: 1; }
+  60% { opacity: 1; }
+  70% { opacity: 1; }
+  80% { opacity: 1; }
+  90% { opacity: 0; }
+  100% { opacity: 0; }
+}
+.blink-img {
+  animation: simple-blinker 1s linear infinite;
+}
+.led {
+    position:absolute;
+    /*top: 1100px;
+    left: 155px;*/
+    top: 1040px;
+    left: 31px;
+    z-index: 1;
 }
 .r1 {
     position: absolute;
@@ -176,8 +206,20 @@
     top:122px;
     left:1022px;
     height:766px;
-    width:1356px;
+    width:1378px;
     overflow: hidden;
+}
+.scrollable {
+    overflow-y: scroll !important;
+}
+.CT64frameHOVER {
+    position:absolute;
+    top:122px;
+    left:1022px;
+    height:0px;
+    width:0px;
+    opacity:0;
+    z-index: 1;
 }
 
 .CT64screen {

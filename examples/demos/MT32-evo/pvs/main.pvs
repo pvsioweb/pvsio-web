@@ -2,7 +2,9 @@ main: THEORY
  BEGIN IMPORTING MT32, CT64
 
   Demo: TYPE = { STD, ACCESS_HOME_PAGE, AUTHENTICATION, HUB_KNOWN_PT, HUB_NEW_PT, HOLTER, TERMINATE_HUB_MODE, TERMINATE_HOLTER_MODE,
-                 NEW_EXAM_HUB_MODE, NEW_EXAM_HOLTER_MODE, TEST_ELECTRODES_HUB, VIEW_EXAMS_HUB, VIEW_INTERPRETATION_HUB }
+                 NEW_EXAM_HUB_MODE, NEW_EXAM_HOLTER_MODE, TEST_ELECTRODES_HUB, VIEW_EXAMS_HUB, VIEW_INTERPRETATION_HUB, VIEW_INTERPRETATION_HOLTER,
+		 REQUEST_REPORT, WRITE_REPORT, VIEW_MEDICAL_REPORT, VIEW_ARCHIVED_MEDICAL_REPORTS, MT32_LED, CREATE_NEW_PATIENT,
+		 TRANSFER_DATA_MICROSD }
 
   state: TYPE = [#
     demo: Demo,
@@ -17,6 +19,8 @@ main: THEORY
        	     mt32 := mtinit WITH [ mo := HUB ],
              ct64 := ctinit WITH [ mode := google, known_patient := TRUE ] #),
      dd = AUTHENTICATION
+       -> (# demo := dd, mt32 := mtinit, ct64 := ctinit #),
+     dd = TRANSFER_DATA_MICROSD
        -> (# demo := dd, mt32 := mtinit, ct64 := ctinit #),
      dd = HUB_KNOWN_PT
        -> (# demo := dd,
@@ -50,10 +54,17 @@ main: THEORY
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HUB ],
              ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
-     dd = VIEW_EXAMS_HUB OR dd = VIEW_INTERPRETATION_HUB
+     dd = CREATE_NEW_PATIENT
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HUB ],
-             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+             ct64 := login(ctinit WITH [ known_patient := FALSE ]) #),
+     dd = VIEW_EXAMS_HUB OR dd = VIEW_INTERPRETATION_HUB OR dd = VIEW_INTERPRETATION_HOLTER
+       OR dd = REQUEST_REPORT OR dd = WRITE_REPORT OR dd = VIEW_MEDICAL_REPORT OR dd = VIEW_ARCHIVED_MEDICAL_REPORTS
+        OR dd = MT32_LED
+       -> (# demo := dd,
+       	     mt32 := mtinit WITH [ mo := HUB ],
+             ct64 := login(ctinit WITH [ known_patient := TRUE,
+	     	     		         report_auth := NOT dd = REQUEST_REPORT ]) #),
      ELSE -> (# demo := dd, mt32 := mtinit, ct64 := ctinit WITH [ known_patient := TRUE ] #)
    ENDCOND
 
@@ -228,6 +239,12 @@ main: THEORY
     ELSE -> st
    ENDCOND
 
+  click_select_exam_data_holter(st: state): state =
+   COND
+    per_select_exam_data_holter(st`ct64) -> st WITH [ ct64 := select_exam_data_holter(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
   click_browse_medicaltech(st: state): state =
    COND
     per_browse_medicaltech(st`ct64) -> st WITH [ ct64 := browse_medicaltech(st`ct64) ],
@@ -270,4 +287,64 @@ main: THEORY
     ELSE -> st
    ENDCOND
 
+  click_write_report(st: state): state =
+   COND
+    per_write_report(st`ct64) -> st WITH [ ct64 := write_report(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_view_ecg(st: state): state =
+   COND
+    per_view_ecg(st`ct64) -> st WITH [ ct64 := view_ecg(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_save_report(st: state): state =
+   COND
+    per_save(st`ct64) -> st WITH [ ct64 := save(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_ct64_back(st: state): state =
+   COND
+    per_back(st`ct64) -> st WITH [ ct64 := back(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_view_medical_report(st: state): state =
+   COND
+    per_view_medical_report(st`ct64) -> st WITH [ ct64 := view_medical_report(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_view_archived_medical_reports(st: state): state =
+   COND
+    per_view_archived_medical_reports(st`ct64) -> st WITH [ ct64 := view_archived_medical_reports(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_view_patient_profile(st: state): state =
+   COND
+    per_view_patient_profile(st`ct64) -> st WITH [ ct64 := view_patient_profile(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_new_patient(st: state): state =
+   COND
+    per_new_patient(st`ct64) -> st WITH [ ct64 := new_patient(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_upload_exams(st: state): state =
+   COND
+    per_upload_exams(st`ct64) -> st WITH [ ct64 := upload_exams(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  set_mt32_off(st: state): state = st WITH [ mt32 := mt32(st) WITH [ battery_status := OFF ]]
+  set_mt32_on_battery(st: state): state = st WITH [ mt32 := mt32(st) WITH [ battery_status := ON_BATTERY ]]
+  set_mt32_charging(st: state): state = st WITH [ mt32 := mt32(st) WITH [ battery_status := CHARGING ]]
+  set_mt32_fully_charged(st: state): state = st WITH [ mt32 := mt32(st) WITH [ battery_status := FULLY_CHARGED ]]
+  set_mt32_charging_error(st: state): state = st WITH [ mt32 := mt32(st) WITH [ battery_status := CHARGING_ERROR ]]
+  
 END main
