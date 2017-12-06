@@ -4,7 +4,7 @@ main: THEORY
   Demo: TYPE = { STD, ACCESS_HOME_PAGE, AUTHENTICATION, HUB_KNOWN_PT, HUB_NEW_PT, HOLTER, TERMINATE_HUB_MODE, TERMINATE_HOLTER_MODE,
                  NEW_EXAM_HUB_MODE, NEW_EXAM_HOLTER_MODE, TEST_ELECTRODES_HUB, VIEW_EXAMS_HUB, VIEW_INTERPRETATION_HUB, VIEW_INTERPRETATION_HOLTER,
 		 REQUEST_REPORT, WRITE_REPORT, VIEW_MEDICAL_REPORT, VIEW_ARCHIVED_MEDICAL_REPORTS, MT32_LED, CREATE_NEW_PATIENT,
-		 TRANSFER_DATA_MICROSD }
+		 TRANSFER_DATA_MICROSD, INTRO, POWER_ON_MT32, POWER_OFF_MT32 }
 
   state: TYPE = [#
     demo: Demo,
@@ -19,7 +19,9 @@ main: THEORY
        	     mt32 := mtinit WITH [ mo := HUB ],
              ct64 := ctinit WITH [ mode := google, known_patient := TRUE ] #),
      dd = AUTHENTICATION
-       -> (# demo := dd, mt32 := mtinit, ct64 := ctinit #),
+       -> (# demo := dd, mt32 := mtinit WITH [ mo := HUB ] , ct64 := ctinit #),
+     dd = INTRO
+       -> (# demo := dd, mt32 := mtinit WITH [ mo := HUB ] , ct64 := ctinit WITH [ known_patient := TRUE ] #),
      dd = TRANSFER_DATA_MICROSD
        -> (# demo := dd, mt32 := mtinit, ct64 := ctinit #),
      dd = HUB_KNOWN_PT
@@ -58,11 +60,16 @@ main: THEORY
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HUB ],
              ct64 := login(ctinit WITH [ known_patient := FALSE ]) #),
-     dd = VIEW_EXAMS_HUB OR dd = VIEW_INTERPRETATION_HUB OR dd = VIEW_INTERPRETATION_HOLTER
+     dd = VIEW_EXAMS_HUB OR dd = VIEW_INTERPRETATION_HUB OR dd = VIEW_INTERPRETATION_HOLTER OR dd = POWER_OFF_MT32
        OR dd = REQUEST_REPORT OR dd = WRITE_REPORT OR dd = VIEW_MEDICAL_REPORT OR dd = VIEW_ARCHIVED_MEDICAL_REPORTS
         OR dd = MT32_LED
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HUB ],
+             ct64 := login(ctinit WITH [ known_patient := TRUE,
+	     	     		         report_auth := NOT dd = REQUEST_REPORT ]) #),
+     dd = POWER_ON_MT32
+       -> (# demo := dd,
+       	     mt32 := mtinit WITH [ mo := HUB, mode := OFF ],
              ct64 := login(ctinit WITH [ known_patient := TRUE,
 	     	     		         report_auth := NOT dd = REQUEST_REPORT ]) #),
      ELSE -> (# demo := dd, mt32 := mtinit, ct64 := ctinit WITH [ known_patient := TRUE ] #)
@@ -162,6 +169,12 @@ main: THEORY
   click_holter(st: state): state =
    COND
     per_mt32_holter(st`mt32) -> st WITH [ mt32 := mt32_holter(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_power_btn(st: state): state =
+   COND
+    per_power_btn(st`mt32) -> st WITH [ mt32 := power_btn(st`mt32) ],
     ELSE -> st
    ENDCOND
 

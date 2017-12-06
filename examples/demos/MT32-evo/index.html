@@ -46,6 +46,10 @@
                     style="position:absolute; top:60px; left:72px; transform:rotateY(22deg)translateZ(-90px)translateY(180px)translateX(140px)skewY(30deg)scaleY(0.92);">
                      <img src="case/MT32-case-leftside-4.png"></img>
                 </div>
+                <div id="MT32-right" class="MT32-case-righside"
+                    style="position:absolute; top:75px; left:526px; display:none;">
+                     <img src="case/MT32-case-rightside.png"></img>
+                </div>
                 <div id="MT32-sdcard-cover" class="MT32-sdcard"
                     style="position:absolute; top:780px; left:135px; transform: rotateY(22deg)translateZ(-55px)translateY(108px)translateX(140px)skewY(30deg)scaleY(1.2);">
                      <img id="MT32-sdcard-cover" src="case/microSD-cover.png"></img>
@@ -250,10 +254,20 @@
                          <img id="mt32_charging_error" class="led blink-img" src="leds/orange.png"></img>
                          <img id="mt32_on" class="led blink-img" src="leds/blue.png"></img>
                     </div>
+
+                    <div id="offScreen">
+                        <div class="screenframe">
+                            <img src="screens/off_screen.png">
+                            <div id="poweron_spinner" style="position:absolute; top:200px; left: 156px; color:white; display:none;">
+                                <i class="fa fa-spinner fa-pulse fa-4x fa-fw" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
-            <div class="central" style="display:block">
+            <div class="central" id="CT64" style="display:block">
                 <div class="CT64-front"
                      style="position:absolute; top:100px; left:1000px;">
                      <img src="CT64_front.png"></img>

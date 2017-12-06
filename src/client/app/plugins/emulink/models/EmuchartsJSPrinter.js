@@ -30,16 +30,17 @@ define(function (require, exports, module) {
 
     var predefined_functions = { leave: "leave", enter: "enter" };
 
-    var typesTable = {
-        "bool"  : "UI_8",
-        "short" : "I_16",
-        "int"   : "I_32",
-        "long"  : "I_64",
-        "float" : "F_32",
-        "double": "D_64",
+    var basicTypes = {
+        "bool"  : 1,
+        "short" : 2,
+        "int"   : 3,
+        "long"  : 4,
+        "float" : 5,
+        "double": 6,
         //--
-        "real"  : "D_64",
-        "nat"   : "UI_32"
+        "real"  : 7,
+        "nat"   : 8,
+        "string": 9
     };
 
     /**
@@ -130,6 +131,16 @@ define(function (require, exports, module) {
                 if (term.isModeAttribute) {
                     var modeType = opt.modeType || "Mode";
                     term.val = modeType + "." + term.val;
+                } else {
+                    var dataType = null;
+                    emuchart.datatypes.forEach(function (dt) {
+                        if (dt.constructors.filter(function (c) { return c === term.val; }).length > 0) {
+                            dataType = dt.name;
+                        }
+                    })
+                    if (dataType && !basicTypes[dataType]) {
+                        term.val = dataType + "." + term.val;
+                    }
                 }
             } else {
                 term = preProcess(term, emuchart, opt);
@@ -137,30 +148,6 @@ define(function (require, exports, module) {
             tmp.push(term.val);
         });
         return tmp.join(" ");
-    }
-
-    // This function converts emucharts variables into MisraC-compliant types and values
-    function convert_variable(v) {
-        if (v) {
-            if (v.type && typesTable[v.type]) {
-                v.value += getSuffix(v.value, v.type);
-                v.originalType = v.type;
-                v.type = typesTable[v.type];
-            }
-        }
-        return v;
-    }
-
-    // This function converts emucharts constants into MisraC-compliant types and values
-    function convert_constant(c) {
-        if (c) {
-            if (c.type && typesTable[c.type]) {
-                c.value += getSuffix(c.value, c.type);
-                c.originalType = c.type;
-                c.type = typesTable[c.type];
-            }
-        }
-        return c;
     }
 
     // this function prints a dummy main file suitable for testing the generated code
@@ -189,8 +176,6 @@ define(function (require, exports, module) {
         function finalize(resolve, reject, opt) {
             var model = _this.genericPrinter.print(emuchart, {
                 convert_expression: convert_expression,
-                convert_variable: convert_variable,
-                convert_constant: convert_constant
             });
 
             var modes_declaration = (model && model.modes) ?
@@ -214,7 +199,12 @@ define(function (require, exports, module) {
                             module: emuchart.name,
                             name: model.init.name,
                             override: model.init.override,
-                            variables: model.init.variables
+                            variables: model.init.variables.map(function (v) {
+                                if (!basicTypes[v.type]) {
+                                    v.userDefinedType = true;
+                                }
+                                return v;
+                            })
                         }) : "";
             var triggers = (model && model.triggers) ?
                         Handlebars.compile(triggers_template, { noEscape: true })({

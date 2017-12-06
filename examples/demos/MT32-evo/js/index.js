@@ -523,6 +523,21 @@ require([
             callback: onMessageReceived
         });
 
+        var mt32 = {};
+        mt32.power_btn = new TouchscreenButton("power_btn", {
+            width: 33,
+            height: 54,
+            top: 709,
+            left: 70
+        }, {
+            softLabel: "",
+            backgroundColor: "steelblue",
+            opacity: "0",
+            borderColor: "#000066",
+            parent: "MT32-right",
+            callback: onMessageReceived
+        });
+
         function viz(id, opt) {
             opt = opt || {};
             if (d3.select(id).node()) {
@@ -553,8 +568,10 @@ require([
             hide("#leftPanel");
             d3.selectAll(".led").style("display", "none");
 
-            // ct64
-            d3.selectAll(".CT64frame").style("display", "none");
+            // ct64 -- OPTIMIZE-ME!
+            // d3.selectAll(".CT64frame").style("display", "none");
+            d3.selectAll(".CT64frame").style("opacity", 0);
+
             d3.selectAll(".CT64frame_inner").style("display", "none");
             d3.selectAll(".CT64Menu").style("display", "none");
             d3.selectAll(".monitorData").style("display", "none");
@@ -937,7 +954,7 @@ require([
             callback: onMessageReceived
         });
         ct64.browse_medicaltech = new TouchscreenButton("browse_medicaltech", {
-            width: 830,
+            width: 1330,
             height: 22,
             top: 45,
             left: 45
@@ -1076,8 +1093,8 @@ require([
         var Demo = { NONE: 0, ACCESS_HOME_PAGE: 1, HUB_NEW_PT: 2, HUB_KNOWN_PT: 3, HOLTER: 4, TERMINATE_HUB_MODE: 5, TERMINATE_HOLTER_MODE: 6,
                      NEW_EXAM_HUB_MODE: 7, TEST_ELECTRODES_HUB: 8, VIEW_EXAMS_HUB: 9, VIEW_INTERPRETATION_HUB: 10, VIEW_INTERPRETATION_HOLTER: 11,
                      REQUEST_REPORT: 12, WRITE_REPORT: 13, VIEW_MEDICAL_REPORT: 14, VIEW_ARCHIVED_MEDICAL_REPORTS: 15,
-                     MT32_LED: 16, CREATE_NEW_PATIENT: 17, TRANSFER_DATA_MICROSD: 18 };
-        var demo = Demo.TRANSFER_DATA_MICROSD;
+                     MT32_LED: 16, CREATE_NEW_PATIENT: 17, TRANSFER_DATA_MICROSD: 18, INTRO: 19, POWER_ON_MT32: 20, POWER_OFF_MT32: 21 };
+        var demo = Demo.NONE;
 
 
 
@@ -1345,7 +1362,59 @@ require([
                 { button: ct64.choose_exams_to_be_uploaded, timeStamp: 36000, timeout: 3000, borderColor: "blue", classed: "blink" },
                 { speak: "Comparirà una schermata che ti permetterà di selezionare gli esami che vuoi caricare sulla centrale CT64.", timeStamp: 39000 }
             ]).play();
+        } else if (demo === Demo.INTRO) {
+            player.load([
+                { speak: "Il Sistema Diagnostico Integrato Multifunzione médicàl téc; è uno strumento all'avanguardia nel panorama del telemonitoraggio cardiologico.", timeStamp: 1000 },
+                { speak: "Il sistema è articolato in due componenti principali.", timeStamp: 10500 },
+                { speak: "Il Terminale Paziente MT32 multi.", timeStamp: 13500 },
+                { speak: "E la Centrale di Telemedicina CT64.", timeStamp: 17500 },
+                { input: "#ct64_address", value: "http://www.medicaltech.it", timeStamp: 17800 },
+                { button: ct64.browse_medicaltech, timeStamp: 19500, borderColor: "transparent" },
+
+                { speak: "Il Terminale Paziente MT32 multi è un registratore di segnali elettro-cardio-gràfici portatile", timeStamp: 23500 },
+                { button: home.new_exam, timeStamp: 25000, borderColor: "white" },
+                { button: exams.ecg12d, timeStamp: 26000, borderColor: "white" },
+                { button: check.confirm, timeStamp: 27000, borderColor: "white" },
+                { speak: "Che fornisce una funzione elettro-cardiografo diagnostico a 12 derivazioni ECG", timeStamp: 26500 },
+                { speak: "una funzione Hólter da 24 a 120 ore.", timeStamp: 30000 },
+                { speak: "E una funzione Hub per l'acquisizione di parametri fisiologici da altri dispositivi.", timeStamp: 32000 },
+                { button: monitoring.rec, timeStamp: 36000, timeout: 1000, classed: "blink2", borderColor: "white" },
+                // { button: results.physio, timeStamp: 45000, timeout: 1000, classed: "blink2", borderColor: "white", stutter: true }
+
+                { speak: "La Centrale di Telemedicina CT64 fornisce applicativi software per personalizzare e configurare il Terminale Paziente MT32.", timeStamp: 50000 },
+                { input: "#email", value: "mario.rossi@medicaltech.it", timeStamp: 50500 },
+                { input: "#password", value: "mylongsecretpassword", timeStamp: 53000 },
+                { button: ct64.login, timeStamp: 55000, timeout: 1000, borderColor: "blue", classed: "blink" },
+
+                { speak: "La centrale fornisce anche funzioni per la lettura, l'analisi, e l'archiviazione di esami cardiaci; e di altri parametri fisiologici registrati con il Terminale Paziente.", timeStamp: 61000 },
+                { button: ct64.monitoring, timeStamp: 64000, timeout: 1000, borderColor: "black", classed: "blink" },
+                { button: ct64.select_exam_data_hub, timeStamp: 70000, timeout: 1000, borderColor: "black", classed: "blink2" },
+
+                { speak: "Gli esami e profili dei pazienti sono memorizzati in modo sicuro in una base di dati.", timeStamp: 74500 },
+                { button: ct64.HES, timeStamp: 78000, timeout: 1000, borderColor: "black", classed: "blink2" },
+                { button: ct64.view_physio, timeStamp: 82000, timeout: 1000, borderColor: "black", classed: "blink2" },
+
+                { speak: "Utilizzando la centrale CT64, il medico specialista e il medico curante possono prontamente accedere agli esami ed ai profili dei pazienti.", timeStamp: 79000 },
+                { speak: "Questo facilita quindi diagnosi e refertazione accurata dei pazienti.", timeStamp: 88000 },
+                { button: ct64.write_report, timeStamp: 91000, timeout: 1000, borderColor: "black", classed: "blink2" },
+                { input: "#diagnosis", value: "Nella norma.", timeStamp: 94000 }
+            ]).play();
+        } else if (demo === Demo.POWER_ON_MT32) {
+            player.load([
+                { speak: "Istruzioni per accendere il dispositivo MT32.", timeStamp: 1000 },
+                { speak: "Premi il pulsante power per almeno un secondo.", timeStamp: 7000 },
+                { button: mt32.power_btn, timeStamp: 9000, timeout: 1500, borderColor: "white" },
+                { speak: "Comparirà la pagina principale ed il dispositivo è pronto all'uso.", timeStamp: 11000 },
+            ]).play();
+        } else if (demo === Demo.POWER_OFF_MT32) {
+            player.load([
+                { speak: "Istruzioni per spegnere il dispositivo MT32.", timeStamp: 1000 },
+                { speak: "Premi il pulsante power per almeno un secondo.", timeStamp: 7000 },
+                { button: mt32.power_btn, timeStamp: 9000, timeout: 1500, borderColor: "white" },
+                { speak: "Comparirà una pagina per confermare l'operazione di spegnimento.", timeStamp: 11000 },
+            ]).play();
         }
+
 
 
 
@@ -1362,12 +1431,18 @@ require([
             }
 
             //-- mt32
+            mt32.power_btn.render(res);
             mt32_settings.mt32_off.render(res);
             mt32_settings.mt32_on_battery.render(res);
             mt32_settings.mt32_charging.render(res);
             mt32_settings.mt32_fully_charged.render(res);
             mt32_settings.mt32_charging_error.render(res);
 
+            if (res.mt32.mode === "OFF") {
+                viz("#offScreen");
+            } else {
+                hide("#offScreen");
+            }
             if (res.mt32.mode === "HOME") {
                 viz("#homeScreen");
                 home.new_exam.render();
@@ -1500,7 +1575,10 @@ require([
                     viz("#ct64homePage", { fade: true });
                 }
             // else if (res.demo === "HUB_KNOWN_PT" || res.demo === "HOLTER" || res.demo === "HUB_NEW_PT") {
-                d3.select("#ct64_address").attr("value", "http://www.medicaltech.it");
+                if (demo !== Demo.INTRO && demo !== Demo.ACCESS_HOME_PAGE) {
+                    d3.select("#ct64_address").attr("value", "http://www.medicaltech.it");
+                }
+
                 if (res.ct64.mode === "PATIENTS_SCREEN") {
                     viz("#PATIENT_SCREENS");
                     viz("#patientsScreen");
@@ -1584,6 +1662,7 @@ require([
                     viz("#ecgResultsInterpretationScreen")
                     viz("#ecgMonitoringMenu");
                 } else if (res.ct64.mode === "ECG_PHYSIO") {
+                    viz("#MONITORING_SCREENS")
                     viz("#ecgResultsPhysioScreen")
                     viz("#ecgMonitoringMenu");
                 } else if (res.ct64.mode === "REPORT") {
@@ -1661,14 +1740,16 @@ require([
         }
         function render_mt32_led(res) {
             viz("#mt32_off");
-            if (res.mt32.battery_status === "ON_BATTERY") {
-                viz("#mt32_on");
-            } else if (res.mt32.battery_status === "CHARGING") {
-                viz("#mt32_charging");
-            } else if (res.mt32.battery_status === "FULLY_CHARGED") {
-                viz("#mt32_fully_charged");
-            } else if (res.mt32.battery_status === "CHARGING_ERROR") {
-                viz("#mt32_charging_error");
+            if (res.mt32.mode !== "OFF") {
+                if (res.mt32.battery_status === "ON_BATTERY") {
+                    viz("#mt32_on");
+                } else if (res.mt32.battery_status === "CHARGING") {
+                    viz("#mt32_charging");
+                } else if (res.mt32.battery_status === "FULLY_CHARGED") {
+                    viz("#mt32_fully_charged");
+                } else if (res.mt32.battery_status === "CHARGING_ERROR") {
+                    viz("#mt32_charging_error");
+                }
             }
         }
         function render_mt32_mode(res, opt) {
@@ -1823,6 +1904,52 @@ require([
                             d3.select("#MT32-sdcard").style("z-index", 2).style("transition-duration", "1600ms")
                                     .style("transform", "translateX(1132px) translateY(421px) rotateX(26deg) rotateZ(-104deg) skewX(-13deg) translateZ(-300px) scale(0.2, 0.5)");
                         }, 12000);
+                    } else if (demo === Demo.INTRO) {
+                        client.getWebSocket().sendGuiAction("init(INTRO);", onMessageReceived);
+                        d3.select("#device").style("transform", "translate(-400px,200px)scale(0.5)");
+                        d3.select("#CT64-screens").style("opacity", 0);
+
+                        // present MT32
+                        setTimeout(function () {
+                            d3.select("#device").style("transition-duration", "1600ms")
+                                .style("transform", "translate(0px,0px)scale(1)");
+                        }, 14000);
+
+                        // ct64
+                        setTimeout(function () {
+                            d3.select("#CT64-screens").transition().duration(1600).style("opacity", 1);
+                        }, 18000);
+
+                        // fad out mt32
+                        setTimeout(function () {
+                            d3.select("#device").style("transition-duration", "1600ms")
+                                .style("transform", "translate(-400px,200px)scale(0.5)");
+                        }, 46500);
+
+                    } else if (demo === Demo.POWER_ON_MT32) {
+                        client.getWebSocket().sendGuiAction("init(POWER_ON_MT32);", onMessageReceived);
+                        d3.selectAll(".MT32-case-righside").style("transition-duration", "1600ms")
+                                .style("transform", "rotateY(22deg)translateZ(-10px)translateY(-12px)skewY(10deg)scaleY(0.9)");
+
+                        setTimeout(function () {
+                            d3.select("#MT32-screens").style("transition-duration", "1600ms")
+                                    .style("transform", "rotateY(-22deg)translateZ(-183px)translateY(-112px)translateX(140px)skewY(-10deg)scaleY(1.4)");
+                            d3.selectAll(".MT32-case-righside").style("transition-duration", "1600ms")
+                                    .style("transform", "rotateY(0deg)translateZ(0px)translateY(0px)skewY(0deg)scaleY(1)");
+                        }, 4000);
+
+                    } else if (demo === Demo.POWER_OFF_MT32) {
+                        client.getWebSocket().sendGuiAction("init(POWER_OFF_MT32);", onMessageReceived);
+                        d3.selectAll(".MT32-case-righside").style("transition-duration", "1600ms")
+                                .style("transform", "rotateY(22deg)translateZ(-10px)translateY(-12px)skewY(10deg)scaleY(0.9)");
+
+                        setTimeout(function () {
+                            d3.select("#MT32-screens").style("transition-duration", "1600ms")
+                                    .style("transform", "rotateY(-22deg)translateZ(-183px)translateY(-112px)translateX(140px)skewY(-10deg)scaleY(1.4)");
+                            d3.selectAll(".MT32-case-righside").style("transition-duration", "1600ms")
+                                    .style("transform", "rotateY(0deg)translateZ(0px)translateY(0px)skewY(0deg)scaleY(1)");
+                        }, 4000);
+
                     }
                     else {
                         client.getWebSocket().sendGuiAction("init(STD);", onMessageReceived);
