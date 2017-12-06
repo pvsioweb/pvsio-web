@@ -827,8 +827,12 @@ define(function (require, exports, module) {
         });
 
         d3.select("#btn_menuJavaScriptPrinter").on("click", function () {
+            var desc = emuchartsManager.getSelectedEmuchartsDescriptor();
+            var filename = (desc && desc.emuchart_name) ? desc.emuchart_name
+                                : ("emucharts_" + projectManager.project().name());
+            filename = filename.replace(/-/g, "_");
             var emucharts = {
-                name: ("emucharts_" + projectManager.project().name() + "_JS"),
+                name: filename,
                 author: {
                     name: "..author name..",
                     affiliation: "..affiliation..",
@@ -836,24 +840,13 @@ define(function (require, exports, module) {
                 },
                 importings: [],
                 constants: emuchartsManager.getConstants(),
+                datatypes: emuchartsManager.getDatatypes(),
                 variables: emuchartsManager.getVariables(),
                 states: emuchartsManager.getStates(),
                 transitions: emuchartsManager.getTransitions(),
                 initial_transitions: emuchartsManager.getInitialTransitions()
             };
-            var model = emuchartsCodeGenerators.emuchartsJSPrinter.print(emucharts);
-            console.log(model);
-            if (model.err) {
-                console.log(model.err);
-                return;
-            }
-            if (model.res) {
-                var name = emucharts.name + ".js";
-                var content = model.res;
-                return projectManager.project().addFile(name, content, { overWrite: true });
-            } else {
-                console.log("Warning, JavaScript code is undefined.");
-            }
+            emuchartsCodeGenerators.emuchartsJSPrinter.print(emucharts, { interactive: false });
         });
 
         d3.select("#btn_menuAdaPrinter").on("click", function () {

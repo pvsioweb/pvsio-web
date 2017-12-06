@@ -2,19 +2,22 @@ MT32: THEORY
  BEGIN
   %-- user-defined datatypes
   OperatingMode: TYPE = { NONE, HUB, HOLTER }
-
+  BatteryStatus: TYPE = { ON_BATTERY, CHARGING, FULLY_CHARGED, CHARGING_ERROR, OFF }
+  
   %-- operating modes
-  Mode: TYPE = { CENTRAL, CHECK_PATIENT, CONFIRM_REC, DATA, EXAMS, HOME, INTERPRETATION, MONITORING, RECORDING, RESULTS, SETTINGS, TEST }
+  Mode: TYPE = { CENTRAL, CHECK_PATIENT, CONFIRM_REC, DATA, EXAMS, HOME, INTERPRETATION, MONITORING, OFF, RECORDING, RESULTS, SETTINGS, TEST }
 
   %-- MTState attributes
   MTState: TYPE = [#
     mode: Mode,
+    battery_status: BatteryStatus,
     mo: OperatingMode
   #]
 
   %-- init function
   mtinit: MTState = (#
     mode := HOME,
+    battery_status := ON_BATTERY,    
     mo := NONE
   #)
 
@@ -195,5 +198,20 @@ MT32: THEORY
           IN enter(CENTRAL)(st),
      ELSE -> st
     ENDCOND
+
+  per_power_btn(st: MTState): bool = (mode(st) = OFF)
+    OR (mode(st) = HOME)
+  power_btn(st: (per_power_btn)): MTState =
+    COND
+     mode(st) = OFF
+      -> LET st = leave(OFF)(st)
+          IN enter(HOME)(st),
+     mode(st) = HOME
+      -> LET st = leave(HOME)(st)
+          IN enter(OFF)(st),
+     ELSE -> st
+    ENDCOND
+
+
 
  END MT32

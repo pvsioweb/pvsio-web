@@ -17,7 +17,7 @@ define(function (require, exports, module) {
         EmuchartsCppPrinter    = require("plugins/emulink/models/EmuchartsCppPrinter"),
         EmuchartsMALPrinter    = require("plugins/emulink/models/EmuchartsMALPrinter2"),
         EmuchartsVDMPrinter    = require("plugins/emulink/models/EmuchartsVDMPrinter"),
-        EmuchartsJSPrinter     = require("plugins/emulink/models/EmuchartsJavaScriptPrinter"),
+        EmuchartsJSPrinter     = require("plugins/emulink/models/EmuchartsJSPrinter"),
         EmuchartsAdaPrinter    = require("plugins/emulink/models/EmuchartsAdaPrinter"),
         EmuchartsBlessPrinter  = require("plugins/emulink/models/EmuchartsBlessPrinter"),
         EmuchartsMisraCPrinter = require("plugins/emulink/models/EmuchartsMisraCPrinter2"),

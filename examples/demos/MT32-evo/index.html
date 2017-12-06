@@ -17,12 +17,42 @@
         <link href="css/MT32.css" rel="stylesheet">
         <link href="css/font-awesome.min.css" rel="stylesheet">
     </head>
-    <body class="noselect" style="background:#dedfdd;">
+    <body class="noselect" style="background:#dedfdd; overflow:hidden;">
         <div id="content" class="content" style="display:none;">
-            <div class="device">
-                <div class="MT32-front"
-                     style="position:absolute; top:0px; left:0px;">
-                     <img src="DSC3489_front.png"></img>
+            <div class="device" id="device" style="perspective:1000px; perspective-origin:-22%;">
+                <div id="MT32-left-bottom" class="MT32-case-leftside MT32-case-leftside-upper"
+                    style="position:absolute; top:60px; left:72px; transform:rotateY(22deg)translateZ(-90px)translateY(180px)translateX(140px)skewY(0deg)scaleY(1.2);">
+                     <img src="case/MT32-case-leftside-1.png"></img>
+                </div>
+                <div id="MT32-left-bottom" class="MT32-case-leftside MT32-case-leftside-lower"
+                    style="position:absolute; top:60px; left:72px; transform:rotateY(22deg)translateZ(-90px)translateY(180px)translateX(140px)skewY(30deg)scaleY(0.92);">
+                     <img src="case/MT32-case-leftside-2.png"></img>
+                </div>
+                <div class="card-reader" style="position:absolute; top:1045px; left:822px; display:none; z-index:2;">
+                     <img src="case/card_reader_hub-lower.png"></img>
+                </div>
+                <div id="MT32-sdcard" class="MT32-sdcard"
+                    style="position:absolute; top:776px; left:130px; transform: translateX(-50px); display: none;">
+                     <img src="microSD.png"></img>
+                </div>
+                <div class="card-reader" style="position:absolute; top:1045px; left:822px; display:none; z-index:2;">
+                     <img src="case/card_reader_hub-upper.png"></img>
+                </div>
+                <div id="MT32-left-bottom" class="MT32-case-leftside MT32-case-leftside-upper"
+                    style="position:absolute; top:60px; left:72px; transform:rotateY(22deg)translateZ(-90px)translateY(180px)translateX(140px)skewY(0deg)scaleY(1.2);">
+                     <img src="case/MT32-case-leftside-3.png"></img>
+                </div>
+                <div id="MT32-left-bottom" class="MT32-case-leftside MT32-case-leftside-lower"
+                    style="position:absolute; top:60px; left:72px; transform:rotateY(22deg)translateZ(-90px)translateY(180px)translateX(140px)skewY(30deg)scaleY(0.92);">
+                     <img src="case/MT32-case-leftside-4.png"></img>
+                </div>
+                <div id="MT32-right" class="MT32-case-righside"
+                    style="position:absolute; top:75px; left:526px; display:none;">
+                     <img src="case/MT32-case-rightside.png"></img>
+                </div>
+                <div id="MT32-sdcard-cover" class="MT32-sdcard"
+                    style="position:absolute; top:780px; left:135px; transform: rotateY(22deg)translateZ(-55px)translateY(108px)translateX(140px)skewY(30deg)scaleY(1.2);">
+                     <img id="MT32-sdcard-cover" src="case/microSD-cover.png"></img>
                 </div>
                 <div id="MT32-screens">
     		        <div id="homeScreen" style="display:block;color:white;">
@@ -216,9 +246,28 @@
                     </div>
 
     		        <div id="leftPanel" class="leftpanel" style="display:none;"></div>
+                    <div id="MT32-front" class="MT32-front" style="position:absolute; top:60px; left:122px;">
+                         <img src="DSC3489_front_transparent.png"></img>
+                         <img id="mt32_off" class="led" src="leds/grey.png"></img>
+                         <img id="mt32_charging" class="led" src="leds/orange.png"></img>
+                         <img id="mt32_fully_charged" class="led" src="leds/green.png"></img>
+                         <img id="mt32_charging_error" class="led blink-img" src="leds/orange.png"></img>
+                         <img id="mt32_on" class="led blink-img" src="leds/blue.png"></img>
+                    </div>
+
+                    <div id="offScreen">
+                        <div class="screenframe">
+                            <img src="screens/off_screen.png">
+                            <div id="poweron_spinner" style="position:absolute; top:200px; left: 156px; color:white; display:none;">
+                                <i class="fa fa-spinner fa-pulse fa-4x fa-fw" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
+
             </div>
-            <div class="central" style="display:block">
+            <div class="central" id="CT64" style="display:block">
                 <div class="CT64-front"
                      style="position:absolute; top:100px; left:1000px;">
                      <img src="CT64_front.png"></img>
@@ -242,19 +291,39 @@
                         <div class="CT64frame" id="ct64google" style="display:block;">
                             <img src="google.png" style="margin-top:165px; margin-left:320px;">
                         </div>
-                        <div class="CT64frame" id="ct64homePage" style="display:none;">
+                        <!-- <div class="CT64frame" id="ct64homePage" style="display:none;">
                             <img class="CT64screen" src="screens/ct64/02 - CT64 Pazienti-EMPTY.jpg">
+                        </div> -->
+                    </div>
+
+                    <div id="NAV_MENU" class="CT64frame">
+                        <!-- TODO -->
+                    </div>
+
+                    <div id="PATIENT_SCREENS" class="CT64frame scrollable" style="display:none;">
+                        <div id="patientMenu" class="CT64Menu" style="display:none;"></div>
+                        <div class="CT64frame_inner" id="patientsScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/02 - CT64 Pazienti.jpg">
+                        </div>
+                        <div class="CT64frame_inner" id="patientMGMScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/05 - CT64 Gestione paziente.jpg">
+                        </div>
+                        <div class="CT64frame_inner" id="medicalReportScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/20 - CT64 Consultazione anamnesi (NON DEFINITIVO).jpg" style="margin-top:68px">
+                        </div>
+                        <div class="CT64frame_inner" id="archiveMedicalReportsScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/19 - CT64 Archivio anamnesi (NON DEFINITIVO).jpg" style="margin-top:-37px">
+                        </div>
+                        <div class="CT64frame_inner" id="createNewPatientScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/21 - Account utente.jpg" style="margin-top:-37px">
+                        </div>
+                        <div class="CT64frame_inner" id="uploadExamsScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/22 - Invio esami.jpg" style="margin-top:-37px">
                         </div>
                     </div>
 
-                    <div class="CT64frame" id="patientsScreen" style="display:none;">
-                        <img class="CT64screen" src="screens/ct64/02 - CT64 Pazienti.jpg">
-                    </div>
                     <div class="CT64frame" id="ct64-monitoringScreen" style="display:none;">
                         <img class="CT64screen" src="screens/ct64/04 - CT64 Monitoraggi.jpg" style="margin-top:-37px">
-                    </div>
-                    <div class="CT64frame" id="patientMGMScreen" style="display:none;">
-                        <img class="CT64screen" src="screens/ct64/05 - CT64 Gestione paziente.jpg">
                     </div>
                     <div class="CT64frame" id="newMonitoringSessionScreen" style="display:none;">
                         <img id="hubSession" class="CT64screen" src="screens/ct64/07 - CT64 Selezione dispositivo.jpg">
@@ -287,32 +356,50 @@
                     </div>
 
 
+                    <div id="MONITORING_SCREENS" class="CT64frame scrollable">
+                        <div id="ecgMonitoringMenu" class="CT64Menu" style="display:none;"></div>
+                        <div class="CT64frame_inner" id="compileReportScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/14 - CT64 Specialista - Stesura referto.jpg" style="margin-top:47px">
+                            <div style="position:absolute;padding-left:226px;top:390px;left:50px;">
+                                <textarea id="diagnosis" class="form-control" type="text" name="diagnosis" rows="20" style="margin: 0px; width: 1012px; height: 240px;"></textarea>
+                            </div>
+                            <div style="position:absolute;padding-left:226px;top:649px;left:50px;">
+                                <textarea id="therapy" class="form-control" type="text" name="diagnosis" rows="20" style="margin: 0px; width: 1012px; height: 240px;"></textarea>
+                            </div>
+                            <div style="position:absolute;padding-left:226px;top:905px;left:50px;">
+                                <textarea id="recommended_exams" class="form-control" type="text" name="diagnosis" rows="20" style="margin: 0px; width: 1012px; height: 240px;"></textarea>
+                            </div>
+                        </div>
+                        <div class="CT64frame_inner" id="ecgAnalysisResultsScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/09 - CT64 ECG12D - Analisi monitoraggio.jpg" style="margin-top:135px">
+                        </div>
+                        <div class="CT64frame_inner" id="ecgResultsInterpretationScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/10 - CT64 ECG12D - Interpretativo.jpg" style="margin-top:206px">
+                        </div>
+                        <div class="CT64frame_inner" id="holterAnalysisResultsScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/18 - CT64 Holter - Analisi monitoraggio (NON DEFINITIVO).jpg" style="margin-top:70px">
+                        </div>
+                        <div class="CT64frame_inner" id="ecgResultsPhysioScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/11 - CT64 ECG12D - Dati fisiologici.jpg" style="margin-top:-37px">
+                        </div>
+                        <div class="CT64frame_inner" id="reportSavedScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/15 - CT64 Referto.jpg" style="margin-top:-37px">
+                        </div>
+
+                    </div>
+
                     <div class="CT64frame" id="devicesScreen" style="display:none;">
                         <img class="CT64screen" src="screens/ct64/03 - CT64 Dispositivi.jpg" style="margin-top:-7px">
                     </div>
                     <div class="CT64frame" id="waitingConnectionScreen" style="display:none;">
                         <img class="CT64screen" src="screens/ct64/06 - CT64 Attesa collegamento dispositivo.jpg">
                     </div>
-                    <div class="CT64frame" id="ecgAnalysisResultsScreen" style="display:none;">
-                        <img class="CT64screen" src="screens/ct64/09 - CT64 ECG12D - Analisi monitoraggio.jpg" style="margin-top:135px">
-                    </div>
-                    <div class="CT64frame" id="ecgResultsInterpretationScreen" style="display:none;">
-                        <img class="CT64screen" src="screens/ct64/10 - CT64 ECG12D - Interpretativo.jpg" style="margin-top:207px">
-                    </div>
-                    <div class="CT64frame" id="ecgResultsPhysioScreen" style="display:none;">
-                        <img class="CT64screen" src="screens/ct64/11 - CT64 ECG12D - Dati fisiologici.jpg" style="margin-top:-37px">
-                    </div>
-                    <div class="CT64frame" id="requestphydataScreen" style="display:none;">
+                    <div class="CT64frame" id="requestReportScreen" style="display:none;">
                         <img class="CT64screen" src="screens/ct64/12 - CT64 Richiesta referto.jpg" style="margin-top:-37px">
                     </div>
+
                     <div class="CT64frame" id="managephydataScreen" style="display:none;">
                         <img class="CT64screen" src="screens/ct64/13 - CT64 Specialista - Gestione nuovo referto.jpg" style="margin-top:-37px">
-                    </div>
-                    <div class="CT64frame" id="compilephydataScreen" style="display:none;">
-                        <img class="CT64screen" src="screens/ct64/14 - CT64 Specialista - Stesura referto.jpg" style="margin-top:47px">
-                    </div>
-                    <div class="CT64frame" id="phydataScreen" style="display:none;">
-                        <img class="CT64screen" src="screens/ct64/15 - CT64 Referto.jpg" style="margin-top:-37px">
                     </div>
                     <div class="CT64frame" id="configHolterScreen" style="display:none;">
                         <img class="CT64screen" src="screens/ct64/16 - CT64 Holter - Configurazione.jpg" style="margin-top:-37px">
@@ -322,18 +409,6 @@
                     </div>
                     <div class="CT64frame" id="analysisMonScreen" style="display:none;">
                         <img class="CT64screen" src="screens/ct64/18 - CT64 Holter - Analisi monitoraggio (NON DEFINITIVO).jpg" style="margin-top:70px">
-                    </div>
-                    <div class="CT64frame" id="archiveScreen" style="display:none;">
-                        <img class="CT64screen" src="screens/ct64/19 - CT64 Archivio anamnesi (NON DEFINITIVO).jpg" style="margin-top:-37px">
-                    </div>
-                    <div class="CT64frame" id="reviewScreen" style="display:none;">
-                        <img class="CT64screen" src="screens/ct64/20 - CT64 Consultazione anamnesi (NON DEFINITIVO).jpg" style="margin-top:68px">
-                    </div>
-                    <div class="CT64frame" id="userAccountScreen" style="display:none;">
-                        <img class="CT64screen" src="screens/ct64/21 - Account utente.jpg" style="margin-top:-37px">
-                    </div>
-                    <div class="CT64frame" id="sendExamsScreen" style="display:none;">
-                        <img class="CT64screen" src="screens/ct64/22 - Invio esami.jpg" style="margin-top:-37px">
                     </div>
 
                     <div class="monitorData" id="knownPT" style="position:absolute; top:276px; left:1400px; font-size:15px; color:gray;">

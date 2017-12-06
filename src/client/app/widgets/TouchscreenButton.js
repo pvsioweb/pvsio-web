@@ -104,12 +104,14 @@ define(function (require, exports, module) {
         var elemClass = id + " noselect";
         if (this.blinking) { elemClass += " blink"; }
         opt.position = opt.position || "absolute";
+        opt.zIndex = opt.zIndex || 1;
         this.div = d3.select(this.parent)
                         .append("div").style("position", opt.position)
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")
                         .style("margin", 0).style("padding", 0).style("border-width", 0)
                         .style("display", "none").attr("id", id).attr("class", elemClass)
+                        .style("z-index", opt.zIndex)
                         .style("cursor", this.cursor);
 
         opt.functionText = opt.functionText || id;
