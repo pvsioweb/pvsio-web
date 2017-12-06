@@ -206,11 +206,11 @@ require([
             parent: "leftPanel",
             callback: onMessageReceived
         });
-        leftpanel.alerts = new TouchscreenButton("alerts", {
-            width: 48,
-            height: 91,
-            top: 490,
-            left: 226
+        leftpanel.view_alerts = new TouchscreenButton("view_alerts", {
+            width: 46,
+            height: 85,
+            top: 495,
+            left: 228
         }, {
             softLabel: "!",
             backgroundColor: "crimson",
@@ -535,6 +535,20 @@ require([
             opacity: "0",
             borderColor: "#000066",
             parent: "MT32-right",
+            callback: onMessageReceived
+        });
+        mt32.confirm_poweroff = new TouchscreenButton("confirm_poweroff", {
+            width: 132,
+            height: 90,
+            top: 588,
+            left: 277
+        }, {
+            softLabel: "",
+            customFunctionText: "click_confirm",
+            backgroundColor: "steelblue",
+            opacity: "0",
+            borderColor: "#000066",
+            parent: "confirmPowerOffScreen",
             callback: onMessageReceived
         });
 
@@ -1093,7 +1107,8 @@ require([
         var Demo = { NONE: 0, ACCESS_HOME_PAGE: 1, HUB_NEW_PT: 2, HUB_KNOWN_PT: 3, HOLTER: 4, TERMINATE_HUB_MODE: 5, TERMINATE_HOLTER_MODE: 6,
                      NEW_EXAM_HUB_MODE: 7, TEST_ELECTRODES_HUB: 8, VIEW_EXAMS_HUB: 9, VIEW_INTERPRETATION_HUB: 10, VIEW_INTERPRETATION_HOLTER: 11,
                      REQUEST_REPORT: 12, WRITE_REPORT: 13, VIEW_MEDICAL_REPORT: 14, VIEW_ARCHIVED_MEDICAL_REPORTS: 15,
-                     MT32_LED: 16, CREATE_NEW_PATIENT: 17, TRANSFER_DATA_MICROSD: 18, INTRO: 19, POWER_ON_MT32: 20, POWER_OFF_MT32: 21 };
+                     MT32_LED: 16, CREATE_NEW_PATIENT: 17, TRANSFER_DATA_MICROSD: 18, INTRO: 19, POWER_ON_MT32: 20, POWER_OFF_MT32: 21,
+                     VIEW_ALERTS: 22, SEND_RESULTS: 23 };
         var demo = Demo.NONE;
 
 
@@ -1403,15 +1418,43 @@ require([
             player.load([
                 { speak: "Istruzioni per accendere il dispositivo MT32.", timeStamp: 1000 },
                 { speak: "Premi il pulsante power per almeno un secondo.", timeStamp: 7000 },
-                { button: mt32.power_btn, timeStamp: 9000, timeout: 1500, borderColor: "white" },
+                { button: mt32.power_btn, timeStamp: 9000, timeout: 1500, borderColor: "black" },
                 { speak: "Comparirà la pagina principale ed il dispositivo è pronto all'uso.", timeStamp: 11000 },
             ]).play();
         } else if (demo === Demo.POWER_OFF_MT32) {
             player.load([
                 { speak: "Istruzioni per spegnere il dispositivo MT32.", timeStamp: 1000 },
                 { speak: "Premi il pulsante power per almeno un secondo.", timeStamp: 7000 },
-                { button: mt32.power_btn, timeStamp: 9000, timeout: 1500, borderColor: "white" },
+                { button: mt32.power_btn, timeStamp: 9000, timeout: 1500, borderColor: "black" },
                 { speak: "Comparirà una pagina per confermare l'operazione di spegnimento.", timeStamp: 11000 },
+                { speak: "Clicca Conferma per confermare lo spegnimento del dispositivo.", timeStamp: 17000 },
+                { button: mt32.confirm_poweroff, timeStamp: 19000, timeout: 2000, borderColor: "white" }
+            ]).play();
+        } else if (demo === Demo.VIEW_ALERTS) {
+            player.load([
+                { speak: "Se il display del dispositivo MT32 mostra un pulsante rosso di allerta, vuol dire che sono state riscontrate alcune anomalie nel funzionamento del dispositivo.", timeStamp: 1000 },
+                { speak: "Clicca il pulsante rosso di allerta per verificare il tipo di anomalie riscontrate.", timeStamp: 13000 },
+                { button: leftpanel.view_alerts, timeStamp: 15000, timeout: 2000, borderColor: "white" },
+                { speak: "Comparirà una pagina con la lista delle anomalie.", timeStamp: 17000 },
+                { speak: "Se le anomalie persistono, è necessario contattare l'assistenza.", timeStamp: 22000 }
+            ]).play();
+        } else if (demo === Demo.SEND_RESULTS) {
+            player.load([
+                { speak: "Istruzioni per caricare gli esami ECG tramite il dispositivo MT32.", timeStamp: 1000 },
+                { speak: "Clicca Centrale.", timeStamp: 8500 },
+                { button: home.server, timeStamp: 10000},
+                { speak: "Poi, clicca Invio Risultati.", timeStamp: 11500 },
+                { button: central.upload_results, timeStamp: 12500 },
+                { speak: "Il dispositivo farà partire una procedura automatica che prevede il collegamento con la CT64, e l'invio di tutte le registrazioni.", timeStamp: 15000 },
+                { input: "#send_1", value: "- Accensione modulo cellulare", timeStamp: 15500, lineFeed: true },
+                { input: "#send_2", value: "- Attesa registrazione SIM", timeStamp: 16000, lineFeed: true },
+                { input: "#send_3", value: "- Avvio connessione dati", timeStamp: 16500, lineFeed: true },
+                { input: "#send_4", value: "- Invio esami", timeStamp: 17500, lineFeed: true },
+                { input: "#send_5", value: "- 8828285a-c395-148d-e55c-abc170102009", timeStamp: 18000, lineFeed: true },
+                { input: "#send_6", value: "- 8828285a-c395-148d-e55c-abc170102009.log", timeStamp: 18300, lineFeed: true },
+                { input: "#send_7", value: "- 8828285a-c395-148d-e55c-abc170102009-00000732.hecg", timeStamp: 18600, lineFeed: true },
+                { input: "#send_8", value: "- 8828285a-c395-148d-e55c-abc170102009-00000295.hecg", timeStamp: 18900, lineFeed: true },
+                { input: "#send_9", value: "- 8828285a-c395-148d-e55c-abc170102009-00000732.hacc", timeStamp: 19200, lineFeed: true }
             ]).play();
         }
 
@@ -1421,7 +1464,7 @@ require([
         function render(res) {
             hide_all_screens(res);
             render_ct64_widgets(res);
-            if (res.ct64.mode === "WAITING_RESULTS") {
+            if (res.ct64.mode === "WAITING_RESULTS" || res.mt32.mode === "POWERING_OFF") {
                 start_tick(res);
             } else { stop_tick(res); }
             if (res.mt32.mode === "RECORDING" && res.mt32.mo === "HUB") {
@@ -1523,6 +1566,15 @@ require([
             } else if (res.mt32.mode === "CONFIRM_REC") {
                 viz("#confirmHolterScreen");
                 exams.confirm.render();
+            } else if (res.mt32.mode === "CONFIRM_POWER_OFF") {
+                viz("#confirmPowerOffScreen");
+                mt32.confirm_poweroff.render();
+            } else if (res.mt32.mode === "POWERING_OFF") {
+                viz("#poweringOffScreen");
+            } else if (res.mt32.mode === "VIEW_ALERTS") {
+                viz("#viewAlertsScreen");
+            } else if (res.mt32.mode === "SENDING_RESULTS") {
+                viz("#sendingResultsScreen");
             }
 
             // render mt32 LED
@@ -1557,10 +1609,12 @@ require([
                 leftpanel.wireless.render();
                 leftpanel.bluetooth.render();
                 leftpanel.battery.render();
-                // leftpanel.alerts.render();
                 if (res.mt32.mode !== "HOME" && res.mt32.mode !== "RESULTS") {
                     leftpanel.back.render();
                 }
+            }
+            if (res.mt32.alerts === "TRUE") {
+                leftpanel.view_alerts.render();
             }
 
             //-- render ct64, based on selected demo mode
@@ -1930,8 +1984,10 @@ require([
                         client.getWebSocket().sendGuiAction("init(POWER_ON_MT32);", onMessageReceived);
                         d3.selectAll(".MT32-case-righside").style("transition-duration", "1600ms")
                                 .style("transform", "rotateY(22deg)translateZ(-10px)translateY(-12px)skewY(10deg)scaleY(0.9)");
+                        d3.select("#MT32-right").style("display", "block");
 
                         setTimeout(function () {
+
                             d3.select("#MT32-screens").style("transition-duration", "1600ms")
                                     .style("transform", "rotateY(-22deg)translateZ(-183px)translateY(-112px)translateX(140px)skewY(-10deg)scaleY(1.4)");
                             d3.selectAll(".MT32-case-righside").style("transition-duration", "1600ms")
@@ -1942,6 +1998,7 @@ require([
                         client.getWebSocket().sendGuiAction("init(POWER_OFF_MT32);", onMessageReceived);
                         d3.selectAll(".MT32-case-righside").style("transition-duration", "1600ms")
                                 .style("transform", "rotateY(22deg)translateZ(-10px)translateY(-12px)skewY(10deg)scaleY(0.9)");
+                        d3.select("#MT32-right").style("display", "block");
 
                         setTimeout(function () {
                             d3.select("#MT32-screens").style("transition-duration", "1600ms")
@@ -1950,6 +2007,19 @@ require([
                                     .style("transform", "rotateY(0deg)translateZ(0px)translateY(0px)skewY(0deg)scaleY(1)");
                         }, 4000);
 
+                        // confirmation screen
+                        setTimeout(function () {
+                            d3.select("#MT32-screens").style("transition-duration", "1600ms")
+                                    .style("transform", "rotateY(0deg)translateZ(0px)translateY(0px)translateX(0px)skewY(0deg)scaleY(1)");
+                            d3.selectAll(".MT32-case-righside").style("transition-duration", "1600ms")
+                                    .style("transform", "rotateY(22deg)translateZ(-10px)translateY(-12px)skewY(10deg)scaleY(0.9)");
+                        }, 12000);
+
+                    } else if (demo === Demo.VIEW_ALERTS) {
+                        client.getWebSocket().sendGuiAction("init(VIEW_ALERTS);", onMessageReceived);
+                        d3.select("#home_battery_empty").style("display", "block");
+                    } else if (demo === Demo.SEND_RESULTS) {
+                        client.getWebSocket().sendGuiAction("init(SEND_RESULTS);", onMessageReceived);
                     }
                     else {
                         client.getWebSocket().sendGuiAction("init(STD);", onMessageReceived);

@@ -4,7 +4,7 @@ main: THEORY
   Demo: TYPE = { STD, ACCESS_HOME_PAGE, AUTHENTICATION, HUB_KNOWN_PT, HUB_NEW_PT, HOLTER, TERMINATE_HUB_MODE, TERMINATE_HOLTER_MODE,
                  NEW_EXAM_HUB_MODE, NEW_EXAM_HOLTER_MODE, TEST_ELECTRODES_HUB, VIEW_EXAMS_HUB, VIEW_INTERPRETATION_HUB, VIEW_INTERPRETATION_HOLTER,
 		 REQUEST_REPORT, WRITE_REPORT, VIEW_MEDICAL_REPORT, VIEW_ARCHIVED_MEDICAL_REPORTS, MT32_LED, CREATE_NEW_PATIENT,
-		 TRANSFER_DATA_MICROSD, INTRO, POWER_ON_MT32, POWER_OFF_MT32 }
+		 TRANSFER_DATA_MICROSD, INTRO, POWER_ON_MT32, POWER_OFF_MT32, VIEW_ALERTS, SEND_RESULTS }
 
   state: TYPE = [#
     demo: Demo,
@@ -14,12 +14,14 @@ main: THEORY
 
   init(dd: Demo): state =
    COND
-     dd = ACCESS_HOME_PAGE
+     dd = ACCESS_HOME_PAGE OR dd = SEND_RESULTS
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HUB ],
              ct64 := ctinit WITH [ mode := google, known_patient := TRUE ] #),
      dd = AUTHENTICATION
        -> (# demo := dd, mt32 := mtinit WITH [ mo := HUB ] , ct64 := ctinit #),
+     dd = VIEW_ALERTS
+       -> (# demo := dd, mt32 := mtinit WITH [ mo := HUB, alerts := true ] , ct64 := ctinit #),
      dd = INTRO
        -> (# demo := dd, mt32 := mtinit WITH [ mo := HUB ] , ct64 := ctinit WITH [ known_patient := TRUE ] #),
      dd = TRANSFER_DATA_MICROSD
@@ -174,10 +176,21 @@ main: THEORY
 
   click_power_btn(st: state): state =
    COND
-    per_power_btn(st`mt32) -> st WITH [ mt32 := power_btn(st`mt32) ],
+    per_mt32_power_btn(st`mt32) -> st WITH [ mt32 := mt32_power_btn(st`mt32) ],
     ELSE -> st
    ENDCOND
 
+  click_view_alerts(st: state): state =
+   COND
+    per_mt32_view_alerts(st`mt32) -> st WITH [ mt32 := mt32_view_alerts(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_upload_results(st: state): state =
+   COND
+    per_mt32_upload_results(st`mt32) -> st WITH [ mt32 := mt32_upload_results(st`mt32) ],
+    ELSE -> st
+   ENDCOND
 
   %-- ct64
   click_login(st: state): state =
@@ -211,6 +224,7 @@ main: THEORY
    ENDCOND
 
   tick(st: state): state =
+   LET st = IF per_mt32_tick(st`mt32) THEN st WITH [ mt32 := mt32_tick(st`mt32) ] ELSE st ENDIF IN
    COND
     per_ct64_tick(st`ct64) ->
     	LET st = st WITH [ ct64 := ct64_tick(st`ct64) ]

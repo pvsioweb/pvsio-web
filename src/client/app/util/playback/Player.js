@@ -110,7 +110,10 @@ define(function (require, exports, module) {
             if (action.input) {
                 _this.timer = window.setTimeout(function () {
                     if (d3.select(action.input).node()) {
-                        fill(action.input, action.value, action.timeStamp);
+                        fill(action.input, action.value, {
+                                timeStamp: action.timeStamp,
+                                lineFeed: action.lineFeed
+                            });
                         if (action.scroll) {
                             scrollTop(action.scroll.id, action.scroll.offset);
                         }
@@ -146,19 +149,24 @@ define(function (require, exports, module) {
     function fill(id, val, opt) {
         opt = opt || {};
         if (val && typeof val === "string") {
-            var current_value = d3.select(id).attr("value") || d3.select(id).text();
-            var elapse = opt.delay || 250;
-            val.split("").forEach(function (c) {
-                setTimeout(function () {
-                    // for input fields
-                    d3.select(id).attr("value", current_value + c);
-                    // for text areas
-                    d3.select(id).text(current_value + c);
-                    // console.log(current_value);
-                    current_value = d3.select(id).attr("value");
-                }, elapse);
-                elapse += (c === "@")? 400 : (Math.random() * (150 - 200) + 100);
-            });
+            if (opt.lineFeed) {
+                d3.select(id).attr("value", val);
+                d3.select(id).text(val);
+            } else {
+                var current_value = d3.select(id).attr("value") || d3.select(id).text();
+                var elapse = opt.delay || 250;
+                val.split("").forEach(function (c) {
+                    setTimeout(function () {
+                        // for input fields
+                        d3.select(id).attr("value", current_value + c);
+                        // for text areas & DIVs
+                        d3.select(id).text(current_value + c);
+                        // console.log(current_value);
+                        current_value = d3.select(id).attr("value");
+                    }, elapse);
+                    elapse += (c === "@")? 400 : (Math.random() * (150 - 200) + 100);
+                });
+            }
         }
     }
 

@@ -54,10 +54,24 @@
                     style="position:absolute; top:780px; left:135px; transform: rotateY(22deg)translateZ(-55px)translateY(108px)translateX(140px)skewY(30deg)scaleY(1.2);">
                      <img id="MT32-sdcard-cover" src="case/microSD-cover.png"></img>
                 </div>
+
+                <div id="MT32-front" class="MT32-front" style="position:absolute; top:60px; left:122px;">
+                     <img src="DSC3489_front_transparent.png"></img>
+                     <img id="mt32_off" class="led" src="leds/grey.png"></img>
+                     <img id="mt32_charging" class="led" src="leds/orange.png"></img>
+                     <img id="mt32_fully_charged" class="led" src="leds/green.png"></img>
+                     <img id="mt32_charging_error" class="led blink-img" src="leds/orange.png"></img>
+                     <img id="mt32_on" class="led blink-img" src="leds/blue.png"></img>
+                </div>
+
+
                 <div id="MT32-screens">
     		        <div id="homeScreen" style="display:block;color:white;">
     		            <div class="screenframe">
     		                <img src="screens/home_screen.png">
+    		            </div>
+                        <div id="home_battery_empty" class="screenframe" style="display:none;">
+    		                <img src="screens/home_screen_battery_empty.png">
     		            </div>
     		            <div id="div_logo" class="logo">
     		                <img src="logo.png">
@@ -103,6 +117,18 @@
                     <div id="confirmHolterScreen" style="display:none;color:white;font-size:18px;">
     		            <div class="screenframe">
     		                <img src="screens/confirm_holter.png">
+    		            </div>
+    		        </div>
+
+                    <div id="confirmPowerOffScreen" style="display:none;color:white;font-size:18px;">
+    		            <div class="screenframe">
+    		                <img src="screens/richiesta_spegnimento.png">
+    		            </div>
+    		        </div>
+
+                    <div id="poweringOffScreen" style="display:none;color:white;font-size:18px;">
+    		            <div class="screenframe">
+    		                <img src="screens/spegnimento_in_corso.png">
     		            </div>
     		        </div>
 
@@ -193,6 +219,29 @@
     		            </div>
     		        </div>
 
+                    <div id="sendingResultsScreen" style="display:none;color:white;font-size:20px;">
+    		            <div class="screenframe">
+    		                <img src="screens/Invio risultati.png">
+    		            </div>
+    		            <div style="position:absolute;left:282px;top:225px;height:356px;width:354px;overflow:auto;">
+    		                <div id="send_1"></div>
+    		                <div id="send_2"></div>
+                            <div id="send_3"></div>
+                            <div id="send_4"></div>
+    		                <div id="send_5"></div>
+                            <div id="send_6"></div>
+                            <div id="send_7"></div>
+                            <div id="send_8"></div>
+                            <div id="send_9"></div>
+    		            </div>
+                        <div style="position:absolute;left:400px;top:354px;height:356px;width:354px;overflow:auto;">
+    		                <img src="screens/spinner-logo.png">
+    		            </div>
+                        <div style="position:absolute;left:404px;top:355px;height:356px;width:354px;overflow:auto;">
+    		                <img src="screens/spinner.png" class="rotating">
+    		            </div>
+    		        </div>
+
     		        <div id="monitoringScreen" style="display:none;color:white;font-size:18px;">
     		            <div class="screenframe">
     		                <img src="screens/run_screen.png">
@@ -245,15 +294,13 @@
                         </div>
                     </div>
 
-    		        <div id="leftPanel" class="leftpanel" style="display:none;"></div>
-                    <div id="MT32-front" class="MT32-front" style="position:absolute; top:60px; left:122px;">
-                         <img src="DSC3489_front_transparent.png"></img>
-                         <img id="mt32_off" class="led" src="leds/grey.png"></img>
-                         <img id="mt32_charging" class="led" src="leds/orange.png"></img>
-                         <img id="mt32_fully_charged" class="led" src="leds/green.png"></img>
-                         <img id="mt32_charging_error" class="led blink-img" src="leds/orange.png"></img>
-                         <img id="mt32_on" class="led blink-img" src="leds/blue.png"></img>
+                    <div id="viewAlertsScreen" style="display:none;color:white;font-size:18px;">
+                        <div class="screenframe">
+                            <img src="screens/segnalazioni.png">
+                        </div>
                     </div>
+
+    		        <div id="leftPanel" class="leftpanel" style="display:none;"></div>
 
                     <div id="offScreen">
                         <div class="screenframe">
