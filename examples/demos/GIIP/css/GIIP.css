@@ -1,41 +1,35 @@
+.screen {
+    position: absolute;
+    left:74px;
+    top:86px;
+    height:300px;
+    width:480px;
+    color: white;
+    z-index: 1;
+}
+.v-center {
+    padding-top: 86px;
+}
+.basal_subscreen {
+    background-color:transparent;
+    position:absolute;
+    left:0px;
+    top:0px;
+    height:200px;
+    width:470px;
+    overflow-x:hidden;
+    overflow-y:auto;
+    /*border: solid 1px;*/
+}
+.pager_button {
+    background-color:black !important;
+    color:white !important;
+}
 @keyframes blinker {
   50% { opacity: 0; }
 }
-.monitorData {
-    display: none;
-}
-.ptData {
-    display: none;
-}
 .blink {
   animation: blinker 1s linear infinite;
-}
-.blink2 {
-  animation: blinker 1s linear;
-}
-@keyframes simple-blinker {
-  0% { opacity: 0; }
-  10% { opacity: 0; }
-  20% { opacity: 0; }
-  30% { opacity: 0; }
-  40% { opacity: 1; }
-  50% { opacity: 1; }
-  60% { opacity: 1; }
-  70% { opacity: 1; }
-  80% { opacity: 1; }
-  90% { opacity: 0; }
-  100% { opacity: 0; }
-}
-.blink-img {
-  animation: simple-blinker 1s linear infinite;
-}
-.led {
-    position:absolute;
-    /*top: 1100px;
-    left: 155px;*/
-    top: 1040px;
-    left: 31px;
-    z-index: 1;
 }
 .r1 {
     position: absolute;
@@ -80,14 +74,7 @@
     color: white;
 }
 .center {
-    padding-top: 34px;
     text-align: center
-}
-.halfpadding {
-    padding-top: 17px !important;
-}
-.nopadding {
-    padding: 0;
 }
 .scroll {
     overflow: auto;
@@ -172,8 +159,6 @@
 .longbutton {
     position: absolute;
     width: 174px;
-    top: 137px;
-    left:280px;
     color: white;
 }
 
@@ -196,43 +181,16 @@
 
 .screenframe {
     position:absolute;
-    top:130px;
-    left:226px;
+    top:71px;
+    left:503px;
     height:550px;
     width: 414px;
-}
-.CT64frame {
-    position:absolute;
-    top:122px;
-    left:1022px;
-    height:766px;
-    width:1378px;
-    overflow: hidden;
-}
-.scrollable {
-    overflow-y: scroll !important;
-}
-.CT64frameHOVER {
-    position:absolute;
-    top:122px;
-    left:1022px;
-    height:0px;
-    width:0px;
-    opacity:0;
-    z-index: 1;
-}
-
-.CT64screen {
-    max-width:1356px;
-    transform: translateY(186px)scale(1.48,1.48);
-    -webkit-transform: translateY(186px)scale(1.48,1.48);
-    -moz-transform: translateY(186px)scale(1.48,1.48);
 }
 
 .tracing {
     position:absolute;
-    top:178px;
-    left:290px;
+    top:120px;
+    left:566px;
     height:418px;
     width: 344px;
     overflow: hidden;
@@ -311,46 +269,10 @@
 
 .logo {
     position: absolute;
-    left:478px;
-    top:186px;
+    left:755px;
+    top:126px;
 }
 .logo img {
     max-width: 140px;
     max-height: 140px;
-}
-
-@-webkit-keyframes rotating /* Safari and Chrome */ {
-  from {
-    -webkit-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  to {
-    -webkit-transform: rotate(360deg);
-    -o-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
-}
-@keyframes rotating {
-  from {
-    -ms-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -webkit-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  to {
-    -ms-transform: rotate(360deg);
-    -moz-transform: rotate(360deg);
-    -webkit-transform: rotate(360deg);
-    -o-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
-}
-.rotating {
-  -webkit-animation: rotating 2s linear infinite;
-  -moz-animation: rotating 2s linear infinite;
-  -ms-animation: rotating 2s linear infinite;
-  -o-animation: rotating 2s linear infinite;
-  animation: rotating 2s linear infinite;
 }
