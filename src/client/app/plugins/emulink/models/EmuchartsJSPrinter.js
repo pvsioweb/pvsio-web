@@ -137,7 +137,7 @@ define(function (require, exports, module) {
                         if (dt.constructors.filter(function (c) { return c === term.val; }).length > 0) {
                             dataType = dt.name;
                         }
-                    })
+                    });
                     if (dataType && !basicTypes[dataType]) {
                         term.val = dataType + "." + term.val;
                     }
