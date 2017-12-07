@@ -755,7 +755,7 @@ define(function (require, exports, module) {
      */
     Project.prototype.saveProject = function (opt) {
         opt = opt || {};
-        opt.filter = opt.filter || function (desc) { return true; }
+        opt.filter = opt.filter || function (desc) { return true; };
         var _this = this;
         return new Promise(function (resolve, reject) {
             console.log(_this.getDescriptors().filter(opt.filter));
