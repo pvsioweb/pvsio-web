@@ -753,13 +753,19 @@ define(function (require, exports, module) {
      * @memberof module:Project
      * @instance
      */
-    Project.prototype.saveProject = function () {
+    Project.prototype.saveProject = function (opt) {
+        opt = opt || {};
+        opt.filter = opt.filter || function (desc) { return true; };
         var _this = this;
         return new Promise(function (resolve, reject) {
-            _this.saveFiles(_this.getDescriptors(), { overWrite: true }).then(function (res) {
+            console.log(_this.getDescriptors().filter(opt.filter));
+            _this.saveFiles(_this.getDescriptors().filter(opt.filter), { overWrite: true }).then(function (res) {
                 _this._dirty(false);
                 resolve(_this);
-            }).catch(function (err) { reject(err); });
+            }).catch(function (err) {
+                console.error(err);
+                reject(err);
+            });
         });
     };
 

@@ -621,9 +621,9 @@ define(function (require, exports, module) {
      * @memberof module:ProjectManager
      * @instance
      */
-    ProjectManager.prototype.saveProject = function () {
+    ProjectManager.prototype.saveProject = function (opt) {
         return new Promise(function (resolve, reject) {
-            _projectManager.project().saveProject().then(function (res) {
+            _projectManager.project().saveProject(opt).then(function (res) {
                 _projectManager.fire({type: "ProjectSaved", project: _projectManager.project()});
                 var notification = "Project " + _projectManager.project().name() + " saved successfully!";
                 NotificationManager.show(notification);

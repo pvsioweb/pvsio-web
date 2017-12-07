@@ -233,17 +233,14 @@ define(function (require, exports, module) {
             switchToSimulatorView();
         });
         d3.select("#btnSaveProject").on("click", function () {
-            var emulink = require("plugins/PluginManager").getInstance().getEnabledPlugins().filter(function (p) { return p.getId() === "EmuChartsEditor"; });
+            projectManager.saveProject({ filter: function (desc) { return desc.name.indexOf(".emdl") !== (desc.name.length - 5); }});
+            // FIXME: implement API plugin.saveAll in all plugins that saves all files relevant to each plugin, and invoke the APIs here.
+            var emulink = require("plugins/PluginManager").getInstance()
+                            .getEnabledPlugins().filter(function (p) {
+                                return p.getId() === "EmuChartsEditor";
+                            });
             if (emulink && emulink[0]) {
-                emulink[0].saveAllCharts().then(function (res) {
-                    projectManager.saveProject();
-                }).catch(function (err) {
-                    console.log("ERROR WHILE SAVING EMUCHARTS FILES (see error below) ");
-                    console.log(err);
-                    projectManager.saveProject();
-                });
-            } else {
-                projectManager.saveProject();
+                emulink[0].saveAllCharts();
             }
         });
         d3.select("#btnSaveProjectAs").on("click", function () {
