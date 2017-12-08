@@ -65,14 +65,38 @@ define(function (require, exports, module) {
     function SliderWidget(id, coords, opt) {
         opt = opt || {};
         coords = coords || {};
+        coords.width = coords.width || 104;
+        coords.height = coords.height || 250;
         this.id = property.call(this, id);
         this.parent = (opt.parent) ? ("#" + opt.parent) : "body";
         this.top = coords.top || 0;
         this.left = coords.left || 0;
-        this.width = coords.width || 104;
-        this.height = coords.height || 250;
-        this.barwidth = opt.barwidth || 20;
-        this.paddingTop = opt.paddingTop || 20;
+        this.orientation = opt.orientation || "vertical";
+        if (this.orientation === "horizontal") {
+            var tmp = opt.handleWidth;
+            opt.handleWidth = opt.handleHeight;
+            opt.handleHeight = tmp;
+
+            tmp = coords.height;
+            coords.height = coords.width;
+            coords.width = tmp;
+        }
+        this.width = coords.width;
+        this.height = coords.height;
+        opt.handleWidth = (opt.handleWidth) ? opt.handleWidth
+                            : (opt.orientation === "horizontal") ? 20 : this.width;
+        opt.handleHeight = (opt.handleHeight) ? opt.handleHeight
+                            : (opt.orientation === "horizontal") ? this.height : 20;
+        opt.barWidth = (opt.barWidth) ? opt.barWidth
+                            : (opt.orientation === "horizontal") ? (this.width - opt.handleWidth) : this.width;
+        this.paddingTop = (opt.paddingTop) ? opt.paddingTop
+                            : (opt.tooltipPosition === "inner") ?
+                                (opt.handleHeight) ? (opt.handleHeight / 4) : 0
+                            : (this.orientation !== "horizontal") ? 40 : 20;
+        this.paddingLeft = (opt.paddingLeft) ? opt.paddingLeft
+                            : (opt.tooltipPosition === "inner") ?
+                                (opt.handleWidth) ? (opt.handleWidth / 4) : 0
+                            : (this.orientation !== "horizontal") ? 40 : 20;
         this.backgroundColor = opt.backgroundColor || "#E0E0E0";
         this.fontColor = opt.fontColor || "white";
         this.borderWidth = opt.borderWidth || 1;
@@ -80,16 +104,15 @@ define(function (require, exports, module) {
         this.borderColor = opt.borderColor || "inherit";
         this.cursor = opt.cursor || "default";
         if (opt.inverted) {
-            var tmp = this.backgroundColor;
+            var tmp_cl = this.backgroundColor;
             this.backgroundColor = this.fontColor;
-            this.fontColor = tmp;
+            this.fontColor = tmp_cl;
         }
         var elemClass = id + " sliderWidget" + " noselect ";
         opt.position = opt.position || "absolute";
         opt.borderRadius = opt.borderRadius || "2px";
         opt.opacity = opt.opacity || 1;
         this.format = opt.format;
-        this.orientation = opt.orientation || "vertical";
         this.max = opt.max || 100;
         this.min = opt.min || 0;
         this.init = opt.init || this.min;
@@ -103,18 +126,19 @@ define(function (require, exports, module) {
                         .style("border-width", this.borderWidth + "px")
                         .style("border-style", this.borderStyle)
                         .style("border-color", this.borderColor)
-                        .style("padding-left", (opt.zero_padding) ? "10px" : (this.width - this.barwidth) / 2 + "px")
+                        .style("padding-left", (opt.zero_padding) ? "0px" : (this.paddingLeft) + "px")
                         .style("padding-top", (opt.zero_padding) ? "0px" : (this.paddingTop) + "px")
                         .style("border", "solid").style("border-color", this.borderColor).style("border-width", "1px")
                         .attr("id", id).attr("class", elemClass);
         this.div.append("input").attr("id", id + "_slider_data")
                         .attr("type", "text");
 
-        opt.tooltip_position = opt.tooltip_position || (this.orientation === "horizontal") ? "bottom" : "left";
+        opt.tooltipPosition = (opt.tooltipPosition) ? opt.tooltipPosition
+                                : (this.orientation === "horizontal") ? "top" : "left";
         this.slider = new Slider("#" + id + "_slider_data", {
-                        reversed: true,
+                        reversed: (this.orientation !== "horizontal"),
                         orientation: this.orientation,
-                        tooltip_position: opt.tooltip_position,
+                        tooltip_position: opt.tooltipPosition,
                         tooltip: "always",
                         max: this.max,
                         min: this.min,
@@ -129,8 +153,14 @@ define(function (require, exports, module) {
                     		return value;
                     	}
                     });
+        if (opt.tooltipPosition === "inner") {
+            d3.select("#" + id).select(".tooltip").style("margin-top", "-6px");
+            d3.select("#" + id).select(".slider-tick-label-container").style("display", "none");
+            opt.tooltipBackgroundColor = opt.tooltipBackgroundColor || "transparent";
+            opt.tooltipArrowColor = opt.tooltipArrowColor || "transparent";
+        }
         if (opt.readonly) {
-            d3.select(".slider-track").style("cursor", "default");
+            d3.select("#" + id).select(".slider-track").style("cursor", "default");
         }
         this.button = new TouchscreenButton(id + "_button", {
             top: 0,
@@ -147,21 +177,44 @@ define(function (require, exports, module) {
             _this.slide(val);
         });
         opt.sliderColor = opt.sliderColor || "#337ab7";
-        this.div.selectAll(".slider-track-high").style("background-color", opt.sliderColor);
-        this.div.selectAll(".slider-selection").style("opacity", "0");
 
-        var margin = 8;
+        opt.track = opt.track || {};
+        var grad_from = (opt.track.gradient && opt.track.gradient.from) ? opt.track.gradient.from : "transparent";
+        var grad_to = (opt.track.gradient && opt.track.gradient.to) ? opt.track.gradient.to : "transparent";
+        var grad_deg = (opt.track.gradient && opt.track.gradient.deg) ? -opt.track.gradient.deg : -45; // negative because we want counter-clockwise rotations
+        var grad_delta = (opt.track.gradient && opt.track.gradient.delta) ? opt.track.gradient.delta : "40%";
+        var track_color = (opt.track.color) ? opt.track.color : (opt.track.gradient) ? "transparent" : opt.sliderColor;
+        var track_height = opt.track.height || "10px";
+        var track_margin_top = opt.track.top || this.paddingTop;
+
+        this.div.selectAll(".slider-track")
+                .style("height", track_height + "px")
+                .style("margin-top", track_margin_top + "px");
         if (this.orientation === "horizontal") {
-            this.div.select(".slider-horizontal").style("width", (this.width - (margin * 4)) + "px").style("margin-left", margin + "px");
-        }
-        if (this.orientation === "vertical") {
-            this.div.select(".slider-vertical").style("height", (this.height - (margin * 4)) + "px");
+            this.div.select(".slider-horizontal").style("width", opt.barWidth + "px").style("margin-left", opt.handleWidth / 4 + "px");
+            this.div.selectAll(".slider-track-high").style("opacity", "0");
+            this.div.selectAll(".slider-selection").style("background-image", "linear-gradient(-45deg, " + track_color + ", " + track_color + ")");
+            this.div.selectAll(".slider-track").style("background-image", "linear-gradient(" + grad_deg + "deg, " + grad_to + ", " + grad_from + " " + grad_delta + ", " + grad_from + ")");
+        } else {
+            this.div.select(".slider-vertical").style("height", (this.height - opt.handleHeight) + "px");
+            this.div.selectAll(".slider-track-high").style("background-color", opt.sliderColor);
+            this.div.selectAll(".slider-selection").style("opacity", "0");
         }
         if (opt.handle === "none") {
             this.div.select(".slider-handle").style("display", "none");
             if (opt.orientation === "horizontal") {
                 this.div.select(".tooltip").style("top", "12px");
             }
+        }
+        if (opt.orientation !== "horizontal" && opt.tooltipPosition === "inner") {
+           this.div.select(".tooltip-inner").style("margin-left", "-150%");
+        }
+        if (opt.handleWidth) {
+            var margin_left = (opt.orientation === "horizontal") ? -(opt.handleWidth / 2) : -(opt.handleWidth / 4);
+            this.div.select(".slider-handle").style("width", opt.handleWidth + "px").style("margin-left", margin_left + "px");
+        }
+        if (opt.handleHeight) {
+            this.div.select(".slider-handle").style("height", opt.handleHeight + "px").style("margin-top", -(opt.handleHeight / 4) + "px");
         }
         if (opt.tooltipColor) {
             this.div.select(".tooltip-inner").style("color", opt.tooltipColor);
@@ -170,11 +223,12 @@ define(function (require, exports, module) {
             this.div.select(".tooltip-inner").style("background-color", opt.tooltipBackgroundColor);
         }
         if (opt.tooltipArrowColor) {
-            this.div.select(".tooltip-arrow").style("border-left-color", opt.tooltipArrowColor);
+            this.div.select(".tooltip-arrow").style("border-top-color", opt.tooltipArrowColor);
         }
 
         this.slider.relayout();
         this.div.select(".slider").style("opacity", 0);
+        this.hide();
 
         Widget.call(this, id, "sliderwidget");
         return this;
