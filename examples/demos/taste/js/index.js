@@ -142,12 +142,20 @@ require([
         });
         sys.slider = new Slider("set_engine_power", {
             top: 280,
-            left: 259,
-            width: 105,
-            height: 250
+            left: 115,
+            width: 40,
+            height: 200
         }, {
             max: 340,
             min: 0,
+            orientation: "horizontal",
+            tooltipPosition: "inner",
+            handleWidth: 40,
+            handleHeight: 60,
+            backgroundColor: "transparent",
+            track: {
+                color: "transparent",
+            },
             init: 300 // initial value selected by the slider
         });
         sys.tempDisplay = new BasicDisplay("temperature_display", {
@@ -172,6 +180,9 @@ require([
             sys.pressureDisplay.render(evaluate(res.pressure) + " bar", {
                 backgroundColor: (evaluate(res.pressure) > 272) ? "red" : "green"
             });
+            // you can tweak the visual appearance of the widgets directly here, e.g., to change the border style
+            d3.select("#pressure_display").select(".pressure_display_canvas").style("border", "solid 4px black");
+
             sys.flowGauge.render(evaluate(res.flow));
             sys.flowDisplay.render(evaluate(res.flow) + " L/min");
             sys.tempDisplay.render(evaluate(res.temperature) + " °C");

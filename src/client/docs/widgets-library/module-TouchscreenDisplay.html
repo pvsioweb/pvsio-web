@@ -233,7 +233,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="TouchscreenDisplay.js.html">TouchscreenDisplay.js</a>, <a href="TouchscreenDisplay.js.html#line367">line 367</a>
+        <a href="TouchscreenDisplay.js.html">TouchscreenDisplay.js</a>, <a href="TouchscreenDisplay.js.html#line368">line 368</a>
     </li></ul></dd>
     
 
@@ -368,7 +368,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="TouchscreenDisplay.js.html">TouchscreenDisplay.js</a>, <a href="TouchscreenDisplay.js.html#line389">line 389</a>
+        <a href="TouchscreenDisplay.js.html">TouchscreenDisplay.js</a>, <a href="TouchscreenDisplay.js.html#line390">line 390</a>
     </li></ul></dd>
     
 
@@ -528,7 +528,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="TouchscreenDisplay.js.html">TouchscreenDisplay.js</a>, <a href="TouchscreenDisplay.js.html#line301">line 301</a>
+        <a href="TouchscreenDisplay.js.html">TouchscreenDisplay.js</a>, <a href="TouchscreenDisplay.js.html#line302">line 302</a>
     </li></ul></dd>
     
 
@@ -614,7 +614,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="TouchscreenDisplay.js.html">TouchscreenDisplay.js</a>, <a href="TouchscreenDisplay.js.html#line378">line 378</a>
+        <a href="TouchscreenDisplay.js.html">TouchscreenDisplay.js</a>, <a href="TouchscreenDisplay.js.html#line379">line 379</a>
     </li></ul></dd>
     
 
@@ -637,6 +637,108 @@
 
 
 
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="%3Caname=%22toJSON%22%3EtoJSON%3C/a%3E"><span class="type-signature"></span><a name="toJSON">toJSON</a><span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns a serialised version of the widget in JSON format.
+             This is useful for saving/loading a specific instance of the widget.
+             In the current implementation, the following attributes are included in the JSON object:
+             <li> type (string): widget type, i.e., "togglebutton" in this case
+             <li> id (string): the unique identifier of the widget instance
+             <li> backgroundColor (string): the background color of the button
+             <li> orientation (string): either horizontal or vertical
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ToggleButton.js.html">ToggleButton.js</a>, <a href="ToggleButton.js.html#line113">line 113</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    JSON object
+</div>
+
+
+
+    
 
 
 
@@ -711,109 +813,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="TouchscreenDisplay.js.html">TouchscreenDisplay.js</a>, <a href="TouchscreenDisplay.js.html#line222">line 222</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    JSON object
-</div>
-
-
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="%3Caname=%22toJSON%22%3EtoJSON%3C/a%3E"><span class="type-signature"></span><a name="toJSON">toJSON</a><span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Returns a serialised version of the widget in JSON format.
-             This is useful for saving/loading a specific instance of the widget.
-             In the current implementation, the following attributes are included in the JSON object:
-             <li> type (string): widget type, i.e., "togglebutton" in this case
-             <li> id (string): the unique identifier of the widget instance
-             <li> backgroundColor (string): the background color of the button
-             <li> orientation (string): either horizontal or vertical
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="ToggleButton.js.html">ToggleButton.js</a>, <a href="ToggleButton.js.html#line113">line 113</a>
+        <a href="TouchscreenDisplay.js.html">TouchscreenDisplay.js</a>, <a href="TouchscreenDisplay.js.html#line223">line 223</a>
     </li></ul></dd>
     
 
@@ -967,6 +967,7 @@
 
             <td class="description last">Options:
          <li>displayKey (string): the name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.
+         <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).
          <li>fontfamily (String): font type (default is "sans-serif")</li>
          <li>fontsize (Number): font size (default is 0.8 * height)</li>
          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
@@ -974,7 +975,7 @@
          <li>backgroundColor (String): background display color (default is black, "#000")</li>
          <li>borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)</li>
          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
-         <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>      
+         <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
          <li>align (String): text alignment (available options are "left", "right", anc "center". Default is "center")</li>
          <li>cursor (String): cursor style, must be a valid HTML5 cursor style, e.g., "pointer", "crosshair", etc. (default is "default")</li>
          <li>blinking (Bool): true means the text is blinking (default is false, i.e., not blinking)</li>
@@ -1063,13 +1064,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-BasicDisplay.html">BasicDisplay</a></li><li><a href="module-Gauge.html">Gauge</a></li><li><a href="module-NumericDisplay.html">NumericDisplay</a></li><li><a href="module-SliderWidget.html">SliderWidget</a></li><li><a href="module-ToggleButton.html">ToggleButton</a></li><li><a href="module-TouchscreenButton.html">TouchscreenButton</a></li><li><a href="module-TouchscreenDisplay.html">TouchscreenDisplay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-BasicDisplay.html">BasicDisplay</a></li><li><a href="module-Gauge.html">Gauge</a></li><li><a href="module-NumericDisplay.html">NumericDisplay</a></li><li><a href="module-SliderWidget.html">SliderWidget</a></li><li><a href="module-SliderWidgetWithButtons.html">SliderWidgetWithButtons</a></li><li><a href="module-ToggleButton.html">ToggleButton</a></li><li><a href="module-TouchscreenButton.html">TouchscreenButton</a></li><li><a href="module-TouchscreenDisplay.html">TouchscreenDisplay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.0-dev</a> on Wed Oct 11 2017 12:10:47 GMT+0100 (WEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.0-dev</a> on Sun Dec 10 2017 23:45:24 GMT+0000 (WET)
 </footer>
 
 <script> prettyPrint(); </script>

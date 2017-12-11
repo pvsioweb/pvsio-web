@@ -64,6 +64,7 @@ define(function (require, exports, module) {
      *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
      *          <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
      *          <li>buttonReadback (String): playback text reproduced with synthesised voice wheneven an action is performed with the button.</li>
+     *          <li>customFunctionText (String): custom PVS function to be associated with button actions.</li>
      *          <li>displayKey (String): name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.</li>
      *          <li>evts (Array[String]): events triggered by the widget. Can be either "click", or "press/release" (default is "click").
      *                                    The PVS function associated with the widget is given by the widget name prefixed with the event name.

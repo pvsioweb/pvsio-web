@@ -13,49 +13,16 @@
 </head>
 <body>
     <div id="main">
-        <h1 class="page-title">Widgets Library</h1>
+        <h1 class="page-title">APIs of the PVSio-web Widgets Library</h1>
         <div style="padding-left:30px">
-            <h3>This documentation presents the APIs of the essential PVSio-Web widgets. </h3>
-            The following files index.html and index.js provide concrete examples demonstrating the use of the PVSio-Web widgets, and can be used to test the APIs of the widgets.
-            These two files can be found in the PVSio-web distribution (folder examples/demos/quickStart). A live demo of these two files is online at <a href="http://www.pvsioweb.org/demos/quickStart/" target=_blank>http://www.pvsioweb.org/demos/quickStart/</a>.
-            To debug the widgets and in general to debug PVSio-web demos, please use Chrome DevTools (<a href="https://developers.google.com/web/tools/chrome-devtools/" target=_blank>https://developers.google.com/web/tools/chrome-devtools/</a>)
+            This document presents the APIs of the PVSio-Web widgets library.<br>
+            The following code snippets demonstrate:
+            <li>The read-eval-loop of PVSio-web, which makes use of a callback function onMessageReceive()</li>
+            <li>The use of core PVSio-Web widgets</li>
+            A live demo of the code snippets is online at <a href="http://www.pvsioweb.org/demos/quickStart/" target=_blank>http://www.pvsioweb.org/demos/quickStart/</a>
+            and is also downloaded with the PVSio-web distribution (check folder pvsio-web/examples/demos/quickStart).<br>
+            To debug the widgets and in general to debug PVSio-web prototypes, use Chrome DevTools (<a href="https://developers.google.com/web/tools/chrome-devtools/" target=_blank>https://developers.google.com/web/tools/chrome-devtools/</a>) or similar IDE.
             <br><br>
-            <p class="code-caption"><b>index.html</b></p>
-                <pre class="prettyprint"><code>&lt;!-- index.html -->
-&lt;!DOCTYPE html>
-&lt;html>
-    &lt;head>
-        &lt;meta charset="utf-8">
-        &lt;meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        &lt;title>&lt;/title>
-        &lt;meta name="description" content="">
-        &lt;meta name="viewport" content="width=device-width">
-        &lt;link href="../../client/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
-        &lt;link href="../../client/app/plugins/graphbuilder/graph.css" rel="stylesheet" type="text/css"/>
-        &lt;link href="../../client/css/style.css" rel="stylesheet" type="text/css"/>
-        &lt;link href="../../client/css/animate.css" rel="stylesheet" type="text/css"/>
-        &lt;link href="../../client/lib/jquery-toggles/css/toggles.css" rel="stylesheet">
-        &lt;link href="../../client/lib/jquery-toggles/css/themes/toggles-modern.css" rel="stylesheet">
-        &lt;link href="../../client/lib/bootstrap/css/bootstrap-slider.css" rel="stylesheet" type="text/css"/>
-    &lt;/head>
-    &lt;body class="noselect">
-        &lt;div>
-        &lt;/div>
-        &lt;script type="application/javascript" src="../../client/lib/layout.js">&lt;/script>
-        &lt;script type="application/javascript" src="../../client/lib/promise-0.1.1.js">&lt;/script>
-        &lt;script type="application/javascript" src="../../client/lib/keys.js">&lt;/script>
-        &lt;script type="text/javascript" src="../../client/lib/jquery.js">&lt;/script>
-        &lt;script type="text/javascript" src="../../client/lib/underscore/underscore.js">&lt;/script>
-        &lt;script type="text/javascript" src="../../client/lib/d3/d3.js">&lt;/script>
-        &lt;script type="text/javascript" src="../../client/lib/backbone.js">&lt;/script>
-        &lt;script type="text/javascript" src="../../client/lib/handlebars-v1.3.0.js">&lt;/script>
-        &lt;script type="text/javascript" src="../../client/lib/bootstrap/js/bootstrap.min.js">&lt;/script>
-        &lt;script type="text/javascript" src="../../client/lib/jquery-toggles/toggles.min.js">&lt;/script>
-        &lt;script type="text/javascript" src="../../client/lib/d3-gauge-plus/d3-gauge-plus.js">&lt;/script>
-        &lt;script type="text/javascript" src="../../client/lib/bootstrap/js/bootstrap-slider.js">&lt;/script>
-        &lt;script src="../../client/require.js" data-main="index.js">&lt;/script>
-    &lt;/body>
-&lt;/html></code></pre>
 
 <p class="code-caption"><b>index.js</b></p>
     <pre class="prettyprint"><code>//-- index.js
@@ -63,115 +30,159 @@ require.config({
     baseUrl: "../../client/app",
     paths: {
         d3: "../lib/d3",
-        lib: "../lib"
+        lib: "../lib",
+        text: "../lib/text",
+        stateParser: './util/PVSioStateParser'
     }
 });
-require(["PVSioWebClient",
+require(["PVSioWebClient", "stateParser",
         "widgets/BasicDisplay","widgets/NumericDisplay", "widgets/TouchscreenButton", "widgets/TouchscreenDisplay",
-        "widgets/ToggleButton", "widgets/SliderWidget", "widgets/car/Gauge"],
-function (PVSioWebClient,
+        "widgets/ToggleButton", "widgets/SliderWidgetWithButtons", "widgets/car/Gauge", "widgets/LED"],
+function (PVSioWebClient, stateParser,
             BasicDisplay, NumericDisplay, TouchscreenButton, TouchscreenDisplay,
-            ToggleButton, SliderWidget, Gauge) {
+            ToggleButton, SliderWidget, Gauge, LED) {
      "use strict";
+
      var device = {};
 
      device.disp = new BasicDisplay("disp", {
-       top: 100, left: 120, height: 24, width: 120
+         top: 100, left: 120, height: 24, width: 120
      }, {
-       displayKey: "disp"
+         displayKey: "disp",
+         borderColor: "blue",
+         borderWidth: 2,
+         align: "right"
      });
-     device.disp.render( { disp: 10.5 }); // the display renders 10.5
-     console.log(device.disp.toJSON());
 
      device.dispNumeric = new NumericDisplay("dispNumeric", {
-       top: 150, left: 120, height: 24, width: 120
+         top: 150, left: 120, height: 24, width: 120
      }, {
-       displayKey: "disp",
-       cursorName: "cur"
+         displayKey: "disp",
+         cursorName: "cur",
+         borderColor: "blue",
+         borderWidth: 2,
+         align: "right"
      });
-     device.dispNumeric.render({ disp: 10.5, cur: -1 }); // the display value is 10.5 and the cursor highlights the first fractional digit
-     console.log(device.dispNumeric.toJSON());
 
      device.touchscreenOk = new TouchscreenButton("touchscreenOk", {
-       top: 200, left: 120, height: 24, width: 120
+         top: 200, left: 120, height: 24, width: 120
      }, {
-       softLabel: "Ok",
-       fontColor: "black",
-       backgroundColor: "blue",
-       fontsize: 16,
-       callback: function (err, data) { console.log("Ok button clicked"); console.log(data); }
+         softLabel: "Ok",
+         fontColor: "white",
+         backgroundColor: "black",
+         borderColor: "blue",
+         borderWidth: 2,
+         fontsize: 16,
+         callback: onMessageReceived
      });
-     device.touchscreenOk.render(); // The touchscreen button is rendered. Clicking the button has the effect of sending a command "click_touchscreenOk(<current state>)" to the pvs back-end
-     console.log(device.touchscreenOk.toJSON());
 
-     device.touchdisp = new TouchscreenDisplay("touchdisp", {
-       top: 250, left: 120, height: 24, width: 120
+     device.slider = new SliderWidget("slider", {
+         top: 250, left: 120, width: 40, height: 260
      }, {
-       displayKey: "touchdisp",
-       fontColor: "yellow",
-       backgroundColor: "black",
-       fontsize: 12,
-       callback: function (err, data) { console.log("Touchscreen display touched"); console.log(data); }
+         max: 340,
+         min: 0,
+         init: 50, // initial value selected by the slider
+         orientation: "horizontal",
+         buttonStep: 10,
+         buttons: {
+             backgroundColor: "#121e2b",
+             borderColor: "#8aa1b6",
+             fontColor: "#cad7e4",
+             opacity: 1
+         },
+         handle: {
+             backgroundColor: "#121e2b",
+             borderColor: "#9bb5cc",
+             fontColor: "#cad7e4",
+             opacity: 0.9,
+             zIndex: 2
+         },
+         innerImage: {
+             type: "triangle"
+         },
+         callback: onMessageReceived
      });
-    device.touchdisp.render({ touchdisp: "touch display" }); // The touchscreen display is rendered. Clicking the button has the effect of sending a command "click_touchdisp(<current state>)" to the pvs back-end
-    console.log(device.touchdisp.toJSON());
 
-    device.togglebtn = new ToggleButton("togglebtn", {
-      top: 300, left: 120, height: 24, width: 120
-     }, {
-      callback: function (err, data) { console.log("toggle button clicked"); console.log(data); }
+
+     //--------------- the following functions take care of rendering state updates sent by the PVSio-web back-end
+     function render(res) {
+         for (var key in device) {
+             device[key].render(res);
+         }
+     }
+     function onMessageReceived(err, event) {
+         if (!err) {
+             // get new state
+             client.getWebSocket().lastState(event.data);
+             // parse and render new state
+             var res = event.data.toString();
+             if (res.indexOf("(#") === 0) {
+                 render(stateParser.parse(res));
+                 console.log(res);
+             }
+         } else {
+             console.log(err);
+         }
+     }
+
+     //--------------- the following code takes care of connecting the JavaScript front-end to the PVSio-web back-end
+     var demoFolder = "quickStart";
+     var client = PVSioWebClient.getInstance();
+     //register event listener for websocket connection from the client
+     client.addListener('WebSocketConnectionOpened', function (e) {
+         console.log("web socket connected");
+         //start pvs process
+         client.getWebSocket()
+         .startPVSProcess({name: "main.pvs", demoName: demoFolder + "/pvs"}, function (err, event) {
+             // first thing, initialise the pvs model
+             client.getWebSocket().sendGuiAction("init;", onMessageReceived);
+         });
+     }).addListener("WebSocketConnectionClosed", function (e) {
+         console.log("web socket closed");
+     }).addListener("processExited", function (e) {
+         var msg = "Warning!!!\r\nServer process exited. See console for details.";
+         console.log(msg);
      });
-   device.togglebtn.on(); // The toggle button is rendered. The state is On. Clicking the button has the effect of sending a command "togglebtn(<current state>)" to the pvs back-end
-   console.log(device.togglebtn.toJSON());
-
-   device.slider = new SliderWidget("slider", {
-     top: 350, left: 120, width: 120
-    }, {
-     max: 340,
-     min: 0,
-     init: 100, // initial value selected by the slider
-     callback: function (err, data) { console.log("adjusting slider"); console.log(data); }
-   });
-   device.slider.render(); // The slider is rendered. Adjusting the slider has the effect of sending a command "slide(<current val>)(<current state>)" to the pvs back-end
-   console.log(device.slider.toJSON());
-
-   var speedGauge = new Gauge("speedGauge", {
-      top: 100, left: 320, width: 220
-    }, {
-      style: 'classic',
-      max: 360,
-      majorTicks: 13,
-      min: 0,
-      size: 360,
-      redZones: [],
-      rotation: -45,
-      gap:90,
-      roundValueBeforeRender: true
-   });
-   speedGauge.render(10.5); // The gauge is rendered and the pointer indicates 10.5
-
-
-   //--------------- the following code takes care of connecting the javascript front-end to the pvs back-end
-   var demoFolder = "quickStart";
-   var client = PVSioWebClient.getInstance();
-   //register event listener for websocket connection from the client
-   client.addListener('WebSocketConnectionOpened', function (e) {
-       console.log("web socket connected");
-       //start pvs process
-       client.getWebSocket()
-           .startPVSProcess({name: "main.pvs", demoName: demoFolder + "/pvs"}, function (err, event) {
-               // first thing, initialise the pvs model
-               client.getWebSocket().sendGuiAction("init;", function (err, data) { console.log(event); });
-       });
-   }).addListener("WebSocketConnectionClosed", function (e) {
-       console.log("web socket closed");
-   }).addListener("processExited", function (e) {
-       var msg = "Warning!!!\r\nServer process exited. See console for details.";
-       console.log(msg);
-   });
-   client.connectToServer();
+     client.connectToServer();
 
 });</code></pre>
+
+<p class="code-caption"><b>index.html</b></p>
+    <pre class="prettyprint"><code>&lt;!-- index.html -->
+&lt;!DOCTYPE html>
+&lt;html>
+&lt;head>
+&lt;meta charset="utf-8">
+&lt;meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+&lt;title>&lt;/title>
+&lt;meta name="description" content="">
+&lt;meta name="viewport" content="width=device-width">
+&lt;link href="../../client/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+&lt;link href="../../client/app/plugins/graphbuilder/graph.css" rel="stylesheet" type="text/css"/>
+&lt;link href="../../client/css/style.css" rel="stylesheet" type="text/css"/>
+&lt;link href="../../client/css/animate.css" rel="stylesheet" type="text/css"/>
+&lt;link href="../../client/lib/jquery-toggles/css/toggles.css" rel="stylesheet">
+&lt;link href="../../client/lib/jquery-toggles/css/themes/toggles-modern.css" rel="stylesheet">
+&lt;link href="../../client/lib/bootstrap/css/bootstrap-slider.css" rel="stylesheet" type="text/css"/>
+&lt;/head>
+&lt;body class="noselect">
+&lt;div>
+&lt;/div>
+&lt;script type="application/javascript" src="../../client/lib/layout.js">&lt;/script>
+&lt;script type="application/javascript" src="../../client/lib/promise-0.1.1.js">&lt;/script>
+&lt;script type="application/javascript" src="../../client/lib/keys.js">&lt;/script>
+&lt;script type="text/javascript" src="../../client/lib/jquery.js">&lt;/script>
+&lt;script type="text/javascript" src="../../client/lib/underscore/underscore.js">&lt;/script>
+&lt;script type="text/javascript" src="../../client/lib/d3/d3.js">&lt;/script>
+&lt;script type="text/javascript" src="../../client/lib/backbone.js">&lt;/script>
+&lt;script type="text/javascript" src="../../client/lib/handlebars-v1.3.0.js">&lt;/script>
+&lt;script type="text/javascript" src="../../client/lib/bootstrap/js/bootstrap.min.js">&lt;/script>
+&lt;script type="text/javascript" src="../../client/lib/jquery-toggles/toggles.min.js">&lt;/script>
+&lt;script type="text/javascript" src="../../client/lib/d3-gauge-plus/d3-gauge-plus.js">&lt;/script>
+&lt;script type="text/javascript" src="../../client/lib/bootstrap/js/bootstrap-slider.js">&lt;/script>
+&lt;script src="../../client/require.js" data-main="index.js">&lt;/script>
+&lt;/body>
+&lt;/html></code></pre>
         </div>
     </div>
     <nav>

@@ -23,7 +23,7 @@ require([
         "widgets/TouchscreenDisplay",
         "widgets/BasicDisplay",
         "widgets/NumericDisplay",
-        "widgets/Slider",
+        "widgets/SliderWidget",
         "widgets/ToggleButton",
 
         "widgets/car/Gauge",
@@ -142,12 +142,20 @@ require([
         });
         sys.slider = new Slider("set_engine_power", {
             top: 280,
-            left: 259,
-            width: 105,
-            height: 250
+            left: 65,
+            width: 40,
+            height: 300
         }, {
             max: 340,
             min: 0,
+            orientation: "horizontal",
+            tooltipPosition: "inner",
+            handleWidth: 40,
+            handleHeight: 100,
+            backgroundColor: "transparent",
+            track: {
+                color: "transparent",
+            },
             init: 300 // initial value selected by the slider
         });
         sys.tempDisplay = new BasicDisplay("temperature_display", {

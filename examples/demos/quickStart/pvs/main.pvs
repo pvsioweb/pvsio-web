@@ -8,10 +8,12 @@ main: THEORY
  BEGIN
 
   state: TYPE = [#
-    disp: real
+    disp: string,
+    dispNumeric: string
   #]
   init: state = (#
-    disp := 0
+    disp := "B23.4",
+    dispNumeric := "B23.4"
   #)
 
   click_touchscreenOk(st: state): state = st

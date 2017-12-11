@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: SliderWidget</title>
+    <title>JSDoc: Module: SliderWidgetWithButtons</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: SliderWidget</h1>
+    <h1 class="page-title">Module: SliderWidgetWithButtons</h1>
 
     
 
@@ -38,7 +38,7 @@
     <div class="container-overview">
     
         
-            <div class="description">Renders a slider
+            <div class="description">Renders a slider adorned with side buttons + / -
              This module provide APIs for changing the look and feel of
              the rendered text, including: cursors, background color, font, size, alignment.
              Uses http://seiyria.com/bootstrap-slider/</div>
@@ -65,7 +65,7 @@
 
     
     <dt class="tag-version">Version:</dt>
-    <dd class="tag-version"><ul class="dummy"><li>2.0</li></ul></dd>
+    <dd class="tag-version"><ul class="dummy"><li>1.0</li></ul></dd>
     
 
     
@@ -100,7 +100,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SliderWidget.js.html">SliderWidget.js</a>, <a href="SliderWidget.js.html#line1">line 1</a>
+        <a href="SliderWidgetWithButtons.js.html">SliderWidgetWithButtons.js</a>, <a href="SliderWidgetWithButtons.js.html#line1">line 1</a>
     </li></ul></dd>
     
 
@@ -131,7 +131,7 @@
     
         <p class="code-caption">Example use of the widget.</p>
     
-    <pre class="prettyprint"><code> // Example pvsio-web demo that uses SliderWidget
+    <pre class="prettyprint"><code> // Example pvsio-web demo that uses SliderWidgetWithButtons
  // The following require.config assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demos/
  require.config({
      baseUrl: "../../client/app",
@@ -140,10 +140,10 @@
          lib: "../lib"
      }
  });
- require(["widgets/SliderWidget"], function (SliderWidget) {
+ require(["widgets/SliderWidgetWithButtons"], function (SliderWidgetWithButtons) {
      "use strict";
      var device = {};
-     device.sliderS1 = new SliderWidget("sliderS1", {
+     device.sliderS1 = new SliderWidgetWithButtons("sliderS1", {
        top: 350, left: 120, width: 120
      }, {
        max: 340,
@@ -236,7 +236,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SliderWidget.js.html">SliderWidget.js</a>, <a href="SliderWidget.js.html#line450">line 450</a>
+        <a href="SliderWidgetWithButtons.js.html">SliderWidgetWithButtons.js</a>, <a href="SliderWidgetWithButtons.js.html#line239">line 239</a>
     </li></ul></dd>
     
 
@@ -332,7 +332,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SliderWidget.js.html">SliderWidget.js</a>, <a href="SliderWidget.js.html#line430">line 430</a>
+        <a href="SliderWidgetWithButtons.js.html">SliderWidgetWithButtons.js</a>, <a href="SliderWidgetWithButtons.js.html#line218">line 218</a>
     </li></ul></dd>
     
 
@@ -467,7 +467,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SliderWidget.js.html">SliderWidget.js</a>, <a href="SliderWidget.js.html#line462">line 462</a>
+        <a href="SliderWidgetWithButtons.js.html">SliderWidgetWithButtons.js</a>, <a href="SliderWidgetWithButtons.js.html#line250">line 250</a>
     </li></ul></dd>
     
 
@@ -602,7 +602,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SliderWidget.js.html">SliderWidget.js</a>, <a href="SliderWidget.js.html#line418">line 418</a>
+        <a href="SliderWidgetWithButtons.js.html">SliderWidgetWithButtons.js</a>, <a href="SliderWidgetWithButtons.js.html#line207">line 207</a>
     </li></ul></dd>
     
 
@@ -688,7 +688,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SliderWidget.js.html">SliderWidget.js</a>, <a href="SliderWidget.js.html#line439">line 439</a>
+        <a href="SliderWidgetWithButtons.js.html">SliderWidgetWithButtons.js</a>, <a href="SliderWidgetWithButtons.js.html#line228">line 228</a>
     </li></ul></dd>
     
 
@@ -823,7 +823,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SliderWidget.js.html">SliderWidget.js</a>, <a href="SliderWidget.js.html#line399">line 399</a>
+        <a href="SliderWidgetWithButtons.js.html">SliderWidgetWithButtons.js</a>, <a href="SliderWidgetWithButtons.js.html#line197">line 197</a>
     </li></ul></dd>
     
 
@@ -857,7 +857,7 @@
     
 
     
-    <h4 class="name" id="%3Caname=%22SliderWidget%22%3ESliderWidget%3C/a%3E"><span class="type-signature"></span><a name="SliderWidget">SliderWidget</a><span class="signature">(id, coords, opt)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="%3Caname=%22SliderWidgetWithButtons%22%3ESliderWidgetWithButtons%3C/a%3E"><span class="type-signature"></span><a name="SliderWidgetWithButtons">SliderWidgetWithButtons</a><span class="signature">(id, coords, opt)</span><span class="type-signature"></span></h4>
     
 
     
@@ -968,6 +968,13 @@
             <td class="description last">Options:
          <li>customFunctionText (String): custom PVS function to be associated with slider actions. This function overrides the default association ("slide_" + id).</li>
          <li>backgroundColor (String): background display color (default is transparent)</li>
+         <li>buttons (Object): visual aspect of the side buttons. The object attributes are:<br>
+            - backgroundColor (String): background color of the side buttons<br>
+            - borderColor (String): border color of the side buttons<br>
+            - borderWidth (Number): border width of the side buttons<br>
+            - fontColor (String): font color for the text displayed in the side buttons<br>
+            - opacity (Number): opacity level of the side buttons<br>
+          </li>
          <li>handle (Object): visual aspect of the slider handle. The object attributes are:<br>
             - type (String): one of "round", "rect", "triangle" (default: rect)<br>
             - height (Number): height of the slider handle<br>
@@ -981,8 +988,8 @@
           </li>
          <li>init (init): initial value selected by the slider
          <li>innerImage (Object): inner image to be displayed in the slider.
-                    The current implementation supports only the option of visualising a gradient with the shape of a triangle when the slider is horizontal.
-                    The object attributes are:<br>
+                        The current implementation supports only the option of visualising a gradient with the shape of a triangle when the slider is horizontal.
+                        The object attributes are:<br>
             - gradient: valid HTML5 gradient image (default: linear-gradient(90deg, black, black 30%, steelblue))<br>
             - shape (String): one of "none", "triangle" (default: none)<br>
           </li>
@@ -1045,7 +1052,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SliderWidget.js.html">SliderWidget.js</a>, <a href="SliderWidget.js.html#line50">line 50</a>
+        <a href="SliderWidgetWithButtons.js.html">SliderWidgetWithButtons.js</a>, <a href="SliderWidgetWithButtons.js.html#line49">line 49</a>
     </li></ul></dd>
     
 
@@ -1090,7 +1097,7 @@
     Returns a serialised version of the widget in JSON format.
              This is useful for saving/loading a specific instance of the widget.
              In the current implementation, the following attributes are included in the JSON object:
-             <li> type (string): widget type, i.e., "sliderwidget" in this case
+             <li> type (string): widget type, i.e., "SliderWidgetWithButtons" in this case
              <li> id (string): the unique identifier of the widget instance
              <li> backgroundColor (string): the background color of the button
              <li> orientation (string): either horizontal or vertical
@@ -1137,7 +1144,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SliderWidget.js.html">SliderWidget.js</a>, <a href="SliderWidget.js.html#line378">line 378</a>
+        <a href="SliderWidgetWithButtons.js.html">SliderWidgetWithButtons.js</a>, <a href="SliderWidgetWithButtons.js.html#line269">line 269</a>
     </li></ul></dd>
     
 
