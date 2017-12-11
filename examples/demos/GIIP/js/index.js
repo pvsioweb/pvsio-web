@@ -110,15 +110,22 @@ require([
             max: 500,
             min: 0,
             init: 0,
-            hide_labels: true,
-            handle: "none",
-            zero_padding: true,
-            backgroundColor: "transparent",
-            borderColor: "transparent",
-            tooltipBackgroundColor: "transparent",
-            tooltipArrowColor: "white",
-            sliderColor: "#3ac441",
-            readonly: true,
+            style: "level-indicator",
+            // orientation: "horizontal",
+            // handle: {
+            //     type: "hidden"
+            // },
+            // zero_padding: true,
+            // backgroundColor: "transparent",
+            // borderColor: "transparent",
+            tooltip: {
+                arrowColor: "white",
+                position: "left"
+            },
+            // track: {
+            //     color: "#3ac441"
+            // },
+            // readonly: true,
             labelFormat: function (value) {
                 if (value === 1) {
                     return value + " unit";

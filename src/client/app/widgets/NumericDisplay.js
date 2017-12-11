@@ -58,8 +58,7 @@ define(function (require, exports, module) {
      *          <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
      *          <li>cursorName (string): the name of the state attribute defining the cursor position. This information will be used by the render method. If this options is not specified, the cursor will not be displayed.
      *          <li>displayKey (string): the name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.
-     *          <li>fontfamily (String): font type (default is "sans-serif")</li>
-     *          <li>fontsize (Number): font size (default is 0.8 * height)</li>
+     *          <li>fontsize (Number): font size (default is 0.8 * coords.height)</li>
      *          <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
      *          <li>inverted (Bool): if true, the text has inverted colors,
@@ -141,110 +140,7 @@ define(function (require, exports, module) {
     NumericDisplay.prototype.constructor = NumericDisplay;
     NumericDisplay.prototype.parentClass = Widget.prototype;
 
-    /**
-     * @function <a name="toJSON">toJSON</a>
-     * @description Returns a serialised version of the widget in JSON format.
-     *              This is useful for saving/loading a specific instance of the widget.
-     *              In the current implementation, the following attributes are included in the JSON object:
-     *              <li> type (string): widget type, i.e., "numericdisplay" in this case
-     *              <li> id (string): the unique identifier of the widget instance
-     *              <li> fontsize (string): the font size of the display
-     *              <li> fontColor (string): the font color of the display
-     *              <li> backgroundColor (string): the background color of the display
-     *              <li> displayKey (string): the name of the state attribute defining the display content.
-     *              <li> cursorName (string): the name of the state attribute defining the cursor position.
-     *              <li> visibleWhen (string): a booloan expression defining when the condition under which the widget is visible
-     *              <li> auditoryFeedback (string): whether display readback is enabled
-     * @returns JSON object
-     * @memberof module:NumericDisplay
-     * @instance
-     */
-    NumericDisplay.prototype.toJSON = function () {
-        return {
-            type: this.type(),
-            id: this.id(),
-            displayKey: this.displayKey(),
-            cursorName: this.cursorName(),
-            auditoryFeedback: this.auditoryFeedback(),
-            visibleWhen: this.visibleWhen(),
-            fontsize: this.fontsize,
-            fontColor: this.fontColor,
-            backgroundColor: this.backgroundColor
-        };
-    };
-    /**
-    * Updates the location and size of the widget according to the given position and size
-     */
-    NumericDisplay.prototype.updateLocationAndSize = function (pos, opt) {
-        opt = opt || {};
-        if (opt.imageMap) {
-            NumericDisplay.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
-        }
-        this.top = pos.y || 0;
-        this.left = pos.x || 0;
-        this.width = pos.width || 200;
-        this.height = pos.height || 80;
-        // this.fontsize = this.height * 0.9;
-        // this.font = [this.fontsize, "px ", this.fontfamily];
-        // this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
-        d3.select("div." + this.id()).style("left", this.left + "px").style("top", this.top + "px")
-            .style("width", this.width + "px").style("height", this.height + "px").style("font-size", this.fontsize + "px");
-        d3.select("div." + this.id()).select("span").attr("width", this.width + "px").attr("height", this.height + "px"); // used for glyphicon
-        d3.select("div." + this.id()).select("canvas").attr("width", this.width + "px").attr("height", this.height + "px"); // used for standard text and numbers
-        return this.render(this.example, opt);
-    };
-    NumericDisplay.prototype.updateStyle = function (data) {
-        data = data || {};
-        this.fontsize = data.fontsize || this.fontsize;
-        this.font = [this.fontsize, "px ", this.fontfamily];
-        this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
-        this.fontColor = data.fontColor || this.fontColor;
-        this.backgroundColor = data.backgroundColor || this.backgroundColor;
-        return this;
-    };
-    /**
-     * @function <a name="remove">remove</a>
-     * @description Removes the div elements of the widget from the html page -- useful to programmaticaly remove widgets from a page.
-     * @memberof module:NumericDisplay
-     * @instance
-     */
-    NumericDisplay.prototype.remove = function () {
-        NumericDisplay.prototype.parentClass.remove.apply(this);
-        d3.select("div." + this.id()).remove();
-    };
-    /**
-     * @function <a name="setColors">setColors</a>
-     * @description Sets the font color and background color.
-     * @param colors {Object} Font color and background color. Attributed of the object are fontColor: (string) and backgroundColor (string).
-     * @param opt {Object} Override options for the display style, useful to dynamically change the display style during a simulation. Available options include:
-     *              <li> fontsize (string): the font size of the display
-     *              <li> fontColor (string): the font color of the display
-     *              <li> backgroundColor (string): the background color of the display
-     *              <li> blinking (Bool): true means the text is blinking
-     * @memberof module:NumericDisplay
-     * @instance
-     */
-    NumericDisplay.prototype.setColors = function (colors, opt) {
-        colors = colors || {};
-        opt = opt || {};
-        opt.auditoryFeedback = opt.auditoryFeedback || "disabled";
-        this.fontColor = colors.fontColor || this.fontColor;
-        this.backgroundColor = colors.backgroundColor || this.backgroundColor;
-        return this.render(this.txt, opt);
-    };
-    /**
-     * @function <a name="invertColors">invertColors</a>
-     * @description Inverts the colors of the display (as in a negative).
-     * @memberof module:NumericDisplay
-     * @instance
-     */
-    NumericDisplay.prototype.invertColors = function () {
-        var tmp = this.backgroundColor;
-        this.backgroundColor = this.fontColor;
-        this.fontColor = tmp;
-        var elemIsBlinking = (document.getElementById(this.id()).getAttribute("class").indexOf("blink") >= 0);
-        return this.render(this.txt, { blinking: elemIsBlinking });
-    };
+
     /**
      * @function <a name="render">render</a>
      * @description Renders the widget (i.e., sets the content according to the parameters and makes the widget visible)
@@ -440,7 +336,7 @@ define(function (require, exports, module) {
                 context: context,
                 align: align,
                 height: this.height,
-                width: this.width
+                width: this.width - 2 * this.borderWidth
             }, opt);
             d3.select("#" + this.id() + "_canvas").style("display", "block");
             d3.select("#" + this.id() + "_span").style("display", "none");
@@ -454,6 +350,39 @@ define(function (require, exports, module) {
         return this.render(txt, { visibleWhen: "true" });
     };
 
+    /**
+     * @function <a name="setColors">setColors</a>
+     * @description Sets the font color and background color.
+     * @param colors {Object} Font color and background color. Attributed of the object are fontColor: (string) and backgroundColor (string).
+     * @param opt {Object} Override options for the display style, useful to dynamically change the display style during a simulation. Available options include:
+     *              <li> fontsize (string): the font size of the display
+     *              <li> fontColor (string): the font color of the display
+     *              <li> backgroundColor (string): the background color of the display
+     *              <li> blinking (Bool): true means the text is blinking
+     * @memberof module:NumericDisplay
+     * @instance
+     */
+    NumericDisplay.prototype.setColors = function (colors, opt) {
+        colors = colors || {};
+        opt = opt || {};
+        opt.auditoryFeedback = opt.auditoryFeedback || "disabled";
+        this.fontColor = colors.fontColor || this.fontColor;
+        this.backgroundColor = colors.backgroundColor || this.backgroundColor;
+        return this.render(this.txt, opt);
+    };
+    /**
+     * @function <a name="invertColors">invertColors</a>
+     * @description Inverts the colors of the display (as in a negative).
+     * @memberof module:NumericDisplay
+     * @instance
+     */
+    NumericDisplay.prototype.invertColors = function () {
+        var tmp = this.backgroundColor;
+        this.backgroundColor = this.fontColor;
+        this.fontColor = tmp;
+        var elemIsBlinking = (document.getElementById(this.id()).getAttribute("class").indexOf("blink") >= 0);
+        return this.render(this.txt, { blinking: elemIsBlinking });
+    };
 
     /**
      * @function <a name="hide">hide</a>
@@ -495,6 +424,79 @@ define(function (require, exports, module) {
             this.div.style("left", this.left + "px");
         }
         return this;
+    };
+
+
+    /**
+     * @function <a name="toJSON">toJSON</a>
+     * @description Returns a serialised version of the widget in JSON format.
+     *              This is useful for saving/loading a specific instance of the widget.
+     *              In the current implementation, the following attributes are included in the JSON object:
+     *              <li> type (string): widget type, i.e., "numericdisplay" in this case
+     *              <li> id (string): the unique identifier of the widget instance
+     *              <li> fontsize (string): the font size of the display
+     *              <li> fontColor (string): the font color of the display
+     *              <li> backgroundColor (string): the background color of the display
+     *              <li> displayKey (string): the name of the state attribute defining the display content.
+     *              <li> cursorName (string): the name of the state attribute defining the cursor position.
+     *              <li> visibleWhen (string): a booloan expression defining when the condition under which the widget is visible
+     *              <li> auditoryFeedback (string): whether display readback is enabled
+     * @returns JSON object
+     * @memberof module:NumericDisplay
+     * @instance
+     */
+    NumericDisplay.prototype.toJSON = function () {
+        return {
+            type: this.type(),
+            id: this.id(),
+            displayKey: this.displayKey(),
+            cursorName: this.cursorName(),
+            auditoryFeedback: this.auditoryFeedback(),
+            visibleWhen: this.visibleWhen(),
+            fontsize: this.fontsize,
+            fontColor: this.fontColor,
+            backgroundColor: this.backgroundColor
+        };
+    };
+    /**
+    * Updates the location and size of the widget according to the given position and size
+     */
+    NumericDisplay.prototype.updateLocationAndSize = function (pos, opt) {
+        opt = opt || {};
+        if (opt.imageMap) {
+            NumericDisplay.prototype.parentClass.updateLocationAndSize.apply(this, arguments);
+        }
+        this.top = pos.y || 0;
+        this.left = pos.x || 0;
+        this.width = pos.width || 200;
+        this.height = pos.height || 80;
+        // this.fontsize = this.height * 0.9;
+        // this.font = [this.fontsize, "px ", this.fontfamily];
+        // this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
+        d3.select("div." + this.id()).style("left", this.left + "px").style("top", this.top + "px")
+            .style("width", this.width + "px").style("height", this.height + "px").style("font-size", this.fontsize + "px");
+        d3.select("div." + this.id()).select("span").attr("width", this.width + "px").attr("height", this.height + "px"); // used for glyphicon
+        d3.select("div." + this.id()).select("canvas").attr("width", this.width + "px").attr("height", this.height + "px"); // used for standard text and numbers
+        return this.render(this.example, opt);
+    };
+    NumericDisplay.prototype.updateStyle = function (data) {
+        data = data || {};
+        this.fontsize = data.fontsize || this.fontsize;
+        this.font = [this.fontsize, "px ", this.fontfamily];
+        this.smallFont = [(this.fontsize * 0.7), "px ", this.fontfamily];
+        this.fontColor = data.fontColor || this.fontColor;
+        this.backgroundColor = data.backgroundColor || this.backgroundColor;
+        return this;
+    };
+    /**
+     * @function <a name="remove">remove</a>
+     * @description Removes the div elements of the widget from the html page -- useful to programmaticaly remove widgets from a page.
+     * @memberof module:NumericDisplay
+     * @instance
+     */
+    NumericDisplay.prototype.remove = function () {
+        NumericDisplay.prototype.parentClass.remove.apply(this);
+        d3.select("div." + this.id()).remove();
     };
 
     module.exports = NumericDisplay;

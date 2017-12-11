@@ -225,7 +225,6 @@ define(function (require, exports, module) {
 
         this.press(opt);
         timerTickFunction = function () {
-            console.log("timer ticked_" + f);
             ButtonActionsQueue.queueGUIAction("press_" + f, opt.callback);
             anim();
             //record action
@@ -249,7 +248,7 @@ define(function (require, exports, module) {
         opt = opt || {};
         var anim = opt.animation || this.animation || function () {};
         opt.callback = opt.callback || this.callback;
-        var functionText = opt.functionText || this.customFunctionText() || ("click_" + this.functionText());
+        var functionText = this.customFunctionText() || opt.functionText || ("click_" + this.functionText());
         ButtonActionsQueue.queueGUIAction(functionText, opt.callback);
 
         anim();

@@ -293,9 +293,8 @@
          <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
          <li>blinking (Bool): true means the display is blinking (default is false, i.e., not blinking)</li>
          <li>displayKey (string): name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.</li>
-         <li>fontfamily (String): font type (default is "sans-serif")</li>
-         <li>fontsize (Number): font size (default is 0.8 * height)</li>
-         <li>fontfamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
+         <li>fontSize (Number): font size (default is 0.8 * coords.height)</li>
+         <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
          <li>format (String): sets the display format. When this option is set to "mm:ss", the display value represents seconds, and format to be displayed is mm:ss</li>
          <li>inverted (Bool): if true, the text has inverted colors,
@@ -429,7 +428,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line533">line 533</a>
+        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line466">line 466</a>
     </li></ul></dd>
     
 
@@ -515,7 +514,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line236">line 236</a>
+        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line316">line 316</a>
     </li></ul></dd>
     
 
@@ -601,7 +600,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line249">line 249</a>
+        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line329">line 329</a>
     </li></ul></dd>
     
 
@@ -736,7 +735,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line555">line 555</a>
+        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line488">line 488</a>
     </li></ul></dd>
     
 
@@ -852,7 +851,7 @@
             
 
             <td class="description last">Override options for the display style, useful to dynamically change the display style during simulations. Available options include:
-             <li> fontsize (string): the font size of the display
+             <li> fontSize (string): the font size of the display
              <li> fontColor (string): the font color of the display
              <li> backgroundColor (string): the background color of the display
              <li> borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)</li>
@@ -899,7 +898,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line267">line 267</a>
+        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line145">line 145</a>
     </li></ul></dd>
     
 
@@ -1052,7 +1051,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line415">line 415</a>
+        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line348">line 348</a>
     </li></ul></dd>
     
 
@@ -1191,7 +1190,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line445">line 445</a>
+        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line378">line 378</a>
     </li></ul></dd>
     
 
@@ -1292,7 +1291,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line544">line 544</a>
+        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line477">line 477</a>
     </li></ul></dd>
     
 
@@ -1410,7 +1409,7 @@
             
 
             <td class="description last">Override options for the display style, useful to dynamically change the display style during a simulation. Available options include:
-             <li> fontsize (string): the font size of the display
+             <li> fontSize (string): the font size of the display
              <li> fontColor (string): the font color of the display
              <li> backgroundColor (string): the background color of the display
              <li> blinking (Bool): true means the text is blinking</td>
@@ -1454,7 +1453,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line213">line 213</a>
+        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line293">line 293</a>
     </li></ul></dd>
     
 
@@ -1501,7 +1500,7 @@
              In the current implementation, the following attributes are included in the JSON object:
              <li> type (string): widget type, i.e., "display" in this case
              <li> id (string): the unique identifier of the widget instance
-             <li> fontsize (string): the font size of the display
+             <li> fontSize (string): the font size of the display
              <li> fontColor (string): the font color of the display
              <li> backgroundColor (string): the background color of the display
              <li> displayKey (string): the name of the state attribute defining the display content.
@@ -1550,7 +1549,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line144">line 144</a>
+        <a href="BasicDisplay.js.html">BasicDisplay.js</a>, <a href="BasicDisplay.js.html#line508">line 508</a>
     </li></ul></dd>
     
 
@@ -1604,13 +1603,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-BasicDisplay.html">BasicDisplay</a></li><li><a href="module-Gauge.html">Gauge</a></li><li><a href="module-NumericDisplay.html">NumericDisplay</a></li><li><a href="module-SliderWidget.html">SliderWidget</a></li><li><a href="module-ToggleButton.html">ToggleButton</a></li><li><a href="module-TouchscreenButton.html">TouchscreenButton</a></li><li><a href="module-TouchscreenDisplay.html">TouchscreenDisplay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-BasicDisplay.html">BasicDisplay</a></li><li><a href="module-Gauge.html">Gauge</a></li><li><a href="module-NumericDisplay.html">NumericDisplay</a></li><li><a href="module-SliderWidget.html">SliderWidget</a></li><li><a href="module-SliderWidgetWithButtons.html">SliderWidgetWithButtons</a></li><li><a href="module-ToggleButton.html">ToggleButton</a></li><li><a href="module-TouchscreenButton.html">TouchscreenButton</a></li><li><a href="module-TouchscreenDisplay.html">TouchscreenDisplay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.0-dev</a> on Thu Nov 30 2017 17:18:14 GMT+0000 (WET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.0-dev</a> on Sun Dec 10 2017 23:45:24 GMT+0000 (WET)
 </footer>
 
 <script> prettyPrint(); </script>

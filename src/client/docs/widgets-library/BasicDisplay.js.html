@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: BasicDisplay.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: BasicDisplay.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @module BasicDisplay
  * @version 2.1
  * @description Renders a basic digital display.
@@ -7,7 +35,7 @@
  * @author Paolo Masci, Patrick Oladimeji, Henrique Pacheco
  * @date May 12, 2017
  *
- * @example <caption>Example use of the widget.</caption>
+ * @example &lt;caption>Example use of the widget.&lt;/caption>
  // Example pvsio-web demo that uses BasicDisplay
  // The following configuration assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demo/
  require.config({
@@ -42,29 +70,29 @@ define(function (require, exports, module) {
         property = require("util/property");
 
     /**
-     * @function <a name="BasicDisplay">BasicDisplay</a>
+     * @function &lt;a name="BasicDisplay">BasicDisplay&lt;/a>
      * @description Constructor.
      * @param id {String} The ID of the display.
      * @param coords {Object} The four coordinates (top, left, width, height) of the display, specifying
      *        the left, top corner, and the width and height of the (rectangular) display.
      *        Default is { top: 0, left: 0, width: 200, height: 80 }.
      * @param opt {Object} Options:
-     *          <li>align (String): text alignment (available options are "left", "right", anc "center". Default is "center")</li>
-     *          <li>backgroundColor (String): background display color (default is black, "#000")</li>
-     *          <li>borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)</li>
-     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
-     *          <li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
-     *          <li>blinking (Bool): true means the display is blinking (default is false, i.e., not blinking)</li>
-     *          <li>displayKey (string): name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.</li>
-     *          <li>fontSize (Number): font size (default is 0.8 * coords.height)</li>
-     *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
-     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
-     *          <li>format (String): sets the display format. When this option is set to "mm:ss", the display value represents seconds, and format to be displayed is mm:ss</li>
-     *          <li>inverted (Bool): if true, the text has inverted colors,
-     *              i.e., fontColor becomes backgroundColor, and backgroundColor becomes fontColor (default is false)</li>
-     *          <li>letterSpacing (Number): spacing between characters, in pixels (default is 0)</li>
-     *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
-     *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
+     *          &lt;li>align (String): text alignment (available options are "left", "right", anc "center". Default is "center")&lt;/li>
+     *          &lt;li>backgroundColor (String): background display color (default is black, "#000")&lt;/li>
+     *          &lt;li>borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)&lt;/li>
+     *          &lt;li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")&lt;/li>
+     *          &lt;li>borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")&lt;/li>
+     *          &lt;li>blinking (Bool): true means the display is blinking (default is false, i.e., not blinking)&lt;/li>
+     *          &lt;li>displayKey (string): name of the state attribute defining the display content. This information will be used by the render method. Default is the ID of the display.&lt;/li>
+     *          &lt;li>fontSize (Number): font size (default is 0.8 * coords.height)&lt;/li>
+     *          &lt;li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")&lt;/li>
+     *          &lt;li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")&lt;/li>
+     *          &lt;li>format (String): sets the display format. When this option is set to "mm:ss", the display value represents seconds, and format to be displayed is mm:ss&lt;/li>
+     *          &lt;li>inverted (Bool): if true, the text has inverted colors,
+     *              i.e., fontColor becomes backgroundColor, and backgroundColor becomes fontColor (default is false)&lt;/li>
+     *          &lt;li>letterSpacing (Number): spacing between characters, in pixels (default is 0)&lt;/li>
+     *          &lt;li>parent (String): the HTML element where the display will be appended (default is "body")&lt;/li>
+     *          &lt;li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).&lt;/li>
      * @memberof module:BasicDisplay
      * @instance
      */
@@ -143,18 +171,18 @@ define(function (require, exports, module) {
     BasicDisplay.prototype.parentClass = Widget.prototype;
 
     /**
-     * @function <a name="render">render</a>
+     * @function &lt;a name="render">render&lt;/a>
      * @param data {Object} JSON object representing the display to be rendered.
-     *                      The display value is specified in the attribute <displayKey>
-     *                      (the actual value of <displayKey> is instantiated when creating the widget, see constructor's options)
+     *                      The display value is specified in the attribute &lt;displayKey>
+     *                      (the actual value of &lt;displayKey> is instantiated when creating the widget, see constructor's options)
      * @param opt {Object} Override options for the display style, useful to dynamically change the display style during simulations. Available options include:
-     *              <li> fontSize (string): the font size of the display
-     *              <li> fontColor (string): the font color of the display
-     *              <li> backgroundColor (string): the background color of the display
-     *              <li> borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)</li>
-     *              <li> borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")</li>
-     *              <li> borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")</li>
-     *              <li> blinking (Bool): true means the text is blinking
+     *              &lt;li> fontSize (string): the font size of the display
+     *              &lt;li> fontColor (string): the font color of the display
+     *              &lt;li> backgroundColor (string): the background color of the display
+     *              &lt;li> borderWidth (Number): border width (default is 0, i.e., no border, unless option borderColor has been specified -- in this case, the border is 2px)&lt;/li>
+     *              &lt;li> borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid" (default is "none")&lt;/li>
+     *              &lt;li> borderColor (String): border color, must be a valid HTML5 color (default color used in the widget is "black")&lt;/li>
+     *              &lt;li> blinking (Bool): true means the text is blinking
      * @memberof module:BasicDisplay
      * @instance
      */
@@ -162,7 +190,7 @@ define(function (require, exports, module) {
         var _this = this;
         function renderln(data, opt) {
             function filltext (data, txt, align) {
-                for (var i = 0; i < txt.length; i++) {
+                for (var i = 0; i &lt; txt.length; i++) {
                     if (align === "right") {
                         data.context.fillText(txt[txt.length - 1 - i], data.width - _this.letterSpacing * i, data.height / 2);
                     } else if (align === "left") {
@@ -208,15 +236,15 @@ define(function (require, exports, module) {
         var isEnabled = false;
         var visibleWhen = opt.visibleWhen || this.visibleWhen();
         var expr = StateParser.simpleExpressionParser(visibleWhen);
-        if (expr && expr.res) {
-            if (expr.res.type === "constexpr" && expr.res.constant === "true") {
+        if (expr &amp;&amp; expr.res) {
+            if (expr.res.type === "constexpr" &amp;&amp; expr.res.constant === "true") {
                 isEnabled = true;
-            } else if (expr.res.type === "boolexpr" && expr.res.binop) {
+            } else if (expr.res.type === "boolexpr" &amp;&amp; expr.res.binop) {
                 var str = StateParser.resolve(txt, expr.res.attr);
                 if (str) {
                     str = StateParser.evaluate(str);
-                    if ((expr.res.binop === "=" && str === expr.res.constant) ||
-                         (expr.res.binop === "!=" && str !== expr.res.constant)) {
+                    if ((expr.res.binop === "=" &amp;&amp; str === expr.res.constant) ||
+                         (expr.res.binop === "!=" &amp;&amp; str !== expr.res.constant)) {
                              isEnabled = true;
                     }
                 }
@@ -244,13 +272,13 @@ define(function (require, exports, module) {
             } else {
                 this.txt = txt;
             }
-            if (this.format === "mm:ss" && !isNaN(parseFloat(this.txt))) {
+            if (this.format === "mm:ss" &amp;&amp; !isNaN(parseFloat(this.txt))) {
                 // value represents seconds, and format to be displayed is mm:ss
                 var val = parseFloat(this.txt);
                 var minutes = Math.floor(val / 60);
                 var seconds = Math.floor(val - (minutes * 60));
-                var minutes_txt = (minutes < 10)? "0" + minutes : minutes;
-                var seconds_txt = (seconds < 10)? "0" + seconds : seconds;
+                var minutes_txt = (minutes &lt; 10)? "0" + minutes : minutes;
+                var seconds_txt = (seconds &lt; 10)? "0" + seconds : seconds;
                 this.text2speech = minutes + " minutes and " + seconds + " seconds";
                 this.txt = minutes_txt + ":" + seconds_txt;
             }
@@ -267,7 +295,7 @@ define(function (require, exports, module) {
             var elemClass = document.getElementById(this.id()).getAttribute("class");
             if(elemClass) {
                 elemClass = (opt.blinking || this.blinking) ?
-                                ((elemClass.indexOf("blink") < 0) ? (elemClass + " blink") : elemClass)
+                                ((elemClass.indexOf("blink") &lt; 0) ? (elemClass + " blink") : elemClass)
                                 : elemClass.replace(" blink", "");
                 document.getElementById(this.id()).setAttribute("class", elemClass);
             }
@@ -291,14 +319,14 @@ define(function (require, exports, module) {
     };
 
     /**
-     * @function <a name="setColors">setColors</a>
+     * @function &lt;a name="setColors">setColors&lt;/a>
      * @description Sets the font color and background color.
      * @param colors {Object} Font color and background color. Attributed of the object are fontColor: (string) and backgroundColor (string).
      * @param opt {Object} Override options for the display style, useful to dynamically change the display style during a simulation. Available options include:
-     *              <li> fontSize (string): the font size of the display
-     *              <li> fontColor (string): the font color of the display
-     *              <li> backgroundColor (string): the background color of the display
-     *              <li> blinking (Bool): true means the text is blinking
+     *              &lt;li> fontSize (string): the font size of the display
+     *              &lt;li> fontColor (string): the font color of the display
+     *              &lt;li> backgroundColor (string): the background color of the display
+     *              &lt;li> blinking (Bool): true means the text is blinking
      * @memberof module:BasicDisplay
      * @instance
      */
@@ -314,7 +342,7 @@ define(function (require, exports, module) {
         return this.render(this.txt, opt);
     };
     /**
-     * @function <a name="invertColors">invertColors</a>
+     * @function &lt;a name="invertColors">invertColors&lt;/a>
      * @description Inverts the colors of the display (as in a negative).
      * @memberof module:BasicDisplay
      * @instance
@@ -327,7 +355,7 @@ define(function (require, exports, module) {
         return this.render(this.txt, { blinking: elemIsBlinking });
     };
     /**
-     * @function <a name="invertGlyphiconColors">invertGlyphiconColors</a>
+     * @function &lt;a name="invertGlyphiconColors">invertGlyphiconColors&lt;/a>
      * @description Inverts the colors of the glyphicond rendered with the display widget.
      * @memberof module:BasicDisplay
      * @instance
@@ -346,7 +374,7 @@ define(function (require, exports, module) {
     };
 
     /**
-     * @function <a name="renderGlyphicon">renderGlyphicon</a>
+     * @function &lt;a name="renderGlyphicon">renderGlyphicon&lt;/a>
      * @description Renders a glyphicon.
      * @param icon (String) Name of the glyphicon to be rendered, e.g., glyphicon-time. Glyphicon names are those of the bootstrap library (https://getbootstrap.com/docs/3.3/components/)
      * @param opt {Object} Override options. Same options available for the render() method.
@@ -376,7 +404,7 @@ define(function (require, exports, module) {
 
 
     /**
-     * @function <a name="renderMultiline">renderMultiline</a>
+     * @function &lt;a name="renderMultiline">renderMultiline&lt;/a>
      * @description Renders an array of display elements. Useful for displaying menus.
      * @example var disp = new BasicDisplay("disp");
                 disp.renderMultiline([ res.bagsval0 + " ml",
@@ -390,10 +418,10 @@ define(function (require, exports, module) {
                                        res.bagsval8 + " ml",
                                        res.bagsval9 + " ml" ], { selected: 0, direction: "inverted" });
      * @param opt {Object} Override options
-     *           <li>blinking (bool) Whether the widget is blinking (default: false, i.e., not blinking)</li>
-     *           <li>direction (String) Whether the display elements are rendered from top to bottom,
-     *               or from bottom to top. Default direction is top to bottom. Use "inverted" to render from bottom to top.</li>
-     *           <li>selected (Number) A number representing the index of the selected display element.</li>
+     *           &lt;li>blinking (bool) Whether the widget is blinking (default: false, i.e., not blinking)&lt;/li>
+     *           &lt;li>direction (String) Whether the display elements are rendered from top to bottom,
+     *               or from bottom to top. Default direction is top to bottom. Use "inverted" to render from bottom to top.&lt;/li>
+     *           &lt;li>selected (Number) A number representing the index of the selected display element.&lt;/li>
      * @memberof module:BasicDisplay
      * @instance
      */
@@ -429,12 +457,12 @@ define(function (require, exports, module) {
         clearContext(context, this.width, this.height);
         context.textBaseline = this.textBaseline;
         var align = opt.align || this.align;
-        if (typeof txt === "object" && txt.length) {
+        if (typeof txt === "object" &amp;&amp; txt.length) {
             var fontSize = opt.menuFontSize || (this.height / txt.length);
             var newFont = [ fontSize ].concat(this.font.slice(1));
             context.font = newFont.join("");
             var i = 0;
-            for (i = 0; i < txt.length; i++) {
+            for (i = 0; i &lt; txt.length; i++) {
                 var offset = (opt.direction === "inverted") ? txt.length - i - 1 : i;
                 renderln({
                     txt:  txt[i],
@@ -450,7 +478,7 @@ define(function (require, exports, module) {
         // set blinking
         var elemClass = document.getElementById(this.id()).getAttribute("class");
         if (opt.blinking || this.blinking) {
-            if (elemClass.indexOf("blink") < 0) {
+            if (elemClass.indexOf("blink") &lt; 0) {
                 elemClass = elemClass + " blink";
             }
         } else {
@@ -464,7 +492,7 @@ define(function (require, exports, module) {
     };
 
     /**
-     * @function <a name="hide">hide</a>
+     * @function &lt;a name="hide">hide&lt;/a>
      * @description Hides the widget
      * @memberof module:BasicDisplay
      * @instance
@@ -475,7 +503,7 @@ define(function (require, exports, module) {
     };
 
     /**
-     * @function <a name="reveal">reveal</a>
+     * @function &lt;a name="reveal">reveal&lt;/a>
      * @description Makes the widget visible
      * @memberof module:BasicDisplay
      * @instance
@@ -486,7 +514,7 @@ define(function (require, exports, module) {
     };
 
     /**
-     * @function <a name="move">move</a>
+     * @function &lt;a name="move">move&lt;/a>
      * @description Changes the position of the widget according to the coordinates given as parameter.
      * @param data {Object} Coordinates indicating the new position of the widget. The coordinates are given in the form { top: (number), left: (number) }
      * @memberof module:BasicDisplay
@@ -506,18 +534,18 @@ define(function (require, exports, module) {
     };
 
     /**
-     * @function <a name="toJSON">toJSON</a>
+     * @function &lt;a name="toJSON">toJSON&lt;/a>
      * @description Returns a serialised version of the widget in JSON format.
      *              This is useful for saving/loading a specific instance of the widget.
      *              In the current implementation, the following attributes are included in the JSON object:
-     *              <li> type (string): widget type, i.e., "display" in this case
-     *              <li> id (string): the unique identifier of the widget instance
-     *              <li> fontSize (string): the font size of the display
-     *              <li> fontColor (string): the font color of the display
-     *              <li> backgroundColor (string): the background color of the display
-     *              <li> displayKey (string): the name of the state attribute defining the display content.
-     *              <li> visibleWhen (string): a booloan expression defining when the condition under which the widget is visible
-     *              <li> auditoryFeedback (string): whether display readback is enabled
+     *              &lt;li> type (string): widget type, i.e., "display" in this case
+     *              &lt;li> id (string): the unique identifier of the widget instance
+     *              &lt;li> fontSize (string): the font size of the display
+     *              &lt;li> fontColor (string): the font color of the display
+     *              &lt;li> backgroundColor (string): the background color of the display
+     *              &lt;li> displayKey (string): the name of the state attribute defining the display content.
+     *              &lt;li> visibleWhen (string): a booloan expression defining when the condition under which the widget is visible
+     *              &lt;li> auditoryFeedback (string): whether display readback is enabled
      * @returns JSON object
      * @memberof module:BasicDisplay
      * @instance
@@ -565,7 +593,7 @@ define(function (require, exports, module) {
         return this;
     };
     /**
-     * @function <a name="remove">remove</a>
+     * @function &lt;a name="remove">remove&lt;/a>
      * @description Removes the div elements of the widget from the html page -- useful to programmaticaly remove widgets from a page.
      * @memberof module:TouchscreenButton
      * @instance
@@ -577,3 +605,26 @@ define(function (require, exports, module) {
 
     module.exports = BasicDisplay;
 });
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-BasicDisplay.html">BasicDisplay</a></li><li><a href="module-Gauge.html">Gauge</a></li><li><a href="module-NumericDisplay.html">NumericDisplay</a></li><li><a href="module-SliderWidget.html">SliderWidget</a></li><li><a href="module-SliderWidgetWithButtons.html">SliderWidgetWithButtons</a></li><li><a href="module-ToggleButton.html">ToggleButton</a></li><li><a href="module-TouchscreenButton.html">TouchscreenButton</a></li><li><a href="module-TouchscreenDisplay.html">TouchscreenDisplay</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.0-dev</a> on Sun Dec 10 2017 23:45:24 GMT+0000 (WET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

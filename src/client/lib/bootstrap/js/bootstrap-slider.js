@@ -1045,7 +1045,7 @@ const windowIsDefined = (typeof window === "object");
 
 			relayout: function() {
 				this._resize();
-				this._layout();
+				// this._layout(); // --- _resize() already calls _layout()
 				return this;
 			},
 
@@ -1686,6 +1686,7 @@ const windowIsDefined = (typeof window === "object");
 				return false;
 			},
 			_calculateValue: function(snapToClosestTick) {
+				snapToClosestTick = false; // override -- we don't want this behaviour, ever.
 				var val;
 				if (this.options.range) {
 					val = [this.options.min,this.options.max];

@@ -1,7 +1,13 @@
 Changelog
 ==========
+2.3.0 (Dec 2017)
+---------------
+    Added new demo: Medicaltech MT32-evo
+    Added new code generator: JavaScript
+    Added Playback Player APIs for creating training material
+    Documentation for core widgets APIs (see http://localhost:8082/docs/widgets-library)
 
-2.2 (June 2017)
+2.2.0 (June 2017)
 ---------------
     Added new demo: Medrad Stellant CT Injection System
     Added new demo: Pillbox device prototype

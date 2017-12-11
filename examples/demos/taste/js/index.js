@@ -144,14 +144,14 @@ require([
             top: 280,
             left: 115,
             width: 40,
-            height: 300
+            height: 200
         }, {
             max: 340,
             min: 0,
             orientation: "horizontal",
             tooltipPosition: "inner",
             handleWidth: 40,
-            handleHeight: 100,
+            handleHeight: 60,
             backgroundColor: "transparent",
             track: {
                 color: "transparent",

@@ -1,0 +1,73 @@
+% ---------------------------------------------------------------
+%  Theory: main / taste demo
+%  Author: Paolo Masci
+%          INESC TEC and Universidade do Minho
+% ---------------------------------------------------------------
+
+main: THEORY
+ BEGIN
+
+ MAX_PRESSURE: int = 340
+ Pressure: TYPE = upto(MAX_PRESSURE)
+
+ MAX_FLOW: int = 20
+ Flow: TYPE = upto(MAX_FLOW)
+
+ MAX_TEMP: real = 100
+ MIN_TEMP: real = -20
+ Temperature: TYPE = { x: real | x >= MIN_TEMP AND x <= MAX_TEMP }
+
+ State: TYPE = [#
+    pressure: Pressure,
+    flow: Flow,
+    temperature: Temperature,
+    engine: Pressure,
+    isOn: bool
+ #]
+
+ init(x: nat): State = (#
+   pressure := 0,
+   flow := 10,
+   temperature := 24,
+   engine := IF x <= MAX_PRESSURE THEN x ELSE MAX_PRESSURE ENDIF,
+   isOn := TRUE
+ #)
+
+
+ inc_pressure(target: Pressure)(p: Pressure, step: nat): Pressure =
+  LET p_prime = p + step IN
+  COND
+    p_prime <= MAX_PRESSURE -> IF p_prime < target THEN p_prime ELSE target ENDIF,
+    ELSE -> MAX_PRESSURE
+  ENDCOND
+ dec_pressure(target: Pressure)(p: Pressure, step: nat): Pressure =
+  LET p_prime = p - step IN
+  COND
+    p_prime >= 0 -> IF p_prime > target THEN p_prime ELSE target ENDIF,
+    ELSE -> 0
+  ENDCOND
+
+ SLOW: nat = 4
+ FAST: nat = 64
+ tick(st: State): State =
+  COND
+   isOn(st)
+     -> COND
+         pressure(st) < engine(st) -> st WITH [ pressure := inc_pressure(engine(st))(pressure(st), FAST) ],
+         pressure(st) > engine(st) -> st WITH [ pressure := dec_pressure(engine(st))(pressure(st), FAST) ],
+         ELSE -> st
+	ENDCOND,
+   ELSE -> st WITH [ pressure := dec_pressure(0)(pressure(st), SLOW) ]
+  ENDCOND
+
+ set_engine_power(x: Pressure)(st: State): State =
+  COND
+   x >= 0 AND x <= MAX_PRESSURE -> st WITH [ engine := x ],
+   x > MAX_PRESSURE -> st WITH [ engine := MAX_PRESSURE ],
+   ELSE -> st
+  ENDCOND
+  
+ toggle_power(st: State): State = st WITH [ isOn := NOT isOn(st) ]
+  
+
+END main
