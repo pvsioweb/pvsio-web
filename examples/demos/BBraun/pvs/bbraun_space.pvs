@@ -1,6 +1,6 @@
 bbraun_space: THEORY
  BEGIN
- 
+
   %-- constants
   max: posreal = 99999;
   alarmType: TYPE = {silent, beep, muted}
@@ -12,7 +12,7 @@ bbraun_space: THEORY
   Memory: DATATYPE
    BEGIN
      mem(value: bbraun_real): valid?
-     NA: NA?   
+     NA: NA?
    END Memory
 
   State: TYPE = [#
@@ -29,30 +29,28 @@ bbraun_space: THEORY
   int2boolean(i: int): boolean = IF i > 0 THEN TRUE ELSE FALSE ENDIF
   CONVERSION int2boolean
 
-  init(x: bbraun_real): State = (#
-            on := 1,
-          inf:= 0,
-          r  := 0,
-          v  := 0,
-          d  := x,
-          c  := 0,
-          m  := NA
+  init: State = (#
+        on := 1,
+        inf:= 0,
+        r  := 0,
+        v  := 0,
+        d  := 0,
+        c  := 0,
+        m  := NA
   #)
-  CONVERSION init
-  
 
 
   %-- On Off button
   %      - when the pump is on, you can switch it off, unless it's infusing
   %      - when the pump is off, you can only switch it on
   bbraun_on(st: State): State =
-    IF     on(st)  THEN IF NOT inf(st) THEN init(0) WITH [ on := FALSE ] ELSE st ENDIF
-    ELSE   init(0) WITH [ on := TRUE ] ENDIF
+    IF     on(st)  THEN IF NOT inf(st) THEN init WITH [ on := FALSE ] ELSE st ENDIF
+    ELSE   init WITH [ on := TRUE ] ENDIF
 
 
   %-- Start-Stop button
   bbraun_start(st: State): State =
-    IF    on(st) AND d(st) > 0 AND v(st) > 0 AND r(st) > 0 
+    IF    on(st) AND d(st) > 0 AND v(st) > 0 AND r(st) > 0
     THEN  IF inf(st) THEN st WITH [ inf := false ] ELSE st WITH [ inf := true ] ENDIF
     ELSE  st ENDIF
 
@@ -65,21 +63,21 @@ bbraun_space: THEORY
            ELSE st WITH [ inf := false ] ENDIF
     ELSE  st ENDIF
 
-  
+
   %-- interactive data entry sub-system
   pow10(i: Cursor): bbraun_real = ^(10,i);
 
-  min_value(st: State): bbraun_real = 
-   LET i = c(st), val = d(st) 
+  min_value(st: State): bbraun_real =
+   LET i = c(st), val = d(st)
     IN IF i >= 3 AND val >= 1          THEN 1
-       ELSIF (i >= 0 AND i < 3) 
+       ELSIF (i >= 0 AND i < 3)
              OR (i < 0 AND val >= 0.1) THEN 0.1 ELSE 0 ENDIF
 
-  min_position(st: State): Cursor = 
+  min_position(st: State): Cursor =
    LET val = d(st) IN
     COND
       val < 100        -> -2,
-      val >= 100 
+      val >= 100
         AND val < 1000 -> -1,
       val >= 1000      -> 0
     ENDCOND
@@ -155,7 +153,7 @@ bbraun_space: THEORY
 
   %-- right button
   rt: [State -> State] =
-    LAMBDA(st: State): 
+    LAMBDA(st: State):
       LET val = d(st), i = c(st), mem = m(st), min_pos = min_position(st) IN
        COND
          i > min_pos  -> st WITH [ d := val, c := i - 1, m := NA ],
@@ -180,8 +178,8 @@ bbraun_space: THEORY
     ELSE st ENDIF
 
   bbraun_ok(st: State): State =
-    IF on(st) AND d(st) > 0 
-    THEN st WITH [ v := d(st), r := 0.1 ] 
+    IF on(st) AND d(st) > 0
+    THEN st WITH [ v := d(st), r := 0.1 ]
     ELSE st ENDIF
 
   %-- for the pvsio-web demo
@@ -201,6 +199,6 @@ bbraun_space: THEORY
   release_rt(st: State): State = st
   click_rt(st: State): State = release_rt(press_rt(st))
 
-  click_clear(st: State): State = init(0) WITH [ on := 1 ]
+  click_clear(st: State): State = init WITH [ on := 1 ]
 
  END bbraun_space

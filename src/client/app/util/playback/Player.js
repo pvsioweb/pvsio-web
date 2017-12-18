@@ -68,14 +68,18 @@ define(function (require, exports, module) {
     Player.prototype.play = function(opt) {
         opt = opt || {};
         if (this.actions.curr < this.actions.seq.length) {
-            console.log(this.actions.curr);
-            console.log(this.actions.seq.length);
+            console.log("Playback: action " + (this.actions.curr + 1) + " of " + this.actions.seq.length);
             var _this = this;
             var action = this.actions.seq[this.actions.curr];
             var timeout = (action.timeout && action.timeout >= 0)? action.timeout : SELECT_TIMEOUT;
             var when = parseFloat(action.timeStamp - _this.now);
             if (action.button && !isNaN(when) && when >= 0) {
                 _this.timer = window.setTimeout(function () {
+                    if (action.stutter) {
+                        console.log("Stutter: " + action.button.id);
+                    } else {
+                        console.log("Click: " + action.button.id);
+                    }
                     action.button.select({
                         borderColor: action.borderColor || "white",
                         classed: action.classed
@@ -101,6 +105,7 @@ define(function (require, exports, module) {
                     msg.localService = true;
                     msg.rate = _this.rate;
                     msg.pitch = _this.pitch;
+                    console.log("Speaking: " + action.speak);
                     window.speechSynthesis.speak(msg);
                     _this.now = action.timeStamp;
                     _this.actions.curr++;
@@ -131,7 +136,17 @@ define(function (require, exports, module) {
                     _this.play(opt);
                 }, when);
             }
+            if (action.trans) {
+                _this.timer = window.setTimeout(function () {
+                    var duration = action.duration || 1000;
+                    d3.select(action.trans).style("display", "block").style("opacity", 1).style("transform", action.transform).style("transition-duration", duration + "ms");
+                    _this.now = action.timeStamp;
+                    _this.actions.curr++;
+                    _this.play(opt);
+                }, when);
+            }
         }
+        return this;
     };
 
     function scrollTop(id, scrollHeight) {

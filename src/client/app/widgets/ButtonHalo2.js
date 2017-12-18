@@ -70,18 +70,19 @@ define(function (require, exports, module) {
             if (!d3.select("#btnSimulatorView").node() || d3.select("#btnSimulatorView").classed("active")) {
                 var widget = instance._keyCode2widget[eventKeyCode];
                 if (widget) {
-                    var evts = instance._evts[widget.id()];
-                    if (evts && evts.indexOf('click') > -1) {
+                    var id = (typeof widget.id === "function") ? widget.id() : widget.id;
+                    var evts = instance._evts[id];
+                    if (evts && (evts.click || typeof evts.indexOf === 'function' && evts.indexOf('click') > -1)) {
                         widget.click({ callback: widget.callback });
-                        if (!instance._noHalo[widget.id()]) {
-                            instance.halo(widget.id());
+                        if (!instance._noHalo[id]) {
+                            instance.halo(id);
                         }
                         d3.event.preventDefault();
                         d3.event.stopPropagation();
-                    } else if (widget && evts && evts.indexOf("press/release") > -1) {
+                    } else if (widget && evts && (evts["press/release"] || typeof evts.indexOf === 'function' && evts.indexOf("press/release") > -1)) {
                         widget.pressAndHold({ callback: widget.callback });
-                        if (!instance._noHalo[widget.id()]) {
-                            instance.halo(widget.id());
+                        if (!instance._noHalo[id]) {
+                            instance.halo(id);
                         }
                         d3.event.preventDefault();
                         d3.event.stopPropagation();
@@ -98,11 +99,12 @@ define(function (require, exports, module) {
             if (!d3.select("#btnSimulatorView").node() || d3.select("#btnSimulatorView").classed("active")) {
                 var widget = instance._keyCode2widget[eventKeyCode];
                 if (widget) {
-                    var evts = instance._evts[widget.id()];
-                    if (evts && evts.indexOf("press/release") > -1) {
+                    var id = (typeof widget.id === "function") ? widget.id() : widget.id;
+                    var evts = instance._evts[id];
+                    if (evts && (evts["press/release"] || typeof evts.indexOf === 'function' && evts.indexOf("press/release") > -1)) {
                         widget.release({ callback: widget.callback });
                     }
-                    if (!instance._noHalo[widget.id()]) {
+                    if (!instance._noHalo[id]) {
                         instance.haloOff(widget);
                     }
                     d3.event.preventDefault();

@@ -32,7 +32,7 @@
  *
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, document */
+/*global define */
 
 define(function (require, exports, module) {
     "use strict";
@@ -311,7 +311,7 @@ define(function (require, exports, module) {
                 if (dispVal) {
                     dispVal = StateParser.evaluate(dispVal).toString().replace(new RegExp("\"", "g"), "");
                 }
-                cursorPos = StateParser.evaluate(StateParser.resolve(txt, this.cursorName()));
+                cursorPos = parseInt(StateParser.evaluate(StateParser.resolve(txt, this.cursorName())));
             }
             //read out the display value if audio is enabled for this display widget
             if (opt.auditoryFeedback === "enabled") {
@@ -320,13 +320,13 @@ define(function (require, exports, module) {
             this.example = dispVal;
             this.txt = txt;
             // set blinking
-            var elemClass = document.getElementById(this.id()).getAttribute("class");
+            var elemClass = this.div.node().getAttribute("class");
             elemClass = (opt.blinking || this.blinking) ?
                             ((elemClass.indexOf("blink") < 0) ? (elemClass + " blink") : elemClass)
                             : elemClass.replace(" blink", "");
-            document.getElementById(this.id()).setAttribute("class", elemClass);
+            this.div.node().setAttribute("class", elemClass);
             // render content
-            var context = document.getElementById(this.id() + "_canvas").getContext("2d");
+            var context = this.div.select("#" + this.id() + "_canvas").node().getContext("2d");
             context.textBaseline = this.textBaseline;
             var align = opt.align || this.align;
             context.font = this.font.join("");
@@ -380,7 +380,7 @@ define(function (require, exports, module) {
         var tmp = this.backgroundColor;
         this.backgroundColor = this.fontColor;
         this.fontColor = tmp;
-        var elemIsBlinking = (document.getElementById(this.id()).getAttribute("class").indexOf("blink") >= 0);
+        var elemIsBlinking = this.div.node().getAttribute("class").indexOf("blink") >= 0;
         return this.render(this.txt, { blinking: elemIsBlinking });
     };
 

@@ -33,19 +33,21 @@ define(function (require, exports, module) {
     }
 
     /**
-        Evaluates a numeric string represented as a fraction. If the string is not a fraction,
-        it converts the string to a number. If the argument is not a string, then the argument is returned unchanged.
+        Evaluates the number contained in the string passed as argument.
+        If the value is in the form a/b, where a and b are numbers, then the funtion performs the division and returns a string representing the evaluated real value.
+        Otherwise the string is simply trimmed to remove initial and trailing white spaces.
+        @return {String} Value of the
     */
     function evaluate(str) {
         if (typeof str === "string") {
             str = str.trim();
             var args = str.split("/");
             if (args.length === 2 && !isNaN(+args[0]) && !isNaN(+args[1])) {
-                return +args[0] / +args[1];
+                return (+args[0] / +args[1]).toString();
             }
-            if (!isNaN(+str)) { return +str; }
+            return str;
         }
-        return str;
+        return str.toString().trim();
     }
 
     /**

@@ -96,9 +96,9 @@ main: THEORY
     ENDCOND
   
   spo2_sensor_data(x: real)(st: state): state =
-    st WITH [ spo2 := x, spo2_fail := (x < 0 OR x > 100) ]
+    st WITH [ spo2 := x, spo2_fail := FALSE ]
 
   rra_sensor_data(x: real)(st: state): state =
-    st WITH [ rra := x, rra_fail := (x < 4 OR x > 70) ]
+    st WITH [ rra := x, rra_fail := FALSE ]
 
  END main
