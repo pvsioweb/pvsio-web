@@ -18,8 +18,8 @@ require.config({
 });
 
 require([
-        "widgets/TouchscreenButton",
-        "widgets/BasicDisplay",
+        "widgets/core/ButtonEVO",
+        "widgets/core/NumericDisplayEVO",
         "widgets/LED",
         "widgets/LED2",
         "widgets/ButtonActionsQueue",
@@ -95,11 +95,13 @@ require([
             backgroundColor: "transparent",
             fontColor: "white",
             align: "right",
+            maxIntegerDigits: 16,
+            maxDecimalDigits: 0,
             letterSpacing: 20.1
         });
         device.disp2 = new BasicDisplay("disp2", {
             top: 266,
-            left: 688,
+            left: 681,
             width: 176,
             height: 16
         }, {
@@ -107,11 +109,13 @@ require([
             backgroundColor: "transparent",
             fontColor: "white",
             align: "right",
+            maxIntegerDigits: 9,
+            maxDecimalDigits: 0,
             letterSpacing: 21
         });
         device.disp3 = new BasicDisplay("disp3", {
             top: 266,
-            left: 328,
+            left: 322,
             width: 308,
             height: 16
         }, {
@@ -119,6 +123,8 @@ require([
             backgroundColor: "transparent",
             fontColor: "white",
             align: "right",
+            maxIntegerDigits: 16,
+            maxDecimalDigits: 0,
             letterSpacing: 20
         });
 

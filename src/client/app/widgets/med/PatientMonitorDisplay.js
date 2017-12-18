@@ -25,7 +25,7 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var SingleDisplay = require("widgets/SingleDisplay");
+    var SingleDisplay = require("widgets/core/BasicDisplayEVO");
     var TracingsDisplay = require("widgets/TracingsDisplay");
     var d3 = require("d3/d3");
 
@@ -121,7 +121,7 @@ define(function (require, exports, module) {
                                        left: opt.tracings.width + opt.tracings.labels.width,
                                        height: opt.value.height * 0.5,
                                        width: opt.value.width },
-                                     { parent: opt.parent, font: "Times", fontColor: "red" });
+                                     { parent: opt.parent, fontColor: "red" });
         this.disp_label = new SingleDisplay(id + "_label",
                                      { top: opt.value.height,
                                        left: opt.tracings.width + opt.tracings.labels.width,
@@ -132,40 +132,40 @@ define(function (require, exports, module) {
                                        left: this.disp_value.left + this.disp_value.width,
                                        height: this.disp_value.height / 4,
                                        width: this.disp_value.width / 4 },
-                                     { parent: opt.parent, align: "left", font: "Times", fontColor: "red" });
+                                     { parent: opt.parent, align: "left", fontSize: 6, fontColor: "red" });
         this.disp_alarm_min = new SingleDisplay(id + "_alarm_min",
                                      { top: this.disp_value.height - this.disp_value.height / 4,
                                        left: this.disp_alarm.left,
                                        height: this.disp_alarm.height,
                                        width: this.disp_alarm.width },
-                                     { parent: opt.parent, align: "left", font: "Times",
+                                     { parent: opt.parent, align: "left",
                                        fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
         this.disp_alarm_max = new SingleDisplay(id + "_alarm_max",
                                      { top: this.disp_alarm_min.top - this.disp_value.height / 4,
                                        left: this.disp_alarm.left,
                                        height: this.disp_alarm.height,
                                        width: this.disp_alarm.width },
-                                     { parent: opt.parent, align: "left", font: "Times",
+                                     { parent: opt.parent, align: "left",
                                        fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
         this.tracings_label_max = new SingleDisplay(id + "_tracings_label_max",
                                      { top: 0, left: 0,
                                        height: opt.tracings.labels.height,
                                        width: opt.tracings.labels.width },
-                                     { parent: opt.parent, align: "right", font: "Times",
+                                     { parent: opt.parent, align: "right",
                                        fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
         this.tracings_label_med = new SingleDisplay(id + "_tracings_label_med",
                                      { top: (opt.tracings.height / 2),
                                        left: 0,
                                        height: opt.tracings.labels.height,
                                        width: opt.tracings.labels.width },
-                                     { parent: opt.parent, align: "right", font: "Times",
+                                     { parent: opt.parent, align: "right",
                                        fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
         this.tracings_label_min = new SingleDisplay(id + "_tracings_label_min",
                                      { top: opt.tracings.height - opt.tracings.labels.height / 4,
                                        left: 0,
                                        height: opt.tracings.labels.height,
                                        width: opt.tracings.labels.width },
-                                     { parent: opt.parent, align: "right", font: "Times",
+                                     { parent: opt.parent, align: "right",
                                        fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
         this.disp_tracings = new TracingsDisplay(id + "_tracings",
                                      { top: opt.tracings.labels.height / 2, left: opt.tracings.left,

@@ -1,7 +1,7 @@
 /**
  *
- * @author Paolo Masci, Patrick Oladimeji
- * @date 27/03/15 20:30:33 PM
+ * @author Paolo Masci
+ * @date Dec 12, 2017
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 require.config({
@@ -18,11 +18,8 @@ require.config({
 });
 
 require([
-        "widgets/Button",
-        "widgets/TouchscreenButton",
-        "widgets/TouchscreenDisplay",
-        "widgets/BasicDisplay",
-        "widgets/NumericDisplay",
+        "widgets/core/ButtonEVO",
+        "widgets/core/NumericDisplayEVO",
         "widgets/SliderWidget",
         "widgets/ToggleButton",
 
@@ -31,11 +28,8 @@ require([
         "stateParser",
         "PVSioWebClient"
     ], function (
-        Button,
-        TouchscreenButton,
-        TouchscreenDisplay,
+        ButtonEVO,
         BasicDisplay,
-        NumericDisplay,
         Slider,
         ToggleButton,
 
@@ -92,18 +86,18 @@ require([
         device.battery_level = new BasicDisplay("battery_level", {
             width: 30,
             height: 16,
-            top: 15,
+            top: 28,
             left: 75
         }, {
             fontColor: "white",
             backgroundColor: "transparent",
             // opacity: "0.2",
-            fontsize: 12,
+            fontsize: 11,
             parent: "battery"
         });
         device.reservoir = new Slider("reservoir", {
             top: 48,
-            left: 520,
+            left: 530,
             width: 44,
             height: 74
         }, {
@@ -120,7 +114,8 @@ require([
             // borderColor: "transparent",
             tooltip: {
                 arrowColor: "white",
-                position: "left"
+                position: "left",
+                fontSize: 11
             },
             // track: {
             //     color: "#3ac441"
@@ -135,7 +130,7 @@ require([
             parent: "topline_display"
         });
 
-        device.on_off = new TouchscreenButton("on_off", {
+        device.on_off = new ButtonEVO("on_off", {
             width: 60,
             height: 60,
             top: 177,
@@ -149,7 +144,7 @@ require([
             callback: onMessageReceived
         });
 
-        device.next_screen = new TouchscreenButton("next_screen", {
+        device.next_screen = new ButtonEVO("next_screen", {
             width: 70,
             height: 50,
             top: 210,
@@ -163,7 +158,7 @@ require([
             parent: "ready_screen",
             callback: onMessageReceived
         });
-        device.previous_screen = new TouchscreenButton("previous_screen", {
+        device.previous_screen = new ButtonEVO("previous_screen", {
             width: 70,
             height: 50,
             top: 210,
@@ -179,7 +174,7 @@ require([
         });
 
         // basal profile screen
-        device.edit_basal_profiles = new TouchscreenButton("edit_basal_profiles", {
+        device.edit_basal_profiles = new ButtonEVO("edit_basal_profiles", {
             width: 472,
             height: 50,
             top: 0,
@@ -193,7 +188,7 @@ require([
             parent: "basal_management_screen",
             callback: onMessageReceived
         });
-        device.activate_basal_profiles = new TouchscreenButton("activate_basal_profiles", {
+        device.activate_basal_profiles = new ButtonEVO("activate_basal_profiles", {
             width: 472,
             height: 50,
             top: 70,
@@ -207,7 +202,7 @@ require([
             parent: "basal_management_screen",
             callback: onMessageReceived
         });
-        device.manage_temporary_basal = new TouchscreenButton("manage_temporary_basal", {
+        device.manage_temporary_basal = new ButtonEVO("manage_temporary_basal", {
             width: 472,
             height: 50,
             top: 140,
@@ -223,7 +218,7 @@ require([
         });
 
         // bolus profile screen
-        device.edit_food_database = new TouchscreenButton("edit_food_database", {
+        device.edit_food_database = new ButtonEVO("edit_food_database", {
             width: 472,
             height: 50,
             top: 0,
@@ -237,7 +232,7 @@ require([
             parent: "bolus_management_screen",
             callback: onMessageReceived
         });
-        device.start_bolus = new TouchscreenButton("start_bolus", {
+        device.start_bolus = new ButtonEVO("start_bolus", {
             width: 472,
             height: 120,
             top: 70,
@@ -253,7 +248,7 @@ require([
         });
 
         // pump configuration screen
-        device.set_time = new TouchscreenButton("set_time", {
+        device.set_time = new ButtonEVO("set_time", {
             width: 472,
             height: 50,
             top: 0,
@@ -267,7 +262,7 @@ require([
             parent: "pump_configuration_screen",
             callback: onMessageReceived
         });
-        device.configure_pump_settings = new TouchscreenButton("configure_pump_settings", {
+        device.configure_pump_settings = new ButtonEVO("configure_pump_settings", {
             width: 472,
             height: 120,
             top: 70,
@@ -283,7 +278,7 @@ require([
         });
 
         // event data maangement screen
-        device.review_bg_readings = new TouchscreenButton("review_bg_readings", {
+        device.review_bg_readings = new ButtonEVO("review_bg_readings", {
             width: 472,
             height: 50,
             top: 0,
@@ -298,7 +293,7 @@ require([
             parent: "event_data_management_screen",
             callback: onMessageReceived
         });
-        device.review_alarm_log = new TouchscreenButton("review_alarm_log", {
+        device.review_alarm_log = new ButtonEVO("review_alarm_log", {
             width: 472,
             height: 50,
             top: 70,
@@ -313,7 +308,7 @@ require([
             parent: "event_data_management_screen",
             callback: onMessageReceived
         });
-        device.review_infusion_statistics = new TouchscreenButton("review_infusion_statistics", {
+        device.review_infusion_statistics = new ButtonEVO("review_infusion_statistics", {
             width: 472,
             height: 50,
             top: 140,
@@ -392,7 +387,7 @@ require([
             var index = 0;
             for (var key in db) {
                 var profile_name = db[key].name.replace(/"/g, '');
-                device.basal_profiles[key] = new TouchscreenButton("basal_profile_" + key, {
+                device.basal_profiles[key] = new ButtonEVO("basal_profile_" + key, {
                     width: 468,
                     height: 50,
                     top: (50 * index),
@@ -412,7 +407,7 @@ require([
                 device.basal_profiles[key].render();
                 index++;
             }
-            device.basal_profiles["new_basal_profile"] = new TouchscreenButton("new_basal_profile", {
+            device.basal_profiles["new_basal_profile"] = new ButtonEVO("new_basal_profile", {
                 width: 468,
                 height: 50,
                 top: (50 * index),
@@ -431,7 +426,7 @@ require([
             device.basal_profiles["new_basal_profile"].render();
         }
 
-        device.basal_profiles_done = new TouchscreenButton("basal_profiles_done", {
+        device.basal_profiles_done = new ButtonEVO("basal_profiles_done", {
             width: 64,
             height: 34,
             top: 219,
@@ -529,12 +524,12 @@ require([
         var hhmmss = d3.select("#div_hhmmss");
         function set_clock() {
             var d = new Date();
-            var hh = (d.getHours() < 10) ? "0" + d.getHours() : d.getHours();
+            var hh = (d.getHours() < 10) ? "0" + d.getHours() : (d.getHours() < 12) ? d.getHours() : d.getHours() - 12;
             var mm = (d.getMinutes() < 10) ? "0" + d.getMinutes() : d.getMinutes();
             var ss = (d.getSeconds() < 10) ? "0" + d.getSeconds() : d.getSeconds();
-            var xx = (hh <= 12) ? "AM" : "PM";
+            var xx = (d.getHours() <= 12) ? "AM" : "PM";
             hour.text(hh + ":" + mm);
-            date.text(d.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZoneName: "short"}));
+            date.text(d.toLocaleDateString("en-US", { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', timeZoneName: 'short'}));
             am_pm.text(xx);
             hhmmss.text(hh + ":" + mm + ":" + ss);
         }

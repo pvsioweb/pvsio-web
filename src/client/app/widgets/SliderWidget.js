@@ -15,7 +15,9 @@
      baseUrl: "../../client/app",
      paths: {
          d3: "../lib/d3",
-         lib: "../lib"
+         lib: "../lib",
+         text: "../lib/text",
+         stateParser: "./util/PVSioStateParser"
      }
  });
  require(["widgets/SliderWidget"], function (SliderWidget) {
@@ -257,12 +259,9 @@ define(function (require, exports, module) {
                     .style("margin-left", opt.handle.left + "px")
                     .style("margin-top", opt.handle.top + "px");
 
-        if (opt.tooltip.color) {
-            this.div.select(".tooltip-inner").style("color", opt.tooltip.color);
-        }
-        if (opt.tooltip.backgroundColor) {
-            this.div.select(".tooltip-inner").style("background-color", opt.tooltip.backgroundColor);
-        }
+        if (opt.tooltip.color) { this.div.select(".tooltip-inner").style("color", opt.tooltip.color); }
+        if (opt.tooltip.backgroundColor) { this.div.select(".tooltip-inner").style("background-color", opt.tooltip.backgroundColor); }
+        if (opt.tooltip.fontSize) { this.div.select(".tooltip-inner").style("font-size", opt.tooltip.fontSize + "pt"); }
         if (opt.tooltip.arrowColor) {
             if (opt.tooltip.position === "left") {
                 this.div.select(".tooltip-arrow")
