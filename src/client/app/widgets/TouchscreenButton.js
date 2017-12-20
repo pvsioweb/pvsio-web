@@ -287,13 +287,13 @@ define(function (require, exports, module) {
      * @instance
      */
     TouchscreenButton.prototype.deselect = function () {
-        if (this.backgroundColor !== "transparent") {
+        // if (this.backgroundColor !== "transparent") {
             this.overlayDisplay.setColors({
                 backgroundColor: this.backgroundColor,
                 fontColor: this.fontColor,
                 opacity: this.opacity
             });
-        }
+        // }
         this.div.style("border", "");
         return this;
     };
