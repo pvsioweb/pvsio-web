@@ -783,7 +783,7 @@ fileListItem.hide {
   background: #fff;
   min-width: 934px;
   border-radius: 4px;
-  height: 844px;
+  height: 1400px;
   left: 1px;
   cursor: default; }
 
@@ -900,7 +900,7 @@ fileListItem.hide {
 
 #EmuchartsFloatTable {
   position: absolute;
-  top: 614px;
+  bottom: 0px;
   width: 100%;
   left: 0;
   margin: 1px;

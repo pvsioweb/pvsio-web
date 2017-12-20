@@ -198,7 +198,7 @@ define(function (require, exports, module) {
                 ans.res = this.parser4triggers.parse(label);
             } catch (e) {
                 ans.err = e.message;
-                console.log(ans.err);
+                console.error(ans.err);
             }
         } else {
             ans.err = "Erroneous argument type for string label: " + (typeof label);
@@ -220,7 +220,7 @@ define(function (require, exports, module) {
                     ans.res = this.parser4conditions.parse(label);
                 } catch (e) {
                     ans.err = e.message;
-                    console.log(ans.err);
+                    console.error(ans.err);
                 }
             } else {
                 ans.err = "Erroneous argument type for string label: " + (typeof label);
@@ -249,7 +249,7 @@ define(function (require, exports, module) {
                     ans.res = this.parser4actions.parse(label);
                 } catch (e) {
                     ans.err = e.message;
-                    console.log(ans.err);
+                    console.error(ans.err);
                 }
             } else {
                 ans.err = "Erroneous argument type for string label: " + (typeof label);
