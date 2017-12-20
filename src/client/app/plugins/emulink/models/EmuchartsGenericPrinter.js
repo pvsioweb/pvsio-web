@@ -273,12 +273,12 @@ An example generic model printed by the Generic Printer is as follows:
 define(function (require, exports, module) {
     "use strict";
     // var printer_version = "2.2";
-    var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
+    // var EmuchartsParser = require("plugins/emulink/EmuchartsParser");
     var EmuchartsParser2 = require("plugins/emulink/EmuchartsParser2");
     // var projectManager = require("project/ProjectManager").getInstance();
     var displayAskParameters = require("plugins/emulink/forms/displayAskParameters");
 
-    var parser;
+    // var parser;
     var parser2;
 
     var undef = "UNINITIALIZED";
@@ -295,7 +295,7 @@ define(function (require, exports, module) {
      */
     function EmuchartsGenericPrinter(opt) {
         opt = opt || {};
-        parser = EmuchartsParser.getInstance();
+        // parser = EmuchartsParser.getInstance();
         parser2 = EmuchartsParser2.getInstance();
         return this;
     }

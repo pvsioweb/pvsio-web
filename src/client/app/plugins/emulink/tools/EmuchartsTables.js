@@ -46,7 +46,7 @@ define(function (require, exports, module) {
     }
 
     var minimized_table = { top: 814, height: 0 };
-    var maximised_table = { top: 26, height: 784 };
+    var maximised_table = { top: 26, height: 800 };
 
     function installTableHandlers (_this) {
         if (document.getElementById("StateVariablesTable")) {
@@ -126,7 +126,7 @@ define(function (require, exports, module) {
         }
         // handlers for resizing table
         d3.select("#btn_minimizeTable").on("click", function () {
-            d3.select("#EmuchartsFloatTable").transition().duration(200).style("top", minimized_table.top + "px");
+            // d3.select("#EmuchartsFloatTable").transition().duration(200).style("top", minimized_table.top + "px");
             d3.selectAll(".EmuchartsTableContent").style("width", "100% ").transition().duration(200).style("height", minimized_table.height + "px");
         });
         var dragResize = d3.behavior.drag()
@@ -140,15 +140,16 @@ define(function (require, exports, module) {
                                 var m = d3.mouse(d3.select("#btn_resizeTableHeight").node());
                                 // update table height
                                 if (m && m.length > 1) {
-                                    var top = parseFloat(d3.select("#EmuchartsFloatTable").style("top")) + m[1];
+                                    // var top = parseFloat(d3.select("#EmuchartsFloatTable").style("top")) + m[1];
                                     var height = parseFloat(d3.select(".EmuchartsTableContent").style("height")) - m[1];
-                                    top = (top < maximised_table.top) ? maximised_table.top
-                                            : (top > minimized_table.top) ? minimized_table.top
-                                            : top;
+                                    var max_height = parseFloat(d3.select("#ContainerStateMachine").style("height")) || maximised_table.height;
+                                    // top = (top < maximised_table.top) ? maximised_table.top
+                                    //         : (top > minimized_table.top) ? minimized_table.top
+                                    //         : top;
                                     height = (height < minimized_table.height) ? minimized_table.height
-                                            : (height > maximised_table.height) ? maximised_table.height
+                                            : (height > max_height) ? max_height
                                             : height;
-                                    d3.select("#EmuchartsFloatTable").style("top", top + "px");
+                                    // d3.select("#EmuchartsFloatTable").style("top", top + "px");
                                     d3.selectAll(".EmuchartsTableContent").style("width", "100% ").style("height", height + "px");
                                 }
                             });
