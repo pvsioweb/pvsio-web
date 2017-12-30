@@ -2,10 +2,11 @@ Changelog
 ==========
 2.3.0 (Dec 2017)
 ---------------
+    Added new widgets libraries: core, media
     Added new demo: Medicaltech MT32-evo
     Added new code generator: JavaScript
-    Added Playback Player APIs for creating training material
-    Documentation for core widgets APIs (see http://localhost:8082/docs/widgets-library)
+    Added new Playback Player APIs for creating training material
+    Added online documentation for widgets APIs (see http://localhost:8082/docs/widgets-library)
 
 2.2.0 (June 2017)
 ---------------

@@ -55,8 +55,8 @@
     "color": "#9467bd",
     "width": 36,
     "height": 36,
-    "x": 1197.3750610351562,
-    "y": 213.375,
+    "x": 1189.3750610351562,
+    "y": 257.375,
     "enter": "",
     "exit": "",
     "pmr": [],
@@ -83,8 +83,8 @@
     "color": "#e377c2",
     "width": 36,
     "height": 36,
-    "x": 2111,
-    "y": 269.9999694824219,
+    "x": 2148,
+    "y": 777.9999694824219,
     "enter": "",
     "exit": "",
     "pmr": [],
@@ -181,8 +181,8 @@
     "color": "gray",
     "width": 36,
     "height": 36,
-    "x": 1891,
-    "y": 12.999995708465576,
+    "x": 2117,
+    "y": 916.9999384880066,
     "enter": "",
     "exit": "",
     "pmr": [],
@@ -398,8 +398,8 @@
      "color": "#9467bd",
      "width": 36,
      "height": 36,
-     "x": 1197.3750610351562,
-     "y": 213.375,
+     "x": 1189.3750610351562,
+     "y": 257.375,
      "enter": "",
      "exit": "",
      "pmr": [],
@@ -407,21 +407,21 @@
      "components": []
     },
     "controlPoint": {
-     "x": 906.7886207827955,
-     "y": 207.0523197409975
+     "x": 904.334559512716,
+     "y": 220.51228794272305
     }
    },
    {
     "id": "T4",
-    "name": "select_device\n{ device_selected := !device_selected; }",
+    "name": "select_device\n[ device_available ]\n{ device_selected := !device_selected; }",
     "source": {
      "id": "X5",
      "name": "NEW_MONITORING_SESSION",
      "color": "#9467bd",
      "width": 36,
      "height": 36,
-     "x": 1197.3750610351562,
-     "y": 213.375,
+     "x": 1189.3750610351562,
+     "y": 257.375,
      "enter": "",
      "exit": "",
      "pmr": [],
@@ -434,8 +434,8 @@
      "color": "#9467bd",
      "width": 36,
      "height": 36,
-     "x": 1197.3750610351562,
-     "y": 213.375,
+     "x": 1189.3750610351562,
+     "y": 257.375,
      "enter": "",
      "exit": "",
      "pmr": [],
@@ -443,8 +443,8 @@
      "components": []
     },
     "controlPoint": {
-     "x": 1369.375,
-     "y": 52.916664123535156
+     "x": 1313.7646484375,
+     "y": 170.67869567871094
     }
    },
    {
@@ -456,8 +456,8 @@
      "color": "#9467bd",
      "width": 36,
      "height": 36,
-     "x": 1197.3750610351562,
-     "y": 213.375,
+     "x": 1189.3750610351562,
+     "y": 257.375,
      "enter": "",
      "exit": "",
      "pmr": [],
@@ -479,8 +479,8 @@
      "components": []
     },
     "controlPoint": {
-     "x": 1435.932909145066,
-     "y": 265.0488829222036
+     "x": 1433.1302820453332,
+     "y": 280.44616789020296
     }
    },
    {
@@ -506,8 +506,8 @@
      "color": "#e377c2",
      "width": 36,
      "height": 36,
-     "x": 2111,
-     "y": 269.9999694824219,
+     "x": 2148,
+     "y": 777.9999694824219,
      "enter": "",
      "exit": "",
      "pmr": [],
@@ -515,8 +515,8 @@
      "components": []
     },
     "controlPoint": {
-     "x": 1844.2414155211914,
-     "y": 292.5028576066673
+     "x": 2198,
+     "y": 357
     }
    },
    {
@@ -722,8 +722,8 @@
      "color": "#9467bd",
      "width": 36,
      "height": 36,
-     "x": 1197.3750610351562,
-     "y": 213.375,
+     "x": 1189.3750610351562,
+     "y": 257.375,
      "enter": "",
      "exit": "",
      "pmr": [],
@@ -731,8 +731,8 @@
      "components": []
     },
     "controlPoint": {
-     "x": 1040.9385138797516,
-     "y": 375.17203173753165
+     "x": 1037.6697238963648,
+     "y": 393.0631249448914
     }
    },
    {
@@ -953,7 +953,7 @@
    },
    {
     "id": "T22",
-    "name": "select_device\n{ device_selected := !device_selected; }",
+    "name": "select_device\n[ device_available ]\n{ device_selected := !device_selected; }",
     "source": {
      "id": "X13",
      "name": "SELECT_HOLTER_DEVICE",
@@ -1019,8 +1019,8 @@
      "components": []
     },
     "controlPoint": {
-     "x": 1444.576858710479,
-     "y": 109.18674360446441
+     "x": 1614.3896484375,
+     "y": 47.5536994934082
     }
    },
    {
@@ -1046,8 +1046,8 @@
      "color": "gray",
      "width": 36,
      "height": 36,
-     "x": 1891,
-     "y": 12.999995708465576,
+     "x": 2117,
+     "y": 916.9999384880066,
      "enter": "",
      "exit": "",
      "pmr": [],
@@ -1055,8 +1055,8 @@
      "components": []
     },
     "controlPoint": {
-     "x": 1792.1421200140203,
-     "y": 176.41464086300172
+     "x": 2355,
+     "y": 330
     }
    },
    {
@@ -1949,8 +1949,365 @@
      "components": []
     },
     "controlPoint": {
-     "x": 351.8286658073485,
-     "y": 280.34964619488846
+     "x": 330.73101806640625,
+     "y": 285.7756652832031
+    }
+   },
+   {
+    "id": "T47",
+    "name": "monitoring",
+    "source": {
+     "id": "X3",
+     "name": "PATIENT_MANAGEMENT",
+     "color": "#2ca02c",
+     "width": 36,
+     "height": 36,
+     "x": 728,
+     "y": 204,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X9",
+     "name": "MONITORING",
+     "color": "#bcbd22",
+     "width": 36,
+     "height": 36,
+     "x": 483,
+     "y": 529.5832824707031,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 575.0167236328125,
+     "y": 404.34710693359375
+    }
+   },
+   {
+    "id": "T48",
+    "name": "monitoring",
+    "source": {
+     "id": "X21",
+     "name": "UPLOAD_EXAMS",
+     "color": "#9467bd",
+     "width": 36,
+     "height": 36,
+     "x": 253.76461791992188,
+     "y": 371.9287109375,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X9",
+     "name": "MONITORING",
+     "color": "#bcbd22",
+     "width": 36,
+     "height": 36,
+     "x": 483,
+     "y": 529.5832824707031,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 380.0167236328125,
+     "y": 447.2042236328125
+    }
+   },
+   {
+    "id": "T49",
+    "name": "upload_exams",
+    "source": {
+     "id": "X9",
+     "name": "MONITORING",
+     "color": "#bcbd22",
+     "width": 36,
+     "height": 36,
+     "x": 483,
+     "y": 529.5832824707031,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X21",
+     "name": "UPLOAD_EXAMS",
+     "color": "#9467bd",
+     "width": 36,
+     "height": 36,
+     "x": 253.76461791992188,
+     "y": 371.9287109375,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 357.8738708496094,
+     "y": 448.6328125
+    }
+   },
+   {
+    "id": "T50",
+    "name": "patients_screen",
+    "source": {
+     "id": "X21",
+     "name": "UPLOAD_EXAMS",
+     "color": "#9467bd",
+     "width": 36,
+     "height": 36,
+     "x": 253.76461791992188,
+     "y": 371.9287109375,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X2",
+     "name": "PATIENTS_SCREEN",
+     "color": "#ff7f0e",
+     "width": 36,
+     "height": 36,
+     "x": 439,
+     "y": 206,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 343.5881652832031,
+     "y": 291.4899597167969
+    }
+   },
+   {
+    "id": "T51",
+    "name": "patients_screen",
+    "source": {
+     "id": "X9",
+     "name": "MONITORING",
+     "color": "#bcbd22",
+     "width": 36,
+     "height": 36,
+     "x": 483,
+     "y": 529.5832824707031,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X2",
+     "name": "PATIENTS_SCREEN",
+     "color": "#ff7f0e",
+     "width": 36,
+     "height": 36,
+     "x": 439,
+     "y": 206,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 462.8738708496094,
+     "y": 365.0613708496094
+    }
+   },
+   {
+    "id": "T52",
+    "name": "monitoring",
+    "source": {
+     "id": "X6",
+     "name": "WAITING_RESULTS",
+     "color": "#8c564b",
+     "width": 36,
+     "height": 36,
+     "x": 1740,
+     "y": 354.99998474121094,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X9",
+     "name": "MONITORING",
+     "color": "#bcbd22",
+     "width": 36,
+     "height": 36,
+     "x": 483,
+     "y": 529.5832824707031,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 965.852783203125,
+     "y": 388.4049072265625
+    }
+   },
+   {
+    "id": "T53",
+    "name": "upload_exams",
+    "source": {
+     "id": "X6",
+     "name": "WAITING_RESULTS",
+     "color": "#8c564b",
+     "width": 36,
+     "height": 36,
+     "x": 1740,
+     "y": 354.99998474121094,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X21",
+     "name": "UPLOAD_EXAMS",
+     "color": "#9467bd",
+     "width": 36,
+     "height": 36,
+     "x": 253.76461791992188,
+     "y": 371.9287109375,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": null
+   },
+   {
+    "id": "T54",
+    "name": "patients_screen",
+    "source": {
+     "id": "X6",
+     "name": "WAITING_RESULTS",
+     "color": "#8c564b",
+     "width": 36,
+     "height": 36,
+     "x": 1740,
+     "y": 354.99998474121094,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X2",
+     "name": "PATIENTS_SCREEN",
+     "color": "#ff7f0e",
+     "width": 36,
+     "height": 36,
+     "x": 439,
+     "y": 206,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 893.352783203125,
+     "y": 330.9049377441406
+    }
+   },
+   {
+    "id": "T55",
+    "name": "monitoring",
+    "source": {
+     "id": "X7",
+     "name": "MT32_HUB_MODE",
+     "color": "#e377c2",
+     "width": 36,
+     "height": 36,
+     "x": 2148,
+     "y": 777.9999694824219,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X9",
+     "name": "MONITORING",
+     "color": "#bcbd22",
+     "width": 36,
+     "height": 36,
+     "x": 483,
+     "y": 529.5832824707031,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 1033.2267928797514,
+     "y": 642.4018908283831
+    }
+   },
+   {
+    "id": "T56",
+    "name": "monitoring",
+    "source": {
+     "id": "X15",
+     "name": "MT32_HOLTER_MODE",
+     "color": "gray",
+     "width": 36,
+     "height": 36,
+     "x": 2117,
+     "y": 916.9999384880066,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "target": {
+     "id": "X9",
+     "name": "MONITORING",
+     "color": "#bcbd22",
+     "width": 36,
+     "height": 36,
+     "x": 483,
+     "y": 529.5832824707031,
+     "enter": "",
+     "exit": "",
+     "pmr": [],
+     "widgets": [],
+     "components": []
+    },
+    "controlPoint": {
+     "x": 1266,
+     "y": 729
     }
    }
   ],
@@ -2064,6 +2421,13 @@
     "name": "patient_management_tab",
     "type": "PatientManagementTab",
     "value": "PATIENT_PROFILE",
+    "scope": "Local"
+   },
+   {
+    "id": "VAR_device_available:bool(Local)",
+    "name": "device_available",
+    "type": "bool",
+    "value": "false",
     "scope": "Local"
    }
   ],

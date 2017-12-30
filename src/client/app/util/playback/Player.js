@@ -30,12 +30,16 @@ define(function (require, exports, module) {
     "use strict";
     var SELECT_TIMEOUT = 800; //msec
 
+    function console_log(msg) {
+        console.log(msg);
+    }
+
     /**
      * @constructor
      */
     function Player (opt) {
         opt = opt || {};
-        this.actions = {
+        this.playlist = {
             seq: [],
             curr: 0
         };
@@ -51,100 +55,242 @@ define(function (require, exports, module) {
      * @function load Loads the list of actions that needs to be played
      * @param actionList {Object} JSON object containing the list of actions to be executed
      *          The object is an array of actions. Each action contains (at least) the following attributes:
-     *              - button: the input widget that needs to be clicked
+     *              - click: the input widget that needs to be clicked
      *              - timestamp: indicates when the action needs to be executed. The value of time is expressed as an absolute value wrt the beginning of time (which is 0)
      */
     Player.prototype.load = function (actionList) {
-        this.actions = {
+        this.playlist = {
             seq: actionList,
             curr: 0
         };
         return this;
     };
 
+    //---  utility functions  ----
+    function viz(id, opt) {
+        // console_log("revealing " + id);
+        opt = opt || {};
+        opt.duration = opt.duration || 300;
+        if (d3.select(id).node()) {
+            if (opt.fade && d3.select(id).style("display") !== "block") {
+                d3.select(id).style("opacity", 0).transition().duration(opt.duration).style("opacity", 1).style("display", "block");
+            } else {
+                d3.select(id).transition().duration(0).style("opacity", 1).style("display", "block");
+            }
+        }
+    }
+    function hide(id) {
+        // console_log("hiding " + id);
+        d3.select(id).style("display", "none");
+    }
+
     /**
      * @function play Plays the action file opened in the player
      */
     Player.prototype.play = function(opt) {
         opt = opt || {};
-        if (this.actions.curr < this.actions.seq.length) {
-            console.log("Playback: action " + (this.actions.curr + 1) + " of " + this.actions.seq.length);
-            var _this = this;
-            var action = this.actions.seq[this.actions.curr];
-            var timeout = (action.timeout && action.timeout >= 0)? action.timeout : SELECT_TIMEOUT;
-            var when = parseFloat(action.timeStamp - _this.now);
-            if (action.button && !isNaN(when) && when >= 0) {
-                _this.timer = window.setTimeout(function () {
-                    if (action.stutter) {
-                        console.log("Stutter: " + action.button.id);
-                    } else {
-                        console.log("Click: " + action.button.id);
-                    }
-                    action.button.select({
-                        borderColor: action.borderColor || "white",
-                        classed: action.classed
-                    });
-                    window.setTimeout(function () {
-                        if (!action.stutter) {
-                            action.button.click({
-                                borderColor: "white"
-                            });
+        function select_widget () {
+            if (action.deselect) {
+                theWidget.deselect();
+            } else {
+                theWidget.select({
+                    borderColor: action.borderColor || "white",
+                    classed: action.classed
+                });
+            }
+        }
+        function click_widget () {
+            if (action.click) {
+                theWidget.click({
+                    borderColor: opt.borderColor || "white"
+                });
+            }
+        }
+        function cursor_move () {
+            action.cursor.offset = action.cursor.offset || {};
+            var yy = (isNaN(parseFloat(action.cursor.offset.top))) ?
+                        (theWidget.getSize().height * 0.2)
+                        : parseFloat(action.cursor.offset.top);
+            var xx = (isNaN(parseFloat(action.cursor.offset.left))) ?
+                        (theWidget.getSize().width * 0.8)
+                        : parseFloat(action.cursor.offset.left);
+            action.cursor.type.move({
+                top: theWidget.getPosition().top + yy,
+                left: theWidget.getPosition().left + xx
+            }, { duration: action.cursor.speed || 1000 });
+        }
+        function cursor_click () {
+            action.cursor.type.click({ fw_move: Math.min(theWidget.getSize().height / 4, theWidget.getSize().width / 4) });
+            window.setTimeout(function () {
+                select_widget();
+            }, 250);
+            window.setTimeout(function () {
+                click_widget();
+            }, timeout);
+        }
+        function cursor_longpress () {
+            action.cursor.type.longPress();
+            window.setTimeout(function () {
+                select_widget();
+            }, 250);
+            window.setTimeout(function () {
+                click_widget();
+            }, timeout);
+        }        
+        try {
+            if (this.playlist.curr < this.playlist.seq.length) {
+                console_log("Playback: action " + (this.playlist.curr + 1) + " of " + this.playlist.seq.length);
+                var _this = this;
+                var action = this.playlist.seq[this.playlist.curr];
+                var duration = action.duration || 1000;
+                var transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
+                var timeout = (action.timeout && action.timeout >= 0)? action.timeout : SELECT_TIMEOUT;
+                var when = parseFloat(action.timeStamp - _this.now);
+                if (when < 0) {
+                    console.error("Timestamp is out of order");
+                    when = 0;
+                }
+
+                if ((action.hide || action.reveal) && !isNaN(when) && when >= 0) {
+                    _this.timer = window.setTimeout(function () {
+                        if (action.hide) {
+                            if (action.hide.widget) {
+                                action.hide.hide();
+                            } else {
+                                console_log("Hiding " + action.hide);
+                                hide(action.hide);
+                            }
+                        } else if (action.reveal){
+                            if (action.reveal.widget) {
+                                action.reveal.reveal();
+                            } else {
+                                console_log("Revealing " + action.reveal);
+                                viz(action.reveal, { fade: true, duration: 1000 });
+                            }
+                        }
+                        _this.now = action.timeStamp;
+                        _this.playlist.curr++;
+                        _this.play(opt);
+                    }, when);
+                }
+                if ((action.click || action.select || action.deselect) && !isNaN(when) && when >= 0) {
+                    var theWidget = action.click || action.select || action.deselect;
+                    _this.timer = window.setTimeout(function () {
+                        if (action.cursor && action.cursor.type) {
+                            cursor_move();
+                            window.setTimeout(function () {
+                                if (action.cursor.longpress) {
+                                    cursor_longpress();
+                                } else {
+                                    cursor_click();
+                                }
+                            }, action.cursor.speed || 1250);
                         } else {
-                            action.button.deselect();
+                            select_widget();
+                            window.setTimeout(function () {
+                                click_widget();
+                            }, timeout);
                         }
-                    }, timeout);
-                    _this.now = action.timeStamp;
-                    _this.actions.curr++;
-                    _this.play(opt);
-                }, when);
-            }
-            if (action.speak) {
-                _this.timer = window.setTimeout(function () {
-                    var msg = new SpeechSynthesisUtterance(action.speak);
-                    msg.lang = _this.lang;
-                    msg.localService = true;
-                    msg.rate = _this.rate;
-                    msg.pitch = _this.pitch;
-                    console.log("Speaking: " + action.speak);
-                    window.speechSynthesis.speak(msg);
-                    _this.now = action.timeStamp;
-                    _this.actions.curr++;
-                    _this.play(opt);
-                }, when);
-            }
-            if (action.input) {
-                _this.timer = window.setTimeout(function () {
-                    if (d3.select(action.input).node()) {
-                        fill(action.input, action.value, {
-                                timeStamp: action.timeStamp,
-                                lineFeed: action.lineFeed
+                        _this.now = action.timeStamp;
+                        _this.playlist.curr++;
+                        _this.play(opt);
+                    }, when);
+                }
+                if (action.speak && !isNaN(when) && when >= 0) {
+                    _this.timer = window.setTimeout(function () {
+                        var msg = new SpeechSynthesisUtterance(action.speak);
+                        msg.lang = _this.lang;
+                        msg.localService = true;
+                        msg.rate = _this.rate;
+                        msg.pitch = _this.pitch;
+                        console_log("Speaking: " + action.speak);
+                        window.speechSynthesis.speak(msg);
+                        _this.now = action.timeStamp;
+                        _this.playlist.curr++;
+                        _this.play(opt);
+                    }, when);
+                }
+                if (action.input && !isNaN(when) && when >= 0) {
+                    _this.timer = window.setTimeout(function () {
+                        if (d3.select(action.input).node()) {
+                            fill(action.input, action.value, {
+                                    timeStamp: action.timeStamp,
+                                    lineFeed: action.lineFeed
+                                });
+                            if (action.scroll) {
+                                scrollTop(action.scroll.id, action.scroll.offset);
+                            }
+                        }
+                        _this.now = action.timeStamp;
+                        _this.playlist.curr++;
+                        _this.play(opt);
+                    }, when);
+                }
+                if (action.scroll && !isNaN(when) && when >= 0) {
+                    _this.timer = window.setTimeout(function () {
+                        scrollTop(action.scroll, action.offset);
+                        _this.now = action.timeStamp;
+                        _this.playlist.curr++;
+                        _this.play(opt);
+                    }, when);
+                }
+                if (action.trans && !isNaN(when) && when >= 0) {
+                    _this.timer = window.setTimeout(function () {
+                        if (action.selectAll) {
+                            d3.selectAll(action.trans).style("display", "block").style("opacity", 1).style("transform", action.transform).style("transition-duration", duration + "ms");
+                        } else {
+                            d3.select(action.trans).style("display", "block").style("opacity", 1).style("transform", action.transform).style("transition-duration", duration + "ms");
+                        }
+                        _this.now = action.timeStamp;
+                        _this.playlist.curr++;
+                        _this.play(opt);
+                    }, when);
+                }
+                if (action.reveal && !isNaN(when) && when >= 0) {
+                    _this.timer = window.setTimeout(function () {
+                        if (action.reveal.widget && typeof action.reveal.reveal === "function") {
+                            action.reveal.reveal();
+                        } else if (typeof action.reveal === "string") {
+                            d3.select(action.reveal).style("display", "block").style("opacity", 1)
+                                .style("transition-duration", duration + "ms")
+                                .style("transition-timing-function", transitionTimingFunction);
+                        }
+                        _this.now = action.timeStamp;
+                        _this.playlist.curr++;
+                        _this.play(opt);
+                    }, when);
+                }
+                if (action.move && !isNaN(when) && when >= 0) {
+                    _this.timer = window.setTimeout(function () {
+                        if (action.move.widget && typeof action.move.move === "function") {
+                            action.move.move({ top: action.top, left: action.left }, {
+                                duration: duration,
+                                transitionTimingFunction: transitionTimingFunction
                             });
-                        if (action.scroll) {
-                            scrollTop(action.scroll.id, action.scroll.offset);
+                        } else if (typeof action.move === "string") {
+                            d3.select(action.move).style("display", "block").style("opacity", 1)
+                                .style("top", action.top + "px").style("left", action.left + "px")
+                                .style("transition-duration", duration + "ms")
+                                .style("transition-timing-function", transitionTimingFunction);
                         }
-                    }
-                    _this.now = action.timeStamp;
-                    _this.actions.curr++;
-                    _this.play(opt);
-                }, when);
+                        _this.now = action.timeStamp;
+                        _this.playlist.curr++;
+                        _this.play(opt);
+                    }, when);
+                }
+                if (action.blink && !isNaN(when) && when >= 0) {
+                    _this.timer = window.setTimeout(function () {
+                        if (d3.select(action.blink).node()) {
+                            d3.select(action.blink).classed("blink");
+                        }
+                        _this.now = action.timeStamp;
+                        _this.playlist.curr++;
+                        _this.play(opt);
+                    }, when);
+                }
             }
-            if (action.scroll) {
-                _this.timer = window.setTimeout(function () {
-                    scrollTop(action.scroll, action.offset);
-                    _this.now = action.timeStamp;
-                    _this.actions.curr++;
-                    _this.play(opt);
-                }, when);
-            }
-            if (action.trans) {
-                _this.timer = window.setTimeout(function () {
-                    var duration = action.duration || 1000;
-                    d3.select(action.trans).style("display", "block").style("opacity", 1).style("transform", action.transform).style("transition-duration", duration + "ms");
-                    _this.now = action.timeStamp;
-                    _this.actions.curr++;
-                    _this.play(opt);
-                }, when);
-            }
+        } catch(play_error) {
+            console.error(play_error);
         }
         return this;
     };
@@ -176,7 +322,7 @@ define(function (require, exports, module) {
                         d3.select(id).attr("value", current_value + c);
                         // for text areas & DIVs
                         d3.select(id).text(current_value + c);
-                        // console.log(current_value);
+                        // console_log(current_value);
                         current_value = d3.select(id).attr("value");
                     }, elapse);
                     elapse += (c === "@")? 400 : (Math.random() * (150 - 200) + 100);
@@ -199,7 +345,7 @@ define(function (require, exports, module) {
      */
     Player.prototype.stop = function() {
         this.pause();
-        this.actions.curr = 0;
+        this.playlist.curr = 0;
         return this;
     };
 

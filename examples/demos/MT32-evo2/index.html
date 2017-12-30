@@ -19,440 +19,9 @@
     </head>
     <body class="noselect" style="background:#dedfdd;>
     <!-- overflow:hidden;"  -->
-        <div id="content" class="content" style="display:none;">
-            <div class="device" id="device" style="perspective:1000px; perspective-origin:-22%;">
-                <div id="MT32-left-bottom" class="MT32-case-leftside MT32-case-leftside-upper"
-                    style="position:absolute; top:60px; left:72px; transform:rotateY(22deg)translateZ(-90px)translateY(180px)translateX(140px)skewY(0deg)scaleY(1.2);">
-                     <img src="case/MT32-case-leftside-1.png"></img>
-                </div>
-                <div id="MT32-left-bottom" class="MT32-case-leftside MT32-case-leftside-lower"
-                    style="position:absolute; top:60px; left:72px; transform:rotateY(22deg)translateZ(-90px)translateY(180px)translateX(140px)skewY(30deg)scaleY(0.92);">
-                     <img src="case/MT32-case-leftside-2.png"></img>
-                </div>
-                <div class="card-reader" style="position:absolute; top:1045px; left:822px; display:none; z-index:2;">
-                     <img src="case/card_reader_hub-lower.png"></img>
-                </div>
-                <div id="MT32-sdcard" class="MT32-sdcard"
-                    style="position:absolute; top:776px; left:130px; transform: translateX(-50px); display: none;">
-                     <img src="microSD.png"></img>
-                </div>
-                <div class="card-reader" style="position:absolute; top:1045px; left:822px; display:none; z-index:2;">
-                     <img src="case/card_reader_hub-upper.png"></img>
-                </div>
-                <div id="MT32-left-bottom" class="MT32-case-leftside MT32-case-leftside-upper"
-                    style="position:absolute; top:60px; left:72px; transform:rotateY(22deg)translateZ(-90px)translateY(180px)translateX(140px)skewY(0deg)scaleY(1.2);">
-                     <img src="case/MT32-case-leftside-3.png"></img>
-                </div>
-                <div id="MT32-left-bottom" class="MT32-case-leftside MT32-case-leftside-lower"
-                    style="position:absolute; top:60px; left:72px; transform:rotateY(22deg)translateZ(-90px)translateY(180px)translateX(140px)skewY(30deg)scaleY(0.92);">
-                     <img src="case/MT32-case-leftside-4.png"></img>
-                </div>
-                <div id="MT32-right" class="MT32-case-righside"
-                    style="position:absolute; top:75px; left:526px; display:none;">
-                     <img src="case/MT32-case-rightside.png"></img>
-                </div>
-                <div id="MT32-sdcard-cover" class="MT32-sdcard"
-                    style="position:absolute; top:780px; left:135px; transform: rotateY(22deg)translateZ(-55px)translateY(108px)translateX(140px)skewY(30deg)scaleY(1.2);">
-                     <img id="MT32-sdcard-cover" src="case/microSD-cover.png"></img>
-                </div>
-                <div id="MT32-cable10" style="position:absolute;z-index:0;top:1320px;left:268px;opacity:0;">
-                     <img id="MT32-sdcard-cover" src="case/cp10.png"></img>
-                </div>
+        <div id="content" class="content" style="display:none;top:74px;">
 
-                <div id="MT32-screens">
-                    <div id="MT32-front" class="MT32-front" style="position:absolute; top:60px; left:122px;">
-                         <img src="DSC3489_front_transparent.png"></img>
-                         <img id="mt32_off" class="led" src="leds/grey.png"></img>
-                         <img id="mt32_charging" class="led" src="leds/orange.png"></img>
-                         <img id="mt32_fully_charged" class="led" src="leds/green.png"></img>
-                         <img id="mt32_charging_error" class="led blink-img" src="leds/orange.png"></img>
-                         <img id="mt32_on" class="led blink-img" src="leds/blue.png"></img>
-                    </div>
-                    <div id="homeScreen" style="display:block;color:white;">
-    		            <div class="screenframe">
-    		                <img src="screens/home_screen.png">
-    		            </div>
-                        <div id="home_battery_empty" class="screenframe" style="display:none;">
-    		                <img src="screens/home_screen_battery_empty.png">
-    		            </div>
-    		            <div id="div_logo" class="logo">
-    		                <img src="logo.png">
-    		            </div>
-    		            <div id="div_clock" class="longbutton center halfpadding">
-    		                <span id="div_hour" style="font-size:20px;"></span><br>
-    		                <span id="div_date"></span>
-    		            </div>
-    		            <div id="div_new_exam">
-    		                <span style="position:absolute;left:355px;top:362px;">Nuovo esame</span>
-    		            </div>
-    		            <div id="div_server">
-    		                <span style="position:absolute;left:450px;top:455px;">Centrale</span>
-    		            </div>
-    		            <div id="div_settings">
-    		                <span style="position:absolute;left:534px;top:544px;">Impostazioni</span>
-    		            </div>
-    		            <div>
-    		                <span style="position:absolute;left:288px;top:596px;">Modalit&agrave; operativa</span>
-                            <span id="mode_hub" style="position:absolute;left:288px;top:612px;font-size:30px; display:none;">ECG12D - HUB</span>
-    		                <span id="mode_none" style="position:absolute;left:288px;top:612px;font-size:30px; display:none;">nessuna</span>
-                            <span id="mode_holter" style="position:absolute;left:288px;top:612px;font-size:30px; display:none;">HOLTER</span>
-    		            </div>
-    		        </div>
-
-    		        <div id="examsScreen" style="display:none;color:white;font-size:18px;">
-    		            <div class="screenframe">
-    		                <img id="examsHUB" src="screens/exams_screen.png">
-                            <img id="examsHOLTER" src="screens/exams_screen_holter.png">
-                            <img id="examsDISABLED" src="screens/exams_screen_DISABLED.png">
-    		            </div>
-    		            <div id="div_ecg12d">
-    		                <span style="position:absolute;left:357px;top:366px;">ECG12D</span>
-    		            </div>
-                        <div id="div_holter">
-    		                <span style="position:absolute;left:520px;top:366px;">HOLTER</span>
-    		            </div>
-    		            <div id="div_testelectrodes">
-    		                <span style="position:absolute;left:340px;top:544px;">Test elettrodi</span>
-    		            </div>
-    		        </div>
-
-                    <div id="confirmHolterScreen" style="display:none;color:white;font-size:18px;">
-    		            <div class="screenframe">
-    		                <img src="screens/confirm_holter.png">
-    		            </div>
-    		        </div>
-
-                    <div id="confirmPowerOffScreen" style="display:none;color:white;font-size:18px;">
-    		            <div class="screenframe">
-    		                <img src="screens/richiesta_spegnimento.png">
-    		            </div>
-    		        </div>
-
-                    <div id="poweringOffScreen" style="display:none;color:white;font-size:18px;">
-    		            <div class="screenframe">
-    		                <img src="screens/spegnimento_in_corso.png">
-    		            </div>
-    		        </div>
-
-    		        <div id="centralScreen" style="display:none;color:white;font-size:18px;">
-    		            <div class="screenframe">
-    		                <img src="screens/central_screen.png">
-                            <div id="operating_mode_btn_disabled" class="overlay" style="top:274px;left:51px;">
-                                <img src="screens/buttons/operating_mode_btn_disabled.png">
-                            </div>
-                            <div id="send_results_btn_disabled" class="overlay" style="top:183px;left:232px;">
-                                <img src="screens/buttons/send_results_btn_disabled.png">
-                            </div>
-    		            </div>
-    		            <div id="div_download_updates">
-    		                <span style="position:absolute;left:360px;top:345px;">Scarica</span>
-    		                <span style="position:absolute;left:350px;top:365px;">aggiornam.</span>
-    		            </div>
-    		            <div id="div_n_results">
-    		                <span id="nresults" style="position:absolute;left:550px;top:320px;font-size:24px;"></span>
-    		            </div>
-    		            <div id="div_upload_results">
-    		                <span style="position:absolute;left:530px;top:365px;">Invio risultati</span>
-    		            </div>
-    		            <div id="div_quit_central">
-    		                <span style="position:absolute;left:362px;top:438px;">Termina</span>
-    		                <span style="position:absolute;left:360px;top:458px;">modalit&agrave;</span>
-    		            </div>
-    		        </div>
-
-    		        <div id="settingsScreen" style="display:none;color:white;font-size:18px;">
-    		            <div class="screenframe">
-    		                <img src="screens/settings_screen.png">
-    		            </div>
-    		            <div id="div_connection_status">
-    		                <span style="position:absolute;left:352px;top:357px;">Connettiv.</span>
-    		            </div>
-    		            <div id="div_ecg_settings">
-    		                <span style="position:absolute;left:537px;top:335px;">Impostaz.</span>
-    		                <span style="position:absolute;left:537px;top:357px;">ECG</span>
-    		            </div>
-    		            <div id="div_security">
-    		                <span style="position:absolute;left:354px;top:447px;">Sicurezza</span>
-    		            </div>
-    		            <div id="div_system">
-    		                <span style="position:absolute;left:542px;top:447px;">Sistema</span>
-    		            </div>
-    		            <div id="div_info">
-    		                <span style="position:absolute;left:380px;top:537px;">Info</span>
-    		            </div>
-    		        </div>
-
-    		        <div id="testScreen" style="display:none;color:white;font-size:18px;">
-    		            <div id="testHUB" class="screenframe">
-    		                <img src="screens/electrodes_screen.png">
-                            <div id="defective_electrode"
-                                 style="position:absolute;border-radius:20px;background-color:black;height:30px;width:30px;top:96px;left:377px;opacity:0.8;display:none;"
-                                 class="blink"></div>
-    		            </div>
-                        <div id="testHOLTER" class="screenframe">
-    		                <img src="screens/electrodes_screen_holter.png">
-    		            </div>
-    		            <div id="div_electrodes_status">
-    		                <span style="position:absolute;left:290px;top:590px;font-size:22px;">Cavo ECG12D protetto</span>
-    		                <span style="position:absolute;left:290px;top:612px;font-size:22px;">correttamente collegato</span>
-    		            </div>
-                        <div id="div_electrodes_status_holter">
-    		                <span style="position:absolute;left:290px;top:590px;font-size:22px;">Cavo Holter</span>
-    		                <span style="position:absolute;left:290px;top:612px;font-size:22px;">correttamente collegato</span>
-    		            </div>
-    		        </div>
-
-
-    		        <div id="checkPatientScreen" style="display:none;color:white;font-size:18px;">
-    		            <div class="screenframe">
-    		                <img src="screens/patient_details_screen.png">
-    		            </div>
-    		            <div style="position:absolute;left:282px;top:225px;height:356px;width:354px;overflow:auto;">
-    		                <div style="font-size:24px;color:#77c5e8">Nome</div>Maria
-    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Cognome</div>Bianchi
-    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">C.F.</div>BNCMRA71P52H612T
-    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Nata il [gg / MM / aaaa] </div>12 / 09 / 1971
-    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Sesso </div>F
-    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Numero telefonico </div>0464 456789
-    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Indirizzo </div>Via Ripafratta 14, 00000, TR
-    		            </div>
-    		            <div id="div_edit_btn">
-    		                <span style="position:absolute;left:380px;top:618px;">Modifica</span>
-    		            </div>
-    		            <div id="div_new_btn">
-    		                <span style="position:absolute;left:475px;top:618px;">Nuova</span>
-    		            </div>
-    		            <div id="div_confirm_btn">
-    		                <span style="position:absolute;left:553px;top:618px;">Conferma</span>
-    		            </div>
-    		        </div>
-
-                    <div id="interpretationScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
-    		            <div class="screenframe">
-    		                <img src="screens/24 - MT32 Interpretativo.png">
-    		            </div>
-    		            <div style="position:absolute;left:227px;top:225px;height:358px;width:412px;overflow:auto;">
-    		                <div style="font-size:24px;color:#77c5e8">Measurements (duration and frontal vector)</div>
-                            FC: 80bpm<br>
-                            P: 96ms<br>
-                            PR: 150ms<br>
-                            QRS: 92ms<br>
-                            QT/QTc: 380/439ms<br>
-                            P/QRS/T: 40/50/42 deg<br>
-    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Bottom line statement</div>
-                            Normal ECG<br>
-    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Version of HES-EKG</div>
-                            HES EKG 73.25 - 07 a<br>
-    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Technical hints (electrode, ...)</div>...
-    		            </div>
-    		            <div id="div_confirm_int_btn" style="position:absolute;top:589px;left:370px;width:268px;height:89px;text-align:center;padding-top:32px;">
-    		                Conferma
-    		            </div>
-    		        </div>
-
-                    <div id="mt32EditPatientScreen" class="MT32frame screenframe" style="display:none;color:white;font-size:18px;" >
-		                <img src="screens/12 - MT32 Modifica anagrafica.png">
-                        <div id="edit_mariabianchi">
-                            <input value="Maria" class="form-control" type="text" autofocus style="position:absolute;top:134px;left:5px;height:34px;width:404px;padding-top:0;padding-bottom:0;background-color:transparent;border-color:black;color:white;font-size:20pt;">
-                            <!-- <div style="position:absolute;top:134px;left:8px;width:2px;height:20px;margin-top:4px;background-color:black;" class="blink"></div> -->
-                            <input value="Bianchi" class="form-control" type="text" style="position:absolute;top:220px;left:5px;height:34px;width:404px;padding-top:0;padding-bottom:0;background-color:transparent;border-color:black;color:white;font-size:20pt;">
-                            <input value="BNCMRA71P52H612T" class="form-control" type="text" style="position:absolute;top:306px;left:5px;height:34px;width:404px;padding-top:0;padding-bottom:0;background-color:transparent;border-color:black;color:white;font-size:20pt;">
-                        </div>
-                        <div id="blankPT">
-                            <input value="" class="form-control" type="text" autofocus style="position:absolute;top:134px;left:5px;height:34px;width:404px;padding-top:0;padding-bottom:0">
-                            <!-- <div style="position:absolute;top:134px;left:8px;width:2px;height:20px;margin-top:4px;background-color:black;" class="blink"></div> -->
-                            <input value="" class="form-control" type="text" style="position:absolute;top:220px;left:5px;height:34px;width:404px;padding-top:0;padding-bottom:0">
-                            <input value="" class="form-control" type="text" style="position:absolute;top:306px;left:5px;height:34px;width:404px;padding-top:0;padding-bottom:0">
-                        </div>
-                    </div>
-
-                    <div id="downloadingUpdatesScreen" class="MT32frame" style="display:none;color:white;font-size:20px;">
-    		            <div class="screenframe">
-    		                <img src="screens/Invio risultati.png">
-    		            </div>
-                        <div id="div_confirm_downloadingupdates" style="position:absolute;top:588px;left:278px;height:89px;width:357px;text-align:center;padding-top:30px;">
-                            Conferma
-                        </div>
-                        <div id="div_abort_downloadingupdates" style="position:absolute;top:588px;left:278px;height:89px;width:357px;text-align:center;padding-top:30px;">
-                            Annulla
-                        </div>
-    		            <div style="position:absolute;left:282px;top:225px;height:356px;width:354px;overflow:auto;">
-    		                <div id="send_1" style="height:20px;"></div>
-    		                <div id="send_2" style="height:20px;"></div>
-                            <div id="send_3" style="height:20px;"></div>
-                            <div id="send_4" style="height:20px;"></div>
-    		                <div id="send_5" style="height:20px;"></div>
-                            <div id="send_6" style="height:20px;"></div>
-                            <div id="send_7" style="height:20px;"></div>
-                            <div id="send_8" style="height:20px;"></div>
-                            <div id="send_9" style="height:20px;"></div>
-    		            </div>
-                        <div id="spinnerWaitingConnection" style="display:none;">
-                            <div style="position:absolute;left:400px;top:354px;height:356px;width:354px;overflow:auto;">
-        		                <img src="screens/spinner-logo.png">
-        		            </div>
-                            <div style="position:absolute;left:404px;top:354px;height:356px;width:354px;overflow:auto;">
-        		                <img src="screens/spinner.png" class="rotating">
-        		            </div>
-                        </div>
-    		        </div>
-
-
-                    <div id="sendingResultsScreen" class="MT32frame" style="display:none;color:white;font-size:20px;">
-    		            <div class="screenframe">
-    		                <img src="screens/Invio risultati.png">
-    		            </div>
-                        <div id="div_confirm_cancel_send" style="position:absolute;top:588px;left:278px;height:89px;width:357px;text-align:center;padding-top:30px;">
-                        </div>
-    		            <div style="position:absolute;left:282px;top:225px;height:356px;width:354px;overflow:auto;">
-    		                <div id="res_send_1" style="height:20px;white-space:nowrap;"></div>
-    		                <div id="res_send_2" style="height:20px;white-space:nowrap;"></div>
-                            <div id="res_send_3" style="height:20px;white-space:nowrap;"></div>
-                            <div id="res_send_4" style="height:20px;white-space:nowrap;"></div>
-    		                <div id="res_send_5" style="height:20px;white-space:nowrap;"></div>
-                            <div id="res_send_6" style="height:20px;white-space:nowrap;"></div>
-                            <div id="res_send_7" style="height:20px;white-space:nowrap;"></div>
-                            <div id="res_send_8" style="height:20px;white-space:nowrap;"></div>
-                            <div id="res_send_9" style="height:20px;white-space:nowrap;"></div>
-                            <div id="res_send_10" style="height:20px;white-space:nowrap;"></div>
-    		            </div>
-                        <div id="send_spinner">
-                            <div style="position:absolute;left:400px;top:354px;height:356px;width:354px;overflow:auto;">
-        		                <img src="screens/spinner-logo.png">
-        		            </div>
-                            <div style="position:absolute;left:404px;top:355px;height:356px;width:354px;overflow:auto;">
-        		                <img src="screens/spinner.png" class="rotating">
-        		            </div>
-                        </div>
-    		        </div>
-
-    		        <div id="monitoringScreen" style="display:none;color:white;font-size:18px;">
-    		            <div class="screenframe">
-    		                <img src="screens/run_screen.png">
-                            <div class="runtrace" id="div_run_trace_5" style="display:none;position:absolute;margin-left:62px;">
-                                <div class="mainrun" style="overflow:hidden;margin-top:-500px;max-width:340px;">
-                                    <img src="screens/run_trace_5-25.png" style="z-index:inherit;">
-                                </div>
-    		                </div>
-                            <div class="runtrace" id="div_run_trace_10" style="display:none;position:absolute;margin-left:62px;">
-                                <div class="mainrun" style="overflow:hidden;margin-top:-500px;max-width:340px;">
-                                    <img src="screens/run_trace_10-25.png" style="z-index:inherit;">
-                                </div>
-    		                </div>
-                            <div class="runtrace" id="div_run_trace_20" style="display:none;position:absolute;margin-left:62px;">
-                                <div class="mainrun" style="overflow:hidden;margin-top:-500px;max-width:340px;">
-                                    <img src="screens/run_trace_20-25.png" style="z-index:inherit;">
-                                </div>
-    		                </div>
-                            <div class="runtrace" id="div_run_trace_init" style="position:absolute;margin-left:62px;">
-                                <div class="mainrun" style="overflow:hidden;margin-top:-500px;max-width:340px;">
-                                    <img src="screens/run_trace_20-25-init.png" style="z-index:inherit;">
-                                </div>
-    		                </div>
-    		            </div>
-    		            <div class="tracing">
-    		                <div id="div_run_trace_cursor"
-    		                    style="position:absolute;width:8px;height:100%;background-color:steelblue;opacity:0.6;overflow:hidden;
-    		                            border:solid 2px #77c5e8; border-radius:4px;">
-    		                    <img src="screens/run_grid.png">
-    		                </div>
-    		            </div>
-    		            <div id="div_patient_name" style="position:absolute;left:285px;top:142px;max-width:200px;">
-    		                Maria Bianchi
-    		            </div>
-    		            <div id="div_clock" style="position:absolute;left:554px;top:142px;">
-    		                <span id="div_hhmmss"></span>
-    		            </div>
-    		            <div id="div_recording_progress" style="position:absolute;left:508px;top:469px;max-width:48px;">
-    		                <!-- 81% -->
-    		            </div>
-    		            <div id="div_bpm" style="position:absolute;left:258px;top:605px;font-size:30px;">
-    		                59
-    		            </div>
-    		            <div id="div_bpm_label" style="position:absolute;left:258px;top:645px;">
-    		                bpm
-    		            </div>
-    		            <div id="div_gain" style="position:absolute;left:362px;top:605px;font-size:30px;">
-    		                20
-    		            </div>
-    		            <div id="div_gain_label" style="position:absolute;left:350px;top:645px;">
-    		                mm/mV
-    		            </div>
-    		            <div id="div_speed" style="position:absolute;left:464px;top:605px;font-size:30px;">
-    		                25
-    		            </div>
-    		            <div id="div_speed_label" style="position:absolute;left:458px;top:645px;">
-    		                mm/s
-    		            </div>
-                        <div id="filter_warning" style="position:absolute;top:130px;left:494px;">
-                            <img src="screens/buttons/filter_warning.png">
-                        </div>
-                        <div id="filters">
-                            <img id="lowpassfilter_on" src="screens/buttons/lowpassfilter_on.png" style="position:absolute;top:177px;left:230px;z-index:1;">
-                            <img id="hipassfilter_on" src="screens/buttons/hipassfilter_on.png" style="position:absolute;top:284px;left:230px;z-index:1;">
-                        </div>
-    		        </div>
-
-                    <div id="resultsScreen" class="MT32frame" style="color:white;font-size:18px;">
-                        <div class="screenframe">
-                            <img src="screens/results_screen.png">
-                        </div>
-                        <div style="position:absolute;top:353px;left:295px;">
-                            Disponibile
-                        </div>
-                        <div id="hasphysio" style="position:absolute;top:431px;left:295px;">
-                            Assenti
-                        </div>
-                    </div>
-
-                    <div id="editPhysioScreen" class="MT32frame" style="color:white;font-size:18px;">
-                        <div class="screenframe">
-                            <img src="screens/26 - MT32 Immissione dato fisiologico.png">
-                            <img id="menu-physio" src="screens/menu-physio.png" style="position:absolute;top:73px;left:0px;z-index:1;">
-                            <input id="dataentry_val" value="" class="form-control" type="text" autofocus
-                                    style="position:absolute;top:129px;left:1px;height:100px;width:275px;padding-top:0;padding-bottom:0;background-color:transparent;border-color:black;color:black;font-size:26pt;text-align:center;">
-                            <input value="°C" class="form-control" type="text"
-                                    style="position:absolute;top:129px;left:275px;height:100px;width:135px;padding-top:0;padding-bottom:0;background-color:transparent;border-color:black;color:black;font-size:26pt;text-align:center;">
-                        </div>
-                    </div>
-
-                    <div id="saveResultsScreen" class="MT32frame" style="color:white;font-size:18px;">
-                        <div class="screenframe">
-                            <img src="screens/27 - MT32 Conclusione esame.png">
-                            <div style="position:absolute;left:182px;top:222px;height:356px;width:354px;overflow:auto;">
-        		                <img src="screens/spinner-logo.png">
-        		            </div>
-                            <div style="position:absolute;left:186px;top:222px;height:356px;width:354px;overflow:auto;">
-        		                <img src="screens/spinner.png" class="rotating">
-        		            </div>
-                        </div>
-                    </div>
-
-                    <div id="viewAlertsScreen" style="display:none;color:white;font-size:18px;">
-                        <div class="screenframe">
-                            <img src="screens/segnalazioni.png">
-                        </div>
-                    </div>
-
-    		        <div id="leftPanel" class="leftpanel" style="display:none;">
-                        <img id="umts_tx" src="screens/buttons/umts_tx.png" style="position:absolute;top:130px;left:226px;z-index:0;">
-                        <img id="umts_on" src="screens/buttons/umts_on.png" style="position:absolute;top:130px;left:226px;z-index:0;">
-                        <img id="umts_off" src="screens/buttons/umts_off.png" style="position:absolute;top:130px;left:226px;z-index:0;">
-                    </div>
-
-                    <div id="offScreen">
-                        <div class="screenframe">
-                            <img src="screens/off_screen.png">
-                            <div id="poweron_spinner" style="position:absolute; top:200px; left: 156px; color:white; display:none;">
-                                <i class="fa fa-spinner fa-pulse fa-4x fa-fw" aria-hidden="true"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-            <div class="central" id="CT64" style="display:block">
+            <div id="CT64" class="central" style="display:block">
                 <div class="CT64-front"
                      style="position:absolute; top:100px; left:1000px;">
                      <img src="CT64_front.png"></img>
@@ -556,11 +125,10 @@
                         </div>
                     </div>
                     <div class="CT64frame" id="newMonitoringSessionScreen" style="display:none;">
-                        <img id="hubSession" class="CT64screen" src="screens/ct64/07 - CT64 Selezione dispositivo.jpg">
+                        <img id="selectDevice" class="CT64screen" src="screens/ct64/07 - CT64 Selezione dispositivo.jpg">
                         <div id="deviceDataNotAvailable" class="overlay" style="position:absolute;top:433px;left:65px;width:1227px;height:30px;background-color:white;text-align:center;font-weight:bold;padding-top:6px;">
                             nessun risultato trovato.
                         </div>
-                        <img id="holterSession" class="CT64screen" src="screens/ct64/17 - CT64 Holter - Attesa collegamento dispositivo.jpg" style="margin-top:-37px; display:none;">
                     </div>
                     <div class="CT64frame" id="waitingResultsScreen" style="display:none;">
                         <img class="CT64screen" src="screens/ct64/06 - CT64 Attesa collegamento dispositivo.jpg">
@@ -644,8 +212,11 @@
                         <img class="CT64screen" src="screens/ct64/18 - CT64 Holter - Analisi monitoraggio (NON DEFINITIVO).jpg" style="margin-top:70px">
                     </div>
 
-                    <div class="monitorData" id="knownPT" style="position:absolute; top:276px; left:1400px; font-size:15px; color:gray;">
+                    <div class="monitorData" id="knownPT-ECG12D" style="position:absolute; top:276px; left:1400px; font-size:15px; color:gray;">
                         <span>Ecg12D con Anagrafica</span>
+                    </div>
+                    <div class="monitorData" id="knownPT-HOLTER" style="position:absolute; top:276px; left:1400px; font-size:15px; color:gray;">
+                        <span>Holter</span>
                     </div>
                     <div class="monitorData" id="newPT" style="position:absolute; top:276px; left:1400px; font-size:15px; color:gray;">
                         <span>Ecg12D senza Anagrafica</span>
@@ -654,7 +225,7 @@
                         <span>Nessun parametro: modalità Hub.</span>
                     </div>
                     <div class="monitorData" id="holter_mode" style="position:absolute; top:318px; left:1400px; font-size:15px; color:gray;">
-                        <span>Nessun parametro: modalità Holter.</span>
+                        <span><b>durata</b>: 24 ore <b>derivazione precordiale</b>: V1 <b>accelerometro</b>: si</span>
                     </div>
                     <div class="monitorData" id="mariabianchi" style="position:absolute; top:360px; left:1400px; font-size:15px; color:gray;">
                         <span>Maria Bianchi BNCMRA71P52H612T</span>
@@ -700,7 +271,480 @@
                     </div> -->
 
                 </div>
+                <div id="ct64_mouse" class="CT64mouse" style="z-index:3;position:absolute;opacity:0.9;">
+                    <!-- <img src="screens/cursor_icon.png"> -->
+                </div>
             </div>
+
+            <div class="device" id="device" style="perspective:1000px; perspective-origin:-22%;">
+                <div id="record_voice" style="position:absolute;top:0px;left:250px; display:none;">
+                    <img src="voice-01.png" class="animated pulse_bak infinite" style="width:90px;">
+                </div>
+                <div id="MT32-left-bottom" class="MT32-case-leftside MT32-case-leftside-upper MT32-case"
+                    style="position:absolute; top:60px; left:72px; transform:rotateY(22deg)translateZ(-90px)translateY(180px)translateX(140px)skewY(0deg)scaleY(1.2);">
+                     <img src="case/MT32-case-leftside-1.png"></img>
+                </div>
+                <div id="MT32-left-bottom" class="MT32-case-leftside MT32-case-leftside-lower MT32-case"
+                    style="position:absolute; top:60px; left:72px; transform:rotateY(22deg)translateZ(-90px)translateY(180px)translateX(140px)skewY(30deg)scaleY(0.92);">
+                     <img src="case/MT32-case-leftside-2.png"></img>
+                </div>
+                <div class="card-reader MT32-case" style="position:absolute; top:1045px; left:822px; display:none; z-index:2;">
+                     <img src="case/card_reader_hub-lower.png"></img>
+                </div>
+                <div id="MT32-sdcard" class="MT32-sdcard MT32-case"
+                    style="position:absolute; top:776px; left:130px; transform: translateX(-50px); display: none;">
+                     <img src="microSD.png"></img>
+                </div>
+                <div class="card-reader MT32-case" style="position:absolute; top:1045px; left:822px; display:none; z-index:2;">
+                     <img src="case/card_reader_hub-upper.png"></img>
+                </div>
+                <div id="MT32-left-bottom" class="MT32-case-leftside MT32-case-leftside-upper MT32-case"
+                    style="position:absolute; top:60px; left:72px; transform:rotateY(22deg)translateZ(-90px)translateY(180px)translateX(140px)skewY(0deg)scaleY(1.2);">
+                     <img src="case/MT32-case-leftside-3.png"></img>
+                </div>
+                <div id="MT32-left-bottom" class="MT32-case-leftside MT32-case-leftside-lower MT32-case"
+                    style="position:absolute; top:60px; left:72px; transform:rotateY(22deg)translateZ(-90px)translateY(180px)translateX(140px)skewY(30deg)scaleY(0.92);">
+                     <img src="case/MT32-case-leftside-4.png"></img>
+                </div>
+                <div id="MT32-right" class="MT32-case-rightside MT32-case"
+                    style="position:absolute; top:75px; left:526px; display:none;">
+                     <img src="case/MT32-case-rightside.png"></img>
+                </div>
+                <div id="MT32-sdcard-cover" class="MT32-sdcard MT32-case"
+                    style="position:absolute; top:780px; left:135px; transform: rotateY(22deg)translateZ(-55px)translateY(108px)translateX(140px)skewY(30deg)scaleY(1.2);">
+                     <img id="MT32-sdcard-cover" src="case/microSD-cover.png"></img>
+                </div>
+                <div id="MT32-cable10" style="position:absolute;z-index:0;top:1320px;left:268px;opacity:0;">
+                     <img id="MT32-sdcard-cover" src="case/cp10.png"></img>
+                </div>
+                <div id="MT32-cable5" style="position:absolute;z-index:0;top:1320px;left:268px;opacity:0;">
+                     <img id="MT32-sdcard-cover" src="case/cp5.png"></img>
+                </div>
+
+                <div id="MT32-screens">
+                    <div id="offScreen">
+                        <div class="screenframe">
+                            <img src="screens/off_screen.png">
+                            <div id="poweron_spinner" style="position:absolute; top:200px; left: 156px; color:white; display:none;">
+                                <i class="fa fa-spinner fa-pulse fa-4x fa-fw" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="MT32-front" class="MT32-front" style="position:absolute; top:60px; left:122px;">
+                         <img src="DSC3489_front_transparent.png"></img>
+                         <img id="mt32_off" class="led" src="leds/grey.png"></img>
+                         <img id="mt32_charging" class="led" src="leds/orange.png"></img>
+                         <img id="mt32_fully_charged" class="led" src="leds/green.png"></img>
+                         <img id="mt32_charging_error" class="led blink-img" src="leds/orange.png"></img>
+                         <img id="mt32_on" class="led blink-img" src="leds/blue.png"></img>
+                    </div>
+                    <div id="homeScreen" class="MT32frame" style="display:block;color:white;">
+    		            <div class="screenframe">
+    		                <img src="screens/home_screen.png">
+    		            </div>
+                        <div id="home_battery_empty" class="screenframe" style="display:none;">
+    		                <img src="screens/home_screen_battery_empty.png">
+    		            </div>
+    		            <div id="div_logo" class="logo">
+    		                <img src="logo.png">
+    		            </div>
+    		            <div id="div_clock" class="longbutton center halfpadding">
+    		                <span id="div_hour" style="font-size:20px;"></span><br>
+    		                <span id="div_date"></span>
+    		            </div>
+    		            <div id="div_new_exam">
+    		                <span style="position:absolute;left:355px;top:362px;">Nuovo esame</span>
+    		            </div>
+    		            <div id="div_server">
+    		                <span style="position:absolute;left:450px;top:455px;">Centrale</span>
+    		            </div>
+    		            <div id="div_settings">
+    		                <span style="position:absolute;left:534px;top:544px;">Impostazioni</span>
+    		            </div>
+    		            <div>
+    		                <span style="position:absolute;left:288px;top:596px;">Modalit&agrave; operativa</span>
+                            <span id="mode_hub" style="position:absolute;left:288px;top:612px;font-size:30px; display:none;">ECG12D - HUB</span>
+    		                <span id="mode_none" style="position:absolute;left:288px;top:612px;font-size:30px; display:none;">nessuna</span>
+                            <span id="mode_holter" style="position:absolute;left:288px;top:612px;font-size:30px; display:none;">HOLTER</span>
+    		            </div>
+    		        </div>
+
+    		        <div id="examsScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
+    		            <div class="screenframe">
+    		                <img id="examsHUB" src="screens/exams_screen.png">
+                            <img id="examsHOLTER" src="screens/exams_screen_holter.png">
+                            <img id="examsDISABLED" src="screens/exams_screen_DISABLED.png">
+    		            </div>
+    		            <div id="div_ecg12d">
+    		                <span style="position:absolute;left:357px;top:366px;">ECG12D</span>
+    		            </div>
+                        <div id="div_holter">
+    		                <span style="position:absolute;left:520px;top:366px;">HOLTER</span>
+    		            </div>
+    		            <div id="div_testelectrodes">
+    		                <span style="position:absolute;left:340px;top:544px;">Test elettrodi</span>
+    		            </div>
+    		        </div>
+
+                    <div id="confirmHolterScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
+    		            <div class="screenframe">
+    		                <img src="screens/confirm_holter.png">
+    		            </div>
+    		        </div>
+
+                    <div id="notifyHolterCompleteScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
+    		            <div class="screenframe">
+    		                <img src="screens/22 - MT32 Esito conclusione esame.png">
+    		            </div>
+    		        </div>
+
+                    <div id="confirmPowerOffScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
+    		            <div class="screenframe">
+    		                <img src="screens/richiesta_spegnimento.png">
+    		            </div>
+    		        </div>
+
+                    <div id="poweringOffScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
+    		            <div class="screenframe">
+    		                <img src="screens/spegnimento_in_corso.png">
+    		            </div>
+    		        </div>
+
+    		        <div id="centralScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
+    		            <div class="screenframe">
+    		                <img src="screens/central_screen.png">
+                            <div id="operating_mode_btn_disabled" class="overlay" style="top:274px;left:51px;">
+                                <img src="screens/buttons/operating_mode_btn_disabled.png">
+                            </div>
+                            <div id="send_results_btn_disabled" class="overlay" style="top:183px;left:232px;">
+                                <img src="screens/buttons/send_results_btn_disabled.png">
+                            </div>
+    		            </div>
+    		            <div id="div_download_updates">
+    		                <span style="position:absolute;left:360px;top:345px;">Scarica</span>
+    		                <span style="position:absolute;left:350px;top:365px;">aggiornam.</span>
+    		            </div>
+    		            <div id="div_n_results">
+    		                <span id="nresults" style="position:absolute;left:550px;top:320px;font-size:24px;"></span>
+    		            </div>
+    		            <div id="div_upload_results">
+    		                <span style="position:absolute;left:530px;top:365px;">Invio risultati</span>
+    		            </div>
+    		            <div id="div_quit_central">
+    		                <span style="position:absolute;left:362px;top:438px;">Termina</span>
+    		                <span style="position:absolute;left:360px;top:458px;">modalit&agrave;</span>
+    		            </div>
+    		        </div>
+
+    		        <div id="settingsScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
+    		            <div class="screenframe">
+    		                <img src="screens/settings_screen.png">
+    		            </div>
+    		            <div id="div_connection_status">
+    		                <span style="position:absolute;left:352px;top:357px;">Connettiv.</span>
+    		            </div>
+    		            <div id="div_ecg_settings">
+    		                <span style="position:absolute;left:537px;top:335px;">Impostaz.</span>
+    		                <span style="position:absolute;left:537px;top:357px;">ECG</span>
+    		            </div>
+    		            <div id="div_security">
+    		                <span style="position:absolute;left:354px;top:447px;">Sicurezza</span>
+    		            </div>
+    		            <div id="div_system">
+    		                <span style="position:absolute;left:542px;top:447px;">Sistema</span>
+    		            </div>
+    		            <div id="div_info">
+    		                <span style="position:absolute;left:380px;top:537px;">Info</span>
+    		            </div>
+    		        </div>
+
+    		        <div id="testScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
+    		            <div id="testHUB" class="screenframe">
+    		                <img src="screens/electrodes_screen.png">
+                            <div id="defective_electrode"
+                                 style="position:absolute;border-radius:20px;background-color:black;height:30px;width:30px;top:96px;left:377px;opacity:0.8;display:none;"
+                                 class="blink"></div>
+    		            </div>
+                        <div id="testHOLTER" class="screenframe">
+    		                <img src="screens/electrodes_screen_holter.png">
+    		            </div>
+    		            <div id="div_electrodes_status">
+    		                <span style="position:absolute;left:290px;top:590px;font-size:22px;">Cavo ECG12D protetto</span>
+    		                <span style="position:absolute;left:290px;top:612px;font-size:22px;">correttamente collegato</span>
+    		            </div>
+                        <div id="div_electrodes_status_holter">
+    		                <span style="position:absolute;left:290px;top:590px;font-size:22px;">Cavo Holter</span>
+    		                <span style="position:absolute;left:290px;top:612px;font-size:22px;">correttamente collegato</span>
+    		            </div>
+    		        </div>
+
+
+    		        <div id="checkPatientScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
+    		            <div class="screenframe">
+    		                <img src="screens/patient_details_screen.png">
+    		            </div>
+    		            <div style="position:absolute;left:282px;top:225px;height:356px;width:354px;overflow:auto;">
+    		                <div style="font-size:24px;color:#77c5e8">Nome</div>Maria
+    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Cognome</div>Bianchi
+    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">C.F.</div>BNCMRA71P52H612T
+    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Nata il [gg / MM / aaaa] </div>12 / 09 / 1971
+    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Sesso </div>F
+    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Numero telefonico </div>0464 456789
+    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Indirizzo </div>Via Ripafratta 14, 00000, TR
+    		            </div>
+    		            <div id="div_edit_btn">
+    		                <span style="position:absolute;left:380px;top:618px;">Modifica</span>
+    		            </div>
+    		            <div id="div_new_btn">
+    		                <span style="position:absolute;left:475px;top:618px;">Nuova</span>
+    		            </div>
+    		            <div id="div_confirm_btn">
+    		                <span style="position:absolute;left:553px;top:618px;">Conferma</span>
+    		            </div>
+    		        </div>
+
+                    <div id="interpretationScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
+    		            <div class="screenframe">
+    		                <img src="screens/24 - MT32 Interpretativo.png">
+    		            </div>
+    		            <div style="position:absolute;left:227px;top:225px;height:358px;width:412px;overflow:auto;">
+    		                <div style="font-size:24px;color:#77c5e8">Measurements (duration and frontal vector)</div>
+                            FC: 80bpm<br>
+                            P: 96ms<br>
+                            PR: 150ms<br>
+                            QRS: 92ms<br>
+                            QT/QTc: 380/439ms<br>
+                            P/QRS/T: 40/50/42 deg<br>
+    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Bottom line statement</div>
+                            Normal ECG<br>
+    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Version of HES-EKG</div>
+                            HES EKG 73.25 - 07 a<br>
+    		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Technical hints (electrode, ...)</div>...
+    		            </div>
+    		            <div id="div_confirm_int_btn" style="position:absolute;top:589px;left:370px;width:268px;height:89px;text-align:center;padding-top:32px;">
+    		                Conferma
+    		            </div>
+    		        </div>
+
+                    <div id="mt32EditPatientScreen" class="MT32frame screenframe" style="display:none;color:white;font-size:18px;" >
+		                <img src="screens/12 - MT32 Modifica anagrafica.png">
+                        <div id="leftpanel_mt32EditPatientScreen" style="position:absolute;top:-130px;left:-226px;">
+                        </div>
+                        <div id="edit_mariabianchi">
+                            <input value="Maria" class="form-control" type="text" autofocus style="position:absolute;top:134px;left:5px;height:34px;width:404px;padding-top:0;padding-bottom:0;background-color:transparent;border-color:black;color:white;font-size:20pt;">
+                            <!-- <div style="position:absolute;top:134px;left:8px;width:2px;height:20px;margin-top:4px;background-color:black;" class="blink"></div> -->
+                            <input value="Bianchi" class="form-control" type="text" style="position:absolute;top:220px;left:5px;height:34px;width:404px;padding-top:0;padding-bottom:0;background-color:transparent;border-color:black;color:white;font-size:20pt;">
+                            <input value="BNCMRA71P52H612T" class="form-control" type="text" style="position:absolute;top:306px;left:5px;height:34px;width:404px;padding-top:0;padding-bottom:0;background-color:transparent;border-color:black;color:white;font-size:20pt;">
+                        </div>
+                        <div id="blankPT">
+                            <input value="" class="form-control" type="text" autofocus style="position:absolute;top:134px;left:5px;height:34px;width:404px;padding-top:0;padding-bottom:0">
+                            <!-- <div style="position:absolute;top:134px;left:8px;width:2px;height:20px;margin-top:4px;background-color:black;" class="blink"></div> -->
+                            <input value="" class="form-control" type="text" style="position:absolute;top:220px;left:5px;height:34px;width:404px;padding-top:0;padding-bottom:0">
+                            <input value="" class="form-control" type="text" style="position:absolute;top:306px;left:5px;height:34px;width:404px;padding-top:0;padding-bottom:0">
+                        </div>
+                    </div>
+
+                    <div id="downloadingUpdatesScreen" class="MT32frame" style="display:none;color:white;font-size:20px;">
+    		            <div class="screenframe">
+    		                <img src="screens/Invio risultati.png">
+    		            </div>
+                        <div id="div_confirm_downloadingupdates" style="position:absolute;top:588px;left:278px;height:89px;width:357px;text-align:center;padding-top:30px;">
+                            Conferma
+                        </div>
+                        <div id="div_abort_downloadingupdates" style="position:absolute;top:588px;left:278px;height:89px;width:357px;text-align:center;padding-top:30px;">
+                            Annulla
+                        </div>
+    		            <div style="position:absolute;left:282px;top:225px;height:356px;width:354px;overflow:auto;">
+    		                <div id="send_1" style="height:20px;"></div>
+    		                <div id="send_2" style="height:20px;"></div>
+                            <div id="send_3" style="height:20px;"></div>
+                            <div id="send_4" style="height:20px;"></div>
+    		                <div id="send_5" style="height:20px;"></div>
+                            <div id="send_6" style="height:20px;"></div>
+                            <div id="send_7" style="height:20px;"></div>
+                            <div id="send_8" style="height:20px;"></div>
+                            <div id="send_9" style="height:20px;"></div>
+    		            </div>
+                        <div id="spinnerWaitingConnection" style="display:none;">
+                            <div style="position:absolute;left:400px;top:354px;height:356px;width:354px;overflow:auto;">
+        		                <img src="screens/spinner-logo.png">
+        		            </div>
+                            <div style="position:absolute;left:404px;top:354px;height:356px;width:354px;overflow:auto;">
+        		                <img src="screens/spinner.png" class="rotating">
+        		            </div>
+                        </div>
+    		        </div>
+
+
+                    <div id="sendingResultsScreen" class="MT32frame" style="display:none;color:white;font-size:20px;">
+    		            <div class="screenframe">
+    		                <img src="screens/Invio risultati.png">
+    		            </div>
+                        <div id="div_confirm_cancel_send" style="position:absolute;top:588px;left:278px;height:89px;width:357px;text-align:center;padding-top:30px;">
+                        </div>
+    		            <div style="position:absolute;left:282px;top:225px;height:356px;width:354px;overflow:auto;">
+    		                <div id="res_send_1" style="height:20px;white-space:nowrap;"></div>
+    		                <div id="res_send_2" style="height:20px;white-space:nowrap;"></div>
+                            <div id="res_send_3" style="height:20px;white-space:nowrap;"></div>
+                            <div id="res_send_4" style="height:20px;white-space:nowrap;"></div>
+    		                <div id="res_send_5" style="height:20px;white-space:nowrap;"></div>
+                            <div id="res_send_6" style="height:20px;white-space:nowrap;"></div>
+                            <div id="res_send_7" style="height:20px;white-space:nowrap;"></div>
+                            <div id="res_send_8" style="height:20px;white-space:nowrap;"></div>
+                            <div id="res_send_9" style="height:20px;white-space:nowrap;"></div>
+                            <div id="res_send_10" style="height:20px;white-space:nowrap;"></div>
+    		            </div>
+                        <div id="send_spinner">
+                            <div style="position:absolute;left:400px;top:354px;height:356px;width:354px;overflow:auto;">
+        		                <img src="screens/spinner-logo.png">
+        		            </div>
+                            <div style="position:absolute;left:404px;top:355px;height:356px;width:354px;overflow:auto;">
+        		                <img src="screens/spinner.png" class="rotating">
+        		            </div>
+                        </div>
+    		        </div>
+
+    		        <div id="monitoringScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
+    		            <div class="screenframe">
+    		                <img src="screens/run_screen.png">
+                            <div class="runtrace" id="div_run_trace_5-LP" style="display:none;position:absolute;margin-left:62px;">
+                                <div class="mainrun" style="overflow:hidden;margin-top:-500px;max-width:340px;">
+                                    <img src="screens/run_trace_5-25-LP.png" style="z-index:inherit;">
+                                </div>
+    		                </div>
+                            <div class="runtrace" id="div_run_trace_10-LP" style="display:none;position:absolute;margin-left:62px;">
+                                <div class="mainrun" style="overflow:hidden;margin-top:-500px;max-width:340px;">
+                                    <img src="screens/run_trace_10-25-LP.png" style="z-index:inherit;">
+                                </div>
+    		                </div>
+                            <div class="runtrace" id="div_run_trace_20-LP" style="display:none;position:absolute;margin-left:62px;">
+                                <div class="mainrun" style="overflow:hidden;margin-top:-500px;max-width:340px;">
+                                    <img src="screens/run_trace_20-25-LP.png" style="z-index:inherit;">
+                                </div>
+    		                </div>
+                            <div class="runtrace" id="div_run_trace_20-V2" style="display:none;position:absolute;margin-left:62px;">
+                                <div class="mainrun" style="overflow:hidden;margin-top:-500px;max-width:340px;">
+                                    <img src="screens/run_trace_20-25-V2.png" style="z-index:inherit;">
+                                </div>
+    		                </div>
+                            <div class="runtrace" id="div_run_trace_20-V1V2V3" style="display:none;position:absolute;margin-left:62px;">
+                                <div class="mainrun" style="overflow:hidden;margin-top:-500px;max-width:340px;">
+                                    <img src="screens/run_trace_20-25-V1V2V3.png" style="z-index:inherit;">
+                                </div>
+    		                </div>
+                            <div class="runtrace" id="div_run_trace_20" style="display:none;position:absolute;margin-left:62px;">
+                                <div class="mainrun" style="overflow:hidden;margin-top:-500px;max-width:340px;">
+                                    <img src="screens/run_trace_20-25.png" style="z-index:inherit;">
+                                </div>
+    		                </div>
+                            <div class="runtrace" id="div_run_trace_init" style="position:absolute;margin-left:62px;">
+                                <div class="mainrun" style="overflow:hidden;margin-top:-500px;max-width:340px;">
+                                    <img src="screens/run_trace_20-25-init.png" style="z-index:inherit;">
+                                </div>
+    		                </div>
+    		            </div>
+    		            <div class="tracing">
+    		                <div id="div_run_trace_cursor"
+    		                    style="position:absolute;width:8px;height:100%;background-color:steelblue;opacity:0.6;overflow:hidden;
+    		                            border:solid 2px #77c5e8; border-radius:4px;">
+    		                    <img src="screens/run_grid.png">
+    		                </div>
+    		            </div>
+    		            <div id="div_patient_name" style="position:absolute;left:285px;top:142px;max-width:200px;">
+    		                Maria Bianchi
+    		            </div>
+    		            <div id="div_clock" style="position:absolute;left:554px;top:142px;">
+    		                <span id="div_hhmmss"></span>
+    		            </div>
+    		            <div id="div_recording_progress" style="position:absolute;left:508px;top:469px;max-width:48px;">
+    		                <!-- 81% -->
+    		            </div>
+    		            <div id="div_bpm" style="position:absolute;left:258px;top:605px;font-size:30px;">
+    		                59
+    		            </div>
+    		            <div id="div_bpm_label" style="position:absolute;left:258px;top:645px;">
+    		                bpm
+    		            </div>
+    		            <div id="div_gain" style="position:absolute;left:362px;top:605px;font-size:30px;">
+    		                20
+    		            </div>
+    		            <div id="div_gain_label" style="position:absolute;left:350px;top:645px;">
+    		                mm/mV
+    		            </div>
+    		            <div id="div_speed" style="position:absolute;left:464px;top:605px;font-size:30px;">
+    		                25
+    		            </div>
+    		            <div id="div_speed_label" style="position:absolute;left:458px;top:645px;">
+    		                mm/s
+    		            </div>
+                        <div id="div_trace_label" style="position:absolute;left:556px;top:619px;transform:scale(1.6);">
+                            <img id="traceOneTwoThree" src="screens/traceOneTwoThree.png" style="display:none;">
+                            <img id="traceV1V2V3" src="screens/traceV1V2V3.png" style="display:none;">
+                            <img id="traceV2" src="screens/traceV2.png" style="display:none;">
+    		            </div>
+                        <div id="filter_warning" style="position:absolute;top:130px;left:494px;">
+                            <img src="screens/buttons/filter_warning.png">
+                        </div>
+                        <div id="filters">
+                            <img id="lowpassfilter_on" src="screens/buttons/lowpassfilter_on.png" style="position:absolute;top:177px;left:230px;z-index:1;">
+                            <img id="hipassfilter_on" src="screens/buttons/hipassfilter_on.png" style="position:absolute;top:284px;left:230px;z-index:1;">
+                        </div>
+    		        </div>
+
+                    <div id="resultsScreen" class="MT32frame" style="color:white;font-size:18px;">
+                        <div class="screenframe">
+                            <img src="screens/results_screen.png">
+                        </div>
+                        <div style="position:absolute;top:353px;left:295px;">
+                            Disponibile
+                        </div>
+                        <div id="hasphysio" style="position:absolute;top:431px;left:295px;">
+                            Assenti
+                        </div>
+                    </div>
+
+                    <div id="editPhysioScreen" class="MT32frame" style="color:white;font-size:18px;">
+                        <div class="screenframe">
+                            <img src="screens/26 - MT32 Immissione dato fisiologico.png">
+                            <img id="menu-physio" src="screens/menu-physio.png" style="position:absolute;top:73px;left:0px;z-index:1;">
+                            <input id="dataentry_val" value="" class="form-control" type="text" autofocus
+                                    style="position:absolute;top:129px;left:1px;height:100px;width:275px;padding-top:0;padding-bottom:0;background-color:transparent;border-color:black;color:black;font-size:26pt;text-align:center;">
+                            <input value="°C" class="form-control" type="text"
+                                    style="position:absolute;top:129px;left:275px;height:100px;width:135px;padding-top:0;padding-bottom:0;background-color:transparent;border-color:black;color:black;font-size:26pt;text-align:center;">
+                        </div>
+                    </div>
+
+                    <div id="saveResultsScreen" class="MT32frame" style="color:white;font-size:18px;">
+                        <div class="screenframe">
+                            <img src="screens/27 - MT32 Conclusione esame.png">
+                            <div style="position:absolute;left:182px;top:222px;height:356px;width:354px;overflow:auto;">
+        		                <img src="screens/spinner-logo.png">
+        		            </div>
+                            <div style="position:absolute;left:186px;top:222px;height:356px;width:354px;overflow:auto;">
+        		                <img src="screens/spinner.png" class="rotating">
+        		            </div>
+                        </div>
+                    </div>
+
+                    <div id="viewAlertsScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
+                        <div class="screenframe">
+                            <img src="screens/segnalazioni.png">
+                        </div>
+                    </div>
+
+    		        <div id="leftPanel" class="leftpanel MT32frame" style="display:none;">
+                        <img id="umts_tx" src="screens/buttons/umts_tx.png" style="position:absolute;top:130px;left:226px;z-index:0;">
+                        <img id="umts_on" src="screens/buttons/umts_on.png" style="position:absolute;top:130px;left:226px;z-index:0;">
+                        <img id="umts_off" src="screens/buttons/umts_off.png" style="position:absolute;top:130px;left:226px;z-index:0;">
+                    </div>
+
+                    <div id="mt32_stylus" class="MT32stylus" style="z-index:3;position:absolute;opacity:0.9;">
+                        <!-- <img src="case/stylus-white.png" style="z-index:inherit;"> -->
+                    </div>
+                </div>
+            </div>
+
         </div>
         <div id="div_splash" class="demo-splash" style="display:none;">
             <div class="loader">

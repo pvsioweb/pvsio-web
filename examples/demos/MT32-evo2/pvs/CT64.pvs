@@ -144,15 +144,19 @@ CT64: THEORY
      ELSE -> st
     ENDCOND
 
-  per_monitoring(st: CTState): bool = (mode(st) = PATIENT_MANAGEMENT)
+  per_monitoring(st: CTState): bool = (mode(st) = MT32_HOLTER_MODE)
+    OR (mode(st) = MT32_HUB_MODE)
     OR (mode(st) = PATIENTS_SCREEN)
     OR (mode(st) = UPLOAD_EXAMS)
-    OR (mode(st) = MT32_HUB_MODE)
+    OR (mode(st) = PATIENT_MANAGEMENT)
     OR (mode(st) = WAITING_RESULTS)
   monitoring(st: (per_monitoring)): CTState =
     COND
-     mode(st) = PATIENT_MANAGEMENT
-      -> LET st = leave(PATIENT_MANAGEMENT)(st)
+     mode(st) = MT32_HOLTER_MODE
+      -> LET st = leave(MT32_HOLTER_MODE)(st)
+          IN enter(MONITORING)(st),
+     mode(st) = MT32_HUB_MODE
+      -> LET st = leave(MT32_HUB_MODE)(st)
           IN enter(MONITORING)(st),
      mode(st) = PATIENTS_SCREEN
       -> LET st = leave(PATIENTS_SCREEN)(st)
@@ -160,8 +164,8 @@ CT64: THEORY
      mode(st) = UPLOAD_EXAMS
       -> LET st = leave(UPLOAD_EXAMS)(st)
           IN enter(MONITORING)(st),
-     mode(st) = MT32_HUB_MODE
-      -> LET st = leave(MT32_HUB_MODE)(st)
+     mode(st) = PATIENT_MANAGEMENT
+      -> LET st = leave(PATIENT_MANAGEMENT)(st)
           IN enter(MONITORING)(st),
      mode(st) = WAITING_RESULTS
       -> LET st = leave(WAITING_RESULTS)(st)
