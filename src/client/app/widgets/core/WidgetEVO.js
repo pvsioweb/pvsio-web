@@ -28,7 +28,6 @@ define(function (require, exports, module) {
      *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
      *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
      *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
-     *          <li>displayKey (String): name of the state attribute defining the button label. Default is the ID of the widget.</li>
      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
      *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
      *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
@@ -55,10 +54,13 @@ define(function (require, exports, module) {
         this.blinking = opt.blinking || false;
         this.opacity = (isNaN(parseFloat(opt.opacity))) ? 0.9 : opt.opacity;
         this.visibleWhen = opt.visibleWhen || "true"; // default: always enabled/visible
+        this.widget = true; // this flag can be used to identify whether an object is a widget
 
         // visual style
-        opt.borderRadius = opt.borderRadius || 0;
-        opt.borderStyle = (opt.borderStyle) ? opt.borderStyle : (opt.borderRadius) ? "solid" : "none";
+        opt.borderRadius = (opt.borderRadius) ?
+                                ((typeof opt.borderRadius === "string" && opt.borderRadius.indexOf("px") >= 0) ? opt.borderRadius : opt.borderRadius.toString() + "px")
+                                : 0;
+        opt.borderStyle = (opt.borderStyle) ? opt.borderStyle : (opt.borderRadius || opt.borderWidth) ? "solid" : "none";
         opt.borderWidth = (!isNaN(parseFloat(opt.borderWidth))) ? opt.borderWidth : (opt.borderColor) ? 2 : 0;
         this.style = this.style || {};
         this.style["background-color"] = opt.backgroundColor || "transparent";
@@ -130,19 +132,49 @@ define(function (require, exports, module) {
      * @param coords {Object} Coordinates indicating the new position of the widget. The coordinates are given in the form { top: (number), left: (number) }
      * @param opt {Object}
      *         <li> duration (Number): duration in milliseconds of the move transition (default is 0, i.e., instantaneous) </li>
+     *         <li> transitionTimingFunction (String): HTML5 timing function (default is "ease-out") </li>
      * @memberof module:WidgetEVO
      * @instance
      */
     WidgetEVO.prototype.move = function (coords, opt) {
+        // console.log(coords);
         if (this.div && this.div.node()) {
             coords = coords || {};
             opt = opt || {};
             opt.duration = opt.duration || 0;
-            this.top = (isNaN(parseFloat(coords.top))) ? this.top : parseFloat(coords.top).toFixed(MAX_COORDINATES_ACCURACY);
-            this.left = (isNaN(parseFloat(coords.left))) ? this.left : parseFloat(coords.left).toFixed(MAX_COORDINATES_ACCURACY);
-            this.div.transition().duration(opt.duration).style("top", this.top + "px").style("left", this.left + "px");
+            opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
+            this.top = (isNaN(parseFloat(coords.top))) ? this.top : parseFloat(parseFloat(coords.top).toFixed(MAX_COORDINATES_ACCURACY));
+            this.left = (isNaN(parseFloat(coords.left))) ? this.left : parseFloat(parseFloat(coords.left).toFixed(MAX_COORDINATES_ACCURACY));
+            this.div.transition().duration(opt.duration).style("top", this.top + "px").style("left", this.left + "px")
+                        .style("transition-timing-function", opt.transitionTimingFunction);
         }
-        return this;
+        return this.reveal();
+    };
+
+    /**
+     * @function <a name="rotate">rotate</a>
+     * @description Rotates the widget of the degree given as parameter.
+     * @param deg {Number | String} Degrees by which the widget will be rotated. Positive degrees are for clock-wise rotations, negative degrees are for counter-clock-wise rotations.
+     * @param opt {Object}
+     *         <li> duration (Number): duration in milliseconds of the move transition (default is 0, i.e., instantaneous) </li>
+     *         <li> transitionTimingFunction (String): HTML5 timing function (default is "ease-in") </li>
+     *         <li> transformOrigin (String): rotation pivot, e.g., "top", "bottom", "center" (default is "center") </li>
+     * @memberof module:WidgetEVO
+     * @instance
+     */
+    WidgetEVO.prototype.rotate = function (deg, opt) {
+        if (this.div && this.div.node()) {
+            deg = (isNaN(parseFloat(deg))) ? 0 : parseFloat(deg);
+            opt = opt || {};
+            opt.duration = opt.duration || 0;
+            opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-in";
+            opt.transformOrigin = opt.transformOrigin || "center";
+            this.div.transition().duration(opt.duration)
+                        .style("transform", "rotate(" + deg + "deg)")
+                        .style("transform-origin", opt.transformOrigin)
+                        .style("transition-timing-function", opt.transitionTimingFunction);
+        }
+        return this.reveal();
     };
 
     /**
@@ -202,11 +234,7 @@ define(function (require, exports, module) {
         if (attr && state && typeof state === "object") {
             var disp = StateParser.resolve(state, attr);
             if (disp) {
-                var ans = StateParser.evaluate(disp);
-                if (typeof ans === "string") {
-                    return ans.replace(new RegExp("\"", "g"), "");
-                }
-                return ans.toString();
+                return StateParser.evaluate(disp).replace(new RegExp("\"", "g"), "");
             } else {
                 console.log("Warning: WidgetEVO.evaluate could not find state attribute " + attr + " requested by " + this.id);
             }
@@ -269,7 +297,7 @@ define(function (require, exports, module) {
         this.div.style("border", "solid 2px");
         this.div.style("border-radius", this.style["border-radius"]);
         this.div.style("border-color", borderColor);
-        return this;
+        return this.reveal();
     };
 
     /**
@@ -284,7 +312,29 @@ define(function (require, exports, module) {
         this.div.style("border-color", "");
         this.overlay.style("background-color", this.style["overlay-color"]);
         this.setStyle(this.style);
-        return this;
+        return this.reveal();
+    };
+
+    /**
+     * @function <a name="getPosition">getPosition</a>
+     * @description Returns the position of the widget
+     * @return {Object} Coordinates of the widget, in the form { left: x, top: y }, where x and y are real numbers
+     * @memberof module:WidgetEVO
+     * @instance
+     */
+    WidgetEVO.prototype.getPosition = function () {
+        return { left: this.left, top: this.top };
+    };
+
+    /**
+     * @function <a name="getSize">getSize</a>
+     * @description Returns the size of the widget
+     * @return {Object} Size of the widget, in the form { width: x, height: y }, where x and y are real numbers
+     * @memberof module:WidgetEVO
+     * @instance
+     */
+    WidgetEVO.prototype.getSize = function () {
+        return { width: this.width, height: this.height };
     };
 
 

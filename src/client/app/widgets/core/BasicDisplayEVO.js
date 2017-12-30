@@ -69,9 +69,11 @@ define(function (require, exports, module) {
      * @instance
      */
      function BasicDisplayEVO(id, coords, opt) {
+         coords = coords || {};
+         opt = opt || {};
          // set widget type & display key
          this.type = this.type || "BasicDisplayEVO";
-         this.displayKey = opt.displayKey || id;
+         this.displayKey = (typeof opt.displayKey === "string") ? opt.displayKey : id;
 
          // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
          opt.backgroundColor = opt.backgroundColor || "black";
@@ -107,11 +109,10 @@ define(function (require, exports, module) {
          this.setStyle(opt);
          if (typeof state !== "object") {
              this.base.text(state);
-             this.reveal();
-         } else if (state && typeof state === "object" && this.evalViz(state)) {
+         } else if (this.displayKey !== "" && this.evalViz(state)) {
              this.base.text(this.evaluate(this.displayKey, state));
-             this.reveal();
          }
+         this.reveal();
          return this;
      };
 

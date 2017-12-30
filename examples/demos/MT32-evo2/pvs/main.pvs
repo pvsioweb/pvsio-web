@@ -246,6 +246,18 @@ main: THEORY
     ELSE -> st
    ENDCOND
 
+  click_mt32_toggle_trace(st: state): state =
+   COND
+    per_mt32_toggle_trace(st`mt32) -> st WITH [ mt32 := mt32_toggle_trace(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_mt32_toggle_speed(st: state): state =
+   COND
+    per_mt32_toggle_speed(st`mt32) -> st WITH [ mt32 := mt32_toggle_speed(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
   click_mt32_physio(st: state): state =
    COND
     per_mt32_physio(st`mt32) -> st WITH [ mt32 := mt32_physio(st`mt32) ],
@@ -327,6 +339,12 @@ main: THEORY
   click_mt32_view_interpretation(st: state): state =
    COND
     per_mt32_view_interpretation(st`mt32) -> st WITH [ mt32 := mt32_view_interpretation(st`mt32) ],
+    ELSE -> st
+   ENDCOND
+
+  click_mt32_record_btn(st: state): state =
+   COND
+    per_mt32_record_btn(st`mt32) -> st WITH [ mt32 := mt32_record_btn(st`mt32) ],
     ELSE -> st
    ENDCOND
 

@@ -79,6 +79,8 @@ define(function (require, exports, module) {
      * @instance
      */
      function NumericDisplayEVO(id, coords, opt) {
+         coords = coords || {};
+         opt = opt || {};
          // set widget type
          this.type = this.type || "NumericDisplayEVO";
          this.cursorName = opt.cursorName || "";

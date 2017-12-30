@@ -21,6 +21,8 @@ require([
         "widgets/core/ButtonEVO",
         "widgets/core/BasicDisplayEVO",
         "widgets/LED",
+        "widgets/media/MouseCursor",
+        "widgets/media/Stylus",
 
         "util/playback/Player",
         "widgets/ButtonActionsQueue",
@@ -30,6 +32,8 @@ require([
         TouchscreenButton,
         BasicDisplay,
         LED,
+        MouseCursor,
+        Stylus,
 
         Player,
         ButtonActionsQueue,
@@ -38,6 +42,10 @@ require([
     ) {
         "use strict";
         var client = PVSioWebClient.getInstance();
+
+        function console_log(msg) {
+            // console.log(msg);
+        }
 
         var examData = {}; // stores monitoring data to be sent to ct64
 
@@ -63,15 +71,15 @@ require([
                 tick = null;
             }
         }
-        function evaluate(str) {
-            var v = +str;
-            if (str.indexOf("/") >= 0) {
-                var args = str.split("/");
-                v = +args[0] / +args[1];
-            }
-            var ans = (v < 100) ? v.toFixed(1).toString() : v.toFixed(0).toString();
-            return parseFloat(ans);
-        }
+        // function evaluate(str) {
+        //     var v = +str;
+        //     if (str.indexOf("/") >= 0) {
+        //         var args = str.split("/");
+        //         v = +args[0] / +args[1];
+        //     }
+        //     var ans = (v < 100) ? v.toFixed(1).toString() : v.toFixed(0).toString();
+        //     return parseFloat(ans);
+        // }
 
         // Function automatically invoked by PVSio-web when the back-end sends states updates
         function onMessageReceived(err, event) {
@@ -82,16 +90,25 @@ require([
                 var res = event.data.toString();
                 if (res.indexOf("(#") === 0) {
                     render(stateParser.parse(res));
-                    console.log(res.replace(/\s\s+/g, ' '));
+                    console_log(res.replace(/\s\s+/g, ' '));
                 }
             } else {
-                console.log(err);
+                console_log(err);
             }
         }
 
+        var media = {};
+        media.mousePointer = new MouseCursor("mousePointer", {
+            top:400, left:100
+        }, { parent: "ct64_mouse" });
+        media.mousePointer.render();
+        media.stylus = new Stylus("stylus", {
+            top:800, left:60
+        }, { parent: "mt32_stylus" });
+        // media.stylus.render();
+
         var mt32 = {};
-        var mt32_settings = {};
-        mt32_settings.mt32_off = new TouchscreenButton("mt32_off", {
+        mt32.off = new TouchscreenButton("mt32_off", {
             width: 0,
             height: 0,
             top: 0,
@@ -106,7 +123,7 @@ require([
             visibleWhen: "false",
             callback: onMessageReceived
         });
-        mt32_settings.mt32_on_battery = new TouchscreenButton("mt32_on_battery", {
+        mt32.on_battery = new TouchscreenButton("mt32_on_battery", {
             width: 0,
             height: 0,
             top: 0,
@@ -121,7 +138,7 @@ require([
             visibleWhen: "false",
             callback: onMessageReceived
         });
-        mt32_settings.mt32_charging = new TouchscreenButton("mt32_charging", {
+        mt32.charging = new TouchscreenButton("mt32_charging", {
             width: 0,
             height: 0,
             top: 0,
@@ -136,7 +153,7 @@ require([
             visibleWhen: "false",
             callback: onMessageReceived
         });
-        mt32_settings.mt32_fully_charged = new TouchscreenButton("mt32_fully_charged", {
+        mt32.fully_charged = new TouchscreenButton("mt32_fully_charged", {
             width: 0,
             height: 0,
             top: 0,
@@ -151,7 +168,7 @@ require([
             visibleWhen: "false",
             callback: onMessageReceived
         });
-        mt32_settings.mt32_charging_error = new TouchscreenButton("mt32_charging_error", {
+        mt32.charging_error = new TouchscreenButton("mt32_charging_error", {
             width: 0,
             height: 0,
             top: 0,
@@ -168,8 +185,7 @@ require([
         });
 
 
-        var leftpanel = {};
-        leftpanel.umts = new TouchscreenButton("umts", {
+        mt32.umts = new TouchscreenButton("umts", {
             width: 48,
             height: 89,
             top: 130,
@@ -182,7 +198,7 @@ require([
             parent: "leftPanel",
             callback: onMessageReceived
         });
-        leftpanel.wireless = new TouchscreenButton("wireless", {
+        mt32.wireless = new TouchscreenButton("wireless", {
             width: 48,
             height: 89,
             top: 220,
@@ -195,7 +211,7 @@ require([
             parent: "leftPanel",
             callback: onMessageReceived
         });
-        leftpanel.bluetooth = new TouchscreenButton("bluetooth", {
+        mt32.bluetooth = new TouchscreenButton("bluetooth", {
             width: 48,
             height: 89,
             top: 310,
@@ -208,7 +224,7 @@ require([
             parent: "leftPanel",
             callback: onMessageReceived
         });
-        leftpanel.battery = new TouchscreenButton("battery", {
+        mt32.battery = new TouchscreenButton("battery", {
             width: 48,
             height: 87,
             top: 402,
@@ -221,7 +237,7 @@ require([
             parent: "leftPanel",
             callback: onMessageReceived
         });
-        leftpanel.view_alerts = new TouchscreenButton("view_alerts", {
+        mt32.view_alerts = new TouchscreenButton("view_alerts", {
             width: 46,
             height: 85,
             top: 495,
@@ -235,7 +251,7 @@ require([
             parent: "leftPanel",
             callback: onMessageReceived
         });
-        leftpanel.back = new TouchscreenButton("back", {
+        mt32.leftpanel_back = new TouchscreenButton("back", {
             width: 48,
             height: 94,
             top: 582,
@@ -248,8 +264,7 @@ require([
             parent: "leftPanel",
             callback: onMessageReceived
         });
-        var home = {};
-        home.new_exam = new TouchscreenButton("new_exam", {
+        mt32.new_exam = new TouchscreenButton("new_exam", {
             width: 178,
             height: 89,
             top: 314,
@@ -262,7 +277,7 @@ require([
             parent: "homeScreen",
             callback: onMessageReceived
         });
-        home.server = new TouchscreenButton("central", {
+        mt32.central = new TouchscreenButton("central", {
             width: 180,
             height: 89,
             top: 404,
@@ -275,10 +290,10 @@ require([
             parent: "homeScreen",
             callback: onMessageReceived
         });
-        home.settings = new TouchscreenButton("settings", {
+        mt32.settings = new TouchscreenButton("settings", {
             width: 177,
             height: 89,
-            top: 494,
+            top: 496,
             left: 458
         }, {
             softLabel: "",
@@ -288,8 +303,7 @@ require([
             parent: "homeScreen",
             callback: onMessageReceived
         });
-        var exams = {};
-        exams.ecg12d = new TouchscreenButton("ecg12d", {
+        mt32.ecg12d = new TouchscreenButton("ecg12d", {
             width: 178,
             height: 89,
             top: 314,
@@ -302,7 +316,7 @@ require([
             parent: "examsScreen",
             callback: onMessageReceived
         });
-        exams.holter = new TouchscreenButton("holter", {
+        mt32.holter = new TouchscreenButton("holter", {
             width: 178,
             height: 89,
             top: 314,
@@ -315,11 +329,11 @@ require([
             parent: "examsScreen",
             callback: onMessageReceived
         });
-        exams.confirm = new TouchscreenButton("exams-confirm", {
-            width: 131,
+        mt32.confirm_exams = new TouchscreenButton("confirm_exams", {
+            width: 126,
             height: 84,
-            top: 586,
-            left: 278
+            top: 592,
+            left: 281
         }, {
             softLabel: "",
             customFunctionText: "click_confirm",
@@ -329,10 +343,10 @@ require([
             parent: "confirmHolterScreen",
             callback: onMessageReceived
         });
-        exams.test = new TouchscreenButton("test_electrodes", {
+        mt32.test_electrodes = new TouchscreenButton("test_electrodes", {
             width: 180,
             height: 89,
-            top: 492,
+            top: 494,
             left: 277
         }, {
             softLabel: "",
@@ -342,9 +356,7 @@ require([
             parent: "examsScreen",
             callback: onMessageReceived
         });
-
-        var central = {};
-        central.download_updates = new TouchscreenButton("download_updates", {
+        mt32.download_updates = new TouchscreenButton("download_updates", {
             width: 178,
             height: 89,
             top: 314,
@@ -357,7 +369,7 @@ require([
             parent: "centralScreen",
             callback: onMessageReceived
         });
-        central.upload_results = new TouchscreenButton("upload_results", {
+        mt32.upload_results = new TouchscreenButton("upload_results", {
             width: 178,
             height: 89,
             top: 314,
@@ -370,7 +382,7 @@ require([
             parent: "centralScreen",
             callback: onMessageReceived
         });
-        central.terminate_operating_mode = new TouchscreenButton("terminate_operating_mode", {
+        mt32.terminate_operating_mode = new TouchscreenButton("terminate_operating_mode", {
             width: 178,
             height: 89,
             top: 402,
@@ -383,9 +395,7 @@ require([
             parent: "centralScreen",
             callback: onMessageReceived
         });
-
-        var settings = {};
-        settings.connection_settings = new TouchscreenButton("connection_settings", {
+        mt32.connection_settings = new TouchscreenButton("connection_settings", {
             width: 178,
             height: 89,
             top: 314,
@@ -398,7 +408,7 @@ require([
             parent: "settingsScreen",
             callback: onMessageReceived
         });
-        settings.ecg_settings = new TouchscreenButton("ecg_settings", {
+        mt32.ecg_settings = new TouchscreenButton("ecg_settings", {
             width: 178,
             height: 89,
             top: 314,
@@ -411,7 +421,7 @@ require([
             parent: "settingsScreen",
             callback: onMessageReceived
         });
-        settings.security_settings = new TouchscreenButton("security_settings", {
+        mt32.security_settings = new TouchscreenButton("security_settings", {
             width: 178,
             height: 89,
             top: 404,
@@ -424,7 +434,7 @@ require([
             parent: "settingsScreen",
             callback: onMessageReceived
         });
-        settings.system_settings = new TouchscreenButton("system_settings", {
+        mt32.system_settings = new TouchscreenButton("system_settings", {
             width: 178,
             height: 89,
             top: 404,
@@ -437,7 +447,7 @@ require([
             parent: "settingsScreen",
             callback: onMessageReceived
         });
-        settings.info = new TouchscreenButton("info", {
+        mt32.info = new TouchscreenButton("info", {
             width: 178,
             height: 89,
             top: 492,
@@ -450,8 +460,7 @@ require([
             parent: "settingsScreen",
             callback: onMessageReceived
         });
-        var check = {};
-        check.confirm = new TouchscreenButton("confirm", {
+        mt32.confirm_patient_details = new TouchscreenButton("confirm", {
             width: 89,
             height: 89,
             top: 585,
@@ -464,9 +473,7 @@ require([
             parent: "checkPatientScreen",
             callback: onMessageReceived
         });
-
-        var monitoring = {};
-        monitoring.quit = new TouchscreenButton("quit", {
+        mt32.quit_monitoring = new TouchscreenButton("quit", {
             width: 52,
             height: 104,
             top: 492,
@@ -492,9 +499,7 @@ require([
             parent: "monitoringScreen",
             callback: onMessageReceived
         });
-
-        var results = {};
-        results.repeat = new TouchscreenButton("repeat", {
+        mt32.repeat_exam = new TouchscreenButton("repeat", {
             width: 342,
             height: 76,
             top: 224,
@@ -507,7 +512,7 @@ require([
             parent: "resultsScreen",
             callback: onMessageReceived
         });
-        results.interpretation = new TouchscreenButton("mt32_view_interpretation", {
+        mt32.view_interpretation = new TouchscreenButton("mt32_view_interpretation", {
             width: 342,
             height: 75,
             top: 305,
@@ -520,7 +525,7 @@ require([
             parent: "resultsScreen",
             callback: onMessageReceived
         });
-        results.physio = new TouchscreenButton("mt32_physio", {
+        mt32.physio = new TouchscreenButton("mt32_physio", {
             width: 342,
             height: 75,
             top: 382,
@@ -533,7 +538,6 @@ require([
             parent: "resultsScreen",
             callback: onMessageReceived
         });
-
         mt32.tick = new TouchscreenButton("mt32_tick", {
             width: 0,
             height: 0
@@ -550,21 +554,21 @@ require([
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
-            parent: "device",
+            parent: "MT32-screens",
             callback: onMessageReceived
         });
         mt32.back_edit_patient = new TouchscreenButton("back_edit_patient", {
             width: 48,
             height: 94,
-            top: 0,
-            left: 0
+            top: 128,
+            left: 226
         }, {
             softLabel: "",
             functionText: "back",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
-            parent: "mt32EditPatientScreen",
+            parent: "leftpanel_mt32EditPatientScreen",
             callback: onMessageReceived
         });
         mt32.edit_patient = new TouchscreenButton("mt32_edit_patient", {
@@ -605,6 +609,7 @@ require([
             fontColor: "white",
             fontSize: 12,
             parent: "monitoringScreen",
+            displayKey: "",
             callback: onMessageReceived
         });
         mt32.choose_physio = new TouchscreenButton("mt32_choose_physio", {
@@ -823,16 +828,34 @@ require([
 
 
 
-        mt32.power_btn = new TouchscreenButton("power_btn", {
-            width: 33,
-            height: 54,
-            top: 709,
-            left: 70
+        var mt32_record_btn = new TouchscreenButton("mt32_record_btn", {
+            width: 37,
+            height: 194,
+            top: 177,
+            left: 66
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "black",
+            opacity: 0,
+            borderColor: "#000066",
+            borderWidth: 4,
+            borderRadius: 20,
+            parent: "MT32-right",
+            toggleButton: true,
+            callback: onMessageReceived
+        });
+        var mt32_power_btn = new TouchscreenButton("power_btn", {
+            width: 37,
+            height: 54,
+            top: 709,
+            left: 66
+        }, {
+            softLabel: "",
+            backgroundColor: "black",
             opacity: "0",
             borderColor: "#000066",
+            borderWidth: 4,
+            borderRadius: 20,
             parent: "MT32-right",
             callback: onMessageReceived
         });
@@ -871,8 +894,8 @@ require([
             left: 230
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
+            backgroundColor: "white",
+            opacity: "0",
             borderColor: "#000066",
             parent: "monitoringScreen",
             callback: onMessageReceived
@@ -884,8 +907,8 @@ require([
             left: 230
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
+            backgroundColor: "white",
+            opacity: "0",
             borderColor: "#000066",
             parent: "monitoringScreen",
             callback: onMessageReceived
@@ -897,15 +920,41 @@ require([
             left: 332
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
+            backgroundColor: "white",
+            opacity: "0",
+            borderColor: "#000066",
+            parent: "monitoringScreen",
+            callback: onMessageReceived
+        });
+        mt32.toggle_speed = new TouchscreenButton("mt32_toggle_speed", {
+            width: 98,
+            height: 74,
+            top: 602,
+            left: 434
+        }, {
+            softLabel: "",
+            backgroundColor: "white",
+            opacity: "0",
+            borderColor: "#000066",
+            parent: "monitoringScreen",
+            callback: onMessageReceived
+        });
+        mt32.toggle_trace = new TouchscreenButton("mt32_toggle_trace", {
+            width: 98,
+            height: 74,
+            top: 602,
+            left: 536
+        }, {
+            softLabel: "",
+            backgroundColor: "white",
+            opacity: "0",
             borderColor: "#000066",
             parent: "monitoringScreen",
             callback: onMessageReceived
         });
 
 
-        // buttons for syncronising with ct64
+        // buttons emulating a syncronisation channel between mt32 and ct64
         mt32.device_selected = new TouchscreenButton("device_selected", {
             width: 0,
             height: 0
@@ -915,42 +964,36 @@ require([
 
 
         function viz(id, opt) {
-            // console.log("revealing " + id);
+            // console_log("revealing " + id);
             opt = opt || {};
-            if (d3.select(id).node()) {
-                if (opt.fade && d3.select(id).style("display") !== "block") {
-                    d3.select(id).style("opacity", 0).transition().duration(300).style("opacity", 1).style("display", "block");
-                } else {
-                    d3.select(id).transition().duration(0).style("opacity", 1).style("display", "block");
-                }
+            var elem = d3.select(id);
+            if (!elem.empty()) {
+                if (elem.style("display") !== "block" || elem.style("opacity") !== 1) {
+                    if (opt.fade) {
+                        elem.style("opacity", 0).transition().duration(300).style("opacity", 1).style("display", "block");
+                    } else {
+                        elem.transition().duration(0).style("opacity", 1).style("display", "block");
+                    }
+                } // else nothing to do, the element is already visible
+            } else {
+                console.log("Warning, viz could not find elem " + id);
             }
         }
         function hide(id) {
-            // console.log("hiding " + id);
+            // console_log("hiding " + id);
             d3.select(id).style("display", "none");
         }
         function hide_all_screens(res) {
-            // mt32
-            hide("#homeScreen");
-            hide("#examsScreen");
-            hide("#centralScreen");
-            hide("#settingsScreen");
-            hide("#testScreen");
-            hide("#checkPatientScreen");
-            hide("#monitoringScreen");
-            hide("#resultsScreen");
-            hide("#confirmHolterScreen");
             if ((res.mt32.mode !== "MONITORING" && res.mt32.mode !== "RECORDING")) {
                 reset_tracing_display();
             }
-            hide("#leftPanel");
-            d3.selectAll(".led").style("display", "none");
+            // d3.selectAll(".led").style("display", "none");
 
             // ct64 -- FIXME -- OPTIMIZE-ME!
-            d3.selectAll(".CT64frame").style("display", "none");
-            // d3.selectAll(".CT64frame").style("opacity", 0);
-
-            d3.selectAll(".MT32frame").style("display", "none");
+            // d3.selectAll(".CT64frame").style("display", "none");
+            // d3.selectAll(".MT32frame").style("display", "none");
+            d3.selectAll(".CT64frame").style("opacity", 0);
+            d3.selectAll(".MT32frame").style("opacity", 0);
 
             d3.selectAll(".CT64frame_inner").style("display", "none");
             d3.selectAll(".CT64Menu").style("display", "none");
@@ -1458,41 +1501,22 @@ require([
             for(var key in ct64) {
                 ct64[key].render(res);
             }
-            // ct64.login.render(res);
-            // ct64.select_patient.render(res);
-            // ct64.new_ecg.render(res);
-            // ct64.new_holter.render(res);
-            // ct64.holter_duration.render(res);
-            // ct64.holter_derivation.render(res);
-            // ct64.holter_accelerometer.render(res);
-            // ct64.select_device.render(res);
-            // ct64.continue.render(res);
-            // ct64.continue_holter_config.render(res);
-            // ct64.monitoring.render(res);
-            // ct64.upload_exams.render(res);
-            // ct64.choose_exams_to_be_uploaded.render(res);
-            // ct64.new_patient.render(res);
-            // ct64.new_monitoring_session.render(res);
-            // ct64.date_time_filters.render(res);
-            // ct64.select_exam_data_hub.render(res);
-            // ct64.HES.render(res);
-            // ct64.view_ecg.render(res);
-            // ct64.view_physio.render(res);
-            // ct64.write_report.render(res);
-            // ct64.select_doctor.render(res);
-            // ct64.select_exam_data_holter.render(res);
-            // ct64.select_visit.render(res);
-            // ct64.select_ecg2d_new_pt.render(res);
-            // ct64.continue_yes_no.render(res);
-            // ct64.browse_medicaltech.render(res);
-            // ct64.select_report_status.render(res);
-            // ct64.save_report.render(res);
-            // ct64.view_medical_report.render(res);
-            // ct64.ct64_back.render(res);
-            // ct64.view_archived_medical_reports.render(res);
-            // ct64.view_patient_profile.render(res);
         }
-
+        function render_mt32_widgets (res) {
+            if (res.mt32.mode === "OFF" || res.mt32.mode === "VOICE_RECORDER") {
+                for (var key in mt32) {
+                    mt32[key].hide();
+                }
+            } else {
+                for (var key in mt32) {
+                    mt32[key].render(res);
+                }
+            }
+            if (res.mt32.mo === "NONE") {
+                viz("#operating_mode_btn_disabled");
+            } else { hide("#operating_mode_btn_disabled"); }
+            viz("#offScreen");
+        }
 
 
         var Demo = { NONE: 0, ACCESS_HOME_PAGE: 1, HUB_NEW_PT: 2, HUB_KNOWN_PT: 3, HOLTER: 4, TERMINATE_HUB_MODE: 5, TERMINATE_HOLTER_MODE: 6,
@@ -1500,101 +1524,308 @@ require([
                      REQUEST_REPORT: 12, WRITE_REPORT: 13, VIEW_MEDICAL_REPORT: 14, VIEW_ARCHIVED_MEDICAL_REPORTS: 15,
                      MT32_LED: 16, CREATE_NEW_PATIENT: 17, TRANSFER_DATA_MICROSD: 18, INTRO: 19, POWER_ON_MT32: 20, POWER_OFF_MT32: 21,
                      VIEW_ALERTS: 22, SEND_RESULTS: 23,
-                     ECG_EXAM_12DER_KNOWN_PT: 24 };
-        var demo = Demo.ECG_EXAM_12DER_KNOWN_PT;
+                     ECG_EXAM_12DER_KNOWN_PT: 24, HOLTER_EXAM: 25 };
+        var demo = Demo.HOLTER_EXAM;
 
+        console_log(mt32.central.getPosition())
 
-
+        var filterSpeechDuration = 64000;
+        var holterParamsSpeechDuration = 15000;
+        let warp = 0;//237000 + holterParamsSpeechDuration;//-10000;
         // è à ó
         var player = new Player({ lang: "it-IT" });
         if (demo === Demo.ECG_EXAM_12DER_KNOWN_PT) {
+            d3.select("body").style("overflow", "hidden");
             player.load([
                 { trans: "#device", transform: "translate(-400px,200px)scale(0.5)", timeStamp: 100, duration: 0 },
                 { trans: "#CT64", transform: "translateY(-100px)scale(1.2)", timeStamp: 110, duration: 0 },
-                { speak: "Instruzioni per eseguire un esame ECG a 12 derivazioni con un nuovo dispositivo MT32.", timeStamp: 4000 },
-                { speak: "Consideriamo in questa fase il caso semplice, in cui i dati anagrafici del paziente sono già presenti sulla centrale CT64.", timeStamp: 12000 },
-                { speak: "Fai doppio click sull'anagrafica desiderata.", timeStamp: 18000 },
-                { button: ct64.select_patient, timeStamp: 23000, timeout: 3000, borderColor: "white", classed: "blink2" },
-                { speak: "La centrale mostrerà una pagina che permette di accedere a una lista di azioni e ai dati del paziente.", timeStamp: 26500 },
-                { speak: "Dalla lista di azioni disponibili, clicca Nuovo ECG.", timeStamp: 34000 },
-                { button: ct64.new_ecg, timeStamp: 37000, timeout: 3000, borderColor: "white", classed: "blink2" },
-                { speak: "A questo punto, prendi il dispositivo.", timeStamp: 40000 },
-                { trans: "#device", transform: "translate(0px,0px)scale(1)", timeStamp: 41000, duration: 1000 },
-                { speak: "Clicca Centrale.", timeStamp: 43000 },
-                { button: home.server, timeStamp: 45000, timeout: 2000, borderColor: "white" },
-                { speak: "Clicca Scarica aggiornamenti.", timeStamp: 47000 },
-                { button: central.download_updates, timeStamp: 50000, timeout: 2000 },
-                { speak: "Il dispositivo invierà alla centrale i comandi necessari per richiedere l'associazione del dispositivo.", timeStamp: 52000 },
-                { speak: "Al termine dell'invio dei comandi, il dispositivo comparirà nella lista di dispositivi noti alla centrale, e resterà in attesa di un comando di conferma.", timeStamp: 60000 },
-                { speak: "Per inviare il comando di conferma, seleziona il dispositivo dalla centrale.", timeStamp: 70000 },
-                { button: ct64.select_device, timeStamp: 74000, timeout: 2000 },
-                { speak: "Quindi, clicca Continua.", timeStamp: 76000 },
-                { button: ct64.continue, timeStamp: 78000, timeout: 2000, borderColor: "white", classed: "blink" },
-                { speak: "Il dispositivo riceverà la conferma in pochi secondi.", timeStamp: 80000 },
-                { speak: "Clicca Conferma sul dispositivo, per completare l'associazione.", timeStamp: 86000 },
-                { button: mt32.confirm_upload, timeStamp: 89000, timeout: 2000, borderColor: "white" },
-                { speak: "Clicca sul logo médicàl téc per andare alla pagina principale.", timeStamp: 93000 },
-                { button: mt32.home, timeStamp: 99000, timeout: 2000, borderColor: "white" },
-                { speak: "Ora il dispositivo è in modalità operativa ECG12D. HUB, ed è quindi pronto per essere utilizzato per un esame ECG.", timeStamp: 100000 },
-                { speak: "Prima di cominciare l'esame, collega il cavo ECG a 12 derivazioni al dispositivo MT32.", timeStamp: 108000 },
-                { trans: "#device", transform: "translate(-400px,200px)scale(0.5)", timeStamp: 110000, duration: 1000 },
-                { trans: "#MT32-cable10", transform: "translateY(-200px)", timeStamp: 112000, duration: 1000 },
-                { trans: "#device", transform: "translate(0px,0px)scale(1)", timeStamp: 113000, duration: 1500 },
-                { speak: "Poi, clicca Nuovo Esame.", timeStamp: 116500 },
-                { button: home.new_exam, timeStamp: 118000, timeout: 2000, borderColor: "white" },
-                { speak: "Clicca ECG12D.", timeStamp: 120000, borderColor: "white" },
-                { button: exams.ecg12d, timeStamp: 122000, timeout: 2000, borderColor: "white" },
-                { speak: "Il dispositivo mostrerà l'anagrafica del paziente ricevuta dalla centrale.", timeStamp: 124000 },
-                { speak: "Verifica i dati del paziente.", timeStamp: 126000 },
-                { speak: "Se necessario, puoi modificare i dati anagrafici direttamente dal dispositivo, cliccando sul pulsante Modifica.", timeStamp: 128000 },
-                { button: mt32.edit_patient, timeStamp: 136000, timeout: 2000, borderColor: "white" },
-                { button: mt32.back_edit_patient, timeStamp: 139800, timeout: 2000, borderColor: "white" },
-                { speak: "Clicca Conferma per iniziare l'esame ECG.", timeStamp: 142000 },
-                { button: check.confirm, timeStamp: 144000, timeout: 2000, borderColor: "white" },
-                { speak: "Attendi che l'icona di allerta si spenga. Questo indica l'andata a regime del segnale ECG.", timeStamp: 147000 },
-                { speak: "Attiva la combinazione di filtri che ritieni adeguata per migliorare la visualizzazione del segnale.", timeStamp: 153000 },
-                { speak: "Quindi, clicca rec per acquisire il segnale ECG.", timeStamp: 158000 },
-                { button: mt32.rec, timeStamp: 162000, timeout: 1500, classed: "blink", borderColor: "white" },
-                { speak: "Al termine dell'acquisizione si passa automaticamente alla pagina Risultato.", timeStamp: 165000 },
-                { speak: "In questa pagina, puoi visionare l'esito interpretativo dell'acquisizione.", timeStamp: 174000 },
-                { button: results.interpretation, timeStamp: 177500, timeout: 2000, classed: "blink2", borderColor: "white"},
-                { button: mt32.back_interpretation, timeStamp: 182500, timeout: 2000, classed: "blink2", borderColor: "white"},
-                { speak: "Puoi anche inserire dati fisiologici rilevanti per l'esame.", timeStamp: 184000 },
-                { button: results.physio, timeStamp: 186000, timeout: 2000, classed: "blink2", borderColor: "white" },
-                { speak: "Seleziona dal menu a tendina il tipo di dato fisiologico che vuoi inserire. Ad esempio, temperatura.", timeStamp: 188000 },
-                { button: mt32.choose_physio, timeStamp: 190000, timeout: 1000, classed: "blink2", borderColor: "white" },
-                { button: mt32.choose_physio, timeStamp: 195000, timeout: 1000, classed: "blink2", borderColor: "white" },
-                { speak: "Poi, usa il tastierino numerico per inserire il valore desiderato.", timeStamp: 196000 },
-                { button: mt32.dataentry_3, timeStamp: 198000, timeout: 500, classed: "blink2", borderColor: "white" },
-                { button: mt32.dataentry_6, timeStamp: 198500, timeout: 500, classed: "blink2", borderColor: "white" },
-                { button: mt32.dataentry_POINT, timeStamp: 199200, timeout: 500, classed: "blink2", borderColor: "white" },
-                { button: mt32.dataentry_8, timeStamp: 200000, timeout: 500, classed: "blink2", borderColor: "white" },
-                { speak: "Infine, clicca Conferma.", timeStamp: 203000 },
-                { button: mt32.dataentry_confirm, timeStamp: 204000, timeout: 2000, classed: "blink2", borderColor: "white" },
-                { speak: "Se ritieni necessario ripetere l'esame, clicca Ripetizione.", timeStamp: 205000 },
-                { button: results.repeat, timeStamp: 208000, timeout: 2000, classed: "blink2", borderColor: "white", stutter: true },
-                { speak: "Altrimenti, clicca Conclusione.", timeStamp: 210000 },
-                { button: mt32.save_results, timeStamp: 213000, timeout: 2000, classed: "blink2", borderColor: "white" },
-                { speak: "A questo punto, l'esame è stato salvato sul dispositivo MT32.", timeStamp: 215000 },
-                { speak: "Per caricare l'esame sulla centrale CT64, procedi come segue.", timeStamp: 221000 },
-                { speak: "Clicca Centrale.", timeStamp: 228000 },
-                { button: home.server, timeStamp: 230000, timeout: 2000 },
-                { speak: "Il numero tra parentesi sul pulsante Invio Risultati indica quanti esami sono attualmente salvati sul dispositivo MT32.", timeStamp: 231000 },
-                { button: central.upload_results, timeStamp: 241000, timeout: 4000, classed: "blink2", borderColor: "white" },
-                { speak: "Clicca Invio Risultati. In pochi secondi tutti gli esami saranno caricati sulla centrale.", timeStamp: 243000 },
-                { speak: "Al termine dell'invio, clicca Conferma.", timeStamp: 257000 },
-                { button: mt32.confirm_upload, timeStamp: 260000, timeout: 2000, classed: "blink2", borderColor: "white" },
-                { speak: "Noterai che il pulsante Invio Risultati è ora disabilitato. Questo indica che tutti gli esami sono stati inviati correttamente alla centrale CT64.", timeStamp: 262000 },
-                { speak: "Per visionare gli esami del paziente sulla centrale, seleziona Monitoraggi.", timeStamp: 272000 },
-                { button: ct64.monitoring, timeStamp: 274000, timeout: 2000, classed: "blink2", borderColor: "white" },
-                { speak: "La pagina mostra la lista di tutti gli esami svolti.", timeStamp: 278000 },
-                { speak: "Nella lista, troverai anche l'esame ECG che hai appena inviato.", timeStamp: 285000 },
-                { button: ct64.select_exam_data_holter,  timeStamp: 287000, timeout: 16000, classed: "blink2", borderColor: "green", stutter: true }
+                { speak: "Instruzioni per eseguire un esame ECG a 12 derivazioni con un nuovo dispositivo MT32.", timeStamp: 4000 - warp },
+                { speak: "Consideriamo in questa fase il caso semplice, in cui i dati anagrafici del paziente sono già presenti sulla centrale CT64.", timeStamp: 12000 - warp },
+                { speak: "Fai doppio click sull'anagrafica desiderata.", timeStamp: 18000 - warp },
+                { click: ct64.select_patient, timeStamp: 23000 - warp, timeout: 3000, borderColor: "white", classed: "blink2", cursor: { type: media.mousePointer, offset: { top: 0, left: 200 } }},
+                { speak: "La centrale mostrerà una pagina che permette di accedere a una lista di azioni e ai dati del paziente.", timeStamp: 26500 - warp },
+                { speak: "Dalla lista di azioni disponibili, clicca Nuovo ECG.", timeStamp: 34000 - warp },
+                { click: ct64.new_ecg, timeStamp: 36000 - warp, timeout: 2000, borderColor: "white", cursor: { type: media.mousePointer, offset: { top: 0, left: 0 } }},
+
+                { speak: "A questo punto, prendi il dispositivo.", timeStamp: 40000 - warp },
+                { trans: "#device", transform: "translate(0px,0px)scale(1)", timeStamp: 41000 - warp, duration: 1000 },
+                { speak: "Clicca Centrale.", timeStamp: 43000 - warp },
+                { reveal: media.stylus, timeStamp: 43000 - warp },
+                { click: mt32.central, timeStamp: 44000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus, offset: { top: 0, left: 120 } }},
+                { speak: "Clicca Scarica aggiornamenti.", timeStamp: 47000 - warp },
+                { click: mt32.download_updates, timeStamp: 48000 - warp, timeout: 1000, cursor: { type: media.stylus, offset: { top: 0, left: 120} }},
+                { hide: media.stylus, timeStamp: 52000 - warp },
+
+                { speak: "Il dispositivo invierà alla centrale i comandi necessari per richiedere l'associazione del dispositivo.", timeStamp: 52000 - warp },
+                { speak: "Al termine dell'invio dei comandi, il dispositivo comparirà nella lista di dispositivi noti alla centrale, e resterà in attesa di un comando di conferma.", timeStamp: 60000 - warp },
+                { speak: "Per inviare il comando di conferma, seleziona il dispositivo dalla centrale.", timeStamp: 70000 - warp },
+                { click: ct64.select_device, timeStamp: 74000 - warp, timeout: 2000, cursor: { type: media.mousePointer, offset: { top: 0, left: 200 } }},
+                { speak: "Quindi, clicca Continua.", timeStamp: 76000 - warp },
+                { click: ct64.continue, timeStamp: 78000 - warp, timeout: 2000, borderColor: "white", cursor: { type: media.mousePointer, offset: { top: 0, left: 0 } }},
+                { speak: "Il dispositivo riceverà la conferma in pochi secondi.", timeStamp: 80000 - warp },
+                { speak: "Clicca Conferma sul dispositivo, per completare l'associazione.", timeStamp: 86000 - warp },
+
+                { reveal: media.stylus, timeStamp: 86000 - warp },
+                { click: mt32.confirm_syncdone, timeStamp: 89000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus, offset: { top: 0, left: 120} }},
+                { speak: "Clicca sul logo médicàl téc per andare alla pagina principale.", timeStamp: 93000 - warp },
+                { click: mt32.home, timeStamp: 95000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+
+                { speak: "Ora il dispositivo è in modalità operativa ECG12D. HUB, ed è quindi pronto per essere utilizzato per un esame ECG.", timeStamp: 97000 - warp },
+                { hide: media.stylus, timeStamp: 103000 - warp },
+                { speak: "Prima di cominciare l'esame, collega il cavo ECG a 12 derivazioni al dispositivo MT32.", timeStamp: 108000 - warp },
+                { trans: "#device", transform: "translate(-400px,200px)scale(0.5)", timeStamp: 110000 - warp, duration: 1000 },
+                { trans: "#MT32-cable10", transform: "translateY(-200px)", timeStamp: 112000 - warp, duration: 1000 },
+                { trans: "#device", transform: "translate(0px,0px)scale(1)", timeStamp: 113000 - warp, duration: 1500 },
+
+                { reveal: media.stylus, timeStamp: 114000 - warp },
+                { speak: "Poi, clicca Nuovo Esame.", timeStamp: 116500 - warp },
+                { click: mt32.new_exam, timeStamp: 118000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Nella nuova pagina, Clicca ECG12D.", timeStamp: 121000 - warp, borderColor: "white" },
+                { click: mt32.ecg12d, timeStamp: 124000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Il dispositivo mostrerà l'anagrafica del paziente ricevuta dalla centrale.", timeStamp: 128000 - warp },
+                { speak: "Verifica i dati del paziente.", timeStamp: 130000 - warp },
+                { speak: "Se necessario, puoi modificare i dati anagrafici direttamente dal dispositivo.", timeStamp: 132000 - warp },
+                { click: mt32.edit_patient, timeStamp: 138000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { click: mt32.back_edit_patient, timeStamp: 141800 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Clicca Conferma per iniziare l'esame ECG.", timeStamp: 146000 - warp },
+                { click: mt32.confirm_patient_details, timeStamp: 148000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Attendi che l'icona di allerta si spenga. Questo indica l'andata a regime del segnale ECG.", timeStamp: 151000 - warp },
+                { move: media.stylus, top: mt32.toggleLP.getPosition().top - 30, left: mt32.toggleLP.getPosition().left + 300, timeStamp: 152000 - warp },
+
+                { speak: "A lato del display, sono disponibili due filtri che possono migliorare la visualizzazione del segnale.", timeStamp: 160000 - warp },
+                { move: media.stylus, top: mt32.toggleLP.getPosition().top, left: mt32.toggleLP.getPosition().left, timeStamp: 161000 - warp },
+                { speak: "Ad esempio, clicca il primo pulsante per abilitare un filtro passa basso.", timeStamp: 164000 - warp },
+                { click: mt32.toggleLP, timeStamp: 169000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Clicca di nuovo il pulsante per disabilitare il filtro.", timeStamp: 171000 - warp },
+                { click: mt32.toggleLP, timeStamp: 173000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+
+                { move: media.stylus, top: mt32.toggle_gain.getPosition().top, left: mt32.toggle_gain.getPosition().left - 50, timeStamp: 180000 - warp },
+                { speak: "Nella parte bassa del display viene visualizzata la frequenza cardiaca.", timeStamp: 180000 - warp },
+
+                { speak: "Il secondo pulsante consente di configurare la sensibilità del segnale.", timeStamp: 185000 - warp },
+                { click: mt32.toggle_gain, timeStamp: 187000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { click: mt32.toggle_gain, timeStamp: 190000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { click: mt32.toggle_gain, timeStamp: 194000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+
+                { speak: "Il terzo pulsante cambia la velocità di acquisizione del segnale.", timeStamp: 196000 - warp },
+                { move: media.stylus, top: mt32.toggle_speed.getPosition().top, left: mt32.toggle_speed.getPosition().left, timeStamp: 197000 - warp },
+                { click: mt32.toggle_speed, timeStamp: 198000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { click: mt32.toggle_speed, timeStamp: 202000 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+
+                { speak: "In fine, il quarto pulsante consente di visualizzare una terna differente di derivazioni.", timeStamp: 204000 - warp },
+                { click: mt32.toggle_trace, timeStamp: 205500 - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Premi a lungo il pulsante per visualizzare una sola derivazione alla volta.", timeStamp: 208000 - warp },
+                { click: mt32.toggle_trace, timeStamp: 209500 - warp, timeout: 3000, borderColor: "white", cursor: { type: media.stylus, longpress: true }},
+                { speak: "Premi di nuovo a lungo il pulsante per tornare alla visualizzazione di tre derivazioni.", timeStamp: 215000 - warp },
+                { click: mt32.toggle_trace, timeStamp: 218000 - warp, timeout: 3000, borderColor: "white", cursor: { type: media.stylus, longpress: true }},
+
+                { speak: "Per cominciare l'acquisizione del segnale ECG, clicca il pulsante rec.", timeStamp: 222000 - warp },
+                { click: mt32.rec, timeStamp: 226000 - warp, timeout: 1500, borderColor: "white", cursor: { type: media.stylus }},
+                { move: media.stylus, top: mt32.view_interpretation.getPosition().top, left: mt32.view_interpretation.getPosition().left + mt32.view_interpretation.getSize().width, timeStamp: 230000 - warp },
+
+                { speak: "Al termine dell'acquisizione si passa automaticamente alla pagina Risultato.", timeStamp: 231000 - warp },
+                { speak: "In questa pagina, puoi visionare l'esito interpretativo dell'acquisizione.", timeStamp: 238000 - warp },
+                { click: mt32.view_interpretation, timeStamp: 241500 - warp, timeout: 2000, borderColor: "white", cursor: { type: media.stylus, offset: { top: -10, left: mt32.view_interpretation.getSize().width - 10 } }},
+                { click: mt32.back_interpretation, timeStamp: 246500 - warp, timeout: 2000, borderColor: "white", cursor: { type: media.stylus }},
+
+                { speak: "Puoi anche inserire dati fisiologici rilevanti per l'esame.", timeStamp: 186000 + filterSpeechDuration - warp },
+                { click: mt32.physio, timeStamp: 188000 + filterSpeechDuration - warp, timeout: 2000, borderColor: "white", cursor: { type: media.stylus, offset: { top: -10, left: mt32.physio.getSize().width - 10 } }},
+                { speak: "Seleziona dal menu a tendina il tipo di dato fisiologico che vuoi inserire. Ad esempio, temperatura.", timeStamp: 190000 + filterSpeechDuration - warp, cursor: { type: media.stylus }},
+                { click: mt32.choose_physio, timeStamp: 192000 + filterSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus, offset: { top: -10, left: 20} }},
+                { click: mt32.choose_physio, timeStamp: 193500 + filterSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus, offset: { top: -10, left: 20} }},
+
+                { speak: "Poi, usa il tastierino numerico per inserire il valore desiderato.", timeStamp: 196000 + filterSpeechDuration - warp },
+                { click: mt32.dataentry_3, timeStamp: 198000 + filterSpeechDuration - warp, timeout: 500, borderColor: "white", cursor: { type: media.stylus, speed: 300 }},
+                { click: mt32.dataentry_6, timeStamp: 198500 + filterSpeechDuration - warp, timeout: 500, borderColor: "white", cursor: { type: media.stylus, speed: 300 }},
+                { click: mt32.dataentry_POINT, timeStamp: 199200 + filterSpeechDuration - warp, timeout: 500, borderColor: "white", cursor: { type: media.stylus, speed: 300 }},
+                { click: mt32.dataentry_8, timeStamp: 200000 + filterSpeechDuration - warp, timeout: 500, borderColor: "white", cursor: { type: media.stylus, speed: 300 }},
+
+                { speak: "Infine, clicca Conferma.", timeStamp: 203000 + filterSpeechDuration - warp },
+                { click: mt32.dataentry_confirm, timeStamp: 204000 + filterSpeechDuration - warp, timeout: 2000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Se ritieni necessario ripetere l'esame, clicca Ripetizione.", timeStamp: 207000 + filterSpeechDuration - warp },
+                { select: mt32.repeat_exam, timeStamp: 208000 + filterSpeechDuration - warp, borderColor: "white", classed: "blink2" },
+                { deselect: mt32.repeat_exam, timeStamp: 210000 + filterSpeechDuration - warp, borderColor: "white", classed: "blink2" },
+                { speak: "Altrimenti, clicca Conclusione.", timeStamp: 210000 + filterSpeechDuration - warp },
+                { click: mt32.save_results, timeStamp: 213000 + filterSpeechDuration - warp, timeout: 2000, borderColor: "white", cursor: { type: media.stylus }},
+
+                { speak: "A questo punto, l'esame è stato salvato sul dispositivo MT32.", timeStamp: 215000 + filterSpeechDuration - warp },
+                { speak: "Per caricare l'esame sulla centrale CT64, procedi come segue.", timeStamp: 221000 + filterSpeechDuration - warp },
+                { speak: "Clicca Centrale.", timeStamp: 228000 + filterSpeechDuration - warp },
+                { click: mt32.central, timeStamp: 230000 + filterSpeechDuration - warp, timeout: 2000, cursor: { type: media.stylus }},
+
+                { move: media.stylus, top: mt32.upload_results.getPosition().top, left: mt32.upload_results.getPosition().left + 100, timeStamp: 233000 + filterSpeechDuration - warp },
+                { speak: "Il numero tra parentesi sul pulsante Invio Risultati indica quanti esami sono attualmente salvati sul dispositivo MT32.", timeStamp: 234000 + filterSpeechDuration - warp },
+                { click: mt32.upload_results, timeStamp: 241000 + filterSpeechDuration - warp, timeout: 4000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Clicca Invio Risultati. In pochi secondi tutti gli esami saranno caricati sulla centrale.", timeStamp: 243000 + filterSpeechDuration - warp },
+                { speak: "Al termine dell'invio, clicca Conferma.", timeStamp: 257000 + filterSpeechDuration - warp },
+                { click: mt32.confirm_upload, timeStamp: 260000 + filterSpeechDuration - warp, timeout: 2000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Noterai che il pulsante Invio Risultati è ora disabilitato. Questo indica che tutti gli esami sono stati inviati correttamente alla centrale CT64.", timeStamp: 262000 + filterSpeechDuration - warp },
+                { move: media.stylus, timeStamp: 263000 + filterSpeechDuration - warp, top: mt32.upload_results.getPosition().top, left: mt32.upload_results.getPosition().left },
+                { hide: media.stylus, timeStamp: 272000 + filterSpeechDuration - warp },
+                { speak: "Per visionare gli esami del paziente sulla centrale, seleziona Monitoraggi.", timeStamp: 272000 + filterSpeechDuration - warp },
+                { click: ct64.monitoring, timeStamp: 274000 + filterSpeechDuration - warp, timeout: 2000, borderColor: "white", cursor: { type: media.mousePointer, offset: { top:0, left:0}}},
+                { speak: "La pagina mostra la lista di tutti gli esami svolti.", timeStamp: 278000 + filterSpeechDuration - warp },
+                { speak: "Nella lista, troverai anche l'esame ECG che hai appena inviato.", timeStamp: 285000 + filterSpeechDuration - warp },
+                // { move: media.mousePointer, top: ct64.select_exam_data_holter.getPosition().top, left: ct64.select_exam_data_holter.getPosition().left, timeStamp: 286000, duration: 1000 },
+                { select: ct64.select_exam_data_holter,  timeStamp: 287000 + filterSpeechDuration - warp, timeout: 16000, classed: "blink2", borderColor: "green", cursor: { type: media.mousePointer, offset: { top:0, left:0}}}
+            ])//;.play();
+        } else if (demo === Demo.HOLTER_EXAM) {
+            d3.select("body").style("overflow", "hidden");
+            player.load([
+                { trans: "#device", transform: "translate(-400px,200px)scale(0.5)", timeStamp: 100, duration: 0 },
+                { trans: "#CT64", transform: "translateY(-100px)scale(1.2)", timeStamp: 110, duration: 0 },
+                { speak: "Instruzioni per eseguire un esame Hólter con un nuovo dispositivo MT32.", timeStamp: 6000 - warp },
+                { speak: "Per effettuare questo tipo di esame, i dati anagrafici del paziente devono essere già presenti sulla centrale CT64.", timeStamp: 12000 - warp },
+                { speak: "Fai doppio click sull'anagrafica del paziente.", timeStamp: 18000 - warp },
+                { click: ct64.select_patient, timeStamp: 23000 - warp, timeout: 3000, borderColor: "white", classed: "blink2", cursor: { type: media.mousePointer, offset: { top: 0, left: 200 } }},
+                { speak: "La centrale mostrerà una pagina che permette di accedere a una lista di azioni e ai dati del paziente.", timeStamp: 26500 - warp },
+                { speak: "Dalla lista di azioni disponibili, clicca Nuovo Hólter.", timeStamp: 34000 - warp },
+                { click: ct64.new_holter, timeStamp: 36000 - warp, timeout: 2000, borderColor: "white", cursor: { type: media.mousePointer, offset: { top: 0, left: 0 } }},
+
+                { speak: "Nella nuova pagina, seleziona Durata Esame e Derivazione Precordiale che intendi utilizzare.", timeStamp: 40000 },
+                { select: ct64.holter_duration, timeStamp: 40500, timeout: 1000, borderColor: "blue", classed: "blink2", cursor: { type: media.mousePointer } },
+                { select: ct64.holter_derivation, timeStamp: 41500, timeout: 1000, borderColor: "blue", classed: "blink2", cursor: { type: media.mousePointer } },
+                { speak: "Inotre, seleziona Attiva Accelerómetro se intendi attivare l'acquisizione dei dati acceleromètrici.", timeStamp: 45000 },
+                { select: ct64.holter_accelerometer, timeStamp: 46000, timeout: 1000, borderColor: "blue", classed: "blink2", cursor: { type: media.mousePointer } },
+                { speak: "Poi, clicca Continua.", timeStamp: 53000 },
+                { click: ct64.continue_holter_config, timeStamp: 54000, timeout: 1000, borderColor: "white", cursor: { type: media.mousePointer, offset: { top: 0, left: 0 }} },
+
+                { speak: "A questo punto, prendi il dispositivo.", timeStamp: 40500 + holterParamsSpeechDuration - warp },
+                { trans: "#device", transform: "translate(0px,0px)scale(1)", timeStamp: 41500 + holterParamsSpeechDuration - warp, duration: 1000 },
+                { speak: "Clicca Centrale.", timeStamp: 44000 + holterParamsSpeechDuration - warp },
+                { reveal: media.stylus, timeStamp: 44000 + holterParamsSpeechDuration- warp },
+                { click: mt32.central, timeStamp: 45000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus, offset: { top: 0, left: 120 } }},
+                { speak: "Clicca Scarica aggiornamenti.", timeStamp: 47000 + holterParamsSpeechDuration - warp },
+                { click: mt32.download_updates, timeStamp: 48000 + holterParamsSpeechDuration - warp, timeout: 1000, cursor: { type: media.stylus, offset: { top: 0, left: 120} }},
+                { hide: media.stylus, timeStamp: 52000 + holterParamsSpeechDuration - warp },
+
+                { speak: "Il dispositivo invierà alla centrale i comandi necessari per richiedere l'associazione del dispositivo.", timeStamp: 52000 + holterParamsSpeechDuration - warp },
+                { speak: "Al termine dell'invio dei comandi, il dispositivo comparirà nella lista di dispositivi noti alla centrale, e resterà in attesa di un comando di conferma.", timeStamp: 60000 + holterParamsSpeechDuration - warp },
+                { speak: "Per inviare il comando di conferma, seleziona il dispositivo dalla centrale.", timeStamp: 70000 + holterParamsSpeechDuration - warp },
+                { click: ct64.select_device, timeStamp: 74000 + holterParamsSpeechDuration - warp, timeout: 2000, cursor: { type: media.mousePointer, offset: { top: 0, left: 200 } }},
+                { speak: "Quindi, clicca Continua.", timeStamp: 76000 + holterParamsSpeechDuration - warp },
+                { click: ct64.continue, timeStamp: 78000 + holterParamsSpeechDuration - warp, timeout: 2000, borderColor: "white", cursor: { type: media.mousePointer, offset: { top: 0, left: 0 } }},
+                { speak: "Il dispositivo riceverà la conferma in pochi secondi.", timeStamp: 80000 + holterParamsSpeechDuration - warp },
+                { speak: "Clicca Conferma sul dispositivo, per completare l'associazione.", timeStamp: 86000 + holterParamsSpeechDuration - warp },
+
+                { reveal: media.stylus, timeStamp: 86000 + holterParamsSpeechDuration - warp },
+                { click: mt32.confirm_syncdone, timeStamp: 89000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus, offset: { top: 0, left: 120} }},
+                { speak: "Quindi, Clicca sul logo médicàl téc per andare alla pagina principale.", timeStamp: 92500 + holterParamsSpeechDuration - warp },
+                { click: mt32.home, timeStamp: 95000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+
+                { speak: "Ora il dispositivo è in modalità operativa Hólter, ed è quindi pronto per essere utilizzato.", timeStamp: 97000 + holterParamsSpeechDuration - warp },
+                { hide: media.stylus, timeStamp: 103000 + holterParamsSpeechDuration - warp },
+
+                { speak: "Prima di cominciare l'esame, collega il cavo ECG a 7 derivazioni al dispositivo MT32.", timeStamp: 106000 + holterParamsSpeechDuration - warp },
+                { trans: "#device", transform: "translate(-400px,200px)scale(0.5)", timeStamp: 110000 + holterParamsSpeechDuration - warp, duration: 1000 },
+                { trans: "#MT32-cable5", transform: "translateY(-200px)", timeStamp: 112000 + holterParamsSpeechDuration - warp, duration: 1000 },
+                { trans: "#device", transform: "translate(0px,0px)scale(1)", timeStamp: 113000 + holterParamsSpeechDuration - warp, duration: 1500 },
+
+                { reveal: media.stylus, timeStamp: 114000 + holterParamsSpeechDuration - warp },
+                { speak: "Poi, clicca Nuovo Esame.", timeStamp: 116500 + holterParamsSpeechDuration - warp },
+                { click: mt32.new_exam, timeStamp: 118000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Nella nuova pagina, Clicca Hólter.", timeStamp: 121000 + holterParamsSpeechDuration - warp, borderColor: "white" },
+                { click: mt32.holter, timeStamp: 124000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Il dispositivo mostrerà l'anagrafica del paziente ricevuta dalla centrale.", timeStamp: 127500 + holterParamsSpeechDuration - warp },
+                { speak: "Verifica i dati del paziente.", timeStamp: 130000 + holterParamsSpeechDuration - warp },
+                { speak: "Se necessario, puoi modificare i dati anagrafici direttamente dal dispositivo.", timeStamp: 132000 + holterParamsSpeechDuration - warp },
+                { click: mt32.edit_patient, timeStamp: 138000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { click: mt32.back_edit_patient, timeStamp: 141800 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Clicca Conferma per confermare i dati del paziente.", timeStamp: 145500 + holterParamsSpeechDuration - warp },
+                { click: mt32.confirm_patient_details, timeStamp: 148000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+
+                { speak: "Attendi che l'icona di allerta si spenga.", timeStamp: 150000 + holterParamsSpeechDuration - warp },
+                { move: media.stylus, top: mt32.toggleLP.getPosition().top - 30, left: mt32.toggleLP.getPosition().left + 300, timeStamp: 152000 + holterParamsSpeechDuration - warp },
+                { speak: "Questo indica l'andata a regime del segnale ECG.", timeStamp: 155000 + holterParamsSpeechDuration - warp },
+
+                { speak: "A lato del display, sono disponibili due filtri che possono migliorare la visualizzazione del segnale.", timeStamp: 160000 + holterParamsSpeechDuration - warp },
+                { move: media.stylus, top: mt32.toggleLP.getPosition().top, left: mt32.toggleLP.getPosition().left, timeStamp: 161000 + holterParamsSpeechDuration - warp },
+                { speak: "Ad esempio, clicca il primo pulsante per abilitare un filtro passa basso.", timeStamp: 164000 + holterParamsSpeechDuration - warp },
+                { click: mt32.toggleLP, timeStamp: 169000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Clicca di nuovo il pulsante per disabilitare il filtro.", timeStamp: 171000 + holterParamsSpeechDuration - warp },
+                { click: mt32.toggleLP, timeStamp: 173000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+
+                { move: media.stylus, top: mt32.toggle_gain.getPosition().top, left: mt32.toggle_gain.getPosition().left - 50, timeStamp: 180000 + holterParamsSpeechDuration - warp },
+                { speak: "Nella parte bassa del display viene visualizzata la frequenza cardiaca.", timeStamp: 180000 + holterParamsSpeechDuration - warp },
+
+                { speak: "Il secondo pulsante consente di configurare la sensibilità del segnale.", timeStamp: 185000 + holterParamsSpeechDuration - warp },
+                { click: mt32.toggle_gain, timeStamp: 187000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { click: mt32.toggle_gain, timeStamp: 190000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { click: mt32.toggle_gain, timeStamp: 194000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+
+                { speak: "Il terzo pulsante cambia la velocità di acquisizione del segnale.", timeStamp: 196000 + holterParamsSpeechDuration - warp },
+                { move: media.stylus, top: mt32.toggle_speed.getPosition().top, left: mt32.toggle_speed.getPosition().left, timeStamp: 197000 + holterParamsSpeechDuration - warp },
+                { click: mt32.toggle_speed, timeStamp: 198000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { click: mt32.toggle_speed, timeStamp: 202000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+
+                { speak: "In fine, il quarto pulsante consente di visualizzare una terna differente di derivazioni.", timeStamp: 204000 + holterParamsSpeechDuration - warp },
+                { click: mt32.toggle_trace, timeStamp: 205500 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Premi a lungo il pulsante per visualizzare una sola derivazione alla volta.", timeStamp: 208000 + holterParamsSpeechDuration - warp },
+                { click: mt32.toggle_trace, timeStamp: 209500 + holterParamsSpeechDuration - warp, timeout: 3000, borderColor: "white", cursor: { type: media.stylus, longpress: true }},
+                { speak: "Premi di nuovo a lungo il pulsante per tornare alla visualizzazione di tre derivazioni.", timeStamp: 215000 + holterParamsSpeechDuration - warp },
+                { click: mt32.toggle_trace, timeStamp: 218000 + holterParamsSpeechDuration - warp, timeout: 3000, borderColor: "white", cursor: { type: media.stylus, longpress: true }},
+
+                { speak: "Dopo aver selezionato i filtri che ritieni necessari, clicca il pulsante rec.", timeStamp: 222000 + holterParamsSpeechDuration - warp },
+                { click: mt32.rec, timeStamp: 226000 + holterParamsSpeechDuration - warp, timeout: 1500, borderColor: "white", cursor: { type: media.stylus }},
+                { move: media.stylus, top: mt32.view_interpretation.getPosition().top, left: mt32.view_interpretation.getPosition().left + mt32.view_interpretation.getSize().width, timeStamp: 230000 + holterParamsSpeechDuration - warp },
+
+                { speak: "Comparirà una finestra di conferma.", timeStamp: 231000 + holterParamsSpeechDuration - warp },
+                { speak: "Clicca conferma, per cominciare la registrazione Hólter.", timeStamp: 234000 + holterParamsSpeechDuration - warp },
+                { click: mt32.confirm_exams, timeStamp: 237000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Il display del dispositivo si spegnerà, e la registrazione Hólter verrà effettuata per la durata impostata in fase di configurazione dell'esame. In questo caso, 24 ore.", timeStamp: 238000 + holterParamsSpeechDuration - warp },
+                { hide: media.stylus, timeStamp: 240000 + holterParamsSpeechDuration - warp },
+
+                { speak: "Per interrompere anticipatamente l'esame Hólter, premi a lungo il pulsante di accensione del dispositivo.", timeStamp: 252000 + holterParamsSpeechDuration - warp },
+                { trans: ".MT32-case-rightside", selectAll: true, transform: "rotateY(22deg)translateZ(-10px)translateY(-12px)skewY(10deg)scaleY(0.9)", duration: 200, timeStamp: 255000 + holterParamsSpeechDuration - warp },
+                { trans: "#MT32-screens", transform: "rotateY(-22deg)translateZ(-183px)translateY(-112px)translateX(140px)skewY(-10deg)scaleY(1.4)", duration: 1600, timeStamp: 256000 + holterParamsSpeechDuration - warp },
+                { trans: ".MT32-case-rightside", selectAll: true, transform: "rotateY(0deg)translateZ(0px)translateY(0px)skewY(0deg)scaleY(1)", duration: 1600, timeStamp: 256000 + holterParamsSpeechDuration - warp },
+                { trans: "#MT32-cable5", transform: "rotateY(-22deg) translateZ(-183px) translateY(-10px) translateX(-19px) skewY(-10deg) scaleY(1.4)", duration: 1400, timeStamp: 256000 + holterParamsSpeechDuration - warp },
+                { select: mt32_power_btn, timeStamp: 258000 + holterParamsSpeechDuration - warp, borderColor: "white", classed: "blink" },
+                { deselect: mt32_power_btn, timeStamp: 261000 + holterParamsSpeechDuration - warp, borderColor: "white", classed: "blink" },
+
+                { speak: "Durante l'esame, puoi eseguire brevi registrazioni vocali premendo a lungo il pulsante Voice Recorder che si trova a lato del dispositivo.", timeStamp: 262000 + holterParamsSpeechDuration - warp },
+                { click: mt32_record_btn, timeStamp: 266000 + holterParamsSpeechDuration - warp, timeout: 5000, borderColor: "white", classed: "blink" },
+                { speak: "Quando il LED frontale del dispositivo diventa blu lampeggiante, la registrazione vocale è attiva.", timeStamp: 270000 + holterParamsSpeechDuration - warp },
+                { reveal: "#record_voice", timeStamp: 277000 + holterParamsSpeechDuration - warp },
+                { speak: "Le registrazioni vocali hanno una durata predefinita di 20 secondi.", timeStamp: 277000 + holterParamsSpeechDuration - warp },
+                { hide: "#record_voice", timeStamp: 289000 + holterParamsSpeechDuration - warp },
+                { speak: "Per terminare anticipatamente la registrazione vocale, premi di nuovo a lungo il pulsante Voice Recorder.", timeStamp: 290000 + holterParamsSpeechDuration - warp },
+                { click: mt32_record_btn, timeStamp: 290000 + holterParamsSpeechDuration - warp, timeout: 5000, borderColor: "white", classed: "blink" },
+
+                { trans: ".MT32-case-rightside", selectAll: true, transform: "rotateY(22deg)translateZ(-10px)translateY(-12px)skewY(10deg)scaleY(0.9)", duration: 1400, timeStamp: 296000 + holterParamsSpeechDuration - warp },
+                { trans: "#MT32-screens", transform: "rotateY(0deg)translateZ(0px)translateY(0px)translateX(0px)skewY(0deg)scaleY(1)", duration: 1600, timeStamp: 296000 + holterParamsSpeechDuration - warp },
+                { trans: "#MT32-cable5", transform: "rotateY(0deg) translateZ(0px) translateY(-200px) translateX(0px) skewY(0deg) scaleY(1)", duration: 1600, timeStamp: 296000 + holterParamsSpeechDuration - warp },
+
+                { speak: "Quando la registrazione Hólter è completa, il dispositivo riaccenderà il display e mostrerà una pagina di notifica.", timeStamp: 298000 + holterParamsSpeechDuration - warp },
+                { click: mt32.tick, timeStamp: 300000 + holterParamsSpeechDuration - warp },
+                { speak: "Dopo 5 secondi, il dispositivo andrà automaticamente sulla home page.", timeStamp: 304000 + holterParamsSpeechDuration - warp },
+                { click: mt32.tick, timeStamp: 309000 + holterParamsSpeechDuration - warp },
+                //-----
+                { speak: "A questo punto, l'esame è stato salvato sul dispositivo MT32.", timeStamp: 315000 + holterParamsSpeechDuration - warp },
+                { speak: "Per caricare l'esame sulla centrale CT64, procedi come segue.", timeStamp: 321000 + holterParamsSpeechDuration - warp },
+                { speak: "Clicca Centrale.", timeStamp: 328000 + holterParamsSpeechDuration - warp },
+                { click: mt32.central, timeStamp: 330000 + holterParamsSpeechDuration - warp, timeout: 2000, cursor: { type: media.stylus }},
+
+                { move: media.stylus, top: mt32.upload_results.getPosition().top, left: mt32.upload_results.getPosition().left + 100, timeStamp: 333000 + holterParamsSpeechDuration - warp },
+                { speak: "Il numero tra parentesi sul pulsante Invio Risultati indica quanti esami sono attualmente salvati sul dispositivo MT32.", timeStamp: 334000 + holterParamsSpeechDuration - warp },
+                { click: mt32.upload_results, timeStamp: 341000 + holterParamsSpeechDuration - warp, timeout: 4000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Clicca Invio Risultati. In pochi secondi tutti gli esami saranno caricati sulla centrale.", timeStamp: 343000 + holterParamsSpeechDuration - warp },
+                { speak: "Al termine dell'invio, clicca Conferma.", timeStamp: 357000 + holterParamsSpeechDuration - warp },
+                { click: mt32.confirm_upload, timeStamp: 360000 + holterParamsSpeechDuration - warp, timeout: 2000, borderColor: "white", cursor: { type: media.stylus }},
+                { speak: "Noterai che il pulsante Invio Risultati è ora disabilitato. Questo indica che tutti gli esami sono stati inviati correttamente alla centrale CT64.", timeStamp: 362000 + holterParamsSpeechDuration - warp },
+                { move: media.stylus, timeStamp: 363000 + holterParamsSpeechDuration - warp, top: mt32.upload_results.getPosition().top, left: mt32.upload_results.getPosition().left },
+                { hide: media.stylus, timeStamp: 372000 + holterParamsSpeechDuration - warp },
+                { speak: "Per visionare gli esami del paziente sulla centrale, seleziona Monitoraggi.", timeStamp: 372000 + holterParamsSpeechDuration - warp },
+                { click: ct64.monitoring, timeStamp: 374000 + holterParamsSpeechDuration - warp, timeout: 2000, borderColor: "white", cursor: { type: media.mousePointer, offset: { top:0, left:0}}},
+                { speak: "La pagina mostra la lista di tutti gli esami svolti.", timeStamp: 378000 + holterParamsSpeechDuration - warp },
+                { speak: "Nella lista, troverai anche l'esame ECG che hai appena inviato.", timeStamp: 384000 + holterParamsSpeechDuration - warp },
+                { select: ct64.select_exam_data_holter,  timeStamp: 387000 + holterParamsSpeechDuration - warp, timeout: 16000, classed: "blink2", borderColor: "green", cursor: { type: media.mousePointer, offset: { top:0, left:0}}}
             ]);//.play();
         }
 
 
         var timers = {};
+        timers.curr_speed = 25;
 
         // emulates a communication link between ct64 and mt32
         var comm = {};
@@ -1602,48 +1833,33 @@ require([
         function render(res) {
             hide_all_screens(res);
             render_ct64_widgets(res);
-            if (res.mt32.mode === "POWERING_OFF" || res.mt32.mode === "MONITORING" || res.mt32.mode === "RECORDING"
-                    || res.mt32.mode === "SAVE_RESULTS") {
+            render_mt32_widgets(res);
+
+            // to improve performance, tick is activated only when necessary
+            if (res.mt32.mode === "POWERING_OFF" || res.mt32.mode === "SAVE_RESULTS") {
                 start_tick();
+            } else if (res.mt32.mode === "MONITORING" || res.mt32.mode === "RECORDING") {
+                if (res.mt32.speed === "25") {
+                    if (timers.curr_speed === "50") {
+                        stop_tick();
+                    }
+                    start_tick({ interval: 1000 });
+                    timers.curr_speed = "25";
+                } else {
+                    if (timers.curr_speed === "25") {
+                        stop_tick();
+                    }
+                    start_tick({ interval: 400 });
+                    timers.curr_speed = "50";
+                }
             } else if (res.ct64.mode === "WAITING_RESULTS") {
                 start_tick();
             } else { stop_tick(); }
 
-            // if (res.mt32.mode === "RECORDING" && res.mt32.mo === "HUB") {
-            //     setTimeout(function () {
-            //         ButtonActionsQueue.getInstance().queueGUIAction("click_mt32_results_ready", onMessageReceived);
-            //     }, 9000);
-            // }
-
-
-
             //-- mt32
-            for (var key in mt32) {
-                mt32[key].render(res);
-            }
-            if (res.mt32.mo === "NONE") {
-                viz("#operating_mode_btn_disabled");
-            } else {
-                hide("#operating_mode_btn_disabled");
-            }
-
-            mt32.power_btn.render(res);
-            mt32_settings.mt32_off.render(res);
-            mt32_settings.mt32_on_battery.render(res);
-            mt32_settings.mt32_charging.render(res);
-            mt32_settings.mt32_fully_charged.render(res);
-            mt32_settings.mt32_charging_error.render(res);
-
-            if (res.mt32.mode === "OFF") {
-                viz("#offScreen");
-            } else {
-                hide("#offScreen");
-            }
             if (res.mt32.mode === "HOME") {
                 viz("#homeScreen");
-                home.new_exam.render();
-                home.server.render();
-                home.settings.render();
+                // mt32.home.hide();
             } else if (res.mt32.mode === "EXAMS") {
                 viz("#examsScreen");
                 if (res.mt32.mo === "HUB") {
@@ -1652,16 +1868,16 @@ require([
                     viz("#div_ecg12d");
                     hide("#examsHOLTER");
                     hide("#div_holter");
-                    exams.ecg12d.render();
-                    exams.test.render();
+                    // mt32.ecg12d.render();
+                    // mt32.test_electrodes.render();
                 } else if (res.mt32.mo === "HOLTER") {
                     hide("#examsDISABLED");
                     hide("#examsHUB");
                     hide("#div_ecg12d");
                     viz("#examsHOLTER");
                     viz("#div_holter");
-                    exams.holter.render();
-                    exams.test.render();
+                    // mt32.holter.render();
+                    // mt32.test_electrodes.render();
                 } else {
                     // mode:none
                     viz("#examsDISABLED");
@@ -1672,9 +1888,9 @@ require([
                 }
             } else if (res.mt32.mode === "CENTRAL") {
                 viz("#centralScreen");
-                central.download_updates.render();
-                central.upload_results.render();
-                central.terminate_operating_mode.render();
+                // mt32.download_updates.render();
+                // mt32.upload_results.render();
+                // mt32.terminate_operating_mode.render();
                 if (res.mt32.results_saved === "TRUE") {
                     hide("#send_results_btn_disabled");
                     d3.select("#nresults").text("(1)");
@@ -1684,11 +1900,11 @@ require([
                 }
             } else if (res.mt32.mode === "SETTINGS") {
                 viz("#settingsScreen");
-                settings.connection_settings.render();
-                settings.ecg_settings.render();
-                settings.security_settings.render();
-                settings.system_settings.render();
-                settings.info.render();
+                // mt32.connection_settings.render();
+                // mt32.ecg_settings.render();
+                // mt32.security_settings.render();
+                // mt32.system_settings.render();
+                // mt32.info.render();
             } else if (res.mt32.mode === "TEST") {
                 viz("#testScreen");
                 if (res.mt32.mo === "HUB") {
@@ -1705,14 +1921,14 @@ require([
             } else if (res.mt32.mode === "CHECK_PATIENT") {
                 viz("#checkPatientScreen");
                 mt32.home.hide();
-                check.confirm.render();
+                // mt32.confirm_patient_details.render();
             } else if (res.mt32.mode === "MONITORING" || res.mt32.mode === "RECORDING") {
                 if (res.mt32.rec === "0") {
                     examData.start = date.text() + " " + hhmmss.text();
                 }
                 viz("#monitoringScreen");
                 mt32.home.hide();
-                monitoring.quit.render();
+                // mt32.quit_monitoring.render();
                 update_tracing_display(res);
                 if (res.mt32.mode === "RECORDING") {
                     mt32.recordLED.reveal();
@@ -1721,7 +1937,6 @@ require([
                     mt32.recordLED.hide();
                     mt32.recPercentage.hide();
                 }
-
                 //set filters
                 if (res.mt32.hpfilter === "TRUE") {
                     viz("#hipassfilter_on");
@@ -1729,7 +1944,6 @@ require([
                 if (res.mt32.lpfilter === "TRUE") {
                     viz("#lowpassfilter_on");
                 } else { hide("#lowpassfilter_on"); }
-
                 // set gain
                 if (res.mt32.gain === "GAIN_5") {
                     d3.select("#div_gain").text("5");
@@ -1738,14 +1952,30 @@ require([
                 } else if (res.mt32.gain === "GAIN_20") {
                     d3.select("#div_gain").text("20");
                 }
+                // set speed
+                d3.select("#div_speed").text(res.mt32.speed);
+                // set trace type
+                if (res.mt32.trace === "v2") {
+                    viz("#traceV2");
+                    hide("#traceV1V2V3");
+                    hide("#traceOneTwoThree");
+                } else if (res.mt32.trace === "v1v2v3") {
+                    viz("#traceV1V2V3");
+                    hide("#traceV2");
+                    hide("#traceOneTwoThree");
+                } else { // res.mt32.trace === "v1v2v3"
+                    viz("#traceOneTwoThree");
+                    hide("#traceV1V2V3");
+                    hide("#traceV2");
+                }
 
             } else if (res.mt32.mode === "RESULTS") {
                 examData.stop = date.text() + " " + hhmmss.text();
                 viz("#resultsScreen");
                 mt32.home.hide();
-                results.repeat.render();
-                results.interpretation.render();
-                results.physio.render();
+                // mt32.repeat_exam.render();
+                // mt32.view_interpretation.render();
+                // mt32.physio.render();
                 if (isNaN(parseFloat(res.mt32.dataentry.replace(/"/g,'')))) {
                     d3.select("#hasphysio").text("Assenti");
                 } else {
@@ -1753,12 +1983,15 @@ require([
                 }
             } else if (res.mt32.mode === "CONFIRM_REC") {
                 viz("#confirmHolterScreen");
-                exams.confirm.render();
+                mt32.home.hide();
+                // mt32.confirm_exams.render();
             } else if (res.mt32.mode === "CONFIRM_POWER_OFF") {
                 viz("#confirmPowerOffScreen");
+                mt32.home.hide();
                 // mt32.confirm_poweroff.render();
             } else if (res.mt32.mode === "POWERING_OFF") {
                 viz("#poweringOffScreen");
+                mt32.home.hide();
             } else if (res.mt32.mode === "VIEW_ALERTS") {
                 viz("#viewAlertsScreen");
             } else if (res.mt32.mode === "SENDING_RESULTS" || res.mt32.mode === "RESULTS_SENT") {
@@ -1770,16 +2003,16 @@ require([
                         { input: "#res_send_1", value: "- Avvio applicazione", timeStamp: 500, lineFeed: true },
                         { input: "#res_send_2", value: "- Accensione modulo cellulare", timeStamp: 1000, lineFeed: true },
                         { input: "#res_send_3", value: "- Attesa registrazione SIM", timeStamp: 2000, lineFeed: true },
-                        { button: mt32.tick, timeStamp: 2500 },
+                        { click: mt32.tick, timeStamp: 2500 },
                         { input: "#res_send_4", value: "- Avvio connessione dati", timeStamp: 6000, lineFeed: true },
-                        { button: mt32.tick, timeStamp: 6500 },
+                        { click: mt32.tick, timeStamp: 6500 },
                         { input: "#res_send_5", value: "- Invio esami", timeStamp: 8000, lineFeed: true },
                         { input: "#res_send_6", value: "- 8828285a-c395-148d-e55c-abc170102009", timeStamp: 9000, lineFeed: true },
                         { input: "#res_send_7", value: "- 8828285a-c395-148d-e55c-abc170102009.log", timeStamp: 9300, lineFeed: true },
                         { input: "#res_send_8", value: "- 8828285a-c395-148d-e55c-abc170102009-00000732.hecg", timeStamp: 9600, lineFeed: true },
                         { input: "#res_send_9", value: "- 8828285a-c395-148d-e55c-abc170102009-00000295.hecg", timeStamp: 9900, lineFeed: true },
                         { input: "#res_send_10", value: "- 8828285a-c395-148d-e55c-abc170102009-00000732.hacc", timeStamp: 10200, lineFeed: true },
-                        { button: mt32.tick, timeStamp: 11000 }
+                        { click: mt32.tick, timeStamp: 11000 }
                     ]).play();
                 }
                 if (res.mt32.mode === "SENDING_RESULTS" && res.mt32.umts === "UMTS_TX") {
@@ -1792,13 +2025,16 @@ require([
                     // the following writes the results in the first line of the ct64 table
                     d3.select("#results_line1-start").text(examData.start);
                     d3.select("#results_line1-stop").text(examData.stop);
-                    d3.select("#results_line1-type").text("ECG12D");
+                    if (res.mt32.mo === "HOLTER") {
+                        d3.select("#results_line1-type").text("HOLTER");
+                    } else {
+                        d3.select("#results_line1-type").text("ECG12D");
+                    }
                     d3.select("#results_line1").classed("animated flash", true);
                     setTimeout(function () {
                         d3.select("#results_line1").classed("animated flash", false);
                     }, 2000);
                 }
-
             } else if (res.mt32.mode === "DOWNLOADING_UPDATES") {
                 viz("#downloadingUpdatesScreen");
                 mt32.home.hide();
@@ -1806,13 +2042,13 @@ require([
                     timers.updates_player = new Player().load([
                         { input: "#send_1", value: "- Avvio applicazione", timeStamp: 500, lineFeed: true },
                         { input: "#send_2", value: "- Accensione modulo cellulare", timeStamp: 600, lineFeed: true },
-                        { button: mt32.tick, timeStamp: 2000 },
+                        { click: mt32.tick, timeStamp: 2000 },
                         { input: "#send_3", value: "- Attesa registrazione SIM", timeStamp: 5000, lineFeed: true },
-                        { button: mt32.tick, timeStamp: 7600 },
+                        { click: mt32.tick, timeStamp: 7600 },
                         { input: "#send_4", value: "- Avvio connessione dati", timeStamp: 9000, lineFeed: true },
-                        { button: mt32.tick, timeStamp: 11200 },
+                        { click: mt32.tick, timeStamp: 11200 },
                         { input: "#send_5", value: "- Sincronizzazione", timeStamp: 13000, lineFeed: true },
-                        { button: mt32.tick, timeStamp: 15000 }
+                        { click: mt32.tick, timeStamp: 15000 }
                     ]).play();
                 }
                 if (res.ct64.device_available === "TRUE") {
@@ -1849,6 +2085,18 @@ require([
                 viz("#saveResultsScreen");
             } else if (res.mt32.mode === "INTERPRETATION") {
                 viz("#interpretationScreen");
+                mt32.home.hide();
+            } else if (res.mt32.mode === "VOICE_RECORDER" || res.mt32.mode === "RCORDING_HOLTER") {
+                // viz off screen
+                mt32.home.hide();
+                if (res.mt32.mode === "VOICE_RECORDER") {
+                    mt32_power_btn.reveal();
+                    mt32_record_btn.reveal();
+                }
+            } else if (res.mt32.mode === "NOTIFY_HOLTER_COMPLETE") {
+                viz("#notifyHolterCompleteScreen");
+                examData.stop = // FIXME: write a proper function to compute the next day.
+                    (parseInt(examData.start.split("/")[0]) + 1).toString() + "/" + examData.start.split("/").slice(1).join("/"); //date.text() + " " + hhmmss.text();
                 mt32.home.hide();
             }
 
@@ -1890,13 +2138,13 @@ require([
             if (res.mt32.mode === "HOME" || res.mt32.mode === "EXAMS" || res.mt32.mode === "CENTRAL"
                     || res.mt32.mode === "SETTINGS" || res.mt32.mode === "TEST" || res.mt32.mode === "CHECK_PATIENT"
                     || res.mt32.mode === "RESULTS" || res.mt32.mode === "DOWNLOADING_UPDATES" || res.mt32.mode === "SENDING_RESULTS") {
-                d3.select("#leftPanel").style("display", "block");
-                leftpanel.umts.render();
-                leftpanel.wireless.render();
-                leftpanel.bluetooth.render();
-                leftpanel.battery.render();
+                viz("#leftPanel");
+                mt32.umts.render();
+                mt32.wireless.render();
+                mt32.bluetooth.render();
+                mt32.battery.render();
                 if (res.mt32.mode !== "HOME" && res.mt32.mode !== "RESULTS") {
-                    leftpanel.back.render();
+                    mt32.leftpanel_back.render();
                 }
                 if (res.mt32.umts === "UMTS_OFF") {
                     viz("#umts_off");
@@ -1913,7 +2161,9 @@ require([
                 }
             }
             if (res.mt32.alerts === "TRUE") {
-                leftpanel.view_alerts.render();
+                mt32.view_alerts.render(res);
+            } else {
+                mt32.view_alerts.hide(res);
             }
 
             //-- render ct64, based on selected demo mode
@@ -1924,9 +2174,10 @@ require([
                     viz("#ct64google", { fade: true });
                 } else if (res.ct64.mode === "LOGIN") {
                     viz("#ct64LoginScreen", { fade: true });
-                } else if (res.ct64.mode === "PATIENTS_SCREEN") {
-                    viz("#ct64homePage", { fade: true });
                 }
+                // else if (res.ct64.mode === "PATIENTS_SCREEN") {
+                //     viz("#ct64homePage", { fade: true });
+                // }
             // else if (res.demo === "HUB_KNOWN_PT" || res.demo === "HOLTER" || res.demo === "HUB_NEW_PT") {
                 if (demo !== Demo.INTRO && demo !== Demo.ACCESS_HOME_PAGE) {
                     d3.select("#ct64_address").attr("value", "http://www.medicaltech.it");
@@ -1948,11 +2199,20 @@ require([
                     }
                 } else if (res.ct64.mode === "MONITORING") {
                     viz("#ct64-monitoringScreen");
-                } else if (res.ct64.mode === "NEW_MONITORING_SESSION") {
+                } else if (res.ct64.mode === "NEW_MONITORING_SESSION" || res.ct64.mode === "SELECT_HOLTER_DEVICE") {
                     viz("#newMonitoringSessionScreen", { flash: true });
-                    if (res.ct64.known_patient === "TRUE") {
-                       viz("#knownPT");
-                    } else { viz("#newPT"); }
+                    viz("#selectDevice");
+                    if (res.ct64.mode === "NEW_MONITORING_SESSION") {
+                        hide("#knownPT-HOLTER");
+                        if (res.ct64.known_patient === "TRUE") {
+                           viz("#knownPT-ECG12D");
+                        } else { viz("#newPT"); }
+                    } else {
+                        hide("#knownPT-ECG12D");
+                        if (res.ct64.known_patient === "TRUE") {
+                           viz("#knownPT-HOLTER");
+                        } else { viz("#newPT"); }
+                    }
                     if (res.ct64.holter_mode === "TRUE") { viz("#holter_mode") }
                     if (res.ct64.hub_mode === "TRUE") { viz("#hub_mode") }
                     viz("#mariabianchi");
@@ -1987,19 +2247,14 @@ require([
                     }
                 } else if (res.ct64.mode === "HOLTER_CONFIG") {
                     viz("#holterConfigScreen");
-                } else if (res.ct64.mode === "SELECT_HOLTER_DEVICE") {
-                    viz("#newMonitoringSessionScreen", { flash: true });
-                    viz("#holterSession");
-                    hide("#hubSession");
-                    if (res.ct64.device_selected === "TRUE") {
-                        ct64.select_device.select();
-                    } else {
-                        ct64.select_device.deselect();
-                    }
                 } else if (res.ct64.mode === "WAITING_RESULTS" || res.ct64.mode === "MT32_HOLTER_MODE" || res.ct64.mode === "MT32_HUB_MODE") {
                     viz("#waitingResultsScreen");
                     if (res.ct64.known_patient === "TRUE") {
-                        viz("#knownPT");
+                        if (res.ct64.mt32_mode === "MT32_HOLTER") {
+                            viz("#knownPT-HOLTER");
+                        } else {
+                            viz("#knownPT-ECG12D");
+                        }
                     } else { viz("#newPT"); }
                     if (res.ct64.holter_mode === "TRUE") { viz("#holter_mode") }
                     if (res.ct64.hub_mode === "TRUE") { viz("#hub_mode") }
@@ -2018,7 +2273,6 @@ require([
                         if (!comm.device_selected) {
                             comm.device_selected = mt32.device_selected.click();
                         }
-
                     }
                 } else if (res.ct64.mode === "ECG_ANALYSIS_RESULTS") {
                     viz("#MONITORING_SCREENS")
@@ -2040,12 +2294,8 @@ require([
                     if (res.ct64.report_auth === "TRUE") {
                         if (res.ct64.ecg_report_saved === "TRUE") {
                             viz("#reportSavedScreen")
-                        } else {
-                            viz("#compileReportScreen");
-                        }
-                    } else {
-                        viz("#requestReportScreen");
-                    }
+                        } else { viz("#compileReportScreen"); }
+                    } else { viz("#requestReportScreen"); }
                     viz("#ecgMonitoringMenu");
                 } else if (res.ct64.mode === "MEDICAL_REPORT") {
                     viz("#PATIENT_SCREENS");
@@ -2065,9 +2315,12 @@ require([
         var hhmmss = d3.select("#div_hhmmss");
         function set_clock() {
             var d = new Date();
-            var hh = (d.getHours() < 10) ? "0" + d.getHours() : d.getHours();
-            var mm = (d.getMinutes() < 10) ? "0" + d.getMinutes() : d.getMinutes();
-            var ss = (d.getSeconds() < 10) ? "0" + d.getSeconds() : d.getSeconds();
+            var hh = d.getHours();
+            if (hh < 10) { hh = "0" + hh; }
+            var mm = d.getMinutes();
+            if (mm < 10) { mm = "0" + mm; }
+            var ss = d.getSeconds();
+            if (ss < 10) { ss = "0" + ss; }
             hour.text(hh + ":" + mm);
             date.text(d.toLocaleDateString("it-IT"));
             hhmmss.text(hh + ":" + mm + ":" + ss);
@@ -2082,7 +2335,7 @@ require([
         var init_trace = "#div_run_trace_init";
         var trace = "#div_run_trace_init";
         var run_trace_cursor = d3.select("#div_run_trace_cursor");
-        var step = 80;
+        var step = 90;
         var duration = 800;
         d3.select(trace).style("width", "0px");
         function reset_tracing_display() {
@@ -2090,32 +2343,53 @@ require([
             run_trace_cursor.transition().duration(0).style("margin-left", "0px");
             d3.selectAll(".mainrun").transition().duration(0).style("width", "0px");
             viz("#filter_warning");
-            d3.select("#div_run_trace_init").select(".mainrun").style("z-index", "1").style("opacity", 1).style("width", "0px");
-            d3.selectAll(".runtrace").style("display", "none");
+            d3.select("#div_run_trace_init").select(".mainrun").style("opacity", 1).style("width", "0px");
+            d3.selectAll(".runtrace").style("opacity", 0);
             streaming = false;
         }
         function update_tracing_display(res) {
-            d3.selectAll(".mainrun").style("z-index", 0);
+            d3.selectAll(".runtrace").transition().duration(duration/4).style("opacity", 0);
             if (res.mt32.gain === "GAIN_5") {
-                trace = "#div_run_trace_5";
+                trace = "#div_run_trace_5-LP";
             } else if (res.mt32.gain === "GAIN_10") {
-                trace = "#div_run_trace_10";
+                trace = "#div_run_trace_10-LP";
             } else if (res.mt32.gain === "GAIN_20") {
-                trace = "#div_run_trace_20";
+                if (res.mt32.lpfilter === "TRUE") {
+                    trace = "#div_run_trace_20-LP";
+                } else {
+                    if (res.mt32.trace === "v2") {
+                        console_log("div_run_trace_20-V2 selected");
+                        trace = "#div_run_trace_20-V2";
+                    } else if (res.mt32.trace === "v1v2v3") {
+                        console_log("div_run_trace_20-V1V2V3 selected");
+                        trace = "#div_run_trace_20-V1V2V3";
+                    } else {
+                        console_log("div_run_trace_20 selected");
+                        trace = "#div_run_trace_20";
+                    }
+                }
+            }
+            if (res.mt32.speed === "25") {
+                duration = 900;
+            } else {
+                duration = 500;
             }
             if (run_trace_cursor_position < max_trace_width) {
                 run_trace_cursor_position += step;
                 run_trace_width += step;
                 if (streaming) {
                     viz(trace);
-                    d3.select(trace).select(".mainrun").style("z-index", 1).transition().duration(duration/2).style("width", run_trace_width + "px");
+                    d3.selectAll(".mainrun").transition().duration(duration/2).style("width", run_trace_width + "px");
+                    d3.select(trace).style("opacity", 1);
                 } else {
                     viz(init_trace);
-                    d3.select(init_trace).select(".mainrun").style("z-index", 1).transition().duration(duration/2).style("width", run_trace_width + "px");
+                    d3.select(init_trace).select(".mainrun").transition().duration(duration/2).style("width", run_trace_width + "px");
+                    d3.select(init_trace).style("opacity", 1);
                 }
             } else {
                 hide("#filter_warning");
-                d3.select(init_trace).select(".mainrun").style("z-index", "0").transition().duration(duration/2).style("opacity", 0);
+                d3.select("#div_run_trace_init").transition().duration(duration/2).style("opacity", 0);
+                d3.select(init_trace).select(".mainrun").transition().duration(duration/2).style("opacity", 0);
                 streaming = true;
                 run_trace_width = 0;
                 viz(trace);
@@ -2127,7 +2401,12 @@ require([
 
         function render_mt32_led(res) {
             viz("#mt32_off");
-            if (res.mt32.mode !== "OFF") {
+            if (res.mt32.mode === "OFF" || res.mt32.mode === "RCORDING_HOLTER") {
+                hide("#mt32_on");
+                hide("#mt32_charging");
+                hide("#mt32_fully_charged");
+                hide("#mt32_charging_error");
+            } else {
                 if (res.mt32.battery_status === "ON_BATTERY") {
                     viz("#mt32_on");
                 } else if (res.mt32.battery_status === "CHARGING") {
@@ -2186,7 +2465,7 @@ require([
                 val.split("").forEach(function (c) {
                     setTimeout(function () {
                         d3.select(id).attr("value", current_value + c);
-                        console.log(current_value);
+                        console_log(current_value);
                         current_value = d3.select(id).attr("value");
                     }, elapse);
                     elapse += (c === "@")? 400 : (Math.random() * (150 - 200) + 100);
@@ -2198,169 +2477,15 @@ require([
 
         //register event listener for websocket connection from the client
         client.addListener('WebSocketConnectionOpened', function (e) {
-            console.log("web socket connected");
+            console_log("web socket connected");
             //start pvs process
             client.getWebSocket()
                 .startPVSProcess({name: "main.pvs", demoName: demoFolder + "/pvs"}, function (err, event) {
-                    if (demo === Demo.ACCESS_HOME_PAGE) {
-                        client.getWebSocket().sendGuiAction("init(ACCESS_HOME_PAGE);", onMessageReceived);
-                    } else if (demo === Demo.HUB_NEW_PT) {
-                        client.getWebSocket().sendGuiAction("init(HUB_NEW_PT);", onMessageReceived);
-                    } else if (demo === Demo.HUB_KNOWN_PT) {
-                        client.getWebSocket().sendGuiAction("init(HUB_KNOWN_PT);", onMessageReceived);
-                    } else if (demo === Demo.HOLTER) {
-                        client.getWebSocket().sendGuiAction("init(HOLTER);", onMessageReceived);
-                    } else if (demo === Demo.TERMINATE_HUB_MODE) {
-                        client.getWebSocket().sendGuiAction("init(TERMINATE_HUB_MODE);", onMessageReceived);
-                    } else if (demo === Demo.TERMINATE_HOLTER_MODE) {
-                        client.getWebSocket().sendGuiAction("init(TERMINATE_HOLTER_MODE);", onMessageReceived);
-                    } else if (demo === Demo.NEW_EXAM_HUB_MODE) {
-                        client.getWebSocket().sendGuiAction("init(NEW_EXAM_HUB_MODE);", onMessageReceived);
-                    } else if (demo === Demo.NEW_EXAM_HOLTER_MODE) {
-                        client.getWebSocket().sendGuiAction("init(NEW_EXAM_HOLTER_MODE);", onMessageReceived);
-                    } else if (demo === Demo.TEST_ELECTRODES_HUB) {
-                        client.getWebSocket().sendGuiAction("init(TEST_ELECTRODES_HUB);", onMessageReceived);
-                    } else if (demo === Demo.VIEW_EXAMS_HUB) {
-                        client.getWebSocket().sendGuiAction("init(VIEW_EXAMS_HUB);", onMessageReceived);
-                    } else if (demo === Demo.VIEW_INTERPRETATION_HUB) {
-                        client.getWebSocket().sendGuiAction("init(VIEW_INTERPRETATION_HUB);", onMessageReceived);
-                    } else if (demo === Demo.VIEW_INTERPRETATION_HOLTER) {
-                        client.getWebSocket().sendGuiAction("init(VIEW_INTERPRETATION_HOLTER);", onMessageReceived);
-                    } else if (demo === Demo.REQUEST_REPORT) {
-                        client.getWebSocket().sendGuiAction("init(REQUEST_REPORT);", onMessageReceived);
-                    } else if (demo === Demo.WRITE_REPORT) {
-                        client.getWebSocket().sendGuiAction("init(WRITE_REPORT);", onMessageReceived);
-                    } else if (demo === Demo.VIEW_MEDICAL_REPORT) {
-                        client.getWebSocket().sendGuiAction("init(VIEW_MEDICAL_REPORT);", onMessageReceived);
-                    } else if (demo === Demo.VIEW_ARCHIVED_MEDICAL_REPORTS) {
-                        client.getWebSocket().sendGuiAction("init(VIEW_ARCHIVED_MEDICAL_REPORTS);", onMessageReceived);
-                    } else if (demo === Demo.MT32_LED) {
-                        client.getWebSocket().sendGuiAction("init(MT32_LED);", onMessageReceived);
-                        setTimeout(function () {
-                            d3.select("#device").style("transition-duration", "1000ms").style("transform", "translate(1200px,-1300px)scale(2,2)");
-                        }, 9000);
-                    } else if (demo === Demo.CREATE_NEW_PATIENT) {
-                        client.getWebSocket().sendGuiAction("init(CREATE_NEW_PATIENT);", onMessageReceived);
-                    } else if (demo === Demo.TRANSFER_DATA_MICROSD) {
-                        client.getWebSocket().sendGuiAction("init(TRANSFER_DATA_MICROSD);", onMessageReceived);
-
-                        // slide everything to the right
-                        setTimeout(function () {
-                            d3.select("#content").style("transition-duration", "1000ms").style("margin-left", "200px");
-                        }, 5000);
-
-                        // rotate MT32 on the side
-                        setTimeout(function () {
-                            d3.select("#MT32-screens").style("transition-duration", "1600ms")
-                                                        .style("transform", "rotateY(22deg)translateZ(-423px)translateY(212px)translateX(140px)skewY(10deg)");
-                            d3.select("#MT32-sdcard").style("transition-duration", "1600ms")
-                                                        .style("transform", "rotateY(22deg)translateZ(-36px)translateY(15px)translateX(-2px)skewY(10deg)");
-                            d3.selectAll(".MT32-case-leftside")
-                                .style("transition-duration", "1600ms")
-                                .style("transform", "rotateY(0deg)translateZ(0px)translateY(8px)translateX(0px)skewY(0deg)scaleY(1.01)");
-                            d3.select("#MT32-sdcard-cover")
-                                .style("transition-duration", "1600ms")
-                                .style("transform", "rotateY(0deg)translateZ(0px)translateY(0px)translateX(0px)skewY(0deg)scaleY(1.04)");
-
-                        }, 6000);
-
-                        // remove SD panel
-                        setTimeout(function () {
-                            d3.select("#MT32-sdcard-cover").transition().duration(1000).style("opacity", "0");
-                        }, 7000);
-
-                        // extract SD card
-                        setTimeout(function () {
-                            d3.select("#MT32-sdcard").style("display", "block");
-                            setTimeout(function () {
-                                d3.select("#MT32-sdcard").style("display", "block");
-                                d3.select("#MT32-sdcard").style("transition-duration", "1600ms")
-                                    .style("transform", "rotateY(22deg)translateZ(-170px)translateY(170px)translateX(-200px)skewY(10deg)");
-                            }, 1000);
-                        }, 7500);
-
-                        // show SD card reader
-                        setTimeout(function () {
-                            d3.selectAll(".card-reader").style("display", "block").style("opacity", 0).transition().duration(1000).style("opacity", 0.8);
-                            d3.select("#MT32-sdcard").style("z-index", 2).style("transition-duration", "2600ms")
-                                    .style("transform", "translateX(980px)translateY(360px)rotateX(17deg)rotateZ(-108deg)skewX(-13deg)scale(0.3,0.5)");
-                        }, 10000);
-
-                        // insert card in the reader
-                        setTimeout(function () {
-                            d3.select("#MT32-sdcard").style("z-index", 2).style("transition-duration", "1600ms")
-                                    .style("transform", "translateX(1132px) translateY(421px) rotateX(26deg) rotateZ(-104deg) skewX(-13deg) translateZ(-300px) scale(0.2, 0.5)");
-                        }, 12000);
-                    } else if (demo === Demo.INTRO) {
-                        client.getWebSocket().sendGuiAction("init(INTRO);", onMessageReceived);
-                        d3.select("#device").style("transform", "translate(-400px,200px)scale(0.5)");
-                        d3.select("#CT64-screens").style("opacity", 0);
-
-                        // present MT32
-                        setTimeout(function () {
-                            d3.select("#device").style("transition-duration", "1600ms")
-                                .style("transform", "translate(0px,0px)scale(1)");
-                        }, 14000);
-
-                        // ct64
-                        setTimeout(function () {
-                            d3.select("#CT64-screens").transition().duration(1600).style("opacity", 1);
-                        }, 18000);
-
-                        // fad out mt32
-                        setTimeout(function () {
-                            d3.select("#device").style("transition-duration", "1600ms")
-                                .style("transform", "translate(-400px,200px)scale(0.5)");
-                        }, 46500);
-
-                    } else if (demo === Demo.POWER_ON_MT32) {
-                        client.getWebSocket().sendGuiAction("init(POWER_ON_MT32);", onMessageReceived);
-                        d3.selectAll(".MT32-case-righside").style("transition-duration", "1600ms")
-                                .style("transform", "rotateY(22deg)translateZ(-10px)translateY(-12px)skewY(10deg)scaleY(0.9)");
-                        d3.select("#MT32-right").style("display", "block");
-
-                        setTimeout(function () {
-
-                            d3.select("#MT32-screens").style("transition-duration", "1600ms")
-                                    .style("transform", "rotateY(-22deg)translateZ(-183px)translateY(-112px)translateX(140px)skewY(-10deg)scaleY(1.4)");
-                            d3.selectAll(".MT32-case-righside").style("transition-duration", "1600ms")
-                                    .style("transform", "rotateY(0deg)translateZ(0px)translateY(0px)skewY(0deg)scaleY(1)");
-                        }, 4000);
-
-                    } else if (demo === Demo.POWER_OFF_MT32) {
-                        client.getWebSocket().sendGuiAction("init(POWER_OFF_MT32);", onMessageReceived);
-                        d3.selectAll(".MT32-case-righside").style("transition-duration", "1600ms")
-                                .style("transform", "rotateY(22deg)translateZ(-10px)translateY(-12px)skewY(10deg)scaleY(0.9)");
-                        d3.select("#MT32-right").style("display", "block");
-
-                        setTimeout(function () {
-                            d3.select("#MT32-screens").style("transition-duration", "1600ms")
-                                    .style("transform", "rotateY(-22deg)translateZ(-183px)translateY(-112px)translateX(140px)skewY(-10deg)scaleY(1.4)");
-                            d3.selectAll(".MT32-case-righside").style("transition-duration", "1600ms")
-                                    .style("transform", "rotateY(0deg)translateZ(0px)translateY(0px)skewY(0deg)scaleY(1)");
-                        }, 4000);
-
-                        // confirmation screen
-                        setTimeout(function () {
-                            d3.select("#MT32-screens").style("transition-duration", "1600ms")
-                                    .style("transform", "rotateY(0deg)translateZ(0px)translateY(0px)translateX(0px)skewY(0deg)scaleY(1)");
-                            d3.selectAll(".MT32-case-righside").style("transition-duration", "1600ms")
-                                    .style("transform", "rotateY(22deg)translateZ(-10px)translateY(-12px)skewY(10deg)scaleY(0.9)");
-                        }, 12000);
-
-                    } else if (demo === Demo.VIEW_ALERTS) {
-                        client.getWebSocket().sendGuiAction("init(VIEW_ALERTS);", onMessageReceived);
-                        d3.select("#home_battery_empty").style("display", "block");
-                    } else if (demo === Demo.SEND_RESULTS) {
-                        client.getWebSocket().sendGuiAction("init(SEND_RESULTS);", onMessageReceived);
-                    }
-
-
-                    else if (demo === Demo.ECG_EXAM_12DER_KNOWN_PT) {
-                        // client.getWebSocket().sendGuiAction("init(ECG_EXAM_12DER_KNOWN_PT);", onMessageReceived);
-                        client.getWebSocket().sendGuiAction("init(ECG_EXAM_12DER_KNOWN_PT) WITH [ mt32 := mtinit WITH [ mo := HUB ]];", onMessageReceived);
-                    }
-                    else {
+                    if (demo === Demo.ECG_EXAM_12DER_KNOWN_PT || demo === Demo.HOLTER_EXAM) {
+                        client.getWebSocket().sendGuiAction("init(ECG_EXAM_12DER_KNOWN_PT);", onMessageReceived);
+                        d3.selectAll(".MT32-case").style("display", "none");
+                        // client.getWebSocket().sendGuiAction("init(ECG_EXAM_12DER_KNOWN_PT) WITH [ mt32 := mtinit WITH [ mo := HUB ]];", onMessageReceived);
+                    } else {
                         client.getWebSocket().sendGuiAction("init(STD);", onMessageReceived);
                     }
                 d3.select(".demo-splash").style("display", "none");
@@ -2371,10 +2496,10 @@ require([
                 d3.select(".content").style("display", "block");
             });
         }).addListener("WebSocketConnectionClosed", function (e) {
-            console.log("web socket closed");
+            console_log("web socket closed");
         }).addListener("processExited", function (e) {
             var msg = "Warning!!!\r\nServer process exited. See console for details.";
-            console.log(msg);
+            console_log(msg);
         });
 
         client.connectToServer();

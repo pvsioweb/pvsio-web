@@ -38,7 +38,7 @@
  });
  *
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext: true */
 /*global define */
 define(function (require, exports, module) {
     "use strict";
@@ -47,6 +47,10 @@ define(function (require, exports, module) {
         ButtonHalo2 = require("widgets/ButtonHalo2"),
         ButtonActionsQueue = require("widgets/ButtonActionsQueue").getInstance(),
         widget_template = require("text!widgets/templates/button_widget_template.handlebars");
+
+    const CLICK_RATE = 250; // 250 milliseconds, default interval for repeating button clicks when the button is pressed and held down
+                             // going below 250ms may cause multiple unintended activations when pressing the button
+    const DBLCLICK_TIMEOUT = 350; // 350 milliseconds, default timeout for detecting double clicks
 
     /**
      * @function <a name="ButtonEVO">ButtonEVO</a>
@@ -78,7 +82,9 @@ define(function (require, exports, module) {
      *          <li>overlayColor (String): color of the semi-transparent overlay layer used indicating mouse over button, button pressed, etc (default is steelblue)</li>
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
      *          <li>pushButton (Bool): if true, the visual aspect of the button resembles a push button, i.e., the button remains selected after clicking the button</li>
+     *          <li>rate (Number): interval, in milliseconds, for repeating button clicks when the button is pressed and held down (default is 250ms)
      *          <li>softLabel (String): the button label (default is blank).
+     *          <li>dblclick_timeout (Number): timeout, in milliseconds, for detecting double clicks (default is 350ms)
      *          <li>toggleButton (Bool): if true, the visual aspect of the button resembles a toggle button, i.e., the button remains selected after clicking the button</li>
      *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
      *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
@@ -86,6 +92,8 @@ define(function (require, exports, module) {
      * @instance
      */
      function ButtonEVO(id, coords, opt) {
+         coords = coords || {};
+         opt = opt || {};
          // set widget type
          this.type = this.type || "ButtonEVO";
          this.widget_template = opt.widget_template || widget_template;
@@ -109,24 +117,27 @@ define(function (require, exports, module) {
          this.keyCode = opt.keyCode;
          this.functionText = opt.functionText || id;
          this.customFunctionText = opt.customFunctionText;
-         this.rate = (isNaN(parseFloat(opt.rate))) ? 250 : Math.max(250, parseFloat(opt.rate)); // going below 250ms will inevitably cause multiple unintended activations when pressing the button
+         this.rate = (isNaN(parseFloat(opt.rate))) ? CLICK_RATE : Math.max(CLICK_RATE, parseFloat(opt.rate));
+         this.dblclick_timeout = (isNaN(parseFloat(opt.dblclick_timeout))) ? DBLCLICK_TIMEOUT : Math.max(DBLCLICK_TIMEOUT, parseFloat(opt.rate));
 
          // associate relevant actions to the button
-         if (typeof opt.evts === "object") {
-             opt.evts = opt.evts || [ "click" ];
-             this.evts = (opt.evts.filter(function (evt) {
-                 return evt === "press/release";
-             }).length > 0) ? { "press/release": true } : { "click": true };
+         opt.evts = opt.evts || "click";
+         if (typeof opt.evts === "object" && opt.evts.length > 0) {
+             this.evts = {};
+             this.evts.click = (opt.evts.filter(function (evt) { return evt === "click"; }).length > 0);
+             this.evts.dblclick = (opt.evts.filter(function (evt) { return evt === "dblclick"; }).length > 0);
+             this.evts["press/release"] = (opt.evts.filter(function (evt) { return evt === "press/release"; }).length > 0);
          } else {
              this.evts = {
                  "press/release": (opt.evts === "press/release"),
-                 "click": (opt.evts !== "press/release")
+                 "click": (opt.evts === "click"),
+                 "dblclick": (opt.evts === "dblclick")
              };
          }
 
          // prepare timers necessary for executing press & hold actions
          var _this = this;
-         this._timer = new Timer(250);
+         this._timer = new Timer(this.rate);
          this.callback = opt.callback || function (err, res) { console.log("Warning: " + _this.id + " does not have a callback :/"); };
          if (!opt.callback) { this.callback(); }
 
@@ -155,6 +166,11 @@ define(function (require, exports, module) {
                  _this.click();
              }
          }
+         function onButtonDoubleClick(_this) {
+             if (_this.evts.dblclick) {
+                 _this.dblclick();
+             }
+         }
          _this.overlay.on("mouseover", function () {
              if (!(_this.toggleButton || _this.pushButton) || _this.isSelected) {
                  _this.select({ opacity: 0.4 });
@@ -177,6 +193,16 @@ define(function (require, exports, module) {
              if (_this.isSelected || (_this.hover && !_this.toggleButton)) {
                  _this.select({ opacity: 0.4 });
              } else { _this.deselect(); }
+             // the following code is the dblclick handler
+             if (_this.dblclick_timer) {
+                 onButtonDoubleClick(_this);
+                 clearInterval(_this.dblclick_timer);
+                 _this.dblclick_timer = null;
+             } else {
+                 _this.dblclick_timer = setTimeout(function () {
+                     _this.dblclick_timer = null;
+                 }, _this.dblclick_timeout);
+             }
          }).on("blur", function () {
              if (_this.isSelected || (_this.hover && !_this.toggleButton)) {
                  _this.select({ opacity: 0.4 });
@@ -225,6 +251,17 @@ define(function (require, exports, module) {
       */
      ButtonEVO.prototype.click = function (opt) {
          btn_action("click", this, opt);
+         return this;
+     };
+
+     /**
+      * @function dblclick
+      * @description API to simulate a double click action on the button
+      * @memberof module:ButtonEVO
+      * @instance
+      */
+     ButtonEVO.prototype.dblclick = function (opt) {
+         btn_action("dblclick", this, opt);
          return this;
      };
 
