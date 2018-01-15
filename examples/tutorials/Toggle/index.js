@@ -78,8 +78,6 @@ require([
         console.log("Connection opened!");
     }).addListener("WebSocketConnectionClosed", function (evt) {
         console.log("Connection closed :((");
-    }).addListener("processExited", function (evt) {
-        console.error(evt);
     });
     client.connectToServer();
 });
@@ -105,7 +103,7 @@ require([
     The standard pattern for using the <em>PVSioWebClient</em> library is therefore as follows:<br>
     <pre class="prettyprint linenums"><code>require([ "PVSioWebClient", ... ], function (PVSioWebClient, ...) {
         ...
-        const client = PVSioWebClient.getInstance();
+        var client = PVSioWebClient.getInstance();
         client.addListener("WebSocketConnectionOpened", function (res) {
            console.log("Connection opened!");
         }).addListener("WebSocketConnectionClosed", function (evt) {
@@ -119,8 +117,8 @@ require([
     <p>
     The HTML code for loading the PVSio-web APIs and the Javascript file of the prototype in the same used for the HellowWorld tutorial.
     To execute the prototype, start the PVSio-web back-end, and then open a web browser at the following page: <a href="http://localhost:8082/tutorials/Toggle" target=_blank>http://localhost:8082/tutorials/Toggle</a><br>
-    The following screenshots illustrate the output rendered in the browser when the home button of the device is clicked:<br>
-    <img src="ready-to-start.png" style="width:200px;"><img src="olive.png" style="width:200px;"><img src="steelblue.png" style="width:200px;">
+    The following screenshots illustrate the output sequence rendered in the browser when the home button of the device is clicked:<br>
+    <img src="ready-to-start.png" style="width:200px;"> &gt;click &gt; <img src="olive.png" style="width:200px;"> &gt;click &gt; <img src="steelblue.png" style="width:200px;"></div>
  */
 /* jslint esnext:true */
 require.config({
@@ -169,8 +167,6 @@ require([
         console.log("Connection opened!");
     }).addListener("WebSocketConnectionClosed", function (evt) {
         console.log("Connection closed :((");
-    }).addListener("processExited", function (evt) {
-        console.error(evt);
     });
     client.connectToServer();
 });
