@@ -1,11 +1,8 @@
 /**
  * @module BasicDisplayEVO
  * @version 1.0
- * @description Renders a customisable button.
- *              The button has two layers: one layer renders the visual appearance, the other layer captures user interactions with the widget.
- *              This module provide APIs for setting up the visual appearance of the button and the user interactions captured by the button.
- *              Note that the button can also be transparent and without label: this is useful for creating
- *              interactive areas over pictures of a user interface.
+ * @description Renders a digital display for rendering text.
+ *              This module provide APIs for setting up the visual appearance of the widget, e.g., font size and color.
  * @author Paolo Masci
  * @date Dec 11, 2017
  *
@@ -14,26 +11,18 @@
  // The following configuration assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demo/
  require.config({
      baseUrl: "../../client/app",
-     paths: {
-         d3: "../lib/d3",
-         lib: "../lib",
-         text: "../lib/text",
-         stateParser: "./util/PVSioStateParser"
-     }
+     paths: { d3: "../lib/d3", text: "../lib/text" }
  });
  require(["widgets/core/BasicDisplayEVO"], function (BasicDisplayEVO) {
       "use strict";
-      var device = {};
-      device.btnOk = new BasicDisplayEVO("btnOk", {
+      var disp = new BasicDisplayEVO("disp", {
         top: 200, left: 120, height: 24, width: 120
       }, {
-        softLabel: "Ok",
         fontColor: "black",
-        backgroundColor: "blue",
         fontsize: 16,
-        callback: function (err, data) { console.log("Ok button clicked"); console.log(data); }
+        backgroundColor: "blue"
       });
-     device.btnOk.render(); // The touchscreen button is rendered.
+      disp.render("Hello World!"); // The display shows Hello World!
  });
  *
  */
