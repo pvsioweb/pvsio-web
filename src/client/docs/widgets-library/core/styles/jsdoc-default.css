@@ -139,6 +139,7 @@ nav li {
 footer {
     display: block;
     padding: 6px;
+    padding-left: 26px;
     margin-top: 12px;
     font-style: italic;
     font-size: 90%;
@@ -178,6 +179,11 @@ h4
     letter-spacing: -0.33px;
     margin-bottom: 12px;
     color: #4d4e53;
+margin-top: 40px;
+border-top: solid;
+padding: 10px;
+background-color: whitesmoke;
+
 }
 
 h5, .container-overview .subsection-title
@@ -287,7 +293,7 @@ tr > th:last-child { border-right: 1px solid #ddd; }
 .prettyprint code
 {
     font-size: 100%;
-    line-height: 18px;
+    line-height: 6px;
     display: block;
     padding: 4px 12px;
     margin: 0;
@@ -312,6 +318,7 @@ tr > th:last-child { border-right: 1px solid #ddd; }
 .prettyprint.linenums ol
 {
   padding-left: 0;
+  line-height: 1em;
 }
 
 .prettyprint.linenums li
