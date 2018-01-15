@@ -1,6 +1,6 @@
 {{#if template_description}}<!-- Basic widget template. Provides a base layer for rendering the visual appearance of the widget -->{{/if}}
 <div id="{{id}}"
-     style="position:absolute; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{zIndex}};"
+     style="position:{{position}}; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{zIndex}};"
      class="{{type}} noselect{{#if blinking}} blink{{/if}}">
     <div id="{{id}}_base"
          style="position:absolute; width:{{width}}px; height:{{height}}px; line-height:{{height}}px; z-index:inherit; {{#each style}} {{@key}}:{{this}};{{/each}}"

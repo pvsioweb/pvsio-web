@@ -50,27 +50,31 @@ define(function (require, exports, module) {
      * @param coords {Object} The four coordinates (top, left, width, height) of the display, specifying
      *        the left, top corner, and the width and height of the (rectangular) widget area.
      *        Default is { top: 0, left: 0, width: 32, height: 20 }.
-     * @param opt {Object} Options:
+     * @param opt {Object} Style options defining the visual appearance of the widget.
+     *                     Options can be given either as standard html style attributes or using the following widget attributes:
      *          <li>blinking (bool): whether the button is blinking (default is false, i.e., does not blink)</li>
      *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
      *          <li>backgroundColor (String): background display color (default is black, "transparent")</li>
      *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
+     *          <li>borderRadius (Number|String): border radius, must be a number or a valid HTML5 border radius, e.g., 2, "2px", etc. (default is 0, i.e., square border)</li>
      *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
      *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
-     *          <li>displayKey (String): name of the state attribute defining the button label. Default is the ID of the widget.</li>
      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
      *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
      *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
      *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is opaque)</li>
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
-     *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
+     *          <li>position (String): standard HTML position attribute indicating the position of the widget with respect to the parent, e.g., "relative", "absolute" (default is "absolute")</li>
+     *          <li>visibleWhen (String): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
      *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
+     *                  The following additional attribute links the display widget to a specific state attribute of a model:
+     *          <li>displayKey (String): name of the state attribute defining the display content. Default is the ID of the widget.</li>
      * @memberof module:BasicDisplayEVO
      * @instance
      */
      function BasicDisplayEVO(id, coords, opt) {
          coords = coords || {};
-         opt = opt || {};
+         opt = this.normaliseOptions(opt);
          // set widget type & display key
          this.type = this.type || "BasicDisplayEVO";
          this.displayKey = (typeof opt.displayKey === "string") ? opt.displayKey : id;
@@ -78,9 +82,10 @@ define(function (require, exports, module) {
          // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
          opt.backgroundColor = opt.backgroundColor || "black";
          opt.cursor = opt.cursor || "default";
+         opt.overflow = "hidden";
 
          // invoke WidgetEVO constructor to create the widget
-         WidgetEVO.apply(this, arguments);
+         WidgetEVO.apply(this, [ id, coords, opt ]);
          return this;
      }
      BasicDisplayEVO.prototype = Object.create(WidgetEVO.prototype);
@@ -91,10 +96,13 @@ define(function (require, exports, module) {
       * @function <a name="render">render</a>
       * @description Rendering function for button widgets.
       * @param state {Object} JSON object with the current value of the state attributes of the modelled system
-      * @param opt {Object} Attributes characterising the visual appearance of the widget:
+      * @param opt {Object} Style options overriding the style attributes used when the widget was created.
+      *                     The override style options are temporary, i.e., they are applied only for the present invocation of the render method.
+      *                     Available options are either html style attributes or the following widget attributes:
       *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
       *          <li>backgroundColor (String): background display color (default is black, "transparent")</li>
       *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
+      *          <li>borderRadius (Number|String): border radius, must be a number or a valid HTML5 border radius, e.g., 2, "2px", etc. (default is 0, i.e., square border)</li>
       *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
       *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
       *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
@@ -106,10 +114,24 @@ define(function (require, exports, module) {
       * @instance
       */
      BasicDisplayEVO.prototype.render = function (state, opt) {
+         // set style
+         opt = this.normaliseOptions(opt);
+         opt["background-color"] = opt.backgroundColor || this.style["background-color"];
+         opt["font-size"] = (opt.fontSize || this.style["font-size"]) + "pt";
+         opt["font-family"] = opt.fontFamily || this.style["font-family"];
+         opt.color = opt.fontColor || this.style.color;
+         opt["text-align"] = opt.align || this.style["text-align"];
+         opt["border-width"] = (opt.borderWidth) ? opt.borderWidth + "px" : this.style["border-width"];
+         opt["border-style"] = opt.borderStyle || this.style["border-style"];
+         opt["border-radius"] = (isNaN(parseFloat(opt.borderRadius))) ? this.style["border-radius"] : opt.borderRadius;
+         opt["border-color"] = opt.borderColor || this.style["border-color"];
          this.setStyle(opt);
-         if (typeof state !== "object") {
+
+         // render content
+         state = state || "";
+         if (typeof state === "string") {
              this.base.text(state);
-         } else if (this.displayKey !== "" && this.evalViz(state)) {
+         } else if (typeof state === "object" && this.displayKey !== "" && this.evalViz(state)) {
              this.base.text(this.evaluate(this.displayKey, state));
          }
          this.reveal();

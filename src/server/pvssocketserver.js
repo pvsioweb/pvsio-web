@@ -49,6 +49,7 @@ function run() {
         serverFuncs				= require("./serverFunctions"),
         baseProjectDir          = path.join(__dirname, "../../examples/projects/"),
         baseDemosDir			= path.join(__dirname, "../../examples/demos/"),
+        baseTutorialsDir			= path.join(__dirname, "../../examples/tutorials/"),
         baseExamplesDir         = path.join(__dirname, "../../examples/"),
         clientDir				= path.join(__dirname, "../client");
     var clientid = 0, WebSocketServer = ws.Server;
@@ -150,6 +151,7 @@ function run() {
     //create the express static server serve contents in the client directory and the demos directory
     webserver.use(express.static(clientDir));
     webserver.use("/demos", express.static(baseDemosDir));
+    webserver.use("/tutorials", express.static(baseTutorialsDir));
     webserver.use("/projects", express.static(baseProjectDir));
     //creating a pathname prefix for client so that demo css and scripts can be loaded from the client dir
     webserver.use("/client", express.static(clientDir));
@@ -550,6 +552,34 @@ function run() {
                     };
                     processCallback(res, socket);
                 });
+            },
+            "ping": function (token, socket, socketid) {
+                setTimeout(function () {
+                    initProcessMap(socketid);
+                    console.log("..sending pong response..");
+                    var res = {
+                        id: token.id,
+                        data: ["<pong>"],
+                        socketId: socketid,
+                        type: "pong",
+                        time: token.time
+                    };
+                    processCallback(res, socket);
+                }, 500);
+            },
+            "pong": function (token, socket, socketid) {
+                setTimeout(function () {
+                    initProcessMap(socketid);
+                    console.log("..sending ping response..");
+                    var res = {
+                        id: token.id,
+                        data: ["<ping>"],
+                        socketId: socketid,
+                        type: "ping",
+                        time: token.time
+                    };
+                    processCallback(res, socket);
+                }, 500);
             },
             "startProcess": function (token, socket, socketid) {
                 initProcessMap(socketid);
@@ -1023,7 +1053,8 @@ function run() {
         socket.on("message", function (m) {
             try {
                 var token = JSON.parse(m);
-                token.time.server = {received: new Date().getTime()};
+                token.time = token.time || {};
+                token.time.server = { received: new Date().getTime() };
                 var f = functionMaps[token.type];
                 if (f && typeof f === 'function') {
                     //call the function with token and socket as parameter
@@ -1033,7 +1064,7 @@ function run() {
                 }
             } catch (error) {
                 logger.error(error.message);
-                logger.warn("Unexpected error while processing token " + JSON.stringify(m));
+                logger.warn("Error while parsing token " + JSON.stringify(m).replace(/\\/g,""));
             }
         });
 

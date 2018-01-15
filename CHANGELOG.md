@@ -1,12 +1,13 @@
 Changelog
 ==========
-2.3.0 (Dec 2017)
+2.3.0 (Dec 2017 / Jan 2018)
 ---------------
+    Added tutorials for PVSio-web APIs (see http://www.pvsioweb.org/tutorials)
     Added new widgets libraries: core, media
     Added new demo: Medicaltech MT32-evo
     Added new code generator: JavaScript
     Added new Playback Player APIs for creating training material
-    Added online documentation for widgets APIs (see http://localhost:8082/docs/widgets-library)
+    Added online documentation for widgets APIs (see http://www.pvsioweb.org/docs/widgets-library)
 
 2.2.0 (June 2017)
 ---------------

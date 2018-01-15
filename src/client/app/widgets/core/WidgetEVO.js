@@ -15,35 +15,87 @@ define(function (require, exports, module) {
         widget_template = require("text!widgets/templates/generic_widget_template.handlebars");
     const MAX_COORDINATES_ACCURACY = 3; // max 3 decimal digits for coordinates
 
+    const normalised = {
+        backgroundcolor: "backgroundColor",
+        fontsize: "fontSize",
+        fontfamily: "fontFamily",
+        fontcolor: "fontColor",
+        borderwidth: "borderWidth",
+        borderstyle: "borderStyle",
+        borderradius: "borderRadius",
+        bordercolor: "borderColor",
+        zindex: "zIndex"
+    };
+    function normalise_options(data) {
+        var opt = {};
+        if (data) {
+            let norm_key = null;
+            for (let key in data) {
+                norm_key = normalised[key] || key;
+                opt[norm_key] = data[key];
+            }
+        }
+        return opt;
+    }
+    const html_attributes = {
+        backgroundColor: "background-color",
+        backgroundcolor: "background-color",
+        fontSize: "font-size",
+        fontsize: "font-size",
+        fontFamily: "font-family",
+        fontfamily: "font-family",
+        fontColor: "color",
+        fontcolor: "color",
+        align: "text-align",
+        borderWidth: "border-width",
+        borderwidth: "border-width",
+        borderStyle: "border-style",
+        borderstyle: "border-style",
+        borderRadius: "border-radius",
+        borderradius: "border-radius",
+        borderColor: "border-color",
+        bordercolor: "border-color",
+        zIndex: "z-index"
+    };
+    function normalise_style(data) {
+        var style = {};
+        if (data) {
+            data = normalise_options(data);
+            let html_key = null;
+            for (let key in data) {
+                html_key = html_attributes[key] || key;
+                style[html_key] = data[key];
+            }
+        }
+        return style;
+    }
+
     /**
      * @function <a name="ButtonEVO">ButtonEVO</a>
      * @description Constructor.
      * @param id {String} The ID of the touchscreen button.
      * @param coords {Object} The four coordinates (top, left, width, height) of the display, specifying
      *        the left, top corner, and the width and height of the (rectangular) widget.
-     * @param opt {Object} Options:
+     * @param opt {Object} Style options defining the visual appearance of the widget.
+     *                     Options can be given either as standard html style attributes or using the following widget attributes:
      *          <li>blinking (bool): whether the button is blinking (default is false, i.e., does not blink)</li>
      *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
      *          <li>backgroundColor (String): background display color (default is "transparent")</li>
      *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
+     *          <li>borderRadius (Number|String): border radius, must be a number or a valid HTML5 border radius, e.g., 2, "2px", etc. (default is 0, i.e., square border)</li>
      *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
      *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
      *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
      *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
-     *          <li>functionText (String): defines the action names associated with the widget.
-     *                                     The indicated name is prefixed with the string indicated in opt.evts.</li>
-     *          <li>keyCode (Number): binds the widget to keyboard keyCodes. Use e.g., http://keycode.info/, to see keyCodes</li>
      *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is 0.9, i.e., semi-opaque)</li>
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
-     *          <li>pushButton (Bool): if true, the visual aspect of the button resembles a push button, i.e., the button remains selected after clicking the button</li>
-     *          <li>softLabel (String): the button label (default is blank).
-     *          <li>toggleButton (Bool): if true, the visual aspect of the button resembles a toggle button, i.e., the button remains selected after clicking the button</li>
-     *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
+     *          <li>position (String): standard HTML position attribute indicating the position of the widget with respect to the parent, e.g., "relative", "absolute" (default is "absolute")</li>
+     *          <li>visibleWhen (String): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
      *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
      */
     function WidgetEVO(id, coords, opt) {
-        opt = opt || {};
+        opt = normalise_options(opt);
         this.id = id;
         this.parent = (opt.parent) ? ("#" + opt.parent) : "body";
         this.top = coords.top || 0;
@@ -55,6 +107,7 @@ define(function (require, exports, module) {
         this.opacity = (isNaN(parseFloat(opt.opacity))) ? 0.9 : opt.opacity;
         this.visibleWhen = opt.visibleWhen || "true"; // default: always enabled/visible
         this.widget = true; // this flag can be used to identify whether an object is a widget
+        this.position = opt.position || "absolute";
 
         // visual style
         opt.borderRadius = (opt.borderRadius) ?
@@ -64,16 +117,17 @@ define(function (require, exports, module) {
         opt.borderWidth = (!isNaN(parseFloat(opt.borderWidth))) ? opt.borderWidth : (opt.borderColor) ? 2 : 0;
         this.style = this.style || {};
         this.style["background-color"] = opt.backgroundColor || "transparent";
-        this.style["font-size"] = (opt.fontSize || opt.fontsize || (this.height - opt.borderWidth) / 2) + "pt";
-        this.style["font-family"] = opt.fontFamily || opt.fontfamily || "sans-serif";
-        this.style.color = opt.fontColor || opt.fontcolor || "white";
+        this.style["font-size"] = (opt.fontSize || (this.height - opt.borderWidth) / 2) + "pt";
+        this.style["font-family"] = opt.fontFamily || "sans-serif";
+        this.style.color = opt.fontColor || "white";
         this.style["text-align"] = opt.align || "center";
         this.style["border-width"] = opt.borderWidth + "px";
         this.style["border-style"] = opt.borderStyle;
         this.style["border-radius"] = opt.borderRadius;
         this.style["border-color"] = opt.borderColor || "steelblue";
+        // this.style.overflow = opt.overflow || "hidden";
+        this.style["white-space"] = "nowrap";
         this.style.opacity = this.opacity;
-
         this.cursor = opt.cursor || "default";
 
         this.widget_template = this.widget_template || widget_template;
@@ -140,7 +194,7 @@ define(function (require, exports, module) {
         // console.log(coords);
         if (this.div && this.div.node()) {
             coords = coords || {};
-            opt = opt || {};
+            opt = normalise_options(opt);
             opt.duration = opt.duration || 0;
             opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
             this.top = (isNaN(parseFloat(coords.top))) ? this.top : parseFloat(parseFloat(coords.top).toFixed(MAX_COORDINATES_ACCURACY));
@@ -165,7 +219,7 @@ define(function (require, exports, module) {
     WidgetEVO.prototype.rotate = function (deg, opt) {
         if (this.div && this.div.node()) {
             deg = (isNaN(parseFloat(deg))) ? 0 : parseFloat(deg);
-            opt = opt || {};
+            opt = normalise_options(opt);
             opt.duration = opt.duration || 0;
             opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-in";
             opt.transformOrigin = opt.transformOrigin || "center";
@@ -257,14 +311,28 @@ define(function (require, exports, module) {
     /**
      * @function <a name="setStyle">setStyle</a>
      * @description Sets the font color and background color.
-     * @param style {Object} Set of valid HTML5 attributes characterising the visual appearance of the widget.
+     * @param style {Object} Style attributes characterising the visual appearance of the widget.
+     *                      Attributes can be either standard HTML5 attributes, or the following widgets attributes:
+     *          <li>blinking (bool): whether the button is blinking (default is false, i.e., does not blink)</li>
+     *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
+     *          <li>backgroundColor (String): background display color (default is "transparent")</li>
+     *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
+     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
+     *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
+     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
+     *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
+     *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
+     *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is 0.9, i.e., semi-opaque)</li>
+     *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
      * @memberof module:WidgetEVO
      * @instance
      */
     WidgetEVO.prototype.setStyle = function (style) {
+        style = normalise_style(style);
         for(var key in style) {
             this.base.style(key, style[key]);
         }
+        if (style.blinking) { this.base.classed("blinking", true); }
         return this;
     };
     /**
@@ -287,7 +355,7 @@ define(function (require, exports, module) {
      * @instance
      */
     WidgetEVO.prototype.select = function (opt) {
-        opt = opt || {};
+        opt = normalise_options(opt);
         opt.opacity = (isNaN(parseFloat(opt.opacity))) ? 0.5 : opt.opacity;
         this.setStyle(opt);
         if (opt.overlayColor) { this.overlay.style("background-color", opt.overlayColor); }
@@ -337,6 +405,28 @@ define(function (require, exports, module) {
         return { width: this.width, height: this.height };
     };
 
+    /**
+     * @function <a name="normaliseOptions">normaliseOptions</a>
+     * @description Utility function for normalising options names (e.g., fontsize -> fontSize)
+     * @param opt {Object} Widget options
+     * @return {Object} Normalised options or {} if function argument is null
+     * @memberof module:WidgetEVO
+     * @instance
+     */
+    WidgetEVO.prototype.normaliseOptions = function (opt) {
+        return normalise_options(opt);
+    };
 
+    /**
+     * @function <a name="toHtmlAttributes">toHtmlAttributes</a>
+     * @description Utility function for translating widget style attributes into standard html5 style attributes (e.g., fontSize -> font-size)
+     * @param opt {Object} Style attributes (e.g., { fontSize: 10 })
+     * @return {Object} HTML5 style attributes or {} if funciton argument is null
+     * @memberof module:WidgetEVO
+     * @instance
+     */
+    WidgetEVO.prototype.toHtmlAttributes = function (opt) {
+        return normalise_style(opt);
+    };
     module.exports = WidgetEVO;
 });

@@ -38,7 +38,7 @@ module.exports = function (grunt) {
             }
         },
         jshint: {
-            all: ["src/client/app/**/*.js", "src/client/tests/**/*.js", "src/server/**/*.js", '!src/server/lib/**/*.js', "!src/client/tests/lib/**/*.js"],
+            all: ["src/client/app/**/*.js", "src/client/tests/**/*.js", "src/server/**/*.js", "examples/tutorials/**/*.js", "!examples/tutorials/**/styles/**/*.js", "!src/server/lib/**/*.js", "!src/client/tests/lib/**/*.js"],
             options: {
                 jshintrc: true // search for .jshintrc files relative to the files being linted
             }
