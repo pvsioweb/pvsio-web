@@ -78,7 +78,8 @@ define(function (require, exports, module) {
                     callbackRegistry[id] = cb;
                     ws.send(JSON.stringify(token));
                 } else {
-                    console.log("Token is undefined");
+                    console.error("Token is undefined or malformed");
+                    console.error(token);
                 }
             }
             return o;

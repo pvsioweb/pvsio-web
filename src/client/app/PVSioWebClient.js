@@ -34,7 +34,7 @@ define(function (require, exports, module) {
 		//add listeners for pvs process events
 		ws = pvsws()
 			.serverUrl(url)
-			.addListener('ConnectionOpened', function (e) {
+			.addListener("ConnectionOpened", function (e) {
                 e.type = "WebSocketConnectionOpened";
 				_pvsioweb.isWebSocketConnected(true).fire(e);
 			}).addListener("ConnectionClosed", function (e) {

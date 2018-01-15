@@ -102,22 +102,34 @@ define(function (require, exports, module) {
             @param {callback} cb The function to invoke with the results of performing the passed action on the process
         */
         o.sendGuiAction = function (action, cb) {
-            wscBase.send({type: "sendCommand", data: {command: action}}, function (err, res) {
-                //do stuff to update the explored state graph and invoke the callback with the same parameters
-                wscBase.fire({type: "GraphUpdate", transition: action, target: res.data, source: o.lastState()});
-                //update the lastState if it was a valid pvsio state
-                if (PVSioStateParser.isState(res.data)) {
-                    o.lastState(res.data);
-                } else {
-                    Logger.log("Warning: PVSio was not able to execute " + action);
-                    Logger.log(res.data);
-                    //update res.data with previous valid state
-                    res.data = o.lastState();
-                }
-                if (cb && typeof cb === "function") { cb(err, res); }
-            });
+            if (action === "<ping>" || action === "<pong>") {
+                var type = action.replace(/</,"").replace(/>/,"");
+                wscBase.send({type: type, data: { command: action }}, function (err, res) {
+                    if (cb && typeof cb === "function") {
+                        cb(err, res);
+                    }
+                });
+            } else {
+                wscBase.send({type: "sendCommand", data: {command: action}}, function (err, res) {
+                    //do stuff to update the explored state graph and invoke the callback with the same parameters
+                    wscBase.fire({type: "GraphUpdate", transition: action, target: res.data, source: o.lastState()});
+                    //update the lastState if it was a valid pvsio state
+                    if (PVSioStateParser.isState(res.data)) {
+                        o.lastState(res.data);
+                    } else {
+                        Logger.log("Warning: PVSio was not able to execute " + action);
+                        Logger.log(res.data);
+                        //update res.data with previous valid state
+                        res.data = o.lastState();
+                    }
+                    if (cb && typeof cb === "function") { cb(err, res); }
+                });
+            }
             wscBase.fire({type: "InputUpdated", data: action});
             return o;
+        };
+        o.send = function (action, cb) {
+            return o.sendGuiAction(action, cb);
         };
         /**
             Gets the content of the file passed in the parameter

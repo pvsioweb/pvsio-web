@@ -3,7 +3,7 @@
       - a base layer renders the visual appearance
       - an overlay layer captures user interactions with the widget -->{{/if}}
 <div id="{{id}}"
-     style="position:absolute; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{zIndex}};"
+     style="position:{{position}}; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{zIndex}};"
      class="{{type}} noselect{{#if blinking}} blink{{/if}}">
     <div id="{{id}}_base"
          style="position:absolute; margin:-1px; width:{{width}}px; height:{{height}}px; line-height:{{height}}px; {{#each style}} {{@key}}:{{this}};{{/each}}"

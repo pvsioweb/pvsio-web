@@ -64,30 +64,33 @@ define(function (require, exports, module) {
      *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
      *          <li>backgroundColor (String): background display color (default is transparent)</li>
      *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
+     *          <li>borderRadius (Number|String): border radius, must be a number or a valid HTML5 border radius, e.g., 2, "2px", etc. (default is 0, i.e., square border)</li>
      *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
      *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
      *          <li>buttonReadback (String): playback text reproduced with synthesised voice wheneven an action is performed with the button.</li>
-     *          <li>customFunctionText (String): overrides the standard action name associated with click events.</li>
+     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
+     *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
+     *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
+     *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is opaque)</li>
+     *          <li>overlayColor (String): color of the semi-transparent overlay layer used indicating mouse over button, button pressed, etc (default is steelblue)</li>
+     *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
+     *          <li>position (String): standard HTML position attribute indicating the position of the widget with respect to the parent, e.g., "relative", "absolute" (default is "absolute")</li>
+     *          <li>pushButton (Bool): if true, the visual aspect of the button resembles a push button, i.e., the button remains selected after clicking the button</li>
+     *          <li>softLabel (String): the button label (default is blank).</li>
+     *          <li>dblclick_timeout (Number): timeout, in milliseconds, for detecting double clicks (default is 350ms)</li>
+     *          <li>toggleButton (Bool): if true, the visual aspect of the button resembles a toggle button, i.e., the button remains selected after clicking the button</li>
+     *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
+     *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
+     *                  The following additional attributes define which events are triggered when the button is activated:
      *          <li>evts (String|Array[String]): actions associated to the widget. Can be either "click", or "press/release" (default is "click").
      *                             Actions can be specified either as a string and using an array of strings (this is useful for backwards compatibility with old prototypes)
      *                             The function associated with the widget is given by the widget name prefixed with the action name.
      *                             In the case of "press/release", the widget is associated to two functions: press_<id> and release_<id>.</li>
-     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
-     *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
-     *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
+     *          <li>customFunctionText (String): overrides the standard action name associated with click events.</li>
      *          <li>functionText (String): defines the action names associated with the widget.
      *                                     The indicated name is prefixed with the string indicated in opt.evts.</li>
      *          <li>keyCode (Number): binds the widget to keyboard keyCodes. Use e.g., http://keycode.info/, to see keyCodes</li>
-     *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is opaque)</li>
-     *          <li>overlayColor (String): color of the semi-transparent overlay layer used indicating mouse over button, button pressed, etc (default is steelblue)</li>
-     *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
-     *          <li>pushButton (Bool): if true, the visual aspect of the button resembles a push button, i.e., the button remains selected after clicking the button</li>
-     *          <li>rate (Number): interval, in milliseconds, for repeating button clicks when the button is pressed and held down (default is 250ms)
-     *          <li>softLabel (String): the button label (default is blank).
-     *          <li>dblclick_timeout (Number): timeout, in milliseconds, for detecting double clicks (default is 350ms)
-     *          <li>toggleButton (Bool): if true, the visual aspect of the button resembles a toggle button, i.e., the button remains selected after clicking the button</li>
-     *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
-     *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
+     *          <li>rate (Number): interval, in milliseconds, for repeating button clicks when the button is pressed and held down (default is 250ms)</li>
      * @memberof module:ButtonEVO
      * @instance
      */
@@ -101,12 +104,12 @@ define(function (require, exports, module) {
          // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
          opt.backgroundColor = opt.backgroundColor || "transparent";
          opt.cursor = opt.cursor || "pointer";
-         opt.zIndex = opt.zIndex || 1; // z-index for buttons should be at least 1
+         opt.zIndex = opt.zIndex || 1; // z-index for buttons should be at least 1, so they can be placed over display widgets
          this.style = this.style || {};
          this.style["overlay-color"] = opt.overlayColor || "steelblue";
 
          // invoke WidgetEVO constructor to create the widget
-         WidgetEVO.apply(this, arguments);
+         WidgetEVO.apply(this, [ id, coords, opt ]);
 
          // add button-specific functionalities
          this.buttonReadback = opt.buttonReadback || "";
@@ -226,16 +229,31 @@ define(function (require, exports, module) {
          opt.functionText = opt.customFunctionText || _this.customFunctionText || (evt + "_" + _this.functionText);
          ButtonActionsQueue.queueGUIAction(opt.functionText, opt.callback);
          _this.deselect();
+         console.log(opt.functionText);
      }
 
      /**
       * @function <a name="render">render</a>
       * @description Rendering function for button widgets.
+      * @param state {Object|String} Information to be rendered
+      * @param opt {Object} Style options overriding the style attributes used when the widget was created.
+      *                     The override style options are temporary, i.e., they are applied only for the present invocation of the render method.
+      *                     Available options are either html style attributes or the following widget attributes:
+      *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
+      *          <li>backgroundColor (String): background display color (default is black, "transparent")</li>
+      *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
+      *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
+      *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
+      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
+      *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
+      *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
+      *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is opaque)</li>
+      *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
       * @memberof module:ButtonEVO
       * @instance
       */
-     ButtonEVO.prototype.render = function (res) {
-         if (this.evalViz(res)) {
+     ButtonEVO.prototype.render = function (state) {
+         if (this.evalViz(state)) {
              this.base.text(this.softLabel);
              this.reveal();
          }

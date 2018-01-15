@@ -3,10 +3,9 @@
  */
 define(function (require, exports, module) {
 
-    var guiActions,
-        instance;
+    var guiActions, instance;
 
-    var WSManager               = require("websockets/pvs/WSManager");
+    var WSManager = require("websockets/pvs/WSManager");
 
     function ButtonActionsQueue() {
         guiActions = Promise.resolve();
@@ -19,6 +18,7 @@ define(function (require, exports, module) {
             ws.sendGuiAction(action, function (err, res) {
                 cb(err, res);
                 if (err) {
+                    console.error(err);
                     reject(err);
                 } else {
                     resolve(res);
@@ -36,16 +36,23 @@ define(function (require, exports, module) {
     ButtonActionsQueue.prototype.queueGUIAction = function (action, cb) {
         var ws = WSManager.getWebSocket();
         guiActions = guiActions.then(function (res) {
-            var guiAction = action + "(" + ws.lastState().toString().replace(/,,/g, ",") + ");";
+            var guiAction = action;
+            if (action !== "<ping>" && action !== "<pong>") {
+                guiAction += "(" + ws.lastState().toString().replace(/,,/g, ",") + ");";
+            }
             var guiActionPromise = getGUIActionPromise(guiAction, cb);
             return guiActionPromise;
         }).catch(function (err) {
-            console.log(err);
+            console.error(err);
         });
     };
 
     ButtonActionsQueue.prototype.sendINIT = function (cb) {
         return this.queueGUIAction("", cb);
+    };
+
+    ButtonActionsQueue.prototype.send = function (action, cb) {
+        return this.queueGUIAction(action, cb);
     };
 
     module.exports = {
