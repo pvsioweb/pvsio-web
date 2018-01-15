@@ -1,7 +1,7 @@
 /**
  * @module BasicDisplayEVO
  * @version 1.0
- * @description Renders a digita display for rendering text.
+ * @description Renders a digital display for rendering text.
  *              This module provide APIs for setting up the visual appearance of the widget, e.g., font size and color.
  * @author Paolo Masci
  * @date Dec 11, 2017
