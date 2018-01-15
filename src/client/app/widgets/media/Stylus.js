@@ -34,6 +34,7 @@
 define(function (require, exports, module) {
     "use strict";
     var WidgetEVO = require("widgets/core/WidgetEVO"),
+        stylus = require("text!widgets/media/imgs/stylus_white.svg"),
         img_template = require("text!widgets/media/templates/img_template.handlebars");
 
     /**
@@ -75,11 +76,11 @@ define(function (require, exports, module) {
          opt.opacity = opt.opacity || 1;
 
          // invoke WidgetEVO constructor to create the widget
-         WidgetEVO.apply(this, arguments);
+         WidgetEVO.apply(this, [ id, coords, opt ]);
 
          // append the pointer image to the base layer
          var dom = Handlebars.compile(img_template, { noEscape: true })({
-             src: "stylus-white.png" //FIXME -- convert image into an svg
+             svg: stylus
          });
          this.base.html(dom);
          return this;

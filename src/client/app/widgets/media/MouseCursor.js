@@ -34,6 +34,7 @@
 define(function (require, exports, module) {
     "use strict";
     var WidgetEVO = require("widgets/core/WidgetEVO"),
+        mouse = require("text!widgets/media/imgs/mouse_cursor.svg"),
         img_template = require("text!widgets/media/templates/img_template.handlebars");
 
     /**
@@ -64,11 +65,11 @@ define(function (require, exports, module) {
          opt.opacity = opt.opacity || 0.9;
 
          // invoke WidgetEVO constructor to create the widget
-         WidgetEVO.apply(this, arguments);
+         WidgetEVO.apply(this, [ id, coords, opt ]);
 
          // append the pointer image to the base layer
          var dom = Handlebars.compile(img_template, { noEscape: true })({
-             src: "cursor_icon.png" //FIXME -- convert image into an svg
+             svg: mouse
          });
          this.base.html(dom);
          return this;
