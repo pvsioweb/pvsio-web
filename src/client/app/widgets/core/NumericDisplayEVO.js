@@ -1,7 +1,7 @@
 /**
  * @module NumericDisplayEVO
  * @version 1.0
- * @description Renders a Numeric Display with a cursor that can be used to highlight digitis.
+ * @description Renders a Numeric Display with a cursor that can be used to highlight digits.
                 Digits can be either numeric or alphanumeric characters.
                 The visibility of the decimal point is enhanced by making it bigger and aligned towards the middle of the line height.
                 The font of integer digits is slightly bigger than that of fractional digits.
