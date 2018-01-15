@@ -115,7 +115,7 @@ require([ "widgets/core/BasicDisplayEVO" ], function (BasicDisplay) {
     &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 
-    To execute the prototype, start the PVSio-web back-end, and then open a web browser at the following page: <a href="http://localhost:8082/tutorials/HelloWorld" target=_blank>http://localhost:8082/tutorials/HelloWorld</a><br>
+    To execute the prototype, start the PVSio-web back-end, and then open a web browser at the following page: <a href="http://www.pvsioweb.org/tutorials/HelloWorld" target=_blank>http://www.pvsioweb.org/tutorials/HelloWorld</a><br>
     The output rendered in the browser is as follows:<br>
     <img src="final-prototype.png" style="width:200px;"><br>
 
@@ -128,7 +128,7 @@ require([ "widgets/core/BasicDisplayEVO" ], function (BasicDisplay) {
     <img src="dev-tools.png">
 
     <h4 style="margin-top:34px;margin-bottom:4px;font-weight:bold;">Coming next...</h4>
-    In the next tutorial (Toggle), you will learn how to make the prototype responsive to user actions.
+    In the next tutorial (<a href="../../Toggle/docs/index.html">Toggle</a>), you will learn how to make the prototype responsive to user actions.
  *
  */
 /* jslint esnext:true */
