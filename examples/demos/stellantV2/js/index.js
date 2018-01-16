@@ -450,7 +450,8 @@ require([
         }, {
             parent: "stellant_console_base",
             label: "ACC",
-            evts: ["press/release"],
+            // evts: ["press/release"],
+            evts: ["click"],
             callback: onMessageReceived,
             backgroundColor: "transparent"
         });
