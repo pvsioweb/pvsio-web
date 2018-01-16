@@ -797,6 +797,22 @@ main: THEORY
      ELSE -> st
    ENDCOND
 
+  %-- quick workaround for Andre's demo
+  click_btn_ACC(st: state): state =
+   COND
+     %-- ON
+     mode(st) = OFF ->
+       LET st = st WITH [ console_screen := CONSOLE_SECURITY, console_LED_ACC := GREEN, console_btn_ACC := IDLE ]
+        IN click_btn_on(st),
+     %-- OFF
+     mode(st) /= OFF AND console_screen(st) /= CONSOLE_SECURITY AND mode(st) /= INFUSING ->
+       init(0) WITH [
+         injector_rotated := injector_rotated(st)
+       ],
+     ELSE -> st
+   ENDCOND   
+
+
   per_click_btn_confirm_security(st: state): bool = (console_screen(st) = CONSOLE_SECURITY AND mode(st) = INIT)
   click_btn_confirm_security(st: (per_click_btn_confirm_security)): state =
    COND
