@@ -134,7 +134,7 @@ define(function (require, exports, module) {
         var res = Handlebars.compile(this.widget_template, { noEscape: true })(this);
         if (!d3.select(this.parent).node()) { console.error("Error: " + this.parent + " does not exist. Widget '" + id + "' cannot be attached to DOM :(("); }
 
-        d3.select(this.parent).append("div").html(res);
+        d3.select(this.parent).append("div").style("height", "0px").style("width", "0px").html(res);
         this.div = d3.select("#" + this.id);
         this.base = d3.select("#" + this.id + "_base");
         this.overlay = d3.select("#" + this.id + "_overlay");
@@ -161,7 +161,8 @@ define(function (require, exports, module) {
      * @instance
      */
     WidgetEVO.prototype.reveal = function () {
-        if (this.div && this.div.node()) {
+        if (this.div && !this.div.empty()) {
+            console.log("revealing button " + this.id);
             this.div.style("display", "block");
         }
         return this;
@@ -174,7 +175,8 @@ define(function (require, exports, module) {
      * @instance
      */
     WidgetEVO.prototype.hide = function () {
-        if (this.div && this.div.node()) {
+        if (this.div && !this.div.empty()) {
+            console.log("hiding button " + this.id);
             this.div.style("display", "none");
         }
         return this;
@@ -365,7 +367,7 @@ define(function (require, exports, module) {
         this.div.style("border", "solid 2px");
         this.div.style("border-radius", this.style["border-radius"]);
         this.div.style("border-color", borderColor);
-        return this.reveal();
+        return this;
     };
 
     /**
@@ -380,7 +382,7 @@ define(function (require, exports, module) {
         this.div.style("border-color", "");
         this.overlay.style("background-color", this.style["overlay-color"]);
         this.setStyle(this.style);
-        return this.reveal();
+        return this;
     };
 
     /**
