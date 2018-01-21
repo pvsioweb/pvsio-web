@@ -282,8 +282,8 @@ tr > th:last-child { border-right: 1px solid #ddd; }
 .prettyprint
 {
     border: 1px solid #ddd;
-    width: 80%;
     overflow: auto;
+    font-size: 12px;
 }
 
 .prettyprint.source {
