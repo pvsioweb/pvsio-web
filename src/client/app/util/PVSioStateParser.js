@@ -39,15 +39,18 @@ define(function (require, exports, module) {
         @return {String} Value of the
     */
     function evaluate(str) {
-        if (typeof str === "string") {
-            str = str.trim();
-            var args = str.split("/");
-            if (args.length === 2 && !isNaN(+args[0]) && !isNaN(+args[1])) {
-                return (+args[0] / +args[1]).toString();
+        if (str) {
+            if (typeof str === "string") {
+                str = str.trim();
+                var args = str.split("/");
+                if (args.length === 2 && !isNaN(+args[0]) && !isNaN(+args[1])) {
+                    return (+args[0] / +args[1]).toString();
+                }
+                return str;
             }
-            return str;
+            return str.toString().trim();
         }
-        return str.toString().trim();
+        return str;
     }
 
     /**

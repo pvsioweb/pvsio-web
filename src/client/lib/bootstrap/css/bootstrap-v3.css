@@ -6761,9 +6761,9 @@ button.close {
 }
 
 .btn-outline-primary:hover {
-  color: #fff;
+  /*color: #fff;
   background-color: #0275d8;
-  border-color: #0275d8;
+  border-color: #0275d8;*/
 }
 
 .btn-outline-primary:focus, .btn-outline-primary.focus {
@@ -6784,16 +6784,16 @@ button.close {
 }
 
 .btn-outline-secondary {
-  color: #ccc;
+  color: gray;
   background-image: none;
   background-color: transparent;
-  border-color: #ccc;
+  border-color: gray;
 }
 
 .btn-outline-secondary:hover {
-  color: #fff;
+  /*color: #fff;
   background-color: #ccc;
-  border-color: #ccc;
+  border-color: #ccc;*/
 }
 
 .btn-outline-secondary:focus, .btn-outline-secondary.focus {
@@ -6809,8 +6809,8 @@ button.close {
 .btn-outline-secondary:active, .btn-outline-secondary.active,
 .show > .btn-outline-secondary.dropdown-toggle {
   color: #fff;
-  background-color: #ccc;
-  border-color: #ccc;
+  background-color: gray;
+  border-color: gray;
 }
 
 .btn-outline-info {
@@ -6821,9 +6821,9 @@ button.close {
 }
 
 .btn-outline-info:hover {
-  color: #fff;
+  /*color: #fff;
   background-color: #5bc0de;
-  border-color: #5bc0de;
+  border-color: #5bc0de;*/
 }
 
 .btn-outline-info:focus, .btn-outline-info.focus {
@@ -6851,9 +6851,10 @@ button.close {
 }
 
 .btn-outline-success:hover {
-  color: #fff;
+  /*color: #fff;
   background-color: #5cb85c;
-  border-color: #5cb85c;
+  border-color: #5cb85c;*/
+  /*border: 2px solid #5cb85c;*/
 }
 
 .btn-outline-success:focus, .btn-outline-success.focus {
@@ -6881,9 +6882,10 @@ button.close {
 }
 
 .btn-outline-warning:hover {
-  color: #fff;
+  /*color: #fff;
   background-color: #f0ad4e;
-  border-color: #f0ad4e;
+  border-color: #f0ad4e;*/
+  /*border: 2px solid #f0ad4e;*/
 }
 
 .btn-outline-warning:focus, .btn-outline-warning.focus {
@@ -6911,9 +6913,10 @@ button.close {
 }
 
 .btn-outline-danger:hover {
-  color: #fff;
+  /*color: #fff;
   background-color: #d9534f;
-  border-color: #d9534f;
+  border-color: #d9534f;*/
+  /*border: 2px solid #d9534f;*/
 }
 
 .btn-outline-danger:focus, .btn-outline-danger.focus {
