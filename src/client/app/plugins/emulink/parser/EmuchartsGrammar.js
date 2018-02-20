@@ -110,7 +110,8 @@ define(function (require, exports, module) {
             lex: {
                 rules: [
                     ["\\s+", "/* skip whitespace */", "whitespace"],
-                    ["([a-zA-Z][a-zA-Z0-9_]*)", "return 'IDENTIFIER'", "identifier"],
+                    ["\\b(?!(AND|and|OR|or|TRUE|true|FALSE|false|IMPLIES|implies|NOT|not)\\b)" + // filters out AND/and/OR/or/TRUE/true/FALSE/false/IMPLIES/implies/NOT/not
+                        "([a-zA-Z][a-zA-Z0-9_]*)", "return 'IDENTIFIER'", "identifier"],
                     ["[0-9]+(?:\\.[0-9]+)?\\b", "return 'NUMBER'", "number"],
                     ['\\"([^\\"]+)\\"',         "return 'STRING'", "string"], // anything but double quotes
                     ["\\*",                     "return '*'"],
@@ -132,9 +133,9 @@ define(function (require, exports, module) {
                     ["(?!(?:(implies[a-zA-Z0-9_]|IMPLIES[a-zA-Z0-9_])))" + // filtering out identifiers starting with IMPLIES/implies
                         "(IMPLIES|implies|(\\=\\>))", "return 'IMPLIES'"],
                     ["(?!(?:(and[a-zA-Z0-9_]|AND[a-zA-Z0-9_])))" + // filtering out identifiers starting with AND/and
-                        "(AND|&&)",                "return 'AND'"],
+                        "(AND|and|&&|&)",                "return 'AND'"],
                     ["(?!(?:(or[a-zA-Z0-9_]|OR[a-zA-Z0-9_])))" + // filtering out identifiers starting with OR/or
-                        "(OR|\\|\\|)",             "return 'OR'"],
+                        "(OR|or|\\|\\|)",             "return 'OR'"],
                     ["(?!(?:(true[a-zA-Z0-9_]|TRUE[a-zA-Z0-9_])))" + // filtering out identifiers starting with TRUE/true
                         "(TRUE|true)",             "return 'TRUE'"],
                     ["(?!(?:(false[a-zA-Z0-9_]|FALSE[a-zA-Z0-9_])))" + // filtering out identifiers starting with TRUE/true
@@ -196,6 +197,7 @@ define(function (require, exports, module) {
                     ["id", "$$ = [$1]"]
                 ],
                 arith_e:  [
+                    ["( arith_e )", exprWithParenthesis()],
                     ["arith_e + arith_e", exprWithBinaryOp()],
                     ["arith_e - arith_e", exprWithBinaryOp()],
                     ["arith_e * arith_e", exprWithBinaryOp()],
@@ -246,7 +248,8 @@ define(function (require, exports, module) {
             lex: {
                 rules: [
                     ["\\s+", "/* skip whitespace */", "whitespace"],
-                    ["([a-zA-Z][a-zA-Z0-9_]*)", "return 'IDENTIFIER'", "identifier"],
+                    ["\\b(?!(AND|and|OR|or|TRUE|true|FALSE|false|IMPLIES|implies|NOT|not)\\b)" + // filters out AND/and/OR/or/TRUE/true/FALSE/false/IMPLIES/implies/NOT/not
+                        "([a-zA-Z][a-zA-Z0-9_]*)", "return 'IDENTIFIER'", "identifier"],
                     ["[0-9]+(?:\\.[0-9]+)?\\b", "return 'NUMBER'", "number"],
                     ['\\"([^\\"]+)\\"',         "return 'STRING'", "string"], // anything but double quotes
                     ["\\*",                     "return '*'"],
@@ -269,9 +272,9 @@ define(function (require, exports, module) {
                     ["(?!(?:(implies[a-zA-Z0-9_]|IMPLIES[a-zA-Z0-9_])))" + // filtering out identifiers starting with IMPLIES/implies
                         "(IMPLIES|implies|(\\=\\>))", "return 'IMPLIES'"],
                     ["(?!(?:(and[a-zA-Z0-9_]|AND[a-zA-Z0-9_])))" + // filtering out identifiers starting with AND/and
-                        "(AND|&&)",                "return 'AND'"],
+                        "(AND|and|&&|&)",                "return 'AND'"],
                     ["(?!(?:(or[a-zA-Z0-9_]|OR[a-zA-Z0-9_])))" + // filtering out identifiers starting with OR/or
-                        "(OR|\\|\\|)",             "return 'OR'"],
+                        "(OR|or|\\|\\|)",             "return 'OR'"],
                     ["(?!(?:(true[a-zA-Z0-9_]|TRUE[a-zA-Z0-9_])))" + // filtering out identifiers starting with TRUE/true
                         "(TRUE|true)",             "return 'TRUE'"],
                     ["(?!(?:(false[a-zA-Z0-9_]|FALSE[a-zA-Z0-9_])))" + // filtering out identifiers starting with TRUE/true
