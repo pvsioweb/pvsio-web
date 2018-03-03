@@ -476,10 +476,11 @@ define(function (require, exports, module) {
     };
 
     function setVariables (parser, emuchart) {
-        var variables = [ get_current_mode(emuchart) ]
-                .concat(emuchart.variables.map(function (v) { return { name: v.name, type: v.type }; }));
+        var variables = [ get_current_mode(emuchart) ].concat(emuchart.variables.map(function (v) {
+            return { name: v.name, type: v.type };
+        }));
         if (predefined_variables.previous_mode) {
-            variables.concat({ name: predefined_variables.previous_mode.name, type: predefined_variables.previous_mode.type });
+            variables = variables.concat({ name: predefined_variables.previous_mode.name, type: predefined_variables.previous_mode.type });
         }
         parser.setVariables(variables);
     }
