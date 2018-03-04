@@ -17,6 +17,20 @@ define(function (require, exports, module) {
 
     var dbg = false;
 
+    /**
+     * Utility function to generate formatted labels for transitions
+     * @returns labels, as a formatted string
+     * @memberof EmuchartsEditor
+     */
+    var max_label_len = 96;
+    function labelToString(label) {
+        if (label.length > max_label_len) {
+            return label.substring(0, max_label_len) + "...";
+        }
+        return label;
+    }
+
+
     // constants for drawing states
 //    var width  = 900;
 //    var height = 800;
@@ -174,19 +188,6 @@ define(function (require, exports, module) {
         this.d3EventScale = 1;
         this.zoomChart();
     };
-
-
-    /**
-     * Utility function to generate formatted labels for transitions
-     * @returns labels, as a formatted string
-     * @memberof EmuchartsEditor
-     */
-    function labelToString(label) {
-        if (label.length > 64) {
-            return label.substring(0, 64) + "...";
-        }
-        return label;
-    }
 
 
     /**
@@ -528,6 +529,7 @@ define(function (require, exports, module) {
      */
     function refreshTransitions(_this, transitions, opt) {
         opt = opt || {};
+        var prefix = opt.prefix || "";
         transitions = transitions ||
             d3.select(_this.container + " svg").select("#Transitions").selectAll(".transition");
         var label;
@@ -550,32 +552,51 @@ define(function (require, exports, module) {
                     label.attr("x", function (edge) {
                         if (edge.target.id === edge.source.id) {
                             // self-edge
-                            return (edge.controlPoint) ?
-                                    (edge.source.x < edge.controlPoint.x) ? edge.controlPoint.x + 8 : edge.controlPoint.x - 16
-                                    : edge.source.x + 32;
+                            return (edge.controlPoint) ? edge.controlPoint.x + 18 : edge.source.x + 32;
                         }
                         // else do nothing -- textpath will take care of placing the text
-                        return "";
+                        return 0;
                     }).attr("y", function (edge) {
                         if (edge.target.id === edge.source.id) {
                             // self-edge
                             return (edge.controlPoint) ?
-                                    (edge.source.y < edge.controlPoint.y) ? edge.controlPoint.y + 8 : edge.controlPoint.y - 8
+                                    (edge.source.y < edge.controlPoint.y) ? edge.controlPoint.y + 8 : edge.controlPoint.y
                                     : edge.source.y + 56;
                         }
                         // else do nothing -- textpath will take care of placing the text
-                        return "";
+                        return 0;
+                    });
+                    label = d3.select(this.parentNode).select(".tlabel_selection");
+                    // adjust selection label position
+                    label.attr("x", function (edge) {
+                        if (edge.target.id === edge.source.id) {
+                            // self-edge
+                            return (edge.controlPoint) ? edge.controlPoint.x + 18 : edge.source.x + 32;
+                        }
+                        // else do nothing -- textpath will take care of placing the text
+                        return 0;
+                    }).attr("y", function (edge) {
+                        if (edge.target.id === edge.source.id) {
+                            // self-edge
+                            var offsetY = d3.select("#" + prefix + "tlabel_" + edge.id).node().getBoundingClientRect().height;
+                            var posY = (edge.controlPoint) ?
+                                    (edge.source.y < edge.controlPoint.y) ? edge.controlPoint.y + 8 : edge.controlPoint.y
+                                    : edge.source.y + 56;
+                            return posY - offsetY;
+                        }
+                        // else do nothing -- textpath will take care of placing the text
+                        return 0;
                     });
                     // clear the text of the other label
                     d3.select(this.parentNode.lastChild.firstChild).text(function (edge) { return ""; });
                     // refresh color, if needed
                     if (opt.color) {
-                        d3.select(this.parentNode.firstChild).style("stroke", opt.color);
-                        d3.select(this.parentNode.children[3]).style("fill", opt.color);
-                        d3.select(this.parentNode.children[4]).style("fill", opt.color);
+                        d3.select(this.parentNode).select(".path").style("stroke", opt.color);
+                        d3.select(this.parentNode).selectAll(".tlabel").style("fill", opt.color);
                         this.parentNode.firstChild.style.markerStart = this.parentNode.firstChild.style.markerStart.replace("-selected", "");
                         this.parentNode.firstChild.style.markerEnd = this.parentNode.firstChild.style.markerEnd.replace("-selected", "");
                     }
+                    d3.select(this.parentNode).selectAll(".tlabel_selection").style("fill", "transparent");
                     // refresh control points
                     cpoints = d3.select(this.parentNode).select(".cpoints");
                     cpoints.attr("cx", cp[2].x).attr("cy", cp[2].y);
@@ -979,8 +1000,7 @@ define(function (require, exports, module) {
                 this.parentNode.appendChild(this);
               });
             };
-            // FIXME: this is disabled, because in some browsers, including Chrome 58.0.3029.96 (64-bit) event handlers for dblclick get lost
-            //g.moveToFront();
+            g.moveToFront();
         }
     }
 
@@ -1003,9 +1023,9 @@ define(function (require, exports, module) {
                         return "";
                     } else { return "url(#end-arrow-rotated-selected)"; }
                 });
-            d3.select(g.children[2]).attr("opacity", 0.6);
-            d3.select(g.children[3]).style("fill", "green");
-            d3.select(g.children[4]).style("fill", "green");
+            d3.select(g).select(".cpoints").attr("opacity", 0.6);
+            d3.select(g).selectAll(".tlabel").style("fill", "green");
+            d3.select(g).selectAll(".tlabel_selection").style("fill", "transparent");
             var edge = this.emucharts.edges.get(id);
             if (edge && edge.source && edge.target && edge.source.id === edge.target.id) {
                 d3.select(g).select(".tlabel").text(function (edge) {
@@ -1036,9 +1056,9 @@ define(function (require, exports, module) {
                         return "";
                     } else { return "url(#end-arrow-rotated)"; }
                 });
-            d3.select(g.children[2]).attr("opacity", 0);
-            d3.select(g.children[3]).style("fill", "black");
-            d3.select(g.children[4]).style("fill", "black");
+            d3.select(g).select(".cpoints").attr("opacity", 0);
+            d3.select(g).selectAll(".tlabel").style("fill", "black");
+            d3.select(g).selectAll(".tlabel_selection").style("fill", "transparent");
             var edge = this.emucharts.edges.get(id);
             if (edge && edge.source && edge.target && edge.source.id === edge.target.id) {
                 d3.select(g).select(".tlabel").text(function (edge) {
@@ -1103,6 +1123,52 @@ define(function (require, exports, module) {
                 .style("markerUnits", "userSpaceOnUse")
                 .style("cursor", "pointer");
 
+
+            // labels are drawn using both text and textpath
+            // the former is for self-edges, the latter for all other edges
+//            var text =
+            enteredTransitions.append("svg:text").classed("tlabel", true)
+                .attr("id", function (d) { return prefix + "tlabel_" + d.id; })
+                .style("font", (fontSize + "px sans-serif"))
+                .style("text-rendering", "optimizeLegibility")
+                .text(function (edge) {
+                    if (edge.target.id === edge.source.id) {
+                        // text for self edges is rendered as standard text field
+                        return labelToString(edge.name);
+                    }
+                    // text for other edges is rendered as textpath
+                    return "";
+                });
+            enteredTransitions.append("svg:rect").classed("tlabel_selection", true)
+                .attr("id", function (d) { return prefix + "tlabel_selection_" + d.id; })
+                .style("cursor", "pointer") // change cursor shape
+                .style("width", function (edge) {
+                    return d3.select("#" + prefix + "tlabel_" + edge.id).node().getBoundingClientRect().width + "px";
+                }).style("height", function (edge) {
+                    return d3.select("#" + prefix + "tlabel_" + edge.id).node().getBoundingClientRect().height + "px";
+                });
+
+
+//            var textPath =
+            enteredTransitions.append("svg:text").classed("tlabel", true)
+                .attr("id", function (edge) { return prefix + "tlabel_" + edge.id; })
+                .style("font", (fontSize + "px sans-serif"))
+                .style("text-rendering", "optimizeLegibility")
+                .style("text-anchor", "middle")
+                .attr("dy", -4)
+                .append("textPath")
+                .attr("xlink:href", function (edge) { return "#" + prefix + "path_" + edge.id; })
+                .attr("startOffset", "50%")
+                .style("cursor", "pointer") // change cursor shape
+                .text(function (edge) {
+                    if (edge.target.id === edge.source.id) {
+                        // text for self edges is rendered as standard text field
+                        return "";
+                    }
+                    // text for other edges is rendered here
+                    return labelToString(edge.name);
+                });
+
             // control points are used to adjust the shape of a path
 //            var controlPoints =
             enteredTransitions.append("svg:circle").classed("cpoints", true)
@@ -1126,59 +1192,6 @@ define(function (require, exports, module) {
                 .attr("r", 10)
                 .style("cursor", "move");
 
-
-            // labels are drawn using both text and textpath
-            // the former is for self-edges, the latter for all other edges
-//            var text =
-            enteredTransitions.append("svg:text").classed("tlabel", true)
-                .attr("id", function (d) { return prefix + "tlabel_" + d.id; })
-                .style("font", (fontSize + "px sans-serif"))
-                .style("text-rendering", "optimizeLegibility")
-                .style("cursor", "pointer") // change cursor shape
-                .attr("x", function (edge) {
-                    if (edge.target.id === edge.source.id) {
-                        // self-edge
-                        return edge.source.x + 32;
-                    }
-                    // else do nothing -- textpath will take care of placing the text
-                    return "";
-                })
-                .attr("y", function (edge) {
-                    if (edge.target.id === edge.source.id) {
-                        // self-edge
-                        return edge.source.y - 32;
-                    }
-                    // else do nothing -- textpath will take care of placing the text
-                    return "";
-                })
-                .text(function (edge) {
-                    if (edge.target.id === edge.source.id) {
-                        // text for self edges is rendered as standard text field
-                        return labelToString(edge.name);
-                    }
-                    // text for other edges is rendered as textpath
-                    return "";
-                });
-
-//            var textPath =
-            enteredTransitions.append("svg:text").classed("tlabel", true)
-                .attr("id", function (edge) { return prefix + "tlabel_" + edge.id; })
-                .style("font", (fontSize + "px sans-serif"))
-                .style("text-rendering", "optimizeLegibility")
-                .style("text-anchor", "middle")
-                .attr("dy", -4)
-                .append("textPath")
-                .attr("xlink:href", function (edge) { return "#" + prefix + "path_" + edge.id; })
-                .attr("startOffset", "50%")
-                .style("cursor", "pointer") // change cursor shape
-                .text(function (edge) {
-                    if (edge.target.id === edge.source.id) {
-                        // text for self edges is rendered as standard text field
-                        return "";
-                    }
-                    // text for other edges is rendered here
-                    return labelToString(edge.name);
-                });
 
             return refreshTransitions(_this, enteredTransitions);
         };
@@ -1240,23 +1253,12 @@ define(function (require, exports, module) {
             }
             if (dbg) { console.log("Transitions.mouseClick"); }
         };
-        var mouseDoubleClick = function (edge) {
-            // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
-            d3.event.stopPropagation();
-            if (editor_mode !== MODE.DELETE()) {
-                _this.fire({
-                    type: "emuCharts_renameTransition",
-                    edge: edge
-                });
-            }
-            if (dbg) { console.log("Transitions.mouseDoubleClick"); }
-        };
         var mouseDown = function (edge) {
             d3.event.stopPropagation();
-            // correct handling of mouse events requires moving the selected transition on top of the others
-            if (svg.node().children.length > 0) {
-                _this.select_transition(edge.id);
-            }
+            // CAREFUL: do not attempt to select the transition if selection is also performed onMouseOver -- this will prevent dblclick events from firing
+            // if (svg.node().children.length > 0) {
+            //     _this.select_transition(edge.id);
+            // }
         };
         var dragStart = function (node) {
             if (dbg) { console.log("Transitions.dragStart"); }
@@ -1285,6 +1287,18 @@ define(function (require, exports, module) {
             // stopPropagation is essential here to avoid messing up with state variables of the SVG drag/zoom events
             d3.event.sourceEvent.stopPropagation();
         };
+        function transitionOnMouseDoubleClick(_this) {
+            return function (edge) {
+                if (editor_mode !== MODE.DELETE()) {
+                    d3.event.stopPropagation();
+                    _this.fire({
+                        type: "emuCharts_renameTransition",
+                        edge: edge
+                    });
+                }
+                if (dbg) { console.log("Transitions.mouseDoubleClick"); }
+            };
+        }
 
         if (!this.emucharts || !this.emucharts.getEdges()) { return; }
         // create svg element, if needed
@@ -1309,7 +1323,7 @@ define(function (require, exports, module) {
                     .on("mouseover", mouseOver)
                     .on("mouseout", mouseOut)
                     .on("click", mouseClick)
-                    .on("dblclick", mouseDoubleClick);
+                    .on("dblclick", transitionOnMouseDoubleClick(_this));
 
                 enteredTransitions.selectAll(".cpoints")
                     .on("mousedown", function (d) {
@@ -1322,6 +1336,7 @@ define(function (require, exports, module) {
             }
         }
     };
+
 
     /**
      * Utility function for drawing initial transitions
@@ -1409,14 +1424,16 @@ define(function (require, exports, module) {
                 });
             }
         };
-        var mouseDoubleClick = function (edge) {
-            if (editor_mode !== MODE.DELETE()) {
-                _this.fire({
-                    type: "emuCharts_renameInitialTransition",
-                    edge: edge
-                });
-            }
-        };
+        function initialTransitionOnMouseDoubleClick(_this) {
+            return function (edge) {
+                if (editor_mode !== MODE.DELETE()) {
+                    _this.fire({
+                        type: "emuCharts_renameInitialTransition",
+                        edge: edge
+                    });
+                }
+            };
+        }
 
         if (!this.emucharts || !this.emucharts.getInitialEdges()) { return; }
         // create svg element, if needed
@@ -1434,7 +1451,7 @@ define(function (require, exports, module) {
                     .on("mouseover", mouseOver)
                     .on("mouseout", mouseOut)
                     .on("click", mouseClick)
-                    .on("dblclick", mouseDoubleClick);
+                    .on("dblclick", initialTransitionOnMouseDoubleClick(_this));
             }
         }
     };
@@ -1580,6 +1597,7 @@ define(function (require, exports, module) {
             }
         };
     };
+
 
     /**
      * Utility function for drawing states
@@ -1777,15 +1795,6 @@ define(function (require, exports, module) {
                 }
             }
         };
-        var mouseDoubleClick = function (node) {
-            if (editor_mode !== MODE.DELETE()) {
-                d3.event.stopPropagation();
-                _this.fire({
-                    type: "emuCharts_renameState",
-                    node: node
-                });
-            }
-        };
         var mouseMove = function (node) {
             if (mouseOverControlPoint) {
                 d3.event.stopPropagation();
@@ -1803,6 +1812,18 @@ define(function (require, exports, module) {
                 return refreshTransitions(_this, transitions);
             }
         };
+        function stateOnMouseDoubleClick(_this) {
+            return function (node) {
+                if (editor_mode !== MODE.DELETE()) {
+                    d3.event.stopPropagation();
+                    _this.fire({
+                        type: "emuCharts_renameState",
+                        node: node
+                    });
+                }
+                if (dbg) { console.log("State.mouseDoubleClick"); }
+            };
+        }
 
         if (!this.emucharts || !this.emucharts.getNodes()) { return; }
 
@@ -1826,7 +1847,7 @@ define(function (require, exports, module) {
                     .on("mouseover", mouseOver)
                     .on("mouseout", mouseOut)
                     .on("mousemove", mouseMove)
-                    .on("dblclick", mouseDoubleClick);
+                    .on("dblclick", stateOnMouseDoubleClick(_this));
             }
         }
     };
@@ -1856,7 +1877,7 @@ define(function (require, exports, module) {
         }
         var _this = this;
         refreshStates(_this);
-        refreshTransitions(_this);
+        refreshTransitions(_this, null, opt);
         refreshInitialTransitions(_this);
         return this;
     };
