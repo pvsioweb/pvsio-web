@@ -606,7 +606,7 @@ define(function (require, exports, module) {
                     // not a self-edge
                     cp = getControlPoints(edge);
                     // refresh transition label
-                    label = d3.select(this.parentNode.lastChild.firstChild);
+                    label = d3.select(this.parentNode).select("textpath");
                     label.text(labelToString(edge.name));
                     // clear the text of the other label
                     d3.select(this.parentNode).select(".tlabel").text(function (edge) { return ""; });
