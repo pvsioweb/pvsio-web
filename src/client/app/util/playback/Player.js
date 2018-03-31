@@ -150,6 +150,14 @@ define(function (require, exports, module) {
                     console.error("Timestamp is out of order");
                     when = 0;
                 }
+                let skip_speech = false;
+                if (opt.from && !isNaN(parseFloat(opt.from))) {
+                    when = when - (parseFloat(opt.from) - _this.now);
+                    if (when < 0) {
+                        when = 0;
+                        skip_speech = true;
+                    }
+                }
 
                 if ((action.hide || action.reveal) && !isNaN(when) && when >= 0) {
                     _this.timer = window.setTimeout(function () {
@@ -197,20 +205,27 @@ define(function (require, exports, module) {
                     }, when);
                 }
                 if (action.speak && !isNaN(when) && when >= 0) {
-                    _this.timer = window.setTimeout(function () {
-                        var msg = new SpeechSynthesisUtterance(action.speak);
-                        msg.lang = _this.lang;
-                        msg.localService = true;
-                        msg.rate = _this.rate;
-                        msg.pitch = _this.pitch;
-                        console_log("Speaking: " + action.speak);
-                        window.speechSynthesis.speak(msg);
+                    if (skip_speech) {
                         _this.now = action.timeStamp;
                         _this.playlist.curr++;
                         _this.play(opt);
-                    }, when);
+                    } else {
+                        _this.timer = window.setTimeout(function () {
+                            var msg = new SpeechSynthesisUtterance(action.speak);
+                            msg.lang = _this.lang;
+                            msg.localService = true;
+                            msg.rate = _this.rate;
+                            msg.pitch = _this.pitch;
+                            console_log("Speaking: " + action.speak);
+                            window.speechSynthesis.speak(msg);
+                            _this.now = action.timeStamp;
+                            _this.playlist.curr++;
+                            _this.play(opt);
+                        }, when);
+                    }
                 }
                 if (action.input && !isNaN(when) && when >= 0) {
+                    console.log("input " + action.input + ": " + action.value);
                     _this.timer = window.setTimeout(function () {
                         if (d3.select(action.input).node()) {
                             fill(action.input, action.value, {
@@ -227,6 +242,7 @@ define(function (require, exports, module) {
                     }, when);
                 }
                 if (action.scroll && !isNaN(when) && when >= 0) {
+                    console.log("scrolling " + action.scroll + " by " + action.offset + "px");
                     _this.timer = window.setTimeout(function () {
                         scrollTop(action.scroll, action.offset);
                         _this.now = action.timeStamp;
