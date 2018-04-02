@@ -24,7 +24,7 @@
  * @author Paolo Masci
  * @date Nov 5, 2017
  */
- /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+ /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext:true */
  /*global SpeechSynthesisUtterance */
 define(function (require, exports, module) {
     "use strict";
@@ -136,7 +136,7 @@ define(function (require, exports, module) {
             window.setTimeout(function () {
                 click_widget();
             }, timeout);
-        }        
+        }
         try {
             if (this.playlist.curr < this.playlist.seq.length) {
                 console_log("Playback: action " + (this.playlist.curr + 1) + " of " + this.playlist.seq.length);
@@ -149,6 +149,14 @@ define(function (require, exports, module) {
                 if (when < 0) {
                     console.error("Timestamp is out of order");
                     when = 0;
+                }
+                let skip_speech = false;
+                if (opt.from && !isNaN(parseFloat(opt.from))) {
+                    when = when - (parseFloat(opt.from) - _this.now);
+                    if (when < 0) {
+                        when = 0;
+                        skip_speech = true;
+                    }
                 }
 
                 if ((action.hide || action.reveal) && !isNaN(when) && when >= 0) {
@@ -197,20 +205,27 @@ define(function (require, exports, module) {
                     }, when);
                 }
                 if (action.speak && !isNaN(when) && when >= 0) {
-                    _this.timer = window.setTimeout(function () {
-                        var msg = new SpeechSynthesisUtterance(action.speak);
-                        msg.lang = _this.lang;
-                        msg.localService = true;
-                        msg.rate = _this.rate;
-                        msg.pitch = _this.pitch;
-                        console_log("Speaking: " + action.speak);
-                        window.speechSynthesis.speak(msg);
+                    if (skip_speech) {
                         _this.now = action.timeStamp;
                         _this.playlist.curr++;
                         _this.play(opt);
-                    }, when);
+                    } else {
+                        _this.timer = window.setTimeout(function () {
+                            var msg = new SpeechSynthesisUtterance(action.speak);
+                            msg.lang = _this.lang;
+                            msg.localService = true;
+                            msg.rate = _this.rate;
+                            msg.pitch = _this.pitch;
+                            console_log("Speaking: " + action.speak);
+                            window.speechSynthesis.speak(msg);
+                            _this.now = action.timeStamp;
+                            _this.playlist.curr++;
+                            _this.play(opt);
+                        }, when);
+                    }
                 }
                 if (action.input && !isNaN(when) && when >= 0) {
+                    console.log("input " + action.input + ": " + action.value);
                     _this.timer = window.setTimeout(function () {
                         if (d3.select(action.input).node()) {
                             fill(action.input, action.value, {
@@ -227,6 +242,7 @@ define(function (require, exports, module) {
                     }, when);
                 }
                 if (action.scroll && !isNaN(when) && when >= 0) {
+                    console.log("scrolling " + action.scroll + " by " + action.offset + "px");
                     _this.timer = window.setTimeout(function () {
                         scrollTop(action.scroll, action.offset);
                         _this.now = action.timeStamp;
@@ -236,10 +252,11 @@ define(function (require, exports, module) {
                 }
                 if (action.trans && !isNaN(when) && when >= 0) {
                     _this.timer = window.setTimeout(function () {
-                        if (action.selectAll) {
-                            d3.selectAll(action.trans).style("display", "block").style("opacity", 1).style("transform", action.transform).style("transition-duration", duration + "ms");
+                        let zIndex = action.zIndex || "inherit";
+                        if (action.trans.startsWith(".")) {
+                            d3.selectAll(action.trans).style("z-index", zIndex).style("display", "block").style("opacity", 1).style("transform", action.transform).style("transition-duration", duration + "ms");
                         } else {
-                            d3.select(action.trans).style("display", "block").style("opacity", 1).style("transform", action.transform).style("transition-duration", duration + "ms");
+                            d3.select(action.trans).style("z-index", zIndex).style("display", "block").style("opacity", 1).style("transform", action.transform).style("transition-duration", duration + "ms");
                         }
                         _this.now = action.timeStamp;
                         _this.playlist.curr++;
@@ -251,9 +268,16 @@ define(function (require, exports, module) {
                         if (action.reveal.widget && typeof action.reveal.reveal === "function") {
                             action.reveal.reveal();
                         } else if (typeof action.reveal === "string") {
-                            d3.select(action.reveal).style("display", "block").style("opacity", 1)
-                                .style("transition-duration", duration + "ms")
-                                .style("transition-timing-function", transitionTimingFunction);
+                            let opacity = isNaN(parseFloat(action.opacity)) ? 1 : action.opacity;
+                            if (action.reveal.startsWith(".")) {
+                                d3.selectAll(action.reveal).style("display", "block").style("opacity", opacity)
+                                    .style("transition-duration", duration + "ms")
+                                    .style("transition-timing-function", transitionTimingFunction);
+                            } else {
+                                d3.select(action.reveal).style("display", "block").style("opacity", opacity)
+                                    .style("transition-duration", duration + "ms")
+                                    .style("transition-timing-function", transitionTimingFunction);
+                            }
                         }
                         _this.now = action.timeStamp;
                         _this.playlist.curr++;

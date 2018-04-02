@@ -28,7 +28,7 @@ define(function (require, exports, module) {
         ws  = pvsioWebClient.getWebSocket();
     }
 
-    var name = "State Machine Viewer";
+    var name = "Interaction Log";
 
     GraphBuilder.prototype._init = function () {
         canvas = PVSioWebClient.getInstance().createCollapsiblePanel({ headerText: name, owner: this.getId(), showContent: true });
