@@ -162,7 +162,7 @@ define(function (require, exports, module) {
      */
     WidgetEVO.prototype.reveal = function () {
         if (this.div && !this.div.empty()) {
-            console.log("revealing button " + this.id);
+            // console.log("revealing button " + this.id);
             this.div.style("display", "block");
         }
         return this;
@@ -176,7 +176,7 @@ define(function (require, exports, module) {
      */
     WidgetEVO.prototype.hide = function () {
         if (this.div && !this.div.empty()) {
-            console.log("hiding button " + this.id);
+            // console.log("hiding button " + this.id);
             this.div.style("display", "none");
         }
         return this;

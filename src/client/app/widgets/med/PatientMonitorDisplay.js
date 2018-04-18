@@ -139,39 +139,39 @@ define(function (require, exports, module) {
                                        height: this.disp_alarm.height,
                                        width: this.disp_alarm.width },
                                      { parent: opt.parent, align: "left",
-                                       fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
+                                       fontColor: this.fontColor, backgroundColor: this.backgroundColor });
         this.disp_alarm_max = new SingleDisplay(id + "_alarm_max",
                                      { top: this.disp_alarm_min.top - this.disp_value.height / 4,
                                        left: this.disp_alarm.left,
                                        height: this.disp_alarm.height,
                                        width: this.disp_alarm.width },
                                      { parent: opt.parent, align: "left",
-                                       fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
+                                       fontColor: this.fontColor, backgroundColor: this.backgroundColor });
         this.tracings_label_max = new SingleDisplay(id + "_tracings_label_max",
                                      { top: 0, left: 0,
                                        height: opt.tracings.labels.height,
                                        width: opt.tracings.labels.width },
                                      { parent: opt.parent, align: "right",
-                                       fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
+                                       fontColor: this.fontColor, backgroundColor: this.backgroundColor });
         this.tracings_label_med = new SingleDisplay(id + "_tracings_label_med",
                                      { top: (opt.tracings.height / 2),
                                        left: 0,
                                        height: opt.tracings.labels.height,
                                        width: opt.tracings.labels.width },
                                      { parent: opt.parent, align: "right",
-                                       fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
+                                       fontColor: this.fontColor, backgroundColor: this.backgroundColor });
         this.tracings_label_min = new SingleDisplay(id + "_tracings_label_min",
                                      { top: opt.tracings.height - opt.tracings.labels.height / 4,
                                        left: 0,
                                        height: opt.tracings.labels.height,
                                        width: opt.tracings.labels.width },
                                      { parent: opt.parent, align: "right",
-                                       fontColor: opt.fontColor, backgroundColor: opt.backgroundColor });
+                                       fontColor: this.fontColor, backgroundColor: this.backgroundColor });
         this.disp_tracings = new TracingsDisplay(id + "_tracings",
                                      { top: opt.tracings.labels.height / 2, left: opt.tracings.left,
                                        height: opt.tracings.height, width: opt.tracings.width },
                                      { parent: opt.parent,
-                                       fontColor: opt.fontColor, backgroundColor: opt.backgroundColor,
+                                       fontColor: this.fontColor, backgroundColor: this.backgroundColor,
                                        range: opt.range });
         return this;
     }
