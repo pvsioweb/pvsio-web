@@ -6,10 +6,16 @@ require.config({
     paths: {
         d3: '../lib/d3',
         stateParser: './util/PVSioStateParser',
+        pvsioweb: "plugins/prototypebuilder",
+        imagemapper: "../lib/imagemapper",
+        text: "../lib/text",
+        lib: "../lib",
+        cm: "../lib/cm",
         NCDevice: 'plugins/networkController/NCDevice',
         NCMonitorCore: 'plugins/networkController/NCMonitorCore'
     }
 });
+
 /**
  * Loading the module PVSioWebClient.
  */

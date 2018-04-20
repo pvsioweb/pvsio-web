@@ -117,7 +117,7 @@ define(function (require, exports, module) {
          this.setStyle(opt);
 
          // render content
-         state = state || "";
+         state = (state === undefined || state === null)? "" : state;
          if (typeof state === "string" || typeof state === "number") {
              this.base.text(state);
          } else if (typeof state === "object" && this.displayKey !== "" && this.evalViz(state)) {

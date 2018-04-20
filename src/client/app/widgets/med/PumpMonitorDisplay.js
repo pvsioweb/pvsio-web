@@ -26,7 +26,7 @@ define(function (require, exports, module) {
     "use strict";
 
     var SingleDisplay = require("widgets/SingleDisplay");
-    var TracingsDisplay = require("widgets/TracingsDisplay");
+    var TracingsDisplay = require("widgets/med/TracingsDisplay");
     var d3 = require("d3/d3");
 
     /**

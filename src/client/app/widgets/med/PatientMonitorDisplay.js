@@ -26,7 +26,7 @@ define(function (require, exports, module) {
     "use strict";
 
     var SingleDisplay = require("widgets/core/BasicDisplayEVO");
-    var TracingsDisplay = require("widgets/TracingsDisplay");
+    var TracingsDisplay = require("widgets/med/TracingsDisplay");
     var d3 = require("d3/d3");
 
     /**
@@ -91,20 +91,22 @@ define(function (require, exports, module) {
                         .style("top", this.top + "px").style("left", this.left + "px")
                         .style("width", this.width + "px").style("height", this.height + "px")
                         .style("margin", 0).style("padding", 0)
+                        // .style("border", "0.2px solid white")
+                        // .style("border-radius", "2px")
                         .style("background-color", this.backgroundColor)
                         .style("display", "block").attr("id", id).attr("class", id);
 
         opt.tracings = opt.tracings || {};
         opt.tracings.labels = opt.tracings.labels || {};
         opt.tracings.labels.width = opt.tracings.labels.width || this.width * 0.07;
-        opt.tracings.labels.height = opt.tracings.labels.height || this.height / 6;
+        opt.tracings.labels.height = opt.tracings.labels.height || this.height / 10;
         opt.tracings.height = opt.tracings.height || this.height * 0.8;
         opt.tracings.width = opt.tracings.width || this.width * 0.62;
         opt.tracings.left = opt.tracings.left || opt.tracings.labels.width + this.width * 0.01;
 
         opt.value = opt.value || {};
         opt.value.height = opt.value.height || this.height * 0.6;
-        opt.value.width = opt.value.width || this.width * 0.3;
+        opt.value.width = opt.value.width || this.width * 0.24;
 
         opt.range = opt.range || {};
         opt.range.max = opt.range.max || 100;
@@ -112,7 +114,7 @@ define(function (require, exports, module) {
 
         opt.parent = (this.div.node()) ? this.div.node().id : "body";
         this.disp_value = new SingleDisplay(id + "_value",
-                                     { top: 0,
+                                     { top: 0.2,
                                        left: opt.tracings.width + opt.tracings.labels.width,
                                        height: opt.value.height,
                                        width: opt.value.width }, opt);
@@ -128,10 +130,10 @@ define(function (require, exports, module) {
                                        height: opt.value.height / 4,
                                        width: opt.value.width }, opt);
         this.disp_alarm = new SingleDisplay(id + "_alarm",
-                                     { top: 0,
+                                     { top: 2,
                                        left: this.disp_value.left + this.disp_value.width,
-                                       height: this.disp_value.height / 4,
-                                       width: this.disp_value.width / 4 },
+                                       height: this.disp_value.height / 6,
+                                       width: this.disp_value.width / 6 },
                                      { parent: opt.parent, align: "left", fontSize: 6, fontColor: "red" });
         this.disp_alarm_min = new SingleDisplay(id + "_alarm_min",
                                      { top: this.disp_value.height - this.disp_value.height / 4,
@@ -148,27 +150,28 @@ define(function (require, exports, module) {
                                      { parent: opt.parent, align: "left",
                                        fontColor: this.fontColor, backgroundColor: this.backgroundColor });
         this.tracings_label_max = new SingleDisplay(id + "_tracings_label_max",
-                                     { top: 0, left: 0,
+                                     { top: opt.tracings.labels.height / 1.2,
+                                       left: 0.2,
                                        height: opt.tracings.labels.height,
                                        width: opt.tracings.labels.width },
                                      { parent: opt.parent, align: "right",
                                        fontColor: this.fontColor, backgroundColor: this.backgroundColor });
         this.tracings_label_med = new SingleDisplay(id + "_tracings_label_med",
-                                     { top: (opt.tracings.height / 2),
-                                       left: 0,
+                                     { top: opt.tracings.labels.height / 1.6 + (opt.tracings.height / 2),
+                                       left: 0.2,
                                        height: opt.tracings.labels.height,
                                        width: opt.tracings.labels.width },
                                      { parent: opt.parent, align: "right",
                                        fontColor: this.fontColor, backgroundColor: this.backgroundColor });
         this.tracings_label_min = new SingleDisplay(id + "_tracings_label_min",
-                                     { top: opt.tracings.height - opt.tracings.labels.height / 4,
-                                       left: 0,
+                                     { top: opt.tracings.height,
+                                       left: 0.2,
                                        height: opt.tracings.labels.height,
                                        width: opt.tracings.labels.width },
                                      { parent: opt.parent, align: "right",
                                        fontColor: this.fontColor, backgroundColor: this.backgroundColor });
         this.disp_tracings = new TracingsDisplay(id + "_tracings",
-                                     { top: opt.tracings.labels.height / 2, left: opt.tracings.left,
+                                     { top: opt.tracings.labels.height, left: opt.tracings.left,
                                        height: opt.tracings.height, width: opt.tracings.width },
                                      { parent: opt.parent,
                                        fontColor: this.fontColor, backgroundColor: this.backgroundColor,

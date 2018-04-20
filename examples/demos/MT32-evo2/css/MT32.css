@@ -214,6 +214,11 @@
     margin-top:146px;
     margin-left:1056px;
 }
+.CT64mouse_secondary_screen {
+    position:absolute;
+    margin-top:146px;
+    margin-left:3016px;
+}
 .MT32stylus {
     position:absolute;
     transition-timing-function: ease-out;

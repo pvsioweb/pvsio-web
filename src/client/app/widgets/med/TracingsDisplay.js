@@ -100,9 +100,11 @@ define(function (require, exports, module) {
         }
         function render_aux() {
             _this.px += _this.speed;
-            context.clearRect(_this.px, 0, _this.scanBar.width, _this.height);
+            context.clearRect(_this.opx, 0, _this.scanBar.width, _this.height);
+            // context.fillStyle = "black";
+            // context.fillRect(_this.px, 0, _this.scanBar.width, _this.height);
             context.beginPath();
-            context.moveTo(_this.opx, _this.py);
+            context.moveTo(_this.opx, _this.opy);
             context.lineTo(_this.px, _this.py);
             context.stroke();
             _this.opx = _this.px;
@@ -123,7 +125,7 @@ define(function (require, exports, module) {
             var align = opt.align || this.align;
             context.textBaseline = this.textBaseline;
             context.strokeStyle = opt.fontColor || _this.fontColor;
-            context.lineWidth = 3;
+            context.lineWidth = 1;
             context.font = this.font.join("");
             render_aux({ val: val, context: context, align: align, height: this.height, width: this.width }, opt);
             this.loop = setInterval(render_aux, _this.refreshRate);
