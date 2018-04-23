@@ -21,7 +21,7 @@ require.config({
 require([
         "widgets/core/ButtonEVO",
         "widgets/LED",
-        "widgets/med/PatientMonitorDisplay",
+        "widgets/medical/PatientMonitorDisplay",
         "stateParser",
         "PVSioWebClient",
         "NCDevice"],

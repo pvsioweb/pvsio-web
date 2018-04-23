@@ -23,10 +23,10 @@ define(function (require, exports, module) {
 
     var d3 = require("d3/d3");
     var Widget = require("widgets/Widget"),
-        syringe_data = require("text!widgets/med/Syringe/syringe_data.svg"),
-        vial_data = require("text!widgets/med/Syringe/vial_data.svg"),
-        infusions_set_data = require("text!widgets/med/Syringe/springs.svg"),
-        lateral_connection_line_data = require("text!widgets/med/Syringe/connection-line.svg"),
+        syringe_data = require("text!widgets/medical/Syringe/syringe_data.svg"),
+        vial_data = require("text!widgets/medical/Syringe/vial_data.svg"),
+        infusions_set_data = require("text!widgets/medical/Syringe/springs.svg"),
+        lateral_connection_line_data = require("text!widgets/medical/Syringe/connection-line.svg"),
         StateParser = require("util/PVSioStateParser"),
         property = require("util/property");
 

@@ -133,7 +133,7 @@ define(function (require, exports, module) {
              this.setStyle(opt);
 
              // set content
-             if (typeof state === "string") {
+             if (typeof state === "string" || typeof state === "number") {
                  var val = state;
                  state = {};
                  state[this.displayKey] = val;
