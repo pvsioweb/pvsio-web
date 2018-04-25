@@ -1,5 +1,5 @@
 /**
- * @module TracingsDisplay
+ * @module TracingsDisplayEVO
  * @version 1.0
  * @description Renders historical data using tracings-like visualisation.
  *              This module provide APIs for changing the look and feel of the tracings,
@@ -7,12 +7,12 @@
  * @author Paolo Masci
  * @date May 10, 2015
  *
- * @example <caption>Typical use of TracingsDisplay APIs within a PVSio-web plugin module.</caption>
- * // Example module that uses TracingsDisplay.
+ * @example <caption>Typical use of TracingsDisplayEVO APIs within a PVSio-web plugin module.</caption>
+ * // Example module that uses TracingsDisplayEVO.
  * define(function (require, exports, module) {
  *     "use strict";
  *     var device = {};
- *     device.tracings = new TracingsDisplay("tracings",
+ *     device.tracings = new TracingsDisplayEVO("tracings",
  *                         { top: 56, left: 164, height: 30, width: 100 },
  *                         { parent: "prototype", align: "left", speed: 0.4 });
  *     device.tracings.render(10); // the display renders 10
@@ -27,7 +27,7 @@ define(function (require, exports, module) {
     var WidgetEVO = require("widgets/core/WidgetEVO");
 
     /**
-     * @function <a name="TracingsDisplay">TracingsDisplay</a>
+     * @function <a name="TracingsDisplayEVO">TracingsDisplayEVO</a>
      * @description Constructor.
      * @param id {String} The ID of the widget.
      * @param coords {Object} The four coordinates (top, left, width, height) of the display, specifying
@@ -35,7 +35,7 @@ define(function (require, exports, module) {
      *        Default is { top: 0, left: 0, width: 200, height: 80 }.
      * @param opt {Object} Style options defining the visual appearance of the widget.
      *                     Options can be given either as standard html style attributes or using the following widget attributes:
-     *          <li>blinking (bool): whether the button is blinking (default is false, i.e., does not blink)</li>
+     *          <li>blinking (bool): whether the widget is blinking (default is false, i.e., does not blink)</li>
      *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
      *          <li>backgroundColor (String): background display color (default is black, "transparent")</li>
      *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
@@ -45,7 +45,7 @@ define(function (require, exports, module) {
      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
      *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
      *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
-     *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is opaque)</li>
+     *          <li>opacity (Number): opacity of the widget. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is opaque)</li>
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
      *          <li>position (String): standard HTML position attribute indicating the position of the widget with respect to the parent, e.g., "relative", "absolute" (default is "absolute")</li>
      *          <li>range (Object): visualisation range. The object has two attributes, max and min, indicating the maximum and minimum value of the range (default: { max: 100, min: 0 })</li>
@@ -55,14 +55,14 @@ define(function (require, exports, module) {
      *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
      *                  The following additional attribute links the display widget to a specific state attribute of a model:
      *          <li>displayKey (String): name of the state attribute defining the display content. Default is the ID of the widget.</li>
-     * @memberof module:TracingsDisplay
+     * @memberof module:TracingsDisplayEVO
      * @instance
      */
-    function TracingsDisplay(id, coords, opt) {
+    function TracingsDisplayEVO(id, coords, opt) {
         coords = coords || {};
         opt = this.normaliseOptions(opt);
         // set widget type & display key
-        this.type = this.type || "TracingsDisplayEVO";
+        this.type = this.type || "TracingsDisplayEVOEVO";
         this.displayKey = (typeof opt.displayKey === "string") ? opt.displayKey : id;
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
@@ -97,13 +97,13 @@ define(function (require, exports, module) {
 
         return this;
     }
-    TracingsDisplay.prototype = Object.create(WidgetEVO.prototype);
-    TracingsDisplay.prototype.parentClass = WidgetEVO.prototype;
-    TracingsDisplay.prototype.constructor = TracingsDisplay;
+    TracingsDisplayEVO.prototype = Object.create(WidgetEVO.prototype);
+    TracingsDisplayEVO.prototype.parentClass = WidgetEVO.prototype;
+    TracingsDisplayEVO.prototype.constructor = TracingsDisplayEVO;
 
     /**
      * @function <a name="render">render</a>
-     * @description Rendering function for button widgets.
+     * @description Rendering function.
      * @param state {Object} JSON object with the current value of the state attributes of the modelled system
      * @param opt {Object} Style options overriding the style attributes used when the widget was created.
      *                     The override style options are temporary, i.e., they are applied only for the present invocation of the render method.
@@ -117,12 +117,12 @@ define(function (require, exports, module) {
      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
      *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
      *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
-     *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is opaque)</li>
+     *          <li>opacity (Number): opacity of the widget. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is opaque)</li>
      *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
-     * @memberof module:TracingsDisplay
+     * @memberof module:TracingsDisplayEVO
      * @instance
      */
-    TracingsDisplay.prototype.render = function (val, opt) {
+    TracingsDisplayEVO.prototype.render = function (val, opt) {
         function clearContext() {
             context.save();
             context.fillStyle = _this.backgroundColor;
@@ -182,7 +182,13 @@ define(function (require, exports, module) {
         return this;
     };
 
-    TracingsDisplay.prototype.hide = function () {
+    /**
+     * @function <a name="hide">hide</a>
+     * @description Hides the widget.
+     * @memberof module:TracingsDisplayEVO
+     * @instance
+     */
+    TracingsDisplayEVO.prototype.hide = function () {
         this.div.style("display", "none");
         if (this.loop) {
             clearInterval(this.loop);
@@ -191,7 +197,13 @@ define(function (require, exports, module) {
         return this;
     };
 
-    TracingsDisplay.prototype.pauseTrace = function () {
+    /**
+     * @function <a name="pauseTrace">pauseTrace</a>
+     * @description Pauses the running scan bar of the trace display.
+     * @memberof module:TracingsDisplayEVO
+     * @instance
+     */
+    TracingsDisplayEVO.prototype.pauseTrace = function () {
         if (this.loop) {
             clearInterval(this.loop);
             this.loop = null;
@@ -199,5 +211,129 @@ define(function (require, exports, module) {
         return this;
     };
 
-    module.exports = TracingsDisplay;
+    // the following methods are inherited from WidgetEVO
+
+    /**
+     * @function <a name="reveal">reveal</a>
+     * @description Reveals the widget.
+     * @memberof module:TracingsDisplayEVO
+     * @instance
+     */
+
+      /**
+       * @function <a name="move">move</a>
+       * @description Changes the position of the widget according to the coordinates given as parameter.
+       * @param coords {Object} Coordinates indicating the new position of the widget. The coordinates are given in the form { top: (number), left: (number) }
+       * @param opt {Object}
+       *         <li> duration (Number): duration in milliseconds of the move transition (default is 0, i.e., instantaneous) </li>
+       *         <li> transitionTimingFunction (String): HTML5 timing function (default is "ease-out") </li>
+       * @memberof module:TracingsDisplayEVO
+       * @instance
+       */
+
+       /**
+        * @function <a name="rotate">rotate</a>
+        * @description Rotates the widget of the degree given as parameter.
+        * @param deg {Number | String} Degrees by which the widget will be rotated. Positive degrees are for clock-wise rotations, negative degrees are for counter-clock-wise rotations.
+        * @param opt {Object}
+        *         <li> duration (Number): duration in milliseconds of the move transition (default is 0, i.e., instantaneous) </li>
+        *         <li> transitionTimingFunction (String): HTML5 timing function (default is "ease-in") </li>
+        *         <li> transformOrigin (String): rotation pivot, e.g., "top", "bottom", "center" (default is "center") </li>
+        * @memberof module:TracingsDisplayEVO
+        * @instance
+        */
+
+        /**
+         * @function <a name="remove">remove</a>
+         * @description Removes the div elements of the widget from the html page -- useful to programmaticaly remove widgets from a page.
+         * @memberof module:TracingsDisplayEVO
+         * @instance
+         */
+
+         /**
+          * @function <a name="evalViz">evalViz</a>
+          * @description Evaluates the visibility of the widget based on the state attrbutes (passed as function parameter) and the expression stored in this.visibleWhen
+          * @param state {Object} JSON object with the current value of the state attributes of the modelled system
+          * @return {bool} true if the state attributes indicate widget visible, otherwise false.
+          * @memberof module:TracingsDisplayEVO
+          * @instance
+          */
+
+          /**
+           * @function <a name="evaluate">evaluate</a>
+           * @description Returns the state of the widget.
+           * @param attr {String} Name of the state attribute associated with the widget.
+           * @param state {Object} Current system state, represented as a JSON object.
+           * @return {String} String representation of the state of the widget.
+           * @memberof module:TracingsDisplayEVO
+           * @instance
+           */
+
+           /**
+            * @function <a name="getVizExpression">getVizExpression</a>
+            * @description Returns the expression defining the visibility of the widget.
+            * @memberof module:TracingsDisplayEVO
+            * @instance
+            */
+
+            /**
+             * @function <a name="setStyle">setStyle</a>
+             * @description Sets the font color and background color.
+             * @param style {Object} Style attributes characterising the visual appearance of the widget.
+             *                      Attributes can be either standard HTML5 attributes, or the following widgets attributes:
+             *          <li>blinking (bool): whether the button is blinking (default is false, i.e., does not blink)</li>
+             *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
+             *          <li>backgroundColor (String): background display color (default is "transparent")</li>
+             *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
+             *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
+             *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
+             *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
+             *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
+             *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
+             *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is 0.9, i.e., semi-opaque)</li>
+             *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
+             * @memberof module:TracingsDisplayEVO
+             * @instance
+             */
+
+             /**
+              * @function <a name="invertColors">invertColors</a>
+              * @description Inverts the colors of the display (as in a negative film).
+              * @memberof module:TracingsDisplayEVO
+              * @instance
+              */
+
+              /**
+               * @function <a name="select">select</a>
+               * @description Selects the widget -- useful to highlight the widget programmaticaly.
+               * @param style {Object} Set of valid HTML5 attributes characterising the visual appearance of the widget.
+               * @memberof module:TracingsDisplayEVO
+               * @instance
+               */
+
+               /**
+                * @function <a name="deselect">deselect</a>
+                * @description Deselects the widget.
+                * @memberof module:TracingsDisplayEVO
+                * @instance
+                */
+
+                /**
+                 * @function <a name="getPosition">getPosition</a>
+                 * @description Returns the position of the widget
+                 * @return {Object} Coordinates of the widget, in the form { left: x, top: y }, where x and y are real numbers
+                 * @memberof module:TracingsDisplayEVO
+                 * @instance
+                 */
+
+                 /**
+                  * @function <a name="getSize">getSize</a>
+                  * @description Returns the size of the widget
+                  * @return {Object} Size of the widget, in the form { width: x, height: y }, where x and y are real numbers
+                  * @memberof module:TracingsDisplayEVO
+                  * @instance
+                  */
+
+
+    module.exports = TracingsDisplayEVO;
 });

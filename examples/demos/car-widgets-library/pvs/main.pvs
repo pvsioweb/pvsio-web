@@ -1,0 +1,172 @@
+% ---------------------------------------------------------------
+%  Theory: car_demo
+%  Author: Paolo Masci
+%          INESC TEC and Universidade do Minho
+% ---------------------------------------------------------------
+
+main: THEORY
+ BEGIN
+
+  Gear: TYPE = { P, N, R, GEAR_1, GEAR_2, GEAR_3, GEAR_4, GEAR_5, GEAR_6 }
+  gear2real(g: Gear): real =
+    COND
+     g = P OR g = N -> 0,
+     g = R -> 3.67,
+     g = GEAR_1 -> 3.78,
+     g = GEAR_2 -> 2.06,
+     g = GEAR_3 -> 1.23,
+     g = GEAR_4 -> 0.83,
+     g = GEAR_5 -> 0.7,
+     g = GEAR_6 -> 0.6
+    ENDCOND
+  CONVERSION gear2real
+  
+  MAX_SPEED: real = 220
+  Speed_Unit: TYPE = { kph, mph }
+  Speed_Val: TYPE = { x: real | x <= MAX_SPEED }
+  Speed: TYPE = [#
+    val: Speed_Val,
+    units: Speed_Unit
+  #]
+  
+  MAX_RPM: real = 9
+  Rpm: TYPE = { x: nonneg_real | x <= MAX_RPM }
+  
+  MAX_ODO: real = 999999
+  Odo: TYPE = { x: nonneg_real | x <= MAX_ODO }
+  
+  TEMP_AMB: real = 16.1
+  Temp_Units: TYPE = { C, F }
+  Temp: TYPE = [#
+    val: real,
+    units: Temp_Units
+  #]
+
+  Action: TYPE = { idle, acc, brake }
+  Time: TYPE = [# hour: int, min: int #]
+  
+  state: TYPE = [#
+    speed: Speed, % Km/h
+    gear: Gear,
+    rpm: Rpm, % x1000/min
+    odo: Odo, % Km
+    temp: Temp,
+    time: Time,
+    action: Action
+  #]
+
+  get_current_time: Time = (# hour := get_time`hour, min := get_time`minute #)
+
+  %-- initial state
+  init(x: real): state = (#
+    speed := (# val:= IF x < MAX_SPEED THEN x ELSE MAX_SPEED ENDIF, units := kph #),
+    gear := N,
+    rpm := 0,
+    odo := 0,
+    temp := (# val := TEMP_AMB, units := C #),
+    time := get_current_time,
+    action := idle
+  #)
+
+  %-- utility functions
+  tyre: real = 6.30 %-- tyre circumference, in feet
+  % this function converts speed into rpms based on the gear and tyre size
+  getRPM(st: state): Rpm =
+    LET new_rpm = (speed(st)`val * gear(st) * 440) / tyre / 1000
+     IN COND
+          new_rpm < 0 -> 0,
+	  new_rpm > MAX_RPM -> MAX_RPM,
+	  ELSE -> new_rpm
+	ENDCOND
+  
+  getAcc(g: Gear): Speed_Val =
+   COND
+     g = P OR g = N -> 0,
+     g = R -> -0.8,
+     g = GEAR_1 -> 0.8,
+     g = GEAR_2 -> 1.2,
+     g = GEAR_3 -> 0.8,
+     g = GEAR_4 -> 0.5,
+     g = GEAR_5 -> 0.3,
+     g = GEAR_6 -> 0.2
+   ENDCOND
+  getBrk(g: Gear): [# speed: real, rpm: real #] = (# speed := -2, rpm := -1 #)
+
+  gearUP(st: state): state =
+    LET g = gear(st) IN
+    COND
+     g = P OR g = N OR g = R -> st,
+     g = GEAR_1 -> st WITH [ gear := GEAR_2 ],
+     g = GEAR_2 -> st WITH [ gear := GEAR_3 ],
+     g = GEAR_3 -> st WITH [ gear := GEAR_4 ],
+     g = GEAR_4 -> st WITH [ gear := GEAR_5 ],
+     g = GEAR_5 -> st WITH [ gear := GEAR_6 ],
+     g = GEAR_6 -> st
+    ENDCOND
+  gearDOWN(st: state): state =
+    LET g = gear(st) IN
+    COND
+     g = P OR g = N OR g = R -> st,
+     g = GEAR_1 -> st,
+     g = GEAR_2 -> st WITH [ gear := GEAR_1 ],
+     g = GEAR_3 -> st WITH [ gear := GEAR_2 ],
+     g = GEAR_4 -> st WITH [ gear := GEAR_3 ],
+     g = GEAR_5 -> st WITH [ gear := GEAR_4 ],
+     g = GEAR_6 -> st WITH [ gear := GEAR_5 ]
+    ENDCOND  
+    
+  accelerate(st: state): state =
+    LET st = st WITH [ gear := IF gear(st) = N THEN GEAR_1 ELSE gear(st) ENDIF ],
+        step = getAcc(gear(st)),
+        st = IF speed(st)`val + step < MAX_SPEED
+             THEN st WITH [ speed := speed(st) WITH [ val:= speed(st)`val + step ]]
+	     ELSE st WITH [ speed := speed(st) WITH [ val:= MAX_SPEED ]] ENDIF,
+	new_rpm = getRPM(st),
+	st = st WITH [ rpm := new_rpm ]
+     IN IF rpm(st) > 6 THEN gearUP(st) ELSE st ENDIF
+
+  brake(st: state): state =
+    LET step = getBrk(gear(st)),
+        st = IF speed(st)`val >= 0
+	     THEN st WITH [ speed := speed(st) WITH
+	   	   	  [ val := IF speed(st)`val + step`speed > 0
+				   THEN speed(st)`val + step`speed
+				   ELSE 0 ENDIF ]]
+	     ELSE %-- the car was driving in reverse, so the speed was negative
+                  st WITH [ speed := speed(st) WITH
+		          [ val:= IF speed(st)`val - step`speed < 0
+				  THEN speed(st)`val - step`speed
+				  ELSE 0 ENDIF ]] ENDIF,
+	new_rpm = getRPM(st),
+        st = st WITH [ rpm := new_rpm ]
+     IN IF rpm(st) < 4 THEN gearDOWN(st) ELSE st ENDIF
+
+  FRICTION: Speed_Val = 0.6
+  inc(odo: Odo, speed: Speed): Odo =
+    LET step = speed`val / 60 * 1
+     IN IF step >= 0
+        THEN IF odo + step <= MAX_ODO THEN odo + step ELSE odo + step - MAX_ODO ENDIF
+	ELSE IF odo + step <= 0 THEN 0 ELSE odo + step ENDIF ENDIF
+     
+  tick(st: state): state =
+   LET st = st WITH [ time := get_current_time ] IN
+    IF action(st) = idle
+    THEN IF speed(st)`val > 0
+         THEN LET new_speed = IF speed(st)`val - FRICTION > 0 THEN speed(st)`val - FRICTION ELSE 0 ENDIF,
+	          st = st WITH [ speed := speed(st) WITH [ val := new_speed ]]
+	       IN st WITH [ rpm := getRPM(st),
+	       	            odo := inc(odo(st), speed(st)) ]
+         ELSE st ENDIF
+    ELSE st ENDIF
+
+
+  %-- APIs
+  press_accelerate(st: state): state = accelerate(st) WITH [ action := acc ]
+  release_accelerate(st: state): state = st WITH [ action := idle ]
+
+  press_brake(st: state): state = brake(st) WITH [ action := brake ]
+  release_brake(st: state): state = st WITH [ action := idle ]
+
+
+
+END main

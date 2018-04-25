@@ -93,6 +93,8 @@ define(function (require, exports, module) {
      *          <li>position (String): standard HTML position attribute indicating the position of the widget with respect to the parent, e.g., "relative", "absolute" (default is "absolute")</li>
      *          <li>visibleWhen (String): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
      *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
+     * @memberof module:WidgetEVO
+     * @instance
      */
     function WidgetEVO(id, coords, opt) {
         opt = normalise_options(opt);
@@ -156,7 +158,7 @@ define(function (require, exports, module) {
 
     /**
      * @function <a name="reveal">reveal</a>
-     * @description Reveals the widget
+     * @description Reveals the widget.
      * @memberof module:WidgetEVO
      * @instance
      */
@@ -170,7 +172,7 @@ define(function (require, exports, module) {
 
     /**
      * @function <a name="hide">hide</a>
-     * @description Hides the widget
+     * @description Hides the widget.
      * @memberof module:WidgetEVO
      * @instance
      */
@@ -279,10 +281,10 @@ define(function (require, exports, module) {
 
     /**
      * @function <a name="evaluate">evaluate</a>
-     * @description Evaluates the visibility of the widget based on the state attrbutes (passed as function parameter) and the expression stored in this.visibleWhen
-     * @param attr {String} Name of the state attribute to be evaluated
-     * @param state {Object} JSON object with the current value of the state attributes of the modelled system
-     * @return {String} Text representing the current evaluation of the state attribute associated with the widget
+     * @description Returns the state of the widget.
+     * @param attr {String} Name of the state attribute associated with the widget.
+     * @param state {Object} Current system state, represented as a JSON object.
+     * @return {String} String representation of the state of the widget.
      * @memberof module:WidgetEVO
      * @instance
      */
