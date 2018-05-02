@@ -358,7 +358,7 @@ require([
         });
 
 
-        var demoFolder = "car-widgets-library";
+        var demoFolder = "gauge-widgets-library";
         //register event listener for websocket connection from the client
         client.addListener('WebSocketConnectionOpened', function (e) {
             //start pvs process
