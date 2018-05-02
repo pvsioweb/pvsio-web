@@ -1682,7 +1682,7 @@ require([
                      VIEW_ALERTS: 22, SEND_RESULTS: 23,
                      ECG_EXAM_12DER_KNOWN_PT: 24, HOLTER_EXAM: 25 };
 
-        var demo = Demo.ECG_EXAM_12DER_KNOWN_PT;
+        var demo = Demo.NONE;
 
         console_log(mt32.central.getPosition())
 
