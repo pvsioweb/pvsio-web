@@ -22,7 +22,7 @@ use Cwd;
 
 $Term::ANSIColor::AUTORESET = 1;
 
-$PVSPATH="/opt/pvsio-web/PVS";
+$PVSPATH="/home/paolo/git/heroku/pvsio-web/PVS";
 
 $OUTPUT_AUTOFLUSH=1;
 $VERSION="ProofLite-6.0 (12/12/12)";

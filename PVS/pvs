@@ -65,7 +65,7 @@
 
 # PVSPATH should be set after installation by <PVS>/bin/relocate or by hand
 # to the location of the PVS installation
-PVSPATH=/app/PVS
+PVSPATH=/home/paolo/git/heroku/pvsio-web/PVS
 
 #-------------------------------------------------
 # Nothing below this line should need modification

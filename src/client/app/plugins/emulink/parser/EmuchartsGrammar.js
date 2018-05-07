@@ -164,54 +164,28 @@ define(function (require, exports, module) {
                 cond: [
                     ["e", "$$ = { type: 'bool_expr', val: $1 }"]
                 ],
-                bool_expr:  [
-                    ["bool_e",   "$$ = $1"]
-                ],
-                bool_e:  [
-                    ["NOT bool_e", exprWithUnaryOp()],
-                    ["( bool_e )", exprWithParenthesis()],
-                    ["bool_e = bool_e", exprWithBinaryOp()],  // comparison of equality of two terms
-                    ["bool_e == bool_e", exprWithBinaryOp()],  // comparison of equality of two terms
-                    ["bool_e != bool_e", exprWithBinaryOp()],  // comparison of inequality of two terms
-                    ["bool_e AND bool_e", exprWithBinaryOp()],
-                    ["bool_e OR bool_e", exprWithBinaryOp()],
-                    ["bool_e IMPLIES bool_e", exprWithBinaryOp()],
-
-                    ["arith_e = arith_e", exprWithBinaryOp()],
-                    ["arith_e == arith_e", exprWithBinaryOp()],
-                    ["arith_e != arith_e", exprWithBinaryOp()],
-                    ["arith_e > arith_e", exprWithBinaryOp()],
-                    ["arith_e >= arith_e", exprWithBinaryOp()],
-                    ["arith_e < arith_e", exprWithBinaryOp()],
-                    ["arith_e <= arith_e", exprWithBinaryOp()],
-
-                    ["bool_e = arith_e", exprWithBinaryOp()],
-                    ["bool_e == arith_e", exprWithBinaryOp()],
-                    ["bool_e != arith_e", exprWithBinaryOp()],
-                    ["bool_e > arith_e", exprWithBinaryOp()],
-                    ["bool_e >= arith_e", exprWithBinaryOp()],
-                    ["bool_e < arith_e", exprWithBinaryOp()],
-                    ["bool_e <= arith_e", exprWithBinaryOp()],
-
-                    ["true_false", "$$ = [$1]"],
-                    ["id", "$$ = [$1]"]
-                ],
-                arith_e:  [
-                    ["( arith_e )", exprWithParenthesis()],
-                    ["arith_e + arith_e", exprWithBinaryOp()],
-                    ["arith_e - arith_e", exprWithBinaryOp()],
-                    ["arith_e * arith_e", exprWithBinaryOp()],
-                    ["arith_e / arith_e", exprWithBinaryOp()],
-                    ["- arith_e", exprWithUnaryOp(), {"prec": "UMINUS"}],
-                    ["number", "$$ = [$1]"],
-                    ["string", "$$ = [$1]"]
-                ],
-                expression:  [
-                    ["e", "$$ = { type: 'expression', val: $e }"]
-                ],
                 e: [
-                    ["arith_e", "$$ = $1"],
-                    ["bool_e", "$$ = $1"]
+                    ["NOT e", exprWithUnaryOp()],
+                    ["( e )", exprWithParenthesis()],
+                    ["e = e", exprWithBinaryOp()],  // comparison of equality of two terms
+                    ["e == e", exprWithBinaryOp()],  // comparison of equality of two terms
+                    ["e != e", exprWithBinaryOp()],  // comparison of inequality of two terms
+                    ["e AND e", exprWithBinaryOp()],
+                    ["e OR e", exprWithBinaryOp()],
+                    ["e IMPLIES e", exprWithBinaryOp()],
+
+                    ["e > e", exprWithBinaryOp()],
+                    ["e >= e", exprWithBinaryOp()],
+                    ["e < e", exprWithBinaryOp()],
+                    ["e <= e", exprWithBinaryOp()],
+
+                    ["e + e", exprWithBinaryOp()],
+                    ["e - e", exprWithBinaryOp()],
+                    ["e * e", exprWithBinaryOp()],
+                    ["e / e", exprWithBinaryOp()],
+                    ["- e", exprWithUnaryOp(), {"prec": "UMINUS"}],
+
+                    ["term", "$$ = [$1]"]
                 ],
                 term: [
                     ["number", "$$ = $1"],
@@ -313,40 +287,31 @@ define(function (require, exports, module) {
                 a: [
                     ["id := expression", "$$ = { type: 'assignment', val: { identifier: $1, binop: { type: 'binop', val: $2 }, expression: $3 }};"]
                 ],
-                bool_expr:  [
-                    ["bool_e",   "$$ = $1"]
-                ],
-                bool_e:  [
-                    ["NOT bool_e", exprWithUnaryOp()],
-                    ["( bool_e )", exprWithParenthesis()],
-                    ["bool_e = bool_e", exprWithBinaryOp()],  // comparison of equality of two terms
-                    ["bool_e == bool_e", exprWithBinaryOp()],  // comparison of equality of two terms
-                    ["bool_e != bool_e", exprWithBinaryOp()],  // comparison of inequality of two terms
-                    ["bool_e > bool_e", exprWithBinaryOp()],
-                    ["bool_e >= bool_e", exprWithBinaryOp()],
-                    ["bool_e < bool_e", exprWithBinaryOp()],
-                    ["bool_e <= bool_e", exprWithBinaryOp()],
-                    ["bool_e AND bool_e", exprWithBinaryOp()],
-                    ["bool_e OR bool_e", exprWithBinaryOp()],
-                    ["bool_e IMPLIES bool_e", exprWithBinaryOp()],
-                    ["term", "$$ = [$1]"]
-                ],
-                arith_expr:  [
-                    ["arith_e",   "$$ = $1"]
-                ],
-                arith_e:  [
-                    ["arith_e + arith_e", exprWithBinaryOp()],
-                    ["arith_e - arith_e", exprWithBinaryOp()],
-                    ["arith_e * arith_e", exprWithBinaryOp()],
-                    ["arith_e / arith_e", exprWithBinaryOp()],
-                    ["- arith_e", exprWithUnaryOp(), {"prec": "UMINUS"}],
-                    ["bool_e", "$$ = $1"]
-                ],
                 expression:  [
                     ["e", "$$ = { type: 'expression', val: $e }"]
                 ],
                 e: [
-                    ["arith_expr", "$$ = $1"]
+                    ["NOT e", exprWithUnaryOp()],
+                    ["( e )", exprWithParenthesis()],
+                    ["e = e", exprWithBinaryOp()],  // comparison of equality of two terms
+                    ["e == e", exprWithBinaryOp()],  // comparison of equality of two terms
+                    ["e != e", exprWithBinaryOp()],  // comparison of inequality of two terms
+                    ["e AND e", exprWithBinaryOp()],
+                    ["e OR e", exprWithBinaryOp()],
+                    ["e IMPLIES e", exprWithBinaryOp()],
+
+                    ["e > e", exprWithBinaryOp()],
+                    ["e >= e", exprWithBinaryOp()],
+                    ["e < e", exprWithBinaryOp()],
+                    ["e <= e", exprWithBinaryOp()],
+
+                    ["e + e", exprWithBinaryOp()],
+                    ["e - e", exprWithBinaryOp()],
+                    ["e * e", exprWithBinaryOp()],
+                    ["e / e", exprWithBinaryOp()],
+                    ["- e", exprWithUnaryOp(), {"prec": "UMINUS"}],
+
+                    ["term", "$$ = [$1]"]
                 ],
                 term: [
                     ["number", "$$ = $1"],

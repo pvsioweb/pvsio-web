@@ -17,7 +17,7 @@
         <link href="css/MT32.css" rel="stylesheet">
         <link href="css/font-awesome.min.css" rel="stylesheet">
     </head>
-    <body class="noselect" style="background:#dedfdd;>
+    <body class="noselect" style="background:#dedfdd";>
     <!-- overflow:hidden;"  -->
         <div id="content" class="content" style="display:none;top:74px;">
 
@@ -91,17 +91,43 @@
                         <div class="CT64frame_inner" id="patientMGMScreen" style="display:none;">
                             <img class="CT64screen" src="screens/ct64/05 - CT64 Gestione paziente.jpg">
                         </div>
+                        <div class="CT64frame_inner" id="inserimentoAnamnesiScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/NEW-Inserimento anamnesi.jpg" style="margin-top:66px">
+                            <input class="form-control today" type="text" style="position:absolute;top:204px;;left:264px;width:1043px;" disabled value="12/01/2018">
+                            <input class="form-control" id="peso" type="text" style="position:absolute;top:256px;;left:264px;width:1043px;">
+                            <input class="form-control" id="altezza" type="text" style="position:absolute;top:307px;;left:264px;width:1043px;">
+                            <input class="form-control" id="pressione_max" type="text" style="position:absolute;top:358px;;left:264px;width:1043px;">
+                            <input class="form-control" id="pressione_min" type="text" style="position:absolute;top:415px;;left:264px;width:1043px;">
+                            <input id="fumatore" type="checkbox" style="position:absolute;top:716px;;left:264px;">
+                        </div>
                         <div class="CT64frame_inner" id="medicalReportScreen" style="display:none;">
                             <img class="CT64screen" src="screens/ct64/20 - CT64 Consultazione anamnesi (NON DEFINITIVO).jpg" style="margin-top:68px">
                         </div>
                         <div class="CT64frame_inner" id="archiveMedicalReportsScreen" style="display:none;">
                             <img class="CT64screen" src="screens/ct64/19 - CT64 Archivio anamnesi (NON DEFINITIVO).jpg" style="margin-top:-37px">
                         </div>
+                        <div class="CT64frame_inner" id="paziente-esami" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/paziente-esami.jpg" style="margin-top:-37px">
+                        </div>
                         <div class="CT64frame_inner" id="createNewPatientScreen" style="display:none;">
-                            <img class="CT64screen" src="screens/ct64/21 - Account utente.jpg" style="margin-top:-37px">
+                            <!-- <img class="CT64screen" src="screens/ct64/21 - Account utente.jpg" style="margin-top:-37px"> -->
+                            <img class="CT64screen" src="screens/ct64/Scheda nuovo paziente.jpg" style="margin-top:-37px">
                         </div>
                         <div class="CT64frame_inner" id="uploadExamsScreen" style="display:none;">
+                            <!-- <input type="file"> -->
                             <img class="CT64screen" src="screens/ct64/22 - Invio esami.jpg" style="margin-top:-37px">
+                            <div id="ct64-file-browser" style="position:absolute;">
+                                <img id="dir-53a" src="screens/ct64/file_browser.png" style="margin-left:300px;margin-top:-435px;z-index:3;border-radius:8px;border:1px solid steelblue;">
+                                <img id="file-53a" src="screens/ct64/file_browser-1.png" style="margin-left:300px;margin-top:-435px;z-index:3;border-radius:8px;border:1px solid steelblue;display:none;">
+                                <div style="position:absolute;left:896px;top:97px;">Cancella</div>
+                                <div style="position:absolute;left:1000px;top:97px;">Apri</div>
+                            </div>
+                            <div id="uploading" style="display:none;position:absolute;top:234px;">
+                                <span style="margin-left:30px;">4f6f3a59-5b9e-1599-f841-abc1700000001.ecgexam</span>
+                                <div class="progress" style="position:absolute; width:1300px; margin-left:30px;">
+                                    <div id="upload-progress-bar" class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:100%">100%</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -171,8 +197,25 @@
                                 <textarea id="recommended_exams" class="form-control" type="text" name="diagnosis" rows="20" style="margin: 0px; width: 1012px; height: 240px;"></textarea>
                             </div>
                         </div>
+                        <div class="CT64frame_inner" id="viewReportScreen" style="display:none;">
+                            <img class="CT64screen" src="screens/ct64/CT64 Referto.jpg" style="margin-top:-36px">
+                        </div>
                         <div class="CT64frame_inner" id="ecgAnalysisResultsScreen" style="display:none;">
-                            <img class="CT64screen" src="screens/ct64/09 - CT64 ECG12D - Analisi monitoraggio.jpg" style="margin-top:135px">
+                            <!-- <img class="CT64screen" src="screens/ct64/09 - CT64 ECG12D - Analisi monitoraggio.jpg" style="margin-top:135px"> -->
+                            <img id="ct64-ecg" class="CT64screen" src="screens/ct64/CT64 ECG.jpg" style="margin-top:135px">
+                            <img id="ct64-ecg-0" class="CT64screen" src="screens/ct64/CT64 Tool misura - 0 click mouse.jpg" style="margin-top:135px;display:none;">
+                            <img id="ct64-ecg-0-1" class="CT64screen" src="screens/ct64/CT64 Tool misura - 0-1 click mouse.jpg" style="margin-top:135px;display:none;">
+                            <img id="ct64-ecg-1" class="CT64screen" src="screens/ct64/CT64 Tool misura - 1 click mouse.jpg" style="margin-top:135px;display:none;">
+                            <img id="ct64-ecg-2" class="CT64screen" src="screens/ct64/CT64 Tool misura - 2 click mouse.jpg" style="margin-top:135px;display:none;">
+                            <img id="ct64-ecg-popup" class="CT64screen" src="screens/ct64/ct64-ecg-popup.png" style="top:532px;left:373px;z-index:1;display:none;position:absolute;width:125px;">
+                            <img id="ct64-ecg-nota" class="CT64screen" src="screens/ct64/CT64 Annotazione.jpg" style="margin-top:157px;display:none;">
+                            <div id="ct64-ecg-nota-dialog" style="display:none;position:absolute;top:0;left:0;">
+                                <img class="CT64screen" src="screens/ct64/ct64-blue-overlay.png" style="top:32px;left:286px;z-index:1;position:absolute;">
+                                <img class="CT64screen" src="screens/ct64/ct64-ecg-nota.png" style="top:32px;left:383px;z-index:1;position:absolute;width:425px;">
+                                <div style="z-index:2;position:absolute;top:0;left:0;">
+                                    <textarea id="input-nota" class="CT64screen form-control" type="text" style="margin-top:108px;margin-left:390px;width:411px;height:96px;z-index:2;font-size:11px;"></textarea>
+                                </div>
+                            </div>
                         </div>
                         <div class="CT64frame_inner" id="ecgResultsInterpretationScreen" style="display:none;">
                             <img class="CT64screen" src="screens/ct64/10 - CT64 ECG12D - Interpretativo.jpg" style="margin-top:206px">
@@ -187,6 +230,38 @@
                             <img class="CT64screen" src="screens/ct64/15 - CT64 Referto.jpg" style="margin-top:-37px">
                         </div>
 
+                    </div>
+
+                    <div id="SECONDARY_SCREENS" style="position:absolute;left:3000px;">
+                        <div style="z-index:1;position:absolute;top:100px;width:3000px;">
+                             <img src="CT64_front.png"></img>
+                        </div>
+                        <div id="secondary_new_message" style="position:absolute;z-index:1;top:122px;overflow:hidden;left:20px;overflow-y:scroll;height:770px;width:1382px;">
+                            <img src="screens/ct64/inbox.png">
+                            <button class="btn btn-default" style="width:1090px;height:180px;text-align:center;vertical-align:middle;left:190px;position:absolute;top:184px;">
+                                <span style="color:#d85f5b;">
+                                    <i class="fa fa-heartbeat fa-5x"></i><br><br>
+                                    Messaggi ricevuti da operatore CT64<br>
+                                    <span class="msg-received blink"><i class="fa fa-envelope-o"></i> (1 nuovo messaggio)</span>
+                                </span>
+                            </button>
+                        </div>
+                        <div id="secondary_ecgAnalysisResultsScreen" style="position:absolute;display:none;z-index:1;top:122px;overflow:hidden;left:20px;overflow-y:scroll;height:770px;width:1382px;">
+                            <!-- <img class="CT64screen" src="screens/ct64/09 - CT64 ECG12D - Analisi monitoraggio.jpg" style="margin-top:135px"> -->
+                            <img src="screens/ct64/CT64 ECG 2.jpg" style="margin-top:12px;margin-left:-302px;">
+                        </div>
+                        <div id="secondary_compileReportScreen" style="display:none;position:absolute;z-index:1;top:122px;overflow:hidden;left:20px;overflow-y:scroll;height:770px;">
+                            <img class="CT64screen" src="screens/ct64/14 - CT64 Specialista - Stesura referto.jpg" style="margin-top:47px">
+                            <div style="position:absolute;padding-left:226px;top:390px;left:50px;">
+                                <textarea id="secondary_diagnosis" class="form-control" type="text" rows="20" style="margin: 0px; width: 1012px; height: 240px;"></textarea>
+                            </div>
+                            <div style="position:absolute;padding-left:226px;top:649px;left:50px;">
+                                <textarea id="secondary_therapy" class="form-control" type="text" rows="20" style="margin: 0px; width: 1012px; height: 240px;"></textarea>
+                            </div>
+                            <div style="position:absolute;padding-left:226px;top:905px;left:50px;">
+                                <textarea id="secondary_recommended_exams" class="form-control" type="text" rows="20" style="margin: 0px; width: 1012px; height: 240px;"></textarea>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="CT64frame" id="devicesScreen" style="display:none;">
@@ -274,6 +349,9 @@
                 <div id="ct64_mouse" class="CT64mouse" style="z-index:3;position:absolute;opacity:0.9;">
                     <!-- <img src="screens/cursor_icon.png"> -->
                 </div>
+                <div id="ct64_mouse_secondary_screen" class="CT64mouse_secondary_screen" style="z-index:3;position:absolute;opacity:0.9;">
+                    <!-- <img src="screens/cursor_icon.png"> -->
+                </div>
             </div>
 
             <div class="device" id="device" style="perspective:1000px; perspective-origin:-22%;">
@@ -295,7 +373,7 @@
                     style="position:absolute; top:776px; left:130px; transform: translateX(-50px); display: none;">
                      <img src="microSD.png"></img>
                 </div>
-                <div class="card-reader MT32-case" style="position:absolute; top:1045px; left:822px; display:none; z-index:2;">
+                <div class="card-reader MT32-case" style="position:absolute; top:1045px; left:822px; display:none; z-index:2; opacity:0.8;">
                      <img src="case/card_reader_hub-upper.png"></img>
                 </div>
                 <div id="MT32-left-bottom" class="MT32-case-leftside MT32-case-leftside-upper MT32-case"
@@ -462,9 +540,10 @@
     		        <div id="testScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
     		            <div id="testHUB" class="screenframe">
     		                <img src="screens/electrodes_screen.png">
-                            <div id="defective_electrode"
-                                 style="position:absolute;border-radius:20px;background-color:black;height:30px;width:30px;top:96px;left:377px;opacity:0.8;display:none;"
-                                 class="blink"></div>
+                            <div style="position:absolute;border-radius:20px;background-color:black;height:30px;width:30px;top:96px;left:377px;opacity:0.8;display:none;"
+                                 class="defective_electrode blink"></div>
+                             <div style="position:absolute;border-radius:16px;background-color:black;height:30px;width:30px;top:117px;left:79px;opacity:0.8;display:none;"
+                                  class="defective_electrode blink"></div>
     		            </div>
                         <div id="testHOLTER" class="screenframe">
     		                <img src="screens/electrodes_screen_holter.png">
@@ -482,7 +561,8 @@
 
     		        <div id="checkPatientScreen" class="MT32frame" style="display:none;color:white;font-size:18px;">
     		            <div class="screenframe">
-    		                <img src="screens/patient_details_screen.png">
+    		                <img class="hub_scr" src="screens/patient_details_screen.png">
+                            <img class="holter_scr" src="screens/patient_details_screen_holter.png" style="display:none;">
     		            </div>
     		            <div style="position:absolute;left:282px;top:225px;height:356px;width:354px;overflow:auto;">
     		                <div style="font-size:24px;color:#77c5e8">Nome</div>Maria
@@ -494,10 +574,10 @@
     		                <div style="font-size:24px;color:#77c5e8;padding-top:8px;">Indirizzo </div>Via Ripafratta 14, 00000, TR
     		            </div>
     		            <div id="div_edit_btn">
-    		                <span style="position:absolute;left:380px;top:618px;">Modifica</span>
+    		                <span class="hub_scr" style="position:absolute;left:380px;top:618px;">Modifica</span>
     		            </div>
     		            <div id="div_new_btn">
-    		                <span style="position:absolute;left:475px;top:618px;">Nuova</span>
+    		                <span class="hub_scr" style="position:absolute;left:475px;top:618px;">Nuova</span>
     		            </div>
     		            <div id="div_confirm_btn">
     		                <span style="position:absolute;left:553px;top:618px;">Conferma</span>

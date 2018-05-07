@@ -20,7 +20,7 @@ require.config({
 require([
         "widgets/TouchscreenButton",
         "widgets/BasicDisplay",
-        "widgets/med/Syringe/Syringe",
+        "widgets/medical/Syringe/Syringe",
         "widgets/LED",
         "widgets/LED2",
         "widgets/ButtonActionsQueue",

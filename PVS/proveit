@@ -15,7 +15,7 @@
 # Script for batch proving in PVS 
 #  
 
-PVSPATH=/app/PVS
+PVSPATH=/home/paolo/git/heroku/pvsio-web/PVS
 VERSION="ProofLite-6.0 (12/12/12)"
 
 export PROVEITVERSION="proveit - $VERSION"

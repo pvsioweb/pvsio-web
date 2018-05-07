@@ -133,7 +133,7 @@ require([
         device.on_off = new ButtonEVO("on_off", {
             width: 60,
             height: 60,
-            top: 177,
+            top: 176,
             left: 576
         }, {
             softLabel: "",
