@@ -15,7 +15,7 @@
 # Script for batch proving several libraries in PVS 
 #
 
-PVSPATH=/home/paolo/git/heroku/pvsio-web/PVS
+PVSPATH=/app/PVS
 
 #-------------------------------------------------
 # Nothing below this line should need modification
