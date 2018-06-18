@@ -7,10 +7,13 @@ main: THEORY
 		 TRANSFER_DATA_MICROSD, INTRO, POWER_ON_MT32, POWER_OFF_MT32, VIEW_ALERTS, SEND_RESULTS,
 		 ECG_EXAM_12DER_KNOWN_PT }
 
+  CTSecondary: TYPE = { VIEW_EXAM, WRITE_REPORT}
+
   state: TYPE = [#
     demo: Demo,
     mt32: MTState,
-    ct64: CTState
+    ct64: CTState,
+    ct642: CTSecondary
   #]
 
   init(dd: Demo): state =
@@ -18,69 +21,89 @@ main: THEORY
      dd = ACCESS_HOME_PAGE OR dd = SEND_RESULTS
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HUB ],
-             ct64 := ctinit WITH [ mode := google, known_patient := TRUE ] #),
+             ct64 := ctinit WITH [ mode := google, known_patient := TRUE ],
+	     ct642 := VIEW_EXAM #),
      dd = AUTHENTICATION
-       -> (# demo := dd, mt32 := mtinit WITH [ mo := HUB ] , ct64 := ctinit #),
+       -> (# demo := dd, mt32 := mtinit WITH [ mo := HUB ] , ct64 := ctinit, ct642 := VIEW_EXAM  #),
      dd = VIEW_ALERTS
-       -> (# demo := dd, mt32 := mtinit WITH [ mo := HUB, alerts := true ] , ct64 := ctinit #),
+       -> (# demo := dd, mt32 := mtinit WITH [ mo := HUB, alerts := true ], ct64 := ctinit, ct642 := VIEW_EXAM #),
      dd = INTRO
-       -> (# demo := dd, mt32 := mtinit WITH [ mo := HUB ] , ct64 := ctinit WITH [ known_patient := TRUE ] #),
+       -> (# demo := dd, mt32 := mtinit WITH [ mo := HUB ], ct64 := ctinit WITH [ known_patient := TRUE ], ct642 := VIEW_EXAM #),
      dd = TRANSFER_DATA_MICROSD
-       -> (# demo := dd, mt32 := mtinit, ct64 := ctinit #),
+       -> (# demo := dd, mt32 := mtinit WITH [ mode := OFF ], ct64 := login(ctinit WITH [ known_patient := TRUE ]), ct642 := VIEW_EXAM #),
      dd = HUB_KNOWN_PT
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := NONE ],
-             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]),
+	     ct642 := VIEW_EXAM #),
      dd = HUB_NEW_PT
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := NONE ],
-             ct64 := login(ctinit WITH [ known_patient := FALSE ]) #),
+             ct64 := login(ctinit WITH [ known_patient := FALSE ]),
+	     ct642 := VIEW_EXAM #),
      dd = HOLTER
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := NONE ],
-             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]),
+	     ct642 := VIEW_EXAM #),
      dd = TERMINATE_HUB_MODE
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HUB ],
-             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]),
+	     ct642 := VIEW_EXAM #),
      dd = TERMINATE_HOLTER_MODE
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HOLTER ],
-             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]),
+	     ct642 := VIEW_EXAM #),
      dd = NEW_EXAM_HUB_MODE
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HUB ],
-             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]),
+	     ct642 := VIEW_EXAM #),
      dd = NEW_EXAM_HOLTER_MODE
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HOLTER ],
-             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]),
+	     ct642 := VIEW_EXAM #),
      dd = TEST_ELECTRODES_HUB
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HUB ],
-             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]),
+	     ct642 := VIEW_EXAM #),
      dd = CREATE_NEW_PATIENT
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HUB ],
-             ct64 := login(ctinit WITH [ known_patient := FALSE ]) #),
-     dd = VIEW_EXAMS_HUB OR dd = VIEW_INTERPRETATION_HUB OR dd = VIEW_INTERPRETATION_HOLTER OR dd = POWER_OFF_MT32
-       OR dd = REQUEST_REPORT OR dd = WRITE_REPORT OR dd = VIEW_MEDICAL_REPORT OR dd = VIEW_ARCHIVED_MEDICAL_REPORTS
+             ct64 := login(ctinit WITH [ known_patient := FALSE ]),
+	     ct642 := VIEW_EXAM #),
+     dd = VIEW_EXAMS_HUB OR dd = VIEW_MEDICAL_REPORT OR dd = VIEW_INTERPRETATION_HOLTER OR dd = POWER_OFF_MT32
+       OR dd = REQUEST_REPORT OR dd = WRITE_REPORT OR dd = VIEW_ARCHIVED_MEDICAL_REPORTS
         OR dd = MT32_LED
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HUB ],
              ct64 := login(ctinit WITH [ known_patient := TRUE,
-	     	     		         report_auth := NOT dd = REQUEST_REPORT ]) #),
+	     	     		         report_auth := TRUE ]),
+	     ct642 := VIEW_EXAM #),
+     dd = VIEW_INTERPRETATION_HUB
+       -> (# demo := dd,
+       	     mt32 := mtinit WITH [ mo := HUB ],
+             ct64 := login(ctinit WITH [ known_patient := TRUE,
+	     	     		       	 exam_closed := FALSE,
+	     	     		         report_auth := FALSE ]),
+             ct642 := VIEW_EXAM #),
      dd = POWER_ON_MT32
        -> (# demo := dd,
        	     mt32 := mtinit WITH [ mo := HUB, mode := OFF ],
              ct64 := login(ctinit WITH [ known_patient := TRUE,
-	     	     		         report_auth := NOT dd = REQUEST_REPORT ]) #),
+	     	     		         report_auth := NOT dd = REQUEST_REPORT ]),
+	     ct642 := VIEW_EXAM #),
      dd = ECG_EXAM_12DER_KNOWN_PT
        -> (# demo := dd,
-       	     mt32 := mtinit WITH [ mo := NONE ],
-             ct64 := login(ctinit WITH [ known_patient := TRUE ]) #),
+       	     mt32 := mtinit WITH [ mo := NONE, mode := OFF ],
+             ct64 := login(ctinit WITH [ known_patient := TRUE ]),
+	     ct642 := VIEW_EXAM #),
 
-     ELSE -> (# demo := dd, mt32 := mtinit, ct64 := ctinit WITH [ known_patient := TRUE ] #)
+     ELSE -> (# demo := dd, mt32 := mtinit WITH [ mo := HUB ], ct64 := ctinit WITH [ known_patient := TRUE ], ct642 := VIEW_EXAM  #)
    ENDCOND
 
   %-- mt32
@@ -349,6 +372,12 @@ main: THEORY
    ENDCOND
 
   %-- ct64
+  click_ct64_open(st: state): state =
+   COND
+    per_ct64_open(st`ct64) -> st WITH [ ct64 := ct64_open(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
   click_login(st: state): state =
    COND
     per_login(st`ct64) -> st WITH [ ct64 := login(st`ct64) ],
@@ -513,6 +542,18 @@ main: THEORY
     ELSE -> st
    ENDCOND
 
+  click_view_anamnesi(st: state): state =
+   COND
+    per_view_anamnesi(st`ct64) -> st WITH [ ct64 := view_anamnesi(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+  click_view_exams(st: state): state =
+   COND
+    per_view_exams(st`ct64) -> st WITH [ ct64 := view_exams(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
   click_new_patient(st: state): state =
    COND
     per_new_patient(st`ct64) -> st WITH [ ct64 := new_patient(st`ct64) ],
@@ -531,12 +572,23 @@ main: THEORY
     ELSE -> st
    ENDCOND
 
-  
+  click_choose_exams_to_be_uploaded(st: state): state =
+   COND
+    per_choose_exams_to_be_uploaded(st`ct64) -> st WITH [ ct64 := choose_exams_to_be_uploaded(st`ct64) ],
+    ELSE -> st
+   ENDCOND
+
+%  click_select_53a(st: state): state =
+%   COND
+%    per_select_53a(st`ct64) -> st WITH [ ct64 := select_53a(st`ct64) ],
+%    ELSE -> st
+%   ENDCOND
+
 
   set_mt32_off(st: state): state = st WITH [ mt32 := mt32(st) WITH [ battery_status := OFF ]]
   set_mt32_on_battery(st: state): state = st WITH [ mt32 := mt32(st) WITH [ battery_status := ON_BATTERY ]]
   set_mt32_charging(st: state): state = st WITH [ mt32 := mt32(st) WITH [ battery_status := CHARGING ]]
   set_mt32_fully_charged(st: state): state = st WITH [ mt32 := mt32(st) WITH [ battery_status := FULLY_CHARGED ]]
   set_mt32_charging_error(st: state): state = st WITH [ mt32 := mt32(st) WITH [ battery_status := CHARGING_ERROR ]]
-  
+
 END main

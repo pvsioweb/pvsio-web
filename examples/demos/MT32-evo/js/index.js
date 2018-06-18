@@ -18,7 +18,7 @@ require.config({
 });
 
 require([
-        "widgets/TouchscreenButton",
+        "widgets/core/ButtonEVO",
 
         "util/playback/Player",
         "widgets/ButtonActionsQueue",
@@ -163,7 +163,7 @@ require([
             softLabel: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
-            borderColor: "blue",
+            borderColor: "white",
             parent: "leftPanel",
             callback: onMessageReceived
         });
@@ -176,7 +176,7 @@ require([
             softLabel: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
-            borderColor: "blue",
+            borderColor: "white",
             parent: "leftPanel",
             callback: onMessageReceived
         });
@@ -189,7 +189,7 @@ require([
             softLabel: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
-            borderColor: "blue",
+            borderColor: "white",
             parent: "leftPanel",
             callback: onMessageReceived
         });
@@ -202,7 +202,7 @@ require([
             softLabel: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
-            borderColor: "blue",
+            borderColor: "white",
             parent: "leftPanel",
             callback: onMessageReceived
         });
@@ -229,7 +229,7 @@ require([
             softLabel: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
-            borderColor: "#000066",
+            borderColor: "white",
             parent: "leftPanel",
             callback: onMessageReceived
         });
@@ -261,7 +261,7 @@ require([
             callback: onMessageReceived
         });
         home.settings = new TouchscreenButton("settings", {
-            width: 180,
+            width: 177,
             height: 89,
             top: 494,
             left: 458
@@ -595,14 +595,14 @@ require([
 
         var ct64 = {};
         ct64.login = new TouchscreenButton("login", {
-            width: 70,
-            height: 34,
+            width: 74,
+            height: 36,
             top: 352,
             left: 905
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.1",
+            backgroundColor: "transparent",
+            opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
             borderWidth: "4px",
@@ -631,7 +631,7 @@ require([
             left: 1068
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -646,7 +646,7 @@ require([
             left: 1197
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -675,7 +675,7 @@ require([
             left: 1200
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -691,7 +691,7 @@ require([
         }, {
             softLabel: "",
             customFunctionText: "click_continue",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -706,7 +706,7 @@ require([
             left: 1250
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -721,7 +721,7 @@ require([
             left: 355
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -735,7 +735,7 @@ require([
             left: 462
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -749,7 +749,7 @@ require([
             left: 32
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -763,7 +763,7 @@ require([
             left: 1158
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -777,7 +777,7 @@ require([
             left: 16
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -805,7 +805,7 @@ require([
             left: 33
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -819,7 +819,7 @@ require([
             left: 186
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -833,7 +833,7 @@ require([
             left: 268
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -847,7 +847,7 @@ require([
             left: 416
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -862,7 +862,7 @@ require([
         }, {
             softLabel: "",
             backgroundColor: "steelblue",
-            opacity: "0.1",
+            opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
             parent: "requestReportScreen",
@@ -890,7 +890,7 @@ require([
         }, {
             softLabel: "",
             backgroundColor: "steelblue",
-            opacity: "0.1",
+            opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
             parent: "newMonSessionScreen",
@@ -903,7 +903,7 @@ require([
             left: 284
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -917,7 +917,7 @@ require([
             left: 284
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -931,7 +931,7 @@ require([
             left: 277
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -946,7 +946,7 @@ require([
         }, {
             softLabel: "",
             backgroundColor: "steelblue",
-            opacity: "0.1",
+            opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
             parent: "visits_menu",
@@ -960,7 +960,7 @@ require([
         }, {
             softLabel: "",
             customFunctionText: "click_continue",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -968,10 +968,10 @@ require([
             callback: onMessageReceived
         });
         ct64.browse_medicaltech = new TouchscreenButton("browse_medicaltech", {
-            width: 1330,
+            width: 1314,
             height: 22,
             top: 45,
-            left: 45
+            left: 65
         }, {
             softLabel: "",
             opacity: "0",
@@ -1001,8 +1001,8 @@ require([
             left: 1235
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.1",
+            backgroundColor: "transparent",
+            opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
             parent: "compileReportScreen",
@@ -1015,7 +1015,7 @@ require([
             left: 34
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -1029,7 +1029,7 @@ require([
             left: 275
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -1043,7 +1043,7 @@ require([
             left: 390
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -1057,7 +1057,7 @@ require([
             left: 32
         }, {
             softLabel: "",
-            backgroundColor: "steelblue",
+            backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -1154,13 +1154,13 @@ require([
             player.load([
                 { speak: "Instruzioni per attivare la modalità operativa Hub, sul dispositivo MT32 quando l'anagrafica del paziente in esame è già presente sulla centrale.", timeStamp: 1000 },
                 { speak: "Fai doppio click sull'anagrafica desiderata.", timeStamp: 10500 },
-                { button: ct64.select_patient, timeStamp: 15000, timeout: 1500, borderColor: "black", classed: "blink2" },
+                { button: ct64.select_patient, timeStamp: 15000, timeout: 1500, borderColor: "blue", classed: "blink2" },
                 { speak: "Clicca Nuovo ECG.", timeStamp: 16500 },
-                { button: ct64.new_ecg, timeStamp: 19000, timeout: 2000, borderColor: "black", classed: "blink" },
+                { button: ct64.new_ecg, timeStamp: 19000, timeout: 2000, borderColor: "blue", classed: "blink" },
                 { speak: "Clicca il nome del dispositivo per selezionarlo.", timeStamp: 19500 },
                 { button: ct64.select_device, timeStamp: 21000, timeout: 3000 },
                 { speak: "Poi, clicca Continua.", timeStamp: 21500 },
-                { button: ct64.continue, timeStamp: 23000, timeout: 1500, borderColor: "black", classed: "blink" },
+                { button: ct64.continue, timeStamp: 23000, timeout: 1500, borderColor: "blue", classed: "blink" },
                 { speak: "Attendi che il dispositivo MT32 abbia ricevuto gli aggiornamenti.", timeStamp: 24000 },
                 { speak: "A questo punto, il dispositivo MT32 è configurato con la modalità operativa Hub, ed è pronto all'utilizzo.", timeStamp: 30500 }
             ]).play();
@@ -1168,20 +1168,20 @@ require([
             player.load([
                 { speak: "Instruzioni per attivare la modalità operativa Hólter, sul dispositivo MT32.", timeStamp: 1000 },
                 { speak: "Nell'home page della centrale, fai doppio click sull'anagrafe desiderata.", timeStamp: 8500 },
-                { button: ct64.select_patient, timeStamp: 13500, timeout: 2500, borderColor: "black", classed: "blink2" },
+                { button: ct64.select_patient, timeStamp: 13500, timeout: 2500, borderColor: "blue", classed: "blink2" },
                 { speak: "Poi, nella pagina Gestione Paziente, clicca Nuovo Hólter.", timeStamp: 14500 },
-                { button: ct64.new_holter, timeStamp: 18000, timeout: 2000, borderColor: "black", classed: "blink" },
+                { button: ct64.new_holter, timeStamp: 18000, timeout: 2000, borderColor: "blue", classed: "blink" },
                 { speak: "Seleziona Durata Esame e Derivazione Precordiale che intendi utilizzare.", timeStamp: 19500 },
-                { button: ct64.holter_duration, timeStamp: 20000, timeout: 1000, borderColor: "black", classed: "blink2" },
-                { button: ct64.holter_derivation, timeStamp: 21000, timeout: 1000, borderColor: "black", classed: "blink2" },
+                { button: ct64.holter_duration, timeStamp: 20000, timeout: 1000, borderColor: "blue", classed: "blink2" },
+                { button: ct64.holter_derivation, timeStamp: 21000, timeout: 1000, borderColor: "blue", classed: "blink2" },
                 { speak: "Inotre, seleziona Attiva Accelerómetro se intendi attivare l'acquisizione dei dati acceleromètrici.", timeStamp: 24500 },
-                { button: ct64.holter_accelerometer, timeStamp: 25500, timeout: 1000, borderColor: "black", classed: "blink2" },
+                { button: ct64.holter_accelerometer, timeStamp: 25500, timeout: 1000, borderColor: "blue", classed: "blink2" },
                 { speak: "Poi, clicca Continua.", timeStamp: 33000 },
-                { button: ct64.continue_holter_config, timeStamp: 34500, timeout: 1500, borderColor: "black", classed: "blink" },
+                { button: ct64.continue_holter_config, timeStamp: 34500, timeout: 1500, borderColor: "blue", classed: "blink" },
                 { speak: "Clicca il nome del dispositivo per selezionarlo.", timeStamp: 37000 },
                 { button: ct64.select_device, timeStamp: 38500, timeout: 3000 },
                 { speak: "Poi, clicca Continua.", timeStamp: 40000 },
-                { button: ct64.continue, timeStamp: 42000, timeout: 1500, borderColor: "black", classed: "blink" },
+                { button: ct64.continue, timeStamp: 42000, timeout: 1500, borderColor: "blue", classed: "blink" },
                 { speak: "Attendi che il dispositivo MT32 abbia ricevuto gli aggiornamenti.", timeStamp: 43000 },
                 { speak: "A questo punto, il dispositivo MT32 è stato configurato in modalità operativa Hólter, ed è pronto all'utilizzo.", timeStamp: 49000 }
             ]).play();
@@ -1255,33 +1255,33 @@ require([
             player.load([
                 { speak: "Instruzioni per vedere tutti gli esami svolti in un determinato periodo di tempo.", timeStamp: 1000 },
                 { speak: "Clicca Monitoraggi nel Pannello di Navigazione della centrale CT64.", timeStamp: 7000 },
-                { button: ct64.monitoring, timeStamp: 12000, timeout: 2000, borderColor: "black", classed: "blink" },
+                { button: ct64.monitoring, timeStamp: 12000, timeout: 2000, borderColor: "blue", classed: "blink" },
                 { speak: "La tabella al centro della schermata contiene l'elenco degli esami effettuati.", timeStamp: 14000 },
-                { button: ct64.select_exam_data_hub, timeStamp: 16000, timeout: 2000, borderColor: "black", classed: "blink2", stutter: true },
-                { button: ct64.select_exam_data_holter, timeStamp: 16000, timeout: 2000, borderColor: "black", classed: "blink2", stutter: true },
+                { button: ct64.select_exam_data_hub, timeStamp: 16000, timeout: 2000, borderColor: "blue", classed: "blink2", stutter: true },
+                { button: ct64.select_exam_data_holter, timeStamp: 16000, timeout: 2000, borderColor: "blue", classed: "blink2", stutter: true },
                 { speak: "Puoi selezionare le date di interesse attraverso i filtri disponibili nella parte alta della pagina.", timeStamp: 19000 },
-                { button: ct64.date_time_filters, timeStamp: 22000, timeout: 2000, borderColor: "black", classed: "blink2", stutter: true }
+                { button: ct64.date_time_filters, timeStamp: 22000, timeout: 2000, borderColor: "blue", classed: "blink2", stutter: true }
             ]).play();
         } else if (demo === Demo.VIEW_INTERPRETATION_HUB) {
             player.load([
                 { speak: "Instruzioni per visualizzare l'analisi di un esame ECG12D.", timeStamp: 1000 },
                 { speak: "Clicca Monitoraggi nel Pannello di Navigazione della centrale CT64.", timeStamp: 6000 },
-                { button: ct64.monitoring, timeStamp: 10000, timeout: 2000, borderColor: "black", classed: "blink" },
+                { button: ct64.monitoring, timeStamp: 10000, timeout: 2000, borderColor: "blue", classed: "blink" },
                 { speak: "Clicca sull'esame ECG di interesse.", timeStamp: 14000 },
-                { button: ct64.select_exam_data_hub, timeStamp: 16000, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { button: ct64.select_exam_data_hub, timeStamp: 16000, timeout: 2000, borderColor: "blue", classed: "blink2" },
                 { speak: "Apparirà la schermata di analisi esame ECG, dove puoi selezionare i parametri di interesse da visualizzare.", timeStamp: 19000 },
                 { speak: "Cliccando su H E S, puoi visualizzare il risultato interpretativo.", timeStamp: 27000 },
-                { button: ct64.HES, timeStamp: 28000, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { button: ct64.HES, timeStamp: 28000, timeout: 2000, borderColor: "blue", classed: "blink2" },
                 { speak: "Cliccando su Dati Fisiologici, puoi vedere i dati fisiologici del paziente raccolti precedentemente.", timeStamp: 34000 },
-                { button: ct64.view_physio, timeStamp: 36000, timeout: 2000, borderColor: "black", classed: "blink2" }
+                { button: ct64.view_physio, timeStamp: 36000, timeout: 2000, borderColor: "blue", classed: "blink2" }
             ]).play();
         } else if (demo === Demo.VIEW_INTERPRETATION_HOLTER) {
             player.load([
                 { speak: "Instruzioni per visualizzare l'analisi di un esame Hólter.", timeStamp: 1000 },
                 { speak: "Clicca Monitoraggi nel Pannello di Navigazione della centrale CT64.", timeStamp: 6000 },
-                { button: ct64.monitoring, timeStamp: 10000, timeout: 2000, borderColor: "black", classed: "blink" },
+                { button: ct64.monitoring, timeStamp: 10000, timeout: 2000, borderColor: "blue", classed: "blink" },
                 { speak: "Clicca sull'esame Hólter di interesse.", timeStamp: 14000 },
-                { button: ct64.select_exam_data_holter, timeStamp: 16000, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { button: ct64.select_exam_data_holter, timeStamp: 16000, timeout: 2000, borderColor: "blue", classed: "blink2" },
                 { speak: "Apparirà la schermata di analisi esame Hólter, dove puoi selezionare i vari parametri di interesse.", timeStamp: 19000 }
             ]).play();
         } else if (demo === Demo.REQUEST_REPORT) {
@@ -1289,23 +1289,23 @@ require([
                 { speak: "Istruzioni per richiedere la refertazione di un esame ECG.", timeStamp: 1000 },
                 { speak: "Questa procedura va utilizzata quando l'operatore non ha l'autorizzazione per refertare.", timeStamp: 4500},
                 { speak: "Clicca Monitoraggi nel Pannello di Navigazione della centrale CT64.", timeStamp: 12000 },
-                { button: ct64.monitoring, timeStamp: 16000, timeout: 2000, borderColor: "black", classed: "blink" },
+                { button: ct64.monitoring, timeStamp: 16000, timeout: 2000, borderColor: "blue", classed: "blink" },
                 { speak: "Clicca sull'esame ECG di interesse.", timeStamp: 20000 },
-                { button: ct64.select_exam_data_hub, timeStamp: 22000, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { button: ct64.select_exam_data_hub, timeStamp: 22000, timeout: 2000, borderColor: "blue", classed: "blink2" },
                 { speak: "Poi, clicca Refertazione.", timeStamp: 24000 },
-                { button: ct64.write_report, timeStamp: 26000, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { button: ct64.write_report, timeStamp: 26000, timeout: 2000, borderColor: "blue", classed: "blink2" },
                 { speak: "Infine, seleziona il medico al quale vuoi richiedere la refertazione.", timeStamp: 28000 },
-                { button: ct64.select_doctor, timeStamp: 32000, timeout: 2000, borderColor: "black", classed: "blink" }
+                { button: ct64.select_doctor, timeStamp: 32000, timeout: 2000, borderColor: "blue", classed: "blink" }
             ]).play();
         } else if (demo === Demo.WRITE_REPORT) {
             player.load([
                 { speak: "Istruzioni per effettuare la refertazione di un esame ECG.", timeStamp: 1000 },
                 { speak: "Clicca Monitoraggi nel Pannello di Navigazione della centrale CT64.", timeStamp: 5500 },
-                { button: ct64.monitoring, timeStamp: 8500, timeout: 2000, borderColor: "black", classed: "blink" },
+                { button: ct64.monitoring, timeStamp: 8500, timeout: 2000, borderColor: "blue", classed: "blink" },
                 { speak: "Clicca sull'esame ECG di interesse.", timeStamp: 12500 },
-                { button: ct64.select_exam_data_hub, timeStamp: 14500, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { button: ct64.select_exam_data_hub, timeStamp: 14500, timeout: 2000, borderColor: "blue", classed: "blink2" },
                 { speak: "Poi, clicca Refertazione.", timeStamp: 16500 },
-                { button: ct64.write_report, timeStamp: 18500, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { button: ct64.write_report, timeStamp: 18500, timeout: 2000, borderColor: "blue", classed: "blink2" },
                 { speak: "Compila la diagnosi del paziente.", timeStamp: 20500 },
                 { input: "#diagnosis", value: "Nella norma", timeStamp: 21000 },
                 { scroll: "#MONITORING_SCREENS", timeStamp: 23500, offset: 300 },
@@ -1315,9 +1315,9 @@ require([
                 { speak: "Indica, gli esami consigliati.", timeStamp: 28500 },
                 { input: "#recommended_exams", value: "Nessuno", timeStamp: 29000 },
                 { speak: "Seleziona lo stato appropriato del referto dal menu a tendina.", timeStamp: 30000 },
-                { button: ct64.select_report_status, timeStamp: 32000, timeout: 2500, borderColor: "black", classed: "blink2" },
+                { button: ct64.select_report_status, timeStamp: 32000, timeout: 2500, borderColor: "blue", classed: "blink2" },
                 { speak: "In fine, clicca su Salva per salvare il referto.", timeStamp: 35000 },
-                { button: ct64.save_report, timeStamp: 37000, timeout: 2000, borderColor: "black", classed: "blink" },
+                { button: ct64.save_report, timeStamp: 37000, timeout: 2000, borderColor: "blue", classed: "blink" },
                 { speak: "Comparirà una schermàta riassuntiva che mostra il referto salvato.", timeStamp: 40000 },
                 { scroll: "#MONITORING_SCREENS", timeStamp: 40500, offset: 0 }
             ]).play();
@@ -1325,18 +1325,18 @@ require([
             player.load([
                 { speak: "Istruzioni per consultare l'anamnesi del paziente.", timeStamp: 1000 },
                 { speak: "Nell'home page della centrale, fai doppio click sull'anagrafe desiderata.", timeStamp: 5000 },
-                { button: ct64.select_patient, timeStamp: 10500, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { button: ct64.select_patient, timeStamp: 10500, timeout: 2000, borderColor: "blue", classed: "blink2" },
                 { speak: "Poi, nella pagina Gestione Paziente, clicca Anamnesi.", timeStamp: 12500 },
-                { button: ct64.view_medical_report, timeStamp: 15000, timeout: 2500, borderColor: "black", classed: "blink2" },
+                { button: ct64.view_medical_report, timeStamp: 15000, timeout: 2500, borderColor: "blue", classed: "blink2" },
                 { speak: "Verrà visualizzata l'anamnesi del paziente selezionato.", timeStamp: 18000 }
             ]).play();
         } else if (demo === Demo.VIEW_ARCHIVED_MEDICAL_REPORTS) {
             player.load([
                 { speak: "Istruzioni per consultare l'archivio di anamnesi del paziente.", timeStamp: 1000 },
                 { speak: "Nell'home page della centrale, fai doppio click sull'anagrafe desiderata.", timeStamp: 6000 },
-                { button: ct64.select_patient, timeStamp: 10500, timeout: 2000, borderColor: "black", classed: "blink2" },
+                { button: ct64.select_patient, timeStamp: 10500, timeout: 2000, borderColor: "blue", classed: "blink2" },
                 { speak: "Clicca Archivio Anamnesi.", timeStamp: 13000 },
-                { button: ct64.view_archived_medical_reports, timeStamp: 15000, timeout: 2500, borderColor: "black", classed: "blink2" },
+                { button: ct64.view_archived_medical_reports, timeStamp: 15000, timeout: 2500, borderColor: "blue", classed: "blink2" },
                 { speak: "Verrà visualizzato l'elenco delle anamnesi archiviate.", timeStamp: 18000 }
             ]).play();
         } else if (demo === Demo.MT32_LED) {
@@ -1359,7 +1359,7 @@ require([
             player.load([
                 { speak: "Istruzioni per creare il profilo di un nuovo paziente nella centrale CT64.", timeStamp: 1000 },
                 { speak: "Nella pagina Pazienti, fai click su Nuovo.", timeStamp: 7000 },
-                { button: ct64.new_patient, timeStamp: 10000, timeout: 2500, borderColor: "black", classed: "blink2" },
+                { button: ct64.new_patient, timeStamp: 10000, timeout: 2500, borderColor: "blue", classed: "blink2" },
                 { speak: "Verrà visualizzata una schermata che consente l'inserimento dei dati del nuovo paziente.", timeStamp: 11000 }
             ]).play();
         } else if (demo === Demo.TRANSFER_DATA_MICROSD) {
@@ -1402,23 +1402,23 @@ require([
                 { button: ct64.login, timeStamp: 55000, timeout: 1000, borderColor: "blue", classed: "blink" },
 
                 { speak: "La centrale fornisce anche funzioni per la lettura, l'analisi, e l'archiviazione di esami cardiaci; e di altri parametri fisiologici registrati con il Terminale Paziente.", timeStamp: 61000 },
-                { button: ct64.monitoring, timeStamp: 64000, timeout: 1000, borderColor: "black", classed: "blink" },
-                { button: ct64.select_exam_data_hub, timeStamp: 70000, timeout: 1000, borderColor: "black", classed: "blink2" },
+                { button: ct64.monitoring, timeStamp: 64000, timeout: 1000, borderColor: "blue", classed: "blink" },
+                { button: ct64.select_exam_data_hub, timeStamp: 70000, timeout: 1000, borderColor: "blue", classed: "blink2" },
 
                 { speak: "Gli esami e profili dei pazienti sono memorizzati in modo sicuro in una base di dati.", timeStamp: 74500 },
-                { button: ct64.HES, timeStamp: 78000, timeout: 1000, borderColor: "black", classed: "blink2" },
-                { button: ct64.view_physio, timeStamp: 82000, timeout: 1000, borderColor: "black", classed: "blink2" },
+                { button: ct64.HES, timeStamp: 78000, timeout: 1000, borderColor: "blue", classed: "blink2" },
+                { button: ct64.view_physio, timeStamp: 82000, timeout: 1000, borderColor: "blue", classed: "blink2" },
 
                 { speak: "Utilizzando la centrale CT64, il medico specialista e il medico curante possono prontamente accedere agli esami ed ai profili dei pazienti.", timeStamp: 79000 },
                 { speak: "Questo facilita quindi diagnosi e refertazione accurata dei pazienti.", timeStamp: 88000 },
-                { button: ct64.write_report, timeStamp: 91000, timeout: 1000, borderColor: "black", classed: "blink2" },
+                { button: ct64.write_report, timeStamp: 91000, timeout: 1000, borderColor: "blue", classed: "blink2" },
                 { input: "#diagnosis", value: "Nella norma.", timeStamp: 94000 }
             ]).play();
         } else if (demo === Demo.POWER_ON_MT32) {
             player.load([
                 { speak: "Istruzioni per accendere il dispositivo MT32.", timeStamp: 1000 },
                 { speak: "Premi il pulsante power per almeno un secondo.", timeStamp: 7000 },
-                { button: mt32.power_btn, timeStamp: 9000, timeout: 1500, borderColor: "black" },
+                { button: mt32.power_btn, timeStamp: 9000, timeout: 1500, borderColor: "blue" },
                 { speak: "Comparirà la pagina principale ed il dispositivo è pronto all'uso.", timeStamp: 11000 },
             ]).play();
         } else if (demo === Demo.POWER_OFF_MT32) {
