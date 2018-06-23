@@ -1913,7 +1913,7 @@ define(function (require, exports, module) {
             .links(extendedLinks)
             .size([width, height])
             .charge(-4096)
-            .gravity(0.8)
+            .gravity(0.6)
             .linkDistance(120)
             .on("tick", function() {
                 // pull initial state towards left-up
