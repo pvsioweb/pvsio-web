@@ -12,6 +12,11 @@ define(function (require, exports, module) {
         this._emuchartsEditor = emuchartsEditor;
     };
 
+    function normalize(name) {
+        // replace all hyphens and white spaces in screen names and transitions namens with an underscore
+        return name.replace(/[-|\s]/g, "_");
+    }
+
     /**
      * Adds the screens from the provided ScreenCollection to the chart
      * @param {ScreenCollection} screens Collection of screens to add
@@ -32,7 +37,7 @@ define(function (require, exports, module) {
                 // doesn't already exist.
                 if (w.targetScreen() != null && !targets.has(w.targetScreen().get("name"))) {
                     _this._addWidgetTransition(w, s);
-                    targets.add(w.targetScreen().get("name"));
+                    targets.add(normalize(w.targetScreen().get("name")));
                 }
             });
 
@@ -70,7 +75,7 @@ define(function (require, exports, module) {
         var _this = this;
         // Have to call down into the emulink object so that we can get the state/node object back
         var state = this._emuchartsEditor.emucharts.add_node({
-            name: scr.get("name"),
+            name: normalize(scr.get("name")),
             id: scr.id
         });
 
@@ -86,7 +91,7 @@ define(function (require, exports, module) {
             }
 
             widgets.push({
-                name: w.name(),
+                name: normalize(w.name()),
                 category: "ActionControl",
                 behaviours: behaviours
             });
@@ -116,7 +121,7 @@ define(function (require, exports, module) {
     };
 
     EmuWrapper.prototype._createBehaviourName = function (targetScreen) {
-        return "I_" + targetScreen.get("name").trim().replace(/[\s-]+/g, "_");
+        return "I_" + normalize(targetScreen.get("name")).trim();
     };
 
     module.exports = EmuWrapper;

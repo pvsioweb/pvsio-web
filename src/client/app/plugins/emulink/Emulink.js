@@ -13,6 +13,7 @@ define(function (require, exports, module) {
         ModelEditor         = require("plugins/modelEditor/ModelEditor"),
         PVSioWebClient      = require("PVSioWebClient"),
         EmuchartsEditorModes= require("plugins/emulink/EmuchartsEditorModes"),
+        // Emucharts           = require("plugins/emulink/Emucharts"),
 
         displayDelete          = require("plugins/emulink/forms/displayDelete"),
 //        displayAddExpression   = require("plugins/emulink/forms/displayAddExpression"),

@@ -15,6 +15,9 @@ define(function (require, exports, module) {
         //Emucharts = require("plugins/emulink/Emucharts"),
         EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes");
 
+    //layout manager
+    // const elk = new ELK();
+        
     var dbg = false;
 
     /**

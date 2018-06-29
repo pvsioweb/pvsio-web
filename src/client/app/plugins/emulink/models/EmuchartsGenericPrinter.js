@@ -277,6 +277,7 @@ define(function (require, exports, module) {
     var EmuchartsParser2 = require("plugins/emulink/EmuchartsParser2");
     // var projectManager = require("project/ProjectManager").getInstance();
     var displayAskParameters = require("plugins/emulink/forms/displayAskParameters");
+    var NotificationManager = require("project/NotificationManager");
 
     // var parser;
     var parser2;
@@ -656,7 +657,8 @@ define(function (require, exports, module) {
                                 var a = parser2.parseAction(action);
                                 if (a) {
                                     if (a.err) {
-                                        trigger_actions.push(a.err);
+                                        console.error(a.err);
+                                        NotificationManager.error(a.err);
                                     } else if (a.res && a.res.val && a.res.val){
                                         trigger_actions.push(shapeAction(a.res.val.val, emuchart));
                                     }

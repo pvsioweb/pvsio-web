@@ -210,6 +210,31 @@ define(function (require, exports, module) {
     };
 
     /**
+     * @function <a name="resize">resize</a>
+     * @description Changes the size of the widget according to the width and height given as parameter.
+     * @param coords {Object} Width and height indicating the new size of the widget. The coordinates are given in the form { width: (number), height: (number) }
+     * @param opt {Object}
+     *         <li> duration (Number): duration in milliseconds of the move transition (default is 0, i.e., instantaneous) </li>
+     *         <li> transitionTimingFunction (String): HTML5 timing function (default is "ease-out") </li>
+     * @memberof module:WidgetEVO
+     * @instance
+     */
+    WidgetEVO.prototype.resize = function (size, opt) {
+        // console.log(coords);
+        if (this.div && this.div.node()) {
+            size = size || {};
+            opt = normalise_options(opt);
+            opt.duration = opt.duration || 0;
+            opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
+            this.height = (isNaN(parseFloat(size.height))) ? this.height : parseFloat(parseFloat(size.height).toFixed(MAX_COORDINATES_ACCURACY));
+            this.width = (isNaN(parseFloat(size.width))) ? this.width : parseFloat(parseFloat(size.width).toFixed(MAX_COORDINATES_ACCURACY));
+            this.div.transition().duration(opt.duration).style("height", this.height + "px").style("width", this.width + "px")
+                        .style("transition-timing-function", opt.transitionTimingFunction);
+        }
+        return this.reveal();
+    };
+
+    /**
      * @function <a name="rotate">rotate</a>
      * @description Rotates the widget of the degree given as parameter.
      * @param deg {Number | String} Degrees by which the widget will be rotated. Positive degrees are for clock-wise rotations, negative degrees are for counter-clock-wise rotations.
