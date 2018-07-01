@@ -1064,6 +1064,7 @@ function run() {
                 }
             } catch (error) {
                 logger.error(error.message);
+                logger.error(m);
                 logger.warn("Error while parsing token " + JSON.stringify(m).replace(/\\/g,""));
             }
         });

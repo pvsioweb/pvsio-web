@@ -99,6 +99,7 @@ define(function (require, exports, module) {
     function WidgetEVO(id, coords, opt) {
         opt = normalise_options(opt);
         this.id = id;
+        this.type = this.type || "widget-evo";
         this.parent = (opt.parent) ? ("#" + opt.parent) : "body";
         this.top = coords.top || 0;
         this.left = coords.left || 0;
@@ -432,6 +433,36 @@ define(function (require, exports, module) {
      */
     WidgetEVO.prototype.getSize = function () {
         return { width: this.width, height: this.height };
+    };
+
+    /**
+     * @function <a name="setPosition">setPosition</a>
+     * @description Sets the position of the widget
+     * @param coords {Object} Coordinates of the widget, in the form { left: x, top: y }, where x and y are real numbers
+     * @memberof module:WidgetEVO
+     * @instance
+     */
+    WidgetEVO.prototype.setPosition = function (coords) {
+        if (coords) {
+            if (coords.left) { this.left = coords.left; }
+            if (coords.top) { this.top = coords.top; }
+        }
+        return this;
+    };
+
+    /**
+     * @function <a name="setSize">setSize</a>
+     * @description Set the size of the widget
+     * @param size {Object} Size of the widget, in the form { width: x, height: y }, where x and y are real numbers
+     * @memberof module:WidgetEVO
+     * @instance
+     */
+    WidgetEVO.prototype.setSize = function (size) {
+        if (size) {
+            if (size.width) { this.width = size.width; }
+            if (size.height) { this.height = size.height; }
+        }
+        return this;
     };
 
     /**

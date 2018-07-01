@@ -1,6 +1,6 @@
 <div id="warnings" class="warnings" style="display:none"><button type="button" id="dismissWarnings">Dismiss</button></div>
-<div id="content" class="center prototypebuilder offscreen">
-    <div id="header" class="btn-group">
+<div id="content" class="center prototypebuilder">
+    <div id="header" class="btn-group toolkit-body">
         <div id="projectTitle">
             <div class="btn txtProjectName"><span id="txtProjectName"></span></div>
             <div style="width:100%">
@@ -47,14 +47,14 @@
             </div>
         </div>
     </div>
-    <div class="ljs-hcontent content-body">
+    <div class="ljs-hcontent content-body toolkit-body" style="opacity:0;">
         <div class="ljs-hcontent">
             <div id="body"></div>
         </div>
         <div id="rightPanel" class="ljs-right">
             <div id="plugins-group" class="plugins-group">
                 <div class="plugins">PVSio-web Tools</div>
-                <ul>
+                {{!-- <ul>
                     {{#each plugins}}
                     <li class="list-group-item plugin-box" id="pluginBox_{{id}}" style="display:flex;">
                         <div class="toggle toggle-modern plugin-toggle" style="width:80px; height:32px;" id="pluginToggle_{{id}}"></div>
@@ -65,31 +65,9 @@
                                    style="display:none;">
                                    {{label}}
                         </label>
-                        <script>
-                            $('#pluginToggle_{{id}}').on('toggle', function (e, active) {
-                                if (active) {
-                                    $('#plugin_{{id}}').get(0).checked = true;
-                                } else {
-                                    $('#plugin_{{id}}').get(0).checked = false;
-                                }
-                            });
-                            $('#plugin_{{id}}').change(function() {
-                              if (this.checked) {
-                                $('#pluginToggle_{{id}}').data('toggles').toggle(true);
-                              } else {
-                                $('#pluginToggle_{{id}}').data('toggles').toggle(false);
-                              }
-                            });
-                        </script>
                     </li>
                     {{/each}}
-                    <script>
-                        // bootstrap toggle buttons
-                        //$('[data-toggle="toggle"]').bootstrapToggle();
-                        $('.toggle').toggles();
-                        $('.toggle-inner').css("display", "flex"); // this is needed to fix a bug in jquery-toggles, which messes up the toggle when zooming in/out in the browser
-                    </script>
-                </ul>
+                </ul> --}}
             </div>
             <div class="expandable-panel">
                 <script>

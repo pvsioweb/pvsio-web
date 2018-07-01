@@ -70,7 +70,9 @@
         // svg does not support z-index, so we need this workaround
         d3.selection.prototype.moveToFront = function() {
           return this.each(function(){
-            this.parentNode.appendChild(this);
+              if (this.parentNode) {
+                this.parentNode.appendChild(this);
+              }
           });
         };
         g.moveToFront();

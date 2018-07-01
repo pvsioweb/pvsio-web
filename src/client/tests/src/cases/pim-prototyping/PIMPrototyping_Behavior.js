@@ -62,15 +62,13 @@ define(function (require, exports, module) {
 
         // https://github.com/nathanielw/pvsio-web/issues/2
         describe("Switching to PIM prototyping mode", function() {
-            var buttonSelector = ".plugin-box input[name='Storyboard Editor']";
-
             it("provides a button to switch to the mode", function() {
                 /*
                  Given the UI is loaded
                  Then a tab for activating the mode exists
                  */
 
-                expect(d3.select(buttonSelector).empty()).toBe(false);
+                expect(d3.select("#pluginToggle_Storyboard_Editor").empty()).toBe(false);
             });
 
             it("switches to PIM mode correctly", function() {
@@ -80,8 +78,8 @@ define(function (require, exports, module) {
                 Then the PIM prototyping interface is shown
                  */
 
-                d3.select("#plugin_StoryboardEditor").node().click();
-                expect(d3.select(".collapsible-panel-parent[plugin-owner='StoryboardEditor']").empty()).toBe(false);
+                d3.select("#pluginToggle_Storyboard_Editor").node().click();
+                expect(d3.select(".collapsible-panel-parent[plugin-owner='Storyboard_Editor']").empty()).toBe(false);
             });
         });
 
@@ -336,7 +334,7 @@ define(function (require, exports, module) {
                 And the chart should have a state for each screen of the prototype
                  */
                 convertChart();
-                var emuPanel = d3.select(".collapsible-panel-parent[plugin-owner='EmuChartsEditor']");
+                var emuPanel = d3.select(".collapsible-panel-parent[plugin-owner='Emucharts_Editor']");
                 expect(emuPanel.empty()).toBe(false);
 
                 util.wait(1000)().then(function() {

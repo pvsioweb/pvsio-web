@@ -99,12 +99,12 @@ define(function (require, exports, module) {
         },
 
         loadPlugin: function (pluginId) {
-            var clickPlugin = util.click("#plugin_{}".format(pluginId));
+            var clickPlugin = util.click("#pluginToggle_{}".format(pluginId));
             return clickPlugin();
         },
 
         unloadPlugin: function (pluginId) {
-            var clickPlugin = util.click("#plugin_{}".format(pluginId));
+            var clickPlugin = util.click("#pluginToggle_{}".format(pluginId));
             return clickPlugin()//to load
                     .then(clickPlugin);
         },

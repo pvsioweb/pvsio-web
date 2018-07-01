@@ -3,10 +3,11 @@
  * @author Patrick Oladimeji
  * @date 11/21/13 15:03:48 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext: true*/
 /*global define, Promise, layoutjs*/
 define(function (require, exports, module) {
     "use strict";
+    const normalize = require("util/Normalize").getInstance();
     var CodeMirror          = require("cm/lib/codemirror"),
         PVSioWebClient      = require("PVSioWebClient"),
         d3                  = require("d3/d3"),
@@ -170,12 +171,14 @@ define(function (require, exports, module) {
         };
     }
 
+    let name = "Model Editor";
+
     ModelEditor.prototype.getName = function () {
-        return "Model Editor";
+        return name;
     };
 
     ModelEditor.prototype.getId = function () {
-        return "ModelEditor";
+        return normalize.removeSpaceDash(name);
     };
 
     /////These are the api methods that the prototype builder plugin exposes

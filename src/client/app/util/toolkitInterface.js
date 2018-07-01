@@ -3,26 +3,22 @@
  * @author Patrick Oladimeji
  * @date 11/15/13 16:29:55 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext: true*/
 /*global define, d3, $, Backbone, Handlebars, layoutjs */
 define(function (require, exports, module) {
     "use strict";
-    var ModelEditor = require("plugins/modelEditor/ModelEditor"),
-        Emulink = require("plugins/emulink/Emulink"),
-//        SafetyTest = require("plugins/safetyTest/SafetyTest"),
-        // PropertyTemplates = require("plugins/propertytemplates/PropertyTemplates"),
-        GraphBuilder = require("plugins/graphbuilder/GraphBuilder"),
-        PIMPrototyper = require("plugins/pimPrototyper/PIMPrototyper"),
-        PrototypeBuilder = require("plugins/prototypebuilder/PrototypeBuilder"),
-        Logger	= require("util/Logger"),
-        PluginManager = require("plugins/PluginManager"),
-        PVSioWeb = require("PVSioWebClient").getInstance(),
-        ProjectManager = require("project/ProjectManager"),
-        displayQuestion = require("pvsioweb/forms/displayQuestion"),
-        PreferenceDialog     = require("preferences/PreferenceDialog"),
-        Preferences = require("preferences/PreferenceStorage").getInstance();
 
-    var template = require("text!pvsioweb/forms/maincontent.handlebars");
+    const Logger = require("util/Logger");
+    const PluginManager = require("plugins/PluginManager").getInstance();
+    const PVSioWeb = require("PVSioWebClient").getInstance();
+    const ProjectManager = require("project/ProjectManager");
+    const PreferenceDialog = require("preferences/PreferenceDialog");
+    const Preferences = require("preferences/PreferenceStorage").getInstance();
+
+    const displayQuestion = require("pvsioweb/forms/displayQuestion");
+    const toolkitTemplate = require("text!./ui.toolkitInterface.handlebars");
+
+
     /**
      * @private
      * Shows a prompt to the user signalling that the connection to the server has broken.
@@ -40,23 +36,7 @@ define(function (require, exports, module) {
                 buttons: ["Dismiss", "Reconnect"]
             };
 
-//        function retry() {
-//            function removeDialog() {
-//                if (q) { q.remove(); }
-//            }
-//            if (!PVSioWeb.isWebSocketConnected()) {
-//                ProjectManager.getInstance().reconnectToServer()
-//                    .then(function () {
-//                        removeDialog();
-//                        clearTimeout(timerid);
-//                    }).catch(function () {
-//                        timerid = setTimeout(retry, 1000);
-//                    });
-//            } else {
-//                removeDialog();
-//            }
-//        }
-        //dont create a new question form if one already exists
+        //don't create a new question form if one already exists
         if (d3.select(".overlay").empty()) {
             if (!opt || (opt && !opt.silentMode)) {
                 q = displayQuestion.create(data).on("reconnect", function (e, view) {
@@ -75,10 +55,6 @@ define(function (require, exports, module) {
                     view.remove();
                 });
             }
-            // I'm disabling this timer because otherwise the dialog cannot be dismissed
-//            //create a timer to poll the connection to the server
-//            //this automatically dismisses the dialog after successful reconnection
-//            timerid = setTimeout(retry, 1000);
         }
     }
 
@@ -140,38 +116,31 @@ define(function (require, exports, module) {
     }
 
 
-    var  MainView = Backbone.View.extend({
+    var ToolkitInterface = Backbone.View.extend({
         initialize: function (data) {
             this.render(data);
         },
         render: function (data) {
-            var t = Handlebars.compile(template);
-            this.$el.html(t(data));
+            let mainView = Handlebars.compile(toolkitTemplate);
+            this.$el.html(mainView(data));
             $("body").append(this.el);
             layoutjs({el: "#content", useFullHeight: true});
+            d3.select("#header").style("opacity", 0);
             return this;
         },
         events: {
-            "change input[type='checkbox']": "checkboxChanged",
             "click .plugin-box": "pluginClicked",
             "click .plugin-box label": "pluginLabelClicked",
             "click a#preferences": "preferencesClicked"
         },
-        checkboxChanged: function (event) {
-            this.trigger("pluginToggled", event);
-        },
         pluginClicked: function (event) {
             if (event.target.tagName.toLowerCase() === "li") {
-                PluginManager.getInstance().selectPlugin(event.target.id.split("_")[1]);
-            } else if (event.target.tagName.toLowerCase() === "div") {
-                event.target.id = d3.select(event.target).node().parentNode.parentNode.parentNode.id;
-                event.target.checked = d3.select(d3.select(event.target).node().parentNode.parentNode.parentNode.parentNode).select("input").node().checked;
-                this.trigger("pluginToggled", event);
+                PluginManager.selectPlugin(event.target.id.replace("pluginBox_", ""));
             }
         },
         pluginLabelClicked: function (event) {
-            if (event && event.target && typeof event.target.id === "string" && event.target.id.split("_").length === 2) {
-                PluginManager.getInstance().selectPlugin(event.target.id.split("_")[1]);
+            if (event && event.target && typeof event.target.id === "string") {
+                PluginManager.selectPlugin(event.target.id.replace("pluginLabel_", ""));
             }
         },
         scriptClicked: function (event) {
@@ -190,44 +159,17 @@ define(function (require, exports, module) {
         }
     });
 
-    function createHtmlElements(data) {
-        return new MainView(data);
+    function createHtmlElements (data) {
+        return new ToolkitInterface(data);
     }
 
-
     module.exports = {
-        init: function (data) {
-            var plugins = [
-                    PrototypeBuilder.getInstance(),
-                    PIMPrototyper.getInstance(),
-                    ModelEditor.getInstance(),
-                    Emulink.getInstance(),
-//                    PropertyTemplates.getInstance(),
-                    GraphBuilder.getInstance()
-            ];
-            data = data || {
-                plugins: plugins.map(function (p) {
-                    var label = (typeof p.getName === "function") ? p.getName() : p.constructor.name;
-                    var id =  (typeof p.getId === "function") ? p.getId() : p.constructor.name;
-                    return { label: label, id: id, plugin: p };
-                })
-            };
-            data.version = PVSioWeb.version();
-
-            PluginManager.getInstance().init();
-            PluginManager.getInstance().addListener("PluginEnabled", function (event) {
-                if (d3.select("#plugin_" + event.plugin.getId()).node() &&
-                        !document.getElementById("plugin_" + event.plugin.getId()).checked) {
-                    d3.select("#plugin_" + event.plugin.getId()).node().click();
-                }
-            }).addListener("PluginDisabled", function (event) {
-                if (d3.select("#plugin_" + event.plugin.getId()).node() &&
-                        document.getElementById("plugin_" + event.plugin.getId()).checked) {
-                    d3.select("#plugin_" + event.plugin.getId()).node().click();
-                }
-            });
+        init: function () {
+            PluginManager.init();
             if (this._view) { this.unload(); }
-            this._view = createHtmlElements(data);
+            this._view = createHtmlElements({
+                version: PVSioWeb.version()
+            });
             return this._view;
         },
         unload: function () {

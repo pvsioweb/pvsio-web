@@ -9,7 +9,7 @@ define(function (require, exports, module) {
             var screenName, node, editorStub;
 
             beforeEach(function () {
-                screenName = "test screen";
+                screenName = "test_screen";
                 node = {};
 
                 editorStub = {
@@ -43,7 +43,7 @@ define(function (require, exports, module) {
                 it("correctly adds the screen's widgets to the state", function() {
                     var scr = new Screen({ name: screenName });
                     var widget = {
-                        name: function() { return "test widget"; },
+                        name: function() { return "test_widget"; },
                         targetScreen: function() { return scr; }
                     };
                     scr.set("widgets", { 1: widget });
@@ -60,7 +60,7 @@ define(function (require, exports, module) {
                 it("calls the add_edge method of the editor with the correct arguments", function() {
                     var scr = new Screen({ name: screenName });
                     var widget = {
-                        name: function() { return "test widget"; },
+                        name: function() { return "test_widget"; },
                         targetScreen: function() { return scr; }
                     };
                     scr.set("widgets", { 1: widget });

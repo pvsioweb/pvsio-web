@@ -1000,7 +1000,9 @@ define(function (require, exports, module) {
         if (g.node()) {
             d3.selection.prototype.moveToFront = function() {
               return this.each(function(){
-                this.parentNode.appendChild(this);
+                  if (this.parentNode) {
+                    this.parentNode.appendChild(this);
+                  }
               });
             };
             g.moveToFront();
