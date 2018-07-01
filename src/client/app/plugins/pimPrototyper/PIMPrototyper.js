@@ -387,9 +387,7 @@ define(function (require, exports, module) {
             view.remove();
         });
         return this;
-    }
-
-
+    };
 
     module.exports = {
         getInstance: function () {
