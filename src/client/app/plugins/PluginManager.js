@@ -73,8 +73,9 @@ define(function (require, exports, module) {
                         });
                         return Promise.all(depPromises).then(function () {
                             plugin.initialise().then(function (res) {
-                                resolve(res);
+                                $("#pluginToggle_" + plugin.getId()).toggles(true);
                                 jumpTo(plugin.getId());
+                                resolve(res);
                             }).catch(function (err) {
                                 console.error(err);
                                 reject(err);
@@ -85,8 +86,9 @@ define(function (require, exports, module) {
                         });
                     } else {
                         plugin.initialise().then(function (res) {
-                            resolve(res);
+                            $("#pluginToggle_" + plugin.getId()).toggles(true);
                             jumpTo(plugin.getId());
+                            resolve(res);
                         }).catch(function (err) {
                             console.error(err);
                             reject(err);
@@ -162,7 +164,7 @@ define(function (require, exports, module) {
             function prepareHTML (pluginList) {
                 pluginList.forEach(function (plugin) {
                     d3.select("#plugins-group").append("div").attr("id", normalize.removeSpaceDash(plugin.id));
-                });            
+                });
             }
             return new Promise(function (resolve, reject) {
                 try {
@@ -171,7 +173,7 @@ define(function (require, exports, module) {
                     require(["text!" + pluginListFile], function (jsonFile) {
                         console.log(jsonFile);
                         let pluginList = JSON.parse(jsonFile);
-                        prepareHTML(pluginList);
+                        prepareHTML(pluginList); // this is necessary to ensure the toolks are always displayed in the same order
                         pluginList.forEach(function (plugin) {
                             promises.push(
                                 load_aux(plugin)
