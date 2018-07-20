@@ -83,7 +83,7 @@ define(function (require, exports, module) {
          // invoke BasicDisplayEVO constructor to create the widget
          BasicDisplayEVO.apply(this, [ id, coords, opt ]);
          // add widget-specific style attributes
-         this.style["letter-spacing"] = opt.letterSpacing || parseFloat(this.style["font-size"]) * 0.8;
+         this.style["letter-spacing"] = opt.letterSpacing || parseFloat(this.style["font-size"]) * 0.96;
          this.style["decimal-font-size"] = opt.decimalFontSize || parseFloat(this.style["font-size"]) * 0.8;
          this.style["decimal-letter-spacing"] = opt.decimalLetterSpacing || parseFloat(this.style["decimal-font-size"]) * 0.8;
          this.maxIntegerDigits = (isNaN(parseInt(opt.maxIntegerDigits))) ? Math.floor(0.75 * this.width / parseFloat(this.style["letter-spacing"])) : parseInt(opt.maxIntegerDigits);
@@ -117,7 +117,7 @@ define(function (require, exports, module) {
       * @instance
       */
      NumericDisplayEVO.prototype.render = function (state, opt) {
-         if (state) {
+         if (state !== null && state !== undefined) {
              // set style
              opt = this.normaliseOptions(opt);
              opt = this.normaliseOptions(opt);
