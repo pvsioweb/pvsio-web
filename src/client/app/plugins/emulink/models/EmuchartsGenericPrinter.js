@@ -419,9 +419,9 @@ define(function (require, exports, module) {
             var trigger = parser2.parseTrigger("{" + x + "}");
             if (trigger.res && trigger.res.val) {
                 trigger = trigger.res.val;
-                var trigger_id = (trigger.identifier.type === "identifier") ?
-                                    trigger.identifier
-                                    : { type: "identifier", val: trigger.identifier };
+                // var trigger_id = (trigger.identifier.type === "identifier") ?
+                //                     trigger.identifier
+                //                     : { type: "identifier", val: trigger.identifier };
                 var trigger_actions = [];
                 if (trigger.actions) {
                     trigger.actions.trim().split(";").forEach(function (action) {
