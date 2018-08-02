@@ -111,16 +111,18 @@ define(function (require, exports, module) {
                 });
             } else {
                 wscBase.send({type: "sendCommand", data: {command: action}}, function (err, res) {
-                    //do stuff to update the explored state graph and invoke the callback with the same parameters
-                    wscBase.fire({type: "GraphUpdate", transition: action, target: res.data, source: o.lastState()});
-                    //update the lastState if it was a valid pvsio state
-                    if (PVSioStateParser.isState(res.data)) {
-                        o.lastState(res.data);
-                    } else {
-                        Logger.log("Warning: PVSio was not able to execute " + action);
-                        Logger.log(res.data);
-                        //update res.data with previous valid state
-                        res.data = o.lastState();
+                    if (res && res.data) {
+                        //do stuff to update the explored state graph and invoke the callback with the same parameters
+                        wscBase.fire({type: "GraphUpdate", transition: action, target: res.data, source: o.lastState()});
+                        //update the lastState if it was a valid pvsio state
+                        if (PVSioStateParser.isState(res.data)) {
+                            o.lastState(res.data);
+                        } else {
+                            Logger.log("Warning: PVSio was not able to execute " + action);
+                            Logger.log(res.data);
+                            //update res.data with previous valid state
+                            res.data = o.lastState();
+                        }
                     }
                     if (cb && typeof cb === "function") { cb(err, res); }
                 });

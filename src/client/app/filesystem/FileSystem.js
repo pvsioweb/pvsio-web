@@ -12,7 +12,7 @@ define(function (require, exports, module) {
         FileHandler           = require("filesystem/FileHandler");
     var PreferenceStorage     = require("preferences/PreferenceStorage").getInstance(),
         PreferenceKeys        = require("preferences/PreferenceKeys"),
-        RemoteFileBrowser     = require("pvsioweb/RemoteFileBrowser"),
+        RemoteFileBrowser     = require("./RemoteFileBrowser"),
         Logger                = require("util/Logger"),
         openFilesForm         = require("pvsioweb/forms/openFiles"),
         displayQuestion       = require("pvsioweb/forms/displayQuestion"),
@@ -241,16 +241,19 @@ define(function (require, exports, module) {
             new RemoteFileBrowser(opt.filter)
                 .open(opt.path, { title: opt.title || "Select files (use shift key to select multiple files)" })
                 .then(function (files) {
-                    var paths = files.map(function (f) {
-                        return f.path;
-                    });
-                    var promises = [];
-                    paths.forEach(function (path) {
-                        promises.push(fs.readFile(path, opt));
-                    });
-                    return Promise.all(promises).then(function (res) {
-                        resolve(res);
-                    });
+                    if (files) {
+                        var paths = files.map(function (f) {
+                            return f.path;
+                        });
+                        var promises = [];
+                        paths.forEach(function (path) {
+                            promises.push(fs.readFile(path, opt));
+                        });
+                        return Promise.all(promises).then(function (res) {
+                            resolve(res);
+                        });
+                    }
+                    Promise.resolve();
                 }).catch(function (err) {
                     reject(err);
                 });

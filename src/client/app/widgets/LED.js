@@ -127,14 +127,16 @@ define(function (require, exports, module) {
 
     LED.prototype.render = function (txt, opt) {
         opt = opt || {};
-        txt = txt || "";
+        txt = txt || "#00FF66"; // default is light green
+        var color = (opt.color) ? opt.color : 
+                        (typeof txt === "string") ? txt : this.ledColor();
         var _this = this;
         function doRender() {
             var context = document.getElementById(_this.id() + "_canvas").getContext("2d");
             context.beginPath();
             context.globalAlpha = 0.9;
             context.arc(_this.width / 2, _this.height / 2, _this.radius, 0, 2 * Math.PI, false);
-            context.fillStyle = opt.color || _this.ledColor();
+            context.fillStyle = color;
             context.fill();
             if (!opt.noborder) { context.stroke(); }
             if (opt.blinking && !_this.blinking) {
@@ -162,9 +164,7 @@ define(function (require, exports, module) {
         return _this.hide();
     };
     LED.prototype.renderSample = function (opt) {
-        opt = opt || {};
-        var txt = opt.txt || this.example;
-        return this.render(txt, { visibleWhen: "true" });
+        return this.render("#00FF66");
     };
 
 

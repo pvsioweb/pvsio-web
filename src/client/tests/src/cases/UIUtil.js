@@ -72,11 +72,12 @@ define(function (require, exports, module) {
             title = title || "dialog triggered by " + btnTrigger;
             var clickbutton = util.click(btnTrigger);
             clickbutton()
-                .then(util.click("div.overlay #btnCancel"))
                 .then(function () {
-                    //expect overlay to have disappeared after clicking cancel
-                    expect($("div.overlay").length).toEqual(0);
-                    done();
+                    util.click("div.overlay #btnCancel")().then(function () {
+                        //expect overlay to have disappeared after clicking cancel
+                        expect($("div.overlay").length).toEqual(0);
+                        done();
+                    }).catch(util.expectError(done));
                 }).catch(util.expectError(done));
         },
 
@@ -94,8 +95,7 @@ define(function (require, exports, module) {
         openSampleProject: function (projectName) {
             var clickOpenProject = util.click("#openProject"),
                 clickProject = util.click("button[data-project='{}']".format(projectName));
-            return clickOpenProject()
-                    .then(clickProject);
+            return clickOpenProject().then(clickProject);
         },
 
         loadPlugin: function (pluginId) {

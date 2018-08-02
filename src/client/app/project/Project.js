@@ -12,7 +12,7 @@ define(function (require, exports, module) {
     var property            = require("util/property"),
         eventDispatcher     = require("util/eventDispatcher"),
         WSManager           = require("websockets/pvs/WSManager"),
-        WidgetManager       = require("pvsioweb/WidgetManager").getWidgetManager(),
+        WidgetManager       = require("plugins/PrototypeBuilderEVO/WidgetManager").getWidgetManager(),
         ScriptPlayer        = require("util/ScriptPlayer"),
         Descriptor			= require("./Descriptor"),
         Logger              = require("util/Logger"),
@@ -23,8 +23,6 @@ define(function (require, exports, module) {
 
     var _descriptors;
     var propertyChangedEvent = "PropertyChanged";
-
-
 
     /**
      * @function Project

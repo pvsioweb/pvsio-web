@@ -65,7 +65,7 @@
  *     }
  * });
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext: true */
 /*global define, _*/
 define(function (require, exports, module) {
     "use strict";
@@ -173,7 +173,7 @@ define(function (require, exports, module) {
                     // Create Pointer widget
                     self.pointers[opt.id] = new Pointer(
                         self.id + '-' + id,
-                        { top: opt.top, left: opt.left, height: opt.height, width: opt.width },
+                        { top: opt.top, left: opt.left, height: self.height, width: self.width },
                         opt
                     );
 
@@ -206,7 +206,7 @@ define(function (require, exports, module) {
                 self.width / svgWidth : self.height / svgHeight;
 
             // Set transform origin attributes and scale the SVG elements
-            self.div.select('svg').style("transform-origin", "0 0").style('transform', 'scale('+ratio+')');
+            self.div.style("transform-origin", "0 0").style('transform', 'scale('+ratio+')');
 
             self.ready();
             return self;
@@ -226,9 +226,13 @@ define(function (require, exports, module) {
      * @memberof module:Clock
      * @instance
      */
-    Clock.prototype.render = function()
-    {
-        if(this.isReady()) {
+    Clock.prototype.render = function() {
+        if(this.isReady() === false) {
+            let _this = this;
+            setTimeout(function () {
+                _this.render();
+            }, 1000);
+        } else {
             // Clock is rendered based on the current date and time
             var current = new Date();
             this.renderPointer(this.pointers.seconds, current.getSeconds(), this.pointers_opt.seconds);

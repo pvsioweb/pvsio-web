@@ -1,7 +1,7 @@
 .prototype-sidebar.ljs-left {
     width: 20%;
     background: $color-bg-lighter;
-    height: 480px;
+    min-height: 585px;
     overflow-y: auto;
 }
 

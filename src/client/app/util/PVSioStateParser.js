@@ -39,7 +39,7 @@ define(function (require, exports, module) {
         @return {String} Value of the
     */
     function evaluate(str) {
-        if (str) {
+        if (str !== null && str !== undefined) {
             if (typeof str === "string") {
                 str = str.trim();
                 var args = str.split("/");
@@ -50,7 +50,7 @@ define(function (require, exports, module) {
             }
             return str.toString().trim();
         }
-        return str;
+        return "";
     }
 
     /**

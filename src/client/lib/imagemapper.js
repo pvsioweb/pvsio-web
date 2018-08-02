@@ -10,6 +10,8 @@
     var helperPos = ['tl', 'tr', 'br', 'bl'], hw = 10, cornerOffset = hw / 2,
         helperData = helperPos.map(function (d) {return {x: cornerOffset, y: cornerOffset, align: d}; });
     var imageIsLoaded = false;
+    var svg;
+    var _editEnabled = true;
 
     var mouse_over_region = false; // this is used to choose between create & edit handlers
     var edit_timer = {
@@ -262,7 +264,7 @@
         config.scale = config.scale || 1;
         //clear any previous svgs
         d3.select(config.parent).select("svg").remove();
-        var imageEl = d3.select(config.element), props, mapLayer, svg,
+        var imageEl = d3.select(config.element), props, mapLayer,
             ed = d3.dispatch("create", "remove", "resize", "move", "select", "clearselection", "edit"), initTimer;
         props = cr(imageEl);
 
@@ -339,11 +341,13 @@
         var loadImage = function () {
             initialiseSVGLayer();
             svg.on("mousedown", function () {
-                if (!mouse_over_region) {
-                    var e = d3.event;
-                    var _scale = scale(svg.select("g"));
-                    createRegion(svg, {x: d3.mouse(this)[0] / _scale, y: d3.mouse(this)[1] / _scale}, ed);
-                    e.preventDefault();
+                if (_editEnabled) {
+                    if (!mouse_over_region) {
+                        var e = d3.event;
+                        var _scale = scale(svg.select("g"));
+                        createRegion(svg, {x: d3.mouse(this)[0] / _scale, y: d3.mouse(this)[1] / _scale}, ed);
+                        e.preventDefault();
+                    }
                 }
             });
             //initialisation complete
@@ -353,6 +357,44 @@
         };
         loadImage();
     }
+
+    booya.enable = function () {
+        _editEnabled = true;
+        if (!svg.empty()) {
+            svg.style("cursor", "crosshair");
+        }
+    }
+
+    booya.disable = function () {
+        _editEnabled = false;
+        if (!svg.empty()) {
+            svg.style("cursor", "default");
+        }
+    }
+
+    booya.resize = function (regionSelector, size) {
+        function updateCoord(val, old) {
+            return (isNaN(parseFloat(val))) ? parseFloat(old) : parseFloat(val);
+        }
+        let r = svg.select(regionSelector);
+        if (!r.empty()) {
+            let currentSize = {
+                width: parseFloat(r.style("width")),
+                height: parseFloat(r.style("height")),
+                x: parseFloat(r.style("x")),
+                y: parseFloat(r.style("y"))
+            };
+            size.x = (size.x === undefined) ? size.left : size.x;
+            size.y = (size.x === undefined) ? size.top : size.y;
+            updateRegion(r, {
+                width: updateCoord(size.width, currentSize.width),
+                height: updateCoord(size.height, currentSize.height),
+                x: updateCoord(size.x, currentSize.x),
+                y: updateCoord(size.y, currentSize.y)
+            });
+        }
+    }
+
 
     if (typeof define === "function") {
         define(function (require, exports, module) {
