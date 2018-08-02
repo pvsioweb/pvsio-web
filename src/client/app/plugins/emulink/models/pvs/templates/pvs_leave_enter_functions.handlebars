@@ -13,9 +13,7 @@
               {{/each}} IN st,
            ELSE -> st{{/each}}
         ENDCOND{{else
-  }}st WITH [ {{{current_mode.name}}} := m ]{{/if}} 
-  
-  {{#if previous_mode}}
+  }}st WITH [ {{{current_mode.name}}} := m ]{{/if}}{{#if previous_mode}}
   {{leave}}(m: {{{current_mode.type}}})(st: {{state_type}}): {{state_type}} = {{#if leave_actions}}
     LET st = st WITH [ {{{current_mode.name}}} := m ]
      IN COND %-- entry actions{{#each leave_actions}}
@@ -25,4 +23,6 @@
               {{/each}} IN st,
            ELSE -> st{{/each}}
         ENDCOND{{else
-  }}st WITH [ {{{current_mode.name}}} := m ]{{/if}}{{/if}}
+  }}st WITH [ {{{current_mode.name}}} := m ]{{/if}}{{else}}
+  {{leave}}(m: {{{current_mode.type}}})(st: {{state_type}}): {{state_type}} = st
+  {{/if}}
