@@ -42,13 +42,13 @@ define(function (require, exports, module) {
                 });
 
                 it("Import files dialog can be opened", function (done) {
-                    util.loadPlugin("ModelEditor").then(function () {
+                    util.loadPlugin("Model_Editor").then(function () {
                         util.pressingButtonOpensDialog("#btnImportFiles", "Import files into Project", done);
                     }).catch(util.expectError(done));
                 });
 
                 it("Import files dialog can be dismissed", function (done) {
-                    util.loadPlugin("ModelEditor").then(function () {
+                    util.loadPlugin("Model_Editor").then(function () {
                         util.dialogCanBeDismissed("#btnImportFiles", "Import files into Project", done);
                     }).catch(util.expectError(done));
                 });
@@ -74,58 +74,59 @@ define(function (require, exports, module) {
                     }).catch(util.expectError(done));
                 });
 
-                it("EmuCharts tool can be loaded", function (done) {
-                    util.loadPlugin("EmuChartsEditor").then(function () {
+                it("Emucharts tool can be loaded", function (done) {
+                    var p = "Emucharts_Editor";
+                    util.loadPlugin("Emucharts_Editor").then(function () {
                         setTimeout(function () {
-                            var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='EmuChartsEditor']");
+                            var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + p + "']");
                             expect(pluginPanel.empty()).toBeFalsy();
                             done();
                         }, 4000);
                     }).catch(util.expectError(done));
                 });
 
-                it("EmuCharts tool can be unloaded", function (done) {
-                    var p = "EmuChartsEditor";
+                it("Emucharts tool can be unloaded", function (done) {
+                    var p = "Emucharts_Editor";
                     util.unloadPlugin(p)
                         .then(function () {
-                            var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='EmuChartsEditor']");
+                            var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + p + "']");
                             expect(pluginPanel.empty()).toEqual(true);
                             done();
                         }).catch(util.expectError(done));
                 });
 
                 it("Model Editor tool can be loaded", function (done) {
-                    var p = "ModelEditor";
+                    var p = "Model_Editor";
                     util.loadPlugin(p).then(function () {
-                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='ModelEditor']");
+                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + p + "']");
                         expect(pluginPanel.empty()).toBeFalsy();
                         done();
                     }).catch(util.expectError(done));
                 });
 
                 it("Model Editor tool can be unloaded", function (done) {
-                    var p = "ModelEditor";
+                    var p = "Model_Editor";
                     util.unloadPlugin(p)
                         .then(function () {
-                            var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='{ModelEditor}']");
+                            var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + p + "']");
                             expect(pluginPanel.empty()).toEqual(true);
                             done();
                         }).catch(util.expectError(done));
                 });
 
-                it("State Machine Viewer tool can be loaded", function (done) {
-                    var p = "StateMachineViewer";
+                it("Interaction Log tool can be loaded", function (done) {
+                    var p = "Interaction_Log";
                     util.loadPlugin(p).then(function () {
-                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='StateMachineViewer']");
+                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + p + "']");
                         expect(pluginPanel.empty()).toBeFalsy();
                         done();
                     }).catch(util.expectError(done));
                 });
 
-                it("State Machine Viewer tool can be unloaded", function (done) {
-                    var p = "StateMachineViewer";
+                it("Interaction Log tool can be unloaded", function (done) {
+                    var p = "Interaction_Log";
                     util.unloadPlugin(p).then(function () {
-                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='StateMachineViewer']");
+                        var pluginPanel = d3.select(".collapsible-panel-parent[plugin-owner='" + p + "']");
                         expect(pluginPanel.empty()).toEqual(true);
                         done();
                     }).catch(util.expectError(done));
@@ -133,7 +134,7 @@ define(function (require, exports, module) {
             });
 
             describe("Prototype Builder", function () {
-                var pluginId = "PrototypeBuilder", editorPanel;
+                var p = "Prototype_Builder", editorPanel;
 
                 beforeEach(function (done) {
                     d3.select("div.overlay").remove();
@@ -142,7 +143,7 @@ define(function (require, exports, module) {
                         // open the unit_test project
                         pm.createProject({ projectName: 'unit_test/test', overWrite: true }).then(function (res) {
                             pm.openProject("unit_test/test").then(function (res) {
-                                editorPanel = "div.collapsible-panel-parent[plugin-owner='PrototypeBuilder'] .collapsible-panel";
+                                editorPanel = "div.collapsible-panel-parent[plugin-owner='" + p + "'] .collapsible-panel";
                                 done();
                             }).catch(util.expectError(done));
                         }).catch(util.expectError(done));
@@ -150,7 +151,7 @@ define(function (require, exports, module) {
                 });
 
                 it("can be collapsed", function (done) {
-                    util.togglePanel(pluginId)()
+                    util.togglePanel(p)()
                         .then(function () {
                             expect(d3.select(editorPanel).style("display")).toEqual("none");
                             done();
@@ -158,8 +159,8 @@ define(function (require, exports, module) {
                 });
 
                 it("can be collapsed and expanded", function (done) {
-                    util.togglePanel(pluginId)()
-                        .then(util.togglePanel(pluginId))
+                    util.togglePanel(p)()
+                        .then(util.togglePanel(p))
                         .then(function () {
                             expect(d3.select(editorPanel).style("display")).toEqual("block");
                             done();
@@ -168,8 +169,8 @@ define(function (require, exports, module) {
 
                 describe("Editor File Lists", function () {
                     it("has context menus", function (done) {
-                        util.loadPlugin("ModelEditor").then(function () {
-                            util.togglePanel(pluginId)()
+                        util.loadPlugin("Model_Editor").then(function () {
+                            util.togglePanel(p)()
                                 .then(util.rightclick("#pvsFiles"))
                                 .then(function () {
                                     expect(d3.select("div.contextmenu").empty()).toBeFalsy();
@@ -196,7 +197,7 @@ define(function (require, exports, module) {
 
                 it("can add files to the project", function (done) {
                     var filesLength = pm.project().pvsFilesList().length;
-                    util.loadPlugin("ModelEditor")
+                    util.loadPlugin("Model_Editor")
                         .then(util.listViewContextMenu("#pvsFiles", "#newfile"))
                         .then(function () {
                             setTimeout(function () {
@@ -210,7 +211,7 @@ define(function (require, exports, module) {
 
                 it("can remove files from the project", function (done) {
                     var filesLength = pm.project().pvsFilesList().length;
-                    util.loadPlugin("ModelEditor")
+                    util.loadPlugin("Model_Editor")
                         .then(util.listViewContextMenu("#pvsFiles", "#newfile"))
                         .then(util.click("#pvsFiles li:last-child"))
                         .then(util.listViewContextMenu("#pvsFiles", "#delete"))

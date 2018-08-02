@@ -45,7 +45,7 @@
  *     }
  * });
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext: true */
 /*global define*/
 define(function (require, exports, module) {
     "use strict";
@@ -145,7 +145,7 @@ define(function (require, exports, module) {
                     // Create Pointer widget instance and save it for later usage in rendering
                     self.pointers[opt.id] = new Pointer(
                         opt.id,
-                        { top: opt.top, left: opt.left, height: opt.height, width: opt.width },
+                        { top: opt.top, left: opt.left, height: self.height, width: self.width },
                         opt
                     );
 
@@ -178,7 +178,7 @@ define(function (require, exports, module) {
                 self.width / svgWidth : self.height / svgHeight;
 
             // Set transform origin attributes and scale the SVG elements
-            self.div.select('svg').style("transform-origin", "0 0").style('transform', 'scale('+ratio+')');
+            self.div.style("transform-origin", "0 0").style('transform', 'scale('+ (ratio * 1.2) +')');
 
             self.ready();
             return self;
@@ -204,26 +204,35 @@ define(function (require, exports, module) {
      * @memberof module:GaugeSport
      * @instance
      */
-    GaugeSport.prototype.render = function(value, opt)
-    {
-        if(this.isReady() && typeof value !== 'undefined') {
-            if(value.constructor === Object) {
-                for (var prop in value) {
-                    if (value.hasOwnProperty(prop) && this.pointers.hasOwnProperty(prop)) {
-                        this.renderPointer(this.pointers[prop], value[prop], this.pointers_opt[prop]);
+    GaugeSport.prototype.render = function(value, opt) {
+        if (this.isReady() === false) {
+            // retry render after one second
+            let _this = this;
+            setTimeout(function () {
+                _this.render(value, opt);
+            }, 1000);
+        } else {
+            if (typeof value !== 'undefined') {
+                if(value.constructor === Object) {
+                    for (var prop in value) {
+                        if (value.hasOwnProperty(prop) && this.pointers.hasOwnProperty(prop)) {
+                            this.renderPointer(this.pointers[prop], value[prop], this.pointers_opt[prop]);
+                        }
                     }
+                } else {
+                    var self = this;
+                    Object.keys(this.pointers).map(function(key, index) {
+                        self.renderPointer(self.pointers[key], value, self.pointers_opt[key]);
+                    });
                 }
-            } else {
-                var self = this;
-                Object.keys(this.pointers).map(function(key, index) {
-                    self.renderPointer(self.pointers[key], value, self.pointers_opt[key]);
-                });
+                this.setValue(value);
             }
-
-            this.setValue(value);
         }
-
         return this;
+    };
+
+    GaugeSport.prototype.renderSample = function () {
+        return this.render();
     };
 
     /**
@@ -292,8 +301,8 @@ define(function (require, exports, module) {
                             max_degree: 304,
                             style: 'gauge-pointer-3',
                             width: 38,
-                            top: 110,
-                            left: 110,
+                            top: 120,
+                            left: 120,
                         }
                     ]
                 };

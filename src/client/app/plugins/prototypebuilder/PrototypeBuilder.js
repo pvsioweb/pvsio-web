@@ -3,10 +3,11 @@
  * @author Patrick Oladimeji
  * @date 11/21/13 15:03:48 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext: true*/
 /*global define, Promise, layoutjs, d3*/
 define(function (require, exports, module) {
     "use strict";
+    const normalize = require("util/Normalize").getInstance();
     var PVSioWebClient      = require("PVSioWebClient"),
         WSManager           = require("websockets/pvs/WSManager"),
         ProjectManager	    = require("project/ProjectManager"),
@@ -24,8 +25,8 @@ define(function (require, exports, module) {
         ScriptPlayer        = require("util/ScriptPlayer"),
         PluginManager       = require("plugins/PluginManager"),
         fs                  = require("filesystem/FileSystem").getInstance(),
-        NotificationManager = require("project/NotificationManager"),
-        SaveProjectChanges  = require("project/forms/SaveProjectChanges"),
+        // NotificationManager = require("project/NotificationManager"),
+        // SaveProjectChanges  = require("project/forms/SaveProjectChanges"),
         Descriptor          = require("project/Descriptor"),
         MIME                = require("util/MIME").getInstance();
 
@@ -45,12 +46,13 @@ define(function (require, exports, module) {
         _prototypeBuilder = this;
     }
 
-    PrototypeBuilder.prototype.getName = function () {
-        return "Prototype Builder";
-    };
+    let name = "Prototype Builder";
 
+    PrototypeBuilder.prototype.getName = function () {
+        return name;
+    };
     PrototypeBuilder.prototype.getId = function () {
-        return "PrototypeBuilder";
+        return normalize.removeSpaceDash(name);
     };
 
     /**
@@ -232,65 +234,65 @@ define(function (require, exports, module) {
             }
             switchToSimulatorView();
         });
-        d3.select("#btnSaveProject").on("click", function () {
-            projectManager.saveProject({ filter: function (desc) { return desc.name.indexOf(".emdl") !== (desc.name.length - 5); }});
-            // FIXME: implement API plugin.saveAll in all plugins that saves all files relevant to each plugin, and invoke the APIs here.
-            var emulink = require("plugins/PluginManager").getInstance()
-                            .getEnabledPlugins().filter(function (p) {
-                                return p.getId() === "EmuChartsEditor";
-                            });
-            if (emulink && emulink[0]) {
-                emulink[0].saveAllCharts();
-            }
-        });
-        d3.select("#btnSaveProjectAs").on("click", function () {
-            if (d3.select("#btn_menuSaveChart").node()) {
-                d3.select("#btn_menuSaveChart").node().click();
-            }
-            var name = projectManager.project().name();
-            var date = (new Date().getFullYear()) + "." +
-                            (new Date().getMonth() + 1) + "." + (new Date().getDate());
-            if (!name.endsWith(date)) {
-                name += "_" + date;
-            }
-            projectManager.saveProjectDialog(name);
-        });
-        d3.select("#openProject").on("click", function () {
-            function openProject() {
-                projectManager.openProjectDialog().then(function (project) {
-                    var notification = "Project " + project.name() + " opened successfully!";
-                    Logger.log(notification);
-                }).catch(function (err) {
-                    if (err && err.error) {
-                        NotificationManager.error(err.error);
-                    } else {
-                        Logger.log(JSON.stringify(err));
-                    }
-                });
-            }
-            var currentProject = projectManager.project();
-            if (currentProject && currentProject._dirty()) {
-                //show save project dialog for the current project
-                SaveProjectChanges.create(currentProject)
-                    .on("yes", function (e, view) {
-                        view.remove();
-                        projectManager.saveProject().then(function (res) {
-                            openProject();
-                        }).catch(function (err) { alert(err); });
-                    }).on("no", function (e, view) {
-                        view.remove();
-                        openProject();
-                    });
-            } else {
-                openProject();
-            }
-        });
-        d3.select("#newProject").on("click", function () {
-            projectManager.createProjectDialog().then(function (res) {
-                var notification = "Project " + res.project().name() + "created!";
-                Logger.log(notification);
-            });
-        });
+        // d3.select("#btnSaveProject").on("click", function () {
+        //     projectManager.saveProject({ filter: function (desc) { return desc.name.indexOf(".emdl") !== (desc.name.length - 5); }});
+        //     // FIXME: implement API plugin.saveAll in all plugins that saves all files relevant to each plugin, and invoke the APIs here.
+        //     var emulink = require("plugins/PluginManager").getInstance()
+        //                     .getEnabledPlugins().filter(function (p) {
+        //                         return p.getId() === "EmuChartsEditor";
+        //                     });
+        //     if (emulink && emulink[0]) {
+        //         emulink[0].saveAllCharts();
+        //     }
+        // });
+        // d3.select("#btnSaveProjectAs").on("click", function () {
+        //     if (d3.select("#btn_menuSaveChart").node()) {
+        //         d3.select("#btn_menuSaveChart").node().click();
+        //     }
+        //     var name = projectManager.project().name();
+        //     var date = (new Date().getFullYear()) + "." +
+        //                     (new Date().getMonth() + 1) + "." + (new Date().getDate());
+        //     if (!name.endsWith(date)) {
+        //         name += "_" + date;
+        //     }
+        //     projectManager.saveProjectDialog(name);
+        // });
+        // d3.select("#openProject").on("click", function () {
+        //     function openProject() {
+        //         projectManager.openProjectDialog().then(function (project) {
+        //             var notification = "Project " + project.name() + " opened successfully!";
+        //             Logger.log(notification);
+        //         }).catch(function (err) {
+        //             if (err && err.error) {
+        //                 NotificationManager.error(err.error);
+        //             } else {
+        //                 Logger.log(JSON.stringify(err));
+        //             }
+        //         });
+        //     }
+        //     var currentProject = projectManager.project();
+        //     if (currentProject && currentProject._dirty()) {
+        //         //show save project dialog for the current project
+        //         SaveProjectChanges.create(currentProject)
+        //             .on("yes", function (e, view) {
+        //                 view.remove();
+        //                 projectManager.saveProject().then(function (res) {
+        //                     openProject();
+        //                 }).catch(function (err) { alert(err); });
+        //             }).on("no", function (e, view) {
+        //                 view.remove();
+        //                 openProject();
+        //             });
+        //     } else {
+        //         openProject();
+        //     }
+        // });
+        // d3.select("#newProject").on("click", function () {
+        //     projectManager.createProjectDialog().then(function (res) {
+        //         var notification = "Project " + res.project().name() + "created!";
+        //         Logger.log(notification);
+        //     });
+        // });
         d3.select("#btnLoadPicture").on("click", function () {
             prototypeImageView.onClickLoad();
         });

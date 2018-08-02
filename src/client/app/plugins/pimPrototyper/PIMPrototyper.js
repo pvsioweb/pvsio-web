@@ -1,6 +1,13 @@
+/**
+ *
+ * @author Nathaniel Watson, Paolo Masci
+ * @date June 30, 2018
+ */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext: true */
 /*global layoutjs, console */
 define(function (require, exports, module) {
     "use strict";
+    const normalize = require("util/Normalize").getInstance();
     var PVSioWebClient = require("PVSioWebClient"),
         ScreenControlsView = require("./forms/ScreenControlsView"),
         Screen = require("./Screen"),
@@ -119,7 +126,7 @@ define(function (require, exports, module) {
             widgetManager: this._widgetManager
         });
 
-        this._widgetListView = new WidgetsListView({
+        this._widgetsListView = new WidgetsListView({
             el: this._container.select(".prototype-list-container").node(),
             widgetManager: this._widgetManager,
             labelFunction: function (widget) {
@@ -138,12 +145,13 @@ define(function (require, exports, module) {
         this.switchToBuilderView();
     };
 
+    let name = "Storyboard Editor";
     PIMPrototyper.prototype.getName = function () {
-        return "Storyboard Editor";
+        return name;
     };
 
     PIMPrototyper.prototype.getId = function () {
-        return "StoryboardEditor";
+        return normalize.removeSpaceDash(name);
     };
 
     PIMPrototyper.prototype.initialise = function () {
@@ -153,7 +161,7 @@ define(function (require, exports, module) {
 
     PIMPrototyper.prototype.unload = function () {
         this._prototypeImageView.remove();
-        this._widgetListView.remove();
+        this._widgetsListView.remove();
         PVSioWebClient.getInstance().removeCollapsiblePanel(this._container);
         return Promise.resolve(true);
     };
@@ -278,7 +286,7 @@ define(function (require, exports, module) {
             },
             this._prototypeImageView.getImageMap()
         );
-        this._widgetListView.update();
+        this._widgetsListView.update();
 
         if (selectedScreen == null || selectedScreen.get("image") == null) {
             this._prototypeImageView.clearImage();
@@ -310,65 +318,75 @@ define(function (require, exports, module) {
      * @private
      */
     PIMPrototyper.prototype._setUpChildListeners = function () {
+        try {
+            var _this = this;
+
+            this._prototypeImageView.on("loadImageClicked", this._showLoadImageDialog, this);
+            this._screenControlsView.on("changeImageClicked", this._showLoadImageDialog, this);
+
+            this._prototypeImageView.on("WidgetRegionDrawn", function(coord, region) {
+                new WidgetConfigView({
+                    screenCollection: _this._screens,
+                    title: "New widget",
+                    okText: "Create",
+                })
+                .on("cancel", function(data, view) {
+                    view.remove();
+                    d3.select(region.node().parentNode).remove();
+                })
+                .on("ok", function(data, view) {
+                    _this._widgetManager.addNewWidget(data.data, coord, function(w) {
+                        region.classed(w.type(), true).attr("id", w.id());
+                        w.element(region);
+                        w.createImageMap({
+                            onClick: function(widget) {
+                                _this._onWidgetClicked(widget);
+                            },
+                            map: _this._prototypeImageView.getImageMap()
+                        });
+                    });
+
+                    view.remove();
+                });
+            });
+
+            this._prototypeImageView.on("WidgetEditRequested", function(widgetID) {
+                _this.editWidgetDialog(widgetID);
+            });
+            this._widgetsListView.on("WidgetEditRequested", function (widgetID) {
+                _this.editWidgetDialog(widgetID);
+            });
+            this._prototypeImageView.on("WidgetSelected", function(widget, add) {
+                _this._widgetsListView.selectWidget(widget, add);
+            });
+            this._widgetsListView.on("WidgetSelected", function(widget, add) {
+                _this._prototypeImageView.selectWidget(widget, add);
+            });
+        } catch (pimprototyper_init_error) {
+            console.error(pimprototyper_init_error);
+        }
+        return this;
+    };
+
+    PIMPrototyper.prototype.editWidgetDialog = function (widgetID) {
+        var widget = this._widgetManager.getWidget(widgetID);
         var _this = this;
 
-        this._prototypeImageView.on("loadImageClicked", this._showLoadImageDialog, this);
-        this._screenControlsView.on("changeImageClicked", this._showLoadImageDialog, this);
-
-        this._prototypeImageView.on("WidgetRegionDrawn", function(coord, region) {
-            new WidgetConfigView({
-                screenCollection: _this._screens,
-                title: "New widget",
-                okText: "Create",
-            })
-            .on("cancel", function(data, view) {
-                view.remove();
-                d3.select(region.node().parentNode).remove();
-            })
-            .on("ok", function(data, view) {
-                _this._widgetManager.addNewWidget(data.data, coord, function(w) {
-                    region.classed(w.type(), true)
-                        .attr("id", w.id());
-                    w.element(region);
-                    w.createImageMap({
-                        onClick: function(widget) {
-                            _this._onWidgetClicked(widget);
-                        },
-                        map: _this._prototypeImageView.getImageMap()
-                     });
-                });
-
-                view.remove();
-            });
+        new WidgetConfigView({
+            screenCollection: this._screens,
+            title: "Edit widget",
+            okText: "Save",
+            widget: widget
+        })
+        .on("cancel", function(data, view) {
+            view.remove();
+        })
+        .on("ok", function(data, view) {
+            widget.updateWithProperties(data.data);
+            _this._widgetManager.trigger("WidgetModified");
+            view.remove();
         });
-
-        this._prototypeImageView.on("WidgetEditRequested", function(widgetID) {
-            var widget = _this._widgetManager.getWidget(widgetID);
-
-            new WidgetConfigView({
-                screenCollection: _this._screens,
-                title: "Edit widget",
-                okText: "Save",
-                widget: widget
-            })
-            .on("cancel", function(data, view) {
-                view.remove();
-            })
-            .on("ok", function(data, view) {
-                widget.updateWithProperties(data.data);
-                _this._widgetManager.trigger("WidgetModified");
-                view.remove();
-            });
-        });
-
-
-        this._prototypeImageView.on("WidgetSelected", function(widget, add) {
-            _this._widgetListView.selectWidget(widget, add);
-        });
-
-        this._widgetListView.on("WidgetSelected", function(widget, add) {
-            _this._prototypeImageView.selectWidget(widget, add);
-        });
+        return this;
     };
 
     module.exports = {

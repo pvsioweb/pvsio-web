@@ -12,6 +12,7 @@ define(function (require, exports, module) {
     var property            = require("util/property"),
         eventDispatcher     = require("util/eventDispatcher"),
         WSManager           = require("websockets/pvs/WSManager"),
+        // WidgetManager       = require("plugins/PrototypeBuilderEVO/WidgetManager").getWidgetManager(),
         WidgetManager       = require("pvsioweb/WidgetManager").getWidgetManager(),
         ScriptPlayer        = require("util/ScriptPlayer"),
         Descriptor			= require("./Descriptor"),
@@ -23,8 +24,6 @@ define(function (require, exports, module) {
 
     var _descriptors;
     var propertyChangedEvent = "PropertyChanged";
-
-
 
     /**
      * @function Project
@@ -78,6 +77,9 @@ define(function (require, exports, module) {
             _this._dirty(true);
             _this.fire({type: "ProjectMainSpecFileChanged", previous: event.old, current: event.fresh});
         });
+
+        this.setUpListeners();
+        return this;
     }
 
     /**
@@ -85,16 +87,15 @@ define(function (require, exports, module) {
      */
     Project.prototype.setUpListeners = function() {
         var _this = this;
-        function onWidgetModified(opt) {
+        WidgetManager.on("WidgetModified", function (evt) {
             _this._dirty(true);
             var newWDStr = JSON.stringify(WidgetManager.getWidgetDefinitions(), null, " ");
             //get the widget definitions and update the widgetDefinition file
             var wdf = _this.getWidgetDefinitionFile();
             wdf.content = newWDStr;
             wdf.dirty(true);
-            _this.fire({type: "WidgetsFileChanged"});
-        }
-        WidgetManager.on("WidgetModified", onWidgetModified, _this); // NB: this third argument is important for getting the context variable right!
+            _this.fire({type: "WidgetsFileChanged"});            
+        });
     };
 
     /**

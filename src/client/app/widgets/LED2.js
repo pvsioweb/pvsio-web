@@ -128,6 +128,8 @@ define(function (require, exports, module) {
 
     LED2.prototype.render = function (txt, opt) {
         opt = opt || {};
+        // var color = (typeof txt === "string") ? txt : 
+        //                 (opt.color) ? opt.color : this.ledColor();
         var visibleWhen = opt.visibleWhen || this.visibleWhen();
         var expr = StateParser.simpleExpressionParser(visibleWhen);
         if (expr && expr.res) {

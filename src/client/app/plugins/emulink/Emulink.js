@@ -3,16 +3,18 @@
  * @author Paolo Masci
  * @date 25/05/14 6:39:02 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext: true*/
 /*global define, Promise, d3*/
 define(function (require, exports, module) {
     "use strict";
+    const normalize = require("util/Normalize").getInstance();
     var ProjectManager		= require("project/ProjectManager"),
         WSManager           = require("websockets/pvs/WSManager"),
         PluginManager       = require("plugins/PluginManager"),
         ModelEditor         = require("plugins/modelEditor/ModelEditor"),
         PVSioWebClient      = require("PVSioWebClient"),
         EmuchartsEditorModes= require("plugins/emulink/EmuchartsEditorModes"),
+        // Emucharts           = require("plugins/emulink/Emucharts"),
 
         displayDelete          = require("plugins/emulink/forms/displayDelete"),
 //        displayAddExpression   = require("plugins/emulink/forms/displayAddExpression"),
@@ -271,12 +273,14 @@ define(function (require, exports, module) {
         return this;
     }
 
+    let name = "Emucharts Editor";
+
     Emulink.prototype.getName = function () {
-        return "EmuCharts Editor";
+        return name;
     };
 
     Emulink.prototype.getId = function () {
-        return this.getName().replace(/\s/g, "");
+        return normalize.removeSpaceDash(name);
     };
 
 

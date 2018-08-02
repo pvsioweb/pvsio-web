@@ -18,9 +18,10 @@ define(function (require, exports, module) {
             ws.sendGuiAction(action, function (err, res) {
                 cb(err, res);
                 if (err) {
-                    console.error(err);
                     reject(err);
                 } else {
+                    console.log(res.command);
+                    console.log(res.data);
                     resolve(res);
                 }
             });
@@ -43,7 +44,13 @@ define(function (require, exports, module) {
             var guiActionPromise = getGUIActionPromise(guiAction, cb);
             return guiActionPromise;
         }).catch(function (err) {
-            console.error(err);
+            if (!(typeof err.message === "string" && err.message.indexOf("No resolution for tick") >= 0)) {
+                if (err.code === "EPIPE") {
+                    console.log("Unable to evaluate command in PVSio :/");
+                } else {
+                    console.error(err);
+                }
+            }
         });
     };
 

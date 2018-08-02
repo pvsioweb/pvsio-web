@@ -24,7 +24,7 @@ You should have received a copy of the GNU General Public License along with pvs
  *
  */
 /*jshint undef: true*/
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, undef: true, node: true*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, undef: true, node: true, esnext:true*/
 /*global __dirname*/
 
 function run() {
@@ -1058,13 +1058,29 @@ function run() {
                 var f = functionMaps[token.type];
                 if (f && typeof f === 'function') {
                     //call the function with token and socket as parameter
-                    f(token, socket, socketid);
+                    try {
+                        f(token, socket, socketid);
+                    } catch (eval_error) {
+                        let cmd = (token && token.data && token.data.command)? token.data.command : JSON.stringify(token);
+                        logger.error("unable to evaluate command " + cmd + " in PVSio (" + eval_error + ")");
+                        let res = {
+                            type: token.type + "_error",
+                            err: eval_error
+                        };
+                        processCallback(res, socket);
+                    }
                 } else {
                     logger.warn("f is something unexpected -- I expected a function but got type " + typeof f);
                 }
             } catch (error) {
                 logger.error(error.message);
+                logger.error(m);
                 logger.warn("Error while parsing token " + JSON.stringify(m).replace(/\\/g,""));
+                let res = {
+                    type: token.type + "_error",
+                    err: error
+                };
+                processCallback(res, socket);
             }
         });
 
@@ -1074,6 +1090,16 @@ function run() {
             if (_p) {
                 _p.close();
             }
+            delete pvsioProcessMap[socketid];
+        });
+
+        socket.on("error", function (err) {
+            logger.info("abrupt websocket close operation from client " + socketid);
+            var _p = pvsioProcessMap[socketid];
+            if (_p) {
+                _p.close();
+            }
+            logger.error(err);
             delete pvsioProcessMap[socketid];
         });
     });

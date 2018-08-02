@@ -82,22 +82,12 @@ define(function (require, exports, module) {
                     adjustedWidth = this.img.width,
                     adjustedHeight = this.img.height;
 
-                // FIXME: scaling is disabled for now, as it has introduced too many complications for resizing widgets style
-                // if (this.img.width > pbox.width && pbox.width > 0 && pbox.height > 0) {
-                //     adjustedWidth = pbox.width;
-                //     scale = adjustedWidth / this.img.width;
-                //     adjustedHeight = scale * this.img.height;
-                // }
-
                 this._innerContainer.style("width", adjustedWidth + "px").style("height", adjustedHeight + "px");
                 this.d3El.select("img").attr("src", this.img.src).attr("height", adjustedHeight).attr("width", adjustedWidth).attr("display", "block");
                 this.d3El.select("svg").attr("height", adjustedHeight).attr("width", adjustedWidth);
                 this.d3El.select("svg > g").attr("transform", "scale(" + scale + ")");
                 //hide the draganddrop stuff
                 this.d3El.select(".dndcontainer").style("display", "none");
-
-                //update widgets maps after resizing
-                this._widgetManager.scaleAreaMaps(scale);
             }
 
             return scale;

@@ -4,8 +4,8 @@
  * @author Patrick Oladimeji
  * @date 6/4/13 18:50:25 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, WebSocket, Promise*/
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext:true */
+/*global define, WebSocket, Promise, _*/
 define(function (require, exports, module) {
     "use strict";
     var property = require("util/property"),
@@ -34,6 +34,7 @@ define(function (require, exports, module) {
                         resolve(ws);
                     };
                     ws.onerror = function (event) {
+                        console.error("socket closed unexpectedly :/");
                         reject(event);
                     };
                     ws.onclose = function (event) {
@@ -46,17 +47,30 @@ define(function (require, exports, module) {
                     ws.onmessage = function (event) {
                         var token = JSON.parse(event.data);
                         //if token has an id check if there is a function to be called in the registry
-                        if (token.id && typeof callbackRegistry[token.id] === "function") {
-                            // var time = new Date().getTime() - token.time.client.sent;
-                            // console.log("Time to response for " + token.type + "  " + (time));
-                            if (token.type.indexOf("_error") >= 0 && dbg) {
-                                console.error(token); // errors should always be reported in the browser console
+                        if (token) {
+                            if (token.err && !token.id) {
+                                // these are critical errors such as websocket being closed
+                                if (token.err.code !== "EPIPE") {
+                                    console.error(JSON.stringify(token)); // errors should always be reported in the browser console
+                                }
+                                // clear callback log to unlock functions waiting
+                                _.each(callbackRegistry, function (f) {
+                                    f.call(o, token.err, null);
+                                });
+                                callbackRegistry = {}; // clean up callback registry for critical errors
                             }
-                            var f = callbackRegistry[token.id];
-                            delete callbackRegistry[token.id];
-                            f.call(o, token.err, token);
-                        } else if (token.type) {
-                            o.fire(token);
+                            if (token.id && typeof callbackRegistry[token.id] === "function") {
+                                // var time = new Date().getTime() - token.time.client.sent;
+                                // console.log("Time to response for " + token.type + "  " + (time));
+                                if (token.type.indexOf("_error") >= 0 && dbg) {
+                                    console.error(token); // errors should always be reported in the browser console
+                                }
+                                let f = callbackRegistry[token.id];
+                                delete callbackRegistry[token.id];
+                                f.call(o, token.err, token);
+                            } else if (token.type) {
+                                o.fire(token);
+                            }
                         }
                     };
                 }
@@ -70,7 +84,7 @@ define(function (require, exports, module) {
                 var id = uuid();
                 if (token && token.type) {
                     token.id = token.id || id;
-                    token.time = {client: {sent: new Date().getTime()}};
+                    token.time = { client: { sent: new Date().getTime() } };
                     if (token.data && token.data.command && typeof token.data.command === "string") {
                         // removing white space is useful to reduce the message size (e.g., to prevent stdin buffer overflow)
                         token.data.command = token.data.command.split(",").map(function(str) { return str.trim(); }).join(",");

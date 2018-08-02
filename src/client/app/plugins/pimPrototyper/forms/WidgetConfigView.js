@@ -62,23 +62,23 @@ define(function (require, exports, module) {
         },
 
         onChooseImage: function () {
-            return new Promise (function (resolve, reject) {
-                require("filesystem/FileSystem").getInstance().readFileDialog({
-                    encoding: "base64",
-                    title: "Select a picture",
-                    filter: require("util/MIME").imageFilter
-                }).then(function (descriptors) {
-                    if (descriptors && descriptors[0] && descriptors[0].content) {
-                        d3.select(".widget-image-alt").style("display", "none");
-                        d3.select(".widget-image")
-                            .attr("path", descriptors[0].path)
-                            .attr("name", descriptors[0].name)
-                            .attr("src", descriptors[0].content)
-                            .style("height", "20px");
-                    }
-                    resolve(descriptors);
-                }).catch(function (err) { reject(err); });
-            });
+            // return new Promise (function (resolve, reject) {
+            //     require("filesystem/FileSystem").getInstance().readFileDialog({
+            //         encoding: "base64",
+            //         title: "Select a picture",
+            //         filter: require("util/MIME").imageFilter
+            //     }).then(function (descriptors) {
+            //         if (descriptors && descriptors[0] && descriptors[0].content) {
+            //             d3.select(".widget-image-alt").style("display", "none");
+            //             d3.select(".widget-image")
+            //                 .attr("path", descriptors[0].path)
+            //                 .attr("name", descriptors[0].name)
+            //                 .attr("src", descriptors[0].content)
+            //                 .style("height", "20px");
+            //         }
+            //         resolve(descriptors);
+            //     }).catch(function (err) { reject(err); });
+            // });
         },
 
         ok: function (event) {

@@ -47,7 +47,7 @@ define(function (require, exports, module) {
     var property              = require("util/property"),
         eventDispatcher       = require("util/eventDispatcher"),
         Project               = require("project/Project"),
-        FileTreeView          = require("pvsioweb/FileTreeView"),
+        FileTreeView          = require("filesystem/FileTreeView"),
         Descriptor            = require("project/Descriptor"),
         WSManager             = require("websockets/pvs/WSManager"),
         displayQuestion       = require("pvsioweb/forms/displayQuestion"),
@@ -159,9 +159,7 @@ define(function (require, exports, module) {
                     project.refreshDescriptor(f).then(function (res) {
                         if (res.content) {
                             pvsFilesListView.getTreeList().refreshSelectedItem();
-//                            NotificationManager.show("Another application changed " + event.path +
-//                                                     ". PVSio-web has reloaded the file content from disk.");
-                            console.log("File " + event.path + " automatically reloaded from disk.");
+                            // console.log("File " + event.path + " automatically reloaded from disk.");
                         }
                     }).catch(function (err) { console.log(err); });
                 }

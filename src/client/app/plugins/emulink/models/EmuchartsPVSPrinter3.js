@@ -161,6 +161,8 @@ define(function (require, exports, module) {
                             current_mode: model.enter_leave.current_mode,
                             previous_mode: model.enter_leave.previous_mode,
                             state_type: model.enter_leave.state_type,
+                            entry_actions: model.enter_leave.entry_actions,
+                            leave_actions: model.enter_leave.leave_actions,
                             enter: predefined_functions.enter,
                             leave: predefined_functions.leave,
                         });

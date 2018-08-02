@@ -15,6 +15,9 @@ define(function (require, exports, module) {
         //Emucharts = require("plugins/emulink/Emucharts"),
         EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes");
 
+    //layout manager
+    // const elk = new ELK();
+        
     var dbg = false;
 
     /**
@@ -997,7 +1000,9 @@ define(function (require, exports, module) {
         if (g.node()) {
             d3.selection.prototype.moveToFront = function() {
               return this.each(function(){
-                this.parentNode.appendChild(this);
+                  if (this.parentNode) {
+                    this.parentNode.appendChild(this);
+                  }
               });
             };
             g.moveToFront();
@@ -1913,7 +1918,7 @@ define(function (require, exports, module) {
             .links(extendedLinks)
             .size([width, height])
             .charge(-4096)
-            .gravity(0.8)
+            .gravity(0.6)
             .linkDistance(120)
             .on("tick", function() {
                 // pull initial state towards left-up

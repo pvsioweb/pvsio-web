@@ -13,19 +13,19 @@
 %                won't be able to check coverage of conditions.
 %
 {{/if}}{{#if comment}}  %-- {{comment}}{{/if}}
-{{#if DEFAULT_INIT}}  {{name}}{{#if args}}({{#each args}}{{name}}: {{type}}{{/each}}){{/if}}: State = (#{{#each variables}}
+{{#if DEFAULT_INIT}}  {{name}}{{#if args}}({{#each args}}{{name}}: {{type}}{{/each}}){{/if}}(x: real): State = (#{{#each variables}}
     {{name}} := {{#if children}} (#{{#each children}}
       {{name}} := {{value}}{{#unless @last}},{{/unless}}{{/each}} #){{
           else}}{{value}}{{/if}}{{#unless @last}}, {{/unless}}{{/each}}
   #){{/if
-  }}{{#if INIT_WITH_OVERRIDES}}  {{name}}{{#if args}}({{#each args}}{{name}}: {{type}}{{/each}}){{/if}}: State = LET st = (#{{#each variables}}
+  }}{{#if INIT_WITH_OVERRIDES}}  {{name}}{{#if args}}({{#each args}}{{name}}: {{type}}{{/each}}){{/if}}(x: real): State = LET st = (#{{#each variables}}
     {{name}} := {{#if children}} (#{{#each children}}
       {{name}} := {{value}}{{#unless @last}},{{/unless}}{{/each}} #){{
           else}}{{value}}{{/if}}{{#unless @last}}, {{/unless}}{{/each}}
   #) IN st WITH [{{#each override}}{{#each actions}}
     {{variable_name}} := {{#if variable_name_l2}}{{variable_name}}(st) WITH [ {{variable_name_l2}} := {{/if}}{{override_expression}}{{#if variable_name_l2}} ]{{/if}}{{#unless @last}}, {{/unless}}{{/each}}{{/each}}
   ]{{/if
-  }}{{#if INIT_MULTI}}  {{name}}{{#if args}}({{#each args}}{{name}}: {{type}}{{/each}}){{/if}}: State = LET st = (#{{#each variables}}
+  }}{{#if INIT_MULTI}}  {{name}}{{#if args}}({{#each args}}{{name}}: {{type}}{{/each}}){{/if}}(x: real): State = LET st = (#{{#each variables}}
     {{name}} := {{#if children}} (#{{#each children}}
       {{name}} := {{value}}{{#unless @last}},{{/unless}}{{/each}} #){{
           else}}{{value}}{{/if}}{{#unless @last}}, {{/unless}}{{/each}}
