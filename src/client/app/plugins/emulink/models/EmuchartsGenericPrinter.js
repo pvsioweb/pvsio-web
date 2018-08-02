@@ -415,32 +415,36 @@ define(function (require, exports, module) {
     EmuchartsGenericPrinter.prototype.get_enter_leave = function (emuchart, opt) {
         function process_actions(actions, state, opt) {
             opt = opt || {};
-            var x = (opt.enter) ? state.enter : state.leave;
-            var ans = parser2.parseTrigger("{" + x + "}");
-            if (ans.res && ans.res.type === "transition") {
-                var action_sequence = [];
-                ans.res.val.actions.val.forEach(function (action) {
-                    var tmp = action.val.identifier.val.split(".");
-                    // this printer supports up to 2 hierarchical levels
-                    if (tmp.length === 2) {
-                        action_sequence.push({
-                            l1_name: tmp[0], // variable name in the form l1_name.l2_name
-                            l2_name: tmp[1],
-                            value: action.val.expression.val // variable value
-                        });
-                    } else {
-                        action_sequence.push({
-                            name: tmp[0], // variable name
-                            value: action.val.expression.val // variable value
-                        });
-                    }
-                });
+            var x = (opt.enter) ? state.enter : state.exit;
+            var trigger = parser2.parseTrigger("{" + x + "}");
+            if (trigger.res && trigger.res.val) {
+                trigger = trigger.res.val;
+                var trigger_id = (trigger.identifier.type === "identifier") ?
+                                    trigger.identifier
+                                    : { type: "identifier", val: trigger.identifier };
+                var trigger_actions = [];
+                if (trigger.actions) {
+                    trigger.actions.trim().split(";").forEach(function (action) {
+                        if (action.trim() !== "") {
+                            var a = parser2.parseAction(action);
+                            if (a) {
+                                if (a.err) {
+                                    console.error(a.err);
+                                    NotificationManager.error(a.err);
+                                } else if (a.res && a.res.val && a.res.val){
+                                    trigger_actions.push(shapeAction(a.res.val.val, emuchart));
+                                }
+                            }
+                        }
+                    });
+                }
                 actions.push({
                     state: state.name,
-                    action_sequence: action_sequence
+                    action_sequence: trigger_actions
                 });
             }
         }
+        setVariables(parser2, emuchart);
         var entry_actions = null, leave_actions = null;
         var states_with_entry_actions = emuchart.states.filter(function (state) {
             return state.enter && state.enter !== "";
@@ -452,7 +456,7 @@ define(function (require, exports, module) {
             });
         }
         var states_with_leave_actions = emuchart.states.filter(function (state) {
-            return state.leave && state.leave !== "";
+            return state.exit && state.exit !== "";
         });
         if (states_with_leave_actions.length > 0) {
             leave_actions = [];
@@ -473,6 +477,29 @@ define(function (require, exports, module) {
         if (predefined_variables.previous_mode) {
             data.previous_mode = predefined_variables.previous_mode;
         }
+        // post-processing
+        if (opt.convert_expression && typeof opt.convert_expression === "function") {
+            data.entry_actions = data.entry_actions.map(function (entry_action) {
+                entry_action.action_sequence = entry_action.action_sequence.map(function (action) {
+                    action.override_expression = opt.convert_expression(action.override_expression, emuchart, { variable_type: action.variable_type });
+                    return action;
+                });
+                return entry_action;
+            });
+            data.leave_actions = data.leave_actions.map(function (exit_action) {
+                exit_action.action_sequence = exit_action.action_sequence.map(function (action) {
+                    action.override_expression = opt.convert_expression(action.override_expression, emuchart, { variable_type: action.variable_type });
+                    return action;
+                });
+                return exit_action;
+            });
+        }
+        // if (opt.convert_variable && typeof opt.convert_variable === "function") {
+        //     data.variables = data.variables.map(function (v) {
+        //         return opt.convert_variable(v);
+        //     });
+        // }
+
         return data;
     };
 

@@ -357,7 +357,7 @@ define(function (require, exports, module) {
         var ans = { triggers: "", conditions: "" };
         this.grammar4triggers().forEach(function (r) {
             if (r.rule && r.rule.length > 0) {
-                ans.tiggers.push({ regex: new RegExp(r.rule[0]), type: (r.rule.length === 3) ? r.rule[2] : "builtin" });
+                ans.triggers.push({ regex: new RegExp(r.rule[0]), type: (r.rule.length === 3) ? r.rule[2] : "builtin" });
             }
         });
         this.grammar4conditions().forEach(function (r) {
