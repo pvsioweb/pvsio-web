@@ -89,7 +89,7 @@ define(function (require, exports, module) {
             this.cursorName = opt.cursorName || "";
 
             // add widget-specific style attributes
-            this.style["letter-spacing"] = opt.letterSpacing || parseFloat(this.style["font-size"]) * 1.1;
+            this.style["letter-spacing"] = opt.letterSpacing || parseFloat(this.style["font-size"]);
             this.style["decimal-font-size"] = opt.decimalFontSize || parseFloat(this.style["font-size"]) * 0.8;
             this.style["decimal-letter-spacing"] = opt.decimalLetterSpacing || parseFloat(this.style["decimal-font-size"]) * 0.8;
             this.maxDecimalDigits = (isNaN(parseInt(opt.maxDecimalDigits))) ? 2 : parseInt(opt.maxDecimalDigits);
