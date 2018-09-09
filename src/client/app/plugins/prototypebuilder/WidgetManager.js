@@ -344,6 +344,9 @@ define(function (require, exports, module) {
     WidgetManager.prototype.addNewWidget = function (data, coord, onCreate) {
         var name = data.functionText || data.displayKey || data.ledKey || "";
         data.id = data.type + "_" + name + "_" + uidGenerator();
+        // the ID should not contain "."
+        data.id = data.id.replace(/\./g,"-");
+
         data.height = coord.height;
         data.width = coord.width;
         data.x = coord.left;
