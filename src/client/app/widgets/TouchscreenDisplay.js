@@ -344,6 +344,9 @@
                  if (typeof txt === "object") {
                     var dispVal = StateParser.resolve(txt, this.displayKey());
                     if (dispVal) {
+                        if (typeof dispVal === "object") {
+                            dispVal = JSON.stringify(dispVal);
+                        }
                         dispVal = StateParser.evaluate(dispVal).toString().replace(new RegExp("\"", "g"), "");
                     }
                     this.overlayDisplay.render(dispVal, opt);
