@@ -236,6 +236,9 @@ define(function (require, exports, module) {
                 // txt in this case is a PVS state that needs to be parsed
                 var disp = StateParser.resolve(txt, this.displayKey());
                 if (disp) {
+                    if (typeof disp === "object") {
+                        disp = JSON.stringify(disp);
+                    }
                     this.txt = StateParser.evaluate(disp);
                     if (typeof this.txt === "string") {
                         this.txt = this.txt.replace(new RegExp("\"", "g"), "");
