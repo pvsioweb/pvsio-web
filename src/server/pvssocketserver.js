@@ -540,17 +540,32 @@ function run() {
             "sendCommand": function (token, socket, socketid) {
                 initProcessMap(socketid);
                 pvsioProcessMap[socketid].sendCommand(token.data.command, function (data) {
-                    var res = {
-                        id: token.id,
-                        command: token.data.command,
-                        data: [data],
-                        socketId: socketid,
-                        type: "commandResult",
-                        time: token.time,
-                        err: (typeof data === "string" && data.indexOf("Expecting an expression") === 0) ?
-                                { message: data, failedCommand: token.data.command } : null
-                    };
-                    processCallback(res, socket);
+                    if (data && typeof data === "object" && data.json) {
+                        console.log("sending json data", data.json);
+                        processCallback({
+                            id: token.id,
+                            command: token.data.command,
+                            data: [data],
+                            json: data.json,
+                            socketId: socketid,
+                            type: "commandResult",
+                            time: token.time,
+                            err: (typeof data === "string" && data.indexOf("Expecting an expression") === 0) ?
+                                    { message: data, failedCommand: token.data.command } : null
+                        }, socket);
+                    } else {
+                        processCallback({
+                            id: token.id,
+                            command: token.data.command,
+                            data: [data],
+                            json: null,
+                            socketId: socketid,
+                            type: "commandResult",
+                            time: token.time,
+                            err: (typeof data === "string" && data.indexOf("Expecting an expression") === 0) ?
+                                    { message: data, failedCommand: token.data.command } : null
+                        }, socket);
+                    }
                 });
             },
             "ping": function (token, socket, socketid) {

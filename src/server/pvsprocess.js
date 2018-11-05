@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License along with Foo
  * @date Jul 27, 2012 12:54:38 AM
  * @project JSLib
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext: true */
 /*global require, module, process, __dirname */
 
 var util = require("util"),
@@ -27,7 +27,7 @@ module.exports = function () {
     "use strict";
     var pvs = procWrapper();
     var o                                   = {},
-        output                              = [],
+		output                              = [],
         readyString                         = "<PVSio>",
         garbageCollector                    = [";;; GC:", ";;; Finished GC"],
         wordsIgnored                        = ["", "==>", readyString].concat(garbageCollector),
@@ -62,22 +62,37 @@ module.exports = function () {
 		return lines.join("").replace(/,/g, ", ").replace(/\s+\:\=/g, ":=").replace(/\:\=\s+/g, ":=");
 	}
 	/**
-        This function returns a function for processing stream data that is returned by the ouput stream of a process.
+        The returned function is responsible for processing stream data from PVSio.
     */
 	function processDataFunc() {
-		var res = [];
+		let res = [];
+		let jsonStream = false;
 		return function (data, cb) {
-			var lines = data.split("\n");
-			if (readyString === lines[lines.length - 1].trim()) {
-				if (cb && typeof cb === "function") {
-					lines.pop();//get rid of last line
-					res = res.concat(filterLines(lines));
-					cb(arrayToOutputString(res));
-					res = [];
-					return true;
+			let lines = data.trim().split("\n");
+			let lastLine = lines[lines.length - 1].trim();
+			if ((lastLine.indexOf("<JSON>") >= 0) || jsonStream) {
+				jsonStream = true;
+				res = res.concat(lines);
+				let complete = (lastLine.indexOf("</JSON>") >= 0);
+				if (complete) {
+					res = res.slice(1, -1);
+					if (cb && typeof cb === "function") {
+						cb({ json: res.join("") });
+					}
+					jsonStream = false;
 				}
 			} else {
-				res = res.concat(filterLines(lines));
+				if (lastLine.indexOf(readyString) >= 0) {
+					if (cb && typeof cb === "function") {
+						lines.pop();//get rid of last line
+						res = res.concat(filterLines(lines));
+						cb(arrayToOutputString(res));
+						res = [];
+						return true;
+					}
+				} else {
+					res = res.concat(filterLines(lines));
+				}
 			}
 			return false;
 		};
@@ -100,13 +115,13 @@ module.exports = function () {
      * The data processor function is used internally to match a command sent to the process with the corresponding
      * callback.
 	 * @param {String} filename source file to load with pvsio
-	 * @param {function} callback to call when processis ready or process exited
+	 * @param {function} callback to call when process is ready or process exited
 	 */
 	o.start = function (file, callback) {
 		filename = file;
         function onDataReceived(data) {
 			// this shows the original PVSio output
-            console.log(data.trim());
+			// console.log(data.trim());
             if (!processReady) {
                 var lines = data.split("\n").map(function (d) {
                     return d.trim();
@@ -116,13 +131,13 @@ module.exports = function () {
                 //and any blank lines
                 output = output.concat(lines.filter(function (d) {
                     return wordsIgnored.indexOf(d) < 0;
-                }));
-
-                if (lastLine.indexOf(readyString) > -1) {
-                    //last line of the output is the ready string
+				}));
+				
+                if (lastLine.indexOf(readyString) >= 0) {
+					//last line of the output is the ready string
                     callback({type: "processReady", data: output});
                     processReady = true;
-                    pvs.dataProcessor(processDataFunc());
+					pvs.dataProcessor(processDataFunc());
                 }
             }
             output = [];
