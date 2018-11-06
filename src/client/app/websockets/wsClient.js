@@ -14,7 +14,7 @@ define(function (require, exports, module) {
         events      = require("websockets/events");
 
     module.exports = function () {
-        var o = eventDispatcher({}), ws, callbackRegistry = {}, dbg = false;
+        let o = eventDispatcher({}), ws, callbackRegistry = {}, dbg = false;
         o.url = property.call(o, "ws://localhost");
 		o.port = property.call(o);
         /**
@@ -26,7 +26,7 @@ define(function (require, exports, module) {
                 if (ws) {
                     resolve(ws);
                 } else {
-                    var wsUrl = o.url();
+                    let wsUrl = o.url();
                     if (o.port()) { wsUrl = wsUrl + ":" + o.port(); }
                     ws = new WebSocket(wsUrl);
                     ws.onopen = function (event) {
@@ -45,10 +45,12 @@ define(function (require, exports, module) {
                     //when a message is received, look for the callback for that message id in the callbackRegistry
                     //if no callback exists then broadcast the event using the token type string
                     ws.onmessage = function (event) {
-                        var token = JSON.parse(event.data);
+                        console.log("message received: ", event);
+                        let token = JSON.parse(event.data);
                         //if token has an id check if there is a function to be called in the registry
                         if (token) {
                             if (token.err && !token.id) {
+                                console.error("Warning: server replied with error state", token.err);
                                 // these are critical errors such as websocket being closed
                                 if (token.err.code !== "EPIPE") {
                                     console.error(JSON.stringify(token)); // errors should always be reported in the browser console
@@ -60,8 +62,8 @@ define(function (require, exports, module) {
                                 callbackRegistry = {}; // clean up callback registry for critical errors
                             }
                             if (token.id && typeof callbackRegistry[token.id] === "function") {
-                                // var time = new Date().getTime() - token.time.client.sent;
-                                // console.log("Time to response for " + token.type + "  " + (time));
+                                let time = new Date().getTime() - token.time.client.sent;
+                                console.log("Time to response for " + token.type + "  " + (time));
                                 if (token.type.indexOf("_error") >= 0 && dbg) {
                                     console.error(token); // errors should always be reported in the browser console
                                 }
@@ -69,6 +71,7 @@ define(function (require, exports, module) {
                                 delete callbackRegistry[token.id];
                                 f.call(o, token.err, token);
                             } else if (token.type) {
+                                console.error("Warning: token id is not in callback registry");
                                 o.fire(token);
                             }
                         }

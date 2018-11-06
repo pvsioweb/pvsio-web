@@ -98,7 +98,9 @@ function run() {
                 }
             }
             if (socket && socket.readyState === 1) {
+                // console.log("sending data back to client...");
                 socket.send(JSON.stringify(token));
+                // console.log("data sent!");
             }
         } catch (processCallbackError) {
             console.log("WARNING: processCallbackError " + JSON.stringify(processCallbackError));
@@ -143,7 +145,9 @@ function run() {
 
     //create logger
     webserver.use("/demos", function (req, res, next) {
-        logger.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
+	if (req.method !== "GET") {
+        	logger.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
+	}
         next();
     });
 
@@ -538,27 +542,16 @@ function run() {
                 });
             },
             "sendCommand": function (token, socket, socketid) {
+                // console.log("received command: ", token);
                 initProcessMap(socketid);
                 pvsioProcessMap[socketid].sendCommand(token.data.command, function (data) {
-                    if (data && typeof data === "object" && data.json) {
-                        console.log("sending json data", data.json);
+                    // console.log("callback");
+                    if (data) {
                         processCallback({
                             id: token.id,
                             command: token.data.command,
-                            data: [data],
-                            json: data.json,
-                            socketId: socketid,
-                            type: "commandResult",
-                            time: token.time,
-                            err: (typeof data === "string" && data.indexOf("Expecting an expression") === 0) ?
-                                    { message: data, failedCommand: token.data.command } : null
-                        }, socket);
-                    } else {
-                        processCallback({
-                            id: token.id,
-                            command: token.data.command,
-                            data: [data],
-                            json: null,
+                            data: [data.pvsioOut],
+                            json: data.jsonOut,
                             socketId: socketid,
                             type: "commandResult",
                             time: token.time,

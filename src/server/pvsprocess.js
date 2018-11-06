@@ -30,7 +30,7 @@ module.exports = function () {
 		output                              = [],
         readyString                         = "<PVSio>",
         garbageCollector                    = [";;; GC:", ";;; Finished GC"],
-        wordsIgnored                        = ["", "==>", readyString].concat(garbageCollector),
+        wordsIgnored                        = ["==>", readyString].concat(garbageCollector),
         filename,
         processReady                        = false,
         workspaceDir                        = path.join(__dirname, "../../examples/");
@@ -62,37 +62,56 @@ module.exports = function () {
 		return lines.join("").replace(/,/g, ", ").replace(/\s+\:\=/g, ":=").replace(/\:\=\s+/g, ":=");
 	}
 	/**
-        The returned function is responsible for processing stream data from PVSio.
-    */
+	 * @function processDataFunc
+	 * @desc This function is responsible for processing stream data from PVSio.
+	 *       Supports parsing of one block of JSON output produced by PVSio within tags <JSON> .. </JSON>
+     */
 	function processDataFunc() {
 		let res = [];
+		let json = [];
 		let jsonStream = false;
-		return function (data, cb) {
-			let lines = data.trim().split("\n");
-			let lastLine = lines[lines.length - 1].trim();
-			if ((lastLine.indexOf("<JSON>") >= 0) || jsonStream) {
+		return function (data, cb) {			
+			// console.log("processDataFunc()");
+			if (data.indexOf("<JSON>") >= 0) {
+				// console.log("json start");
 				jsonStream = true;
-				res = res.concat(lines);
-				let complete = (lastLine.indexOf("</JSON>") >= 0);
+				data = data.split("<JSON>").slice(1);
+				data = data.join("");
+				// console.log("init data: " + data);
+			}
+			if (jsonStream) {
+				let complete = (data.indexOf("</JSON>") >= 0);
 				if (complete) {
-					res = res.slice(1, -1);
-					if (cb && typeof cb === "function") {
-						cb({ json: res.join("") });
-					}
+					let finalData = data.split("</JSON>")[0];
+					data = data.split("</JSON>").slice(1).join("");
+					// console.log("end data: " + data);
+					json = json.concat(finalData);
+					// console.log("rest: ", data);
+					// callback is done in the other branch, when pvsio responds with the ready prompt <PVSio>
 					jsonStream = false;
+					// console.log("json end");
+				} else {
+					// console.log("data: " + data);
+					json = json.concat(data);
+					return false;
+				}
+			}
+			let lines = data.trim().split("\n");
+			// console.log("receiving pvsio output...", data);
+			if (data.indexOf(readyString) >= 0) {
+				// console.log("pvsio output complete");
+				if (cb && typeof cb === "function") {
+					res = res.concat(filterLines(lines));
+					cb({
+						pvsioOut: arrayToOutputString(res),
+						jsonOut: (json.length > 0) ? json.join("") : null
+					});
+					res = [];
+					json = [];
+					return true;
 				}
 			} else {
-				if (lastLine.indexOf(readyString) >= 0) {
-					if (cb && typeof cb === "function") {
-						lines.pop();//get rid of last line
-						res = res.concat(filterLines(lines));
-						cb(arrayToOutputString(res));
-						res = [];
-						return true;
-					}
-				} else {
-					res = res.concat(filterLines(lines));
-				}
+				res = res.concat(filterLines(lines));
 			}
 			return false;
 		};
@@ -121,7 +140,7 @@ module.exports = function () {
 		filename = file;
         function onDataReceived(data) {
 			// this shows the original PVSio output
-			// console.log(data.trim());
+			console.log(data.trim());
             if (!processReady) {
                 var lines = data.split("\n").map(function (d) {
                     return d.trim();
