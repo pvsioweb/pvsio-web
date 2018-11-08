@@ -555,8 +555,8 @@ function run() {
                             socketId: socketid,
                             type: "commandResult",
                             time: token.time,
-                            err: (typeof data === "string" && data.indexOf("Expecting an expression") === 0) ?
-                                    { message: data, failedCommand: token.data.command } : null
+                            err: (data.pvsioOut && typeof data.pvsioOut === "string" && data.pvsioOut.indexOf("Expecting an expression") === 0) ?
+                                    { message: data.pvsioOut, failedCommand: token.data.command } : null
                         }, socket);
                     }
                 });
