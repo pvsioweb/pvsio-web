@@ -28,7 +28,7 @@
  /*global SpeechSynthesisUtterance */
 define(function (require, exports, module) {
     "use strict";
-    var SELECT_TIMEOUT = 800; //msec
+    const SELECT_TIMEOUT = 800; //msec
 
     function console_log(msg) {
         console.log(msg);
@@ -48,6 +48,8 @@ define(function (require, exports, module) {
         this.lang = opt.lang || "en-GB";
         this.pitch = opt.pitch || 1.04;
         this.rate = opt.rate || 1.03;
+        // log-related attributes
+        this._log = [];
         return this;
     }
 
@@ -64,6 +66,18 @@ define(function (require, exports, module) {
             curr: 0
         };
         return this;
+    };
+
+    Player.prototype.log = function (state) {
+        this._log.push({
+            time: new Date(),
+            state: state
+        });
+        return this;
+    };
+
+    Player.prototype.getLog = function () {
+        return this._log;
     };
 
     //---  utility functions  ----

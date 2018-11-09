@@ -45,7 +45,7 @@ define(function (require, exports, module) {
                     //when a message is received, look for the callback for that message id in the callbackRegistry
                     //if no callback exists then broadcast the event using the token type string
                     ws.onmessage = function (event) {
-                        console.log("message received: ", event);
+                        console.log(event);
                         let token = JSON.parse(event.data);
                         //if token has an id check if there is a function to be called in the registry
                         if (token) {
@@ -63,14 +63,14 @@ define(function (require, exports, module) {
                             }
                             if (token.id && typeof callbackRegistry[token.id] === "function") {
                                 let time = new Date().getTime() - token.time.client.sent;
-                                console.log("Time to response for " + token.type + "  " + (time));
+                                console.log("Time to response", time, "ms");
                                 if (token.type.indexOf("_error") >= 0 && dbg) {
                                     console.error(token); // errors should always be reported in the browser console
                                 }
                                 let f = callbackRegistry[token.id];
                                 delete callbackRegistry[token.id];
                                 f.call(o, token.err, token);
-                            } else if (token.type) {
+                            } else if (token.type && token.type !== "FileSystemUpdate") {
                                 console.error("Warning: token id is not in callback registry");
                                 o.fire(token);
                             }
@@ -98,6 +98,8 @@ define(function (require, exports, module) {
                     console.error("Token is undefined or malformed");
                     console.error(token);
                 }
+            } else {
+                console.error("Cannot send: WebSocket is closed :/");
             }
             return o;
         };

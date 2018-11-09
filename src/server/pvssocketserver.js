@@ -49,7 +49,7 @@ function run() {
         serverFuncs				= require("./serverFunctions"),
         baseProjectDir          = path.join(__dirname, "../../examples/projects/"),
         baseDemosDir			= path.join(__dirname, "../../examples/demos/"),
-        baseTutorialsDir			= path.join(__dirname, "../../examples/tutorials/"),
+        baseTutorialsDir		= path.join(__dirname, "../../examples/tutorials/"),
         baseExamplesDir         = path.join(__dirname, "../../examples/"),
         clientDir				= path.join(__dirname, "../client");
     var clientid = 0, WebSocketServer = ws.Server;
@@ -636,8 +636,14 @@ function run() {
             },
             "readFile": function (token, socket, socketid) {
                 initProcessMap(socketid);
-                var encoding = token.encoding || "utf8";
-                token.path = isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
+                let encoding = token.encoding || "utf8";
+                if (isAbsolute(token.path)) {
+                    // remove all ../ to avoid writing in arbitrary parts of the file system
+                    token.path = token.path.replace(/\.\./g, "");
+                    token.path = path.join(baseExamplesDir, token.path);
+                } else {
+                    token.path = path.join(baseProjectDir, token.path);
+                }
                 console.log("reading file " + token.path);
                 readFile(token.path, encoding)
                     .then(function (content) {
@@ -679,7 +685,14 @@ function run() {
                     name: token.name,
                     path: token.path
                 };
-                token.path = isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
+                if (isAbsolute(token.path)) {
+                    // remove all ../ to avoid writing in arbitrary parts of the file system
+                    token.path = token.path.replace(/\.\./g, "");
+                    token.path = path.join(baseExamplesDir, token.path);
+                } else {
+                    token.path = path.join(baseProjectDir, token.path);
+                }
+                console.log("writing file " + token.path);
                 writeFile(token.path, token.content, token.encoding, token.opt)
                     .then(function () {
                         processCallback(res, socket);

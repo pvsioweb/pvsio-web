@@ -6,6 +6,7 @@
  * This module provides api access to interact with the filesystem. This includes
  * reading, writing and deleting files, as well as creating and removing directories.
  */
+/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext: true */
 define(function (require, exports, module) {
 
     var eventDispatcher       = require("util/eventDispatcher"),
@@ -66,7 +67,6 @@ define(function (require, exports, module) {
      *
      */
     FileSystem.prototype.writeFile = function (path, content, opt) {
-        var fs = this;
         return new Promise(function (resolve, reject) {
             if (!path) {
                 reject({
@@ -75,7 +75,7 @@ define(function (require, exports, module) {
                     path: path
                 });
             } else {
-                var token = {
+                let token = {
                     path: path,
                     name: path.split("/").slice(-1).join(""),
                     content: content || "",
@@ -84,13 +84,12 @@ define(function (require, exports, module) {
                 };
                 WSManager.getWebSocket().writeFile(token, function (err, res) {
                     if (err || res.path !== token.path) { return reject(err); }
-                    var notification = "File " + res.path + " correctly written to disk";
+                    let notification = "File " + res.path + " correctly written to disk";
                     if (opt && opt.silentMode) {
                         Logger.log(notification);
                     } else {
                         NotificationManager.show(notification);
-                        var event = {type: "filewritten", path: path};
-                        fs.fire(event);
+                        this.fire({ type: "filewritten", path: path });
                         //pvsFilesListView.selectItem(path);
                     }
                     return resolve(new Descriptor(token.path, token.content, { encoding: token.encoding }));
