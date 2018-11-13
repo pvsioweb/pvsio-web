@@ -99,7 +99,9 @@ function run() {
                 }
             }
             if (socket && socket.readyState === 1) {
+                // console.log("sending data back to client...");
                 socket.send(JSON.stringify(token));
+                // console.log("data sent!");
             }
         } catch (processCallbackError) {
             console.log("WARNING: processCallbackError " + JSON.stringify(processCallbackError));
@@ -151,7 +153,9 @@ function run() {
 
     //create logger
     webserver.use("/demos", function (req, res, next) {
-        logger.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
+	if (req.method !== "GET") {
+        	logger.log('Method: %s,  Url: %s, IP: %s', req.method, req.url, req.connection.remoteAddress);
+	}
         next();
     });
 
@@ -573,19 +577,23 @@ function run() {
                 });
             },
             "sendCommand": function (token, socket, socketid) {
+                // console.log("received command: ", token);
                 initProcessMap(socketid);
                 pvsioProcessMap[socketid].sendCommand(token.data.command, function (data) {
-                    let res = {
-                        id: token.id,
-                        command: token.data.command,
-                        data: [data],
-                        socketId: socketid,
-                        type: "commandResult",
-                        time: token.time,
-                        err: (typeof data === "string" && data.indexOf("Expecting an expression") === 0) ?
-                                { message: data, failedCommand: token.data.command } : null
-                    };
-                    processCallback(res, socket);
+                    // console.log("callback");
+                    if (data) {
+                        processCallback({
+                            id: token.id,
+                            command: token.data.command,
+                            data: [data.pvsioOut],
+                            json: data.jsonOut,
+                            socketId: socketid,
+                            type: "commandResult",
+                            time: token.time,
+                            err: (data.pvsioOut && typeof data.pvsioOut === "string" && data.pvsioOut.indexOf("Expecting an expression") === 0) ?
+                                    { message: data.pvsioOut, failedCommand: token.data.command } : null
+                        }, socket);
+                    }
                 });
             },
             "ping": function (token, socket, socketid) {
@@ -664,7 +672,13 @@ function run() {
             "readFile": function (token, socket, socketid) {
                 initProcessMap(socketid);
                 let encoding = token.encoding || "utf8";
-                token.path = isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
+                if (isAbsolute(token.path)) {
+                    // remove all ../ to avoid writing in arbitrary parts of the file system
+                    token.path = token.path.replace(/\.\./g, "");
+                    token.path = path.join(baseExamplesDir, token.path);
+                } else {
+                    token.path = path.join(baseProjectDir, token.path);
+                }
                 console.log("reading file " + token.path);
                 readFile(token.path, encoding)
                     .then(function (content) {
@@ -706,7 +720,14 @@ function run() {
                     name: token.name,
                     path: token.path
                 };
-                token.path = isAbsolute(token.path) ? token.path : path.join(baseProjectDir, token.path);
+                if (isAbsolute(token.path)) {
+                    // remove all ../ to avoid writing in arbitrary parts of the file system
+                    token.path = token.path.replace(/\.\./g, "");
+                    token.path = path.join(baseExamplesDir, token.path);
+                } else {
+                    token.path = path.join(baseProjectDir, token.path);
+                }
+                console.log("writing file " + token.path);
                 writeFile(token.path, token.content, token.encoding, token.opt)
                     .then(function () {
                         processCallback(res, socket);

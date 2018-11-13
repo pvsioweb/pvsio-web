@@ -162,20 +162,30 @@ define(function (require, exports, module) {
                 });
             } else {
                 wscBase.send({type: "sendCommand", data: {command: action}}, function (err, res) {
-                    if (res && res.data) {
-                        //do stuff to update the explored state graph and invoke the callback with the same parameters
-                        wscBase.fire({type: "GraphUpdate", transition: action, target: res.data, source: o.lastState()});
-                        //update the lastState if it was a valid pvsio state
-                        if (PVSioStateParser.isState(res.data)) {
-                            o.lastState(res.data);
+                    console.log("data received: ", res);
+                    if (res) {
+                        if (res.json) {
+                            console.log("json data: ", res.json);
+                        } 
+                        if (res.data && res.data !== "") {
+                            //do stuff to update the explored state graph and invoke the callback with the same parameters
+                            wscBase.fire({type: "GraphUpdate", transition: action, target: res.data, source: o.lastState()});
+                            //update the lastState if it was a valid pvsio state
+                            if (PVSioStateParser.isState(res.data)) {
+                                o.lastState(res.data);
+                            }
                         } else {
-                            Logger.log("Warning: PVSio was not able to execute " + action);
-                            Logger.log(res.data);
-                            //update res.data with previous valid state
-                            res.data = o.lastState();
+                            console.error("Warning: expression received from PVS is invalid: ", res);
                         }
+                        if (cb && typeof cb === "function") {
+                            cb(err, res);
+                        }
+                    } else {
+                        Logger.log("Warning: PVSio was not able to evalute expression ", action);
+                        Logger.log(res.data);
+                        //update res.data with previous valid state
+                        res.data = o.lastState();
                     }
-                    if (cb && typeof cb === "function") { cb(err, res); }
                 });
             }
             wscBase.fire({type: "InputUpdated", data: action});

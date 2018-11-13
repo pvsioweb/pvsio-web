@@ -50,6 +50,7 @@ define(function (require, exports, module) {
                         //if token has an id check if there is a function to be called in the registry
                         if (token) {
                             if (token.err && !token.id) {
+                                console.error("Warning: server replied with error state", token.err);
                                 // these are critical errors such as websocket being closed
                                 if (token.err.code !== "EPIPE") {
                                     console.error(JSON.stringify(token)); // errors should always be reported in the browser console
@@ -71,15 +72,16 @@ define(function (require, exports, module) {
                                 }
                             }
                             if (token.id && typeof callbackRegistry[token.id] === "function") {
-                                // var time = new Date().getTime() - token.time.client.sent;
-                                // console.log("Time to response for " + token.type + "  " + (time));
+                                let time = new Date().getTime() - token.time.client.sent;
+                                console.log("Time to response", time, "ms");
                                 if (token.type.indexOf("_error") >= 0 && dbg) {
                                     console.error(token); // errors should always be reported in the browser console
                                 }
                                 let f = callbackRegistry[token.id];
                                 delete callbackRegistry[token.id];
                                 f.call(o, token.err, token);
-                            } else if (token.type) {
+                            } else if (token.type && token.type !== "FileSystemUpdate") {
+                                console.error("Warning: token id is not in callback registry");
                                 o.fire(token);
                             }
                         }
@@ -106,6 +108,8 @@ define(function (require, exports, module) {
                     console.error("Token is undefined or malformed");
                     console.error(token);
                 }
+            } else {
+                console.error("Cannot send: WebSocket is closed :/");
             }
             return o;
         };

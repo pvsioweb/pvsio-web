@@ -150,9 +150,9 @@ define(function (require, exports, module) {
                         key.word = key.word.substr(0, key.word.length - 1); //removing spaces and last char ":"
                         key.index = key.index + 1;
                         val = parseValue(subValue.word.substring(key.index));
-			if (val && val.value && typeof val.value === "string") {
-				val.value = val.value.trim();
-			}
+                        if (val && val.value && typeof val.value === "string") {
+                            val.value = val.value.trim();
+                        }
                         res[key.word] = val.value;
                         index = (val.index + key.index);
                     } while (subValue.word[index] === ",");
@@ -173,6 +173,10 @@ define(function (require, exports, module) {
                         value: res,
                         index: subValue.index
                     };
+                } else if (br === "((") { // tuple of records/lists
+                    subValue = readUntil(value, token.index + 1, function (ch, prev) {
+                        return (prev + ch) !== "))";
+                    });
                 }
             } else {
                 //just an open bracket -- they usually signify a list of some sort
