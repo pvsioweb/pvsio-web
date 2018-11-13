@@ -88,6 +88,57 @@ define(function (require, exports, module) {
                 console.log("ERROR: Failed to load pvs file " + data.demoName + "/" + data.name);
             }
         };
+
+        /**
+         * @function java
+         * @desc Executes a java command
+         * @param {Function} cb Callback function invoked when the command execution completes
+         */
+        o.java = function (javaFile, data, cb) {
+            if (javaFile) {
+                wscBase.send({
+                    type: "java",
+                    data: {
+                        javaFile: javaFile,
+                        argv: data.argv,
+                        javaOptions: data.javaOptions,
+                        basePath: data.basePath
+                    }
+                }, function (err, res) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(res);
+                        if (cb && typeof cb === "function") {
+                            cb(res.stderr, res.stdout);
+                        }
+                    }
+                });
+            }
+        };
+
+
+        /**
+         * @function ctrl
+         * @desc Sends input control commands
+         * @param {Function} cb Callback function invoked when the command execution completes
+         */
+        o.ctrl = function (data, cb) {
+            wscBase.send({
+                type: "ctrl",
+                data: data
+            }, function (err, res) {
+                if (err) {
+                    console.error(err);
+                } else {
+                    // console.log(res);
+                    if (cb && typeof cb === "function") {
+                        cb(res.stderr, res.stdout);
+                    }
+                }
+            });
+        };
+
         /**
             Closes the pvsio process attributed to this websocket connection if there is one
             @param {function} cb The function to invoke when process has been closed
@@ -133,6 +184,11 @@ define(function (require, exports, module) {
         o.send = function (action, cb) {
             return o.sendGuiAction(action, cb);
         };
+
+        o.registerReceiver = function (channelID, cb) {
+            return wscBase.registerReceiver(channelID, cb);
+        };
+
         /**
             Gets the content of the file passed in the parameter
             @param {string} path The relative path (from the base project dir) to the file whose content is desired

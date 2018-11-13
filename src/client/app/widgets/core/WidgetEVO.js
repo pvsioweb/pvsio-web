@@ -101,6 +101,7 @@ define(function (require, exports, module) {
          */
         constructor (id, coords, opt) {
             opt = normalise_options(opt);
+            coords = coords || {};
             this.id = id;
             this.type = opt.type || "WidgetEVO";
             this.parent = (opt.parent) ? ("#" + opt.parent) : "body";

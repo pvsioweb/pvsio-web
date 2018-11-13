@@ -2,19 +2,20 @@
  * Generic websocket client that is able to listen to messages and handle specific results from
  * server function call
  * @author Patrick Oladimeji
+ * @contributors Paolo Masci
  * @date 6/4/13 18:50:25 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext:true */
 /*global define, WebSocket, Promise, _*/
 define(function (require, exports, module) {
     "use strict";
-    var property = require("util/property"),
-        eventDispatcher = require("util/eventDispatcher"),
-        uuid        = require("util/uuidGenerator"),
-        events      = require("websockets/events");
+    const property = require("util/property");
+    const eventDispatcher = require("util/eventDispatcher");
+    const uuid = require("util/uuidGenerator");
+    const events = require("websockets/events");
 
     module.exports = function () {
-        var o = eventDispatcher({}), ws, callbackRegistry = {}, dbg = false;
+        let o = eventDispatcher({}), ws, callbackRegistry = {}, receiversRegistry = {}, dbg = false;
         o.url = property.call(o, "ws://localhost");
 		o.port = property.call(o);
         /**
@@ -26,7 +27,7 @@ define(function (require, exports, module) {
                 if (ws) {
                     resolve(ws);
                 } else {
-                    var wsUrl = o.url();
+                    let wsUrl = o.url();
                     if (o.port()) { wsUrl = wsUrl + ":" + o.port(); }
                     ws = new WebSocket(wsUrl);
                     ws.onopen = function (event) {
@@ -45,7 +46,7 @@ define(function (require, exports, module) {
                     //when a message is received, look for the callback for that message id in the callbackRegistry
                     //if no callback exists then broadcast the event using the token type string
                     ws.onmessage = function (event) {
-                        var token = JSON.parse(event.data);
+                        let token = JSON.parse(event.data);
                         //if token has an id check if there is a function to be called in the registry
                         if (token) {
                             if (token.err && !token.id) {
@@ -58,6 +59,16 @@ define(function (require, exports, module) {
                                     f.call(o, token.err, null);
                                 });
                                 callbackRegistry = {}; // clean up callback registry for critical errors
+                            }
+                            if (token.type === "ctrl") {
+                                let cbs = receiversRegistry[token.data.channelID];
+                                if (cbs && cbs.length > 0) {
+                                    cbs.forEach(function (f) {
+                                        if (f && typeof f === "function") {
+                                            f(token.data);
+                                        }
+                                    });
+                                }
                             }
                             if (token.id && typeof callbackRegistry[token.id] === "function") {
                                 // var time = new Date().getTime() - token.time.client.sent;
@@ -81,7 +92,7 @@ define(function (require, exports, module) {
          */
         o.send = function (token, cb) {
             if (ws) {
-                var id = uuid();
+                let id = uuid();
                 if (token && token.type) {
                     token.id = token.id || id;
                     token.time = { client: { sent: new Date().getTime() } };
@@ -107,6 +118,23 @@ define(function (require, exports, module) {
                 ws = undefined;
                 console.log("Client closes websocket connection...");
             }
+        };
+
+        o.registerReceiver = function (channelID, cb) {
+            if (!receiversRegistry[channelID]) {
+                receiversRegistry[channelID] = [];
+            }
+            receiversRegistry[channelID].push(cb);
+            // if (ws) {
+            //     if (!receiversRegistry[channelID]) {
+            //         receiversRegistry[channelID] = [];
+            //     }
+            //     ws.send(JSON.stringify({
+            //         id: uuid(),
+            //         time: { client: { sent: new Date().getTime() } },
+            //         type: "registerReceiver"
+            //     }));
+            // }
         };
 
         return o;
