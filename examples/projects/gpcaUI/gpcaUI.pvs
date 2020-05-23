@@ -37,6 +37,9 @@ gpcaUI: THEORY
   int2boolean(i: int): boolean =
     IF i = 0 THEN FALSE ELSE TRUE ENDIF
   CONVERSION int2boolean
+  boolean2int(b: boolean): int = IF b THEN 1 ELSE 0 ENDIF
+  CONVERSION boolean2int
+
 
   gpcaui_init(x: device_real): gpcaui_state = (#
   	  is_on       := FALSE,

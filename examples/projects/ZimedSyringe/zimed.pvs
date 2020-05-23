@@ -24,6 +24,8 @@ zimed: THEORY
 
   int2boolean(i: int): boolean = IF i > 0 THEN TRUE ELSE FALSE ENDIF
   CONVERSION int2boolean
+  boolean2int(b: boolean): int = IF b THEN 1 ELSE 0 ENDIF
+  CONVERSION boolean2int
 
   init(x: zimed_real): State = (#
             on := 1, % 0, just for simulation purposes
