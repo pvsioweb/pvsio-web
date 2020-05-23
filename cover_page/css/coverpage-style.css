@@ -4,3 +4,10 @@
 .authors {
 	font-style: italic;
 }
+h3 {
+	margin-bottom: 20px;
+	font-weight: 700;
+}
+h4 {
+	text-align: center;
+}
