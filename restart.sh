@@ -1,22 +1,22 @@
 #!/bin/bash
-npm install
-if [ -d "src/server/lib" ] && [ -f "src/server/lib/glassfish-4-1.zip.partaa" ] && 
-	[ -f "src/server/lib/glassfish-4-1.zip.partab" ] && 
-	[ -f "src/server/lib/glassfish-4-1.zip.partac" ] && 
-	[ -f "src/server/lib/glassfish-4-1.zip.partad" ] && 
-	[ -f "src/server/lib/glassfish-4-1.zip.partae" ] && 
-	[ -f "src/server/lib/glassfish-4-1.zip.partaf" ] && 
-	[ -f "src/server/lib/glassfish-4-1.zip.partag" ] && 
-	[ ! -d "src/server/lib/glassfish4" ]; then
-  cd src/server/lib/
+# npm install
+if [ -d "dist/server/lib" ] && [ -f "dist/server/lib/glassfish-4-1.zip.partaa" ] && 
+	[ -f "dist/server/lib/glassfish-4-1.zip.partab" ] && 
+	[ -f "dist/server/lib/glassfish-4-1.zip.partac" ] && 
+	[ -f "dist/server/lib/glassfish-4-1.zip.partad" ] && 
+	[ -f "dist/server/lib/glassfish-4-1.zip.partae" ] && 
+	[ -f "dist/server/lib/glassfish-4-1.zip.partaf" ] && 
+	[ -f "dist/server/lib/glassfish-4-1.zip.partag" ] && 
+	[ ! -d "dist/server/lib/glassfish4" ]; then
+  cd dist/server/lib/
   ./installNC.sh
   cd ../../..
 fi
-if [ -d "src/server/ext" ] && [ ! -d "src/server/ext/IVY" ] &&
-    [ -f "src/server/ext/IVY.zip.partaa" ] && 
-	[ -f "src/server/ext/IVY.zip.partab" ] && 
-	[ -f "src/server/ext/IVY.zip.partac" ]; then
-  cd src/server/ext/
+if [ -d "dist/server/ext" ] && [ ! -d "dist/server/ext/IVY" ] &&
+    [ -f "dist/server/ext/IVY.zip.partaa" ] && 
+	[ -f "dist/server/ext/IVY.zip.partab" ] && 
+	[ -f "dist/server/ext/IVY.zip.partac" ]; then
+  cd dist/server/ext/
   ./installIVY.sh
   cd ../../..
 fi
@@ -35,8 +35,8 @@ if [ -d "PVS" ] && [ -f "PVS/pvs" ] && [ -f "PVS/pvsio" ] && [ -f "PVS/proveit" 
 		bin/relocate
 		cd ..
 	fi
-	cd src/server
-	node pvssocketserver.js pvsdir:$PVS_DIR restart
+	cd dist/server
+	node pvsioweb-server.js pvsdir:$PVS_DIR restart
 elif [ -f "../pvs" ] && [ -f "../pvsio" ] && [ -f "../proveit" ]; then
     PVS_DIR=${PWD%/*}
     pvsioweb_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -53,13 +53,13 @@ elif [ -f "../pvs" ] && [ -f "../pvsio" ] && [ -f "../proveit" ]; then
 		bin/relocate
 		cd $pvsioweb_DIR
 	fi
-	cd src/server
-	node pvssocketserver.js pvsdir:$PVS_DIR restart
+	cd dist/server
+	node pvsioweb-server.js pvsdir:$PVS_DIR restart
 else
 	pvsio -version
 	if [ $? -eq 0 ]; then
-		cd src/server
-		node pvssocketserver.js restart
+		cd dist/server
+		node pvsioweb-server.js restart
 	else
 		#FAIL
         echo "================================================================"
@@ -72,7 +72,7 @@ else
         echo "================================================================"
         echo "================================================================"
 		#start in any case the UI, this is useful for developing additional PVSio-web UI components even without PVS
-		cd src/server
-		node pvssocketserver.js restart
+		cd dist/server
+		node pvsioweb-server.js restart
 	fi
 fi

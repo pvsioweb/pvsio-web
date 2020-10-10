@@ -7,32 +7,47 @@
     }
   ],
   "description": "A formal methods toolkit for model-based development of human-machine interfaces",
-  "version": "2.3.0",
-  "preferGlobal": "true",
+  "version": "3.0.0",
   "dependencies": {
+    "backbone": "^1.4.0",
     "body-parser": "^1.18.3",
-    "es6-promise": "0.1.x",
+    "common-js": "^0.3.8",
     "express": "^4.16.4",
-    "open": "^6.0.0",
+    "handlebars": "^4.7.6",
+    "node": "^12.16.1",
+    "open": "^7.0.3",
     "tracer": "0.7.1",
+    "uuid": "^7.0.2",
     "ws": "3.3.2"
   },
   "devDependencies": {
+    "@types/backbone": "^1.4.0",
+    "@types/express": "^4.16.1",
+    "@types/jasmine": "^3.5.0",
+    "@types/jquery": "^3.3.29",
+    "@types/node": "^13.9.0",
+    "@types/ws": "^6.0.1",
     "autoprefixer": "^6.3.6",
-    "grunt": "^1.0.4",
+    "grunt": "^1.1.0",
     "grunt-concurrent": "^2.3.0",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-postcss": "^0.9.0",
     "grunt-run": "^0.8.0",
-    "grunt-sass": "^2.0"
+    "grunt-sass": "^3.1.0",
+    "jasmine": "^3.4.0",
+    "ts-node": "^8.3.0",
+    "typescript": "^3.5.3"
   },
   "debugDep": {
     "jasmine-node": "^2.0.1"
   },
   "scripts": {
+    "build": "tsc",
+    "compile": "tsc",
+    "watch": "tsc -b -w",
     "test": "grunt test",
-    "local-test": "jasmine-node --verbose src/server/servertests; node client-test.js",
-    "start": "node src/server/pvssocketserver.js"
+    "local-test": "jasmine-node --verbose dist/server/servertests; node client-test.js",
+    "start": "node dist/server/pvsioweb-server.js"
   },
   "repository": {
     "type": "git",
@@ -40,6 +55,6 @@
   },
   "license": "GPL-3.0",
   "engine": {
-    "node": ">=10.15.3"
+    "node": ">=12.19.0"
   }
 }

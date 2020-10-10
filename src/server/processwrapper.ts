@@ -17,16 +17,14 @@ You should have received a copy of the GNU General Public License along with Foo
  * @author Patrick Oladimeji
  * @date Dec 2, 2012 : 10:28:48 PM
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global require, process, module */
-var spawn = require("child_process").spawn,
-    logger = require("tracer").console(),
-	exec = require("child_process").exec;
 
-module.exports = function () {
-    "use strict";
-    var proc, _dataProcessor;
-    var o = {}, cbQueue = [];
+import { spawn, exec, ExecException } from 'child_process';
+
+export class ProcessWrapper {
+
+    protected proc;
+    protected _dataProcessor;
+    protected cbQueue = [];
 
     /**
      * Starts an interactive process with the specified parameters. The opt variable should contain
@@ -40,36 +38,46 @@ module.exports = function () {
      *
      * @returns {___anonymous325_326}
      */
-    o.start = function (opt) {
+    start (opt?: { 
+        processName: string, 
+        args?: string[], 
+        onDataReceived: (data: string) => void, 
+        onProcessExited: (err: NodeJS.ErrnoException) => void, 
+        onErrorReceived?: (err: NodeJS.ErrnoException) => void 
+    }): ProcessWrapper {
         if (opt) {
             try {
-                proc = spawn(opt.processName, opt.args, {uid: process.getuid(), gid: process.getgid()});
+                this.proc = spawn(opt.processName, opt.args, {
+                    uid: process.getuid(), 
+                    gid: process.getgid()
+                });
 
-                proc.stdout.setEncoding('utf8');
-                proc.stderr.setEncoding("utf8");
+                this.proc.stdout.setEncoding('utf8');
+                this.proc.stderr.setEncoding("utf8");
 
-                proc.stdout.on("data", function (data) {
-                    var f = o.dataProcessor();
+                this.proc.stdout.on("data", function (data) {
+                    const f = this.dataProcessor();
                     //call any callback and forward the data to onDataReceived if it exists
                     if (f) {
-                        if (f(data, cbQueue[0])) {
-                            cbQueue.shift();
+                        if (f(data, this.cbQueue[0])) {
+                            this.cbQueue.shift();
                         }
                     }
                     if (opt.onDataReceived) { opt.onDataReceived(data); }
                 });
                 if (opt.onErrorReceived) {
-                    proc.stderr.on("data", opt.onErrorReceived);
+                    this.proc.stderr.on("data", opt.onErrorReceived);
                 }
                 if (opt.onProcessExited) {
-                    proc.on('close', opt.onProcessExited);
-                    proc.on('error', opt.onProcessExited);
+                    this.proc.on('close', opt.onProcessExited);
+                    this.proc.on('error', opt.onProcessExited);
                 }
             } catch (err) {
-                logger.log(err);
+                console.log(err);
+            } finally {
+                return this;
             }
         }
-        return o;
     };
     /**
 	 * A function that is parses the data stream and forwards the result to a callback function as appropriate.
@@ -77,49 +85,41 @@ module.exports = function () {
 	 * The function takes a string and a callback function as parameter and should return true if the callback function
 	 * has been invoked
 	 */
-	o.dataProcessor = function (f) {
+	dataProcessor (f) {
 		if (f) {
-			_dataProcessor = f;
-			return o;
+			this._dataProcessor = f;
 		}
-		return _dataProcessor;
+		return this._dataProcessor;
 	};
     /**
      * execute a self terminating process and calls the callback with the output of the stdout
      * @param {String} opt A space separated string containing the process to execute and any arguments
      * @returns {___anonymous364_365}
      */
-    o.exec = function (opt) {
+    exec (opt?: { command: string, callBack?: (error: ExecException | null, stdout?: string, stderr?: string) => void }): ProcessWrapper {
         exec(opt.command, opt.callBack);
-        return o;
+        return this;
     };
     /**
      * stop the process spawned
      * @returns {___anonymous364_365}
      */
-    o.kill = function (signal) {
+    kill (signal: string): ProcessWrapper {
         signal = signal || 'SIGTERM';
-        if (proc) {
-            proc.kill(signal);
-            proc.stdout.destroy();
-            proc.stdin.destroy();
-            proc.stderr.destroy();
-            proc = undefined;
+        if (this.proc) {
+            this.proc.kill(signal);
+            this.proc.stdout.destroy();
+            this.proc.stdin.destroy();
+            this.proc.stderr.destroy();
+            this.proc = undefined;
         }
-        return o;
+        return this;
     };
 
-	function write(msg, cb) {
-		cbQueue.push(cb);
-        //msg = msg.replace(/\s+/g, ""); // this reduces the message size -- this may create issues when using string constants tho
-		//var ok =
-        proc.stdin.write(msg);
-		// if (!ok) {
-			// wait for drain event before writing another command
-			// proc.stdin.once("drain", (function (m) {
-			// 	write(m);
-			// }(msg)));
-		// }
+	write(msg: string, cb): ProcessWrapper {
+		this.cbQueue.push(cb);
+        this.proc.stdin.write(msg);
+        return this;
 	}
 
     /**
@@ -127,9 +127,8 @@ module.exports = function () {
      * @param command
      * @returns {___anonymous364_365}
      */
-    o.sendCommand = function (command, cb) {
-		write(command, cb);
-        return o;
+    sendCommand (command: string, cb): ProcessWrapper {
+		this.write(command, cb);
+        return this;
     };
-    return o;
 };

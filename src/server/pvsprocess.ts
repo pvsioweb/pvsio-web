@@ -14,63 +14,71 @@ You should have received a copy of the GNU General Public License along with Foo
  * javascript nodejs lib for communicating with pvs process
  * @author hogfather
  * @date Jul 27, 2012 12:54:38 AM
- * @project JSLib
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext: true */
-/*global require, module, process, __dirname */
 
-var util = require("util"),
-    path = require("path"),
-    logger = require("tracer").console();
-var procWrapper = require("./processwrapper");
-module.exports = function () {
-    "use strict";
-    var pvs = procWrapper();
-    var o                                   = {},
-		output                              = [],
-        readyString                         = "<PVSio>",
-        garbageCollector                    = [";;; GC:", ";;; Finished GC"],
-        wordsIgnored                        = ["==>", readyString].concat(garbageCollector),
-        filename,
-        processReady                        = false,
-        workspaceDir                        = path.join(__dirname, "../../examples/");
-    var _silentMode = false; // used to turn off log messages when restarting pvsio
+import * as util from 'util';
+import * as path from 'path';
+import { ProcessWrapper } from './processwrapper';
+import { ExecException } from 'child_process';
+
+export type CallbackArgs = { type: "processReady" | "processExited", data: string[], error?: NodeJS.ErrnoException };
+export type Callback = (args: CallbackArgs) => void;
+
+export class PvsProcess {
+
+	protected pvs: ProcessWrapper;
+	protected contextFolder: string = path.join(__dirname, "../../examples/");
+	protected output: string[] = [];
+	protected filename: string;
+	protected processReady: boolean = false;
+
+	protected _silentMode: boolean = false; // used to turn off log messages when restarting pvsio
+	
+
+	readonly readyString: string = "<PVSio>";
+	readonly garbageCollector: string[] = [";;; GC:", ";;; Finished GC"];
+	readonly wordsIgnored: string[] = ["==>", this.readyString].concat(this.garbageCollector);
+
+
+	constructor () {
+		this.pvs = new ProcessWrapper();
+	}
+
 	/**
 	 * get or set the workspace dir. this is the base directory of the pvs source code
 	 * @param {String} dir
 	 * @return {String} the current workspace directory
 	 */
-	o.workspaceDir = function (dir) {
+	workspaceDir (dir: string): PvsProcess {
 		if (dir) {
 			//logger.log(dir);
 			dir = dir.substr(-1) !== "/" ? (dir + "/") : dir;
-			workspaceDir = dir;
-			console.log("Workspace directory: " + workspaceDir + "\n");
-            process.chdir(workspaceDir);
-			return o;
+			this.contextFolder = dir;
+			console.log("Workspace directory: " + this.contextFolder + "\n");
+            process.chdir(this.contextFolder);
 		}
-		return workspaceDir;
+		return this;
 	};
-
-	function filterLines(lines) {
-		return lines.filter(function (d) {
-			return wordsIgnored.indexOf(d.trim()) < 0;
+	protected filterLines(lines: string[]): string[] {
+		return lines?.filter(function (d) {
+			return this.wordsIgnored.indexOf(d.trim()) < 0;
 		});
 	}
 
-	function arrayToOutputString(lines) {
-		return lines.join("").replace(/,/g, ", ").replace(/\s+\:\=/g, ":=").replace(/\:\=\s+/g, ":=");
+	protected arrayToOutputString(lines: string[]): string {
+		return lines?.join("").replace(/,/g, ", ").replace(/\s+\:\=/g, ":=").replace(/\:\=\s+/g, ":=");
 	}
+
 	/**
 	 * @function processDataFunc
 	 * @desc This function is responsible for processing stream data from PVSio.
 	 *       Supports parsing of one block of JSON output produced by PVSio within tags <JSON> .. </JSON>
      */
-	function processDataFunc() {
+	processDataFunc () {
 		let res = [];
 		let json = [];
 		let jsonStream = false;
-		return function (data, cb) {			
+		return (data, cb) => {			
 			// console.log("processDataFunc()");
 			if (data.indexOf("<JSON>") >= 0) {
 				// console.log("json start");
@@ -98,12 +106,12 @@ module.exports = function () {
 			}
 			let lines = data.trim().split("\n");
 			// console.log("receiving pvsio output...", data);
-			if (data.indexOf(readyString) >= 0) {
+			if (data.indexOf(this.readyString) >= 0) {
 				// console.log("pvsio output complete");
 				if (cb && typeof cb === "function") {
-					res = res.concat(filterLines(lines));
+					res = res.concat(this.filterLines(lines));
 					cb({
-						pvsioOut: arrayToOutputString(res),
+						pvsioOut: this.arrayToOutputString(res),
 						jsonOut: (json.length > 0) ? json.join("") : null
 					});
 					res = [];
@@ -111,22 +119,24 @@ module.exports = function () {
 					return true;
 				}
 			} else {
-				res = res.concat(filterLines(lines));
+				res = res.concat(this.filterLines(lines));
 			}
 			return false;
 		};
 	}
 
-    o.removeFile = function (file, cb) {
+    async removeFile (file: string, callBack?: (error: ExecException) => void): Promise<void> {
         var np = path.normalize(file);
-
-        if (np.indexOf(path.dirname(workspaceDir)) === 0) {
-            pvs.exec({command: "rm -rf \"" + np + "\"", callBack: cb});
+        if (np.indexOf(path.dirname(this.contextFolder)) === 0) {
+            this.pvs.exec({ command: "rm -rf \"" + np + "\"", callBack });
         } else {
-            var error = ("cannot delete a folder outside the context of the current project");
-            logger.error(error);
-            logger.error(util.format("path: %s, workspace: %s, normalised Path: %s", file, workspaceDir, np));
-            cb(error);
+            const message: string = "cannot delete a folder outside the context of the current project";
+            console.error(message);
+            console.error(util.format("path: %s, workspace: %s, normalised Path: %s", file, this.contextFolder, np));
+            callBack({
+				name: "removeFile",
+				message
+			});
         }
     };
 	/**
@@ -136,70 +146,76 @@ module.exports = function () {
 	 * @param {String} filename source file to load with pvsio
 	 * @param {function} callback to call when process is ready or process exited
 	 */
-	o.start = function (file, callback) {
-		filename = file;
-        function onDataReceived(data) {
+	start (file: string, callback: Callback): void {
+		this.filename = file;
+        const onDataReceived = (data: string) => {
 			// this shows the original PVSio output
-			console.log(data.trim());
-            if (!processReady) {
-                var lines = data.split("\n").map(function (d) {
+			console.log(data?.trim());
+            if (!this.processReady) {
+                const lines: string[] = data?.split("\n").map((d) => {
                     return d.trim();
-                });
-                var lastLine = lines[lines.length - 1];
+                }) || [];
+                const lastLine: string = lines[lines.length - 1];
                 //copy lines into the output list ignoring the exit string, the startoutput string '==>'
                 //and any blank lines
-                output = output.concat(lines.filter(function (d) {
-                    return wordsIgnored.indexOf(d) < 0;
+                this.output = this.output.concat(lines.filter((d) => {
+                    return this.wordsIgnored.indexOf(d) < 0;
 				}));
 				
-                if (lastLine.indexOf(readyString) >= 0) {
+                if (lastLine.indexOf(this.readyString) >= 0) {
 					//last line of the output is the ready string
-                    callback({type: "processReady", data: output});
-                    processReady = true;
-					pvs.dataProcessor(processDataFunc());
+                    callback({ type: "processReady", data: this.output });
+                    this.processReady = true;
+					this.pvs.dataProcessor(this.processDataFunc());
                 }
             }
-            output = [];
+            this.output = [];
 		}
 
-		function onProcessExited(err) {
-			processReady = false;
-			var msg;
-            if (_silentMode) {
-                msg = "";
-            } else {
-                if (err) {
-                    if (err.code === "ENOENT") {
+		const onProcessExited = (error: NodeJS.ErrnoException) => {
+			this.processReady = false;
+			let msg = "";
+            if (!this._silentMode) {
+                if (error) {
+                    if (error.code === "ENOENT") {
                         msg = "\n\n\n---------------------------------------------------\n\n\nError: PVS executable files are not on your PATH.\nPlease add the PVS executable files (pvs, pvsio and proveit) to your PATH.\n\nA way to do this is to create symbolic links to those files, and place the symbolic links in /usr/bin. For instance, if PVS is installed in /opt/PVS/pvs, the following commands executed in a Terminal window create the required symbolic links (note that you need to specify absolute paths):\n\nsudo ln -s /opt/PVS/pvs /usr/bin/pvs\nsudo ln -s /opt/PVS/pvsio /usr/bin/pvsio\nsudo ln -s /opt/PVS/proveit /usr/bin/proveit\n\n\n---------------------------------------------------";
                     } else {
-                        msg = (err.code) ? "pvsio process exited with error code " + err.code + ".\n" + output.join("")
-									: "pvsio process exited with error code " + err + ".\n" + output.join("");
+                        msg = (error.code) ? "pvsio process exited with error code " + error.code + ".\n" + this.output.join("")
+									: "pvsio process exited with error code " + error + ".\n" + this.output.join("");
                     }
-                } else { msg = "pvsio process exited cleanly.\n" + output.join(""); }
-                logger.error(msg);
+                } else { msg = "pvsio process exited cleanly.\n" + this.output.join(""); }
+                console.error(msg);
             }
-            _silentMode = false;
-			callback({type: "processExited", data: msg, code: err});
+            this._silentMode = false;
+			callback({ type: "processExited", data: [ msg ], error });
 		}
 
 		if (process.env.PORT) { // this is for the PVSio-web version installed on the heroku cloud -- !!NB!! the pvsio script needs to be manually updated to point to /app/PVS (the relocate script does not work with heroku)
-		    pvs.start({processName: "/app/PVS/pvsio", args: [filename],
-				onDataReceived: onDataReceived,
-				onProcessExited: onProcessExited});
+		    this.pvs.start({
+				processName: "/app/PVS/pvsio", 
+				args: [ this.filename ],
+				onDataReceived,
+				onProcessExited
+			});
 		} else if (process.env.pvsdir) {
-		    pvs.start({processName: path.join(process.env.pvsdir, "pvsio"), args: [filename],
-				onDataReceived: onDataReceived,
-				onProcessExited: onProcessExited});
+		    this.pvs.start({
+				processName: path.join(process.env.pvsdir, "pvsio"), 
+				args: [ this.filename ],
+				onDataReceived,
+				onProcessExited
+			});
         } else {
-		    pvs.start({processName: "pvsio", args: [filename],
-				onDataReceived: onDataReceived,
-				onProcessExited: onProcessExited});
+		    this.pvs.start({
+				processName: "pvsio", 
+				args: [ this.filename ],
+				onDataReceived,
+				onProcessExited
+			});
 		}
 
-		logger.info("\n-------------------------------------\nPVSio process started with theory "
-                    + filename + "\n-------------------------------------");
-        console.log("\nProcess context is " + o.workspaceDir() + "\n");
-		return o;
+		console.info("\n-------------------------------------\nPVSio process started with theory "
+            + this.filename + "\n-------------------------------------");
+        console.log("\nProcess context is " + this.contextFolder + "\n");
 	};
 
 	/**
@@ -207,21 +223,18 @@ module.exports = function () {
 	 * will be by the 'on data' event of the process standard output stream
 	 * @param {string} command the command to send to pvsio
 	 */
-	o.sendCommand = function (command, callback) {
+	sendCommand (command: string, callback): void {
         console.log(command);
-		pvs.sendCommand(command, callback);
-		return o;
+		this.pvs.sendCommand(command, callback);
 	};
 
 	/**
 	 * closes the pvsio process
      * @param {string} signal The signal to send to the kill process. Default is 'SIGTERM'
 	 */
-	o.close = function (signal, silentMode) {
-        _silentMode = silentMode;
+	close (signal?: string, silentMode?: boolean) {
+        this._silentMode = silentMode;
 		signal = signal || 'SIGTERM';
-		pvs.kill(signal);
-		return o;
+		this.pvs.kill(signal);
 	};
-	return o;
 };
