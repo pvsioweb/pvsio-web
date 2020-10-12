@@ -268,6 +268,7 @@ class PvsiowebServer {
             socket.on("message", async (m: string) => {
                 try {
                     let token = JSON.parse(m);
+                    console.dir(`[pvsioweb-server] ${m}`);
                     token.time = token.time || {};
                     token.time.server = { received: new Date().getTime() };
                     const f: (token: Token, socket: WebSocket, socketid: number) => Promise<void> = this.functionMaps[token.type];
@@ -671,23 +672,23 @@ class PvsiowebServer {
         }
     }
 
-    async readFolderContent(token: Token, socket: WebSocket): Promise<FileSystemUpdateToken> {
+    async readFolderContent(folderPath: string, socket: WebSocket): Promise<FileSystemUpdateToken> {
         const res: FileSystemUpdateToken = {
             socketId: -1,
             type: "FileSystemUpdate",
             event: "refresh",
-            name: token.path,
-            path: token.path,
+            name: path.dirname(folderPath),
+            path: folderPath,
             isDirectory: true,
             time: { server: {} }
         };
-        const data: serverUtils.FileDescriptor[] = await serverUtils.getFolderTree(token.path);
+        const data: serverUtils.FileDescriptor[] = await serverUtils.getFolderTree(folderPath);
         res.subFiles = data?.filter((f: serverUtils.FileDescriptor) => {
             return (!f.isDirectory) && FileFilters.filesFilter?.indexOf(path.extname(f.path).toLowerCase()) > -1;
-        }).map(this.toRelativePath(token.path));
+        }).map(this.toRelativePath(folderPath));
         res.subFolders = data?.filter((f: serverUtils.FileDescriptor) => {
             return f.isDirectory;
-        }).map(this.toRelativePath(token.path));
+        }).map(this.toRelativePath(folderPath));
         this.processCallback(res, socket);
         return res;
     }
@@ -957,6 +958,7 @@ class PvsiowebServer {
                 token.socketId = socketid;
                 if (token.path) {
                     const folder: string = path.join(baseProjectDir, token.path);
+                    console.log(`[pvsioweb-server] Creating folder ${folder}`);
                     let exists: boolean = serverUtils.fileOrFolderExists(folder);
                     if (!exists) {
                         exists = await serverUtils.mkdirRecursive(folder);
@@ -967,8 +969,8 @@ class PvsiowebServer {
                         // that is visible to the client (the client might not have info about it)
                         await serverUtils.stat(folder);
                         this.unregisterFolderWatcher(folder);
-                        await this.readFolderContent(token, socket);
-                        await this.registerFolderWatcher(token.path, socket);
+                        await this.readFolderContent(folder, socket);
+                        await this.registerFolderWatcher(folder, socket);
                     } else {
                         token.err = {
                             path: token.path,

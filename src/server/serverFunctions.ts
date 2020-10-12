@@ -3,6 +3,7 @@
  * @author Patrick Oladimeji, Paolo Masci
  * @date 6/26/14 11:29:07 AM
  */
+import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -19,41 +20,12 @@ const filesFilter: string[] = [".pvs", ".tex", ".txt", ".i", ".json"].concat(ima
  */
 export async function mkdirRecursive(dirPath: string, cb?: (error?: NodeJS.ErrnoException) => void): Promise<boolean> {
    try {
-        fs.mkdirSync(dirPath);
-        if (cb) { cb(); }
+        execSync(`mkdir -p ${dirPath}`);
         return true;
     } catch (mkdirErr) {
-        if (mkdirErr && mkdirErr.code === "ENOENT") {
-            // the callback will be invoked only by the first instance of mkdirRecursive
-            var parentDirectory = dirPath.substr(0, dirPath.lastIndexOf("/"));
-            mkdirRecursive(parentDirectory, (error: NodeJS.ErrnoException) => {
-                // note: multiple instances of this function might be running in parallel
-                // because the caller could have invoked the function using Promise.all(promises)
-                // we therefore need to handle the case EEXIST (two or more instances could
-                // be competing for the creation of the same parent directories)
-                if (!error || error.code === "EEXIST") {
-                    try {
-                        fs.mkdirSync(dirPath);
-                        if (cb) {
-                            cb();
-                            return true;
-                        }
-                    } catch (mkdirErr2) {
-                        cb(mkdirErr2);
-                        return false;
-                    }
-                } else {
-                    cb(error);
-                    return false;
-                }
-            });
-        } else {
-            // if the path has been created successfully, just invoke the callback function (if any)
-            cb();
-            return true;
-        }
+        console.error(mkdirErr);
+        return false;
     }
-    return false;
 }
 /**
  * Get the stat for the file in the specified path
@@ -61,6 +33,7 @@ export async function mkdirRecursive(dirPath: string, cb?: (error?: NodeJS.Errno
  * see http://nodejs.org/api/fs.html#fs_class_fs_stats for details
  */
 export async function stat(fullPath: string): Promise<fs.Stats> {
+    console.log(`[server-functions] stat ${fullPath}`);
     return fs.statSync(fullPath);
 }
 /**
