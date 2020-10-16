@@ -381,9 +381,10 @@ class PvsiowebServer {
                 }
             }
             if (socket && socket.readyState === 1) {
-                // console.log("sending data back to client...");
+                console.log("sending data back to client...");
+                console.dir(token);
                 socket.send(JSON.stringify(token));
-                // console.log("data sent!");
+                console.log("data sent!");
             }
         } catch (processCallbackError) {
             console.log("WARNING: processCallbackError " + JSON.stringify(processCallbackError));
@@ -743,13 +744,15 @@ class PvsiowebServer {
             "listProjects": async (token: ListProjectsToken, socket: WebSocket, socketid: number) => {
                 initProcessMap(socketid);
                 token.socketId = socketid;
+                const projects: serverUtils.ProjectDescriptor[] = await serverUtils.listProjects();
                 const res: ListProjectsToken = {
                     type: token.type,
                     id: token.id,
                     socketId: socketid,
                     time: token.time,
-                    projects: await serverUtils.listProjects()
+                    projects
                 };
+                console.log("[pvsioweb-server] listProjects", projects);
                 this.processCallback(res, socket);
             },
             "openProject": async (token: OpenProjectToken, socket: WebSocket, socketid: number) => {
