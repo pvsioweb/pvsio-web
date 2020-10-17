@@ -262,8 +262,8 @@ export async function listProjects(): Promise<ProjectDescriptor[]> {
                     }
                 }
             }
+            resolve(projects);
         });
-        resolve(projects);
     });
 }
 
