@@ -18,12 +18,12 @@ You should have received a copy of the GNU General Public License along with Foo
  * @date Dec 2, 2012 : 10:28:48 PM
  */
 
-import { spawn, exec, ExecException } from 'child_process';
+import { spawn, exec, ExecException, ChildProcess } from 'child_process';
 
 export class ProcessWrapper {
 
-    protected proc;
-    protected _dataProcessor;
+    protected proc: ChildProcess;
+    protected dataProcessor;
     protected cbQueue = [];
 
     /**
@@ -55,8 +55,8 @@ export class ProcessWrapper {
                 this.proc.stdout.setEncoding('utf8');
                 this.proc.stderr.setEncoding("utf8");
 
-                this.proc.stdout.on("data", function (data) {
-                    const f = this.dataProcessor();
+                this.proc.stdout.on("data", (data) => {
+                    const f = this.getDataProcessor();
                     //call any callback and forward the data to onDataReceived if it exists
                     if (f) {
                         if (f(data, this.cbQueue[0])) {
@@ -85,12 +85,19 @@ export class ProcessWrapper {
 	 * The function takes a string and a callback function as parameter and should return true if the callback function
 	 * has been invoked
 	 */
-	dataProcessor (f) {
+	setDataProcessor (f) {
 		if (f) {
-			this._dataProcessor = f;
+			this.dataProcessor = f;
 		}
-		return this._dataProcessor;
-	};
+		return this.dataProcessor;
+    };
+    getDataProcessor () {
+        const noop = () => {};
+        if (this.dataProcessor) {
+            return this.dataProcessor();
+        }
+        return noop;
+    }
     /**
      * execute a self terminating process and calls the callback with the output of the stdout
      * @param {String} opt A space separated string containing the process to execute and any arguments
@@ -104,7 +111,7 @@ export class ProcessWrapper {
      * stop the process spawned
      * @returns {___anonymous364_365}
      */
-    kill (signal: string): ProcessWrapper {
+    kill (signal: NodeJS.Signals | number): ProcessWrapper {
         signal = signal || 'SIGTERM';
         if (this.proc) {
             this.proc.kill(signal);

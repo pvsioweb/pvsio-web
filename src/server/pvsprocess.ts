@@ -74,17 +74,16 @@ export class PvsProcess {
 	 * @desc This function is responsible for processing stream data from PVSio.
 	 *       Supports parsing of one block of JSON output produced by PVSio within tags <JSON> .. </JSON>
      */
-	processDataFunc () {
+	processData () {
 		let res = [];
 		let json = [];
 		let jsonStream = false;
-		return (data, cb) => {			
+		return (data: string, cb) => {			
 			// console.log("processDataFunc()");
 			if (data.indexOf("<JSON>") >= 0) {
 				// console.log("json start");
 				jsonStream = true;
-				data = data.split("<JSON>").slice(1);
-				data = data.join("");
+				data = data.split("<JSON>").slice(1).join("");
 				// console.log("init data: " + data);
 			}
 			if (jsonStream) {
@@ -166,7 +165,7 @@ export class PvsProcess {
 					//last line of the output is the ready string
                     callback({ type: "processReady", data: this.output });
                     this.processReady = true;
-					this.pvs.dataProcessor(this.processDataFunc());
+					this.pvs.setDataProcessor(this.processData());
                 }
             }
             this.output = [];
@@ -230,9 +229,9 @@ export class PvsProcess {
 
 	/**
 	 * closes the pvsio process
-     * @param {string} signal The signal to send to the kill process. Default is 'SIGTERM'
+     * @param {NodeJS.Signals | number} signal The signal to send to the kill process. Default is 'SIGTERM'
 	 */
-	close (signal?: string, silentMode?: boolean) {
+	close (signal?: NodeJS.Signals | number, silentMode?: boolean) {
         this._silentMode = silentMode;
 		signal = signal || 'SIGTERM';
 		this.pvs.kill(signal);

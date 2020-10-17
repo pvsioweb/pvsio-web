@@ -72,21 +72,21 @@ export interface TokenId extends BasicToken {
 }
 export interface SetMainFileToken extends TokenId {
     type: "setMainFile",
-    projectName: string,
-    projectDesc: serverUtils.ProjectDescriptor,
+    name: string,
+    project: serverUtils.ProjectDescriptor,
     key?: string,
     value?: string
 }
 export interface ChangeProjectSettingsToken extends TokenId {
     type: "changeProjectSettings",
-    projectName: string,
-    projectDesc: serverUtils.ProjectDescriptor,
+    name: string,
+    project: serverUtils.ProjectDescriptor,
     key?: string,
     value?: string
 }
 export interface OpenProjectToken extends TokenId {
-    projectName: string,
-    projectDesc: serverUtils.ProjectDescriptor,
+    name: string,
+    project: serverUtils.ProjectDescriptor,
     key?: string,
     value?: string
 }
@@ -715,7 +715,7 @@ class PvsiowebServer {
                 token.socketId = socketid;
                 const mainFile = token.path.split("/").slice(1).join("/");
                 if (mainFile !== "") {
-                    await this.changeProjectSetting(token.projectName, "mainPVSFile", mainFile);
+                    await this.changeProjectSetting(token.name, "mainPVSFile", mainFile);
                     this.processCallback(token, socket);
                 } else {
                     token.err = {
@@ -730,7 +730,7 @@ class PvsiowebServer {
                 initProcessMap(socketid);
                 token.socketId = socketid;
                 if (token && token.key && token.value) {
-                    await this.changeProjectSetting(token.projectName, token.key, token.value);
+                    await this.changeProjectSetting(token.name, token.key, token.value);
                     this.processCallback(token, socket);
                 } else {
                     token.err = {
@@ -763,8 +763,8 @@ class PvsiowebServer {
                     type: token.type,
                     socketId: socketid,
                     time: token.time,
-                    projectName: token.projectName,
-                    projectDesc: await serverUtils.openProject(token.name)
+                    name: token.name,
+                    project: await serverUtils.openProject(token.name)
                 };
                 this.unregisterFolderWatchers();
                 await this.registerFolderWatcher(path.join(baseProjectDir, token.name), socket);

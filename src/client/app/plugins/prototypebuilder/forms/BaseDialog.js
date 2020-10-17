@@ -25,7 +25,7 @@ define(function (require, exports, module) {
         },
         focus: function () {
             d3.select(".panel-heading").classed("noselect", true);
-            d3.select(this.el).select(".panel").attr("tabindex", 1).node().focus();
+            d3.select(this.el).select(".panel").attr("tabindex", 1).node()?.focus();
         },
         moveDialog: function (event) {
             var bbox = d3.select(".panel-heading").node().getBoundingClientRect();
