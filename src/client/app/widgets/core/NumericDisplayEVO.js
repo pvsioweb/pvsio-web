@@ -34,7 +34,7 @@
 define(function (require, exports, module) {
     "use strict";
     let BasicDisplayEVO = require("widgets/core/BasicDisplayEVO"),
-        digits_template = require("text!widgets/templates/digits_template.handlebars");
+        digits_template = require("./Templates").digitsTemplate;
 
     const selectedFontSize = 1.076; // ratio selectedFont/normalFont for integer digits
 

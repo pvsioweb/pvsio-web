@@ -44,7 +44,7 @@ define(function (require, exports, module) {
     "use strict";
     const Timer = require("util/Timer"),
           WidgetEVO = require("widgets/core/WidgetEVO"),
-          ButtonHalo2 = require("widgets/ButtonHalo2"),
+        //   ButtonHalo2 = require("widgets/ButtonHalo2"),
           ButtonActionsQueue = require("widgets/ButtonActionsQueue").getInstance();
 
     const CLICK_RATE = 250; // 250 milliseconds, default interval for repeating button clicks when the button is pressed and held down
@@ -112,12 +112,12 @@ define(function (require, exports, module) {
         });
         // bind key events
         if (_this.keyCode) {
-            ButtonHalo2.getInstance().installKeypressHandler(_this, {
-                keyCode: _this.keyCode,
-                coords: { left: _this.left, top: _this.top, height: _this.height, width: _this.width },
-                evts: _this.evts,
-                noHalo: opt.noHalo
-            });
+            // ButtonHalo2.getInstance().installKeypressHandler(_this, {
+            //     keyCode: _this.keyCode,
+            //     coords: { left: _this.left, top: _this.top, height: _this.height, width: _this.width },
+            //     evts: _this.evts,
+            //     noHalo: opt.noHalo
+            // });
         }
     }
     function btn_action(evt, _this, opt) {

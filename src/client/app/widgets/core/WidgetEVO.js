@@ -13,7 +13,7 @@ define(function (require, exports, module) {
     const d3 = require("d3/d3");
     const MAX_COORDINATES_ACCURACY = 0; // max 0 decimal digits for coordinates, i.e., accuracy is 1px
     const StateParser = require("util/PVSioStateParser");
-    const widget_template = require("text!widgets/templates/generic_widget_template.handlebars");
+    const widget_template = require("./Templates").genericWidgetTemplate;
 
     const normalised = {
         backgroundcolor: "backgroundColor",

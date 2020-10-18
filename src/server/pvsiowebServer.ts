@@ -31,11 +31,10 @@ import * as express from 'express';
 import * as http from 'http';
 import * as open from 'open';
 import * as util from 'util';
-import { ProcessWrapper } from './processwrapper';
 import * as FileFilters from './FileFilters';
-import * as serverUtils from './serverFunctions';
-import { ExecException } from 'child_process';
-import { CallbackArgs, PvsProcess } from './pvsprocess';
+import * as serverUtils from './serverUtils';
+import { exec, ExecException, execSync } from 'child_process';
+import { PvsProxy } from './pvsProxy';
 import WebSocket = require('ws');
 
 const baseProjectDir: string = path.join(__dirname, "../../examples/projects/");
@@ -224,18 +223,16 @@ export type Token = PongToken | PingToken | FileSystemUpdateToken | StartIVYToke
 
 class PvsiowebServer {
     protected port: number = +process.env.PORT || 8082;
-    protected pvsioProcessMap: { [key: string]: PvsProcess } = {};//each client should get his own process
+    protected pvsioProcessMap: { [key: string]: PvsProxy } = {};//each client should get his own process
     protected httpServer: http.Server;
     protected wsServer: ws.Server;
     protected clientid: number = 0;
     protected fsWatchers: { [folder: string]: fs.FSWatcher } = {};
     protected socketRegistry = {};
-    protected procWrapper: ProcessWrapper;
     protected functionMaps: { [key: string]: (token: Token, socket: WebSocket, socketid: number) => Promise<void> } = {};
 
     constructor () {
         // create pvs process wrapper
-        this.procWrapper = new ProcessWrapper();
         this.createClientFunctionMaps();
     }
 
@@ -268,11 +265,13 @@ class PvsiowebServer {
             socket.on("message", async (m: string) => {
                 try {
                     let token = JSON.parse(m);
-                    console.dir(`[pvsioweb-server] ${m}`);
+                    // console.dir(`[pvsiowebServer] ${m}`);
                     token.time = token.time || {};
                     token.time.server = { received: new Date().getTime() };
                     const f: (token: Token, socket: WebSocket, socketid: number) => Promise<void> = this.functionMaps[token.type];
                     if (f && typeof f === 'function') {
+                        console.log("received request from client...");
+                        console.dir({ type: token.type, command: token["command"] });        
                         //call the function with token and socket as parameter
                         try {
                             await f(token, socket, socketid);
@@ -301,7 +300,7 @@ class PvsiowebServer {
     
             socket.on("close", () => {
                 console.info("closing websocket client " + socketid);
-                const p: PvsProcess = this.pvsioProcessMap[socketid];
+                const p: PvsProxy = this.pvsioProcessMap[socketid];
                 p?.close();
                 delete this.pvsioProcessMap[socketid];
             });
@@ -309,7 +308,7 @@ class PvsiowebServer {
             socket.on("error", (err: NodeJS.ErrnoException) => {
                 console.error("abrupt websocket close operation from client " + socketid);
                 console.error(err);
-                const p: PvsProcess = this.pvsioProcessMap[socketid];
+                const p: PvsProxy = this.pvsioProcessMap[socketid];
                 p?.close();
                 delete this.pvsioProcessMap[socketid];
             });
@@ -382,9 +381,9 @@ class PvsiowebServer {
             }
             if (socket && socket.readyState === 1) {
                 console.log("sending data back to client...");
-                console.dir(token);
+                console.dir({ type: token.type, data: token.type === "sendCommand" ? token["data"] : null });
                 socket.send(JSON.stringify(token));
-                console.log("data sent!");
+                console.log("data sent!\n");
             }
         } catch (processCallbackError) {
             console.log("WARNING: processCallbackError " + JSON.stringify(processCallbackError));
@@ -431,23 +430,17 @@ class PvsiowebServer {
     async typeCheck(file: string, cb: (error: ExecException, stdout: string, stderr: string) => void): Promise<void> {
         console.log("typechecking file " + file + " ...");
         if (process.env.PORT) { // this is for the PVSio-web version installed on the heroku cloud
-            console.log("/app/PVS/proveit -T -l -v " + file);
-            this.procWrapper.exec({
-                command: "/app/PVS/proveit -T -l -v " + file,
-                callBack: cb
-            });
+            const cmd: string = `/app/PVS/proveit -T -l -v ${file}`;
+            console.log(cmd);
+            exec(cmd, cb);
         } else if (process.env.pvsdir) {
-            console.log(path.join(process.env.pvsdir, "proveit") + " -T -l -v " + file);
-            this.procWrapper.exec({
-                command: path.join(process.env.pvsdir, "proveit") + " -T -l -v " + file,
-                callBack: cb
-            });
+            const cmd: string = `${path.join(process.env.pvsdir, "proveit")} -T -l -v ${file}`;
+            console.log(cmd);
+            exec(cmd, cb);
         } else {
-            console.log("proveit -T -l -v " + file);
-            this.procWrapper.exec({
-                command: "proveit -T -l -v " + file,
-                callBack: cb
-            });
+            const cmd: string = `proveit -T -l -v ${file}`;
+            console.log(cmd);
+            exec(cmd, cb);
         }
     }
 
@@ -471,10 +464,7 @@ class PvsiowebServer {
             // console.log(javaFile, argv, basePath);
             const command = `cd ${basePath} && java ${javaOptions.join(" ")} ${javaFile} ${argv.join(" ")}`;
             console.log("Executing command: ", command);
-            this.procWrapper.exec({
-                command: command,
-                callBack: cb
-            });
+            exec(command, cb);
         } catch (execError) {
             console.error(execError);
         }
@@ -482,18 +472,18 @@ class PvsiowebServer {
 
     async startSapereEE(cb: (error: ExecException, stdout: string, stderr: string) => void): Promise<void> {
         const command: string = path.join(__dirname, "lib/glassfish4/bin/asadmin") + " restart-domain --force=true";
-        this.procWrapper.exec({ command, callBack: cb });
+        exec(command, cb);
     }
 
     async stopSapereEE(cb: (error: ExecException, stdout: string, stderr: string) => void): Promise<void> {
         const command: string = path.join(__dirname, "lib/glassfish4/bin/asadmin") + "  stop-domain";
-        this.procWrapper.exec({ command, callBack: cb });
+        exec(command, cb);
     }
 
     async startIVY(cb: (error: ExecException, stdout: string, stderr: string) => void): Promise<void> {
         const command: string = `cd ${path.join(__dirname, "ext/IVY")} && java -Dlog4j.configuration=file:log4j.properties -jar lib/jpf-boot.jar -interactive`;
         console.log(command);
-        this.procWrapper.exec({ command });
+        exec(command);
         // This delayed callback is a workaround to wait for IVY to start up.
         // We can remove this workaround as soon as the IVY tool implements a way to start IVY and return control to the caller.
         setTimeout(cb, 2000);
@@ -701,7 +691,7 @@ class PvsiowebServer {
     protected createClientFunctionMaps(): void {
         const initProcessMap = (socketid: number) => {
             if (!this.pvsioProcessMap[socketid]) {
-                this.pvsioProcessMap[socketid] = new PvsProcess();
+                this.pvsioProcessMap[socketid] = new PvsProxy();
             }
             // console.debug(socketid);
         };
@@ -752,7 +742,7 @@ class PvsiowebServer {
                     time: token.time,
                     projects
                 };
-                console.log("[pvsioweb-server] listProjects", projects);
+                // console.log("[pvsiowebServer] listProjects", projects);
                 this.processCallback(res, socket);
             },
             "openProject": async (token: OpenProjectToken, socket: WebSocket, socketid: number) => {
@@ -788,16 +778,15 @@ class PvsiowebServer {
                 // console.log("received command: ", token);
                 initProcessMap(socketid);
                 token.socketId = socketid;
-                this.pvsioProcessMap[socketid]?.sendCommand(token.command, (data: { pvsioOut: string, jsonOut: string }) => {
-                    // console.log("callback");
-                    if (data) {
-                        token.data = data?.pvsioOut ? [ data.pvsioOut ] : [];
-                        token.json = data?.jsonOut;
-                        token.err = (data?.pvsioOut && typeof data.pvsioOut === "string" && data.pvsioOut.indexOf("Expecting an expression") === 0) ?
-                                        { message: data.pvsioOut, failedCommand: token?.command } : null
-                        this.processCallback(token, socket);
-                    }
-                });
+                
+                const res: { pvsioOut: string, jsonOut?: string } = await this.pvsioProcessMap[socketid]?.sendCommand(token.command);
+                if (res) {
+                    token.data = res?.pvsioOut ? [ res.pvsioOut ] : [];
+                    token.json = res?.jsonOut;
+                    token.err = (res?.pvsioOut && typeof res.pvsioOut === "string" && res.pvsioOut.indexOf("Expecting an expression") === 0) ?
+                                    { message: res.pvsioOut, failedCommand: token?.command } : null
+                    this.processCallback(token, socket);
+                }
             },
             "ping": async (token: PingToken, socket: WebSocket, socketid: number) => {
                 setTimeout(() => {
@@ -836,16 +825,15 @@ class PvsiowebServer {
                         : token.data.demoName ? path.join(baseDemosDir, token.data.demoName) : "";
                 // close the process if it exists and recreate it
                 if (this.pvsioProcessMap[socketid]) {
-                    this.pvsioProcessMap[socketid].close('SIGTERM', true);
+                    this.pvsioProcessMap[socketid].close();
                     delete this.pvsioProcessMap[socketid];
                 }
                 // recreate the pvsio process
-                this.pvsioProcessMap[socketid] = new PvsProcess();
+                this.pvsioProcessMap[socketid] = new PvsProxy();
                 // set the workspace dir and start the pvs process with a callback for processing process ready and exit
                 // messages from the process
-                this.pvsioProcessMap[socketid].workspaceDir(root).start(token.data.name, (args: CallbackArgs) => {
-                    this.processCallback(token, socket);
-                });
+                const res: boolean = await this.pvsioProcessMap[socketid].start({ contextFolder: root, fileName: path.basename(token.data.name, ".pvs"), fileExtension: ".pvs" });
+                this.processCallback(token, socket);
             },
             "closeProcess": async (token: CloseProcessToken, socket: WebSocket, socketid: number) => {
                 //closes pvs process
@@ -900,16 +888,9 @@ class PvsiowebServer {
                 token.socketId = socketid;
                 token.path = path.join(baseProjectDir, token.path);
                 try {
-                    this.pvsioProcessMap[socketid].removeFile(token.path, (error: ExecException | null, stdout?: string, stderr?: string) => {
-                        if (error) {
-                            token.err = {
-                                path: token.path,
-                                message: error.message,
-                                code: `${error.code}`
-                            };
-                        }
-                        this.processCallback(token, socket);
-                    });
+                    const contextFolder: string = this.pvsioProcessMap[socketid].getContextFolder();
+                    serverUtils.removeFile(token.path, { contextFolder });
+                    this.processCallback(token, socket);
                 } catch (err) {
                     token.err = err;
                     this.processCallback(token, socket);
@@ -961,7 +942,7 @@ class PvsiowebServer {
                 token.socketId = socketid;
                 if (token.path) {
                     const folder: string = path.join(baseProjectDir, token.path);
-                    console.log(`[pvsioweb-server] Creating folder ${folder}`);
+                    // console.log(`[pvsiowebServer] Creating folder ${folder}`);
                     let exists: boolean = serverUtils.fileOrFolderExists(folder);
                     if (!exists) {
                         exists = await serverUtils.mkdirRecursive(folder);
@@ -995,15 +976,7 @@ class PvsiowebServer {
                 token.socketId = socketid;
                 try {
                     const folder: string = path.join(baseProjectDir, token.path);
-                    this.pvsioProcessMap[socketid].removeFile(folder, (error: ExecException) => {
-                        if (error) {
-                            token.err = {
-                                code: `${error.code}`,
-                                message: error.message,
-                                path: token.path
-                            };
-                        }
-                    });
+                    serverUtils.removeFile(folder);
                 } catch (err) {
                     token.err = err;
                 } finally {

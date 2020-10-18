@@ -1,11 +1,13 @@
 /**
- * Utility functions used by the pvsioweb-server for dealing with filesystem etc
+ * Utility functions used by the pvsiowebServer for dealing with filesystem etc
  * @author Patrick Oladimeji, Paolo Masci
  * @date 6/26/14 11:29:07 AM
  */
-import { execSync } from 'child_process';
+import { ExecException, execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as util from 'util';
+
 
 const imageExts: string[] = [".jpg", ".jpeg", ".png"];
 const baseProjectDir: string = path.join(__dirname, "../../examples/projects/");
@@ -135,6 +137,17 @@ export async function writeFile(fullPath: string, content: string, encoding?: "b
         });
     });
 }
+
+export function removeFile (file: string, opt?: { contextFolder?: string }): boolean {
+    const np: string = path.normalize(file);
+    opt = opt || {};
+    if (opt.contextFolder && !(np.indexOf(path.dirname(opt.contextFolder)) === 0)) {
+        return false;
+    }
+    execSync(`rm -rf "${np}"`);
+    return true;
+};
+
 
 /**
  * Recursively reads the files in a directory using promises

@@ -37,8 +37,8 @@ if [ -d "PVS" ] && [ -f "PVS/pvs" ] && [ -f "PVS/pvsio" ] && [ -f "PVS/proveit" 
 		cd ..
 	fi
 	cd src/server
-	node-debug pvsioweb-server.js pvsdir:$PVS_DIR restart
+	node-debug pvsiowebServer.js pvsdir:$PVS_DIR restart
 else
 	cd src/server
-	node-debug pvsioweb-server.js restart
+	node-debug pvsiowebServer.js restart
 fi

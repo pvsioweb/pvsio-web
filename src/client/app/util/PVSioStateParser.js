@@ -147,7 +147,7 @@ define(function (require, exports, module) {
                     do {
                         var key = readUntil(subValue.word, index + 1, wordBeforeEqual);
                         key.word = key.word.trim();
-                        key.word = key.word.substr(0, key.word.length - 1); //removing spaces and last char ":"
+                        key.word = key.word.substr(0, key.word.length - 1).trim(); //removing spaces and last char ":"
                         key.index = key.index + 1;
                         val = parseValue(subValue.word.substring(key.index));
                         if (val && val.value && typeof val.value === "string") {
