@@ -155,13 +155,13 @@ define(function (require, exports, module) {
         o.sendGuiAction = function (action, cb) {
             if (action === "<ping>" || action === "<pong>") {
                 var type = action.replace(/</,"").replace(/>/,"");
-                wscBase.send({type: type, data: { command: action }}, function (err, res) {
+                wscBase.send({type: type, command: action }, function (err, res) {
                     if (cb && typeof cb === "function") {
                         cb(err, res);
                     }
                 });
             } else {
-                wscBase.send({type: "sendCommand", data: {command: action}}, function (err, res) {
+                wscBase.send({ type: "sendCommand", command: action }, function (err, res) {
                     console.log("data received: ", res);
                     if (res) {
                         if (res.json) {
