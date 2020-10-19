@@ -675,7 +675,9 @@ function run() {
                 if (isAbsolute(token.path)) {
                     // remove all ../ to avoid writing in arbitrary parts of the file system
                     token.path = token.path.replace(/\.\./g, "");
-                    token.path = path.join(baseExamplesDir, token.path);
+		    if (!token.path.startsWith(baseExamplesDir)) {
+                        token.path = path.join(baseExamplesDir, token.path);
+                    }
                 } else {
                     token.path = path.join(baseProjectDir, token.path);
                 }
