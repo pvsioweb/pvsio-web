@@ -12,14 +12,17 @@ define(function (require, exports, module) {
         uidGenerator    = require("util/uuidGenerator"),
         EditWidgetView  = require("pvsioweb/forms/editWidget"),
         BaseWidgetManager  = require("pvsioweb/BaseWidgetManager"),
-        Button          = require("widgets/Button"),
-        TouchscreenButton  = require("widgets/TouchscreenButton"),
-        TouchscreenDisplay = require("widgets/TouchscreenDisplay"),
-        LED             = require("widgets/LED"),
-        BasicDisplay    = require("widgets/BasicDisplay"),
-        NumericDisplay  = require("widgets/NumericDisplay"),
+        
+        // core widgets
+        Button          = require("widgets/core/ButtonEVO"),
+        TouchscreenButton  = require("widgets/core/TouchScreenEVO"),
+        TouchscreenDisplay = require("widgets/core/TouchScreenEVO"),
+        LED             = require("widgets/core/LedEVO"),
+        BasicDisplay    = require("widgets/core/BasicDisplayEVO"),
+        NumericDisplay  = require("widgets/core/NumericDisplayEVO"),
+
         // Storyboard      = require("pvsioweb/Storyboard"),
-        EmuTimer        = require("widgets/EmuTimer"),
+        EmuTimer        = require("widgets/EmuTimer").EmuTimer,
         StateParser     = require("util/PVSioStateParser"),
         ButtonActionsQueue = require("widgets/ButtonActionsQueue").getInstance(),
         PreferenceKeys  = require("preferences/PreferenceKeys"),
@@ -41,11 +44,11 @@ define(function (require, exports, module) {
         }
     }
     function createImageMap(widget) {
-        if (widget.needsImageMap()) {
-            widget.createImageMap({
-                callback: renderResponse
-            });
-        }
+        // if (widget.needsImageMap()) {
+        //     widget.createImageMap({
+        //         callback: renderResponse
+        //     });
+        // }
     }
     function handleTimerEdit(emuTimer, wm) {
         EditWidgetView.create(emuTimer)
@@ -99,8 +102,12 @@ define(function (require, exports, module) {
     }
 
     function createWidget(w) {
-        var widget = null;
-        var x = w.x, y = w.y, height = w.height, width = w.width, scale = w.scale;
+        let widget = null;
+        let x = w.x;
+        let y = w.y;
+        let height = w.height;
+        let width = w.width;
+        let scale = w.scale;
         w.type = w.type.toLowerCase();
         if (w.type === "button") {
             widget = new Button(w.id,
@@ -112,7 +119,8 @@ define(function (require, exports, module) {
                   customFunctionText: w.customFunctionText,
                   visibleWhen: w.visibleWhen,
                   evts: w.evts,
-                  buttonReadback: w.buttonReadback });
+                  buttonReadback: w.buttonReadback,
+                  parent: "imageDiv .prototype-image-inner" });
         } else if (w.type === "display") {
             widget = new BasicDisplay(w.id,
                 { top: y * scale, left: x * scale, width: width * scale, height: height * scale },
@@ -224,8 +232,8 @@ define(function (require, exports, module) {
             _.each(defs.widgetMaps, function (w, i) {
                 defs.regionDefs = defs.regionDefs || [];
                 var coords = ((i < defs.regionDefs.length) && defs.regionDefs[i].coords) ? defs.regionDefs[i].coords.split(",") : [0,0,0,0];
-                w.height = parseFloat(coords[3]) - parseFloat(coords[1]);
-                w.width  = parseFloat(coords[2]) - parseFloat(coords[0]);
+                w.height = (parseFloat(coords[3]) - parseFloat(coords[1]));
+                w.width  = (parseFloat(coords[2]) - parseFloat(coords[0]));
                 w.x = parseFloat(coords[0]);
                 w.y = parseFloat(coords[1]);
                 w.scale = (d3.select("#imageDiv svg > g").node()) ?
@@ -233,8 +241,8 @@ define(function (require, exports, module) {
                 var widget = createWidget(w);
                 if (widget) {
                     wm.addWidget(widget);
-                    if (typeof widget.keyCode === "function" && widget.keyCode() && widget.type() === "button") {
-                        wm._keyCode2widget[widget.keyCode()] = widget;
+                    if (widget.keyCode && widget.type === "button") {
+                        wm._keyCode2widget[widget.keyCode] = widget;
                     }
                 }
             });
@@ -250,6 +258,8 @@ define(function (require, exports, module) {
                         w = parseFloat(coords[2]) - parseFloat(coords[0]),
                         x = parseFloat(coords[0]),
                         y = parseFloat(coords[1]);
+                    h = h > 8 ? h - 5 : h;
+                    w = w > 8 ? w - 5 : w;
                     var coord = {x: x, y: y, width: w, height: h};
                     wm.trigger("WidgetRegionRestored", widget, coord);
                     createImageMap(widget);
@@ -293,7 +303,7 @@ define(function (require, exports, module) {
         var id = "tick";
         var timerRate = Preferences.get(PreferenceKeys.WALL_CLOCK_INTERVAL) * 1000;
         var emuTimer = new EmuTimer(id, { timerEvent: id, timerRate: timerRate, callback: renderResponse });
-        this._timers[emuTimer.id()] = emuTimer;
+        this._timers[emuTimer.id] = emuTimer;
         // fire event widget created
         wm.trigger("TimerModified", { action: "create", timer: emuTimer });
 
@@ -360,8 +370,8 @@ define(function (require, exports, module) {
             }
             widget.updateWithProperties(data);
             this.addWidget(widget);
-            if (typeof widget.keyCode === "function" && widget.keyCode() && widget.type() === "button") {
-                wm._keyCode2widget[widget.keyCode()] = widget;
+            if (widget.keyCode && widget.type === "button") {
+                wm._keyCode2widget[widget.keyCode] = widget;
             }
             this.trigger("WidgetModified", {action: "create", widget: widget});
         }
@@ -386,7 +396,7 @@ define(function (require, exports, module) {
      */
     WidgetManager.prototype.getAllDisplays = function () {
         return _.filter(this._widgets, function (w) {
-            return w.type() === "display" || w.type() === "numericdisplay" || w.type() === "touchscreendisplay";
+            return w.type === "display" || w.type === "numericdisplay" || w.type === "touchscreendisplay";
         });
     };
     /**
@@ -396,7 +406,7 @@ define(function (require, exports, module) {
      */
     WidgetManager.prototype.getDisplayWidgets = function () {
         return _.filter(this._widgets, function (w) {
-            return w.type() === "display";
+            return w.type === "display";
         });
     };
     /**
@@ -406,7 +416,7 @@ define(function (require, exports, module) {
      */
     WidgetManager.prototype.getNumericDisplayWidgets = function () {
         return _.filter(this._widgets, function (w) {
-            return w.type() === "numericdisplay";
+            return w.type === "numericdisplay";
         });
     };
     /**
@@ -416,7 +426,7 @@ define(function (require, exports, module) {
      */
     WidgetManager.prototype.getLEDWidgets = function () {
         return _.filter(this._widgets, function (w) {
-            return w.type() === "led";
+            return w.type === "led";
         });
     };
     /**
@@ -426,7 +436,7 @@ define(function (require, exports, module) {
      */
     WidgetManager.prototype.getButtonWidgets = function () {
         return _.filter(this._widgets, function (w) {
-            return w.type() === "button";
+            return w.type === "button";
         });
     };
     /**
@@ -436,7 +446,7 @@ define(function (require, exports, module) {
      */
     WidgetManager.prototype.getTouchscreenButtonWidgets = function () {
         return _.filter(this._widgets, function (w) {
-            return w.type() === "touchscreenbutton";
+            return w.type === "touchscreenbutton";
         });
     };
     /**
@@ -446,7 +456,7 @@ define(function (require, exports, module) {
      */
     WidgetManager.prototype.getTouchscreenDisplayWidgets = function () {
         return _.filter(this._widgets, function (w) {
-            return w.type() === "touchscreendisplay";
+            return w.type === "touchscreendisplay";
         });
     };
     // /**
@@ -456,7 +466,7 @@ define(function (require, exports, module) {
     //  */
     // WidgetManager.prototype.getStoryboardWidgets = function () {
     //     return _.filter(this._widgets, function (w) {
-    //         return w.type() === "storyboard";
+    //         return w.type === "storyboard";
     //     });
     // };
 
@@ -477,7 +487,7 @@ define(function (require, exports, module) {
     };
     WidgetManager.prototype.getAllTimers = function () {
         return _.filter(this._widgets, function (w) {
-            return w.type() === "timer";
+            return w.type === "timer";
         });
     };
 

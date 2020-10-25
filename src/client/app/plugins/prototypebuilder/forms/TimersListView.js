@@ -17,7 +17,7 @@ define(function (require, exports, module) {
 
         function update(data) {
             var listItems = el.selectAll("li.list-group-item").data(data, function (timer) {
-                return timer.id();
+                return timer.id;
             });
             var enteredItems = listItems.enter();
             var exitedItems = listItems.exit();
@@ -27,7 +27,7 @@ define(function (require, exports, module) {
                 })
                 .attr("timer-id", function (t) {
                     d3.selectAll("#timersList ul li").classed("selected", false);
-                    return t.id();
+                    return t.id;
                 }).classed("selected", true)
                 .text(labelFunction)
                 .on("click", function (t) {

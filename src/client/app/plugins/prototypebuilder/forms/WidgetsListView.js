@@ -76,7 +76,7 @@ define(function (require, exports, module) {
             var _this = this;
 
             this.listItems = this.d3ListElement.selectAll("li.list-group-item").data(this._widgetManager.getAllWidgets(), function (widget) {
-                return widget.id();
+                return widget.id;
             });
             var enteredItems = this.listItems.enter();
             var exitedItems = this.listItems.exit();
@@ -84,7 +84,7 @@ define(function (require, exports, module) {
             enteredItems.append("li").attr("class", "list-group-item")
                 .attr("widget-id", function (w) {
                     _this.d3ListElement.selectAll("ul li").classed("selected", false);
-                    return w.id();
+                    return w.id;
                 }).classed("selected", false)
                 .text(this._labelFunction)
                 .on("click", function (w) {
@@ -95,7 +95,7 @@ define(function (require, exports, module) {
                     d3.event.stopPropagation();
                 }).on("dblclick", function (w) {
                     _this.selectWidget(w);
-                    _this.trigger("WidgetEditRequested", w.id());
+                    _this.trigger("WidgetEditRequested", w.id);
                     // var event = d3.event;
                     // var dblclick = new Event("dblclick");
                     // w.element().node().dispatchEvent(dblclick);

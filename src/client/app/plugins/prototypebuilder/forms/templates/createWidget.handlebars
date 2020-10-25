@@ -1,8 +1,8 @@
 <div class="form-center">
     <form class="center form-horizontal" onsubmit="return false" role="form">
-    <div class="panel panel-info shadow center dialog">
-        <div class="panel-heading">Create Widget</div>
-        <div class="panel-body" style="min-height:420px">
+    <div class="card panel panel-info shadow center dialog">
+        <div class="card-header panel-heading">Create Widget</div>
+        <div class="card-body panel-body" style="min-height:420px; display:inline-flex;">
                 <ul class="nav nav-tabs" id="tabHeaders">
                     <li>
                         <a href="#button" data-toggle="tab" id="buttonTab" widgetType="button">Button</a>
@@ -24,8 +24,8 @@
                     </li>
                 </ul>
                 <div class="tab-content col-sm-4 noselect">
-                    <div class="widgetPreview img-thumbnail" id="widgetPreview"></div>
-                    <div class="img-thumbnail" id="navkeys"><img src="projects/navkeys.png" usemap="#widgetPreviewMap"></img></div>
+                    <div class="widgetPreview" id="widgetPreview"></div>
+                    <div class="img-thumbnail" id="navkeys"><img src="projects/navkeys.png"></img></div>
                 </div>
                 <div class="tab-content col-sm-8">
                     <div class="tab-pane active" id="button">
@@ -310,7 +310,7 @@
                     </div>
                 </div>
         </div>
-        <div class="panel-footer">
+        <div class="card-footer panel-footer">
             <button type="button" class="btn btn-danger left" id="btnCancel">Cancel</button>
             <button type="submit" class="btn btn-success right" id="btnOk">OK</button>
         </div>

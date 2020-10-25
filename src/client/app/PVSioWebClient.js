@@ -10,7 +10,7 @@
 
 define(function (require, exports, module) {
     "use strict";
-    var pvsioweb_version = "2.3";
+    var pvsioweb_version = "3.0";
 
     var pvsws                   = require("websockets/pvs/pvsWSClient"),
 		eventDispatcher			= require("util/eventDispatcher"),

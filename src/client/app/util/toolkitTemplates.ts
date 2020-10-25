@@ -12,42 +12,38 @@ export const toolkitInterface: string = `
             <div class="btn txtProjectName"><span id="txtProjectName" style="color:white;"></span></div>
             <div style="width:100%">
                 <div class="btn-group pull-right" style="display:flex">
-                    <button type="button" class="btn btn-primary" id="newProject"><span class="glyphicon glyphicon-file"></span> New Project</button>
-                    <button type="button" class="btn btn-primary" id="openProject">
-                        <span class="glyphicon glyphicon-folder-open"></span> Open Project</button>
+                    <button type="button" class="btn" id="newProject" style="color:white;">New Project</button>
+                    <button type="button" class="btn" id="openProject" style="color:white;">Open Project</button>
     <!--
                     <a class="btn"
-                       id="btnEditStoryboard">
-                        <span class="glyphicon glyphicon-film"></span> Edit Storyboard</a>
+                       id="btnEditStoryboard">Edit Storyboard</a>
     -->
                     <input type="file" class="hide" id="btnSelectPicture" name="selectPicture" accept="image/*">
                     <div class="btn-group pull-right" style="display:flex; width:158px;">
-                        <button type="button" class="btn btn-primary" id="btnSaveProject"><span class="glyphicon glyphicon-floppy-save"></span> Save Project</button>
-                           <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" style="width:32px;">
-                               <span class="caret"></span>
+                        <button type="button" class="btn btn" id="btnSaveProject" style="color:white;">Save Project</button>
+                           <button type="button" class="btn btn dropdown-toggle" data-toggle="dropdown" style="color:white; width:32px;">
+                               <span class="caret" style="color:white;"></span>
                            </button>
-                        <ul class="dropdown-menu" role="menu">
-                            <li><a class="btn" id="btnSaveProjectAs" style="border-radius:0; margin:-8px 0 -8px; border-color: whitesmoke;">
-                                <span class="glyphicon glyphicon-floppy-disk" style="margin-left:-30px;"></span> Save As...</a>
-                            </li>
-                        </ul>
+                        <div class="dropdown-menu dropdown-menu-right" role="menu" style="background-color:#08589a;">
+                            <button class="btn" id="btnSaveProjectAs" style="color:white; border-radius:0; margin:-8px 0 -8px; padding-left:16px; width:100%; text-align:left;">Save As...</button>
+                        </div>
                     </div>
-                    <button type="button" class="btn btn-primary" id="btnLoadPicture"><span class="glyphicon glyphicon-picture"></span> Change Picture</button>
+                    <button type="button" class="btn" id="btnLoadPicture" style="color:white;">Change Picture</button>
                     <div class="pull-right" style="min-width: 260px; display:inline-flex;">
 <!--
-                        <a id="lblWebSocketStatus" class="btn status">WebSocket <span class="glyphicon glyphicon-ok"></span></a>
-                        <a id="lblPVSioStatus" class="btn status">PVSio <span class="glyphicon glyphicon-warning-sign"></span></a>
+                        <a id="lblWebSocketStatus" class="btn status">WebSocket <span class="fa fa-check"></span></a>
+                        <a id="lblPVSioStatus" class="btn status">PVSio <span class="fa fa-exclamation"></span></a>
 -->
-                        <a id="btnReconnect" class="btn" style="display:none;">Try to reconnect to WebServer <span class="glyphicon glyphicon-random"></span></a>
+                        <a id="btnReconnect" class="btn" style="display:none;">Try to reconnect to WebServer <span class="fa fa-random"></span></a>
                         <a id="lblWebSocketStatus" class="btn status"
                            style="background:rgb(8, 88, 154); color:white; cursor:default;">
-                            WebServer <span class="glyphicon glyphicon-ok"></span></a>
+                            WebServer <span class="fa fa-check"></span></a>
                         <a id="logo" class="btn status"
                            style="background:rgb(8, 88, 154); color:white; cursor:default;">
                             <span>PVSio-web {{version}}</span></a>
                         <div id="autoSaver" class="pull-right"></div>
                         <a id="preferences" class="btn">
-                            <span class="glyphicon glyphicon-menu-hamburger"></span>
+                            <span class="fa fa-bars"></span>
                         </a>
                     </div>
                 </div>

@@ -175,7 +175,7 @@ define(function (require, exports, module) {
         constructor (id, coords, opt) {
             opt = opt || {};
             // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-            opt.type = opt.type || "ButtonEVO";
+            opt.type = opt.type || "button";
             opt.backgroundColor = opt.backgroundColor || "transparent";
             opt.fontColor = opt.fontColor || "black";
             opt.cursor = opt.cursor || "pointer";
@@ -219,6 +219,12 @@ define(function (require, exports, module) {
             this._timer = new Timer(this.rate);
             this.callback = opt.callback || function (err, res) { console.log("Warning: " + _this.id + " does not have a callback :/"); };
             if (!opt.callback) { this.callback(); }
+
+            this._tick_listener = () => {
+                if (this._tick) {
+                    this._tick();
+                } else { console.err("Error in ButtonEVO: undefined handler for tick function."); }
+            }
 
             // install action handlers
             installHandlers(this);
@@ -318,17 +324,12 @@ define(function (require, exports, module) {
          * @instance
          */
         pressAndHold (opt) {
-            let _this = this;
-            this._tick = function () {
-                _this.press(opt);
+            this._tick = () => {
+                this.press(opt);
             };
-            this._timer.addListener("TimerTicked", function () {
-                if (_this._tick) {
-                    _this._tick();
-                } else { console.err("Error in ButtonEVO: undefined handler for tick function."); }
-            });
-            _this.press(opt);
-            this._timer.interval(_this.rate).start();
+            this._timer.addListener("TimerTicked", this._tick_listener);
+            this.press(opt);
+            this._timer.interval(this.rate).start();
             return this;
         }
 
@@ -342,6 +343,7 @@ define(function (require, exports, module) {
             btn_action("release", this, opt);
             this._tick = null;
             this._timer.reset();
+            this._timer.removeListener("TimerTicked", this._tick_listener);
             return this;
         }
 

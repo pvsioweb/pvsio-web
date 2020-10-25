@@ -79,7 +79,7 @@ define(function (require, exports, module) {
             opt = opt || {};
 
             // override options
-            opt.type = opt.type || "NumericDisplayEVO";
+            opt.type = opt.type || "numericdisplay";
             opt.backgroundColor = opt.backgroundColor || "black";
 
             // invoke BasicDisplayEVO constructor to create the widget

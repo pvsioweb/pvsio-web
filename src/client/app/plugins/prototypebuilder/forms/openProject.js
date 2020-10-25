@@ -9,7 +9,7 @@
 define(function (require, exports, module) {
     "use strict";
     var d3						= require("d3/d3"),
-        template				= require("./templates").openProject,
+        template				= require("./prototypebuilderTemplates").openProject,
         BaseDialog              = require("pvsioweb/forms/BaseDialog"),
         FormUtils				= require("./FormUtils");
 

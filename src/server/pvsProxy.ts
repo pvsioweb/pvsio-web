@@ -64,7 +64,7 @@ class PvsProcess {
 	 * Sends the quit command (followed by a confirmation) to PVSio
 	 */
 	quit (): void {
-		this.pvsioProcess.stdin.write("exit; Y");
+		this.pvsioProcess.stdin.write("exit; Y\n");
 	}
 	/**
 	 * Creates a new pvsio process.
@@ -105,6 +105,7 @@ class PvsProcess {
 					// wait for the pvs prompt, to make sure pvs-server is operational
 					// const match: RegExpMatchArray = /\s*<PVSio>\s*/g.exec(data);
 					if (this.data.trim().endsWith(readyString)) {
+						console.log("[pvsproxy] PVSio ready!");
 						if (!this.ready) {
 							this.ready = true;
 							resolve(true);
@@ -192,12 +193,16 @@ class PvsProcess {
 	}
 }
 
+export type PvsioResponse = { pvsioOut?: string, jsonOut?: string, error?: string };
+export type FileDescriptor = { contextFolder: string, fileName: string, fileExtension: string };
+
 export class PvsProxy {
 	protected pvsPath: string;
 	protected pvsLibPath: string; // internal libraries
 	protected pvsLibraryPath: string; // external libraries
 	protected proc: PvsProcess;
 	protected contextFolder: string;
+	protected pvsFile: FileDescriptor
 
 	constructor (opt?: { pvsPath?: string, pvsLibraryPath?: string }) {
 		opt = opt || {};
@@ -205,7 +210,8 @@ export class PvsProxy {
 		this.pvsLibraryPath = opt.pvsLibraryPath || "";
 		// this.pvsLibPath = path.join(pvsPath, "lib");
 	}
-	async start (desc: { contextFolder: string, fileName: string, fileExtension: string }): Promise<boolean> {
+	async start (desc: FileDescriptor): Promise<boolean> {
+		this.pvsFile = desc;
 		const pvsioProcess: PvsProcess = new PvsProcess({ pvsPath: this.pvsPath });
 		const success: boolean = await pvsioProcess.activate({
 			fileName: desc.fileName, 
@@ -222,17 +228,25 @@ export class PvsProxy {
 		}
 		return false;
 	}
-	async sendCommand (cmd: string): Promise<{ pvsioOut: string, jsonOut?: string }> {
-		let data: string = "";
+	async sendCommand (cmd: string): Promise<PvsioResponse> {
+		let res: { pvsioOut?: string, jsonOut?: string, error?: string } = { };
+		if (!this.proc) {
+			await this.start(this.pvsFile);
+		}
 		if (this.proc && cmd) {
 			if (cmd === ";") { cmd = `"";`; }
 			const command: string = (cmd.endsWith(";") || cmd.endsWith("!")) ? cmd : `${cmd};`;
 			console.dir(command);
-			data = await this.proc.sendText(command);
+			const result: string = await this.proc.sendText(command);
+			if (result && result.indexOf("Expecting an expression") === 0) {
+				res.error = result;
+			} else {
+				res.pvsioOut = result;
+			}
 		} else {
-			data = "Error: PVSio could not be started. Please check pvs-server log for details.";
+			res.error = "Error: PVSio could not be started. Please check pvs-server log for details.";
 		}
-		return { pvsioOut: data } ;
+		return res;
 	}
 	async close (): Promise<boolean> {
 		return await this.proc?.kill();

@@ -34,7 +34,7 @@ import * as util from 'util';
 import * as FileFilters from './FileFilters';
 import * as serverUtils from './serverUtils';
 import { exec, ExecException, execSync } from 'child_process';
-import { PvsProxy } from './pvsProxy';
+import { PvsioResponse, PvsProxy } from './pvsProxy';
 import WebSocket = require('ws');
 
 const baseProjectDir: string = path.join(__dirname, "../../examples/projects/");
@@ -779,12 +779,11 @@ class PvsiowebServer {
                 initProcessMap(socketid);
                 token.socketId = socketid;
                 
-                const res: { pvsioOut: string, jsonOut?: string } = await this.pvsioProcessMap[socketid]?.sendCommand(token.command);
+                const res: PvsioResponse = await this.pvsioProcessMap[socketid]?.sendCommand(token.command);
                 if (res) {
                     token.data = res?.pvsioOut ? [ res.pvsioOut ] : [];
                     token.json = res?.jsonOut;
-                    token.err = (res?.pvsioOut && typeof res.pvsioOut === "string" && res.pvsioOut.indexOf("Expecting an expression") === 0) ?
-                                    { message: res.pvsioOut, failedCommand: token?.command } : null
+                    token.err = res?.error ? { message: res.error, failedCommand: token?.command } : null;
                     this.processCallback(token, socket);
                 }
             },
@@ -833,6 +832,7 @@ class PvsiowebServer {
                 // set the workspace dir and start the pvs process with a callback for processing process ready and exit
                 // messages from the process
                 const res: boolean = await this.pvsioProcessMap[socketid].start({ contextFolder: root, fileName: path.basename(token.data.name, ".pvs"), fileExtension: ".pvs" });
+                console.log(`[pvsioweb-server] PVSio process started`);
                 this.processCallback(token, socket);
             },
             "closeProcess": async (token: CloseProcessToken, socket: WebSocket, socketid: number) => {
@@ -858,7 +858,6 @@ class PvsiowebServer {
                 if (path.isAbsolute(token.path)) {
                     // remove all ../ to avoid writing in arbitrary parts of the file system
                     token.path = token.path.replace(/\.\./g, "");
-                    token.path = path.join(baseExamplesDir, token.path);
                 } else {
                     token.path = path.join(baseProjectDir, token.path);
                 }

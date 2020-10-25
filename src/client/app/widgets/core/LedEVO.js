@@ -70,7 +70,7 @@ define(function (require, exports, module) {
             coords.height = coords.width = size / 2;
 
             // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-            opt.type = opt.type || "LedEVO";
+            opt.type = opt.type || "led";
             opt.backgroundColor = opt.color || opt.backgroundColor || COLOR.brightGreen;
             opt.cursor = opt.cursor || "default";
             opt.borderRadius = opt.borderRadius || Math.max(coords.width, coords.height); // this will produce a round LED

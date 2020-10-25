@@ -103,7 +103,7 @@ define(function (require, exports, module) {
             opt = normalise_options(opt);
             coords = coords || {};
             this.id = id;
-            this.type = opt.type || "WidgetEVO";
+            this.type = opt.type || "widget";
             this.parent = (opt.parent) ? ("#" + opt.parent) : "body";
             this.top = coords.top || 0;
             this.left = coords.left || 0;
@@ -493,6 +493,9 @@ define(function (require, exports, module) {
             return this;
         }
 
+        updateLocationAndSize (data) {
+            return this.setPositionAndSize(data);
+        }
 
         /**
          * @function <a name="normaliseOptions">normaliseOptions</a>
@@ -580,6 +583,17 @@ define(function (require, exports, module) {
                 coords: this.getCoordinates(),
                 style: this.getStyle()
             };
+        }
+
+        element (marker) {
+            if (marker) {
+                this.marker = marker;
+            }
+            return this.marker;
+        }
+
+        imageMap () {
+            return null;
         }
     }
 

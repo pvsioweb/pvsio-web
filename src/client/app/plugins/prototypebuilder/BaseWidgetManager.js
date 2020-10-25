@@ -27,7 +27,7 @@ define(function (require, exports, module) {
         @memberof module:WidgetManager
      */
     WidgetManager.prototype.addWidget = function (widget) {
-        this._widgets[widget.id()] = widget;
+        this._widgets[widget.id] = widget;
     };
 
     /**
@@ -37,7 +37,7 @@ define(function (require, exports, module) {
      */
     WidgetManager.prototype.removeWidget = function (widget) {
         widget.remove();
-        delete this._widgets[widget.id()];
+        delete this._widgets[widget.id];
     };
 
     /**

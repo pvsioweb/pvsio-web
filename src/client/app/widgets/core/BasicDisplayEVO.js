@@ -67,10 +67,10 @@ define(function (require, exports, module) {
             opt = opt || {};
 
             // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-            opt.type = opt.type || "BasicDisplayEVO";
+            opt.type = opt.type || "display";
             opt.backgroundColor = opt.backgroundColor || "transparent";
             opt.cursor = opt.cursor || "default";
-            opt.overflow = "hidden";
+            opt.overflow = opt.overflow || "hidden";
             
             // invoke WidgetEVO constructor to create the widget
             super(id, coords, opt);

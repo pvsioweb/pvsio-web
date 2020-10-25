@@ -16,7 +16,7 @@ define(function (require, exports, module) {
     const Preferences = require("preferences/PreferenceStorage").getInstance();
 
     const displayQuestion = require("pvsioweb/forms/displayQuestion");
-    const toolkitTemplate = require("text!./ui.toolkitInterface.handlebars");
+    const toolkitTemplate = require("./toolkitTemplates").toolkitInterface;
 
 
     /**

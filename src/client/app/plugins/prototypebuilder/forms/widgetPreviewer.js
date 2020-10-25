@@ -7,12 +7,12 @@
 /*global define, displayKeyCode*/
 define(function (require, exports, module) {
     "use strict";
-    var Button          = require("widgets/Button"),
-        LED             = require("widgets/LED"),
-        BasicDisplay    = require("widgets/BasicDisplay"),
-        NumericDisplay  = require("widgets/NumericDisplay"),
-        TouchscreenButton = require("widgets/TouchscreenButton"),
-        TouchscreenDisplay = require("widgets/TouchscreenDisplay"),
+    var Button          = require("widgets/core/ButtonEVO"),
+        LED             = require("widgets/core/LedEVO"),
+        BasicDisplay    = require("widgets/core/BasicDisplayEVO"),
+        NumericDisplay  = require("widgets/core/NumericDisplayEVO"),
+        TouchscreenButton = require("widgets/core/TouchScreenEVO"),
+        TouchscreenDisplay = require("widgets/core/TouchScreenEVO"),
         d3				= require("d3/d3");
 
     module.exports = {

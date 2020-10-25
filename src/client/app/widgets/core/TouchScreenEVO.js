@@ -80,7 +80,7 @@ define(function (require, exports, module) {
             opt.backgroundColor = opt.backgroundColor || "steelblue";
             opt.fontColor = opt.fontColor || "white";
             opt.touchscreenMode = true;
-            opt.type = opt.type || "TouchScreenEVO";
+            opt.type = opt.type || "touchscreendisplay";
 
             // invoke ButtonEVO constructor to create the widget
             super(id, coords, opt);

@@ -1,8 +1,8 @@
 <div class="form-center">
-    <div id="pimWidgetModal" class="panel panelWide panel-info shadow center">
-        <div class="panel-heading">{{header}}</div>
+    <div id="pimWidgetModal" class="card panel panelWide panel-info shadow center">
+        <div class="card-header panel-heading">{{header}}</div>
         <form class="center form-inline" onsubmit="return false">
-            <div class="panel-body" style="overflow-y: auto; height: 280px;">
+            <div class="card-body panel-body" style="overflow-y: auto; height: 280px;">
                 <div class="alert alert-danger hide">
                     <a href="#" class="close" onclick="$(this).parent().addClass('hide');">&times;</a>
                     <div id="editWidgetsError"></div>
@@ -51,7 +51,7 @@
                     <div id="pmWidgetsList"></div>
                 </div>
             </div>
-            <div class="panel-footer">
+            <div class="card-footer panel-footer">
                 <button type="button"
                         class="btn btn-danger left"
                         id="btnLeft2">{{buttons.[0]}}</button>

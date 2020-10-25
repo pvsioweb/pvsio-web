@@ -9,7 +9,7 @@ define(function (require, exports, module) {
     "use strict";
 
     const eventDispatcher = require("util/eventDispatcher");
-    const pluginTemplate = require("text!util/ui.pluginToggle.handlebars");
+    const pluginTemplate = require("../util/toolkitTemplates").pluginToggle;
     const normalize = require("util/Normalize").getInstance();
     const pluginListFile = "plugins/plugins.json";
 

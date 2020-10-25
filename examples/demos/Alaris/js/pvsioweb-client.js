@@ -737,7 +737,7 @@ define('websockets/pvs/pvsWSClient',['require','exports','module','websockets/ws
             @param {callback} cb The function to invoke with the results of performing the passed action on the process
         */
         o.sendGuiAction = function (action, cb) {
-            wscBase.send({type: "sendCommand", data: {command: action}}, function (err, res) {
+            wscBase.send({type: "sendCommand", command: action }, function (err, res) {
 				//do stuff to update the explored state graph and invoke the callback with the same parameters
 				wscBase.fire({type: "GraphUpdate", transition: action, target: res.data, source: o.lastState()});
 				//update the lastState 

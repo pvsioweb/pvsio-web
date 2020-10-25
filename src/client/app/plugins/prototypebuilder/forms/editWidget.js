@@ -89,13 +89,13 @@ define(function (require, exports, module) {
         render: function (widget) {
             var t = Handlebars.compile(template);
             var widgetData = widget.toJSON();
-            widgetData.isButton = widget.type() === "button";
-            widgetData.isDisplay = widget.type() === "display";
-            widgetData.isNumericDisplay = widget.type() === "numericdisplay";
-            widgetData.isTouchscreenDisplay = widget.type() === "touchscreendisplay";
-            widgetData.isTouchscreenButton = widget.type() === "touchscreenbutton";
-            widgetData.isLED = widget.type() === "led";
-            widgetData.isTimer = widget.type() === "timer";
+            widgetData.isButton = widget.type === "button";
+            widgetData.isDisplay = widget.type === "display";
+            widgetData.isNumericDisplay = widget.type === "numericdisplay";
+            widgetData.isTouchscreenDisplay = widget.type === "touchscreendisplay";
+            widgetData.isTouchscreenButton = widget.type === "touchscreenbutton";
+            widgetData.isLED = widget.type === "led";
+            widgetData.isTimer = widget.type === "timer";
             this.$el.html(t(widgetData));
             $("body").append(this.el);
             this.widget = widget;
@@ -106,16 +106,16 @@ define(function (require, exports, module) {
                     d3.select("#custom_event").attr("checked", true);
                     document.getElementById("boundFunctions").value = widget.customFunctionText();
                 } else {
-                    widget.evts().forEach(function (e) {
+                    for (let e in widget.evts) {
                         d3.select("input[type='radio'][value='" + e + "']").property("checked", true);
-                    });
+                    }
                 }
-                updateBoundFunctionsLabel(widget.type());
+                updateBoundFunctionsLabel(widget.type);
             }
-            if (widget.auditoryFeedback && widget.auditoryFeedback() === "enabled") {
+            if (widget.auditoryFeedback && typeof widget.auditoryFeedback === "function" && widget.auditoryFeedback() === "enabled") {
                 d3.select("input[type='checkbox'][name='auditoryFeedback']").property("checked", true);
             }
-            showWidgetPreview(widget.type());
+            showWidgetPreview(widget.type);
             return this;
         },
         events: {
@@ -134,14 +134,14 @@ define(function (require, exports, module) {
             "input #cursorName"           : "updatePreview"
         },
         eventsChanged: function (event) {
-            updateBoundFunctionsLabel(this.widget.type());
-            showWidgetPreview(this.widget.type());
+            updateBoundFunctionsLabel(this.widget.type);
+            showWidgetPreview(this.widget.type);
         },
         updatePreview: function (event) {
-            showWidgetPreview(this.widget.type());
+            showWidgetPreview(this.widget.type);
         },
         timerEventChanged: function (event) {
-            updateTimerEvent(this.widget.type());
+            updateTimerEvent(this.widget.type);
         },
         ok: function (event) {
             var form = this.el;

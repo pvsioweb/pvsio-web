@@ -37,12 +37,12 @@ define(function (require, exports, module) {
             _.each(this._widgets, function(widget) {
                 _this.trigger("WidgetRegionRestored", widget, widget.getCoords());
 
-                if (widget.needsImageMap()) {
-                    widget.createImageMap({
-                        onClick: widgetClickHandler,
-                        map: widgetImageMap
-                    });
-                }
+                // if (widget.needsImageMap()) {
+                //     widget.createImageMap({
+                //         onClick: widgetClickHandler,
+                //         map: widgetImageMap
+                //     });
+                // }
                 if (widget.image) {
                     widget.createWidgetImage();
                 }

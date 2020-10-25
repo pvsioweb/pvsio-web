@@ -44,18 +44,8 @@ define(function (require, exports, module) {
             var _this = this;
             this.listenTo(this._widgetManager, "WidgetRegionRestored", function(widget, coord) {
                 var mark = _this._mapCreator.restoreRectRegion(coord);
-                mark.attr("id", widget.id()).classed(widget.type(), true);
+                mark.attr("id", widget.id).classed(widget.type, true);
                 widget.element(mark);
-
-                // Reattach the widget's area map if it isn't already attached to the DOM
-                // FIXME: this should never be necessary
-                if (widget.imageMap() && widget.imageMap().node().parentNode == null) {
-                    this._map.node().appendChild(widget.imageMap().node());
-                }
-
-                // mark.on("dblclick", function () {
-                //     _this.trigger("WidgetEditRequested", mark.attr("id"));
-                // });
             });
 
             nextID++;

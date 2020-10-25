@@ -1,12 +1,12 @@
 <div class="form-center">
-    <div class="panel panel-info shadow center">
-        <div class="panel-heading">{{header}}</div>
-        <div class="panel-body" style="overflow-y: scroll; height: 120px;">
+    <div class="card panel panel-info shadow center">
+        <div class="card-header panel-heading">{{header}}</div>
+        <div class="card-body panel-body" style="overflow-y: scroll; height: 120px;">
             {{#each notification}}
             {{this}}<br/>
             {{/each}}
         </div>
-        <div class="panel-footer">
+        <div class="card-footer panel-footer">
             <button type="submit" class="btn btn-success right" id="btnOk">OK</button>
         </div>
     </div>

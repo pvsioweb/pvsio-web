@@ -60,10 +60,10 @@ define(function (require, exports, module) {
      * @private
      */
     function switchToBuilderView() {
-        d3.select("#prototype-builder-container .image-map-layer").style("opacity", 1).style("z-index", 190);
-        d3.select("#btnBuilderView").classed("btn-default", false).classed("btn-primary", true).classed("active", true);
-        d3.select("#btnSimulatorView").classed("btn-default", true).classed("btn-primary", false).classed("active", false);
-        d3.select("#btnRebootPrototype").classed("disabled", true);
+        $("#prototype-builder-container .image-map-layer").css("opacity", 1).css("z-index", 190);
+        $("#btnBuilderView").removeClass("btn-outline-secondary").addClass("btn-primary active");
+        $("#btnSimulatorView").addClass("btn-outline-secondary").removeClass("btn-primary active");
+        $("#btnRebootPrototype").addClass("disabled");
         WidgetManager.stopTimers();
         expandWidgetsList();
     }
@@ -72,10 +72,10 @@ define(function (require, exports, module) {
         @private
     */
     function switchToSimulatorView() {
-        d3.select("#prototype-builder-container .image-map-layer").style("opacity", 0.1).style("z-index", -2);
-        d3.select("#btnBuilderView").classed("btn-default", true).classed("btn-primary", false).classed("active", false);
-        d3.select("#btnSimulatorView").classed("btn-default", false).classed("btn-primary", true).classed("active", true);
-        d3.select("#btnRebootPrototype").classed("disabled", false);
+        $("#prototype-builder-container .image-map-layer").css("opacity", 0.1).css("z-index", -2);
+        $("#btnBuilderView").addClass("btn-outline-secondary").removeClass("btn-primary active");
+        $("#btnSimulatorView").removeClass("btn-outline-secondary").addClass("btn-primary active");
+        $("#btnRebootPrototype").addClass("disabled");
         console.log("bootstrapping widgets with init(0)...");
         WidgetManager.initialiseWidgets();
         console.log("bootstrapping wallclock timers...");
@@ -155,18 +155,26 @@ define(function (require, exports, module) {
     }
 
     function collapseWidgetsList() {
-        var width = d3.select("#builder-controls").node().getBoundingClientRect().width;
-        if (width > 0) {
-            widgetListView.width = width;
-            d3.select("#builder-controls").transition().duration(300)
-                .styleTween("width", function() { return d3.interpolateString(widgetListView.width + "px", "0px"); });
+        const elem = $("#builder-controls");
+        if (elem[0]) {
+            const width = elem[0].getBoundingClientRect().width;
+            if (width > 0) {
+                widgetListView.width = width;
+                $("#builder-controls").animate({ width: "0px" }, 300);
+                // d3.select("#builder-controls").transition().duration(300)
+                //     .styleTween("width", function() { return d3.interpolateString(widgetListView.width + "px", "0px"); });
+            }
         }
     }
     function expandWidgetsList() {
-        var width = d3.select("#builder-controls").node().getBoundingClientRect().width;
-        if (width === 0) {
-            d3.select("#builder-controls").transition().duration(300)
-                .styleTween("width", function() { return d3.interpolateString("0px", widgetListView.width + "px"); });
+        const elem = $("#builder-controls");
+        if (elem[0]) {
+            const width = elem[0].getBoundingClientRect().width;
+            if (width === 0) {
+                $("#builder-controls").animate({ width: "300px" }, 300);
+                // d3.select("#builder-controls").transition().duration(300)
+                //     .styleTween("width", function() { return d3.interpolateString("0px", widgetListView.width + "px"); });
+            }
         }
     }
 
@@ -492,13 +500,11 @@ define(function (require, exports, module) {
                     view.remove();
                     e.data.scale = prototypeImageView.resize();
                     var widget = WidgetManager.addNewWidget(e.data, coord, function(w, renderResponse) {
-                        region.classed(w.type(), true).attr("id", w.id());
+                        region.classed(w.type, true).attr("id", w.id);
                         w.element(region);
-                        if (w.needsImageMap()) {
-                            w.createImageMap({ callback: renderResponse });
-                        }
-                        // w.updateLocationAndSize({ x: e.data.x, y: e.data.y, width: e.data.width, height: e.data.height }, { imageMap: true });
-                        // w.updateStyle(e.data);
+                        // if (w.needsImageMap()) {
+                        //     w.createImageMap({ callback: renderResponse });
+                        // }
                     });
                     widget.renderSample({ visibleWhen: "true" });
 
@@ -573,14 +579,14 @@ define(function (require, exports, module) {
             el: $("#widgetsList"),
             widgetManager: WidgetManager,
             labelFunction: function (widget) {
-                switch (widget.type()) {
-                    case "display"       : { return "Display: " + widget.displayKey(); }
-                    case "numericdisplay": { return "Numeric Display: " + widget.displayKey(); }
-                    case "led"           : { return "LED: " + widget.ledKey(); }
-                    case "button"        : { return "Button: " + widget.functionText(); }
-                    case "touchscreenbutton": { return "Touch-Button: " + widget.functionText(); }
-                    case "touchscreendisplay": { return "Touch-Display: " + widget.displayKey(); }
-                    default: { return widget.type() + ": " + widget.id(); }
+                switch (widget.type) {
+                    case "display"       : { return "Display: " + widget.displayKey; }
+                    case "numericdisplay": { return "Numeric Display: " + widget.displayKey; }
+                    case "led"           : { return "LED: " + widget.ledKey; }
+                    case "button"        : { return "Button: " + widget.functionText; }
+                    case "touchscreenbutton": { return "Touch-Button: " + widget.functionText; }
+                    case "touchscreendisplay": { return "Touch-Display: " + widget.functionText; }
+                    default: { return widget.type + ": " + widget.id; }
                 }
             }
         });

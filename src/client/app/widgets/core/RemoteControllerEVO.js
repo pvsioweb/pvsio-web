@@ -21,7 +21,7 @@ define(function (require, exports, module) {
             coords = coords || { top: 0, left: 0, width: 200, height: 40 };
 
             // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-            opt.type = opt.type || "RemoteControllerEVO";
+            opt.type = opt.type || "remotecontroller";
             
             // invoke WidgetEVO constructor to create the widget
             super(id, coords, opt);
