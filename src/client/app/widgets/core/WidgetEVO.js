@@ -113,8 +113,13 @@ define(function (require, exports, module) {
             this.widget = true; // this flag can be used to identify whether an object is a widget
             this.position = opt.position || "absolute";
             this.zIndex = opt.zIndex || 0;
+            this.fontPadding = 6;
 
             // visual style
+            opt.borderWidth = +opt.borderWidth || 0;
+            opt.fontSize = !isNaN(+opt.fontSize) && +opt.fontSize < this.height - opt.borderWidth - this.fontPadding ? 
+                opt.fontSize 
+                    : this.height - opt.borderWidth - this.fontPadding;
             opt.borderRadius = (opt.borderRadius) ?
                                     ((typeof opt.borderRadius === "string" && opt.borderRadius.indexOf("px") >= 0) ? opt.borderRadius : opt.borderRadius.toString() + "px")
                                     : 0;
@@ -122,7 +127,7 @@ define(function (require, exports, module) {
             opt.borderWidth = (!isNaN(parseFloat(opt.borderWidth))) ? opt.borderWidth : (opt.borderColor) ? 2 : 0;
             this.style = {};
             this.style["background-color"] = opt.backgroundColor || "transparent";
-            this.style["font-size"] = (opt.fontSize || (this.height - opt.borderWidth) / 2) + "pt";
+            this.style["font-size"] = opt.fontSize + "pt";
             this.style["font-family"] = opt.fontFamily || "sans-serif";
             this.style.color = opt.fontColor || "white";
             this.style["text-align"] = opt.align || "center";
@@ -248,16 +253,24 @@ define(function (require, exports, module) {
                 opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
                 this.height = (isNaN(parseFloat(size.height))) ? this.height : parseFloat(parseFloat(size.height).toFixed(MAX_COORDINATES_ACCURACY));
                 this.width = (isNaN(parseFloat(size.width))) ? this.width : parseFloat(parseFloat(size.width).toFixed(MAX_COORDINATES_ACCURACY));
+
+                // update font size
+                opt.borderWidth = +opt.borderWidth || 0;
+                opt.fontSize = !isNaN(+opt.fontSize) && +opt.fontSize < this.height - opt.borderWidth - this.fontPadding ? 
+                    opt.fontSize 
+                        : this.height - opt.borderWidth - this.fontPadding;
+                this.style["font-size"] = opt.fontSize + "pt";
+
                 if (opt.duration) {
                     this.div.transition().duration(opt.duration).style("height", this.height + "px").style("width", this.width + "px")
                                 .style("transition-timing-function", opt.transitionTimingFunction);
                     this.base.transition().duration(opt.duration).style("line-height", this.height + "px").style("height", this.height + "px").style("width", this.width + "px")
-                                .style("transition-timing-function", opt.transitionTimingFunction);
+                                .style("transition-timing-function", opt.transitionTimingFunction).style("font-size", this.style["font-size"]);
                     this.overlay.transition().duration(opt.duration).style("height", this.height + "px").style("width", this.width + "px")
                                 .style("transition-timing-function", opt.transitionTimingFunction);
                 } else {
                     this.div.style("height", this.height + "px").style("width", this.width + "px");
-                    this.base.style("line-height", this.height + "px").style("height", this.height + "px").style("width", this.width + "px");
+                    this.base.style("line-height", this.height + "px").style("height", this.height + "px").style("width", this.width + "px").style("font-size", this.style["font-size"]);
                     this.overlay.style("height", this.height + "px").style("width", this.width + "px");
                 }
             }
@@ -494,7 +507,12 @@ define(function (require, exports, module) {
         }
 
         updateLocationAndSize (data) {
-            return this.setPositionAndSize(data);
+            return this.setPositionAndSize({
+                top: data.top || data.y,
+                left: data.left || data.x,
+                width: data.width,
+                height: data.height
+            });
         }
 
         /**
