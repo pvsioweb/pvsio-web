@@ -43,9 +43,9 @@ require([
     //-- messages from the PVSio-web Network Controller
     function parseNCUpdate(event) {
         if (event.from === "Alaris") {
-            ButtonActionsQueue.getInstance().queueGUIAction("update_pump(" + event.message + ")", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("update_pump(" + event.message + ")", onMessageReceived);
         } else if (event.from === "Radical") {
-            ButtonActionsQueue.getInstance().queueGUIAction("update_monitor(" + event.message + ")", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("update_monitor(" + event.message + ")", onMessageReceived);
         }
     }
 
@@ -186,7 +186,7 @@ require([
     function start_tick() {
         if (!tick) {
             tick = setInterval(function () {
-                ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
+                ButtonActionsQueue.queueGUIAction("tick", onMessageReceived);
             }, 4000);
         }
     }

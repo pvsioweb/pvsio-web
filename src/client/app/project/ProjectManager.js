@@ -45,7 +45,7 @@
 define(function (require, exports, module) {
     "use strict";
     var property              = require("util/property"),
-        eventDispatcher       = require("util/eventDispatcher"),
+        eventDispatcher       = require("util/eventDispatcher").eventDispatcher,
         Project               = require("project/Project"),
         FileTreeView          = require("filesystem/FileTreeView"),
         Descriptor            = require("project/Descriptor"),

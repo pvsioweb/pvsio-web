@@ -8,7 +8,7 @@ define(function (require, exports, module) {
     "use strict";
 
     var table_template = require("text!plugins/emulink/tools/tables/table_template.handlebars"),
-        eventDispatcher = require("util/eventDispatcher");
+        eventDispatcher = require("util/eventDispatcher").eventDispatcher;
 
     /**
      * @function GenericTable

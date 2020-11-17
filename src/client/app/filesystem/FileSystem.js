@@ -9,7 +9,7 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, esnext: true */
 define(function (require, exports, module) {
 
-    var eventDispatcher       = require("util/eventDispatcher"),
+    var eventDispatcher       = require("util/eventDispatcher").eventDispatcher,
         FileHandler           = require("filesystem/FileHandler");
     var PreferenceStorage     = require("preferences/PreferenceStorage").getInstance(),
         PreferenceKeys        = require("preferences/PreferenceKeys"),

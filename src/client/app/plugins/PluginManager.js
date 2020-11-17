@@ -8,7 +8,7 @@
 define(function (require, exports, module) {
     "use strict";
 
-    const eventDispatcher = require("util/eventDispatcher");
+    const eventDispatcher = require("util/eventDispatcher").eventDispatcher;
     const pluginTemplate = require("../util/toolkitTemplates").pluginToggle;
     const normalize = require("util/Normalize").getInstance();
     const pluginListFile = "plugins/plugins.json";

@@ -10,7 +10,7 @@ define(function (require, exports, module) {
     "use strict";
     var _this;
 
-    var eventDispatcher = require("util/eventDispatcher");
+    var eventDispatcher = require("util/eventDispatcher").eventDispatcher;
 
 
     function NCMonitorRendering(opt) {

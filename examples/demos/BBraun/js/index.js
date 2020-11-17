@@ -4,7 +4,6 @@
  * @date 11/25/13 23:10:09 PM
  */
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, d3, require, $, brackets, document, PVSioWebClient */
 require.config({
     baseUrl: "../../client/app",
     paths: {
@@ -31,7 +30,7 @@ require([
     "use strict";
     var device = {};
 
-    device.disp = new NumericDisplay("display", {
+    device.disp = new NumericDisplay.NumericDisplayEVO("display", {
         left: 88, top: 234, width: 220, height: 56
     }, {
         displayKey: "d",
@@ -40,31 +39,31 @@ require([
         maxIntegerDigits: 6,
         maxFractionalDigits: 2
     });
-    device.up = new Button("up", {
+    device.up = new Button.ButtonEVO("up", {
         top: 240, left: 382, width: 38, height: 38
     }, {
         keyCode: 38, //arrow up
         callback: onMessageReceived
     });
-    device.dn = new Button("dn", {
+    device.dn = new Button.ButtonEVO("dn", {
         top: 288, left: 382, width: 38, height: 38
     }, {
         keyCode: 40, //arrow down
         callback: onMessageReceived
     });
-    device.lf = new Button("lf", {
+    device.lf = new Button.ButtonEVO("lf", {
         top: 264, left: 344, width: 38, height: 38
     }, {
         keyCode: 37, //arrow left
         callback: onMessageReceived
     });
-    device.rt = new Button("rt", {
+    device.rt = new Button.ButtonEVO("rt", {
         top: 264, left: 420, width: 38, height: 38
     }, {
         keyCode: 39, //arrow right
         callback: onMessageReceived
     });
-    device.clear = new Button("clear", {
+    device.clear = new Button.ButtonEVO("clear", {
         top: 240, left: 463, width: 38, height: 38
     }, {
         keyCode: 46, //clear button

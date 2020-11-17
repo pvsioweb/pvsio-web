@@ -39,7 +39,7 @@ require([
         function start_tick() {
             if (!tick) {
                 tick = setInterval(function () {
-                    ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
+                    ButtonActionsQueue.queueGUIAction("tick", onMessageReceived);
                 }, 1000);
             }
         }
@@ -1469,7 +1469,7 @@ require([
             } else { stop_tick(res); }
             if (res.mt32.mode === "RECORDING" && res.mt32.mo === "HUB") {
                 setTimeout(function () {
-                    ButtonActionsQueue.getInstance().queueGUIAction("click_mt32_results_ready", onMessageReceived);
+                    ButtonActionsQueue.queueGUIAction("click_mt32_results_ready", onMessageReceived);
                 }, 9000);
             }
 

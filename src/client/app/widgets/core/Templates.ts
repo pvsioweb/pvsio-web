@@ -34,6 +34,7 @@ export const genericWidgetTemplate: string = `
       - a div layer defining position and size of the widget
       - a base layer renders the visual appearance
       - an overlay layer captures user interactions with the widget -->{{/if}}
+<div style="width:0px; height:0px">
 <div id="{{id}}"
      style="position:{{position}}; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{zIndex}}; overflow:{{overflow}};"
      class="{{type}} noselect{{#if blinking}} blink{{/if}}">
@@ -43,6 +44,7 @@ export const genericWidgetTemplate: string = `
     <div id="{{id}}_overlay"
          style="position:absolute; width:{{width}}px; height:{{height}}px; background-color:{{style.overlay-color}}; border-radius:{{style.border-radius}}; cursor:{{style.cursor}}; opacity:0; z-index:inherit;"
          class="{{type}}_overlay {{id}}_overlay"></div>
+</div>
 </div>`;
 
 export const triangleTemplate: string = `

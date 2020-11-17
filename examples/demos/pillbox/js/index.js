@@ -105,12 +105,12 @@ require([
 
         var tick;
         function single_tick() {
-            ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("tick", onMessageReceived);
         }
         function start_tick() {
             if (!tick && !pause_simulation) {
                 tick = setInterval(function () {
-                    ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
+                    ButtonActionsQueue.queueGUIAction("tick", onMessageReceived);
                 }, 2000);
             }
         }
@@ -586,7 +586,7 @@ require([
             client.getWebSocket().startPVSProcess({name: "main.pvs", demoName: "pillbox/pvs"}, function (err, event) {
                 d3.select(".demo-splash").style("display", "none");
                 d3.select(".content").style("display", "block");
-                ButtonActionsQueue.getInstance().queueGUIAction("", onMessageReceived);
+                ButtonActionsQueue.queueGUIAction("", onMessageReceived);
             });
         }).addListener("WebSocketConnectionClosed", function (e) {
             console.log("web socket closed");

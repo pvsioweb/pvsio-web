@@ -11,7 +11,7 @@ define(function (require, exports, module) {
         uidGenerator = require("util/uuidGenerator"),
         fs	         = require("util/fileHandler"),
         displayEditStoryboard = require("pvsioweb/forms/displayEditStoryboard"),
-        eventDispatcher = require("util/eventDispatcher"),
+        eventDispatcher = require("util/eventDispatcher").eventDispatcher,
         StateParser  = require("util/PVSioStateParser");
 
     function Storyboard(id) {

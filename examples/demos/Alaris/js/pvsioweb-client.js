@@ -521,7 +521,7 @@ define('util/eventDispatcher',['require','exports','module'],function (require, 
 
 define('util/property',['require','exports','module','util/eventDispatcher'],function (require, exports, module) {
     
-    var eventDispatcher = require("util/eventDispatcher");
+    var eventDispatcher = require("util/eventDispatcher").eventDispatcher;
 
 	//defines property function
 	module.exports = function (v) {
@@ -591,7 +591,7 @@ define('websockets/events',['require','exports','module'],function (require, exp
 define('websockets/wsClient',['require','exports','module','util/property','util/eventDispatcher','util/uuidGenerator','websockets/events'],function (require, exports, module) {
     
     var property = require("util/property"),
-        eventDispatcher = require("util/eventDispatcher"),
+        eventDispatcher = require("util/eventDispatcher").eventDispatcher,
         uuid        = require("util/uuidGenerator"),
         events      = require("websockets/events");
     
@@ -663,7 +663,7 @@ define('websockets/wsClient',['require','exports','module','util/property','util
 define('websockets/pvs/pvsWSClient',['require','exports','module','websockets/wsClient','util/eventDispatcher','util/property'],function (require, exports, module) {
     
     var wsclient            = require("websockets/wsClient"),
-        eventDispatcher     = require("util/eventDispatcher"),
+        eventDispatcher     = require("util/eventDispatcher").eventDispatcher,
         property            = require("util/property"),
         wsSingleton;
     
@@ -9809,7 +9809,7 @@ amdExports = d3;
 define('PVSioWebClient',['require','exports','module','websockets/pvs/pvsWSClient','util/eventDispatcher','d3/d3','util/property'],function (require, exports, module) {
     
     var pvsws                   = require("websockets/pvs/pvsWSClient"),
-		eventDispatcher			= require("util/eventDispatcher"),
+		eventDispatcher			= require("util/eventDispatcher").eventDispatcher,
 		d3						= require("d3/d3"),
 		property				= require("util/property"),
 		ws,

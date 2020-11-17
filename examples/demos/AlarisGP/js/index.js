@@ -370,7 +370,7 @@ require([
         function start_tick() {
             if (!tick && !pause_simulation) {
                 tick = setInterval(function () {
-                    ButtonActionsQueue.getInstance().queueGUIAction("alaris_tick", onMessageReceived);
+                    ButtonActionsQueue.queueGUIAction("alaris_tick", onMessageReceived);
                 }, 1000);
             }
         }
@@ -612,24 +612,24 @@ require([
         });
 
         d3.select("#btn_insert_infusionset").on("click", function () {
-            ButtonActionsQueue.getInstance().queueGUIAction("insert_infusion_set", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("insert_infusion_set", onMessageReceived);
         });
         d3.select("#btn_remove_infusionset").on("click", function () {
-            ButtonActionsQueue.getInstance().queueGUIAction("remove_infusion_set", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("remove_infusion_set", onMessageReceived);
         });
 
         d3.select("#btn_plug_mains").on("click", function () {
-            ButtonActionsQueue.getInstance().queueGUIAction("plug_mains", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("plug_mains", onMessageReceived);
         });
         d3.select("#btn_unplug_mains").on("click", function () {
-            ButtonActionsQueue.getInstance().queueGUIAction("unplug_mains", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("unplug_mains", onMessageReceived);
         });
 
         d3.select("#set_battery_level").on("click", function () {
             var data = d3.select("#battery_level").node().value;
             if (data) {
                 data = (isNaN(parseFloat(data))) ? -1 : parseFloat(data);
-                ButtonActionsQueue.getInstance().queueGUIAction("set_battery_level(" + data + ")", onMessageReceived);
+                ButtonActionsQueue.queueGUIAction("set_battery_level(" + data + ")", onMessageReceived);
             }
         });
 

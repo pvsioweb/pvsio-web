@@ -8,7 +8,7 @@
 /*global define, d3, Promise*/
 define(function (require, exports, module) {
     "use strict";
-    var eventDispatcher = require("util/eventDispatcher"),
+    var eventDispatcher = require("util/eventDispatcher").eventDispatcher,
         fs              = require("filesystem/FileSystem").getInstance(),
         QuestionForm    = require("pvsioweb/forms/displayQuestion"),
         NotificationManager = require("project/NotificationManager"),

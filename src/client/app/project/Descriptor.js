@@ -9,7 +9,7 @@
 define(function (require, exports, module) {
     "use strict";
     var property = require("util/property"),
-        eventDispatcher = require("util/eventDispatcher");
+        eventDispatcher = require("util/eventDispatcher").eventDispatcher;
     var WSManager = require("websockets/pvs/WSManager");
     var imageExtensions = [".jpg", ".jpeg", ".png"];
     /**

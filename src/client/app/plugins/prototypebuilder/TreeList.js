@@ -12,7 +12,7 @@ define(function (require, exports, module) {
         duration = 200,
         contextMenuItems = ["New File", "New Folder", "Rename", "Delete"];
     var globalId = 0;
-    var eventDispatcher = require("util/eventDispatcher");
+    var eventDispatcher = require("util/eventDispatcher").eventDispatcher;
     var lineID = 0;
 
     /**

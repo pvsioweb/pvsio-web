@@ -301,7 +301,7 @@ export class TouchscreenElement extends NumericDisplay {
         const anim = opt.animation || this.animation;
         opt.callback = opt.callback || this.callback;
         const functionText: string = this.customFunctionText || opt.functionText || `click_${this.functionText}`;
-        ButtonActionsQueue.getInstance().queueGUIAction(functionText, opt.callback);
+        ButtonActionsQueue.queueGUIAction(functionText, opt.callback);
 
         if (anim) { anim(); }
         Recorder.addAction({

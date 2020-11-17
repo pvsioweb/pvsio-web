@@ -20,23 +20,23 @@ require.config({
 require([
         "widgets/core/ButtonEVO",
         "widgets/core/BasicDisplayEVO",
-        "widgets/LED",
         "widgets/media/MouseCursor",
         "widgets/media/Stylus",
-
+        "widgets/core/LedEVO",
         "util/playback/Player",
         "widgets/ButtonActionsQueue",
+
         "stateParser",
         "PVSioWebClient"
     ], function (
         TouchscreenButton,
         BasicDisplay,
-        LED,
         MouseCursor,
         Stylus,
-
+        LED,
         Player,
         ButtonActionsQueue,
+
         stateParser,
         PVSioWebClient
     ) {
@@ -52,7 +52,7 @@ require([
         var tick;
         function single_tick(timeout) {
             setTimeout(function () {
-               ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
+               ButtonActionsQueue.ButtonActionsQueue.queueGUIAction("tick", onMessageReceived);
                tick = null;
            }, timeout);
         }
@@ -61,7 +61,7 @@ require([
             opt.interval = opt.interval || 1000;
             if (!tick) {
                 tick = setInterval(function () {
-                    ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
+                    ButtonActionsQueue.ButtonActionsQueue.queueGUIAction("tick", onMessageReceived);
                 }, opt.interval);
             }
         }
@@ -98,21 +98,21 @@ require([
         }
 
         var media = {};
-        media.mousePointer = new MouseCursor("mousePointer", {
+        media.mousePointer = new MouseCursor.MouseCursor("mousePointer", {
             top:400, left:100
         }, { parent: "ct64_mouse" });
         media.mousePointer.render();
-        media.mousePointer2 = new MouseCursor("mousePointer2", {
+        media.mousePointer2 = new MouseCursor.MouseCursor("mousePointer2", {
             top:400, left:100
         }, { parent: "ct64_mouse_secondary_screen" });
         media.mousePointer2.render();
-        media.stylus = new Stylus("stylus", {
+        media.stylus = new Stylus.Stylus("stylus", {
             top:800, left:60
         }, { parent: "mt32_stylus" });
         // media.stylus.render();
 
         var mt32 = {};
-        mt32.off = new TouchscreenButton("mt32_off", {
+        mt32.off = new TouchscreenButton.ButtonEVO("mt32_off", {
             width: 0,
             height: 0,
             top: 0,
@@ -127,7 +127,7 @@ require([
             visibleWhen: "false",
             callback: onMessageReceived
         });
-        mt32.on_battery = new TouchscreenButton("mt32_on_battery", {
+        mt32.on_battery = new TouchscreenButton.ButtonEVO("mt32_on_battery", {
             width: 0,
             height: 0,
             top: 0,
@@ -142,7 +142,7 @@ require([
             visibleWhen: "false",
             callback: onMessageReceived
         });
-        mt32.charging = new TouchscreenButton("mt32_charging", {
+        mt32.charging = new TouchscreenButton.ButtonEVO("mt32_charging", {
             width: 0,
             height: 0,
             top: 0,
@@ -157,7 +157,7 @@ require([
             visibleWhen: "false",
             callback: onMessageReceived
         });
-        mt32.fully_charged = new TouchscreenButton("mt32_fully_charged", {
+        mt32.fully_charged = new TouchscreenButton.ButtonEVO("mt32_fully_charged", {
             width: 0,
             height: 0,
             top: 0,
@@ -172,7 +172,7 @@ require([
             visibleWhen: "false",
             callback: onMessageReceived
         });
-        mt32.charging_error = new TouchscreenButton("mt32_charging_error", {
+        mt32.charging_error = new TouchscreenButton.ButtonEVO("mt32_charging_error", {
             width: 0,
             height: 0,
             top: 0,
@@ -189,7 +189,7 @@ require([
         });
 
 
-        mt32.umts = new TouchscreenButton("umts", {
+        mt32.umts = new TouchscreenButton.ButtonEVO("umts", {
             width: 48,
             height: 89,
             top: 130,
@@ -202,7 +202,7 @@ require([
             parent: "leftPanel",
             callback: onMessageReceived
         });
-        mt32.wireless = new TouchscreenButton("wireless", {
+        mt32.wireless = new TouchscreenButton.ButtonEVO("wireless", {
             width: 48,
             height: 89,
             top: 220,
@@ -215,7 +215,7 @@ require([
             parent: "leftPanel",
             callback: onMessageReceived
         });
-        mt32.bluetooth = new TouchscreenButton("bluetooth", {
+        mt32.bluetooth = new TouchscreenButton.ButtonEVO("bluetooth", {
             width: 48,
             height: 89,
             top: 310,
@@ -228,7 +228,7 @@ require([
             parent: "leftPanel",
             callback: onMessageReceived
         });
-        mt32.battery = new TouchscreenButton("battery", {
+        mt32.battery = new TouchscreenButton.ButtonEVO("battery", {
             width: 48,
             height: 87,
             top: 402,
@@ -241,7 +241,7 @@ require([
             parent: "leftPanel",
             callback: onMessageReceived
         });
-        mt32.view_alerts = new TouchscreenButton("view_alerts", {
+        mt32.view_alerts = new TouchscreenButton.ButtonEVO("view_alerts", {
             width: 46,
             height: 85,
             top: 495,
@@ -255,7 +255,7 @@ require([
             parent: "leftPanel",
             callback: onMessageReceived
         });
-        mt32.leftpanel_back = new TouchscreenButton("back", {
+        mt32.leftpanel_back = new TouchscreenButton.ButtonEVO("back", {
             width: 48,
             height: 94,
             top: 582,
@@ -268,7 +268,7 @@ require([
             parent: "leftPanel",
             callback: onMessageReceived
         });
-        mt32.new_exam = new TouchscreenButton("new_exam", {
+        mt32.new_exam = new TouchscreenButton.ButtonEVO("new_exam", {
             width: 178,
             height: 89,
             top: 314,
@@ -281,7 +281,7 @@ require([
             parent: "homeScreen",
             callback: onMessageReceived
         });
-        mt32.central = new TouchscreenButton("central", {
+        mt32.central = new TouchscreenButton.ButtonEVO("central", {
             width: 180,
             height: 89,
             top: 404,
@@ -294,7 +294,7 @@ require([
             parent: "homeScreen",
             callback: onMessageReceived
         });
-        mt32.settings = new TouchscreenButton("settings", {
+        mt32.settings = new TouchscreenButton.ButtonEVO("settings", {
             width: 177,
             height: 89,
             top: 496,
@@ -307,7 +307,7 @@ require([
             parent: "homeScreen",
             callback: onMessageReceived
         });
-        mt32.ecg12d = new TouchscreenButton("ecg12d", {
+        mt32.ecg12d = new TouchscreenButton.ButtonEVO("ecg12d", {
             width: 178,
             height: 89,
             top: 314,
@@ -320,7 +320,7 @@ require([
             parent: "examsScreen",
             callback: onMessageReceived
         });
-        mt32.holter = new TouchscreenButton("holter", {
+        mt32.holter = new TouchscreenButton.ButtonEVO("holter", {
             width: 178,
             height: 89,
             top: 314,
@@ -333,7 +333,7 @@ require([
             parent: "examsScreen",
             callback: onMessageReceived
         });
-        mt32.confirm_exams = new TouchscreenButton("confirm_exams", {
+        mt32.confirm_exams = new TouchscreenButton.ButtonEVO("confirm_exams", {
             width: 126,
             height: 84,
             top: 592,
@@ -347,7 +347,7 @@ require([
             parent: "confirmHolterScreen",
             callback: onMessageReceived
         });
-        mt32.test_electrodes = new TouchscreenButton("test_electrodes", {
+        mt32.test_electrodes = new TouchscreenButton.ButtonEVO("test_electrodes", {
             width: 180,
             height: 89,
             top: 494,
@@ -360,7 +360,7 @@ require([
             parent: "examsScreen",
             callback: onMessageReceived
         });
-        mt32.download_updates = new TouchscreenButton("download_updates", {
+        mt32.download_updates = new TouchscreenButton.ButtonEVO("download_updates", {
             width: 178,
             height: 89,
             top: 314,
@@ -373,7 +373,7 @@ require([
             parent: "centralScreen",
             callback: onMessageReceived
         });
-        mt32.upload_results = new TouchscreenButton("upload_results", {
+        mt32.upload_results = new TouchscreenButton.ButtonEVO("upload_results", {
             width: 178,
             height: 89,
             top: 314,
@@ -386,7 +386,7 @@ require([
             parent: "centralScreen",
             callback: onMessageReceived
         });
-        mt32.terminate_operating_mode = new TouchscreenButton("terminate_operating_mode", {
+        mt32.terminate_operating_mode = new TouchscreenButton.ButtonEVO("terminate_operating_mode", {
             width: 178,
             height: 89,
             top: 402,
@@ -399,7 +399,7 @@ require([
             parent: "centralScreen",
             callback: onMessageReceived
         });
-        mt32.connection_settings = new TouchscreenButton("connection_settings", {
+        mt32.connection_settings = new TouchscreenButton.ButtonEVO("connection_settings", {
             width: 178,
             height: 89,
             top: 314,
@@ -412,7 +412,7 @@ require([
             parent: "settingsScreen",
             callback: onMessageReceived
         });
-        mt32.ecg_settings = new TouchscreenButton("ecg_settings", {
+        mt32.ecg_settings = new TouchscreenButton.ButtonEVO("ecg_settings", {
             width: 178,
             height: 89,
             top: 314,
@@ -425,7 +425,7 @@ require([
             parent: "settingsScreen",
             callback: onMessageReceived
         });
-        mt32.security_settings = new TouchscreenButton("security_settings", {
+        mt32.security_settings = new TouchscreenButton.ButtonEVO("security_settings", {
             width: 178,
             height: 89,
             top: 404,
@@ -438,7 +438,7 @@ require([
             parent: "settingsScreen",
             callback: onMessageReceived
         });
-        mt32.system_settings = new TouchscreenButton("system_settings", {
+        mt32.system_settings = new TouchscreenButton.ButtonEVO("system_settings", {
             width: 178,
             height: 89,
             top: 404,
@@ -451,7 +451,7 @@ require([
             parent: "settingsScreen",
             callback: onMessageReceived
         });
-        mt32.info = new TouchscreenButton("info", {
+        mt32.info = new TouchscreenButton.ButtonEVO("info", {
             width: 178,
             height: 89,
             top: 492,
@@ -464,7 +464,7 @@ require([
             parent: "settingsScreen",
             callback: onMessageReceived
         });
-        mt32.confirm_patient_details = new TouchscreenButton("confirm", {
+        mt32.confirm_patient_details = new TouchscreenButton.ButtonEVO("confirm", {
             width: 89,
             height: 89,
             top: 585,
@@ -477,7 +477,7 @@ require([
             parent: "checkPatientScreen",
             callback: onMessageReceived
         });
-        mt32.quit_monitoring = new TouchscreenButton("quit", {
+        mt32.quit_monitoring = new TouchscreenButton.ButtonEVO("quit", {
             width: 52,
             height: 104,
             top: 492,
@@ -490,7 +490,7 @@ require([
             parent: "monitoringScreen",
             callback: onMessageReceived
         });
-        mt32.rec = new TouchscreenButton("rec", {
+        mt32.rec = new TouchscreenButton.ButtonEVO("rec", {
             width: 52,
             height: 104,
             top: 389,
@@ -503,7 +503,7 @@ require([
             parent: "monitoringScreen",
             callback: onMessageReceived
         });
-        mt32.repeat_exam = new TouchscreenButton("repeat", {
+        mt32.repeat_exam = new TouchscreenButton.ButtonEVO("repeat", {
             width: 342,
             height: 76,
             top: 224,
@@ -516,7 +516,7 @@ require([
             parent: "resultsScreen",
             callback: onMessageReceived
         });
-        mt32.view_interpretation = new TouchscreenButton("mt32_view_interpretation", {
+        mt32.view_interpretation = new TouchscreenButton.ButtonEVO("mt32_view_interpretation", {
             width: 342,
             height: 75,
             top: 305,
@@ -529,7 +529,7 @@ require([
             parent: "resultsScreen",
             callback: onMessageReceived
         });
-        mt32.physio = new TouchscreenButton("mt32_physio", {
+        mt32.physio = new TouchscreenButton.ButtonEVO("mt32_physio", {
             width: 342,
             height: 75,
             top: 382,
@@ -542,14 +542,14 @@ require([
             parent: "resultsScreen",
             callback: onMessageReceived
         });
-        mt32.tick = new TouchscreenButton("mt32_tick", {
+        mt32.tick = new TouchscreenButton.ButtonEVO("mt32_tick", {
             width: 0,
             height: 0
         }, {
             customFunctionText: "tick",
             callback: onMessageReceived
         });
-        mt32.home = new TouchscreenButton("mt32_home", {
+        mt32.home = new TouchscreenButton.ButtonEVO("mt32_home", {
             width: 86,
             height: 88,
             top: 588,
@@ -561,7 +561,7 @@ require([
             parent: "MT32-screens",
             callback: onMessageReceived
         });
-        mt32.back_edit_patient = new TouchscreenButton("back_edit_patient", {
+        mt32.back_edit_patient = new TouchscreenButton.ButtonEVO("back_edit_patient", {
             width: 48,
             height: 94,
             top: 128,
@@ -575,7 +575,7 @@ require([
             parent: "leftpanel_mt32EditPatientScreen",
             callback: onMessageReceived
         });
-        mt32.edit_patient = new TouchscreenButton("mt32_edit_patient", {
+        mt32.edit_patient = new TouchscreenButton.ButtonEVO("mt32_edit_patient", {
             width: 86,
             height: 88,
             top: 588,
@@ -584,7 +584,7 @@ require([
             parent: "checkPatientScreen",
             callback: onMessageReceived
         });
-        mt32.new_patient = new TouchscreenButton("mt32_new_patient", {
+        mt32.new_patient = new TouchscreenButton.ButtonEVO("mt32_new_patient", {
             width: 86,
             height: 88,
             top: 588,
@@ -593,7 +593,7 @@ require([
             parent: "checkPatientScreen",
             callback: onMessageReceived
         });
-        mt32.recordLED = new LED("mt32_recordLED", {
+        mt32.recordLED = new LED.LedEVO("mt32_recordLED", {
             width: 32,
             height: 32,
             top: 424,
@@ -603,7 +603,7 @@ require([
             parent: "monitoringScreen",
             callback: onMessageReceived
         });
-        mt32.recPercentage = new BasicDisplay("recPercentage", {
+        mt32.recPercentage = new BasicDisplay.BasicDisplayEVO("recPercentage", {
             width: 52,
             height: 32,
             top: 457,
@@ -616,7 +616,7 @@ require([
             displayKey: "",
             callback: onMessageReceived
         });
-        mt32.choose_physio = new TouchscreenButton("mt32_choose_physio", {
+        mt32.choose_physio = new TouchscreenButton.ButtonEVO("mt32_choose_physio", {
             width: 413,
             height: 54,
             top: 150,
@@ -629,7 +629,7 @@ require([
             parent: "editPhysioScreen",
             callback: onMessageReceived
         });
-        mt32.dataentry_1 = new TouchscreenButton("mt32_dataentry_1", {
+        mt32.dataentry_1 = new TouchscreenButton.ButtonEVO("mt32_dataentry_1", {
             width: 65,
             height: 65,
             top: 406,
@@ -642,7 +642,7 @@ require([
             parent: "editPhysioScreen",
             callback: onMessageReceived
         });
-        mt32.dataentry_2 = new TouchscreenButton("mt32_dataentry_2", {
+        mt32.dataentry_2 = new TouchscreenButton.ButtonEVO("mt32_dataentry_2", {
             width: 65,
             height: 65,
             top: 406,
@@ -655,7 +655,7 @@ require([
             parent: "editPhysioScreen",
             callback: onMessageReceived
         });
-        mt32.dataentry_3 = new TouchscreenButton("mt32_dataentry_3", {
+        mt32.dataentry_3 = new TouchscreenButton.ButtonEVO("mt32_dataentry_3", {
             width: 65,
             height: 65,
             top: 406,
@@ -668,7 +668,7 @@ require([
             parent: "editPhysioScreen",
             callback: onMessageReceived
         });
-        mt32.dataentry_4 = new TouchscreenButton("mt32_dataentry_4", {
+        mt32.dataentry_4 = new TouchscreenButton.ButtonEVO("mt32_dataentry_4", {
             width: 65,
             height: 65,
             top: 475,
@@ -681,7 +681,7 @@ require([
             parent: "editPhysioScreen",
             callback: onMessageReceived
         });
-        mt32.dataentry_5 = new TouchscreenButton("mt32_dataentry_5", {
+        mt32.dataentry_5 = new TouchscreenButton.ButtonEVO("mt32_dataentry_5", {
             width: 65,
             height: 65,
             top: 475,
@@ -694,7 +694,7 @@ require([
             parent: "editPhysioScreen",
             callback: onMessageReceived
         });
-        mt32.dataentry_6 = new TouchscreenButton("mt32_dataentry_6", {
+        mt32.dataentry_6 = new TouchscreenButton.ButtonEVO("mt32_dataentry_6", {
             width: 65,
             height: 65,
             top: 475,
@@ -707,7 +707,7 @@ require([
             parent: "editPhysioScreen",
             callback: onMessageReceived
         });
-        mt32.dataentry_7 = new TouchscreenButton("mt32_dataentry_7", {
+        mt32.dataentry_7 = new TouchscreenButton.ButtonEVO("mt32_dataentry_7", {
             width: 65,
             height: 65,
             top: 544,
@@ -720,7 +720,7 @@ require([
             parent: "editPhysioScreen",
             callback: onMessageReceived
         });
-        mt32.dataentry_8 = new TouchscreenButton("mt32_dataentry_8", {
+        mt32.dataentry_8 = new TouchscreenButton.ButtonEVO("mt32_dataentry_8", {
             width: 65,
             height: 65,
             top: 544,
@@ -733,7 +733,7 @@ require([
             parent: "editPhysioScreen",
             callback: onMessageReceived
         });
-        mt32.dataentry_9 = new TouchscreenButton("mt32_dataentry_9", {
+        mt32.dataentry_9 = new TouchscreenButton.ButtonEVO("mt32_dataentry_9", {
             width: 65,
             height: 65,
             top: 544,
@@ -746,7 +746,7 @@ require([
             parent: "editPhysioScreen",
             callback: onMessageReceived
         });
-        mt32.dataentry_0 = new TouchscreenButton("mt32_dataentry_0", {
+        mt32.dataentry_0 = new TouchscreenButton.ButtonEVO("mt32_dataentry_0", {
             width: 65,
             height: 65,
             top: 544,
@@ -759,7 +759,7 @@ require([
             parent: "editPhysioScreen",
             callback: onMessageReceived
         });
-        mt32.dataentry_POINT = new TouchscreenButton("mt32_dataentry_POINT", {
+        mt32.dataentry_POINT = new TouchscreenButton.ButtonEVO("mt32_dataentry_POINT", {
             width: 65,
             height: 65,
             top: 475,
@@ -772,7 +772,7 @@ require([
             parent: "editPhysioScreen",
             callback: onMessageReceived
         });
-        mt32.dataentry_confirm = new TouchscreenButton("mt32_dataentry_confirm", {
+        mt32.dataentry_confirm = new TouchscreenButton.ButtonEVO("mt32_dataentry_confirm", {
             width: 202,
             height: 65,
             top: 612,
@@ -786,7 +786,7 @@ require([
             parent: "editPhysioScreen",
             callback: onMessageReceived
         });
-        mt32.save_results = new TouchscreenButton("mt32_save_results", {
+        mt32.save_results = new TouchscreenButton.ButtonEVO("mt32_save_results", {
             width: 173,
             height: 88,
             top: 588,
@@ -800,7 +800,7 @@ require([
             parent: "resultsScreen",
             callback: onMessageReceived
         });
-        mt32.confirm_upload = new TouchscreenButton("mt32_confirm_upload", {
+        mt32.confirm_upload = new TouchscreenButton.ButtonEVO("mt32_confirm_upload", {
             width: 358,
             height: 88,
             top: 588,
@@ -814,7 +814,7 @@ require([
             parent: "sendingResultsScreen",
             callback: onMessageReceived
         });
-        mt32.back_interpretation = new TouchscreenButton("back_interpretation", {
+        mt32.back_interpretation = new TouchscreenButton.ButtonEVO("back_interpretation", {
             width: 268,
             height: 90,
             top: 588,
@@ -832,7 +832,7 @@ require([
 
 
 
-        var mt32_record_btn = new TouchscreenButton("mt32_record_btn", {
+        var mt32_record_btn = new TouchscreenButton.ButtonEVO("mt32_record_btn", {
             width: 37,
             height: 194,
             top: 177,
@@ -848,7 +848,7 @@ require([
             toggleButton: true,
             callback: onMessageReceived
         });
-        var mt32_power_btn = new TouchscreenButton("power_btn", {
+        var mt32_power_btn = new TouchscreenButton.ButtonEVO("power_btn", {
             width: 37,
             height: 54,
             top: 709,
@@ -863,7 +863,7 @@ require([
             parent: "MT32-right",
             callback: onMessageReceived
         });
-        mt32.confirm_poweroff = new TouchscreenButton("confirm_poweroff", {
+        mt32.confirm_poweroff = new TouchscreenButton.ButtonEVO("confirm_poweroff", {
             width: 132,
             height: 90,
             top: 588,
@@ -877,7 +877,7 @@ require([
             parent: "confirmPowerOffScreen",
             callback: onMessageReceived
         });
-        mt32.confirm_syncdone = new TouchscreenButton("confirm_syncdone", {
+        mt32.confirm_syncdone = new TouchscreenButton.ButtonEVO("confirm_syncdone", {
             width: 358,
             height: 90,
             top: 588,
@@ -891,7 +891,7 @@ require([
             parent: "downloadingUpdatesScreen",
             callback: onMessageReceived
         });
-        mt32.toggleLP = new TouchscreenButton("mt32_toggleLP", {
+        mt32.toggleLP = new TouchscreenButton.ButtonEVO("mt32_toggleLP", {
             width: 52,
             height: 104,
             top: 177,
@@ -904,7 +904,7 @@ require([
             parent: "monitoringScreen",
             callback: onMessageReceived
         });
-        mt32.toggleHP = new TouchscreenButton("mt32_toggleHP", {
+        mt32.toggleHP = new TouchscreenButton.ButtonEVO("mt32_toggleHP", {
             width: 52,
             height: 104,
             top: 282,
@@ -917,7 +917,7 @@ require([
             parent: "monitoringScreen",
             callback: onMessageReceived
         });
-        mt32.toggle_gain = new TouchscreenButton("mt32_toggle_gain", {
+        mt32.toggle_gain = new TouchscreenButton.ButtonEVO("mt32_toggle_gain", {
             width: 98,
             height: 74,
             top: 602,
@@ -930,7 +930,7 @@ require([
             parent: "monitoringScreen",
             callback: onMessageReceived
         });
-        mt32.toggle_speed = new TouchscreenButton("mt32_toggle_speed", {
+        mt32.toggle_speed = new TouchscreenButton.ButtonEVO("mt32_toggle_speed", {
             width: 98,
             height: 74,
             top: 602,
@@ -943,7 +943,7 @@ require([
             parent: "monitoringScreen",
             callback: onMessageReceived
         });
-        mt32.toggle_trace = new TouchscreenButton("mt32_toggle_trace", {
+        mt32.toggle_trace = new TouchscreenButton.ButtonEVO("mt32_toggle_trace", {
             width: 98,
             height: 74,
             top: 602,
@@ -959,7 +959,7 @@ require([
 
 
         // buttons emulating a syncronisation channel between mt32 and ct64
-        mt32.device_selected = new TouchscreenButton("device_selected", {
+        mt32.device_selected = new TouchscreenButton.ButtonEVO("device_selected", {
             width: 0,
             height: 0
         }, {
@@ -1006,7 +1006,7 @@ require([
         }
 
         var ct64 = {};
-        ct64.login = new TouchscreenButton("login", {
+        ct64.login = new TouchscreenButton.ButtonEVO("login", {
             width: 74,
             height: 36,
             top: 352,
@@ -1021,7 +1021,7 @@ require([
             parent: "ct64LoginScreen",
             callback: onMessageReceived
         });
-        ct64.select_patient = new TouchscreenButton("select_patient", {
+        ct64.select_patient = new TouchscreenButton.ButtonEVO("select_patient", {
             width: 1324,
             height: 32,
             top: 284,
@@ -1036,7 +1036,7 @@ require([
             visibleWhen: "ct64.known_patient = TRUE",
             callback: onMessageReceived
         });
-        ct64.check_email = new TouchscreenButton("check_email", {
+        ct64.check_email = new TouchscreenButton.ButtonEVO("check_email", {
             width: 1091,
             height: 182,
             top: 182,
@@ -1049,7 +1049,7 @@ require([
             parent: "secondary_new_message",
             callback: onMessageReceived
         });
-        ct64.new_ecg = new TouchscreenButton("new_ecg", {
+        ct64.new_ecg = new TouchscreenButton.ButtonEVO("new_ecg", {
             width: 122,
             height: 36,
             top: 143,
@@ -1064,7 +1064,7 @@ require([
             parent: "patientMGMScreen",
             callback: onMessageReceived
         });
-        ct64.new_holter = new TouchscreenButton("new_holter", {
+        ct64.new_holter = new TouchscreenButton.ButtonEVO("new_holter", {
             width: 128,
             height: 36,
             top: 143,
@@ -1079,7 +1079,7 @@ require([
             parent: "patientMGMScreen",
             callback: onMessageReceived
         });
-        ct64.send_request_to_doctor = new TouchscreenButton("send_request_to_doctor", {
+        ct64.send_request_to_doctor = new TouchscreenButton.ButtonEVO("send_request_to_doctor", {
             width: 65,
             height: 36,
             top: 463,
@@ -1094,7 +1094,7 @@ require([
             parent: "requestReportScreen",
             callback: onMessageReceived
         });
-        ct64.select_device = new TouchscreenButton("select_device", {
+        ct64.select_device = new TouchscreenButton.ButtonEVO("select_device", {
             width: 1229,
             height: 32,
             top: 431,
@@ -1108,7 +1108,7 @@ require([
             toggleButton: true,
             callback: onMessageReceived
         });
-        ct64.continue = new TouchscreenButton("continue", {
+        ct64.continue = new TouchscreenButton.ButtonEVO("continue", {
             width: 88,
             height: 34,
             top: 538,
@@ -1123,7 +1123,7 @@ require([
             parent: "newMonitoringSessionScreen",
             callback: onMessageReceived
         });
-        ct64.continue_holter_config = new TouchscreenButton("continue_holter_config", {
+        ct64.continue_holter_config = new TouchscreenButton.ButtonEVO("continue_holter_config", {
             width: 85,
             height: 34,
             top: 453,
@@ -1139,7 +1139,7 @@ require([
             parent: "holterConfigScreen",
             callback: onMessageReceived
         });
-        ct64.new_patient = new TouchscreenButton("new_patient", {
+        ct64.new_patient = new TouchscreenButton.ButtonEVO("new_patient", {
             width: 85,
             height: 36,
             top: 323,
@@ -1154,7 +1154,7 @@ require([
             parent: "patientsScreen",
             callback: onMessageReceived
         });
-        ct64.patients_screen = new TouchscreenButton("patients_screen", {
+        ct64.patients_screen = new TouchscreenButton.ButtonEVO("patients_screen", {
             width: 84,
             height: 46,
             top: 10,
@@ -1168,7 +1168,7 @@ require([
             parent: "ct64-navigation-bar",
             callback: onMessageReceived
         });
-        ct64.monitoring = new TouchscreenButton("monitoring", {
+        ct64.monitoring = new TouchscreenButton.ButtonEVO("monitoring", {
             width: 107,
             height: 46,
             top: 10,
@@ -1182,7 +1182,7 @@ require([
             parent: "ct64-navigation-bar",
             callback: onMessageReceived
         });
-        ct64.upload_exams = new TouchscreenButton("upload_exams", {
+        ct64.upload_exams = new TouchscreenButton.ButtonEVO("upload_exams", {
             width: 124,
             height: 46,
             top: 10,
@@ -1196,7 +1196,7 @@ require([
             parent: "ct64-navigation-bar",
             callback: onMessageReceived
         });
-        ct64.choose_exams_to_be_uploaded = new TouchscreenButton("choose_exams_to_be_uploaded", {
+        ct64.choose_exams_to_be_uploaded = new TouchscreenButton.ButtonEVO("choose_exams_to_be_uploaded", {
             width: 137,
             height: 38,
             top: 181,
@@ -1210,7 +1210,7 @@ require([
             parent: "uploadExamsScreen",
             callback: onMessageReceived
         });
-        ct64.new_monitoring_session = new TouchscreenButton("new_monitoring_session", {
+        ct64.new_monitoring_session = new TouchscreenButton.ButtonEVO("new_monitoring_session", {
             width: 177,
             height: 36,
             top: 299,
@@ -1224,7 +1224,7 @@ require([
             parent: "ct64-monitoringScreen",
             callback: onMessageReceived
         });
-        ct64.date_time_filters = new TouchscreenButton("date_time_filters", {
+        ct64.date_time_filters = new TouchscreenButton.ButtonEVO("date_time_filters", {
             width: 1324,
             height: 117,
             top: 78,
@@ -1238,7 +1238,7 @@ require([
             parent: "ct64-monitoringScreen",
             callback: onMessageReceived
         });
-        ct64.select_exam_data_hub = new TouchscreenButton("select_exam_data_hub", {
+        ct64.select_exam_data_hub = new TouchscreenButton.ButtonEVO("select_exam_data_hub", {
             width: 1324,
             height: 32,
             top: 260,
@@ -1252,7 +1252,7 @@ require([
             parent: "ct64-monitoringScreen",
             callback: onMessageReceived
         });
-        ct64.view_ecg = new TouchscreenButton("view_ecg", {
+        ct64.view_ecg = new TouchscreenButton.ButtonEVO("view_ecg", {
             width: 155,
             height: 44,
             top: 263,
@@ -1266,7 +1266,7 @@ require([
             parent: "ecgMonitoringMenu",
             callback: onMessageReceived
         });
-        ct64.HES = new TouchscreenButton("HES", {
+        ct64.HES = new TouchscreenButton.ButtonEVO("HES", {
             width: 84,
             height: 44,
             top: 263,
@@ -1280,7 +1280,7 @@ require([
             parent: "ecgMonitoringMenu",
             callback: onMessageReceived
         });
-        ct64.view_physio = new TouchscreenButton("view_physio", {
+        ct64.view_physio = new TouchscreenButton.ButtonEVO("view_physio", {
             width: 144,
             height: 44,
             top: 263,
@@ -1294,7 +1294,7 @@ require([
             parent: "ecgMonitoringMenu",
             callback: onMessageReceived
         });
-        ct64.write_report = new TouchscreenButton("write_report", {
+        ct64.write_report = new TouchscreenButton.ButtonEVO("write_report", {
             width: 134,
             height: 44,
             top: 263,
@@ -1308,7 +1308,7 @@ require([
             parent: "ecgMonitoringMenu",
             callback: onMessageReceived
         });
-        ct64.write_report2 = new TouchscreenButton("write_report2", {
+        ct64.write_report2 = new TouchscreenButton.ButtonEVO("write_report2", {
             width: 134,
             height: 37,
             top: 263,
@@ -1322,7 +1322,7 @@ require([
             parent: "secondary_ecgAnalysisResultsScreen",
             callback: onMessageReceived
         });
-        ct64.select_doctor = new TouchscreenButton("select_doctor", {
+        ct64.select_doctor = new TouchscreenButton.ButtonEVO("select_doctor", {
             width: 1017,
             height: 36,
             top: 390,
@@ -1336,7 +1336,7 @@ require([
             parent: "requestReportScreen",
             callback: onMessageReceived
         });
-        ct64.select_exam_data_holter = new TouchscreenButton("select_exam_data_holter", {
+        ct64.select_exam_data_holter = new TouchscreenButton.ButtonEVO("select_exam_data_holter", {
             width: 1324,
             height: 32,
             top: 228,
@@ -1350,7 +1350,7 @@ require([
             parent: "ct64-monitoringScreen",
             callback: onMessageReceived
         });
-        ct64.select_exam_data_hub_alt = new TouchscreenButton("select_exam_data_hub_alt", {
+        ct64.select_exam_data_hub_alt = new TouchscreenButton.ButtonEVO("select_exam_data_hub_alt", {
             width: 1259,
             height: 36,
             top: 291,
@@ -1365,7 +1365,7 @@ require([
             parent: "paziente-esami",
             callback: onMessageReceived
         });
-        ct64.select_visit = new TouchscreenButton("select_visit", {
+        ct64.select_visit = new TouchscreenButton.ButtonEVO("select_visit", {
             width: 1019,
             height: 36,
             top: 220,
@@ -1379,7 +1379,7 @@ require([
             parent: "newMonSessionScreen",
             callback: onMessageReceived
         });
-        ct64.holter_duration = new TouchscreenButton("holter_duration", {
+        ct64.holter_duration = new TouchscreenButton.ButtonEVO("holter_duration", {
             width: 993,
             height: 36,
             top: 275,
@@ -1393,7 +1393,7 @@ require([
             parent: "holterConfigScreen",
             callback: onMessageReceived
         });
-        ct64.holter_derivation = new TouchscreenButton("holter_derivation", {
+        ct64.holter_derivation = new TouchscreenButton.ButtonEVO("holter_derivation", {
             width: 993,
             height: 36,
             top: 326,
@@ -1407,7 +1407,7 @@ require([
             parent: "holterConfigScreen",
             callback: onMessageReceived
         });
-        ct64.holter_accelerometer = new TouchscreenButton("holter_accelerometer", {
+        ct64.holter_accelerometer = new TouchscreenButton.ButtonEVO("holter_accelerometer", {
             width: 28,
             height: 28,
             top: 386,
@@ -1421,7 +1421,7 @@ require([
             parent: "holterConfigScreen",
             callback: onMessageReceived
         });
-        ct64.select_ecg2d_new_pt = new TouchscreenButton("select_ecg2d_new_pt", {
+        ct64.select_ecg2d_new_pt = new TouchscreenButton.ButtonEVO("select_ecg2d_new_pt", {
             width: 1019,
             height: 46,
             top: 48,
@@ -1435,7 +1435,7 @@ require([
             parent: "visits_menu",
             callback: onMessageReceived
         });
-        ct64.continue_yes_no = new TouchscreenButton("continue_yes_no", {
+        ct64.continue_yes_no = new TouchscreenButton.ButtonEVO("continue_yes_no", {
             width: 82,
             height: 34,
             top: 0,
@@ -1450,7 +1450,7 @@ require([
             parent: "yes_no",
             callback: onMessageReceived
         });
-        ct64.browse_medicaltech = new TouchscreenButton("browse_medicaltech", {
+        ct64.browse_medicaltech = new TouchscreenButton.ButtonEVO("browse_medicaltech", {
             width: 1314,
             height: 22,
             top: 45,
@@ -1463,7 +1463,7 @@ require([
             parent: "browser-navbar",
             callback: onMessageReceived
         });
-        ct64.select_report_status = new TouchscreenButton("select_report_status", {
+        ct64.select_report_status = new TouchscreenButton.ButtonEVO("select_report_status", {
             width: 1019,
             height: 36,
             top: 1160,
@@ -1477,7 +1477,7 @@ require([
             parent: "compileReportScreen",
             callback: onMessageReceived
         });
-        ct64.save_report = new TouchscreenButton("save_report", {
+        ct64.save_report = new TouchscreenButton.ButtonEVO("save_report", {
             width: 62,
             height: 36,
             top: 1340,
@@ -1491,7 +1491,7 @@ require([
             parent: "compileReportScreen",
             callback: onMessageReceived
         });
-        ct64.save_report2 = new TouchscreenButton("save_report2", {
+        ct64.save_report2 = new TouchscreenButton.ButtonEVO("save_report2", {
             width: 62,
             height: 36,
             top: 1340,
@@ -1505,7 +1505,7 @@ require([
             parent: "secondary_compileReportScreen",
             callback: onMessageReceived
         });
-        ct64.view_patient_profile = new TouchscreenButton("view_patient_profile", {
+        ct64.view_patient_profile = new TouchscreenButton.ButtonEVO("view_patient_profile", {
             width: 144,
             height: 44,
             top: 145,
@@ -1519,7 +1519,7 @@ require([
             parent: "patientMenu",
             callback: onMessageReceived
         });
-        ct64.view_exams = new TouchscreenButton("view_exams", {
+        ct64.view_exams = new TouchscreenButton.ButtonEVO("view_exams", {
             width: 98,
             height: 44,
             top: 145,
@@ -1533,7 +1533,7 @@ require([
             parent: "patientMenu",
             callback: onMessageReceived
         });
-        ct64.view_medical_report = new TouchscreenButton("view_medical_report", {
+        ct64.view_medical_report = new TouchscreenButton.ButtonEVO("view_medical_report", {
             width: 1258,
             height: 41,
             top: 290,
@@ -1547,7 +1547,7 @@ require([
             parent: "archiveMedicalReportsScreen",
             callback: onMessageReceived
         });
-        ct64.view_anamnesi = new TouchscreenButton("view_anamnesi", {
+        ct64.view_anamnesi = new TouchscreenButton.ButtonEVO("view_anamnesi", {
             width: 118,
             height: 44,
             top: 145,
@@ -1561,7 +1561,7 @@ require([
             parent: "patientMenu",
             callback: onMessageReceived
         });
-        ct64.view_archived_medical_reports = new TouchscreenButton("view_archived_medical_reports", {
+        ct64.view_archived_medical_reports = new TouchscreenButton.ButtonEVO("view_archived_medical_reports", {
             width: 172,
             height: 44,
             top: 145,
@@ -1575,7 +1575,7 @@ require([
             parent: "patientMenu",
             callback: onMessageReceived
         });
-        ct64.ct64_back = new TouchscreenButton("ct64_back", {
+        ct64.ct64_back = new TouchscreenButton.ButtonEVO("ct64_back", {
             width: 156,
             height: 34,
             top: 145,
@@ -1589,7 +1589,7 @@ require([
             parent: "medicalReportScreen",
             callback: onMessageReceived
         });
-        ct64.ct64_inserisci_anamnesi = new TouchscreenButton("ct64_inserisci_anamnesi", {
+        ct64.ct64_inserisci_anamnesi = new TouchscreenButton.ButtonEVO("ct64_inserisci_anamnesi", {
             width: 87,
             height: 34,
             top: 1451,
@@ -1603,7 +1603,7 @@ require([
             parent: "inserimentoAnamnesiScreen",
             callback: onMessageReceived
         });
-        ct64.select_holter_folders = new TouchscreenButton("select_holter_folders", {
+        ct64.select_holter_folders = new TouchscreenButton.ButtonEVO("select_holter_folders", {
             width: 757,
             height: 70,
             top: -335,
@@ -1616,7 +1616,7 @@ require([
             parent: "ct64-file-browser",
             callback: onMessageReceived
         });
-        ct64.select_ecg_file = new TouchscreenButton("select_ecg_file", {
+        ct64.select_ecg_file = new TouchscreenButton.ButtonEVO("select_ecg_file", {
             width: 757,
             height: 26,
             top: -266,
@@ -1629,7 +1629,7 @@ require([
             parent: "ct64-file-browser",
             callback: onMessageReceived
         });
-        ct64.open = new TouchscreenButton("ct64_open", {
+        ct64.open = new TouchscreenButton.ButtonEVO("ct64_open", {
             width: 82,
             height: 28,
             top: 664,
@@ -1644,7 +1644,7 @@ require([
             callback: onMessageReceived
         });
 
-        var main_tick = new TouchscreenButton("tick", {
+        var main_tick = new TouchscreenButton.ButtonEVO("tick", {
             width: 0,
             height: 0
         }, {
@@ -1682,7 +1682,7 @@ require([
                      VIEW_ALERTS: 22, SEND_RESULTS: 23,
                      ECG_EXAM_12DER_KNOWN_PT: 24, HOLTER_EXAM: 25 };
 
-        var demo = Demo.NONE;
+        var demo = Demo.TERMINATE_HUB_MODE;//Demo.NONE;
 
         console_log(mt32.central.getPosition())
 
@@ -1691,7 +1691,7 @@ require([
         let warp = 0;//237000 + holterParamsSpeechDuration;//-10000;
         // è à ó ú
 
-        var player = new Player({ lang: "it-IT" });
+        var player = new Player.Player({ lang: "it-IT" });
         if (demo === Demo.ECG_EXAM_12DER_KNOWN_PT) {
             d3.select("body").style("overflow", "hidden");
             player.load([
@@ -2056,6 +2056,7 @@ require([
                 { speak: "Instruzioni per terminare la modalità operativa ECG12D-Hub, sul dispositivo MT32.", timeStamp: 2000 },
                 { speak: "Clicca Centrale.", timeStamp: 8500 },
                 { click: mt32.central, timeStamp: 10000, cursor: { type: media.stylus }},
+
                 { speak: "Poi, clicca Termina modalità.", timeStamp: 11500 },
                 { click: mt32.terminate_operating_mode, timeStamp: 12500, cursor: { type: media.stylus }},
                 { speak: "Il dispositivo si connetterà alla centrale per terminare la modalità operativa.", timeStamp: 14000 },
@@ -2522,7 +2523,7 @@ require([
                 d3.select("#div_confirm_cancel_send").text("Annulla");
                 mt32.home.hide();
                 if (!timers.send_results) {
-                    timers.send_results = new Player().load([
+                    timers.send_results = new Player.Player().load([
                         { input: "#res_send_1", value: "- Avvio applicazione", timeStamp: 500, lineFeed: true },
                         { input: "#res_send_2", value: "- Accensione modulo cellulare", timeStamp: 1000, lineFeed: true },
                         { input: "#res_send_3", value: "- Attesa registrazione SIM", timeStamp: 2000, lineFeed: true },
@@ -2562,7 +2563,7 @@ require([
                 viz("#downloadingUpdatesScreen");
                 mt32.home.hide();
                 if (!timers.updates_player) {
-                    timers.updates_player = new Player().load([
+                    timers.updates_player = new Player.Player().load([
                         { input: "#send_1", value: "- Avvio applicazione", timeStamp: 500, lineFeed: true },
                         { input: "#send_2", value: "- Accensione modulo cellulare", timeStamp: 600, lineFeed: true },
                         { click: mt32.tick, timeStamp: 2000 },
@@ -2588,7 +2589,7 @@ require([
                 viz("#div_confirm_downloadingupdates");
                 hide("#div_abort_downloadingupdates");
                 if (!timers.sync_player) {
-                    timers.sync_player = new Player().load([
+                    timers.sync_player = new Player.Player().load([
                         { input: "#send_6", value: "- Ricevuti nuovi aggiornamenti", timeStamp: 1000, lineFeed: true },
                         { input: "#send_7", value: "- Termine applicazione", timeStamp: 2000, lineFeed: true }
                     ]).play();
@@ -2626,7 +2627,7 @@ require([
                 d3.select("#div_confirm_cancel_send").text("Annulla");
                 mt32.home.hide();
                 if (!timers.send_results) {
-                    timers.send_results = new Player().load([
+                    timers.send_results = new Player.Player().load([
                         { input: "#res_send_1", value: "- Attesa riavvio applicazione", timeStamp: 500, lineFeed: true },
                         { input: "#res_send_2", value: "- Avvio applicazione", timeStamp: 1000, lineFeed: true },
                         { input: "#res_send_3", value: "- Accensione modulo cellulare", timeStamp: 1500, lineFeed: true },

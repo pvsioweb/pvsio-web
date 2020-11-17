@@ -13,7 +13,7 @@
   */
 define(function (require, exports, module) {
     "use strict";
-    var eventDispatcher    = require("util/eventDispatcher"),
+    var eventDispatcher    = require("util/eventDispatcher").eventDispatcher,
         DefaultPreferences = require("preferences/DefaultPreferences").getInstance(),
         PreferenceKeys     = require("preferences/PreferenceKeys");
 

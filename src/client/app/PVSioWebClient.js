@@ -12,10 +12,10 @@ define(function (require, exports, module) {
     "use strict";
     var pvsioweb_version = "3.0";
 
-    var pvsws                   = require("websockets/pvs/pvsWSClient"),
-		eventDispatcher			= require("util/eventDispatcher"),
-		d3						= require("d3/d3"),
-		property				= require("util/property"),
+    var pvsws = require("./WSManager").WSManager.getWebSocket(),
+		eventDispatcher = require("util/eventDispatcher").eventDispatcher,
+		d3 = require("d3/d3"),
+		property = require("util/property"),
 		ws,
 		_port = (window.location.href.indexOf(".herokuapp.com") >= 0 ||
                    window.location.href.indexOf("pvsioweb.org") >= 0) ? 0 : 8082,
@@ -32,17 +32,15 @@ define(function (require, exports, module) {
 		var _pvsioweb = this;
 		//create pvs websocket connection
 		//add listeners for pvs process events
-		ws = pvsws()
-			.serverUrl(url)
-			.addListener("ConnectionOpened", function (e) {
+		ws = pvsws.serverUrl(url).on("ConnectionOpened", (e) => {
                 e.type = "WebSocketConnectionOpened";
-				_pvsioweb.isWebSocketConnected(true).fire(e);
-			}).addListener("ConnectionClosed", function (e) {
+                _pvsioweb.isWebSocketConnected(true).fire(e);
+			}).on("ConnectionClosed", (e) => {
                 e.type = "WebSocketConnectionClosed";
 				_pvsioweb.isWebSocketConnected(false).fire(e);
-			}).addListener("pvsoutput", function (e) {
+			}).on("pvsoutput", (e) => {
 				_pvsioweb.fire(e);
-			}).addListener("processExited", function (e) {
+			}).on("processExited", (e) => {
 				_pvsioweb.isPVSProcessConnected(false).fire(e);
 			});
 

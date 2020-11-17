@@ -45,14 +45,14 @@ require([
         function start_tick_plunger() {
             if (!tick.plunger) {
                 tick.plunger = setInterval(function () {
-                    ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
+                    ButtonActionsQueue.queueGUIAction("tick", onMessageReceived);
                 }, 500);
             }
         }
         function start_tick_time() {
             if (!tick.time) {
                 tick.time = setInterval(function () {
-                    ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
+                    ButtonActionsQueue.queueGUIAction("tick", onMessageReceived);
                 }, 60 * 1000);
             }
         }
@@ -885,7 +885,7 @@ require([
                     // this is an optimisation for handling case 'prime warning' in the PVS model (see tick function)
                     stop_tick();
                     window.setTimeout(function () {
-                        ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived); // single tick after 3 seconds
+                        ButtonActionsQueue.queueGUIAction("tick", onMessageReceived); // single tick after 3 seconds
                         console.log("tick");
                     }, 3000);
                 } else if (res.console_screen === "CONSOLE_PROTOCOL") {
@@ -1039,25 +1039,25 @@ require([
 
 
         d3.select("#plug_syringe_saline").on("click", function () {
-            ButtonActionsQueue.getInstance().queueGUIAction("plug_syringe_saline", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("plug_syringe_saline", onMessageReceived);
         });
         d3.select("#spike_saline_bag").on("click", function () {
-            ButtonActionsQueue.getInstance().queueGUIAction("plug_bag_saline", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("plug_bag_saline", onMessageReceived);
         });
         d3.select("#plug_syringe_contrast").on("click", function () {
-            ButtonActionsQueue.getInstance().queueGUIAction("plug_syringe_contrast", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("plug_syringe_contrast", onMessageReceived);
         });
         d3.select("#spike_contrast_bag").on("click", function () {
-            ButtonActionsQueue.getInstance().queueGUIAction("plug_bag_contrast", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("plug_bag_contrast", onMessageReceived);
         });
         d3.select("#connect_infusion_set").on("click", function () {
-            ButtonActionsQueue.getInstance().queueGUIAction("connect_infusion_set", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("connect_infusion_set", onMessageReceived);
         });
         d3.select("#restart_simulation").on("click", function () {
-            ButtonActionsQueue.getInstance().queueGUIAction("restart_simulation", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("restart_simulation", onMessageReceived);
         });
         d3.select("#rotate_injector").on("click", function () {
-            ButtonActionsQueue.getInstance().queueGUIAction("rotate_injector", onMessageReceived);
+            ButtonActionsQueue.queueGUIAction("rotate_injector", onMessageReceived);
         });
 
         //register event listener for websocket connection from the client

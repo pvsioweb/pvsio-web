@@ -10,7 +10,7 @@ define(function (require, exports, module) {
     "use strict";
 
     var instance = null,
-        eventDispatcher = require("util/eventDispatcher"),
+        eventDispatcher = require("util/eventDispatcher").eventDispatcher,
         selector_template = require("text!./emuchartselector/selector_template.handlebars");
 
     function EmuchartsSelector() {

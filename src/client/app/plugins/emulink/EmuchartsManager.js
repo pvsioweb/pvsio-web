@@ -13,7 +13,7 @@ define(function (require, exports, module) {
     var Emucharts = require("plugins/emulink/Emucharts"),
         EmuchartsEditor = require("plugins/emulink/EmuchartsEditor"),
         PVSioWebClient = require("PVSioWebClient"),
-        eventDispatcher = require("util/eventDispatcher"),
+        eventDispatcher = require("util/eventDispatcher").eventDispatcher,
         Colors = require("plugins/emulink/tools/Colors"),
         PIMImporter = require("plugins/emulink/models/pim/PIMImporter"),
         UppaalConverter = require("plugins/emulink/tools/UppaalConverter").getInstance(),

@@ -12,7 +12,7 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var eventDispatcher = require("util/eventDispatcher"),
+    var eventDispatcher = require("util/eventDispatcher").eventDispatcher,
         PIMs = require("plugins/emulink/models/pim/PIMs"),
         d3 = require("d3/d3"),
         Colors = require("plugins/emulink/tools/Colors");

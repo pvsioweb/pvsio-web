@@ -10,7 +10,7 @@ define(function (require, exports, module) {
     var _this;
 
     var nc_websocket_monitor;
-    var eventDispatcher = require("util/eventDispatcher");
+    var eventDispatcher = require("util/eventDispatcher").eventDispatcher;
 
     /**
      * @function NCMonitorCore

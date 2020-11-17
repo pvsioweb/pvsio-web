@@ -8,7 +8,7 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var eventDispatcher = require("util/eventDispatcher"),
+    var eventDispatcher = require("util/eventDispatcher").eventDispatcher,
         contextMenus = require("plugins/emulink/menus/ContextMenus").getInstance(),
         emuchartsManager = require("plugins/emulink/EmuchartsManager").getInstance(),
         PIMEmulink = require("plugins/emulink/models/pim/PIMEmulink");

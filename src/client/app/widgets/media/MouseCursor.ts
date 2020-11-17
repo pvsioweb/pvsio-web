@@ -29,14 +29,11 @@
  });
  *
  */
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define */
-define(function (require, exports, module) {
-    "use strict";
-    var WidgetEVO = require("widgets/core/WidgetEVO"),
-        mouse = require("text!widgets/media/imgs/mouse_cursor.svg"),
-        img_template = require("text!widgets/media/templates/img_template.handlebars");
 
+import { Coords, WidgetEVO } from "../core/WidgetEVO";
+import { img_template, mouse } from "./templates/img_template";
+
+export class MouseCursor extends WidgetEVO {
     /**
      * @function <a name="MouseCursor">MouseCursor</a>
      * @description Constructor.
@@ -52,51 +49,60 @@ define(function (require, exports, module) {
      * @memberof module:MouseCursor
      * @instance
      */
-     function MouseCursor(id, coords, opt) {
-         coords = coords || {};
-         opt = opt || {};
+    constructor (id: string, coords: Coords, opt?) {
+        super(id, coords, opt);
+        opt = opt || {};
 
-         // set widget type
-         this.type = this.type || "MouseCursor";
+        // set widget type
+        this.type = this.type || "MouseCursor";
 
-         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-         opt.backgroundColor = "transparent";
-         opt.zIndex = opt.zIndex || "inherit";
-         opt.opacity = opt.opacity || 0.9;
+        // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
+        opt.backgroundColor = "transparent";
+        opt.zIndex = opt.zIndex || "inherit";
+        opt.opacity = opt.opacity || 0.9;
 
-         // invoke WidgetEVO constructor to create the widget
-         WidgetEVO.apply(this, [ id, coords, opt ]);
+        // invoke createHTMLElement to create the widget
+        super.createHTMLElement();
 
-         // append the pointer image to the base layer
-         var dom = Handlebars.compile(img_template, { noEscape: true })({
-             svg: mouse
-         });
-         this.base.html(dom);
-         return this;
-     }
-     MouseCursor.prototype = Object.create(WidgetEVO.prototype);
-     MouseCursor.prototype.parentClass = WidgetEVO.prototype;
-     MouseCursor.prototype.constructor = MouseCursor;
+        // append the pointer image to the base layer
+        const dom: string = Handlebars.compile(img_template, { noEscape: true })({
+            svg: mouse
+        });
+        this.base.append(dom);
+    }
 
-     /**
-      * @function <a name="render">render</a>
-      * @description Rendering function for button widgets.
-      * @memberof module:MouseCursor
-      * @instance
-      */
-     MouseCursor.prototype.render = function () {
-         return this.reveal();
-     };
+    /**
+     * @function <a name="render">render</a>
+     * @description Rendering function for button widgets.
+     * @memberof module:MouseCursor
+     * @instance
+     */
+    render (): void {
+        return this.reveal();
+    };
 
-     /**
-      * @function <a name="click">click</a>
-      * @description Simulates a click -- this function does nothing for now.
-      * @memberof module:MouseCursor
-      * @instance
-      */
-     MouseCursor.prototype.click = function () {
-         return this.reveal();
-     };
+    /**
+     * @function <a name="click">click</a>
+     * @description Simulates a click -- this function does nothing for now.
+     * @memberof module:MouseCursor
+     * @instance
+     */
+    click (opt?: { fw_move?: number }): void {
+        return this.reveal();
+    };
 
-     module.exports = MouseCursor;
-});
+    longPress (opt?) {
+        opt = opt || {};
+        opt.fw_move = opt.fw_move || 20;
+        this.move({ top: this.top + opt.fw_move, left: this.left - opt.fw_move }, {
+            duration: 200
+        });
+        setTimeout(() => {
+            this.move({ top: this.top - opt.fw_move, left: this.left + opt.fw_move }, {
+                duration: 500
+            });
+        }, 2500);
+        return this.reveal();
+    }
+
+}

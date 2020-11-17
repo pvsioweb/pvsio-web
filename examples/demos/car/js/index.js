@@ -60,7 +60,7 @@ require([
         function start_tick() {
             if (!tick) {
                 tick = setInterval(function () {
-                    ButtonActionsQueue.getInstance().queueGUIAction("tick", onMessageReceived);
+                    ButtonActionsQueue.queueGUIAction("tick", onMessageReceived);
                 }, 1000);
             }
         }
