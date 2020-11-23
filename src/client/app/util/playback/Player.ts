@@ -108,6 +108,7 @@ export class Player {
     protected lang: Lang;
     protected pitch: number;
     protected rate: number;
+    protected voice: SpeechSynthesisVoice;
     protected _log: Log;
 
     /**
@@ -118,6 +119,10 @@ export class Player {
         this.lang = opt.lang || "en-GB";
         this.pitch = opt.pitch || 1.04;
         this.rate = opt.rate || 1.03;
+        const voices: SpeechSynthesisVoice[] =  window.speechSynthesis.getVoices().filter(voice => {
+            return voice.lang === this.lang && (voice.name.endsWith("a") || voice.name.endsWith("e"));
+        });
+        this.voice = (voices && voices.length) ? voices[0] : null;
         // log-related attributes
         this._log = [];
         return this;
@@ -297,6 +302,7 @@ export class Player {
                             const msg: SpeechSynthesisUtterance = new SpeechSynthesisUtterance(action.speak);
                             msg.lang = this.lang;
                             // msg.localService = true;
+                            msg.voice = this.voice;
                             msg.rate = this.rate;
                             msg.pitch = this.pitch;
                             console_log("Speaking: " + action.speak);

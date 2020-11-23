@@ -1680,9 +1680,14 @@ require([
                      REQUEST_REPORT: 12, WRITE_REPORT: 13, VIEW_MEDICAL_REPORT: 14, VIEW_ARCHIVED_MEDICAL_REPORTS: 15,
                      MT32_LED: 16, CREATE_NEW_PATIENT: 17, TRANSFER_DATA_MICROSD: 18, INTRO: 19, POWER_ON_MT32: 20, POWER_OFF_MT32: 21,
                      VIEW_ALERTS: 22, SEND_RESULTS: 23,
-                     ECG_EXAM_12DER_KNOWN_PT: 24, HOLTER_EXAM: 25 };
+                     ECG_EXAM_12DER_KNOWN_PT: 24, HOLTER_EXAM: 25,
 
-        var demo = Demo.TERMINATE_HUB_MODE;//Demo.NONE;
+                     TERMINATE_HUB_MODE_EN: 105,
+                     TRANSFER_DATA_MICROSD_EN: 118
+                    
+                    };
+
+        var demo = Demo.TRANSFER_DATA_MICROSD_EN;//Demo.NONE;
 
         console_log(mt32.central.getPosition())
 
@@ -2071,6 +2076,29 @@ require([
                 { speak: "Potrai verificare che la modalità operativa non è piu presente sul dispositivo MT32.", timeStamp: 34000},
                 { speak: "Applica la stessa procedura per terminare le altre modalità operative.", timeStamp: 40000}
             ]).play();
+        } else if (demo === Demo.TERMINATE_HUB_MODE_EN) {
+            document.getElementById("demo-hub-mode").onclick = function () {
+                player = new Player.Player({ lang: "en-US", pitch: 1.7, rate: 0.9 });
+                player.load([
+                    { reveal: media.stylus, timeStamp: 100 },
+                    { speak: "Instructions for stopping operating modes on the portable cardiac monitor.", timeStamp: 2000 },
+                    { speak: "From the main screen, select Central.", timeStamp: 8500 },
+                    { click: mt32.central, timeStamp: 10000, cursor: { type: media.stylus }},
+
+                    { speak: "Then, select End Mode.", timeStamp: 11500 },
+                    { click: mt32.terminate_operating_mode, timeStamp: 12500, cursor: { type: media.stylus }},
+                    { speak: "The device will send the request to the central server.", timeStamp: 14000 },
+                    { hide: media.stylus, timeStamp: 16000 },
+
+                    { reveal: media.stylus, timeStamp: 26000 },
+                    { speak: "Select confirm to complete the request.", timeStamp: 26000},
+                    { click: mt32.confirm_upload, timeStamp: 28000, timeout: 1000, borderColor: "white", cursor: { type: media.stylus, offset: { top: 0, left: 120} }},
+                    { speak: "Finally, click on the M logo to go to the main page.", timeStamp: 30000 },
+                    { click: mt32.home, timeStamp: 32000, timeout: 1000, borderColor: "white", cursor: { type: media.stylus }},
+
+                    { speak: "You can confirm that the operating mode has ended by checking that the message at the bottom of the main screen indicates none.", timeStamp: 34000}
+                ]).play();
+            }
         } else if (demo === Demo.TRANSFER_DATA_MICROSD) {
             // slide everything to the right
             setTimeout(function () {
@@ -2128,6 +2156,67 @@ require([
                 { reveal: "#uploading", timeStamp: 89000 },
                 { speak: "I faill verranno caricati sulla centrale in pochi secondi.", timeStamp: 90000 }
             ]).play();
+        } else if (demo === Demo.TRANSFER_DATA_MICROSD_EN) {
+            document.getElementById("demo-hub-mode").onclick = function () {
+                player = new Player.Player({ lang: "en-US", pitch: 1.7, rate: 0.9 });
+
+                // slide everything to the right
+                setTimeout(function () {
+                    d3.select("#content").style("transition-duration", "1000ms").style("margin-left", "200px");
+                }, 9000);
+                player.load([
+                    { speak: "Instrunctions for uploading E-C-G exam results from the portable monitor to the central server.", timeStamp: 4000 },
+
+                    // rotate MT32 on the side
+                    { trans: "#MT32-screens", timeStamp: 10000, transform: "rotateY(22deg)translateZ(-423px)translateY(212px)translateX(140px)skewY(10deg)"},
+                    { trans: "#MT32-sdcard", timeStamp: 10000, transform: "rotateY(22deg)translateZ(-36px)translateY(15px)translateX(-2px)skewY(10deg)"},
+                    { hide: "#MT32-sdcard", timeStamp: 10000 },
+                    { trans: ".MT32-case-leftside", timeStamp: 10000, transform: "rotateY(0deg)translateZ(0px)translateY(8px)translateX(0px)skewY(0deg)scaleY(1.01)"},
+                    { trans: "#MT32-sdcard-cover", timeStamp: 10000, transform: "rotateY(0deg)translateZ(0px)translateY(0px)translateX(0px)skewY(0deg)scaleY(1.04)"},
+
+                    { speak: "Open the side panel of the portable monitor and pull out the micro-SD card.", timeStamp: 11000 },
+
+                    // remove SD cover
+                    { hide: "#MT32-sdcard-cover", timeStamp: 12000 },
+                    // extract SD card
+                    { reveal: "#MT32-sdcard", timeStamp: 13500 },
+                    { trans: "#MT32-sdcard", timeStamp: 13600, transform: "rotateY(22deg)translateZ(-170px)translateY(170px)translateX(-200px)skewY(10deg)"},
+
+                    { speak: "Then, place the SD-card inthe SD reader of a computer connected to the central server.", timeStamp: 15000 },
+                    // show SD card reader
+                    { reveal: ".card-reader", timeStamp: 17000, opacity: 0.8 },
+
+                    // insert SD card in the card reader
+                    { trans: "#MT32-sdcard", zIndex: 3, timeStamp: 17000, transform: "translateX(790px)translateY(360px)rotateX(17deg)rotateZ(-108deg)skewX(-13deg)scale(0.3,0.5)"},
+                    { trans: "#MT32-sdcard", zIndex: 2, timeStamp: 18000, transform: "translateX(1132px) translateY(421px) rotateX(26deg) rotateZ(-104deg) skewX(-13deg) translateZ(-300px) scale(0.2, 0.5)"},
+
+                    { speak: "From the top panel of the main page, click Upload Exams.", timeStamp: 24000 },
+                    { click: ct64.upload_exams, timeStamp: 25000, timeout: 1000, borderColor: "blue", classed: "blink", cursor: { type: media.mousePointer, offset: { top:0, left:0}}},
+
+                    { speak: "On the new screen, click Upload Exams.", timeStamp: 30000 },
+                    { click: ct64.choose_exams_to_be_uploaded, timeStamp: 31000, timeout: 1000, borderColor: "blue", classed: "blink", cursor: { type: media.mousePointer, offset: { top:0, left:0}}},
+                    { speak: "A new window will be opened that allows you to choose which E-C-G exams you want to upload to the central server.", timeStamp: 34000 },
+                    { move: media.mousePointer, top: 170, left: 444, timeStamp: 36000 },
+
+                    { speak: "All exams are saved in a folder whose name is the ID of the nurse responsible for the portable monitor.", timeStamp: 42000 },
+
+                    { move: media.mousePointer, top: 250, left: 428, timeStamp: 52000 },
+                    { speak: "Exams are saved either as sub-folders with multiple files, or single files.", timeStamp: 52000 },
+                    { move: media.mousePointer, top: 301, left: 428, timeStamp: 55000 },
+
+                    { speak: "It is important to note that all saved exams are anonymized.", timeStamp: 60000 },
+                    { speak: "This is necessary to protect the patients' privacy.", timeStamp: 65000 },
+
+                    { speak: "Because of this, if you want to search a specific exam, you will need to search it based on hour and date of the exam, as opposed to searching for the patient's name.", timeStamp: 65000 },
+                    { move: media.mousePointer, top: 301, left: 684, timeStamp: 76000 },
+
+                    { select: ct64.select_ecg_file, timeStamp: 78000, borderColor: "steelblue", classed: "blink" },
+                    { speak: "When you have found the exams you want to upload, click on Open.", timeStamp: 84000 },
+                    { click: ct64.open, timeStamp: 86000, timeout: 1000, borderColor: "blue", classed: "blink", cursor: { type: media.mousePointer, offset: { top:0, left:0}}},
+                    { reveal: "#uploading", timeStamp: 89000 },
+                    { speak: "The selected exams will be uploaded to the central server in few seconds.", timeStamp: 90000 }
+                ]).play();
+            }
         } else if (demo === Demo.VIEW_MEDICAL_REPORT) {
             player.load([
                 { speak: "Istruzioni per inserire e consultare l'anamnesi del paziente.", timeStamp: 4000 },
