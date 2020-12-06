@@ -21,10 +21,10 @@
 /*global define, Promise, Handlebars, $ */
 define(function (require, exports, module) {
     "use strict";
-    var TreeList        = require("./TreeList"),
-        WSManager       = require("websockets/pvs/WSManager"),
+    var TreeList        = require("./TreeView/TreeList"),
+        WSManager       = require("../../WSManager").WSManager,
         template        = require("text!pvsioweb/forms/templates/fileBrowser.handlebars"),
-        BaseDialog      = require("pvsioweb/forms/BaseDialog"),
+        BaseDialog      = require("src/client/plugins/PrototypeBuilder/forms/node_modules/pvsioweb/forms/BaseDialog"),
         MIME            = require("util/MIME").getInstance(),
         PreferenceStorage = require("preferences/PreferenceStorage").getInstance(),
         EmuchartsManager = require("plugins/emulink/EmuchartsManager"),
@@ -571,7 +571,7 @@ define(function (require, exports, module) {
             view.on("cancel", function (event, view) {
                 clearTimeout(timer);
                 view.remove();
-                resolve();
+                reject();
             }).on("ok", function (event, view) {
                 clearTimeout(timer);
                 var selectedFiles = rfb._treeList.getSelectedItems();

@@ -3,8 +3,8 @@
  * @desc Widget within the PIM prototype editor
  * @author Nathaniel Watson
  */
-import * as Widget from '../../widgets/Widget';
-import { TouchscreenElement } from '../../widgets/TouchscreenElement';
+import * as Widget from '../../../plugins/PrototypeBuilder/widgets/Widget';
+import { TouchscreenElement } from '../../../plugins/PrototypeBuilder/widgets/TouchscreenElement';
 
 export interface WidgetOptions extends Widget.WidgetOptions {
     targetScreen?: { id: string },

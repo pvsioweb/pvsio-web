@@ -3,6 +3,7 @@
 		"target": "es6",
 		"module": "UMD",
 		"moduleResolution": "node",
+		"removeComments": true,
 		"sourceMap": false,
 		"outDir": "dist",
 		"rootDir": "src",
@@ -12,8 +13,11 @@
 			"*": [ "node_modules/*", "node_modules/@types/*", "client/node_modules/*" ]
 		},
 		"types": [
-			"handlebars", "jquery", "node", "express", "ws", "connect", "body-parser", "jasmine", "backbone"
+			"handlebars", "jquery", "node", "express", "ws", "connect", "body-parser", "jasmine"
 		],
+		"typeRoots": [
+            "node_modules/@types"
+        ],
         "diagnostics": true,
 		"allowJs": true
 	},

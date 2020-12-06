@@ -10,13 +10,13 @@ define(function (require, exports, module) {
     const normalize = require("util/Normalize").getInstance();
     var CodeMirror          = require("cm/lib/codemirror"),
         PVSioWebClient      = require("PVSioWebClient"),
-        d3                  = require("d3/d3"),
+        d3                  = require("src/client/plugins/PrototypeBuilder/forms/node_modules/d3/d3"),
         ProjectManager		= require("project/ProjectManager"),
         sourceCodeTemplate	= require("text!pvsioweb/forms/templates/sourceCodeEditorPanel.handlebars"),
         Logger              = require("util/Logger"),
         NotificationManager = require("project/NotificationManager"),
         Notification        = require("pvsioweb/forms/displayNotification"),
-        WSManager           = require("websockets/pvs/WSManager"),
+        WSManager           = require("../../WSManager").WSManager,
         fs                  = require("filesystem/FileSystem").getInstance();
 //        MIME                = require("util/MIME");
     var instance,

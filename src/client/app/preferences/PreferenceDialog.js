@@ -8,7 +8,7 @@
 define(function (require, exports, module) {
     "use strict";
     var dialogTemplate = require("text!./templates/preference-dialog.handlebars"),
-        BaseDialog  = require("pvsioweb/forms/BaseDialog"),
+        BaseDialog  = require("src/client/plugins/PrototypeBuilder/forms/node_modules/pvsioweb/forms/BaseDialog"),
         Preferences = require("preferences/PreferenceStorage");
 
     var PreferenceDialog = BaseDialog.extend({

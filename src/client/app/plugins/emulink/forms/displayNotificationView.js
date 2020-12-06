@@ -7,9 +7,9 @@
 /*jshint unused:false*/
 define(function (require, exports, module) {
     "use strict";
-    var d3 = require("d3/d3"),
+    var d3 = require("src/client/plugins/PrototypeBuilder/forms/node_modules/d3/d3"),
         formTemplate = require("text!./templates/displayNotificationView.handlebars"),
-        BaseDialog   = require("pvsioweb/forms/BaseDialog"),
+        BaseDialog   = require("src/client/plugins/PrototypeBuilder/forms/node_modules/pvsioweb/forms/BaseDialog"),
         FormUtils = require("./FormUtils");
 
     var DisplayNotificationView = BaseDialog.extend({

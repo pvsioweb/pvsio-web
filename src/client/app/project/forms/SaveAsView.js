@@ -8,7 +8,7 @@
 define(function (require, exports, module) {
     "use strict";
     var saveAsTemplate = require("text!./templates/saveAs.handlebars"),
-        BaseDialog  = require("pvsioweb/forms/BaseDialog");
+        BaseDialog  = require("src/client/plugins/PrototypeBuilder/forms/node_modules/pvsioweb/forms/BaseDialog");
 
     var SaveAsView = BaseDialog.extend({
         render: function (data) {

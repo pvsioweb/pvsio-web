@@ -4,9 +4,9 @@
  */
 /*global define */
 define(function (require, exports, module) {
-    var BaseDialog = require("pvsioweb/forms/BaseDialog"),
+    var BaseDialog = require("src/client/plugins/PrototypeBuilder/forms/node_modules/pvsioweb/forms/BaseDialog"),
         ScreenDropdownView = require("./ScreenDropdownView"),
-        d3 = require("d3/d3"),
+        d3 = require("src/client/plugins/PrototypeBuilder/forms/node_modules/d3/d3"),
 		FormUtils = require("pvsioweb/forms/FormUtils"),
         template = require("text!./templates/WidgetConfigView.handlebars");
 

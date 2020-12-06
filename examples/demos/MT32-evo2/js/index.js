@@ -12,8 +12,7 @@ require.config({
         "imagemapper": "../lib/imagemapper",
         "text": "../lib/text",
         "lib": "../lib",
-        "cm": "../lib/cm",
-        stateParser: './util/PVSioStateParser'
+        "cm": "../lib/cm"
     }
 });
 
@@ -23,11 +22,11 @@ require([
         "widgets/media/MouseCursor",
         "widgets/media/Stylus",
         "widgets/core/LedEVO",
-        "util/playback/Player",
+        "../util/playback/Player",
         "widgets/ButtonActionsQueue",
 
-        "stateParser",
-        "PVSioWebClient"
+        "../utils/PVSioStateParser",
+        "Client"
     ], function (
         TouchscreenButton,
         BasicDisplay,
@@ -2078,7 +2077,9 @@ require([
             ]).play();
         } else if (demo === Demo.TERMINATE_HUB_MODE_EN) {
             document.getElementById("demo-hub-mode").onclick = function () {
-                player = new Player.Player({ lang: "en-US", pitch: 1.7, rate: 0.9 });
+                const pitch = window.navigator.platform.startsWith("Linux") ? 1.07 : 1.7;
+                const rate = 0.9;
+                player = new Player.Player({ lang: "en-US", pitch, rate });
                 player.load([
                     { reveal: media.stylus, timeStamp: 100 },
                     { speak: "Instructions for stopping operating modes on the portable cardiac monitor.", timeStamp: 2000 },
@@ -2158,7 +2159,9 @@ require([
             ]).play();
         } else if (demo === Demo.TRANSFER_DATA_MICROSD_EN) {
             document.getElementById("demo-hub-mode").onclick = function () {
-                player = new Player.Player({ lang: "en-US", pitch: 1.7, rate: 0.9 });
+                const pitch = window.navigator.platform.startsWith("Linux") ? 1.07 : 1.7;
+                const rate = 0.9;
+                player = new Player.Player({ lang: "en-US", pitch, rate });
 
                 // slide everything to the right
                 setTimeout(function () {

@@ -20,7 +20,7 @@ define(function (require, exports, module) {
         MIME                  = require("util/MIME"),
         NotificationManager   = require("project/NotificationManager"),
         Descriptor            = require("project/Descriptor"),
-        WSManager             = require("websockets/pvs/WSManager");
+        WSManager             = require("../WSManager").WSManager;
 
     var instance;
 

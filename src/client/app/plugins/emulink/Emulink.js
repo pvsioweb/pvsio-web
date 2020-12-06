@@ -9,7 +9,7 @@ define(function (require, exports, module) {
     "use strict";
     const normalize = require("util/Normalize").getInstance();
     var ProjectManager		= require("project/ProjectManager"),
-        WSManager           = require("websockets/pvs/WSManager"),
+        WSManager           = require("../../WSManager").WSManager,
         PluginManager       = require("plugins/PluginManager"),
         ModelEditor         = require("plugins/modelEditor/ModelEditor"),
         PVSioWebClient      = require("PVSioWebClient"),

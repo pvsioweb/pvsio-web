@@ -10,7 +10,7 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var d3 = require("d3/d3"),
+    var d3 = require("src/client/plugins/PrototypeBuilder/forms/node_modules/d3/d3"),
         eventDispatcher = require("util/eventDispatcher").eventDispatcher,
         //Emucharts = require("plugins/emulink/Emucharts"),
         EditorModeUtils = require("plugins/emulink/EmuchartsEditorModes");

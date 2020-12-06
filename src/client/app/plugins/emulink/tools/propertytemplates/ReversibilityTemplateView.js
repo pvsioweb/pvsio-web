@@ -7,13 +7,13 @@
  /*jshint unused:false*/
  define(function (require, exports, module) {
      "use strict";
-     var d3 = require("d3/d3"),
+     var d3 = require("src/client/plugins/PrototypeBuilder/forms/node_modules/d3/d3"),
          formTemplate = require("text!./reversibility/frontend.handlebars"),
          theoremTemplate = require("text!./reversibility/reversibility.handlebars"),
          prooflite_strategy_induction  = require("text!./prooflite_strategy_induction.handlebars"),
          pvs_strategy_induction  = require("text!./pvs_strategy_induction.handlebars"),
          pvs_theorem_induction  = require("text!./pvs_theorem_induction.handlebars"),
-         BaseDialog = require("pvsioweb/forms/BaseDialog"),
+         BaseDialog = require("src/client/plugins/PrototypeBuilder/forms/node_modules/pvsioweb/forms/BaseDialog"),
          FormUtils = require("plugins/emulink/forms/FormUtils");
 
      var default_data = { actions: ["act"], reversingAction: "rev", s: "s" };

@@ -4,8 +4,8 @@
  */
 /*global define */
 define(function (require, exports, module) {
-    var BaseDialog = require("pvsioweb/forms/BaseDialog"),
-        d3 = require("d3/d3"),
+    var BaseDialog = require("src/client/plugins/PrototypeBuilder/forms/node_modules/pvsioweb/forms/BaseDialog"),
+        d3 = require("src/client/plugins/PrototypeBuilder/forms/node_modules/d3/d3"),
         template = require("text!./templates/EditScreenView.handlebars");
 
     var templateHelpers = {

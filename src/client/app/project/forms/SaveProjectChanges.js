@@ -7,7 +7,7 @@
 /*global define, $, Handlebars*/
 define(function (require, exports, module) {
     "use strict";
-    var BaseDialog              = require("pvsioweb/forms/BaseDialog"),
+    var BaseDialog              = require("src/client/plugins/PrototypeBuilder/forms/node_modules/pvsioweb/forms/BaseDialog"),
         template				= require("text!./saveChanges.handlebars");
 
     var SaveProjectChangesView = BaseDialog.extend({

@@ -38,7 +38,7 @@
     "@types/ws": "^6.0.1"
   },
   "scripts": {
-    "start": "node dist/server/pvsiowebServer.js"
+    "start": "node dist/server/PVSioWebServer.js"
   },
   "repository": {
     "type": "git",

@@ -7,7 +7,7 @@
 /*global define, Promise*/
 define(function (require, exports, module) {
     "use strict";
-    const d3 = require("d3/d3");
+    const d3 = require("src/client/plugins/PrototypeBuilder/forms/node_modules/d3/d3");
     const PVSioWebClient = require("PVSioWebClient");
     const PluginManager = require("plugins/PluginManager").getInstance();
     const ProjectManager = require("project/ProjectManager");

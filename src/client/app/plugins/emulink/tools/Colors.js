@@ -8,7 +8,7 @@
 define(function (require, exports, module) {
     "use strict";
     
-    var d3 = require("d3/d3");
+    var d3 = require("src/client/plugins/PrototypeBuilder/forms/node_modules/d3/d3");
     var colors = d3.scale.category10();
     
     module.exports = {

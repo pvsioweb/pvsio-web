@@ -17,7 +17,11 @@ build:
 
 	make copy-css
 	make copy-handlebars
+	make examples
 	-cd dist/client && npm install
+
+examples:
+	rsync -av --exclude='*.ts' src/examples dist/
 
 copy-css:
 	-cp -r src/client/css dist/client
@@ -88,3 +92,5 @@ copy-handlebars:
 
 clean:
 	rm -rf dist
+
+.PHONY: examples

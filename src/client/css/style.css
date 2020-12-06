@@ -1192,10 +1192,10 @@ img {
   font-size: 13px;
   width: 100%; }
 
-[draggable] {
-  /* Required to make elements draggable in old WebKit */
+/* Required to make elements draggable in old WebKit */
+/* [draggable] {
   -khtml-user-drag: element;
-  -webkit-user-drag: element; }
+  -webkit-user-drag: element; } */
 
 .dbg {
   overflow: scroll;

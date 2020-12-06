@@ -14,7 +14,7 @@ define(function (require, exports, module) {
 
     var eventDispatcher = require("util/eventDispatcher").eventDispatcher,
         PIMs = require("plugins/emulink/models/pim/PIMs"),
-        d3 = require("d3/d3"),
+        d3 = require("src/client/plugins/PrototypeBuilder/forms/node_modules/d3/d3"),
         Colors = require("plugins/emulink/tools/Colors");
 
     var emuchartsVersion = "2.0";

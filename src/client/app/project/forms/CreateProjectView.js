@@ -7,10 +7,10 @@
 /*global define, Handlebars, $*/
 define(function (require, exports, module) {
     "use strict";
-    var d3 = require("d3/d3"),
+    var d3 = require("src/client/plugins/PrototypeBuilder/forms/node_modules/d3/d3"),
         createProjectTemplate = require("text!./templates/createProject.handlebars"),
         fs = require("filesystem/FileSystem").getInstance(),
-        BaseDialog  = require("pvsioweb/forms/BaseDialog"),
+        BaseDialog  = require("src/client/plugins/PrototypeBuilder/forms/node_modules/pvsioweb/forms/BaseDialog"),
         PVSioWebClient = require("PVSioWebClient").getInstance();
 
     function choose(_title, _encoding) {

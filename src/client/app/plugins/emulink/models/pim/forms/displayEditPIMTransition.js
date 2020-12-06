@@ -7,7 +7,7 @@
 /*global define, $, Backbone, Handlebars, self */
 define(function (require, exports, module) {
     "use strict";
-    var d3 = require("d3/d3"),
+    var d3 = require("src/client/plugins/PrototypeBuilder/forms/node_modules/d3/d3"),
         formTemplate = require("text!./templates/displayEditPIMTransition.handlebars"),
         FormUtils = require("plugins/emulink/forms/FormUtils");
 

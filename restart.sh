@@ -36,7 +36,7 @@ if [ -d "PVS" ] && [ -f "PVS/pvs" ] && [ -f "PVS/pvsio" ] && [ -f "PVS/proveit" 
 		cd ..
 	fi
 	cd dist/server
-	node pvsiowebServer.js pvsdir:$PVS_DIR restart
+	node PVSioWebServer.js pvsdir:$PVS_DIR restart
 elif [ -f "../pvs" ] && [ -f "../pvsio" ] && [ -f "../proveit" ]; then
     PVS_DIR=${PWD%/*}
     pvsioweb_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -54,12 +54,12 @@ elif [ -f "../pvs" ] && [ -f "../pvsio" ] && [ -f "../proveit" ]; then
 		cd $pvsioweb_DIR
 	fi
 	cd dist/server
-	node pvsiowebServer.js pvsdir:$PVS_DIR restart
+	node PVSioWebServer.js pvsdir:$PVS_DIR restart
 else
 	pvsio -version
 	if [ $? -eq 0 ]; then
 		cd dist/server
-		node pvsiowebServer.js restart
+		node PVSioWebServer.js restart
 	else
 		#FAIL
         echo "================================================================"
@@ -73,6 +73,6 @@ else
         echo "================================================================"
 		#start in any case the UI, this is useful for developing additional PVSio-web UI components even without PVS
 		cd dist/server
-		node pvsiowebServer.js restart
+		node PVSioWebServer.js restart
 	fi
 fi

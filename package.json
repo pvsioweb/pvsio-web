@@ -47,7 +47,7 @@
     "watch": "tsc -b -w",
     "test": "grunt test",
     "local-test": "jasmine-node --verbose dist/server/servertests; node client-test.js",
-    "start": "node dist/server/pvsiowebServer.js"
+    "start": "node dist/server/PVSioWebServer.js"
   },
   "repository": {
     "type": "git",
@@ -56,5 +56,6 @@
   "license": "GPL-3.0",
   "engine": {
     "node": ">=12.19.0"
-  }
+  },
+  "type": "commonjs"
 }
