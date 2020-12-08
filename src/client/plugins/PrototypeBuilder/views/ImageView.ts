@@ -10,33 +10,35 @@ import { WidgetEVO } from "../widgets/core/WidgetEVO";
 import { Coords } from "../widgets/core/WidgetEVO";
 import { Connection, OpenFileDialog, ReadFileRequest, ReadFileResponse } from '../../../env/Connection';
 import { WidgetManager } from "../WidgetManager";
-import { BlueprintEditor } from './utils/BlueprintEditor';
+import { HotspotEditor } from './utils/HotspotEditor';
 
-import { BuilderView, BuilderViewOptions } from './BuilderView';
-import { data } from 'jquery';
+import { View, BuilderViewOptions } from './View';
 
-export const content: string = `
+export const contentTemplate: string = `
 <div class="image-div container-fluid" style="padding-left:0;">
     <div class="container-fluid" style="position:relative; overflow:hidden; background-color:white; border:4px dashed teal; text-align:center; min-height:480px;">
+        <form id="open-local-file-form" style="margin-top:200px; display:none;"> <input type="file" id="open-local-file" accept="*"> </form>
         <button class="load-image-btn btn btn-primary center btn-lg" style="top:50%; margin-left:-5%; position:absolute; white-space:nowrap;">Load Image</button>
     </div>
 </div>
 <div class="image-overlay container-fluid" style="padding-left:0;"></div>`;
 
-export class ImageView extends BuilderView {
+export class ImageView extends View {
     
     protected $imageOverlay: JQuery<HTMLElement>;
     protected $imageDiv: JQuery<HTMLElement>;
     
-    protected blueprintEditor: BlueprintEditor;
+    protected hotspots: HotspotEditor;
 
-    constructor (widgetManager: WidgetManager, data: BuilderViewOptions, connection: Connection) {
+    constructor (widgetManager: WidgetManager, data: BuilderViewOptions, connection: Connection, opt?: { localFiles?: boolean }) {
         super(widgetManager, data, connection);        
-        this.render(data);
+        this.render(data, opt);
         this.installHandlers();
     }
 
-    render (data?: BuilderViewOptions): ImageView {
+    render (data?: BuilderViewOptions, opt?: { localFiles?: boolean }): ImageView {
+        opt = opt || {};
+        const content: string = Handlebars.compile(contentTemplate, { noEscape: true })(opt);
         super.render({ ...data, content });
         this.$imageDiv = this.$el.find(".image-div");
         this.$imageOverlay = this.$el.find(".image-overlay");
@@ -63,10 +65,9 @@ export class ImageView extends BuilderView {
                     const $image: JQuery<HTMLImageElement> = this.$imageDiv.find("img");
                     $image.attr("id", this.id).addClass(this.viewId);
 
-                    this.blueprintEditor = new BlueprintEditor(this.widgetManager, {
+                    this.hotspots = new HotspotEditor(this.widgetManager, {
                         el: $image[0],
-                        overlay: this.$imageOverlay[0],
-                        imageViewId: this.viewId
+                        overlay: this.$imageOverlay[0]
                     });
                 }
             });

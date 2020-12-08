@@ -1,10 +1,8 @@
 import * as Backbone from 'backbone';
-import * as Utils from '../../../env/Utils';
-
 import { Connection } from '../../../env/Connection';
 import { WidgetManager } from "../WidgetManager";
 
-import { BuilderView, BuilderViewOptions } from './BuilderView';
+import { View, BuilderViewOptions } from './View';
 
 export const content: string = `
 <div class="builder-settings container-fluid" style="padding-left:0;">
@@ -12,7 +10,7 @@ export const content: string = `
 </div>`;
 
 
-export class SettingsView extends BuilderView {
+export class SettingsView extends View {
     
     constructor (widgetManager: WidgetManager, data: BuilderViewOptions, connection: Connection) {
         super(widgetManager, data, connection);        

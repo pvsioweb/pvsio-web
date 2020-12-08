@@ -4,6 +4,7 @@ import { Connection } from '../../../env/Connection';
 import { WidgetManager } from "../WidgetManager";
 
 export interface BuilderViewOptions extends Backbone.ViewOptions {
+    viewId: string,
     screenName: string,
     headerDiv: HTMLElement,
     content?: string,
@@ -21,24 +22,25 @@ const bodyTemplate: string = `
     {{content}}
 </div>`;
 
-export abstract class BuilderView extends Backbone.View {
+export abstract class View extends Backbone.View {
     protected widgetManager: WidgetManager;
     protected connection: Connection;
     
     protected screenName: string;
     protected $headerDiv: JQuery<HTMLElement>;
 
-    protected viewId: string = `builder-view-${Utils.uuid()}`;
+    protected viewId: string;
 
     constructor (widgetManager: WidgetManager, data: BuilderViewOptions, connection: Connection) {
         super(data);
         this.widgetManager = widgetManager;
         this.connection = connection;
-        this.screenName = data.screenName;
+        this.viewId = data.viewId || `view-${Utils.uuid()}`;
+        this.screenName = data?.screenName || "";
         this.$headerDiv = (data?.headerDiv) ? $(data.headerDiv) : null;
     }
 
-    render (opt?: BuilderViewOptions): BuilderView {
+    render (opt?: BuilderViewOptions): View {
         // append body
         const viewBody: string = Handlebars.compile(bodyTemplate, { noEscape: true })({
             id: this.viewId,

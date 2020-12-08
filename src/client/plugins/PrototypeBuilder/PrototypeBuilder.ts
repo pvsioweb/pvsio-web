@@ -11,7 +11,7 @@ import { ImageView } from './views/ImageView';
 import { WidgetsListView } from './views/WidgetsListView';
 import { WidgetManager } from "./WidgetManager";
 import { SettingsView } from './views/SettingsView';
-import { BuilderView } from './views/BuilderView';
+import { View } from './views/View';
 
 // import { WidgetEVO } from "../../widgets/core/WidgetEVO";
 // import { BasicDisplayEVO } from "../../widgets/core/BasicDisplayEVO";
@@ -91,7 +91,7 @@ export class PrototypeBuilder implements PVSioWebPlugin {
     protected widgetManager: WidgetManager;
 
     protected widgetListView: WidgetsListView;
-    protected prototypeImageViews: { [screenId: string]: BuilderView };
+    protected prototypeImageViews: { [screenId: string]: View };
 
     async activate (connection?: Connection): Promise<boolean> {
         this.connection = connection;
@@ -115,16 +115,20 @@ export class PrototypeBuilder implements PVSioWebPlugin {
         const headerDiv: HTMLElement = this.panel.$content.find(`.prototype-screen-list`)[0];
         this.prototypeImageViews = {
             "Settings": new SettingsView(this.widgetManager, {
+                viewId: "Settings",
                 screenName: "Settings",
                 el: bodyDiv,
                 headerDiv,
             }, this.connection),
             "Main": new ImageView(this.widgetManager, {
+                viewId: "Main",
                 screenName: "Main",
                 el: bodyDiv,
                 headerDiv,
                 active: true
-            }, this.connection)
+            }, this.connection, {
+                localFiles: true
+            })
         };
 
         return true;

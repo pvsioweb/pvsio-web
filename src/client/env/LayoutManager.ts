@@ -17,7 +17,6 @@ const toolkitInterface: string = `
     </div>
 </div>
 <div id="warnings" class="warnings" style="display:none"><button type="button" id="dismissWarnings">Dismiss</button></div>
-<form id="open-local-file-form"> <input type="file" style="display:none;" id="open-local-file"> </form>
 <div id="content" class="center pvsioweb-content" style="position:absolute; top:52px;">
     <div class="container-fluid row no-gutters" style="padding:0;">
         <div id="toolkit-body" class="container-fluid col no-gutters">
@@ -120,6 +119,8 @@ export class LayoutManager extends EventDispatcher {
     protected version: string;
     protected collapsed: boolean = false;
 
+    protected static firstClick: boolean = true;
+
     constructor (opt?: { version: string }) {
         super();
         this.version = opt?.version || "";
@@ -132,12 +133,15 @@ export class LayoutManager extends EventDispatcher {
         return true;
     }
 
-    static async openLocalFile (opt?: { image?: boolean }): Promise<Utils.FileDescriptor> {
-        opt = opt || {};
+    static openLocalFile (opt?: { image?: boolean }): Promise<Utils.FileDescriptor> {
+        (opt?.image) ? $("#open-local-file").attr("accept", "image/*") : $("#open-local-file").attr("accept", "*");
+        // the following workaroung is necessary for recent web browser, as they require an explicit user click before enabling programmatic clicks.
+        if (LayoutManager.firstClick) {
+            LayoutManager.firstClick = false;
+            return null;
+        }
         return new Promise ((resolve, reject) => {
-            (opt.image) ? $("#open-local-file").attr("accept", "image/*") : $("#open-local-file").removeAttr("accept");
             $("#open-local-file").on("input", (evt: JQuery.ChangeEvent) => {
-                console.log(evt);
                 const file: File = evt?.currentTarget?.files[0];
                 const reader: FileReader = new FileReader();
                 reader.addEventListener('loadend', (evt: ProgressEvent<FileReader>) => {
