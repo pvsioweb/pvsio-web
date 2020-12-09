@@ -30,18 +30,16 @@ export enum opacity {
 
 // templates
 const markerOverlayTemplate: string = `
-<div">
-    <div class="marker-info noselect" style="display:block; z-index:100; position:absolute; background-color:white; color:black; opacity:0.8; padding:2px 8px; border-radius:8px;">
-        <div class="marker-info-label" style="display:block; z-index:100;"></div>
-    </div>
-    <div class="marker-areas" style="display:block; z-index:100; opacity:0.9; background-color:green;"></div>
+<div class="marker-tooltip noselect" style="display:block; z-index:100; position:absolute; background-color:white; color:black; opacity:0.8; padding:2px 8px; border-radius:8px;">
+    <div class="marker-tooltip-label" style="display:block; z-index:100;"></div>
 </div>
+<div class="marker-areas" style="display:block; z-index:100; opacity:0.9; background-color:green;"></div>
 `;
 // the marker has only one active corner for resize (tl), as this makes everything much easier to implement and bring little or no usability issue.
 const markerTemplate: string = `
 <div class="marker" coords="{ top: 0, left: 0, width: 0, height: 0 }" id="{{id}}" style="top:{{top}}px; left:{{left}}px; width:{{width}}px; height:{{height}}px; position:absolute;">
-    <div class="shader" style="margin-left:-1px; margin-top:-1px; width:100%; height:100%; background:lightseagreen; position:absolute; opacity:0.4; border: 1px solid blue; cursor:pointer;"></div>
-    <div class="tl corner" style="width:16px; height:16px; background: blue; top:0px; left:0px; position:absolute; cursor:nw-resize; margin-left:-8px; margin-top:-8px;"></div>
+    <div class="shader" style="margin-left:-1px; margin-top:-1px; width:100%; height:100%; background:lightseagreen; position:absolute; opacity:0.4; border: 1px solid yellow; cursor:pointer;"></div>
+    <div class="tl corner" style="width:16px; height:16px; top:0px; left:0px; position:absolute; cursor:nw-resize; margin-left:-6px; margin-top:-6px; border:1px solid yellow; opacity:0.7;"></div>
 </div>
 `;
 
@@ -244,13 +242,13 @@ export class HotspotEditor extends Backbone.View {
         return this;
     }
     label (): JQuery<HTMLElement> {
-        return this.$overlay.find(".marker-info-label");
+        return this.$overlay.find(".marker-tooltip-label");
     }
     areas (): JQuery<HTMLElement> {
         return this.$overlay.find(".marker-areas");
     }
     info (): JQuery<HTMLElement> {
-        return this.$overlay.find(".marker-info");
+        return this.$overlay.find(".marker-tooltip");
     }
     events (): Backbone.EventsHash {
         return {

@@ -56,30 +56,31 @@ export function showDialog (data: DialogOptions): JQuery<HTMLElement> {
     $("body").append(dialogView);
     return $("body").find("#pvsioweb-modal-center");
 }
-export const DBLCLICK_TIMEOUT: number = 300;
+export const DBLCLICK_TIMEOUT: number = 300; //ms -- if two consecutive clicks are registered in a time frame lower than this timeout, then it's a double click
 export const dialogTemplate: string = `
 <div class="modal fade show" id="{{#if id}}{{id}}{{else}}pvsioweb-modal-center{{/if}}" tabindex="-1" role="dialog" aria-labelledby="{{id}}-title" aria-hidden="true" style="display:block; opacity:0.98;">
-  <div class="modal-dialog modal-dialog-centered{{#if largeModal}} modal-lg{{/if}}" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="{{id}}-title">{{title}}</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true" class="cancel-btn">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-{{content}}
-      </div>
-      <div class="modal-footer">
-{{#if buttons}}
-{{buttons}}
-{{else}}
-        <button type="button" class="cancel-btn btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="ok-btn btn btn-primary">Ok</button>
-{{/if}}
-      </div>
+    <div class="modal-dialog-shadow" style="width: 100%; height: 100%; position: absolute; background: black; opacity: 0.8;"></div>
+    <div class="modal-dialog modal-dialog-centered{{#if largeModal}} modal-lg{{/if}}" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="{{id}}-title">{{title}}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true" class="cancel-btn">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+                {{content}}
+            </div>
+            <div class="modal-footer">
+            {{#if buttons}}
+            {{buttons}}
+            {{else}}
+                <button type="button" class="cancel-btn btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="ok-btn btn btn-primary">Ok</button>
+            {{/if}}
+            </div>
+        </div>
     </div>
-  </div>
 </div>`;
 const collapsiblePanelTemplate: string = `
 <div id="{{id}}-panel" class="collapsible-panel-parent" style="width:{{width}};">

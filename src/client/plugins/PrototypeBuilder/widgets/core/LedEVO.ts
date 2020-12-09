@@ -63,8 +63,9 @@ export class LedEVO extends WidgetEVO {
         super(id, coords, opt);
 
         opt = opt || {};
+        coords = coords || {};
 
-        let size = Math.min(coords.width, coords.height) || 1;
+        let size: number = Math.min(coords.width, coords.height) || 1;
         opt.marginLeft = (coords.width - size / 2) / 2;
         opt.marginTop = (coords.height - size / 2) / 2;
         coords.height = coords.width = size / 2;

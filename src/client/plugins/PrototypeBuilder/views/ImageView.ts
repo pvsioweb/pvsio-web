@@ -144,7 +144,7 @@ export class ImageView extends View {
                     });
                     // install handlers for hotspot events
                     this.hotspots.on(HotspotEditorEvents.DidCreateHotspot, (data: HotspotData) => {
-                        this.showDialog(data);
+                        // this.showDialog(data);
                     });
                     this.hotspots.on(HotspotEditorEvents.EditHotspot, (data: HotspotData) => {
                         this.showDialog(data);
@@ -180,7 +180,7 @@ export class ImageView extends View {
             });
             // install handlers for hotspot events
             this.hotspots.on(HotspotEditorEvents.DidCreateHotspot, (data: HotspotData) => {
-                this.showDialog(data);
+                // this.showDialog(data);
             });
             this.hotspots.on(HotspotEditorEvents.EditHotspot, (data: HotspotData) => {
                 this.showDialog(data);

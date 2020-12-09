@@ -93,9 +93,14 @@ export class PrototypeBuilder implements PVSioWebPlugin {
     protected widgetListView: WidgetsListView;
     protected prototypeImageViews: { [screenId: string]: View };
 
+    constructor () {
+        this.widgetManager = new WidgetManager();
+    }
+
     async activate (connection?: Connection): Promise<boolean> {
         this.connection = connection;
-        this.widgetManager = new WidgetManager(this.connection);
+
+        this.widgetManager.activate(connection);
 
         this.panel = Utils.createCollapsiblePanel(this, {
             parent: "toolkit-body",
@@ -157,7 +162,7 @@ export class PrototypeBuilder implements PVSioWebPlugin {
         $("#btnBuilderView").addClass("btn-outline-secondary").removeClass("btn-primary active");
         $("#btnSimulatorView").removeClass("btn-outline-secondary").addClass("btn-primary active");
         $("#btnRebootPrototype").addClass("disabled");
-        this.widgetManager.initialiseWidgets();
+        this.widgetManager.initWidgets();
         this.widgetManager.startTimers();
         this.collapseWidgetsList();
     }

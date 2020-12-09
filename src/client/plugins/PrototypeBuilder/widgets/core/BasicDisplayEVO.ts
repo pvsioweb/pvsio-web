@@ -27,7 +27,7 @@
  *
  */
 
-import { WidgetEVO } from "./WidgetEVO";
+import { Coords, WidgetEVO } from "./WidgetEVO";
 
 export class BasicDisplayEVO extends WidgetEVO {
     widgetKeys = [ "displayKey" ];
@@ -63,7 +63,7 @@ export class BasicDisplayEVO extends WidgetEVO {
      * @memberof module:BasicDisplayEVO
      * @instance
      */
-    constructor (id, coords, opt?) {
+    constructor (id: string, coords: Coords, opt?) {
         super(id, coords, opt);
 
         opt = opt || {};
