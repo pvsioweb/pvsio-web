@@ -136,12 +136,14 @@ export class LayoutManager extends EventDispatcher {
     static openLocalFile (opt?: { image?: boolean }): Promise<Utils.FileDescriptor> {
         (opt?.image) ? $("#open-local-file").attr("accept", "image/*") : $("#open-local-file").attr("accept", "*");
         // the following workaroung is necessary for recent web browser, as they require an explicit user click before enabling programmatic clicks.
+        // TODO: deprecate open local file, and use the pvsioweb file browser dialog
         if (LayoutManager.firstClick) {
             LayoutManager.firstClick = false;
             return null;
         }
         return new Promise ((resolve, reject) => {
             $("#open-local-file").on("input", (evt: JQuery.ChangeEvent) => {
+                LayoutManager.firstClick = false;
                 const file: File = evt?.currentTarget?.files[0];
                 const reader: FileReader = new FileReader();
                 reader.addEventListener('loadend', (evt: ProgressEvent<FileReader>) => {
@@ -157,7 +159,7 @@ export class LayoutManager extends EventDispatcher {
                 });
                 reader.readAsDataURL(file);
             });
-            $("#open-local-file").trigger("click");
+            $("#open-local-file").trigger("click");            
         });
     }
 

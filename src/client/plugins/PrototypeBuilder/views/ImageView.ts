@@ -8,7 +8,7 @@ import * as Utils from '../../../env/Utils';
 
 import { WidgetEVO } from "../widgets/core/WidgetEVO";
 import { Coords } from "../widgets/core/WidgetEVO";
-import { Connection, OpenFileDialog, ReadFileRequest, ReadFileResponse } from '../../../env/Connection';
+import { Connection, OpenFileDialog, OpenLocalFileDialog, ReadFileRequest, ReadFileResponse } from '../../../env/Connection';
 import { WidgetManager } from "../WidgetManager";
 import { HotspotEditor } from './utils/HotspotEditor';
 
@@ -18,7 +18,15 @@ export const contentTemplate: string = `
 <div class="image-div container-fluid" style="padding-left:0;">
     <div class="container-fluid" style="position:relative; overflow:hidden; background-color:white; border:4px dashed teal; text-align:center; min-height:480px;">
         <form id="open-local-file-form" style="margin-top:200px; display:none;"> <input type="file" id="open-local-file" accept="*"> </form>
-        <button class="load-image-btn btn btn-primary center btn-lg" style="top:50%; margin-left:-5%; position:absolute; white-space:nowrap;">Load Image</button>
+        <!--<button class="load-image-btn btn btn-primary center btn-lg" style="top:50%; margin-left:-5%; position:absolute; white-space:nowrap;">Load Image</button>-->
+
+        <div class="btn-group pull-right" style="top:50%; margin-left:-5%; position:absolute;">
+            <button class="load-image-btn btn btn-primary center btn-lg" style="top:50%;margin-left:-5%;/* position:absolute; */white-space:nowrap;">Load Image</button>
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" style="color:white;/* position: absolute; */float: right;" aria-expanded="false">
+                <span class="caret" style="color:white;"></span>
+            </button>
+            <div class="open-local-file-btn btn btn-primary dropdown-menu dropdown-menu-right" role="menu" style="text-align: center;">Open Local File</div>
+        </div>
     </div>
 </div>
 <div class="image-overlay container-fluid" style="padding-left:0;"></div>`;
@@ -72,6 +80,28 @@ export class ImageView extends View {
                 }
             });
         });
+
+        this.$el.find(".open-local-file-btn").on("click", (evt: JQuery.ClickEvent) => {
+            const req: OpenLocalFileDialog = {
+                type: "openLocalFileDialog",
+                image: true
+            };
+            this.connection?.sendRequest(req, (desc: Utils.FileDescriptor) => {
+                if (desc && desc.fileContent) {
+                    const imageElement: HTMLImageElement = new Image();
+                    imageElement.src = desc.fileContent;
+                    this.$imageDiv.html(imageElement);
+                    const $image: JQuery<HTMLImageElement> = this.$imageDiv.find("img");
+                    $image.attr("id", this.id).addClass(this.viewId);
+
+                    this.hotspots = new HotspotEditor(this.widgetManager, {
+                        el: $image[0],
+                        overlay: this.$imageOverlay[0]
+                    });
+                }
+            });
+        });
+
     }
 
     events (): Backbone.EventsHash {

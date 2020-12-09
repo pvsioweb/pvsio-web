@@ -28,13 +28,11 @@ const markerOverlayTemplate: string = `
     <div class="marker-areas" style="display:block; z-index:100; opacity:0.9; background-color:green;"></div>
 </div>
 `;
+// the marker has only one active corner for resize (tl), as this makes everything much easier to implement and bring little or no usability issue.
 const markerTemplate: string = `
 <div class="marker" coords="{ top: 0, left: 0, width: 0, height: 0 }" id="{{id}}" style="top:{{top}}px; left:{{left}}px; width:{{width}}px; height:{{height}}px; position:absolute;">
     <div class="shader" style="margin-left:-1px; margin-top:-1px; width:100%; height:100%; background:lightseagreen; position:absolute; opacity:0.4; border: 1px solid blue; cursor:pointer;"></div>
     <div class="tl corner" style="width:16px; height:16px; background: blue; top:0px; left:0px; position:absolute; cursor:nw-resize; margin-left:-8px; margin-top:-8px;"></div>
-    <div class="tr corner" style="width:16px; height:16px; background: blue; top:0px; left:{{width}}px; position:absolute; cursor:ne-resize; margin-left:-10px; margin-top:-8px;"></div>
-    <div class="bl corner" style="width:16px; height:16px; background: blue; top:{{height}}px; left:0px; position:absolute; cursor:sw-resize; margin-left:-8px; margin-top:-8px;"></div>
-    <div class="br corner" style="width:16px; height:16px; background: blue; top:{{height}}px; left:{{width}}px; position:absolute; cursor:se-resize; margin-left:-10px; margin-top:-8px;"></div>
 </div>
 `;
 
@@ -62,8 +60,8 @@ abstract class HotspotHandler {
     protected $el: JQuery<HTMLElement>;
     protected initialMarkerCoords?: Coords;
     protected dragStartCoords?: Coords;
-    protected $activeMarker?: JQuery<HTMLElement>;
-    protected $activeCorner?: JQuery<HTMLElement>;
+    protected $marker?: JQuery<HTMLElement>;
+    protected $corner?: JQuery<HTMLElement>;
     constructor ($el: JQuery<HTMLElement>) {
         this.$el = $el;
     }
@@ -73,49 +71,42 @@ abstract class HotspotHandler {
         initialMarkerCoords?: Coords, 
         draftStartCoords?: Coords 
     }): boolean {
-        this.$activeMarker = desc.$activeMarker;
-        this.$activeCorner = desc.$activeCorner;
+        this.$marker = desc.$activeMarker;
+        this.$corner = desc.$activeCorner;
         this.initialMarkerCoords = desc.initialMarkerCoords;
         this.dragStartCoords = desc.draftStartCoords;
         return true 
     };
     deactivate () {
-        this.$activeMarker = null;
-        this.$activeCorner = null;
+        this.$marker = null;
+        this.$corner = null;
         this.initialMarkerCoords = null;
         this.dragStartCoords = null;
     }
     onMouseDown (evt: JQuery.MouseDownEvent): void {};
     onMouseMove (evt: JQuery.MouseMoveEvent): void {};
     onMouseUp (evt: JQuery.MouseUpEvent): void {};
-    protected adjustShader ($activeMarker: JQuery<HTMLElement>, $activeCorner:JQuery<HTMLElement>, offset: Coords): void {
-        // node: corners are not adjusted, to reduce overhead. All corners should be hidden when the shader is adjusted.
+    protected resizeHotspot (evt: JQuery.MouseMoveEvent | JQuery.MouseUpEvent): Coords {
+        const mousePosition: Coords = getMouseCoords(evt, this.$el);
+        const offset: Coords = {
+            left: mousePosition.left - this.dragStartCoords.left,
+            top: mousePosition.top - this.dragStartCoords.top
+        };
+        // node: corners are not adjusted, to reduce overhead. All corners but the active corner are hidden.
+        this.$marker.find(".corner").css({
+            display: "none"
+        });
+        this.$corner.css("display", "block");
         // resize marker -- this will automatically resize shader
-        if ($activeCorner.hasClass("tl")) {
-            $activeMarker.css({
+        if (this.$corner.hasClass("tl")) {
+            this.$marker.css({
                 left: this.initialMarkerCoords.left + offset.left,
                 top: this.initialMarkerCoords.top + offset.top,
                 width: this.initialMarkerCoords.width - offset.left,
                 height: this.initialMarkerCoords.height - offset.top
             });
-        } else if ($activeCorner.hasClass("tr")) {
-            $activeMarker.css({
-                top: this.initialMarkerCoords.top + offset.top,
-                width: this.initialMarkerCoords.width + offset.left,
-                height: this.initialMarkerCoords.height - offset.top,
-            });
-        } else if ($activeCorner.hasClass("br")) {
-            $activeMarker.css({
-                width: this.initialMarkerCoords.width + offset.left,
-                height: this.initialMarkerCoords.height + offset.top,
-            });
-        } else if ($activeCorner.hasClass("bl")) {
-            $activeMarker.css({
-                left: this.initialMarkerCoords.left + offset.left,
-                width: this.initialMarkerCoords.width - offset.left,
-                height: this.initialMarkerCoords.height + offset.top,
-            });
         }
+        return offset;
     }
 };
 class ResizeHandler extends HotspotHandler {
@@ -123,50 +114,31 @@ class ResizeHandler extends HotspotHandler {
         // save initial drag position
         this.dragStartCoords = getMouseCoords(evt, this.$el);
         // save marker and coords
-        this.initialMarkerCoords = getCoords(this.$activeMarker);
+        this.initialMarkerCoords = getCoords(this.$marker);
     }
     onMouseMove (evt: JQuery.MouseMoveEvent) {
         if (this.dragStartCoords) {
-            const mousePosition: Coords = getMouseCoords(evt, this.$el);
-            this.$activeMarker.find(".corner").css({
-                display: "none"
-            });
             // resize marker -- this will automatically resize shader
-            const offset: Coords = {
-                left: mousePosition.left - this.dragStartCoords.left,
-                top: mousePosition.top - this.dragStartCoords.top
-            };        
-            this.adjustShader(this.$activeMarker, this.$activeCorner, offset);
+            this.resizeHotspot(evt);
         }
     }
     onMouseUp (evt: JQuery.MouseUpEvent) {
         if (this.dragStartCoords) {
-            const mousePosition: Coords = getMouseCoords(evt, this.$el);
-            const offset: Coords = {
-                left: mousePosition.left - this.dragStartCoords.left,
-                top: mousePosition.top - this.dragStartCoords.top
-            };        
-            this.adjustShader(this.$activeMarker, this.$activeCorner, offset);
-
-            const finalMarkerCoords: Coords = getCoords(this.$activeMarker);
+            const offset: Coords = this.resizeHotspot(evt);
             this.dragStartCoords = null;
 
-            const widgetCoords: Coords = JSON.parse(this.$activeMarker.attr("coords"));
+            const widgetCoords: Coords = JSON.parse(this.$marker.attr("coords"));
             const finalWidgetCoords: Coords = {
                 left: widgetCoords.left + offset.left,
                 top: widgetCoords.top + offset.top,
                 width: widgetCoords.width - offset.left,
                 height: widgetCoords.height - offset.top
             };                
-            this.$activeMarker.attr("coords", JSON.stringify(finalWidgetCoords));
-
-            // adjust corners
-            this.$activeMarker.find(".tr").css({ left: finalMarkerCoords.width });
-            this.$activeMarker.find(".bl").css({ top: finalMarkerCoords.height });
-            this.$activeMarker.find(".br").css({ top: finalMarkerCoords.height, left: finalMarkerCoords.width });
+            this.$marker.attr("coords", JSON.stringify(finalWidgetCoords));
+            this.$marker.find(".shader").css({ cursor: "pointer" });
         }
         // show corners
-        this.$activeMarker.find(".corner").css({
+        this.$marker.find(".corner").css({
             display: "block"
         });
     }
@@ -176,9 +148,9 @@ class MoveHandler extends HotspotHandler {
         // save initial drag position
         this.dragStartCoords = getMouseCoords(evt, this.$el);
         // save marker and coords
-        this.initialMarkerCoords = getCoords(this.$activeMarker);
+        this.initialMarkerCoords = getCoords(this.$marker);
         // change cursor style
-        this.$activeMarker.find(".shader").css({ cursor: "move" });
+        this.$marker.find(".shader").css({ cursor: "move" });
     }
     onMouseMove (evt: JQuery.MouseMoveEvent) {
         if (this.dragStartCoords) {
@@ -187,7 +159,7 @@ class MoveHandler extends HotspotHandler {
                 left: mousePosition.left - this.dragStartCoords.left,
                 top: mousePosition.top - this.dragStartCoords.top
             };
-            this.$activeMarker.css({
+            this.$marker.css({
                 left: this.initialMarkerCoords.left + offset.left,
                 top: this.initialMarkerCoords.top + offset.top
             });
@@ -200,21 +172,21 @@ class MoveHandler extends HotspotHandler {
                 left: mousePosition.left - this.dragStartCoords.left,
                 top: mousePosition.top - this.dragStartCoords.top
             };
-            this.$activeMarker.css({
+            this.$marker.css({
                 left: this.initialMarkerCoords.left + offset.left,
                 top: this.initialMarkerCoords.top + offset.top
             });
             this.dragStartCoords = null;
 
-            const widgetCoords: Coords = JSON.parse(this.$activeMarker.attr("coords"));
+            const widgetCoords: Coords = JSON.parse(this.$marker.attr("coords"));
             const finalWidgetCoords: Coords = {
                 left: widgetCoords.left + offset.left,
                 top: widgetCoords.top + offset.top,
                 width: widgetCoords.width,
                 height: widgetCoords.height
             };                
-            this.$activeMarker.attr("coords", JSON.stringify(finalWidgetCoords));
-            this.$activeMarker.find(".shader").css({ cursor: "pointer" });
+            this.$marker.attr("coords", JSON.stringify(finalWidgetCoords));
+            this.$marker.find(".shader").css({ cursor: "pointer" });
         }
     }
 }
@@ -412,17 +384,7 @@ export class HotspotEditor extends Backbone.View {
                 if (this.$marker) {
                     const $activeMarker: JQuery<HTMLElement> = this.$marker;
                     const $shader: JQuery<HTMLElement> = $activeMarker.find(".shader");
-                    const corners: {
-                        $tl: JQuery<HTMLElement>,
-                        $tr: JQuery<HTMLElement>,
-                        $bl: JQuery<HTMLElement>,
-                        $br: JQuery<HTMLElement>
-                    } = {
-                        $tl: $activeMarker.find(".tl"),
-                        $tr: $activeMarker.find(".tr"),
-                        $bl: $activeMarker.find(".bl"),
-                        $br: $activeMarker.find(".br")
-                    };
+                    const $tl: JQuery<HTMLElement> = $activeMarker.find(".tl");
 
                     $shader.on("mouseover", (evt: JQuery.MouseOverEvent) => {
                         if (this.mode === null) {
@@ -480,62 +442,57 @@ export class HotspotEditor extends Backbone.View {
                         this.mode = null; // end move mode
                     });
 
-                    for (let i in corners) {
-                        corners[i].on("mousedown", (evt: JQuery.MouseDownEvent) => {
-                            if (this.mode === null) {
-                                this.mode = "resize"; // start resize mode
-                                this.resizeHandler.activate({ $activeMarker, $activeCorner: corners[i] });
-                                this.resizeHandler.onMouseDown(evt);
+                    $tl.on("mousedown", (evt: JQuery.MouseDownEvent) => {
+                        if (this.mode === null) {
+                            this.mode = "resize"; // start resize mode
+                            this.resizeHandler.activate({ $activeMarker, $activeCorner: $tl });
+                            this.resizeHandler.onMouseDown(evt);
+                        }
+                    }).on("mousemove", (evt: JQuery.MouseMoveEvent) => {
+                        switch (this.mode) {
+                            case "move": {
+                                this.hideCoords();
+                                this.moveHandler.onMouseMove(evt);
+                                break;
                             }
-                        }).on("mousemove", (evt: JQuery.MouseMoveEvent) => {
-                            switch (this.mode) {
-                                case "move": {
-                                    this.hideCoords();
-                                    this.moveHandler.onMouseMove(evt);
-                                    break;
-                                }
-                                case "resize": {
-                                    this.hideCoords();
-                                    this.resizeHandler.onMouseMove(evt); 
-                                    break;
-                                }
-                                default: {
-                                    break;
-                                }
+                            case "resize": {
+                                this.hideCoords();
+                                this.resizeHandler.onMouseMove(evt); 
+                                break;
                             }
-                        }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
-                            switch (this.mode) {
-                                case "move": {
-                                    const coords: Coords = getMouseCoords(evt, this.$el);
-                                    this.showCoords(coords);
-                                    this.moveHandler.onMouseUp(evt); 
-                                    break; 
-                                }
-                                case "resize": {
-                                    const coords: Coords = getMouseCoords(evt, this.$el);
-                                    this.showCoords(coords);
-                                    this.resizeHandler.onMouseUp(evt);
-                                    break;
-                                }
-                                default: {
-                                    break;
-                                }
+                            default: {
+                                break;
                             }
-                            this.resizeHandler.deactivate();
-                            this.mode = null; // end move mode
-                            
-                            const coords: Coords = getMouseCoords(evt, this.$el);
-                            this.showCoords(coords);
-                        });
-                    }
+                        }
+                    }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
+                        switch (this.mode) {
+                            case "move": {
+                                const coords: Coords = getMouseCoords(evt, this.$el);
+                                this.showCoords(coords);
+                                this.moveHandler.onMouseUp(evt); 
+                                break; 
+                            }
+                            case "resize": {
+                                const coords: Coords = getMouseCoords(evt, this.$el);
+                                this.showCoords(coords);
+                                this.resizeHandler.onMouseUp(evt);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
+                        this.resizeHandler.deactivate();
+                        this.mode = null; // end move mode
+                        
+                        const coords: Coords = getMouseCoords(evt, this.$el);
+                        this.showCoords(coords);
+                    });
 
                     const width: number = parseFloat($activeMarker.css("width"));
                     const height: number = parseFloat($activeMarker.css("height"));
 
                     // adjust corners
-                    corners.$tr.css({ left: width });
-                    corners.$bl.css({ top: height });
-                    corners.$br.css({ top: height, left: width });
                     $activeMarker.find(".corner").css({ display: "block" });
 
                     const dragEndPosition: Coords = getMouseCoords(evt, this.$el);
