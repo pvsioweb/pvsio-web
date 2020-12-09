@@ -30,6 +30,57 @@ export interface CollapsiblePanel extends Panel {
     $label: JQuery<HTMLElement>,
     $collapseBtn?: JQuery<HTMLElement>
 }
+/**
+ * The dialog template creates a modal dialog with bootstrap. 
+ * The template should be compiled with Handlebars, using option { noEscape: true }.
+ * The template parameters are 'id', 'title', 'content' and 'buttons' (optional).
+ * - id is a unique dialog ID. If not provided, the default id is pvsioweb-modal-center
+ * - title is the title of the dialog. The title element can be found using class .modal-title
+ * - content is a string providing the html elements of the main body of the dialog
+ * - buttons is a string providing the html elements for the buttons. 
+ *   If buttons are not specified, the dialog provides the standard Ok / Cancel buttons.
+ *   The Ok / Cancel buttons can be found using classes .ok-btn / .cancel-btn
+ */
+export interface DialogOptions {
+    id?: string,
+    title?: string,
+    content: HTMLElement | string,
+    buttons?: HTMLElement,
+    largeModal?: boolean
+}
+export function showDialog (data: DialogOptions): JQuery<HTMLElement> {
+    const dialogView: string = Handlebars.compile(dialogTemplate, { noEscape: true })(data);
+    // remove old dialog, if any
+    $("body").find("#pvsioweb-modal-center").remove();
+    // append new dialog
+    $("body").append(dialogView);
+    return $("body").find("#pvsioweb-modal-center");
+}
+export const DBLCLICK_TIMEOUT: number = 300;
+export const dialogTemplate: string = `
+<div class="modal fade show" id="{{#if id}}{{id}}{{else}}pvsioweb-modal-center{{/if}}" tabindex="-1" role="dialog" aria-labelledby="{{id}}-title" aria-hidden="true" style="display:block; opacity:0.98;">
+  <div class="modal-dialog modal-dialog-centered{{#if largeModal}} modal-lg{{/if}}" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="{{id}}-title">{{title}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true" class="cancel-btn">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+{{content}}
+      </div>
+      <div class="modal-footer">
+{{#if buttons}}
+{{buttons}}
+{{else}}
+        <button type="button" class="cancel-btn btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="ok-btn btn btn-primary">Ok</button>
+{{/if}}
+      </div>
+    </div>
+  </div>
+</div>`;
 const collapsiblePanelTemplate: string = `
 <div id="{{id}}-panel" class="collapsible-panel-parent" style="width:{{width}};">
     <div id="{{id}}-title" class="header">

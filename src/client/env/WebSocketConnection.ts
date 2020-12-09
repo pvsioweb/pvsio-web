@@ -161,16 +161,9 @@ export class WebSocketConnection extends EventDispatcher implements Connection {
         if (this.ws) {
             if (request && request.type) {
                 switch (request.type) {
-                    case "openLocalFileDialog": {
-                        const res: FileDescriptor = await LayoutManager.openLocalFile({
-                            image: (<OpenFileDialog>request).image
-                        });
-                        if (cb) {
-                            cb(res);
-                        }
-                        return;
+                    default: {
+                        break;
                     }
-                    default: {}
                 }
                 send();
                 return true;

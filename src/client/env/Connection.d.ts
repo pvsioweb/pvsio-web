@@ -41,10 +41,10 @@ export declare interface OpenFileDialog extends PVSioWebRequest {
     type: "openFileDialog",
     image?: boolean
 }
-export declare interface OpenLocalFileDialog extends PVSioWebRequest {
-    type: "openLocalFileDialog",
-    image?: boolean
-}
+// export declare interface OpenLocalFileDialog extends PVSioWebRequest {
+//     type: "openLocalFileDialog",
+//     image?: boolean
+// }
 export declare interface ReadFileRequest extends PVSioWebRequest {
     type: "readFile",
     path: string,

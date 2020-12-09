@@ -1,9 +1,18 @@
-import Backbone = require("backbone");
-import { WidgetManager } from "../../WidgetManager";
+import * as Backbone from 'backbone';
 import * as Utils from '../../../../env/Utils';
+import { WidgetManager } from "../../WidgetManager";
 import { Coords } from "../../widgets/core/WidgetEVO";
 
-export interface ImageMarkerOptions extends Backbone.ViewOptions {
+export const HotspotEditorEvents = {
+    DidCreateHotspot: "DidCreateHotspot",
+    EditHotspot: "EditHotspot"
+};
+export interface HotspotData {
+    id: string,
+    coords: Coords
+};
+
+export interface HotspotEditorOptions extends Backbone.ViewOptions {
     overlay: HTMLElement//,
     // imageViewId: string
 };
@@ -199,6 +208,7 @@ export class HotspotEditor extends Backbone.View {
 
     protected anchorCoords: Coords;
 
+    protected dblClick: number = 0;
     // protected imageViewId: string;
     // readonly imageMarkerId: string;
 
@@ -210,7 +220,7 @@ export class HotspotEditor extends Backbone.View {
     protected moveHandler: HotspotHandler;
     protected resizeHandler: HotspotHandler;
     
-    constructor (widgetManager: WidgetManager, data: ImageMarkerOptions) {
+    constructor (widgetManager: WidgetManager, data: HotspotEditorOptions) {
         super(data);
         this.widgetManager = widgetManager;
         // this.imageViewId = data.imageViewId;
@@ -369,6 +379,16 @@ export class HotspotEditor extends Backbone.View {
             }
         }
     }
+    /**
+     * Utility function, detects double clicks based on timing of consecutive mouse presses
+     */
+    protected isDoubleClick (): boolean {
+        this.dblClick++;
+        setTimeout(() => {
+            this.dblClick = 0;
+        }, Utils.DBLCLICK_TIMEOUT);
+        return this.dblClick > 1;
+    }
 
     onMouseUp (evt: JQuery.MouseUpEvent): void {
         switch (this.mode) {
@@ -380,12 +400,15 @@ export class HotspotEditor extends Backbone.View {
                 this.resizeHandler.onMouseUp(evt);
                 break;
             }
+            case "create":
             default: {
                 if (this.$marker) {
+                    // create hotspot
                     const $activeMarker: JQuery<HTMLElement> = this.$marker;
                     const $shader: JQuery<HTMLElement> = $activeMarker.find(".shader");
                     const $tl: JQuery<HTMLElement> = $activeMarker.find(".tl");
 
+                    // install mouse handlers on shader
                     $shader.on("mouseover", (evt: JQuery.MouseOverEvent) => {
                         if (this.mode === null) {
                             // put marker under the cursor on top of the other markers
@@ -422,26 +445,37 @@ export class HotspotEditor extends Backbone.View {
                             }
                         }
                     }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
-                        switch (this.mode) {
-                            case "move": {
-                                const coords: Coords = getMouseCoords(evt, this.$el);
-                                this.showCoords(coords);
-                                this.moveHandler.onMouseUp(evt);
-                                break;
-                            }
-                            case "resize": {
-                                const coords: Coords = getMouseCoords(evt, this.$el);
-                                this.showCoords(coords);
-                                this.resizeHandler.onMouseUp(evt);
-                                break;
-                            }
-                            default: {
-                                break;
+                        // check if this is a double click
+                        if (this.isDoubleClick()) {
+                            // trigger edit event
+                            const hotspotData: HotspotData = {
+                                id: $activeMarker.attr("id"),
+                                coords: JSON.parse($activeMarker.attr("coords"))
+                            };    
+                            this.trigger(HotspotEditorEvents.EditHotspot, hotspotData);
+                        } else {
+                            switch (this.mode) {
+                                case "move": {
+                                    const coords: Coords = getMouseCoords(evt, this.$el);
+                                    this.showCoords(coords);
+                                    this.moveHandler.onMouseUp(evt);
+                                    break;
+                                }
+                                case "resize": {
+                                    const coords: Coords = getMouseCoords(evt, this.$el);
+                                    this.showCoords(coords);
+                                    this.resizeHandler.onMouseUp(evt);
+                                    break;
+                                }
+                                default: {
+                                    break;
+                                }
                             }
                         }
-                        this.mode = null; // end move mode
+                        this.mode = null; // end mode
                     });
 
+                    // install mouse handlers on hot corners
                     $tl.on("mousedown", (evt: JQuery.MouseDownEvent) => {
                         if (this.mode === null) {
                             this.mode = "resize"; // start resize mode
@@ -494,7 +528,6 @@ export class HotspotEditor extends Backbone.View {
 
                     // adjust corners
                     $activeMarker.find(".corner").css({ display: "block" });
-
                     const dragEndPosition: Coords = getMouseCoords(evt, this.$el);
                     $activeMarker.attr("coords", JSON.stringify({
                         top: (this.anchorCoords.top < dragEndPosition.top) ? this.anchorCoords.top : dragEndPosition.top,
@@ -502,14 +535,22 @@ export class HotspotEditor extends Backbone.View {
                         width,
                         height
                     }));
+
+                    // move hotspot on the front
                     $activeMarker.css("z-index", zIndex.FRONT);
                     $shader.css("opacity", opacity.HIGH);
 
+                    // end creation
+                    const hotspotData: HotspotData = {
+                        id: $activeMarker.attr("id"),
+                        coords: JSON.parse($activeMarker.attr("coords"))
+                    };
+                    this.trigger(HotspotEditorEvents.DidCreateHotspot, hotspotData);
                     this.$marker = null;
-                }        
+                }
                 this.anchorCoords = null;
             }
-            this.mode = null;
+            this.mode = null; // end current mode
         }
     }
     onMouseDown (evt: JQuery.MouseDownEvent): void {
