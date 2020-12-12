@@ -25,7 +25,7 @@
  */
 
 import { Connection } from "../../../../env/Connection";
-import { ButtonEVO } from "./ButtonEVO";
+import { ButtonEVO, ButtonOptions } from "./ButtonEVO";
 import { Coords } from "./WidgetEVO";
 
 export class TouchScreenEVO extends ButtonEVO {
@@ -71,21 +71,20 @@ export class TouchScreenEVO extends ButtonEVO {
      * @memberof module:TouchScreenEVO
      * @instance
      */
-    constructor (id: string, coords: Coords, connection: Connection, opt?) {
-        super(id, coords, connection, opt);
+    constructor (id: string, coords: Coords, opt?: ButtonOptions) {
+        super(id, coords, opt);
         opt = opt || {};
 
         this.widgetKeys = this.widgetKeys.concat("displayKey");
 
-        // override default style options
-        this.style["font-size"] = opt.fontSize || 12;
+        // override default button style
         this.style["background-color"] = opt.backgroundColor || "steelblue";
         this.style["font-color"] = opt.fontColor || "white";
         this.touchscreenMode = true;
         this.type = opt.type || "touchscreendisplay";
 
-        // invoke ButtonEVO constructor to create the widget
-        super.createHTMLElement();
+        // override default button style
+        this.setStyle(this.style);
     }
 
     /**
@@ -95,7 +94,7 @@ export class TouchScreenEVO extends ButtonEVO {
      * @instance
      */
     renderSample () {
-        return this.render("touch");
+        return this.render("Touch");
     }
 
     // getKeys () {

@@ -39,14 +39,32 @@
  *
  */
 
-import { Coords, WidgetEVO } from "./WidgetEVO";
+import { Coords, MouseEvents, WidgetEVO, WidgetOptions } from "./WidgetEVO";
 import { Timer } from "../../../../util/Timer"
-import { ButtonActionsQueue, ActionCallback } from "../ButtonActionsQueue";
+import { ActionsQueue, ActionCallback } from "../ActionsQueue";
 import { Connection } from "../../../../env/Connection";
+import { dimColor } from "../../../../env/Utils";
 
 const CLICK_RATE = 250; // 250 milliseconds, default interval for repeating button clicks when the button is pressed and held down
                             // going below 250ms may cause multiple unintended activations when pressing the button
 const DBLCLICK_TIMEOUT = 350; // 350 milliseconds, default (and minimum) timeout for detecting double clicks
+
+
+export interface ButtonOptions extends WidgetOptions {
+    toggleButton?: boolean,
+    pushButton?: boolean,
+    softLabel?: string,
+    buttonReadback?: string,
+    touchscreenMode?: boolean,
+    keyCode?: string,
+    evts?: MouseEvents | MouseEvents[],
+    functionText?: string,
+    customFunctionText?: string,
+    rate?: number,
+    dblclick_timeout?: number,
+    callback?: ActionCallback,
+    connection?: Connection
+}
 
 export class ButtonEVO extends WidgetEVO {
     protected widgetKeys = [ "functionText" ];
@@ -61,10 +79,10 @@ export class ButtonEVO extends WidgetEVO {
     customFunctionText: string;
     rate: number;
     dblclick_timeout: number;
-    dblclick_timer;
-    _timer;
+    dblclick_timer: NodeJS.Timer;
+    _timer: Timer;
     callback: ActionCallback;
-    _tick_listener;
+    _tick_listener: () => void;
     _tick;
 
     isSelected: boolean = false;
@@ -114,22 +132,23 @@ export class ButtonEVO extends WidgetEVO {
      * @memberof module:ButtonEVO
      * @instance
      */
-    constructor (id: string, coords: Coords, connection: Connection, opt?) {
+    constructor (id: string, coords: Coords, opt?: ButtonOptions) {
         super(id, coords, opt);
 
         opt = opt || {};
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-        opt.type = opt.type || "button";
-        opt.backgroundColor = opt.backgroundColor || "transparent";
-        opt.fontColor = opt.fontColor || "black";
-        opt.cursor = opt.cursor || "pointer";
-        opt.borderWidth = (!isNaN(parseFloat(opt.borderWidth))) ? parseFloat(opt.borderWidth) : (opt.borderColor) ? 1 : 0;
-        opt.borderRadius = (!isNaN(parseFloat(opt.borderRadius))) ? parseFloat(opt.borderRadius) : 4;
-        opt.zIndex = opt.zIndex || 1; // z-index for buttons should be at least 1, so they are placed over display widgets
-        opt.overlayColor = opt.overlayColor || "steelblue";
-        this.connection = connection;
+        this.type = opt.type || "button";
+        this.style["background-color"] = opt.backgroundColor || "transparent";
+        this.style["font-color"] = opt.fontColor || "black";
+        this.style["font-size"] = opt.fontSize || 12;
+        this.style["cursor"] = opt.cursor || "pointer";
+        this.style["border-width"] = (!isNaN(parseFloat(`${opt.borderRadius}`))) ? parseFloat(`${opt.borderWidth}`) : (opt.borderColor) ? 1 : 0;
+        this.style["border-radius"] = (!isNaN(parseFloat(`${opt.borderRadius}`))) ? parseFloat(`${opt.borderRadius}`) : 4;
+        this.style["z-index"] = opt.zIndex || 1; // z-index for buttons should be at least 1, so they are placed over display widgets
+        this.style["overlay-color"] = opt.overlayColor || "steelblue";
+        this.connection = opt.connection;
 
-        // invoke WidgetEVO constructor to create the basic widget
+        // create the basic widget
         super.createHTMLElement();
 
         // add button-specific functionalities
@@ -141,8 +160,8 @@ export class ButtonEVO extends WidgetEVO {
         this.keyCode = opt.keyCode;
         this.functionText = opt.functionText || id;
         this.customFunctionText = opt.customFunctionText;
-        this.rate = (isNaN(parseFloat(opt.rate))) ? CLICK_RATE : Math.max(CLICK_RATE, parseFloat(opt.rate));
-        this.dblclick_timeout = (isNaN(parseFloat(opt.dblclick_timeout))) ? DBLCLICK_TIMEOUT : Math.max(DBLCLICK_TIMEOUT, parseFloat(opt.rate));
+        this.rate = (isNaN(opt.rate)) ? CLICK_RATE : Math.max(CLICK_RATE, opt.rate);
+        this.dblclick_timeout = (isNaN(opt.dblclick_timeout)) ? DBLCLICK_TIMEOUT : Math.max(DBLCLICK_TIMEOUT, opt.rate);
 
         // associate relevant actions to the button
         opt.evts = opt.evts || "click";
@@ -196,8 +215,10 @@ export class ButtonEVO extends WidgetEVO {
 
         this.overlay.on("mouseover", () => {
             if (!(this.toggleButton || this.pushButton) || this.isSelected) {
-                this.select({ opacity: 0.8, "background-color": "steelblue" });
-            } else { this.select({ opacity: 0.4, "background-color": "transparent" }); }
+                this.select({ opacity: 0.8 });
+            } else {
+                this.select({ opacity: 0.4, backgroundColor: this.style.overflow }); 
+            }
             this.hover = true;
         }).on("mouseout", () => {
             if (!this.isSelected) { this.deselect(); }
@@ -212,7 +233,7 @@ export class ButtonEVO extends WidgetEVO {
         }).on("mouseup", () => {
             onButtonRelease();
             if (this.isSelected || (this.hover && !this.toggleButton)) {
-                this.select({ opacity: 0.8, "background-color": "steelblue" });
+                this.select({ opacity: 0.8 });
             } else { this.deselect(); }
             // the following code is the dblclick handler
             if (this.dblclick_timer) {
@@ -246,7 +267,7 @@ export class ButtonEVO extends WidgetEVO {
         opt = opt || {};
         opt.callback = opt.callback || this.callback;
         opt.functionText = opt.customFunctionText || this.customFunctionText || (evt + "_" + this.functionText);
-        ButtonActionsQueue.queueGUIAction(opt.functionText, this.connection, opt.callback);
+        ActionsQueue.queueGUIAction(opt.functionText, this.connection, opt.callback);
         this.deselect();
         // console.log(opt.functionText);
     }
@@ -272,16 +293,16 @@ export class ButtonEVO extends WidgetEVO {
      * @memberof module:ButtonEVO
      * @instance
      */
-    render (state, opt?) {
+    render (state: string | {}, opt?: ButtonOptions): void {
         // set style
-        opt = this.normaliseOptions(opt);
+        opt = opt || {};
         // handle options that need units
-        opt["font-size"] = (opt.fontSize || this.style["font-size"]) + "pt";
+        opt["font-size"] = (opt.fontSize || this.style["font-size"]) + "px";
         opt["border-width"] = (opt.borderWidth) ? opt.borderWidth + "px" : this.style["border-width"];
-        this.setStyle(opt);
+        this.setStyle({ ...this.style, ...opt });
 
         // render content
-        state = (state === undefined || state === null)? "" : state;
+        state = (state === undefined || state === null) ? "" : state;
         if (this.evalViz(state)) {
             if (typeof state === "string") {
                 this.base.text(state);
@@ -290,7 +311,6 @@ export class ButtonEVO extends WidgetEVO {
             }
             this.reveal();
         }
-        return this;
     }
 
     /**
@@ -299,11 +319,10 @@ export class ButtonEVO extends WidgetEVO {
      * @memberof module:ButtonEVO
      * @instance
      */
-    renderSample () {
-        return this.render("Esc", { borderColor: "steelblue", borderWidth: 1 });
+    renderSample (): void {
+        this.style["background-color"] = "steelblue";
+        this.render("Button", { borderColor: "steelblue", borderWidth: 1 });
     }
-
-
 
     /**
      * @function <a name="click">click</a>

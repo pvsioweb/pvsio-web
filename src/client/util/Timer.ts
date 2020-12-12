@@ -3,34 +3,38 @@
  * @date Nov 2020
  */
 
+import * as Backbone from 'backbone';
+
 export type TimerEvent = "TimerTicked";
 const MIN_RATE: number = 250; //ms
 
-// @ts-ignore
-export class Timer implements Backbone.Events {
+export class Timer extends Backbone.Model {
     protected rate: number; //ms
     timer: NodeJS.Timer;
     tick: () => void;
 
     constructor (rate: number) {
+        super();
         rate = rate || MIN_RATE;
         this.rate = rate < MIN_RATE ? MIN_RATE : rate;
     }
 
-    addListener (evt: TimerEvent, fn: () => void): void {
-        // @ts-ignore
-        this.on(evt, fn);
+    addListener (evt: TimerEvent, callback: () => void): void {
+        this.on(evt, callback);
     }
-    removeListener (fn: () => void): void {
-        // @ts-ignore
-        this.off(fn);
+    removeListener (evt: TimerEvent, callback: () => void): void {
+        this.off(evt, callback);
     }
 
     start (): Timer {
         this.timer = setInterval(() => {
-            // @ts-ignore
             this.trigger("TimerTicked")
         }, this.rate);
+        return this;
+    }
+
+    interval (rate: number): Timer {
+        this.rate = rate < MIN_RATE ? MIN_RATE : rate;
         return this;
     }
 
@@ -52,4 +56,4 @@ export class Timer implements Backbone.Events {
 }
 
 // @ts-ignore
-Object.assign(Timer.prototype, Backbone.Events);
+// Object.assign(Timer.prototype, Backbone.Events);

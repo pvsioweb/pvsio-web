@@ -3,7 +3,7 @@
  */
 import { Connection, SendCommandRequest } from '../../../env/Connection';
 export type ActionCallback = (err: string | null, res: {}) => void;
-export class ButtonActionsQueue {
+export class ActionsQueue {
     static guiActions: Promise<any> = Promise.resolve();
 
     protected static getGUIActionPromise(action: string, connection: Connection, cb: ActionCallback) {
@@ -36,8 +36,8 @@ export class ButtonActionsQueue {
      * e.g., "click_bigUP"
      */
     static queueGUIAction (action: string, connection: Connection, cb: ActionCallback) {
-        ButtonActionsQueue.guiActions = ButtonActionsQueue.guiActions.then((res) => {
-            const guiActionPromise = ButtonActionsQueue.getGUIActionPromise(action, connection, cb);
+        ActionsQueue.guiActions = ActionsQueue.guiActions.then((res) => {
+            const guiActionPromise = ActionsQueue.getGUIActionPromise(action, connection, cb);
             return guiActionPromise;
         }).catch((err) => {
             if (!(typeof err.message === "string" && err.message.indexOf("No resolution for tick") >= 0)) {
@@ -51,11 +51,11 @@ export class ButtonActionsQueue {
     };
 
     static sendINIT (connection: Connection, cb: ActionCallback) {
-        return ButtonActionsQueue.queueGUIAction("", connection, cb);
+        return ActionsQueue.queueGUIAction("", connection, cb);
     };
 
     static send (action: string, connection: Connection, cb: ActionCallback) {
-        return ButtonActionsQueue.queueGUIAction(action, connection, cb);
+        return ActionsQueue.queueGUIAction(action, connection, cb);
     };
 
 }

@@ -251,7 +251,7 @@ export class Player {
                 console_log("Playback: action " + (this.playlist.curr + 1) + " of " + this.playlist.seq.length);
                 const action: Action = this.playlist.seq[this.playlist.curr];
                 const duration: number = action.duration || 1000;
-                const transitionTimingFunction: string = opt.transitionTimingFunction || "ease-out";
+                const transitionTimingFunction: "ease-in" | "ease-out" = opt.transitionTimingFunction || "ease-out";
                 action.timeout = (action.timeout && action.timeout >= 0)? action.timeout : SELECT_TIMEOUT;
                 let when: number = action.timeStamp - this.now;
                 if (when < 0) {

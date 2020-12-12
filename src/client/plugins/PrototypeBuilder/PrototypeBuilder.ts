@@ -7,7 +7,7 @@ import { Connection } from '../../env/Connection';
 // Prompt              = require("pvsioweb/forms/displayPrompt"),
 
 import * as Utils from '../../env/Utils';
-import { ImageView } from './views/ImageView';
+import { BuilderView } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
 import { WidgetManager } from "./WidgetManager";
 import { SettingsView } from './views/SettingsView';
@@ -125,7 +125,7 @@ export class PrototypeBuilder implements PVSioWebPlugin {
                 el: bodyDiv,
                 headerDiv,
             }, this.connection),
-            "Main": new ImageView(this.widgetManager, {
+            "Main": new BuilderView(this.widgetManager, {
                 viewId: "Main",
                 screenName: "Main",
                 el: bodyDiv,

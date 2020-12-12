@@ -46,9 +46,10 @@ export interface DialogOptions {
     title?: string,
     content: HTMLElement | string,
     buttons?: HTMLElement,
-    largeModal?: boolean
+    largeModal?: boolean,
+    hidden?: boolean
 }
-export function showDialog (data: DialogOptions): JQuery<HTMLElement> {
+export function createDialog (data: DialogOptions): JQuery<HTMLElement> {
     const dialogView: string = Handlebars.compile(dialogTemplate, { noEscape: true })(data);
     // remove old dialog, if any
     $("body").find("#pvsioweb-modal-center").remove();
@@ -56,9 +57,12 @@ export function showDialog (data: DialogOptions): JQuery<HTMLElement> {
     $("body").append(dialogView);
     return $("body").find("#pvsioweb-modal-center");
 }
+export function revealDialog (): JQuery<HTMLElement> {
+    return $("body").find("#pvsioweb-modal-center").css("display", "block");
+}
 export const DBLCLICK_TIMEOUT: number = 300; //ms -- if two consecutive clicks are registered in a time frame lower than this timeout, then it's a double click
 export const dialogTemplate: string = `
-<div class="modal fade show" id="{{#if id}}{{id}}{{else}}pvsioweb-modal-center{{/if}}" tabindex="-1" role="dialog" aria-labelledby="{{id}}-title" aria-hidden="true" style="display:block; opacity:0.98;">
+<div class="modal fade show" id="{{#if id}}{{id}}{{else}}pvsioweb-modal-center{{/if}}" tabindex="-1" role="dialog" aria-labelledby="{{id}}-title" aria-hidden="true" style="display:{{#if hidden}}none{{else}}block{{/if}}; opacity:0.98;">
     <div class="modal-dialog-shadow" style="width: 100%; height: 100%; position: absolute; background: black; opacity: 0.8;"></div>
     <div class="modal-dialog modal-dialog-centered{{#if largeModal}} modal-lg{{/if}}" role="document">
         <div class="modal-content">
@@ -522,13 +526,13 @@ export function dimColor(col: string, level?: number) {
     col = rgb2hex(colorNameToHex(col)).slice(1) || "0";
     const num: number = parseInt(col, 16);
 
-    let r: number = (num >> 16) + level;
+    let r: number = (num >> 16) - level;
     r = (r > 255) ? 255 : ((r < 0) ? 0 : r);
 
-    let b: number = ((num >> 8) & 0x00FF) + level;
+    let b: number = ((num >> 8) & 0x00FF) - level;
     b = (b > 255) ? 255 : ((b < 0) ? 0 : b);
 
-    let g: number = (num & 0x0000FF) + level;
+    let g: number = (num & 0x0000FF) - level;
     g = (g > 255) ? 255 : ((g < 0) ? 0 : g);
 
     return "#" + (g | (b << 8) | (r << 16)).toString(16);

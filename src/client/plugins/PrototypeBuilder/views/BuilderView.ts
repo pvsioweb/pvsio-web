@@ -40,7 +40,7 @@ export const contentTemplate: string = `
 </div>
 <div class="image-overlay container-fluid" style="padding-left:0;"></div>`;
 
-export class ImageView extends View {
+export class BuilderView extends View {
     
     protected $imageOverlay: JQuery<HTMLElement>;
     protected $imageDiv: JQuery<HTMLElement>;
@@ -53,7 +53,7 @@ export class ImageView extends View {
         this.installHandlers();
     }
 
-    render (data?: BuilderViewOptions, opt?: { localFiles?: boolean }): ImageView {
+    render (data?: BuilderViewOptions, opt?: { localFiles?: boolean }): BuilderView {
         opt = opt || {};
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })(opt);
         super.render({ ...data, content });

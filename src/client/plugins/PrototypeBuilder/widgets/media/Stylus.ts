@@ -159,7 +159,7 @@ export class Stylus extends WidgetEVO {
      * @memberof module:Stylus
      * @instance
      */
-    move (coords: Coords, opt?: { rotation?: boolean, duration?: number, transitionTimingFunction?: string }) {
+    move (coords: Coords, opt?: { rotation?: number | boolean, duration?: number, transitionTimingFunction?: "ease-in" | "ease-out" }) {
         super.move(coords, opt);
         if (this.div && this.div[0]) {
             opt = opt || {};
@@ -167,7 +167,7 @@ export class Stylus extends WidgetEVO {
             opt.duration = opt.duration || 1000;
             opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
             opt.rotation = (opt.rotation !== undefined) ? opt.rotation : true;
-            const rotation_val: number = (opt.rotation) ? 35 : 0;
+            const rotation_val: number = (typeof opt.rotation === "number" || opt.rotation) ? 35 : 0;
             this.base.css("transform", "rotate(" + rotation_val + "deg)")
                 .css("transform-origin", "bottom")
                 .css("transition-duration", opt.duration + "ms")
@@ -184,7 +184,7 @@ export class Stylus extends WidgetEVO {
      * @memberof module:Stylus
      * @instance
      */
-    select (opt?: { opacity?: number }) {
+    select (opt?: { opacity?: number, overlayColor?: string, classed?: string, "background-color"?: string }) {
         opt = opt || {};
         opt.opacity = (isNaN(+opt.opacity)) ? 1 : opt.opacity;
         return this.setStyle(opt);

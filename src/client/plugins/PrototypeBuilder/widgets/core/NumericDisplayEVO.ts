@@ -32,10 +32,13 @@
 
 import { BasicDisplayEVO } from './BasicDisplayEVO';
 import { digitsTemplate } from './Templates';
-import { Coords } from './WidgetEVO';
-
+import { Coords, WidgetOptions, WidgetStyle } from './WidgetEVO';
 
 const selectedFontSize = 1.076; // ratio selectedFont/normalFont for integer digits
+
+export interface NumericDisplayOptions extends WidgetOptions {
+    cursorName?: string
+}
 
 export class NumericDisplayEVO extends BasicDisplayEVO {
     protected cursorName: string;
@@ -97,8 +100,8 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         this.cursorName = opt.cursorName || "";
 
         // add widget-specific style attributes
-        this.style["letter-spacing"] = opt.letterSpacing || parseFloat(this.style["font-size"]);
-        this.style["decimal-font-size"] = opt.decimalFontSize || parseFloat(this.style["font-size"]) * 0.8;
+        this.style["letter-spacing"] = opt.letterSpacing || (typeof this.style["font-size"] === "string" ? parseFloat(this.style["font-size"]) : this.style["font-size"]);
+        this.style["decimal-font-size"] = opt.decimalFontSize || (typeof this.style["font-size"] === "string" ? parseFloat(this.style["font-size"]) * 0.8 : this.style["font-size"] * 0.8);
         this.style["decimal-letter-spacing"] = opt.decimalLetterSpacing || parseFloat(this.style["decimal-font-size"]) * 0.8;
         this.maxDecimalDigits = (isNaN(parseInt(opt.maxDecimalDigits))) ? 2 : parseInt(opt.maxDecimalDigits);
 
@@ -129,19 +132,19 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
      * @memberof module:NumericDisplayEVO
      * @instance
      */
-    render (state, opt?) {
+    render (state: string | {}, opt?: NumericDisplayOptions): void {
         if (state !== null && state !== undefined) {
             // set style
-            opt = this.normaliseOptions(opt);
+            opt = opt || {};
             opt["background-color"] = opt.backgroundColor || this.style["background-color"];
             opt.color = opt.fontColor || this.style.color;
-            opt["font-size"] = (opt.fontSize || this.style["font-size"]) + "pt";
+            opt["font-size"] = (opt.fontSize || this.style["font-size"]) + "px";
             opt["font-family"] = opt.fontFamily || this.style["font-family"];
             opt["text-align"] = opt.align || this.style["text-align"];
-            let borderWidth = opt.borderWidth || 0;
+            const borderWidth: number = +opt.borderWidth || 0;
             opt["border-width"] = (!isNaN(borderWidth)) ? opt.borderWidth + "px" : this.style["border-width"];
             opt["border-style"] = (opt.borderStyle) ? opt.borderStyle : (borderWidth > 0) ? "solid" : this.style["border-style"];
-            opt["border-radius"] = (!isNaN(parseFloat(opt.borderRadius))) ? opt.borderRadius : this.style["border-radius"];
+            opt["border-radius"] = (!isNaN(+opt.borderRadius)) ? opt.borderRadius : this.style["border-radius"];
             opt["border-color"] = (opt.borderColor) ? opt.borderColor : (borderWidth > 0) ? "transparent" : this.style["border-color"];
             this.setStyle(opt);
 
@@ -174,14 +177,14 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                     cursorPos: 0
                 };
                 desc.whole = parts[0].split("").map((d) => {
-                    return { val: d, selected: false, "font-size": parseFloat(this.style["font-size"]) };
+                    return { val: d, selected: false, "font-size": parseFloat(`${this.style["font-size"]}`) };
                 });
                 if (parts.length > 1) {
                     desc.frac = parts[1].split("").map((d) => {
-                        return { val: d, selected: false, "font-size": parseFloat(this.style["decimal-font-size"]) };
+                        return { val: d, selected: false, "font-size": parseFloat(`${this.style["decimal-font-size"]}`) };
                     });
                 }
-                let cursorName = opt.cursorName || this.cursorName;
+                const cursorName: string = opt.cursorName || this.cursorName;
                 desc.cursorPos = parseInt(this.evaluate(cursorName, state));
                 if (!isNaN(desc.cursorPos)) {
                     if (desc.cursorPos >= 0) {
@@ -190,10 +193,10 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                             desc.whole[desc.whole.length - 1 - desc.cursorPos]["font-size"] *= selectedFontSize;
                         } else { // introduce leading zeros
                             desc.whole_zeropadding = new Array(desc.cursorPos - (desc.whole.length - 1)).fill({
-                                val: "0", selected: false, "font-size": parseFloat(this.style["font-size"])
+                                val: "0", selected: false, "font-size": parseFloat(`${this.style["font-size"]}`)
                             });
                             desc.whole_zeropadding[0] = {
-                                val: "0", selected: true, "font-size": parseFloat(this.style["font-size"]) * selectedFontSize
+                                val: "0", selected: true, "font-size": parseFloat(`${this.style["font-size"]}`) * selectedFontSize
                             };
                         }
                     } else if (desc.cursorPos < 0) {
@@ -252,7 +255,6 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
             }
         }
         this.reveal();
-        return this;
     }
 
     /**
@@ -261,11 +263,11 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
      * @memberof module:NumericDisplayEVO
      * @instance
      */
-    renderSample () {
+    renderSample (): void {
         let st = {};
         st[this.displayKey] = "_12.3";
         st["demoCursor"] = 2;
-        return this.render(st, { cursorName: "demoCursor", borderWidth: 2, fontColor: "white", backgroundColor: "black" });
+        this.render(st, { cursorName: "demoCursor", borderWidth: 2, fontColor: "white", backgroundColor: "black" });
     }
 
     // getKeys() {

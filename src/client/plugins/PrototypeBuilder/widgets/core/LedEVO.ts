@@ -21,7 +21,13 @@
  });
  *
  */
-import { Coords, WidgetEVO } from "./WidgetEVO";
+import { ActionCallback } from "../ActionsQueue";
+import { WidgetOptions, Coords, WidgetEVO, WidgetStyle } from "./WidgetEVO";
+
+export interface LedOptions extends WidgetOptions {
+    ledKey?: string,
+    callback?: ActionCallback
+};
 
 const COLOR = {
     brightGreen: "#00FF66"
@@ -30,6 +36,7 @@ const COLOR = {
 export class LedEVO extends WidgetEVO {
     widgetKeys = [ "ledKey" ];
     ledKey: string;
+    protected radius: number;
     /**
      * @function <a name="LedEVO">LedEVO</a>
      * @description Constructor.
@@ -59,26 +66,35 @@ export class LedEVO extends WidgetEVO {
      * @memberof module:LedEVO
      * @instance
      */
-    constructor (id: string, coords: Coords, opt?) {
+    constructor (id: string, coords: Coords, opt?: LedOptions) {
         super(id, coords, opt);
 
         opt = opt || {};
         coords = coords || {};
 
-        let size: number = Math.min(coords.width, coords.height) || 1;
-        opt.marginLeft = (coords.width - size / 2) / 2;
-        opt.marginTop = (coords.height - size / 2) / 2;
-        coords.height = coords.width = size / 2;
+        coords.width = coords.width || coords.height || 1;
+        coords.height = coords.height || coords.width || 1;
+        const maxWidth: number = parseFloat($(opt.parent).css("width")) || coords.width;
+        const maxHeight: number = parseFloat($(opt.parent).css("height")) || coords.height;
+
+        this.radius = Math.min(coords.width, coords.height, maxWidth, maxHeight) / 2;
+        opt.marginLeft = (coords.width - this.radius) / 2;
+        opt.marginTop = (coords.height - this.radius) / 2;
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-        opt.type = opt.type || "led";
-        opt.backgroundColor = opt.color || opt.backgroundColor || COLOR.brightGreen;
-        opt.cursor = opt.cursor || "default";
-        opt.borderRadius = opt.borderRadius || Math.max(coords.width, coords.height); // this will produce a round LED
-        opt.overflow = "visible";
+        this.type = opt.type || "led";
+        this.style["background-color"] = opt.color || opt.backgroundColor || COLOR.brightGreen;
+        this.style.cursor = opt.cursor || "default";
+        this.style["border-radius"] = opt.borderRadius || this.radius;
+        this.style.overflow = "visible";
         
-        // invoke WidgetEVO constructor to create the widget
+        // create the DOM element
         super.createHTMLElement();
+        this.base.css({ 
+            width: this.radius,
+            height: this.radius,
+            left: `${(this.width - this.radius) / 2}px`
+        });
 
         // delete unnecessary style options
         delete this.style["font-size"];
@@ -111,18 +127,18 @@ export class LedEVO extends WidgetEVO {
      * @memberof module:LedEVO
      * @instance
      */
-    render (state, opt?) {
+    render (state: string | {}, opt?: WidgetStyle): void {
         // set style
-        opt = this.normaliseOptions(opt);
+        opt = opt || {};
         opt["background-color"] = opt.color || opt.backgroundColor || this.style["background-color"];
         opt["border-width"] = (opt.borderWidth) ? opt.borderWidth + "px" : this.style["border-width"];
         opt["border-style"] = opt.borderStyle || this.style["border-style"];
-        opt["border-radius"] = (isNaN(parseFloat(opt.borderRadius))) ? this.style["border-radius"] : opt.borderRadius;
+        opt["border-radius"] = (opt.borderRadius === undefined) ? this.style["border-radius"] : `${opt.borderRadius}`;
         opt["border-color"] = opt.borderColor || this.style["border-color"];
         this.setStyle(opt);
 
         // update style, if necessary
-        state = (state === undefined || state === null)? "" : state;
+        state = (state === undefined || state === null) ? "" : state;
         if (typeof state === "string") {
             this.setStyle({ "background-color": state });
         } else if (typeof state === "object" && this.ledKey !== "" && this.evalViz(state)) {
@@ -130,7 +146,6 @@ export class LedEVO extends WidgetEVO {
         }
 
         this.reveal();
-        return this;
     }
 
     /**
@@ -139,11 +154,11 @@ export class LedEVO extends WidgetEVO {
      * @memberof module:LedEVO
      * @instance
      */
-    renderSample () {
-        return this.render(COLOR.brightGreen);
+    renderSample (): void {
+        this.render(COLOR.brightGreen);
     }
 
-    getPrimaryKey () {
+    getPrimaryKey (): string {
         return this.ledKey;
     }
 

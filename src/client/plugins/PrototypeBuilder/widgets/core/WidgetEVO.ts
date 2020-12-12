@@ -10,61 +10,62 @@
 // import * as StateParser from "../../../util/PVSioStateParser";
 import { genericWidgetTemplate as widget_template } from "./Templates";
 import * as Utils from '../../../../env/Utils';
+import { dimColor } from "../../../../env/Utils";
 
-const normalised = {
-    backgroundcolor: "backgroundColor",
-    fontsize: "fontSize",
-    fontfamily: "fontFamily",
-    fontcolor: "fontColor",
-    borderwidth: "borderWidth",
-    borderstyle: "borderStyle",
-    borderradius: "borderRadius",
-    bordercolor: "borderColor",
-    zindex: "zIndex"
-};
-function normalise_options(data) {
-    var opt = {};
-    if (data) {
-        let norm_key = null;
-        for (let key in data) {
-            norm_key = normalised[key] || key;
-            opt[norm_key] = data[key];
-        }
-    }
-    return opt;
-}
-const html_attributes = {
-    backgroundColor: "background-color",
-    backgroundcolor: "background-color",
-    fontSize: "font-size",
-    fontsize: "font-size",
-    fontFamily: "font-family",
-    fontfamily: "font-family",
-    fontColor: "color",
-    fontcolor: "color",
-    align: "text-align",
-    borderWidth: "border-width",
-    borderwidth: "border-width",
-    borderStyle: "border-style",
-    borderstyle: "border-style",
-    borderRadius: "border-radius",
-    borderradius: "border-radius",
-    borderColor: "border-color",
-    bordercolor: "border-color",
-    zIndex: "z-index"
-};
-function normalise_style(data) {
-    var style = {};
-    if (data) {
-        data = normalise_options(data);
-        let html_key = null;
-        for (let key in data) {
-            html_key = html_attributes[key] || key;
-            style[html_key] = data[key];
-        }
-    }
-    return style;
-}
+// const normalised = {
+//     backgroundcolor: "backgroundColor",
+//     fontsize: "fontSize",
+//     fontfamily: "fontFamily",
+//     fontcolor: "fontColor",
+//     borderwidth: "borderWidth",
+//     borderstyle: "borderStyle",
+//     borderradius: "borderRadius",
+//     bordercolor: "borderColor",
+//     zindex: "zIndex"
+// };
+// function normalise_options(data) {
+//     var opt = {};
+//     if (data) {
+//         let norm_key = null;
+//         for (let key in data) {
+//             norm_key = normalised[key] || key;
+//             opt[norm_key] = data[key];
+//         }
+//     }
+//     return opt;
+// }
+// const html_attributes = {
+//     backgroundColor: "background-color",
+//     backgroundcolor: "background-color",
+//     fontSize: "font-size",
+//     fontsize: "font-size",
+//     fontFamily: "font-family",
+//     fontfamily: "font-family",
+//     fontColor: "color",
+//     fontcolor: "color",
+//     align: "text-align",
+//     borderWidth: "border-width",
+//     borderwidth: "border-width",
+//     borderStyle: "border-style",
+//     borderstyle: "border-style",
+//     borderRadius: "border-radius",
+//     borderradius: "border-radius",
+//     borderColor: "border-color",
+//     bordercolor: "border-color",
+//     zIndex: "z-index"
+// };
+// function toHtmlStyle (style: WidgetStyle): HtmlStyle {
+//     var style = {};
+//     if (data) {
+//         data = normalise_options(data);
+//         let html_key = null;
+//         for (let key in data) {
+//             html_key = html_attributes[key] || key;
+//             style[html_key] = data[key];
+//         }
+//     }
+//     return style;
+// }
 
 export type Coords = { top?: number, left?: number, width?: number, height?: number };
 export type WidgetDescriptor = {
@@ -72,8 +73,68 @@ export type WidgetDescriptor = {
     type: string,
     key: string,
     coords: Coords,
-    style: { [key: string]: string }
+    style: HtmlStyle
 };
+export interface WidgetStyle {
+    position?: "absolute" | "relative",
+    parent?: string,
+    cursor?: string,
+    backgroundColor?: string,
+    fontSize?: number | string,
+    fontFamily?: string,
+    fontColor?: string, // equivalent to "color"
+    color?: string,
+    align?: string,
+    borderWidth?: number | string,
+    borderStyle?: string,
+    borderRadius?: number | string,
+    borderColor?: string,
+    overflow?: "hidden" | "visible",
+    opacity?: number | string,
+    blinking?: boolean,
+    marginLeft?: number | string,
+    marginTop?: number | string,
+    duration?: number | string,
+    overlayColor?: string,
+    transitionTimingFunction?: "ease-in" | "ease-out",
+    transformOrigin?: "center"
+    zIndex?: number | string
+}
+export interface HtmlStyle {
+    position?: "absolute" | "relative",
+    parent?: string,
+    cursor?: string,
+    "background-color"?: string,
+    "font-size"?: number | string,
+    "font-family"?: string,
+    "font-color"?: string, // equivalent to "color"
+    "color"?: string,
+    align?: string,
+    "border-width"?: number | string,
+    "border-style"?: string,
+    "border-radius"?: number | string,
+    "border-color"?: string,
+    overflow?: "hidden" | "visible",
+    opacity?: number | string,
+    "margin-left"?: number | string,
+    "margin-top"?: number | string,
+    "z-index"?: number | string,
+    // animation options
+    overlayColor?: string,
+    duration?: number | string,
+    rotation?: number | boolean,
+    blinking?: boolean,
+    transitionTimingFunction?: "ease-in" | "ease-out",
+    transformOrigin?: "center"
+}
+export interface WidgetOptions extends WidgetStyle {
+    visibleWhen?: string,
+    overlayColor?: string,
+    type?: string, // widget type, e.g., button, display
+    widget_template?: string // HTML template for rendering the widget
+};
+
+export type MouseEvents = "click" | "dblclick" | "press/release";
 
 export abstract class WidgetEVO {
     static readonly MAX_COORDINATES_ACCURACY: number = 0; // max 0 decimal digits for coordinates, i.e., accuracy is 1px
@@ -90,14 +151,14 @@ export abstract class WidgetEVO {
     visibleWhen: string;
     position: "absolute" | "relative";
     zIndex: number;
-    style: { [key: string]: string };
+    style: HtmlStyle = {};
 
     widget_template: string;
 
     div: JQuery<HTMLDivElement>;
     base: JQuery<HTMLDivElement>;
     overlay: JQuery<HTMLDivElement>;
-    marker: JQuery<HTMLDivElement>;
+    marker: JQuery<HTMLElement>;
 
     evts: {
         click?: boolean,
@@ -136,19 +197,20 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    constructor (id: string, coords: Coords, opt?) {
-        opt = normalise_options(opt);
+    constructor (id: string, coords: Coords, opt?: WidgetOptions) {
+        opt = opt || {};
         coords = coords || {};
         this.id = id;
         this.type = opt.type || "widget";
-        this.parent = (opt.parent) ? ("#" + opt.parent) : "body";
+        opt.parent = (opt.parent) ? ("#" + opt.parent) : "body"
+        this.parent = opt.parent;
         this.top = coords.top || 0;
         this.left = coords.left || 0;
         this.width = (isNaN(coords.width)) ? 32 : coords.width;
         this.height = (isNaN(coords.height)) ? 32 : coords.height;
         this.visibleWhen = opt.visibleWhen || "true"; // default: always enabled/visible
         this.position = opt.position || "absolute";
-        this.zIndex = opt.zIndex || 0;
+        this.zIndex = opt.zIndex !== undefined ? parseFloat(`${opt.zIndex}`) : 0;
 
         // visual style
         opt.borderWidth = +opt.borderWidth || 0;
@@ -159,30 +221,31 @@ export abstract class WidgetEVO {
                                 ((typeof opt.borderRadius === "string" && opt.borderRadius.indexOf("px") >= 0) ? opt.borderRadius : opt.borderRadius.toString() + "px")
                                 : 0;
         opt.borderStyle = (opt.borderStyle) ? opt.borderStyle : (opt.borderRadius || opt.borderWidth) ? "solid" : "none";
-        opt.borderWidth = (!isNaN(parseFloat(opt.borderWidth))) ? opt.borderWidth : (opt.borderColor) ? 2 : 0;
+        opt.borderWidth = (!isNaN(+opt.borderWidth)) ? opt.borderWidth : (opt.borderColor) ? 2 : 0;
         this.style = {};
         this.style["background-color"] = opt.backgroundColor || "transparent";
-        this.style["font-size"] = opt.fontSize + "pt";
+        this.style["font-size"] = opt.fontSize + "px";
         this.style["font-family"] = opt.fontFamily || "sans-serif";
         this.style.color = opt.fontColor || "white";
         this.style["text-align"] = opt.align || "center";
         this.style["border-width"] = opt.borderWidth + "px";
         this.style["border-style"] = opt.borderStyle;
-        this.style["border-radius"] = opt.borderRadius;
+        this.style["border-radius"] = (typeof opt.borderRadius === "string" && opt.borderRadius.indexOf("px") >= 0) ? opt.borderRadius : `${opt.borderRadius}px`;
         this.style["border-color"] = opt.borderColor || "steelblue";
         this.style.overflow = opt.overflow || "hidden";
-        this.style["margin-left"] = (isNaN(parseFloat(opt.marginLeft))) ? "0px" : parseFloat(opt.marginLeft) + "px";
-        this.style["margin-top"] = (isNaN(parseFloat(opt.marginTop))) ? "0px" : parseFloat(opt.marginTop) + "px";
+        this.style["margin-left"] = (isNaN(parseFloat(`${opt.marginLeft}`))) ? "0px" : `${opt.marginLeft}px`;
+        this.style["margin-top"] = (isNaN(parseFloat(`${opt.marginTop}`))) ? "0px" : `${opt.marginTop}px`;
         this.style["white-space"] = "nowrap";
-        this.style.opacity = (isNaN(parseFloat(opt.opacity))) ? 0.9 : opt.opacity;
+        this.style.opacity = (typeof opt.opacity === "number" && isNaN(opt.opacity)) ? 0.9 : opt.opacity;
         this.style.blinking = opt.blinking || false;
         this.style.cursor = opt.cursor || "default";
-        this.style["overlay-color"] = opt.overlayColor;
+        this.style.overlayColor = opt.overlayColor;
+        this.style["z-index"] = opt.zIndex || 0;
 
         this.widget_template = opt.widget_template || widget_template;
     }
 
-    createHTMLElement () {
+    createHTMLElement (): void {
         this.rendered = true;
 
         const res: string = Handlebars.compile(this.widget_template, { noEscape: true })(this);
@@ -205,7 +268,7 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    render (opt?): void {
+    render (state?: string | {}, opt?: WidgetOptions): void {
         return this.reveal();
     }
 
@@ -216,8 +279,8 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    renderSample (opt?) {
-        return this.render(opt);
+    renderSample (opt?): void {
+        this.render(opt);
     }
 
     /**
@@ -256,22 +319,23 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    move (coords, opt?) {
+    move (coords: Coords, opt?: WidgetOptions): void {
+        opt = opt || {};
         // console.log(coords);
         if (this.div && this.div[0]) {
             coords = coords || {};
-            opt = normalise_options(opt);
+            // opt = normalise_options(opt);
             opt.duration = opt.duration || 0;
             opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
-            this.top = (isNaN(parseFloat(coords.top))) ? this.top : parseFloat(parseFloat(coords.top).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY));
-            this.left = (isNaN(parseFloat(coords.left))) ? this.left : parseFloat(parseFloat(coords.left).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY));
+            this.top = (isNaN(coords.top)) ? this.top : parseFloat(coords.top.toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY));
+            this.left = (isNaN(coords.left)) ? this.left : parseFloat(coords.left.toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY));
             this.div.animate({
                 "top": this.top + "px",
                 "left": this.left + "px",
                 "transition-timing-function": opt.transitionTimingFunction
             }, opt.duration);
         }
-        return this.reveal();
+        this.reveal();
     }
 
     /**
@@ -284,22 +348,22 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    resize (size, opt?) {
+    resize (size: { height?: number, width?: number}, opt?: WidgetOptions): void {
         // console.log(coords);
         if (this.div && this.div[0]) {
             size = size || {};
-            opt = normalise_options(opt);
+            opt = opt || {};
             opt.duration = opt.duration || 0;
             opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
-            this.height = (isNaN(parseFloat(size.height))) ? this.height : parseFloat(parseFloat(size.height).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY));
-            this.width = (isNaN(parseFloat(size.width))) ? this.width : parseFloat(parseFloat(size.width).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY));
+            this.height = (isNaN(size.height)) ? this.height : parseFloat(size.height.toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY));
+            this.width = (isNaN(size.width)) ? this.width : parseFloat(size.width.toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY));
 
             // update font size
             opt.borderWidth = +opt.borderWidth || 0;
             opt.fontSize = !isNaN(+opt.fontSize) && +opt.fontSize < this.height - opt.borderWidth - this.fontPadding ? 
                 opt.fontSize 
                     : this.height - opt.borderWidth - this.fontPadding;
-            this.style["font-size"] = opt.fontSize + "pt";
+            this.style["font-size"] = opt.fontSize + "px";
 
             if (opt.duration) {
                 this.div.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, opt.duration);
@@ -311,7 +375,7 @@ export abstract class WidgetEVO {
                 this.overlay.css("height", this.height + "px").css("width", this.width + "px");
             }
         }
-        return this.reveal();
+        this.reveal();
     }
 
     /**
@@ -325,10 +389,10 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    rotate (deg, opt) {
+    rotate (deg: string | number, opt?: WidgetOptions): void {
         if (this.div && this.div[0]) {
-            deg = (isNaN(parseFloat(deg))) ? 0 : parseFloat(deg);
-            opt = normalise_options(opt);
+            deg = (isNaN(parseFloat(`${deg}`))) ? 0 : parseFloat(`${deg}`);
+            opt = opt || {};
             opt.duration = opt.duration || 0;
             opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-in";
             opt.transformOrigin = opt.transformOrigin || "center";
@@ -338,7 +402,7 @@ export abstract class WidgetEVO {
                 "transition-timing-function": opt.transitionTimingFunction
             }, opt.duration);
         }
-        return this.reveal();
+        this.reveal();
     }
 
     /**
@@ -347,11 +411,10 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    remove () {
+    remove (): void {
         if (this.div && this.div[0]) {
             this.div.remove();
         }
-        return this;
     }
 
     /**
@@ -413,7 +476,7 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    getVizExpression () {
+    getVizExpression (): string {
         return this.visibleWhen;
     }
 
@@ -426,7 +489,7 @@ export abstract class WidgetEVO {
      *          <li>blinking (bool): whether the button is blinking (default is false, i.e., does not blink)</li>
      *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
      *          <li>backgroundColor (String): background display color (default is "transparent")</li>
-     *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
+     *          <li>borderColor (String): border color, must be a valid HTML5 color </li>
      *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
      *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
@@ -437,15 +500,18 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    setStyle (style) {
-        style = normalise_style(style);
-        for(var key in style) {
+    setStyle (style: HtmlStyle): void {
+        style = style || {};
+        for(const key in style) {
             this.base.css(key, style[key]);
+            if (key === "z-index" || key === "overlayColor") {
+                // set z-index of the overlay, otherwise the overlay may fall under base
+                this.overlay.css(key, style[key]);
+            }
         }
         if (style.blinking) {
             this.base.addClass("blinking");
         }
-        return this;
     }
 
     /**
@@ -454,10 +520,9 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    invertColors () {
+    invertColors (): void {
         this.base.css("background-color", this.style["font-color"]);
         this.base.css("color", this.style["background-color"]);
-        return this;
     }
 
     /**
@@ -467,13 +532,14 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    select (opt?) {
-        opt = normalise_options(opt);
-        opt.opacity = (isNaN(parseFloat(opt.opacity))) ? 0.5 : opt.opacity;
-        this.setStyle(opt);
-        if (opt.overlayColor) { this.overlay.css("background-color", opt.overlayColor); }
+    select (opt?: { opacity?: number, borderColor?: string, classed?: string, backgroundColor?: string }): void {
+        opt = opt || {};
+        opt.opacity = (isNaN(opt.opacity)) ? 0.5 : opt.opacity;
+        const borderColor: string = opt.borderColor || this.base.css("background-color") || "yellow";
+        this.base.css({ "background-color": opt.backgroundColor || dimColor(this.base.css("background-color")) });
         if (opt.classed) { this.base.addClass(opt.classed); }
-        return this;
+        this.overlay.css("background-color", "transparent");
+        this.overlay.css({ border: `1px solid ${borderColor}`, opacity: 1 });
     }
 
     /**
@@ -482,9 +548,9 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    deselect () {
+    deselect (): void {
         this.setStyle(this.style);
-        return this;
+        this.overlay.css({ border: '0px', opacity: 0 });
     }
 
     /**
@@ -494,7 +560,7 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    getPosition () {
+    getPosition (): { left: number, top: number } {
         return { left: this.left, top: this.top };
     }
 
@@ -505,7 +571,7 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    getSize () {
+    getSize (): { width: number, height: number } {
         return { width: this.width, height: this.height };
     }
 
@@ -516,7 +582,7 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    setPosition (coords) {
+    setPosition (coords: Coords): void {
         return this.move(coords);
     }
 
@@ -527,7 +593,7 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    setSize (size) {
+    setSize (size: { height?: number, width?: number}): void {
         return this.resize(size);
     }
 
@@ -538,74 +604,45 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    setPositionAndSize (data) {
+    setPositionAndSize (data: Coords): void {
         if (data) {
             this.move(data);
             this.resize(data);
         }
-        return this;
     }
 
-    updateLocationAndSize (data) {
-        return this.setPositionAndSize({
-            top: data.top || data.y,
-            left: data.left || data.x,
-            width: data.width,
-            height: data.height
-        });
-    }
-
-    /**
-     * @function <a name="normaliseOptions">normaliseOptions</a>
-     * @description Utility function for normalising options names (e.g., fontsize -> fontSize)
-     * @param opt {Object} Widget options
-     * @return {Object} Normalised options or {} if function argument is null
-     * @memberof module:WidgetEVO
-     * @instance
-     */
-    normaliseOptions (opt) {
-        return normalise_options(opt);
-    }
-
-    /**
-     * @function <a name="toHtmlAttributes">toHtmlAttributes</a>
-     * @description Utility function for translating widget style attributes into standard html5 style attributes (e.g., fontSize -> font-size)
-     * @param opt {Object} Style attributes (e.g., { fontSize: 10 })
-     * @return {Object} HTML5 style attributes or {} if funciton argument is null
-     * @memberof module:WidgetEVO
-     * @instance
-     */
-    toHtmlAttributes (opt) {
-        return normalise_style(opt);
+    updateLocationAndSize (data: Coords): void {
+        return this.setPositionAndSize(data);
     }
 
     getType () {
         return this.type;
     }
 
-    getStyle () {
-        let ans = {};
-        let _this = this;
-        // remove units of numeric values, e.g., font-size is returned as 13 (rather than "13pt")
-        Object.keys(this.style).forEach(function (key) {
-            ans[key] = isNaN(parseFloat(_this.style[key])) ? _this.style[key] : parseFloat(_this.style[key]);
-        });
-        return ans;
+    getStyle (): HtmlStyle {
+        // let ans = {};
+        // let _this = this;
+        // // remove units of numeric values, e.g., font-size is returned as 13 (rather than "13pt")
+        // Object.keys(this.style).forEach(function (key) {
+        //     ans[key] = isNaN(parseFloat(_this.style[key])) ? _this.style[key] : parseFloat(_this.style[key]);
+        // });
+        // return ans;
+        return this.style;
     }
 
-    getStyle2 () {
-        let ans = {};
-        let _this = this;
-        // remove units of numeric values, e.g., font-size is returned as 13 (rather than "13pt")
-        Object.keys(this.style).forEach(function (key) {
-            let isNumeric = !isNaN(parseFloat(_this.style[key]));
-            ans[key] = {
-                val: (isNumeric) ? parseFloat(_this.style[key]) : _this.style[key],
-                isNumeric: isNumeric
-            };
-        });
-        return ans;
-    }
+    // getStyle2 () {
+    //     let ans = {};
+    //     let _this = this;
+    //     // remove units of numeric values, e.g., font-size is returned as 13 (rather than "13pt")
+    //     Object.keys(this.style).forEach(function (key) {
+    //         let isNumeric = !isNaN(parseFloat(_this.style[key]));
+    //         ans[key] = {
+    //             val: (isNumeric) ? parseFloat(_this.style[key]) : _this.style[key],
+    //             isNumeric: isNumeric
+    //         };
+    //     });
+    //     return ans;
+    // }
 
     getCoordinates (): Coords {
         return {
@@ -616,20 +653,23 @@ export abstract class WidgetEVO {
         };
     }
 
-    getKeys () {
-        let _this = this;
+    getKeys (): {[name:string]: string} {
         let ans = {};
-        this.widgetKeys.forEach(function (key) {
-            ans[key] = _this[key];
-        });
+        for (const key in this.widgetKeys) {
+            ans[key] = this.widgetKeys[key]
+        }
         return ans;
     }
     
-    getPrimaryKey () {
+    getPrimaryKey (): string {
         return this.id;
     }
 
-    getEvents () {
+    getEvents (): {
+        click?: boolean,
+        dblclick?: boolean,
+        "press/release"?: boolean
+    } {
         return this.evts;
     }
 
@@ -643,15 +683,13 @@ export abstract class WidgetEVO {
         };
     }
 
-    element (marker?) {
+    setMarker (marker?: JQuery<HTMLElement>): void {
         if (marker) {
             this.marker = marker;
         }
+    }
+
+    getMarker (): JQuery<HTMLElement> {
         return this.marker;
     }
-
-    imageMap () {
-        return null;
-    }
-
 }

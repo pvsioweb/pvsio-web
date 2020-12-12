@@ -8,7 +8,7 @@
 import * as Widget from './Widget';
 import { Recorder } from '../../../util/ActionRecorder';
 import { Timer } from "../../../util/Timer";
-import { ActionCallback, ButtonActionsQueue } from "./ButtonActionsQueue";
+import { ActionCallback, ActionsQueue } from "./ActionsQueue";
 import { Connection } from '../../../env/Connection';
 
 export interface WidgetOptions extends Widget.WidgetOptions {
@@ -100,7 +100,7 @@ export class EmuTimer {
      */
     tick () {
         console.log("automatic action fired: " + this.timerFunction);
-        ButtonActionsQueue.queueGUIAction(this.timerFunction, this.connection, this.callback);
+        ActionsQueue.queueGUIAction(this.timerFunction, this.connection, this.callback);
         Recorder.addAction({
             id: this.id,
             timerEvent: this.timerEvent,
@@ -122,7 +122,7 @@ export class EmuTimer {
             this.timerRate = opt.timerRate;
         }
         this.timerTickFunction = () => {
-            ButtonActionsQueue.queueGUIAction(this.timerFunction, this.connection, this.callback);
+            ActionsQueue.queueGUIAction(this.timerFunction, this.connection, this.callback);
             //record action
             Recorder.addAction({
                 id: this.id,

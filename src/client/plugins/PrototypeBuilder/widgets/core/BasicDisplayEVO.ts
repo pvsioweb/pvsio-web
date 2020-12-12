@@ -27,7 +27,7 @@
  *
  */
 
-import { Coords, WidgetEVO } from "./WidgetEVO";
+import { Coords, WidgetEVO, WidgetOptions } from "./WidgetEVO";
 
 export class BasicDisplayEVO extends WidgetEVO {
     widgetKeys = [ "displayKey" ];
@@ -101,21 +101,21 @@ export class BasicDisplayEVO extends WidgetEVO {
      * @memberof module:BasicDisplayEVO
      * @instance
      */
-    render (state, opt?) {
+    render (state: string | {}, opt?: WidgetOptions): void {
         if (!this.rendered) {
             // invoke createHTMLElement to create the widget
             super.createHTMLElement();
         }
         // set style
-        opt = this.normaliseOptions(opt);
+        opt = opt || {};
         opt["background-color"] = opt.backgroundColor || this.style["background-color"];
-        opt["font-size"] = (opt.fontSize || this.style["font-size"]) + "pt";
+        opt["font-size"] = (opt.fontSize || this.style["font-size"]) + "px";
         opt["font-family"] = opt.fontFamily || this.style["font-family"];
         opt.color = opt.fontColor || this.style.color;
         opt["text-align"] = opt.align || this.style["text-align"];
         opt["border-width"] = (opt.borderWidth) ? opt.borderWidth + "px" : this.style["border-width"];
         opt["border-style"] = opt.borderStyle || this.style["border-style"];
-        opt["border-radius"] = (isNaN(parseFloat(opt.borderRadius))) ? this.style["border-radius"] : opt.borderRadius;
+        opt["border-radius"] = (isNaN(parseFloat(`${opt.borderRadius}`))) ? this.style["border-radius"] : opt.borderRadius;
         opt["border-color"] = opt.borderColor || this.style["border-color"];
         this.setStyle(opt);
 
@@ -127,7 +127,6 @@ export class BasicDisplayEVO extends WidgetEVO {
             this.base.text(this.evaluate(this.displayKey, state));
         }
         this.reveal();
-        return this;
     }
 
     /**
