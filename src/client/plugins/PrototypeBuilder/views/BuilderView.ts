@@ -17,24 +17,13 @@ import { WidgetData, WidgetEditor, WidgetEditorEvents } from './utils/WidgetEdit
 export const contentTemplate: string = `
 <div class="image-div container-fluid" style="padding-left:0;">
     <div class="container-fluid" style="position:relative; overflow:hidden; background-color:white; border:4px dashed teal; text-align:center; min-height:480px;">
-        <!-- <form id="open-local-file-form" style="margin-top:200px; display:none;"> <input type="file" id="open-local-file" accept="*"> </form> -->
-        <!--<button class="load-image-btn btn btn-primary center btn-lg" style="top:50%; margin-left:-5%; position:absolute; white-space:nowrap;">Load Image</button>-->
 
-        <form class="open-file-form"> 
-            <div class="btn-group pull-right" style="top:50%; margin-left:-5%; position:absolute;">
-                <button class="load-image-btn btn btn-primary center btn-lg" style="top:50%;margin-left:-5%;/* position:absolute; */white-space:nowrap;">Load Image</button>
-                <button type="button" class="show-more-options btn btn-primary dropdown-toggle" data-toggle="dropdown" style="color:white;/* position: absolute; */float: right;" aria-expanded="false">
-                    <span class="caret" style="color:white;"></span>
-                </button>
-
-                <div class="custom-file more-options btn btn-primary dropdown-menu dropdown-menu-right" role="menu" style="text-align:center; display:none;">
-                    <input type="file" class="custom-file-input" id="open-local-file-input" required>
-                    <label class="custom-file-label" for="open-local-file-btn" style="text-align:left;">...</label>
-                    <!-- <div class="invalid-feedback">Example invalid custom file feedback</div> -->
-                </div>
-                <!-- <div class="open-local-file-btn btn btn-primary dropdown-menu dropdown-menu-right" role="menu" style="text-align: center;">Open Local File</div> -->
+        <div style="top:50%; left:35%; position:absolute;">
+            <div class="btn-group center">
+                <button class="btn btn-primary btn-lg load-image-btn" style="white-space:nowrap;">Load Image</button>
+                <button class="btn btn-outline-secondary btn-lg use-whiteboard-btn" style="white-space:nowrap;">Use Whiteboard</button>
             </div>
-        </form>
+        </div>
 
     </div>
 </div>
@@ -74,17 +63,6 @@ export class BuilderView extends View {
         });
     }
 
-    toggleMoreOptions (): void {
-        const visible: boolean = this.$el.find(".more-options").css("display") === "block";
-        visible ? this.hideMoreOptions() : this.showMoreOptions();
-    }
-    hideMoreOptions (): void {
-        this.$el.find(".more-options").css({ display: "none" });
-    }
-    showMoreOptions (): void {
-        this.$el.find(".more-options").css({ display: "block" });
-    }
-
     protected installOpenLocalFileHandler (cb: (desc: Utils.FileDescriptor) => void, opt?: { isImage?: boolean }): void {
         const customFileInput: JQuery<HTMLElement> = this.$imageDiv.find(".custom-file-input");
         (opt?.isImage) ? customFileInput.attr("accept", "image/*") 
@@ -109,10 +87,6 @@ export class BuilderView extends View {
         });
     }
 
-    protected installOpenLocalImageHandler (cb: (desc: Utils.FileDescriptor) => void): void {
-        this.installOpenLocalFileHandler(cb, { isImage: true });
-    }
-
     protected installHandlers (): void {
         this.listenTo(this.widgetManager, "WidgetRegionRestored", (id: string, coord: Coords) => {
             const widget: WidgetEVO = this.widgetManager.getWidget(id);
@@ -120,9 +94,29 @@ export class BuilderView extends View {
             // widget.element(mark);
         });
 
-        this.$el.find(".show-more-options").on("click", (evt: JQuery.ClickEvent) => {
-            // toggle more open option
-            this.toggleMoreOptions();
+        this.$el.find(".use-whiteboard-btn").on("click", (evt: JQuery.ClickEvent) => {
+
+            const imageElement: HTMLImageElement = new Image();
+            imageElement.src = Utils.whiteGif;
+            imageElement.width = 800;
+            imageElement.height = 600;
+            this.$imageDiv.html(imageElement);
+            this.$imageDiv.css({ border: "1px solid black" });
+
+            const $image: JQuery<HTMLImageElement> = this.$imageDiv.find("img");
+            $image.attr("id", this.id).addClass(this.viewId);
+
+            this.hotspots = new HotspotEditor(this.widgetManager, {
+                el: $image[0],
+                overlay: this.$imageOverlay[0]
+            });
+            // install handlers for hotspot events
+            this.hotspots.on(HotspotEditorEvents.DidCreateHotspot, (data: HotspotData) => {
+                // this.showDialog(data);
+            });
+            this.hotspots.on(HotspotEditorEvents.EditHotspot, (data: HotspotData) => {
+                this.showDialog(data);
+            });
         });
 
         this.$el.find(".load-image-btn").on("click", (evt: JQuery.ClickEvent) => {
@@ -135,6 +129,8 @@ export class BuilderView extends View {
                     const imageElement: HTMLImageElement = new Image();
                     imageElement.src = desc.fileContent;
                     this.$imageDiv.html(imageElement);
+                    this.$imageDiv.css({ border: "none" });
+
                     const $image: JQuery<HTMLImageElement> = this.$imageDiv.find("img");
                     $image.attr("id", this.id).addClass(this.viewId);
 
@@ -152,11 +148,6 @@ export class BuilderView extends View {
                 }
             });
         });
-
-        
-        this.installOpenLocalImageHandler((desc: Utils.FileDescriptor) => {
-            this.loadImage(desc);
-        });
     }
 
 
@@ -166,7 +157,7 @@ export class BuilderView extends View {
         };
     }
 
-    async loadImage (desc: Utils.FileDescriptor): Promise<boolean> {
+    async loadImageContent (desc: Utils.FileDescriptor): Promise<boolean> {
         if (desc && desc.fileContent) {
             const imageElement: HTMLImageElement = new Image();
             imageElement.src = desc.fileContent;

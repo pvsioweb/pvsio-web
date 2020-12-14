@@ -43,7 +43,6 @@ import { Coords, MouseEvents, WidgetEVO, WidgetOptions } from "./WidgetEVO";
 import { Timer } from "../../../../util/Timer"
 import { ActionsQueue, ActionCallback } from "../ActionsQueue";
 import { Connection } from "../../../../env/Connection";
-import { dimColor } from "../../../../env/Utils";
 
 const CLICK_RATE = 250; // 250 milliseconds, default interval for repeating button clicks when the button is pressed and held down
                             // going below 250ms may cause multiple unintended activations when pressing the button
@@ -61,9 +60,7 @@ export interface ButtonOptions extends WidgetOptions {
     functionText?: string,
     customFunctionText?: string,
     rate?: number,
-    dblclick_timeout?: number,
-    callback?: ActionCallback,
-    connection?: Connection
+    dblclick_timeout?: number
 }
 
 export class ButtonEVO extends WidgetEVO {

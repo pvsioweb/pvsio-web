@@ -50,38 +50,46 @@ export interface DialogOptions {
     hidden?: boolean
 }
 export function createDialog (data: DialogOptions): JQuery<HTMLElement> {
-    const dialogView: string = Handlebars.compile(dialogTemplate, { noEscape: true })(data);
-    // remove old dialog, if any
-    $("body").find("#pvsioweb-modal-center").remove();
-    // append new dialog
-    $("body").append(dialogView);
-    return $("body").find("#pvsioweb-modal-center");
+    if (data) {
+        const dialogView: string = Handlebars.compile(dialogTemplate, { noEscape: true })({
+            dialogId: "pvsioweb-modal", 
+            ...data
+        });
+        // remove old dialog, if any
+        $("body").find("#pvsioweb-modal").remove();
+        // append new dialog
+        $("body").append(dialogView);
+    }
+    return $("body").find("#pvsioweb-modal");
 }
 export function revealDialog (): JQuery<HTMLElement> {
-    return $("body").find("#pvsioweb-modal-center").css("display", "block");
+    return $("body").find("#pvsioweb-modal").css("display", "block");
+}
+export function setDialogTitle (title: string): JQuery<HTMLElement> {
+    return $("body").find("#pvsioweb-modal-title").html(title);
 }
 export const DBLCLICK_TIMEOUT: number = 300; //ms -- if two consecutive clicks are registered in a time frame lower than this timeout, then it's a double click
 export const dialogTemplate: string = `
-<div class="modal fade show" id="{{#if id}}{{id}}{{else}}pvsioweb-modal-center{{/if}}" tabindex="-1" role="dialog" aria-labelledby="{{id}}-title" aria-hidden="true" style="display:{{#if hidden}}none{{else}}block{{/if}}; opacity:0.98;">
+<div class="modal fade show" id="{{dialogId}}" tabindex="-1" role="dialog" aria-labelledby="{{dialogId}}-title" aria-hidden="true" style="display:{{#if hidden}}none{{else}}block{{/if}}; opacity:0.98;">
     <div class="modal-dialog-shadow" style="width: 100%; height: 100%; position: absolute; background: black; opacity: 0.8;"></div>
     <div class="modal-dialog modal-dialog-centered{{#if largeModal}} modal-lg{{/if}}" role="document">
         <div class="modal-content">
             <div class="modal-header">
-            <h5 class="modal-title" id="{{id}}-title">{{title}}</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true" class="cancel-btn">&times;</span>
-            </button>
+                <h5 class="modal-title tile" id="{{dialogId}}-title">{{title}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="cancel-btn">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 {{content}}
             </div>
             <div class="modal-footer">
-            {{#if buttons}}
-            {{buttons}}
-            {{else}}
-                <button type="button" class="cancel-btn btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="ok-btn btn btn-primary">Ok</button>
-            {{/if}}
+                {{#if buttons}}
+                {{buttons}}
+                {{else}}
+                    <button type="button" class="cancel-btn btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="ok-btn btn btn-primary">Ok</button>
+                {{/if}}
             </div>
         </div>
     </div>
@@ -203,9 +211,10 @@ export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth
  * @author Patrick Oladimeji
  * @date 6/4/13 15:35:54 PM
  */
-export function uuid () {
+export function uuid (format?: string) {
     let d: number = new Date().getTime();
-    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c: string) => {
+    format = format || 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
+    const uuid = format.replace(/[xy]/g, (c: string) => {
         const r: number = ((d + Math.random() * 16) % 16) | 0;
         d = Math.floor(d / 16);
         return (c === 'x' ? r : (r & 0x7 | 0x8)).toString(16);
@@ -278,6 +287,8 @@ export function desc2fname (desc: FileDescriptor): string | null {
     }
     return null;
 }
+export const whiteGif: string = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+export const blackGif: string = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
 
 export function isHiddenFile (fname: string): boolean {
     return fname ? getFileName(fname).indexOf(".") === 0 : false;

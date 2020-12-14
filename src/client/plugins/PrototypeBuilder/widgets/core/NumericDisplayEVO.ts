@@ -30,14 +30,22 @@
  *
  */
 
-import { BasicDisplayEVO } from './BasicDisplayEVO';
+import { BasicDisplayEVO, DisplayOptions } from './BasicDisplayEVO';
 import { digitsTemplate } from './Templates';
-import { Coords, WidgetOptions, WidgetStyle } from './WidgetEVO';
+import { Coords } from './WidgetEVO';
 
 const selectedFontSize = 1.076; // ratio selectedFont/normalFont for integer digits
 
-export interface NumericDisplayOptions extends WidgetOptions {
-    cursorName?: string
+export interface NumericDisplayOptions extends DisplayOptions, NumericDisplayStyle {
+    cursorName?: string,
+};
+
+export interface NumericDisplayStyle {
+    decimalFontSize?: number | string,
+    decimalLetterSpacing?: number | string,
+    maxDecimalDigits?: number,
+    maxIntegerDigits?: number
+    decimalPointOffset?: number
 }
 
 export class NumericDisplayEVO extends BasicDisplayEVO {
@@ -83,7 +91,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
      * @memberof module:NumericDisplayEVO
      * @instance
      */
-    constructor (id: string, coords: Coords, opt?) {
+    constructor (id: string, coords: Coords, opt?: NumericDisplayOptions) {
         super(id, coords, opt);
 
         opt = opt || {};        
@@ -103,10 +111,12 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         this.style["letter-spacing"] = opt.letterSpacing || (typeof this.style["font-size"] === "string" ? parseFloat(this.style["font-size"]) : this.style["font-size"]);
         this.style["decimal-font-size"] = opt.decimalFontSize || (typeof this.style["font-size"] === "string" ? parseFloat(this.style["font-size"]) * 0.8 : this.style["font-size"] * 0.8);
         this.style["decimal-letter-spacing"] = opt.decimalLetterSpacing || parseFloat(this.style["decimal-font-size"]) * 0.8;
-        this.maxDecimalDigits = (isNaN(parseInt(opt.maxDecimalDigits))) ? 2 : parseInt(opt.maxDecimalDigits);
+        this.maxDecimalDigits = isNaN(parseInt(`${opt.maxDecimalDigits}`)) ? 2 : parseInt(`${opt.maxDecimalDigits}`);
 
         //  this.maxDecimalDigits = (isNaN(parseInt(opt.maxDecimalDigits))) ? Math.floor(0.25 * this.width / parseFloat(this.style["decimal-letter-spacing"])) : parseInt(opt.maxDecimalDigits);
-        this.maxIntegerDigits = (isNaN(parseInt(opt.maxIntegerDigits))) ? Math.floor((this.width - this.maxDecimalDigits * parseFloat(this.style["decimal-letter-spacing"])) / parseFloat(this.style["letter-spacing"])) : parseInt(opt.maxIntegerDigits);
+        this.maxIntegerDigits = isNaN(parseInt(`${opt.maxIntegerDigits}`)) ? 
+            Math.floor((this.width - this.maxDecimalDigits * parseFloat(this.style["decimal-letter-spacing"])) / parseFloat(`${this.style["letter-spacing"]}`)) 
+                : parseInt(`${opt.maxIntegerDigits}`);
         this.decimalPointOffset = opt.decimalPointOffset || 0;
     }
 
@@ -150,7 +160,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
 
             // set content
             if (typeof state === "string" || typeof state === "number") {
-                var val = state;
+                const val: string = `${state}`;
                 state = {};
                 state[this.displayKey] = val;
             }
@@ -215,28 +225,30 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                 }
                 //  console.log(desc);
                 const point_style = {
-                    left: ((desc.max_integer_digits) * parseFloat(this.style["letter-spacing"]) + (this.decimalPointOffset)).toFixed(2),
-                    width: (parseFloat(this.style["letter-spacing"]) / 2).toFixed(2),
+                    left: ((desc.max_integer_digits) * parseFloat(`${this.style["letter-spacing"]}`) + (this.decimalPointOffset)).toFixed(2),
+                    width: (parseFloat(`${this.style["letter-spacing"]}`) / 2).toFixed(2),
                     height: this.height - 2 * borderWidth,
-                    "margin-left": (-parseFloat(this.style["letter-spacing"]) / 32).toFixed(2),
+                    "margin-left": (-parseFloat(`${this.style["letter-spacing"]}`) / 32).toFixed(2),
                     "font-size": parseFloat(this.style["decimal-font-size"]).toFixed(2),
                     viz: desc.point
                 };
                 const whole_style = {
                     digits: desc.whole_zeropadding.concat(desc.whole),
-                    width: (desc.max_integer_digits) * parseFloat(this.style["letter-spacing"]),
+                    width: (desc.max_integer_digits) * parseFloat(`${this.style["letter-spacing"]}`),
                     height: this.height - 2 * borderWidth,
+                    "margin-top": `-${borderWidth}px`,
                     left: parseFloat(point_style.left) - parseFloat(point_style.width),
-                    "letter-spacing": parseFloat(this.style["letter-spacing"]).toFixed(2),
+                    "letter-spacing": parseFloat(`${this.style["letter-spacing"]}`).toFixed(2),
                     color: this.style.color,
                     "background-color": this.style["background-color"],
-                    "padding-left": (((desc.max_integer_digits) - (desc.whole.length) - (desc.whole_zeropadding.length)) * parseFloat(this.style["letter-spacing"])).toFixed(2)
+                    "padding-left": (((desc.max_integer_digits) - (desc.whole.length) - (desc.whole_zeropadding.length)) * parseFloat(`${this.style["letter-spacing"]}`)).toFixed(2)
                 };
                 const frac_digits: { val: string, selected: boolean, "font-size": number }[] = desc.frac.concat(desc.frac_zeropadding);
                 const frac_style = {
                     digits: frac_digits,
                     width: ((desc.max_decimal_digits) * parseFloat(this.style["decimal-letter-spacing"])).toFixed(2),
                     height: this.height - 2 * borderWidth,
+                    "margin-top": `-${borderWidth / 2}px`,
                     left: (parseFloat(point_style.left) + parseFloat(point_style.width)).toFixed(2),
                     "letter-spacing": parseFloat(this.style["decimal-letter-spacing"]).toFixed(2),
                     color: this.style.color,
@@ -265,7 +277,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
      */
     renderSample (): void {
         let st = {};
-        st[this.displayKey] = "_12.3";
+        st[this.displayKey] = "123.4";
         st["demoCursor"] = 2;
         this.render(st, { cursorName: "demoCursor", borderWidth: 2, fontColor: "white", backgroundColor: "black" });
     }

@@ -187,11 +187,12 @@ class MoveHandler extends HotspotHandler {
 
             const widgetCoords: Coords = JSON.parse(this.$marker.attr("coords"));
             const finalWidgetCoords: Coords = {
-                left: widgetCoords.left + offset.left,
-                top: widgetCoords.top + offset.top,
-                width: widgetCoords.width,
-                height: widgetCoords.height
-            };                
+                left: +(widgetCoords.left + offset.left).toFixed(0),
+                top: +(widgetCoords.top + offset.top).toFixed(0),
+                width: +(widgetCoords.width).toFixed(0),
+                height: +(widgetCoords.height).toFixed(0)
+            };
+
             this.$marker.attr("coords", JSON.stringify(finalWidgetCoords));
             this.$marker.find(".shader").css({ cursor: "pointer" });
         }
@@ -201,6 +202,9 @@ class MoveHandler extends HotspotHandler {
 // main class
 export class HotspotEditor extends Backbone.View {
     protected widgetManager: WidgetManager;
+
+    static readonly MIN_WIDTH: number = 10;
+    static readonly MIN_HEIGHT: number = 10;
 
     protected mode: "create" | "move" | "resize" | null = null;
 
@@ -406,58 +410,110 @@ export class HotspotEditor extends Backbone.View {
                     const $shader: JQuery<HTMLElement> = $activeMarker.find(".shader");
                     const $tl: JQuery<HTMLElement> = $activeMarker.find(".tl");
 
-                    // install mouse handlers on shader
-                    $shader.on("mouseover", (evt: JQuery.MouseOverEvent) => {
-                        if (this.mode === null) {
-                            // put marker under the cursor on top of the other markers
-                            $(".marker").css("z-index", zIndex.NORMAL);
-                            $activeMarker.css("z-index", zIndex.FRONT);
-                            // increase visibility of the marker under the cursor
-                            $shader.css({ opacity: opacity.HIGH });
-                        }
-                    }).on("mouseout", (evt: JQuery.MouseOutEvent) => {
-                        if (this.mode === null) {
-                            $activeMarker.css("z-index", zIndex.NORMAL);
-                            $shader.css({ opacity: opacity.LOW });
-                        }
-                    }).on("mousedown", (evt: JQuery.MouseDownEvent) => {
-                        if (this.mode === null) {
-                            this.mode = "move"; // start move mode
-                            this.moveHandler.activate({ $activeMarker });
-                            this.moveHandler.onMouseDown(evt);
-                        }
-                    }).on("mousemove", (evt: JQuery.MouseMoveEvent) => {
-                        switch (this.mode) {
-                            case "move": {
-                                this.hideCoords();
-                                this.moveHandler.onMouseMove(evt);
-                                break; 
+                    const width: number = parseFloat($activeMarker.css("width"));
+                    const height: number = parseFloat($activeMarker.css("height"));
+
+                    if (height < HotspotEditor.MIN_HEIGHT && width < HotspotEditor.MIN_WIDTH) {
+                        this.$marker.remove();
+                        this.$marker = null;
+                    } else {
+                        // install mouse handlers on shader
+                        $shader.on("mouseover", (evt: JQuery.MouseOverEvent) => {
+                            if (this.mode === null) {
+                                // put marker under the cursor on top of the other markers
+                                $(".marker").css("z-index", zIndex.NORMAL);
+                                $activeMarker.css("z-index", zIndex.FRONT);
+                                // increase visibility of the marker under the cursor
+                                $shader.css({ opacity: opacity.HIGH });
                             }
-                            case "resize": {
-                                this.hideCoords(); 
-                                this.resizeHandler.onMouseMove(evt); 
-                                break; 
+                        }).on("mouseout", (evt: JQuery.MouseOutEvent) => {
+                            if (this.mode === null) {
+                                $activeMarker.css("z-index", zIndex.NORMAL);
+                                $shader.css({ opacity: opacity.LOW });
                             }
-                            default: {
-                                break
+                        }).on("mousedown", (evt: JQuery.MouseDownEvent) => {
+                            if (this.mode === null) {
+                                this.mode = "move"; // start move mode
+                                this.moveHandler.activate({ $activeMarker });
+                                this.moveHandler.onMouseDown(evt);
                             }
-                        }
-                    }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
-                        // check if this is a double click
-                        if (this.isDoubleClick()) {
-                            // trigger edit event
-                            const hotspotData: HotspotData = {
-                                id: $activeMarker.attr("id"),
-                                coords: JSON.parse($activeMarker.attr("coords"))
-                            };    
-                            this.trigger(HotspotEditorEvents.EditHotspot, hotspotData);
-                        } else {
+                        }).on("mousemove", (evt: JQuery.MouseMoveEvent) => {
+                            switch (this.mode) {
+                                case "move": {
+                                    this.hideCoords();
+                                    this.moveHandler.onMouseMove(evt);
+                                    break; 
+                                }
+                                case "resize": {
+                                    this.hideCoords(); 
+                                    this.resizeHandler.onMouseMove(evt); 
+                                    break; 
+                                }
+                                default: {
+                                    break
+                                }
+                            }
+                        }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
+                            // check if this is a double click
+                            if (this.isDoubleClick()) {
+                                // trigger edit event
+                                const hotspotData: HotspotData = {
+                                    id: $activeMarker.attr("id"),
+                                    coords: JSON.parse($activeMarker.attr("coords"))
+                                };    
+                                this.trigger(HotspotEditorEvents.EditHotspot, hotspotData);
+                            } else {
+                                switch (this.mode) {
+                                    case "move": {
+                                        const coords: Coords = getMouseCoords(evt, this.$el);
+                                        this.showCoords(coords);
+                                        this.moveHandler.onMouseUp(evt);
+                                        break;
+                                    }
+                                    case "resize": {
+                                        const coords: Coords = getMouseCoords(evt, this.$el);
+                                        this.showCoords(coords);
+                                        this.resizeHandler.onMouseUp(evt);
+                                        break;
+                                    }
+                                    default: {
+                                        break;
+                                    }
+                                }
+                            }
+                            this.mode = null; // end mode
+                        });
+
+                        // install mouse handlers on hot corners
+                        $tl.on("mousedown", (evt: JQuery.MouseDownEvent) => {
+                            if (this.mode === null) {
+                                this.mode = "resize"; // start resize mode
+                                this.resizeHandler.activate({ $activeMarker, $activeCorner: $tl });
+                                this.resizeHandler.onMouseDown(evt);
+                            }
+                        }).on("mousemove", (evt: JQuery.MouseMoveEvent) => {
+                            switch (this.mode) {
+                                case "move": {
+                                    this.hideCoords();
+                                    this.moveHandler.onMouseMove(evt);
+                                    break;
+                                }
+                                case "resize": {
+                                    this.hideCoords();
+                                    this.resizeHandler.onMouseMove(evt); 
+                                    break;
+                                }
+                                default: {
+                                    break;
+                                }
+                            }
+                        }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
                             switch (this.mode) {
                                 case "move": {
                                     const coords: Coords = getMouseCoords(evt, this.$el);
                                     this.showCoords(coords);
-                                    this.moveHandler.onMouseUp(evt);
-                                    break;
+                                    this.moveHandler.onMouseUp(evt); 
+                                    break; 
                                 }
                                 case "resize": {
                                     const coords: Coords = getMouseCoords(evt, this.$el);
@@ -469,82 +525,35 @@ export class HotspotEditor extends Backbone.View {
                                     break;
                                 }
                             }
-                        }
-                        this.mode = null; // end mode
-                    });
+                            this.resizeHandler.deactivate();
+                            this.mode = null; // end move mode
+                            
+                            const coords: Coords = getMouseCoords(evt, this.$el);
+                            this.showCoords(coords);
+                        });
 
-                    // install mouse handlers on hot corners
-                    $tl.on("mousedown", (evt: JQuery.MouseDownEvent) => {
-                        if (this.mode === null) {
-                            this.mode = "resize"; // start resize mode
-                            this.resizeHandler.activate({ $activeMarker, $activeCorner: $tl });
-                            this.resizeHandler.onMouseDown(evt);
-                        }
-                    }).on("mousemove", (evt: JQuery.MouseMoveEvent) => {
-                        switch (this.mode) {
-                            case "move": {
-                                this.hideCoords();
-                                this.moveHandler.onMouseMove(evt);
-                                break;
-                            }
-                            case "resize": {
-                                this.hideCoords();
-                                this.resizeHandler.onMouseMove(evt); 
-                                break;
-                            }
-                            default: {
-                                break;
-                            }
-                        }
-                    }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
-                        switch (this.mode) {
-                            case "move": {
-                                const coords: Coords = getMouseCoords(evt, this.$el);
-                                this.showCoords(coords);
-                                this.moveHandler.onMouseUp(evt); 
-                                break; 
-                            }
-                            case "resize": {
-                                const coords: Coords = getMouseCoords(evt, this.$el);
-                                this.showCoords(coords);
-                                this.resizeHandler.onMouseUp(evt);
-                                break;
-                            }
-                            default: {
-                                break;
-                            }
-                        }
-                        this.resizeHandler.deactivate();
-                        this.mode = null; // end move mode
-                        
-                        const coords: Coords = getMouseCoords(evt, this.$el);
-                        this.showCoords(coords);
-                    });
+                        // adjust corners
+                        $activeMarker.find(".corner").css({ display: "block" });
+                        const dragEndPosition: Coords = getMouseCoords(evt, this.$el);
+                        $activeMarker.attr("coords", JSON.stringify({
+                            top: (this.anchorCoords.top < dragEndPosition.top) ? this.anchorCoords.top : dragEndPosition.top,
+                            left: (this.anchorCoords.left < dragEndPosition.left) ? this.anchorCoords.left : dragEndPosition.left,
+                            width,
+                            height
+                        }));
 
-                    const width: number = parseFloat($activeMarker.css("width"));
-                    const height: number = parseFloat($activeMarker.css("height"));
+                        // move hotspot on the front
+                        $activeMarker.css("z-index", zIndex.FRONT);
+                        $shader.css("opacity", opacity.HIGH);
 
-                    // adjust corners
-                    $activeMarker.find(".corner").css({ display: "block" });
-                    const dragEndPosition: Coords = getMouseCoords(evt, this.$el);
-                    $activeMarker.attr("coords", JSON.stringify({
-                        top: (this.anchorCoords.top < dragEndPosition.top) ? this.anchorCoords.top : dragEndPosition.top,
-                        left: (this.anchorCoords.left < dragEndPosition.left) ? this.anchorCoords.left : dragEndPosition.left,
-                        width,
-                        height
-                    }));
-
-                    // move hotspot on the front
-                    $activeMarker.css("z-index", zIndex.FRONT);
-                    $shader.css("opacity", opacity.HIGH);
-
-                    // end creation
-                    const hotspotData: HotspotData = {
-                        id: $activeMarker.attr("id"),
-                        coords: JSON.parse($activeMarker.attr("coords"))
-                    };
-                    this.trigger(HotspotEditorEvents.DidCreateHotspot, hotspotData);
-                    this.$marker = null;
+                        // end creation
+                        const hotspotData: HotspotData = {
+                            id: $activeMarker.attr("id"),
+                            coords: JSON.parse($activeMarker.attr("coords"))
+                        };
+                        this.trigger(HotspotEditorEvents.DidCreateHotspot, hotspotData);
+                        this.$marker = null;
+                    }
                 }
                 this.anchorCoords = null;
             }

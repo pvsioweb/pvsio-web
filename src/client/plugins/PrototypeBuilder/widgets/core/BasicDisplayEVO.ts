@@ -27,7 +27,11 @@
  *
  */
 
-import { Coords, WidgetEVO, WidgetOptions } from "./WidgetEVO";
+import { Coords, WidgetEVO, WidgetOptions, WidgetStyle } from "./WidgetEVO";
+
+export interface DisplayOptions extends WidgetOptions, WidgetStyle {
+    displayKey?: string
+}
 
 export class BasicDisplayEVO extends WidgetEVO {
     widgetKeys = [ "displayKey" ];
@@ -63,21 +67,19 @@ export class BasicDisplayEVO extends WidgetEVO {
      * @memberof module:BasicDisplayEVO
      * @instance
      */
-    constructor (id: string, coords: Coords, opt?) {
+    constructor (id: string, coords: Coords, opt?: DisplayOptions) {
         super(id, coords, opt);
 
         opt = opt || {};
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-        opt.type = opt.type || "display";
-        opt.backgroundColor = opt.backgroundColor || "transparent";
-        opt.cursor = opt.cursor || "default";
-        opt.overflow = opt.overflow || "hidden";
+        this.type = opt.type || "display";
+        this.style["background-color"] = opt.backgroundColor || "transparent";
+        this.style.cursor = opt.cursor || "default";
+        this.style.overflow = opt.overflow || "hidden";
         
         // set display key
-        this.displayKey = (typeof opt.displayKey === "string") ? opt.displayKey : id;
-
-        return this;
+        this.displayKey = opt.displayKey || id;
     }
 
     /**

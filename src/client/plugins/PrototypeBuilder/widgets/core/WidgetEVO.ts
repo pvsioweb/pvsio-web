@@ -11,6 +11,8 @@
 import { genericWidgetTemplate as widget_template } from "./Templates";
 import * as Utils from '../../../../env/Utils';
 import { dimColor } from "../../../../env/Utils";
+import { ActionCallback } from "../ActionsQueue";
+import { Connection } from "../../../../env/Connection";
 
 // const normalised = {
 //     backgroundcolor: "backgroundColor",
@@ -98,7 +100,8 @@ export interface WidgetStyle {
     overlayColor?: string,
     transitionTimingFunction?: "ease-in" | "ease-out",
     transformOrigin?: "center"
-    zIndex?: number | string
+    zIndex?: number | string,
+    letterSpacing?: number | string
 }
 export interface HtmlStyle {
     position?: "absolute" | "relative",
@@ -119,6 +122,7 @@ export interface HtmlStyle {
     "margin-left"?: number | string,
     "margin-top"?: number | string,
     "z-index"?: number | string,
+    "letter-spacing"?: number | string,
     // animation options
     overlayColor?: string,
     duration?: number | string,
@@ -131,7 +135,9 @@ export interface WidgetOptions extends WidgetStyle {
     visibleWhen?: string,
     overlayColor?: string,
     type?: string, // widget type, e.g., button, display
-    widget_template?: string // HTML template for rendering the widget
+    widget_template?: string, // HTML template for rendering the widget
+    callback?: ActionCallback,
+    connection?: Connection
 };
 
 export type MouseEvents = "click" | "dblclick" | "press/release";
@@ -169,6 +175,9 @@ export abstract class WidgetEVO {
     readonly fontPadding: number = 6;
     protected rendered?: boolean = false;
 
+    static uuid (): string {
+        return "wdg_" + Utils.uuid("xxxx");    
+    }
     /**
      * @function <a name="ButtonEVO">ButtonEVO</a>
      * @description Constructor.
@@ -214,32 +223,29 @@ export abstract class WidgetEVO {
 
         // visual style
         opt.borderWidth = +opt.borderWidth || 0;
-        opt.fontSize = !isNaN(+opt.fontSize) && +opt.fontSize < this.height - opt.borderWidth - this.fontPadding ? 
+        opt.fontSize = !isNaN(parseFloat(`${opt.fontSize}`)) && parseFloat(`${opt.fontSize}`) < this.height - opt.borderWidth - this.fontPadding ? 
             opt.fontSize 
                 : this.height - opt.borderWidth - this.fontPadding;
-        opt.borderRadius = (opt.borderRadius) ?
-                                ((typeof opt.borderRadius === "string" && opt.borderRadius.indexOf("px") >= 0) ? opt.borderRadius : opt.borderRadius.toString() + "px")
-                                : 0;
         opt.borderStyle = (opt.borderStyle) ? opt.borderStyle : (opt.borderRadius || opt.borderWidth) ? "solid" : "none";
         opt.borderWidth = (!isNaN(+opt.borderWidth)) ? opt.borderWidth : (opt.borderColor) ? 2 : 0;
         this.style = {};
         this.style["background-color"] = opt.backgroundColor || "transparent";
-        this.style["font-size"] = opt.fontSize + "px";
+        this.style["font-size"] = parseFloat(`${opt.fontSize}`) + "px";
         this.style["font-family"] = opt.fontFamily || "sans-serif";
         this.style.color = opt.fontColor || "white";
         this.style["text-align"] = opt.align || "center";
         this.style["border-width"] = opt.borderWidth + "px";
-        this.style["border-style"] = opt.borderStyle;
-        this.style["border-radius"] = (typeof opt.borderRadius === "string" && opt.borderRadius.indexOf("px") >= 0) ? opt.borderRadius : `${opt.borderRadius}px`;
+        this.style["border-style"] = opt.borderStyle || "none";
+        this.style["border-radius"] = (isNaN(parseFloat(`${opt.borderRadius}`))) ? "0px" : `${parseFloat(`${opt.borderRadius}`)}px`;
         this.style["border-color"] = opt.borderColor || "steelblue";
         this.style.overflow = opt.overflow || "hidden";
-        this.style["margin-left"] = (isNaN(parseFloat(`${opt.marginLeft}`))) ? "0px" : `${opt.marginLeft}px`;
-        this.style["margin-top"] = (isNaN(parseFloat(`${opt.marginTop}`))) ? "0px" : `${opt.marginTop}px`;
+        this.style["margin-left"] = (isNaN(parseFloat(`${opt.marginLeft}`))) ? "0px" : `${parseFloat(`${opt.marginLeft}`)}px`;
+        this.style["margin-top"] = (isNaN(parseFloat(`${opt.marginTop}`))) ? "0px" : `${parseFloat(`${opt.marginTop}`)}px`;
         this.style["white-space"] = "nowrap";
-        this.style.opacity = (typeof opt.opacity === "number" && isNaN(opt.opacity)) ? 0.9 : opt.opacity;
+        this.style.opacity = isNaN(parseFloat(`${opt.opacity}`)) ? 1 : parseFloat(`${opt.opacity}`);
         this.style.blinking = opt.blinking || false;
         this.style.cursor = opt.cursor || "default";
-        this.style.overlayColor = opt.overlayColor;
+        this.style.overlayColor = opt.overlayColor || "transparent";
         this.style["z-index"] = opt.zIndex || 0;
 
         this.widget_template = opt.widget_template || widget_template;
