@@ -247,8 +247,8 @@ class MT32Demo {
             top: 0,
             left: 0
         }, { connection: this.connection,
-            softLabel: "",
-            customFunctionText: "set_mt32_off",
+            label: "",
+            customFunction: "set_mt32_off",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
@@ -262,8 +262,8 @@ class MT32Demo {
             top: 0,
             left: 0
         }, { connection: this.connection,
-            softLabel: "",
-            customFunctionText: "set_mt32_on_battery",
+            label: "",
+            customFunction: "set_mt32_on_battery",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
@@ -277,8 +277,8 @@ class MT32Demo {
             top: 0,
             left: 0
         }, { connection: this.connection,
-            softLabel: "",
-            customFunctionText: "set_mt32_charging",
+            label: "",
+            customFunction: "set_mt32_charging",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
@@ -292,8 +292,8 @@ class MT32Demo {
             top: 0,
             left: 0
         }, { connection: this.connection,
-            softLabel: "",
-            customFunctionText: "set_mt32_fully_charged",
+            label: "",
+            customFunction: "set_mt32_fully_charged",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
@@ -307,8 +307,8 @@ class MT32Demo {
             top: 0,
             left: 0
         }, { connection: this.connection,
-            softLabel: "",
-            customFunctionText: "set_mt32_charging_error",
+            label: "",
+            customFunction: "set_mt32_charging_error",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
@@ -324,7 +324,7 @@ class MT32Demo {
             top: 130,
             left: 226
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
@@ -337,7 +337,7 @@ class MT32Demo {
             top: 220,
             left: 226
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
@@ -350,7 +350,7 @@ class MT32Demo {
             top: 310,
             left: 226
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
@@ -363,7 +363,7 @@ class MT32Demo {
             top: 402,
             left: 226
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
@@ -376,7 +376,7 @@ class MT32Demo {
             top: 495,
             left: 228
         }, { connection: this.connection,
-            softLabel: "!",
+            label: "!",
             backgroundColor: "crimson",
             opacity: "0.8",
             fontSize: 48,
@@ -390,7 +390,7 @@ class MT32Demo {
             top: 582,
             left: 226
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
@@ -403,7 +403,7 @@ class MT32Demo {
             top: 314,
             left: 277
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -416,7 +416,7 @@ class MT32Demo {
             top: 404,
             left: 366
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -429,7 +429,7 @@ class MT32Demo {
             top: 496,
             left: 458
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -442,7 +442,7 @@ class MT32Demo {
             top: 314,
             left: 277
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -455,7 +455,7 @@ class MT32Demo {
             top: 314,
             left: 459
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -468,8 +468,8 @@ class MT32Demo {
             top: 592,
             left: 281
         },{ connection: this.connection,
-            softLabel: "",
-            customFunctionText: "click_confirm",
+            label: "",
+            customFunction: "click_confirm",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -482,7 +482,7 @@ class MT32Demo {
             top: 494,
             left: 277
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -495,7 +495,7 @@ class MT32Demo {
             top: 314,
             left: 277
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -508,7 +508,7 @@ class MT32Demo {
             top: 314,
             left: 458
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -521,7 +521,7 @@ class MT32Demo {
             top: 402,
             left: 277
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -534,7 +534,7 @@ class MT32Demo {
             top: 314,
             left: 275
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -547,7 +547,7 @@ class MT32Demo {
             top: 314,
             left: 458
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -560,7 +560,7 @@ class MT32Demo {
             top: 404,
             left: 275
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -573,7 +573,7 @@ class MT32Demo {
             top: 404,
             left: 458
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -586,7 +586,7 @@ class MT32Demo {
             top: 492,
             left: 275
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -599,7 +599,7 @@ class MT32Demo {
             top: 585,
             left: 550
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             borderColor: "white",
             opacity: "0.2",
@@ -612,7 +612,7 @@ class MT32Demo {
             top: 492,
             left: 230
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "#000066",
@@ -625,7 +625,7 @@ class MT32Demo {
             top: 389,
             left: 230
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -638,7 +638,7 @@ class MT32Demo {
             top: 224,
             left: 287
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "#000066",
@@ -651,7 +651,7 @@ class MT32Demo {
             top: 305,
             left: 287
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "#000066",
@@ -664,7 +664,7 @@ class MT32Demo {
             top: 382,
             left: 287
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "#000066",
@@ -675,7 +675,7 @@ class MT32Demo {
             width: 0,
             height: 0
         }, { connection: this.connection,
-            customFunctionText: "tick",
+            customFunction: "tick",
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.home = new TouchscreenButton("mt32_home", {
@@ -696,8 +696,8 @@ class MT32Demo {
             top: 128,
             left: 226
         }, { connection: this.connection,
-            softLabel: "",
-            functionText: "back",
+            label: "",
+            functionName: "back",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
@@ -742,7 +742,7 @@ class MT32Demo {
             fontColor: "white",
             fontSize: 12,
             parent: "monitoringScreen",
-            displayKey: "",
+            displayName: "",
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.choose_physio = new TouchscreenButton("mt32_choose_physio", {
@@ -751,7 +751,7 @@ class MT32Demo {
             top: 150,
             left: 227
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -764,7 +764,7 @@ class MT32Demo {
             top: 406,
             left: 297
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -777,7 +777,7 @@ class MT32Demo {
             top: 406,
             left: 365
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -790,7 +790,7 @@ class MT32Demo {
             top: 406,
             left: 434
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -803,7 +803,7 @@ class MT32Demo {
             top: 475,
             left: 297
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -816,7 +816,7 @@ class MT32Demo {
             top: 475,
             left: 365
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -829,7 +829,7 @@ class MT32Demo {
             top: 475,
             left: 434
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -842,7 +842,7 @@ class MT32Demo {
             top: 544,
             left: 297
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -855,7 +855,7 @@ class MT32Demo {
             top: 544,
             left: 365
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -868,7 +868,7 @@ class MT32Demo {
             top: 544,
             left: 434
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -881,7 +881,7 @@ class MT32Demo {
             top: 544,
             left: 503
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -894,7 +894,7 @@ class MT32Demo {
             top: 475,
             left: 503
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -907,8 +907,8 @@ class MT32Demo {
             top: 612,
             left: 229
         }, { connection: this.connection,
-            softLabel: "",
-            functionText: "confirm",
+            label: "",
+            functionName: "confirm",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -921,8 +921,8 @@ class MT32Demo {
             top: 588,
             left: 461
         }, { connection: this.connection,
-            softLabel: "",
-            functionText: "confirm",
+            label: "",
+            functionName: "confirm",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -935,8 +935,8 @@ class MT32Demo {
             top: 588,
             left: 278
         }, { connection: this.connection,
-            softLabel: "",
-            functionText: "confirm",
+            label: "",
+            functionName: "confirm",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -949,8 +949,8 @@ class MT32Demo {
             top: 588,
             left: 370
         }, { connection: this.connection,
-            softLabel: "",
-            functionText: "back",
+            label: "",
+            functionName: "back",
             backgroundColor: "steelblue",
             opacity: "0.2",
             borderColor: "white",
@@ -965,7 +965,7 @@ class MT32Demo {
             top: 177,
             left: 66
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "black",
             opacity: 0,
             borderColor: "#000066",
@@ -981,7 +981,7 @@ class MT32Demo {
             top: 709,
             left: 66
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "black",
             opacity: "0",
             borderColor: "#000066",
@@ -996,8 +996,8 @@ class MT32Demo {
             top: 588,
             left: 277
         }, { connection: this.connection,
-            softLabel: "",
-            customFunctionText: "click_confirm",
+            label: "",
+            customFunction: "click_confirm",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -1010,8 +1010,8 @@ class MT32Demo {
             top: 588,
             left: 277
         }, { connection: this.connection,
-            softLabel: "",
-            customFunctionText: "click_confirm",
+            label: "",
+            customFunction: "click_confirm",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -1024,7 +1024,7 @@ class MT32Demo {
             top: 177,
             left: 230
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "white",
             opacity: "0",
             borderColor: "#000066",
@@ -1037,7 +1037,7 @@ class MT32Demo {
             top: 282,
             left: 230
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "white",
             opacity: "0",
             borderColor: "#000066",
@@ -1050,7 +1050,7 @@ class MT32Demo {
             top: 602,
             left: 332
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "white",
             opacity: "0",
             borderColor: "#000066",
@@ -1063,7 +1063,7 @@ class MT32Demo {
             top: 602,
             left: 434
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "white",
             opacity: "0",
             borderColor: "#000066",
@@ -1076,7 +1076,7 @@ class MT32Demo {
             top: 602,
             left: 536
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "white",
             opacity: "0",
             borderColor: "#000066",
@@ -1097,7 +1097,7 @@ class MT32Demo {
             top: 352,
             left: 905
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1112,7 +1112,7 @@ class MT32Demo {
             top: 284,
             left: 16
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -1127,7 +1127,7 @@ class MT32Demo {
             top: 182,
             left: 190
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -1140,7 +1140,7 @@ class MT32Demo {
             top: 143,
             left: 1070
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1155,7 +1155,7 @@ class MT32Demo {
             top: 143,
             left: 1197
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1170,7 +1170,7 @@ class MT32Demo {
             top: 463,
             left: 1233
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1185,7 +1185,7 @@ class MT32Demo {
             top: 431,
             left: 63
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -1199,7 +1199,7 @@ class MT32Demo {
             top: 538,
             left: 1198
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1214,8 +1214,8 @@ class MT32Demo {
             top: 453,
             left: 1200
         }, { connection: this.connection,
-            softLabel: "",
-            customFunctionText: "click_continue",
+            label: "",
+            customFunction: "click_continue",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1230,7 +1230,7 @@ class MT32Demo {
             top: 323,
             left: 1250
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1245,7 +1245,7 @@ class MT32Demo {
             top: 10,
             left: 271
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1259,7 +1259,7 @@ class MT32Demo {
             top: 10,
             left: 355
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1273,7 +1273,7 @@ class MT32Demo {
             top: 10,
             left: 462
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1287,7 +1287,7 @@ class MT32Demo {
             top: 181,
             left: 32
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1301,7 +1301,7 @@ class MT32Demo {
             top: 299,
             left: 1158
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1315,7 +1315,7 @@ class MT32Demo {
             top: 78,
             left: 16
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1329,7 +1329,7 @@ class MT32Demo {
             top: 260,
             left: 16
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -1343,7 +1343,7 @@ class MT32Demo {
             top: 263,
             left: 33
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1357,7 +1357,7 @@ class MT32Demo {
             top: 263,
             left: 186
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1371,7 +1371,7 @@ class MT32Demo {
             top: 263,
             left: 268
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1385,7 +1385,7 @@ class MT32Demo {
             top: 263,
             left: 416
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1399,7 +1399,7 @@ class MT32Demo {
             top: 263,
             left: 405
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1413,7 +1413,7 @@ class MT32Demo {
             top: 390,
             left: 274
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -1427,7 +1427,7 @@ class MT32Demo {
             top: 228,
             left: 16
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -1441,8 +1441,8 @@ class MT32Demo {
             top: 291,
             left: 49
         }, { connection: this.connection,
-            softLabel: "",
-            functionText: "select_exam_data_hub",
+            label: "",
+            functionName: "select_exam_data_hub",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -1456,7 +1456,7 @@ class MT32Demo {
             top: 220,
             left: 274
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -1470,7 +1470,7 @@ class MT32Demo {
             top: 275,
             left: 284
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1484,7 +1484,7 @@ class MT32Demo {
             top: 326,
             left: 284
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1498,7 +1498,7 @@ class MT32Demo {
             top: 386,
             left: 277
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1512,7 +1512,7 @@ class MT32Demo {
             top: 48,
             left: 0
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -1526,8 +1526,8 @@ class MT32Demo {
             top: 0,
             left: 77
         }, { connection: this.connection,
-            softLabel: "",
-            customFunctionText: "click_continue",
+            label: "",
+            customFunction: "click_continue",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1541,7 +1541,7 @@ class MT32Demo {
             top: 45,
             left: 65
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             opacity: "0",
             borderColor: "#000066",
             borderRadius: "6px",
@@ -1554,7 +1554,7 @@ class MT32Demo {
             top: 1160,
             left: 274
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -1568,7 +1568,7 @@ class MT32Demo {
             top: 1340,
             left: 1235
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1582,7 +1582,7 @@ class MT32Demo {
             top: 1340,
             left: 1235
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1596,7 +1596,7 @@ class MT32Demo {
             top: 145,
             left: 34
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1610,7 +1610,7 @@ class MT32Demo {
             top: 145,
             left: 179
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1624,7 +1624,7 @@ class MT32Demo {
             top: 290,
             left: 48
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "steelblue",
             opacity: "0",
             borderColor: "#000066",
@@ -1638,7 +1638,7 @@ class MT32Demo {
             top: 145,
             left: 275
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1652,7 +1652,7 @@ class MT32Demo {
             top: 145,
             left: 390
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1666,7 +1666,7 @@ class MT32Demo {
             top: 145,
             left: 32
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1680,7 +1680,7 @@ class MT32Demo {
             top: 1451,
             left: 1220
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1694,7 +1694,7 @@ class MT32Demo {
             top: -335,
             left: 307
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "steelblue",
@@ -1707,7 +1707,7 @@ class MT32Demo {
             top: -266,
             left: 307
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "steelblue",
@@ -1720,7 +1720,7 @@ class MT32Demo {
             top: 664,
             left: 973
         }, { connection: this.connection,
-            softLabel: "",
+            label: "",
             backgroundColor: "transparent",
             opacity: "0",
             borderColor: "#000066",
@@ -1734,7 +1734,7 @@ class MT32Demo {
             height: 0
         }, { connection: this.connection,
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); },
-            customFunctionText: "tick"
+            customFunction: "tick"
         });
 
         this.hour = $("#div_hour");

@@ -31,10 +31,22 @@
  */
 
 import { BasicDisplayEVO, DisplayOptions } from './BasicDisplayEVO';
-import { digitsTemplate } from './Templates';
 import { Coords } from './WidgetEVO';
 
 const selectedFontSize = 1.076; // ratio selectedFont/normalFont for integer digits
+
+export const digitsTemplate: string = `
+{{#if template_description}}<!-- Template defining the visual appearance of integer and fractional part of a numeric display widget -->{{/if}}
+<div class="{{type}}_whole_part" style="position:absolute; left:0px; margin-left:{{whole.margin-left}}px; width:{{whole.width}}px; height:{{whole.height}}px; {{#if whole.margin-top}}margin-top:{{whole.margin-top}};{{/if}} text-align:right; display:inline-flex;">{{#each whole.digits}}
+    <div style="border-radius:2px;text-align:center; width:{{../whole.letter-spacing}}px; min-width:{{../whole.letter-spacing}}px; max-width:{{../whole.letter-spacing}}px; font-size:{{font-size}}pt;{{#if selected}} color:{{../whole.background-color}}; background-color:{{../whole.color}}; transform:scale(0.94); transform-origin:bottom;{{else}} color:{{../whole.color}}; background-color:{{../whole.background-color}};{{/if}}">{{val}}</div>{{/each}}
+</div>
+
+{{#if point.viz}}<div class="{{type}}_decimal_point" style="position:absolute; text-align:center; margin-left:{{point.margin-left}}px; left:{{point.left}}px; width:{{point.width}}px; min-width:{{point.width}}px; max-width:{{point.width}}px; height:{{point.height}}px; text-align:center; font-size:{{point.font-size}}pt;">
+&bull;</div>{{/if}}
+
+{{#if frac.viz}}<div class="{{type}}_frac_part" style="position:absolute; left:{{frac.left}}px; width:{{frac.width}}px; height:{{frac.height}}px; {{#if frac.margin-top}}margin-top:{{frac.margin-top}};{{/if}} text-align:left; display:inline-flex;">{{#each frac.digits}}
+    <div style="border-radius:2px; text-align:center; width:{{../frac.letter-spacing}}px; min-width:{{../frac.letter-spacing}}px; max-width:{{../frac.letter-spacing}}px; font-size:{{font-size}}pt;{{#if selected}} color:{{../frac.background-color}}; background-color:{{../frac.color}}{{else}} color:{{../frac.color}}; background-color:{{../frac.background-color}}{{/if}}">{{val}}</div>{{/each}}
+</div>{{/if}}`;
 
 export interface NumericDisplayOptions extends DisplayOptions, NumericDisplayStyle {
     cursorName?: string,
@@ -49,7 +61,7 @@ export interface NumericDisplayStyle {
 }
 
 export class NumericDisplayEVO extends BasicDisplayEVO {
-    protected cursorName: string;
+
     protected maxDecimalDigits: number;
     protected maxIntegerDigits: number;
     protected decimalPointOffset: number;
@@ -75,7 +87,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
      *          <li>decimalPointOffset (Number): offset for the decimal point position (default is 0, i.e., the decimal point is placed at the center of the display)</li>
      *          <li>decimalFontSize (Number): decimal font size (default is opt.fontSize * 0.8)</li>
      *          <li>decimalLetterSpacing (Number): fixed letter spacing for decimal digits (default: opt.decimalFontSize * 0.8).</li>
-     *          <li>displayKey (String): name of the state attribute defining the display content. Default is the ID of the widget.</li>
+     *          <li>displayName (String): name of the state attribute defining the display content. Default is the ID of the widget.</li>
      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
      *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
      *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
@@ -94,8 +106,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
     constructor (id: string, coords: Coords, opt?: NumericDisplayOptions) {
         super(id, coords, opt);
 
-        opt = opt || {};        
-        this.widgetKeys = this.widgetKeys.concat("cursorName");
+        opt = opt || {};
 
         // override options
         this.type = opt.type || "numericdisplay";
@@ -104,9 +115,6 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         // invoke BasicDisplayEVO constructor to create the widget
         super.createHTMLElement();
         
-        // set cursor name
-        this.cursorName = opt.cursorName || "";
-
         // add widget-specific style attributes
         this.style["letter-spacing"] = opt.letterSpacing || (typeof this.style["font-size"] === "string" ? parseFloat(this.style["font-size"]) : this.style["font-size"]);
         this.style["decimal-font-size"] = opt.decimalFontSize || (typeof this.style["font-size"] === "string" ? parseFloat(this.style["font-size"]) * 0.8 : this.style["font-size"] * 0.8);
@@ -118,6 +126,9 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
             Math.floor((this.width - this.maxDecimalDigits * parseFloat(this.style["decimal-letter-spacing"])) / parseFloat(`${this.style["letter-spacing"]}`)) 
                 : parseInt(`${opt.maxIntegerDigits}`);
         this.decimalPointOffset = opt.decimalPointOffset || 0;
+
+        // set widget keys
+        this.attr.cursorName = opt.cursorName;
     }
 
     /**
@@ -162,10 +173,10 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
             if (typeof state === "string" || typeof state === "number") {
                 const val: string = `${state}`;
                 state = {};
-                state[this.displayKey] = val;
+                state[this.attr.displayName] = val;
             }
             if (typeof state === "object" && this.evalViz(state)) {
-                const disp: string = this.evaluate(this.displayKey, state);
+                const disp: string = this.evaluate(this.attr.displayName, state);
                 let parts: string[] = disp.split(".");
 
                 const desc: {
@@ -194,7 +205,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                         return { val: d, selected: false, "font-size": parseFloat(`${this.style["decimal-font-size"]}`) };
                     });
                 }
-                const cursorName: string = opt.cursorName || this.cursorName;
+                const cursorName: string = opt.cursorName || this.attr.cursorName;
                 desc.cursorPos = parseInt(this.evaluate(cursorName, state));
                 if (!isNaN(desc.cursorPos)) {
                     if (desc.cursorPos >= 0) {
@@ -241,7 +252,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                     "letter-spacing": parseFloat(`${this.style["letter-spacing"]}`).toFixed(2),
                     color: this.style.color,
                     "background-color": this.style["background-color"],
-                    "padding-left": (((desc.max_integer_digits) - (desc.whole.length) - (desc.whole_zeropadding.length)) * parseFloat(`${this.style["letter-spacing"]}`)).toFixed(2)
+                    "margin-left": (((desc.max_integer_digits) - (desc.whole.length) - (desc.whole_zeropadding.length)) * parseFloat(`${this.style["letter-spacing"]}`)).toFixed(2)
                 };
                 const frac_digits: { val: string, selected: boolean, "font-size": number }[] = desc.frac.concat(desc.frac_zeropadding);
                 const frac_style = {
@@ -256,7 +267,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                     viz: (frac_digits.length > 0)
                 };
                 //  console.log(frac_style);
-                var dom = Handlebars.compile(digitsTemplate, { noEscape: true })({
+                const dom = Handlebars.compile(digitsTemplate, { noEscape: true })({
                     type: this.type,
                     whole: whole_style,
                     frac: frac_style,
@@ -277,146 +288,15 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
      */
     renderSample (): void {
         let st = {};
-        st[this.displayKey] = "123.4";
+        st[this.attr.displayName] = "123.4";
         st["demoCursor"] = 2;
-        this.render(st, { cursorName: "demoCursor", borderWidth: 2, fontColor: "white", backgroundColor: "black" });
+        this.render(st, { cursorName: "demoCursor" });
     }
 
-    // getKeys() {
-    //     return {
-    //         displayKey: this.displayKey,
-    //         cursorName: this.cursorName
-    //     };
-    // }
+    getDescription (): string {
+        return `Numeric display, suitable for rendering numbers. 
+                Enhances the visibility of decimal point and fractional digits.
+                Provides a cursor for highlighting digits.`;
+    }
 
-
-    // the following methods are inherited from WidgetEVO
-
-    /**
-     * @function <a name="reveal">reveal</a>
-     * @description Reveals the widget.
-     * @memberof module:NumericDisplayEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="hide">hide</a>
-     * @description Hides the widget.
-     * @memberof module:NumericDisplayEVO
-     * @instance
-     */
-
-    /**
-    * @function <a name="move">move</a>
-    * @description Changes the position of the widget according to the coordinates given as parameter.
-    * @param coords {Object} Coordinates indicating the new position of the widget. The coordinates are given in the form { top: (number), left: (number) }
-    * @param opt {Object}
-    *         <li> duration (Number): duration in milliseconds of the move transition (default is 0, i.e., instantaneous) </li>
-    *         <li> transitionTimingFunction (String): HTML5 timing function (default is "ease-out") </li>
-    * @memberof module:NumericDisplayEVO
-    * @instance
-    */
-
-    /**
-     * @function <a name="rotate">rotate</a>
-     * @description Rotates the widget of the degree given as parameter.
-     * @param deg {Number | String} Degrees by which the widget will be rotated. Positive degrees are for clock-wise rotations, negative degrees are for counter-clock-wise rotations.
-     * @param opt {Object}
-     *         <li> duration (Number): duration in milliseconds of the move transition (default is 0, i.e., instantaneous) </li>
-     *         <li> transitionTimingFunction (String): HTML5 timing function (default is "ease-in") </li>
-     *         <li> transformOrigin (String): rotation pivot, e.g., "top", "bottom", "center" (default is "center") </li>
-     * @memberof module:NumericDisplayEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="remove">remove</a>
-     * @description Removes the div elements of the widget from the html page -- useful to programmaticaly remove widgets from a page.
-     * @memberof module:NumericDisplayEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="evalViz">evalViz</a>
-     * @description Evaluates the visibility of the widget based on the state attrbutes (passed as function parameter) and the expression stored in this.visibleWhen
-     * @param state {Object} JSON object with the current value of the state attributes of the modelled system
-     * @return {bool} true if the state attributes indicate widget visible, otherwise false.
-     * @memberof module:NumericDisplayEVO
-     * @instance
-     */
-
-    /**
-    * @function <a name="evaluate">evaluate</a>
-    * @description Returns the state of the widget.
-    * @param attr {String} Name of the state attribute associated with the widget.
-    * @param state {Object} Current system state, represented as a JSON object.
-    * @return {String} String representation of the state of the widget.
-    * @memberof module:NumericDisplayEVO
-    * @instance
-    */
-
-    /**
-     * @function <a name="getVizExpression">getVizExpression</a>
-     * @description Returns the expression defining the visibility of the widget.
-     * @memberof module:NumericDisplayEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="setStyle">setStyle</a>
-     * @description Sets the font color and background color.
-     * @param style {Object} Style attributes characterising the visual appearance of the widget.
-     *                      Attributes can be either standard HTML5 attributes, or the following widgets attributes:
-     *          <li>blinking (bool): whether the button is blinking (default is false, i.e., does not blink)</li>
-     *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
-     *          <li>backgroundColor (String): background display color (default is "transparent")</li>
-     *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
-     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
-     *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
-     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
-     *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
-     *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
-     *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is 0.9, i.e., semi-opaque)</li>
-     *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
-     * @memberof module:NumericDisplayEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="invertColors">invertColors</a>
-     * @description Inverts the colors of the display (as in a negative film).
-     * @memberof module:NumericDisplayEVO
-     * @instance
-     */
-
-    /**
-    * @function <a name="select">select</a>
-    * @description Selects the widget -- useful to highlight the widget programmaticaly.
-    * @param style {Object} Set of valid HTML5 attributes characterising the visual appearance of the widget.
-    * @memberof module:NumericDisplayEVO
-    * @instance
-    */
-
-    /**
-     * @function <a name="deselect">deselect</a>
-     * @description Deselects the widget.
-     * @memberof module:NumericDisplayEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="getPosition">getPosition</a>
-     * @description Returns the position of the widget
-     * @return {Object} Coordinates of the widget, in the form { left: x, top: y }, where x and y are real numbers
-     * @memberof module:NumericDisplayEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="getSize">getSize</a>
-     * @description Returns the size of the widget
-     * @return {Object} Size of the widget, in the form { width: x, height: y }, where x and y are real numbers
-     * @memberof module:NumericDisplayEVO
-     * @instance
-     */
 }

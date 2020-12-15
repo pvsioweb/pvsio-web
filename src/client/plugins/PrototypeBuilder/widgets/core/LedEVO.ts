@@ -25,7 +25,7 @@ import { ActionCallback } from "../ActionsQueue";
 import { WidgetOptions, Coords, WidgetEVO, WidgetStyle } from "./WidgetEVO";
 
 export interface LedOptions extends WidgetOptions {
-    ledKey?: string,
+    ledName?: string,
     callback?: ActionCallback
 };
 
@@ -34,8 +34,6 @@ const COLOR = {
 };
 
 export class LedEVO extends WidgetEVO {
-    widgetKeys = [ "ledKey" ];
-    ledKey: string;
     protected radius: number;
     /**
      * @function <a name="LedEVO">LedEVO</a>
@@ -56,7 +54,7 @@ export class LedEVO extends WidgetEVO {
      *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
      *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
      *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
-     *          <li>ledKey (String): The name of the state attribute defining the color of the display. This information will be used by the render method. Default is the ID of the display.</li>
+     *          <li>ledName (String): The name of the state attribute defining the color of the display. This information will be used by the render method. Default is the ID of the display.</li>
      *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is opaque)</li>
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
      *          <li>position (String): standard HTML position attribute indicating the position of the widget with respect to the parent, e.g., "relative", "absolute" (default is "absolute")</li>
@@ -78,8 +76,8 @@ export class LedEVO extends WidgetEVO {
         const maxHeight: number = parseFloat($(opt.parent).css("height")) || coords.height;
 
         this.radius = Math.min(coords.width, coords.height, maxWidth, maxHeight) / 2;
-        opt.marginLeft = (coords.width - this.radius) / 2;
-        opt.marginTop = (coords.height - this.radius) / 2;
+        opt.marginLeft = coords.width / 2 - this.radius;
+        opt.marginTop = coords.height / 2 - this.radius;
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
         this.type = opt.type || "led";
@@ -91,9 +89,9 @@ export class LedEVO extends WidgetEVO {
         // create the DOM element
         super.createHTMLElement();
         this.base.css({ 
-            width: this.radius,
-            height: this.radius,
-            left: `${(this.width - this.radius) / 2}px`
+            width: this.radius * 2,
+            height: this.radius * 2,
+            left: `${this.width / 2 - this.radius}px`
         });
 
         // delete unnecessary style options
@@ -103,7 +101,9 @@ export class LedEVO extends WidgetEVO {
         delete this.style["white-space"];
 
         // set display key
-        this.ledKey = (typeof opt.ledKey === "string") ? opt.ledKey : id;
+        this.attr = {
+            ledName: opt.ledName || id        
+        };
     }
 
     /**
@@ -141,8 +141,8 @@ export class LedEVO extends WidgetEVO {
         state = (state === undefined || state === null) ? "" : state;
         if (typeof state === "string") {
             this.setStyle({ "background-color": state });
-        } else if (typeof state === "object" && this.ledKey !== "" && this.evalViz(state)) {
-            this.setStyle({ "background-color": this.evaluate(this.ledKey, state) });
+        } else if (typeof state === "object" && this.attr.ledName !== "" && this.evalViz(state)) {
+            this.setStyle({ "background-color": this.evaluate(this.attr.ledName, state) });
         }
 
         this.reveal();
@@ -158,144 +158,8 @@ export class LedEVO extends WidgetEVO {
         this.render(COLOR.brightGreen);
     }
 
-    getPrimaryKey (): string {
-        return this.ledKey;
+    // @override
+    getDescription (): string {
+        return "LED widget, renders multi-color LED lights.";
     }
-
-    // getKeys () {
-    //     return {
-    //         ledKey: this.ledKey,
-    //         ledColor: this.ledColor
-    //     }
-    // }
-
-    // the following methods are inherited from WidgetEVO
-
-    /**
-     * @function <a name="reveal">reveal</a>
-     * @description Reveals the widget.
-     * @memberof module:LedEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="hide">hide</a>
-     * @description Hides the widget.
-     * @memberof module:LedEVO
-     * @instance
-     */
-
-    /**
-    * @function <a name="move">move</a>
-    * @description Changes the position of the widget according to the coordinates given as parameter.
-    * @param coords {Object} Coordinates indicating the new position of the widget. The coordinates are given in the form { top: (number), left: (number) }
-    * @param opt {Object}
-    *         <li> duration (Number): duration in milliseconds of the move transition (default is 0, i.e., instantaneous) </li>
-    *         <li> transitionTimingFunction (String): HTML5 timing function (default is "ease-out") </li>
-    * @memberof module:LedEVO
-    * @instance
-    */
-
-    /**
-     * @function <a name="rotate">rotate</a>
-     * @description Rotates the widget of the degree given as parameter.
-     * @param deg {Number | String} Degrees by which the widget will be rotated. Positive degrees are for clock-wise rotations, negative degrees are for counter-clock-wise rotations.
-     * @param opt {Object}
-     *         <li> duration (Number): duration in milliseconds of the move transition (default is 0, i.e., instantaneous) </li>
-     *         <li> transitionTimingFunction (String): HTML5 timing function (default is "ease-in") </li>
-     *         <li> transformOrigin (String): rotation pivot, e.g., "top", "bottom", "center" (default is "center") </li>
-     * @memberof module:LedEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="remove">remove</a>
-     * @description Removes the div elements of the widget from the html page -- useful to programmaticaly remove widgets from a page.
-     * @memberof module:LedEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="evalViz">evalViz</a>
-     * @description Evaluates the visibility of the widget based on the state attrbutes (passed as function parameter) and the expression stored in this.visibleWhen
-     * @param state {Object} JSON object with the current value of the state attributes of the modelled system
-     * @return {bool} true if the state attributes indicate widget visible, otherwise false.
-     * @memberof module:LedEVO
-     * @instance
-     */
-
-    /**
-    * @function <a name="evaluate">evaluate</a>
-    * @description Returns the state of the widget.
-    * @param attr {String} Name of the state attribute associated with the widget.
-    * @param state {Object} Current system state, represented as a JSON object.
-    * @return {String} String representation of the state of the widget.
-    * @memberof module:LedEVO
-    * @instance
-    */
-
-    /**
-     * @function <a name="getVizExpression">getVizExpression</a>
-     * @description Returns the expression defining the visibility of the widget.
-     * @memberof module:LedEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="setStyle">setStyle</a>
-     * @description Sets the font color and background color.
-     * @param style {Object} Style attributes characterising the visual appearance of the widget.
-     *                      Attributes can be either standard HTML5 attributes, or the following widgets attributes:
-     *          <li>blinking (bool): whether the button is blinking (default is false, i.e., does not blink)</li>
-     *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
-     *          <li>backgroundColor (String): background display color (default is "transparent")</li>
-     *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
-     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
-     *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
-     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
-     *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
-     *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
-     *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is 0.9, i.e., semi-opaque)</li>
-     *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
-     * @memberof module:LedEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="invertColors">invertColors</a>
-     * @description Inverts the colors of the display (as in a negative film).
-     * @memberof module:LedEVO
-     * @instance
-     */
-
-    /**
-    * @function <a name="select">select</a>
-    * @description Selects the widget -- useful to highlight the widget programmaticaly.
-    * @param style {Object} Set of valid HTML5 attributes characterising the visual appearance of the widget.
-    * @memberof module:LedEVO
-    * @instance
-    */
-
-    /**
-     * @function <a name="deselect">deselect</a>
-     * @description Deselects the widget.
-     * @memberof module:LedEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="getPosition">getPosition</a>
-     * @description Returns the position of the widget
-     * @return {Object} Coordinates of the widget, in the form { left: x, top: y }, where x and y are real numbers
-     * @memberof module:LedEVO
-     * @instance
-     */
-
-    /**
-     * @function <a name="getSize">getSize</a>
-     * @description Returns the size of the widget
-     * @return {Object} Size of the widget, in the form { width: x, height: y }, where x and y are real numbers
-     * @memberof module:LedEVO
-     * @instance
-     */
 }

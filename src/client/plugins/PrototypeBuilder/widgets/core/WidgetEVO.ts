@@ -8,11 +8,11 @@
  */
 
 // import * as StateParser from "../../../util/PVSioStateParser";
-import { genericWidgetTemplate as widget_template } from "./Templates";
 import * as Utils from '../../../../env/Utils';
 import { dimColor } from "../../../../env/Utils";
 import { ActionCallback } from "../ActionsQueue";
 import { Connection } from "../../../../env/Connection";
+import * as Backbone from 'backbone';
 
 // const normalised = {
 //     backgroundcolor: "backgroundColor",
@@ -69,6 +69,32 @@ import { Connection } from "../../../../env/Connection";
 //     return style;
 // }
 
+export const widget_template: string = `
+{{#if template_description}}<!--
+    Basic widget template. Provides a base layer for rendering the visual appearance of the widget
+    The widget has three layers:
+      - a div layer defining position and size of the widget
+      - a base layer renders the visual appearance
+      - an overlay layer captures user interactions with the widget -->{{/if}}
+<div style="width:0px; height:0px">
+<div id="{{id}}"
+     style="position:{{position}}; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{zIndex}}; overflow:{{overflow}};"
+     class="{{type}} noselect{{#if blinking}} blink{{/if}}">
+    <div id="{{id}}_base"
+         style="position:absolute; width:{{width}}px; height:{{height}}px; line-height:{{height}}px; z-index:inherit; {{#each style}} {{@key}}:{{this}};{{/each}}"
+         class="{{type}}_base {{id}}_base"></div>
+    <div id="{{id}}_overlay"
+         style="position:absolute; width:{{width}}px; height:{{height}}px; background-color:{{style.overlay-color}}; border-radius:{{style.border-radius}}; cursor:{{style.cursor}}; opacity:0; z-index:inherit;"
+         class="{{type}}_overlay {{id}}_overlay"></div>
+</div>
+</div>`;
+
+export const img_template: string = `
+{{#if template_description}}<!-- Template for embedding an image in the div -->{{/if}}
+{{#if img}}<img src="{{img}}" style="z-index:inherit;opacity:{{opacity}};transform-origin:{{transformOrigin}};">{{/if}}
+{{#if svg}}{{svg}}{{/if}}
+`;
+
 export type Coords = { top?: number, left?: number, width?: number, height?: number };
 export type WidgetDescriptor = {
     id: string,
@@ -124,7 +150,7 @@ export interface HtmlStyle {
     "z-index"?: number | string,
     "letter-spacing"?: number | string,
     // animation options
-    overlayColor?: string,
+    "overlay-color"?: string,
     duration?: number | string,
     rotation?: number | boolean,
     blinking?: boolean,
@@ -133,20 +159,35 @@ export interface HtmlStyle {
 }
 export interface WidgetOptions extends WidgetStyle {
     visibleWhen?: string,
-    overlayColor?: string,
+    enabledWhen?: string,
     type?: string, // widget type, e.g., button, display
     widget_template?: string, // HTML template for rendering the widget
     callback?: ActionCallback,
     connection?: Connection
 };
 
-export type MouseEvents = "click" | "dblclick" | "press/release";
+export type VisibilityOptions =  {
+    visible: string,
+    enabled: string
+};
 
-export abstract class WidgetEVO {
-    static readonly MAX_COORDINATES_ACCURACY: number = 0; // max 0 decimal digits for coordinates, i.e., accuracy is 1px
+export type BasicEvent = "click" | "dblclick" | "press" | "release";
+export type WidgetEvents = {
+    click?: boolean,
+    dblclick?: boolean,
+    press?: boolean,
+    release?: boolean
+};
+export type WidgetAttr = {
+    [key: string]: string | null
+};
+
+export abstract class WidgetEVO extends Backbone.Model {
+    static readonly MAX_COORDINATES_ACCURACY: number = 0; // max 0 decimal digits for coordinates, i.e., position accuracy is 1px
     readonly widget: boolean = true; // this flag can be used to identify whether an object is a widget
 
-    protected widgetKeys: string[] = [];
+    protected attr: WidgetAttr = {};
+
     id: string;
     type: string;
     parent: string;
@@ -154,7 +195,7 @@ export abstract class WidgetEVO {
     left: number;
     width: number;
     height: number;
-    visibleWhen: string;
+    viz: VisibilityOptions;
     position: "absolute" | "relative";
     zIndex: number;
     style: HtmlStyle = {};
@@ -166,17 +207,13 @@ export abstract class WidgetEVO {
     overlay: JQuery<HTMLDivElement>;
     marker: JQuery<HTMLElement>;
 
-    evts: {
-        click?: boolean,
-        dblclick?: boolean,
-        "press/release"?: boolean
-    };
+    evts: WidgetEvents = null;
     alias: string;
     readonly fontPadding: number = 6;
     protected rendered?: boolean = false;
 
     static uuid (): string {
-        return "wdg_" + Utils.uuid("xxxx");    
+        return "wdg" + Utils.uuid("Wxxxx");    
     }
     /**
      * @function <a name="ButtonEVO">ButtonEVO</a>
@@ -207,6 +244,7 @@ export abstract class WidgetEVO {
      * @instance
      */
     constructor (id: string, coords: Coords, opt?: WidgetOptions) {
+        super();
         opt = opt || {};
         coords = coords || {};
         this.id = id;
@@ -217,7 +255,10 @@ export abstract class WidgetEVO {
         this.left = coords.left || 0;
         this.width = (isNaN(coords.width)) ? 32 : coords.width;
         this.height = (isNaN(coords.height)) ? 32 : coords.height;
-        this.visibleWhen = opt.visibleWhen || "true"; // default: always enabled/visible
+        this.viz = {
+            visible: opt.visibleWhen || "true", // default: always enabled/visible
+            enabled: opt.enabledWhen || "true"
+        };
         this.position = opt.position || "absolute";
         this.zIndex = opt.zIndex !== undefined ? parseFloat(`${opt.zIndex}`) : 0;
 
@@ -234,7 +275,7 @@ export abstract class WidgetEVO {
         this.style["font-family"] = opt.fontFamily || "sans-serif";
         this.style.color = opt.fontColor || "white";
         this.style["text-align"] = opt.align || "center";
-        this.style["border-width"] = opt.borderWidth + "px";
+        this.style["border-width"] = (isNaN(parseFloat(`${opt.borderWidth}`))) ? "0px" : `${parseFloat(`${opt.borderWidth}`)}px`;
         this.style["border-style"] = opt.borderStyle || "none";
         this.style["border-radius"] = (isNaN(parseFloat(`${opt.borderRadius}`))) ? "0px" : `${parseFloat(`${opt.borderRadius}`)}px`;
         this.style["border-color"] = opt.borderColor || "steelblue";
@@ -245,7 +286,7 @@ export abstract class WidgetEVO {
         this.style.opacity = isNaN(parseFloat(`${opt.opacity}`)) ? 1 : parseFloat(`${opt.opacity}`);
         this.style.blinking = opt.blinking || false;
         this.style.cursor = opt.cursor || "default";
-        this.style.overlayColor = opt.overlayColor || "transparent";
+        this.style["overlay-color"] = opt.overlayColor || opt["overlay-color"] || "transparent";
         this.style["z-index"] = opt.zIndex || 0;
 
         this.widget_template = opt.widget_template || widget_template;
@@ -287,6 +328,13 @@ export abstract class WidgetEVO {
      */
     renderSample (opt?): void {
         this.render(opt);
+    }
+
+    /**
+     * Returns a description of the widget, e.g., display for text and numbers, touchscreen, button, etc
+     */
+    getDescription (): string {
+        return "";
     }
 
     /**
@@ -431,11 +479,11 @@ export abstract class WidgetEVO {
      * @memberof module:WidgetEVO
      * @instance
      */
-    evalViz (state: {}): boolean {
+    evalViz (state: string | {}): boolean {
         let vizAttribute: boolean = true;
         if (state && typeof state === "object") {
             vizAttribute = false;
-            const expr: { res: Utils.SimpleExpression, err?: string } = Utils.simpleExpressionParser(this.visibleWhen);
+            const expr: { res: Utils.SimpleExpression, err?: string } = Utils.simpleExpressionParser(this.viz?.visible);
             if (expr && expr.res) {
                 if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                     vizAttribute = true;
@@ -483,7 +531,7 @@ export abstract class WidgetEVO {
      * @instance
      */
     getVizExpression (): string {
-        return this.visibleWhen;
+        return this.viz?.visible;
     }
 
 
@@ -509,14 +557,25 @@ export abstract class WidgetEVO {
     setStyle (style: HtmlStyle): void {
         style = style || {};
         for(const key in style) {
+            // store style info
+            this.style[key] = style[key];
+            // update style
             this.base.css(key, style[key]);
-            if (key === "z-index" || key === "overlayColor") {
+            if (key === "z-index" || key === "overlayColor" || key === "overlay-color") {
                 // set z-index of the overlay, otherwise the overlay may fall under base
                 this.overlay.css(key, style[key]);
             }
         }
         if (style.blinking) {
             this.base.addClass("blinking");
+        }
+    }
+
+    setAttr (attr: WidgetAttr): void {
+        attr = attr || {};
+        for(const key in attr) {
+            // store style info
+            this.attr[key] = attr[key];
         }
     }
 
@@ -541,11 +600,15 @@ export abstract class WidgetEVO {
     select (opt?: { opacity?: number, borderColor?: string, classed?: string, backgroundColor?: string }): void {
         opt = opt || {};
         opt.opacity = (isNaN(opt.opacity)) ? 0.5 : opt.opacity;
-        const borderColor: string = opt.borderColor || this.base.css("background-color") || "yellow";
-        this.base.css({ "background-color": opt.backgroundColor || dimColor(this.base.css("background-color")) });
+        const borderColor: string = this.base.css("background-color") === "transparent" ? "yellow" : this.base.css("background-color");
+        this.base.css({
+            "background-color": opt.backgroundColor || dimColor(this.base.css("background-color")),
+            opacity: opt.opacity
+        });
         if (opt.classed) { this.base.addClass(opt.classed); }
         this.overlay.css("background-color", "transparent");
-        this.overlay.css({ border: `1px solid ${borderColor}`, opacity: 1 });
+        this.overlay.css({ "box-shadow": `0px 0px 10px ${opt.borderColor || borderColor}`, opacity: 1 });
+        // this.overlay.css({ border: `1px solid ${opt.borderColor || borderColor}`, opacity: 1 });
     }
 
     /**
@@ -556,7 +619,7 @@ export abstract class WidgetEVO {
      */
     deselect (): void {
         this.setStyle(this.style);
-        this.overlay.css({ border: '0px', opacity: 0 });
+        this.overlay.css({ opacity: 0 });
     }
 
     /**
@@ -625,15 +688,23 @@ export abstract class WidgetEVO {
         return this.type;
     }
 
-    getStyle (): HtmlStyle {
-        // let ans = {};
-        // let _this = this;
-        // // remove units of numeric values, e.g., font-size is returned as 13 (rather than "13pt")
-        // Object.keys(this.style).forEach(function (key) {
-        //     ans[key] = isNaN(parseFloat(_this.style[key])) ? _this.style[key] : parseFloat(_this.style[key]);
-        // });
-        // return ans;
-        return this.style;
+    getStyle (): HtmlStyle | null {
+        const keys: string[] = Object.keys(this.style)?.sort((a: string, b: string): number => {
+            return a < b ? -1 : 1;
+        });
+        if (keys && keys.length) {
+            const ans: HtmlStyle = {};
+            for (let i in keys) {
+                const key: string = keys[i];
+                ans[key] = this.style[key];
+            }
+            return ans;
+        }
+        return null;
+    }
+
+    getViz (): VisibilityOptions {
+        return this.viz;
     }
 
     // getStyle2 () {
@@ -659,23 +730,39 @@ export abstract class WidgetEVO {
         };
     }
 
-    getKeys (): {[name:string]: string} {
-        let ans = {};
-        for (const key in this.widgetKeys) {
-            ans[key] = this.widgetKeys[key]
-        }
-        return ans;
+    /**
+     * Get widget attributes
+     * @param opt 
+     *      nameReplace {string}: apply a name-replace to the attribute name, where the id of the widget is replaced by the provided string
+     *      keyCode {boolean}: whether to include keyCode in the returned list of attributes 
+     */
+    getAttr (opt?: { nameReplace?: string, keyCode?: boolean }): WidgetAttr {
+        opt = opt || {};
+        const keys: string[] = Object.keys(this.attr)?.sort((a: string, b: string): number => {
+            return a < b ? -1 : 1;
+        });
+        if (keys && keys.length) {
+            if (opt.nameReplace) {
+                const ans: WidgetAttr = {};
+                for (let i in keys) {
+                    const key: string = keys[i];
+                    if (key !== "keyCode" || opt.keyCode) {
+                        ans[key] = this.attr[key]?.replace(this.id, opt.nameReplace);
+                    }
+                }
+                return ans;
+            } else {
+                return this.attr;
+            }
+        };
+        return null;
     }
     
     getPrimaryKey (): string {
         return this.id;
     }
 
-    getEvents (): {
-        click?: boolean,
-        dblclick?: boolean,
-        "press/release"?: boolean
-    } {
+    getEvents (): WidgetEvents {
         return this.evts;
     }
 

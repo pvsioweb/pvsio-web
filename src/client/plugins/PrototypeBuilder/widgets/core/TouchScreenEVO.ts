@@ -25,8 +25,11 @@
  */
 
 import { Connection } from "../../../../env/Connection";
+import { DisplayOptions } from "./BasicDisplayEVO";
 import { ButtonEVO, ButtonOptions } from "./ButtonEVO";
 import { Coords } from "./WidgetEVO";
+
+export interface TouchScreenOptions extends DisplayOptions, ButtonOptions { };
 
 export class TouchScreenEVO extends ButtonEVO {
     /**
@@ -71,20 +74,20 @@ export class TouchScreenEVO extends ButtonEVO {
      * @memberof module:TouchScreenEVO
      * @instance
      */
-    constructor (id: string, coords: Coords, opt?: ButtonOptions) {
-        super(id, coords, opt);
+    constructor (id: string, coords: Coords, opt?: TouchScreenOptions) {
+        super(id, coords, { ...opt, touchscreenMode: true });
         opt = opt || {};
-
-        this.widgetKeys = this.widgetKeys.concat("displayKey");
 
         // override default button style
         this.style["background-color"] = opt.backgroundColor || "steelblue";
         this.style["font-color"] = opt.fontColor || "white";
-        this.touchscreenMode = true;
         this.type = opt.type || "touchscreendisplay";
 
         // override default button style
         this.setStyle(this.style);
+
+        // set widget keys
+        this.attr.displayName = opt.displayName || id;
     }
 
     /**
@@ -94,17 +97,11 @@ export class TouchScreenEVO extends ButtonEVO {
      * @instance
      */
     renderSample () {
-        return this.render("Touch");
+        return this.render();
     }
 
-    // getKeys () {
-    //     return {
-    //         displayKey: this.displayKey,
-    //         functionText: this.functionKey,
-    //         customFunctionText: this.customFunctionText,
-    //         evts: this.evts
-    //     };
-    // }
-
-    // all other functions are inherited from ButtonEVO
+    getDescription (): string {
+        return `Touchscreen display, renders touch-screen elements.
+            Click events are registered when the element is released.`;
+    }
 }

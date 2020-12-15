@@ -39,7 +39,7 @@ const markerOverlayTemplate: string = `
 const markerTemplate: string = `
 <div class="marker" coords="{ top: 0, left: 0, width: 0, height: 0 }" id="{{id}}" style="top:{{top}}px; left:{{left}}px; width:{{width}}px; height:{{height}}px; position:absolute;">
     <div class="shader" style="margin-left:-1px; margin-top:-1px; width:100%; height:100%; background:lightseagreen; position:absolute; opacity:0.4; border: 1px solid yellow; cursor:pointer;"></div>
-    <div class="tl corner" style="width:16px; height:16px; top:0px; left:0px; position:absolute; cursor:nw-resize; margin-left:-6px; margin-top:-6px; border:1px solid yellow; opacity:0.7;"></div>
+    <div class="tl corner" style="width:16px; height:16px; top:0px; left:0px; position:absolute; cursor:nw-resize; margin-left:-6px; margin-top:-6px; border-top: 6px solid green; border-left: 6px solid green; opacity:0.7;"></div>
 </div>
 `;
 

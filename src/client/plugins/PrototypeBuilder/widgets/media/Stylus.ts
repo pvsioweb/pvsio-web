@@ -30,8 +30,8 @@
  *
  */
 
-import { Coords, WidgetEVO } from "../core/WidgetEVO";
-import { img_template, stylus_white } from "./templates/img_template";
+import { Coords, WidgetEVO, img_template } from "../core/WidgetEVO";
+import { stylus_white } from "./StylusTemplate";
 
 export class Stylus extends WidgetEVO {
     protected initial_position: {
